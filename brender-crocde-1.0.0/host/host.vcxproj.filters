@@ -1,0 +1,66 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="C Source">
+      <UniqueIdentifier>{24c43fd1-dbe3-4d16-888d-7f413b9d1991}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Headers">
+      <UniqueIdentifier>{7e1ae98a-ec86-4dad-8e9b-1769b6309047}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Perl Scripts">
+      <UniqueIdentifier>{4748c28a-4480-4f23-ba80-79b7c975b7f7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Miscellaneous">
+      <UniqueIdentifier>{47cde09c-202b-413e-8e9d-44adb42b8a4f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Assembly">
+      <UniqueIdentifier>{688b9a67-c786-4f1e-83f6-c7328cb8a187}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Assembly Includes">
+      <UniqueIdentifier>{57eda96e-1a5c-42be-8556-ed0380255f48}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="cpu_msvc.c">
+      <Filter>C Source</Filter>
+    </ClCompile>
+    <ClCompile Include="CPUInfo.c">
+      <Filter>C Source</Filter>
+    </ClCompile>
+    <ClCompile Include="himage.c">
+      <Filter>C Source</Filter>
+    </ClCompile>
+    <ClCompile Include="hostcfg.c">
+      <Filter>C Source</Filter>
+    </ClCompile>
+    <ClCompile Include="hstsetup.c">
+      <Filter>C Source</Filter>
+    </ClCompile>
+    <ClCompile Include="posixcompat.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="cpu.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="host_ip.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="host_p.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="hostimg.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="posixcompat.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="host.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\h2incfix.pl">
+      <Filter>Perl Scripts</Filter>
+    </None>
+  </ItemGroup>
+</Project>

@@ -1,0 +1,101 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="C Source">
+      <UniqueIdentifier>{faeb8def-e96d-4895-95e0-c504af07cea1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Headers">
+      <UniqueIdentifier>{9eafdd4a-08e0-474b-adde-e2d28f18096c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Perl Scripts">
+      <UniqueIdentifier>{b9ba4b0c-6819-4b60-9430-702ff3683b86}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Miscellaneous">
+      <UniqueIdentifier>{3f59a636-c8b5-43df-8b92-d3b7553f9963}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Assembly">
+      <UniqueIdentifier>{c65fc150-74eb-40f0-9195-f9aacd386736}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Assembly Includes">
+      <UniqueIdentifier>{3beb94a8-44ac-41c0-9016-e88e77b12238}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Fonts">
+      <UniqueIdentifier>{707d7280-6b27-426f-a9ca-d865c31518c3}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="fontptrs.c">
+      <Filter>C Source</Filter>
+    </ClCompile>
+    <ClCompile Include="genclip.c">
+      <Filter>C Source</Filter>
+    </ClCompile>
+    <ClCompile Include="gencopy.c">
+      <Filter>C Source</Filter>
+    </ClCompile>
+    <ClCompile Include="mipsupt.c">
+      <Filter>C Source</Filter>
+    </ClCompile>
+    <ClCompile Include="pixelmap.c">
+      <Filter>C Source</Filter>
+    </ClCompile>
+    <ClCompile Include="pmdsptch.c">
+      <Filter>C Source</Filter>
+    </ClCompile>
+    <ClCompile Include="pmfile.c">
+      <Filter>C Source</Filter>
+    </ClCompile>
+    <ClCompile Include="pmgen.c">
+      <Filter>C Source</Filter>
+    </ClCompile>
+    <ClCompile Include="pmmem.c">
+      <Filter>C Source</Filter>
+    </ClCompile>
+    <ClCompile Include="pmnull.c">
+      <Filter>C Source</Filter>
+    </ClCompile>
+    <ClCompile Include="pmsetup.c">
+      <Filter>C Source</Filter>
+    </ClCompile>
+    <ClCompile Include="quantize.c">
+      <Filter>C Source</Filter>
+    </ClCompile>
+    <ClCompile Include="scale.c">
+      <Filter>C Source</Filter>
+    </ClCompile>
+    <ClCompile Include="fnt3x5.c">
+      <Filter>Fonts</Filter>
+    </ClCompile>
+    <ClCompile Include="fntp4x6.c">
+      <Filter>Fonts</Filter>
+    </ClCompile>
+    <ClCompile Include="fntp7x9.c">
+      <Filter>Fonts</Filter>
+    </ClCompile>
+    <ClCompile Include="cmemloops.c" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="pm.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="pm_ip.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="pmmem.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\resgen.pl">
+      <Filter>Perl Scripts</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="pmimg.fns">
+      <Filter>Miscellaneous</Filter>
+    </CustomBuild>
+    <CustomBuild Include="memloops.asm">
+      <Filter>Assembly</Filter>
+    </CustomBuild>
+  </ItemGroup>
+</Project>

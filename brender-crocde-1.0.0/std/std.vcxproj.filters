@@ -1,0 +1,46 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="C Source">
+      <UniqueIdentifier>{aafb1ce7-2149-413d-827d-6ac2382677ba}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Headers">
+      <UniqueIdentifier>{22372399-d8ae-4395-aac6-ba3da3674276}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Perl Scripts">
+      <UniqueIdentifier>{97391eeb-e204-498a-b6fe-1a73b6000123}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Miscellaneous">
+      <UniqueIdentifier>{9e2cc134-07e7-480c-90b6-ead441148271}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Assembly">
+      <UniqueIdentifier>{d71b10e6-077b-4411-8657-9be5fa386950}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Assembly Includes">
+      <UniqueIdentifier>{29c80fdb-5c4a-4b16-a0be-3fcb6303a3e1}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="brexcept.c">
+      <Filter>C Source</Filter>
+    </ClCompile>
+    <ClCompile Include="logwrite.c">
+      <Filter>C Source</Filter>
+    </ClCompile>
+    <ClCompile Include="math.c">
+      <Filter>C Source</Filter>
+    </ClCompile>
+    <ClCompile Include="stddiag.c">
+      <Filter>C Source</Filter>
+    </ClCompile>
+    <ClCompile Include="stdfile.c">
+      <Filter>C Source</Filter>
+    </ClCompile>
+    <ClCompile Include="stdlib.c">
+      <Filter>C Source</Filter>
+    </ClCompile>
+    <ClCompile Include="stdmem.c">
+      <Filter>C Source</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>

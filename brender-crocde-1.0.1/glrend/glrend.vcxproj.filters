@@ -1,0 +1,180 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="Renderer">
+      <UniqueIdentifier>{e7cb7f41-a702-454b-b746-ca229d77a42d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="VIDEO">
+      <UniqueIdentifier>{55d17184-a48c-4f53-bf7a-ffe2b63baffe}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="STATE">
+      <UniqueIdentifier>{93dc5790-147a-4092-bec5-4a87b9e40e90}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="device.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="devpixmp.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="drv.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="drv_ip.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="object.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="rendfcty.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="template.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="gl_core_3_2.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="gprim.hpp">
+      <Filter>Renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="gv1buckt.hpp">
+      <Filter>Renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="gv1model.hpp">
+      <Filter>Renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="lighting.hpp">
+      <Filter>Renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="renderer.hpp">
+      <Filter>Renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="video_ip.hpp">
+      <Filter>VIDEO</Filter>
+    </ClInclude>
+    <ClInclude Include="video.h">
+      <Filter>VIDEO</Filter>
+    </ClInclude>
+    <ClInclude Include="glstate.hpp">
+      <Filter>STATE</Filter>
+    </ClInclude>
+    <ClInclude Include="glstate_ip.hpp">
+      <Filter>STATE</Filter>
+    </ClInclude>
+    <ClInclude Include="sstate.hpp">
+      <Filter>Renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="sbuffer.hpp">
+      <Filter>Renderer</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="driver.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="device.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="outfcty.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="gl_core_3_2.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="devpixmp.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="rendfcty.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="renderer.cpp">
+      <Filter>Renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="gprim.cpp">
+      <Filter>Renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="gv1buckt.cpp">
+      <Filter>Renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="gv1model.cpp">
+      <Filter>Renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="lighting.cpp">
+      <Filter>Renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="video.cpp">
+      <Filter>VIDEO</Filter>
+    </ClCompile>
+    <ClCompile Include="checkboard64.cpp">
+      <Filter>VIDEO</Filter>
+    </ClCompile>
+    <ClCompile Include="video_fonts.cpp">
+      <Filter>VIDEO</Filter>
+    </ClCompile>
+    <ClCompile Include="shader_default.cpp">
+      <Filter>VIDEO</Filter>
+    </ClCompile>
+    <ClCompile Include="shader_text.cpp">
+      <Filter>VIDEO</Filter>
+    </ClCompile>
+    <ClCompile Include="shader_brender.cpp">
+      <Filter>VIDEO</Filter>
+    </ClCompile>
+    <ClCompile Include="glstate.cpp">
+      <Filter>STATE</Filter>
+    </ClCompile>
+    <ClCompile Include="glstate_matrix.cpp">
+      <Filter>STATE</Filter>
+    </ClCompile>
+    <ClCompile Include="gv1stored.cpp">
+      <Filter>Renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="onscreen.cpp">
+      <Filter>Renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="glstate_cull.cpp">
+      <Filter>STATE</Filter>
+    </ClCompile>
+    <ClCompile Include="glstate_surface.cpp">
+      <Filter>STATE</Filter>
+    </ClCompile>
+    <ClCompile Include="glstate_primitive.cpp">
+      <Filter>STATE</Filter>
+    </ClCompile>
+    <ClCompile Include="sstate.cpp">
+      <Filter>Renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="sbuffer.cpp">
+      <Filter>Renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="glstate_output.cpp">
+      <Filter>STATE</Filter>
+    </ClCompile>
+    <ClCompile Include="glstate_hidden.cpp">
+      <Filter>STATE</Filter>
+    </ClCompile>
+    <ClCompile Include="glstate_light.cpp">
+      <Filter>STATE</Filter>
+    </ClCompile>
+    <ClCompile Include="glcache.cpp">
+      <Filter>STATE</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Natvis Include="glm\util\glm.natvis" />
+  </ItemGroup>
+</Project>

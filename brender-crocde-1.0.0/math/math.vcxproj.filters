@@ -1,0 +1,60 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="C Source">
+      <UniqueIdentifier>{fee03738-8417-401f-bdac-21fa63fa410b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Headers">
+      <UniqueIdentifier>{8898d1f9-231e-402f-8e2d-7a095095056e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Perl Scripts">
+      <UniqueIdentifier>{88cc5b2f-1e29-4423-b175-f5dc5899c809}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Miscellaneous">
+      <UniqueIdentifier>{40219bb7-b247-4718-bbe9-7e2598bae579}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="angles.c">
+      <Filter>C Source</Filter>
+    </ClCompile>
+    <ClCompile Include="fixed.c">
+      <Filter>C Source</Filter>
+    </ClCompile>
+    <ClCompile Include="matrix23.c">
+      <Filter>C Source</Filter>
+    </ClCompile>
+    <ClCompile Include="matrix34.c">
+      <Filter>C Source</Filter>
+    </ClCompile>
+    <ClCompile Include="matrix4.c">
+      <Filter>C Source</Filter>
+    </ClCompile>
+    <ClCompile Include="plane.c">
+      <Filter>C Source</Filter>
+    </ClCompile>
+    <ClCompile Include="quat.c">
+      <Filter>C Source</Filter>
+    </ClCompile>
+    <ClCompile Include="scalar.c">
+      <Filter>C Source</Filter>
+    </ClCompile>
+    <ClCompile Include="transfrm.c">
+      <Filter>C Source</Filter>
+    </ClCompile>
+    <ClCompile Include="vector.c">
+      <Filter>C Source</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="brmath.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="math_ip.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="vecifns.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>

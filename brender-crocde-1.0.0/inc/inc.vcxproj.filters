@@ -1,0 +1,143 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Headers">
+      <UniqueIdentifier>{ec1e27b9-f4d4-4fc1-9433-054d60bdd2c2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="C Source">
+      <UniqueIdentifier>{5567d6d9-6b1e-490a-bb05-ed4dab557371}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Perl Scripts">
+      <UniqueIdentifier>{2487b880-8929-4690-be1f-f2816b5c2052}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Miscellaneous">
+      <UniqueIdentifier>{53cf2d62-6b40-4908-b967-b85a43987703}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="actor.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="angles.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="assoca_p.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="assocarr.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="brdiag.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="brender.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="brerror.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="brfile.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="brfont.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="brlimits.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="brmem.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="brv1db.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="camera.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="colour.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="compend.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="compiler.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="custsupt.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="dmyifix.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="fixed.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="fw_p.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="light.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="material.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="math_p.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="matrix.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="model.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="order.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="pixelmap.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="pm_p.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="pool.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="quat.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="render.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="scalar.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="syscn_p.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="token.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="transfrm.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="v1db_p.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="vecfns.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="vector.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="tokgen.pl">
+      <Filter>Perl Scripts</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="pretok.tok">
+      <Filter>Miscellaneous</Filter>
+    </CustomBuild>
+  </ItemGroup>
+</Project>

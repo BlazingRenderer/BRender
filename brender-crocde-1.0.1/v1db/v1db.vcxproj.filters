@@ -1,0 +1,110 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="C Source">
+      <UniqueIdentifier>{a5130ead-1961-43c3-a5d4-a327e8001ef9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Headers">
+      <UniqueIdentifier>{37d0fbf6-ad65-46a4-be5e-d7ffb906dfbf}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Miscellaneous">
+      <UniqueIdentifier>{3d29f242-804d-4021-9f39-5c58f2eb1f96}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Perl Scripts">
+      <UniqueIdentifier>{3d4c173f-50fa-40d2-bc08-5f3e60a38108}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Assembly">
+      <UniqueIdentifier>{6799457c-a1f0-40ee-8642-68bf2744413c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Assembly Includes">
+      <UniqueIdentifier>{741a894d-eec3-43a2-9c72-458414bd0f3d}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="actsupt.c">
+      <Filter>C Source</Filter>
+    </ClCompile>
+    <ClCompile Include="custsupt.c">
+      <Filter>C Source</Filter>
+    </ClCompile>
+    <ClCompile Include="dbquery.c">
+      <Filter>C Source</Filter>
+    </ClCompile>
+    <ClCompile Include="dbsetup.c">
+      <Filter>C Source</Filter>
+    </ClCompile>
+    <ClCompile Include="def_mat.c">
+      <Filter>C Source</Filter>
+    </ClCompile>
+    <ClCompile Include="def_mdl.c">
+      <Filter>C Source</Filter>
+    </ClCompile>
+    <ClCompile Include="def_otab.c">
+      <Filter>C Source</Filter>
+    </ClCompile>
+    <ClCompile Include="enables.c">
+      <Filter>C Source</Filter>
+    </ClCompile>
+    <ClCompile Include="ffhooks.c">
+      <Filter>C Source</Filter>
+    </ClCompile>
+    <ClCompile Include="matsupt.c">
+      <Filter>C Source</Filter>
+    </ClCompile>
+    <ClCompile Include="modrend.c">
+      <Filter>C Source</Filter>
+    </ClCompile>
+    <ClCompile Include="modsupt.c">
+      <Filter>C Source</Filter>
+    </ClCompile>
+    <ClCompile Include="otable.c">
+      <Filter>C Source</Filter>
+    </ClCompile>
+    <ClCompile Include="pick.c">
+      <Filter>C Source</Filter>
+    </ClCompile>
+    <ClCompile Include="prelight.c">
+      <Filter>C Source</Filter>
+    </ClCompile>
+    <ClCompile Include="prepmap.c">
+      <Filter>C Source</Filter>
+    </ClCompile>
+    <ClCompile Include="prepmatl.c">
+      <Filter>C Source</Filter>
+    </ClCompile>
+    <ClCompile Include="prepmesh.c">
+      <Filter>C Source</Filter>
+    </ClCompile>
+    <ClCompile Include="preptab.c">
+      <Filter>C Source</Filter>
+    </ClCompile>
+    <ClCompile Include="regsupt.c">
+      <Filter>C Source</Filter>
+    </ClCompile>
+    <ClCompile Include="render.c">
+      <Filter>C Source</Filter>
+    </ClCompile>
+    <ClCompile Include="v1dbfile.c">
+      <Filter>C Source</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="horizon.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="v1db.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="v1db_ip.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="zsmacro.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="v1db_ix.afn">
+      <Filter>Miscellaneous</Filter>
+    </CustomBuild>
+  </ItemGroup>
+</Project>

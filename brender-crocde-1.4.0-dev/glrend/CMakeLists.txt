@@ -1,0 +1,103 @@
+project(glrend)
+
+find_package(OpenGL REQUIRED)
+
+set(GLSTATE_FILES
+	./glcache.c
+	./glstate.c
+	./glstate.h
+	./glstate_cull.c
+	./glstate_hidden.c
+	./glstate_ip.h
+	./glstate_light.c
+	./glstate_matrix.c
+	./glstate_output.c
+	./glstate_primitive.c
+	./glstate_surface.c
+	./glstate_global.c
+)
+source_group("STATE" FILES ${GLSTATE_FILES})
+
+set(VIDEO_FILES
+	./checkboard64.c
+	./shader_brender.c
+	./shader_default.c
+	./shader_text.c
+	./video.c
+	./video.h
+	./video_fonts.c
+)
+source_group("VIDEO" FILES ${VIDEO_FILES})
+
+set(RENDERER_FILES
+	./gv1buckt.c
+	./gv1buckt.h
+
+	./gv1model.c
+	./gv1model.h
+
+	./gstored.c
+	./gstored.h
+	./v1model.c
+
+	./onscreen.c
+
+	./renderer.c
+	./renderer.h
+
+	./sbuffer.h
+	./sbuffer.c
+
+	./sstate.c
+	./sstate.h
+)
+source_group("Renderer" FILES ${RENDERER_FILES})
+
+##
+# lua ../../../glLoadGen_2_0_2/LoadGen.lua -spec gl -version 3.2 \
+#	-profile core -style pointer_c -indent tab \
+#	-ext EXT_texture_filter_anisotropic \
+#	-ext EXT_texture_lod_bias \
+#	core_3_2
+##
+set(GLREND_FILES
+	./drv.h
+	./drv_ip.h
+	./gl_core_3_2.h
+	./gl_core_3_2.c
+
+	./driver.c
+
+	./outfcty.c
+	./outfcty.h
+
+	./rendfcty.c
+	./rendfcty.h
+
+	./device.c
+	./device.h
+
+	./devpixmp.c
+	./devpixmp.h
+
+	./template.h
+)
+
+add_library(glrend STATIC
+	${GLREND_FILES}
+	${RENDERER_FILES}
+	${VIDEO_FILES}
+	${GLSTATE_FILES}
+)
+
+get_target_property(target_type glrend TYPE)
+if(target_type STREQUAL STATIC_LIBRARY)
+	target_compile_definitions(glrend PRIVATE -DBrDrv1Begin=BrDrvGLBegin)
+endif()
+
+target_link_libraries(glrend SDL2::SDL2)
+target_link_libraries(glrend fw)
+target_link_libraries(glrend pixelmap)
+target_link_libraries(glrend nulldev)
+target_link_libraries(glrend OpenGL::GL)
+set_property(TARGET glrend PROPERTY FOLDER ${BRENDER_FOLDER})

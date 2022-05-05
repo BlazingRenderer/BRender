@@ -1,0 +1,49 @@
+SCC = This is a Source Code Control file
+
+[mmx.mak]
+SCC_Project_Name = "$/croc/source/brender/pentprim", PGAAAAAA
+
+[SOFTB.MAK]
+SCC_Project_Name = "$/croc/source/brender/pentprim", PGAAAAAA
+
+[softd.mak]
+SCC_Project_Name = "$/croc/source/brender/pentprim", PGAAAAAA
+
+[SOFTH.MAK]
+SCC_Project_Name = "$/croc/source/brender/pentprim", PGAAAAAA
+
+[softhlp.mak]
+SCC_Project_Name = "$/croc/source/brender/pentprim", PGAAAAAA
+
+[SOFTHZ.MAK]
+SCC_Project_Name = "$/croc/source/brender/pentprim", PGAAAAAA
+
+[softhzlp.mak]
+SCC_Project_Name = "$/croc/source/brender/pentprim", PGAAAAAA
+
+[SOFTI.MAK]
+SCC_Project_Name = "$/croc/source/brender/pentprim", PGAAAAAA
+
+[softilp.mak]
+SCC_Project_Name = "$/croc/source/brender/pentprim", PGAAAAAA
+
+[SOFTIZ.MAK]
+SCC_Project_Name = "$/croc/source/brender/pentprim", PGAAAAAA
+
+[softizb.mak]
+SCC_Project_Name = "$/croc/source/brender/pentprim", PGAAAAAA
+
+[softizf.mak]
+SCC_Project_Name = "$/croc/source/brender/pentprim", PGAAAAAA
+
+[softizfb.mak]
+SCC_Project_Name = "$/croc/source/brender/pentprim", PGAAAAAA
+
+[softizlp.mak]
+SCC_Project_Name = "$/croc/source/brender/pentprim", PGAAAAAA
+
+[SOFTT.MAK]
+SCC_Project_Name = "$/croc/source/brender/pentprim", PGAAAAAA
+
+[SOFTTZ.MAK]
+SCC_Project_Name = "$/croc/source/brender/pentprim", PGAAAAAA
