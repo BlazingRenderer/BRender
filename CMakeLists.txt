@@ -19,3 +19,4 @@ add_subdirectory(brender-crocde-1.4.0-dev)
 
 add_subdirectory(mkshades)
 add_subdirectory(mkranges)
+add_subdirectory(robot)

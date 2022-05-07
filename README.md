@@ -5,8 +5,8 @@ I can now release the copies used in the various Croc DE versions.
 
 These are copied straight out of the Croc source tree.
 
-A sample CMake project and two BRender tools (`mkranges` and `mkshades`) have been provided
-to demonstrate usage of the engine.
+A sample CMake project, two BRender tools (`mkranges` and `mkshades`), and the OS/2 Robot
+example application have been provided to demonstrate usage of the engine.
 
 Enjoy!
 
