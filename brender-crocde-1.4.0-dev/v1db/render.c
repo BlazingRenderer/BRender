@@ -19,12 +19,6 @@
 
 #include "math_ip.h"
 
-#include "../../csource/strat.h"
-#define MarkStratAsDrawn(a) \
-	if ((a) > (void *)1024) ((STRAT *)(a))->flag_2|=ST_2_ONSCREEN;
-#define MarkStratAsNotDrawn(a) \
-	if ((a) > (void *)1024) ((STRAT *)(a))->flag_2&=~ST_2_ONSCREEN;
-
 BR_RCS_ID("$Id: render.c 2.17 1997/04/30 15:57:49 jon Exp $")
 
 #if DEBUG 
@@ -202,7 +196,6 @@ void BR_PUBLIC_ENTRY BrDbModelRender(br_actor *actor,
 	{
 		RenderStyleCalls[style](actor, model, material, render_data, style, on_screen);
 	}
-	MarkStratAsDrawn(actor->user);
 }
 
 br_uint_32 BR_PUBLIC_ENTRY BrOnScreenCheck(br_bounds3 *bounds)
@@ -308,8 +301,6 @@ static void actorRender(br_actor *ap,
 
 	ASSERT_MESSAGE("Invalid actorRender pointer", model != NULL);
 	ASSERT_MESSAGE("Invalid actorRender pointer", material != NULL);
-
-	MarkStratAsNotDrawn(ap->user);
 
 	/*
 	 * Ignore actors with no children that are not models, and actors with renderstyle = NONE
