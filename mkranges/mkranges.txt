@@ -1,0 +1,31 @@
+MKRANGES
+
+A utility for building ramped palettes.
+
+
+Usage:
+	mkranges <input-script> <output-palette>
+
+The input script is read a line at a time. Lines starting with '#' are ignored.
+Each line describes a ramp in the palette. There a five groups of numbers.
+Each group is sperated by white space. The numbers in each group are seperated
+by commas. The groups are respectively -
+
+Range      (2 integers) - The starting index and size of the ramp
+Ambient    (3 integers) - The colour at the start of the ramp
+Diffuse    (3 integers) - The colour at the cut point in the ramp
+Specular   (3 integers) - The colour at the end of the ramp
+Cut	   (1 float)    - The point where the ramp cuts from diffuse to specular
+
+The follwing is an example script that generates the standard palette -
+
+# Range		Ambient		Diffuse		Specular	Cut
+#
+  0,64		0,0,0		147,147,147	255,255,255	0.75	# Grey
+
+ 64,32		0,0,0		 60, 60,238	255,255,255	0.75	# Blue
+ 96,32		0,0,0		 60,238, 60	255,255,255	0.75	# Green
+128,32		0,0,0		 60,238,238	255,255,255	0.75	# Cyan
+160,32		0,0,0		238, 60, 60	255,255,255	0.75	# Red
+192,32		0,0,0		238, 60,238	255,255,255	0.75	# Magenta
+224,32		0,0,0		238,238, 60	255,255,255	0.75	# Yellow
