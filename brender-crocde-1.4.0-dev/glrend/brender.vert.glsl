@@ -1,16 +1,16 @@
 #version 150
-// Must match up with BRender
-#define MAX_LIGHTS  			48
-#define SPECULARPOW_CUTOFF		0.6172
-#define BR_SCALAR_EPSILON		1.192092896e-7f
 
-#define DEBUG_DISABLE_LIGHTS			0
-#define DEBUG_DISABLE_LIGHT_DIRECTIONAL	0
-#define DEBUG_DISABLE_LIGHT_POINT		0
-#define DEBUG_DISABLE_LIGHT_POINTATTEN	0
-#define DEBUG_DISABLE_LIGHT_SPOT		1
-#define DEBUG_DISABE_LIGHT_SPECULAR		0
-#define ENABLE_PSX_SIMULATION			0
+#define MAX_LIGHTS                      48 /* Must match up with BRender */
+#define SPECULARPOW_CUTOFF              0.6172
+#define BR_SCALAR_EPSILON               1.192092896e-7f
+
+#define DEBUG_DISABLE_LIGHTS            0
+#define DEBUG_DISABLE_LIGHT_DIRECTIONAL 0
+#define DEBUG_DISABLE_LIGHT_POINT       0
+#define DEBUG_DISABLE_LIGHT_POINTATTEN  0
+#define DEBUG_DISABLE_LIGHT_SPOT        1
+#define DEBUG_DISABE_LIGHT_SPECULAR     0
+#define ENABLE_PSX_SIMULATION           0
 
 in vec3 aPosition;
 in vec2 aUV;
@@ -23,294 +23,263 @@ out vec2 uv;
 out vec4 colour;
 bool directLightExists;
 
-
 struct br_light
 {
-	/* (X, Y, Z, 1) */
-	vec4 position;
-	/* (X, Y, Z, 0), normalised */
-	vec4 direction;
-	/* (X, Y, Z, 0), normalised */
-	vec4 half_;
-	/* (R, G, B, 0), normalised */
-	vec4 colour;
-	/* (intensity, constant, linear, attenutation) */
-	vec4 iclq;
-	/* (inner, outer), if (0.0, 0.0), then this is a point light. */
-	vec2 spot_angles;
+    vec4 position;    /* (X, Y, Z, 1) */
+    vec4 direction;   /* (X, Y, Z, 0), normalised */
+    vec4 half_;       /* (X, Y, Z, 0), normalised */
+    vec4 colour;      /* (R, G, B, 0), normalised */
+    vec4 iclq;        /* (intensity, constant, linear, attenutation) */
+    vec2 spot_angles; /* (inner, outer), if (0.0, 0.0), then this is a point light. */
 };
 
 layout(std140) uniform br_scene_state
 {
-	/* Eye position in view-space */
-	vec4 eye_view;
-	vec4 global_ambient_colour;
-	br_light lights[MAX_LIGHTS];
-	uint num_lights;
+    vec4 eye_view; /* Eye position in view-space */
+    vec4 global_ambient_colour;
+    br_light lights[MAX_LIGHTS];
+    uint num_lights;
 };
 
-layout (std140) uniform br_model_state
+layout(std140) uniform br_model_state
 {
-	mat4 model_view;
-	mat4 projection;
-	mat4 mvp;
-	mat4 normal_matrix;
-	vec4 surface_colour;
-	vec4 ambient_colour;
-	vec4 clear_colour;
-	float ka;
-	float ks;
-	float kd;
-	float power;
-	uint unlit;
+    mat4 model_view;
+    mat4 projection;
+    mat4 mvp;
+    mat4 normal_matrix;
+    vec4 surface_colour;
+
+    vec4 ambient_colour; /* Material ambient colour. Is multiplied by surface_colour. */
+    vec4 clear_colour;
+    float ka; /* Ambient mod */
+    float ks; /* Specular mod (doesn't seem to be used by Croc) */
+    float kd; /* Diffuse mod */
+    float power;
+    uint unlit; /* Is this surface unlit? */
 };
 
-
-
-#define SPECULAR_DOT()					\
-{										\
-	float rd = dot(dirn_norm, n) * 2;	\
-	vec4 r = n - rd;					\
-	r = r - dirn_norm;					\
-										\
-	_dot = dot(eye_view, r);			\
-}
+#define SPECULAR_DOT()                    \
+    {                                     \
+        float rd = dot(dirn_norm, n) * 2; \
+        vec4 r = n - rd;                  \
+        r = r - dirn_norm;                \
+                                          \
+        _dot = dot(eye_view, r);          \
+    }
 
 #define SPECULAR_POWER(l) (_dot * (l)) / (power - (power * _dot) + _dot)
 
 float calculateAttenuation(in br_light alp, in float dist)
 {
-	if(dist > alp.iclq.w)
-		return 0.0;
+    if (dist > alp.iclq.w)
+        return 0.0;
 
-	float attn;
+    float attn;
 
-	if(dist > alp.iclq.y)
-		attn = (dist - alp.iclq.y) * alp.iclq.z;
-	else
-		attn = 0.0;
+    if (dist > alp.iclq.y)
+        attn = (dist - alp.iclq.y) * alp.iclq.z;
+    else
+        attn = 0.0;
 
-	return 1.0 - attn;
+    return 1.0 - attn;
 }
-
 
 float shadingFilter(in float i)
 {
-	// Software shading emulation:
+/* Software shading emulation */
 #if ENABLE_PSX_SIMULATION
-	i = floor(i * 255.0) / 255.0;
+    i = floor(i * 255.0) / 255.0;
 #endif
-	return i;
+    return i;
 }
-
 
 vec3 lightingColourDirect(in vec4 p, in vec4 n, in vec3 colour, in br_light alp)
 {
-	/* Notes: '_dot' is 'intensity'
-	*/
-	float _dot = max(dot(n, alp.direction), 0.0) * kd;
+    /* Notes: '_dot' is 'intensity' */
+    float _dot = max(dot(n, alp.direction), 0.0) * kd;
 
-	/* Shading filters like 'toon' */
-	_dot = shadingFilter(_dot);
+    /* Shading filters like 'toon' */
+    _dot = shadingFilter(_dot);
 
-	// -- Kludge to emulate the broken D3D lighting from v1.0 and v1.1
-	//vec3 outColour = vec3((alp.colour.x + alp.colour.y + alp.colour.z) / 3.0) * _dot;
-	vec3 outColour = alp.colour.xyz * _dot;
+    /*
+     * -- Kludge to emulate the broken D3D lighting from v1.0 and v1.1
+     * vec3 outColour = vec3((alp.colour.x + alp.colour.y + alp.colour.z) / 3.0) * _dot;
+     */
+    vec3 outColour = alp.colour.xyz * _dot;
 
 #if !DEBUG_DISABE_LIGHT_SPECULAR
-	if(ks <= 0.0)
-	{
-		_dot = dot(n, alp.half_);
+    if (ks <= 0.0) {
+        _dot = dot(n, alp.half_);
 
-		if(_dot > SPECULARPOW_CUTOFF)
-			outColour += SPECULAR_POWER(ks * alp.iclq.x);
-	}
+        if (_dot > SPECULARPOW_CUTOFF)
+            outColour += SPECULAR_POWER(ks * alp.iclq.x);
+    }
 #endif
-	return outColour;
+    return outColour;
 }
 
 vec3 lightingColourPoint(in vec4 p, in vec4 n, in vec3 colour, in br_light alp)
 {
-	float _dot;
-	vec4 dirn, dirn_norm;
+    float _dot;
+    vec4 dirn, dirn_norm;
 
-	/* Work out vector between point and light source */
-	dirn = alp.position - p;
-	dirn_norm = normalize(dirn);
+    /* Work out vector between point and light source */
+    dirn = alp.position - p;
+    dirn_norm = normalize(dirn);
 
-	float dist = length(dirn);
+    float dist = length(dirn);
 
-	_dot = max(dot(n, dirn_norm), 0.0) * kd;
+    _dot = max(dot(n, dirn_norm), 0.0) * kd;
 
-	/* Shading filters like 'toon' */
-	_dot = shadingFilter(_dot);
+    /* Shading filters like 'toon' */
+    _dot = shadingFilter(_dot);
 
-	vec3 outColour = _dot * (alp.iclq.x * alp.colour.xyz);
+    vec3 outColour = _dot * (alp.iclq.x * alp.colour.xyz);
 
 #if !DEBUG_DISABE_LIGHT_SPECULAR
-	if(ks != 0.0)
-	{
-		/* Specular */
-		SPECULAR_DOT();
+    if (ks != 0.0) {
+        /* Specular */
+        SPECULAR_DOT();
 
-		/* Phong lighting approximation from Gems IV pg. 385 */
-		if(_dot > SPECULARPOW_CUTOFF)
-			outColour += SPECULAR_POWER(ks);
-	}
+        /* Phong lighting approximation from Gems IV pg. 385 */
+        if (_dot > SPECULARPOW_CUTOFF)
+            outColour += SPECULAR_POWER(ks);
+    }
 #endif
-	return (outColour);
+    return (outColour);
 }
 
 vec3 lightingColourPointAtten(in vec4 p, in vec4 n, in vec3 colour, in br_light alp)
 {
-	float _dot;
-	vec4 dirn, dirn_norm;
+    float _dot;
+    vec4 dirn, dirn_norm;
 
-	/* Work out vector between point and light source */
-	dirn = alp.position - p;
-	dirn_norm = normalize(dirn);
-	_dot = ((max(dot(n, dirn_norm), 0.0) * kd));
+    /* Work out vector between point and light source */
+    dirn = alp.position - p;
+    dirn_norm = normalize(dirn);
+    _dot = ((max(dot(n, dirn_norm), 0.0) * kd));
 
-	/* Shading filters like 'toon' */
-	_dot = shadingFilter(_dot);
+    /* Shading filters like 'toon' */
+    _dot = shadingFilter(_dot);
 
-	float dist = length(dirn);
-	float atten = calculateAttenuation(alp, dist);
+    float dist = length(dirn);
+    float atten = calculateAttenuation(alp, dist);
 
-	vec3 outColour = _dot * alp.colour.xyz;
+    vec3 outColour = _dot * alp.colour.xyz;
 
 #if !DEBUG_DISABE_LIGHT_SPECULAR
-	if(ks != 0.0)
-	{
-		/* Specular */
-		SPECULAR_DOT();
+    if (ks != 0.0) {
+        /* Specular */
+        SPECULAR_DOT();
 
-		/* Phong lighting approximation from Gems IV pg. 385 */
-		if(_dot > SPECULARPOW_CUTOFF)
-			outColour += SPECULAR_POWER(ks);
-	}
+        /* Phong lighting approximation from Gems IV pg. 385 */
+        if (_dot > SPECULARPOW_CUTOFF)
+            outColour += SPECULAR_POWER(ks);
+    }
 #endif
-	return outColour * atten;
+    return outColour * atten;
 }
 
 vec3 lightingColourSpot(in vec4 p, in vec4 n, in vec3 colour, in br_light alp)
 {
-	/* Croc doesn't use spot lights */
-	return vec3(0);
+    /* Croc doesn't use spot lights */
+    return vec3(0);
 }
 
 vec3 lightingColourSpotAtten(in vec4 p, in vec4 n, in vec3 colour, in br_light alp)
 {
-	/* Croc doesn't use spot lights */
-	return vec3(0);
+    /* Croc doesn't use spot lights */
+    return vec3(0);
 }
-
 
 vec4 fragmain()
 {
 #if DEBUG_DISABLE_LIGHTS
-	return surface_colour;
+    return surface_colour;
 #endif
 
-	if(num_lights == 0u || unlit != 0u)
-	{
-		return surface_colour;
-	}
+    if (num_lights == 0u || unlit != 0u) {
+        return surface_colour;
+    }
 
-	//vec4 normalDirection = vec4(normalize(normal), 0);
-	vec4 normalDirection = normal;
+    vec4 normalDirection = normal;
 
-	// -- FIX: fixes BR_TWO_SIDED faces
-	/*if(gl_FrontFacing != true)
-	{
-		normalDirection *= -1.0;
-	}*/
+    // -- FIX: fixes BR_TWO_SIDED faces
+    /*if(gl_FrontFacing != true)
+    {
+        normalDirection *= -1.0;
+    }*/
 
-	vec3 _colour = surface_colour.xyz * ka;
+    vec3 _colour = surface_colour.xyz * ka;
 
-	/* This is shit, but this is the way the engine does it */
-	vec3 lightColour = vec3(0.0);
-	vec3 directLightColour = vec3(0.0);
-	directLightExists = false;
+    /* This is shit, but this is the way the engine does it */
+    vec3 lightColour = vec3(0.0);
+    vec3 directLightColour = vec3(0.0);
+    directLightExists = false;
 
-	for(uint i = 0u; i < num_lights; ++i)
-	{
-		if(lights[i].position.w == 0)
-		{
+    for (uint i = 0u; i < num_lights; ++i) {
+        if (lights[i].position.w == 0) {
 #if !DEBUG_DISABLE_LIGHT_DIRECTIONAL
-			directLightExists = true;
-			directLightColour += lightingColourDirect(position, normalDirection, _colour, lights[i]);
+            directLightExists = true;
+            directLightColour += lightingColourDirect(position, normalDirection, _colour, lights[i]);
 #endif
-		}
-		else
-		{
-			if(lights[i].spot_angles == vec2(0.0, 0.0))
-			{
-				if(lights[i].iclq.zw == vec2(0))
-				{
+        } else {
+            if (lights[i].spot_angles == vec2(0.0, 0.0)) {
+                if (lights[i].iclq.zw == vec2(0)) {
 #if !DEBUG_DISABLE_LIGHT_POINT
-					lightColour += lightingColourPoint(position, normalDirection, _colour, lights[i]);
+                    lightColour += lightingColourPoint(position, normalDirection, _colour, lights[i]);
 #endif
-				}
-				else
-				{
+                } else {
 #if !DEBUG_DISABLE_LIGHT_POINTATTEN
-					lightColour += lightingColourPointAtten(position, normalDirection, _colour, lights[i]);
+                    lightColour += lightingColourPointAtten(position, normalDirection, _colour, lights[i]);
 #endif
-				}
-			}
-			else
-			{
+                }
+            } else {
 #if !DEBUG_DISABLE_LIGHT_SPOT
-				if(lights[i].iclq.zw == vec2(0))
-					lightColour += lightingColourSpot(position, normalDirection, _colour, lights[i]);
-				else
-					lightColour += lightingColourSpotAtten(position, normalDirection, _colour, lights[i]);
+                if (lights[i].iclq.zw == vec2(0))
+                    lightColour += lightingColourSpot(position, normalDirection, _colour, lights[i]);
+                else
+                    lightColour += lightingColourSpotAtten(position, normalDirection, _colour, lights[i]);
 #endif
-			}
+            }
+        }
+    }
 
-		}
-	}
+    /* Force minimum 'ambient' light if a directional light exists */
+    if (directLightExists)
+        lightColour += global_ambient_colour.rgb + directLightColour;
 
-	/* Force minimum 'ambient' light if a directional light exists */
-	if(directLightExists)
-	{
-		lightColour += global_ambient_colour.rgb + directLightColour;
-	}
-
-	return vec4(_colour * lightColour, surface_colour.a);
+    return vec4(_colour * lightColour, surface_colour.a);
 }
-
 
 #if ENABLE_PSX_SIMULATION
 vec4 PSXify_pos(in vec4 vertex, in vec2 resolution)
 {
-	vec4 snappedPos = vertex;
-	snappedPos.xyz = vertex.xyz / vertex.w;
-	snappedPos.xy = floor(resolution.xy * snappedPos.xy) / resolution;
-	snappedPos.xyz *= vertex.w;
-	return snappedPos;
+    vec4 snappedPos = vertex;
+    snappedPos.xyz = vertex.xyz / vertex.w;
+    snappedPos.xy = floor(resolution.xy * snappedPos.xy) / resolution;
+    snappedPos.xyz *= vertex.w;
+    return snappedPos;
 }
 #endif
 
-
 void main()
 {
-	vec4 pos = vec4(aPosition, 1.0);
+    vec4 pos = vec4(aPosition, 1.0);
 
-	position = model_view * pos;
-	normal = normalize(vec4(mat3(normal_matrix) * aNormal, 0));
-	uv = aUV;
-	colour = aColour + fragmain();
+    position = model_view * pos;
+    normal = normalize(vec4(mat3(normal_matrix) * aNormal, 0));
+    uv = aUV;
+    colour = aColour + fragmain();
 
-	if (!directLightExists && num_lights > 0u && unlit == 0u)
-		colour += vec4(clear_colour.rgb, 0.0);
+    if (!directLightExists && num_lights > 0u && unlit == 0u)
+        colour += vec4(clear_colour.rgb, 0.0);
 
 #if ENABLE_PSX_SIMULATION
-	pos = PSXify_pos(mvp * pos, vec2(200.0, 150.0));
+    pos = PSXify_pos(mvp * pos, vec2(200.0, 150.0));
 #else
-	pos = mvp * pos;
-#endif // ENABLE_PSX_SIMULATION
+    pos = mvp * pos;
+#endif
 
-	gl_Position = pos;
+    gl_Position = pos;
 }

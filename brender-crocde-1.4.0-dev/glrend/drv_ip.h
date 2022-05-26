@@ -19,6 +19,8 @@ void VIDEO_Close(HVIDEO hVideo);
 
 GLuint VIDEOI_CreateAndCompileShader(GLenum type, const char *shader, size_t size);
 
+GLuint VIDEOI_LoadAndCompileShader(GLenum type, const char *path, const char *default_data, size_t default_size);
+
 GLuint VIDEOI_CreateAndCompileProgram(GLuint vert, GLuint frag);
 
 br_boolean VIDEOI_CompileDefaultShader(HVIDEO hVideo);

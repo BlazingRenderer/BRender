@@ -37,6 +37,25 @@ GLuint VIDEOI_CreateAndCompileShader(GLenum type, const char *shader, size_t siz
     return s;
 }
 
+GLuint VIDEOI_LoadAndCompileShader(GLenum type, const char *path, const char *default_data, size_t default_size)
+{
+    GLchar *source;
+    size_t size;
+    GLuint shader;
+
+    if(path == NULL || (source = BrFileLoad(NULL, path, &size)) == NULL) {
+        source = (GLchar *)default_data;
+        size   = default_size;
+    }
+
+    shader = VIDEOI_CreateAndCompileShader(type, source, size);
+
+    if(source != default_data)
+        BrResFree(source);
+
+    return shader;
+}
+
 GLuint VIDEOI_CreateAndCompileProgram(GLuint vert, GLuint frag)
 {
     GLuint program;

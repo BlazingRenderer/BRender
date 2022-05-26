@@ -90,7 +90,7 @@ br_device *DeviceGLAllocate(const char *identifier, const char *arguments)
         BrTokenValueSetMany(self, &count, NULL, args_tv, deviceArgs);
     }
 
-    if(self->sdl_window == NULL || self->vertex_shader == NULL || self->fragment_shader == NULL) {
+    if(self->sdl_window == NULL) {
         BrResFreeNoCallback(self);
         return NULL;
     }
