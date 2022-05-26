@@ -136,12 +136,7 @@ int main(int argc, char **argv)
 
     {
         char args[256];
-        snprintf(args, BR_ASIZE(args),
-                 "WINDOW_HANDLE=0x%" PRIxPTR " "
-                 "OPENGL_VERTEX_SHADER=\"brender.vert.glsl\" "
-                 "OPENGL_FRAGMENT_SHADER=\"brender.frag.glsl\"",
-                 (intptr_t)sdlWindow
-        );
+        snprintf(args, BR_ASIZE(args), "WINDOW_HANDLE=0x%" PRIxPTR, (intptr_t)sdlWindow);
 
         struct br_device *BR_EXPORT BrDrvGLBegin(const char *arguments);
 
