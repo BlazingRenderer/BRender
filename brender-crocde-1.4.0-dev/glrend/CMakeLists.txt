@@ -63,8 +63,10 @@ source_group("Renderer" FILES ${RENDERER_FILES})
 set(GLREND_FILES
 	./drv.h
 	./drv_ip.h
-	./gl_core_3_2.h
-	./gl_core_3_2.c
+
+	./glad/src/glad.c
+	./glad/include/glad/glad.h
+	./glad/include/KHR/khrplatform.h
 
 	./driver.c
 
@@ -94,6 +96,8 @@ get_target_property(target_type glrend TYPE)
 if(target_type STREQUAL STATIC_LIBRARY)
 	target_compile_definitions(glrend PRIVATE -DBrDrv1Begin=BrDrvGLBegin)
 endif()
+
+target_include_directories(glrend PRIVATE ./glad/include)
 
 target_link_libraries(glrend SDL2::SDL2)
 target_link_libraries(glrend fw)

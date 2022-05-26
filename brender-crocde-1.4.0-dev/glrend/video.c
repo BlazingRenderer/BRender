@@ -135,7 +135,7 @@ HVIDEO VIDEO_Open(HVIDEO hVideo, const char *vertShader, const char *fragShader)
         return NULL;
     }
 
-    if(ogl_LoadFunctions() == ogl_LOAD_FAILED) {
+    if(gladLoadGLLoader(SDL_GL_GetProcAddress) == 0) {
         BrLogError("VIDEO", "Unable to load OpenGL functions.");
         return NULL;
     }
@@ -157,7 +157,7 @@ HVIDEO VIDEO_Open(HVIDEO hVideo, const char *vertShader, const char *fragShader)
     glGetIntegerv(GL_MAX_FRAGMENT_UNIFORM_BLOCKS, &hVideo->maxFragmentUniformBlocks);
     glGetIntegerv(GL_MAX_SAMPLES, &hVideo->maxSamples);
 
-    if(ogl_ext_EXT_texture_filter_anisotropic)
+    if(GLAD_GL_EXT_texture_filter_anisotropic)
         glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, &hVideo->maxAnisotropy);
 
     if(!VIDEOI_CompileDefaultShader(hVideo))

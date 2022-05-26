@@ -938,7 +938,7 @@ br_error BR_RESIDENT_ENTRY BrTokenValueQueryAll(
 		/*
 		 * Fetch value
 		 */
-		r = ValueQuery(tv, &extra, &extra_size, block, tp);
+		r = ValueQuery(tv, (void**)&extra, &extra_size, block, tp);
 
 		if(r != BRE_OK)
 			return r;

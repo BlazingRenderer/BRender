@@ -170,7 +170,7 @@ static void apply_stored_properties(HVIDEO hVideo, HGLSTATE_STACK state, uint32_
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, (GLint)minFilter);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, (GLint)magFilter);
 
-        if(ogl_ext_EXT_texture_filter_anisotropic)
+        if(GLAD_GL_EXT_texture_filter_anisotropic)
             glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, maxAnisotropy);
 
         //if(state->prim.colour_map)

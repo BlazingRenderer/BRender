@@ -12,7 +12,7 @@ extern "C" {
 #include <assert.h>
 
 #include <SDL_video.h>
-#include "gl_core_3_2.h"
+#include "glad/glad.h"
 
 #define BR_DEVICE_PRIVATE
 #define BR_OUTPUT_FACILITY_PRIVATE
