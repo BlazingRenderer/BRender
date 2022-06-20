@@ -292,6 +292,7 @@ static br_uint_16 calculate_bucket(const br_order_table *ot, const GLSTATE_STACK
     int             render_mode;
     br_scalar       ot_size;
     br_uint_16      base, count;
+    br_scalar       tmp_depth;
 
     ASSERT(BR_ADD(BR_MUL(ratio_force_frontback, BR_SCALAR(2)), ratio_transparent) < BR_SCALAR(1.0));
 
@@ -372,6 +373,7 @@ static br_uint_16 calculate_bucket(const br_order_table *ot, const GLSTATE_STACK
 
     ASSERT(count_forced + count_opaque + count_trans + count_forced == ot->size);
 
+    tmp_depth = *depth;
     switch(render_mode) {
         case RM_FORCE_FRONT:
             base  = 0;
@@ -383,8 +385,9 @@ static br_uint_16 calculate_bucket(const br_order_table *ot, const GLSTATE_STACK
             break;
         case RM_OPAQUE:
         default:
-            base  = count_forced + count_trans;
-            count = count_opaque;
+            base      = count_forced + count_trans;
+            count     = count_opaque;
+            tmp_depth = -tmp_depth;
             break;
         case RM_FORCE_BACK:
             base  = count_forced + count_trans + count_opaque;
@@ -392,7 +395,7 @@ static br_uint_16 calculate_bucket(const br_order_table *ot, const GLSTATE_STACK
             break;
     }
 
-    return base + BrZsPrimitiveBucketSelect(depth, BR_PRIMITIVE_POINT, ot->min_z, ot->max_z, count, ot->type);
+    return base + BrZsPrimitiveBucketSelect(&tmp_depth, BR_PRIMITIVE_POINT, ot->min_z, ot->max_z, count, ot->type);
 }
 
 static br_error V1Model_RenderStored(struct br_geometry_stored *self, br_renderer *renderer, br_boolean on_screen)
