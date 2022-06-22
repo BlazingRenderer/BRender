@@ -815,8 +815,7 @@ br_error BR_CMETHOD(br_device_pixelmap_gl, text)(br_device_pixelmap *self, br_po
     glDisable(GL_DEPTH_TEST);
     glDisable(GL_CULL_FACE);
 
-    glUseProgram(hVideo
-                     ->textProgram.program);
+    glUseProgram(hVideo->textProgram.program);
 
     br_vector3_f col = {{
                             BR_RED(colour) / 255.0f,
@@ -828,14 +827,11 @@ br_error BR_CMETHOD(br_device_pixelmap_gl, text)(br_device_pixelmap *self, br_po
     BrMatrix4Orthographic(&mvp, 0.0f, 1.0f, 0.0f, 1.0f, -1.0f, 1.0f);
     VIDEOI_D3DtoGLProjection(&mvp);
 
-    glUniformMatrix4fv(hVideo
-                           ->textProgram.uMVP, 1, GL_FALSE, (GLfloat *)&mvp);
+    glUniformMatrix4fv(hVideo->textProgram.uMVP, 1, GL_FALSE, (GLfloat *)&mvp);
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, hFont->glTex);
-    glUniform1i(hVideo
-                    ->textProgram.uSampler, 0);
-    glUniform3fv(hVideo
-                     ->textProgram.uColour, 1, col.v);
+    glUniform1i(hVideo->textProgram.uSampler, 0);
+    glUniform3fv(hVideo->textProgram.uColour, 1, col.v);
 
     br_rectangle r = {.x = point->x, .y = point->y, .h = font->glyph_y, .w = 0,};
 
@@ -858,13 +854,11 @@ br_error BR_CMETHOD(br_device_pixelmap_gl, text)(br_device_pixelmap *self, br_po
                             hFont->glyph[glyph].y1
         );
 
-        glBindVertexArray(self
-                              ->asBack.quad.textVao);
+        glBindVertexArray(self->asBack.quad.textVao);
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, NULL);
 
         r.x += width + 1;
-        r.w +=
-            width;
+        r.w += width;
     }
 
     glBindVertexArray(0);

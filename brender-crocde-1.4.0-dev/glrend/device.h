@@ -43,8 +43,7 @@ typedef struct br_device {
     struct br_renderer_facility *renderer_facility;
 
     /*
-     * Device-wide VIDEO instance. Pointer until C++ -> C
-     * conversion is complete.
+     * Device-wide VIDEO instance.
      */
     VIDEO video;
 
@@ -52,6 +51,11 @@ typedef struct br_device {
      * SDL window handle
      */
     SDL_Window *sdl_window;
+
+    /*
+     * SDL OpenGL context
+     */
+    SDL_GLContext *sdl_context;
 
     /*
      * Vertex shader source

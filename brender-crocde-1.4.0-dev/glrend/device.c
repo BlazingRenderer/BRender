@@ -42,7 +42,7 @@ static struct br_tv_template_entry deviceTemplateEntries[] = {
 /*
  * List of tokens which are not significant in matching (for output facilities)
  */
-br_token insignificantMatchTokens[] = {
+static br_token insignificantMatchTokens[] = {
     BRT_WINDOW_HANDLE_H,
     BRT_OPENGL_MSAA_SAMPLES_I32,
     BRT_TEMPORARY_B,
@@ -95,17 +95,26 @@ br_device *DeviceGLAllocate(const char *identifier, const char *arguments)
         return NULL;
     }
 
-    if(VIDEO_Open(&self->video, self->vertex_shader, self->fragment_shader) == NULL) {
+    if((self->sdl_context = SDL_GL_CreateContext(self->sdl_window)) == NULL) {
         BrResFreeNoCallback(self);
         return NULL;
     }
 
-    if((self->renderer_facility = RendererFacilityGLInit(self)) == NULL) {
-        BrResFree(self);
-        return NULL;
-    }
+    if(SDL_GL_MakeCurrent(self->sdl_window, self->sdl_context) < 0)
+        goto cleanup_context;
+
+    if(VIDEO_Open(&self->video, self->vertex_shader, self->fragment_shader) == NULL)
+        goto cleanup_context;
+
+    if((self->renderer_facility = RendererFacilityGLInit(self)) == NULL)
+        goto cleanup_context;
 
     return self;
+
+cleanup_context:
+    SDL_GL_DeleteContext(self->sdl_context);
+    BrResFree(self);
+    return NULL;
 }
 
 static void BR_CMETHOD_DECL(br_device_gl, free)(struct br_object *_self)
@@ -113,6 +122,8 @@ static void BR_CMETHOD_DECL(br_device_gl, free)(struct br_object *_self)
     br_device *self = (br_device *)_self;
 
     VIDEO_Close(&self->video);
+
+    SDL_GL_DeleteContext(self->sdl_context);
 
     /*
      * Remove attached objects
