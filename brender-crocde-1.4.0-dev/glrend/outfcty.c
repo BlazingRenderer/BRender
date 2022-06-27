@@ -27,6 +27,7 @@ static struct br_tv_template_entry outputFacilityTemplateEntries[] = {
     {BRT_IDENTIFIER_CSTR,         NULL, F(identifier),        BRTV_QUERY | BRTV_ALL, BRTV_CONV_COPY,},
     {BRT_RENDERER_FACILITY_O,     NULL, F(renderer_facility), BRTV_QUERY | BRTV_ALL, BRTV_CONV_COPY,},
     {BRT_TEMPORARY_B,             NULL, F(temporary),         BRTV_QUERY | BRTV_ALL, BRTV_CONV_COPY,},
+    {BRT_SDL_DISPLAY_MODE_P,      NULL, F(display_mode),      BRTV_QUERY | BRTV_ALL, BRTV_CONV_COPY,},
 
     /*
      * We don't use these, but we need BrDevBeginVar to accept them.
@@ -51,14 +52,16 @@ static int BrType_BPP(int type)
             return 24;
         case BR_PMT_RGBX_888:
         case BR_PMT_RGBA_8888:
+        case BR_PMT_ARGB_8888:
             return 32;
         default:
             return 0;
     }
 }
 
-br_output_facility *OutputFacilityGLCreateMode(br_device *dev, br_uint_16 type, br_int_32 width, br_int_32 height,
-                                               br_int_32 monitorIndex, br_boolean temporary)
+static br_output_facility *OutputFacilityGLCreateMode(br_device *dev, br_uint_16 type,
+                                                      br_int_32 width, br_int_32 height,
+                                                      br_int_32 monitorIndex, br_boolean temporary)
 {
     br_output_facility *self;
     char               tmp[64];
@@ -85,6 +88,8 @@ br_output_facility *OutputFacilityGLCreateMode(br_device *dev, br_uint_16 type, 
 
     self->renderer_facility = dev->renderer_facility;
 
+    self->display_mode = NULL;
+
     ObjectContainerAddFront(dev, (br_object *)self);
     return self;
 }
@@ -92,7 +97,6 @@ br_output_facility *OutputFacilityGLCreateMode(br_device *dev, br_uint_16 type, 
 
 static br_error sdlToBRrenderSurfaceType(const SDL_DisplayMode *mode, br_uint_16 *pType)
 {
-    /* Only support RGB555, RGB555, and RGB888 */
     switch(mode->format) {
         case SDL_PIXELFORMAT_RGB555:
             *pType = BR_PMT_RGB_555;
@@ -103,7 +107,11 @@ static br_error sdlToBRrenderSurfaceType(const SDL_DisplayMode *mode, br_uint_16
         case SDL_PIXELFORMAT_RGB888:
             *pType = BR_PMT_RGB_888;
             break;
+        case SDL_PIXELFORMAT_ARGB8888:
+            *pType = BR_PMT_ARGB_8888;
+            break;
         default:
+            BrLogWarn("GLREND", "Unhandled SDL pixel format: %s", SDL_GetPixelFormatName(mode->format));
             return BRE_FAIL;
     }
 
@@ -114,11 +122,16 @@ static br_error sdlToBRrenderSurfaceType(const SDL_DisplayMode *mode, br_uint_16
 static br_output_facility *OutputFacilityGLCreateModeFromSDL(br_device *dev, br_int_32 monitorIndex,
                                                              const SDL_DisplayMode *mode)
 {
-    br_uint_16 type;
+    br_uint_16         type;
+    br_output_facility *outfcty;
+
     if(sdlToBRrenderSurfaceType(mode, &type) != BRE_OK)
         return NULL;
 
-    return OutputFacilityGLCreateMode(dev, type, mode->w, mode->h, monitorIndex, 0);
+    outfcty = OutputFacilityGLCreateMode(dev, type, mode->w, mode->h, monitorIndex, 0);
+    outfcty->_display_mode = *mode;
+    outfcty->display_mode  = &outfcty->_display_mode;
+    return outfcty;
 }
 
 br_output_facility *OutputFacilityGLCreateTemporary(br_device *dev, br_token_value *tv)

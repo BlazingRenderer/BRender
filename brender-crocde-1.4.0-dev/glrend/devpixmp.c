@@ -488,6 +488,7 @@ struct pixelmapMatchTokens {
     br_int_32 width;
     br_int_32 height;
     br_int_32 pixel_bits;
+    br_uint_8 type;
     br_token  use_type;
 };
 
@@ -496,6 +497,7 @@ static struct br_tv_template_entry pixelmapMatchTemplateEntries[] = {
     {BRT_WIDTH_I32,      NULL, F(width),      BRTV_SET, BRTV_CONV_COPY,},
     {BRT_HEIGHT_I32,     NULL, F(height),     BRTV_SET, BRTV_CONV_COPY,},
     {BRT_PIXEL_BITS_I32, NULL, F(pixel_bits), BRTV_SET, BRTV_CONV_COPY,},
+    {BRT_PIXEL_TYPE_U8,  NULL, F(type),       BRTV_SET, BRTV_CONV_COPY,},
     {BRT_USE_T,          NULL, F(use_type),   BRTV_SET, BRTV_CONV_COPY,},
 };
 #undef F
@@ -505,7 +507,7 @@ br_error BR_CMETHOD_DECL(br_device_pixelmap_gl, match)(br_device_pixelmap *self,
 {
     br_int_32                  count;
     br_uint_8                  type;
-    struct pixelmapMatchTokens mt = {.width = -1, .height = -1, .pixel_bits = -1, .use_type = BRT_NONE};
+    struct pixelmapMatchTokens mt = {.width = -1, .height = -1, .pixel_bits = -1, .type = BR_PMT_MAX, .use_type = BRT_NONE};
 
     if(self->device->templates.pixelmapMatchTemplate == NULL) {
         self->device->templates.pixelmapMatchTemplate = BrTVTemplateAllocate(
@@ -535,6 +537,8 @@ br_error BR_CMETHOD_DECL(br_device_pixelmap_gl, match)(br_device_pixelmap *self,
         type = BR_PMT_DEPTH_16;
         mt.width  = self->pm_width;
         mt.height = self->pm_height;
+    } else if(mt.type != BR_PMT_MAX) {
+        type = mt.type;
     } else {
         type = self->pm_type;
     }

@@ -70,10 +70,19 @@ typedef struct br_output_facility {
     br_boolean temporary;
 
     /*
+     * SDL Display Mode structure, required for SDL_SetWindowDisplayMode().
+     */
+    SDL_DisplayMode *display_mode;
+
+    /*
      * Renderer facilities to use, and default
      */
     struct br_renderer_facility *renderer_facility;
 
+    /*
+     * Storage for display_mode.
+     */
+    SDL_DisplayMode _display_mode;
 } br_output_facility;
 
 #endif /* BR_OUTPUT_FACILITY_PRIVATE */
