@@ -44,7 +44,7 @@ static struct br_tv_template_entry deviceTemplateEntries[] = {
  */
 static br_token insignificantMatchTokens[] = {
     BRT_WINDOW_HANDLE_H,
-    BRT_OPENGL_MSAA_SAMPLES_I32,
+    BRT_MSAA_SAMPLES_I32,
     BRT_TEMPORARY_B,
     BR_NULL_TOKEN,
 };

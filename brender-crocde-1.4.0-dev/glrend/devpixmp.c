@@ -26,7 +26,7 @@ static struct br_tv_template_entry devicePixelmapTemplateEntries[] = {
     {BRT_OUTPUT_FACILITY_O,       NULL, F(output_facility), BRTV_QUERY | BRTV_ALL, BRTV_CONV_COPY,},
     {BRT_FACILITY_O,              NULL, F(output_facility), BRTV_QUERY,            BRTV_CONV_COPY,},
     {BRT_IDENTIFIER_CSTR,         NULL, F(pm_identifier),   BRTV_QUERY | BRTV_ALL, BRTV_CONV_COPY,},
-    {BRT_OPENGL_MSAA_SAMPLES_I32, NULL, F(msaa_samples),    BRTV_QUERY | BRTV_ALL, BRTV_CONV_COPY,}
+    {BRT_MSAA_SAMPLES_I32,        NULL, F(msaa_samples),    BRTV_QUERY | BRTV_ALL, BRTV_CONV_COPY,}
 };
 #undef F
 
@@ -36,7 +36,7 @@ struct pixelmapNewTokens {
 
 #define F(f) offsetof(struct pixelmapNewTokens, f)
 static struct br_tv_template_entry pixelmapNewTemplateEntries[] = {
-    {BRT_OPENGL_MSAA_SAMPLES_I32, NULL, F(msaa_samples), BRTV_SET, BRTV_CONV_COPY,}
+    {BRT_MSAA_SAMPLES_I32, NULL, F(msaa_samples), BRTV_SET, BRTV_CONV_COPY,}
 };
 #undef F
 

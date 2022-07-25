@@ -802,7 +802,8 @@ WINDOW_BUFFER_METHOD			token
 	DIBSECTION						none
 	DIRECTDRAW						none
 
-OPENGL_MSAA_SAMPLES					int_32
+MSAA_SAMPLES						int_32
+
 OPENGL_VERTEX_SHADER				string
 OPENGL_FRAGMENT_SHADER				string
 TEMPORARY                           boolean
