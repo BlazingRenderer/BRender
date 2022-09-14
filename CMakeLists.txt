@@ -15,7 +15,7 @@ set(PERL "perl")
 # glrend needs this
 find_package(SDL2 REQUIRED)
 
-add_subdirectory(brender-crocde-1.4.0-dev)
+add_subdirectory(brender)
 
 add_subdirectory(mkshades)
 add_subdirectory(mkranges)
