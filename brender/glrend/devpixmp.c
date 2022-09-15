@@ -413,8 +413,6 @@ void BR_CMETHOD_DECL(br_device_pixelmap_gl, free)(br_object *_self)
 
     ObjectContainerRemove(self->output_facility, (br_object *)self);
 
-    OutputFacilityGLOnPixelmapFree(self->output_facility, self);
-
     BrResFreeNoCallback(self);
 }
 

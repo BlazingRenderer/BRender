@@ -163,26 +163,6 @@ br_output_facility *OutputFacilityGLCreateTemporary(br_device *dev, br_token_val
     return OutputFacilityGLCreateMode(dev, pmt, width, height, -1, 1);
 }
 
-void OutputFacilityGLOnPixelmapFree(br_output_facility *outfcty, br_device_pixelmap *pixmp)
-{
-    br_device_pixelmap *pm = NULL;
-
-    (void)pixmp;
-
-    if(!outfcty->temporary)
-        return;
-
-    /* Find a device pixelmap. If this fails, we don't care. */
-    (void)ObjectContainerFind(outfcty, (struct br_object **)&pm, BRT_DEVICE_PIXELMAP, NULL, NULL);
-
-    if(pm != NULL)
-        return;
-
-    /* No pixelmaps left, destroy */
-    ObjectFree(outfcty);
-}
-
-
 br_error OutputFacilityGLEnumerate(br_device *device)
 {
     int numMonitors = SDL_GetNumVideoDisplays();
