@@ -59,8 +59,6 @@ br_renderer_facility *RendererFacilityGLInit(br_device *dev);
  */
 br_output_facility *OutputFacilityGLCreateTemporary(br_device *dev, br_token_value *tv);
 
-void OutputFacilityGLOnPixelmapFree(br_output_facility *outfcty, br_device_pixelmap *pixmp);
-
 br_error OutputFacilityGLEnumerate(br_device *device);
 
 /*
