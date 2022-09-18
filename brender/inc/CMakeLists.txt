@@ -3,7 +3,7 @@ project(inc)
 # Generate pretok.h, pretok_c.h, and toktype.c
 add_custom_command(
 	OUTPUT pretok.h pretok_c.h toktype.c
-	COMMAND "${PERL}" "${CMAKE_CURRENT_SOURCE_DIR}/tokgen.pl" "${CMAKE_CURRENT_SOURCE_DIR}/pretok.tok"
+	COMMAND "${PERL_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/tokgen.pl" "${CMAKE_CURRENT_SOURCE_DIR}/pretok.tok"
 	MAIN_DEPENDENCY "${CMAKE_CURRENT_SOURCE_DIR}/pretok.tok"
 	DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/tokgen.pl"
 )

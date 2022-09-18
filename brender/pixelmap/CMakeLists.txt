@@ -7,7 +7,7 @@ target_link_libraries(pixelmap-headers INTERFACE math-headers)
 
 add_custom_command(
 	OUTPUT pmimg.h pmimg.def
-	COMMAND "${PERL}" "${CMAKE_CURRENT_SOURCE_DIR}/../resgen.pl" "pmimg.h" "pmimg.def" < "${CMAKE_CURRENT_SOURCE_DIR}/pmimg.fns"
+	COMMAND "${PERL_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/../resgen.pl" "pmimg.h" "pmimg.def" < "${CMAKE_CURRENT_SOURCE_DIR}/pmimg.fns"
 	MAIN_DEPENDENCY "${CMAKE_CURRENT_SOURCE_DIR}/pmimg.fns"
 	DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/../resgen.pl"
 )
