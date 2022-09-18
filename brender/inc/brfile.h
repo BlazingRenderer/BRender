@@ -32,9 +32,9 @@ typedef int BR_CALLBACK brfile_eof_cbfn(void * f);
 typedef int	BR_CALLBACK brfile_getchr_cbfn(void * f);
 typedef void BR_CALLBACK brfile_putchr_cbfn(int c, void * f);
 typedef br_size_t BR_CALLBACK brfile_read_cbfn(void *buf, br_size_t size, br_size_t nelems, void * f);
-typedef br_size_t BR_CALLBACK brfile_write_cbfn(void *buf, br_size_t size, br_size_t nelems, void * f);
+typedef br_size_t BR_CALLBACK brfile_write_cbfn(const void *buf, br_size_t size, br_size_t nelems, void * f);
 typedef br_size_t BR_CALLBACK brfile_getline_cbfn(char *buf, br_size_t buf_len, void * f);
-typedef void BR_CALLBACK brfile_putline_cbfn(char *buf, void * f);
+typedef void BR_CALLBACK brfile_putline_cbfn(const char *buf, void * f);
 typedef void BR_CALLBACK brfile_advance_cbfn(br_size_t count, void * f);
 typedef void * BR_CALLBACK brfile_load_cbfn(void *res, const char *name, br_size_t *size);
 

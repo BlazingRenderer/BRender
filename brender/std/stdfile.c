@@ -261,7 +261,7 @@ static br_size_t BR_CALLBACK BrStdioRead(void *buf, br_size_t size, br_size_t n,
 /*
  * Write a block to a file
  */
-static br_size_t BR_CALLBACK BrStdioWrite(void *buf, br_size_t size, br_size_t n, void *f)
+static br_size_t BR_CALLBACK BrStdioWrite(const void *buf, br_size_t size, br_size_t n, void *f)
 {
 	return fwrite(buf,size,n,(FILE *)f);
 }
@@ -292,7 +292,7 @@ static br_size_t BR_CALLBACK BrStdioGetLine(char *buf, br_size_t buf_len, void *
 /*
  * Write a line to text file, followed by newline
  */
-static void BR_CALLBACK BrStdioPutLine(char *buf, void * f)
+static void BR_CALLBACK BrStdioPutLine(const char *buf, void * f)
 {
 	fputs(buf,(FILE *)f);
 	fputc('\n',(FILE *)f);
