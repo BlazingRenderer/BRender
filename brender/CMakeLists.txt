@@ -11,9 +11,15 @@ add_subdirectory(v1db)
 add_subdirectory(nulldev)
 add_subdirectory(glrend)
 
-##
-# Top level "brender" interface library.
-# Pulls in v1db and glrend.
-##
 add_library(brender INTERFACE)
 target_link_libraries(brender INTERFACE v1db glrend)
+
+##
+# Full BRender, with drivers.
+##
+add_library(BRender::Full ALIAS brender)
+
+##
+# Core BRender, no drivers.
+##
+add_library(BRender::Core ALIAS v1db)
