@@ -2,6 +2,8 @@ project(glrend)
 
 find_package(OpenGL REQUIRED)
 
+add_subdirectory(glad)
+
 set(GLSTATE_FILES
 	./glcache.c
 	./glstate.c
@@ -97,8 +99,7 @@ if(target_type STREQUAL STATIC_LIBRARY)
 	target_compile_definitions(glrend PRIVATE -DBrDrv1Begin=BrDrvGLBegin)
 endif()
 
-target_include_directories(glrend PRIVATE ./glad/include)
-
+target_link_libraries(glrend glrend-glad)
 target_link_libraries(glrend SDL2::SDL2)
 target_link_libraries(glrend fw)
 target_link_libraries(glrend pixelmap)
