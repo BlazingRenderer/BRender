@@ -213,6 +213,11 @@ virtual br_error BR_METHOD rectangleStretchCopyFrom(br_rectangle *r,class br_dev
 	//
 		virtual br_error BR_METHOD directLock(br_boolean block);
 		virtual br_error BR_METHOD directUnlock(void);
+
+		// Locking/unlocking for direct pixel access
+		//
+		virtual br_error BR_METHOD getControls(br_display_controls *controls);
+		virtual br_error BR_METHOD setControls(br_display_controls *controls);
 };
 
 // A device Colour LookUp Table

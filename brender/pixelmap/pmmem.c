@@ -1373,5 +1373,8 @@ static struct br_device_pixelmap_dispatch devicePixelmapDispatch = {
 	._synchronise				= BR_CMETHOD_REF(br_device_pixelmap_mem, synchronise),
 	._directLock				= BR_CMETHOD_REF(br_device_pixelmap_mem, directLock),
 	._directUnlock				= BR_CMETHOD_REF(br_device_pixelmap_mem, directUnlock),
+
+	._getControls				= BR_CMETHOD_REF(br_device_pixelmap_gen, getControls),
+	._setControls				= BR_CMETHOD_REF(br_device_pixelmap_gen, setControls),
 };
       

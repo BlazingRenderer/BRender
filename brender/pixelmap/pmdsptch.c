@@ -969,3 +969,21 @@ br_pixelmap * BR_PUBLIC_ENTRY BrPixelmapDirectUnlock(br_pixelmap *src)
 	return src;
 }
 
+
+br_error BR_PUBLIC_ENTRY BrPixelmapGetControls(br_pixelmap *src, br_display_controls *controls)
+{
+	UASSERT(src);
+
+	CheckDispatch(src);
+
+	return DevicePixelmapGetControls(src, controls);
+}
+
+br_error BR_PUBLIC_ENTRY BrPixelmapSetControls(br_pixelmap *src, br_display_controls *controls)
+{
+	UASSERT(src);
+
+	CheckDispatch(src);
+
+	return DevicePixelmapSetControls(src, controls);
+}

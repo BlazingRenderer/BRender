@@ -175,6 +175,8 @@ br_error BR_CMETHOD_DECL(br_device_pixelmap_gen, flush)(struct br_device_pixelma
 br_error BR_CMETHOD_DECL(br_device_pixelmap_gen, synchronise)(struct br_device_pixelmap *self,br_token sync_type,br_boolean block);
 br_error BR_CMETHOD_DECL(br_device_pixelmap_gen, directLock)(struct br_device_pixelmap *self, br_boolean block);
 br_error BR_CMETHOD_DECL(br_device_pixelmap_gen, directUnlock)(struct br_device_pixelmap *self);
+br_error BR_CMETHOD_DECL(br_device_pixelmap_gen, getControls)(struct br_device_pixelmap *self, br_display_controls * controls);
+br_error BR_CMETHOD_DECL(br_device_pixelmap_gen, setControls)(struct br_device_pixelmap *self, br_display_controls * controls);
 
 /*
  * pmnull.c
@@ -248,6 +250,8 @@ br_error BR_CMETHOD_DECL(br_device_pixelmap_fail, synchronise)(struct br_device_
                                                                br_token sync_type, br_boolean block);
 br_error BR_CMETHOD_DECL(br_device_pixelmap_fail, directLock)(struct br_device_pixelmap *self, br_boolean block);
 br_error BR_CMETHOD_DECL(br_device_pixelmap_fail, directUnlock)(struct br_device_pixelmap *self);
+br_error BR_CMETHOD_DECL(br_device_pixelmap_fail, getControls)(struct br_device_pixelmap *self, br_display_controls * controls);
+br_error BR_CMETHOD_DECL(br_device_pixelmap_fail, setControls)(struct br_device_pixelmap *self, br_display_controls * controls);
 
 /*
  * gencopy.c

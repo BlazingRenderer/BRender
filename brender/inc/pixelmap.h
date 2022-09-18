@@ -317,6 +317,27 @@ enum{
 	BR_QUANTIZE_MAX
 };
 
+enum{
+        BR_CONTROL_GAMMA_RGB    = 0x00000001,
+        BR_CONTROL_GAMMA        = 0x00000002,
+        BR_CONTROL_BRIGHTNESS   = 0x00000004,
+        BR_CONTROL_CONTRAST     = 0x00000008,
+        BR_CONTROL_HUE          = 0x00000010,
+        BR_CONTROL_SATURATION   = 0x00000020,
+        BR_CONTROL_SHARPNESS    = 0x00000040,
+};
 
+typedef struct{
+        br_uint_32 flags;
+        br_uint_16 gamma_red[256];
+        br_uint_16 gamma_green[256];
+        br_uint_16 gamma_blue[256];
+        br_int_32 gamma;
+        br_int_32 brightness;
+        br_int_32 contrast;
+        br_int_32 hue;
+        br_int_32 saturation;
+        br_int_32 sharpness;
+}br_display_controls;
 
 #endif

@@ -662,3 +662,14 @@ br_error BR_CMETHOD_DECL(br_device_pixelmap_gen, directUnlock)(br_device_pixelma
 {
 	return BRE_OK;
 }
+
+br_error BR_CMETHOD_DECL(br_device_pixelmap_gen, getControls)(br_device_pixelmap *self, br_display_controls * controls)
+{
+    return BRE_FAIL;
+}
+
+br_error BR_CMETHOD_DECL(br_device_pixelmap_gen, setControls)(br_device_pixelmap *self, br_display_controls * controls)
+{
+    return BRE_FAIL;
+}
+
