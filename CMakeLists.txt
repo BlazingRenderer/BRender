@@ -11,6 +11,13 @@ find_package(SDL2 REQUIRED)
 
 add_subdirectory(brender)
 
-add_subdirectory(mkshades)
-add_subdirectory(mkranges)
-add_subdirectory(robot)
+option(BRENDER_BUILD_TOOLS    "Build Tools"    ON)
+option(BRENDER_BUILD_EXAMPLES "Build Examples" ON)
+
+if(BRENDER_BUILD_TOOLS)
+    add_subdirectory(tools)
+endif()
+
+if(BRENDER_BUILD_EXAMPLES)
+    add_subdirectory(examples)
+endif()
