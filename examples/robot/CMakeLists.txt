@@ -7,4 +7,4 @@ add_executable(robot WIN32
         robot.c
 )
 
-target_link_libraries(robot PUBLIC brender)
+target_link_libraries(robot PUBLIC BRender::Full)
