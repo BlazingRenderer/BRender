@@ -38,11 +38,11 @@ set(V1DB_FILES
 add_library(v1db STATIC ${V1DB_FILES})
 target_link_libraries(v1db v1db-headers)
 target_link_libraries(v1db host)
+target_link_libraries(v1db fmt)
 target_link_libraries(v1db pixelmap)
 target_link_libraries(v1db fw)
 target_link_libraries(v1db math)
 target_link_libraries(v1db std)
-target_link_libraries(v1db fmt)
 
 set_property(TARGET v1db PROPERTY FOLDER ${BRENDER_FOLDER})
 
