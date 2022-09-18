@@ -20,7 +20,7 @@
 #include "math_ip.h"
 
 #if defined(CROC_BUILD)
-#include "../../csource/strat.h"
+#include <csource/strat.h>
 #define MarkStratAsDrawn(a) \
 	if ((a) > (void *)1024) ((STRAT *)(a))->flag_2|=ST_2_ONSCREEN;
 #define MarkStratAsNotDrawn(a) \
