@@ -14,13 +14,19 @@
 
 #ifndef _NO_PROTOTYPES
 
-#include <math.h>
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-#define BrFloatFloor(f) floorf(f)
-#define BrFloatCeil(f) ceilf(f)
-#define BrFloatSqrt(f) sqrtf(f)
-#define BrFloatPow(a, b) powf(a, b)
-#define BrFloatAtan2(x, y) atan2f(x, y)
+float BR_PUBLIC_ENTRY BrFloatFloor(float f);
+float BR_PUBLIC_ENTRY BrFloatCeil(float f);
+float BR_PUBLIC_ENTRY BrFloatSqrt(float f);
+float BR_PUBLIC_ENTRY BrFloatPow(float a, float b);
+float BR_PUBLIC_ENTRY BrFloatAtan2(float x, float y);
+
+#ifdef __cplusplus
+};
+#endif
 
 #endif
 

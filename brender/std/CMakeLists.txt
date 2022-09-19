@@ -7,6 +7,7 @@ target_link_libraries(std-headers INTERFACE fw-headers)
 set(STD_FILES
 	./brexcept.c
 	./logwrite.c
+	./math.c
 	./stddiag.c
 	./stdfile.c
 	./stdlib.c
