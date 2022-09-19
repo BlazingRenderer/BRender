@@ -182,15 +182,7 @@ static void apply_stored_properties(HVIDEO hVideo, HGLSTATE_STACK state, uint32_
             glEnable(GL_BLEND);
 
             glBlendEquation(GL_FUNC_ADD);
-            if(state->prim.colour_map != NULL) {
-                /* https://stackoverflow.com/a/37533711 */
-                if(state->prim.colour_map->source_flags & BR_PMF_PREMULTIPLIED_ALPHA)
-                    glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
-                else
-                    glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
-            } else {
-                glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
-            }
+            glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
         }
     }
 }

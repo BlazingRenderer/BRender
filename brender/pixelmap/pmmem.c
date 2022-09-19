@@ -37,7 +37,7 @@ struct pm_type_info pmTypeInfo[] = {
 	[BR_PMT_ALPHA_8]		= { .bits = 8,	.file_size = 1, .align = 4, .channels = BR_PMCHAN_ALPHA },
 
 	/*****These may be wrong and need updating. *****/
-	[BR_PMT_INDEXA_88]		= { .bits = 16,	.file_size = 2, .align = 2, .channels = BR_PMCHAN_INDEX | BR_PMCHAN_ALPHA },
+	[BR_PMT_AINDEX_88]		= { .bits = 16,	.file_size = 2, .align = 2, .channels = BR_PMCHAN_INDEX | BR_PMCHAN_ALPHA },
 	[BR_PMT_NORMAL_INDEX_8]	= { .bits = 16,	.file_size = 2, .align = 2, .channels = BR_PMCHAN_INDEX | BR_PMCHAN_ALPHA },
 	[BR_PMT_NORMAL_XYZ] 	= { .bits = 16,	.file_size = 2, .align = 2, .channels = BR_PMCHAN_INDEX | BR_PMCHAN_ALPHA },
 	[BR_PMT_BGR_555]		= { .bits = 16,	.file_size = 2, .align = 2, .channels = BR_PMCHAN_INDEX | BR_PMCHAN_ALPHA },
@@ -51,13 +51,15 @@ struct pm_type_info pmTypeInfo[] = {
 	[BR_PMT_DEPTH_8]		= { .bits = 8,	.file_size = 1, .align = 4, .channels = BR_PMCHAN_DEPTH },
 	[BR_PMT_ARGB_8888]		= { .bits = 32,	.file_size = 4, .align = 1, .channels = BR_PMCHAN_RGB | BR_PMCHAN_ALPHA },
 	[BR_PMT_ALPHA_4]		= { .bits = 4,	.file_size = 1, .align = 8, .channels = BR_PMCHAN_ALPHA },
-	[BR_PMT_AINDEX_44]		= { .bits = 8,	.file_size = 1, .align = 4, .channels = BR_PMCHAN_INDEX | BR_PMCHAN_ALPHA },
-	[BR_PMT_AINDEX_88]		= { .bits = 16,	.file_size = 2, .align = 4, .channels = BR_PMCHAN_INDEX | BR_PMCHAN_ALPHA },
+	[BR_PMT_INDEXA_44]		= { .bits = 8,	.file_size = 1, .align = 4, .channels = BR_PMCHAN_INDEX | BR_PMCHAN_ALPHA },
 	[BR_PMT_DEPTH_15]		= { .bits = 16,	.file_size = 2, .align = 2, .channels = BR_PMCHAN_DEPTH },
 	[BR_PMT_DEPTH_31]		= { .bits = 32,	.file_size = 4, .align = 1, .channels = BR_PMCHAN_DEPTH },
 	[BR_PMT_DEPTH_FP16]		= { .bits = 16,	.file_size = 2, .align = 2, .channels = BR_PMCHAN_DEPTH },
 	[BR_PMT_DEPTH_FP15]		= { .bits = 16,	.file_size = 2, .align = 2, .channels = BR_PMCHAN_DEPTH },
 
+	[BR_PMT_RGBA_5551]		= { .bits = 16,	.file_size = 2, .align = 2, .channels = BR_PMCHAN_INDEX | BR_PMCHAN_ALPHA },
+	[BR_PMT_ARGB_1555]		= { .bits = 16,	.file_size = 2, .align = 2, .channels = BR_PMCHAN_INDEX | BR_PMCHAN_ALPHA },
+	[BR_PMT_ARGB_4444]		= { .bits = 16,	.file_size = 2, .align = 2, .channels = BR_PMCHAN_INDEX | BR_PMCHAN_ALPHA },
 
 	[BR_PMT_RGBA_8888_ARR]	= { .bits = 32,	.file_size = 4, .align = 1, .channels = BR_PMCHAN_RGB | BR_PMCHAN_ALPHA },
 };

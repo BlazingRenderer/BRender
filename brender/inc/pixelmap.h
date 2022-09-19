@@ -1,8 +1,8 @@
 /*
  * Copyright (c) 1993-1995 by Argonaut Technologies Limited. All rights reserved.
  *
- * $Id: pixelmap.h 2.26 1997/03/19 10:38:37 ALISTAIR Exp ALISTAIR $
- * $Locker: ALISTAIR $
+ * $Id: pixelmap.h 1.7 1998/09/09 13:28:45 johng Exp $
+ * $Locker: $
  *
  * A stopgap 2D pixelmap structure for brender. This should really be the
  * pixelmap data type from the underlying 2D system (whatever that will
@@ -13,7 +13,6 @@
 #ifndef _PIXELMAP_H_
 #define _PIXELMAP_H_
 
-#include "colour.h"
 /*
  * Various types of pixel
  */
@@ -54,7 +53,7 @@ enum {
 	BR_PMT_ALPHA_8,
 
 	/*
-	 * Opacity + Index. 
+	 * Opacity + Index.
 	 */
 	BR_PMT_INDEXA_88,
 
@@ -74,28 +73,28 @@ enum {
 	 */
 	BR_PMT_RGBA_4444,
 
-    /*
-     * Handy types for converting to 15/16 bit
-     */
-    BR_PMT_RBG_bab,
-    BR_PMT_RBG_1aba,
+	/*
+	 * Handy types for converting to 15/16 bit
+	 */
+	BR_PMT_RBG_bab,
+	BR_PMT_RBG_1aba,
 
 	/*
-     * Pixelmap extensions.
+	 * Pixelmap extensions.
 	 */
 	BR_PMT_RGB_332,
 	BR_PMT_DEPTH_8,
 
 	BR_PMT_ARGB_8888,
 	BR_PMT_ALPHA_4,
-	BR_PMT_AINDEX_44,
-	BR_PMT_AINDEX_88,
+	BR_PMT_INDEXA_44,
 	BR_PMT_DEPTH_15,
 	BR_PMT_DEPTH_31,
 	BR_PMT_DEPTH_FP16,
 	BR_PMT_DEPTH_FP15,
 
-	/* New */
+	BR_PMT_RGBA_5551,
+	BR_PMT_ARGB_1555,
 	BR_PMT_ARGB_4444,
 
 	/*
@@ -104,7 +103,10 @@ enum {
 	 */
 	BR_PMT_RGBA_8888_ARR,
 
-	BR_PMT_MAX
+	BR_PMT_MAX,
+
+	BR_PMT_AINDEX_44 = BR_PMT_INDEXA_44,
+	BR_PMT_AINDEX_88 = BR_PMT_INDEXA_88,
 };
 
 /*
@@ -114,25 +116,22 @@ enum {
 	/*
 	 * No direct access to pixels
 	 */
-	BR_PMF_NO_ACCESS			= 0x0001,
+	BR_PMF_NO_ACCESS                    = 0x01,
 
-	BR_PMF_LINEAR				= 0x0002,
-	BR_PMF_ROW_WHOLEPIXELS		= 0x0004,
+	BR_PMF_LINEAR						= 0x02,
+	BR_PMF_ROW_WHOLEPIXELS				= 0x04,
 
-	BR_PMF_PIXELS_NEAR			= 0x0008,
-	BR_PMF_PIXELS_NEAR_ALIAS	= 0x0010,
+	BR_PMF_PIXELS_NEAR					= 0x08,
+	BR_PMF_PIXELS_NEAR_ALIAS			= 0x10,
 
-	BR_PMF_KEYED_TRANSPARENCY	= 0x0020,
+	BR_PMF_KEYED_TRANSPARENCY			= 0x20,
 
-	BR_PMF_KEEP_ORIGINAL		= 0x0040,
+	BR_PMF_KEEP_ORIGINAL				= 0x40,
 	/*
-	 * Experimental - if set then pixelmap is tiled - low bits of Y are moved to least significant part of pixel address
-	 */
-	BR_PMF_TILED				= 0x0080,
-	/*
-	 * Experimental - the texture's alpha is premultiplied.
-	 */
-	BR_PMF_PREMULTIPLIED_ALPHA	= 0x0100
+	* Experimental - if set then pixelmap is tiled - low bits of Y are moved to least significant part of pixel address
+	*/
+        BR_PMF_ENABLE_TEXTURE_COMPRESSION       = 0x80,
+//      BR_PMF_TILED = 0x80,
 };
 
 #define BR_PM_TILE_SIZE	2
