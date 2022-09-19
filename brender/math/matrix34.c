@@ -149,26 +149,15 @@ void BR_PUBLIC_ENTRY BrMatrix34RotateY(br_matrix34 *mat, br_angle ry)
 	M(3,0) = S0; M(3,1) = S0; M(3,2) = S0;
 }
 
-void BR_PUBLIC_ENTRY BrMatrix34PreRotateY(br_matrix34 *mat, br_angle ry){
-	float s,c;
-	float t0,t1,t2;
-	if(ry==0)
-		return;
+void BR_PUBLIC_ENTRY BrMatrix34PreRotateY(br_matrix34 *mat, br_angle ry)
+{
+	br_matrix34 mattmp1,mattmp2;
 
-	s=BR_SIN(ry);
-	c=BR_COS(ry);
+	UASSERT_MESSAGE("Subject matrix is NULL", mat != NULL);
 
-	t0=mat->m[0][0];
-	t1=mat->m[0][1];
-	t2=mat->m[0][2];
-
-	mat->m[0][0]=c*mat->m[0][0]-s*mat->m[2][0];
-	mat->m[0][1]=c*mat->m[0][1]-s*mat->m[2][1];
-	mat->m[0][2]=c*mat->m[0][2]-s*mat->m[2][2];
-
-	mat->m[2][0]=s*t0+c*mat->m[2][0];
-	mat->m[2][1]=s*t1+c*mat->m[2][1];
-	mat->m[2][2]=s*t2+c*mat->m[2][2];
+    BrMatrix34RotateY(&mattmp1,ry);
+	BrMatrix34Mul(&mattmp2,&mattmp1,mat);
+	BrMatrix34Copy(mat,&mattmp2);
 }
 
 void BR_PUBLIC_ENTRY BrMatrix34PostRotateY(br_matrix34 *mat, br_angle ry){
