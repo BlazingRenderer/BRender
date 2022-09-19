@@ -1,6 +1,6 @@
 // Copyright (c) 1993-1995 Argonaut Technologies Limited. All rights reserved.
 //
-// $Id: dev_objs.hpp 2.13 1996/12/04 17:32:00 NIKH Exp $
+// $Id: dev_objs.hpp 1.7 1998/11/17 15:58:54 jon Exp $
 // $Locker: $
 //
 // C++ Classes for BRender device interface
@@ -98,7 +98,7 @@ class br_device : public br_object_container {
 	public:
 };
 
-// Some facility that a device supports 
+// Some facility that a device supports
 
 class br_facility : public br_object_container {
 	public:
@@ -114,8 +114,8 @@ class br_output_facility : public br_facility {
 		virtual br_error BR_METHOD validSource(br_boolean *bp, class br_object *h);
 		virtual br_error BR_METHOD pixelmapNew(class br_device_pixelmap **ppmap, br_token_value *tv);
 		virtual br_error BR_METHOD clutNew(class br_device_clut **pclut, br_token_value *tv);
-        virtual br_error BR_METHOD queryCapability(br_token_value *buffer_in, br_token_value *buffer_out,
-            br_size_t size_buffer_out);
+		virtual br_error BR_METHOD queryCapability(br_token_value *buffer_in, br_token_value *buffer_out,
+			br_size_t size_buffer_out);
 };
 
 // A drawable surface - compatibile with br_pixelmap. May represent
@@ -160,10 +160,10 @@ class br_device_pixelmap : public br_object {
 		virtual br_error BR_METHOD rectangleCopyTo(br_point *p, class br_device_pixelmap *src, br_rectangle *src_rect);
 		virtual br_error BR_METHOD rectangleCopyFrom(br_point *p, class br_device_pixelmap *src, br_rectangle *src_rect);
 
-                virtual br_error BR_METHOD rectangleStretchCopy(br_rectangle *r,class br_device_pixelmap *s,br_rectangle *q);
-                virtual br_error BR_METHOD rectangleStretchCopyTo(br_rectangle *r,class br_device_pixelmap *s,br_rectangle *q);
-virtual br_error BR_METHOD rectangleStretchCopyFrom(br_rectangle *r,class br_device_pixelmap *s,br_rectangle *q);
-	
+		virtual br_error BR_METHOD rectangleStretchCopy(br_rectangle *r,class br_device_pixelmap *s,br_rectangle *q);
+		virtual br_error BR_METHOD rectangleStretchCopyTo(br_rectangle *r,class br_device_pixelmap *s,br_rectangle *q);
+		virtual br_error BR_METHOD rectangleStretchCopyFrom(br_rectangle *r,class br_device_pixelmap *s,br_rectangle *q);
+
 		virtual br_error BR_METHOD rectangleFill(br_rectangle *rect, br_uint_32 colour);
 
 		virtual br_error BR_METHOD pixelSet(br_point *point, br_uint_32 colour);
@@ -214,8 +214,8 @@ virtual br_error BR_METHOD rectangleStretchCopyFrom(br_rectangle *r,class br_dev
 		virtual br_error BR_METHOD directLock(br_boolean block);
 		virtual br_error BR_METHOD directUnlock(void);
 
-		// Locking/unlocking for direct pixel access
-		//
+	// Locking/unlocking for direct pixel access
+	//
 		virtual br_error BR_METHOD getControls(br_display_controls *controls);
 		virtual br_error BR_METHOD setControls(br_display_controls *controls);
 };
@@ -279,7 +279,7 @@ class br_renderer : public br_object_container {
 		virtual br_error BR_METHOD partQueryAll(br_token part, br_int_32 index, br_token_value *buffer, br_size_t buffer_size);
 		virtual br_error BR_METHOD partQueryAllSize(br_token part, br_int_32 index, br_size_t *psize);
 
-    // Find out the range of indices for a part
+	// Find out the range of indices for a part
 		virtual br_error BR_METHOD partIndexQuery(br_token part, br_int_32 *pnindex);
 
 	// Special case state manipulation for ease of use
@@ -351,15 +351,14 @@ class br_renderer : public br_object_container {
 			union brp_vertex *v2);
 #endif
 
-    // Query state performance
-        virtual br_error BR_METHOD partQueryCapability(br_token part, br_int_32 index, br_token_value *buffer,
-            br_size_t buffer_size);
-        virtual br_error BR_METHOD stateQueryPerformance(br_fixed_lu *speed);
+	// Query state performance
+		virtual br_error BR_METHOD partQueryCapability(br_token part, br_int_32 index, br_token_value *buffer,
+			br_size_t buffer_size);
+		virtual br_error BR_METHOD stateQueryPerformance(br_fixed_lu *speed);
 		virtual br_error BR_METHOD frameBegin(void);
 		virtual br_error BR_METHOD frameEnd(void);
 		virtual br_error BR_METHOD focusLossBegin(void);
 		virtual br_error BR_METHOD focusLossEnd(void);
-
 };
 
 // Stored renderer state
@@ -421,9 +420,9 @@ class br_geometry_v1_buckets : public br_geometry {
 class br_geometry_lighting : public br_geometry {
 	public:
 		virtual br_error BR_METHOD CG_F(render)(class br_renderer *r,
-                                br_vector3_f *points, br_vector3_f *normals, br_colour *colour_in,
-                                br_colour *colour_out, br_uint_16 *redirect, int pstride, int nstride,
-                                int cinstride, int coutstride, int nvertices);
+			br_vector3_f *points, br_vector3_f *normals, br_colour *colour_in,
+			br_colour *colour_out, br_uint_16 *redirect, int pstride, int nstride,
+			int cinstride, int coutstride, int nvertices);
 }
 
 // Stored texture map/table etc.
@@ -479,7 +478,7 @@ class br_primitive_state : public br_object {
 
 	// Copy parts of state from one to another
 		virtual br_error BR_METHOD stateCopy(class br_primitive_state *source, br_uint_32 mask);
-	
+
 	// Get a pointer to a primitive block representing the current state
 	//
 		virtual br_error BR_METHOD renderBegin(class brp_block **rpb,
@@ -492,10 +491,9 @@ class br_primitive_state : public br_object {
 	//
 		virtual br_error BR_METHOD CG_F(rangesQuery)(br_float *offset, br_float *scale, br_int_32 max_comp);
 
-    // Query state performance
-        virtual br_error BR_METHOD partQueryCapability(br_token part, br_int_32 index, br_token_value *buffer,
-            br_size_t buffer_size);
-        virtual br_error BR_METHOD stateQueryPerformance(br_fixed_lu *speed);
-
+	// Query state performance
+		virtual br_error BR_METHOD partQueryCapability(br_token part, br_int_32 index, br_token_value *buffer,
+			br_size_t buffer_size);
+		virtual br_error BR_METHOD stateQueryPerformance(br_fixed_lu *speed);
 };
 
