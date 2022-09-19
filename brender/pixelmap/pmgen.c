@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 1992,1993-1995 Argonaut Technologies Limited. All rights reserved.
  *
- * $Id: pmgen.c 2.11 1997/06/03 12:04:53 jon Exp $
+ * $Id: pmgen.c 1.2 1998/08/10 16:12:24 johng Exp $
  * $Locker: $
  *
  * Various useful implmementations of pixelmap methods in terms of others
@@ -9,7 +9,7 @@
 #include "pm.h"
 #include "brassert.h"
 
-BR_RCS_ID("$Id: pmgen.c 2.11 1997/06/03 12:04:53 jon Exp $")
+BR_RCS_ID("$Id: pmgen.c 1.2 1998/08/10 16:12:24 johng Exp $")
 
 br_error BR_CMETHOD_DECL(br_device_pixelmap_gen, match)(br_device_pixelmap *self, br_device_pixelmap **newpm, br_token_value *tv)
 {
@@ -127,7 +127,7 @@ br_error BR_CMETHOD_DECL(br_device_pixelmap_gen, copyDirty)\
 		e = DevicePixelmapRectangleCopy(self, &p, src, dirty+i);
 		if (e != BRE_OK)
 			return e;
-	}	
+	}
 
 	return BRE_OK;
 }
@@ -152,7 +152,7 @@ br_error BR_CMETHOD_DECL(br_device_pixelmap_gen, copyToDirty)\
 		e = DevicePixelmapRectangleCopyTo(self, &p, src, dirty+i);
 		if (e != BRE_OK)
 			return e;
-	}	
+	}
 
 	return BRE_OK;
 }
@@ -177,7 +177,7 @@ br_error BR_CMETHOD_DECL(br_device_pixelmap_gen, copyFromDirty)\
 		e = DevicePixelmapRectangleCopyFrom(self, &p, src, dirty+i);
 		if (e != BRE_OK)
 			return e;
-	}	
+	}
 
 	return BRE_OK;
 }
@@ -193,7 +193,7 @@ br_error BR_CMETHOD_DECL(br_device_pixelmap_gen, fillDirty)\
 		if (e != BRE_OK)
 			return e;
 	}
-	
+
 	return BRE_OK;
 }
 
@@ -539,8 +539,8 @@ br_error BR_CMETHOD_DECL(br_device_pixelmap_gen, text)(br_device_pixelmap *self,
 		for(;*(unsigned char *)text; text++) {
 			r.w = font->width[*(unsigned char *)text];
 			s_stride = (r.w+7)/8;
-	
-			if(x+r.w > 0) 
+
+			if(x+r.w > 0)
 				DevicePixelmapCopyBits(self, &p,
 					font->glyphs+font->encoding[*(unsigned char *)text],
 					(br_uint_16) s_stride,
@@ -598,7 +598,7 @@ br_error BR_CMETHOD_DECL(br_device_pixelmap_gen, textBounds)(br_device_pixelmap 
 			 */
 			for(i = 0, j = BrStrLen(text) ; i<j; i++, text++)
 				rect->w += font->width[*(unsigned char *)text]+1;
-	
+
 			rect->w -= 1;
 		} else
 			rect->w = (font->glyph_x+1) * BrStrLen(text) -1;
@@ -672,4 +672,5 @@ br_error BR_CMETHOD_DECL(br_device_pixelmap_gen, setControls)(br_device_pixelmap
 {
     return BRE_FAIL;
 }
+
 

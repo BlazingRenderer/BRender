@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 1993-1995 Argonaut Technologies Limited. All rights reserved.
  *
- * $Id: pm_ip.h 2.15.1.1 1997/02/21 15:05:38 Johng Exp $
+ * $Id: pm_ip.h 1.3 1998/09/02 13:41:56 johng Exp $
  * $Locker: $
  *
  * Prototypes for functions internal to pixelmap support
@@ -330,3 +330,4 @@ struct br_pixelmap_state * BR_RESIDENT_ENTRY PixelmapState(void);
 #endif
 #endif
 #endif
+

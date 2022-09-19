@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 1992,1993-1995 Argonaut Technologies Limited. All rights reserved.
  *
- * $Id: quantize.c 2.5 1996/10/01 14:14:13 sam Exp $
+ * $Id: quantize.c 1.1 1997/12/10 16:41:27 jon Exp $
  * $Locker: $
  *
  *
@@ -31,11 +31,11 @@ Free to distribute, comments and suggestions are appreciated.
 Converted by SamL for use in avc
 	by SE for use in Brender
 
-**********************************************************************/	
+**********************************************************************/
 
 #include "brender.h"
 
-BR_RCS_ID("$Id: quantize.c 2.5 1996/10/01 14:14:13 sam Exp $")
+BR_RCS_ID("$Id: quantize.c 1.1 1997/12/10 16:41:27 jon Exp $")
 
 #define MAXCOLOR	256
 

@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 1992,1993-1995 Argonaut Technologies Limited. All rights reserved.
  *
- * $Id: pmnull.c 2.5 1996/10/03 17:58:29 STEVEW Exp $
+ * $Id: pmnull.c 1.1 1997/12/10 16:41:27 jon Exp $
  * $Locker: $
  *
  * Stub methods for pixelmap rendering that do nothing
@@ -9,7 +9,7 @@
 #include "pm.h"
 #include "brassert.h"
 
-BR_RCS_ID("$Id: pmnull.c 2.5 1996/10/03 17:58:29 STEVEW Exp $")
+BR_RCS_ID("$Id: pmnull.c 1.1 1997/12/10 16:41:27 jon Exp $")
 
 br_error BR_CMETHOD_DECL(br_device_pixelmap_null, validSource)(br_device_pixelmap *self, br_boolean *bp, br_object *h)
 {
@@ -149,3 +149,4 @@ br_error BR_CMETHOD_DECL(br_device_pixelmap_null, pixelAddressSet)(br_device_pix
 {
 	return BRE_OK;
 }
+

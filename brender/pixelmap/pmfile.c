@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 1993-1995 Argonaut Technologies Limited. All rights reserved.
  *
- * $Id: pmfile.c 2.8.1.1 1997/02/21 15:03:57 Johng Exp $
+ * $Id: pmfile.c 1.1 1997/12/10 16:41:26 jon Exp $
  * $Locker: $
  *
  * Pixelmap per-chunk file operations
@@ -18,7 +18,7 @@
 
 #include "pmmem.h"
 
-BR_RCS_ID("$Id: pmfile.c 2.8.1.1 1997/02/21 15:03:57 Johng Exp $")
+BR_RCS_ID("$Id: pmfile.c 1.1 1997/12/10 16:41:26 jon Exp $")
 
 /**
  ** Pixelmap
@@ -203,9 +203,9 @@ STATIC int FopRead_PIXELS(br_datafile *df, br_uint_32 id, br_uint_32 length, br_
 
 	df->res = pp;
 	pp->pixels = df->prims->block_read(df,NULL, &icount, size, BR_MEMORY_PIXELS);
-	pp->flags |= BR_PMF_LINEAR; 
+	pp->flags |= BR_PMF_LINEAR;
 	df->res = NULL;
-	
+
 	return 0;
 }
 
@@ -285,9 +285,9 @@ br_uint_32 BR_PUBLIC_ENTRY BrPixelmapLoadMany(const char *filename,br_pixelmap *
 STATIC int WritePixelmap(br_pixelmap *pp, br_datafile *df)
 {
 	// Lock the pixelmap because we want to access it's pixels
-	
+
 	BrPixelmapDirectLock( pp, BR_TRUE );
-	
+
 	ASSERT(pp->pixels);
 
 	/*
@@ -298,7 +298,7 @@ STATIC int WritePixelmap(br_pixelmap *pp, br_datafile *df)
 	/*
 	 * Write any palette
 	 */
-	if(pp->map) 
+	if(pp->map)
 	{
 		WritePixelmap(pp->map,df);
 		FopWrite_ADD_MAP(df);
@@ -310,7 +310,7 @@ STATIC int WritePixelmap(br_pixelmap *pp, br_datafile *df)
 	FopWrite_PIXELS(df,pp);
 
 	// We're finished with the pixelmap, so unlock it.
-	
+
 	BrPixelmapDirectUnlock( pp );
 
 	return 0;

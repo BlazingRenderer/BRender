@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 1993-1995 by Argonaut Technologies Limited. All rights reserved.
  *
- * $Id: pm_p.h 2.14 1997/02/19 17:34:31 Johng Exp $
+ * $Id: pm_p.h 1.3 1998/11/06 14:54:25 jon Exp $
  * $Locker: $
  *
  * Public function prototypes for BRender pixelmap support
@@ -176,7 +176,7 @@ void BR_PUBLIC_ENTRY BrQuantMapColours(int base,br_uint_8 *colours,
 	br_uint_8 *mapped_colours, int size);
 
 /*
- * Produce a pixelmap containing mip levels from a pixelmap. 
+ * Produce a pixelmap containing mip levels from a pixelmap.
  */
 
 br_pixelmap * BR_PUBLIC_ENTRY BrPixelmapMakeMipMap(br_pixelmap *source,

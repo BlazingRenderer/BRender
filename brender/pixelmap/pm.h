@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 1993-1995 Argonaut Technologies Limited. All rights reserved.
  *
- * $Id: pm.h 2.7 1996/10/03 11:59:51 sam Exp $
+ * $Id: pm.h 1.1 1997/12/10 16:41:25 jon Exp $
  * $Locker: $
  *
  * Internal types and structures for pixelmap support

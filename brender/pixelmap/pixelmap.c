@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 1992,1993-1995 Argonaut Technologies Limited. All rights reserved.
  *
- * $Id: pixelmap.c 2.4 1996/02/17 18:03:04 sam Exp $
+ * $Id: pixelmap.c 1.1 1997/12/10 16:41:25 jon Exp $
  * $Locker: $
  *
  * Manipulating pixelmaps
@@ -10,7 +10,7 @@
 #include "pm.h"
 #include "brassert.h"
 
-BR_RCS_ID("$Id: pixelmap.c 2.4 1996/02/17 18:03:04 sam Exp $")
+BR_RCS_ID("$Id: pixelmap.c 1.1 1997/12/10 16:41:25 jon Exp $")
 
 /*
  * Allocate a new, pixelmap of the given type and size

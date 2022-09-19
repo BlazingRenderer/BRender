@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 1992,1993-1995 Argonaut Technologies Limited. All rights reserved.
  *
- * $Id: scale.c 2.4 1996/10/01 14:14:13 sam Exp $
+ * $Id: scale.c 1.1 1997/12/10 16:41:27 jon Exp $
  * $Locker: $
  *
  * Image scaling (only RGB)
@@ -12,7 +12,7 @@
 #include "brender.h"
 #include "brmath.h"
 
-BR_RCS_ID("$Id: scale.c 2.4 1996/10/01 14:14:13 sam Exp $")
+BR_RCS_ID("$Id: scale.c 1.1 1997/12/10 16:41:27 jon Exp $")
 
 #define CLAMP(a,min,max)	(a<min?min:(a>max?max:a))
 

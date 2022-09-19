@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 1992,1993-1995 Argonaut Technologies Limited. All rights reserved.
  *
- * $Id: genclip.c 2.5 1996/03/07 20:36:08 sam Exp $
+ * $Id: genclip.c 1.1 1997/12/10 16:41:24 jon Exp $
  * $Locker: $
  *
  * Useful line and rectangle clipping routines
@@ -9,7 +9,7 @@
 #include "pm.h"
 #include "brassert.h"
 
-BR_RCS_ID("$Id: genclip.c 2.5 1996/03/07 20:36:08 sam Exp $")
+BR_RCS_ID("$Id: genclip.c 1.1 1997/12/10 16:41:24 jon Exp $")
 
 /*
  * Clip a point to a pixelmap, producing coordinates relative to base of pixelmap
@@ -259,6 +259,7 @@ br_clip_result BR_RESIDENT_ENTRY PixelmapRectangleClipTwo(
 
 	return BR_CLIP_PARTIAL;
 }
+
 
 /*
  * Clip two rectangles rectangle to two pixelmaps, producing coordinates relative to base of pixelmaps

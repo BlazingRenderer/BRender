@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 1993-1995 Argonaut Technologies Limited. All rights reserved.
  *
- * $Id: pmsetup.c 2.8 1996/10/01 14:14:12 sam Exp $
+ * $Id: pmsetup.c 1.2 1998/09/02 13:42:37 johng Exp $
  * $Locker: $
  *
  */

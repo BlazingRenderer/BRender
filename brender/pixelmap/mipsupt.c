@@ -61,7 +61,7 @@ br_pixelmap * BR_PUBLIC_ENTRY BrPixelmapMakeMipMap(br_pixelmap *source,br_uint_3
                 (source->width==source->height)&&(!(source->width&(source->width-1))));
 
 // Perform Allocations
-	
+
 	destPtr=BrResAllocate(NULL,BrPixelmapMipMemorySize(source->width,destinationType),BR_MEMORY_PIXELS);
 	destination=BrPixelmapAllocate(destinationType,source->width,source->height,destPtr,BR_PMAF_NORMAL);
 	BrResAdd(destination,destPtr);
@@ -157,7 +157,7 @@ br_pixelmap * BR_PUBLIC_ENTRY BrPixelmapMakeMipMap(br_pixelmap *source,br_uint_3
 			case BR_PMT_RGB_565:
 				*((short*)destPtr)=(short)(((BR_RED(colour)>>3)<<11)|((BR_GRN(colour)>>2)<<5)|(BR_BLU(colour)>>3));
 				break;
-			
+
 			case BR_PMT_RGB_888:
 				*((br_colour*)destPtr)=colour;
 				break;
@@ -214,12 +214,12 @@ br_pixelmap * BR_PUBLIC_ENTRY BrPixelmapMakeMipMap(br_pixelmap *source,br_uint_3
 
 	for(dimension=source->width>>1;dimension;dimension>>=1){
 		agregateSourcePtr=agregateDestinationPtr=agregateMap;
-		for(row=0;row<(unsigned)dimension;row++,agregateSourcePtr+=3*dimension<<1){	
+		for(row=0;row<(unsigned)dimension;row++,agregateSourcePtr+=3*dimension<<1){
 			for(col=0;col<(unsigned)dimension;col++,agregateSourcePtr+=6,agregateDestinationPtr+=3){
 				agregateDestinationPtr[0]=agregateSourcePtr[0]+agregateSourcePtr[3]+agregateSourcePtr[0+3*(dimension<<1)]+agregateSourcePtr[3+3*(dimension<<1)];
 				agregateDestinationPtr[1]=agregateSourcePtr[1]+agregateSourcePtr[4]+agregateSourcePtr[1+3*(dimension<<1)]+agregateSourcePtr[4+3*(dimension<<1)];
 				agregateDestinationPtr[2]=agregateSourcePtr[2]+agregateSourcePtr[5]+agregateSourcePtr[2+3*(dimension<<1)]+agregateSourcePtr[5+3*(dimension<<1)];
-			
+
 				red=agregateDestinationPtr[0];
 				green=agregateDestinationPtr[1];
 				blue=agregateDestinationPtr[2];

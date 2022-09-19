@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 1992,1993-1995 Argonaut Technologies Limited. All rights reserved.
  *
- * $Id: pmdsptch.c 2.27 1997/07/03 11:12:47 ALISTAIR Exp $
+ * $Id: pmdsptch.c 1.2 1998/08/10 16:12:21 johng Exp $
  * $Locker: $
  *
  * Convert high level br_pixelmap ops. to br_device_pixelmap methods
@@ -15,7 +15,7 @@
 
 #include "pmmem.h"
 
-BR_RCS_ID("$Id: pmdsptch.c 2.27 1997/07/03 11:12:47 ALISTAIR Exp $")
+BR_RCS_ID("$Id: pmdsptch.c 1.2 1998/08/10 16:12:21 johng Exp $")
 
 /*
  * Comatibility hack to catch any pixelmaps with NULL dispatch pointers and
@@ -25,7 +25,7 @@ BR_RCS_ID("$Id: pmdsptch.c 2.27 1997/07/03 11:12:47 ALISTAIR Exp $")
 extern void _CheckDispatch(br_device_pixelmap *pm);
 #define CheckDispatch(x) _CheckDispatch((br_device_pixelmap *)(x))
 #else
-#define 
+#define
 CheckDispatch(x)
 #endif
 
@@ -57,7 +57,7 @@ void BR_PUBLIC_ENTRY BrPixelmapFree(br_pixelmap *src)
 	/*
 	 * Gross V1.1 compatibity problem
 	 *
- 	 * If user free's the current DosGfxBegin() pixelmap - 
+ 	 * If user free's the current DosGfxBegin() pixelmap -
 	 * mark it as unused
 	 */
 	if(BrDevLastBeginQuery() == src)
@@ -607,7 +607,7 @@ void BR_PUBLIC_ENTRY BrPixelmapDirtyRectangleCopy(br_pixelmap *dst,
 		 * Spot case of copying from device (to addressable memory)
 		 */
 		DevicePixelmapCopyFromDirty(src, (br_device_pixelmap *)dst, &r, 1);
-	else 
+	else
 		/*
 		 * Otherwise use a general copy with intermediate buffer
 		 */
@@ -779,7 +779,7 @@ br_uint_16 BR_PUBLIC_ENTRY BrPixelmapTextWidth(br_pixelmap *dst,
 			w += font->width[*text]+1;
 
 		w -= 1;
-		return w; 
+		return w;
 	} else
 		return (font->glyph_x+1) * BrStrLen(text) -1;
 }
@@ -903,7 +903,7 @@ void BR_PUBLIC_ENTRY BrPixelmapPaletteSet(br_pixelmap *pm, br_pixelmap *pal)
 {
 	UASSERT(pal);
 	UASSERT(pm);
-	
+
 	CheckDispatch(pm);
 
 	BrPixelmapPaletteEntrySetMany(pm, 0, pal->height, (br_colour *)pal->pixels);
@@ -968,7 +968,6 @@ br_pixelmap * BR_PUBLIC_ENTRY BrPixelmapDirectUnlock(br_pixelmap *src)
 
 	return src;
 }
-
 
 br_error BR_PUBLIC_ENTRY BrPixelmapGetControls(br_pixelmap *src, br_display_controls *controls)
 {

@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 1992,1993-1995 Argonaut Technologies Limited. All rights reserved.
  *
- * $Id: gencopy.c 2.5 1996/12/03 20:00:53 jon Exp $
+ * $Id: gencopy.c 1.1 1997/12/10 16:41:24 jon Exp $
  * $Locker: $
  *
  * Copy between device pixelmaps on different devices
@@ -11,7 +11,7 @@
 #include "pm.h"
 #include "brassert.h"
 
-BR_RCS_ID("$Id: gencopy.c 2.5 1996/12/03 20:00:53 jon Exp $")
+BR_RCS_ID("$Id: gencopy.c 1.1 1997/12/10 16:41:24 jon Exp $")
 
 br_error GeneralRectangleCopy(
 	br_device_pixelmap *dest,

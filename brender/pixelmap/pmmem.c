@@ -1,8 +1,8 @@
 /*
  * Copyright (c) 1992,1993-1995 Argonaut Technologies Limited. All rights reserved.
  *
- * $Id: pmmem.c 2.26 1997/03/12 16:19:48 ALISTAIR Exp ALISTAIR $
- * $Locker: ALISTAIR $
+ * $Id: pmmem.c 1.5 1998/08/10 16:12:27 johng Exp $
+ * $Locker: $
  *
  * Memory pixelmap implementation
  */
@@ -15,7 +15,7 @@
 #include "brassert.h"
 
 
-BR_RCS_ID("$Id: pmmem.c 2.26 1997/03/12 16:19:48 ALISTAIR Exp ALISTAIR $")
+BR_RCS_ID("$Id: pmmem.c 1.5 1998/08/10 16:12:27 johng Exp $")
 
 /*
  * Useful info about each pixelmap type
@@ -120,7 +120,7 @@ br_device_pixelmap * DevicePixelmapMemAllocate(br_uint_8 type,br_uint_16 w,br_ui
 	pm->pm_height = h;
 
 	pm->pm_origin_x = 0;
-	pm->pm_origin_y = 0;	
+	pm->pm_origin_y = 0;
 
 	/*
 	 * Work out size of a row
@@ -1183,7 +1183,7 @@ br_error BR_CMETHOD_DECL(br_device_pixelmap_mem, copyBits)\
 
 	bytes = DevicePixelmapPixelBytes(self);
 	bit = (ar.x & 7);
-	
+
 	_MemCopyBits_A(
 		DevicePixelmapMemAddress(self, ap.x+(ar.x & ~7)-bit, ap.y, bytes),
 		self->pm_row_bytes,
@@ -1204,7 +1204,7 @@ br_error BR_CMETHOD_DECL(br_device_pixelmap_mem, pixelQuery)\
 {
 	br_point ap;
 	br_int_8 bytes;
-	
+
 	if(PixelmapPointClip(&ap, p, (br_pixelmap *)self) == BR_CLIP_REJECT)
 		return BRE_FAIL;
 
@@ -1229,7 +1229,7 @@ br_error BR_CMETHOD_DECL(br_device_pixelmap_mem, pixelAddressQuery)\
 
    	bytes = DevicePixelmapPixelBytes(self);
 
-	if(pptr) 
+	if(pptr)
 		*pptr = DevicePixelmapMemAddress(self,ap.x,ap.y,bytes);
 
 	return BRE_OK;
