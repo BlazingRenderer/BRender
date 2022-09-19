@@ -267,6 +267,8 @@ void BR_PUBLIC_ENTRY BrMatrix34RollingBall(br_matrix34 *mat, int dx,int dy, int 
 
 br_matrix34 * BR_PUBLIC_ENTRY BrBoundsToMatrix34( br_matrix34 *mat, const br_bounds *bounds);
 
+void BR_PUBLIC_ENTRY BrMatrix34ApplyPlaneEquation(br_vector4 *A, const br_vector4 *B, const br_matrix34 *C);
+
 /*
  * 4x4 Matrix ops.
  */

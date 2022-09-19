@@ -72,3 +72,18 @@ br_int_32 BR_PUBLIC_ENTRY BrPlaneEquation(br_vector4 *eqn, const br_vector3 *v0,
 	return l == 0;
 }
 
+/*
+ * Apply a matrix34 transformation to a plane equation
+ */
+void BR_PUBLIC_ENTRY BrMatrix34ApplyPlaneEquation(br_vector4 *A, const br_vector4 *B, const br_matrix34 *C)
+{
+	br_scalar length;
+
+	BrMatrix34ApplyV((br_vector3 *)A, (br_vector3 *)B, C);
+
+	length = BrVector3Length((br_vector3 *)A);
+	BrVector3Scale((br_vector3 *)A, (br_vector3 *)A, BR_RCP(length));
+
+	A->v[3] = BR_MUL(length, B->v[3]) + BrVector3Dot((br_vector3 *)A, (br_vector3 *)&C->m[3]);
+}
+
