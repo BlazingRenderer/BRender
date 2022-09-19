@@ -139,21 +139,21 @@ STATIC struct v11model bounds_prepared = {
 };
 
 STATIC struct br_model bounds_model = {
-	0,
-	"Bounds",
-	NULL,
-	NULL,
-	0,0,
-	BR_VECTOR3(0,0,0),
-	0,
-	NULL,
-	NULL,
-	0,
-	0,
-	0,
-	{0},
-	&bounds_prepared,
-	NULL
+	._reserved    = 0,
+	.identifier   = "Bounds",
+	.vertices     = NULL,
+	.faces        = NULL,
+	.nvertices    = 0,
+	.nfaces       = 0,
+	.pivot        = BR_VECTOR3(0,0,0),
+	.flags        = 0,
+	.custom       = NULL,
+	.user         = NULL,
+	.crease_angle = 0,
+	.radius       = 0,
+	.bounds       = {0},
+	.prepared     = &bounds_prepared,
+	.stored       = NULL
 };
 
 /*

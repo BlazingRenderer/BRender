@@ -44,13 +44,13 @@ static br_face default_model_faces[] = {
 };
 
 br_model _BrDefaultModel = {
-	0,
-	"default_model",	   			/* identifier	*/
-	default_model_vertices,			/* vertices		*/
-	default_model_faces,			/* faces		*/
-	8,								/* nvertices	*/
-	12,								/* nfaces		*/
-	BR_VECTOR3(0.0,0.0,0.0), 		/* pivot		*/
-	BR_MODF_UPDATEABLE,				/* flags		*/
+	._reserved  = 0,
+	.identifier = "default_model",
+	.vertices   = default_model_vertices,
+	.faces      = default_model_faces,
+	.nvertices  = 8,
+	.nfaces     = 12,
+	.pivot      = BR_VECTOR3(0.0,0.0,0.0),
+	.flags      = BR_MODF_UPDATEABLE,
 };
 
