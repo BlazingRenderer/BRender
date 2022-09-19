@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 1993-1995 Argonaut Technologies Limited. All rights reserved.
  *
- * $Id: def_mdl.c 2.5 1996/02/08 17:07:22 sam Exp $
+ * $Id: def_mdl.c 1.2 1998/05/20 11:57:10 jon Exp $
  * $Locker: $
  *
  * default model for when an actor is created - a cube of the default
@@ -9,7 +9,7 @@
  */
 #include "brender.h"
 
-BR_RCS_ID("$Id: def_mdl.c 2.5 1996/02/08 17:07:22 sam Exp $")
+BR_RCS_ID("$Id: def_mdl.c 1.2 1998/05/20 11:57:10 jon Exp $")
 
 /*
  * 8 Vertices

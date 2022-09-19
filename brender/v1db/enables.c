@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 1993-1995 Argonaut Technologies Limited. All rights reserved.
  *
- * $Id: enables.c 2.7 1996/10/09 15:55:18 NEELA Exp $
+ * $Id: enables.c 1.7 1998/08/17 14:53:21 jon Exp $
  * $Locker: $
  *
  * Enabling/disabling of 'special' places in actor hierarchy
@@ -11,7 +11,7 @@
 #include "brassert.h"
 #include "math_ip.h"
 
-BR_RCS_ID("$Id: enables.c 2.7 1996/10/09 15:55:18 NEELA Exp $")
+BR_RCS_ID("$Id: enables.c 1.7 1998/08/17 14:53:21 jon Exp $")
 
 
 static void actorEnable(br_v1db_enable *e, br_actor *a)
@@ -173,13 +173,13 @@ void BR_PUBLIC_ENTRY BrClipPlaneEnable(br_actor *c)
 }
 
 /*
- * Remove a clip plane 
+ * Remove a clip plane
  */
 void BR_PUBLIC_ENTRY BrClipPlaneDisable(br_actor *c)
 {
 
     UASSERT_MESSAGE("BrClipPlaneDisable NULL pointer to a clip plane actor", c != NULL);
-	
+
 	actorDisable(&v1db.enabled_clip_planes,c);
 }
 
@@ -189,12 +189,12 @@ void BR_PUBLIC_ENTRY BrClipPlaneDisable(br_actor *c)
 void BR_PUBLIC_ENTRY BrHorizonPlaneEnable(br_actor *h)
 {
     UASSERT_MESSAGE("BrHorizonPlaneEnable NULL pointer to a horizon plane actor", h != NULL);
-	    
+
 	actorEnable(&v1db.enabled_horizon_planes,h);
 }
 
 /*
- * Remove a horizon plane 
+ * Remove a horizon plane
  */
 void BR_PUBLIC_ENTRY BrHorizonPlaneDisable(br_actor *h)
 {
@@ -226,7 +226,7 @@ br_actor * BR_PUBLIC_ENTRY BrEnvironmentSet(br_actor *a)
 static br_boolean setupView(
 	br_matrix34 *view_to_this,
 	br_matrix34 *this_to_view,
-	br_matrix34 *world_to_view, 
+	br_matrix34 *world_to_view,
 	br_int_32 w2vt,
 	br_actor *world, br_actor *a)
 {
@@ -578,7 +578,7 @@ void BrSetupClipPlanes(br_actor *world, br_matrix34 *world_to_view, br_int_32 w2
 		 * Make screen->plane
 		 */
 		BrMatrix4Copy34(&tmp4,&view_to_this);
-		
+
 		BrMatrix4Mul(&screen_to_this,&screen_to_view, &tmp4);
 
 		/*
@@ -588,12 +588,12 @@ void BrSetupClipPlanes(br_actor *world, br_matrix34 *world_to_view, br_int_32 w2
 
 		RendererPartSetMany(v1db.renderer, BRT_CLIP, clip_part, tv, NULL);
 		clip_part++;
-	}	
+	}
 
 	tv[0].t = BRT_TYPE_T;
 	tv[0].v.t = BRT_NONE;
 	tv[1].t = BR_NULL_TOKEN;
-	
+
 	for( ; clip_part < v1db.max_clip; clip_part++)
 		RendererPartSetMany(v1db.renderer, BRT_CLIP, clip_part, tv, NULL);
 
@@ -627,7 +627,7 @@ void BrSetupEnvironment(br_actor *world, br_matrix34 *world_to_view, br_int_32 w
 			h = BRT_NONE;
 		}
 
-	} 
+	}
 
 	/*
 	 * Send to renderer

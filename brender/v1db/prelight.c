@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 1993-1995 Argonaut Technologies Limited. All rights reserved.
  *
- * $Id: prelight.c 2.6 1996/11/21 18:10:33 NIKH Exp $
+ * $Id: prelight.c 1.2 1998/07/16 17:56:14 johng Exp $
  * $Locker: $
  *
  * Bits of the lighting model for indexed pixels
@@ -12,7 +12,7 @@
 #include "formats.h"
 #include "v1db.h"
 
-BR_RCS_ID("$Id: prelight.c 2.6 1996/11/21 18:10:33 NIKH Exp $")
+BR_RCS_ID("$Id: prelight.c 1.2 1998/07/16 17:56:14 johng Exp $")
 
 /*
  * Set the per-vertex i,r,g,b values for the model.
@@ -20,7 +20,7 @@ BR_RCS_ID("$Id: prelight.c 2.6 1996/11/21 18:10:33 NIKH Exp $")
  * This must be called during rendering - eg: as part of a model callback.
  * If you simply want to light a few models, then sandwich the call between
  * ZbSceneRenderBegin() and ZbSceneRenderEnd()
- * 
+ *
  * If 'a' != NULL, The values are generated as if the model were attached to
  * the actor 'a', otherwise the model will be in the current frame
  */

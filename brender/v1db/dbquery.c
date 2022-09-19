@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 1993-1996 Argonaut Technologies Limited. All rights reserved.
  *
- * $Id: dbquery.c 1.1 1997/07/14 18:08:06 jon Exp $
+ * $Id: dbquery.c 1.1 1997/12/10 16:41:29 jon Exp $
  * $Locker: $
  *
  * Routines for querying devices
@@ -10,7 +10,7 @@
 #include "brddi.h"
 #include "brassert.h"
 
-BR_RCS_ID("$Id: dbquery.c 1.1 1997/07/14 18:08:06 jon Exp $")
+BR_RCS_ID("$Id: dbquery.c 1.1 1997/12/10 16:41:29 jon Exp $")
 
 
 STATIC br_boolean rendfctyEnum(br_object *rendfcty, br_rendfcty_enum_cbfn *cbfn,

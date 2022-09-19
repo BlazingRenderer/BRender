@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 1993-1995 Argonaut Technologies Limited. All rights reserved.
  *
- * $Id: prepmap.c 2.6 1996/10/16 15:18:26 NEELA Exp $
+ * $Id: prepmap.c 1.2 1998/09/25 15:37:40 johng Exp $
  * $Locker: $
  *
  * Precompute information for texture maps
@@ -10,7 +10,7 @@
 #include "brassert.h"
 #include "shortcut.h"
 
-BR_RCS_ID("$Id: prepmap.c 2.6 1996/10/16 15:18:26 NEELA Exp $")
+BR_RCS_ID("$Id: prepmap.c 1.2 1998/09/25 15:37:40 johng Exp $")
 
 void BR_PUBLIC_ENTRY BrMapUpdate(br_pixelmap *map, br_uint_16 flags)
 {

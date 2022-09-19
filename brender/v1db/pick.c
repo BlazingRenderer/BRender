@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 1994-1995 Argonaut Technologies Limited. All rights reserved.
  *
- * $Id: pick.c 2.9 1997/06/18 12:19:11 JOHNG Exp $
+ * $Id: pick.c 1.1 1997/12/10 16:41:32 jon Exp $
  * $Locker: $
  *
  * Pick traversal and testing
@@ -12,7 +12,7 @@
 #include "brassert.h"
 #include "math_ip.h"
 
-BR_RCS_ID("$Id: pick.c 2.9 1997/06/18 12:19:11 JOHNG Exp $")
+BR_RCS_ID("$Id: pick.c 1.1 1997/12/10 16:41:32 jon Exp $")
 
 STATIC br_matrix34 pick_model_to_view;
 
@@ -341,7 +341,7 @@ int BR_PUBLIC_ENTRY BrScenePick2D(
 			eqn.v[Y],((eqn.v[Y]>0)?(bounds->min.v[Y]):(bounds->max.v[Y])),\
 			eqn.v[Z],((eqn.v[Z]>0)?(bounds->min.v[Z]):(bounds->max.v[Z]))) <\
 			eqn.v[W])
-	
+
 #define TEST_OUT\
 		(BR_MAC3(\
 			eqn.v[X],((eqn.v[X]>0)?(bounds->max.v[X]):(bounds->min.v[X])),\
@@ -364,7 +364,7 @@ STATIC int PickBoundsTestBox(br_bounds *model_bounds,br_bounds *bounds, br_matri
 	 */
 	for(i=0; i< 3; i++) {
 		/*
-		 * Min X	
+		 * Min X
 		 */
 		MAKE_EQN(i, - ,+ model_bounds->min.v[i]);
 
@@ -372,7 +372,7 @@ STATIC int PickBoundsTestBox(br_bounds *model_bounds,br_bounds *bounds, br_matri
 			return 0;
 
 		/*
-		 * Max X	
+		 * Max X
 		 */
 		MAKE_EQN(i, +, - model_bounds->max.v[i]);
 
@@ -501,7 +501,7 @@ int BR_PUBLIC_ENTRY BrScenePick3D(
  *	Nearest face
  *	Nearest vertex of hit face
  *  U,V parameters of hit point
- *	
+ *
  */
 int BR_PUBLIC_ENTRY BrModelPick2D(
 		br_model *model,

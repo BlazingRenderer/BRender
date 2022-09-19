@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 1993-1995 Argonaut Technologies Limited. All rights reserved.
  *
- * $Id: modrend.c 2.6 1996/09/06 12:01:00 sam Exp $
+ * $Id: modrend.c 1.2 1998/07/14 13:38:44 johng Exp $
  * $Locker: $
  *
  * Model rendering
@@ -11,7 +11,7 @@
 #include "brassert.h"
 #include "formats.h"
 
-BR_RCS_ID("$Id: modrend.c 2.6 1996/09/06 12:01:00 sam Exp $")
+BR_RCS_ID("$Id: modrend.c 1.2 1998/07/14 13:38:44 johng Exp $")
 
 /*
  * Render model faces

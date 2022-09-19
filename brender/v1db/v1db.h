@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 1993-1995 Argonaut Technologies Limited. All rights reserved.
  *
- * $Id: v1db.h 2.13 1996/12/02 16:06:26 NIKH Exp $
+ * $Id: v1db.h 1.1 1997/12/10 16:41:33 jon Exp $
  * $Locker: $
  *
  * Internal structures for V1 database

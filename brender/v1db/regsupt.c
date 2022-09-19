@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 1993-1995 Argonaut Technologies Limited. All rights reserved.
  *
- * $Id: regsupt.c 2.9 1996/12/02 11:57:12 OWAIN Exp $
+ * $Id: regsupt.c 1.3 1998/01/15 12:58:24 jon Exp $
  * $Locker: $
  *
  * Public registry functions
@@ -12,7 +12,7 @@
 #include "brassert.h"
 #include "datafile.h"
 
-BR_RCS_ID("$Id: regsupt.c 2.9 1996/12/02 11:57:12 OWAIN Exp $")
+BR_RCS_ID("$Id: regsupt.c 1.3 1998/01/15 12:58:24 jon Exp $")
 
 /*
  * Declare static registry lists for evaluation build

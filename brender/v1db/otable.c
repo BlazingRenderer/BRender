@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 1993-1995 Argonaut Technologies Limited. All rights reserved.
  *
- * $Id: otable.c 2.9 1997/04/17 11:23:04 JOHNG Exp $
+ * $Id: otable.c 1.1 1997/12/10 16:41:32 jon Exp $
  * $Locker: $
  *
  * order table support code
@@ -12,7 +12,7 @@
 
 #include "zsmacro.h"
 
-BR_RCS_ID("$Id: otable.c 2.9 1997/04/17 11:23:04 JOHNG Exp $")
+BR_RCS_ID("$Id: otable.c 1.1 1997/12/10 16:41:32 jon Exp $")
 
 /*
  * Smallest possible distance between Z bounds

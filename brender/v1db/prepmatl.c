@@ -1,8 +1,8 @@
 /*
  * Copyright (c) 1993-1995 Argonaut Technologies Limited. All rights reserved.
  *
- * $Id: prepmatl.c 2.20 1997/07/03 11:13:23 ALISTAIR Exp ALISTAIR $
- * $Locker: ALISTAIR $
+ * $Id: prepmatl.c 1.13 1998/11/13 16:22:29 jon Exp $
+ * $Locker: $
  *
  * Precompute information for materials
 	Last change:  TN   11 Apr 97   12:22 pm
@@ -11,7 +11,7 @@
 #include "brassert.h"
 #include "shortcut.h"
 
-BR_RCS_ID("$Id: prepmatl.c 2.20 1997/07/03 11:13:23 ALISTAIR Exp ALISTAIR $")
+BR_RCS_ID("$Id: prepmatl.c 1.13 1998/11/13 16:22:29 jon Exp $")
 
 /*
  * Mask of renderer state parts that materials are mapped to

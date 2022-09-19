@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 1993-1995 Argonaut Technologies Limited. All rights reserved.
  *
- * $Id: custsupt.c 2.7 1996/10/02 16:31:12 NEELA Exp $
+ * $Id: custsupt.c 1.1 1997/12/10 16:41:29 jon Exp $
  * $Locker: $
  *
  * Support routines for application
@@ -10,7 +10,7 @@
 #include "shortcut.h"
 #include "brassert.h"
 
-BR_RCS_ID("$Id: custsupt.c 2.7 1996/10/02 16:31:12 NEELA Exp $")
+BR_RCS_ID("$Id: custsupt.c 1.1 1997/12/10 16:41:29 jon Exp $")
 
 #define BR_FIXED_SIGN 0x80000000UL
 
@@ -201,7 +201,7 @@ void BR_PUBLIC_ENTRY BrPointToScreenXYMany(br_vector2 *screens, br_vector3 *poin
 {
 	br_vector4 sp;
 	br_uint_32 i;
-	
+
 	UASSERT(v1db.rendering);
     UASSERT_MESSAGE("BrPointToScreenXYMany NULL pointer to an array of destination vectors", screens != NULL);
     UASSERT_MESSAGE("BrPointToScreenXYMany NULL pointer to an array of source vectors containing the coords of the points in model space", points != NULL);
@@ -273,7 +273,7 @@ void BR_PUBLIC_ENTRY BrPointToScreenXYZMany(br_vector3 *screens, br_vector3 *poi
 	UASSERT(v1db.rendering);
     UASSERT_MESSAGE("BrPointToScreenXYZMany NULL pointer to an array of destination vectors", screens != NULL);
     UASSERT_MESSAGE("BrPointToScreenXYZMany NULL pointer to an array of source vectors" , points != NULL);
-    
+
 	for(i=0; i< npoints; i++, screens++, points++) {
 		BrMatrix4ApplyP(&sp,points,&v1db.model_to_screen);
 
@@ -334,14 +334,14 @@ br_uint_32 BR_PUBLIC_ENTRY BrZbScreenZToDepth(br_scalar sz,const br_camera* came
  * Convert Z-sort depth (-hither,+yon) to screen Z (-32,768.0 to +32,767.9)
  *
  * Clamp to view
- * 
+ *
  */
 br_scalar BR_PUBLIC_ENTRY BrZsDepthToScreenZ(br_scalar depth_z,const br_camera* camera)
 {	br_scalar hither,yon;
 	hither=camera->hither_z;
 	yon=camera->yon_z;
     UASSERT_MESSAGE("BrZsDepthToScreenZ NULL pointer to camera being used for rendering", camera != NULL);	// Not accessed, but should still be valid
-	
+
 	if (depth_z<=hither)
 		return BrFixedToScalar((br_fixed_ls)0x80000000);
 	else
@@ -364,7 +364,7 @@ br_scalar BR_PUBLIC_ENTRY BrZsScreenZToDepth(br_scalar sz,const br_camera* camer
 	hither=camera->hither_z;
 	yon=camera->yon_z;
     UASSERT_MESSAGE("BrZsScreenZToDepth NULL pointer to camera being used for rendering", camera != NULL);	// Not accessed, but should still be valid
-	
+
 /*	depth=BR_CONST_DIV(BR_MULDIV(sz,yon+hither,BR_SCALAR(-32768.f))-yon+hither,2); Not so good */
 	depth=BR_CONST_DIV(BR_ADD(BR_MULDIV(BR_CONST_DIV(sz,2),BR_SUB(yon,hither),BR_SCALAR(16384)),BR_ADD(yon,hither)),2);
 
@@ -389,7 +389,7 @@ br_scalar BR_PUBLIC_ENTRY BrScreenZToCamera(const br_actor* camera, br_scalar sz
     UASSERT_MESSAGE("BrScreenZToCamera - invalid camera data", camera->type_data != NULL);
 
     data=camera->type_data;
-	
+
 	hither=data->hither_z;
 	yon=data->yon_z;
 

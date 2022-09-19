@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 1993-1995 Argonaut Technologies Limited. All rights reserved.
  *
- * $Id: render.c 2.17 1997/04/30 15:57:49 jon Exp $
+ * $Id: render.c 1.9 1998/11/12 13:16:45 johng Exp $
  * $Locker: $
  *
  * Traversal of hierachy for rendering
@@ -30,7 +30,7 @@
 #define MarkStratAsNotDrawn(a)
 #endif
 
-BR_RCS_ID("$Id: render.c 2.17 1997/04/30 15:57:49 jon Exp $")
+BR_RCS_ID("$Id: render.c 1.9 1998/11/12 13:16:45 johng Exp $")
 
 #if DEBUG 
 extern int trianglesInHierarchyCount;
@@ -77,8 +77,7 @@ void BR_PUBLIC_ENTRY BrDbModelRender(br_actor *actor,
 	 * If model has custom callback, keep following it until
 	 * a model is reached
 	 */
-	if(use_custom && (model->flags & BR_MODF_CUSTOM))
-	{
+	if(use_custom && (model->flags & BR_MODF_CUSTOM)) {
 		/*
 		 * XXX Fetch current transforms from renderer
 		 */
@@ -99,14 +98,12 @@ void BR_PUBLIC_ENTRY BrDbModelRender(br_actor *actor,
 	/*
 	 * Optional preparation for Z-Sort
 	 */
-	if(render_data != NULL)
-	{
+	if(render_data != NULL) {
 		br_order_table *ot = render_data;
 
 		SetOrderTableBounds(&model->bounds, ot);
 
-		if(ot->visits == 0)
-		{
+		if(ot->visits == 0) {
 			BrZsOrderTableClear(ot);
 			InsertOrderTableList(ot);
 		}
@@ -119,8 +116,7 @@ void BR_PUBLIC_ENTRY BrDbModelRender(br_actor *actor,
 		/*
 		 * See if a 'primitive insertion' function needs to be added
 		 */
-		if(v1db.primitive_call)
-		{
+		if(v1db.primitive_call) {
 
 			tv[0].v.p = v1db.primitive_call;
 			tv[1].v.p = actor;
@@ -131,8 +127,7 @@ void BR_PUBLIC_ENTRY BrDbModelRender(br_actor *actor,
 		}
 	}
 
-	if(v1db.bounds_call)
-	{
+	if(v1db.bounds_call) {
 		br_int_32 c;
 		char buffer[sizeof(br_vector2) * 2];
 		br_token_value tv[] = {
@@ -194,17 +189,14 @@ void BR_PUBLIC_ENTRY BrDbModelRender(br_actor *actor,
 
 
 		if((int_bounds[0] <= int_bounds[2]) &&
-			(int_bounds[1] <= int_bounds[3]))
-		{
+		   (int_bounds[1] <= int_bounds[3]) ) {
 			/*
 			 * XXX Must make sure model_to_screen is up to date
 			 */
 			v1db.bounds_call(actor, model, material, render_data, style, &v1db.model_to_screen, int_bounds);
 		}
 
-	}
-	else
-	{
+	} else {
 		RenderStyleCalls[style](actor, model, material, render_data, style, on_screen);
 	}
 	MarkStratAsDrawn(actor->user);
@@ -232,8 +224,7 @@ static br_uint_16 prependActorTransform(br_actor *ap, br_uint_16 t)
 	/*
 	 * See if this actor is on the camera path - if so, generate a new transform
 	 */
-	if(ap == v1db.camera_path[ap->depth].a)
-	{
+	if(ap == v1db.camera_path[ap->depth].a) {
 
 		RendererPartSet(v1db.renderer, BRT_MATRIX, 0,
 						BRT_AS_MATRIX34_SCALAR(MODEL_TO_VIEW), BR_VALUE_PASSTHROUGH(&v1db.camera_path[ap->depth].m));
@@ -243,13 +234,10 @@ static br_uint_16 prependActorTransform(br_actor *ap, br_uint_16 t)
 						BRT_MODEL_TO_VIEW_HINT_T, BR_VALUE_PASSTHROUGH(BrTransformTypeIsLP(t) ? BRT_LENGTH_PRESERVING : BRT_NONE));
 
 		RendererModelInvert(v1db.renderer);
-	}
-	else
-	{
+	} else {
 		if(BrTransformTypeIsMatrix34(ap->t.type))
 			RendererModelMul(v1db.renderer, (void *)&ap->t.t.mat);
-		else
-		{
+		else {
 			BrTransformToMatrix34(&mt, &ap->t);
 			RendererModelMul(v1db.renderer, (void *)&mt);
 		}
@@ -259,12 +247,9 @@ static br_uint_16 prependActorTransform(br_actor *ap, br_uint_16 t)
 						BRT_MODEL_TO_VIEW_HINT_T, BR_VALUE_PASSTHROUGH(BrTransformTypeIsLP(t) ? BRT_LENGTH_PRESERVING : BRT_NONE));
 	}
 #else
-	if(BrTransformTypeIsMatrix34(ap->t.type))
-	{
+	if(BrTransformTypeIsMatrix34(ap->t.type)) {
 		RendererModelMul(v1db.renderer, (void *)&ap->t.t.mat);
-}
-	else
-	{
+	} else {
 		BrTransformToMatrix34(&mt, &ap->t);
 		RendererModelMul(v1db.renderer, (void *)&mt);
 	}
@@ -338,30 +323,26 @@ static void actorRender(br_actor *ap,
 	/*
 	 * Catch special case of identity transforms
 	 */
-	if(ap->t.type == BR_TRANSFORM_IDENTITY)
-	{
+	if(ap->t.type == BR_TRANSFORM_IDENTITY) {
 		/**
 		 ** Actor has no transform
 		 **/
-		switch(ap->type)
-		{
+		switch(ap->type) {
 
 			case BR_ACTOR_MODEL:
 				/*
 				 * This is a model -  see if model's bounding box is on screen
 				 */
-#if DEBUG 
+#if DEBUG
 			{
 				int a;
 				struct v11model *mdl = (struct v11model*)this_model->prepared;
-				for(a = 0; a < mdl->ngroups; a++)
-				{
+				for(a = 0; a < mdl->ngroups; a++) {
 					trianglesInHierarchyCount += mdl->groups[a].nfaces;
 				}
 			}
 #endif
-			if((s = BrOnScreenCheck(&this_model->bounds)) != OSC_REJECT)
-			{
+			if((s = BrOnScreenCheck(&this_model->bounds)) != OSC_REJECT) {
 				BrLightCullReset();
 				BrDbModelRender(ap, this_model, this_material, this_render_data, style, s, 1);
 			}
@@ -527,8 +508,7 @@ static void actorRenderOnScreen(br_actor *ap,
 	/*
 	 * Catch special case of identity transforms
 	 */
-	if(ap->t.type == BR_TRANSFORM_IDENTITY)
-	{
+	if(ap->t.type == BR_TRANSFORM_IDENTITY) {
 		/*
 		 * This actor has no transform
 		 */
@@ -547,9 +527,9 @@ static void actorRenderOnScreen(br_actor *ap,
 	 ** Actor has a transform
 	 **/
 
-	 /*
-	  * Save the current transforms
-	  */
+	/*
+	 * Save the current transforms
+	 */
 	RendererStatePush(v1db.renderer, BR_STATE_MATRIX);
 
 	t = prependActorTransform(ap, t);
@@ -612,8 +592,7 @@ static void sceneRenderAdd(br_actor *tree)
 	br_int_32 t;
 	br_matrix34 m;
 
-	if(tree->parent == NULL)
-	{
+	if(tree->parent == NULL) {
 		/*
 		 * Simple case for when added tree is unconnected
 		 */
@@ -631,8 +610,7 @@ static void sceneRenderAdd(br_actor *tree)
 	/*
 	 * Walk back to current rendering root
 	 */
-	for(a = tree->parent; a; a = a->parent)
-	{
+	for(a = tree->parent; a ; a = a->parent) {
 		/*
 		 * Closest material, model and render_data
 		 */
@@ -662,8 +640,7 @@ static void sceneRenderAdd(br_actor *tree)
 		/*
 		 * Accumulate transform
 		 */
-		if(a->t.type != BR_TRANSFORM_IDENTITY)
-		{
+		if(a->t.type != BR_TRANSFORM_IDENTITY) {
 			BrMatrix34PostTransform(&m, &a->t);
 			t = BrTransformCombineTypes(t, a->t.type);
 		}
@@ -678,13 +655,10 @@ static void sceneRenderAdd(br_actor *tree)
 	if(render_data == NULL)
 		render_data = v1db.default_render_data;
 
-	if(t == BR_TRANSFORM_IDENTITY)
-	{
+	if(t == BR_TRANSFORM_IDENTITY) {
 		actorRender(tree, model, material, render_data, style,
 			(br_uint_16)v1db.ttype);
-	}
-	else
-	{
+	} else {
 		RendererStatePush(v1db.renderer, BR_STATE_MATRIX);
 
 		t = prependMatrix(&m, (br_uint_16)t, (br_uint_16)v1db.ttype);
@@ -769,8 +743,7 @@ void BR_PUBLIC_ENTRY BrDbSceneRenderBegin(br_actor *world,
 	BrMatrix34Identity(&v1db.camera_path[i].m);
 	v1db.camera_path[i].transform_type = BR_TRANSFORM_IDENTITY;
 
-	for(; (i > 0) && (a != world); a = a->parent, i--)
-	{
+	for(; (i > 0) && (a != world); a = a->parent, i--) {
 		ASSERT(a != NULL);
 		BrMatrix34Transform(&tfm, &a->t);
 		BrMatrix34Mul(&v1db.camera_path[i - 1].m, &v1db.camera_path[i].m, &tfm);
@@ -896,8 +869,7 @@ void BR_PUBLIC_ENTRY BrZbSceneRenderBegin(br_actor *world,
 	/*
 	 * Setup primitives heap and order table for deferred primitives
 	 */
-	if(v1db.format_buckets != NULL)
-	{
+	if(v1db.format_buckets != NULL) {
 
 		v1db.heap.current = v1db.heap.base;
 
@@ -916,9 +888,7 @@ void BR_PUBLIC_ENTRY BrZbSceneRenderBegin(br_actor *world,
 
 		v1db.default_render_data = v1db.default_order_table;
 
-	}
-	else
-	{
+	} else {
 
 		RendererPartSet(v1db.renderer, BRT_HIDDEN_SURFACE, 0, BRT_TYPE_T, BR_VALUE_PASSTHROUGH(BRT_NONE));
 		RendererPartSet(v1db.renderer, BRT_HIDDEN_SURFACE, 0, BRT_DIVERT_T, BR_VALUE_PASSTHROUGH(BRT_NONE));
@@ -973,17 +943,14 @@ void BR_PUBLIC_ENTRY BrZbSceneRenderEnd(void)
 	 */
 	if(v1db.format_buckets != NULL)
 
-		if(v1db.primary_order_table)
-		{
+		if(v1db.primary_order_table) {
 
 			/*
 			 * Render primitives in the primary order table
 			 * and the list of order tables
 			 */
 			RenderPrimaryOrderTable();
-		}
-		else
-		{
+		} else {
 			/*
 			 * Render primitives in the list of order table
 			 */
@@ -1113,17 +1080,14 @@ void BR_PUBLIC_ENTRY BrZsSceneRenderEnd(void)
 	if(v1db.format_buckets == NULL)
 		BR_ERROR0("Renderer does not support buckets");
 
-	if(v1db.primary_order_table)
-	{
+	if(v1db.primary_order_table) {
 
 		/*
 		 * Render primitives in the primary order table
 		 * and the list of order tables
 		 */
 		RenderPrimaryOrderTable();
-	}
-	else
-	{
+	} else {
 		/*
 		 * Render primitives in the list of order table
 		 */

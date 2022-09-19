@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 1993-1995 Argonaut Technologies Limited. All rights reserved.
  *
- * $Id: prepmesh.c 2.16 1997/05/22 14:46:45 jon Exp $
+ * $Id: prepmesh.c 1.10 1998/10/22 18:41:15 johng Exp $
  * $Locker: $
  *
  * Precompute information for triangle meshes:
@@ -30,7 +30,7 @@
 	BR_MODU_VERTEX_NORMALS)
 
 
-BR_RCS_ID("$Id: prepmesh.c 2.16 1997/05/22 14:46:45 jon Exp $")
+BR_RCS_ID("$Id: prepmesh.c 1.10 1998/10/22 18:41:15 johng Exp $")
 
 /*
  * Temporary structure used whilst processing normals and groups
@@ -75,7 +75,7 @@ static int addEdge(br_uint_16 first, br_uint_16 last)
 	 */
 	for(tep = pm_edge_hash[last]; tep; tep = tep->next) {
 
-		if(tep->last == first && tep->other == 0) { 
+		if(tep->last == first && tep->other == 0) {
 			/*
 			 * Yup, flag as used and return index
 			 */
@@ -94,7 +94,7 @@ static int addEdge(br_uint_16 first, br_uint_16 last)
 	tep->other = 0;
 	tep->next = pm_edge_hash[first];
 	pm_edge_hash[first] = tep;
-	
+
 	return num_edges++;
 }
 
@@ -498,7 +498,7 @@ static void PrepareGroups(br_model *model)
 	}
 
 	/*
-	 * Select function for smoothing 
+	 * Select function for smoothing
 	 */
 	if(model->flags & BR_MODF_CREASE) {
 		crease_limit = BR_COS(model->crease_angle);
@@ -558,7 +558,7 @@ static void PrepareGroups(br_model *model)
 
 	ASSERT(i == ntemps);
 	ASSERT(gtvp == temp_verts + ntemps);
-	
+
 	/*
 	 * Sort face pointers by material
 	 */
@@ -663,7 +663,7 @@ static void PrepareGroups(br_model *model)
 
 	v11m->groups = v11g;
 	v11m->ngroups = ng;
-	
+
 	/*
 	 * Build prepared data
 	 */
@@ -748,6 +748,7 @@ static void PrepareGroups(br_model *model)
 
 		old_count = count;
 		if(vertex_compare_groups(sorted_vertices+v,sorted_vertices+v+1)) {
+
 			count++;
 			sorted_vertices[v]->v = count;
 			CopyVertex(v11g+g, v11g[g].nvertices, sorted_vertices[v+1], model);
@@ -1218,7 +1219,7 @@ void BR_PUBLIC_ENTRY BrModelUpdate(br_model *model, br_uint_16 flags)
 		 * Try and generate a stored version of the model (as faces)
 		 */
 		r = GeometryV1ModelStoredNew(v1db.format_model, v1db.renderer, &sg, model->prepared, BRT_TRIANGLE, tv);
-		
+
 		if((r == BRE_OK) && (sg != NULL)) {
 			/*
 			 * It worked, remember the pointer

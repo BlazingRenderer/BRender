@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 1993-1995 Argonaut Technologies Limited. All rights reserved.
  *
- * $Id: v1db_ip.h 2.7 1996/10/03 12:03:24 sam Exp $
+ * $Id: v1db_ip.h 1.5 1998/06/17 16:14:18 jon Exp $
  * $Locker: $
  *
  * Prototypes for functions internal to V1 database

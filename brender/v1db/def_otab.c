@@ -1,14 +1,14 @@
 /*
  * Copyright (c) 1993-1995 Argonaut Technologies Limited. All rights reserved.
  *
- * $Id: def_otab.c 2.3 1996/12/09 14:42:36 JOHNG Exp $
+ * $Id: def_otab.c 1.1 1997/12/10 16:41:30 jon Exp $
  * $Locker: $
  *
  * Default order_table for bucket Z-sort renderer
  */
 #include "v1db.h"
 
-BR_RCS_ID("$Id: def_otab.c 2.3 1996/12/09 14:42:36 JOHNG Exp $")
+BR_RCS_ID("$Id: def_otab.c 1.1 1997/12/10 16:41:30 jon Exp $")
 
 #define DEFAULT_ORDER_TABLE_SIZE 256
 
@@ -29,3 +29,4 @@ br_order_table _BrDefaultOrderTable = {
     .type   = BR_SORT_AVERAGE,             /* Sort type        */
     .visits = 0                            /* Visit count      */
 };
+

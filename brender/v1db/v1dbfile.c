@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 1993-1995 Argonaut Technologies Limited. All rights reserved.
  *
- * $Id: v1dbfile.c 2.15 1997/04/23 17:04:20 jon Exp $
+ * $Id: v1dbfile.c 1.9 1998/07/21 19:35:59 jon Exp $
  * $Locker: $
  *
  * Per-chunk file operations
@@ -13,7 +13,7 @@
 #include "brassert.h"
 #include "datafile.h"
 
-BR_RCS_ID("$Id: v1dbfile.c 2.15 1997/04/23 17:04:20 jon Exp $")
+BR_RCS_ID("$Id: v1dbfile.c 1.9 1998/07/21 19:35:59 jon Exp $")
 
 /*
  * For digging around in points etc - makes things slightly easier to read
@@ -33,7 +33,7 @@ BR_RCS_ID("$Id: v1dbfile.c 2.15 1997/04/23 17:04:20 jon Exp $")
 
 #define _STRUCT_NAME struct br_vertex
 
-STATIC br_file_struct_member br_vertex_FM[] = 
+STATIC br_file_struct_member br_vertex_FM[] =
 {
 	_SCALAR(p.v[X]),
 	_SCALAR(p.v[Y]),
@@ -114,7 +114,6 @@ STATIC int FopWrite_VERTEX_UV(br_datafile *df, br_vertex *vertices, int nvertice
 
 	return 0;
 }
-
 
 /*
  * Read an array of texture components and add it to the model on the stack
@@ -260,7 +259,7 @@ STATIC int FopRead_MATERIAL_INDEX(br_datafile *df, br_uint_32 id, br_uint_32 len
 	char name[BR_MAX_NAME];
 	br_material **mip;
 	br_uint_32 i;
-	
+
 	/*
 	 * Allocate block for pointers to materials. Include a NULL pointer
 	 * at entry 0
@@ -326,7 +325,7 @@ STATIC int FopRead_OLD_MATERIAL_INDEX(br_datafile *df, br_uint_32 id, br_uint_32
 
 	if(BrFileRead(mblock, 1, length, df->h) != (int)length)
 			BR_ERROR0("could not read material index");
-	
+
 	/*
 	 * Count the number of 0's in buffer (== number of strings as
 	 * each string is 0 or more chars terminated with 0)
@@ -362,7 +361,7 @@ STATIC int FopRead_OLD_MATERIAL_INDEX(br_datafile *df, br_uint_32 id, br_uint_32
 }
 
 /**
- ** Faces 
+ ** Faces
  **/
 #define _STRUCT_NAME struct br_face
 STATIC br_file_struct_member br_face_FM[] = {
@@ -577,7 +576,7 @@ STATIC int FopRead_OLD_FACES(br_datafile *df, br_uint_32 id, br_uint_32 length, 
 	ptr = DfPop(DFST_VERTICES,(int *)&i);
 	mip = DfPop(DFST_MATERIAL_INDEX,&mi_count);
 	DfPush(DFST_VERTICES,ptr,i);
- 
+
 	fp = BrResAllocate(v1db.res, count * sizeof(br_face), BR_MEMORY_FACES);
 
 	DfStructReadArray(df,&br_old_face_F, fp , count);
@@ -694,7 +693,7 @@ STATIC int FopRead_FACE_MATERIAL(br_datafile *df, br_uint_32 id, br_uint_32 leng
 	 * Release material index
 	 */
 	BrResFree(mindex);
-	
+
 	return 0;
 }
 
@@ -890,7 +889,7 @@ STATIC int FopRead_OLD_MODEL(br_datafile *df, br_uint_32 id, br_uint_32 length, 
 	mp->flags &=
 			BR_MODF_DONT_WELD |
 			BR_MODF_QUICK_UPDATE |
-			BR_MODF_KEEP_ORIGINAL | 
+			BR_MODF_KEEP_ORIGINAL |
 			BR_MODF_GENERATE_TAGS;
 
 	/*
@@ -927,7 +926,7 @@ STATIC int FopRead_PIVOT(br_datafile *df, br_uint_32 id, br_uint_32 length, br_u
 }
 
 /**
- ** Material 
+ ** Material
  **/
 #define _STRUCT_NAME struct br_material
 STATIC br_file_struct_member br_material_oldest_FM[] = {
@@ -1084,7 +1083,7 @@ STATIC struct {
 	{FID_INDEX_BLEND_REF,	offsetof(struct br_material,index_blend),		1},
 	{FID_INDEX_SHADE_REF,	offsetof(struct br_material,index_shade),		1},
 	{FID_SCREENDOOR_REF,	offsetof(struct br_material,screendoor),		1},
-        {FID_INDEX_FOG_REF,     offsetof(struct br_material,index_fog),                 1},
+	{FID_INDEX_FOG_REF,     offsetof(struct br_material,index_fog),                 1},
 };
 
 STATIC int FopRead_PIXELMAP_REF(br_datafile *df, br_uint_32 id, br_uint_32 length, br_uint_32 count)
@@ -1109,10 +1108,10 @@ STATIC int FopRead_PIXELMAP_REF(br_datafile *df, br_uint_32 id, br_uint_32 lengt
 	mp = DfTop(DFST_MATERIAL,0);
 
 	if(MaterialMaps[i].table)
-		pm = BrTableFind(df->prims->name_read(df,name)); 
+		pm = BrTableFind(df->prims->name_read(df,name));
 	else
-		pm = BrMapFind(df->prims->name_read(df,name)); 
-	
+		pm = BrMapFind(df->prims->name_read(df,name));
+
 	*(br_pixelmap **)(mp+MaterialMaps[i].offset) = pm;
 
 	return 0;
@@ -1223,7 +1222,7 @@ STATIC int FopRead_ACTOR_MODEL(br_datafile *df, br_uint_32 id, br_uint_32 length
 	a = DfTop(DFST_ACTOR,0);
 
 	a->model = BrModelFind(df->prims->name_read(df,name));
-	
+
 	return 0;
 }
 
@@ -1250,7 +1249,7 @@ STATIC int FopRead_ACTOR_MATERIAL(br_datafile *df, br_uint_32 id, br_uint_32 len
 	a = DfTop(DFST_ACTOR,0);
 
 	a->material = BrMaterialFind(df->prims->name_read(df,name));
-	
+
 	return 0;
 }
 
@@ -1586,7 +1585,7 @@ STATIC int FopRead_TRANSFORM(br_datafile *df, br_uint_32 id, br_uint_32 length, 
 	 * Leave transform on stack
 	 */
 	DfPush(DFST_TRANSFORM,tp,1);
-	
+
 	return 0;
 }
 
@@ -1705,7 +1704,7 @@ STATIC br_file_struct_member br_light_FM[] = {
 	_ENUM_8(type,light_type_F),
 
 	_COLOUR(colour),
-	
+
 	_SCALAR(attenuation_c),
 	_SCALAR(attenuation_l),
 	_SCALAR(attenuation_q),
@@ -1909,8 +1908,8 @@ STATIC br_chunks_table_entry ModelLoadEntries[] = {
 	{FID_VERTEX_UV,				1,FopRead_VERTEX_UV},
 	{FID_VERTEX_COLOUR,			1,FopRead_VERTEX_COLOUR},
 	{FID_VERTEX_NORMAL,			1,FopRead_VERTEX_NORMAL},
-	{FID_FACES,					1,FopRead_FACES},           
-	{FID_FACE_MATERIAL,			0,FopRead_FACE_MATERIAL},           
+	{FID_FACES,					1,FopRead_FACES},
+	{FID_FACE_MATERIAL,			0,FopRead_FACE_MATERIAL},
 	{FID_FACE_COLOUR,			1,FopRead_FACE_COLOUR},
 	{FID_FACE_EQUATION,			1,FopRead_FACE_EQUATION},
 	{FID_PIVOT,					0,FopRead_PIVOT},
@@ -1951,7 +1950,7 @@ br_uint_32 BR_PUBLIC_ENTRY BrModelLoadMany(const char *filename,br_model **model
  * Write a complete single model.
  *
  * Does not know about groups - which would be a quicker way of acquiring
- * the material index, but makes this code dependant on the groups code 
+ * the material index, but makes this code dependant on the groups code
  * staying the same.
  */
 
@@ -1976,19 +1975,18 @@ STATIC br_uint_32 BR_CALLBACK WriteModel(br_model *mp, br_datafile *df)
 	int has_vertex_colour;
 	int has_face_colour;
 
-   if (!(mp->vertices) | !(mp->faces))
-   {
-      if ( mp->identifier )
-        BR_WARNING0( mp->identifier );
+	if (mp->vertices == NULL || mp->faces == NULL) {
 
-      BR_WARNING0("Model must have vertex and face information to save.");
-      BR_WARNING0("This information may have neem stripped on addition to"); 
-      BR_WARNING0("the registry. To prevent this, set the BR_MODF_UPDATEABLE");
-      BR_ERROR0("flag before adding the model to the registry.");
+		if (mp->identifier)
+			BR_WARNING0(mp->identifier);
 
-      return 0;
-   }
+		BR_WARNING0("Model must have vertex and face information to save.");
+		BR_WARNING0("This information may have neem stripped on addition to");
+		BR_WARNING0("the registry. To prevent this, set the BR_MODF_UPDATEABLE");
+		BR_ERROR0("flag before adding the model to the registry.");
 
+		return 0;
+	}
 
 	/*
 	 * Build material index	- there will never be more materials than faces
@@ -2021,7 +2019,7 @@ STATIC br_uint_32 BR_CALLBACK WriteModel(br_model *mp, br_datafile *df)
 		if(mindex[nmaterials-1] == NULL)
 			nmaterials --;
 	}
-	
+
 	/*
 	 * See if model has any non zero U and V components or colours
 	 */
@@ -2030,8 +2028,10 @@ STATIC br_uint_32 BR_CALLBACK WriteModel(br_model *mp, br_datafile *df)
 	has_face_colour = 0;
 
 	for(i=0, vp = mp->vertices; i< mp->nvertices; i++, vp++)  {
+
 		if((vp->map.v[U] != BR_SCALAR(0.0)) ||
 		   (vp->map.v[V] != BR_SCALAR(0.0))) {
+
 			has_uv = 1;
 
 			if (has_vertex_colour)
@@ -2062,7 +2062,9 @@ STATIC br_uint_32 BR_CALLBACK WriteModel(br_model *mp, br_datafile *df)
 	FopWrite_MODEL(df, mp);
 
 	if(mp->nvertices) {
+
 		FopWrite_VERTICES(df, mp->vertices, mp->nvertices);
+
 		if(has_uv)
 			FopWrite_VERTEX_UV(df, mp->vertices, mp->nvertices);
 
@@ -2074,6 +2076,7 @@ STATIC br_uint_32 BR_CALLBACK WriteModel(br_model *mp, br_datafile *df)
 	}
 
 	if(mp->nfaces) {
+
 		FopWrite_FACES(df, mp->faces, mp->nfaces);
 
 		if(has_face_colour)
@@ -2105,9 +2108,9 @@ br_uint_32 BR_PUBLIC_ENTRY BrModelSaveMany(const char *filename,br_model **model
 	br_datafile *df;
 	int i,m=0;
 
-   // Only updateable models can be written at present, 
+   // Only updateable models can be written at present,
    // so check the first one
- 
+
 	/*
 	 * Open file and write header
 	 */
@@ -2123,7 +2126,7 @@ br_uint_32 BR_PUBLIC_ENTRY BrModelSaveMany(const char *filename,br_model **model
 			WriteModel(models[i],df);
 		m = num;
 	} else {
-		BrModelEnum(NULL,(br_model_enum_cbfn *)WriteModel,(void *)df); 
+		BrModelEnum(NULL,(br_model_enum_cbfn *)WriteModel,(void *)df);
 		m = BrModelCount(NULL);
 	}
 
@@ -2264,7 +2267,7 @@ STATIC int WriteActor(br_actor *a, br_datafile *df)
    // For the children to retain the same order when reloaded, we need
    // to save them out in reverse order
 
-   
+
    ap = a->children ;
 
 
@@ -2275,12 +2278,12 @@ STATIC int WriteActor(br_actor *a, br_datafile *df)
       last_ap = ap ;
       ap = ap->next ;
    }
-      
+
    // Write out list in reverse ... stop when we get back to the parent
 
    ap = last_ap ;
 
-	for ( ;; ) 
+	for ( ;; )
    {
 		WriteActor(ap,df);
 		FopWrite_ACTOR_ADD_CHILD(df);
@@ -2423,12 +2426,12 @@ br_uint_32 BR_PUBLIC_ENTRY BrMaterialSaveMany(const char *filename,br_material *
 
     FopWrite_FILE_INFO(df,FILE_TYPE_MATERIAL_OLD);
 
-	if(materials) { 
+	if(materials) {
 		for(i=0; i<num; i++)
 			WriteMaterial(materials[i],df);
 		count = num;
 	} else {
-		BrMaterialEnum(NULL,(br_material_enum_cbfn *)WriteMaterial,df); 
+		BrMaterialEnum(NULL,(br_material_enum_cbfn *)WriteMaterial,df);
 		count = BrMaterialCount(NULL);
 	}
 
@@ -2497,7 +2500,7 @@ br_error BR_PUBLIC_ENTRY BrModelFileCount(const char *filename, br_uint_16 *num)
 
 	DfClose(df);
 
-        return BRE_OK;
+	return BRE_OK;
 }
 
 br_error BR_PUBLIC_ENTRY BrActorFileCount(const char *filename, br_uint_16 *num)
@@ -2523,7 +2526,7 @@ br_error BR_PUBLIC_ENTRY BrActorFileCount(const char *filename, br_uint_16 *num)
 
 	DfClose(df);
 
-        return BRE_OK;
+	return BRE_OK;
 }
 
 
@@ -2550,6 +2553,6 @@ br_error BR_PUBLIC_ENTRY BrMaterialFileCount(const char *filename, br_uint_16 *n
 
 	DfClose(df);
 
-        return BRE_OK;
+	return BRE_OK;
 }
 

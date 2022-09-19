@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 1993-1995 Argonaut Technologies Limited. All rights reserved.
  *
- * $Id: dbsetup.c 2.16 1997/07/14 18:08:05 jon Exp $
+ * $Id: dbsetup.c 1.6 1998/03/10 15:18:54 jon Exp $
  * $Locker: $
  *
  */
@@ -104,7 +104,7 @@ br_error BR_PUBLIC_ENTRY BrV1dbBegin(void)
 	 */
 	v1db.default_model =
 		BrResAllocate(v1db.res, sizeof(br_model), BR_MEMORY_MODEL);
-		
+
 	*v1db.default_model = _BrDefaultModel;
 
 	/*
@@ -200,7 +200,7 @@ static br_uint_32 BR_CALLBACK clearTable(br_pixelmap *item, void *arg)
 static br_uint_32 BR_CALLBACK clearMap(br_pixelmap *item, void *arg)
 {
     ASSERT_MESSAGE("BR_CALLBACK clearMap NULL pointer", item !=NULL);
-	
+
 	BrBufferClear(item);
 
 	return 0;
@@ -209,7 +209,7 @@ static br_uint_32 BR_CALLBACK clearMap(br_pixelmap *item, void *arg)
 static br_uint_32 BR_CALLBACK clearMaterial(br_material *item, void *arg)
 {
     ASSERT_MESSAGE("BR_CALLBACK clearMaterial NULL pointer", item !=NULL);
-	
+
 	BrMaterialClear(item);
 
 	return 0;
@@ -218,7 +218,7 @@ static br_uint_32 BR_CALLBACK clearMaterial(br_material *item, void *arg)
 static br_uint_32 BR_CALLBACK clearModel(br_model *item, void *arg)
 {
     ASSERT_MESSAGE("BR_CALLBACK clearModel NULL pointer", item !=NULL);
-	
+
 	BrModelClear(item);
 
 	return 0;
@@ -305,9 +305,9 @@ br_error BR_PUBLIC_ENTRY BrV1dbRendererBegin(br_device_pixelmap *destination, br
 	// STEVE : For some bizzare reason that I don't have time to look
 	// at now, we need to do two material updates on the default material
 	// to get it to work. Weird.
-   
+
 	BrMaterialUpdate(v1db.default_material, BR_MATU_ALL);
-	BrMaterialUpdate(v1db.default_material, BR_MATU_ALL); 
+	BrMaterialUpdate(v1db.default_material, BR_MATU_ALL);
 
 	/*
 	 * Set the default order table
@@ -349,7 +349,7 @@ br_error BR_PUBLIC_ENTRY BrV1dbRendererEnd(void)
 	BrMapEnum(NULL, clearMap, NULL);
 	BrMaterialEnum(NULL, clearMaterial, NULL);
 	BrModelEnum(NULL, clearModel, NULL);
-	
+
 	/*
 	 * Clear down the defaults
 	 */
@@ -367,7 +367,7 @@ br_error BR_PUBLIC_ENTRY BrV1dbRendererEnd(void)
      */
 	ObjectFree(v1db.renderer);
 	v1db.renderer = NULL;
-	
+
 	return BRE_OK;
 }
 
@@ -450,7 +450,7 @@ void BR_PUBLIC_ENTRY BrRendererEnd(void)
  */
 void BR_PUBLIC_ENTRY BrZbBegin(br_uint_8 colour_type, br_uint_8 depth_type)
 {
-	if(!v1db.zs_active && !v1db.zb_active) 
+	if(!v1db.zs_active && !v1db.zb_active)
 		if(BrV1dbRendererBegin((br_device_pixelmap *)BrDevLastBeginQuery(),NULL) != BRE_OK)
 			BR_ERROR0("Failed to load renderer\n");
 
@@ -461,7 +461,7 @@ void BR_PUBLIC_ENTRY BrZsBegin(br_uint_8 colour_type, void *primitive, br_uint_3
 {
         UASSERT_MESSAGE("BrZsBegin NULL pointer to an allocated block of memory", primitive != NULL);
 
-	if(!v1db.zs_active && !v1db.zb_active) 
+	if(!v1db.zs_active && !v1db.zb_active)
 		if(BrV1dbRendererBegin((br_device_pixelmap *)BrDevLastBeginQuery(),NULL) != BRE_OK)
 			BR_ERROR0("Failed to load renderer\n");
 

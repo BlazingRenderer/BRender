@@ -1,10 +1,10 @@
 /*
  * Copyright (c) 1993-1995 Argonaut Technologies Limited. All rights reserved.
  *
- * $Id: actsupt.c 2.15 1996/10/08 17:59:44 STEVEW Exp $
+ * $Id: actsupt.c 1.4 1998/11/17 16:01:01 nikh Exp $
  * $Locker: $
  *
- * Actor support routines 
+ * Actor support routines
  */
 #include "v1db.h"
 #include "shortcut.h"
@@ -12,7 +12,7 @@
 #include "datafile.h"
 #include "math_ip.h"
 
-BR_RCS_ID("$Id: actsupt.c 2.15 1996/10/08 17:59:44 STEVEW Exp $")
+BR_RCS_ID("$Id: actsupt.c 1.4 1998/11/17 16:01:01 nikh Exp $")
 
 
 /*
@@ -201,7 +201,6 @@ br_actor * BR_PUBLIC_ENTRY BrActorRemove(br_actor *a)
 
 	return a;
 }
-
 /*
  * Move an actor in the hierachy, but preserve it's apparent world
  * transform by manipulating the transform
@@ -445,7 +444,7 @@ br_boolean ActorToRootTyped(br_actor *a, br_actor *world, br_matrix34 *m, br_int
 	return (a == world);
 }
 
-void Matrix4PerspectiveNew(br_matrix4 *mat, 
+void Matrix4PerspectiveNew(br_matrix4 *mat,
 		br_angle field_of_view,
 		br_scalar aspect,
 		br_scalar hither,
@@ -454,21 +453,21 @@ void Matrix4PerspectiveNew(br_matrix4 *mat,
 		br_scalar origin_y)
 {
 	br_scalar scale ;
-	
+
 	UASSERT_MESSAGE("NULL pointer to destination matrix to receive the perspective transform", mat != NULL);
 	UASSERT_MESSAGE("field_of view is zero", field_of_view != 0 );
 	UASSERT(hither <= BR_SCALAR(0.0)); /* hither and yon are in view space - view volume is along -ve Z */
 	UASSERT_MESSAGE("Divide by zero error", BR_SIN((br_angle)(field_of_view/2)) != 0);
-	
+
 	scale = BR_DIV( BR_COS((br_angle)(field_of_view/2)), BR_SIN((br_angle)(field_of_view/2)));
-	
+
 	UASSERT_MESSAGE("Divide by zero error, aspect=0", aspect != 0);
 	M(0,0) = BR_DIV(scale,aspect);
 	M(1,1) = scale;
 	UASSERT_MESSAGE("Divide by zero error, yon-hither=0", yon-hither != 0);
 	M(2,2) = BR_DIV((yon+hither),(yon-hither));
 	M(3,2) = BR_CONST_MUL(BR_MULDIV(yon,hither,(yon-hither)),-2);
-	
+
 	M(0,1) = S0; M(0,2) = S0; M(0,3) = S0;
 	M(1,0) = S0; M(1,2) = S0; M(1,3) = S0;
 	M(2,0) = -origin_x; M(2,1) = -origin_y; M(2,3) = BR_SCALAR(-1);
@@ -489,7 +488,7 @@ br_token CameraToScreenMatrix4(br_matrix4 *mat, br_actor *camera)
 	UASSERT_MESSAGE("NULL pointer to the camera", camera != NULL);
 	UASSERT_MESSAGE("Invalid camera", camera->type == BR_ACTOR_CAMERA);
 	UASSERT_MESSAGE("Invalid camera data", camera->type_data != NULL);
-	
+
 	camera_type = camera->type_data;
 
 	UASSERT_MESSAGE("Invalid camera data range", camera_type->hither_z > S0);
@@ -502,7 +501,7 @@ br_token CameraToScreenMatrix4(br_matrix4 *mat, br_actor *camera)
 			camera_type->field_of_view,camera_type->aspect,
 			-camera_type->hither_z,-camera_type->yon_z,
 			v1db.origin.v[0], v1db.origin.v[1]);
-	
+
 		return BRT_PERSPECTIVE;
 
 	case BR_CAMERA_PERSPECTIVE_FOV_OLD:

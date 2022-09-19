@@ -1,14 +1,14 @@
 /*
  * Copyright (c) 1993-1995 by Argonaut Technologies Limited. All rights reserved.
  *
- * $Id: ffhooks.c 2.3 1996/12/12 16:33:41 sam Exp $
+ * $Id: ffhooks.c 1.1 1997/12/10 16:41:30 jon Exp $
  * $Locker: $
  *
  * FindFailed hooks that load models/materials/maps/tables from the filesystem
  */
 #include "brender.h"
 
-BR_RCS_ID("$Id: ffhooks.c 2.3 1996/12/12 16:33:41 sam Exp $")
+BR_RCS_ID("$Id: ffhooks.c 1.1 1997/12/10 16:41:30 jon Exp $")
 
 /*
  * Find Failed callbacks to automatically load textures & tables

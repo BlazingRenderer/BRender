@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 1993-1995 Argonaut Technologies Limited. All rights reserved.
  *
- * $Id: def_mat.c 2.5 1996/12/10 13:02:19 STEVEW Exp $
+ * $Id: def_mat.c 1.2 1998/03/05 20:24:10 jon Exp $
  * $Locker: $
  *
  * default material
@@ -13,7 +13,7 @@
 #include <brassert.h>
 
 
-BR_RCS_ID("$Id: def_mat.c 2.5 1996/12/10 13:02:19 STEVEW Exp $")
+BR_RCS_ID("$Id: def_mat.c 1.2 1998/03/05 20:24:10 jon Exp $")
 
 
 /*
