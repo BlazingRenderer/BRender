@@ -1103,16 +1103,32 @@ void BR_PUBLIC_ENTRY BrMatrix34PostShearZ(br_matrix34 *mat, br_scalar sx, br_sca
 	BrMatrix34Copy(mat,&mattmp2);
 }
 
+/*
+ * [a b c d] = [ e f g 0 ] . M
+ */
 void BR_PUBLIC_ENTRY BrMatrix34ApplyV(br_vector3 *A, const br_vector3 *B, const br_matrix34 *C)
 {
-	A->v[0] = BR_MAC3(B->v[0],C->m[0][0], B->v[1],C->m[1][0], B->v[2],C->m[2][0]);
-	A->v[1] = BR_MAC3(B->v[0],C->m[0][1], B->v[1],C->m[1][1], B->v[2],C->m[2][1]);
-	A->v[2] = BR_MAC3(B->v[0],C->m[0][2], B->v[1],C->m[1][2], B->v[2],C->m[2][2]);
+	UASSERT_MESSAGE("Destination Vector is NULL", A != NULL);
+	UASSERT_MESSAGE("Source Vector is NULL", B != NULL);
+	UASSERT_MESSAGE("Transform Matrix is NULL", C != NULL);
+	UASSERT_MESSAGE("Source and Destination vector may not be the same.", A != B);
+
+	A->v[0] = BR_MAC3(B->v[0],C(0,0), B->v[1],C(1,0), B->v[2],C(2,0));
+	A->v[1] = BR_MAC3(B->v[0],C(0,1), B->v[1],C(1,1), B->v[2],C(2,1));
+	A->v[2] = BR_MAC3(B->v[0],C(0,2), B->v[1],C(1,2), B->v[2],C(2,2));
 }
 
+/*
+ * [a b c ] = [ e f g ] . M
+ */
 void BR_PUBLIC_ENTRY BrMatrix34ApplyP(br_vector3 *A, const br_vector3 *B, const br_matrix34 *C)
 {
-	A->v[0] = BR_MAC3(B->v[0],C->m[0][0], B->v[1],C->m[1][0], B->v[2],C->m[2][0]) + C->m[3][0];
-	A->v[1] = BR_MAC3(B->v[0],C->m[0][1], B->v[1],C->m[1][1], B->v[2],C->m[2][1]) + C->m[3][1];
-	A->v[2] = BR_MAC3(B->v[0],C->m[0][2], B->v[1],C->m[1][2], B->v[2],C->m[2][2]) + C->m[3][2];
+	UASSERT_MESSAGE("Destination Vector is NULL", A != NULL);
+	UASSERT_MESSAGE("Source Vector is NULL", B != NULL);
+	UASSERT_MESSAGE("Transform Matrix is NULL", C != NULL);
+	UASSERT_MESSAGE("Source and Destination vector may not be the same.", A != B);
+
+	A->v[0] = BR_MAC3(B->v[0],C(0,0), B->v[1],C(1,0), B->v[2],C(2,0)) + C(3,0);
+	A->v[1] = BR_MAC3(B->v[0],C(0,1), B->v[1],C(1,1), B->v[2],C(2,1)) + C(3,1);
+	A->v[2] = BR_MAC3(B->v[0],C(0,2), B->v[1],C(1,2), B->v[2],C(2,2)) + C(3,2);
 }
