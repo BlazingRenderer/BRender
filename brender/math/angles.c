@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 1992,1993-1995 Argonaut Technologies Limited. All rights reserved.
  *
- * $Id: angles.c 2.2 1996/03/07 20:28:01 sam Exp $
+ * $Id: angles.c 1.1 1997/12/10 16:41:20 jon Exp $
  * $Locker: $
  *
  * Euler angle manipulation - loosely based on -
@@ -12,7 +12,7 @@
 #include "brassert.h"
 #include "shortcut.h"
 
-BR_RCS_ID("$Id: angles.c 2.2 1996/03/07 20:28:01 sam Exp $")
+BR_RCS_ID("$Id: angles.c 1.1 1997/12/10 16:41:20 jon Exp $")
 
 /*
  * Table of axes for each order

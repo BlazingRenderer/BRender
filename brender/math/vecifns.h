@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 1992,1993-1995 Argonaut Technologies Limited. All rights reserved.
  *
- * $Id: vecifns.h 2.2 1996/10/03 11:55:34 sam Exp $
+ * $Id: vecifns.h 1.1 1997/12/10 16:41:23 jon Exp $
  * $Locker: $
  *
  * Inline versions of the internal vector operations

@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 1992,1993-1995 Argonaut Technologies Limited. All rights reserved.
  *
- * $Id: quat.c 2.2 1996/12/04 16:12:53 OWAIN Exp $
+ * $Id: quat.c 1.1 1997/12/10 16:41:22 jon Exp $
  * $Locker: $
  *
  * Unit quaternion manipulation - based on
@@ -13,7 +13,7 @@
 #include "shortcut.h"
 #include "brassert.h"
 
-BR_RCS_ID("$Id: quat.c 2.2 1996/12/04 16:12:53 OWAIN Exp $")
+BR_RCS_ID("$Id: quat.c 1.1 1997/12/10 16:41:22 jon Exp $")
 
 br_quat * BR_PUBLIC_ENTRY BrQuatMul(br_quat *q, const br_quat *l, const br_quat *r)
 {
@@ -159,7 +159,7 @@ br_matrix34 * BR_PUBLIC_ENTRY BrQuatToMatrix34(br_matrix34 *mat, const br_quat *
 
         UASSERT_MESSAGE("Destination Matrix is NULL", mat != NULL);
         UASSERT_MESSAGE("Source Quaternion is NULL", q != NULL);
-        
+
 	/* NB: unit quat is assumed */
 
 	xs = BR_CONST_MUL(qX,2);

@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 1992,1993-1995 Argonaut Technologies Limited. All rights reserved.
  *
- * $Id: matrix23.c 2.5 1996/12/04 15:42:32 OWAIN Exp $
+ * $Id: matrix23.c 1.5 1998/08/13 11:55:46 jon Exp $
  * $Locker: $
  *
  * A very unoptimised set of transforms - these should each
@@ -15,7 +15,7 @@
 #include "shortcut.h"
 #include "brassert.h"
 
-BR_RCS_ID("$Id: matrix23.c 2.5 1996/12/04 15:42:32 OWAIN Exp $")
+BR_RCS_ID("$Id: matrix23.c 1.5 1998/08/13 11:55:46 jon Exp $")
 
 static br_matrix23 mattmp1,mattmp2;
 
@@ -24,10 +24,10 @@ static br_matrix23 mattmp1,mattmp2;
  */
 void BR_PUBLIC_ENTRY BrMatrix23Copy(br_matrix23 *A, const br_matrix23 *B)
 {
-        UASSERT_MESSAGE("Destination matrix is NULL", A != NULL);
-        UASSERT_MESSAGE("Source matrix is NULL", B != NULL);
+	UASSERT_MESSAGE("Destination matrix is NULL", A != NULL);
+	UASSERT_MESSAGE("Source matrix is NULL", B != NULL);
 
-        A(0,0) = B(0,0);
+	A(0,0) = B(0,0);
 	A(0,1) = B(0,1);
 
 	A(1,0) = B(1,0);
@@ -42,9 +42,9 @@ void BR_PUBLIC_ENTRY BrMatrix23Copy(br_matrix23 *A, const br_matrix23 *B)
  */
 void BR_PUBLIC_ENTRY BrMatrix23Mul(br_matrix23 *A, const br_matrix23 *B, const br_matrix23 *C)
 {
-        UASSERT_MESSAGE("Destination matrix is NULL", A != NULL);
-        UASSERT_MESSAGE("Left Hand Source matrix is NULL", B != NULL);
-        UASSERT_MESSAGE("Right Hand Source matrix is NULL", C != NULL);
+	UASSERT_MESSAGE("Destination matrix is NULL", A != NULL);
+	UASSERT_MESSAGE("Left Hand Source matrix is NULL", B != NULL);
+	UASSERT_MESSAGE("Right Hand Source matrix is NULL", C != NULL);
 
 	A(0,0) = BR_MAC2(B(0,0),C(0,0), B(0,1),C(1,0));
 	A(0,1) = BR_MAC2(B(0,0),C(0,1), B(0,1),C(1,1));
@@ -59,9 +59,9 @@ void BR_PUBLIC_ENTRY BrMatrix23Mul(br_matrix23 *A, const br_matrix23 *B, const b
 
 void BR_PUBLIC_ENTRY BrMatrix23Identity(br_matrix23 *mat)
 {
-        UASSERT_MESSAGE("Destination matrix is NULL", mat != NULL);
+	UASSERT_MESSAGE("Destination matrix is NULL", mat != NULL);
 
-        M(0,0) = S1; M(0,1) = S0;
+	M(0,0) = S1; M(0,1) = S0;
 	M(1,0) = S0; M(1,1) = S1;
 	M(2,0) = S0; M(2,1) = S0;
 }
@@ -80,7 +80,7 @@ void BR_PUBLIC_ENTRY BrMatrix23Rotate(br_matrix23 *mat, br_angle rz)
 	br_scalar s = BR_SIN(rz);
 	br_scalar c = BR_COS(rz);
 
-        UASSERT_MESSAGE("Destination matrix is NULL", mat != NULL);
+	UASSERT_MESSAGE("Destination matrix is NULL", mat != NULL);
 
 	M(0,0) =  c; M(0,1) =  s;
 	M(1,0) = -s; M(1,1) =  c;
@@ -98,11 +98,11 @@ void BR_PUBLIC_ENTRY BrMatrix23Rotate(br_matrix23 *mat, br_angle rz)
  */
 void BR_PUBLIC_ENTRY BrMatrix23Translate(br_matrix23 *mat, br_scalar dx, br_scalar dy)
 {
-        UASSERT_MESSAGE("Destination matrix is NULL", mat != NULL);
+	UASSERT_MESSAGE("Destination matrix is NULL", mat != NULL);
 
-        M(0,0) = S1; M(0,1) = S0;
-	M(1,0) = S0; M(1,1) = S1; 
-	M(2,0) = dx; M(2,1) = dy; 
+	M(0,0) = S1; M(0,1) = S0;
+	M(1,0) = S0; M(1,1) = S1;
+	M(2,0) = dx; M(2,1) = dy;
 }
 
 /*
@@ -116,7 +116,7 @@ void BR_PUBLIC_ENTRY BrMatrix23Translate(br_matrix23 *mat, br_scalar dx, br_scal
  */
 void BR_PUBLIC_ENTRY BrMatrix23Scale(br_matrix23 *mat, br_scalar sx, br_scalar sy)
 {
-        UASSERT_MESSAGE("Destination matrix is NULL", mat != NULL);
+	UASSERT_MESSAGE("Destination matrix is NULL", mat != NULL);
 
 	M(0,0) = sx; M(0,1) = S0;
 	M(1,0) = S0; M(1,1) = sy;
@@ -134,9 +134,9 @@ void BR_PUBLIC_ENTRY BrMatrix23Scale(br_matrix23 *mat, br_scalar sx, br_scalar s
  */
 void BR_PUBLIC_ENTRY BrMatrix23ShearX(br_matrix23 *mat, br_scalar sy)
 {
-        UASSERT_MESSAGE("Destination matrix is NULL", mat != NULL);
+	UASSERT_MESSAGE("Destination matrix is NULL", mat != NULL);
 
-        M(0,0) = S1; M(0,1) = sy;
+	M(0,0) = S1; M(0,1) = sy;
 	M(1,0) = S0; M(1,1) = S1;
 	M(2,0) = S0; M(2,1) = S0;
 }
@@ -152,15 +152,15 @@ void BR_PUBLIC_ENTRY BrMatrix23ShearX(br_matrix23 *mat, br_scalar sy)
  */
 void BR_PUBLIC_ENTRY BrMatrix23ShearY(br_matrix23 *mat, br_scalar sx)
 {
-        UASSERT_MESSAGE("Destination matrix is NULL", mat != NULL);
+	UASSERT_MESSAGE("Destination matrix is NULL", mat != NULL);
 
-        M(0,0) = S1; M(0,1) = S0;
+	M(0,0) = S1; M(0,1) = S0;
 	M(1,0) = sx; M(1,1) = S1;
 	M(2,0) = S0; M(2,1) = S0;
 }
 
 /*
- * Computes the inverse of a 2D affine matrix; 
+ * Computes the inverse of a 2D affine matrix;
  */
 
 #define PRECISION_LIMIT BR_SCALAR(1e-15)
@@ -224,8 +224,8 @@ void BR_PUBLIC_ENTRY BrMatrix23LPInverse(br_matrix23 *B, const br_matrix23 *A)
 
 void BR_PUBLIC_ENTRY BrMatrix23LPNormalise(br_matrix23 *A, const br_matrix23 *B)
 {
-        UASSERT_MESSAGE("Destination matrix is NULL", A != NULL);
-        UASSERT_MESSAGE("Source matrix is NULL", B != NULL);
+	UASSERT_MESSAGE("Destination matrix is NULL", A != NULL);
+	UASSERT_MESSAGE("Source matrix is NULL", B != NULL);
 
 	BrVector2Normalise((br_vector2 *)A->m[Y],(br_vector2 *)B->m[Y]);
 	A(0,0) = A(1,1);
@@ -240,12 +240,12 @@ void BR_PUBLIC_ENTRY BrMatrix23LPNormalise(br_matrix23 *A, const br_matrix23 *B)
  */
 void BR_PUBLIC_ENTRY BrMatrix23ApplyP(br_vector2 *A, const br_vector2 *B, const br_matrix23 *C)
 {
-        UASSERT_MESSAGE("Destination vector is NULL", A != NULL);
-        UASSERT_MESSAGE("Source vector is NULL", B != NULL);
-        UASSERT_MESSAGE("Transform matrix is NULL", C != NULL);
-        UASSERT_MESSAGE("Source may not be Destination", A != B);
+	UASSERT_MESSAGE("Destination vector is NULL", A != NULL);
+	UASSERT_MESSAGE("Source vector is NULL", B != NULL);
+	UASSERT_MESSAGE("Transform matrix is NULL", C != NULL);
+	UASSERT_MESSAGE("Source may not be Destination", A != B);
 
-        A->v[0] = BR_MAC2(B->v[0],C(0,0), B->v[1],C(1,0)) + C(2,0);
+	A->v[0] = BR_MAC2(B->v[0],C(0,0), B->v[1],C(1,0)) + C(2,0);
 	A->v[1] = BR_MAC2(B->v[0],C(0,1), B->v[1],C(1,1)) + C(2,1);
 }
 
@@ -254,12 +254,12 @@ void BR_PUBLIC_ENTRY BrMatrix23ApplyP(br_vector2 *A, const br_vector2 *B, const 
  */
 void BR_PUBLIC_ENTRY BrMatrix23ApplyV(br_vector2 *A, const br_vector2 *B, const br_matrix23 *C)
 {
-        UASSERT_MESSAGE("Destination vector is NULL", A != NULL);
-        UASSERT_MESSAGE("Source vector is NULL", B != NULL);
-        UASSERT_MESSAGE("Transform matrix is NULL", C != NULL);
-        UASSERT_MESSAGE("Source may not be Destination", A != B);
+	UASSERT_MESSAGE("Destination vector is NULL", A != NULL);
+	UASSERT_MESSAGE("Source vector is NULL", B != NULL);
+	UASSERT_MESSAGE("Transform matrix is NULL", C != NULL);
+	UASSERT_MESSAGE("Source may not be Destination", A != B);
 
-        A->v[0] = BR_MAC2(B->v[0],C(0,0), B->v[1],C(1,0));
+	A->v[0] = BR_MAC2(B->v[0],C(0,0), B->v[1],C(1,0));
 	A->v[1] = BR_MAC2(B->v[0],C(0,1), B->v[1],C(1,1));
 }
 
@@ -268,10 +268,10 @@ void BR_PUBLIC_ENTRY BrMatrix23ApplyV(br_vector2 *A, const br_vector2 *B, const 
  */
 void BR_PUBLIC_ENTRY BrMatrix23TApplyP(br_vector2 *A, const br_vector2 *B, const br_matrix23 *C)
 {
-        UASSERT_MESSAGE("Destination vector is NULL", A != NULL);
-        UASSERT_MESSAGE("Source vector is NULL", B != NULL);
-        UASSERT_MESSAGE("Transform matrix is NULL", C != NULL);
-        UASSERT_MESSAGE("Source may not be Destination", A != B);
+	UASSERT_MESSAGE("Destination vector is NULL", A != NULL);
+	UASSERT_MESSAGE("Source vector is NULL", B != NULL);
+	UASSERT_MESSAGE("Transform matrix is NULL", C != NULL);
+	UASSERT_MESSAGE("Source may not be Destination", A != B);
 
 	A->v[0] = BR_MAC2(B->v[0],C(0,0), B->v[1],C(0,1));
 	A->v[1] = BR_MAC2(B->v[0],C(1,0), B->v[1],C(1,1));
@@ -282,12 +282,12 @@ void BR_PUBLIC_ENTRY BrMatrix23TApplyP(br_vector2 *A, const br_vector2 *B, const
  */
 void BR_PUBLIC_ENTRY BrMatrix23TApplyV(br_vector2 *A, const br_vector2 *B, const br_matrix23 *C)
 {
-        UASSERT_MESSAGE("Destination vector is NULL", A != NULL);
-        UASSERT_MESSAGE("Source vector is NULL", B != NULL);
-        UASSERT_MESSAGE("Transform matrix is NULL", C != NULL);
-        UASSERT_MESSAGE("Source may not be Destination", A != B);
+	UASSERT_MESSAGE("Destination vector is NULL", A != NULL);
+	UASSERT_MESSAGE("Source vector is NULL", B != NULL);
+	UASSERT_MESSAGE("Transform matrix is NULL", C != NULL);
+	UASSERT_MESSAGE("Source may not be Destination", A != B);
 
-        A->v[0] = BR_MAC2(B->v[0],C(0,0), B->v[1],C(0,1));
+	A->v[0] = BR_MAC2(B->v[0],C(0,0), B->v[1],C(0,1));
 	A->v[1] = BR_MAC2(B->v[0],C(1,0), B->v[1],C(1,1));
 }
 

@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 1992,1993-1995 Argonaut Technologies Limited. All rights reserved.
  *
- * $Id: matrix4.c 2.3 1996/12/04 15:36:03 OWAIN Exp $
+ * $Id: matrix4.c 1.1 1997/12/10 16:41:22 jon Exp $
  * $Locker: $
  *
  * A very unoptimised set of transforms - these should each
@@ -15,17 +15,17 @@
 #include "shortcut.h"
 #include "brassert.h"
 
-BR_RCS_ID("$Id: matrix4.c 2.3 1996/12/04 15:36:03 OWAIN Exp $")
+BR_RCS_ID("$Id: matrix4.c 1.1 1997/12/10 16:41:22 jon Exp $")
 
 /*
  * A = B
  */
 void BR_PUBLIC_ENTRY BrMatrix4Copy(br_matrix4 *A, const br_matrix4 *B)
 {
-        UASSERT_MESSAGE("Destination matrix is NULL", A != NULL);
-        UASSERT_MESSAGE("Source matrix is NULL", B != NULL);
+	UASSERT_MESSAGE("Destination matrix is NULL", A != NULL);
+	UASSERT_MESSAGE("Source matrix is NULL", B != NULL);
 
-        A(0,0) = B(0,0); A(0,1) = B(0,1); A(0,2) = B(0,2); A(0,3) = B(0,3);
+	A(0,0) = B(0,0); A(0,1) = B(0,1); A(0,2) = B(0,2); A(0,3) = B(0,3);
 	A(1,0) = B(1,0); A(1,1) = B(1,1); A(1,2) = B(1,2); A(1,3) = B(1,3);
 	A(2,0) = B(2,0); A(2,1) = B(2,1); A(2,2) = B(2,2); A(2,3) = B(2,3);
 	A(3,0) = B(3,0); A(3,1) = B(3,1); A(3,2) = B(3,2); A(3,3) = B(3,3);
@@ -36,11 +36,11 @@ void BR_PUBLIC_ENTRY BrMatrix4Copy(br_matrix4 *A, const br_matrix4 *B)
  */
 void BR_PUBLIC_ENTRY BrMatrix4Mul(br_matrix4 *A, const br_matrix4 *B, const br_matrix4 *C)
 {
-        UASSERT_MESSAGE("Destination matrix is NULL", A != NULL);
-        UASSERT_MESSAGE("Left Hand Source matrix is NULL", B != NULL);
-        UASSERT_MESSAGE("Right Hand Source matrix is NULL", C != NULL);
+	UASSERT_MESSAGE("Destination matrix is NULL", A != NULL);
+	UASSERT_MESSAGE("Left Hand Source matrix is NULL", B != NULL);
+	UASSERT_MESSAGE("Right Hand Source matrix is NULL", C != NULL);
 
-        A(0,0) = BR_MAC4(B(0,0),C(0,0), B(0,1),C(1,0), B(0,2),C(2,0), B(0,3),C(3,0));
+	A(0,0) = BR_MAC4(B(0,0),C(0,0), B(0,1),C(1,0), B(0,2),C(2,0), B(0,3),C(3,0));
 	A(0,1) = BR_MAC4(B(0,0),C(0,1), B(0,1),C(1,1), B(0,2),C(2,1), B(0,3),C(3,1));
 	A(0,2) = BR_MAC4(B(0,0),C(0,2), B(0,1),C(1,2), B(0,2),C(2,2), B(0,3),C(3,2));
 	A(0,3) = BR_MAC4(B(0,0),C(0,3), B(0,1),C(1,3), B(0,2),C(2,3), B(0,3),C(3,3));
@@ -66,9 +66,9 @@ void BR_PUBLIC_ENTRY BrMatrix4Mul(br_matrix4 *A, const br_matrix4 *B, const br_m
  */
 void BR_PUBLIC_ENTRY BrMatrix4Identity(br_matrix4 *mat)
 {
-        UASSERT_MESSAGE("Subject matrix is NULL", mat != NULL);
+	UASSERT_MESSAGE("Subject matrix is NULL", mat != NULL);
 
-        M(0,0) = S1; M(0,1) = S0; M(0,2) = S0; M(0,3) = S0;
+	M(0,0) = S1; M(0,1) = S0; M(0,2) = S0; M(0,3) = S0;
 	M(1,0) = S0; M(1,1) = S1; M(1,2) = S0; M(1,3) = S0;
 	M(2,0) = S0; M(2,1) = S0; M(2,2) = S1; M(2,3) = S0;
 	M(3,0) = S0; M(3,1) = S0; M(3,2) = S0; M(3,3) = S1;
@@ -76,7 +76,7 @@ void BR_PUBLIC_ENTRY BrMatrix4Identity(br_matrix4 *mat)
 
 void BR_PUBLIC_ENTRY BrMatrix4Scale(br_matrix4 *mat, br_scalar sx, br_scalar sy, br_scalar sz)
 {
-        UASSERT_MESSAGE("Subject matrix is NULL", mat != NULL);
+	UASSERT_MESSAGE("Subject matrix is NULL", mat != NULL);
 
 	M(0,0) = sx; M(0,1) = S0; M(0,2) = S0; M(0,3) = S0;
 	M(1,0) = S0; M(1,1) = sy; M(1,2) = S0; M(1,3) = S0;
@@ -121,7 +121,7 @@ br_scalar BR_PUBLIC_ENTRY BrMatrix4Inverse(br_matrix4 *A, const br_matrix4 *B)
 
     /*
 	 * Calculate the 4x4 determinant
-     *  if the determinant is zero, 
+     *  if the determinant is zero,
      *  then the inverse matrix is not unique.
      */
 
@@ -156,7 +156,7 @@ static br_scalar Determinant3(
 
 /*
  * return determinant(mat)
- * 
+ *
  */
 br_scalar BR_PUBLIC_ENTRY BrMatrix4Determinant(const br_matrix4 *mat)
 {
@@ -164,16 +164,16 @@ br_scalar BR_PUBLIC_ENTRY BrMatrix4Determinant(const br_matrix4 *mat)
 
     UASSERT_MESSAGE("Source matrix is NULL", mat != NULL);
 
-	a1 = M(0,0); b1 = M(0,1); 
+	a1 = M(0,0); b1 = M(0,1);
 	c1 = M(0,2); d1 = M(0,3);
 
-	a2 = M(1,0); b2 = M(1,1); 
+	a2 = M(1,0); b2 = M(1,1);
 	c2 = M(1,2); d2 = M(1,3);
 
-	a3 = M(2,0); b3 = M(2,1); 
+	a3 = M(2,0); b3 = M(2,1);
 	c3 = M(2,2); d3 = M(2,3);
 
-	a4 = M(3,0); b4 = M(3,1); 
+	a4 = M(3,0); b4 = M(3,1);
 	c4 = M(3,2); d4 = M(3,3);
 
     return BR_MAC4(a1, Determinant3( b2, b3, b4, c2, c3, c4, d2, d3, d4),
@@ -182,7 +182,7 @@ br_scalar BR_PUBLIC_ENTRY BrMatrix4Determinant(const br_matrix4 *mat)
 				  -d1, Determinant3( a2, a3, a4, b2, b3, b4, c2, c3, c4));
 }
 
-/* 
+/*
  * A = adjoint(B)
  */
 
@@ -194,16 +194,16 @@ void BR_PUBLIC_ENTRY BrMatrix4Adjoint(br_matrix4 *A, const br_matrix4 *B)
     UASSERT_MESSAGE("Destination matrix is NULL", A != NULL);
     UASSERT_MESSAGE("Source matrix is NULL", B != NULL);
 
-	a1 = B(0,0); b1 = B(0,1); 
+	a1 = B(0,0); b1 = B(0,1);
 	c1 = B(0,2); d1 = B(0,3);
 
-	a2 = B(1,0); b2 = B(1,1); 
+	a2 = B(1,0); b2 = B(1,1);
 	c2 = B(1,2); d2 = B(1,3);
 
 	a3 = B(2,0); b3 = B(2,1);
 	c3 = B(2,2); d3 = B(2,3);
 
-	a4 = B(3,0); b4 = B(3,1); 
+	a4 = B(3,0); b4 = B(3,1);
 	c4 = B(3,2); d4 = B(3,3);
 
 
@@ -213,17 +213,17 @@ void BR_PUBLIC_ENTRY BrMatrix4Adjoint(br_matrix4 *A, const br_matrix4 *B)
     A(1,0) = -Determinant3( a2, a3, a4, c2, c3, c4, d2, d3, d4);
     A(2,0) =  Determinant3( a2, a3, a4, b2, b3, b4, d2, d3, d4);
     A(3,0) = -Determinant3( a2, a3, a4, b2, b3, b4, c2, c3, c4);
-        
+
     A(0,1) = -Determinant3( b1, b3, b4, c1, c3, c4, d1, d3, d4);
     A(1,1) =  Determinant3( a1, a3, a4, c1, c3, c4, d1, d3, d4);
     A(2,1) = -Determinant3( a1, a3, a4, b1, b3, b4, d1, d3, d4);
     A(3,1) =  Determinant3( a1, a3, a4, b1, b3, b4, c1, c3, c4);
-        
+
     A(0,2) =  Determinant3( b1, b2, b4, c1, c2, c4, d1, d2, d4);
     A(1,2) = -Determinant3( a1, a2, a4, c1, c2, c4, d1, d2, d4);
     A(2,2) =  Determinant3( a1, a2, a4, b1, b2, b4, d1, d2, d4);
     A(3,2) = -Determinant3( a1, a2, a4, b1, b2, b4, c1, c2, c4);
-        
+
     A(0,3) = -Determinant3( b1, b2, b3, c1, c2, c3, d1, d2, d3);
     A(1,3) =  Determinant3( a1, a2, a3, c1, c2, c3, d1, d2, d3);
     A(2,3) = -Determinant3( a1, a2, a3, b1, b2, b3, d1, d2, d3);

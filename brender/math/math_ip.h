@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 1993-1995 Argonaut Technologies Limited. All rights reserved.
  *
- * $Id: math_ip.h 2.4 1996/10/03 11:55:33 sam Exp $
+ * $Id: math_ip.h 1.1 1997/12/10 16:41:21 jon Exp $
  * $Locker: $
  *
  * Prototypes for private math functions

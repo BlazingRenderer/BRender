@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 1992,1993-1995 Argonaut Technologies Limited. All rights reserved.
  *
- * $Id: transfrm.c 2.5 1996/12/04 17:35:47 OWAIN Exp $
+ * $Id: transfrm.c 1.1 1997/12/10 16:41:22 jon Exp $
  * $Locker: $
  *
  */
@@ -10,7 +10,7 @@
 #include "brassert.h"
 #include "vecifns.h"
 
-BR_RCS_ID("$Id: transfrm.c 2.5 1996/12/04 17:35:47 OWAIN Exp $")
+BR_RCS_ID("$Id: transfrm.c 1.1 1997/12/10 16:41:22 jon Exp $")
 
 #define COMBINE_TRANSFORMS(a,b) (_CombineTransforms[(a)][(b)])
 #define IS_LP(a) ((a) != BR_TRANSFORM_MATRIX34)

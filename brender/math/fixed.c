@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 1992,1993-1995 Argonaut Technologies Limited. All rights reserved.
  *
- * $Id: fixed.c 2.2 1996/03/07 20:28:02 sam Exp $
+ * $Id: fixed.c 1.1 1997/12/10 16:41:21 jon Exp $
  * $Locker: $
  *
  * Various fixed point support functions

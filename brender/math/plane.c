@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 1992,1993-1995 Argonaut Technologies Limited. All rights reserved.
  *
- * $Id: plane.c 2.4 1996/12/04 16:00:40 OWAIN Exp $
+ * $Id: plane.c 1.3 1998/08/03 16:48:18 jon Exp $
  * $Locker: $
  */
 
@@ -10,14 +10,14 @@
 #include "brmath.h"
 #include "brassert.h"
 
-BR_RCS_ID("$Id: plane.c 2.4 1996/12/04 16:00:40 OWAIN Exp $")
+BR_RCS_ID("$Id: plane.c 1.3 1998/08/03 16:48:18 jon Exp $")
 
 /*
  * Work out the plane equation of the plane defined by three points
  *
  * Use float for intermdiates for accuracy
  *
- * Returns != 0 if points were co-linear 
+ * Returns != 0 if points were co-linear
  */
 br_int_32 BR_PUBLIC_ENTRY BrPlaneEquation(br_vector4 *eqn, const br_vector3 *v0, const br_vector3 *v1, const br_vector3 *v2)
 {
@@ -35,20 +35,20 @@ br_int_32 BR_PUBLIC_ENTRY BrPlaneEquation(br_vector4 *eqn, const br_vector3 *v0,
 	BrVector3Sub(&a,v1,v0);
 	BrVector3Sub(&b,v2,v0);
 
-	ax = BrScalarToFloat(a.v[0]);	
-	ay = BrScalarToFloat(a.v[1]);	
-	az = BrScalarToFloat(a.v[2]);	
+	ax = BrScalarToFloat(a.v[0]);
+	ay = BrScalarToFloat(a.v[1]);
+	az = BrScalarToFloat(a.v[2]);
 
-	bx = BrScalarToFloat(b.v[0]);	
-	by = BrScalarToFloat(b.v[1]);	
-	bz = BrScalarToFloat(b.v[2]);	
+	bx = BrScalarToFloat(b.v[0]);
+	by = BrScalarToFloat(b.v[1]);
+	bz = BrScalarToFloat(b.v[2]);
 
 	nx = ay*bz-az*by;
 	ny = az*bx-ax*bz;
 	nz = ax*by-ay*bx;
 
 	l = BrFloatSqrt(nx * nx + ny * ny + nz * nz);
-	
+
 	if(l != 0) {
 		l = 1.0F/l;
 		nx *= l;
@@ -56,8 +56,8 @@ br_int_32 BR_PUBLIC_ENTRY BrPlaneEquation(br_vector4 *eqn, const br_vector3 *v0,
 		nz *= l;
 	} else {
 		nx = 0.0F;
-		ny = 1.0F;
-		nz = 0.0F;
+		ny = 0.0F;
+		nz = 1.0F;
 	}
 
 	d = nx * BrScalarToFloat(v0->v[0]) +

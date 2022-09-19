@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 1992,1993-1995 Argonaut Technologies Limited. All rights reserved.
  *
- * $Id: vector.c 2.5 1996/12/04 18:30:44 OWAIN Exp $
+ * $Id: vector.c 1.1 1997/12/10 16:41:23 jon Exp $
  * $Locker: $
  *
  * Vector op. - some of these are redefined as macros in vecfns.h
@@ -16,7 +16,7 @@
 #include "shortcut.h"
 #include "brassert.h"
 
-BR_RCS_ID("$Id: vector.c 2.5 1996/12/04 18:30:44 OWAIN Exp $")
+BR_RCS_ID("$Id: vector.c 1.1 1997/12/10 16:41:23 jon Exp $")
 
 /**
  ** 2D Vectors

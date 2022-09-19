@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 1992,1993-1995 Argonaut Technologies Limited. All rights reserved.
  *
- * $Id: matrix34.c 2.6 1996/12/04 15:42:42 OWAIN Exp $
+ * $Id: matrix34.c 1.7 1998/08/13 11:56:03 jon Exp $
  * $Locker: $
  *
  * A very unoptimised set of transforms - these should each
@@ -15,7 +15,7 @@
 #include "shortcut.h"
 #include "brassert.h"
 
-BR_RCS_ID("$Id: matrix34.c 2.6 1996/12/04 15:42:42 OWAIN Exp $")
+BR_RCS_ID("$Id: matrix34.c 1.7 1998/08/13 11:56:03 jon Exp $")
 
 static br_matrix34 mattmp1,mattmp2;
 
@@ -494,7 +494,7 @@ void BR_PUBLIC_ENTRY BrMatrix34ShearZ(br_matrix34 *mat, br_scalar sx, br_scalar 
  *
  * Output:
  *   B  - inverse of 3D affine matrix
- *   
+ *
  * Returned value:
  *   determinant of matrix
  */
@@ -635,7 +635,7 @@ br_scalar BR_PUBLIC_ENTRY BrMatrix34Inverse(br_matrix34 *B, const br_matrix34 *A
 		return S0;
 
 	if((ABS(det/(pos - neg)) < PRECISION_LIMIT)) {
-	/*
+		/*
 		 * Matrix M has no inverse
 		 */
 		return S0;
@@ -680,7 +680,7 @@ br_scalar BR_PUBLIC_ENTRY BrMatrix34Inverse(br_matrix34 *B, const br_matrix34 *A
  * Invert a length preserving matrix
  *
  * Given:
- *	  
+ *
  *  A     0
  *
  *  C     1
@@ -731,7 +731,7 @@ void BR_PUBLIC_ENTRY BrMatrix34LPNormalise(br_matrix34 *A, const br_matrix34 *B)
 
 	A(3,0) = B(3,0);
 	A(3,1) = B(3,1);
-	A(3,2) = B(3,2);	
+	A(3,2) = B(3,2);
 }
 
 
@@ -892,7 +892,6 @@ void BrMatrix34TApplyFV(br_vector3 *A, const br_vector3 *B, const br_matrix34 *C
 	UASSERT_MESSAGE("Destination Vector is NULL", A != NULL);
 	UASSERT_MESSAGE("Source Vector is NULL", B != NULL);
 	UASSERT_MESSAGE("Transform Matrix is NULL", C != NULL);
-	UASSERT_MESSAGE("Source vector may not be destination", A != B);
 
 	A->v[0] = BR_FMAC3(B->v[0],C(0,0), B->v[1],C(0,1), B->v[2],C(0,2));
 	A->v[1] = BR_FMAC3(B->v[0],C(1,0), B->v[1],C(1,1), B->v[2],C(1,2));
