@@ -493,16 +493,14 @@ br_scalar BR_PUBLIC_ENTRY BrMatrix34Inverse(br_matrix34 *B, br_matrix34 *A)
 #define AF(x,y) (AF[x][y])
 #define BF(x,y) (BF[x][y])
 
-#define BR_FLOAT_EPSILON	1.192092896e-7f
-
 /*
  * Use float intermediates for invertion
  */
 br_scalar BR_PUBLIC_ENTRY BrMatrix34Inverse(br_matrix34 *B, const br_matrix34 *A)
 {
-    float	idet,det;
-    float	pos, neg, temp;
-	float	AF[4][3], BF[4][3];
+	double	idet,det;
+	double	pos, neg, temp;
+	double	AF[4][3], BF[4][3];
 	int i;
 
 #define ACCUMULATE if (temp >= 0.0) pos += temp; else neg += temp;
@@ -543,8 +541,12 @@ br_scalar BR_PUBLIC_ENTRY BrMatrix34Inverse(br_matrix34 *B, const br_matrix34 *A
 
     /*
 	 * Is the submatrix A singular?
+	 *
+	 * Not sure about this - using double precision as an intermediate
+	 * allows more matrices to be inverted but when they are stored back
+	 * how can we determine if they will become singular?
 	 */
-    if(ABS(det) <= BR_FLOAT_EPSILON)
+    if(ABS(det) <= PRECISION_LIMIT)
 		return S0;
 
 	if((ABS(det/(pos - neg)) < PRECISION_LIMIT)) {
