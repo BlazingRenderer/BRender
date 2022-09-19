@@ -17,7 +17,6 @@
 
 BR_RCS_ID("$Id: matrix23.c 1.5 1998/08/13 11:55:46 jon Exp $")
 
-static br_matrix23 mattmp1,mattmp2;
 
 /*
  * A = B
@@ -298,25 +297,31 @@ void BR_PUBLIC_ENTRY BrMatrix23TApplyV(br_vector2 *A, const br_vector2 *B, const
 
 void BR_PUBLIC_ENTRY BrMatrix23Pre(br_matrix23 *mat, const br_matrix23 *A)
 {
-        UASSERT_MESSAGE("Subject matrix is NULL", mat != NULL);
-        UASSERT_MESSAGE("Pre-multiplying matrix is NULL", A != NULL);
-        
-        BrMatrix23Mul(&mattmp2,A,mat);
-	BrMatrix23Copy(mat,&mattmp2);
+	br_matrix23 mattmp;
+
+	UASSERT_MESSAGE("Subject matrix is NULL", mat != NULL);
+	UASSERT_MESSAGE("Pre-multiplying matrix is NULL", A != NULL);
+
+	BrMatrix23Mul(&mattmp,A,mat);
+	BrMatrix23Copy(mat,&mattmp);
 }
 
 void BR_PUBLIC_ENTRY BrMatrix23Post(br_matrix23 *mat, const br_matrix23 *A)
 {
-        UASSERT_MESSAGE("Subject matrix is NULL", mat != NULL);
-        UASSERT_MESSAGE("Post-multiplying matrix is NULL", A != NULL);
+	br_matrix23 mattmp;
 
-        BrMatrix23Mul(&mattmp2,mat,A);
-	BrMatrix23Copy(mat,&mattmp2);
+	UASSERT_MESSAGE("Subject matrix is NULL", mat != NULL);
+	UASSERT_MESSAGE("Post-multiplying matrix is NULL", A != NULL);
+
+	BrMatrix23Mul(&mattmp,mat,A);
+	BrMatrix23Copy(mat,&mattmp);
 }
 
 void BR_PUBLIC_ENTRY BrMatrix23PreRotate(br_matrix23 *mat, br_angle rz)
-{			  
-        UASSERT_MESSAGE("Matrix is NULL", mat != NULL);
+{
+	br_matrix23 mattmp1,mattmp2;
+
+	UASSERT_MESSAGE("Matrix is NULL", mat != NULL);
 
 	BrMatrix23Rotate(&mattmp1,rz);
 	BrMatrix23Mul(&mattmp2,&mattmp1,mat);
@@ -325,7 +330,9 @@ void BR_PUBLIC_ENTRY BrMatrix23PreRotate(br_matrix23 *mat, br_angle rz)
 
 void BR_PUBLIC_ENTRY BrMatrix23PostRotate(br_matrix23 *mat, br_angle rz)
 {
-        UASSERT_MESSAGE("Matrix is NULL", mat != NULL);
+	br_matrix23 mattmp1,mattmp2;
+
+	UASSERT_MESSAGE("Matrix is NULL", mat != NULL);
 
 	BrMatrix23Rotate(&mattmp1,rz);
 	BrMatrix23Mul(&mattmp2,mat,&mattmp1);
@@ -334,7 +341,9 @@ void BR_PUBLIC_ENTRY BrMatrix23PostRotate(br_matrix23 *mat, br_angle rz)
 
 void BR_PUBLIC_ENTRY BrMatrix23PreTranslate(br_matrix23 *mat, br_scalar x, br_scalar y)
 {
-        UASSERT_MESSAGE("Matrix is NULL", mat != NULL);
+	br_matrix23 mattmp1,mattmp2;
+
+	UASSERT_MESSAGE("Matrix is NULL", mat != NULL);
 
 	BrMatrix23Translate(&mattmp1,x,y);
 	BrMatrix23Mul(&mattmp2,&mattmp1,mat);
@@ -343,7 +352,7 @@ void BR_PUBLIC_ENTRY BrMatrix23PreTranslate(br_matrix23 *mat, br_scalar x, br_sc
 
 void BR_PUBLIC_ENTRY BrMatrix23PostTranslate(br_matrix23 *A, br_scalar x, br_scalar y)
 {
-        UASSERT_MESSAGE("Matrix is NULL", A != NULL);
+	UASSERT_MESSAGE("Matrix is NULL", A != NULL);
 
 	A(2,0) += x;
 	A(2,1) += y;
@@ -351,7 +360,9 @@ void BR_PUBLIC_ENTRY BrMatrix23PostTranslate(br_matrix23 *A, br_scalar x, br_sca
 
 void BR_PUBLIC_ENTRY BrMatrix23PreScale(br_matrix23 *mat, br_scalar sx, br_scalar sy)
 {
-        UASSERT_MESSAGE("Matrix is NULL", mat != NULL);
+	br_matrix23 mattmp1,mattmp2;
+
+	UASSERT_MESSAGE("Matrix is NULL", mat != NULL);
 
 	BrMatrix23Scale(&mattmp1,sx,sy);
 	BrMatrix23Mul(&mattmp2,&mattmp1,mat);
@@ -360,7 +371,9 @@ void BR_PUBLIC_ENTRY BrMatrix23PreScale(br_matrix23 *mat, br_scalar sx, br_scala
 
 void BR_PUBLIC_ENTRY BrMatrix23PostScale(br_matrix23 *mat, br_scalar sx, br_scalar sy)
 {
-        UASSERT_MESSAGE("Matrix is NULL", mat != NULL);
+	br_matrix23 mattmp1,mattmp2;
+
+	UASSERT_MESSAGE("Matrix is NULL", mat != NULL);
 
 	BrMatrix23Scale(&mattmp1,sx,sy);
 	BrMatrix23Mul(&mattmp2,mat,&mattmp1);
@@ -369,7 +382,9 @@ void BR_PUBLIC_ENTRY BrMatrix23PostScale(br_matrix23 *mat, br_scalar sx, br_scal
 
 void BR_PUBLIC_ENTRY BrMatrix23PreShearX(br_matrix23 *mat, br_scalar sy)
 {
-        UASSERT_MESSAGE("Matrix is NULL", mat != NULL);
+	br_matrix23 mattmp1,mattmp2;
+
+	UASSERT_MESSAGE("Matrix is NULL", mat != NULL);
 
 	BrMatrix23ShearX(&mattmp1,sy);
 	BrMatrix23Mul(&mattmp2,&mattmp1,mat);
@@ -378,7 +393,9 @@ void BR_PUBLIC_ENTRY BrMatrix23PreShearX(br_matrix23 *mat, br_scalar sy)
 
 void BR_PUBLIC_ENTRY BrMatrix23PostShearX(br_matrix23 *mat, br_scalar sy)
 {
-        UASSERT_MESSAGE("Matrix is NULL", mat != NULL);
+	br_matrix23 mattmp1,mattmp2;
+
+	UASSERT_MESSAGE("Matrix is NULL", mat != NULL);
 
 	BrMatrix23ShearX(&mattmp1,sy);
 	BrMatrix23Mul(&mattmp2,mat,&mattmp1);
@@ -387,7 +404,9 @@ void BR_PUBLIC_ENTRY BrMatrix23PostShearX(br_matrix23 *mat, br_scalar sy)
 
 void BR_PUBLIC_ENTRY BrMatrix23PreShearY(br_matrix23 *mat, br_scalar sx)
 {
-        UASSERT_MESSAGE("Matrix is NULL", mat != NULL);
+	br_matrix23 mattmp1,mattmp2;
+
+	UASSERT_MESSAGE("Matrix is NULL", mat != NULL);
 
 	BrMatrix23ShearY(&mattmp1,sx);
 	BrMatrix23Mul(&mattmp2,&mattmp1,mat);
@@ -396,7 +415,9 @@ void BR_PUBLIC_ENTRY BrMatrix23PreShearY(br_matrix23 *mat, br_scalar sx)
 
 void BR_PUBLIC_ENTRY BrMatrix23PostShearY(br_matrix23 *mat, br_scalar sx)
 {
-        UASSERT_MESSAGE("Matrix is NULL", mat != NULL);
+	br_matrix23 mattmp1,mattmp2;
+
+	UASSERT_MESSAGE("Matrix is NULL", mat != NULL);
 
 	BrMatrix23ShearY(&mattmp1,sx);
 	BrMatrix23Mul(&mattmp2,mat,&mattmp1);
