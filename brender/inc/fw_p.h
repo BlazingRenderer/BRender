@@ -148,7 +148,7 @@ br_int_32 BR_RESIDENT_ENTRY BrMemAlign(br_uint_8 type);
 void * BR_RESIDENT_ENTRY BrMemAllocateAlign(br_size_t size, br_uint_8 type, br_int_32 align);
 #endif
 
-char * BR_RESIDENT_ENTRY BrMemStrDup(char *str);
+char * BR_RESIDENT_ENTRY BrMemStrDup(const char *str);
 void * BR_RESIDENT_ENTRY BrMemCalloc(int nelems, br_size_t size, br_uint_8 type);
 
 /*

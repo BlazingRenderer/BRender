@@ -109,7 +109,7 @@ void * BR_RESIDENT_ENTRY BrMemCalloc(int nelems, br_size_t size, br_uint_8 type)
 /*
  * strdup() equivalent
  */
-char * BR_RESIDENT_ENTRY BrMemStrDup(char *str)
+char * BR_RESIDENT_ENTRY BrMemStrDup(const char *str)
 {
 	br_size_t l;
 	char *nstr;
