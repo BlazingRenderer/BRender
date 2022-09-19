@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 1992,1993-1995 Argonaut Technologies Limited. All rights reserved.
  *
- * $Id: token.h 1.8 1996/12/06 12:47:34 NIKH Exp $
+ * $Id: token.h 1.2 1998/09/21 14:53:14 johng Exp $
  * $Locker: $
  *
  */
@@ -48,7 +48,7 @@ typedef br_uint_32 br_token;
 
 #define BRT_AS_MATRIX23_SCALAR(tok)	BRT_AS_MATRIX23_FLOAT(tok)
 #define BRT_AS_MATRIX34_SCALAR(tok)	BRT_AS_MATRIX34_FLOAT(tok)
-#define BRT_AS_MATRIX4_SCALAR(tok)	BRT_AS_MATRIX4_FLOAT(tok)	
+#define BRT_AS_MATRIX4_SCALAR(tok)	BRT_AS_MATRIX4_FLOAT(tok)
 
 #define BRT_AS_VECTOR2_SCALAR(tok)	BRT_AS_VECTOR2_FLOAT(tok)
 #define BRT_AS_VECTOR3_SCALAR(tok)	BRT_AS_VECTOR3_FLOAT(tok)

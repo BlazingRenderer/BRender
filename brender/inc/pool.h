@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 1993-1995 by Argonaut Technologies Limited. All rights reserved.
  *
- * $Id: pool.h 2.2 1996/10/03 11:10:04 sam Exp $
+ * $Id: pool.h 1.1 1997/12/10 16:41:19 jon Exp $
  * $Locker: $
  *
  * Fixed size block pools

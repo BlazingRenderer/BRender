@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 1993-1995 by Argonaut Technologies Limited. All rights reserved.
  *
- * $Id: model.h 2.12 1997/05/22 14:42:25 jon Exp $
+ * $Id: model.h 1.4 1998/07/21 17:33:17 jon Exp $
  * $Locker: $
  *
  * In-memory structures for models, both public and private areas

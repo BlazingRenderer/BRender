@@ -1,23 +1,19 @@
 /*
-* Copyright (c) 1993-1995 by Argonaut Technologies Limited. All rights reserved.
-*
-* $Id: transfrm.h 2.2 1996/10/03 11:10:13 sam Exp $
-* $Locker: $
-*
-* Structure describing an affine transform from one coordinate space
-* to another
-*/
+ * Copyright (c) 1993-1995 by Argonaut Technologies Limited. All rights reserved.
+ *
+ * $Id: transfrm.h 1.1 1997/12/10 16:41:20 jon Exp $
+ * $Locker: $
+ *
+ * Structure describing an affine transform from one coordinate space
+ * to another
+ */
 #ifndef _TRANSFRM_H_
 #define _TRANSFRM_H_
 
-#include "compiler.h"
-#include "matrix.h"
-
 /*
-* Type of actor position
-*/
-enum
-{
+ * Type of actor position
+ */
+enum {
 	BR_TRANSFORM_MATRIX34,
 	BR_TRANSFORM_MATRIX34_LP,
 	BR_TRANSFORM_QUAT,
@@ -28,51 +24,46 @@ enum
 	BR_TRANSFORM_MAX
 };
 
-typedef struct br_transform
-{
+typedef struct br_transform {
 
 	/*
-	* Type of position
-	*/
+	 * Type of position
+	 */
 	br_uint_16 type;
 
 	/*
-	* Union of the various means of describing a transform -
-	* these are explicity arrranged so that any exlicit transform
-	* will always be available as br_transform.t.translate
-	*/
-	union
-	{
+	 * Union of the various means of describing a transform -
+	 * these are explicity arrranged so that any exlicit transform
+	 * will always be available as br_transform.t.translate
+	 */
+	union {
 		/*
-		* Affine 3x4 matrix
-		*/
+		 * Affine 3x4 matrix
+		 */
 		br_matrix34 mat;
 
 		/*
-		* Euler angles and translation
-		*/
-		struct
-		{
+		 * Euler angles and translation
+		 */
+		struct {
 			br_euler e;
 			br_scalar _pad[7];
 			br_vector3 t;
 		} euler;
 
 		/*
-		* Unit quaternion and translation
-		*/
-		struct
-		{
+		 * Unit quaternion and translation
+		 */
+		struct {
 			br_quat q;
 			br_scalar _pad[5];
 			br_vector3 t;
 		} quat;
 
 		/*
-		* Lookat vector, up vector and translation
-		*/
-		struct
-		{
+		 * Lookat vector, up vector and translation
+		 */
+		struct {
 			br_vector3 look;
 			br_vector3 up;
 			br_scalar _pad[3];
@@ -80,10 +71,9 @@ typedef struct br_transform
 		} look_up;
 
 		/*
-		* Just a translation
-		*/
-		struct
-		{
+		 * Just a translation
+		 */
+		struct {
 			br_scalar _pad[9];
 			br_vector3 t;
 		} translate;

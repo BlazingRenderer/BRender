@@ -1,18 +1,15 @@
 /*
-* Copyright (c) 1993-1995 by Argonaut Technologies Limited. All rights reserved.
-*
-* $Id: quat.h 2.2 1996/10/03 11:10:08 sam Exp $
-* $Locker: $
-*
-* Type descibing a unit quaternion
-*/
+ * Copyright (c) 1993-1995 by Argonaut Technologies Limited. All rights reserved.
+ *
+ * $Id: quat.h 1.1 1997/12/10 16:41:19 jon Exp $
+ * $Locker: $
+ *
+ * Type descibing a unit quaternion
+ */
 #ifndef _QUAT_H_
 #define _QUAT_H_
 
-#include "scalar.h"
-
-typedef struct br_quat
-{
+typedef struct br_quat {
 	br_scalar x;
 	br_scalar y;
 	br_scalar z;

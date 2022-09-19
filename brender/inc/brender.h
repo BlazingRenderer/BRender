@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 1993-1995 by Argonaut Technologies Limited. All rights reserved.
  *
- * $Id: brender.h 2.14 1996/12/13 12:07:33 sam Exp $
+ * $Id: brender.h 1.2 1998/11/12 13:19:07 johng Exp $
  * $Locker: $
  *
  * Master include file for BRender
@@ -18,9 +18,13 @@
 // #define __BRENDER__  BR_VERSION(1,3,0)
 #define __BRENDER__ 0x010300
 
+#ifndef _COMPILER_H_
 #include "compiler.h"
-#include "brlimits.h"
+#endif
 
+#ifndef _BRLIMITS_H_
+#include "brlimits.h"
+#endif
 
 /**
  ** Framework
@@ -54,15 +58,15 @@
  **/
 #ifndef _FIXED_H_
 #include "fixed.h"
-#endif		   
+#endif
 
 #ifndef _SCALAR_H_
 #include "scalar.h"
-#endif		   
+#endif
 
 #ifndef _COLOUR_H_
 #include "colour.h"
-#endif		   
+#endif
 
 #ifndef _MATRIX_H_
 #include "matrix.h"

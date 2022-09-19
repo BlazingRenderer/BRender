@@ -1,19 +1,17 @@
 /*
-* Copyright (c) 1992,1993-1995 by Argonaut Technologies Limited. All rights reserved.
-*
-* $Id: angles.h 2.5 1996/10/03 11:09:30 sam Exp $
-* $Locker: $
-*
-*/
+ * Copyright (c) 1992,1993-1995 by Argonaut Technologies Limited. All rights reserved.
+ *
+ * $Id: angles.h 1.2 1998/05/07 15:50:35 jon Exp $
+ * $Locker: $
+ *
+ */
 #ifndef _ANGLES_H_
 #define _ANGLES_H_
 
-#include "compiler.h"
-
 /*
-* Angles are alway 0.16 fixed point
-*/
-typedef br_uint_16 br_angle;
+ * Angles are always 0.16 fixed point
+ */
+typedef br_fixed_luf br_angle;
 
 #define BR_ANGLE_DEG(deg) ((br_angle)(long)((deg)*182))
 #define BR_ANGLE_RAD(rad) ((br_angle)(long)((rad)*10430))
@@ -36,73 +34,70 @@ typedef br_uint_16 br_angle;
 #define BR_ATAN2FAST(a,b)			BrRadianToAngle(atan2f((a),(b)))
 
 /*
-* Fields that go into br_euler.order
-*/
-enum
-{
-	BR_EULER_FIRST = 0x03,
-	BR_EULER_FIRST_X = 0x00,
-	BR_EULER_FIRST_Y = 0x01,
-	BR_EULER_FIRST_Z = 0x02,
+ * Fields that go into br_euler.order
+ */
+enum {
+	BR_EULER_FIRST			= 0x03,
+		BR_EULER_FIRST_X		= 0x00,
+		BR_EULER_FIRST_Y		= 0x01,
+		BR_EULER_FIRST_Z		= 0x02,
 
-	BR_EULER_PARITY = 0x04,
-	BR_EULER_PARITY_EVEN = 0x00,
-	BR_EULER_PARITY_ODD = 0x04,
+	BR_EULER_PARITY			= 0x04,
+		BR_EULER_PARITY_EVEN	= 0x00,
+		BR_EULER_PARITY_ODD		= 0x04,
 
-	BR_EULER_REPEAT = 0x08,
-	BR_EULER_REPEAT_NO = 0x00,
-	BR_EULER_REPEAT_YES = 0x08,
+	BR_EULER_REPEAT			= 0x08,
+		BR_EULER_REPEAT_NO		= 0x00,
+		BR_EULER_REPEAT_YES	= 0x08,
 
-	BR_EULER_FRAME = 0x10,
-	BR_EULER_FRAME_STATIC = 0x00,
-	BR_EULER_FRAME_ROTATING = 0x10
+	BR_EULER_FRAME			= 0x10,
+		BR_EULER_FRAME_STATIC	= 0x00,
+		BR_EULER_FRAME_ROTATING	= 0x10
 };
 
 /*
-* Various possible orders
-*/
+ * Various possible orders
+ */
 #define BR_EULER_ORDER(a,p,r,f)\
 	(BR_EULER_FIRST_##a |\
 	 BR_EULER_PARITY_##p |\
 	 BR_EULER_REPEAT_##r |\
 	 BR_EULER_FRAME_##f)
 
-enum
-{
-	BR_EULER_XYZ_S = BR_EULER_ORDER(X, EVEN, NO, STATIC),
-	BR_EULER_XYX_S = BR_EULER_ORDER(X, EVEN, YES, STATIC),
-	BR_EULER_XZY_S = BR_EULER_ORDER(X, ODD, NO, STATIC),
-	BR_EULER_XZX_S = BR_EULER_ORDER(X, ODD, YES, STATIC),
-	BR_EULER_YZX_S = BR_EULER_ORDER(Y, EVEN, NO, STATIC),
-	BR_EULER_YZY_S = BR_EULER_ORDER(Y, EVEN, YES, STATIC),
-	BR_EULER_YXZ_S = BR_EULER_ORDER(Y, ODD, NO, STATIC),
-	BR_EULER_YXY_S = BR_EULER_ORDER(Y, ODD, YES, STATIC),
-	BR_EULER_ZXY_S = BR_EULER_ORDER(Z, EVEN, NO, STATIC),
-	BR_EULER_ZXZ_S = BR_EULER_ORDER(Z, EVEN, YES, STATIC),
-	BR_EULER_ZYX_S = BR_EULER_ORDER(Z, ODD, NO, STATIC),
-	BR_EULER_ZYZ_S = BR_EULER_ORDER(Z, ODD, YES, STATIC),
+enum {
+	BR_EULER_XYZ_S = BR_EULER_ORDER(X,EVEN,NO ,STATIC  ),
+	BR_EULER_XYX_S = BR_EULER_ORDER(X,EVEN,YES,STATIC  ),
+	BR_EULER_XZY_S = BR_EULER_ORDER(X,ODD ,NO ,STATIC  ),
+	BR_EULER_XZX_S = BR_EULER_ORDER(X,ODD ,YES,STATIC  ),
+	BR_EULER_YZX_S = BR_EULER_ORDER(Y,EVEN,NO ,STATIC  ),
+	BR_EULER_YZY_S = BR_EULER_ORDER(Y,EVEN,YES,STATIC  ),
+	BR_EULER_YXZ_S = BR_EULER_ORDER(Y,ODD ,NO ,STATIC  ),
+	BR_EULER_YXY_S = BR_EULER_ORDER(Y,ODD ,YES,STATIC  ),
+	BR_EULER_ZXY_S = BR_EULER_ORDER(Z,EVEN,NO ,STATIC  ),
+	BR_EULER_ZXZ_S = BR_EULER_ORDER(Z,EVEN,YES,STATIC  ),
+	BR_EULER_ZYX_S = BR_EULER_ORDER(Z,ODD ,NO ,STATIC  ),
+	BR_EULER_ZYZ_S = BR_EULER_ORDER(Z,ODD ,YES,STATIC  ),
 
-	BR_EULER_ZYX_R = BR_EULER_ORDER(X, EVEN, NO, ROTATING),
-	BR_EULER_XYX_R = BR_EULER_ORDER(X, EVEN, YES, ROTATING),
-	BR_EULER_YZX_R = BR_EULER_ORDER(X, ODD, NO, ROTATING),
-	BR_EULER_XZX_R = BR_EULER_ORDER(X, ODD, YES, ROTATING),
-	BR_EULER_XZY_R = BR_EULER_ORDER(Y, EVEN, NO, ROTATING),
-	BR_EULER_YZY_R = BR_EULER_ORDER(Y, EVEN, YES, ROTATING),
-	BR_EULER_ZXY_R = BR_EULER_ORDER(Y, ODD, NO, ROTATING),
-	BR_EULER_YXY_R = BR_EULER_ORDER(Y, ODD, YES, ROTATING),
-	BR_EULER_YXZ_R = BR_EULER_ORDER(Z, EVEN, NO, ROTATING),
-	BR_EULER_ZXZ_R = BR_EULER_ORDER(Z, EVEN, YES, ROTATING),
-	BR_EULER_XYZ_R = BR_EULER_ORDER(Z, ODD, NO, ROTATING),
-	BR_EULER_ZYZ_R = BR_EULER_ORDER(Z, ODD, YES, ROTATING)
+	BR_EULER_ZYX_R = BR_EULER_ORDER(X,EVEN,NO ,ROTATING),
+	BR_EULER_XYX_R = BR_EULER_ORDER(X,EVEN,YES,ROTATING),
+	BR_EULER_YZX_R = BR_EULER_ORDER(X,ODD ,NO ,ROTATING),
+	BR_EULER_XZX_R = BR_EULER_ORDER(X,ODD ,YES,ROTATING),
+	BR_EULER_XZY_R = BR_EULER_ORDER(Y,EVEN,NO ,ROTATING),
+	BR_EULER_YZY_R = BR_EULER_ORDER(Y,EVEN,YES,ROTATING),
+	BR_EULER_ZXY_R = BR_EULER_ORDER(Y,ODD ,NO ,ROTATING),
+	BR_EULER_YXY_R = BR_EULER_ORDER(Y,ODD ,YES,ROTATING),
+	BR_EULER_YXZ_R = BR_EULER_ORDER(Z,EVEN,NO ,ROTATING),
+	BR_EULER_ZXZ_R = BR_EULER_ORDER(Z,EVEN,YES,ROTATING),
+	BR_EULER_XYZ_R = BR_EULER_ORDER(Z,ODD ,NO ,ROTATING),
+	BR_EULER_ZYZ_R = BR_EULER_ORDER(Z,ODD ,YES,ROTATING)
 };
 
 /*
-* A triple of euler angles and a description of how they are to
-* be applied - loosely based on -
-* 	"Euler Angle Conversion" Ken Shoemake, Graphics Gems IV pp. 222
-*/
-typedef struct br_euler
-{
+ * A triple of euler angles and a description of how they are to
+ * be applied - loosely based on -
+ * 	"Euler Angle Conversion" Ken Shoemake, Graphics Gems IV pp. 222
+ */
+typedef struct br_euler {
 	br_angle a;
 	br_angle b;
 	br_angle c;

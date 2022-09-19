@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 1993-1995 by Argonaut Technologies Limited. All rights reserved.
  *
- * $Id: light.h 2.4 1997/03/04 11:22:27 johng Exp $
+ * $Id: light.h 1.3 1998/06/17 16:11:46 jon Exp $
  * $Locker: $
  *
  * Definitons for a light
@@ -13,15 +13,15 @@ enum {
 	/*
 	 * Type of light
 	 */
-	BR_LIGHT_TYPE  = 0x0003,
-	 BR_LIGHT_POINT  = 0x0000,
- 	 BR_LIGHT_DIRECT = 0x0001,
-	 BR_LIGHT_SPOT   = 0x0002,
+	BR_LIGHT_TYPE    = 0x0003,
+	BR_LIGHT_POINT   = 0x0000,
+	BR_LIGHT_DIRECT  = 0x0001,
+	BR_LIGHT_SPOT    = 0x0002,
 	BR_LIGHT_AMBIENT = 0x0003,
 
 	/*
      * Flag indicating that calculations are done in view space
-     */ 
+     */
 	BR_LIGHT_VIEW  = 0x0004,
 
 	/*
@@ -83,8 +83,7 @@ typedef struct br_light {
 	 * Cutoff volumes
 	 */
 	br_light_volume volume;
-
-        void * user;
+	void * user;
 
 } br_light;
 

@@ -1,17 +1,27 @@
 /*
-* Copyright (c) 1993-1995 by Argonaut Technologies Limited. All rights reserved.
-*
-* $Id: scalar.h 2.10 1996/10/03 11:10:11 sam Exp $
-* $Locker: $
-*
-* Scalar type - 32 bit floating point
-*/
+ * Copyright (c) 1993-1995 by Argonaut Technologies Limited. All rights reserved.
+ *
+ * $Id: scalar.h 1.3 1998/07/01 19:31:26 jon Exp $
+ * $Locker: $
+ *
+ * Scalar type
+ *
+ * External defines:
+ *
+ * BASED_FIXED
+ *  True if system is based on signed 16.16 fixed point
+ *
+ * BASED_FLOAT
+ *  True if system is based on 32 bit floating point
+ *
+ * One of these must be defined and the appropriate libraries must be used
+ */
 #ifndef _SCALAR_H_
 #define _SCALAR_H_
 
 /**
-** Basic types - float
-**/
+ ** Basic types - float
+ **/
 #include <math.h>
 
 /*
@@ -28,15 +38,15 @@ typedef br_float br_ufraction;
 #define BR_SCALAR_TOKEN		BRT_FLOAT
 
 /*
-* Macros for static initialisation
-*/
+ * Macros for static initialisation
+ */
 #define BR_SCALAR(x)		((br_scalar)(x))
 #define BR_FRACTION(x)		((br_fraction)(x))
 #define BR_UFRACTION(x)		((br_ufraction)(x))
 
 /*
-* Macros for type conversion
-*/
+ * Macros for type conversion
+ */
 #define BrFloatToScalar(f)	(f)
 #define BrScalarToFloat(c)	(c)
 
@@ -53,8 +63,8 @@ typedef br_float br_ufraction;
 #define BrScalarToUFraction(s)	(s)
 
 /*
-* Various arithmetic operations
-*/
+ * Various arithmetic operations
+ */
 #define BR_ADD(a,b)				((a)+(b))
 #define BR_SUB(a,b)				((a)-(b))
 #define BR_MUL(a,b)				((a)*(b))
@@ -103,15 +113,15 @@ typedef br_float br_ufraction;
 #define BR_CEIL(a)				((br_scalar)ceilf(a))
 
 /*
-* Make sure PI is defined
-*/
+ * Make sure PI is defined
+ */
 #ifndef PI
 #define PI		3.14159265358979323846f
 #endif
 
 /*
-* Build independant types
-*/
+ * Build independant types
+ */
 typedef br_fixed_ls		br_scalar_x;
 typedef br_fixed_lsf	br_fraction_x;
 typedef br_fixed_luf	br_ufraction_x;
@@ -136,3 +146,4 @@ typedef br_float br_ufraction_f;
 #define BR_SCALAR_GT(a,b) (*(br_int_32 *)&(a) > *(br_int_32 *)&(b))
 
 #endif
+

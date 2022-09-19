@@ -1,16 +1,15 @@
 /*
-* Copyright (c) 1993-1995 by Argonaut Technologies Limited. All rights reserved.
-*
-* $Id: colour.h 2.5 1997/02/06 14:49:53 Johng Exp $
-* $Locker: $
-*
-* Colour type and macros
-*
-*/
+ * Copyright (c) 1993-1995 by Argonaut Technologies Limited. All rights reserved.
+ *
+ * $Id: colour.h 1.2 1998/11/13 16:22:33 jon Exp $
+ * $Locker: $
+ *
+ * Colour type and macros
+ *
+ */
 #ifndef _COLOUR_H_
 #define _COLOUR_H_
 
-#include "compiler.h"
 typedef br_uint_32 br_colour;
 
 /*
@@ -22,10 +21,9 @@ typedef br_uint_32 br_colour;
  *
  * Note that the range is always specified inclusively.
  */
-typedef struct br_colour_range
-{
-	br_colour low;
-	br_colour high;
+typedef struct br_colour_range {
+	br_uint_32 low;
+	br_uint_32 high;
 } br_colour_range;
 
 #define BR_COLOUR_RGB(r,g,b) \

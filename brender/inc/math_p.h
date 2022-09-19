@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 1993-1995 by Argonaut Technologies Limited. All rights reserved.
  *
- * $Id: math_p.h 2.6 1996/10/03 11:09:54 sam Exp $
+ * $Id: math_p.h 1.7 1998/10/16 10:33:15 johng Exp $
  * $Locker: $
  *
  * Public function prototypes for BRender maths support
@@ -15,7 +15,6 @@
 extern "C" {
 #endif
 
-#include <math.h>
 /**
  ** Fixed Point
  **/
@@ -70,7 +69,7 @@ br_fixed_ls BR_PUBLIC_ENTRY BrFixedSqr4(br_fixed_ls a,
 
 /* result = sqrt(a*a + b*b)
  */
-br_fixed_ls BrFixedLength2(br_fixed_ls a, br_fixed_ls b);
+br_fixed_ls BR_ASM_CALL BrFixedLength2(br_fixed_ls a, br_fixed_ls b);
 
 /* result = sqrt(a*a + b*b + c*c)
  */
@@ -100,7 +99,7 @@ br_fixed_ls BR_ASM_CALL BrFixedRLength3(br_fixed_ls a,
 br_fixed_ls BR_ASM_CALL BrFixedRLength4(br_fixed_ls a,
 										br_fixed_ls b,
 										br_fixed_ls c,
-										br_fixed_ls d);			
+										br_fixed_ls d);
 
 /* result = a/b
  */
@@ -114,7 +113,7 @@ br_fixed_ls BR_ASM_CALL BrFixedDivF(br_fixed_ls a, br_fixed_ls b);
  */
 br_fixed_ls BR_ASM_CALL BrFixedDivR(br_fixed_ls a, br_fixed_ls b);
 
-/* 
+/*
  */
 br_fixed_ls BR_ASM_CALL _FixedDivP(br_fixed_ls a, br_fixed_ls b);
 
@@ -207,19 +206,15 @@ void BR_PUBLIC_ENTRY BrMatrix34Post(br_matrix34 *mat, const br_matrix34 *A);
 void BR_PUBLIC_ENTRY BrMatrix34Identity(br_matrix34 *mat);
 
 void BR_PUBLIC_ENTRY BrMatrix34RotateX(br_matrix34 *mat, br_angle rx);
-
 void BR_PUBLIC_ENTRY BrMatrix34PreRotateX(br_matrix34 *mat, br_angle rx);
-
 void BR_PUBLIC_ENTRY BrMatrix34PostRotateX(br_matrix34 *mat, br_angle rx);
+
 void BR_PUBLIC_ENTRY BrMatrix34RotateY(br_matrix34 *mat, br_angle ry);
-
 void BR_PUBLIC_ENTRY BrMatrix34PreRotateY(br_matrix34 *mat, br_angle ry);
-
 void BR_PUBLIC_ENTRY BrMatrix34PostRotateY(br_matrix34 *mat, br_angle ry);
 
 void BR_PUBLIC_ENTRY BrMatrix34RotateZ(br_matrix34 *mat, br_angle rz);
 void BR_PUBLIC_ENTRY BrMatrix34PreRotateZ(br_matrix34 *mat, br_angle rz);
-
 void BR_PUBLIC_ENTRY BrMatrix34PostRotateZ(br_matrix34 *mat, br_angle rz);
 
 void BR_PUBLIC_ENTRY BrMatrix34Rotate(br_matrix34 *mat, br_angle r, const br_vector3 *axis);
@@ -228,11 +223,9 @@ void BR_PUBLIC_ENTRY BrMatrix34PostRotate(br_matrix34 *mat, br_angle r, const br
 
 void BR_PUBLIC_ENTRY BrMatrix34Translate(br_matrix34 *mat, br_scalar x, br_scalar y, br_scalar z);
 void BR_PUBLIC_ENTRY BrMatrix34PreTranslate(br_matrix34 *mat, br_scalar x, br_scalar y, br_scalar z);
-
 void BR_PUBLIC_ENTRY BrMatrix34PostTranslate(br_matrix34 *mat, br_scalar x, br_scalar y, br_scalar z);
 
 void BR_PUBLIC_ENTRY BrMatrix34Scale(br_matrix34 *mat, br_scalar sx, br_scalar sy, br_scalar sz);
-
 void BR_PUBLIC_ENTRY BrMatrix34PreScale(br_matrix34 *mat, br_scalar sx, br_scalar sy, br_scalar sz);
 
 void BR_PUBLIC_ENTRY BrMatrix34PostScale(br_matrix34 *mat, br_scalar sx, br_scalar sy, br_scalar sz);
@@ -250,9 +243,7 @@ void BR_PUBLIC_ENTRY BrMatrix34PreShearZ(br_matrix34 *mat, br_scalar sx, br_scal
 void BR_PUBLIC_ENTRY BrMatrix34PostShearZ(br_matrix34 *mat, br_scalar sx, br_scalar sy);
 
 void BR_PUBLIC_ENTRY BrMatrix34ApplyV(br_vector3 *A, const br_vector3 *B, const br_matrix34 *C);
-
 void BR_PUBLIC_ENTRY BrMatrix34ApplyP(br_vector3 *A, const br_vector3 *B, const br_matrix34 *C);
-
 void BR_PUBLIC_ENTRY BrMatrix34Apply(br_vector3 *A, const br_vector4 *B, const br_matrix34 *C);
 
 void BR_PUBLIC_ENTRY BrMatrix34TApplyV(br_vector3 *A, const br_vector3 *B, const br_matrix34 *C);
@@ -284,7 +275,7 @@ br_scalar BR_PUBLIC_ENTRY BrMatrix4Inverse(br_matrix4 *A, const br_matrix4 *B);
 void BR_PUBLIC_ENTRY BrMatrix4Adjoint(br_matrix4 *A, const br_matrix4 *B);
 br_scalar BR_PUBLIC_ENTRY BrMatrix4Determinant(const br_matrix4 *mat);
 
-void BR_PUBLIC_ENTRY BrMatrix4Perspective(br_matrix4 *mat, 
+void BR_PUBLIC_ENTRY BrMatrix4Perspective(br_matrix4 *mat,
 		br_angle field_of_view,
 		br_scalar aspect,
 		br_scalar hither,

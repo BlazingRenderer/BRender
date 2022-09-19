@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 1992,1993-1995 by Argonaut Technologies Limited. All rights reserved.
  *
- * $Id: brfont.h 2.3 1996/10/03 11:09:36 sam Exp $
+ * $Id: brfont.h 1.1 1997/12/10 16:41:16 jon Exp $
  * $Locker: $
  *
  */

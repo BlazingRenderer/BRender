@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 1993-1995 by Argonaut Technologies Limited. All rights reserved.
  *
- * $Id: syscn_p.h 1.2 1997/06/16 19:20:22 jon Exp $
+ * $Id: syscn_p.h 1.1 1997/12/10 16:41:19 jon Exp $
  * $Locker: $
  *
  * Public function prototypes for BRender framework

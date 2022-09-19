@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 1993-1995 by Argonaut Technologies Limited. All rights reserved.
  *
- * $Id: v1db_p.h 2.14 1997/07/14 18:08:05 jon Exp $
+ * $Id: v1db_p.h 1.8 1998/11/12 13:19:16 johng Exp $
  * $Locker: $
  *
  * Public function prototypes for BRender V1 database

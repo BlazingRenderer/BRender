@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 1993-1995 by Argonaut Technologies Limited. All rights reserved.
  *
- * $Id: actor.h 2.6 1997/04/15 15:39:11 TOMN Exp $
+ * $Id: actor.h 1.2 1998/06/09 17:29:25 johng Exp $
  * $Locker: $
  *
  * Definitons for an Actor

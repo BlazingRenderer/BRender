@@ -1,49 +1,49 @@
 /*
-* Copyright (c) 1993-1995 Argonaut Technologies Limited. All rights reserved.
-*
-* $Id: brerror.h 1.9 1996/11/25 15:29:27 STEVEW Exp $
-* $Locker: $
-*
-* Error type
-*/
+ * Copyright (c) 1993-1995 Argonaut Technologies Limited. All rights reserved.
+ *
+ * $Id: brerror.h 1.1 1997/12/10 16:41:15 jon Exp $
+ * $Locker: $
+ *
+ * Error type
+ */
 #ifndef _BRERR_H_
 #define _BRERR_H_
 
 /*
-* Error types are 32 bit integers, broken into four fields -
-*
-* Reserved Class    Subclass
-*
-* 33222222 22221111 1111110000000000
-* 10987654 32109876 5432109876543210
-*
-* A value of all zeros is reserved to indiciate no error
-*
-* Class indicates which part of Brender originated the error
-* Subclass indicates the particular error
-*/
+ * Error types are 32 bit integers, broken into four fields -
+ *
+ * Reserved Class    Subclass
+ *
+ * 33222222 22221111 1111110000000000
+ * 10987654 32109876 5432109876543210
+ *
+ * A value of all zeros is reserved to indiciate no error
+ *
+ * Class indicates which part of Brender originated the error
+ * Subclass indicates the particular error
+ */
 typedef br_uint_32 br_error;
 
 /*
-* OK error return
-*/
+ * OK error return
+ */
 #define BRE_OK	0x0
 
 
 /*
-* Make an error value from the seperate fields
-*/
+ * Make an error value from the seperate fields
+ */
 #define BR_ERROR_MAKE(klass,sub) ((klass) | (sub))
 
 /*
-* Extract fields from an error
-*/
+ * Extract fields from an error
+ */
 #define BR_ERROR_CLASS(error)    (error & 0xFF0000)
 #define BR_ERROR_SUBCLASS(error) (error & 0x00FFFF)
 
 /*
-* Defined error classes
-*/
+ * Defined error classes
+ */
 #define BR_ECLASS_NONE			0x0000
 #define BR_ECLASS_MISC			0x1000
 #define BR_ECLASS_APPLICATION	0x2000
@@ -57,8 +57,8 @@ typedef br_uint_32 br_error;
 #define BR_ECLASS_DEVICE		0xA000
 
 /*
-* Some generic error values
-*/
+ * Some generic error values
+ */
 #define BRE_UNKNOWN			BR_ERROR_MAKE(BR_ECLASS_MISC,1)
 #define BRE_FAIL			BR_ERROR_MAKE(BR_ECLASS_MISC,2)
 #define BRE_NO_MEMORY		BR_ERROR_MAKE(BR_ECLASS_MISC,3)

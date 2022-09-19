@@ -1,8 +1,8 @@
 /*
  * Copyright (c) 1993-1995 by Argonaut Technologies Limited. All rights reserved.
  *
- * $Id: material.h 2.17 1997/05/22 14:42:22 jon Exp ALISTAIR $
- * $Locker: ALISTAIR $
+ * $Id: material.h 1.12 1998/11/13 16:22:27 jon Exp $
+ * $Locker: $
  *
  * Describes the appearance of a material than can be applied to a surface
 	Last change:  TN    9 Apr 97    4:41 pm
@@ -205,7 +205,7 @@ enum {
 enum {
 	BR_MAPU_DATA			= 0x0001, // If this flag is ommitted the driver gets a chance to free the original (assuming KEEP_ORIGINAL not set) without doing any extra work.
 	BR_MAPU_ALL				= 0x0fff,
-	BR_MAPU_SHARED			= 0x8000
+	BR_MAPU_SHARED			= 0x8000,
 };
 
 /*

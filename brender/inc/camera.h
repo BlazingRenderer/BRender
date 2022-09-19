@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 1993-1995 by Argonaut Technologies Limited. All rights reserved.
  *
- * $Id: camera.h 2.5 1997/03/04 11:22:13 johng Exp $
+ * $Id: camera.h 1.1 1997/12/10 16:41:16 jon Exp $
  * $Locker: $
  *
  * Definitons for a camera

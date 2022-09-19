@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 1993-1995 by Argonaut Technologies Limited. All rights reserved.
  *
- * $Id: fw_p.h 2.22 1997/07/14 18:08:04 jon Exp $
+ * $Id: fw_p.h 1.2 1998/11/12 13:19:14 johng Exp $
  * $Locker: $
  *
  * Public function prototypes for BRender framework
@@ -22,7 +22,7 @@ extern "C" {
 br_error BR_PUBLIC_ENTRY BrBegin(void);
 br_error BR_PUBLIC_ENTRY BrEnd(void);
 
-/*f
+/*
  * Framework Setup
  */
 br_error BR_PUBLIC_ENTRY BrFwBegin(void);
@@ -58,7 +58,6 @@ void * BR_PUBLIC_ENTRY BrPoolBlockAllocate(struct br_pool *pool);
 void BR_PUBLIC_ENTRY BrPoolBlockFree(struct br_pool *pool,void *block);
 
 void BR_PUBLIC_ENTRY BrPoolEmpty(struct br_pool *pool);
-
 
 /*
  * Byte swapping

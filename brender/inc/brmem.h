@@ -1,65 +1,61 @@
 /*
-* Copyright (c) 1993-1995 by Argonaut Technologies Limited. All rights reserved.
-*
-* $Id: brmem.h 2.12 1996/10/03 11:09:39 sam Exp $
-* $Locker: $
-*
-* Brender's interface to memory allocation
-*/
+ * Copyright (c) 1993-1995 by Argonaut Technologies Limited. All rights reserved.
+ *
+ * $Id: brmem.h 1.1 1997/12/10 16:41:16 jon Exp $
+ * $Locker: $
+ *
+ * Brender's interface to memory allocation
+ */
 
 #ifndef _BRMEM_H_
 #define _BRMEM_H_
 
-#include "compiler.h"
-
 /*
-* Instance of a memory allocator
-*/
+ * Instance of a memory allocator
+ */
 typedef void * BR_CALLBACK brmem_allocate_cbfn(br_size_t size, br_uint_8 type);
 typedef void BR_CALLBACK brmem_free_cbfn(void *block);
 typedef	br_size_t BR_CALLBACK brmem_inquire_cbfn(br_uint_8 type);
 typedef	br_uint_32 BR_CALLBACK brmem_align_cbfn(br_uint_8 type);
 
-typedef struct br_allocator
-{
-	const char *identifier;
+typedef struct br_allocator {
+	char *identifier;
 
 	/*
-	* Allocate a new chunk of memory - must return the new pointer
-	* or handle the error itself
-	*/
+	 * Allocate a new chunk of memory - must return the new pointer
+	 * or handle the error itself
+	 */
 	brmem_allocate_cbfn *allocate;
 
 	/*
-	* Release previously allocated block
-	*/
+	 * Release previously allocated block
+	 */
 	brmem_free_cbfn *free;
 
 	/*
-	* Inquire as to the amount of memory available for a given type
-	*/
+	 * Inquire as to the amount of memory available for a given type
+	 */
 	brmem_inquire_cbfn *inquire;
 
 	/*
-	* Inquire as to the minimum alignment (in bytes) that allocations
-	* of the supplied type will have
-	*
-	* Assumed to be 1 is this pointer is NULL
-	*/
+	 * Inquire as to the minimum alignment (in bytes) that allocations
+	 * of the supplied type will have
+	 *
+	 * Assumed to be 1 is this pointer is NULL
+	 */
 	brmem_align_cbfn *align;
 
 } br_allocator;
 
 /*
-* Classes of resource that brender allocates
-*
-* Valid values are 1 to 255
-*/
-enum br_memory_classes
-{
+ * Classes of resource that brender allocates
+ *
+ * Valid values are 1 to 255
+ */
+enum br_memory_classes {
 	/*
-	* System classes
-	*/
+	 * System classes
+	 */
 	BR_MEMORY_SCRATCH = 1,
 	BR_MEMORY_PIXELMAP,
 	BR_MEMORY_PIXELS,
@@ -107,28 +103,27 @@ enum br_memory_classes
 	BR_MEMORY_TOKEN_TEMPLATE,
 
 	/*
-	* Marker for blocks being freed
-	*/
+	 * Marker for blocks being freed
+	 */
 	BR_MEMORY_FREE = 0x7f,
 
 	/*
-	* Application classes
-	*/
+	 * Application classes
+	 */
 	BR_MEMORY_APPLICATION = 0x80,
 
 	/*
-	* User defined classed are BR_MEMORY_APPLICATION + 1 ... 127
-	*/
+	 * User defined classed are BR_MEMORY_APPLICATION + 1 ... 127
+	 */
 	BR_MEMORY_MAX = 256
 };
 
 /*
-* A resource class structure
-*/
+ * A resource class structure
+ */
 typedef void BR_CALLBACK br_resourcefree_cbfn(void *res, br_uint_8 res_class, br_size_t size);
 
-typedef struct br_resource_class
-{
+typedef struct br_resource_class {
 	br_uint_32 reserved;
 	const char *identifier;
 	br_uint_8 res_class;

@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 1992,1993-1995 by Argonaut Technologies Limited. All rights reserved.
  *
- * $Id: vecfns.h 2.3 1996/10/03 11:10:16 sam Exp $
+ * $Id: vecfns.h 1.6 1998/11/03 16:06:43 jon Exp $
  * $Locker: $
  *
  * Inline versions of the vector operations (could do compiler specific
@@ -367,3 +367,4 @@
 } while(0)
 
 #endif
+

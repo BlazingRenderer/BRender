@@ -1,36 +1,44 @@
 /*
-* Copyright (c) 1993-1995 by Argonaut Technologies Limited. All rights reserved.
-*
-* $Id: brdiag.h 2.3 1996/10/03 11:09:32 sam Exp $
-* $Locker: $
-*
-* Brender's interface to diagnostic handling
-*/
+ * Copyright (c) 1993-1995 by Argonaut Technologies Limited. All rights reserved.
+ *
+ * $Id: brdiag.h 1.1 1997/12/10 16:41:15 jon Exp $
+ * $Locker: $
+ *
+ * Brender's interface to diagnostic handling
+ */
 
 #ifndef _BRDIAG_H_
 #define _BRDIAG_H_
 
-#include "compiler.h"
 /*
-* Instance of an error handler
-*/
+ * Instance of an error handler
+ */
 typedef void BR_CALLBACK br_diag_warning_cbfn(const char * message);
 typedef void BR_CALLBACK br_diag_failure_cbfn(const char * message);
 
-typedef struct br_diaghandler
-{
+typedef struct br_diaghandler {
 	const char *identifier;
 	br_diag_warning_cbfn *warning;
 	br_diag_failure_cbfn *failure;
 } br_diaghandler;
 
+/*
+ * For backwards compatibility
+ */
+typedef struct br_errorhandler {
+	const char *identifier;
+	br_diag_warning_cbfn *message;
+	br_diag_failure_cbfn *error;
+
+} br_errorhandler;
+
 /**
-** Macros for diagnostic generation
-**/
+ ** Macros for diagnostic generation
+ **/
 
 /*
-* Report message and exit - should not return to application
-*/
+ * Report message and exit - should not return to application
+ */
 #define BR_FAILURE(s) BrFailure(s)
 #define BR_FAILURE0(s) BrFailure(s)
 #define BR_FAILURE1(s,a) BrFailure(s,a)
@@ -41,8 +49,8 @@ typedef struct br_diaghandler
 #define BR_FAILURE6(s,a,b,c,d,e,f) BrFailure(s,a,b,c,d,e,f)
 
 /*
-* Report message and continue
-*/
+ * Report message and continue
+ */
 #define BR_WARNING(s) BrWarning(s)
 #define BR_WARNING0(s) BrWarning(s)
 #define BR_WARNING1(s,a) BrWarning(s,a)
@@ -53,8 +61,8 @@ typedef struct br_diaghandler
 #define BR_WARNING6(s,a,b,c,d,e,f) BrWarning(s,a,b,c,d,e,f)
 
 /*
-* Report message and exit, including source file and line number
-*/
+ * Report message and exit, including source file and line number
+ */
 #define BR_FATAL(s) BrFatal(__FILE__,__LINE__,s)
 #define BR_FATAL0(s) BrFatal(__FILE__,__LINE__,s)
 #define BR_FATAL1(s,a) BrFatal(__FILE__,__LINE__,s,a)
@@ -65,8 +73,8 @@ typedef struct br_diaghandler
 #define BR_FATAL6(s,a,b,c,d,e,f) BrFatal(__FILE__,__LINE__,s,a,b,c,d,e,f)
 
 /*
-* Backwards compatibility
-*/
+ * Backwards compatibility
+ */
 #define BR_ERROR(s) BrFailure(s)
 #define BR_ERROR0(s) BrFailure(s)
 #define BR_ERROR1(s,a) BrFailure(s,a)

@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 1993-1995 by Argonaut Technologies Limited. All rights reserved.
  *
- * $Id: render.h 2.7 1996/10/03 11:10:10 sam Exp $
+ * $Id: render.h 1.1 1997/12/10 16:41:19 jon Exp $
  * $Locker: $
  *
  * Standard declarations relating to renderers
@@ -25,7 +25,6 @@ enum {
 
 	BR_STATE_OUTPUT				= 0x40000000,
 	BR_STATE_PRIMITIVE			= 0x80000000,
-
 
 	BR_STATE_ALL				= 0xFFFFFFFF
 };

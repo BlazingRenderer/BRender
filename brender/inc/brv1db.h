@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 1993-1995 by Argonaut Technologies Limited. All rights reserved.
  *
- * $Id: brv1db.h 2.2 1996/10/03 11:09:40 sam Exp $
+ * $Id: brv1db.h 1.1 1997/12/10 16:41:16 jon Exp $
  * $Locker: $
  *
  * Master include file for BRender V1 Database

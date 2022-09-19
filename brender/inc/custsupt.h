@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 1993-1995 by Argonaut Technologies Limited. All rights reserved.
  *
- * $Id: custsupt.h 2.3 1996/10/03 11:09:45 sam Exp $
+ * $Id: custsupt.h 1.1 1997/12/10 16:41:17 jon Exp $
  * $Locker: $
  *
  * Definitions for support routines available during render callbacks

@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 1993-1995 by Argonaut Technologies Limited. All rights reserved.
  *
- * $Id: order.h 2.6 1997/04/17 11:22:05 JOHNG Exp $
+ * $Id: order.h 1.1 1997/12/10 16:41:18 jon Exp $
  * $Locker: $
  *
  * Definitions for order tables and primitives

@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 1993-1995 by Argonaut Technologies Limited. All rights reserved.
  *
- * $Id: brlimits.h 2.3 1996/10/03 11:09:37 sam Exp $
+ * $Id: brlimits.h 1.2 1998/07/01 19:35:08 jon Exp $
  * $Locker: $
  *
  * Various limits imposed by the renderer
