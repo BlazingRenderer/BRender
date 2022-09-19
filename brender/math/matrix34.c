@@ -103,26 +103,15 @@ void BR_PUBLIC_ENTRY BrMatrix34RotateX(br_matrix34 *mat, br_angle rx)
 	M(3,0) = S0; M(3,1) = S0; M(3,2) = S0;
 }
 
-void BR_PUBLIC_ENTRY BrMatrix34PreRotateX(br_matrix34 *mat, br_angle rx){
-	float s,c;
-	float t0,t1,t2;
-	if(rx==0)
-		return;
+void BR_PUBLIC_ENTRY BrMatrix34PreRotateX(br_matrix34 *mat, br_angle rx)
+{
+	br_matrix34 mattmp1,mattmp2;
 
-	s=BR_SIN(rx);
-	c=BR_COS(rx);
+	UASSERT_MESSAGE("Subject matrix is NULL", mat != NULL);
 
-	t0=mat->m[1][0];
-	t1=mat->m[1][1];
-	t2=mat->m[1][2];
-
-	mat->m[1][0]=c*mat->m[1][0]+s*mat->m[2][0];
-	mat->m[1][1]=c*mat->m[1][1]+s*mat->m[2][1];
-	mat->m[1][2]=c*mat->m[1][2]+s*mat->m[2][2];
-
-	mat->m[2][0]=-s*t0+c*mat->m[2][0];
-	mat->m[2][1]=-s*t1+c*mat->m[2][1];
-	mat->m[2][2]=-s*t2+c*mat->m[2][2];
+	BrMatrix34RotateX(&mattmp1,rx);
+	BrMatrix34Mul(&mattmp2,&mattmp1,mat);
+	BrMatrix34Copy(mat,&mattmp2);
 }
 
 void BR_PUBLIC_ENTRY BrMatrix34PostRotateX(br_matrix34 *mat, br_angle rx){
