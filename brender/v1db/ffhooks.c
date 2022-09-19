@@ -13,7 +13,7 @@ BR_RCS_ID("$Id: ffhooks.c 2.3 1996/12/12 16:33:41 sam Exp $")
 /*
  * Find Failed callbacks to automatically load textures & tables
  */
-br_pixelmap * BR_CALLBACK BrMapFindFailedLoad(char *name)
+br_pixelmap * BR_CALLBACK BrMapFindFailedLoad(const char *name)
 {
 	br_pixelmap *pm;
 
@@ -25,7 +25,7 @@ br_pixelmap * BR_CALLBACK BrMapFindFailedLoad(char *name)
 	return pm;
 }
 
-br_pixelmap * BR_CALLBACK BrTableFindFailedLoad(char *name)
+br_pixelmap * BR_CALLBACK BrTableFindFailedLoad(const char *name)
 {
 	br_pixelmap *pm;
 
@@ -37,7 +37,7 @@ br_pixelmap * BR_CALLBACK BrTableFindFailedLoad(char *name)
 	return pm;
 }
 
-br_model * BR_CALLBACK BrModelFindFailedLoad(char *name)
+br_model * BR_CALLBACK BrModelFindFailedLoad(const char *name)
 {
 	br_model *m;
 
@@ -49,7 +49,7 @@ br_model * BR_CALLBACK BrModelFindFailedLoad(char *name)
 	return m;
 }
 
-br_material * BR_CALLBACK BrMaterialFindFailedLoad(char *name)
+br_material * BR_CALLBACK BrMaterialFindFailedLoad(const char *name)
 {
 	br_material *m;
 

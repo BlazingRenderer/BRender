@@ -186,22 +186,22 @@ br_bounds * BR_PUBLIC_ENTRY BrActorToBounds( br_bounds *b, br_actor *ap);
 /*
  * File operations
  */
-br_model * BR_PUBLIC_ENTRY BrModelLoad(char *filename);
-br_uint_32 BR_PUBLIC_ENTRY BrModelSave(char *filename,br_model *model);
-br_uint_32 BR_PUBLIC_ENTRY BrModelLoadMany(char *filename,br_model **models,br_uint_16 num);
-br_uint_32 BR_PUBLIC_ENTRY BrModelSaveMany(char *filename,br_model **models,br_uint_16 num);
+br_model * BR_PUBLIC_ENTRY BrModelLoad(const char *filename);
+br_uint_32 BR_PUBLIC_ENTRY BrModelSave(const char *filename,br_model *model);
+br_uint_32 BR_PUBLIC_ENTRY BrModelLoadMany(const char *filename,br_model **models,br_uint_16 num);
+br_uint_32 BR_PUBLIC_ENTRY BrModelSaveMany(const char *filename,br_model **models,br_uint_16 num);
 br_error BR_PUBLIC_ENTRY BrModelFileCount(const char *filename, br_uint_16 *num);
 
-br_material * BR_PUBLIC_ENTRY BrMaterialLoad(char *filename);
-br_uint_32 BR_PUBLIC_ENTRY BrMaterialSave(char *filename,br_material *material);
-br_uint_32 BR_PUBLIC_ENTRY BrMaterialLoadMany(char *filename,br_material **materials,br_uint_16 num);
-br_uint_32 BR_PUBLIC_ENTRY BrMaterialSaveMany(char *filename,br_material **materials,br_uint_16 num);
+br_material * BR_PUBLIC_ENTRY BrMaterialLoad(const char *filename);
+br_uint_32 BR_PUBLIC_ENTRY BrMaterialSave(const char *filename,br_material *material);
+br_uint_32 BR_PUBLIC_ENTRY BrMaterialLoadMany(const char *filename,br_material **materials,br_uint_16 num);
+br_uint_32 BR_PUBLIC_ENTRY BrMaterialSaveMany(const char *filename,br_material **materials,br_uint_16 num);
 br_error BR_PUBLIC_ENTRY BrMaterialFileCount(const char *filename, br_uint_16 *num);
 
-br_actor * BR_PUBLIC_ENTRY BrActorLoad(char *filename);
-br_uint_32 BR_PUBLIC_ENTRY BrActorSave(char *filename, br_actor *actor);
-br_uint_32 BR_PUBLIC_ENTRY BrActorLoadMany(char *filename,br_actor **actors,br_uint_16 num);
-br_uint_32 BR_PUBLIC_ENTRY BrActorSaveMany(char *filename,br_actor **actors,br_uint_16 num);
+br_actor * BR_PUBLIC_ENTRY BrActorLoad(const char *filename);
+br_uint_32 BR_PUBLIC_ENTRY BrActorSave(const char *filename, br_actor *actor);
+br_uint_32 BR_PUBLIC_ENTRY BrActorLoadMany(const char *filename,br_actor **actors,br_uint_16 num);
+br_uint_32 BR_PUBLIC_ENTRY BrActorSaveMany(const char *filename,br_actor **actors,br_uint_16 num);
 br_error BR_PUBLIC_ENTRY BrActorFileCount(const char *filename, br_uint_16 *num);
 
 /*
@@ -314,10 +314,10 @@ void BR_PUBLIC_ENTRY BrScreenXYZToCamera(br_vector3* point,const br_actor* camer
  * Utility "FindFailed" callbacks that can be used to automaticaly load
  * models/materials/maps/tables from the filesystem
  */
-br_pixelmap * BR_CALLBACK BrMapFindFailedLoad(char *name);
-br_pixelmap * BR_CALLBACK BrTableFindFailedLoad(char *name);
-br_model * BR_CALLBACK BrModelFindFailedLoad(char *name);
-br_material * BR_CALLBACK BrMaterialFindFailedLoad(char *name);
+br_pixelmap * BR_CALLBACK BrMapFindFailedLoad(const char *name);
+br_pixelmap * BR_CALLBACK BrTableFindFailedLoad(const char *name);
+br_model * BR_CALLBACK BrModelFindFailedLoad(const char *name);
+br_material * BR_CALLBACK BrMaterialFindFailedLoad(const char *name);
 
 /*
  * Backwards comaptibility

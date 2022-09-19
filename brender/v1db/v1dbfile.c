@@ -1528,7 +1528,7 @@ STATIC br_chunks_table ModelLoadTable = {
 	ModelLoadEntries,
 };
 
-br_uint_32 BR_PUBLIC_ENTRY BrModelLoadMany(char *filename,br_model **models,br_uint_16 num)
+br_uint_32 BR_PUBLIC_ENTRY BrModelLoadMany(const char *filename,br_model **models,br_uint_16 num)
 {
 	int	count;
 	int r;
@@ -1670,7 +1670,7 @@ STATIC br_uint_32 BR_CALLBACK WriteModel(br_model *mp, br_datafile *df)
  *
  * if models == NULL, then all registered models are saved
  */
-br_uint_32 BR_PUBLIC_ENTRY BrModelSaveMany(char *filename,br_model **models,br_uint_16 num)
+br_uint_32 BR_PUBLIC_ENTRY BrModelSaveMany(const char *filename,br_model **models,br_uint_16 num)
 {
 	br_datafile *df;
 	int i,m=0;
@@ -1738,7 +1738,7 @@ STATIC br_chunks_table ActorLoadTable = {
 	ActorLoadEntries,
 };
 
-br_uint_32 BR_PUBLIC_ENTRY BrActorLoadMany(char *filename, br_actor **actors, br_uint_16 num)
+br_uint_32 BR_PUBLIC_ENTRY BrActorLoadMany(const char *filename, br_actor **actors, br_uint_16 num)
 {
 	br_datafile *df;
 	int	count;
@@ -1867,7 +1867,7 @@ STATIC int WriteActor(br_actor *a, br_datafile *df)
 /*
  * Save a set of actors to the named file.
  */
-br_uint_32 BR_PUBLIC_ENTRY BrActorSaveMany(char *filename, br_actor **actors, br_uint_16 num)
+br_uint_32 BR_PUBLIC_ENTRY BrActorSaveMany(const char *filename, br_actor **actors, br_uint_16 num)
 {
 	br_datafile *df;
 	int i;
@@ -1914,7 +1914,7 @@ STATIC br_chunks_table MaterialLoadTable = {
 	MaterialLoadEntries,
 };
 
-br_uint_32 BR_PUBLIC_ENTRY BrMaterialLoadMany(char *filename,br_material **materials,br_uint_16 num)
+br_uint_32 BR_PUBLIC_ENTRY BrMaterialLoadMany(const char *filename,br_material **materials,br_uint_16 num)
 {
 	br_datafile *df;
 	int	count;
@@ -1976,7 +1976,7 @@ STATIC br_uint_32 BR_CALLBACK WriteMaterial(br_material *mp, br_datafile *df)
 	return 0;
 }
 
-br_uint_32 BR_PUBLIC_ENTRY BrMaterialSaveMany(char *filename,br_material **materials,br_uint_16 num)
+br_uint_32 BR_PUBLIC_ENTRY BrMaterialSaveMany(const char *filename,br_material **materials,br_uint_16 num)
 {
 	br_datafile *df;
 	int i,count;
@@ -2006,38 +2006,38 @@ br_uint_32 BR_PUBLIC_ENTRY BrMaterialSaveMany(char *filename,br_material **mater
 }
 
 
-br_model * BR_PUBLIC_ENTRY BrModelLoad(char *filename)
+br_model * BR_PUBLIC_ENTRY BrModelLoad(const char *filename)
 {
 	br_model *ptr;
 
 	return (BrModelLoadMany(filename,&ptr,1) != 1)?NULL:ptr;
 }
 
-br_uint_32 BR_PUBLIC_ENTRY BrModelSave(char *filename, br_model *ptr)
+br_uint_32 BR_PUBLIC_ENTRY BrModelSave(const char *filename, br_model *ptr)
 {
 	return BrModelSaveMany(filename,&ptr,1);
 }
 
-br_material * BR_PUBLIC_ENTRY BrMaterialLoad(char *filename)
+br_material * BR_PUBLIC_ENTRY BrMaterialLoad(const char *filename)
 {
 	br_material *ptr;
 
 	return (BrMaterialLoadMany(filename,&ptr,1) != 1)?NULL:ptr;
 }
 
-br_uint_32 BR_PUBLIC_ENTRY BrMaterialSave(char *filename, br_material *ptr)
+br_uint_32 BR_PUBLIC_ENTRY BrMaterialSave(const char *filename, br_material *ptr)
 {
 	return BrMaterialSaveMany(filename,&ptr,1);
 }
 
-br_actor * BR_PUBLIC_ENTRY BrActorLoad(char *filename)
+br_actor * BR_PUBLIC_ENTRY BrActorLoad(const char *filename)
 {
 	br_actor *ptr;
 
 	return (BrActorLoadMany(filename,&ptr,1) != 1)?NULL:ptr;
 }
 
-br_uint_32 BR_PUBLIC_ENTRY BrActorSave(char *filename, br_actor *ptr)
+br_uint_32 BR_PUBLIC_ENTRY BrActorSave(const char *filename, br_actor *ptr)
 {
 	return BrActorSaveMany(filename,&ptr,1);
 }
