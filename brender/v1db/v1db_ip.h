@@ -36,6 +36,7 @@ void BrMaterialClear(br_material *mat);
  * prepmesh.c
  */
 void BrModelClear(br_model *model);
+void BrModelClearPrepared(br_model *model);
 
 /*
  * enables.c

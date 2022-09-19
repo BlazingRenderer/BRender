@@ -1078,3 +1078,11 @@ void BrModelClear(struct br_model *model)
 		model->stored = NULL;
 	}
 }
+
+void BrModelClearPrepared(struct br_model *model)
+{
+	if(model->prepared) {
+		BrResFree(model->prepared);
+		model->prepared = NULL;
+	}
+}
