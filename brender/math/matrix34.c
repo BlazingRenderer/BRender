@@ -1026,10 +1026,15 @@ void BR_PUBLIC_ENTRY BrMatrix34PreTranslate(br_matrix34 *mat, br_scalar x, br_sc
 	BrMatrix34Copy(mat,&mattmp2);
 }
 
-void BR_PUBLIC_ENTRY BrMatrix34PostTranslate(br_matrix34 *mat, br_scalar x, br_scalar y, br_scalar z){
-	mat->m[3][0]+=x;
-	mat->m[3][1]+=y;
-	mat->m[3][2]+=z;
+void BR_PUBLIC_ENTRY BrMatrix34PostTranslate(br_matrix34 *mat, br_scalar x, br_scalar y, br_scalar z)
+{
+	br_matrix34 mattmp1,mattmp2;
+
+	UASSERT_MESSAGE("Subject matrix is NULL", mat != NULL);
+
+	BrMatrix34Translate(&mattmp1,x,y,z);
+	BrMatrix34Mul(&mattmp2,mat,&mattmp1);
+	BrMatrix34Copy(mat,&mattmp2);
 }
 
 void BR_PUBLIC_ENTRY BrMatrix34PreShearX(br_matrix34 *mat, br_scalar sy, br_scalar sz)
