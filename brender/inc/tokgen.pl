@@ -100,7 +100,7 @@ close(STDOUT);
 
 # Predefined table
 #
-open(STDOUT,">pretok_c.h");
+open(STDOUT,">pretok.c");
 
 foreach $t (sort(keys %token_val)) {
 	$len = length($t) - length($type_ext{$token_val{$t}});

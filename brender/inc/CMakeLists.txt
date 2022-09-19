@@ -2,14 +2,14 @@ project(inc)
 
 # Generate pretok.h, pretok_c.h, and toktype.c
 add_custom_command(
-	OUTPUT pretok.h pretok_c.h toktype.c
+	OUTPUT pretok.h pretok.c toktype.c
 	COMMAND "${PERL_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/tokgen.pl" "${CMAKE_CURRENT_SOURCE_DIR}/pretok.tok"
 	MAIN_DEPENDENCY "${CMAKE_CURRENT_SOURCE_DIR}/pretok.tok"
 	DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/tokgen.pl"
 )
 set(INC_TOKEN_FILES
 	${CMAKE_CURRENT_BINARY_DIR}/pretok.h
-	${CMAKE_CURRENT_BINARY_DIR}/pretok_c.h
+	${CMAKE_CURRENT_BINARY_DIR}/pretok.c
 	${CMAKE_CURRENT_BINARY_DIR}/toktype.c
 	${CMAKE_CURRENT_SOURCE_DIR}/pretok.tok
 	${CMAKE_CURRENT_SOURCE_DIR}/tokgen.pl

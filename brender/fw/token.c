@@ -26,7 +26,7 @@ typedef struct br_token_entry {
  * Predefined entries
  */
 static br_token_entry predefinedTokens[] = {
-#include "pretok_c.h"
+#include "pretok.c"
 };
 
 /*
