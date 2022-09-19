@@ -103,28 +103,6 @@ void BR_PUBLIC_ENTRY BrMatrix34RotateX(br_matrix34 *mat, br_angle rx)
 	M(3,0) = S0; M(3,1) = S0; M(3,2) = S0;
 }
 
-void BR_PUBLIC_ENTRY BrMatrix34PreRotateX(br_matrix34 *mat, br_angle rx)
-{
-	br_matrix34 mattmp1,mattmp2;
-
-	UASSERT_MESSAGE("Subject matrix is NULL", mat != NULL);
-
-	BrMatrix34RotateX(&mattmp1,rx);
-	BrMatrix34Mul(&mattmp2,&mattmp1,mat);
-	BrMatrix34Copy(mat,&mattmp2);
-}
-
-void BR_PUBLIC_ENTRY BrMatrix34PostRotateX(br_matrix34 *mat, br_angle rx)
-{
-	br_matrix34 mattmp1,mattmp2;
-
-	UASSERT_MESSAGE("Subject matrix is NULL", mat != NULL);
-
-	BrMatrix34RotateX(&mattmp1,rx);
-	BrMatrix34Mul(&mattmp2,mat,&mattmp1);
-	BrMatrix34Copy(mat,&mattmp2);
-}
-
 /*
  *         ┌                  ┐
  *         │ cosθ  0 -sinθ  0 │
@@ -149,28 +127,6 @@ void BR_PUBLIC_ENTRY BrMatrix34RotateY(br_matrix34 *mat, br_angle ry)
 	M(3,0) = S0; M(3,1) = S0; M(3,2) = S0;
 }
 
-void BR_PUBLIC_ENTRY BrMatrix34PreRotateY(br_matrix34 *mat, br_angle ry)
-{
-	br_matrix34 mattmp1,mattmp2;
-
-	UASSERT_MESSAGE("Subject matrix is NULL", mat != NULL);
-
-    BrMatrix34RotateY(&mattmp1,ry);
-	BrMatrix34Mul(&mattmp2,&mattmp1,mat);
-	BrMatrix34Copy(mat,&mattmp2);
-}
-
-void BR_PUBLIC_ENTRY BrMatrix34PostRotateY(br_matrix34 *mat, br_angle ry)
-{
-	br_matrix34 mattmp1,mattmp2;
-
-	UASSERT_MESSAGE("Subject matrix is NULL", mat != NULL);
-
-	BrMatrix34RotateY(&mattmp1,ry);
-	BrMatrix34Mul(&mattmp2,mat,&mattmp1);
-	BrMatrix34Copy(mat,&mattmp2);
-}
-
 /*
  *         ┌                   ┐
  *         │  cosθ  sinθ  0  0 │
@@ -193,28 +149,6 @@ void BR_PUBLIC_ENTRY BrMatrix34RotateZ(br_matrix34 *mat, br_angle rz)
 	M(1,0) = -s; M(1,1) =  c; M(1,2) = S0;
 	M(2,0) = S0; M(2,1) = S0; M(2,2) = S1;
 	M(3,0) = S0; M(3,1) = S0; M(3,2) = S0;
-}
-
-void BR_PUBLIC_ENTRY BrMatrix34PreRotateZ(br_matrix34 *mat, br_angle rz)
-{
-	br_matrix34 mattmp1,mattmp2;
-
-	UASSERT_MESSAGE("Subject matrix is NULL", mat != NULL);
-
-	BrMatrix34RotateZ(&mattmp1,rz);
-	BrMatrix34Mul(&mattmp2,&mattmp1,mat);
-	BrMatrix34Copy(mat,&mattmp2);
-}
-
-void BR_PUBLIC_ENTRY BrMatrix34PostRotateZ(br_matrix34 *mat, br_angle rz)
-{
-	br_matrix34 mattmp1,mattmp2;
-
-	UASSERT_MESSAGE("Subject matrix is NULL", mat != NULL);
-
-	BrMatrix34RotateZ(&mattmp1,rz);
-	BrMatrix34Mul(&mattmp2,mat,&mattmp1);
-	BrMatrix34Copy(mat,&mattmp2);
 }
 
 /*
@@ -288,29 +222,6 @@ void BR_PUBLIC_ENTRY BrMatrix34Scale(br_matrix34 *mat, br_scalar sx, br_scalar s
 	M(1,0) = S0; M(1,1) = sy; M(1,2) = S0;
 	M(2,0) = S0; M(2,1) = S0; M(2,2) = sz;
 	M(3,0) = S0; M(3,1) = S0; M(3,2) = S0;
-}
-
-
-void BR_PUBLIC_ENTRY BrMatrix34PreScale(br_matrix34 *mat, br_scalar sx, br_scalar sy, br_scalar sz)
-{
-	br_matrix34 mattmp1,mattmp2;
-
-	UASSERT_MESSAGE("Subject matrix is NULL", mat != NULL);
-
-	BrMatrix34Scale(&mattmp1,sx,sy,sz);
-	BrMatrix34Mul(&mattmp2,&mattmp1,mat);
-	BrMatrix34Copy(mat,&mattmp2);
-}
-
-void BR_PUBLIC_ENTRY BrMatrix34PostScale(br_matrix34 *mat, br_scalar sx, br_scalar sy, br_scalar sz)
-{
-	br_matrix34 mattmp1,mattmp2;
-
-	UASSERT_MESSAGE("Subject matrix is NULL", mat != NULL);
-
-	BrMatrix34Scale(&mattmp1,sx,sy,sz);
-	BrMatrix34Mul(&mattmp2,mat,&mattmp1);
-	BrMatrix34Copy(mat,&mattmp2);
 }
 
 /*
@@ -829,6 +740,36 @@ void BR_PUBLIC_ENTRY BrMatrix34Apply(br_vector3 *A, const br_vector4 *B, const b
 }
 
 /*
+ * [a b c ] = [ e f g ] . M
+ */
+void BR_PUBLIC_ENTRY BrMatrix34ApplyP(br_vector3 *A, const br_vector3 *B, const br_matrix34 *C)
+{
+	UASSERT_MESSAGE("Destination Vector is NULL", A != NULL);
+	UASSERT_MESSAGE("Source Vector is NULL", B != NULL);
+	UASSERT_MESSAGE("Transform Matrix is NULL", C != NULL);
+	UASSERT_MESSAGE("Source and Destination vector may not be the same.", A != B);	UASSERT_MESSAGE("Source and Destination vector may not be the same.", A != B);	UASSERT_MESSAGE("Source and Destination vector may not be the same.", A != B);
+
+	A->v[0] = BR_MAC3(B->v[0],C(0,0), B->v[1],C(1,0), B->v[2],C(2,0)) + C(3,0);
+	A->v[1] = BR_MAC3(B->v[0],C(0,1), B->v[1],C(1,1), B->v[2],C(2,1)) + C(3,1);
+	A->v[2] = BR_MAC3(B->v[0],C(0,2), B->v[1],C(1,2), B->v[2],C(2,2)) + C(3,2);
+}
+
+/*
+ * [a b c d] = [ e f g 0 ] . M
+ */
+void BR_PUBLIC_ENTRY BrMatrix34ApplyV(br_vector3 *A, const br_vector3 *B, const br_matrix34 *C)
+{
+	UASSERT_MESSAGE("Destination Vector is NULL", A != NULL);
+	UASSERT_MESSAGE("Source Vector is NULL", B != NULL);
+	UASSERT_MESSAGE("Transform Matrix is NULL", C != NULL);
+	UASSERT_MESSAGE("Source and Destination vector may not be the same.", A != B);	UASSERT_MESSAGE("Source and Destination vector may not be the same.", A != B);	UASSERT_MESSAGE("Source and Destination vector may not be the same.", A != B);
+
+	A->v[0] = BR_MAC3(B->v[0],C(0,0), B->v[1],C(1,0), B->v[2],C(2,0));
+	A->v[1] = BR_MAC3(B->v[0],C(0,1), B->v[1],C(1,1), B->v[2],C(2,1));
+	A->v[2] = BR_MAC3(B->v[0],C(0,2), B->v[1],C(1,2), B->v[2],C(2,2));
+}
+
+/*
  * vec_a = vec_b * transpose(M)
  */
 void BR_PUBLIC_ENTRY BrMatrix34TApply(br_vector4 *A, const br_vector4 *B, const br_matrix34 *C)
@@ -910,6 +851,72 @@ void BR_PUBLIC_ENTRY BrMatrix34Post(br_matrix34 *mat , const br_matrix34 *A)
 	BrMatrix34Copy(mat,&mattmp);
 }
 
+void BR_PUBLIC_ENTRY BrMatrix34PreRotateX(br_matrix34 *mat, br_angle rx)
+{
+	br_matrix34 mattmp1,mattmp2;
+
+	UASSERT_MESSAGE("Subject matrix is NULL", mat != NULL);
+
+	BrMatrix34RotateX(&mattmp1,rx);
+	BrMatrix34Mul(&mattmp2,&mattmp1,mat);
+	BrMatrix34Copy(mat,&mattmp2);
+}
+
+void BR_PUBLIC_ENTRY BrMatrix34PostRotateX(br_matrix34 *mat, br_angle rx)
+{
+	br_matrix34 mattmp1,mattmp2;
+
+	UASSERT_MESSAGE("Subject matrix is NULL", mat != NULL);
+
+	BrMatrix34RotateX(&mattmp1,rx);
+	BrMatrix34Mul(&mattmp2,mat,&mattmp1);
+	BrMatrix34Copy(mat,&mattmp2);
+}
+
+void BR_PUBLIC_ENTRY BrMatrix34PreRotateY(br_matrix34 *mat, br_angle ry)
+{
+	br_matrix34 mattmp1,mattmp2;
+
+	UASSERT_MESSAGE("Subject matrix is NULL", mat != NULL);
+
+    BrMatrix34RotateY(&mattmp1,ry);
+	BrMatrix34Mul(&mattmp2,&mattmp1,mat);
+	BrMatrix34Copy(mat,&mattmp2);
+}
+
+void BR_PUBLIC_ENTRY BrMatrix34PostRotateY(br_matrix34 *mat, br_angle ry)
+{
+	br_matrix34 mattmp1,mattmp2;
+
+	UASSERT_MESSAGE("Subject matrix is NULL", mat != NULL);
+
+	BrMatrix34RotateY(&mattmp1,ry);
+	BrMatrix34Mul(&mattmp2,mat,&mattmp1);
+	BrMatrix34Copy(mat,&mattmp2);
+}
+
+void BR_PUBLIC_ENTRY BrMatrix34PreRotateZ(br_matrix34 *mat, br_angle rz)
+{
+	br_matrix34 mattmp1,mattmp2;
+
+	UASSERT_MESSAGE("Subject matrix is NULL", mat != NULL);
+
+	BrMatrix34RotateZ(&mattmp1,rz);
+	BrMatrix34Mul(&mattmp2,&mattmp1,mat);
+	BrMatrix34Copy(mat,&mattmp2);
+}
+
+void BR_PUBLIC_ENTRY BrMatrix34PostRotateZ(br_matrix34 *mat, br_angle rz)
+{
+	br_matrix34 mattmp1,mattmp2;
+
+	UASSERT_MESSAGE("Subject matrix is NULL", mat != NULL);
+
+	BrMatrix34RotateZ(&mattmp1,rz);
+	BrMatrix34Mul(&mattmp2,mat,&mattmp1);
+	BrMatrix34Copy(mat,&mattmp2);
+}
+
 void BR_PUBLIC_ENTRY BrMatrix34PreRotate(br_matrix34 *mat, br_angle r, const br_vector3 *axis)
 {
 	br_matrix34 mattmp1,mattmp2;
@@ -950,6 +957,28 @@ void BR_PUBLIC_ENTRY BrMatrix34PostTranslate(br_matrix34 *mat, br_scalar x, br_s
 	UASSERT_MESSAGE("Subject matrix is NULL", mat != NULL);
 
 	BrMatrix34Translate(&mattmp1,x,y,z);
+	BrMatrix34Mul(&mattmp2,mat,&mattmp1);
+	BrMatrix34Copy(mat,&mattmp2);
+}
+
+void BR_PUBLIC_ENTRY BrMatrix34PreScale(br_matrix34 *mat, br_scalar sx, br_scalar sy, br_scalar sz)
+{
+	br_matrix34 mattmp1,mattmp2;
+
+	UASSERT_MESSAGE("Subject matrix is NULL", mat != NULL);
+
+	BrMatrix34Scale(&mattmp1,sx,sy,sz);
+	BrMatrix34Mul(&mattmp2,&mattmp1,mat);
+	BrMatrix34Copy(mat,&mattmp2);
+}
+
+void BR_PUBLIC_ENTRY BrMatrix34PostScale(br_matrix34 *mat, br_scalar sx, br_scalar sy, br_scalar sz)
+{
+	br_matrix34 mattmp1,mattmp2;
+
+	UASSERT_MESSAGE("Subject matrix is NULL", mat != NULL);
+
+	BrMatrix34Scale(&mattmp1,sx,sy,sz);
 	BrMatrix34Mul(&mattmp2,mat,&mattmp1);
 	BrMatrix34Copy(mat,&mattmp2);
 }
@@ -1018,34 +1047,4 @@ void BR_PUBLIC_ENTRY BrMatrix34PostShearZ(br_matrix34 *mat, br_scalar sx, br_sca
 	BrMatrix34ShearZ(&mattmp1,sx,sy);
 	BrMatrix34Mul(&mattmp2,mat,&mattmp1);
 	BrMatrix34Copy(mat,&mattmp2);
-}
-
-/*
- * [a b c d] = [ e f g 0 ] . M
- */
-void BR_PUBLIC_ENTRY BrMatrix34ApplyV(br_vector3 *A, const br_vector3 *B, const br_matrix34 *C)
-{
-	UASSERT_MESSAGE("Destination Vector is NULL", A != NULL);
-	UASSERT_MESSAGE("Source Vector is NULL", B != NULL);
-	UASSERT_MESSAGE("Transform Matrix is NULL", C != NULL);
-	UASSERT_MESSAGE("Source and Destination vector may not be the same.", A != B);
-
-	A->v[0] = BR_MAC3(B->v[0],C(0,0), B->v[1],C(1,0), B->v[2],C(2,0));
-	A->v[1] = BR_MAC3(B->v[0],C(0,1), B->v[1],C(1,1), B->v[2],C(2,1));
-	A->v[2] = BR_MAC3(B->v[0],C(0,2), B->v[1],C(1,2), B->v[2],C(2,2));
-}
-
-/*
- * [a b c ] = [ e f g ] . M
- */
-void BR_PUBLIC_ENTRY BrMatrix34ApplyP(br_vector3 *A, const br_vector3 *B, const br_matrix34 *C)
-{
-	UASSERT_MESSAGE("Destination Vector is NULL", A != NULL);
-	UASSERT_MESSAGE("Source Vector is NULL", B != NULL);
-	UASSERT_MESSAGE("Transform Matrix is NULL", C != NULL);
-	UASSERT_MESSAGE("Source and Destination vector may not be the same.", A != B);
-
-	A->v[0] = BR_MAC3(B->v[0],C(0,0), B->v[1],C(1,0), B->v[2],C(2,0)) + C(3,0);
-	A->v[1] = BR_MAC3(B->v[0],C(0,1), B->v[1],C(1,1), B->v[2],C(2,1)) + C(3,1);
-	A->v[2] = BR_MAC3(B->v[0],C(0,2), B->v[1],C(1,2), B->v[2],C(2,2)) + C(3,2);
 }
