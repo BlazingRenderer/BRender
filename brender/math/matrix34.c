@@ -840,6 +840,48 @@ void BR_PUBLIC_ENTRY BrMatrix34Copy4(br_matrix34 *A, const br_matrix4 *B)
 }
 
 /*
+ * Transform a bounding box into another bounding box
+ *
+ * based on "Transforming Axis-Aligned Bounding Boxes" by James Avro -
+ * Gems I, page 548
+ */
+void BR_PUBLIC_ENTRY BrMatrix34ApplyBounds(br_bounds *A, const br_bounds *B, const br_matrix34 *C)
+{
+	int i,j;
+	br_scalar a,b;
+
+	ASSERT_MESSAGE("NULL pointer to the bounding box", A != NULL);
+	ASSERT_MESSAGE("NULL pointer to the bounding box", B != NULL);
+	ASSERT(C != NULL);
+
+	/*
+	 * Start with translation part
+	 */
+	A->min.v[0] = A->max.v[0] = C->m[3][0];
+	A->min.v[1] = A->max.v[1] = C->m[3][1];
+	A->min.v[2] = A->max.v[2] = C->m[3][2];
+
+	/*
+	 * Add in extreme values obtained by computing the products
+	 * of the min and maxes with the elements of the i'th row
+	 * of the matrix
+	 */
+	for( i = 0; i < 3; i++ ) {
+	    for( j = 0; j < 3; j++ ) {
+			a = BR_MUL(C->m[j][i], B->min.v[j]);
+			b = BR_MUL(C->m[j][i], B->max.v[j]);
+			if( a < b ) {
+				A->min.v[i] += a;
+				A->max.v[i] += b;
+			} else {
+				A->min.v[i] += b;
+				A->max.v[i] += a;
+			}
+		}
+	}
+}
+
+/*
  * [a b c d] = [ e f g 0 ] . transpose(M)
  * (unit vector)
  *

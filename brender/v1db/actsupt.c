@@ -698,47 +698,6 @@ void BR_PUBLIC_ENTRY BrActorToScreenMatrix4(br_matrix4 *m, br_actor *a, br_actor
 			BrMatrix4Pre34(m,&a2c);
 	}
 }
-/*
- * Transform a bounding box into another bounding box
- *
- * based on "Transforming Axis-Aligned Bounding Boxes" by James Avro -
- * Gems I, page 548
- */
-STATIC void BrMatrix34ApplyBounds(br_bounds *d, br_bounds *s, br_matrix34 *m)
-{
-	int i,j;
-	br_scalar a,b;
-
-        ASSERT_MESSAGE("NULL pointer to the bounding box", d != NULL);
-        ASSERT_MESSAGE("NULL pointer to the bounding box", s != NULL);
-        ASSERT(m != NULL);
-
-	/*
-	 * Start with translation part
-	 */
-	d->min.v[0] = d->max.v[0] = m->m[3][0];
-	d->min.v[1] = d->max.v[1] = m->m[3][1];
-	d->min.v[2] = d->max.v[2] = m->m[3][2];
-
-	/*
-	 * Add in extreme values obtained by computing the products
-	 * of the min and maxes with the elements of the i'th row
-	 * of the matrix
-	 */
-	for( i = 0; i < 3; i++ ) {
-	    for( j = 0; j < 3; j++ ) {
-			a = BR_MUL(m->m[j][i], s->min.v[j]);
-			b = BR_MUL(m->m[j][i], s->max.v[j]);
-			if( a < b ) {
-				d->min.v[i] += a; 
-				d->max.v[i] += b;
-			} else {
-				d->min.v[i] += b; 
-				d->max.v[i] += a;
-			}
-		}
-	}
-}
 
 /*
  * Find the bounding box of an actor and all it's children
