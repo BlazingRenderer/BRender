@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 1993-1995 by Argonaut Technologies Limited. All rights reserved.
  *
- * $Id: assoca_p.h 1.1 1996/10/29 16:01:01 STEVEW Exp $
+ * $Id: assoca_p.h 1.2 1998/02/26 21:17:28 jon Exp $
  * $Locker: $
  *
  * Public function prototypes for BRender associative arrays

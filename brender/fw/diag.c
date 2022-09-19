@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 1993-1995 Argonaut Technologies Limited. All rights reserved.
  *
- * $Id: diag.c 2.6 1996/12/12 17:01:44 STEVEW Exp $
+ * $Id: diag.c 1.1 1997/12/10 16:41:06 jon Exp $
  * $Locker: $
  *
  * Diagnostic handling support
@@ -15,7 +15,7 @@
 
 #include "fw.h"
 
-BR_RCS_ID("$Id: diag.c 2.6 1996/12/12 17:01:44 STEVEW Exp $")
+BR_RCS_ID("$Id: diag.c 1.1 1997/12/10 16:41:06 jon Exp $")
 
 static char _diag_scratch[128];
 

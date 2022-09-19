@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 1993-1995 by Argonaut Technologies Limited. All rights reserved.
  *
- * $Id: lexer.c 2.6 1996/03/15 16:49:41 sam Exp $
+ * $Id: lexer.c 1.1 1997/12/10 16:41:08 jon Exp $
  * $Locker: $
  *
  * Generic lexer
@@ -102,7 +102,7 @@ br_error BR_RESIDENT_ENTRY BrLexerPushFile(struct br_lexer * l, const char *file
 		return BRE_NO_MEMORY;
 
 	/*
-	 * Attach file resource to source 
+	 * Attach file resource to source
 	 */
 	BrResAdd(s,f);
 
@@ -110,7 +110,7 @@ br_error BR_RESIDENT_ENTRY BrLexerPushFile(struct br_lexer * l, const char *file
 	s->line = 1;
 	s->getchar = fileGetchar;
 	s->ptr = f;
-	
+
 	/*
 	 * Setup first charater
 	 */
@@ -178,7 +178,7 @@ struct br_lexer_source * BR_RESIDENT_ENTRY BrLexerPop(struct br_lexer * l)
 	 * Set current source to previous
 	 */
 	l->source = s->prev;
-	
+
 	BrResFree(s);
 
 	return s;
@@ -301,7 +301,7 @@ static void lexerAdvance(struct br_lexer * l)
 			got_point = BR_FALSE;
 
 			for(n=1; n < l->string_buffer_size-1; n++) {
-				
+
 				switch(l->source->next) {
 				case '0': case '1': case '2': case '3':	case '4': case '5':
 				case '6': case '7': case '8': case '9':	case 'x': case 'X':
@@ -310,7 +310,7 @@ static void lexerAdvance(struct br_lexer * l)
 					l->string_buffer[n] = (char)l->source->next;
 					l->source->getchar(l->source);
 					break;
-				
+
 				case '.':
 					got_point = BR_TRUE;
 					l->string_buffer[n] = (char)l->source->next;
@@ -435,7 +435,7 @@ static void lexerAdvanceDump(struct br_lexer * l)
 	BrStrCat(tmp,">");
 
 	l->putline(tmp, l->putline_arg);
-}	   	
+}
 #endif
 
 br_error BR_RESIDENT_ENTRY BrLexerDumpSet(struct br_lexer * l, br_putline_cbfn *putline, void *putline_arg)
@@ -459,7 +459,7 @@ void BR_RESIDENT_ENTRY BrLexerTokenError(struct br_lexer * l, br_lexer_token_id 
 	char tmp[256];
 
 	if(l->current.id == T_ERROR) {
-	} else 
+	} else
 	switch(t) {
 	case T_EOF:
 		BrLexerError(l, "expected end of file");
@@ -521,7 +521,7 @@ void BR_RESIDENT_ENTRY BrLexerPosition(struct br_lexer * l, char *buf, br_size_t
 	ASSERT(buf_size >= 1);
 
 	if(l->source == NULL || l->source->name == NULL) {
-		buf[0] = '\0'; 
+		buf[0] = '\0';
 		return;
 	}
 

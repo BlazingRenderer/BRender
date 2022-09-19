@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 1995 Argonaut Technologies Limited. All rights reserved.
  *
- * $Id: object.c 2.5 1996/03/07 20:22:09 sam Exp $
+ * $Id: object.c 1.1 1997/12/10 16:41:09 jon Exp $
  * $Locker: $
  *
  * Some generic methods for object support
@@ -9,7 +9,7 @@
 #include "fw.h"
 #include "brassert.h"
 
-BR_RCS_ID("$Id: object.c 2.5 1996/03/07 20:22:09 sam Exp $")
+BR_RCS_ID("$Id: object.c 1.1 1997/12/10 16:41:09 jon Exp $")
 
 /*
  * Token/Value support methods (via private templateQuery() method)

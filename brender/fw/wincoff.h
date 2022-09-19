@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 1993-1995 Argonaut Technologies Limited. All rights reserved.
  *
- * $Id: wincoff.h 2.2 1996/10/03 11:35:34 sam Exp $
+ * $Id: wincoff.h 1.1 1997/12/10 16:41:11 jon Exp $
  * $Locker: $
  *
  * Structures that appear in a file

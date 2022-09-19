@@ -1,12 +1,12 @@
 /*
  * Copyright (c) 1995 Argonaut Technologies Limited. All rights reserved.
  *
- * $Id: loader.c 2.11 1996/09/30 12:54:04 sam Exp $
+ * $Id: loader.c 1.1 1997/12/10 16:41:08 jon Exp $
  * $Locker: $
  *
  * Win32 Image Loader - Can load EXEs and DLLs
  *
- * 
+ *
  * XXX Todo:
  * 	Add exceptions
  *	Make more paranoid about reading sections and applying relocations
@@ -16,7 +16,7 @@
 #include "fw.h"
 #include "wincoff.h"
 
-BR_RCS_ID("$Id: loader.c 2.11 1996/09/30 12:54:04 sam Exp $")
+BR_RCS_ID("$Id: loader.c 1.1 1997/12/10 16:41:08 jon Exp $")
 
 #define READ_BLOCK(var,fh) do { if (BrFileRead(&(var), 1, sizeof(var),(fh)) != sizeof(var)) return NULL; } while (0)
 
@@ -96,9 +96,9 @@ br_image *ImageLoad(char *name)
 
 	if(coff_header.opt_header_size != sizeof(nt_header))
 		return NULL;	/* Expecting NT coff file */
-	
+
 	/*
-	 * Read optional header 
+	 * Read optional header
 	 */
 	READ_BLOCK(nt_header,fh);
 
@@ -121,7 +121,7 @@ br_image *ImageLoad(char *name)
 	 */
 	for(i=0; i < coff_header.n_sections; i++) {
 		READ_BLOCK(section_header,fh);
-	 
+
 		/*
 		 * Make copies of the parts of the header that
 		 * are needed
@@ -145,7 +145,7 @@ br_image *ImageLoad(char *name)
 	/*
 	 * Remember current offset into file
 	 */
-	offset = dos_header.new_header_offset + 
+	offset = dos_header.new_header_offset +
 		sizeof(pe) +
 		sizeof(coff_header) +
 		sizeof(nt_header) +
@@ -177,7 +177,7 @@ br_image *ImageLoad(char *name)
 		 * Advance to start of section in file
 		 */
 		BrFileAdvance(img->sections[i].data_offset - offset, fh);
-		
+
 		/*
 		 * Record pointer to start of section
 		 */
@@ -281,7 +281,7 @@ br_image *ImageLoad(char *name)
 			for(
 				lt = (br_uint_32 *)(arena_base + id->lookup_table);
 				*lt; lt++, at++) {
-				if(*lt & 0x80000000) 
+				if(*lt & 0x80000000)
 					*at = BrImageLookupOrdinal(import_img, *lt & 0x7fffffff);
 
     				if(*at == NULL) {

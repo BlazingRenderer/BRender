@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 1995 Argonaut Technologies Limited. All rights reserved.
  *
- * $Id: image.c 1.11 1997/01/27 15:19:07 Johng Exp $
+ * $Id: image.c 1.2 1998/06/23 13:46:15 jon Exp $
  * $Locker: $
  *
  * Loadable image management
@@ -10,7 +10,7 @@
 #include "host.h"
 #include "brassert.h"
 
-BR_RCS_ID("$Id: image.c 1.11 1997/01/27 15:19:07 Johng Exp $")
+BR_RCS_ID("$Id: image.c 1.2 1998/06/23 13:46:15 jon Exp $")
 
 #define ARENA_ALIGN 4096
 

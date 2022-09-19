@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 1992,1993-1995 Argonaut Technologies Limited. All rights reserved.
  *
- * $Id: shortcut.h 2.1 1995/08/02 14:21:10 sam Exp $
+ * $Id: shortcut.h 1.1 1997/12/10 16:41:10 jon Exp $
  * $Locker: $
  *
  * Some shortcut macros to make matrix, euler, and quaternion access

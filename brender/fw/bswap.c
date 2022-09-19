@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 1993-1995 Argonaut Technologies Limited. All rights reserved.
  *
- * $Id: bswap.c 2.2 1995/10/06 18:42:14 sam Exp $
+ * $Id: bswap.c 1.1 1997/12/10 16:41:05 jon Exp $
  * $Locker: $
  *
  * Byte swap routines for net<->host conversion
@@ -11,7 +11,8 @@
 #include "brassert.h"
 #include "brhton.h"
 
-BR_RCS_ID("$Id: bswap.c 2.2 1995/10/06 18:42:14 sam Exp $")
+BR_RCS_ID("$Id: bswap.c 1.1 1997/12/10 16:41:05 jon Exp $")
+
 
 #undef _SWAP
 #define _SWAP(a,b) { (a) ^= (b); (b) ^= (a); (a) ^= (b); }
@@ -25,7 +26,7 @@ br_uint_32 BR_RESIDENT_ENTRY BrSwap32(br_uint_32 l)
 		unsigned long l;
 		unsigned char c[4];
 	} u;
-	
+
 	u.l = l;
 
 	_SWAP(u.c[0],u.c[3]);
@@ -97,7 +98,7 @@ void * BR_RESIDENT_ENTRY BrSwapBlock(void *block, int count, int size)
 			_SWAP(cp[0],cp[1]);
 		}
 		break;
-			
+
 	case 3:
 		for(i=0, cp = block; i< count; i++,cp+=3) {
 			_SWAP(cp[0],cp[2]);

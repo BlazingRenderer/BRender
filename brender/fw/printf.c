@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 1993-1995 Argonaut Technologies Limited. All rights reserved.
  *
- * $Id: printf.c 2.5 1996/10/01 14:13:57 sam Exp $
+ * $Id: printf.c 1.1 1997/12/10 16:41:09 jon Exp $
  * $Locker: $
  *
  * Various printf's that are exported
@@ -10,7 +10,7 @@
 
 #include "fw.h"
 
-BR_RCS_ID("$Id: printf.c 2.5 1996/10/01 14:13:57 sam Exp $")
+BR_RCS_ID("$Id: printf.c 1.1 1997/12/10 16:41:09 jon Exp $")
 
 br_int_32 BR_RESIDENT_ENTRY BrSprintf(char * buf, const char *fmt, ...)
 {
@@ -79,6 +79,3 @@ br_int_32 BR_RESIDENT_ENTRY BrSScanf(char *str, const char *fmt, ...)
 
 	return n;
 }
-
-
-

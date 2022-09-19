@@ -333,6 +333,7 @@ void BR_RESIDENT_ENTRY BrLogInfo(const char *component, const char *fmt, ...);
 void BR_RESIDENT_ENTRY BrLogWarn(const char *component, const char *fmt, ...);
 void BR_RESIDENT_ENTRY BrLogError(const char *component, const char *fmt, ...);
 
+
 #endif /* _NO_PROTOTYPES */
 
 #ifdef __cplusplus

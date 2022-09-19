@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 1993-1995 Argonaut Technologies Limited. All rights reserved.
  *
- * $Id: brbegin.c 2.6 1996/11/04 14:46:38 TECHSUPP Exp $
+ * $Id: brbegin.c 1.1 1997/12/10 16:41:03 jon Exp $
  * $Locker: $
  *
  * Wrapper functions for all the various subsystem begins
@@ -10,9 +10,10 @@
 #include "host.h"
 #include <brassert.h>
 
-BR_RCS_ID("$Id: brbegin.c 2.6 1996/11/04 14:46:38 TECHSUPP Exp $")
+BR_RCS_ID("$Id: brbegin.c 1.1 1997/12/10 16:41:03 jon Exp $")
 
 static br_boolean active = BR_FALSE;
+
 
 br_error BR_PUBLIC_ENTRY BrBegin(void)
 {

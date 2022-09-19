@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 1993-1996 Argonaut Technologies Limited. All rights reserved.
  *
- * $Id: devquery.c 1.6 1997/07/14 18:08:02 jon Exp $
+ * $Id: devquery.c 1.2 1997/12/11 13:34:07 jon Exp $
  * $Locker: $
  *
  * Routines for querying devices
@@ -10,7 +10,7 @@
 #include "fw.h"
 #include "brassert.h"
 
-BR_RCS_ID("$Id: devquery.c 1.6 1997/07/14 18:08:02 jon Exp $")
+BR_RCS_ID("$Id: devquery.c 1.2 1997/12/11 13:34:07 jon Exp $")
 
 STATIC br_boolean deviceEnum(br_device *dev, br_device_enum_cbfn *cbfn,
                              void *args)
@@ -81,13 +81,13 @@ br_error BR_PUBLIC_ENTRY BrDeviceEnum(br_device_enum_cbfn *cbfn, void *args)
 
 	// If BRENDER_DEVICES is not set, use whatever value is
 	// in BRENDER_DEFAULT_DEVICE instead.
-	
+
 	if (*devices_str == '\0') {
-		BrSystemConfigQueryString(BRT_DEFAULT_DEVICE_STR, 
+		BrSystemConfigQueryString(BRT_DEFAULT_DEVICE_STR,
 		                          devices_str, BR_ASIZE(devices_str));
 		pass_args = BR_FALSE;
 	}
-	
+
 	for (device_name = devices_str; !terminate && *device_name != '\0'; device_name = next_device) {
 
 		/*

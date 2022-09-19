@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 1993-1995 Argonaut Technologies Limited. All rights reserved.
  *
- * $Id: sys_conf.c 1.13 1997/06/23 21:05:05 jon Exp $
+ * $Id: sys_conf.c 1.3 1998/02/27 18:11:28 jon Exp $
  * $Locker: $
  *
  * System configuration
@@ -97,7 +97,7 @@ br_error BR_PUBLIC_ENTRY BrSystemConfigLoad(br_token t, const char *param1, cons
 {
 	ASSERT(fw.sys_config);
 	ASSERT(param1);
-	 
+
 	switch (t) {
 
 	case BRT_REGISTRY_STR:
@@ -120,7 +120,7 @@ br_error BR_PUBLIC_ENTRY BrSystemConfigSave(br_token t, const char *param1, cons
 {
 	ASSERT(fw.sys_config);
 	ASSERT(param1);
-	 
+
 	switch (t) {
 
 	case BRT_REGISTRY_STR:
@@ -288,7 +288,7 @@ br_error BR_PUBLIC_ENTRY BrReadEnvironmentEntry(br_associative_array *a, const c
  * quotes
  *
  * With the exception of the configuration strings, all keys should be
- * a valid token identifier, and must include the suffix unless it is a 
+ * a valid token identifier, and must include the suffix unless it is a
  * predefined token
  */
 br_error BR_PUBLIC_ENTRY BrReadIniSection(br_associative_array *a, const char *filename, const char *section)
@@ -699,7 +699,7 @@ static br_error	parseEntryLine(br_lexer *l, br_token_value *tv, br_size_t size)
 	 */
 	if (tv->t == BR_NULL_TOKEN)
 		tv->t = BrTokenCreate(name, BR_NULL_TOKEN);
-	
+
 	if(BrLexerCurrent(l) == T_COLON || BrLexerCurrent(l) == T_EQUAL) {
 
 		BrLexerAdvance(l);
@@ -710,7 +710,7 @@ static br_error	parseEntryLine(br_lexer *l, br_token_value *tv, br_size_t size)
 		 * this information)
 		 */
 		if (BrTokenType(tv->t) == BRT_STRING && BrLexerCurrent(l) != T_STRING) {
-				
+
 			tv->v.str = NULL;
 			return BRE_OK;
 		}
@@ -743,7 +743,7 @@ static br_error	parseEntryLine(br_lexer *l, br_token_value *tv, br_size_t size)
 			else
 				tv->t = BrTokenFindType(&type, name, real_types, BR_ASIZE(real_types));
 
-			if(tv->t == BR_NULL_TOKEN) 
+			if(tv->t == BR_NULL_TOKEN)
 				break;
 
 			switch(type) {
@@ -784,7 +784,7 @@ static br_error	parseEntryLine(br_lexer *l, br_token_value *tv, br_size_t size)
 				else
 					tv->t = BrTokenFindType(&type, name, pos_int_types, BR_ASIZE(pos_int_types));
 
-			if(tv->t == BR_NULL_TOKEN) 
+			if(tv->t == BR_NULL_TOKEN)
 				break;
 
 			switch(type) {
@@ -887,7 +887,7 @@ static br_error	parseEntryLine(br_lexer *l, br_token_value *tv, br_size_t size)
 			else
 				tv->t = BrTokenFindType(&type, name, bool_types, BR_ASIZE(bool_types));
 
-			if(tv->t == BR_NULL_TOKEN) 
+			if(tv->t == BR_NULL_TOKEN)
 				break;
 
 			if (type == BRT_BOOLEAN)
@@ -911,7 +911,7 @@ static br_error	parseEntryLine(br_lexer *l, br_token_value *tv, br_size_t size)
 			else
 				tv->t = BrTokenFindType(&type, name, string_types, BR_ASIZE(string_types));
 
-			if(tv->t == BR_NULL_TOKEN) 
+			if(tv->t == BR_NULL_TOKEN)
 				break;
 
 			if (type == BRT_STRING || type == BRT_CONSTANT_STRING) {
@@ -919,7 +919,7 @@ static br_error	parseEntryLine(br_lexer *l, br_token_value *tv, br_size_t size)
 				/*
 				 * Allocate space from end of buffer
 				 */
-				len = BrStrLen(BrLexerString(l))+1; 
+				len = BrStrLen(BrLexerString(l))+1;
 				if(len > (int)size)
 					return BRE_OVERFLOW;
 

@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 1993-1995 Argonaut Technologies Limited. All rights reserved.
  *
- * $Id: assocarr.c 1.2 1996/12/13 14:35:42 STEVEW Exp $
+ * $Id: assocarr.c 1.3 1998/02/27 18:10:44 jon Exp $
  * $Locker: $
  *
  * Associative array handling code

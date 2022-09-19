@@ -1,14 +1,14 @@
 /*
  * Copyright (c) 1993-1995 Argonaut Technologies Limited. All rights reserved.
  *
- * $Id: defdiag.c 2.2 1996/03/07 20:21:45 sam Exp $
+ * $Id: defdiag.c 1.1 1997/12/10 16:41:05 jon Exp $
  * $Locker: $
  *
  * Default diagnostic handler that does nothing
  */
 #include "brender.h"
 
-BR_RCS_ID("$Id: defdiag.c 2.2 1996/03/07 20:21:45 sam Exp $")
+BR_RCS_ID("$Id: defdiag.c 1.1 1997/12/10 16:41:05 jon Exp $")
 
 static void BrNullWarning(const char *message)
 {

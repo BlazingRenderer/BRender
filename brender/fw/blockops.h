@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 1993-1995 by Argonaut Technologies Limited. All rights reserved.
  *
- * $Id: blockops.h 2.1 1995/08/02 14:21:03 sam Exp $
+ * $Id: blockops.h 1.1 1997/12/10 16:41:03 jon Exp $
  * $Locker: $
  *
  * Memory operations, block fill, block copy etc.

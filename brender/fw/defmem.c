@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 1993-1995 Argonaut Technologies Limited. All rights reserved.
  *
- * $Id: defmem.c 2.2 1996/03/07 20:21:47 sam Exp $
+ * $Id: defmem.c 1.1 1997/12/10 16:41:06 jon Exp $
  * $Locker: $
  *
  * Default memory handler that does nothing
@@ -9,7 +9,7 @@
 
 #include "brender.h"
 
-BR_RCS_ID("$Id: defmem.c 2.2 1996/03/07 20:21:47 sam Exp $")
+BR_RCS_ID("$Id: defmem.c 1.1 1997/12/10 16:41:06 jon Exp $")
 
 static void *BrNullAllocate(br_size_t size, br_uint_8 type)
 {

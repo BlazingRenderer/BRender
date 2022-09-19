@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 1993-1995 Argonaut Technologies Limited. All rights reserved.
  *
- * $Id: fw_ip.h 2.19 1996/10/01 14:13:53 sam Exp $
+ * $Id: fw_ip.h 1.1 1997/12/10 16:41:07 jon Exp $
  * $Locker: $
  *
  * Prototypes for functions internal to framework

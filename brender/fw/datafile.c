@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 1993-1995 Argonaut Technologies Limited. All rights reserved.
  *
- * $Id: datafile.c 2.12 1997/04/23 16:15:25 jon Exp $
+ * $Id: datafile.c 1.4 1998/07/21 17:32:46 jon Exp $
  * $Locker: $
  *
  * Data file support routines
@@ -12,7 +12,7 @@
 #include "datafile.h"
 #include "shortcut.h"
 
-BR_RCS_ID("$Id: datafile.c 2.12 1997/04/23 16:15:25 jon Exp $")
+BR_RCS_ID("$Id: datafile.c 1.4 1998/07/21 17:32:46 jon Exp $")
 
 #define CHUNK_LOG 0
 
@@ -169,7 +169,7 @@ STATIC int TextReadLine(br_datafile *df, char **ident, char **data)
 	 * Skip white to data
 	 */
 	while(ISSPACE(*cp))	cp++;
-	
+
 	*data = cp;
 
 	if(*cp == '"') {
@@ -179,7 +179,7 @@ STATIC int TextReadLine(br_datafile *df, char **ident, char **data)
 		cp++;
 
 		while((*cp != '"') && (*cp != '\0')) cp++;
-		
+
 	} else {
 		/*
 		 * Null terminate data at next white space
@@ -371,7 +371,7 @@ STATIC br_uint_32 DfStructWriteBinary(br_datafile *df, br_file_struct *str, void
 
 		case FSM_FIXED:
 			conv.f = BrFixedToFloat(*((br_fixed_ls *)mp));
-		put_four:			
+		put_four:
 			BrFilePutChar(conv.b[BR_HTON_32(0)],df->h);
 			BrFilePutChar(conv.b[BR_HTON_32(1)],df->h);
 			BrFilePutChar(conv.b[BR_HTON_32(2)],df->h);
@@ -721,7 +721,7 @@ STATIC br_uint_32 DfStructReadBinary(br_datafile *df, br_file_struct *str, void 
 			 * Terminate it
 			 */
 			tmp_string[i] = '\0';
-			
+
 			*((char **)mp) = BrResStrDup(df->res?df->res:fw.res, tmp_string);
 
 			break;
@@ -831,7 +831,7 @@ STATIC int EnumFromString(br_file_enum *e, char *str)
 {
 	unsigned int m;
 
-	for(m=0; m < e->nmembers; m++) 
+	for(m=0; m < e->nmembers; m++)
 		if((e->members[m].name[0] == *str) && !BrStrCmp(e->members[m].name,str))
 			return e->members[m].value;
 
@@ -844,7 +844,7 @@ STATIC char *EnumToString(br_file_enum *e, int num)
 {
 	unsigned int m;
 
-	for(m=0; m < e->nmembers; m++) 
+	for(m=0; m < e->nmembers; m++)
 		if(num == e->members[m].value)
 			return e->members[m].name;
 
@@ -1122,7 +1122,7 @@ STATIC br_uint_32 DfStructReadText(br_datafile *df, br_file_struct *str, void *b
 
 	if(BrStrCmp(data,str->name))
 		BR_ERROR1("Incorrect structure name \"%s\"",data);
-	
+
 	StructReadTextSub(df,str,base);
 
 	return 1;
@@ -1515,7 +1515,7 @@ STATIC int DfChunkWriteText(br_datafile *df, br_uint_32 id, br_uint_32 length)
 		BrFilePrintf(df->h,"*%-16s %d\n",ChunkNames[id],length);
 	else
 		BrFilePrintf(df->h,"*0x%08x %d\n",id,length);
-		
+
 	return 0;
 }
 
@@ -1590,7 +1590,7 @@ STATIC int DfChunkReadBinary(br_datafile *df, br_uint_32 *plength)
 		return -1;
 
 	id = BrHtoNL(id);
-	
+
 	BrFileRead(&l,sizeof(l),1,df->h);
 
 	if(BrFileEof(df->h))
@@ -1612,8 +1612,8 @@ STATIC br_uint_32 DfCountReadText(br_datafile *df)
 {
 	char *id,*data;
 
-	TextReadLine(df,&id,&data);	
-	
+	TextReadLine(df,&id,&data);
+
 	if(BrStrCmp(id,"count"))
 		BR_ERROR0("no element count for chunk");
 
@@ -1664,9 +1664,9 @@ STATIC br_uint_8 *BlockWriteSetup(void *base, int block_size, int block_stride, 
 #endif
 
 #if !BR_ENDIAN_BIG
-	if(size == 1 && block_count == 1) 
+	if(size == 1 && block_count == 1)
 #else
-	if(block_count == 1) 
+	if(block_count == 1)
 #endif
 		return base;
 
@@ -1708,7 +1708,7 @@ STATIC int DfBlockWriteText(br_datafile *df, void *base, int block_size, int blo
 			BrFilePrintf(df->h,"    %08x: %02x",i,*cp);
 		else
 			BrFilePrintf(df->h,"%02x",*cp);
-		
+
 		if((i%TEXT_BLOCK_LINE)==(TEXT_BLOCK_LINE-1))
 			BrFilePutChar('\n',df->h);
 	}
@@ -1764,7 +1764,7 @@ STATIC void *DfBlockReadText(br_datafile *df, void *base, int *count, int size, 
 	}
 
 	/*
-	 * Return the actual size 
+	 * Return the actual size
 	 */
 	*count = l;
 
@@ -1860,7 +1860,7 @@ STATIC void *DfBlockReadBinary(br_datafile *df, void *base, int *count, int size
 	}
 
 	/*
-	 * Return the actual size 
+	 * Return the actual size
 	 */
 	*count = l;
 
@@ -1905,7 +1905,7 @@ STATIC char *DfNameReadText(br_datafile *df, char *name)
 		BR_ERROR0("no name");
 	if(data == NULL || *data != '\"')
 		BR_ERROR0("no name string");
-	
+
 	/*
 	 * Copy name into callers buffer
 	 */
@@ -2297,7 +2297,7 @@ STATIC int BR_CALLBACK DfFileIdentify(br_uint_8 *magics,br_size_t n_magics)
 }
 
 /*
- * Sets up a new current datafile for reading or writing, working out whether it 
+ * Sets up a new current datafile for reading or writing, working out whether it
  * is in text mode or not, returns true if open suceeded
  */
 br_datafile *DfOpen(const char *name, int write, br_token scalar_type)

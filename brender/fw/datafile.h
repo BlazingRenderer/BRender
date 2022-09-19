@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 1993-1995 Argonaut Technologies Limited. All rights reserved.
  *
- * $Id: datafile.h 2.10 1997/02/19 17:34:49 Johng Exp $
+ * $Id: datafile.h 1.5 1998/07/21 17:33:14 jon Exp $
  * $Locker: $
  *
  * Constants and structures inside a 3d data file
@@ -34,7 +34,7 @@ enum {
 
 	FID_IMAGE_PLANE,		/* UNUSED */
 	FID_RLE_IMAGE_PLANE,	/* UNUSED */
-        FID_OLD_PIXELMAP,
+	FID_OLD_PIXELMAP,
 
     FID_MATERIAL_OLDEST,
 	FID_ADD_MATERIAL,		/* UNUSED */
@@ -66,7 +66,7 @@ enum {
 	FID_FACE_MATERIAL,
 	FID_OLD_MODEL_1,
 
-	FID_COLOUR_MAP_REF,	
+	FID_COLOUR_MAP_REF,
 	FID_OPACITY_MAP_REF,	/* UNUSED */
 	FID_INDEX_BLEND_REF,
 	FID_INDEX_SHADE_REF,
@@ -188,7 +188,7 @@ enum  {
  * Member types
  */
 enum {
-	FSM_INT_8,   
+	FSM_INT_8,
 	FSM_UINT_8,
 	FSM_INT_16,
 	FSM_UINT_16,
@@ -276,7 +276,7 @@ typedef struct br_file_struct {
 #define _ENUM_16(m,e)  {FSM_ENUM_16,  offsetof(_STRUCT_NAME,m),#m,&(e)}
 #define _ENUM_32(m,e)  {FSM_ENUM_32,  offsetof(_STRUCT_NAME,m),#m,&(e)}
 #define _STRUCT(m,s)   {FSM_STRUCT,   offsetof(_STRUCT_NAME,m),#m,&(s)}
-#define _ASCIZ(m)      {FSM_ASCIZ,    offsetof(_STRUCT_NAME,m),#m}    
+#define _ASCIZ(m)      {FSM_ASCIZ,    offsetof(_STRUCT_NAME,m),#m}
 #define _COLOUR(m)     {FSM_COLOUR,   offsetof(_STRUCT_NAME,m),#m}
 #define _VECTOR2(m)    {FSM_VECTOR2,  offsetof(_STRUCT_NAME,m),#m}
 #define _VECTOR3(m)    {FSM_VECTOR3,  offsetof(_STRUCT_NAME,m),#m}

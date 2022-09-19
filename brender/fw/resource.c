@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 1993-1995 Argonaut Technologies Limited. All rights reserved.
  *
- * $Id: resource.c 2.14 1996/11/25 18:43:34 sam Exp $
+ * $Id: resource.c 1.1 1997/12/10 16:41:10 jon Exp $
  * $Locker: $
  *
  * Generic code for maintaining a hierachy of resources
@@ -11,14 +11,14 @@
  *		A size
  *		A block of memory of 'size' bytes
  *		0 or more child resources
- * 
+ *
  * XXX
  *	Add optional source file/line tracking
  */
 #include "fw.h"
 #include "brassert.h"
 
-BR_RCS_ID("$Id: resource.c 2.14 1996/11/25 18:43:34 sam Exp $")
+BR_RCS_ID("$Id: resource.c 1.1 1997/12/10 16:41:10 jon Exp $")
 
 /*
  * The granularity of resource sizes
@@ -52,8 +52,8 @@ struct resource_header {
 #define RES_SIZE_GET(r) ((r)->size << BR_RES_GRANULARITY_SHIFT)
 
 /*
-** Set size of a resource block
-*/
+ * Set size of a resource block
+ */
 #define RES_SIZE_SET(r,s) do {\
 	(r)->size = (s) >> BR_RES_GRANULARITY_SHIFT;		\
 } while(0)
@@ -130,15 +130,14 @@ STATIC struct resource_header *UserToRes(void *r)
 	return res;
 }
 
-
 /*
  * Create a new resource block of the given class, with 'size' bytes associated
  * with it.
- * 
+ *
  * If parent is not NULL it adds the new resource as a child
  *
  * Returns a pointer to the first byte of the resource data
- */ 
+ */
 void * BR_RESIDENT_ENTRY BrResAllocate(void *vparent, br_size_t size, br_uint_8 res_class)
 {
 	struct resource_header *res;
@@ -532,7 +531,7 @@ void BR_RESIDENT_ENTRY BrResDump(void *vres, br_putline_cbfn *putline, void *arg
 }
 
 /*
- * REturn the name for a resource class
+ * Return the name for a resource class
  */
 const char * BR_RESIDENT_ENTRY BrResClassIdentifier(br_uint_8 res_class)
 {
@@ -543,5 +542,3 @@ const char * BR_RESIDENT_ENTRY BrResClassIdentifier(br_uint_8 res_class)
 	return rclass?rclass->identifier:"<NULL>";
 
 }
-
-

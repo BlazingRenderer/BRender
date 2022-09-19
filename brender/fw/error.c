@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 1993-1995 Argonaut Technologies Limited. All rights reserved.
  *
- * $Id: error.c 2.4 1996/10/01 14:13:52 sam Exp $
+ * $Id: error.c 1.1 1997/12/10 16:41:06 jon Exp $
  * $Locker: $
  *
  * Error value support
@@ -9,7 +9,7 @@
 
 #include "fw.h"
 
-BR_RCS_ID("$Id: error.c 2.4 1996/10/01 14:13:52 sam Exp $")
+BR_RCS_ID("$Id: error.c 1.1 1997/12/10 16:41:06 jon Exp $")
 
 br_error BR_RESIDENT_ENTRY BrLastErrorGet(void **valuep)
 {

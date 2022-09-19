@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 1993-1995 Argonaut Technologies Limited. All rights reserved.
  *
- * $Id: pool.c 2.3 1996/02/17 18:00:56 sam Exp $
+ * $Id: pool.c 1.1 1997/12/10 16:41:09 jon Exp $
  * $Locker: $
  *
  * Memory pool allocation (fixed size objects)
@@ -9,7 +9,7 @@
 #include "fw.h"
 #include "brassert.h"
 
-BR_RCS_ID("$Id: pool.c 2.3 1996/02/17 18:00:56 sam Exp $")
+BR_RCS_ID("$Id: pool.c 1.1 1997/12/10 16:41:09 jon Exp $")
 
 #if BR_POOL_DEBUG
 #undef PoolAllocate

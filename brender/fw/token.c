@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 1995 Argonaut Technologies Limited. All rights reserved.
  *
- * $Id: token.c 2.18 1997/01/09 15:26:55 sam Exp $
+ * $Id: token.c 1.1 1997/12/10 16:41:11 jon Exp $
  * $Locker: $
  *
  * Token management and manipulation
@@ -9,7 +9,7 @@
 #include "fw.h"
 #include "brassert.h"
 
-BR_RCS_ID("$Id: token.c 2.18 1997/01/09 15:26:55 sam Exp $")
+BR_RCS_ID("$Id: token.c 1.1 1997/12/10 16:41:11 jon Exp $")
 
 /*
  * Private structure used to reference a registered token

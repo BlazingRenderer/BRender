@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 1993-1995 Argonaut Technologies Limited. All rights reserved.
  *
- * $Id: mem.c 2.7 1996/04/19 14:55:04 sam Exp $
+ * $Id: mem.c 1.1 1997/12/10 16:41:08 jon Exp $
  * $Locker: $
  *
  * Low level wrappers for allocator access
@@ -9,7 +9,7 @@
 #include "fw.h"
 #include "brassert.h"
 
-BR_RCS_ID("$Id: mem.c 2.7 1996/04/19 14:55:04 sam Exp $")
+BR_RCS_ID("$Id: mem.c 1.1 1997/12/10 16:41:08 jon Exp $")
 
 #define MEM_LOG 0
 

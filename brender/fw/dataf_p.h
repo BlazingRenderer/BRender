@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 1993-1995 Argonaut Technologies Limited. All rights reserved.
  *
- * $Id: dataf_p.h 1.1 1996/10/01 14:38:01 sam Exp $
+ * $Id: dataf_p.h 1.1 1997/12/10 16:41:05 jon Exp $
  * $Locker: $
  *
  * Prototypes for functions internal to framework

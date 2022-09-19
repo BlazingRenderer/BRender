@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 1993-1995 Argonaut Technologies Limited. All rights reserved.
  *
- * $Id: fw.h 2.13 1996/10/29 16:14:18 STEVEW Exp $
+ * $Id: fw.h 1.1 1997/12/10 16:41:07 jon Exp $
  * $Locker: $
  *
  * Internal types and structures for framework
@@ -43,7 +43,7 @@ typedef struct br_framework_state {
 	br_token next_free_token;
 
 	/*
-	 * Current filesystem, memory, error, and log handlers
+	 * Current filesystem, memory, and error handlers
 	 */
 	br_filesystem *fsys;
 	br_allocator *mem;

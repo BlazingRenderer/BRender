@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 1993-1995 Argonaut Technologies Limited. All rights reserved.
  *
- * $Id: devlist.c 2.14 1996/10/30 20:46:13 STEVEW Exp $
+ * $Id: devlist.c 1.1 1997/12/10 16:41:06 jon Exp $
  * $Locker: $
  *
  * XXX Need to keep track of images that devices came from and dereference
@@ -10,12 +10,12 @@
 #include "fw.h"
 #include "brassert.h"
 
-BR_RCS_ID("$Id: devlist.c 2.14 1996/10/30 20:46:13 STEVEW Exp $")
+BR_RCS_ID("$Id: devlist.c 1.1 1997/12/10 16:41:06 jon Exp $")
 
 extern br_framework_state BR_ASM_DATA fw ;
 
-/* Add drivers specified in the BRENDER_DRIVERS configuration entry 
- * This is only done once, so check it has not already been done    
+/* Add drivers specified in the BRENDER_DRIVERS configuration entry
+ * This is only done once, so check it has not already been done
  */
 
 static br_error AddRequestedDrivers()
@@ -29,7 +29,7 @@ static br_error AddRequestedDrivers()
 
        if ( *devstr != '\0' )
           BrDevAddConfig(devstr);
-      
+
        fw.bAlreadyLoadedDrivers = BR_TRUE ;
     }
 
@@ -56,7 +56,7 @@ static br_error devAdd(br_device **pdev, br_device_begin_fn *dev_begin, const ch
 
 	if(dev == NULL)
 		return BRE_FAIL;
-	
+
 	/*
 	 * Got device, find free slot
 	 */
@@ -84,7 +84,7 @@ static br_error devAdd(br_device **pdev, br_device_begin_fn *dev_begin, const ch
 		return BRE_NO_MEMORY;
 	}
 
-	for(i=0; i < fw.ndev_slots; i++) 
+	for(i=0; i < fw.ndev_slots; i++)
 		new_slots[i] = fw.dev_slots[i];
 
 	BrResFree(fw.dev_slots);
@@ -118,7 +118,7 @@ br_error BR_RESIDENT_ENTRY BrDevAdd(br_device **pdev, const char *image, const c
 	 * Try and load up device
 	 */
 	dev_image = BrImageReference(image);
-	
+
 	if(dev_image == NULL) {
 		return BRE_FAIL;
 	}
@@ -169,8 +169,8 @@ br_error BR_RESIDENT_ENTRY BrDevCheckAdd(br_device **pdev, const char *name, con
 
 /*
  * Take a config string and split it into <dev_args>{;<dev_args>}
- * 
- * Add each device in turn with it's arguments
+ *
+ * Add each device in turn with its arguments
  */
 br_error BR_RESIDENT_ENTRY BrDevAddConfig(const char *config)
 {
@@ -186,13 +186,13 @@ br_error BR_RESIDENT_ENTRY BrDevAddConfig(const char *config)
 		 */
 		for(end = config; *end != '\0' && *end != ';' ; end++)
 			;
-		
+
 		n = end - config;
-		
+
 		if(n) {
 			/*
 			 * Make a copy of this device string
-			 */	
+			 */
 			BrMemCpy(tmp, config, n);
 			tmp[n] = '\0';
 			dev = tmp;
@@ -215,13 +215,13 @@ br_error BR_RESIDENT_ENTRY BrDevAddConfig(const char *config)
 				dev++;
 
 			n = BrStrLen(dev);
-			
+
 			if(n) {
 				while(BrIsSpace(dev[n-1])) {
 					dev[n-1] = '\0';
 					n--;
 				}
-				
+
 				BrDevAdd(NULL, dev, arg);
 			}
 		}
@@ -283,7 +283,7 @@ br_error BR_RESIDENT_ENTRY BrDevFind(struct br_device **pdev, const char *patter
 				if(pdev)
 					*pdev = fw.dev_slots[i].dev;
 				return BRE_OK;
-			}				
+			}
 		}
 	}
 

@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 1993-1995 Argonaut Technologies Limited. All rights reserved.
  *
- * $Id: resreg.c 2.3 1996/10/01 14:13:59 sam Exp $
+ * $Id: resreg.c 1.1 1997/12/10 16:41:10 jon Exp $
  * $Locker: $
  *
  * Resource class management
@@ -9,7 +9,7 @@
 #include "fw.h"
 #include "brassert.h"
 
-BR_RCS_ID("$Id: resreg.c 2.3 1996/10/01 14:13:59 sam Exp $")
+BR_RCS_ID("$Id: resreg.c 1.1 1997/12/10 16:41:10 jon Exp $")
 
 /*
  * Resource Classes
@@ -101,7 +101,3 @@ br_uint_32 BR_PUBLIC_ENTRY BrResClassEnum(const char *pattern,
 {
 	return BrRegistryEnum(&fw.reg_resource_classes,pattern,(br_enum_cbfn *)callback,arg);
 }
-
-
-
-

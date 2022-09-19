@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 1993-1995 by Argonaut Technologies Limited. All rights reserved.
  *
- * $Id: brhton.h 2.4 1996/10/03 11:35:19 sam Exp $
+ * $Id: brhton.h 1.1 1997/12/10 16:41:04 jon Exp $
  * $Locker: $
  *
  * Converting 'network' (big endian) byte order to host order

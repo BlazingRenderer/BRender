@@ -1,16 +1,18 @@
 /*
  * Copyright (c) 1993-1995 Argonaut Technologies Limited. All rights reserved.
  *
- * $Id: formats.h 2.6 1997/05/27 12:30:35 jon Exp $
+ * $Id: formats.h 1.4 1998/09/21 14:50:54 johng Exp $
  * $Locker: $
  *
  * All the geometry formats understood by the renderer
- *
+ * This internal format is being generally release to remove the need for
+ * for duplicate copies of model data when accessing is required.
  */
 #ifndef _FORMATS_H_
 #define _FORMATS_H_
 
 
+// This was for restricting our evaluation version.
 #if EVAL
 #define PAD_SIZE (2048-32)
 #endif
@@ -36,7 +38,7 @@ struct fmt_vertex_x {
 	br_int_8 _pad[PAD_SIZE];
 #endif
 };
-		  
+
 struct fmt_vertex_f {
 	br_vector3_f p;			/* Point in model space				*/
 	br_vector2_f map;		/* Mapping coordinates				*/
@@ -45,7 +47,6 @@ struct fmt_vertex_f {
 	br_int_8 _pad[PAD_SIZE];
 #endif
 };
-
 /**
  ** Version 1.1 prepared model format
  **/

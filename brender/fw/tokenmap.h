@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 1992,1993-1995 Argonaut Technologies Limited. All rights reserved.
  *
- * $Id: tokenmap.h 2.11 1996/10/03 11:35:33 sam Exp $
+ * $Id: tokenmap.h 1.1 1997/12/10 16:41:11 jon Exp $
  * $Locker: $
  *
  */

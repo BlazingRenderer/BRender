@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 1995 Argonaut Technologies Limited. All rights reserved.
  *
- * $Id: brexcept.h 2.3 1996/10/03 11:35:10 sam Exp $
+ * $Id: brexcept.h 1.1 1997/12/10 16:41:04 jon Exp $
  * $Locker: $
  *
  * Simple exception handling
@@ -19,7 +19,7 @@
 typedef br_error br_exception;
 
 /*
- * Exception handler - allocated as a resource 
+ * Exception handler - allocated as a resource
  */
 typedef struct br_exception_handler {
 	struct br_exception_handler *prev;

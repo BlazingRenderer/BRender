@@ -1,5 +1,5 @@
 /*
- * $Id: brqsort.c 2.3 1996/02/17 18:00:39 sam Exp $
+ * $Id: brqsort.c 1.1 1997/12/10 16:41:05 jon Exp $
  * $Locker: $
  *
  * Local quicksort for brender
@@ -10,7 +10,7 @@
 
 #include "brender.h"
 
-BR_RCS_ID("$Id: brqsort.c 2.3 1996/02/17 18:00:39 sam Exp $")
+BR_RCS_ID("$Id: brqsort.c 1.1 1997/12/10 16:41:05 jon Exp $")
 
 #include <stdlib.h>
 

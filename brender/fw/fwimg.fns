@@ -140,6 +140,12 @@ BrStrToF
 BrStrToL
 BrStrToUL
 
+BrFloatFloor
+BrFloatCeil
+BrFloatSqrt
+BrFloatPow
+BrFloatAtan2
+
 BrSwap16
 BrSwap32
 BrSwapBlock

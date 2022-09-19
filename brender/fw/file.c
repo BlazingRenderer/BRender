@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 1993-1995 Argonaut Technologies Limited. All rights reserved.
  *
- * $Id: file.c 2.8 1996/11/20 18:07:30 STEVEW Exp $
+ * $Id: file.c 1.1 1997/12/10 16:41:07 jon Exp $
  * $Locker: $
  *
  * Low level wrappers for file system access
@@ -11,7 +11,7 @@
 #include "fw.h"
 #include "brassert.h"
 
-BR_RCS_ID("$Id: file.c 2.8 1996/11/20 18:07:30 STEVEW Exp $")
+BR_RCS_ID("$Id: file.c 1.1 1997/12/10 16:41:07 jon Exp $")
 
 /*
  * Resource block used to represent an open file
@@ -62,7 +62,7 @@ void * BR_PUBLIC_ENTRY BrFileOpenRead(const char *name, br_size_t n_magics,
 		raw_file = fw.fsys->open_read(name,n_magics,mode_test,mode_result);
 	else
 		raw_file = fw.fsys->open_read(name,n_magics,mode_test,&bin_mode);
-	
+
 	/*
 	 * Catch failure
 	 */
@@ -163,7 +163,7 @@ br_size_t BR_PUBLIC_ENTRY BrFileWrite(const void *buf, br_size_t size, br_size_t
 {
    UASSERT_MESSAGE("BrFileWrite",f!=NULL);
    UASSERT_MESSAGE("BrFileWrite",buf!=NULL);
-                                 
+
    ASSERT(fw.fsys->write != NULL);
 
    return fw.fsys->write(buf,size,n,((br_file *)f)->raw_file);
@@ -202,7 +202,7 @@ int BR_PUBLIC_ENTRY BrFilePrintf(void *f, const char *fmt, ...)
 {
 	int n;
 	va_list args;
-UASSERT_MESSAGE("In BrFilePrintf",f!=NULL);
+	UASSERT_MESSAGE("In BrFilePrintf",f!=NULL);
 
 	ASSERT(fw.fsys->write != NULL);
 

@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 1993-1995 by Argonaut Technologies Limited. All rights reserved.
  *
- * $Id: lexer.h 2.5 1996/10/03 11:35:30 sam Exp $
+ * $Id: lexer.h 1.1 1997/12/10 16:41:08 jon Exp $
  * $Locker: $
  *
  * Generic lexer data structures

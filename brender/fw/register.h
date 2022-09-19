@@ -1,10 +1,10 @@
 /*
  * Copyright (c) 1993-1995 Argonaut Technologies Limited. All rights reserved.
  *
- * $Id: register.h 2.3 1996/10/03 11:35:32 sam Exp $
+ * $Id: register.h 1.1 1997/12/10 16:41:10 jon Exp $
  * $Locker: $
  *
- * 
+ *
  */
 
 #ifndef _REGISTER_H_

@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 1993-1995 Argonaut Technologies Limited. All rights reserved.
  *
- * $Id: brlists.c 2.3 1995/12/05 10:58:18 sam Exp $
+ * $Id: brlists.c 1.2 1998/02/12 16:04:06 jon Exp $
  * $Locker: $
  *
  * Doubly linked list support - has a full and simple version
@@ -9,16 +9,16 @@
 
 #include "fw.h"
 
-BR_RCS_ID("$Id: brlists.c 2.3 1995/12/05 10:58:18 sam Exp $")
+BR_RCS_ID("$Id: brlists.c 1.2 1998/02/12 16:04:06 jon Exp $")
 
 /**
  ** Full features list handling
  **/
 
- /*
-  * Initialse a list structure to be empty list
-  */
-	void BR_RESIDENT_ENTRY BrNewList(struct br_list *list)
+/*
+ * Initialse a list structure to be empty list
+ */
+void BR_RESIDENT_ENTRY BrNewList(struct br_list *list)
 {
 	list->head = (struct br_node *)&(list->_null);
 	list->tail = (struct br_node *)&(list->head);
@@ -61,6 +61,7 @@ struct br_node * BR_RESIDENT_ENTRY BrRemHead(struct br_list *list)
 		return NULL;
 
 	list->head = n->next;
+	n->next->prev = (struct br_node *)&(list->head);
 
 	return n;
 }
@@ -79,6 +80,7 @@ struct br_node * BR_RESIDENT_ENTRY BrRemTail(struct br_list *list)
 		return NULL;
 
 	list->tail = n->prev;
+	n->prev->next = (struct br_node *)&(list->_null);
 
 	return n;
 }

@@ -1,14 +1,14 @@
 /*
  * Copyright (c) 1993-1995 Argonaut Technologies Limited. All rights reserved.
  *
- * $Id: scrstr.c 2.2 1995/11/29 14:10:54 sam Exp $
+ * $Id: scrstr.c 1.1 1997/12/10 16:41:10 jon Exp $
  * $Locker: $
  *
  * A global scratchpad string used for printf and error operations
  */
 #include "fw.h"
 
-BR_RCS_ID("$Id: scrstr.c 2.2 1995/11/29 14:10:54 sam Exp $")
+BR_RCS_ID("$Id: scrstr.c 1.1 1997/12/10 16:41:10 jon Exp $")
 
 /*
  * Initialised to a value because IBM Cset++ LIB hides the symbol

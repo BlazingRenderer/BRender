@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 1995 Argonaut Technologies Limited. All rights reserved.
  *
- * $Id: tokenval.c 2.7 1997/07/16 13:40:48 jon Exp $
+ * $Id: tokenval.c 1.3 1998/05/20 15:25:02 jon Exp $
  * $Locker: $
  *
  * Token/value list mangement
@@ -10,7 +10,7 @@
 #include "fw.h"
 #include "brassert.h"
 
-BR_RCS_ID("$Id: tokenval.c 2.7 1997/07/16 13:40:48 jon Exp $")
+BR_RCS_ID("$Id: tokenval.c 1.3 1998/05/20 15:25:02 jon Exp $")
 
 /*
  * Allocate a new template structure
@@ -67,7 +67,7 @@ static void templateMakeMap(br_tv_template *template)
 		templateResolveNames(template);
 
 	/*
-	 * Find range of tokens used 
+	 * Find range of tokens used
 	 */
 	min = max = template->entries->token;
 
@@ -160,7 +160,7 @@ static br_fixed_ls * ConvertFloatToFixed(br_fixed_ls **pextra, br_float *src, br
 
 	while(count--)
 		*(*pextra)++ = BrFloatToFixed(*src++);
-		
+
 	return ret;
 }
 
@@ -192,7 +192,7 @@ static br_float * ConvertFixedToFloat(br_float **pextra, br_fixed_ls *src, br_in
 
 	while(count--)
 		*(*pextra)++ = (float)BrFixedToFloat(*src++);
-		
+
 	return ret;
 }
 
@@ -224,7 +224,7 @@ static br_uint_32 * ConvertLongCopy(br_uint_32 **pextra, br_uint_32 *src, br_int
 
 	while(count--)
 		*(*pextra)++ = *src++;
-		
+
 	return ret;
 }
 
@@ -272,7 +272,7 @@ static br_error ValueQuery(
 	case BRTV_CONV_DIRECT:
 		tv->v.pu = tep->conv_arg;
 		break;
-		
+
 	case BRTV_CONV_I32_I8:
 		tv->v.i32 = MEM(br_int_8);
 		break;
@@ -402,7 +402,7 @@ static br_error ValueQuery(
 		 */
 		t = BrStrLen(MEM(char *))+1;
 		t = (t+(sizeof(br_uint_32)-1))/sizeof(br_uint_32);
-		
+
 		if((tv->v.p = ConvertLongCopy((br_uint_32 **)pextra, MEM(br_uint_32 *), t, pextra_size)) == NULL)
 			return BRE_OVERFLOW;
 
@@ -503,7 +503,7 @@ static br_error ValueSet(
 	case BRTV_CONV_COPY:
 		BrTokenCopy(mem, tv);
 		break;
-		
+
 	case BRTV_CONV_I32_I8:
 		MEM(br_int_8) = (br_int_8)tv->v.i32;
 		break;
@@ -657,7 +657,7 @@ static br_error ValueSet(
 		 */
 		return BRE_UNKNOWN;
 	}
-	
+
 	return BRE_OK;
 }
 
@@ -718,7 +718,7 @@ static br_size_t ValueExtraSize(void *block, const br_tv_template_entry *tep)
 		 */
 		t = BrStrLen(MEM(char *))+1;
 		t = (t+(sizeof(br_uint_32)-1))/sizeof(br_uint_32);
-		
+
 		return t * sizeof(br_uint_32);
 
 	case BRTV_CONV_LIST:
@@ -981,7 +981,7 @@ br_error BR_RESIDENT_ENTRY BrTokenValueQueryAllSize(
 
 		if(!(tp->flags & BRTV_ALL))
 			continue;
-		
+
 		n ++;
 
 		/*
@@ -1115,7 +1115,7 @@ static void DumpMatrixInteger(br_int_32 *ip, int rows, int cols,
 		cp = value+BrSprintf(value,"%s%s[",
 			prefix,
 			(i == 0)?info_0:info_n);
-		
+
 		for(j=0; j < cols; j++)
 			cp += BrSprintf(cp,"%s%d",(j != 0)?",":"",*ip++);
 
@@ -1137,7 +1137,7 @@ static void DumpMatrixFixed(br_fixed_ls *xp, int rows, int cols,
 		cp = value+BrSprintf(value,"%s%s[",
 			prefix,
 			(i == 0)?info_0:info_n);
-		
+
 		for(j=0; j < cols; j++)
 			cp += BrSprintf(cp,"%s%f",(j != 0)?",":"",BrFixedToFloat(*xp++));
 
@@ -1159,7 +1159,7 @@ static void DumpMatrixFloat(br_float *fp, int rows, int cols,
 		cp = value+BrSprintf(value,"%s%s[",
 			prefix,
 			(i == 0)?info_0:info_n);
-		
+
 		for(j=0; j < cols; j++)
 			cp += BrSprintf(cp,"%s%f",(j != 0)?",":"",*fp++);
 
@@ -1187,7 +1187,7 @@ static void DumpObject(br_object *h,
 			dev_ident = ObjectIdentifier(dev);
 		else
 			dev_ident = "<NULL DEVICE>";
-	
+
 		if(dev_ident == NULL)
 			dev_ident = "<NULL>";
 
@@ -1234,7 +1234,7 @@ void BR_RESIDENT_ENTRY BrTokenValueDump(br_token_value *tv, const char *prefix, 
 			putline(tmp,arg);
 			continue;
 		}
-	
+
 		i = BrSprintf(info_0,"%5d:  %-32s ",n, id);
 
 		/*
@@ -1578,7 +1578,7 @@ void BR_RESIDENT_ENTRY BrTokenValueDump(br_token_value *tv, const char *prefix, 
  * 				"l"
  * t_value:		integer
  * 				float
- * 				'"' string '"'			
+ * 				'"' string '"'
  * 				identifer
  *				"true"
  *				"t"
@@ -1643,7 +1643,7 @@ static br_error	parseTokenValue(br_lexer *l, br_token_value *tv, br_size_t size)
 	 */
 	if(size < sizeof(br_token_value))
 		return BRE_OVERFLOW;
-	
+
 	size -= sizeof(br_token_value);
 
 	while (BrLexerCurrent(l) != T_EOF) {
@@ -1719,7 +1719,7 @@ static br_error	parseTokenValue(br_lexer *l, br_token_value *tv, br_size_t size)
 
 				tv->t = BrTokenFindType(&type, name, real_types, BR_ASIZE(real_types));
 
-				if(tv->t == BR_NULL_TOKEN) 
+				if(tv->t == BR_NULL_TOKEN)
 					break;
 
 				switch(type) {
@@ -1751,7 +1751,7 @@ static br_error	parseTokenValue(br_lexer *l, br_token_value *tv, br_size_t size)
 				else
 					tv->t = BrTokenFindType(&type, name, pos_int_types, BR_ASIZE(pos_int_types));
 
-				if(tv->t == BR_NULL_TOKEN) 
+				if(tv->t == BR_NULL_TOKEN)
 					break;
 
 				switch(type) {
@@ -1818,7 +1818,7 @@ static br_error	parseTokenValue(br_lexer *l, br_token_value *tv, br_size_t size)
 
 				if(tv->t == BR_NULL_TOKEN)
 					break;
-		
+
 				tv->v.t = BrTokenFind(BrLexerString(l));
 				if(tv->v.t == BR_NULL_TOKEN)
 					tv->t = BR_NULL_TOKEN;
@@ -1834,9 +1834,9 @@ static br_error	parseTokenValue(br_lexer *l, br_token_value *tv, br_size_t size)
 
 				tv->t = BrTokenFindType(&type, name, bool_types, BR_ASIZE(bool_types));
 
-				if(tv->t == BR_NULL_TOKEN) 
+				if(tv->t == BR_NULL_TOKEN)
 					break;
-	
+
 				tv->v.b = BrLexerCurrent(l) == T_TRUE;
 				break;
 			}
@@ -1849,13 +1849,13 @@ static br_error	parseTokenValue(br_lexer *l, br_token_value *tv, br_size_t size)
 
 				tv->t = BrTokenFindType(&type, name, string_types, BR_ASIZE(string_types));
 
-				if(tv->t == BR_NULL_TOKEN) 
+				if(tv->t == BR_NULL_TOKEN)
 					break;
 
 				/*
 				 * Allocate space from end of buffer
 				 */
-				len = BrStrLen(BrLexerString(l))+1; 
+				len = BrStrLen(BrLexerString(l))+1;
 				if(len > (int)size) {
 					tv->t = BR_NULL_TOKEN;
 					r = BRE_OVERFLOW;
@@ -1925,7 +1925,7 @@ br_boolean BR_RESIDENT_ENTRY BrTokenValueCompare(br_token_value *tv1, br_token_v
 
 		if(tv1->t == BR_NULL_TOKEN)
 			return BR_TRUE;
-		
+
 		switch(BrTokenType(tv1->t)) {
 		case BRT_NONE:
 			break;
@@ -2076,7 +2076,7 @@ br_boolean BR_RESIDENT_ENTRY BrTokenValueComparePartial(br_token_value *tv1, br_
 
 		if(tv1->t == BR_NULL_TOKEN)
 			return BR_TRUE;
-		
+
 		for (t = insignificant; *t != BR_NULL_TOKEN; t++)
 			if (tv1->t == *t)
 				break;

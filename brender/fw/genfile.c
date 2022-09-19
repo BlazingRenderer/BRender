@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 1993-1995 Argonaut Technologies Limited. All rights reserved.
  *
- * $Id: genfile.c 2.2 1996/11/21 23:07:45 NIKH Exp $
+ * $Id: genfile.c 1.1 1997/12/10 16:41:08 jon Exp $
  * $Locker: $
  *
  * General per-chunk file operations
@@ -13,7 +13,7 @@
 #include "brassert.h"
 #include "datafile.h"
 
-BR_RCS_ID("$Id: genfile.c 2.2 1996/11/21 23:07:45 NIKH Exp $")
+BR_RCS_ID("$Id: genfile.c 1.1 1997/12/10 16:41:08 jon Exp $")
 
 /**
  ** End Marker

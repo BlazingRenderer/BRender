@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 1993-1995 Argonaut Technologies Limited. All rights reserved.
  *
- * $Id: register.c 2.4 1996/10/01 14:13:58 sam Exp $
+ * $Id: register.c 1.1 1997/12/10 16:41:09 jon Exp $
  * $Locker: $
  *
  * Generic code for lists of registered items. Used for models, materials,
@@ -13,7 +13,7 @@
 #include "fw.h"
 #include "brassert.h"
 
-BR_RCS_ID("$Id: register.c 2.4 1996/10/01 14:13:58 sam Exp $")
+BR_RCS_ID("$Id: register.c 1.1 1997/12/10 16:41:09 jon Exp $")
 
 /*
  * Initialise a registry
@@ -26,7 +26,7 @@ void *BrRegistryNew(br_registry *reg)
 	 * Intitialise linked list
 	 */
 	BrNewList(&reg->list);
-	
+
 	/*
 	 * List is empty
 	 */
@@ -214,7 +214,7 @@ int BrRegistryCount(br_registry *reg, const char *pattern)
 
 	UASSERT(reg != NULL);
 
-	if(pattern == NULL) 
+	if(pattern == NULL)
 		return reg->count;
 
 	/*

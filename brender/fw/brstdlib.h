@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 1993-1995 by Argonaut Technologies Limited. All rights reserved.
  *
- * $Id: brstdlib.h 2.5 1997/06/16 19:19:37 jon Exp $
+ * $Id: brstdlib.h 1.1 1997/12/10 16:41:05 jon Exp $
  * $Locker: $
  *
  * Wrappers around standard C library functions that are provided by the STD library
@@ -54,59 +54,6 @@ br_int_32 BR_RESIDENT_ENTRY BrVSprintfN(char * buf, br_size_t buf_size, char *fm
 #ifdef __cplusplus
 };
 #endif
-#endif
-
-
-/*
- * Compiler specific overrides
- */
-#if defined(__USE_CLIB__)
-
-#include <stdlib.h>
-#include <string.h>
-#include <ctype.h>
-#include <stdio.h>
-
-/*
- * Force stlib operations to be used directly
- */
-#define BrMemCmp	memcmp
-#define BrMemCpy	memcpy
-#define BrMemSet	memset
-
-#define BrStrCat	strcat
-#define BrStrCmp	strcmp
-#define BrStrICmp	stricmp
-#define BrStrCpy	strcpy
-#define BrStrLen	strlen
-#define BrStrNCmp	strncmp
-#define BrStrNICmp	strnicmp
-#define BrStrNCpy	strncpy
-
-#define BrStrChr	strchr
-#define BrStrRChr	strrchr
-
-#define BrAbort		abort
-
-#define BrGetEnv	getenv
-
-#define BrStrToF	strtod
-#define BrStrToD	strtod
-#define BrStrToL	strtol
-#define BrStrToUL	strtoul
-
-#define BrIsAlpha	isalpha
-#define BrIsDigit	isdigit
-#define BrIsSpace	isspace
-#define BrIsPrint	isprint
-
-#define BrVSScanf	vsscanf
-#define BrVSprintf	vsprintf
-
-#elif defined(_MSC_VER)
-
-#elif defined(__GNUC__) && defined(i386)
-
 #endif
 
 #endif

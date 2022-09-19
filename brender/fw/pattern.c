@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 1993-1995 Argonaut Technologies Limited. All rights reserved.
  *
- * $Id: pattern.c 2.2 1995/10/13 18:26:21 sam Exp $
+ * $Id: pattern.c 1.1 1997/12/10 16:41:09 jon Exp $
  * $Locker: $
  *
  * Pattern matcher
@@ -9,7 +9,7 @@
 #include "fw.h"
 #include "brassert.h"
 
-BR_RCS_ID("$Id: pattern.c 2.2 1995/10/13 18:26:21 sam Exp $")
+BR_RCS_ID("$Id: pattern.c 1.1 1997/12/10 16:41:09 jon Exp $")
 
 /*
  * Compare a pattern against a string
@@ -17,7 +17,7 @@ BR_RCS_ID("$Id: pattern.c 2.2 1995/10/13 18:26:21 sam Exp $")
  * Return true if pattern matches string
  *
  * Patterns have the magic characters '*' and '?'
- * 
+ *
  * '*' matches 0 or more characters
  * '?' matches any single character
  * '/' terminates the pattern
@@ -26,8 +26,8 @@ BR_RCS_ID("$Id: pattern.c 2.2 1995/10/13 18:26:21 sam Exp $")
  *
  * Recursive approach, implemented with tail recursion -
  *
- * match (p,s) 
- * 
+ * match (p,s)
+ *
  *	case first(p) in
  *
  *	NULL	- TRUE if s is empty else FALSE

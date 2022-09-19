@@ -1,8 +1,8 @@
 /*
  * Copyright (c) 1993-1995 Argonaut Technologies Limited. All rights reserved.
  *
- * $Id: scratch.c 2.4 1996/10/01 14:13:59 sam Exp JOHNG $
- * $Locker: JOHNG $
+ * $Id: scratch.c 1.1 1997/12/10 16:41:10 jon Exp $
+ * $Locker: $
  *
  * Manage a temporary scratchpad for the rest of the system
  *
@@ -11,17 +11,16 @@
 #include "fw.h"
 #include "brassert.h"
 
-BR_RCS_ID("$Id: scratch.c 2.4 1996/10/01 14:13:59 sam Exp JOHNG $")
+BR_RCS_ID("$Id: scratch.c 1.1 1997/12/10 16:41:10 jon Exp $")
 
 /*
  * Allocate a scratch buffer of the given size
  */
 void *BR_RESIDENT_ENTRY BrScratchAllocate(br_size_t size)
 {
-#if DEBUG
 	if(fw.scratch_inuse)
 		BR_ERROR0("Scratchpad not available");
-#endif
+
 	fw.scratch_last = size;
 
 	if(size > fw.scratch_size) {
@@ -36,10 +35,9 @@ void *BR_RESIDENT_ENTRY BrScratchAllocate(br_size_t size)
 		fw.scratch_size = size;
 #endif
 	}
-	
-#if DEBUG
+
 	fw.scratch_inuse = 1;
-#endif
+
 	return fw.scratch_ptr;
 }
 
@@ -50,9 +48,8 @@ void BR_RESIDENT_ENTRY BrScratchFree(void *scratch)
 {
 	UASSERT(fw.scratch_ptr == scratch);
 
-#if DEBUG
 	fw.scratch_inuse = 0;
-#endif
+
 #if 0
 	BrResFree(fw.scratch_ptr);
 	fw.scratch_ptr = NULL;
@@ -98,5 +95,3 @@ br_size_t BR_RESIDENT_ENTRY BrScratchStringSize(void)
 {
 	return BR_ASIZE(scratchString);
 }
-
-

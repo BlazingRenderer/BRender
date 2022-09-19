@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 1993-1995 Argonaut Technologies Limited. All rights reserved.
  *
- * $Id: brddi_p.h 2.4 1997/07/16 13:40:26 jon Exp $
+ * $Id: brddi_p.h 1.3 1998/11/12 13:14:55 johng Exp $
  * $Locker: $
  *
  * Prototypes for functions that are exposed to device drivers
@@ -67,7 +67,7 @@ br_error BR_RESIDENT_ENTRY BrTokenValueQuery(
 	br_tv_template *_template);
 
 br_error BR_RESIDENT_ENTRY BrTokenValueQueryMany(
-	br_token_value *tv, 
+	br_token_value *tv,
 	void *extra, br_size_t extra_size,
 	br_int_32 *pcount,
 	void *block,
@@ -90,7 +90,7 @@ br_error BR_RESIDENT_ENTRY BrTokenValueQueryAllSize(
 	br_tv_template *_template);
 
 /* NB: value doesn't have to be a pointer. A pointer just happens to be large enough.
-** It should really be br_value. */
+ * It should really be br_value. */
 br_error BR_RESIDENT_ENTRY BrTokenValueSet(
 	void *mem,
 	br_uint_32 *pcombined_mask,

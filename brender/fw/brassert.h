@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 1993-1995 by Argonaut Technologies Limited. All rights reserved.
  *
- * $Id: brassert.h 2.3 1996/09/30 15:13:45 JOHNG Exp $
+ * $Id: brassert.h 1.1 1997/12/10 16:41:03 jon Exp $
  * $Locker: $
  *
  * Assertion macros

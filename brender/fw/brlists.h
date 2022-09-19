@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 1993-1995 Argonaut Technologies Limited. All rights reserved.
  *
- * $Id: brlists.h 2.5 1996/10/03 11:35:21 sam Exp $
+ * $Id: brlists.h 1.2 1998/05/20 11:55:54 jon Exp $
  * $Locker: $
  *
  * Doubly linked list supoprt (Based on Amiga EXEC!)
@@ -91,7 +91,7 @@ typedef struct br_simple_list {
 
 #define BR_SIMPLEINSERTED(n) (void *)(((br_simple_node *)(n))->prev)
 
-#define BR_SIMPLECHECK(l) BR_HEAD(l)
+#define BR_SIMPLECHECK(l) BR_SIMPLEHEAD(l)
 
 
 #define BR_FOR_SIMPLELIST(list,ptr) for((ptr)=BR_SIMPLEHEAD(list);(ptr);(ptr)=BR_SIMPLENEXT(ptr))

@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 1995 Argonaut Technologies Limited. All rights reserved.
  *
- * $Id: brimage.h 2.3 1996/10/03 11:35:21 sam Exp $
+ * $Id: brimage.h 1.1 1997/12/10 16:41:04 jon Exp $
  * $Locker: $
  *
  */

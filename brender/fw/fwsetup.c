@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 1993-1995 Argonaut Technologies Limited. All rights reserved.
  *
- * $Id: fwsetup.c 2.17 1996/10/29 16:15:51 STEVEW Exp $
+ * $Id: fwsetup.c 1.2 1998/07/20 21:52:55 jon Exp $
  * $Locker: $
  *
  */
@@ -9,9 +9,9 @@
 #include "brassert.h"
 #include "datafile.h"
 #include "syscn_p.h"
+#include "brmath.h"
 
-
-BR_RCS_ID("$Id: fwsetup.c 2.17 1996/10/29 16:15:51 STEVEW Exp $")
+BR_RCS_ID("$Id: fwsetup.c 1.2 1998/07/20 21:52:55 jon Exp $")
 
 /*
  * Stubs left over from dealing with Watcom's
@@ -71,7 +71,7 @@ static br_resource_class resourceClasses[] = {
 };
 
 /*
- * Resident image that is used to expose resident framework 
+ * Resident image that is used to expose resident framework
  * functions to loaded devices.
  */
 #include "fwimg.h"
@@ -118,10 +118,10 @@ br_error BR_PUBLIC_ENTRY BrFwBegin(void)
 	 * Fake the resource classes that are required to
 	 * support the registry
 	 */
-	fw.resource_class_index[BR_MEMORY_REGISTRY] = 
+	fw.resource_class_index[BR_MEMORY_REGISTRY] =
 		resourceClasses+0;
 
-	fw.resource_class_index[BR_MEMORY_ANCHOR] = 
+	fw.resource_class_index[BR_MEMORY_ANCHOR] =
 		resourceClasses+1;
 
 	/*
@@ -159,14 +159,14 @@ br_error BR_PUBLIC_ENTRY BrFwBegin(void)
 
    /*
     *  Set up default system configuration
-    */ 
+    */
 
     BrSystemConfigBegin();
 
 	// Mark default drivers as still to be loaded.
-	
+
 	fw.bAlreadyLoadedDrivers = BR_FALSE ;
-	
+
 	/*
 	 * Set up resident framework image
 	 */

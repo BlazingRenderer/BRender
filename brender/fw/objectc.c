@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 1995 Argonaut Technologies Limited. All rights reserved.
  *
- * $Id: objectc.c 2.8 1997/07/14 11:11:19 jon Exp $
+ * $Id: objectc.c 1.3 1998/07/15 18:32:32 johng Exp $
  * $Locker: $
  *
  * Some generic methods for object container list management
@@ -9,7 +9,7 @@
 #include "fw.h"
 #include "brassert.h"
 
-BR_RCS_ID("$Id: objectc.c 2.8 1997/07/14 11:11:19 jon Exp $")
+BR_RCS_ID("$Id: objectc.c 1.3 1998/07/15 18:32:32 johng Exp $")
 
 /*
  * Parts that lists are constructed from
@@ -51,7 +51,7 @@ br_error BR_CMETHOD_DECL(br_object_container, addFront)(struct br_object_contain
 
 	/*
 	 * Allocate a new list entry and add it to the list
-	 */	
+	 */
 	he = BrResAllocate(hl, sizeof(struct object_list_entry), BR_MEMORY_OBJECT_LIST_ENTRY);
 
 	if(he == NULL)
@@ -112,14 +112,14 @@ br_error BR_CMETHOD_DECL(br_object_container, removeFront)(struct br_object_cont
 	 */
 	he = BR_SIMPLEREMHEAD(&hl->l);
 
-	if(he == NULL) { 
+	if(he == NULL) {
 		*ph = NULL;
 		return BRE_FAIL;
 	}
 
 	/*
 	 * Return object pointer to caller
-	 */	
+	 */
 	*ph = he->h;
 	BrResFree(he);
 
@@ -165,14 +165,14 @@ br_error BR_CMETHOD_DECL(br_object_container, find)(br_object_container *self,
 	 * Find first matching object in list
 	 */
 	BR_FOR_SIMPLELIST(&hl->l, he) {
-		if((type == BR_NULL_TOKEN || type == ObjectType(he->h)) && BrNamePatternMatch(pattern,ObjectIdentifier(he->h))) {
-			
-			if(!tv || ObjectContainerTokensMatch(self, he->h, tvarg))
-			{
-				*ph = he->h;
-				r = BRE_OK;
-				break;
-			}
+		if((type == BR_NULL_TOKEN || type == ObjectType(he->h)) &&
+			BrNamePatternMatch(pattern,ObjectIdentifier(he->h))) {
+
+			if(tv && !ObjectContainerTokensMatch(self, he->h, tvarg))
+				continue;
+
+			*ph = he->h;
+			r = BRE_OK;
 		}
 	}
 
@@ -209,7 +209,7 @@ br_error BR_CMETHOD_DECL(br_object_container, findMany)(br_object_container *sel
 		 */
 		if((type == BR_NULL_TOKEN || type == ObjectType(he->h)) &&
 			BrNamePatternMatch(pattern, ObjectIdentifier(he->h))) {
-	
+
 			if(tv != NULL && ObjectContainerTokensMatch(self, he->h, tvarg) == BR_FALSE)
 				continue;
 

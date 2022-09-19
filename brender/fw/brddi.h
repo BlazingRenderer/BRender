@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 1993-1995 Argonaut Technologies Limited. All rights reserved.
  *
- * $Id: brddi.h 2.2 1996/10/01 14:13:46 sam Exp $
+ * $Id: brddi.h 1.2 1998/11/12 13:14:23 johng Exp $
  * $Locker: $
  *
  * Master include file for devices
@@ -66,6 +66,4 @@ struct fmt_vertex;
 
 #endif
 #endif
-
-
 

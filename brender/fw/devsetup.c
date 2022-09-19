@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 1993-1995 Argonaut Technologies Limited. All rights reserved.
  *
- * $Id: devsetup.c 2.19 1997/07/14 18:08:03 jon Exp $
+ * $Id: devsetup.c 1.2 1997/12/11 13:33:10 jon Exp $
  * $Locker: $
  *
  * XXX should condense all the BrXXXFind() functions into one,
@@ -14,7 +14,7 @@
 #include "host.h"
 #include "brassert.h"
 
-BR_RCS_ID("$Id: devsetup.c 2.19 1997/07/14 18:08:03 jon Exp $")
+BR_RCS_ID("$Id: devsetup.c 1.2 1997/12/11 13:33:10 jon Exp $")
 
 /*
  * XXX A very nasty hack to get around limitiations of v1.1.x
@@ -70,7 +70,7 @@ br_error BR_PUBLIC_ENTRY BrDevBeginVar(br_pixelmap **ppm, const char *setup_stri
 }
 
 /*
- * Takes a setup string and produces a new output screen pixelmap 
+ * Takes a setup string and produces a new output screen pixelmap
  */
 br_error BR_PUBLIC_ENTRY BrDevBegin(br_pixelmap **ppm, const char *setup_string)
 {
@@ -79,7 +79,7 @@ br_error BR_PUBLIC_ENTRY BrDevBegin(br_pixelmap **ppm, const char *setup_string)
 
 /*
  * Takes a setup string and NULL terminated list of setup token-value pairs
- * and produces a new output screen pixelmap 
+ * and produces a new output screen pixelmap
  */
 br_error BR_PUBLIC_ENTRY BrDevBeginTV(br_pixelmap **ppm, const char *setup_string, br_token_value *setup_tv)
 {
@@ -123,7 +123,7 @@ br_error BR_PUBLIC_ENTRY BrDevBeginTV(br_pixelmap **ppm, const char *setup_strin
 		devname++;
 
 	n = BrStrLen(devname);
-			
+
 	if(n) {
 		while(BrIsSpace(devname[n-1])) {
 			devname[n-1] = '\0';
@@ -225,7 +225,7 @@ br_error BR_PUBLIC_ENTRY BrDevBeginTV(br_pixelmap **ppm, const char *setup_strin
 						device_name++;
 
 					n = BrStrLen(device_name);
-			
+
 					if (n) {
 						while (BrIsSpace(device_name[n-1])) {
 							device_name[n-1] = '\0';
@@ -441,7 +441,6 @@ br_error BR_RESIDENT_ENTRY BrRendererFacilityFind(br_renderer_facility **prf,
  * filled with the as many facilities as possible and the count is the number
  * of renderer facilities that were found.
  */
-#pragma warning( disable : 4047 )
 br_error BR_RESIDENT_ENTRY BrRendererFacilityListFind(br_renderer_facility **prf,
 				br_int_32 *num_rf, br_int_32 max_rf,
 				br_device_pixelmap *destination, br_token scalar_type)
@@ -621,7 +620,6 @@ br_error BR_RESIDENT_ENTRY BrRendererFacilityListFind(br_renderer_facility **prf
 
 	return BRE_OK;
 }
-#pragma warning( default : 4047 )
 
 
 /*
@@ -712,7 +710,6 @@ br_error BR_RESIDENT_ENTRY BrPrimitiveLibraryFind(br_primitive_library **ppl,
  * filled with the as many libraries as possible and the count is the number
  * of primitive libraries that were found.
  */
-#pragma warning( disable : 4047 )
 br_error BR_RESIDENT_ENTRY BrPrimitiveLibraryListFind(br_primitive_library **ppl,
 				br_int_32 *num_pl, br_int_32 max_pl,
 				br_device_pixelmap *destination, br_token scalar_type)
@@ -892,7 +889,6 @@ br_error BR_RESIDENT_ENTRY BrPrimitiveLibraryListFind(br_primitive_library **ppl
 
 	return BRE_OK;
 }
-#pragma warning( default : 4047 )
 
 
 br_error BR_RESIDENT_ENTRY BrGeometryFormatFind(br_geometry **pgf,
