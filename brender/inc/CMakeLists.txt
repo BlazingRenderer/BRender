@@ -31,6 +31,7 @@ set(INC_FILES
 	./brlog.h
 	./brmem.h
 	./brv1db.h
+	./brvector.h
 	./camera.h
 	./colour.h
 	./compend.h
@@ -56,7 +57,6 @@ set(INC_FILES
 	./transfrm.h
 	./v1db_p.h
 	./vecfns.h
-	./vector.h
 	./inc-dummy.c
 )
 

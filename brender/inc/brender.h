@@ -69,7 +69,7 @@
 #endif
 
 #ifndef _VECTOR_H_
-#include "vector.h"
+#include "brvector.h"
 #endif
 
 #ifndef _ANGLES_H_
