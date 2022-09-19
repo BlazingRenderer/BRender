@@ -180,7 +180,7 @@ void BR_PUBLIC_ENTRY BrQuantMapColours(int base,br_uint_8 *colours,
  */
 
 br_pixelmap * BR_PUBLIC_ENTRY BrPixelmapMakeMipMap(br_pixelmap *source,
-	br_uint_8 destinationType,br_pixelmap *palette,br_uint_32 base,
+	br_uint_32 destinationType,br_pixelmap *palette,br_uint_32 base,
 	br_uint_32 range,br_uint_32 quantizationMethod);
 
 br_error BR_PUBLIC_ENTRY BrPixelmapGetControls(br_pixelmap *pm, br_display_controls * controls);
