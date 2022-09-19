@@ -61,3 +61,8 @@ void BR_PUBLIC_ENTRY BrPixelmapEnd(void)
 	 */
 	BrMemSet(&_pixelmap, 0, sizeof(_pixelmap));
 }
+
+struct br_pixelmap_state * BR_RESIDENT_ENTRY PixelmapState(void)
+{
+	return &_pixelmap;
+}
