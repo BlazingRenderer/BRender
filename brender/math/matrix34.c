@@ -302,22 +302,15 @@ void BR_PUBLIC_ENTRY BrMatrix34PreScale(br_matrix34 *mat, br_scalar sx, br_scala
 	BrMatrix34Copy(mat,&mattmp2);
 }
 
-void BR_PUBLIC_ENTRY BrMatrix34PostScale(br_matrix34 *mat, br_scalar sx, br_scalar sy, br_scalar sz){
-	mat->m[0][0]*=sx;
-	mat->m[1][0]*=sx;
-	mat->m[2][0]*=sx;
-	mat->m[3][0]*=sx;
+void BR_PUBLIC_ENTRY BrMatrix34PostScale(br_matrix34 *mat, br_scalar sx, br_scalar sy, br_scalar sz)
+{
+	br_matrix34 mattmp1,mattmp2;
 
-	mat->m[0][1]*=sy;
-	mat->m[1][1]*=sy;
-	mat->m[2][1]*=sy;
-	mat->m[3][1]*=sy;
+	UASSERT_MESSAGE("Subject matrix is NULL", mat != NULL);
 
-	mat->m[0][2]*=sz;
-	mat->m[1][2]*=sz;
-	mat->m[2][2]*=sz;
-	mat->m[3][2]*=sz;
-
+	BrMatrix34Scale(&mattmp1,sx,sy,sz);
+	BrMatrix34Mul(&mattmp2,mat,&mattmp1);
+	BrMatrix34Copy(mat,&mattmp2);
 }
 
 /*
