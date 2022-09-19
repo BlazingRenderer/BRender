@@ -17,8 +17,6 @@
 
 BR_RCS_ID("$Id: matrix34.c 1.7 1998/08/13 11:56:03 jon Exp $")
 
-static br_matrix34 mattmp1,mattmp2;
-
 /*
  * A = B
  */
@@ -975,24 +973,30 @@ void BR_PUBLIC_ENTRY BrMatrix34TApplyV(br_vector3 *A, const br_vector3 *B, const
 
 void BR_PUBLIC_ENTRY BrMatrix34Pre(br_matrix34 *mat , const br_matrix34 *A)
 {
+	br_matrix34 mattmp;
+
 	UASSERT_MESSAGE("Subject matrix is NULL", mat != NULL);
 	UASSERT_MESSAGE("Pre-multiplying matrix is NULL", A != NULL);
 
-	BrMatrix34Mul(&mattmp2,A,mat);
-	BrMatrix34Copy(mat,&mattmp2);
+	BrMatrix34Mul(&mattmp,A,mat);
+	BrMatrix34Copy(mat,&mattmp);
 }
 
 void BR_PUBLIC_ENTRY BrMatrix34Post(br_matrix34 *mat , const br_matrix34 *A)
 {
+	br_matrix34 mattmp;
+
 	UASSERT_MESSAGE("Subject matrix is NULL", mat != NULL);
 	UASSERT_MESSAGE("Post-multiplying matrix is NULL", A != NULL);
 
-	BrMatrix34Mul(&mattmp2,mat,A);
-	BrMatrix34Copy(mat,&mattmp2);
+	BrMatrix34Mul(&mattmp,mat,A);
+	BrMatrix34Copy(mat,&mattmp);
 }
 
 void BR_PUBLIC_ENTRY BrMatrix34PreRotate(br_matrix34 *mat, br_angle r, const br_vector3 *axis)
 {
+	br_matrix34 mattmp1,mattmp2;
+
 	UASSERT_MESSAGE("Subject matrix is NULL", mat != NULL);
 
 	BrMatrix34Rotate(&mattmp1,r,axis);
@@ -1002,6 +1006,8 @@ void BR_PUBLIC_ENTRY BrMatrix34PreRotate(br_matrix34 *mat, br_angle r, const br_
 
 void BR_PUBLIC_ENTRY BrMatrix34PostRotate(br_matrix34 *mat, br_angle r, const br_vector3 *axis)
 {
+	br_matrix34 mattmp1,mattmp2;
+
 	UASSERT_MESSAGE("Subject matrix is NULL", mat != NULL);
 
 	BrMatrix34Rotate(&mattmp1,r,axis);
@@ -1011,6 +1017,8 @@ void BR_PUBLIC_ENTRY BrMatrix34PostRotate(br_matrix34 *mat, br_angle r, const br
 
 void BR_PUBLIC_ENTRY BrMatrix34PreTranslate(br_matrix34 *mat, br_scalar x, br_scalar y, br_scalar z)
 {
+	br_matrix34 mattmp1,mattmp2;
+
 	UASSERT_MESSAGE("Subject matrix is NULL", mat != NULL);
 
 	BrMatrix34Translate(&mattmp1,x,y,z);
@@ -1026,6 +1034,8 @@ void BR_PUBLIC_ENTRY BrMatrix34PostTranslate(br_matrix34 *mat, br_scalar x, br_s
 
 void BR_PUBLIC_ENTRY BrMatrix34PreShearX(br_matrix34 *mat, br_scalar sy, br_scalar sz)
 {
+	br_matrix34 mattmp1,mattmp2;
+
 	UASSERT_MESSAGE("Subject matrix is NULL", mat != NULL);
 
 	BrMatrix34ShearX(&mattmp1,sy,sz);
@@ -1035,6 +1045,8 @@ void BR_PUBLIC_ENTRY BrMatrix34PreShearX(br_matrix34 *mat, br_scalar sy, br_scal
 
 void BR_PUBLIC_ENTRY BrMatrix34PostShearX(br_matrix34 *mat, br_scalar sy, br_scalar sz)
 {
+	br_matrix34 mattmp1,mattmp2;
+
 	UASSERT_MESSAGE("Subject matrix is NULL", mat != NULL);
 
 	BrMatrix34ShearX(&mattmp1,sy,sz);
@@ -1044,6 +1056,8 @@ void BR_PUBLIC_ENTRY BrMatrix34PostShearX(br_matrix34 *mat, br_scalar sy, br_sca
 
 void BR_PUBLIC_ENTRY BrMatrix34PreShearY(br_matrix34 *mat, br_scalar sx, br_scalar sz)
 {
+	br_matrix34 mattmp1,mattmp2;
+
 	UASSERT_MESSAGE("Subject matrix is NULL", mat != NULL);
 
 	BrMatrix34ShearY(&mattmp1,sx,sz);
@@ -1053,6 +1067,8 @@ void BR_PUBLIC_ENTRY BrMatrix34PreShearY(br_matrix34 *mat, br_scalar sx, br_scal
 
 void BR_PUBLIC_ENTRY BrMatrix34PostShearY(br_matrix34 *mat, br_scalar sx, br_scalar sz)
 {
+	br_matrix34 mattmp1,mattmp2;
+
 	UASSERT_MESSAGE("Subject matrix is NULL", mat != NULL);
 
 	BrMatrix34ShearY(&mattmp1,sx,sz);
@@ -1062,6 +1078,8 @@ void BR_PUBLIC_ENTRY BrMatrix34PostShearY(br_matrix34 *mat, br_scalar sx, br_sca
 
 void BR_PUBLIC_ENTRY BrMatrix34PreShearZ(br_matrix34 *mat, br_scalar sx, br_scalar sy)
 {
+	br_matrix34 mattmp1,mattmp2;
+
 	UASSERT_MESSAGE("Subject matrix is NULL", mat != NULL);
 
 	BrMatrix34ShearZ(&mattmp1,sx,sy);
@@ -1071,6 +1089,8 @@ void BR_PUBLIC_ENTRY BrMatrix34PreShearZ(br_matrix34 *mat, br_scalar sx, br_scal
 
 void BR_PUBLIC_ENTRY BrMatrix34PostShearZ(br_matrix34 *mat, br_scalar sx, br_scalar sy)
 {
+	br_matrix34 mattmp1,mattmp2;
+
 	UASSERT_MESSAGE("Subject matrix is NULL", mat != NULL);
 
 	BrMatrix34ShearZ(&mattmp1,sx,sy);
