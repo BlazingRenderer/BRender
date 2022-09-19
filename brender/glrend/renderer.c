@@ -470,6 +470,27 @@ static br_error BR_CMETHOD_DECL(br_renderer_gl, stateQueryPerformance)(br_render
     return BRE_FAIL;
 }
 
+static br_error BR_CMETHOD_DECL(br_renderer_gl, frameBegin)(br_renderer *self)
+{
+    return BRE_OK;
+}
+
+static br_error BR_CMETHOD_DECL(br_renderer_gl, frameEnd)(br_renderer *self)
+{
+    return BRE_OK;
+}
+
+static br_error BR_CMETHOD_DECL(br_renderer_gl, focusLossBegin)(br_renderer *self)
+{
+    return BRE_OK;
+}
+
+static br_error BR_CMETHOD_DECL(br_renderer_gl, focusLossEnd)(br_renderer *self)
+{
+    return BRE_OK;
+}
+
+
 /*
  * Default dispatch table for renderer
  */
@@ -538,4 +559,8 @@ static const struct br_renderer_dispatch rendererDispatch = {
     ._testRender            = BR_CMETHOD(br_renderer_gl, testRender),
     ._partQueryCapability   = BR_CMETHOD(br_renderer_gl, partQueryCapability),
     ._stateQueryPerformance = BR_CMETHOD(br_renderer_gl, stateQueryPerformance),
+    ._frameBegin            = BR_CMETHOD(br_renderer_gl, frameBegin),
+    ._frameEnd              = BR_CMETHOD(br_renderer_gl, frameEnd),
+    ._focusLossBegin        = BR_CMETHOD(br_renderer_gl, focusLossBegin),
+    ._focusLossEnd          = BR_CMETHOD(br_renderer_gl, focusLossEnd),
 };

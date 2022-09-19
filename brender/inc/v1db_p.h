@@ -336,6 +336,12 @@ void BR_PUBLIC_ENTRY BrRendererBegin(br_pixelmap *destination,
 
 void BR_PUBLIC_ENTRY BrRendererEnd(void);
 
+void BR_PUBLIC_ENTRY BrRendererFrameBegin(void);
+void BR_PUBLIC_ENTRY BrRendererFrameEnd(void);
+
+void BR_PUBLIC_ENTRY BrRendererFocusLossBegin(void);
+void BR_PUBLIC_ENTRY BrRendererFocusLossEnd(void);
+
 /*
  * Renderering - Z Buffer
  */
@@ -478,12 +484,6 @@ typedef br_boolean BR_CALLBACK br_primlib_enum_cbfn(const char *identifier,
  */
 br_error BR_PUBLIC_ENTRY BrRendererFacilityEnum(br_pixelmap *destination, br_rendfcty_enum_cbfn *cbfn, void *args);
 br_error BR_PUBLIC_ENTRY BrPrimitiveLibraryEnum(br_pixelmap *destination, br_primlib_enum_cbfn *cbfn, void *args);
-
-/*
- * Stub functions for now.
- */
-void BR_PUBLIC_ENTRY BrRendererFrameBegin(void);
-void BR_PUBLIC_ENTRY BrRendererFrameEnd(void);
 
 #ifdef __cplusplus
 };

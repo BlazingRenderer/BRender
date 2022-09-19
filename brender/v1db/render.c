@@ -694,6 +694,32 @@ static void sceneRenderAdd(br_actor *tree)
 	}
 }
 
+/* Signal start of frame */
+void BR_PUBLIC_ENTRY BrRendererFrameBegin(void)
+{
+	RendererFrameBegin(v1db.renderer);
+}
+
+/* Signal end of frame */
+void BR_PUBLIC_ENTRY BrRendererFrameEnd(void)
+{
+	RendererFrameEnd(v1db.renderer);
+}
+
+/* Hack to tell d3d driver when it is about to loose surfaces */
+void BR_PUBLIC_ENTRY BrRendererFocusLossBegin(void)
+{
+	if(v1db.renderer)
+		RendererFocusLossBegin(v1db.renderer);
+}
+
+/* Hack to tell d3d driver when it will have to restore surfaces */
+void BR_PUBLIC_ENTRY BrRendererFocusLossEnd(void)
+{
+	if(v1db.renderer)
+		RendererFocusLossEnd(v1db.renderer);
+}
+
 /*
  * BrDbSceneRenderBegin()
  *
@@ -1152,21 +1178,6 @@ br_renderbounds_cbfn * BR_PUBLIC_ENTRY BrZsRenderBoundsCallbackSet(br_renderboun
 	}
 	else
 		return BrDbSetRenderBoundsCallback(new_cbfn);
-}
-
-/* Stubs until I can implement them properly */
-void BR_PUBLIC_ENTRY BrRendererFrameBegin(void)
-{
-#if defined(_DEBUG) && (DISPLAY_STUBS != 0)
-	fprintf(stderr, "STUB: BrRendererFrameBegin\n");
-#endif
-}
-
-void BR_PUBLIC_ENTRY BrRendererFrameEnd(void)
-{
-#if defined(_DEBUG) && (DISPLAY_STUBS != 0)
-	fprintf(stderr, "STUB: BrRendererFrameEnd\n");
-#endif
 }
 
 br_colour BR_PUBLIC_ENTRY BrSceneAmbientLight(br_colour colour)
