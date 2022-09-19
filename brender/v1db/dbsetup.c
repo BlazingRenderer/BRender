@@ -500,15 +500,34 @@ void BR_PUBLIC_ENTRY BrZsEnd(void)
 #undef BrBegin
 #undef BrEnd
 
-void BR_PUBLIC_ENTRY BrV1dbBeginWrapper(void)
+br_error BR_PUBLIC_ENTRY BrV1dbBeginWrapper(void)
 {
-	BrBegin();
-	BrV1dbBegin();
+	br_error error;
+
+	error = BrBegin();
+	if (error != BRE_OK)
+		return error;
+
+	error = BrV1dbBegin();
+	if (error != BRE_OK)
+		return error;
+
+	return BRE_OK;
 }
 
-void BR_PUBLIC_ENTRY BrV1dbEndWrapper(void)
+br_error BR_PUBLIC_ENTRY BrV1dbEndWrapper(void)
 {
-	BrV1dbEnd();
-	BrEnd();
+	br_error result = BRE_OK;
+	br_error error;
+
+	error = BrV1dbEnd();
+	if (error != BRE_OK)
+		result = error;
+
+	error = BrEnd();
+	if (error != BRE_OK)
+		result = error;
+
+	return result;
 }
 

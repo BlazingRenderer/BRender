@@ -58,8 +58,8 @@ typedef void BR_CALLBACK br_primitive_cbfn(
 extern "C" {
 #endif
 
-void BR_PUBLIC_ENTRY BrV1dbBeginWrapper(void);
-void BR_PUBLIC_ENTRY BrV1dbEndWrapper(void);
+br_error BR_PUBLIC_ENTRY BrV1dbBeginWrapper(void);
+br_error BR_PUBLIC_ENTRY BrV1dbEndWrapper(void);
 
 br_error BR_PUBLIC_ENTRY BrV1dbRendererBegin(struct br_device_pixelmap *destination, struct br_renderer *renderer);
 struct br_renderer * BR_PUBLIC_ENTRY BrV1dbRendererQuery(void);
