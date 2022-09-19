@@ -627,8 +627,13 @@ int BR_PUBLIC_ENTRY BrModelPick2D(
 			if(u2 == S0)
 				continue;
 
+			/*
+			 * Safety code - ignore faces that will cause a divide by zero
+			 */
+			if (v1 == 0)
+				continue;
+
 			beta = BR_DIV(u0,u2);
-            UASSERT_MESSAGE("BrModelPick2D divide by zero error", v1 != 0);
 			if( beta >= S0 && beta <= S1)
 				alpha = BR_DIV(BR_SUB(v0,BR_MUL(beta,v2)),v1);
 			else
@@ -643,8 +648,13 @@ int BR_PUBLIC_ENTRY BrModelPick2D(
 			if(d == S0)
 				continue;
 
+			/*
+			 * Safety code - ignore faces that will cause a divide by zero
+			 */
+			if (u1 == 0)
+				continue;
+
 			beta = BR_DIV(n,d);
-            UASSERT_MESSAGE("BrModelPick2D divide by zero error", u1 != 0);
 			if( beta >= S0 && beta <= S1)
 				alpha = BR_DIV(BR_SUB(u0,BR_MUL(beta,u2)),u1);
 			else
