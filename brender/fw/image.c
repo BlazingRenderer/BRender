@@ -174,6 +174,8 @@ br_image * BR_RESIDENT_ENTRY BrImageReference(char *name)
 
 		BrResAdd(fw.res, img);
 		BrImageAdd(img);
+
+		img->ref_count++;
 	}
 
 	return img;
