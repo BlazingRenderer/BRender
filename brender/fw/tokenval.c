@@ -63,6 +63,9 @@ static void templateMakeMap(br_tv_template *template)
 	ASSERT(template);
 	ASSERT(template->n_entries > 0);
 
+	if(!template->names_resolved)
+		templateResolveNames(template);
+
 	/*
 	 * Find range of tokens used 
 	 */
