@@ -1999,6 +1999,36 @@ br_boolean BR_RESIDENT_ENTRY BrTokenValueCompare(br_token_value *tv1, br_token_v
 				return BR_FALSE;
 			break;
 
+		case BRT_INT_32:
+			if(tv1->v.i32 != tv2->v.i32)
+				return BR_FALSE;
+			break;
+
+		case BRT_UINT_32:
+			if(tv1->v.u32 != tv2->v.u32)
+				return BR_FALSE;
+			break;
+
+		case BRT_INT_64:
+			if(tv1->v.i64 != tv2->v.i64)
+				return BR_FALSE;
+			break;
+
+		case BRT_UINT_64:
+			if(tv1->v.u64 != tv2->v.u64)
+				return BR_FALSE;
+			break;
+
+		case BRT_INTPTR:
+			if(tv1->v.pi != tv2->v.pi)
+				return BR_FALSE;
+			break;
+
+		case BRT_UINTPTR:
+			if(tv1->v.pu != tv2->v.pu)
+				return BR_FALSE;
+			break;
+
 		default:
 			if(tv1->v.u32 != tv2->v.u32)
 				return BR_FALSE;
@@ -2124,6 +2154,36 @@ br_boolean BR_RESIDENT_ENTRY BrTokenValueComparePartial(br_token_value *tv1, br_
 
 		case BRT_UINT_16:
 			if(tv1->v.u16 != tv2->v.u16)
+				return BR_FALSE;
+			break;
+
+		case BRT_INT_32:
+			if(tv1->v.i32 != tv2->v.i32)
+				return BR_FALSE;
+			break;
+
+		case BRT_UINT_32:
+			if(tv1->v.u32 != tv2->v.u32)
+				return BR_FALSE;
+			break;
+
+		case BRT_INT_64:
+			if(tv1->v.i64 != tv2->v.i64)
+				return BR_FALSE;
+			break;
+
+		case BRT_UINT_64:
+			if(tv1->v.u64 != tv2->v.u64)
+				return BR_FALSE;
+			break;
+
+		case BRT_INTPTR:
+			if(tv1->v.pi != tv2->v.pi)
+				return BR_FALSE;
+			break;
+
+		case BRT_UINTPTR:
+			if(tv1->v.pu != tv2->v.pu)
 				return BR_FALSE;
 			break;
 
