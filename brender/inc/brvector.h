@@ -87,6 +87,18 @@ typedef struct br_vector4_i
 	br_int_32 v[4];
 } br_vector4_i;
 
+typedef struct br_vector2_u16 {
+    br_uint_16 v[2];
+} br_vector2_u16;
+
+typedef struct br_vector3_u16 {
+    br_uint_16 v[3];
+} br_vector3_u16;
+
+typedef struct br_vector4_u16 {
+    br_uint_16 v[4];
+} br_vector4_u16;
+
 /*
 * Fraction vector types
 */
