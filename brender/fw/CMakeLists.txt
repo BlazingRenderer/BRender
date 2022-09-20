@@ -72,7 +72,6 @@ set(FW_FILES
 	./token.c
 	./tokenval.c
 
-	./assocarr.h
 	./blockops.h
 	./brassert.h
 	./brddi.h
