@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 1995 Argonaut Technologies Limited. All rights reserved.
  *
- * $Id: stdlib.c 2.5 1997/06/16 19:19:52 jon Exp $
+ * $Id: stdlib.c 1.1 1997/12/10 16:41:28 jon Exp $
  * $Locker: $
  *
  * Glue to stdlib functions
@@ -16,7 +16,7 @@
 
 #include "brender.h"
 
-BR_RCS_ID("$Id: stdlib.c 2.5 1997/06/16 19:19:52 jon Exp $")
+BR_RCS_ID("$Id: stdlib.c 1.1 1997/12/10 16:41:28 jon Exp $")
 
 int BR_RESIDENT_ENTRY BrMemCmp( const void *s1, const void *s2, size_t n )
 {

@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 1993-1995 by Argonaut Technologies Limited. All rights reserved.
  *
- * $Id: stdfile.c 2.7 1996/11/20 18:07:52 STEVEW Exp $
+ * $Id: stdfile.c 1.1 1997/12/10 16:41:28 jon Exp $
  * $Locker: $
  *
  * Default file handler that uses <stdio.h>
@@ -15,7 +15,7 @@
 #include "brassert.h"
 
 
-BR_RCS_ID("$Id: stdfile.c 2.7 1996/11/20 18:07:52 STEVEW Exp $")
+BR_RCS_ID("$Id: stdfile.c 1.1 1997/12/10 16:41:28 jon Exp $")
 
 
 
@@ -65,8 +65,8 @@ static FILE *BrStdioFopenUtf8(const char *utf8Name, const char *mode)
  */
 static br_uint_32 BR_CALLBACK BrStdioAttributes(void)
 {
-	return 
-		BR_FS_ATTR_READABLE   | 
+	return
+		BR_FS_ATTR_READABLE   |
 		BR_FS_ATTR_WRITEABLE  |
 		BR_FS_ATTR_HAS_TEXT   |
 		BR_FS_ATTR_HAS_BINARY |
@@ -283,7 +283,7 @@ static br_size_t BR_CALLBACK BrStdioGetLine(char *buf, br_size_t buf_len, void *
 
 	if(l > 0 && buf[l-1] == '\n')
 		buf[--l] = '\0';
-		
+
 	return l;
 }
 

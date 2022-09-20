@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 1993-1995 by Argonaut Technologies Limited. All rights reserved.
  *
- * $Id: brmath.h 2.5 1997/08/13 10:53:20 JOHNG Exp $
+ * $Id: brmath.h 1.2 1998/07/20 21:52:53 jon Exp $
  * $Locker: $
  *
  * Wrappers around standard C math functions

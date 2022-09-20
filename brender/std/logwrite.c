@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 1995 Argonaut Technologies Limited. All rights reserved.
  *
- * $Id: logwrite.c 2.1 1996/03/07 20:37:27 sam Exp $
+ * $Id: logwrite.c 1.1 1997/12/10 16:41:28 jon Exp $
  * $Locker: $
  *
  * Glue to stdlib functions
@@ -10,7 +10,7 @@
 
 #include "brender.h"
 
-BR_RCS_ID("$Id: logwrite.c 2.1 1996/03/07 20:37:27 sam Exp $")
+BR_RCS_ID("$Id: logwrite.c 1.1 1997/12/10 16:41:28 jon Exp $")
 
 int BR_PUBLIC_ENTRY BrLogWrite(void *buffer, br_size_t s, br_size_t n)
 {

@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 1993-1995 by Argonaut Technologies Limited. All rights reserved.
  *
- * $Id: stdmem.c 2.6 1996/04/25 14:47:10 sam Exp $
+ * $Id: stdmem.c 1.1 1997/12/10 16:41:29 jon Exp $
  * $Locker: $
  *
  * Default memory handler that uses malloc()/free() from C library
@@ -9,7 +9,7 @@
 #include <stdlib.h>
 #include "brender.h"
 
-BR_RCS_ID("$Id: stdmem.c 2.6 1996/04/25 14:47:10 sam Exp $")
+BR_RCS_ID("$Id: stdmem.c 1.1 1997/12/10 16:41:29 jon Exp $")
 
 /*
  * Glue functions for malloc()/free()
@@ -58,3 +58,4 @@ br_allocator BrStdlibAllocator = {
  * Override global variable s.t. this is the default allocator
  */
 br_allocator * BR_ASM_DATA _BrDefaultAllocator = &BrStdlibAllocator;
+

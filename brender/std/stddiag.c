@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 1993-1995 by Argonaut Technologies Limited. All rights reserved.
  *
- * $Id: stddiag.c 2.3 1996/04/25 14:47:07 sam Exp $
+ * $Id: stddiag.c 1.1 1997/12/10 16:41:28 jon Exp $
  * $Locker: $
  *
  * Default diagnostic handler that reports through stderr
@@ -11,7 +11,7 @@
 
 #include "brender.h"
 
-BR_RCS_ID("$Id: stddiag.c 2.3 1996/04/25 14:47:07 sam Exp $")
+BR_RCS_ID("$Id: stddiag.c 1.1 1997/12/10 16:41:28 jon Exp $")
 
 static void BR_CALLBACK BrStdioWarning(const char *message)
 {

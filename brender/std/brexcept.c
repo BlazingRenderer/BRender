@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 1995 Argonaut Technologies Limited. All rights reserved.
  *
- * $Id: brexcept.c 2.2 1996/09/30 17:57:56 sam Exp $
+ * $Id: brexcept.c 1.1 1997/12/10 16:41:27 jon Exp $
  * $Locker: $
  *
  * Simple exception handling
@@ -10,7 +10,7 @@
 
 #include "brddi.h"
 
-BR_RCS_ID("$Id: brexcept.c 2.2 1996/09/30 17:57:56 sam Exp $")
+BR_RCS_ID("$Id: brexcept.c 1.1 1997/12/10 16:41:27 jon Exp $")
 
 /*
  * Current head of exception handler chain
