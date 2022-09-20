@@ -9,8 +9,6 @@
 #ifndef _BRERR_H_
 #define _BRERR_H_
 
-#include "compiler.h"
-
 /*
 * Error types are 32 bit integers, broken into four fields -
 *
