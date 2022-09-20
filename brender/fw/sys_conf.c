@@ -46,11 +46,11 @@ br_error BrSystemConfigBegin()
 	 * Initially set default values
 	 */
 	v.str = DEFAULT_BRENDER_PATH;
-	BrAssociativeArraySetEntry(fw.sys_config, BRT_BRENDER_PATH_STR, v);
+	BrAssociativeArraySet(fw.sys_config, BRT_BRENDER_PATH_STR, v);
 
 	v.str = HostDefaultDevice();
 	if (v.str != NULL)
-		BrAssociativeArraySetEntry(fw.sys_config, BRT_DEFAULT_DEVICE_STR, v);
+		BrAssociativeArraySet(fw.sys_config, BRT_DEFAULT_DEVICE_STR, v);
 	
 	/*
 	 * Read basic configuration entries from the environment, obsolete
@@ -148,7 +148,7 @@ br_error BR_PUBLIC_ENTRY BrSystemConfigSetString( br_token t, const char *string
 
    v.cstr = string ;
 
-   return ( BrAssociativeArraySetEntry( fw.sys_config, t, v ) );
+   return ( BrAssociativeArraySet( fw.sys_config, t, v ) );
 }
 
 
@@ -180,7 +180,7 @@ br_error BR_PUBLIC_ENTRY BrSystemConfigSet(br_token t, br_value v)
 {
    ASSERT(fw.sys_config);
 
-   return BrAssociativeArraySetEntry(fw.sys_config, t, v);
+   return BrAssociativeArraySet(fw.sys_config, t, v);
 }
 
 
@@ -270,7 +270,7 @@ br_error BR_PUBLIC_ENTRY BrReadEnvironmentEntry(br_associative_array *a, const c
 
 		((br_token_value *)tv)->v.str = BrGetEnv(name);
 
-	r = BrAssociativeArraySetEntry(a, ((br_token_value *)tv)->t,
+	r = BrAssociativeArraySet(a, ((br_token_value *)tv)->t,
 		((br_token_value *)tv)->v);
 
 	BrLexerFree(l);
@@ -365,7 +365,7 @@ br_error BR_PUBLIC_ENTRY BrReadIniSection(br_associative_array *a, const char *f
 			((br_token_value *)tv)->v.str = pos;
 		}
 
-		r = BrAssociativeArraySetEntry(a, ((br_token_value *)tv)->t,
+		r = BrAssociativeArraySet(a, ((br_token_value *)tv)->t,
 			((br_token_value *)tv)->v);
 
 		if (r != BRE_OK) {
@@ -535,7 +535,7 @@ br_error BR_PUBLIC_ENTRY BrReadRegistryKey(br_associative_array *a, const void *
 			((br_token_value *)tv)->v.str = pos;
 		}
 
-		r = BrAssociativeArraySetEntry(a, ((br_token_value *)tv)->t,
+		r = BrAssociativeArraySet(a, ((br_token_value *)tv)->t,
 			((br_token_value *)tv)->v);
 
 		if (r != BRE_OK) {
