@@ -243,6 +243,16 @@ typedef struct br_bounds4_i br_bounds4i;
 #define BR_FVECTOR3(a,b,c)   {BR_FRACTION(a),BR_FRACTION(b),BR_FRACTION(c)}
 #define BR_FVECTOR4(a,b,c,d) {BR_FRACTION(a),BR_FRACTION(b),BR_FRACTION(c),BR_FRACTION(d)}
 
+/*
+ * A structure describing a convex region of 3-space as a list of bounding
+ * planes with normals pointing inwards
+ */
+typedef struct br_convex_region {
+
+	br_vector4 *planes;
+	br_uint_32 nplanes;
+
+} br_convex_region;
 
 #endif
 
