@@ -481,8 +481,8 @@ br_error BR_CMETHOD_DECL(br_device_pixelmap_mem, copyTo)(br_device_pixelmap *sel
 		char *s, *d;
 		br_uint_32 y;
 
-		s = DevicePixelmapMemAddress(src->pm_pixels, 0, 0, bytes);
-		d = DevicePixelmapMemAddress(self->pm_pixels, 0, 0, bytes);
+		s = DevicePixelmapMemAddress(src, 0, 0, bytes);
+		d = DevicePixelmapMemAddress(self, 0, 0, bytes);
 
 		for (y = 0; y < self->pm_height; y++) {
 
@@ -544,8 +544,8 @@ br_error BR_CMETHOD_DECL(br_device_pixelmap_mem, copyFrom)(br_device_pixelmap *s
 		char *s, *d;
 		br_uint_32 y;
 
-		s = DevicePixelmapMemAddress(self->pm_pixels, 0, 0, bytes);
-		d = DevicePixelmapMemAddress(dest->pm_pixels, 0, 0, bytes);
+		s = DevicePixelmapMemAddress(self, 0, 0, bytes);
+		d = DevicePixelmapMemAddress(dest, 0, 0, bytes);
 
 		for (y = 0; y < self->pm_height; y++) {
 
@@ -598,7 +598,7 @@ br_error BR_CMETHOD_DECL(br_device_pixelmap_mem, fill)(br_device_pixelmap *self,
 		char *d;
 		br_uint_32 y;
 
-		d = DevicePixelmapMemAddress(self->pm_pixels, 0, 0, bytes);
+		d = DevicePixelmapMemAddress(self, 0, 0, bytes);
 
 		for (y = 0; y < self->pm_height; y++) {
 
@@ -704,8 +704,8 @@ br_error BR_CMETHOD_DECL(br_device_pixelmap_mem, rectangleCopyTo)\
 		char *s, *d;
 		br_int_32 y;
 
-		s = DevicePixelmapMemAddress(src->pm_pixels, ar.x, ar.y, bytes);
-		d = DevicePixelmapMemAddress(self->pm_pixels, ap.x, ap.y, bytes);
+		s = DevicePixelmapMemAddress(src, ar.x, ar.y, bytes);
+		d = DevicePixelmapMemAddress(self, ap.x, ap.y, bytes);
 
 		for (y = 0; y < ar.h; y++) {
 
@@ -774,8 +774,8 @@ br_error BR_CMETHOD_DECL(br_device_pixelmap_mem, rectangleCopyFrom)\
 		char *s, *d;
 		br_int_32 y;
 
-		s = DevicePixelmapMemAddress(self->pm_pixels, ar.x, ar.y, bytes);
-		d = DevicePixelmapMemAddress(dest->pm_pixels, ap.x, ap.y, bytes);
+		s = DevicePixelmapMemAddress(self, ar.x, ar.y, bytes);
+		d = DevicePixelmapMemAddress(dest, ap.x, ap.y, bytes);
 
 		for (y = 0; y < ar.h; y++) {
 
