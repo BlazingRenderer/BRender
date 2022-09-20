@@ -71,7 +71,6 @@ br_error BrSystemConfigBegin()
 
 	BrReadEnvironmentEntry(fw.sys_config, "BRENDER_DEVELOPER_B");
 	BrReadEnvironmentEntry(fw.sys_config, "BRENDER_USE_MMX_B");
-	BrReadEnvironmentEntry(fw.sys_config, "BRENDER_USE_CMOV_B");
 
 	/*
 	 * COMPATIBILITY - Read the non version specific section from the
@@ -648,7 +647,6 @@ static br_error	parseEntryLine(br_lexer *l, br_token_value *tv, br_size_t size)
 		BRT_DEFAULT_DEVICE_STR, "BRENDER_DEFAULT_DEVICE",
 		BRT_DEFAULT_DEVICE_STR, "BRENDER_DOS_GFX",
 		BRT_BRENDER_USE_MMX_B, "BRENDER_USE_MMX",
-		BRT_BRENDER_USE_CMOV_B, "BRENDER_USE_CMOV",
 	};
 
 	/*
