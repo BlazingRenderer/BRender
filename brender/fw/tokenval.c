@@ -1977,16 +1977,19 @@ br_boolean BR_RESIDENT_ENTRY BrTokenValueCompare(br_token_value *tv1, br_token_v
 		case BRT_BOOLEAN:
 			if(!tv1->v.u32 != !tv2->v.u32)
 				return BR_FALSE;
+			break;
 
 		case BRT_INT_8:
 		case BRT_UINT_8:
-			if(!tv1->v.u8 != !tv2->v.u8)
+			if(tv1->v.u8 != tv2->v.u8)
 				return BR_FALSE;
+			break;
 
 		case BRT_INT_16:
 		case BRT_UINT_16:
-			if(!tv1->v.u16 != !tv2->v.u16)
+			if(tv1->v.u16 != tv2->v.u16)
 				return BR_FALSE;
+			break;
 
 		default:
 			if(tv1->v.u32 != tv2->v.u32)
@@ -2094,16 +2097,19 @@ br_boolean BR_RESIDENT_ENTRY BrTokenValueComparePartial(br_token_value *tv1, br_
 		case BRT_BOOLEAN:
 			if(!tv1->v.u32 != !tv2->v.u32)
 				return BR_FALSE;
+			break;
 
 		case BRT_INT_8:
 		case BRT_UINT_8:
-			if(!tv1->v.u8 != !tv2->v.u8)
+			if(tv1->v.u8 != tv2->v.u8)
 				return BR_FALSE;
+			break;
 
 		case BRT_INT_16:
 		case BRT_UINT_16:
-			if(!tv1->v.u16 != !tv2->v.u16)
+			if(tv1->v.u16 != tv2->v.u16)
 				return BR_FALSE;
+			break;
 
 		default:
 			if(tv1->v.u32 != tv2->v.u32)
