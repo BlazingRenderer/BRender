@@ -449,6 +449,54 @@ br_error BR_CMETHOD_DECL(br_device_pixelmap_mem, copyTo)(br_device_pixelmap *sel
    	bytes = DevicePixelmapPixelBytes(self);
 
 	/*
+	 * Do a colour keyed copy if necessary
+	 */
+	if (src->pm_copy_function & BR_PMCOPY_SRC_KEYED) {
+#if 0
+		/*
+		 * Don't do generic colour keying at the moment
+		 */
+		if (self->pm_copy_function & BR_PMCOPY_DST_KEYED ||
+			src->pm_src_key.low != 0 || src->pm_src_key.high != 0)
+
+			return BRE_UNSUPPORTED;
+
+		/*
+		 * Do block copy when both pixelmaps have same stride and have
+		 * adjoining rows
+		 */
+		if (self->pm_row_bytes == src->pm_row_bytes &&
+			(self->pm_flags & (BR_PMF_LINEAR | BR_PMF_ROW_WHOLEPIXELS)) ==
+			(BR_PMF_LINEAR | BR_PMF_ROW_WHOLEPIXELS) &&
+			(src->pm_flags & (BR_PMF_LINEAR | BR_PMF_ROW_WHOLEPIXELS)) ==
+			(BR_PMF_LINEAR | BR_PMF_ROW_WHOLEPIXELS))
+
+			if(self->pm_row_bytes > 0)
+
+				_MemCopySourceColourKey0_A(
+					DevicePixelmapMemAddress(self,0,0,bytes),self->pm_pixels_qualifier,
+					DevicePixelmapMemAddress(src,0,0,bytes),src->pm_pixels_qualifier,
+					self->pm_width * self->pm_height, bytes);
+			else
+				_MemCopySourceColourKey0_A(
+					DevicePixelmapMemAddress(self,0,self->pm_height-1,bytes),self->pm_pixels_qualifier,
+					DevicePixelmapMemAddress(src,0,src->pm_height-1,bytes),src->pm_pixels_qualifier,
+					self->pm_width * self->pm_height, bytes);
+
+		else
+
+			_MemRectCopySourceColourKey0_A(
+				DevicePixelmapMemAddress(self,0,0,bytes),self->pm_pixels_qualifier,
+				DevicePixelmapMemAddress(src,0,0,bytes),src->pm_pixels_qualifier,
+				self->pm_width,self->pm_height,
+				self->pm_row_bytes,src->pm_row_bytes,bytes);
+
+		return BRE_OK;
+#endif
+		return BRE_UNSUPPORTED;
+	}
+
+	/*
 	 * Do block copy when both pixelmaps have same stride and have
 	 * adjoining rows
 	 */
@@ -510,6 +558,54 @@ br_error BR_CMETHOD_DECL(br_device_pixelmap_mem, copyFrom)(br_device_pixelmap *s
 	        (self->pm_height == dest->pm_height));
 
    	bytes = DevicePixelmapPixelBytes(self);
+
+	/*
+	 * Do a colour keyed copy if necessary
+	 */
+	if (self->pm_copy_function & BR_PMCOPY_SRC_KEYED) {
+#if 0
+		/*
+		 * Don't do generic colour keying at the moment
+		 */
+		if (dest->pm_copy_function & BR_PMCOPY_DST_KEYED ||
+			self->pm_src_key.low != 0 || self->pm_src_key.high != 0)
+
+			return BRE_UNSUPPORTED;
+
+		/*
+		 * Do block copy when both pixelmaps have same stride and have
+		 * adjoining rows
+		 */
+		if (self->pm_row_bytes == dest->pm_row_bytes &&
+			(self->pm_flags & (BR_PMF_LINEAR | BR_PMF_ROW_WHOLEPIXELS)) ==
+			(BR_PMF_LINEAR | BR_PMF_ROW_WHOLEPIXELS) &&
+			(dest->pm_flags & (BR_PMF_LINEAR | BR_PMF_ROW_WHOLEPIXELS)) ==
+			(BR_PMF_LINEAR | BR_PMF_ROW_WHOLEPIXELS))
+
+			if(self->pm_row_bytes > 0)
+
+				_MemCopySourceColourKey0_A(
+					DevicePixelmapMemAddress(dest,0,0,bytes),dest->pm_pixels_qualifier,
+					DevicePixelmapMemAddress(self,0,0,bytes),self->pm_pixels_qualifier,
+					self->pm_width * self->pm_height, bytes);
+			else
+				_MemCopySourceColourKey0_A(
+					DevicePixelmapMemAddress(dest,0,0,bytes),dest->pm_pixels_qualifier,
+					DevicePixelmapMemAddress(self,0,self->pm_height-1,bytes),self->pm_pixels_qualifier,
+					self->pm_width * self->pm_height, bytes);
+
+		else
+
+			_MemRectCopySourceColourKey0_A(
+				DevicePixelmapMemAddress(dest,0,0,bytes),dest->pm_pixels_qualifier,
+				DevicePixelmapMemAddress(self,0,0,bytes),self->pm_pixels_qualifier,
+				self->pm_width,self->pm_height,
+				dest->pm_row_bytes,self->pm_row_bytes,bytes);
+
+		return BRE_OK;
+#endif
+		return BRE_UNSUPPORTED;
+	}
 
 	/*
 	 * Do block copy when both pixelmaps have same stride and have
@@ -668,6 +764,51 @@ br_error BR_CMETHOD_DECL(br_device_pixelmap_mem, rectangleCopyTo)\
 		return BRE_OK;
 
    	bytes = DevicePixelmapPixelBytes(self);
+	/*
+	 * Do a colour keyed copy if necessary
+	 */
+	if (src->pm_copy_function & BR_PMCOPY_SRC_KEYED) {
+#if 0
+		/*
+		 * Don't do generic colour keying at the moment
+		 */
+		if (self->pm_copy_function & BR_PMCOPY_DST_KEYED ||
+			src->pm_src_key.low != 0 || src->pm_src_key.high != 0)
+
+			return BRE_UNSUPPORTED;
+
+		/*
+		 * Try to do full width copies with block copy
+		 */
+		if (ar.w == self->pm_width && self->pm_row_bytes == src->pm_row_bytes &&
+			(self->pm_flags & (BR_PMF_LINEAR | BR_PMF_ROW_WHOLEPIXELS)) ==
+			(BR_PMF_LINEAR | BR_PMF_ROW_WHOLEPIXELS) &&
+			(src->pm_flags & (BR_PMF_LINEAR | BR_PMF_ROW_WHOLEPIXELS)) ==
+			(BR_PMF_LINEAR | BR_PMF_ROW_WHOLEPIXELS))
+
+			if(self->pm_row_bytes > 0)
+
+				_MemCopySourceColourKey0_A(
+					DevicePixelmapMemAddress(self,ap.x,ap.y,bytes),self->pm_pixels_qualifier,
+					DevicePixelmapMemAddress(src,ar.x,ar.y,bytes),src->pm_pixels_qualifier,
+					ar.w * ar.h,bytes);
+			else
+				_MemCopySourceColourKey0_A(
+					DevicePixelmapMemAddress(self,ap.x,ap.y+ar.h-1,bytes),self->pm_pixels_qualifier,
+					DevicePixelmapMemAddress(src,ar.x,ar.y+ar.h-1,bytes),src->pm_pixels_qualifier,
+					ar.w * ar.h,bytes);
+
+		else
+
+			_MemRectCopySourceColourKey0_A(
+				DevicePixelmapMemAddress(self,ap.x,ap.y,bytes),self->pm_pixels_qualifier,
+				DevicePixelmapMemAddress(src,ar.x,ar.y,bytes),src->pm_pixels_qualifier,
+				ar.w,ar.h,self->pm_row_bytes,src->pm_row_bytes,bytes);
+
+		return BRE_OK;
+#endif
+		return BRE_UNSUPPORTED;
+	}
 
 	/*
 	 * Try to do full width copies with block copy
@@ -737,6 +878,52 @@ br_error BR_CMETHOD_DECL(br_device_pixelmap_mem, rectangleCopyFrom)\
 		return BRE_OK;
 
    	bytes = DevicePixelmapPixelBytes(self);
+
+	/*
+	 * Do a colour keyed copy if necessary
+	 */
+	if (self->pm_copy_function & BR_PMCOPY_SRC_KEYED) {
+#if 0
+		/*
+		 * Don't do generic colour keying at the moment
+		 */
+		if (dest->pm_copy_function & BR_PMCOPY_DST_KEYED ||
+			self->pm_src_key.low != 0 || self->pm_src_key.high != 0)
+
+			return BRE_UNSUPPORTED;
+
+		/*
+		 * Try to do full width copies with block copy
+		 */
+		if (ar.w == self->pm_width && self->pm_row_bytes == dest->pm_row_bytes &&
+			(self->pm_flags & (BR_PMF_LINEAR | BR_PMF_ROW_WHOLEPIXELS)) ==
+			(BR_PMF_LINEAR | BR_PMF_ROW_WHOLEPIXELS) &&
+			(dest->pm_flags & (BR_PMF_LINEAR | BR_PMF_ROW_WHOLEPIXELS)) ==
+			(BR_PMF_LINEAR | BR_PMF_ROW_WHOLEPIXELS))
+
+			if(self->pm_row_bytes > 0)
+
+				_MemCopySourceColourKey0_A(
+					DevicePixelmapMemAddress(dest,ap.x,ap.y,bytes),dest->pm_pixels_qualifier,
+					DevicePixelmapMemAddress(self,ar.x,ar.y,bytes),self->pm_pixels_qualifier,
+					ar.w * ar.h,bytes);
+			else
+				_MemCopySourceColourKey0_A(
+					DevicePixelmapMemAddress(dest,ap.x,ap.y+ar.h-1,bytes),dest->pm_pixels_qualifier,
+					DevicePixelmapMemAddress(self,ar.x,ar.y+ar.h-1,bytes),self->pm_pixels_qualifier,
+					ar.w * ar.h,bytes);
+
+		else
+
+			_MemRectCopySourceColourKey0_A(
+				DevicePixelmapMemAddress(dest,ap.x,ap.y,bytes),dest->pm_pixels_qualifier,
+				DevicePixelmapMemAddress(self,ar.x,ar.y,bytes),self->pm_pixels_qualifier,
+				ar.w,ar.h,dest->pm_row_bytes,self->pm_row_bytes,bytes);
+
+		return BRE_OK;
+#endif
+		return BRE_UNSUPPORTED;
+	}
 
 	/*
 	 * Try to do full width copies with block copy
