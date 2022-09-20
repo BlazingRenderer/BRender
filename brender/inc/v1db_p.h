@@ -170,7 +170,9 @@ typedef br_uint_32 BR_CALLBACK br_actor_enum_cbfn(br_actor *mat, void *arg);
 br_uint_32 BR_PUBLIC_ENTRY BrActorEnum(br_actor *parent, br_actor_enum_cbfn *callback , void *arg);
 
 br_actor * BR_PUBLIC_ENTRY BrActorAdd(br_actor *parent, br_actor *a);
+br_actor * BR_PUBLIC_ENTRY BrActorAddNoRenumber(br_actor *parent, br_actor *a);
 br_actor * BR_PUBLIC_ENTRY BrActorRemove(br_actor *a);
+br_actor * BR_PUBLIC_ENTRY BrActorRemoveNoRenumber(br_actor *a);
 void BR_PUBLIC_ENTRY BrActorRelink(br_actor *parent,br_actor *actor);
 br_uint_16 BR_PUBLIC_ENTRY BrActorToActorMatrix34(br_matrix34 *m, br_actor *a, br_actor *b);
 void BR_PUBLIC_ENTRY BrActorToScreenMatrix4(br_matrix4 *m, br_actor *a, br_actor *camera);

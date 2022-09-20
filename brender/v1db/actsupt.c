@@ -135,6 +135,21 @@ STATIC void RenumberActor(br_actor *a,int d)
 /*
  * Add an actor to the children of the given parent
  */
+br_actor * BR_PUBLIC_ENTRY BrActorAddNoRenumber(br_actor *parent, br_actor *a)
+{
+	UASSERT_MESSAGE("NULL pointer to the parent's new child", a != NULL);
+	UASSERT_MESSAGE("NULL pointer to the parental actor", parent != NULL);
+	UASSERT(a->prev == NULL);
+
+	/*
+	 * Link this actor into sibling list of parent
+	 */
+	BR_SIMPLEADDHEAD(&parent->children,a);
+	a->parent = parent;
+
+	return a;
+}
+
 br_actor * BR_PUBLIC_ENTRY BrActorAdd(br_actor *parent, br_actor *a)
 {
 	br_actor *ac;
@@ -157,6 +172,18 @@ br_actor * BR_PUBLIC_ENTRY BrActorAdd(br_actor *parent, br_actor *a)
 	BR_FOR_SIMPLELIST(&a->children,ac)
 		RenumberActor(ac,a->depth+1);
 	
+	return a;
+}
+
+br_actor * BR_PUBLIC_ENTRY BrActorRemoveNoRenumber(br_actor *a)
+{
+	UASSERT_MESSAGE("NULL pointer to the hierrachy to remove", a != NULL);
+	UASSERT(a->prev != NULL);
+
+	BR_SIMPLEREMOVE(a);
+
+	a->parent = NULL;
+
 	return a;
 }
 
