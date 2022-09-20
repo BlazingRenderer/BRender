@@ -1053,6 +1053,16 @@ static char *valueToString(br_token_value *tv)
 		BrSprintf(buffer, "%f", tv->v.f);
 		return buffer;
 
+	case BRT_ANGLE:
+
+		BrSprintf(buffer, "%f", BrScalarToFloat(BrAngleToScalar(tv->v.f)));
+		return buffer;
+
+	case BRT_COLOUR_RGB:
+
+		BrSprintf(buffer, "0x%08x", (br_uint_32)tv->v.rgb);
+		return buffer;
+
 	default:
 
 		return NULL;
