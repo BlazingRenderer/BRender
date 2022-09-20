@@ -696,7 +696,7 @@ br_error BR_CMETHOD_DECL(br_device_pixelmap_mem, fill)(br_device_pixelmap *self,
 		char *d;
 		br_uint_32 y;
 
-		d = DevicePixelmapMemAddress(self, 0, 0, bytes);
+		d = self->pm_pixels;
 
 		for (y = 0; y < self->pm_height; y++) {
 
