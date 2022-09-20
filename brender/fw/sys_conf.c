@@ -1003,6 +1003,26 @@ static char *valueToString(br_token_value *tv)
 		BrSprintf(buffer, "%" PRIu32, tv->v.u32);
 		return buffer;
 
+	case BRT_INT_64:
+
+		BrSprintf(buffer, "%" PRId64, tv->v.i64);
+		return buffer;
+
+	case BRT_UINT_64:
+
+		BrSprintf(buffer, "%" PRIu64, tv->v.u64);
+		return buffer;
+
+	case BRT_INTPTR:
+
+		BrSprintf(buffer, "%" PRIdPTR, tv->v.pi);
+		return buffer;
+
+	case BRT_UINTPTR:
+
+		BrSprintf(buffer, "%" PRIuPTR, tv->v.pu);
+		return buffer;
+
 	case BRT_FIXED:
 
 		BrSprintf(buffer, "%f", BrFixedToFloat(tv->v.x));
