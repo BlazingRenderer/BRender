@@ -216,6 +216,9 @@ STATIC br_boolean outfctyEnum(br_object *outfcty, br_outfcty_enum_cbfn *cbfn,
                 case BRT_INDEXED_B :
                     desc.indexed = tvp->v.b;
                     break;
+                case BRT_WINDOW_FULLSCREEN_B :
+                    desc.fullscreen = tvp->v.b;
+                    break;
                 default :
                     break;
             }

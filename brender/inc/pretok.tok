@@ -802,6 +802,7 @@ KEY_IS_TRANSPARENT				none
 WINDOW_NAME		    			constant_string
 WINDOW_PROCEDURE				pointer
 WINDOW_HANDLE					handle
+WINDOW_FULLSCREEN				boolean
 WINDOW_MONITOR					int_32
 WINDOW_BUFFER_METHOD			token
 	WING							none
