@@ -117,7 +117,7 @@ typedef struct br_fvector3_f
 
 typedef struct br_fvector4_f
 {
-	br_fraction v[4];
+	br_fraction_f v[4];
 } br_fvector4_f;
 
 typedef struct br_fvector2_x
