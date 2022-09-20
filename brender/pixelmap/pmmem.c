@@ -893,32 +893,29 @@ br_error BR_CMETHOD_DECL(br_device_pixelmap_mem, rectangleFill)\
 	if (arect.w == self->pm_width &&
 		(self->pm_flags & (BR_PMF_LINEAR | BR_PMF_ROW_WHOLEPIXELS)) ==
 		(BR_PMF_LINEAR | BR_PMF_ROW_WHOLEPIXELS))
-	{
+
 		if(self->pm_row_bytes > 0)
-		{
+
 			_MemFill_A(
 				DevicePixelmapMemAddress(self,arect.x,arect.y,bytes),
 				arect.w * arect.h,
 				bytes, colour);
-		}
 		else
-		{
 			_MemFill_A(
 				DevicePixelmapMemAddress(self,arect.x,arect.y+arect.h-1,bytes),
 				arect.w * arect.h,
 				bytes, colour);
-		}
-	}
+
 	/*
 	 * Rectangle fill only works when qword alignment is the same from row
 	 * to row
 	 */
 	else if ((self->pm_row_bytes & 7) == 0)
-	{
+
 		_MemRectFill_A(
 			DevicePixelmapMemAddress(self,arect.x,arect.y,bytes),
 			arect.w,arect.h,self->pm_row_bytes,bytes,colour);
-	}
+
 	else {
 
 		char *d;
