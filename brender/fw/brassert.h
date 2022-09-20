@@ -16,8 +16,6 @@
  */
 #undef ASSERT
 
-#include "compiler.h"
-
 #if DEBUG
 #define ASSERT(e)	((void)((e) || (_BrAssert(#e,__FILE__,__LINE__),1)))
 #define ASSERT_MESSAGE(m,e) ((void)((e) || (_BrAssert(m " : " #e,__FILE__,__LINE__),1)))
