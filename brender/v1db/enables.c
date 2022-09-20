@@ -87,6 +87,40 @@ void BR_PUBLIC_ENTRY BrLightDisable(br_actor *l)
 	actorDisable(&v1db.enabled_lights,l);
 }
 
+/*
+ * Allow all lights to illuminate the current model
+ */
+br_error BrLightCullReset(void)
+{
+	br_token_value tv[2];
+	br_uint_32 light_part;
+	int i;
+
+	/*
+	 * Find the light in the list of enabled lights and set the appropriate
+	 * part of the light state.  N.B. the culled state is reset before each
+	 * model is rendered
+	 */
+	if (v1db.enabled_lights.enabled == NULL)
+		return BRE_FAIL;
+
+	tv[0].t = BRT_CULLED_B;
+	tv[0].v.b = BR_FALSE;
+
+	tv[1].t = BR_NULL_TOKEN;
+
+	for (light_part = 0, i = 0; i < v1db.enabled_lights.max; i++) {
+
+		if (v1db.enabled_lights.enabled[i] == NULL)
+			continue;
+
+		RendererPartSetMany(v1db.renderer, BRT_LIGHT, light_part, tv, NULL);
+
+		light_part++;
+	}
+
+	return BRE_OK;
+}
 
 /*
  * Prevent a light from illuminating the current model
