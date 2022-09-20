@@ -980,6 +980,9 @@ static char *valueToString(br_token_value *tv)
 	case BRT_STRING:
 	case BRT_CONSTANT_STRING:
 
+		if (tv->v.str == NULL)
+			return NULL;
+
 		if (BrStrLen(tv->v.str) > sizeof(buffer) - 2)
 			return NULL;
 
