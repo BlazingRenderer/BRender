@@ -312,6 +312,8 @@ br_scalar BR_PUBLIC_ENTRY BrScreenZToCamera(const br_actor* camera, br_scalar sz
 void BR_PUBLIC_ENTRY BrScreenXYZToCamera(br_vector3* point,const br_actor* camera,
 	const br_pixelmap* screen_buffer, br_int_16 x, br_int_16 y,br_scalar sz);
 
+br_error BR_PUBLIC_ENTRY BrLightModelCull(br_actor *light);
+
 /*
  * Utility "FindFailed" callbacks that can be used to automaticaly load
  * models/materials/maps/tables from the filesystem
