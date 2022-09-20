@@ -7,13 +7,11 @@
  * Default file handler that uses <stdio.h>
  */
 #include <stddef.h>
-#include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
 #include <limits.h>
 
 #include "brender.h"
-#include "host.h"
 #include "brassert.h"
 
 
