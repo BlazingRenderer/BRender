@@ -6,6 +6,7 @@
  *
  * System configuration
  */
+#include <inttypes.h>
 #include "fw.h"
 #include "host.h"
 #include <brassert.h>
@@ -974,32 +975,32 @@ static char *valueToString(br_token_value *tv)
 
 	case BRT_INT_8:
 
-		BrSprintf(buffer, "%d", tv->v.i8);
+		BrSprintf(buffer, "%" PRId8, tv->v.i8);
 		return buffer;
 
 	case BRT_UINT_8:
 
-		BrSprintf(buffer, "%d", tv->v.u8);
+		BrSprintf(buffer, "%" PRIu8, tv->v.u8);
 		return buffer;
 
 	case BRT_INT_16:
 
-		BrSprintf(buffer, "%d", tv->v.i16);
+		BrSprintf(buffer, "%" PRId16, tv->v.i16);
 		return buffer;
 
 	case BRT_UINT_16:
 
-		BrSprintf(buffer, "%d", tv->v.u16);
+		BrSprintf(buffer, "%" PRIu16, tv->v.u16);
 		return buffer;
 
 	case BRT_INT_32:
 
-		BrSprintf(buffer, "%d", tv->v.i32);
+		BrSprintf(buffer, "%" PRId32, tv->v.i32);
 		return buffer;
 
 	case BRT_UINT_32:
 
-		BrSprintf(buffer, "%d", tv->v.u32);
+		BrSprintf(buffer, "%" PRIu32, tv->v.u32);
 		return buffer;
 
 	case BRT_FIXED:
