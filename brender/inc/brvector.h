@@ -16,20 +16,62 @@
 /*
 * Scalar vector types
 */
-typedef struct br_vector2
-{
+
+//br_vector2
+#ifdef __cplusplus
+typedef union{
+	br_scalar v[2];
+	struct{
+        br_scalar x;
+        union{
+            br_scalar y;
+            br_scalar z;
+        };
+	};
+	struct{
+        br_scalar s,t; // texture coords
+	};
+}br_vector2;
+#else
+typedef struct br_vector2 {
 	br_scalar v[2];
 } br_vector2;
+#endif
 
-typedef struct br_vector3
-{
+//br_vector3
+#ifdef __cplusplus
+typedef union{
+	br_scalar v[3];
+	struct{
+		br_scalar x,y,z;
+	};
+    struct{
+        br_scalar r,g,b;
+    };
+}br_vector3;
+#else
+typedef struct br_vector3 {
 	br_scalar v[3];
 } br_vector3;
+#endif
 
-typedef struct br_vector4
-{
+//br_vector4
+#ifdef __cplusplus
+typedef union{
+	br_scalar v[4];
+	struct{
+        br_scalar x,y,z; // homogeneous coordinates
+        union{
+            br_scalar d;
+            br_scalar w;
+        };
+	};
+}br_vector4;
+#else
+typedef struct br_vector4 {
 	br_scalar v[4];
 } br_vector4;
+#endif
 
 /*
 * Fixed vectors
