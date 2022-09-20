@@ -30,6 +30,19 @@ enum {
 	BR_LIGHT_LINEAR_FALLOFF = 0x0008,
 };
 
+/*
+ * Definition of cutoff volumes - vertex is lit if it falls within any of
+ * a number of convex volumes, and partially lit if it falls within the
+ * falloff distance from any
+ */
+typedef struct br_light_volume {
+
+	br_scalar falloff_distance;
+	br_convex_region *regions;
+	br_uint_32 nregions;
+
+} br_light_volume;
+
 typedef struct br_light {
 	/*
 	 * Optional identifier
