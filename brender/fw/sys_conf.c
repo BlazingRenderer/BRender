@@ -15,7 +15,7 @@
 #define BRENDER_INI_FILE "BRender.ini"
 #define BRENDER_REGISTRY_KEY "SOFTWARE\\Argonaut\\BRender"
 
-#define DEFAULT_BRENDER_PATH "dat;../dat;../../dat;../../../dat;../../../../dat"
+#define DEFAULT_BRENDER_PATH "dat;../dat;../../dat;../../../dat;../../../../dat;dll;../dll;../../dll;../../../dll;../../../../dll"
 
 
 //extern br_framework_state BR_ASM_DATA fw ;
