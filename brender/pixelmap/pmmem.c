@@ -918,18 +918,13 @@ br_error BR_CMETHOD_DECL(br_device_pixelmap_mem, rectangleFill)\
 
 	else {
 
-		char *d;
 		br_int_32 y;
 
-		d = DevicePixelmapMemAddress(self->pm_pixels, arect.x, arect.y, bytes);
-
-		for (y = 0; y < arect.h; y++) {
+		for (y = arect.y; y < arect.y + arect.h; y++) {
 
 			_MemFill_A(
-				d,
+				DevicePixelmapMemAddress(self,arect.x,y,bytes),
 				arect.w, bytes, colour);
-
-			d += self->pm_row_bytes;
 		}
 	}
 
