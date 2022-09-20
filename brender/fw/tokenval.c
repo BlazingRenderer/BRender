@@ -7,7 +7,6 @@
  * Token/value list mangement
  */
 #include <inttypes.h>
-#include <assert.h> /* For static_assert */
 #include "fw.h"
 #include "brassert.h"
 
@@ -997,7 +996,7 @@ br_error BR_RESIDENT_ENTRY BrTokenValueQueryAllSize(
 	return BRE_OK;
 }
 
-static_assert(sizeof(br_value_passthrough) == sizeof(br_value), "sizeof(br_value_passthrough) != sizeof(br_value)");
+_Static_assert(sizeof(br_value_passthrough) == sizeof(br_value), "sizeof(br_value_passthrough) != sizeof(br_value)");
 
 br_error BR_RESIDENT_ENTRY BrTokenValueSet(
 	void *mem,
