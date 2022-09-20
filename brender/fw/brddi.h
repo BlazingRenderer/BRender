@@ -22,10 +22,6 @@
 #include "pool.h"
 #endif
 
-#ifndef _BRLISTS_H_
-#include "brlists.h"
-#endif
-
 #ifndef _BREXCEPT_H_
 #include "brexcept.h"
 #endif

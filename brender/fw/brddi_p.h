@@ -110,24 +110,6 @@ br_error BR_RESIDENT_ENTRY BrStringToTokenValue(br_token_value *buffer, br_size_
 br_boolean BR_RESIDENT_ENTRY BrTokenValueCompare(br_token_value *tv1, br_token_value *tv2);
 br_boolean BR_RESIDENT_ENTRY BrTokenValueComparePartial(br_token_value *tv1, br_token_value *tv2, br_token *insignificant);
 
-/*
- * brlists.c
- */
-void BR_RESIDENT_ENTRY BrNewList(br_list *list);
-void BR_RESIDENT_ENTRY BrAddHead(br_list *list, br_node *node);
-void BR_RESIDENT_ENTRY BrAddTail(br_list *list, br_node *node);
-
-br_node * BR_RESIDENT_ENTRY BrRemHead(br_list *list);
-br_node * BR_RESIDENT_ENTRY BrRemTail(br_list *list);
-
-void BR_RESIDENT_ENTRY BrInsert(br_list *list, br_node *here, br_node *node);
-br_node * BR_RESIDENT_ENTRY BrRemove(br_node *node);
-
-void BR_RESIDENT_ENTRY BrSimpleNewList(br_simple_list *list);
-void BR_RESIDENT_ENTRY BrSimpleAddHead(br_simple_list *list, br_simple_node *node);
-br_simple_node * BR_RESIDENT_ENTRY BrSimpleRemHead(br_simple_list *list);
-void BR_RESIDENT_ENTRY BrSimpleInsert(br_simple_list *list, br_simple_node *here, br_simple_node *node);
-br_simple_node * BR_RESIDENT_ENTRY BrSimpleRemove(br_simple_node *node);
 
 /*
  * diag.c

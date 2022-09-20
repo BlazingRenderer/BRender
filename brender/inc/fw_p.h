@@ -304,6 +304,26 @@ br_error BR_RESIDENT_ENTRY BrGeometryFormatFind(struct br_geometry **pgf,
 				br_token format_type);
 
 /*
+ * lists
+ */
+
+void BR_RESIDENT_ENTRY BrNewList(br_list *list);
+void BR_RESIDENT_ENTRY BrAddHead(br_list *list, br_node *node);
+void BR_RESIDENT_ENTRY BrAddTail(br_list *list, br_node *node);
+
+br_node * BR_RESIDENT_ENTRY BrRemHead(br_list *list);
+br_node * BR_RESIDENT_ENTRY BrRemTail(br_list *list);
+
+void BR_RESIDENT_ENTRY BrInsert(br_list *list, br_node *here, br_node *node);
+br_node * BR_RESIDENT_ENTRY BrRemove(br_node *node);
+
+void BR_RESIDENT_ENTRY BrSimpleNewList(br_simple_list *list);
+void BR_RESIDENT_ENTRY BrSimpleAddHead(br_simple_list *list, br_simple_node *node);
+br_simple_node * BR_RESIDENT_ENTRY BrSimpleRemHead(br_simple_list *list);
+void BR_RESIDENT_ENTRY BrSimpleInsert(br_simple_list *list, br_simple_node *here, br_simple_node *node);
+br_simple_node * BR_RESIDENT_ENTRY BrSimpleRemove(br_simple_node *node);
+
+/*
  * Logging routines.
  */
 br_uint_8 BR_RESIDENT_ENTRY BrLogSetLevel(br_uint_8 level);

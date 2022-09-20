@@ -126,7 +126,9 @@
 #include "assocarr.h"
 #endif
 
-
+#ifndef _BRLISTS_H_
+#include "brlists.h"
+#endif
 
 	/*
 	 * Function prototypes
