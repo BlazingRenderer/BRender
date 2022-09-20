@@ -7,8 +7,6 @@
  * Default memory handler that uses malloc()/free() from C library
  */
 #include <stdlib.h>
-#include <limits.h>
-
 #include "brender.h"
 
 BR_RCS_ID("$Id: stdmem.c 2.6 1996/04/25 14:47:10 sam Exp $")
