@@ -176,6 +176,13 @@ void * BR_RESIDENT_ENTRY BrResAllocate(void *vparent, br_size_t size, br_uint_8 
 	res = BrMemAllocate(size + pad, res_class);
 
 	/*
+	 * Since loads of BrResAllocate calls check for NULL returns we
+	 * might as well return NULL sometimes!
+	 */
+	if (res == NULL)
+		return NULL;
+
+	/*
 	 * Check to see if memory allocator lied about alignment
 	 */
 	actual_pad = (ALIGN(res,calign)-((br_uintptr_t)res));
