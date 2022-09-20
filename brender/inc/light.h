@@ -17,11 +17,17 @@ enum {
 	 BR_LIGHT_POINT  = 0x0000,
  	 BR_LIGHT_DIRECT = 0x0001,
 	 BR_LIGHT_SPOT   = 0x0002,
+	BR_LIGHT_AMBIENT = 0x0003,
 
 	/*
      * Flag indicating that calculations are done in view space
      */ 
 	BR_LIGHT_VIEW  = 0x0004,
+
+	/*
+	 * Flag indicating that linear falloff should be used
+	 */
+	BR_LIGHT_LINEAR_FALLOFF = 0x0008,
 };
 
 typedef struct br_light {
@@ -53,6 +59,17 @@ typedef struct br_light {
 	 */
 	br_angle cone_outer;
 	br_angle cone_inner;
+
+	/*
+	 * Sphere radii for linear falloff and cutoff of normally attenuated lights
+	 */
+	br_scalar radius_outer;
+	br_scalar radius_inner;
+
+	/*
+	 * Cutoff volumes
+	 */
+	br_light_volume volume;
 
         void * user;
 
