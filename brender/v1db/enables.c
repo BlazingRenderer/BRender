@@ -192,10 +192,14 @@ static br_boolean setupView(
 void BrSetupLights(br_actor *world, br_matrix34 *world_to_view, br_int_32 w2vt)
 {
 	br_matrix34 this_to_view, view_to_this;
-	int light_part = 0,i;
-	br_token_value tv[16],*tvp;
+	int light_part = 0,l;
+	br_token_value tv[32],*tvp;
 	br_vector3 view_position, view_direction;
 	br_light *light;
+	br_light_volume new_volume;
+	br_convex_region *temp_regions, *region, *new_region;
+	br_vector4 *temp_planes, *plane, *new_plane;
+	br_uint_32 i, j;
 
     ASSERT_MESSAGE("BrSetupLights NULL pointer to actor", world != NULL);
     ASSERT_MESSAGE("BrSetupLights NULL pointer", world_to_view != NULL);
@@ -262,7 +266,31 @@ void BrSetupLights(br_actor *world, br_matrix34 *world_to_view, br_int_32 w2vt)
 
 		case BR_LIGHT_POINT:
 			tvp->v.t = BRT_POINT;
-			tvp++;
+			break;
+
+		case BR_LIGHT_DIRECT:
+			tvp->v.t = BRT_DIRECT;
+			break;
+
+		case BR_LIGHT_SPOT:
+			tvp->v.t = BRT_SPOT;
+			break;
+
+		case BR_LIGHT_AMBIENT:
+			tvp->v.t = BRT_AMBIENT;
+			break;
+		}
+
+		tvp++;
+
+		/*
+		 * Set position and radius and enable radius culling, if
+		 * appropriate
+		 */
+		if ((light->type & BR_LIGHT_TYPE) == BR_LIGHT_POINT ||
+			(light->type & BR_LIGHT_TYPE) == BR_LIGHT_SPOT ||
+			light->volume.regions != NULL ||
+			light->type & BR_LIGHT_LINEAR_FALLOFF) {
 
 			/*
 			 * Transform position (0,0,0,1) into view space
@@ -272,53 +300,141 @@ void BrSetupLights(br_actor *world, br_matrix34 *world_to_view, br_int_32 w2vt)
 			tvp->v.p = &view_position;
 			tvp++;
 
-			break;
-
-		case BR_LIGHT_DIRECT:
-			tvp->v.t = BRT_DIRECT;
+			tvp->t = BRT_AS_SCALAR(RADIUS_OUTER);
+			tvp->v.s = light->radius_outer;
 			tvp++;
+
+			tvp->t = BRT_AS_SCALAR(RADIUS_INNER);
+			tvp->v.s = light->radius_inner;
+			tvp++;
+
+			/*
+			 * Enable radius culling if outer radius given
+			 */
+			tvp->t = BRT_RADIUS_CULL_B;
+			tvp->v.b = light->radius_outer != BR_SCALAR(0.0);
+			tvp++;
+
+		} else {
+
+			tvp->t = BRT_RADIUS_CULL_B;
+			tvp->v.b = BR_FALSE;
+			tvp++;
+		}
+
+		/*
+		 * Set direction and cone angles and enable angle culling, if
+		 * appropriate
+		 */
+		if ((light->type & BR_LIGHT_TYPE) == BR_LIGHT_DIRECT ||
+			(light->type & BR_LIGHT_TYPE) == BR_LIGHT_SPOT ||
+			light->volume.regions != NULL) {
 
 			/*
 			 * Transform direction (0,0,1,0) into view space -
 			 * use T(I(l_to_v)) - or column 2 of view_to_this
 			 */
 			BrVector3CopyMat34Col(&view_direction,&view_to_this,2);
+			BrVector3Normalise(&view_direction, &view_direction);
 			tvp->t = BRT_AS_VECTOR3_SCALAR(DIRECTION);
 			tvp->v.p = &view_direction;
 			tvp++;
 
-			break;
+			if ((light->type & BR_LIGHT_TYPE) == BR_LIGHT_SPOT) {
 
-		case BR_LIGHT_SPOT:
-			tvp->v.t = BRT_SPOT;
+				tvp->t = BRT_AS_SCALAR(SPOT_OUTER);
+				tvp->v.s = BR_COS(light->cone_outer);
+				tvp++;
+
+				tvp->t = BRT_AS_SCALAR(SPOT_INNER);
+				tvp->v.s = BR_COS(light->cone_inner);
+				tvp++;
+
+				tvp->t = BRT_ANGLE_OUTER_A;
+				tvp->v.a = light->cone_outer;
+				tvp++;
+
+				tvp->t = BRT_ANGLE_INNER_A;
+				tvp->v.a = light->cone_inner;
+				tvp++;
+
+				tvp->t = BRT_ANGLE_CULL_B;
+				tvp->v.b = BR_TRUE;
+				tvp++;
+
+			} else {
+
+				tvp->t = BRT_ANGLE_CULL_B;
+				tvp->v.b = BR_FALSE;
+				tvp++;
+			}
+
+		} else {
+
+			tvp->t = BRT_ANGLE_CULL_B;
+			tvp->v.b = BR_FALSE;
 			tvp++;
-
-			/*
-			 * Transform position and direction into view space
-			 */
-			BrVector3CopyMat34Row(&view_position,&this_to_view,3);
-			tvp->t = BRT_AS_VECTOR3_SCALAR(POSITION);
-			tvp->v.p = &view_position;
-			tvp++;
-
-			BrVector3CopyMat34Col(&view_direction,&view_to_this,2);
-			tvp->t = BRT_AS_VECTOR3_SCALAR(DIRECTION);
-			tvp->v.p = &view_direction;
-			tvp++;
-
-			tvp->t = BRT_AS_SCALAR(SPOT_OUTER);
-			tvp->v.s = BR_COS(light->cone_outer);
-			tvp++;
-
-			tvp->t = BRT_AS_SCALAR(SPOT_INNER);
-			tvp->v.s = BR_COS(light->cone_inner);
-			tvp++;
-
-			break;
-
-		default:
-			continue;
 		}
+
+		/*
+		 * Pass down type of attenuation
+		 */
+		tvp->t = BRT_ATTENUATION_TYPE_T;
+		tvp->v.t = light->type & BR_LIGHT_LINEAR_FALLOFF? BRT_RADII: BRT_QUADRATIC;
+		tvp++;
+
+		/*
+		 * Pass down a hint describing the complexity of the attenuation
+		 */
+		tvp->t = BRT_ATTENUATION_HINT_T;
+		tvp->v.t = light->attenuation_q != BR_SCALAR(0.0)? BRT_QUADRATIC:
+		           light->attenuation_l != BR_SCALAR(0.0)? BRT_LINEAR:
+		                                                   BRT_CONSTANT;
+		tvp++;
+
+		/*
+		 * Transform lighting volume into view space and pass down
+		 */
+		tvp->t = BRT_LIGHTING_VOLUME_P;
+
+		if (light->volume.regions != NULL) {
+
+			temp_regions = BrResAllocate(v1db.res, sizeof(*temp_regions) * light->volume.nregions, BR_MEMORY_OBJECT_DATA);
+
+			if (temp_regions != NULL)
+
+				for (region = light->volume.regions, new_region = temp_regions, i = 0; i < light->volume.nregions; i++, region++, new_region++) {
+
+					temp_planes = BrResAllocate(temp_regions, sizeof(*temp_planes) * region->nplanes, BR_MEMORY_OBJECT_DATA);
+
+					if (temp_planes == NULL) {
+
+						BrResFree(temp_regions);
+						temp_regions = NULL;
+
+						break;
+					}
+
+					for (plane = region->planes, new_plane = temp_planes, j = 0; j < region->nplanes; j++, plane++, new_plane++)
+						BrMatrix34ApplyPlaneEquation(new_plane, plane, &this_to_view);
+
+					new_region->planes = temp_planes;
+					new_region->nplanes = region->nplanes;
+				}
+
+				new_volume.falloff_distance = light->volume.falloff_distance;
+				new_volume.regions = temp_regions;
+				new_volume.nregions = light->volume.nregions;
+
+				tvp->v.p = &new_volume;
+
+		} else {
+
+			temp_regions = NULL;
+			tvp->v.p = NULL;
+		}
+
+		tvp++;
 
 		/*
 		 * Send finished token list off to renderer
@@ -326,6 +442,9 @@ void BrSetupLights(br_actor *world, br_matrix34 *world_to_view, br_int_32 w2vt)
 		tvp->t = BR_NULL_TOKEN;
 		RendererPartSetMany(v1db.renderer, BRT_LIGHT, light_part, tv, NULL);
 		light_part++;
+
+		if (temp_regions != NULL)
+			BrResFree(temp_regions);
 	}
 
 	/*

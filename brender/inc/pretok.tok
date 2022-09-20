@@ -587,6 +587,7 @@ TYPE							token
 	DIRECT							none
 	POINT							none
 	SPOT							none
+	AMBIENT							none
 
 SPACE							token
 	VIEW							none
@@ -616,6 +617,14 @@ SPOT_OUTER						float
 SPOT_INNER						fixed
 SPOT_INNER						float
 
+RADIUS_OUTER					fixed	# Cutoff radius and outer radius for linear falloff
+RADIUS_OUTER					float
+RADIUS_INNER					fixed
+RADIUS_INNER					float
+
+ANGLE_OUTER						angle	# Cutoff angle
+ANGLE_INNER						angle
+
 ATTENUATION_L					fixed
 ATTENUATION_L					float
 
@@ -624,6 +633,28 @@ ATTENUATION_C					float
 
 ATTENUATION_Q					fixed
 ATTENUATION_Q					float
+
+# Flag indicating that radius/angle cutoff is to be used on point and spot lights
+
+RADIUS_CULL						boolean
+ANGLE_CULL						boolean
+
+# Type of attenuation - quadratic or using inner and outer radii
+
+ATTENUATION_TYPE				token
+	QUADRATIC						none
+	RADII							none
+
+ATTENUATION_HINT				token
+	CONSTANT						none
+	LINEAR							none
+	QUADRATIC						none
+
+LIGHTING_VOLUME					pointer
+
+# Boolean that can be set to cull a light from affecting a particular model
+
+CULLED							boolean
 
 # Tokens used for clip state
 #
