@@ -9,16 +9,13 @@
 #ifndef _ASSOCARR_H_
 #define _ASSOCARR_H_
 
+typedef struct br_associative_array {
 
-#define BR_ASSOCIATIVE_ARRAY_BLOCK_SIZE 10
+	br_token_value *tv;
+	br_uint_16 num_elements;
+	br_uint_16 max_elements;
 
-typedef struct br_associative_array_tag
-{
-   br_token_value *tv ;
-   br_uint_16 num_elements ;
-   br_uint_16 max_elements ;
-}
-br_associative_array ;
+} br_associative_array;
 
 
 

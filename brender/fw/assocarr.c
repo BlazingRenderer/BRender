@@ -12,190 +12,161 @@
 
 
 
+#define MAX_ELEMENTS_INCREMENT 32
+
+
 br_associative_array *BrAssociativeArrayAllocate()
 {
-   br_associative_array *pArray ;
+	br_associative_array *array;
 
-   pArray = (br_associative_array *) BrResAllocate( fw.res, sizeof(br_associative_array), BR_MEMORY_SCRATCH );
+	array = (br_associative_array *)BrResAllocate(fw.res, sizeof(br_associative_array), BR_MEMORY_TOKEN_VALUE);
+	if (array == NULL)
+		return NULL;
 
-   if ( !pArray )
-      return NULL ;
+	array->tv = NULL;
+	array->max_elements = 0;
+	array->num_elements = 0;
 
-   pArray->tv = (br_token_value *) BrResAllocate( pArray, BR_ASSOCIATIVE_ARRAY_BLOCK_SIZE * sizeof(br_token_value ), BR_MEMORY_SCRATCH );
- 
-   if ( !pArray->tv )
-     return NULL ;  
-
-   pArray->max_elements = BR_ASSOCIATIVE_ARRAY_BLOCK_SIZE ;
-
-   pArray->num_elements = 0 ;
-
-   return pArray ;
+	return array;
 }
 
 
-
-
-static br_error Set_Associative_Array_Value( br_associative_array *pArray, int index, br_value v )
+br_error BrAssociativeArraySet(br_associative_array *array, br_token t, br_value v)
 {
-    switch ( BrTokenType(pArray->tv[index].t) )
-    {
-         case BRT_STRING:
-           if ( pArray->tv[index].v.str )
-              BrResFree( pArray->tv[index].v.str );
-                  
-          
-           if ( v.str )
-              pArray->tv[index].v.str = BrResStrDup( pArray, v.str ) ;
-           else
-              pArray->tv[index].v.str = NULL ;
-      
-           break ;
+	br_token_value *tv = NULL;
+	char *string;
+	br_uint_32 i;
 
-         default:
-           pArray->tv[index].v = v ;
-           break ;
-    }
+	ASSERT(array);
 
-    return BRE_OK ;
+	/*
+	 * Look for the key in the array
+	 */
+	for (i = 0; i < array->num_elements; i++)
+
+		if (array->tv[i].t == t) {
+			tv = &array->tv[i];
+			break;
+		}
+
+	/*
+	 * Add the key to the array if necessary
+	 */
+	if (tv == NULL) {
+
+		/*
+		 * If necessary, expand the array
+		 */
+		if (array->num_elements >= array->max_elements) {
+
+			tv = (br_token_value *)BrResAllocate(array, (array->max_elements + MAX_ELEMENTS_INCREMENT) * sizeof(br_token_value), BR_MEMORY_APPLICATION );
+			if (tv == NULL)
+				return BRE_FAIL;
+
+			if (array->tv != NULL) {
+				BrMemCpy(tv, array->tv, array->num_elements * sizeof(br_token_value));
+				BrResFree(array->tv);
+			}
+
+			array->tv = tv;
+			array->max_elements += MAX_ELEMENTS_INCREMENT;
+		}
+
+		tv = &array->tv[array->num_elements];
+
+		array->num_elements++;
+
+		tv->t = t;
+	}
+
+	/*
+	 * Copy the data, duplicating all strings.  Other references are
+	 * copied so they must remain valid if they are to be used
+	 */
+    switch (BrTokenType(tv->t)) {
+
+	case BRT_STRING:
+
+		if (v.str != NULL) {
+
+			string = BrResStrDup(array, v.str);
+			if (string == NULL)
+				return BRE_FAIL;
+
+		} else
+
+			string = NULL;
+
+		if (tv->v.str != NULL)
+			BrResFree(tv->v.str);
+
+		tv->v.str = string;
+		break;
+
+	default:
+
+		tv->v = v;
+		break ;
+	}
+
+	return BRE_OK;
 }
 
 
-
-br_error BrAssociativeArraySetEntry( br_associative_array *pArray, br_token t, br_value v )
+br_error BrAssociativeArrayQuery(br_associative_array *array, br_token t, br_value *v)
 {
-   br_uint_16 i = 0 ;
-   br_token_value *temp ;
+	br_uint_32 i;
 
-   ASSERT(pArray);
-   ASSERT(pArray->tv);
+	ASSERT(array);
 
-   // If the key is already in the array, set the value ...
+	/*
+	 * Look for the key in the array
+	 */
+	for (i = 0; i < array->num_elements; i++)
 
-   for ( i = 0 ; i < pArray->num_elements ; i++ )
-   {
-       if ( pArray->tv[i].t == t )
-       {
-            Set_Associative_Array_Value( pArray, i, v );
-            return BRE_OK ;
-       }
-   } 
+		if (array->tv[i].t == t) {
 
-   // The key is not present in the associative array, so add it if
-   // there is space ...
+			/*
+			 * Copy the data - string references are not duplicated, so
+			 * they must be duplicated if they will be needed after the array
+			 * is freed or the key is set to a new value
+			 */
+			*v = array->tv[i].v;
+			return BRE_OK;
+		}
 
-   if ( pArray->num_elements < pArray->max_elements )
-   {
-      pArray->tv[pArray->num_elements].t   = t ;
-      pArray->tv[pArray->num_elements].v.u32 = 0 ;
-
-      Set_Associative_Array_Value( pArray, pArray->num_elements++, v );
-
-      return BRE_OK ;
-   }
-
-   // There's no more room in the associative array, so allocate a bigger one 
-   // and copy over all the existing contents ..
-
-   temp = (br_token_value *) BrResAllocate( pArray, sizeof(br_token_value) * (pArray->max_elements + BR_ASSOCIATIVE_ARRAY_BLOCK_SIZE), BR_MEMORY_APPLICATION );
-
-   BrMemCpy( temp, pArray->tv, pArray->max_elements * sizeof(br_token_value) );
-   BrMemFree(pArray->tv);
-   pArray->tv = temp ;
-   temp = NULL ;
-
-   if ( !pArray->tv )
-      return BRE_FAIL ;
-
-   pArray->max_elements += BR_ASSOCIATIVE_ARRAY_BLOCK_SIZE ;
-  
-   pArray->tv[pArray->num_elements].t   = t ;
-   pArray->tv[pArray->num_elements].v.u32 = 0 ;
-
-   Set_Associative_Array_Value( pArray, pArray->num_elements++, v );
-
-
-   return BRE_OK ;
+	return BRE_FAIL;
 }
 
 
-
-
-
-br_error BrAssociativeArrayRemoveEntry( br_associative_array *pArray, br_token t )
+br_error BrAssociativeArrayRemove(br_associative_array *array, br_token t)
 {
-   br_uint_16 i ;
-   br_boolean bFound = BR_FALSE ;
+	br_uint_32 i;
 
-   ASSERT(pArray);
-   ASSERT(pArray->tv);
+	/*
+	 * Look for the key in the array
+	 */
+	for (i = 0; i < array->num_elements; i++)
 
-   for ( i = 0 ; i < pArray->num_elements ; i++ )
-   {
-       if ( pArray->tv[i].t == t )
-       {
-	        bFound = BR_TRUE ;
-           break ;
-       }
-   } 
+		if (array->tv[i].t == t) {
 
-   if ( !bFound )
-      return BRE_FAIL ;
+			/*
+			 * Delete the old string copy if necessary
+			 */
+			if (BrTokenType(array->tv[i].t) == BRT_STRING && array->tv[i].v.str != NULL)
+				BrResFree(array->tv[i].v.str);
 
+			/*
+			 * Copy the last element over to replace this one
+			 */
+			array->num_elements--;
 
-   // Remove token's data if necesary ...
+			array->tv[i] = array->tv[array->num_elements];
 
-   switch ( BrTokenType(t) )
-   {
-       case BRT_STRING:
-          if ( pArray->tv[i].v.str )
-             BrResFree( pArray->tv[i].v.str );
-          break ;
+			return BRE_OK;
+		}
 
-       default :
-         break ;
-   }
-                  
-   // Delete by moving all following entries up one place - not fast,
-   // but it'll do for now. 
-
-   for ( ; i < pArray->num_elements - 1 ; i ++ )
-   {
-	   BrMemCpy( &pArray->tv[i], &pArray[i+1], sizeof(br_token_value) );
-   }
-
-   pArray->num_elements -- ;
- 
-   return BRE_OK ;
-}
-
-
-
-
-
-
-
-
-br_error BrAssociativeArrayQuery( br_associative_array *pArray, br_token t, br_value *pValue )
-{
-   br_uint_16 i ;
-
-   ASSERT(pArray);
-   ASSERT(pArray->tv);
-
-   // If the key is already in the array, set the value ...
-
-   for ( i = 0 ; i < pArray->num_elements ; i++ )
-   {
-       if ( pArray->tv[i].t == t )
-       {
-           *pValue = pArray->tv[i].v ;
-           return BRE_OK ;
-       }
-   } 
-
-
-   return BRE_FAIL ;
+	return BRE_FAIL;
 }
 
 
