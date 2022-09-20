@@ -158,11 +158,7 @@ br_actor * BR_PUBLIC_ENTRY BrActorAdd(br_actor *parent, br_actor *a)
 	UASSERT_MESSAGE("NULL pointer to the parental actor", parent != NULL);
 	UASSERT(a->prev == NULL);
 
-	/*
-	 * Link this actor into sibling list of parent
-	 */
-	BR_SIMPLEADDHEAD(&parent->children,a);
-	a->parent = parent;
+	BrActorAddNoRenumber(parent,a);
 
 	/*
 	 * Update depth for added hierachy
@@ -171,7 +167,7 @@ br_actor * BR_PUBLIC_ENTRY BrActorAdd(br_actor *parent, br_actor *a)
 
 	BR_FOR_SIMPLELIST(&a->children,ac)
 		RenumberActor(ac,a->depth+1);
-	
+
 	return a;
 }
 
@@ -194,12 +190,10 @@ br_actor * BR_PUBLIC_ENTRY BrActorRemove(br_actor *a)
 	UASSERT_MESSAGE("NULL pointer to the hierrachy to remove", a != NULL);
 	UASSERT(a->prev != NULL);
 	
-	BR_SIMPLEREMOVE(a);
-
+	BrActorRemoveNoRenumber(a);
 	/*
 	 * Renumber the removed hierachy
 	 */
-	a->parent = NULL;
 	a->depth = 0;
 
 	BR_FOR_SIMPLELIST(&a->children,ac)
