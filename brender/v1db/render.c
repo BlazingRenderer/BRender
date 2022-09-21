@@ -362,6 +362,7 @@ static void actorRender(br_actor *ap,
 #endif
 			if((s = BrOnScreenCheck(&this_model->bounds)) != OSC_REJECT)
 			{
+				BrLightCullReset();
 				BrDbModelRender(ap, this_model, this_material, this_render_data, style, s, 1);
 			}
 			break;
@@ -436,6 +437,7 @@ static void actorRender(br_actor *ap,
 		 */
 		if((s = BrOnScreenCheck(&this_model->bounds)) != OSC_REJECT)
 		{
+			BrLightCullReset();
 			BrDbModelRender(ap, this_model, this_material, this_render_data, style, s, 1);
 		}
 		break;
@@ -530,8 +532,10 @@ static void actorRenderOnScreen(br_actor *ap,
 		/*
 		 * This actor has no transform
 		 */
-		if(ap->type == BR_ACTOR_MODEL)
+		if(ap->type == BR_ACTOR_MODEL) {
+			BrLightCullReset();
 			BrDbModelRender(ap, this_model, this_material, this_render_data, style, OSC_ACCEPT, 1);
+		}
 
 		BR_FOR_SIMPLELIST(&ap->children, a)
 			actorRenderOnScreen(a, this_model, this_material, this_render_data, style, t);
@@ -551,8 +555,10 @@ static void actorRenderOnScreen(br_actor *ap,
 	t = prependActorTransform(ap, t);
 
 
-	if(ap->type == BR_ACTOR_MODEL)
+	if(ap->type == BR_ACTOR_MODEL) {
+		BrLightCullReset();
 		BrDbModelRender(ap, this_model, this_material, this_render_data, style, OSC_ACCEPT, 1);
+	}
 
 	BR_FOR_SIMPLELIST(&ap->children, a)
 		actorRenderOnScreen(a, this_model, this_material, this_render_data, style, t);
