@@ -685,7 +685,7 @@ static void sceneRenderAdd(br_actor *tree)
 	{
 		RendererStatePush(v1db.renderer, BR_STATE_MATRIX);
 
-		t = prependMatrix(&m, (unsigned short)t, (unsigned short)v1db.ttype);
+		t = prependMatrix(&m, (br_uint_16)t, (br_uint_16)v1db.ttype);
 
 		actorRender(tree, model, material, render_data, style,
 			(br_uint_16)t);
