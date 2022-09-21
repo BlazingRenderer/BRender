@@ -389,6 +389,10 @@ void BR_PUBLIC_ENTRY BrZsSceneRenderBegin(br_actor *world,
 					br_actor *camera,
 					br_pixelmap *colour_buffer);
 
+void BR_PUBLIC_ENTRY BrZsSceneRenderContinue(br_actor *world,
+					br_actor *camera,
+					br_pixelmap *colour_buffer);
+
 void BR_PUBLIC_ENTRY BrZsSceneRenderAdd(br_actor *tree);
 void BR_PUBLIC_ENTRY BrZsSceneRenderEnd(void);
 
