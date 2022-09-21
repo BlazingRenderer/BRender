@@ -10,7 +10,6 @@
 #ifndef _FORMATS_H_
 #define _FORMATS_H_
 
-#include <assert.h>
 
 #if EVAL
 #define PAD_SIZE (2048-32)
@@ -67,8 +66,8 @@ struct v11face_f {
     br_vector4_f eqn;           /* Plane equation as a 4 vector (Nx,Ny,Nz,D)*/
 };
 
-static_assert(sizeof(struct v11face_x) == sizeof(struct v11face), "sizeof(struct v11face_x) != sizeof(struct v11face)");
-static_assert(sizeof(struct v11face_f) == sizeof(struct v11face), "sizeof(struct v11face_f) != sizeof(struct v11face)");
+_Static_assert(sizeof(struct v11face_x) == sizeof(struct v11face), "sizeof(struct v11face_x) != sizeof(struct v11face)");
+_Static_assert(sizeof(struct v11face_f) == sizeof(struct v11face), "sizeof(struct v11face_f) != sizeof(struct v11face)");
 
 struct v11group {
 	void *stored;					/* Group material (or NULL) 			*/
@@ -121,8 +120,8 @@ struct v11group_f {
 	br_uint_16 nedges;				/* Number of edges in this group		*/
 };
 
-static_assert(sizeof(struct v11group_x) == sizeof(struct v11group), "sizeof(struct v11group_x) != sizeof(struct v11group)");
-static_assert(sizeof(struct v11group_f) == sizeof(struct v11group), "sizeof(struct v11group_f) != sizeof(struct v11group)");
+_Static_assert(sizeof(struct v11group_x) == sizeof(struct v11group), "sizeof(struct v11group_x) != sizeof(struct v11group)");
+_Static_assert(sizeof(struct v11group_f) == sizeof(struct v11group), "sizeof(struct v11group_f) != sizeof(struct v11group)");
 
 enum{
 	V11MODF_LIT=1,
@@ -158,7 +157,7 @@ struct v11model_f { // why do I get the feeling these aren't used.
 	br_scalar radius;
 };
 
-static_assert(sizeof(struct v11model_x) == sizeof(struct v11model), "sizeof(struct v11model_x) != sizeof(struct v11model)");
-static_assert(sizeof(struct v11model_f) == sizeof(struct v11model), "sizeof(struct v11model_f) != sizeof(struct v11model)");
+_Static_assert(sizeof(struct v11model_x) == sizeof(struct v11model), "sizeof(struct v11model_x) != sizeof(struct v11model)");
+_Static_assert(sizeof(struct v11model_f) == sizeof(struct v11model), "sizeof(struct v11model_f) != sizeof(struct v11model)");
 
 #endif
