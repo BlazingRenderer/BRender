@@ -752,10 +752,11 @@ static br_error	parseEntryLine(br_lexer *l, br_token_value *tv, br_size_t size)
 		 */
 		case T_INTEGER: {
 			static br_token pos_int_types[] = {
+				BRT_INTPTR, BRT_UINTPTR, BRT_INT_64, BRT_UINT_64,
 				BRT_INT_32, BRT_UINT_32, BRT_INT_16, BRT_UINT_16,
 				BRT_INT_8, BRT_UINT_8, BRT_FLOAT, BRT_FIXED, BRT_BOOLEAN};
 			static br_token neg_int_types[] = {
-				BRT_INT_32,	BRT_INT_16, BRT_INT_8,
+				BRT_INTPTR, BRT_INT_64, BRT_INT_32, BRT_INT_16, BRT_INT_8,
 				BRT_FLOAT, BRT_FIXED, BRT_BOOLEAN};
 
 			if (tv->t != BR_NULL_TOKEN)
@@ -770,6 +771,22 @@ static br_error	parseEntryLine(br_lexer *l, br_token_value *tv, br_size_t size)
 				break;
 
 			switch(type) {
+			case BRT_INTPTR:
+				tv->v.pi = (br_intptr_t)BrLexerInteger(l);
+				break;
+
+			case BRT_UINTPTR:
+				tv->v.pu = (br_uintptr_t)BrLexerInteger(l);
+				break;
+
+			case BRT_INT_64:
+				tv->v.i64 = (br_int_64)BrLexerInteger(l);
+				break;
+
+			case BRT_UINT_64:
+				tv->v.u64 = (br_uint_64)BrLexerInteger(l);
+				break;
+
 			case BRT_INT_32:
 				tv->v.i32 = (br_int_32)BrLexerInteger(l);
 				break;
