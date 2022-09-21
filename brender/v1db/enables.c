@@ -9,7 +9,6 @@
 #include "v1db.h"
 #include "shortcut.h"
 #include "brassert.h"
-#include "assert.h"
 #include "math_ip.h"
 
 BR_RCS_ID("$Id: enables.c 2.7 1996/10/09 15:55:18 NEELA Exp $")
@@ -51,8 +50,7 @@ static void actorDisable(br_v1db_enable *e, br_actor *a)
 	int i;
 
 	ASSERT_MESSAGE("actorDisable NULL pointer to an actor", a != NULL);
-//	ASSERT(a->type == e->type);
-	assert(a->type == e->type);
+	ASSERT(a->type == e->type);
 
 	if(e->enabled == NULL)
 		return;
