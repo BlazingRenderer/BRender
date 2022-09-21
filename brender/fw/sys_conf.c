@@ -752,7 +752,7 @@ static br_error	parseEntryLine(br_lexer *l, br_token_value *tv, br_size_t size)
 			static br_token pos_int_types[] = {
 				BRT_INTPTR, BRT_UINTPTR, BRT_INT_64, BRT_UINT_64,
 				BRT_INT_32, BRT_UINT_32, BRT_INT_16, BRT_UINT_16,
-				BRT_INT_8, BRT_UINT_8, BRT_FLOAT, BRT_FIXED, BRT_BOOLEAN};
+				BRT_INT_8, BRT_UINT_8, BRT_FLOAT, BRT_FIXED, BRT_BOOLEAN, BRT_COLOUR_RGB};
 			static br_token neg_int_types[] = {
 				BRT_INTPTR, BRT_INT_64, BRT_INT_32, BRT_INT_16, BRT_INT_8,
 				BRT_FLOAT, BRT_FIXED, BRT_BOOLEAN};
@@ -817,6 +817,9 @@ static br_error	parseEntryLine(br_lexer *l, br_token_value *tv, br_size_t size)
 				break;
 			case BRT_BOOLEAN:
 				tv->v.b = (BrLexerInteger(l) != 0);
+				break;
+			case BRT_COLOUR_RGB:
+				tv->v.rgb = (br_colour)BrLexerInteger(l);
 				break;
 			default:
 				BrLexerError(l,"invalid token type");
