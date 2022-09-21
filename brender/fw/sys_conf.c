@@ -720,7 +720,7 @@ static br_error	parseEntryLine(br_lexer *l, br_token_value *tv, br_size_t size)
 		 * Look for float or fixed
 		 */
 		case T_REAL: {
-		static br_token real_types[] = {BRT_FLOAT, BRT_FIXED};
+		static br_token real_types[] = {BRT_FLOAT, BRT_FIXED, BRT_ANGLE};
 
 			if (tv->t != BR_NULL_TOKEN)
 				type = BrTokenType(tv->t);
@@ -736,6 +736,9 @@ static br_error	parseEntryLine(br_lexer *l, br_token_value *tv, br_size_t size)
 				break;
 			case BRT_FIXED:
 				tv->v.x = BrFloatToFixed(BrLexerReal(l));
+				break;
+			case BRT_ANGLE:
+				tv->v.a = BrScalarToAngle(BrFloatToScalar(BrLexerReal(l)));
 				break;
 			default:
 				BrLexerError(l,"invalid token type");
