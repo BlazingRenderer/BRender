@@ -95,34 +95,88 @@ static void nullRender(br_actor *actor,
 /*
  * 8 Vertices
  */
-static struct fmt_vertex bounds_vertices[] = {
-	{BR_VECTOR3(-1,-1,-1),BR_VECTOR2(0,0),BR_VECTOR3(-0.666,-0.333,-0.666)},	/*    0 */
-	{BR_VECTOR3(-1,-1, 1),BR_VECTOR2(0,0),BR_VECTOR3(-0.333,-0.666, 0.666)},	/*    1 */
-	{BR_VECTOR3(-1, 1,-1),BR_VECTOR2(0,1),BR_VECTOR3(-0.408, 0.816,-0.408)},	/*    2 */
-	{BR_VECTOR3(-1, 1, 1),BR_VECTOR2(0,1),BR_VECTOR3(-0.816, 0.408, 0.408)},	/*    3 */
-	{BR_VECTOR3( 1,-1,-1),BR_VECTOR2(1,0),BR_VECTOR3( 0.408,-0.816,-0.408)},	/*    4 */
-	{BR_VECTOR3( 1,-1, 1),BR_VECTOR2(1,0),BR_VECTOR3( 0.816,-0.408, 0.408)},	/*    5 */
-	{BR_VECTOR3( 1, 1,-1),BR_VECTOR2(1,1),BR_VECTOR3( 0.666, 0.333,-0.666)},	/*    6 */
-	{BR_VECTOR3( 1, 1, 1),BR_VECTOR2(1,1),BR_VECTOR3( 0.333, 0.666, 0.666)},	/*    7 */
+
+static br_vector3 bounds_position[]={
+	BR_VECTOR3(-1,-1,-1),
+	BR_VECTOR3(-1,-1, 1),
+	BR_VECTOR3(-1, 1,-1),
+	BR_VECTOR3(-1, 1, 1),
+	BR_VECTOR3( 1,-1,-1),
+	BR_VECTOR3( 1,-1, 1),
+	BR_VECTOR3( 1, 1,-1),
+	BR_VECTOR3( 1, 1, 1)
+};
+
+static br_vector2 bounds_map[]={
+	BR_VECTOR2(0,0),
+	BR_VECTOR2(0,0),
+	BR_VECTOR2(0,1),
+	BR_VECTOR2(0,1),
+	BR_VECTOR2(1,0),
+	BR_VECTOR2(1,0),
+	BR_VECTOR2(1,1),
+	BR_VECTOR2(1,1)
+};
+
+static br_vector3 bounds_normal[]={
+	BR_VECTOR3(-0.666,-0.333,-0.666),
+	BR_VECTOR3(-0.333,-0.666, 0.666),
+	BR_VECTOR3(-0.408, 0.816,-0.408),
+	BR_VECTOR3(-0.816, 0.408, 0.408),
+	BR_VECTOR3( 0.408,-0.816,-0.408),
+	BR_VECTOR3( 0.816,-0.408, 0.408),
+	BR_VECTOR3( 0.666, 0.333,-0.666),
+	BR_VECTOR3( 0.333, 0.666, 0.666)
 };
 
 /*
  * 12 Faces
  */
-static struct v11face bounds_faces[] = {
-	{{5,6,7},{ 0,13,14}, BR_VECTOR4( 1, 0, 0,1)},	/*    6 */
-	{{5,4,6},{ 3, 4, 0}, BR_VECTOR4( 1, 0, 0,1)},	/*    1 */
-	{{7,6,2},{13, 6, 0}, BR_VECTOR4( 0, 1, 0,1)},	/*    9 */
-	{{7,2,3},{ 0, 5,16}, BR_VECTOR4( 0, 1, 0,1)},	/*   10 */
-	{{1,5,7},{11,14, 0}, BR_VECTOR4( 0, 0, 1,1)},	/*    7 */
-	{{1,7,3},{ 0,16,12}, BR_VECTOR4( 0, 0, 1,1)},	/*    8 */
-	{{3,0,1},{ 0, 8,12}, BR_VECTOR4(-1, 0, 0,1)},	/*    5 */
-	{{3,2,0},{ 5, 1, 0}, BR_VECTOR4(-1, 0, 0,1)},	/*    0 */
-	{{1,0,4},{ 8, 9, 0}, BR_VECTOR4( 0,-1, 0,1)},	/*    3 */
-	{{1,4,5},{ 0, 3,11}, BR_VECTOR4( 0,-1, 0,1)},	/*    4 */
-	{{0,6,4},{ 0, 4, 9}, BR_VECTOR4( 0, 0,-1,1)},	/*   11 */
-	{{0,2,6},{ 1, 6, 0}, BR_VECTOR4( 0, 0,-1,1)},	/*    2 */
+static br_vector3_u16 bounds_vertex_numbers[]={
+	{5,6,7},
+	{5,4,6},
+	{7,6,2},
+	{7,2,3},
+	{1,5,7},
+	{1,7,3},
+	{3,0,1},
+	{3,2,0},
+	{1,0,4},
+	{1,4,5},
+	{0,6,4},
+	{0,2,6}
 };
+
+static br_vector3_u16 bounds_edges[]={
+	{ 0,13,14},
+	{ 3, 4, 0},
+	{13, 6, 0},
+	{ 0, 5,16},
+	{11,14, 0},
+	{ 0,16,12},
+	{ 0, 8,12},
+	{ 5, 1, 0},
+	{ 8, 9, 0},
+	{ 0, 3,11},
+	{ 0, 4, 9},
+	{ 1, 6, 0}
+};
+
+static br_vector4 bounds_plane_equation[]={
+	BR_VECTOR4( 1, 0, 0,1),
+	BR_VECTOR4( 1, 0, 0,1),
+	BR_VECTOR4( 0, 1, 0,1),
+	BR_VECTOR4( 0, 1, 0,1),
+	BR_VECTOR4( 0, 0, 1,1),
+	BR_VECTOR4( 0, 0, 1,1),
+	BR_VECTOR4(-1, 0, 0,1),
+	BR_VECTOR4(-1, 0, 0,1),
+	BR_VECTOR4( 0,-1, 0,1),
+	BR_VECTOR4( 0,-1, 0,1),
+	BR_VECTOR4( 0, 0,-1,1),
+	BR_VECTOR4( 0, 0,-1,1)
+};
+
 
 static br_colour bounds_colours[12];
 
@@ -130,7 +184,7 @@ static br_colour bounds_colours[12];
  * 1 Group
  */
 static struct v11group bounds_face_groups[] = {
-	{NULL,bounds_faces,bounds_colours, NULL,0, bounds_vertices, bounds_colours, NULL, 12, 8, 18}
+        {NULL,bounds_vertex_numbers,bounds_edges,bounds_plane_equation,bounds_colours, NULL, 0,bounds_position,bounds_map,bounds_normal, bounds_colours, NULL, 12, 8, 18}
 };
 
 STATIC struct v11model bounds_prepared = {
@@ -166,22 +220,22 @@ static struct br_model * makeMeshFromBounds(br_bounds *b)
 	/*
 	 * Fill in vertices
 	 */
-	BrVector3Set(&bounds_vertices[0].p,b->min.v[X],b->min.v[Y],b->min.v[Z]);
-	BrVector3Set(&bounds_vertices[1].p,b->min.v[X],b->min.v[Y],b->max.v[Z]);
-	BrVector3Set(&bounds_vertices[2].p,b->min.v[X],b->max.v[Y],b->min.v[Z]);
-	BrVector3Set(&bounds_vertices[3].p,b->min.v[X],b->max.v[Y],b->max.v[Z]);
-	BrVector3Set(&bounds_vertices[4].p,b->max.v[X],b->min.v[Y],b->min.v[Z]);
-	BrVector3Set(&bounds_vertices[5].p,b->max.v[X],b->min.v[Y],b->max.v[Z]);
-	BrVector3Set(&bounds_vertices[6].p,b->max.v[X],b->max.v[Y],b->min.v[Z]);
-	BrVector3Set(&bounds_vertices[7].p,b->max.v[X],b->max.v[Y],b->max.v[Z]);
+	BrVector3Set(&bounds_position[0],b->min.v[X],b->min.v[Y],b->min.v[Z]);
+	BrVector3Set(&bounds_position[1],b->min.v[X],b->min.v[Y],b->max.v[Z]);
+	BrVector3Set(&bounds_position[2],b->min.v[X],b->max.v[Y],b->min.v[Z]);
+	BrVector3Set(&bounds_position[3],b->min.v[X],b->max.v[Y],b->max.v[Z]);
+	BrVector3Set(&bounds_position[4],b->max.v[X],b->min.v[Y],b->min.v[Z]);
+	BrVector3Set(&bounds_position[5],b->max.v[X],b->min.v[Y],b->max.v[Z]);
+	BrVector3Set(&bounds_position[6],b->max.v[X],b->max.v[Y],b->min.v[Z]);
+	BrVector3Set(&bounds_position[7],b->max.v[X],b->max.v[Y],b->max.v[Z]);
 
 
 	/*
 	 * Fill in plane equations of faces
 	 */
 	for(i=0; i< 3; i++) {
-		bounds_faces[  i*2].eqn.v[3] = bounds_faces[1+i*2].eqn.v[3] =  b->max.v[i];
-		bounds_faces[6+i*2].eqn.v[3] = bounds_faces[7+i*2].eqn.v[3] = -b->min.v[i];
+		bounds_plane_equation[  i*2].v[3] = bounds_plane_equation[1+i*2].v[3] =  b->max.v[i];
+		bounds_plane_equation[6+i*2].v[3] = bounds_plane_equation[7+i*2].v[3] = -b->min.v[i];
 	}
 
 	/*

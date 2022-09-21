@@ -44,13 +44,23 @@ static br_face default_model_faces[] = {
 };
 
 br_model _BrDefaultModel = {
-	._reserved  = 0,
-	.identifier = "default_model",
-	.vertices   = default_model_vertices,
-	.faces      = default_model_faces,
-	.nvertices  = 8,
-	.nfaces     = 12,
-	.pivot      = BR_VECTOR3(0.0,0.0,0.0),
-	.flags      = BR_MODF_UPDATEABLE,
+	._reserved    = 0,
+	.identifier   = "default_model",
+	.vertices     = default_model_vertices,
+	.faces        = default_model_faces,
+	.nvertices    = 8,
+	.nfaces       = 12,
+	.pivot        = BR_VECTOR3(0.0,0.0,0.0),
+	.flags        = BR_MODF_UPDATEABLE,
+	.custom       = NULL,
+	.user         = NULL,
+	.crease_angle = BR_ANGLE_DEG(90),
+	.radius       = BR_SCALAR(1.732050808),
+	.bounds       = { { BR_SCALAR(-1.0),
+	    BR_SCALAR(-1.0),
+	    BR_SCALAR(-1.0) },
+	  { BR_SCALAR( 1.0),
+	    BR_SCALAR( 1.0),
+	    BR_SCALAR( 1.0) } }
 };
 

@@ -364,6 +364,10 @@ enum {
 	BR_MODF_CUSTOM_BOUNDS	= 0x0400,	/* Bounding box is already set up				*/
 	BR_MODF_FACES_ONLY		= 0x0800,	/* Model will only be used to render faces (not edges or points) */
 
+	BR_MODF_USED_PREPARED_USER = 0x1000,/* User fields in prepared data used */
+
+	BR_MODF_CUSTOM_EQUATIONS= 0x2000,	/* Uses face equations from br_face structure */
+
 	_BR_MODF_RESERVED		= 0x8000
 };
 
@@ -380,7 +384,11 @@ enum {
 	BR_MODU_VERTICES			= 0x0040,
 	BR_MODU_FACES				= 0x0080,
 	BR_MODU_PIVOT				= 0x0100,
-	BR_MODU_ALL					= 0x7FFF
+	BR_MODU_PREPARED			= 0x0200,
+	BR_MODU_PRIMITIVE_EQUATIONS	= 0x0400,
+	BR_MODU_ALL					= 0x7FFF,
+
+	_BR_MODU_RESERVED			= 0x8000
 };
 
 /*
@@ -389,6 +397,7 @@ enum {
 
 #define BR_MODU_FACE_MATERIALS  BR_MODU_PRIMITIVE_MATERIALS
 #define BR_MODU_FACE_COLOURS	BR_MODU_PRIMITIVE_COLOURS
+#define BR_MODU_FACE_EQUATIONS	BR_MODU_PRIMITIVE_EQUATIONS
 #define BR_MODU_NORMALS       	BR_MODU_VERTEX_POSITIONS
 #define BR_MODU_EDGES		 	BR_MODU_FACES
 #define BR_MODU_RADIUS		 	BR_MODU_VERTEX_POSITIONS

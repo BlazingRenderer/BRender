@@ -91,7 +91,7 @@ br_geometry_v1_model *GeometryV1ModelGLAllocate(br_renderer_facility *type, cons
 /*
  * gstored.c
  */
-br_geometry_stored *GeometryStoredGLAllocate(br_geometry_v1_model *gv1model, const char *id, struct v11model_f *model);
+br_geometry_stored *GeometryStoredGLAllocate(br_geometry_v1_model *gv1model, const char *id, struct v11model *model);
 
 /*
  * onscreen.c

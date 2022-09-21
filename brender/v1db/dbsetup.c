@@ -180,7 +180,11 @@ static br_uint_32 BR_CALLBACK updateMaterial(br_material *item, void *arg)
 static br_uint_32 BR_CALLBACK updateModel(br_model *item, void *arg)
 {
     ASSERT_MESSAGE("BR_CALLBACK updateModel NULL pointer", item !=NULL);
-	BrModelUpdate(item, BR_MODU_ALL);
+
+	if (item->prepared != NULL)
+		BrModelUpdate(item, _BR_MODU_RESERVED);
+	else
+		BrModelUpdate(item, BR_MODU_ALL);
 
 	return 0;
 }

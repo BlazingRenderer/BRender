@@ -62,15 +62,15 @@ static void create_vao(br_geometry_stored *self)
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
 
-static void build_vbo_posn(br_geometry_stored *self, struct v11model_f *model, size_t total_vertices)
+static void build_vbo_posn(br_geometry_stored *self, struct v11model *model, size_t total_vertices)
 {
     br_vector3_f *vtx = BrScratchAllocate(total_vertices * sizeof(br_vector3_f));
     br_vector3_f *next = vtx;
 
     for(br_uint_16 i = 0; i < model->ngroups; ++i) {
-        const struct v11group_f *gp = model->groups + i;
-        for(br_uint_16 v = 0; v < gp->nvertices; ++v, ++next)
-            *next = gp->vertices[v].p;
+        const struct v11group *gp = model->groups + i;
+        memcpy(next, gp->position, gp->nvertices * sizeof(br_vector3_f));
+        next += gp->nvertices;
     }
 
     glBindBuffer(GL_ARRAY_BUFFER, self->gl_vbo_posn);
@@ -79,17 +79,18 @@ static void build_vbo_posn(br_geometry_stored *self, struct v11model_f *model, s
     BrScratchFree(vtx);
 }
 
-static void build_vbo(GLuint vbo, struct v11model_f *model, size_t total_vertices)
+static void build_vbo(GLuint vbo, struct v11model *model, size_t total_vertices)
 {
     /* Collate and upload the vertex data. */
     gl_vertex_f *vtx = (gl_vertex_f *)BrScratchAllocate(total_vertices * sizeof(gl_vertex_f));
     ASSERT(vtx);
     gl_vertex_f    *nextVtx = vtx;
     for(br_uint_16 i        = 0; i < model->ngroups; ++i) {
-        for(br_uint_16 v = 0; v < model->groups[i].nvertices; ++v, ++nextVtx) {
-            nextVtx->map = model->groups[i].vertices[v].map;
-            nextVtx->n   = model->groups[i].vertices[v].n;
-            nextVtx->c   = model->groups[i].vertex_colours[v];
+        const struct v11group *gp = model->groups + i;
+        for(br_uint_16 v = 0; v < gp->nvertices; ++v, ++nextVtx) {
+            nextVtx->map = *(br_vector2_f*)(gp->map + v);
+            nextVtx->n   = *(br_vector3_f*)(gp->normal + v);
+            nextVtx->c   = gp->vertex_colours[v];
         }
     }
 
@@ -98,7 +99,7 @@ static void build_vbo(GLuint vbo, struct v11model_f *model, size_t total_vertice
 }
 
 
-static void build_ibo(GLuint ibo, struct v11model_f *model, size_t total_faces, gl_groupinfo *groups)
+static void build_ibo(GLuint ibo, struct v11model *model, size_t total_faces, gl_groupinfo *groups)
 {
     br_uint_16 *idx = (br_uint_16 *)BrScratchAllocate(total_faces * 3 * sizeof(br_uint_16));
 
@@ -107,12 +108,12 @@ static void build_ibo(GLuint ibo, struct v11model_f *model, size_t total_faces, 
     br_size_t  face_offset = 0;
 
     for(br_uint_16 i = 0; i < model->ngroups; ++i) {
-        const struct v11group_f *gp = model->groups + i;
+        const struct v11group *gp = model->groups + i;
         for(br_uint_16          f   = 0; f < gp->nfaces; ++f) {
-            const struct v11face_f *fp = gp->faces + f;
-            *nextIdx++ = fp->vertices[0] + offset;
-            *nextIdx++ = fp->vertices[1] + offset;
-            *nextIdx++ = fp->vertices[2] + offset;
+            const br_vector3_u16 *fp = gp->vertex_numbers + f;
+            *nextIdx++ = fp->v[0] + offset;
+            *nextIdx++ = fp->v[1] + offset;
+            *nextIdx++ = fp->v[2] + offset;
         }
 
         groups[i].count  = (GLsizei)gp->nfaces * 3;
@@ -129,7 +130,7 @@ static void build_ibo(GLuint ibo, struct v11model_f *model, size_t total_faces, 
     BrScratchFree(idx);
 }
 
-br_geometry_stored *GeometryStoredGLAllocate(br_geometry_v1_model *gv1model, const char *id, struct v11model_f *model)
+br_geometry_stored *GeometryStoredGLAllocate(br_geometry_v1_model *gv1model, const char *id, struct v11model *model)
 {
     size_t             total_vertices, total_faces;
     br_geometry_stored *self;
@@ -438,7 +439,7 @@ static br_error V1Model_RenderStored(struct br_geometry_stored *self, br_rendere
              state->hidden.heap != NULL);
 
     for(int i = 0; i < self->model->ngroups; ++i) {
-        struct v11group_f        *group     = self->model->groups + i;
+        struct v11group          *group     = self->model->groups + i;
         gl_groupinfo             *groupinfo = self->groups + i;
         br_renderer_state_stored *stored    = (br_renderer_state_stored *)group->stored;
 

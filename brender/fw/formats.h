@@ -18,6 +18,7 @@
 /**
  ** Generic vertex structure used for geometry formats
  **/
+#if 0
 struct fmt_vertex {
 	br_vector3 p;			/* Point in model space				*/
 	br_vector2 map;			/* Mapping coordinates				*/
@@ -65,19 +66,24 @@ struct v11face_f {
 	br_uint_16 edges[3];		/* Edges around face			            */
     br_vector4_f eqn;           /* Plane equation as a 4 vector (Nx,Ny,Nz,D)*/
 };
+#endif
 
-_Static_assert(sizeof(struct v11face_x) == sizeof(struct v11face), "sizeof(struct v11face_x) != sizeof(struct v11face)");
-_Static_assert(sizeof(struct v11face_f) == sizeof(struct v11face), "sizeof(struct v11face_f) != sizeof(struct v11face)");
-
+// This groups together all the faces with the same material.
 struct v11group {
 	void *stored;					/* Group material (or NULL) 			*/
 
-	struct v11face *faces;  	 	/* faces in group						*/
+//	struct v11face *faces;  	 	/* faces in group						*/
+	br_vector3_u16 *vertex_numbers;
+	br_vector3_u16 *edges;
+	br_vector4 * eqn;
     br_colour *face_colours;   		/* Colour for geometry				    */
     br_uint_16 *face_user;          /* Per face user data                   */
 	br_uint_8 *face_flags;			/* Per face flags                       */
 
-	struct fmt_vertex *vertices;	/* vertices in group					*/
+//	struct fmt_vertex *vertices;	/* vertices in group					*/
+	br_vector3 * position;
+	br_vector2 * map;
+	br_vector3 * normal;
     br_colour *vertex_colours;   	/* Colour for geometry				    */
     br_uint_16 *vertex_user;        /* Per vertex user data                 */
 
@@ -86,6 +92,7 @@ struct v11group {
 	br_uint_16 nedges;				/* Number of edges in this group		*/
 };
 
+#if 0
 struct v11group_x {
 	void *stored;					/* Group material (or NULL) 			*/
 
@@ -117,15 +124,9 @@ struct v11group_f {
 
 	br_uint_16 nfaces;				/* Number of faces in this group		*/
 	br_uint_16 nvertices;			/* Number of vertices in this group		*/
-	br_uint_16 nedges;				/* Number of edges in this group		*/
+	br_uint_16 nedges;				/* Num`ber of edges in this grou`p		*/
 };
-
-_Static_assert(sizeof(struct v11group_x) == sizeof(struct v11group), "sizeof(struct v11group_x) != sizeof(struct v11group)");
-_Static_assert(sizeof(struct v11group_f) == sizeof(struct v11group), "sizeof(struct v11group_f) != sizeof(struct v11group)");
-
-enum{
-	V11MODF_LIT=1,
-};
+#endif
 
 struct v11model {
 	br_size_t size;
@@ -134,9 +135,14 @@ struct v11model {
 	br_vector3 pivot;
 
 	struct v11group *groups;
+
+	br_bounds bounds;
 	br_scalar radius;
+	br_vector3 centre;
+	br_scalar centred_radius;
 };
 
+#if 0
 struct v11model_x {
 	br_size_t size;
 	br_uint_32 flags;
@@ -144,20 +150,25 @@ struct v11model_x {
 	br_vector3_x pivot;
 
 	struct v11group_x *groups;
-	br_scalar radius;
+
+	br_bounds3_x bounds;
+	br_fixed_ls radius;
+	br_vector3_x centre;
+	br_fixed_ls centred_radius;
 };
 
-struct v11model_f { // why do I get the feeling these aren't used.
+struct v11model_f {
 	br_size_t size;
 	br_uint_32 flags;
 	br_uint_16 ngroups;
 	br_vector3_f pivot;
 
 	struct v11group_f *groups;
-	br_scalar radius;
+
+	br_bounds3_f bounds;
+	float radius;
+	br_vector3_f centre;
+	float centred_radius;
 };
-
-_Static_assert(sizeof(struct v11model_x) == sizeof(struct v11model), "sizeof(struct v11model_x) != sizeof(struct v11model)");
-_Static_assert(sizeof(struct v11model_f) == sizeof(struct v11model), "sizeof(struct v11model_f) != sizeof(struct v11model)");
-
+#endif
 #endif

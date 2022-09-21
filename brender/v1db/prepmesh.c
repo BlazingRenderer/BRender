@@ -19,7 +19,9 @@
 
 #include "formats.h"
 
-#define MODU_FACE_COPY_FLAGS BR_MODU_FACE_COLOURS
+#define MODU_FACE_COPY_FLAGS \
+	(BR_MODU_FACE_COLOURS|\
+	BR_MODU_FACE_EQUATIONS)
 
 #define MODU_VERTEX_COPY_FLAGS \
 	(BR_MODU_VERTEX_POSITIONS|\
@@ -64,8 +66,6 @@ static struct pm_temp_edge **pm_edge_hash;
 static char *pm_edge_scratch;
 static int num_edges = 0;
 
-static int isLit;
-
 static int addEdge(br_uint_16 first, br_uint_16 last)
 {
 	struct pm_temp_edge *tep;
@@ -106,7 +106,11 @@ static void prepareEdges(struct v11group *group, br_model *model)
 {
 	br_size_t scratch_size;
 	br_face *mfp;
-	struct v11face *fp;
+//	struct v11face *fp;
+	br_vector3_u16 *vertex_numbers;
+	br_vector3_u16 *edges;
+//	br_vector4 * plane_equation;
+
 	int f;
 
 	scratch_size =
@@ -128,28 +132,30 @@ static void prepareEdges(struct v11group *group, br_model *model)
 	 * Accumulate shared edges from each face
 	 */
 	num_edges = 0;
-	fp = group->faces;
+//	fp = group->faces;
+	vertex_numbers=group->vertex_numbers;
+	edges=group->edges;
 
-	for(f = 0; f < group->nfaces; f++, fp++) {
+	for(f = 0; f < group->nfaces; f++, vertex_numbers++,edges++) {
         /*
          * Get a pointer back to original model face
          */
 		mfp = model->faces + group->face_user[f];
 
 		if(!(mfp->flags & BR_FACEF_COPLANAR_0))
-			fp->edges[0] = addEdge(fp->vertices[0],fp->vertices[1])+1;
-		else 
-			fp->edges[0] = 0;
+			edges->v[0] = addEdge(vertex_numbers->v[0],vertex_numbers->v[1])+1;
+		else
+			edges->v[0] = 0;
 
 		if(!(mfp->flags & BR_FACEF_COPLANAR_1))
-			fp->edges[1] = addEdge(fp->vertices[1],fp->vertices[2])+1;
-		else 
-			fp->edges[1] = 0;
+			edges->v[1] = addEdge(vertex_numbers->v[1],vertex_numbers->v[2])+1;
+		else
+			edges->v[1] = 0;
 
 		if(!(mfp->flags & BR_FACEF_COPLANAR_2))
-			fp->edges[2] = addEdge(fp->vertices[2],fp->vertices[0])+1;
-		else 
-			fp->edges[2] = 0;
+			edges->v[2] = addEdge(vertex_numbers->v[2],vertex_numbers->v[0])+1;
+		else
+			edges->v[2] = 0;
 	}
 
 	group->nedges = num_edges+1;
@@ -399,8 +405,8 @@ static void SmoothingCreased(br_model *model, br_scalar crease_limit,
 		BrVector3CopyF(&o_n, &model->faces[(*outer)->f].n);
 		for(inner = start ; inner < end; inner++) {
 			if((inner == outer) || ((model->faces[(*outer)->f].smoothing & model->faces[(*inner)->f].smoothing) &&
-				BrFVector3Dot(&model->faces[(*inner)->f].n, &o_n) > crease_limit)) {
-				BrVector3Accumulate(&(*outer)->n, &model->faces[(*inner)->f].n);
+                                BrFVector3Dot(&model->faces[(*inner)->f].n, &o_n) > crease_limit)) {
+                                        BrVector3Accumulate(&(*outer)->n, &model->faces[(*inner)->f].n);
 			}
 		}
 	}
@@ -412,18 +418,19 @@ static void SmoothingCreased(br_model *model, br_scalar crease_limit,
 static void CopyVertex(struct v11group *group, int v, struct prep_vertex *src, br_model *model)
 {
 	br_vertex *srcv = model->vertices + src->v;
+	br_vector3 temp;
 
-	group->vertices[v].p.v[0] = srcv->p.v[0] - model->pivot.v[0];
-	group->vertices[v].p.v[1] = srcv->p.v[1] - model->pivot.v[1];
-	group->vertices[v].p.v[2] = srcv->p.v[2] - model->pivot.v[2];
+	group->position[v].v[0] = srcv->p.v[0] - model->pivot.v[0];
+	group->position[v].v[1] = srcv->p.v[1] - model->pivot.v[1];
+	group->position[v].v[2] = srcv->p.v[2] - model->pivot.v[2];
 
-	group->vertices[v].map = srcv->map;
+	group->map[v] = srcv->map;
 
-	BrVector3Normalise(&group->vertices[v].n, &src->n);
+	BrVector3Normalise(&group->normal[v], &src->n);
 
-    group->vertex_colours[v] = BR_COLOUR_RGBA(srcv->red, srcv->grn, srcv->blu, srcv->index);
+	group->vertex_colours[v] = BR_COLOUR_RGBA(srcv->red, srcv->grn, srcv->blu, srcv->index);
 
-    group->vertex_user[v] = src->v;
+	group->vertex_user[v] = src->v;
 }
 
 /*
@@ -431,16 +438,16 @@ static void CopyVertex(struct v11group *group, int v, struct prep_vertex *src, b
  */
 static void CopyFace(struct v11group *group, int f, br_face *src, br_model *model)
 {
-	group->faces[f].vertices[0] = src->vertices[0];
-	group->faces[f].vertices[1] = src->vertices[1];
-	group->faces[f].vertices[2] = src->vertices[2];
+	group->vertex_numbers[f].v[0] = src->vertices[0];
+	group->vertex_numbers[f].v[1] = src->vertices[1];
+	group->vertex_numbers[f].v[2] = src->vertices[2];
 
 	group->face_colours[f] = BR_COLOUR_RGBA(src->red, src->grn, src->blu, src->index);
 
-	group->faces[f].eqn.v[0] = BrFractionToScalar(src->n.v[0]);
-	group->faces[f].eqn.v[1] = BrFractionToScalar(src->n.v[1]);
-	group->faces[f].eqn.v[2] = BrFractionToScalar(src->n.v[2]);
-	group->faces[f].eqn.v[3] = src->d;
+	group->eqn[f].v[0] = BrFractionToScalar(src->n.v[0]);
+	group->eqn[f].v[1] = BrFractionToScalar(src->n.v[1]);
+	group->eqn[f].v[2] = BrFractionToScalar(src->n.v[2]);
+	group->eqn[f].v[3] = src->d;
 
 	group->face_flags[f] = src->flags;
 
@@ -455,23 +462,29 @@ static void PrepareGroups(br_model *model)
 	br_qsort_cbfn *vertex_compare_smoothing;
 	br_qsort_cbfn *vertex_compare_groups;
 	void (*smoothing_fn)(br_model *, br_scalar,struct prep_vertex **, struct prep_vertex **);
-	void *vp;
 	br_size_t block_size;
 	struct prep_vertex *temp_verts, *gtvp, **sorted_vertices;
 	struct br_face *fp;
+	struct br_vertex *vp;
 	int g,f,v,i,ntemps,count,nf,nv,ng, old_count;
 	br_scalar crease_limit;
 	struct v11model *v11m;
 	struct v11group *v11g;
-	struct v11face *v11f;
-	struct fmt_vertex *v11v;
+//	struct v11face *v11f;
+	br_vector3_u16 *vertex_numbers;
+	br_vector3_u16 *edges;
+	br_vector4 *eqn;
+//	struct fmt_vertex *v11v;
+	br_vector3 *position;
+	br_vector2 *map;
+	br_vector3 *normal;
+	br_fvector3 last_n;
+
     br_colour *v11fcolours, *v11vcolours;
     br_uint_16 *v11fuser, *v11vuser;
     br_uint_8 *v11fflags;
 	struct br_face **sorted_faces;
 	char *cp;
-
-	isLit=BR_FALSE;
 
 	/*
 	 * Select sorting functions
@@ -509,11 +522,10 @@ static void PrepareGroups(br_model *model)
 	ntemps = model->nfaces * 3;
 
 	block_size = ntemps * (sizeof(*temp_verts) + sizeof(*sorted_vertices)) + model->nfaces * sizeof(sorted_faces);
-	vp = BrScratchAllocate(block_size);
+	temp_verts = BrScratchAllocate(block_size);
 
-	BrMemSet(vp, 0, block_size);
+	BrMemSet(temp_verts, 0, block_size);
 
-	temp_verts = vp;
 	sorted_vertices = (struct prep_vertex **)(temp_verts + ntemps);
 	sorted_faces = (struct br_face **)(sorted_vertices + ntemps);
 
@@ -523,6 +535,12 @@ static void PrepareGroups(br_model *model)
 		for( v = 0; v < 3; v++, i++, gtvp++) {
 
 			ASSERT(gtvp < temp_verts + model->nfaces*3);
+
+			if (model->flags & BR_MODF_CUSTOM_NORMALS) {
+				gtvp->n.v[0] = BrFractionToScalar(model->vertices[fp->vertices[v]].n.v[0]);
+				gtvp->n.v[1] = BrFractionToScalar(model->vertices[fp->vertices[v]].n.v[1]);
+				gtvp->n.v[2] = BrFractionToScalar(model->vertices[fp->vertices[v]].n.v[2]);
+			}
 
 			gtvp->v = fp->vertices[v];
 			gtvp->f = f;
@@ -549,20 +567,23 @@ static void PrepareGroups(br_model *model)
 	/*
 	 * Propagate normals based on smoothing groups (and creasing)
 	 */
-	BrQsort(sorted_vertices, ntemps, sizeof(*sorted_vertices),vertex_compare_smoothing);
+	if (!(model->flags & BR_MODF_CUSTOM_NORMALS)) {
 
-	for(v=0, i=0; v < ntemps-1; v++) {
+		BrQsort(sorted_vertices, ntemps, sizeof(*sorted_vertices),vertex_compare_smoothing);
 
-		if(vertex_compare_smoothing(sorted_vertices+v,sorted_vertices+v+1)) {
-			/*
-			 * Process a group of vertices
-			 */
-			smoothing_fn(model, crease_limit, sorted_vertices+i, sorted_vertices+v+1);
-			i = v+1;
+		for(v=0, i=0; v < ntemps-1; v++) {
+
+			if(vertex_compare_smoothing(sorted_vertices+v,sorted_vertices+v+1)) {
+				/*
+				 * Process a group of vertices
+				 */
+				smoothing_fn(model, crease_limit, sorted_vertices+i, sorted_vertices+v+1);
+				i = v+1;
+			}
 		}
-	}
 
-	smoothing_fn(model, crease_limit, sorted_vertices+i, sorted_vertices+ntemps);
+		smoothing_fn(model, crease_limit, sorted_vertices+i, sorted_vertices+ntemps);
+	}
 
 	/*
 	 * Resort temp. vertices into groups
@@ -583,16 +604,6 @@ static void PrepareGroups(br_model *model)
 		if(sorted_faces[f]->material != sorted_faces[f-1]->material)
 			ng++;
 
-	for(f=0; f < model->nfaces; f++){
-		if(!sorted_faces[f]->material){ //assume the worst
-			isLit=BR_TRUE;
-		}else{
-			if((sorted_faces[f]->material->flags&BR_MATF_LIGHT)&&((sorted_faces[f]->material->flags&BR_MATF_PRELIT)==0))
-				isLit=BR_TRUE;
-		}
-	}
-
-			
 	/*
 	 * Prepared data will have same number of faces as input
 	 */
@@ -603,8 +614,15 @@ static void PrepareGroups(br_model *model)
 	 */
 	block_size= PREP_ALIGN(sizeof(struct v11model)) +
 				PREP_ALIGN(ng * sizeof(struct v11group)) +
-				PREP_ALIGN(nf * sizeof(struct v11face)) +
-				PREP_ALIGN(nv * sizeof(struct fmt_vertex))+
+
+				PREP_ALIGN(nf * sizeof(*v11g->vertex_numbers)) +
+				PREP_ALIGN(nf * sizeof(*v11g->edges)) +
+				PREP_ALIGN(nf * sizeof(*v11g->eqn)) +
+
+				PREP_ALIGN(nv * sizeof(*v11g->position))+
+				PREP_ALIGN(nv * sizeof(*v11g->map))+
+				PREP_ALIGN(nv * sizeof(*v11g->normal))+
+
 				PREP_ALIGN(nf * sizeof(br_colour)) +
                 PREP_ALIGN(nv * sizeof(br_colour)) +
                 PREP_ALIGN(nf * sizeof(br_uint_8)) +
@@ -624,8 +642,16 @@ static void PrepareGroups(br_model *model)
 
 	v11m = (void *)cp; cp+= PREP_ALIGN(sizeof(struct v11model));
 	v11g = (void *)cp; cp+= PREP_ALIGN(ng * sizeof(struct v11group));
-	v11f = (void *)cp; cp+= PREP_ALIGN(nf * sizeof(struct v11face));
-	v11v = (void *)cp; cp+= PREP_ALIGN(nv * sizeof(struct fmt_vertex));
+
+//	v11f = (void *)cp; cp+= PREP_ALIGN(nf * sizeof(struct v11face));
+	vertex_numbers	=	(void *)cp; cp+= PREP_ALIGN(nf * sizeof(*v11g->vertex_numbers));
+	edges			=	(void *)cp; cp+= PREP_ALIGN(nf * sizeof(*v11g->edges));
+	eqn				=	(void *)cp; cp+= PREP_ALIGN(nf * sizeof(*v11g->eqn));
+
+//	v11v = (void *)cp; cp+= PREP_ALIGN(nv * sizeof(struct fmt_vertex));
+	position	= (void *)cp; cp+= PREP_ALIGN(nv * sizeof(*v11g->position));
+	map			= (void *)cp; cp+= PREP_ALIGN(nv * sizeof(*v11g->map));
+	normal		= (void *)cp; cp+= PREP_ALIGN(nv * sizeof(*v11g->normal));
 
     v11vcolours = (void *)cp; cp+= PREP_ALIGN(nv * sizeof(br_colour));
 	v11fcolours = (void *)cp; cp+= PREP_ALIGN(nf * sizeof(br_colour));
@@ -645,7 +671,11 @@ static void PrepareGroups(br_model *model)
 	/*
 	 * Group Faces
 	 */
-	v11g[0].faces = v11f;
+//	v11g[0].faces = v11f;
+	v11g[0].vertex_numbers=vertex_numbers;
+	v11g[0].edges=edges;
+	v11g[0].eqn=eqn;
+
     v11g[0].face_colours = v11fcolours;
     v11g[0].face_user = v11fuser;
 
@@ -661,7 +691,11 @@ static void PrepareGroups(br_model *model)
 
 		if(sorted_faces[f]->material != sorted_faces[f+1]->material) {
 			g++;
-    		v11g[g].faces = v11f+f+1;
+//    		v11g[g].faces = v11f+f+1;
+			v11g[g].vertex_numbers=vertex_numbers+f+1;
+			v11g[g].edges=edges+f+1;
+			v11g[g].eqn=eqn+f+1;
+
             v11g[g].face_colours = v11fcolours+f+1;
             v11g[g].face_user = v11fuser+f+1;
             v11g[g].face_flags = v11fflags+f+1;
@@ -677,19 +711,36 @@ static void PrepareGroups(br_model *model)
 	/*
 	 * Group Vertices
 	 */
-	v11g[0].vertices = v11v;
+//	v11g[0].vertices = v11v;
+	v11g[0].position=position;
+	v11g[0].map=map;
+	v11g[0].normal=normal;
+
 	v11g[0].vertex_colours = v11vcolours;
 	v11g[0].vertex_user = v11vuser;
 
 	v11g[0].nvertices = 1;
 	CopyVertex(v11g, 0, sorted_vertices[0], model);
 
+	if (model->flags & BR_MODF_UPDATEABLE) {
+
+		last_n.v[0] = BrScalarToFractionClamp(v11g[0].normal[0].v[0]);
+		last_n.v[1] = BrScalarToFractionClamp(v11g[0].normal[0].v[1]);
+		last_n.v[2] = BrScalarToFractionClamp(v11g[0].normal[0].v[2]);
+
+		model->vertices[sorted_vertices[0]->v].n = last_n;
+	}
+
 	for(v=0, g=0, count=0; v < ntemps-1; v++) {
 
 		if(model->faces[sorted_vertices[v]->f].material !=
 			model->faces[sorted_vertices[v+1]->f].material ) {
             g++;
-			v11g[g].vertices = v11v+count+1;
+//			v11g[g].vertices = v11v+count+1;
+			v11g[g].position = position+count+1;
+			v11g[g].map = map+count+1;
+			v11g[g].normal = normal+count+1;
+
         	v11g[g].vertex_colours = v11vcolours+count+1;
         	v11g[g].vertex_user = v11vuser+count+1;
 			v11g[g].nvertices = 0;
@@ -700,8 +751,19 @@ static void PrepareGroups(br_model *model)
 			count++;
 			sorted_vertices[v]->v = count;
 			CopyVertex(v11g+g, v11g[g].nvertices, sorted_vertices[v+1], model);
+
+			if (model->flags & BR_MODF_UPDATEABLE) {
+
+				last_n.v[0] = BrScalarToFractionClamp(v11g[g].normal[v11g[g].nvertices].v[0]);
+				last_n.v[1] = BrScalarToFractionClamp(v11g[g].normal[v11g[g].nvertices].v[1]);
+				last_n.v[2] = BrScalarToFractionClamp(v11g[g].normal[v11g[g].nvertices].v[2]);
+			}
+
 			v11g[g].nvertices++;
 		}
+
+		if (model->flags & BR_MODF_UPDATEABLE)
+			model->vertices[sorted_vertices[v+1]->v].n = last_n;
 
 		sorted_vertices[v]->v = old_count;
 	}
@@ -713,19 +775,19 @@ static void PrepareGroups(br_model *model)
 	 */
 	for(g=0; g < ng; g++) {
 		for(f=0; f < v11g[g].nfaces; f++) {
-			i = v11g[g].vertices - v11v;
+			i = v11g[g].position - position;
 			v = v11g[g].face_user[f] * 3;
 
-			v11g[g].faces[f].vertices[0] = temp_verts[v+0].v - i;
-			v11g[g].faces[f].vertices[1] = temp_verts[v+1].v - i;
-			v11g[g].faces[f].vertices[2] = temp_verts[v+2].v - i;
+			v11g[g].vertex_numbers[f].v[0] = temp_verts[v+0].v - i;
+			v11g[g].vertex_numbers[f].v[1] = temp_verts[v+1].v - i;
+			v11g[g].vertex_numbers[f].v[2] = temp_verts[v+2].v - i;
 		}
 	}
 
 	/*
 	 * Release scratchpad
 	 */
-	BrScratchFree(vp);
+	BrScratchFree(temp_verts);
 }
 
 /*
@@ -747,6 +809,28 @@ static void PrepareBoundingRadius(br_model *model)
 	}
 
 	model->radius = BrFloatToScalar(BrFloatSqrt(max));
+}
+
+static br_scalar PrepareCentredBoundingRadius(br_model *model,const br_vector3 * centre)
+{
+	float d,max = 0.0F;
+	int v;
+	br_vertex *vp;
+	float rp[3];
+
+	for(v=0, vp = model->vertices ; v< model->nvertices; v++, vp++) {
+
+		rp[0]=BrScalarToFloat(vp->p.v[0]) - BrScalarToFloat(centre->v[0]);
+		rp[1]=BrScalarToFloat(vp->p.v[1]) - BrScalarToFloat(centre->v[1]);
+		rp[2]=BrScalarToFloat(vp->p.v[2]) - BrScalarToFloat(centre->v[2]);
+
+		d = rp[0]*rp[0] + rp[1]*rp[1] + rp[2]*rp[2];
+
+		if(d>max)
+			max = d;
+	}
+
+	return BrFloatToScalar(BrFloatSqrt(max));
 }
 
 /*
@@ -786,16 +870,19 @@ static void PrepareBoundingBox(br_model *model)
 void RegenerateFaceNormals(struct v11model *v11m)
 {
 	int g,f;
-	struct v11face *fp;
+//	struct v11face *fp;
+	br_vector4 * eqn;
+	br_vector3_u16 *vertex_numbers;
 
 	for(g=0; g < v11m->ngroups; g++) {
-		fp=v11m->groups[g].faces;
-		for(f=0; f < v11m->groups[g].nfaces; f++, fp++) {
-			
-			BrPlaneEquation(&fp->eqn,
-					&v11m->groups[g].vertices[fp->vertices[0]].p,
-					&v11m->groups[g].vertices[fp->vertices[1]].p,
-					&v11m->groups[g].vertices[fp->vertices[2]].p);
+		eqn=v11m->groups[g].eqn;
+		vertex_numbers=v11m->groups[g].vertex_numbers;
+		for(f=0; f < v11m->groups[g].nfaces; f++, eqn++,vertex_numbers++) {
+
+			BrPlaneEquation(eqn,
+					&v11m->groups[g].position[vertex_numbers->v[0]],
+					&v11m->groups[g].position[vertex_numbers->v[1]],
+					&v11m->groups[g].position[vertex_numbers->v[2]]);
 		}
 	}
 }
@@ -803,8 +890,12 @@ void RegenerateFaceNormals(struct v11model *v11m)
 void RegenerateVertexNormals(struct v11model *v11m)
 {
 	int g,v,f;
-	struct v11face *fp;
-	struct fmt_vertex *vp;
+//	struct v11face *fp;
+	br_vector3_u16 *vertex_numbers;
+	br_vector4 *eqn;
+
+//	struct fmt_vertex *vp;
+	br_vector3 * normal;
 	br_vector3 *normals;
 
 	for(g=0; g < v11m->ngroups; g++) {
@@ -818,20 +909,23 @@ void RegenerateVertexNormals(struct v11model *v11m)
 		/*
 		 * Accumulate normals from each face
 		 */
-		fp=v11m->groups[g].faces;
-		for(f=0 ; f < v11m->groups[g].nfaces; f++, fp++) {
-			BrVector3Accumulate(normals+fp->vertices[0],(br_vector3 *)&fp->eqn);
-			BrVector3Accumulate(normals+fp->vertices[1],(br_vector3 *)&fp->eqn);
-			BrVector3Accumulate(normals+fp->vertices[2],(br_vector3 *)&fp->eqn);
-			
+//		fp=v11m->groups[g].faces;
+		vertex_numbers=v11m->groups[g].vertex_numbers;
+		eqn=v11m->groups[g].eqn;
+
+		for(f=0 ; f < v11m->groups[g].nfaces; f++, vertex_numbers++,eqn++) {
+			BrVector3Accumulate(normals+vertex_numbers->v[0],(br_vector3 *)eqn);
+			BrVector3Accumulate(normals+vertex_numbers->v[1],(br_vector3 *)eqn);
+			BrVector3Accumulate(normals+vertex_numbers->v[2],(br_vector3 *)eqn);
+
 		}
 
 		/*
 		 * Normalise accumulated normals into vertices
 		 */
-		vp = v11m->groups[g].vertices;
-		for(v=0; v < v11m->groups[g].nvertices; v++,vp++)
-			BrVector3Normalise(&vp->n,normals+v);
+		normal = v11m->groups[g].normal;
+		for(v=0; v < v11m->groups[g].nvertices; v++,normal++)
+			BrVector3Normalise(normal,normals+v);
 
 		BrScratchFree(normals);
 	}
@@ -844,10 +938,18 @@ void BR_PUBLIC_ENTRY BrModelUpdate(br_model *model, br_uint_16 flags)
 {
 	int g,f,v;
 	struct v11model *v11m;
-	struct fmt_vertex *fvp;
-	struct v11face *ffp;
-	br_vertex *vp;
-	br_face *fp;
+//	struct fmt_vertex *fvp;
+	br_vector3 * position;
+	br_vector2 * map;
+	br_vector3 * normal;
+	br_vector4 * eqn;
+	br_face * fp;
+	br_vertex * vp;
+
+	br_vector3 centre;
+	br_scalar centred_radius;
+	br_bounds3 old_bounds;
+	br_boolean centre_valid=BR_FALSE;
 
 	/*
 	 * Do not do anything if model is marked as being pre-prepared
@@ -861,6 +963,16 @@ void BR_PUBLIC_ENTRY BrModelUpdate(br_model *model, br_uint_16 flags)
 	if(model->faces == NULL || model->vertices == NULL)
 			BR_FAILURE1("BrModelUpdate: model has no faces or vertices (%s)",
 				model->identifier?model->identifier:"<NULL>");
+
+	v11m = model->prepared;
+	if(v11m){
+		// initialise the centre and radius to the old centre and radius
+		centre=v11m->centre;
+        centred_radius=v11m->centred_radius;
+		centre_valid=BR_TRUE; // assume the old radius is either correct or will be overwritten with a correct value
+	}
+
+
 	/*
 	 * Re-copy the vertices if the pivot has moved
 	 */
@@ -878,17 +990,50 @@ void BR_PUBLIC_ENTRY BrModelUpdate(br_model *model, br_uint_16 flags)
 	 * Bounds
 	 *
 	 */
-	if(!(model->flags & BR_MODF_CUSTOM_BOUNDS) &&
-		(flags & (BR_MODU_VERTICES|BR_MODU_VERTEX_POSITIONS))) {
+	if(!(model->flags & BR_MODF_CUSTOM_BOUNDS) && (flags & (BR_MODU_VERTICES|BR_MODU_VERTEX_POSITIONS))) {
 		PrepareBoundingRadius(model);
 		PrepareBoundingBox(model);
+// use the average of the bounds as an approximation to the centre of the model (that gives the minimal bounding radius)
+		centre.v[0]=BR_CONST_DIV(model->bounds.min.v[0]+model->bounds.max.v[0],2);
+		centre.v[1]=BR_CONST_DIV(model->bounds.min.v[1]+model->bounds.max.v[1],2);
+		centre.v[2]=BR_CONST_DIV(model->bounds.min.v[2]+model->bounds.max.v[2],2);
+		centred_radius=PrepareCentredBoundingRadius(model,&centre);
+		centre_valid=BR_TRUE;
+	}else if((model->flags & BR_MODF_CUSTOM_BOUNDS) && (flags & (BR_MODU_VERTICES|BR_MODU_VERTEX_POSITIONS))) {
+		old_bounds=model->bounds;
+		PrepareBoundingBox(model);
+// use the average of the bounds as an approximation to the centre of the model (that gives the minimal bounding radius)
+		centre.v[0]=BR_CONST_DIV(model->bounds.min.v[0]+model->bounds.max.v[0],2);
+		centre.v[1]=BR_CONST_DIV(model->bounds.min.v[1]+model->bounds.max.v[1],2);
+		centre.v[2]=BR_CONST_DIV(model->bounds.min.v[2]+model->bounds.max.v[2],2);
+		model->bounds=old_bounds;
+		centred_radius=PrepareCentredBoundingRadius(model,&centre);
+		centre_valid=BR_TRUE;
 	}
+
+	/*
+	 * Catch internal update - just look up new material stored pointers
+	 */
+	if (flags & _BR_MODU_RESERVED &&
+		!(model->flags & BR_MODF_USED_PREPARED_USER)) {
+
+		v11m = model->prepared;
+
+		for(g=0; g < v11m->ngroups; g++) {
+
+			ASSERT(v11m->groups[g].face_user[0] < model->nfaces);
+
+			fp = model->faces + v11m->groups[g].face_user[0];
+
+			v11m->groups[g].stored = fp->material != NULL? fp->material->stored: NULL;
+		}
 
 	/*
 	 * See if the only thing needed is to copy new parts over
 	 */
-	if(model->prepared && 
-		!(flags & ~(MODU_VERTEX_COPY_FLAGS | MODU_FACE_COPY_FLAGS))) {
+	} else if (model->prepared &&
+		!(flags & ~(MODU_VERTEX_COPY_FLAGS | MODU_FACE_COPY_FLAGS)) &&
+		!(model->flags & BR_MODF_USED_PREPARED_USER)) {
 
 		v11m = model->prepared;
 
@@ -897,16 +1042,19 @@ void BR_PUBLIC_ENTRY BrModelUpdate(br_model *model, br_uint_16 flags)
 		 */
 		if(model->vertices && (flags & MODU_VERTEX_COPY_FLAGS)) {
 			for(g=0; g < v11m->ngroups; g++) {
-				for(v=0; v < v11m->groups[g].nvertices; v++, fvp++) {
-					fvp = v11m->groups[g].vertices+v;
+				for(v=0; v < v11m->groups[g].nvertices; v++) {
+//					fvp = v11m->groups[g].vertices+v;
+					position=v11m->groups[g].position+v;
+					normal=v11m->groups[g].normal+v;
+					map=v11m->groups[g].map+v;
 
 					ASSERT(v11m->groups[g].vertex_user[v] < model->nvertices);
 					vp = model->vertices + v11m->groups[g].vertex_user[v];
 
 					if(flags & BR_MODU_VERTEX_POSITIONS) {
-						fvp->p.v[0] = vp->p.v[0] - model->pivot.v[0];
-						fvp->p.v[1] = vp->p.v[1] - model->pivot.v[1];
-						fvp->p.v[2] = vp->p.v[2] - model->pivot.v[2];
+						position->v[0] = vp->p.v[0] - model->pivot.v[0];
+						position->v[1] = vp->p.v[1] - model->pivot.v[1];
+						position->v[2] = vp->p.v[2] - model->pivot.v[2];
 					}
 
 					if(flags & BR_MODU_VERTEX_COLOURS)
@@ -914,12 +1062,12 @@ void BR_PUBLIC_ENTRY BrModelUpdate(br_model *model, br_uint_16 flags)
 						    BR_COLOUR_RGBA(vp->red, vp->grn, vp->blu, vp->index);
 
 					if(flags & BR_MODU_VERTEX_MAPPING)
-						fvp->map = vp->map;
+						*map = vp->map;
 
 					if((flags & BR_MODU_VERTEX_NORMALS) && (model->flags & BR_MODF_CUSTOM_NORMALS)) {
-						fvp->n.v[0] = BrFractionToScalar(vp->n.v[0]);
-						fvp->n.v[1] = BrFractionToScalar(vp->n.v[1]);
-						fvp->n.v[2] = BrFractionToScalar(vp->n.v[2]);
+						normal->v[0] = BrFractionToScalar(vp->n.v[0]);
+						normal->v[1] = BrFractionToScalar(vp->n.v[1]);
+						normal->v[2] = BrFractionToScalar(vp->n.v[2]);
                     }
 				}
 			}
@@ -931,14 +1079,21 @@ void BR_PUBLIC_ENTRY BrModelUpdate(br_model *model, br_uint_16 flags)
 		if(model->faces && (flags & MODU_FACE_COPY_FLAGS)) {
 
 			for(g=0; g < v11m->ngroups; g++) {
-				for(f=0; f < v11m->groups[g].nfaces; f++, ffp++) {
-					ffp = v11m->groups[g].faces+f;
+				for(f=0; f < v11m->groups[g].nfaces; f++) {
+					eqn=v11m->groups[g].eqn+v;
 
 					ASSERT(v11m->groups[g].face_user[f] < model->nfaces);
 					fp = model->faces+v11m->groups[g].face_user[f];
 
 					if(flags & BR_MODU_FACE_COLOURS)
 				        v11m->groups[g].face_colours[f] = BR_COLOUR_RGBA(fp->red, fp->grn, fp->blu, fp->index);
+
+					if((flags & BR_MODU_FACE_EQUATIONS) && (model->flags & BR_MODF_CUSTOM_EQUATIONS)) {
+						eqn->v[0] = BrFractionToScalar(fp->n.v[0]);
+						eqn->v[1] = BrFractionToScalar(fp->n.v[1]);
+						eqn->v[2] = BrFractionToScalar(fp->n.v[2]);
+						eqn->v[3] = fp->d;
+                    }
 				}
 			}
 		}
@@ -950,9 +1105,21 @@ void BR_PUBLIC_ENTRY BrModelUpdate(br_model *model, br_uint_16 flags)
 				RegenerateVertexNormals(v11m);
 #endif
 
-			RegenerateFaceNormals(v11m);
+			if(!(model->flags & BR_MODF_CUSTOM_EQUATIONS))
+				RegenerateFaceNormals(v11m);
 		}
 
+		v11m->bounds = model->bounds;
+		v11m->radius = model->radius;
+		if(centre_valid && centred_radius<model->radius){
+			v11m->centre=centre;
+			v11m->centred_radius=centred_radius;
+		}else{
+			v11m->centre.v[0]=0;
+			v11m->centre.v[1]=0;
+			v11m->centre.v[2]=0;
+			v11m->centred_radius=model->radius;
+		}
 	} else {
 		/*
 		 *	Regenerate from scratch...
@@ -967,7 +1134,8 @@ void BR_PUBLIC_ENTRY BrModelUpdate(br_model *model, br_uint_16 flags)
 		/*
 		 * Generate all face normals
 		 */
-		PrepareFaceNormals(model);
+		if (!(model->flags & BR_MODF_CUSTOM_EQUATIONS))
+			PrepareFaceNormals(model);
 
 		/*
 		 * Check that faces do not reference non-existant vertices and set
@@ -987,14 +1155,21 @@ void BR_PUBLIC_ENTRY BrModelUpdate(br_model *model, br_uint_16 flags)
 		}
 
 		PrepareGroups(model);
-		((struct v11model*)model->prepared)->radius=model->radius;
-		if(isLit){
-			((struct v11model*)model->prepared)->flags|=V11MODF_LIT;
-		}else{
-			((struct v11model*)model->prepared)->flags&=~V11MODF_LIT;
-		}
-
 		BrPrepareEdges(model);
+
+		v11m = model->prepared;
+
+		v11m->bounds = model->bounds;
+		v11m->radius = model->radius;
+		if(centre_valid && centred_radius<model->radius){
+			v11m->centre=centre;
+			v11m->centred_radius=centred_radius;
+		}else{
+			v11m->centre.v[0]=0;
+			v11m->centre.v[1]=0;
+			v11m->centre.v[2]=0;
+			v11m->centred_radius=model->radius;
+		}
 	}
 
 	/*

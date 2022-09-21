@@ -39,7 +39,7 @@ typedef struct gl_groupinfo {
     /*
      * The group itself
      */
-    struct v11group_f *group;
+    struct v11group *group;
 
     /*
      * Stored renderer state for the group
@@ -71,7 +71,7 @@ typedef struct br_geometry_stored {
     struct br_geometry_v1_model *gv1model;
 
     br_boolean        shared;
-    struct v11model_f *model;
+    struct v11model   *model;
 
     GLuint gl_vao;
     GLuint gl_vbo_posn;
