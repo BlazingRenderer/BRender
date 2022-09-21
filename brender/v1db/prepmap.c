@@ -22,7 +22,8 @@ void BrBufferUpdate(br_pixelmap *pm, br_token use, br_uint_16 flags)
 {
 	br_token_value tv[] = {
 		{BRT_PREFER_SHARE_B,	{.b = BR_FALSE}},
-		{BRT_CAN_SHARE_B,		{.b = BR_TRUE}},
+		{BRT_CAN_SHARE_B,       {.b = BR_TRUE}},
+		{BRT_UPDATE_DATA_B,     {.b = BR_FALSE}},
 		{0}
 	};
 
@@ -32,6 +33,9 @@ void BrBufferUpdate(br_pixelmap *pm, br_token use, br_uint_16 flags)
 
 	if(flags & BR_MAPU_SHARED)
 		tv[0].v.b = BR_TRUE;
+
+	if(flags & BR_MAPU_DATA)
+		tv[2].v.b = BR_TRUE;
 
 	/*
 	 * If there is a stored buffer, update that, otherwise allocate a new buffer

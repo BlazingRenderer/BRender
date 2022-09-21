@@ -247,6 +247,7 @@ SHARED							boolean
 CACHED							boolean
 CACHED_SIZE						uint_32
 CACHED_TOTAL					uint_32
+UPDATE_DATA						boolean
 
 # tokens for bufferAdd/Update
 #

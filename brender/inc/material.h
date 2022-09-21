@@ -252,6 +252,7 @@ enum {
  * Flags to BrMapUpdate()
  */
 enum {
+	BR_MAPU_DATA			= 0x0001, // If this flag is ommitted the driver gets a chance to free the original (assuming KEEP_ORIGINAL not set) without doing any extra work.
 	BR_MAPU_ALL				= 0x0fff,
 	BR_MAPU_SHARED			= 0x8000
 };
