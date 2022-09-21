@@ -633,6 +633,7 @@ static br_error	parseEntryLine(br_lexer *l, br_token_value *tv, br_size_t size)
 	char name[40];
 	br_token type;
 	br_uint_32 i;
+	br_boolean negative;
 
 	static struct {
 
@@ -714,6 +715,21 @@ static br_error	parseEntryLine(br_lexer *l, br_token_value *tv, br_size_t size)
 			return BRE_OK;
 		}
 
+		/*
+		 * Check for negative scalar types
+		 */
+		negative = BrLexerCurrent(l) == T_DASH;
+
+		if (negative) {
+
+			BrLexerAdvance(l);
+
+			if (BrLexerCurrent(l) != T_INTEGER && BrLexerCurrent(l) != T_REAL) {
+				BrLexerError(l,"invalid scalar");
+				return BRE_FAIL;
+			}
+		}
+
 		switch (BrLexerCurrent(l)) {
 
 		/*
@@ -732,13 +748,13 @@ static br_error	parseEntryLine(br_lexer *l, br_token_value *tv, br_size_t size)
 
 			switch(type) {
 			case BRT_FLOAT:
-				tv->v.f = BrLexerReal(l);
+				tv->v.f = negative? -BrLexerReal(l): BrLexerReal(l);
 				break;
 			case BRT_FIXED:
-				tv->v.x = BrFloatToFixed(BrLexerReal(l));
+				tv->v.x = BrFloatToFixed(negative? -BrLexerReal(l): BrLexerReal(l));
 				break;
 			case BRT_ANGLE:
-				tv->v.a = BrScalarToAngle(BrFloatToScalar(BrLexerReal(l)));
+				tv->v.a = BrScalarToAngle(BrFloatToScalar(negative? -BrLexerReal(l): BrLexerReal(l)));
 				break;
 			default:
 				BrLexerError(l,"invalid token type");
@@ -748,8 +764,8 @@ static br_error	parseEntryLine(br_lexer *l, br_token_value *tv, br_size_t size)
 		}
 
 		/*
-		 * if > 0 Look for i32, ui32, float, fixed or boolean
-		 * else Look for i32, float, fixed or boolean
+		 * if positive look for i32/16/8, u32/16/8, float, fixed or boolean
+		 * otherwise look for i32/16/8, float, fixed or boolean
 		 */
 		case T_INTEGER: {
 			static br_token pos_int_types[] = {
@@ -763,17 +779,17 @@ static br_error	parseEntryLine(br_lexer *l, br_token_value *tv, br_size_t size)
 			if (tv->t != BR_NULL_TOKEN)
 				type = BrTokenType(tv->t);
 			else
-				if(BrLexerInteger(l) >= 0)
-					tv->t = BrTokenFindType(&type, name, pos_int_types, BR_ASIZE(pos_int_types));
-				else
+				if (negative)
 					tv->t = BrTokenFindType(&type, name, neg_int_types, BR_ASIZE(neg_int_types));
+				else
+					tv->t = BrTokenFindType(&type, name, pos_int_types, BR_ASIZE(pos_int_types));
 
 			if(tv->t == BR_NULL_TOKEN) 
 				break;
 
 			switch(type) {
 			case BRT_INTPTR:
-				tv->v.pi = (br_intptr_t)BrLexerInteger(l);
+				tv->v.pi = negative? -(br_intptr_t)BrLexerInteger(l): (br_intptr_t)BrLexerInteger(l);
 				break;
 
 			case BRT_UINTPTR:
@@ -781,7 +797,7 @@ static br_error	parseEntryLine(br_lexer *l, br_token_value *tv, br_size_t size)
 				break;
 
 			case BRT_INT_64:
-				tv->v.i64 = (br_int_64)BrLexerInteger(l);
+				tv->v.i64 = negative? -(br_int_64)BrLexerInteger(l): (br_int_64)BrLexerInteger(l);
 				break;
 
 			case BRT_UINT_64:
@@ -789,7 +805,7 @@ static br_error	parseEntryLine(br_lexer *l, br_token_value *tv, br_size_t size)
 				break;
 
 			case BRT_INT_32:
-				tv->v.i32 = (br_int_32)BrLexerInteger(l);
+				tv->v.i32 = negative? -(br_int_32)BrLexerInteger(l): (br_int_32)BrLexerInteger(l);
 				break;
 
 			case BRT_UINT_32:
@@ -797,7 +813,7 @@ static br_error	parseEntryLine(br_lexer *l, br_token_value *tv, br_size_t size)
 				break;
 
 			case BRT_INT_16:
-				tv->v.i16 = (br_int_16)BrLexerInteger(l);
+				tv->v.i16 = (br_int_16)(negative? -BrLexerInteger(l): BrLexerInteger(l));
 				break;
 
 			case BRT_UINT_16:
@@ -805,7 +821,7 @@ static br_error	parseEntryLine(br_lexer *l, br_token_value *tv, br_size_t size)
 				break;
 
 			case BRT_INT_8:
-				tv->v.i8 = (br_int_8)BrLexerInteger(l);
+				tv->v.i8 = (br_int_8)(negative? -BrLexerInteger(l): BrLexerInteger(l));
 				break;
 
 			case BRT_UINT_8:
@@ -813,10 +829,10 @@ static br_error	parseEntryLine(br_lexer *l, br_token_value *tv, br_size_t size)
 				break;
 
 			case BRT_FLOAT:
-				tv->v.f = (br_float)BrLexerInteger(l);
+				tv->v.f = (br_float)(negative? -BrLexerInteger(l): BrLexerInteger(l));
 				break;
 			case BRT_FIXED:
-				tv->v.x = BrIntToFixed((br_int_32)BrLexerInteger(l));
+				tv->v.x = BrIntToFixed(negative? -BrLexerInteger(l): BrLexerInteger(l));
 				break;
 			case BRT_BOOLEAN:
 				tv->v.b = (BrLexerInteger(l) != 0);
