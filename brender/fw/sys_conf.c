@@ -935,18 +935,76 @@ static br_error	parseEntryLine(br_lexer *l, br_token_value *tv, br_size_t size)
 			break;
 		}
 
-		default:
-			BrLexerError(l,"expecting a value");
-			return BRE_FAIL;
+		default: {
+
+			/*
+			 * look for any valid type and set it to the NULL or zero value - a bit gross
+			 * but it works.
+			 */
+			static br_token none_types[] = {
+				BRT_NONE, BRT_BOOLEAN, BRT_TOKEN, BRT_INT_8, BRT_UINT_8, BRT_INT_16,
+				BRT_UINT_16, BRT_INT_32, BRT_UINT_32, BRT_INT_64, BRT_UINT_64, BRT_INTPTR, BRT_UINTPTR,
+				BRT_FIXED, BRT_FLOAT, BRT_ANGLE,
+				BRT_COLOUR_RGB, BRT_STRING, BRT_CONSTANT_STRING};
+
+			if (tv->t != BR_NULL_TOKEN)
+				type = BrTokenType(tv->t);
+			else
+				tv->t = BrTokenFindType(&type, name, none_types, BR_ASIZE(none_types));
+
+			if(tv->t != BR_NULL_TOKEN) {
+
+				switch (type) {
+
+				case BRT_NONE:
+					break;
+
+				case BRT_INTPTR:
+				case BRT_UINTPTR:
+				case BRT_INT_64:
+				case BRT_UINT_64:
+				case BRT_INT_32:
+				case BRT_UINT_32:
+				case BRT_INT_16:
+				case BRT_UINT_16:
+				case BRT_INT_8:
+				case BRT_UINT_8:
+				case BRT_FIXED:
+				case BRT_ANGLE:
+				case BRT_COLOUR_RGB:
+				case BRT_BOOLEAN:
+				case BRT_TOKEN:
+				case BRT_STRING:
+				case BRT_CONSTANT_STRING:
+
+					tv->v.u32 = 0;
+					break;
+
+				case BRT_FLOAT:
+
+					tv->v.f = 0.0f;
+					break;
+
+				default:
+					BrLexerError(l,"invalid token type");
+					return BRE_FAIL;
+				}
+			}
+		}
 		}
 
 		BrLexerAdvance(l);
 
 	} else {
 		/*
-		 * look for none or boolean
+		 * look for any valid type and set it to the NULL or zero value - a bit gross
+		 * but it works.
 		 */
-		static br_token none_types[] = {BRT_NONE, BRT_BOOLEAN};
+		static br_token none_types[] = {
+			BRT_NONE, BRT_BOOLEAN, BRT_TOKEN, BRT_INT_8, BRT_UINT_8, BRT_INT_16,
+			BRT_UINT_16, BRT_INT_32, BRT_UINT_32, BRT_INT_64, BRT_UINT_64,
+			BRT_INTPTR, BRT_UINTPTR, BRT_FIXED, BRT_FLOAT, BRT_ANGLE,
+			BRT_COLOUR_RGB, BRT_STRING, BRT_CONSTANT_STRING};
 
 		if (tv->t != BR_NULL_TOKEN)
 			type = BrTokenType(tv->t);
@@ -957,11 +1015,33 @@ static br_error	parseEntryLine(br_lexer *l, br_token_value *tv, br_size_t size)
 
 			switch (type) {
 
-			case BRT_BOOLEAN:
-				tv->v.b = T_TRUE;
+			case BRT_NONE:
 				break;
 
-			case BRT_NONE:
+			case BRT_INTPTR:
+			case BRT_UINTPTR:
+			case BRT_INT_64:
+			case BRT_UINT_64:
+			case BRT_INT_32:
+			case BRT_UINT_32:
+			case BRT_INT_16:
+			case BRT_UINT_16:
+			case BRT_INT_8:
+			case BRT_UINT_8:
+			case BRT_FIXED:
+			case BRT_ANGLE:
+			case BRT_COLOUR_RGB:
+			case BRT_BOOLEAN:
+			case BRT_TOKEN:
+			case BRT_STRING:
+			case BRT_CONSTANT_STRING:
+
+				tv->v.u32 = 0;
+				break;
+
+			case BRT_FLOAT:
+
+				tv->v.f = 0.0f;
 				break;
 
 			default:
