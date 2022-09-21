@@ -632,7 +632,6 @@ static br_error	parseEntryLine(br_lexer *l, br_token_value *tv, br_size_t size)
 	br_size_t len;
 	char name[40];
 	br_token type;
-	static br_token real_types[] = {BRT_FLOAT, BRT_FIXED};
 	br_uint_32 i;
 
 	static struct {
