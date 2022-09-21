@@ -927,6 +927,34 @@ void BR_PUBLIC_ENTRY BrZbSceneRenderBegin(br_actor *world,
 	BrDbSceneRenderBegin(world, camera);
 }
 
+void BR_PUBLIC_ENTRY BrZbSceneRenderContinue(br_actor *world,
+					br_actor *camera,
+					br_pixelmap *colour_buffer,
+					br_pixelmap *depth_buffer)
+{
+	br_camera *camera_data;
+
+	UASSERT(v1db.rendering == RENDERING_ZB);
+	UASSERT_MESSAGE("Invalid BrZbSceneRenderBegin actor pointer", world != NULL);
+	UASSERT_MESSAGE("Invalid BrZbSceneRenderBegin actor pointer", camera != NULL);
+	UASSERT_MESSAGE("Invalid BrZbSceneRenderBegin pixelmap pointer", colour_buffer != NULL);
+	UASSERT_MESSAGE("Invalid BrZbSceneRenderBegin pixelmap pointer", depth_buffer != NULL);
+
+	v1db.render_root = world;
+	v1db.colour_buffer = colour_buffer;
+
+	/*
+	 * Setup output state for renderer
+	 */
+	SetOrigin(colour_buffer);
+	SetViewport(colour_buffer);
+
+	RendererPartSet(v1db.renderer, BRT_OUTPUT, 0, BRT_COLOUR_BUFFER_O, BR_VALUE_PASSTHROUGH(colour_buffer));
+	RendererPartSet(v1db.renderer, BRT_OUTPUT, 0, BRT_DEPTH_BUFFER_O, BR_VALUE_PASSTHROUGH(depth_buffer));
+
+	BrDbSceneRenderBegin(world, camera);
+}
+
 void BR_PUBLIC_ENTRY BrZbSceneRenderAdd(br_actor *tree)
 {
 	UASSERT(v1db.rendering == RENDERING_ZB);
