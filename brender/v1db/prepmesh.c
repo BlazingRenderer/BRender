@@ -1068,16 +1068,12 @@ void BR_PUBLIC_ENTRY BrModelUpdate(br_model *model, br_uint_16 flags)
  */
 void BrModelClear(struct br_model *model)
 {
-	if(model->prepared) {
-		BrResFree(model->prepared);
-		model->prepared = NULL;
-	}
-
 	if(model->stored) {
 		ObjectFree(model->stored);
 		model->stored = NULL;
 	}
 }
+
 
 void BrModelClearPrepared(struct br_model *model)
 {
