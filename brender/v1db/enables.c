@@ -282,14 +282,14 @@ void BrSetupLights(br_actor *world, br_matrix34 *world_to_view, br_int_32 w2vt)
 	if(v1db.enabled_lights.enabled == NULL)
 		return;
 
-	for(i=0; i < v1db.enabled_lights.max; i++) {
+	for(l=0; l < v1db.enabled_lights.max; l++) {
 		tvp = tv;
 
-		if(v1db.enabled_lights.enabled[i] == NULL) {
+		if(v1db.enabled_lights.enabled[l] == NULL) {
 			continue;
 		}
 
-		light = v1db.enabled_lights.enabled[i]->type_data;
+		light = v1db.enabled_lights.enabled[l]->type_data;
 
 		ASSERT_MESSAGE("Invalid light data", light != NULL);
 
@@ -297,7 +297,7 @@ void BrSetupLights(br_actor *world, br_matrix34 *world_to_view, br_int_32 w2vt)
 		 * Work out view<->light transforms - ignore light if not part of current hierachy
 		 */
 		if(!setupView(&view_to_this, & this_to_view, world_to_view, w2vt,
-			world, v1db.enabled_lights.enabled[i]))
+			world, v1db.enabled_lights.enabled[l]))
 			continue;
 
 		/*
