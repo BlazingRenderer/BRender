@@ -29,7 +29,6 @@ set(V1DB_FILES
 	./render.c
 	./v1dbfile.c
 
-	./horizon.h
 	./v1db.h
 	./v1db_ip.h
 	./zsmacro.h
