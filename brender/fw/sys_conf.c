@@ -146,7 +146,7 @@ br_error BR_PUBLIC_ENTRY BrSystemConfigSetString( br_token t, const char *string
    ASSERT( fw.sys_config );
    ASSERT( string );
 
-   v.cstr = (char*)string ;
+   v.cstr = string ;
 
    return ( BrAssociativeArraySetEntry( fw.sys_config, t, v ) );
 }
