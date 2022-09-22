@@ -97,7 +97,7 @@ void BR_PUBLIC_ENTRY BrMaterialFree(br_material *m);
 br_model * BR_PUBLIC_ENTRY BrModelAdd(br_model *model);
 br_model * BR_PUBLIC_ENTRY BrModelRemove(br_model *model);
 br_model * BR_PUBLIC_ENTRY BrModelFind(const char *pattern);
-typedef br_model * BR_CALLBACK br_model_find_cbfn(char *name);
+typedef br_model * BR_CALLBACK br_model_find_cbfn(const char *name);
 br_model_find_cbfn * BR_PUBLIC_ENTRY BrModelFindHook(br_model_find_cbfn *hook);
 br_uint_32 BR_PUBLIC_ENTRY BrModelAddMany(br_model **items, int n);
 br_uint_32 BR_PUBLIC_ENTRY BrModelRemoveMany(br_model **items, int n);
