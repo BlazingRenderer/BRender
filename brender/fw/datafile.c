@@ -1484,7 +1484,7 @@ STATIC char *ChunkNames[] = {
 	[FID_TRANSFORM_TRANSLATION] = "TRANSFORM_TRANSLATION",
 	[FID_TRANSFORM_IDENTITY]    = "TRANSFORM_IDENTITY",
 	[FID_BOUNDS]                = "BOUNDS",
-	[FID_LIGHT]                 = "LIGHT",
+	[FID_LIGHT_OLD]             = "LIGHT_OLD",
 	[FID_CAMERA]                = "CAMERA",
 	[FID_FACES]                 = "FACES",
 	[FID_MODEL]                 = "MODEL",
@@ -1495,6 +1495,8 @@ STATIC char *ChunkNames[] = {
 	[FID_INDEX_FOG_REF]         = "INDEX_FOG_REF",
 	[FID_MATERIAL]              = "MATERIAL",
 	[FID_PIXELMAP]              = "PIXELMAP",
+	[FID_RESERVED_0]            = "RESERVED_0",
+	[FID_LIGHT]                 = "LIGHT",
 };
 
 /*

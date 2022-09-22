@@ -1389,10 +1389,22 @@ STATIC br_file_enum_member light_type_FM[] = {
 	 _ENUM_MEMBER(BR_LIGHT_POINT),
  	 _ENUM_MEMBER(BR_LIGHT_DIRECT),
 	 _ENUM_MEMBER(BR_LIGHT_SPOT),
+	 _ENUM_MEMBER(BR_LIGHT_AMBIENT),
 
 	 _ENUM_MEMBER(BR_LIGHT_VIEW|BR_LIGHT_POINT),
  	 _ENUM_MEMBER(BR_LIGHT_VIEW|BR_LIGHT_DIRECT),
 	 _ENUM_MEMBER(BR_LIGHT_VIEW|BR_LIGHT_SPOT),
+	 _ENUM_MEMBER(BR_LIGHT_VIEW|BR_LIGHT_AMBIENT),
+
+	 _ENUM_MEMBER(BR_LIGHT_LINEAR_FALLOFF|BR_LIGHT_POINT),
+ 	 _ENUM_MEMBER(BR_LIGHT_LINEAR_FALLOFF|BR_LIGHT_DIRECT),
+	 _ENUM_MEMBER(BR_LIGHT_LINEAR_FALLOFF|BR_LIGHT_SPOT),
+	 _ENUM_MEMBER(BR_LIGHT_LINEAR_FALLOFF|BR_LIGHT_AMBIENT),
+
+	 _ENUM_MEMBER(BR_LIGHT_LINEAR_FALLOFF|BR_LIGHT_VIEW|BR_LIGHT_POINT),
+ 	 _ENUM_MEMBER(BR_LIGHT_LINEAR_FALLOFF|BR_LIGHT_VIEW|BR_LIGHT_DIRECT),
+	 _ENUM_MEMBER(BR_LIGHT_LINEAR_FALLOFF|BR_LIGHT_VIEW|BR_LIGHT_SPOT),
+	 _ENUM_MEMBER(BR_LIGHT_LINEAR_FALLOFF|BR_LIGHT_VIEW|BR_LIGHT_AMBIENT),
 };
 
 STATIC _FILE_ENUM(light_type);
@@ -1410,20 +1422,71 @@ STATIC br_file_struct_member br_light_FM[] = {
 	_ANGLE(cone_inner),
 	_ANGLE(cone_outer),
 
+	_SCALAR(radius_inner),
+	_SCALAR(radius_outer),
+
+	_SCALAR(volume.falloff_distance),
+	_UINT_32(volume.nregions),
+
 	_ASCIZ(identifier),
 };
 STATIC _FILE_STRUCT(br_light);
 #undef _STRUCT_NAME
 
+#define _STRUCT_NAME struct br_convex_region
+STATIC br_file_struct_member br_convex_region_FM[] = {
+	_UINT_32(nplanes),
+};
+STATIC _FILE_STRUCT(br_convex_region);
+#undef _STRUCT_NAME
+
+#define _STRUCT_NAME struct br_light
+STATIC br_file_struct_member br_light_old_FM[] = {
+	_ENUM_8(type,light_type_F),
+
+	_COLOUR(colour),
+
+	_SCALAR(attenuation_c),
+	_SCALAR(attenuation_l),
+	_SCALAR(attenuation_q),
+
+	_ANGLE(cone_inner),
+	_ANGLE(cone_outer),
+
+	_ASCIZ(identifier),
+};
+STATIC _FILE_STRUCT(br_light_old);
+#undef _STRUCT_NAME
+
 STATIC int FopWrite_LIGHT(br_datafile *df, br_light *lp)
 {
-	df->prims->chunk_write(df,FID_LIGHT, df->prims->struct_size(df,&br_light_F, lp));
+	br_uint_32 length, i, j;
+
+	length = df->prims->struct_size(df,&br_light_F, lp);
+
+	for (i = 0; i < lp->volume.nregions; i++) {
+
+		length += df->prims->struct_size(df,&br_convex_region_F, &lp->volume.regions[i]);
+
+		for (j = 0; j < lp->volume.regions[i].nplanes; j++)
+			length += df->prims->struct_size(df,&br_plane_F, &lp->volume.regions[i].planes[j]);
+	}
+
+	df->prims->chunk_write(df,FID_LIGHT, length);
 	df->prims->struct_write(df,&br_light_F, lp);
+
+	for (i = 0; i < lp->volume.nregions; i++) {
+
+		df->prims->struct_write(df,&br_convex_region_F, &lp->volume.regions[i]);
+
+		for (j = 0; j < lp->volume.regions[i].nplanes; j++)
+			df->prims->struct_write(df,&br_plane_F, &lp->volume.regions[i].planes[j]);
+	}
 
 	return 0;
 }
 
-STATIC int FopRead_LIGHT(br_datafile *df, br_uint_32 id, br_uint_32 length, br_uint_32 count)
+STATIC int FopRead_LIGHT_OLD(br_datafile *df, br_uint_32 id, br_uint_32 length, br_uint_32 count)
 {
 	br_light *lp;
 
@@ -1432,7 +1495,41 @@ STATIC int FopRead_LIGHT(br_datafile *df, br_uint_32 id, br_uint_32 length, br_u
 	 */
 	lp = BrResAllocate(v1db.res,sizeof(*lp),BR_MEMORY_LIGHT);
 	df->res = lp;
+	df->prims->struct_read(df,&br_light_old_F, lp);
+	df->res = NULL;
+
+	/*
+	 * Leave light on stack
+	 */
+	DfPush(DFST_LIGHT,lp,1);
+
+	return 0;
+}
+
+STATIC int FopRead_LIGHT(br_datafile *df, br_uint_32 id, br_uint_32 length, br_uint_32 count)
+{
+	br_light *lp;
+	br_uint_32 i, j;
+
+	/*
+	 * Allocate and read in light structure
+	 */
+	lp = BrResAllocate(v1db.res,sizeof(*lp),BR_MEMORY_LIGHT);
+	df->res = lp;
 	df->prims->struct_read(df,&br_light_F, lp);
+
+	lp->volume.regions = BrResAllocate(lp, lp->volume.nregions * sizeof(*lp->volume.regions), BR_MEMORY_LIGHT);
+
+	for (i = 0; i < lp->volume.nregions; i++) {
+
+		df->prims->struct_read(df,&br_convex_region_F, &lp->volume.regions[i]);
+
+		lp->volume.regions[i].planes = BrResAllocate(lp, lp->volume.regions[i].nplanes * sizeof(*lp->volume.regions[i].planes), BR_MEMORY_LIGHT);
+
+		for (j = 0; j < lp->volume.regions[i].nplanes; j++)
+			df->prims->struct_read(df,&br_plane_F, &lp->volume.regions[i].planes[j]);
+	}
+
 	df->res = NULL;
 
 	/*
@@ -1728,6 +1825,7 @@ STATIC br_chunks_table_entry ActorLoadEntries[] = {
 	{FID_TRANSFORM_IDENTITY,	0,FopRead_TRANSFORM},
 
 	{FID_BOUNDS,				0,FopRead_BOUNDS},
+	{FID_LIGHT_OLD,				0,FopRead_LIGHT_OLD},
 	{FID_LIGHT,					0,FopRead_LIGHT},
 	{FID_CAMERA,				0,FopRead_CAMERA},
 	{FID_PLANE,					0,FopRead_PLANE},
