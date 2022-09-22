@@ -177,6 +177,48 @@ STATIC int FopRead_VERTEX_COLOUR(br_datafile *df, br_uint_32 id, br_uint_32 leng
 	return 0;
 }
 
+
+/**
+ ** Per Vertex normal
+ **/
+#define _STRUCT_NAME struct br_vertex
+STATIC br_file_struct_member br_vertex_normal_FM[] = {
+	_FVECTOR3(n),
+};
+STATIC _FILE_STRUCT(br_vertex_normal);
+#undef _STRUCT_NAME
+
+/*
+ * Write out an array of vertex normals
+ */
+STATIC int FopWrite_VERTEX_NORMAL(br_datafile *df, br_vertex *vertices, int nvertices)
+{
+	df->prims->chunk_write(df,FID_VERTEX_NORMAL,
+		df->prims->count_size(df) + nvertices * df->prims->struct_size(df,&br_vertex_normal_F,NULL));
+	df->prims->count_write(df,nvertices);
+
+	DfStructWriteArray(df,&br_vertex_normal_F,	vertices, nvertices);
+
+	return 0;
+}
+
+/*
+ * Read an array of vertex colours and add it to the model on the stack
+ *
+ * The incoming array has to be <= the existing vertex array
+ */
+STATIC int FopRead_VERTEX_NORMAL(br_datafile *df, br_uint_32 id, br_uint_32 length, br_uint_32 count)
+{
+	br_model *mp = DfTop(DFST_MODEL,0);
+
+	if(count > mp->nvertices)
+		BR_ERROR0("Vertex normal: too many entries");
+
+	DfStructReadArray(df,&br_vertex_normal_F, mp->vertices, count);
+
+	return 0;
+}
+
 #define _STRUCT_NAME struct br_vertex
 STATIC br_file_struct_member br_old_vertex_uv_FM[] = {
 	_SCALAR(p.v[X]),
@@ -1660,6 +1702,7 @@ STATIC br_chunks_table_entry ModelLoadEntries[] = {
 	{FID_VERTICES,				1,FopRead_VERTICES},
 	{FID_VERTEX_UV,				1,FopRead_VERTEX_UV},
 	{FID_VERTEX_COLOUR,			1,FopRead_VERTEX_COLOUR},
+	{FID_VERTEX_NORMAL,			1,FopRead_VERTEX_NORMAL},
 	{FID_FACES,					1,FopRead_FACES},           
 	{FID_FACE_MATERIAL,			0,FopRead_FACE_MATERIAL},           
 	{FID_PIVOT,					0,FopRead_PIVOT},

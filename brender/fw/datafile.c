@@ -1499,6 +1499,7 @@ STATIC char *ChunkNames[] = {
 	[FID_LIGHT]                 = "LIGHT",
 	[FID_RESERVED_1]            = "RESERVED_1",
 	[FID_VERTEX_COLOUR]         = "VERTEX_COLOUR",
+	[FID_VERTEX_NORMAL]         = "VERTEX_NORMAL",
 };
 
 /*

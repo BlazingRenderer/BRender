@@ -117,6 +117,7 @@ enum {
 
     FID_RESERVED_1,
     FID_VERTEX_COLOUR,
+    FID_VERTEX_NORMAL,
 };
 
 /*
