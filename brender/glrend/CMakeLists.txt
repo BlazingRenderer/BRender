@@ -4,6 +4,20 @@ find_package(OpenGL REQUIRED)
 
 add_subdirectory(glad)
 
+add_custom_command(
+		OUTPUT brender.vert.glsl.h
+		COMMAND "${PERL_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/embedshader.pl" "g_DefaultVertexShader" "${CMAKE_CURRENT_SOURCE_DIR}/brender.vert.glsl" brender.vert.glsl.h
+		MAIN_DEPENDENCY "${CMAKE_CURRENT_SOURCE_DIR}/brender.vert.glsl"
+		DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/embedshader.pl"
+)
+
+add_custom_command(
+		OUTPUT brender.frag.glsl.h
+		COMMAND "${PERL_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/embedshader.pl" "g_DefaultFragmentShader" "${CMAKE_CURRENT_SOURCE_DIR}/brender.frag.glsl" brender.frag.glsl.h
+		MAIN_DEPENDENCY "${CMAKE_CURRENT_SOURCE_DIR}/brender.frag.glsl"
+		DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/embedshader.pl"
+)
+
 set(GLSTATE_FILES
 	./glcache.c
 	./glstate.c
@@ -92,12 +106,17 @@ add_library(glrend STATIC
 	${RENDERER_FILES}
 	${VIDEO_FILES}
 	${GLSTATE_FILES}
+
+	"${CMAKE_CURRENT_BINARY_DIR}/brender.vert.glsl.h"
+	"${CMAKE_CURRENT_BINARY_DIR}/brender.frag.glsl.h"
 )
 
 get_target_property(target_type glrend TYPE)
 if(target_type STREQUAL STATIC_LIBRARY)
 	target_compile_definitions(glrend PRIVATE -DBrDrv1Begin=BrDrvGLBegin)
 endif()
+
+target_include_directories(glrend PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
 
 target_link_libraries(glrend glrend-glad)
 target_link_libraries(glrend SDL2::SDL2)
