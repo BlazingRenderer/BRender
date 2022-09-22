@@ -114,6 +114,8 @@ enum {
     FID_PIXELMAP,
     FID_RESERVED_0,
     FID_LIGHT,
+
+    FID_RESERVED_1,
 };
 
 /*

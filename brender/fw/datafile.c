@@ -1497,6 +1497,7 @@ STATIC char *ChunkNames[] = {
 	[FID_PIXELMAP]              = "PIXELMAP",
 	[FID_RESERVED_0]            = "RESERVED_0",
 	[FID_LIGHT]                 = "LIGHT",
+	[FID_RESERVED_1]            = "RESERVED_1",
 };
 
 /*
