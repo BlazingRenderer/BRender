@@ -78,11 +78,6 @@ br_diaghandler BrPMErrorHandler = {
 static char primitive_heap[1500 * 1024];
 
 /*
- * Called before buffer swap. Use to render overlays, e.g. ImGui,
- */
-void _GLREND_PreSwapHook(Uint32 fbo) { }
-
-/*
  * FUNCTION NAME: main
  *
  * DESCRIPTION:   Main routine...initializes window and message queue
