@@ -42,7 +42,7 @@ br_model * BR_CALLBACK BrModelFindFailedLoad(const char *name)
 	br_model *m;
 
 	if((m = BrModelLoad(name)) != NULL) {
-		m->identifier = BrMemStrDup(name);
+		m->identifier = BrResStrDup(m, name);
 		BrModelAdd(m);
 	}
 
@@ -54,7 +54,7 @@ br_material * BR_CALLBACK BrMaterialFindFailedLoad(const char *name)
 	br_material *m;
 
 	if((m = BrMaterialLoad(name)) != NULL) {
-		m->identifier = BrMemStrDup(name);
+		m->identifier = BrResStrDup(m, name);
 		BrMaterialAdd(m);
 	}
 
