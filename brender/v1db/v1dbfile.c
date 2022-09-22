@@ -457,6 +457,48 @@ STATIC int FopRead_FACE_COLOUR(br_datafile *df, br_uint_32 id, br_uint_32 length
 }
 
 /**
+ ** Per Face equation
+ **/
+#define _STRUCT_NAME struct br_face
+STATIC br_file_struct_member br_face_equation_FM[] = {
+	_FVECTOR3(n),
+	_SCALAR(d),
+};
+STATIC _FILE_STRUCT(br_face_equation);
+#undef _STRUCT_NAME
+
+/*
+ * Write out an array of face equations
+ */
+STATIC int FopWrite_FACE_EQUATION(br_datafile *df, br_face *faces, int nfaces)
+{
+	df->prims->chunk_write(df,FID_FACE_EQUATION,
+		df->prims->count_size(df) + nfaces * df->prims->struct_size(df,&br_face_equation_F,NULL));
+	df->prims->count_write(df,nfaces);
+
+	DfStructWriteArray(df,&br_face_equation_F,	faces, nfaces);
+
+	return 0;
+}
+
+/*
+ * Read an array of face equations and add it to the model on the stack
+ *
+ * The incoming array has to be <= the existing face array
+ */
+STATIC int FopRead_FACE_EQUATION(br_datafile *df, br_uint_32 id, br_uint_32 length, br_uint_32 count)
+{
+	br_model *mp = DfTop(DFST_MODEL,0);
+
+	if(count > mp->nfaces)
+		BR_ERROR0("Face equation: too many entries");
+
+	DfStructReadArray(df,&br_face_equation_F, mp->faces, count);
+
+	return 0;
+}
+
+/**
  ** Obselete Faces (before 16 bit smoothing values)
  **/
 #define _STRUCT_NAME struct br_face
@@ -1751,6 +1793,7 @@ STATIC br_chunks_table_entry ModelLoadEntries[] = {
 	{FID_FACES,					1,FopRead_FACES},           
 	{FID_FACE_MATERIAL,			0,FopRead_FACE_MATERIAL},           
 	{FID_FACE_COLOUR,			1,FopRead_FACE_COLOUR},
+	{FID_FACE_EQUATION,			1,FopRead_FACE_EQUATION},
 	{FID_PIVOT,					0,FopRead_PIVOT},
 };
 
