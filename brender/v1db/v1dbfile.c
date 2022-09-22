@@ -704,6 +704,11 @@ STATIC int FopRead_FACE_MATERIAL(br_datafile *df, br_uint_32 id, br_uint_32 leng
 #define _STRUCT_NAME struct br_model
 STATIC br_file_struct_member br_model_FM[] = {
 	_UINT_16(flags),
+	_VECTOR3(pivot),
+	_ANGLE(crease_angle),
+	_SCALAR(radius),
+	_VECTOR3(bounds.min),
+	_VECTOR3(bounds.max),
 	_ASCIZ(identifier),
 };
 STATIC _FILE_STRUCT(br_model);
@@ -727,8 +732,13 @@ STATIC int FopRead_MODEL(br_datafile *df, br_uint_32 id, br_uint_32 length, br_u
 	mp->flags &=
 			BR_MODF_DONT_WELD |
 			BR_MODF_QUICK_UPDATE |
-			BR_MODF_KEEP_ORIGINAL | 
-			BR_MODF_GENERATE_TAGS;
+			BR_MODF_KEEP_ORIGINAL |
+			BR_MODF_GENERATE_TAGS |
+			BR_MODF_UPDATEABLE |
+			BR_MODF_CREASE |
+			BR_MODF_CUSTOM_NORMALS |
+			BR_MODF_CUSTOM_EQUATIONS |
+			BR_MODF_CUSTOM_BOUNDS;
 
 	/*
 	 * Leave model on stack
@@ -748,8 +758,13 @@ STATIC int FopWrite_MODEL(br_datafile *df, br_model *mp)
 	temp_model.flags &=
 			BR_MODF_DONT_WELD |
 			BR_MODF_QUICK_UPDATE |
-			BR_MODF_KEEP_ORIGINAL | 
-			BR_MODF_GENERATE_TAGS;
+			BR_MODF_KEEP_ORIGINAL |
+			BR_MODF_GENERATE_TAGS |
+			BR_MODF_UPDATEABLE |
+			BR_MODF_CREASE |
+			BR_MODF_CUSTOM_NORMALS |
+			BR_MODF_CUSTOM_EQUATIONS |
+			BR_MODF_CUSTOM_BOUNDS;
 
 	df->prims->chunk_write(df,FID_MODEL, df->prims->struct_size(df,&br_model_F, &temp_model));
 	df->prims->struct_write(df,&br_model_F, &temp_model);
@@ -760,6 +775,62 @@ STATIC int FopWrite_MODEL(br_datafile *df, br_model *mp)
 /**
  ** Old model
  **/
+#define _STRUCT_NAME struct br_model
+STATIC br_file_struct_member br_old_model_2_FM[] = {
+	_UINT_16(flags),
+	_ASCIZ(identifier),
+};
+STATIC _FILE_STRUCT(br_old_model_2);
+#undef _STRUCT_NAME
+
+STATIC int FopRead_OLD_MODEL_2(br_datafile *df, br_uint_32 id, br_uint_32 length, br_uint_32 count)
+{
+	br_model *mp;
+
+	/*
+	 * Allocate and read in model structure
+	 */
+	mp = BrModelAllocate(NULL,0,0);
+	df->res = mp;
+	df->prims->struct_read(df,&br_old_model_2_F, mp);
+	df->res = NULL;
+
+	/*
+	 * Only allow DONT_WELD, QUICK_UPDATE, KEEP_ORIGINAL and GENERATE_TAGS
+	 */
+	mp->flags &=
+			BR_MODF_DONT_WELD |
+			BR_MODF_QUICK_UPDATE |
+			BR_MODF_KEEP_ORIGINAL |
+			BR_MODF_GENERATE_TAGS;
+
+	/*
+	 * Leave model on stack
+	 */
+	DfPush(DFST_MODEL,mp,1);
+
+	return 0;
+}
+
+STATIC int FopWrite_OLD_MODEL_2(br_datafile *df, br_model *mp)
+{
+	br_model temp_model = *mp;
+
+	/*
+	 * Only allow DONT_WELD, QUICK_UPDATE, KEEP_ORIGINAL and GENERATE_TAGS
+	 */
+	temp_model.flags &=
+			BR_MODF_DONT_WELD |
+			BR_MODF_QUICK_UPDATE |
+			BR_MODF_KEEP_ORIGINAL |
+			BR_MODF_GENERATE_TAGS;
+
+	df->prims->chunk_write(df,FID_OLD_MODEL_2, df->prims->struct_size(df,&br_old_model_2_F, &temp_model));
+	df->prims->struct_write(df,&br_old_model_2_F, &temp_model);
+
+	return 0;
+}
+
 #define _STRUCT_NAME struct br_model
 STATIC br_file_struct_member br_old_model_1_FM[] = {
 	_ASCIZ(identifier),
@@ -1783,7 +1854,8 @@ STATIC br_chunks_table_entry ModelLoadEntries[] = {
 	{FID_OLD_MODEL,				0,FopRead_OLD_MODEL},
 	{FID_OLD_FACES_1,			1,FopRead_OLD_FACES_1},
 	{FID_OLD_MODEL_1,			0,FopRead_OLD_MODEL_1},
-								
+	{FID_OLD_MODEL_2,			0,FopRead_OLD_MODEL_2},
+
 	{FID_MODEL,					0,FopRead_MODEL},
 	{FID_MATERIAL_INDEX,        1,FopRead_MATERIAL_INDEX},
 	{FID_VERTICES,				1,FopRead_VERTICES},
@@ -1850,10 +1922,12 @@ STATIC br_uint_32 BR_CALLBACK WriteModel(br_model *mp, br_datafile *df)
 {
 	br_material **mindex;
 	br_vertex *vp;
+	br_face *fp;
 	int nmaterials;
 	int i;
 	int has_uv;
-
+	int has_vertex_colour;
+	int has_face_colour;
 
    if (!(mp->vertices) | !(mp->faces))
    {
@@ -1902,13 +1976,35 @@ STATIC br_uint_32 BR_CALLBACK WriteModel(br_model *mp, br_datafile *df)
 	}
 	
 	/*
-	 * See if model has any non zero U and V components
+	 * See if model has any non zero U and V components or colours
 	 */
 	has_uv = 0;
+	has_vertex_colour = 0;
+	has_face_colour = 0;
+
 	for(i=0, vp = mp->vertices; i< mp->nvertices; i++, vp++)  {
 		if((vp->map.v[U] != BR_SCALAR(0.0)) ||
 		   (vp->map.v[V] != BR_SCALAR(0.0))) {
 			has_uv = 1;
+
+			if (has_vertex_colour)
+				break;
+		}
+
+		if(vp->index != 0 || vp->red != 0 || vp->grn != 0 || vp->blu != 0) {
+
+			has_vertex_colour = 1;
+
+			if (has_uv)
+				break;
+		}
+	}
+
+	for(i=0, fp = mp->faces; i< mp->nfaces; i++, fp++)  {
+
+		if(fp->index != 0 || fp->red != 0 || fp->grn != 0 || fp->blu != 0) {
+
+			has_face_colour = 1;
 			break;
 		}
 	}
@@ -1922,10 +2018,23 @@ STATIC br_uint_32 BR_CALLBACK WriteModel(br_model *mp, br_datafile *df)
 		FopWrite_VERTICES(df, mp->vertices, mp->nvertices);
 		if(has_uv)
 			FopWrite_VERTEX_UV(df, mp->vertices, mp->nvertices);
+
+		if(has_vertex_colour)
+			FopWrite_VERTEX_COLOUR(df, mp->vertices, mp->nvertices);
+
+		if (mp->flags & BR_MODF_CUSTOM_NORMALS)
+			FopWrite_VERTEX_NORMAL(df, mp->vertices, mp->nvertices);
 	}
 
 	if(mp->nfaces) {
 		FopWrite_FACES(df, mp->faces, mp->nfaces);
+
+		if(has_face_colour)
+			FopWrite_FACE_COLOUR(df, mp->faces, mp->nfaces);
+
+		if (mp->flags & BR_MODF_CUSTOM_EQUATIONS)
+			FopWrite_FACE_EQUATION(df, mp->faces, mp->nfaces);
+
 		if(nmaterials) {
 			FopWrite_MATERIAL_INDEX(df, mindex,nmaterials);
 			FopWrite_FACE_MATERIAL(df, mp->faces,mp->nfaces,mindex,nmaterials);
