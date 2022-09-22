@@ -411,6 +411,51 @@ STATIC int FopWrite_FACES(br_datafile *df, br_face *faces, int nfaces)
 	return 0;
 }
 
+
+/**
+ ** Per Face colour
+ **/
+#define _STRUCT_NAME struct br_face
+STATIC br_file_struct_member br_face_colour_FM[] = {
+	_UINT_8(index),
+	_UINT_8(red),
+	_UINT_8(grn),
+	_UINT_8(blu),
+};
+STATIC _FILE_STRUCT(br_face_colour);
+#undef _STRUCT_NAME
+
+/*
+ * Write out an array of face colours
+ */
+STATIC int FopWrite_FACE_COLOUR(br_datafile *df, br_face *faces, int nfaces)
+{
+	df->prims->chunk_write(df,FID_FACE_COLOUR,
+		df->prims->count_size(df) + nfaces * df->prims->struct_size(df,&br_face_colour_F,NULL));
+	df->prims->count_write(df,nfaces);
+
+	DfStructWriteArray(df,&br_face_colour_F,	faces, nfaces);
+
+	return 0;
+}
+
+/*
+ * Read an array of face colours and add it to the model on the stack
+ *
+ * The incoming array has to be <= the existing face array
+ */
+STATIC int FopRead_FACE_COLOUR(br_datafile *df, br_uint_32 id, br_uint_32 length, br_uint_32 count)
+{
+	br_model *mp = DfTop(DFST_MODEL,0);
+
+	if(count > mp->nfaces)
+		BR_ERROR0("Face colour: too many entries");
+
+	DfStructReadArray(df,&br_face_colour_F, mp->faces, count);
+
+	return 0;
+}
+
 /**
  ** Obselete Faces (before 16 bit smoothing values)
  **/
@@ -1705,6 +1750,7 @@ STATIC br_chunks_table_entry ModelLoadEntries[] = {
 	{FID_VERTEX_NORMAL,			1,FopRead_VERTEX_NORMAL},
 	{FID_FACES,					1,FopRead_FACES},           
 	{FID_FACE_MATERIAL,			0,FopRead_FACE_MATERIAL},           
+	{FID_FACE_COLOUR,			1,FopRead_FACE_COLOUR},
 	{FID_PIVOT,					0,FopRead_PIVOT},
 };
 
