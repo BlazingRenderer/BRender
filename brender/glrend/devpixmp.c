@@ -544,7 +544,10 @@ br_error BR_CMETHOD_DECL(br_device_pixelmap_gl, match)(br_device_pixelmap *self,
     return create_pixelmap(_newpm, (br_object *)self, mt.use_type, type, mt.width, mt.height, self->msaa_samples);
 }
 
-extern void _GLREND_PreSwapHook(GLuint fbo);
+void BR_WEAK _GLREND_PreSwapHook(GLuint fbo)
+{
+    /* nop */
+}
 
 br_error BR_CMETHOD_DECL(br_device_pixelmap_gl, doubleBuffer)(br_device_pixelmap *self, br_device_pixelmap *src)
 {
