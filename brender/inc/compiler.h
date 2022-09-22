@@ -112,6 +112,11 @@ typedef float br_float;
  */
 #define BR_CALLBACK		__cdecl
 
+/*
+ * A function with weak linkage
+ */
+#define BR_WEAK __weak
+
 #define BR_ASM_DATA
 #define BR_ASM_CALL __cdecl
 #define BR_ASM_CALLBACK __cdecl
@@ -160,6 +165,11 @@ typedef float br_float;
  * A user defined callback function
  */
 #define BR_CALLBACK
+
+/*
+ * A function with weak linkage
+ */
+#define BR_WEAK __attribute__((weak))
 
 #define BR_ASM_DATA
 #define BR_ASM_CALL 
