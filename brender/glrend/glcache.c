@@ -72,7 +72,7 @@ void GLCACHEI_ProcessSceneLights(HGLCACHE hCache, const HGLSTATE_LIGHT lights)
 		{
 			BrVector4Copy(&hActiveLight->half, &hActiveLight->direction);
 			hActiveLight->half.v[2] += 1.0f;
-			BrVector4Normalise(&hActiveLight->half, &hActiveLight->direction);
+			BrVector4Normalise(&hActiveLight->half, &hActiveLight->half);
 
 			BrVector4Scale(&hActiveLight->direction, &hActiveLight->direction, intensity);
 		}
