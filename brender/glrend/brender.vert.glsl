@@ -247,7 +247,9 @@ vec4 fragmain()
 
     /* Force minimum 'ambient' light if a directional light exists */
     if (directLightExists)
-        lightColour += global_ambient_colour.rgb + directLightColour;
+        lightColour += global_ambient_colour.rgb;
+
+    lightColour += directLightColour;
 
     return vec4(_colour * lightColour, surface_colour.a);
 }
