@@ -250,8 +250,10 @@ vec4 fragmain()
         lightColour += global_ambient_colour.rgb;
 
     lightColour += directLightColour;
+    lightColour *= _colour;
 
-    return vec4(_colour * lightColour, surface_colour.a);
+    lightColour = clamp(lightColour, 0.0, 1.0);
+    return vec4(lightColour, surface_colour.a);
 }
 
 #if ENABLE_PSX_SIMULATION
