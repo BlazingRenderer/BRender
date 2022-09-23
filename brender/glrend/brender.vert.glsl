@@ -93,7 +93,7 @@ float shadingFilter(in float i)
     return i;
 }
 
-vec3 lightingColourDirect(in vec4 p, in vec4 n, in vec3 colour, in br_light alp)
+vec3 lightingColourDirect(in vec4 p, in vec4 n, in br_light alp)
 {
     /* Notes: '_dot' is 'intensity' */
     float _dot = max(dot(n, alp.direction), 0.0) * kd;
@@ -118,7 +118,7 @@ vec3 lightingColourDirect(in vec4 p, in vec4 n, in vec3 colour, in br_light alp)
     return outColour;
 }
 
-vec3 lightingColourPoint(in vec4 p, in vec4 n, in vec3 colour, in br_light alp)
+vec3 lightingColourPoint(in vec4 p, in vec4 n, in br_light alp)
 {
     float _dot;
     vec4 dirn, dirn_norm;
@@ -149,7 +149,7 @@ vec3 lightingColourPoint(in vec4 p, in vec4 n, in vec3 colour, in br_light alp)
     return (outColour);
 }
 
-vec3 lightingColourPointAtten(in vec4 p, in vec4 n, in vec3 colour, in br_light alp)
+vec3 lightingColourPointAtten(in vec4 p, in vec4 n, in br_light alp)
 {
     float _dot;
     vec4 dirn, dirn_norm;
@@ -180,13 +180,13 @@ vec3 lightingColourPointAtten(in vec4 p, in vec4 n, in vec3 colour, in br_light 
     return outColour * atten;
 }
 
-vec3 lightingColourSpot(in vec4 p, in vec4 n, in vec3 colour, in br_light alp)
+vec3 lightingColourSpot(in vec4 p, in vec4 n, in br_light alp)
 {
     /* Croc doesn't use spot lights */
     return vec3(0);
 }
 
-vec3 lightingColourSpotAtten(in vec4 p, in vec4 n, in vec3 colour, in br_light alp)
+vec3 lightingColourSpotAtten(in vec4 p, in vec4 n, in br_light alp)
 {
     /* Croc doesn't use spot lights */
     return vec3(0);
@@ -221,25 +221,25 @@ vec4 fragmain()
         if (lights[i].position.w == 0) {
 #if !DEBUG_DISABLE_LIGHT_DIRECTIONAL
             directLightExists = true;
-            directLightColour += lightingColourDirect(position, normalDirection, _colour, lights[i]);
+            directLightColour += lightingColourDirect(position, normalDirection, lights[i]);
 #endif
         } else {
             if (lights[i].spot_angles == vec2(0.0, 0.0)) {
                 if (lights[i].iclq.zw == vec2(0)) {
 #if !DEBUG_DISABLE_LIGHT_POINT
-                    lightColour += lightingColourPoint(position, normalDirection, _colour, lights[i]);
+                    lightColour += lightingColourPoint(position, normalDirection, lights[i]);
 #endif
                 } else {
 #if !DEBUG_DISABLE_LIGHT_POINTATTEN
-                    lightColour += lightingColourPointAtten(position, normalDirection, _colour, lights[i]);
+                    lightColour += lightingColourPointAtten(position, normalDirection, lights[i]);
 #endif
                 }
             } else {
 #if !DEBUG_DISABLE_LIGHT_SPOT
                 if (lights[i].iclq.zw == vec2(0))
-                    lightColour += lightingColourSpot(position, normalDirection, _colour, lights[i]);
+                    lightColour += lightingColourSpot(position, normalDirection, lights[i]);
                 else
-                    lightColour += lightingColourSpotAtten(position, normalDirection, _colour, lights[i]);
+                    lightColour += lightingColourSpotAtten(position, normalDirection, lights[i]);
 #endif
             }
         }
