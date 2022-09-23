@@ -90,11 +90,11 @@ void BR_PUBLIC_ENTRY BrDbModelRender(br_actor *actor,
 	if(model->prepared == NULL && model->stored == NULL)
 		BR_ERROR1("Tried to render un-prepared model %s", model->identifier ? model->identifier : "<NULL>");
 
-	/* Set the surface and primitive states for batched rendering (OpenGL 2.0+) */
+	/* Set the surface, primitive, and culling states for batched rendering (OpenGL 2.0+) */
 	if(material == NULL || material->stored == NULL)
-		RendererStateDefault(v1db.renderer, (br_uint_32)(BR_STATE_PRIMITIVE | BR_STATE_SURFACE));
+		RendererStateDefault(v1db.renderer, (br_uint_32)(BR_STATE_PRIMITIVE | BR_STATE_SURFACE | BR_STATE_CULL));
 	else
-		RendererStateRestore(v1db.renderer, material->stored, (br_uint_32)(BR_STATE_PRIMITIVE | BR_STATE_SURFACE));
+		RendererStateRestore(v1db.renderer, material->stored, (br_uint_32)(BR_STATE_PRIMITIVE | BR_STATE_SURFACE | BR_STATE_CULL));
 
 	/*
 	 * Optional preparation for Z-Sort
