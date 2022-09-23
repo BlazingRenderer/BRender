@@ -66,7 +66,9 @@ void GLCACHEI_ProcessSceneLights(HGLCACHE hCache, const HGLSTATE_LIGHT lights)
 			0.0f
 		);
 
-		float intensity = BR_RCP(hLight->attenuation_c);
+		float intensity = 16384.0f; /* Effectively infinite */
+		if(hLight->attenuation_c != 0)
+			intensity = BR_RCP(hLight->attenuation_c);
 
 		if(hLight->type == BRT_DIRECT)
 		{
