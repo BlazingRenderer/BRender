@@ -9,7 +9,7 @@
 #define DEBUG_DISABLE_LIGHT_POINT       0
 #define DEBUG_DISABLE_LIGHT_POINTATTEN  0
 #define DEBUG_DISABLE_LIGHT_SPOT        1
-#define DEBUG_DISABE_LIGHT_SPECULAR     0
+#define DEBUG_DISABLE_LIGHT_SPECULAR    0
 #define ENABLE_PSX_SIMULATION           0
 
 in vec3 aPosition;
@@ -107,7 +107,7 @@ vec3 lightingColourDirect(in vec4 p, in vec4 n, in br_light alp)
      */
     vec3 outColour = alp.colour.xyz * _dot;
 
-#if !DEBUG_DISABE_LIGHT_SPECULAR
+#if !DEBUG_DISABLE_LIGHT_SPECULAR
     if (ks <= 0.0) {
         _dot = dot(n, alp.half_);
 
@@ -136,7 +136,7 @@ vec3 lightingColourPoint(in vec4 p, in vec4 n, in br_light alp)
 
     vec3 outColour = _dot * (alp.iclq.x * alp.colour.xyz);
 
-#if !DEBUG_DISABE_LIGHT_SPECULAR
+#if !DEBUG_DISABLE_LIGHT_SPECULAR
     if (ks != 0.0) {
         /* Specular */
         SPECULAR_DOT();
@@ -167,7 +167,7 @@ vec3 lightingColourPointAtten(in vec4 p, in vec4 n, in br_light alp)
 
     vec3 outColour = _dot * alp.colour.xyz;
 
-#if !DEBUG_DISABE_LIGHT_SPECULAR
+#if !DEBUG_DISABLE_LIGHT_SPECULAR
     if (ks != 0.0) {
         /* Specular */
         SPECULAR_DOT();
