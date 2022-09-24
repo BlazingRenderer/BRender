@@ -322,6 +322,7 @@ COLOUR_WRITE					boolean
 BLEND							boolean
 MODULATE						boolean
 MODULATE_ALPHA						boolean
+COLOUR_KEY						boolean
 
 PERSPECTIVE						boolean
 PERSPECTIVE						token
