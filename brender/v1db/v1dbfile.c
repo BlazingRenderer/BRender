@@ -930,7 +930,7 @@ STATIC int FopRead_PIVOT(br_datafile *df, br_uint_32 id, br_uint_32 length, br_u
  ** Material 
  **/
 #define _STRUCT_NAME struct br_material
-STATIC br_file_struct_member br_material_old_FM[] = {
+STATIC br_file_struct_member br_material_oldest_FM[] = {
 	_COLOUR(colour),
 	_UINT_8(opacity),
 	_UFRACTION(ka),
@@ -946,7 +946,7 @@ STATIC br_file_struct_member br_material_old_FM[] = {
 	_ASCIZ(identifier),
 };
 
-STATIC _FILE_STRUCT(br_material_old);
+STATIC _FILE_STRUCT(br_material_oldest);
 #undef _STRUCT_NAME
 
 #define _STRUCT_NAME struct br_material
@@ -973,7 +973,7 @@ STATIC br_file_struct_member br_material_FM[] = {
 STATIC _FILE_STRUCT(br_material);
 #undef _STRUCT_NAME
 
-STATIC int FopRead_MATERIAL_OLD(br_datafile *df, br_uint_32 id, br_uint_32 length, br_uint_32 count)
+STATIC int FopRead_MATERIAL_OLDEST(br_datafile *df, br_uint_32 id, br_uint_32 length, br_uint_32 count)
 {
 	br_material *mp;
 
@@ -982,7 +982,7 @@ STATIC int FopRead_MATERIAL_OLD(br_datafile *df, br_uint_32 id, br_uint_32 lengt
 	 */
 	mp = BrMaterialAllocate(NULL);
 	df->res = mp;
-    df->prims->struct_read(df,&br_material_old_F, mp);
+    df->prims->struct_read(df,&br_material_oldest_F, mp);
 	df->res = NULL;
 
 	/*
@@ -2284,7 +2284,7 @@ br_uint_32 BR_PUBLIC_ENTRY BrActorSaveMany(const char *filename, br_actor **acto
  */
 STATIC br_chunks_table_entry MaterialLoadEntries[] = {
 	{FID_END,					0,FopRead_END},
-    {FID_MATERIAL_OLD,          0,FopRead_MATERIAL_OLD},
+    {FID_MATERIAL_OLDEST,       0,FopRead_MATERIAL_OLDEST},
 	{FID_COLOUR_MAP_REF,		0,FopRead_PIXELMAP_REF},
 	{FID_INDEX_BLEND_REF,		0,FopRead_PIXELMAP_REF},
 	{FID_INDEX_SHADE_REF,		0,FopRead_PIXELMAP_REF},
