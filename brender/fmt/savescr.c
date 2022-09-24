@@ -54,6 +54,16 @@ STATIC const struct {
     { "al" , BR_MATM_DEPTH_TEST_AL },
 };
 
+STATIC const struct {
+	const char *name;
+	int value;
+} BlendModeNames[] = {
+    { "standard"      , BR_MATM_BLEND_MODE_STANDARD      },
+    { "summed"        , BR_MATM_BLEND_MODE_SUMMED        },
+    { "dimmed"        , BR_MATM_BLEND_MODE_DIMMED        },
+    { "premultiplied" , BR_MATM_BLEND_MODE_PREMULTIPLIED },
+};
+
 STATIC void WriteScriptMaterial(br_material *mat, void *df)
 {
 	int i,j;
@@ -134,6 +144,13 @@ STATIC void WriteScriptMaterial(br_material *mat, void *df)
 		for (i = 0; i < BR_ASIZE(DepthTestNames); i++)
 			if ((mat->mode & BR_MATM_DEPTH_TEST_MASK) == DepthTestNames[i].value) {
 				BrFilePrintf(df,"    depth_test = %s;\n",DepthTestNames[i].name);
+				break;
+			}
+
+	if((mat->mode & BR_MATM_BLEND_MODE_MASK) != (_DefaultScriptMaterial.mode & BR_MATM_BLEND_MODE_MASK))
+		for (i = 0; i < BR_ASIZE(BlendModeNames); i++)
+			if ((mat->mode & BR_MATM_BLEND_MODE_MASK) == BlendModeNames[i].value) {
+				BrFilePrintf(df,"    blend_mode = %s;\n",BlendModeNames[i].name);
 				break;
 			}
 

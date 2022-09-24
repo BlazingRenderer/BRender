@@ -209,16 +209,26 @@ void BR_PUBLIC_ENTRY BrMaterialUpdate(br_material *mat, br_uint_16 flags)
 		tvp++;
 
 		tvp->t = BRT_BLEND_MODE_T;
-		switch(mat->alpha_mode)
-		{
-			case BR_MATB_NONE: tvp->v.t = BRT_NONE; break;
-			case BR_MATB_INTENSITY_REDUCTION: tvp->v.t = BRT_INTENSITY_REDUCTION; break;
-			case BR_MATB_COMPOSITING_WITH_REDUCTION: tvp->v.t = BRT_COMPOSITING_WITH_REDUCTION; break;
-			case BR_MATB_STANDARD_BLEND: tvp->v.t = BRT_STANDARD_BLEND; break;
-			case BR_MATB_COMPOSITING: tvp->v.t = BRT_COMPOSITING; break;
-			case BR_MATB_COMPOSITING_WITH_INCREASE: tvp->v.t = BRT_COMPOSITING_WITH_INCREASE; break;
-			default: tvp->v.t = BRT_NONE;
+
+		switch (mat->mode & BR_MATM_BLEND_MODE_MASK) {
+
+		case BR_MATM_BLEND_MODE_STANDARD:
+			tvp->v.t = BRT_BLEND_STANDARD;
+			break;
+
+		case BR_MATM_BLEND_MODE_SUMMED:
+			tvp->v.t = BRT_BLEND_SUMMED;
+			break;
+
+		case BR_MATM_BLEND_MODE_DIMMED:
+			tvp->v.t = BRT_BLEND_DIMMED;
+			break;
+
+		case BR_MATM_BLEND_MODE_PREMULTIPLIED:
+			tvp->v.t = BRT_BLEND_PREMULTIPLIED;
+			break;
 		}
+
 		tvp++;
 
 

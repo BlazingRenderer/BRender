@@ -73,7 +73,6 @@ typedef struct br_material {
 
     br_uint_32 flags_ext;
 
-    br_uint_8 alpha_mode;
     br_uint_8 zbuffer_mode;
 
     br_int_32 subdivide_tolerance;
@@ -154,6 +153,12 @@ enum {
 	BR_MATM_DEPTH_TEST_LT	= 0x0005,
 	BR_MATM_DEPTH_TEST_NV	= 0x0006,
 	BR_MATM_DEPTH_TEST_AL	= 0x0007,
+
+	BR_MATM_BLEND_MODE_MASK			= 0x0018,
+	BR_MATM_BLEND_MODE_STANDARD		= 0x0000,
+	BR_MATM_BLEND_MODE_SUMMED		= 0x0008,
+	BR_MATM_BLEND_MODE_DIMMED		= 0x0010,
+	BR_MATM_BLEND_MODE_PREMULTIPLIED= 0x0018,
 };
 
 /*
@@ -178,21 +183,6 @@ enum {
 
     BR_MATFX_SMOOTH_1            = 0x00004000
 };
-
-
-/*
- * Bits for screen alpha-blend mode
- */
-
-enum {
-    BR_MATB_NONE                        = 0x00,
-    BR_MATB_INTENSITY_REDUCTION         = 0x01,
-    BR_MATB_COMPOSITING_WITH_REDUCTION  = 0x02,
-    BR_MATB_STANDARD_BLEND              = 0x03,
-    BR_MATB_COMPOSITING                 = 0x04,
-    BR_MATB_COMPOSITING_WITH_INCREASE   = 0x05
-};
-
 
 /* Bits for z buffer mode */
 

@@ -882,6 +882,7 @@ BLEND_MODE					token_list
 	BLEND_STANDARD				none
 	BLEND_SUMMED				none
 	BLEND_DIMMED				none
+	BLEND_PREMULTIPLIED			none
 	BLEND_CONSTANT				none
 
 # Depth buffer extensions
@@ -934,13 +935,5 @@ MIP_MODIFIER					int_8
 MIP_MIN						uint_8
 MIP_MAX						uint_8
 MIP_MOD_ABSOLUTE				boolean
-
-
-# More blend tokens
-INTENSITY_REDUCTION				none	
-COMPOSITING_WITH_REDUCTION			none
-STANDARD_BLEND					none
-COMPOSITING					none
-COMPOSITING_WITH_INCREASE			none
 
 FOG						boolean

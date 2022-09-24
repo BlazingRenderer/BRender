@@ -30,7 +30,7 @@ const br_material _DefaultScriptMaterial = {
 		BR_VECTOR2(0,1),
 		BR_VECTOR2(0,0),
 	}},
-	.mode           = BR_MATM_DEPTH_TEST_LE,
+	.mode           = BR_MATM_DEPTH_TEST_LE | BR_MATM_BLEND_MODE_STANDARD,
 	.index_base     = 0,
 	.index_range    = 63,
 };
@@ -69,6 +69,7 @@ enum {
     T_INDEX_FOG,
     T_SUBDIVIDE_TOLERANCE,
     T_DEPTH_TEST,
+    T_BLEND_MODE,
 
 	/*
 	 * Material flags
@@ -108,6 +109,14 @@ enum {
 	T_LT,
 	T_NV,
 	T_AL,
+
+	/*
+	 * Blend modes
+	 */
+	T_STANDARD,
+	T_SUMMED,
+	T_DIMMED,
+	T_PREMULTIPLIED,
 };
 
 static const br_lexer_keyword keywords[] = {
@@ -132,6 +141,7 @@ static const br_lexer_keyword keywords[] = {
     { "index_shade",                T_INDEX_SHADE,          },
     { "index_blend",                T_INDEX_BLEND,          },
     { "depth_test",                 T_DEPTH_TEST,           },
+    { "blend_mode",                 T_BLEND_MODE,           },
     { "light",                      T_LIGHT,                },
     { "prelit",                     T_PRELIT,               },
     { "smooth",                     T_SMOOTH,               },
@@ -177,6 +187,10 @@ static const br_lexer_keyword keywords[] = {
     { "less",                       T_LT                    },
     { "never",                      T_NV                    },
     { "always",                     T_AL                    },
+    { "standard",                   T_STANDARD,             },
+    { "summed",                     T_SUMMED,               },
+    { "dimmed",                     T_DIMMED,               },
+    { "premultiplied",              T_PREMULTIPLIED,        },
 };
 
 static void BrLexerPrintPos(struct br_lexer *l)
@@ -347,6 +361,27 @@ STATIC br_material *ParseMaterial(br_lexer *l)
 				break;
 			default:
 				BrLexerError(l, "Unknown depth test mode");
+			}
+			BrLexerAdvance(l);
+			break;
+
+		case T_BLEND_MODE:
+			BrLexerAdvance(l); BrLexerExpect(l,T_EQUAL);
+			switch (BrLexerCurrent(l)) {
+			case T_STANDARD:
+				mat->mode = (mat->mode & ~BR_MATM_BLEND_MODE_MASK) | BR_MATM_BLEND_MODE_STANDARD;
+				break;
+			case T_SUMMED:
+				mat->mode = (mat->mode & ~BR_MATM_BLEND_MODE_MASK) | BR_MATM_BLEND_MODE_SUMMED;
+				break;
+			case T_DIMMED:
+				mat->mode = (mat->mode & ~BR_MATM_BLEND_MODE_MASK) | BR_MATM_BLEND_MODE_DIMMED;
+				break;
+			case T_PREMULTIPLIED:
+				mat->mode = (mat->mode & ~BR_MATM_BLEND_MODE_MASK) | BR_MATM_BLEND_MODE_PREMULTIPLIED;
+				break;
+			default:
+				BrLexerError(l, "Unknown blend mode");
 			}
 			BrLexerAdvance(l);
 			break;
