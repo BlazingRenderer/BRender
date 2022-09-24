@@ -950,7 +950,7 @@ STATIC _FILE_STRUCT(br_material_oldest);
 #undef _STRUCT_NAME
 
 #define _STRUCT_NAME struct br_material
-STATIC br_file_struct_member br_material_FM[] = {
+STATIC br_file_struct_member br_material_old_FM[] = {
 	_COLOUR(colour),
 	_UINT_8(opacity),
 	_UFRACTION(ka),
@@ -970,7 +970,7 @@ STATIC br_file_struct_member br_material_FM[] = {
 	_ASCIZ(identifier),
 };
 
-STATIC _FILE_STRUCT(br_material);
+STATIC _FILE_STRUCT(br_material_old);
 #undef _STRUCT_NAME
 
 STATIC int FopRead_MATERIAL_OLDEST(br_datafile *df, br_uint_32 id, br_uint_32 length, br_uint_32 count)
@@ -993,7 +993,7 @@ STATIC int FopRead_MATERIAL_OLDEST(br_datafile *df, br_uint_32 id, br_uint_32 le
 	return 0;
 }
 
-STATIC int FopRead_MATERIAL(br_datafile *df, br_uint_32 id, br_uint_32 length, br_uint_32 count)
+STATIC int FopRead_MATERIAL_OLD(br_datafile *df, br_uint_32 id, br_uint_32 length, br_uint_32 count)
 {
 	br_material *mp;
 
@@ -1002,21 +1002,21 @@ STATIC int FopRead_MATERIAL(br_datafile *df, br_uint_32 id, br_uint_32 length, b
 	 */
 	mp = BrMaterialAllocate(NULL);
 	df->res = mp;
-	df->prims->struct_read(df,&br_material_F, mp);
+    df->prims->struct_read(df,&br_material_old_F, mp);
 	df->res = NULL;
 
 	/*
 	 * Leave material on stack
 	 */
-	DfPush(DFST_MATERIAL,mp,1);
+    DfPush(DFST_MATERIAL,mp,1);
 
 	return 0;
 }
 
-STATIC int FopWrite_MATERIAL(br_datafile *df, br_material *mp)
+STATIC int FopWrite_MATERIAL_OLD(br_datafile *df, br_material *mp)
 {
-	df->prims->chunk_write(df,FID_MATERIAL, df->prims->struct_size(df,&br_material_F, mp));
-	df->prims->struct_write(df,&br_material_F, mp);
+	df->prims->chunk_write(df,FID_MATERIAL_OLD, df->prims->struct_size(df,&br_material_old_F, mp));
+	df->prims->struct_write(df,&br_material_old_F, mp);
 
 	return 0;
 }
@@ -2242,7 +2242,7 @@ STATIC int WriteActor(br_actor *a, br_datafile *df)
          break ;
 
       ap = (br_actor*) ap->prev ;
-	} 
+	}
 
 
 	return 0;
@@ -2290,7 +2290,7 @@ STATIC br_chunks_table_entry MaterialLoadEntries[] = {
 	{FID_INDEX_SHADE_REF,		0,FopRead_PIXELMAP_REF},
 	{FID_SCREENDOOR_REF,		0,FopRead_PIXELMAP_REF},
     {FID_INDEX_FOG_REF,         0,FopRead_PIXELMAP_REF},
-	{FID_MATERIAL,				0,FopRead_MATERIAL},
+	{FID_MATERIAL_OLD,			0,FopRead_MATERIAL_OLD},
 };
 
 STATIC br_chunks_table MaterialLoadTable = {
@@ -2334,7 +2334,7 @@ STATIC br_uint_32 BR_CALLBACK WriteMaterial(br_material *mp, br_datafile *df)
 	/*
 	 * Write base material structure
 	 */
-	FopWrite_MATERIAL(df, mp);
+	FopWrite_MATERIAL_OLD(df, mp);
 
 	/*
 	 * Write out any references to pixelmaps
