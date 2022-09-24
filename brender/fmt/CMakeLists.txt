@@ -13,6 +13,7 @@ set(FMT_FILES
 	./loadnff.c
 	./loadscr.c
 	./loadtga.c
+	./loadvue.c
 	./savescr.c
 
 	./fmt.h

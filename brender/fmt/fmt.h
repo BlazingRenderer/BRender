@@ -122,6 +122,34 @@ enum {
 	BR_3DS_USE_MODEL_PIVOT		=	0x00000800,
 };
 
+
+/*
+ * VUE format structures
+ */
+
+// Pointer to actor plus desired transform matrix.
+struct vue_transform {
+	br_actor       *actor;	// slot for actor to be moved by vue
+	br_matrix34     mat;	// by this matrix
+};
+
+// All desired actor transforms required for a single frame.
+
+struct vue_frame {
+	struct vue_transform *transforms;//actor/transforms
+	int             ntransforms;	// number of transforms for that frame
+};
+
+
+typedef struct br_vue{
+	int 	nframes;
+	int	ntransforms;
+	int 	frame_delta;	// default=1
+	int 	current_frame;	// initialised to zero
+struct 	vue_frame *frames;
+} br_vue;
+
+
 #ifndef _FMT_P_H_
 #include "fmt_p.h"
 #endif

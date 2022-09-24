@@ -57,6 +57,14 @@ br_pixelmap * BR_PUBLIC_ENTRY BrFmtGIFLoad(const char *name,br_uint_32 flags);
  */
 br_pixelmap * BR_PUBLIC_ENTRY BrFmtIFFLoad(const char *name,br_uint_32 flags);
 
+/*
+ * .VUE files
+ */
+br_vue * BR_PUBLIC_ENTRY BrVueAllocate(int nframes, int ntransforms);
+void BR_PUBLIC_ENTRY BrVueFree(br_vue *vue);
+void BR_PUBLIC_ENTRY BrLoadVUE(const char *file_name, br_actor * root, br_vue *vue);
+void BR_PUBLIC_ENTRY BrApplyVue( br_vue *vue, br_actor * actors);
+
 #ifdef __cplusplus
 };
 #endif
