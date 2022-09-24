@@ -211,6 +211,20 @@ void BR_PUBLIC_ENTRY BrMaterialUpdate(br_material *mat, br_uint_16 flags)
 
 		RendererPartSetMany(v1db.renderer, BRT_PRIMITIVE, 0, tva, &c);
 
+		tvp = tva;
+
+		tvp->t = BRT_FORCE_FRONT_B;
+		tvp->v.b = !!(mat->flags & BR_MATF_FORCE_FRONT);
+		tvp++;
+
+		tvp->t = BRT_FORCE_BACK_B;
+		tvp->v.b = !!(mat->flags & BR_MATF_FORCE_BACK);
+		tvp++;
+
+		tvp->t = BR_NULL_TOKEN;
+
+		RendererPartSetMany(v1db.renderer, BRT_SURFACE, 0, tva, &c);
+
 		t = BRT_ONE_SIDED;
 
 		if(mat->flags & BR_MATF_ALWAYS_VISIBLE)
@@ -255,14 +269,6 @@ void BR_PUBLIC_ENTRY BrMaterialUpdate(br_material *mat, br_uint_16 flags)
 			tvp->v.b = BR_FALSE;
 		else
 			tvp->v.b = !!(mat->flags & BR_MATF_LIGHT);
-		tvp++;
-
-		tvp->t = BRT_FORCE_FRONT_B;
-		tvp->v.b = !!(mat->flags & BR_MATF_FORCE_FRONT);
-		tvp++;
-
-		tvp->t = BRT_FORCE_BACK_B;
-		tvp->v.b = !!(mat->flags & BR_MATF_FORCE_BACK);
 		tvp++;
 
 		tvp->t = BRT_COLOUR_SOURCE_T;
