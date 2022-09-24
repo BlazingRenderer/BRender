@@ -270,6 +270,13 @@
 /*
  * 4D Vectors
  */
+#define BrVector4Set(v1, s1, s2, s3, s4) do {\
+	(v1)->v[0]=(s1);\
+	(v1)->v[1]=(s2);\
+	(v1)->v[2]=(s3);\
+	(v1)->v[3]=(s4);\
+} while(0)
+
 /*
  *  = v1.v2
  */
