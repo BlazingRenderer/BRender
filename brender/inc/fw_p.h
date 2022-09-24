@@ -19,9 +19,6 @@ extern "C" {
 /*
  * Global setup
  */
-br_error BR_PUBLIC_ENTRY BrBeginWrapper_Fixed(void);
-br_error BR_PUBLIC_ENTRY BrBeginWrapper_Float(void);
-br_error BR_PUBLIC_ENTRY BrEndWrapper(void);
 br_error BR_PUBLIC_ENTRY BrBegin(void);
 br_error BR_PUBLIC_ENTRY BrEnd(void);
 
