@@ -13,6 +13,15 @@
 #include "compiler.h"
 typedef br_uint_32 br_colour;
 
+/*
+ * N.B. Colour ranges are specified in the format of the pixelmap to which
+ * they refer.  For indexed pixelmaps they specify a range of indices.
+ * For RGB and YUV pixelmaps they specify a cube of colours in the
+ * colourspace bounded by the planes obtained by separating out each
+ * component from the low and high bounds.
+ *
+ * Note that the range is always specified inclusively.
+ */
 typedef struct br_colour_range
 {
 	br_colour low;
