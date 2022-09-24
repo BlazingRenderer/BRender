@@ -2046,29 +2046,22 @@ br_error BR_PUBLIC_ENTRY BrModelFileCount(const char *filename, br_uint_16 *num)
 {
 	br_datafile *df;
 
+	if (num != NULL)
+		*num = 0;
+
 	df = DfOpen(filename, 0, BR_SCALAR_TOKEN);
 
-        if(df == NULL) {
-           if (!num)
-                   return BRE_FAIL;
-           else {
-             *num = 0;
-             return BRE_FAIL;
-           }
+	if (df == NULL)
+		return BRE_FAIL;
+
+	if (num != NULL) {
+		while (DfChunksInterpret(df, &ModelLoadTable) != 0) {
+			if (DfTopType() == DFST_MODEL) {
+				(*num)++;
+				DfPop(DFST_MODEL, 0);
+			}
         }
-
-        if (!num)
-                return BRE_OK;
-
-        *num = 0;
-
-        while (DfChunksInterpret(df, &ModelLoadTable) != 0) {
-
-                if(DfTopType() == DFST_MODEL) {
-                        (*num)++;
-                        DfPop(DFST_MODEL, 0);
-                }
-	}
+    }
 
 	DfClose(df);
 
@@ -2079,62 +2072,49 @@ br_error BR_PUBLIC_ENTRY BrActorFileCount(const char *filename, br_uint_16 *num)
 {
 	br_datafile *df;
 
+	if (num != NULL)
+		*num = 0;
+
 	df = DfOpen(filename, 0, BR_SCALAR_TOKEN);
 
-        if(df == NULL) {
-           if (!num)
-                   return BRE_FAIL;
-           else {
-             *num = 0;
-             return BRE_FAIL;
-           }
+	if (df == NULL)
+		return BRE_FAIL;
+
+	if (num != NULL) {
+		while (DfChunksInterpret(df, &ActorLoadTable) != 0) {
+			if (DfTopType() == DFST_ACTOR) {
+				(*num)++;
+				DfPop(DFST_ACTOR, 0);
+			}
         }
-
-        if (!num)
-                return BRE_OK;
-
-        *num = 0;
-
-        while (DfChunksInterpret(df, &ActorLoadTable) != 0) {
-
-                if(DfTopType() == DFST_ACTOR) {
-                        (*num)++;
-                        DfPop(DFST_ACTOR, 0);
-                }
-	}
+    }
 
 	DfClose(df);
 
         return BRE_OK;
 }
 
+
 br_error BR_PUBLIC_ENTRY BrMaterialFileCount(const char *filename, br_uint_16 *num)
 {
 	br_datafile *df;
 
+	if (num != NULL)
+		*num = 0;
+
 	df = DfOpen(filename, 0, BR_SCALAR_TOKEN);
 
-        if(df == NULL) {
-           if (!num)
-                   return BRE_FAIL;
-           else {
-             *num = 0;
-             return BRE_FAIL;
-           }
+	if (df == NULL)
+		return BRE_FAIL;
+
+	if (num != NULL) {
+		while (DfChunksInterpret(df, &MaterialLoadTable) != 0) {
+			if (DfTopType() == DFST_MATERIAL) {
+				(*num)++;
+				DfPop(DFST_MATERIAL, 0);
+			}
         }
-
-        if (!num)
-                return BRE_OK;
-
-        *num = 0;
-
-        while (DfChunksInterpret(df, &MaterialLoadTable) != 0) {
-
-                if(DfTopType() == DFST_MATERIAL) {
-                        (*num)++;
-                        DfPop(DFST_MATERIAL, 0);
-                }
-	}
+    }
 
 	DfClose(df);
 
