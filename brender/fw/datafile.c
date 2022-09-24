@@ -1893,128 +1893,128 @@ STATIC br_size_t BrNullNameSize(br_datafile *df, const char *name)
  * Handler structures for getting at the above functions
  */
 br_file_primitives _BrFilePrimsNull = {
-	"NULL",				/* identifier	*/
+	.identifier     = "NULL",
 
-	BrNullSkip,			/* skip			*/
+	.skip           = BrNullSkip,
 
-	BrNullChunkWrite,	/* chunk_write	*/
-	BrNullChunkRead,	/* chunk_read	*/
+	.chunk_write    = BrNullChunkWrite,
+	.chunk_read     = BrNullChunkRead,
 
-	BrNullCountWrite,	/* count_write	*/
-	BrNullCountRead,	/* count_read   */
-	BrNullCountSize,	/* count_size	*/
+	.count_write    = BrNullCountWrite,
+	.count_read     = BrNullCountRead,
+	.count_size     = BrNullCountSize,
 
-	BrNullStructWrite,	/* struct_write	*/
-	BrNullStructRead,	/* struct_read	*/
-	BrNullStructSize,	/* struct_size	*/
+	.struct_write   = BrNullStructWrite,
+	.struct_read    = BrNullStructRead,
+	.struct_size    = BrNullStructSize,
 
-	BrNullBlockWrite,	/* block_write	*/
-	BrNullBlockRead,	/* block_read	*/
-	BrNullBlockSize,	/* block_size	*/
+	.block_write    = BrNullBlockWrite,
+	.block_read     = BrNullBlockRead,
+	.block_size     = BrNullBlockSize,
 
-	BrNullNameWrite,	/* name_write	*/
-	BrNullNameRead,		/* name_read	*/
-	BrNullNameSize,		/* name_size	*/
+	.name_write     = BrNullNameWrite,
+	.name_read      = BrNullNameRead,
+	.name_size      = BrNullNameSize,
 };
 
 STATIC br_file_primitives _BrFilePrimsReadBinary = {
-	"Read Binary",		/* identifier */
+	.identifier     = "Read Binary",
 
-	DfSkipBinary,		/* skip			*/
+	.skip           = DfSkipBinary,
 
-	BrNullChunkWrite,	/* chunk_write	*/
-	DfChunkReadBinary,	/* chunk_read	*/
+	.chunk_write    = BrNullChunkWrite,
+	.chunk_read     = DfChunkReadBinary,
 
-	BrNullCountWrite,	/* count_write	*/
-	DfCountReadBinary,	/* count_read   */
-	DfCountSizeBinary,	/* count_size	*/
+	.count_write    = BrNullCountWrite,
+	.count_read     = DfCountReadBinary,
+	.count_size     = DfCountSizeBinary,
 
-	BrNullStructWrite,	/* struct_write	*/
-	DfStructReadBinary,	/* struct_read	*/
-	DfStructSizeBinary,	/* struct_size	*/
+	.struct_write   = BrNullStructWrite,
+	.struct_read    = DfStructReadBinary,
+	.struct_size    = DfStructSizeBinary,
 
-	BrNullBlockWrite,	/* block_write	*/
-	DfBlockReadBinary,	/* block_read	*/
-	DfBlockSizeBinary,	/* block_size	*/
+	.block_write    = BrNullBlockWrite,
+	.block_read     = DfBlockReadBinary,
+	.block_size     = DfBlockSizeBinary,
 
-	BrNullNameWrite,	/* name_write	*/
-	DfNameReadBinary,	/* name_read	*/
-	DfNameSizeBinary,	/* name_size	*/
+	.name_write     = BrNullNameWrite,
+	.name_read      = DfNameReadBinary,
+	.name_size      = DfNameSizeBinary,
 };
 
 STATIC br_file_primitives _BrFilePrimsWriteBinary = {
-	"Write Binary",				/* identifier   */
+	.identifier     = "Write Binary",
 
-	DfSkipBinary,		/* skip			*/
+	.skip           = DfSkipBinary,
 
-	DfChunkWriteBinary,	/* chunk_write	*/
-	BrNullChunkRead,		/* chunk_read	*/
+	.chunk_write    = DfChunkWriteBinary,
+	.chunk_read     = BrNullChunkRead,
 
-	DfCountWriteBinary,	/* count_write  */
-	BrNullCountRead,		/* count_read	*/
-	DfCountSizeBinary,	/* count_size	*/
+	.count_write    = DfCountWriteBinary,
+	.count_read     = BrNullCountRead,
+	.count_size     = DfCountSizeBinary,
 
-	DfStructWriteBinary,/* struct_write	*/
-	BrNullStructRead,		/* struct_read	*/
-	DfStructSizeBinary,	/* struct_size	*/
+	.struct_write   = DfStructWriteBinary,
+	.struct_read    = BrNullStructRead,
+	.struct_size    = DfStructSizeBinary,
 
-	DfBlockWriteBinary,	/* block_write	*/
-	BrNullBlockRead,		/* block_read	*/
-	DfBlockSizeBinary,	/* block_size	*/
+	.block_write    = DfBlockWriteBinary,
+	.block_read     = BrNullBlockRead,
+	.block_size     = DfBlockSizeBinary,
 
-	DfNameWriteBinary,	/* name_write	*/
-	BrNullNameRead,		/* name_read	*/
-	DfNameSizeBinary,	/* name_size	*/
+	.name_write     = DfNameWriteBinary,
+	.name_read      = BrNullNameRead,
+	.name_size      = DfNameSizeBinary,
 };
 
 STATIC br_file_primitives _BrFilePrimsReadText = {
-	"Read Text",		/* identifier */
+	.identifier     = "Read Text",
 
-	DfSkipText,			/* skip			*/
+	.skip           = DfSkipText,
 
-	BrNullChunkWrite,	/* chunk_write	*/
-	DfChunkReadText,	/* chunk_read	*/
+	.chunk_write    = BrNullChunkWrite,
+	.chunk_read     = DfChunkReadText,
 
-	BrNullCountWrite,	/* count_write	*/
-	DfCountReadText,	/* count_read   */
-	DfCountSizeText,	/* count_size	*/
+	.count_write    = BrNullCountWrite,
+	.count_read     = DfCountReadText,
+	.count_size     = DfCountSizeText,
 
-	BrNullStructWrite,	/* struct_write	*/
-	DfStructReadText,	/* struct_read	*/
-	DfStructSizeText,	/* struct_size	*/
+	.struct_write   = BrNullStructWrite,
+	.struct_read    = DfStructReadText,
+	.struct_size    = DfStructSizeText,
 
-	BrNullBlockWrite,	/* block_write	*/
-	DfBlockReadText,	/* block_read	*/
-	DfBlockSizeText,	/* block_size	*/
+	.block_write    = BrNullBlockWrite,
+	.block_read     = DfBlockReadText,
+	.block_size     = DfBlockSizeText,
 
-	BrNullNameWrite,	/* name_write	*/
-	DfNameReadText,		/* name_read	*/
-	DfNameSizeText,		/* name_size	*/
+	.name_write     = BrNullNameWrite,
+	.name_read      = DfNameReadText,
+	.name_size      = DfNameSizeText,
 };
 
 STATIC br_file_primitives _BrFilePrimsWriteText = {
-	"Write Text",		/* identifier   */
+	.identifier     = "Write Text",
 
-	DfSkipText,			/* skip			*/
+	.skip           = DfSkipText,
 
-	DfChunkWriteText,	/* chunk_write	*/
-	BrNullChunkRead,	/* chunk_read	*/
+	.chunk_write    = DfChunkWriteText,
+	.chunk_read     = BrNullChunkRead,
 
-	DfCountWriteText,	/* count_write  */
-	BrNullCountRead,	/* count_read	*/
-	DfCountSizeText,	/* count_size	*/
+	.count_write    = DfCountWriteText,
+	.count_read     = BrNullCountRead,
+	.count_size     = DfCountSizeText,
 
-	DfStructWriteText,	/* struct_write	*/
-	BrNullStructRead,	/* struct_read	*/
-	DfStructSizeText,	/* struct_size	*/
+	.struct_write   = DfStructWriteText,
+	.struct_read    = BrNullStructRead,
+	.struct_size    = DfStructSizeText,
 
-	DfBlockWriteText,	/* block_write	*/
-	BrNullBlockRead,	/* block_read	*/
-	DfBlockSizeText,	/* block_size	*/
+	.block_write    = DfBlockWriteText,
+	.block_read     = BrNullBlockRead,
+	.block_size     = DfBlockSizeText,
 
-	DfNameWriteText,	/* name_write	*/
-	BrNullNameRead,		/* name_read	*/
-	DfNameSizeText,		/* name_size	*/
+	.name_write     = DfNameWriteText,
+	.name_read      = BrNullNameRead,
+	.name_size      = DfNameSizeText,
 };
 
 /*
