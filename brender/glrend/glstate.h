@@ -74,6 +74,7 @@ typedef struct _GLSTATE_SURFACE
 	br_boolean	lighting;
 	br_boolean	force_front;
 	br_boolean	force_back;
+	br_scalar	depth_bias;
 
 	br_token	colour_source;
 	br_token	mapping_source;

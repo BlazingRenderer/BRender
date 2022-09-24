@@ -221,6 +221,10 @@ void BR_PUBLIC_ENTRY BrMaterialUpdate(br_material *mat, br_uint_16 flags)
 		tvp->v.b = !!(mat->flags & BR_MATF_FORCE_BACK);
 		tvp++;
 
+		tvp->t = BRT_AS_SCALAR(DEPTH_BIAS);
+		tvp->v.s = mat->depth_bias;
+		tvp++;
+
 		tvp->t = BR_NULL_TOKEN;
 
 		RendererPartSetMany(v1db.renderer, BRT_SURFACE, 0, tva, &c);

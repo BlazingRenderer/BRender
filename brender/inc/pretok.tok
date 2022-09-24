@@ -525,6 +525,9 @@ LIGHTING						boolean
 FORCE_FRONT						boolean
 FORCE_BACK						boolean
 
+DEPTH_BIAS						float
+DEPTH_BIAS						fixed
+
 COLOUR_SOURCE					token
 	NONE							none
 	SURFACE							none

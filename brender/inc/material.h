@@ -74,6 +74,8 @@ typedef struct br_material {
 
     br_int_32 subdivide_tolerance;
 
+	br_scalar depth_bias;
+
 	/*
 	 * Workspace fields for user and database
 	 */

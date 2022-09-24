@@ -26,6 +26,8 @@ static const br_tv_template_entry GLSTATEI_SurfaceTemplateEntries[] = {
     {BRT_LIGHTING_B,       NULL, F(surface.lighting),       Q | S | A,  BRTV_CONV_COPY,             0, TM_PART | TM_INVALID_CC},
     {BRT_FORCE_FRONT_B,    NULL, F(surface.force_front),    Q | S | A,  BRTV_CONV_COPY,             0, TM_PART | TM_INVALID_CC},
     {BRT_FORCE_BACK_B,     NULL, F(surface.force_back),     Q | S | A,  BRTV_CONV_COPY,             0, TM_PART | TM_INVALID_CC},
+    {BRT_DEPTH_BIAS_X,     NULL, F(surface.depth_bias),     Q | S | A,  BRTV_CONV_FIXED_SCALAR,     0, TM_PART | TM_INVALID_CC},
+    {BRT_DEPTH_BIAS_F,     NULL, F(surface.depth_bias),     Q | S | A,  BRTV_CONV_FLOAT_SCALAR,     0, TM_PART | TM_INVALID_CC},
 
     {BRT_COLOUR_SOURCE_T,  NULL, F(surface.colour_source),  Q | S | A,  BRTV_CONV_COPY,             0, TM_PART | TM_INVALID_CC},
     {BRT_MAPPING_SOURCE_T, NULL, F(surface.mapping_source), Q | S | A,  BRTV_CONV_COPY,             0, TM_PART | TM_INVALID_CC},
