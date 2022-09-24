@@ -40,6 +40,11 @@ typedef struct br_material {
 	br_matrix23 map_transform;
 
 	/*
+	 * Various mode bit fields
+	 */
+	br_uint_16 mode;
+
+	/*
 	 * The direct index ramp base and range
 	 */
 	br_uint_8 index_base;

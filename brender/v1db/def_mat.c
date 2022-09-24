@@ -44,6 +44,7 @@ br_material *SetupDefaultMaterial()
    default_mat->ks = BR_UFRACTION(0.0);
    default_mat->power = BR_SCALAR(20);
    default_mat->flags = BR_MATF_LIGHT;
+   default_mat->mode = 0;
 
    // Set map transform default
 

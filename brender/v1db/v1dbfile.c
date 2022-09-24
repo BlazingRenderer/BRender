@@ -986,6 +986,7 @@ STATIC br_file_struct_member br_material_FM[] = {
 	_VECTOR2(map_transform.m[0]),
 	_VECTOR2(map_transform.m[1]),
 	_VECTOR2(map_transform.m[2]),
+	_UINT_16(mode),
 	_UINT_8(index_base),
 	_UINT_8(index_range),
 	_SCALAR(fog_min),
