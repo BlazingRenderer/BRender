@@ -40,6 +40,20 @@ STATIC const struct {
 	{ "quad_mapping"		, BR_MATF_QUAD_MAPPING		},
 };
 
+STATIC const struct {
+	const char *name;
+	int value;
+} DepthTestNames[] = {
+    { "gt" , BR_MATM_DEPTH_TEST_GT },
+    { "ge" , BR_MATM_DEPTH_TEST_GE },
+    { "eq" , BR_MATM_DEPTH_TEST_EQ },
+    { "ne" , BR_MATM_DEPTH_TEST_NE },
+    { "le" , BR_MATM_DEPTH_TEST_LE },
+    { "lt" , BR_MATM_DEPTH_TEST_LT },
+    { "nv" , BR_MATM_DEPTH_TEST_NV },
+    { "al" , BR_MATM_DEPTH_TEST_AL },
+};
+
 STATIC void WriteScriptMaterial(br_material *mat, void *df)
 {
 	int i,j;
@@ -115,6 +129,13 @@ STATIC void WriteScriptMaterial(br_material *mat, void *df)
 					 i != 2?",":"");
 		BrFilePrintf(df,"                    ];\n");
 	}
+
+	if((mat->mode & BR_MATM_DEPTH_TEST_MASK) != (_DefaultScriptMaterial.mode & BR_MATM_DEPTH_TEST_MASK))
+		for (i = 0; i < BR_ASIZE(DepthTestNames); i++)
+			if ((mat->mode & BR_MATM_DEPTH_TEST_MASK) == DepthTestNames[i].value) {
+				BrFilePrintf(df,"    depth_test = %s;\n",DepthTestNames[i].name);
+				break;
+			}
 
 	/*
 	 * Maps and Tables 

@@ -112,6 +112,12 @@ static void apply_stored_properties(HVIDEO hVideo, HGLSTATE_STACK state, uint32_
             case BRT_NOT_EQUAL:
                 depthFunc = GL_NOTEQUAL;
                 break;
+            case BRT_NEVER:
+                depthFunc = GL_NEVER;
+                break;
+            case BRT_ALWAYS:
+                depthFunc = GL_ALWAYS;
+                break;
             default:
                 depthFunc = GL_LESS;
         }

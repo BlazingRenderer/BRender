@@ -174,16 +174,42 @@ void BR_PUBLIC_ENTRY BrMaterialUpdate(br_material *mat, br_uint_16 flags)
 		tvp++;
 
 		tvp->t = BRT_DEPTH_TEST_T;
-		switch(mat->zbuffer_compare)
-		{
-			case BR_MATZC_LT: tvp->v.t = BRT_LESS; break;
-			case BR_MATZC_GT: tvp->v.t = BRT_GREATER; break;
-			case BR_MATZC_LE: tvp->v.t = BRT_LESS_OR_EQUAL; break;
-			case BR_MATZC_GE: tvp->v.t = BRT_GREATER_OR_EQUAL; break;
-			case BR_MATZC_EQ: tvp->v.t = BRT_EQUAL; break;
-			case BR_MATZC_NE: tvp->v.t = BRT_NOT_EQUAL; break;
-			default: tvp->v.t = BRT_LESS;
+
+		switch (mat->mode & BR_MATM_DEPTH_TEST_MASK) {
+
+		case BR_MATM_DEPTH_TEST_GT:
+			tvp->v.t = BRT_GREATER;
+			break;
+
+		case BR_MATM_DEPTH_TEST_GE:
+			tvp->v.t = BRT_GREATER_OR_EQUAL;
+			break;
+
+		case BR_MATM_DEPTH_TEST_EQ:
+			tvp->v.t = BRT_EQUAL;
+			break;
+
+		case BR_MATM_DEPTH_TEST_NE:
+			tvp->v.t = BRT_NOT_EQUAL;
+			break;
+
+		case BR_MATM_DEPTH_TEST_LE:
+			tvp->v.t = BRT_LESS_OR_EQUAL;
+			break;
+
+		case BR_MATM_DEPTH_TEST_LT:
+			tvp->v.t = BRT_LESS;
+			break;
+
+		case BR_MATM_DEPTH_TEST_NV:
+			tvp->v.t = BRT_NEVER;
+			break;
+
+		case BR_MATM_DEPTH_TEST_AL:
+			tvp->v.t = BRT_ALWAYS;
+			break;
 		}
+
 		tvp++;
 
 		tvp->t = BRT_BLEND_MODE_T;

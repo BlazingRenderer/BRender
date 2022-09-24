@@ -30,6 +30,7 @@ const br_material _DefaultScriptMaterial = {
 		BR_VECTOR2(0,1),
 		BR_VECTOR2(0,0),
 	}},
+	.mode           = BR_MATM_DEPTH_TEST_LE,
 	.index_base     = 0,
 	.index_range    = 63,
 };
@@ -67,6 +68,7 @@ enum {
     T_FOG_COLOUR,
     T_INDEX_FOG,
     T_SUBDIVIDE_TOLERANCE,
+    T_DEPTH_TEST,
 
 	/*
 	 * Material flags
@@ -94,6 +96,18 @@ enum {
     T_FOG_LOCAL,
     T_SUBDIVIDE,
 	T_QUAD_MAPPING,
+
+	/*
+	 * Depth test modes
+	 */
+	T_GT,
+	T_GE,
+	T_EQ,
+	T_NE,
+	T_LE,
+	T_LT,
+	T_NV,
+	T_AL,
 };
 
 static const br_lexer_keyword keywords[] = {
@@ -117,6 +131,7 @@ static const br_lexer_keyword keywords[] = {
     { "screen_door",                T_SCREEN_DOOR,          },
     { "index_shade",                T_INDEX_SHADE,          },
     { "index_blend",                T_INDEX_BLEND,          },
+    { "depth_test",                 T_DEPTH_TEST,           },
     { "light",                      T_LIGHT,                },
     { "prelit",                     T_PRELIT,               },
     { "smooth",                     T_SMOOTH,               },
@@ -146,6 +161,22 @@ static const br_lexer_keyword keywords[] = {
     { "subdivide_tolerance",        T_SUBDIVIDE_TOLERANCE,  },
     { "subdivide",                  T_SUBDIVIDE,            },
     { "quad_mapping",               T_QUAD_MAPPING,         },
+    { "gt",                         T_GT                    },
+    { "ge",                         T_GE                    },
+    { "eq",                         T_EQ                    },
+    { "ne",                         T_NE                    },
+    { "le",                         T_LE                    },
+    { "lt",                         T_LT                    },
+    { "nv",                         T_NV                    },
+    { "al",                         T_AL                    },
+    { "greater",                    T_GT                    },
+    { "greater_or_equal",           T_GE                    },
+    { "equal",                      T_EQ                    },
+    { "not_equal",                  T_NE                    },
+    { "less_or_equal",              T_LE                    },
+    { "less",                       T_LT                    },
+    { "never",                      T_NV                    },
+    { "always",                     T_AL                    },
 };
 
 static void BrLexerPrintPos(struct br_lexer *l)
@@ -285,6 +316,39 @@ STATIC br_material *ParseMaterial(br_lexer *l)
 		case T_MAP_TRANSFORM:
 			BrLexerAdvance(l); BrLexerExpect(l,T_EQUAL);
 			BrParseMatrix(l, &mat->map_transform.m[0][0],2,3);
+			break;
+
+		case T_DEPTH_TEST:
+			BrLexerAdvance(l); BrLexerExpect(l,T_EQUAL);
+			switch (BrLexerCurrent(l)) {
+			case T_GT:
+				mat->mode = (mat->mode & ~BR_MATM_DEPTH_TEST_MASK) | BR_MATM_DEPTH_TEST_GT;
+				break;
+			case T_GE:
+				mat->mode = (mat->mode & ~BR_MATM_DEPTH_TEST_MASK) | BR_MATM_DEPTH_TEST_GE;
+				break;
+			case T_EQ:
+				mat->mode = (mat->mode & ~BR_MATM_DEPTH_TEST_MASK) | BR_MATM_DEPTH_TEST_EQ;
+				break;
+			case T_NE:
+				mat->mode = (mat->mode & ~BR_MATM_DEPTH_TEST_MASK) | BR_MATM_DEPTH_TEST_NE;
+				break;
+			case T_LE:
+				mat->mode = (mat->mode & ~BR_MATM_DEPTH_TEST_MASK) | BR_MATM_DEPTH_TEST_LE;
+				break;
+			case T_LT:
+				mat->mode = (mat->mode & ~BR_MATM_DEPTH_TEST_MASK) | BR_MATM_DEPTH_TEST_LT;
+				break;
+			case T_NV:
+				mat->mode = (mat->mode & ~BR_MATM_DEPTH_TEST_MASK) | BR_MATM_DEPTH_TEST_NV;
+				break;
+			case T_AL:
+				mat->mode = (mat->mode & ~BR_MATM_DEPTH_TEST_MASK) | BR_MATM_DEPTH_TEST_AL;
+				break;
+			default:
+				BrLexerError(l, "Unknown depth test mode");
+			}
+			BrLexerAdvance(l);
 			break;
 
 		case T_INDEX_BASE:

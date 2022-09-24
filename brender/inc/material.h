@@ -75,7 +75,6 @@ typedef struct br_material {
 
     br_uint_8 alpha_mode;
     br_uint_8 zbuffer_mode;
-    br_uint_8 zbuffer_compare;
 
     br_int_32 subdivide_tolerance;
 
@@ -142,6 +141,20 @@ enum {
 #define BR_MATF_FORCE_Z_0	BR_MATF_FORCE_FRONT
 #define BR_MATF_BLEND		0
 
+/*
+ * Bits for br_material->mode
+ */
+enum {
+	BR_MATM_DEPTH_TEST_MASK	= 0x0007,
+	BR_MATM_DEPTH_TEST_GT	= 0x0000,
+	BR_MATM_DEPTH_TEST_GE	= 0x0001,
+	BR_MATM_DEPTH_TEST_EQ	= 0x0002,
+	BR_MATM_DEPTH_TEST_NE	= 0x0003,
+	BR_MATM_DEPTH_TEST_LE	= 0x0004,
+	BR_MATM_DEPTH_TEST_LT	= 0x0005,
+	BR_MATM_DEPTH_TEST_NV	= 0x0006,
+	BR_MATM_DEPTH_TEST_AL	= 0x0007,
+};
 
 /*
  * Bits for material->flags_ext
@@ -190,19 +203,6 @@ enum {
     BR_MATZM_DONT_WRITE   = 0x02,
     BR_MATZM_OFF          = 0x03
 };
-
-
-/* Bits for z buffer compare. */
-
-enum {
-    BR_MATZC_LT = 0x00,
-    BR_MATZC_GT = 0x01,
-    BR_MATZC_LE = 0x02,
-    BR_MATZC_GE = 0x03,
-    BR_MATZC_EQ = 0x04,
-    BR_MATZC_NE = 0x05
-};
-
 
 /*
  * Flags to BrMaterialUpdate()
