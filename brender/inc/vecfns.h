@@ -301,6 +301,16 @@
 } while(0)
 
 /*
+ * v1=-v2
+ */
+#define BrVector4Negate(v1, v2) do {\
+	(v1)->v[0]=-(v2)->v[0];\
+	(v1)->v[1]=-(v2)->v[1];\
+	(v1)->v[2]=-(v2)->v[2];\
+	(v1)->v[3]=-(v2)->v[3];\
+} while(0)
+
+/*
  * v1=(s1,s2,s3,s4)
  */
 #define BrVector4Set(v1, s1, s2, s3, s4) do {\
