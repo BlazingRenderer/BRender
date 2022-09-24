@@ -120,4 +120,19 @@ typedef br_float br_scalar_f;
 typedef br_float br_fraction_f;
 typedef br_float br_ufraction_f;
 
+/*
+ * Some macros to speed up floating point comparisons
+ *
+ * N.B. when comparing two scalars in floating point
+ * 		at least one must be non-negative
+ * 		-0 < 0
+ */
+
+#define BR_SCALAR_LE_0(a) (*(br_int_32 *)&(a) <= 0)
+#define BR_SCALAR_GE_1(a) (*(br_int_32 *)&(a) >= 0x3f800000)
+#define BR_SCALAR_LE_2_EPSILON(a) (*(br_int_32 *)&(a) <= 0x34800000)
+#define BR_SCALAR_GT_SPECULARPOW_CUTOFF(a) (*(br_int_32 *)&(a) > 0x3f1e00d2)
+#define BR_SCALAR_LT(a,b) (*(br_int_32 *)&(a) < *(br_int_32 *)&(b))
+#define BR_SCALAR_GT(a,b) (*(br_int_32 *)&(a) > *(br_int_32 *)&(b))
+
 #endif
