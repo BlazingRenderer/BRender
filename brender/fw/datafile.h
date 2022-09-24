@@ -203,6 +203,10 @@ enum {
 	FSM_VECTOR3,
 	FSM_VECTOR4,
 
+	FSM_FVECTOR2,
+	FSM_FVECTOR3,
+	FSM_FVECTOR4,
+
 	FSM_FIXED_FRACTION,
 	FSM_FIXED_UFRACTION,
 
@@ -215,7 +219,17 @@ enum {
 
 	FSM_FLOAT_VECTOR2,
 	FSM_FLOAT_VECTOR3,
-	FSM_FLOAT_VECTOR4
+	FSM_FLOAT_VECTOR4,
+
+	FSM_FIXED_FVECTOR2,
+	FSM_FIXED_FVECTOR3,
+	FSM_FIXED_FVECTOR4,
+
+	FSM_FLOAT_FVECTOR2,
+	FSM_FLOAT_FVECTOR3,
+	FSM_FLOAT_FVECTOR4,
+
+	FSM_COLOUR_ALPHA,
 };
 
 typedef struct br_file_struct_member {
@@ -259,6 +273,9 @@ typedef struct br_file_struct {
 #define _VECTOR2(m)    {FSM_VECTOR2,  offsetof(_STRUCT_NAME,m),#m}
 #define _VECTOR3(m)    {FSM_VECTOR3,  offsetof(_STRUCT_NAME,m),#m}
 #define _VECTOR4(m)    {FSM_VECTOR4,  offsetof(_STRUCT_NAME,m),#m}
+#define _FVECTOR2(m)   {FSM_FVECTOR2, offsetof(_STRUCT_NAME,m),#m}
+#define _FVECTOR3(m)   {FSM_FVECTOR3, offsetof(_STRUCT_NAME,m),#m}
+#define _FVECTOR4(m)   {FSM_FVECTOR4, offsetof(_STRUCT_NAME,m),#m}
 
 #define _FIXED_FRACTION(m)   {FSM_FIXED_FRACTION, offsetof(_STRUCT_NAME,m),#m}
 #define _FIXED_UFRACTION(m)  {FSM_FIXED_UFRACTION,offsetof(_STRUCT_NAME,m),#m}
@@ -272,6 +289,15 @@ typedef struct br_file_struct {
 #define _FLOAT_VECTOR2(m)    {FSM_FLOAT_VECTOR2,  offsetof(_STRUCT_NAME,m),#m}
 #define _FLOAT_VECTOR3(m)    {FSM_FLOAT_VECTOR3,  offsetof(_STRUCT_NAME,m),#m}
 #define _FLOAT_VECTOR4(m)    {FSM_FLOAT_VECTOR4,  offsetof(_STRUCT_NAME,m),#m}
+
+#define _FIXED_FVECTOR2(m)   {FSM_FIXED_FVECTOR2, offsetof(_STRUCT_NAME,m),#m}
+#define _FIXED_FVECTOR3(m)   {FSM_FIXED_FVECTOR3, offsetof(_STRUCT_NAME,m),#m}
+#define _FIXED_FVECTOR4(m)   {FSM_FIXED_FVECTOR4, offsetof(_STRUCT_NAME,m),#m}
+#define _FLOAT_FVECTOR2(m)   {FSM_FLOAT_FVECTOR2, offsetof(_STRUCT_NAME,m),#m}
+#define _FLOAT_FVECTOR3(m)   {FSM_FLOAT_FVECTOR3, offsetof(_STRUCT_NAME,m),#m}
+#define _FLOAT_FVECTOR4(m)   {FSM_FLOAT_FVECTOR4, offsetof(_STRUCT_NAME,m),#m}
+
+#define _COLOUR_ALPHA(m)     {FSM_COLOUR_ALPHA,   offsetof(_STRUCT_NAME,m),#m}
 
 #define _FILE_STRUCT(name)\
 br_file_struct name##_F = {\

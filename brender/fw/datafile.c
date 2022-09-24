@@ -224,6 +224,9 @@ STATIC char *member_type_names[] = {
 	[FSM_VECTOR2]          = "vector2",
 	[FSM_VECTOR3]          = "vector3",
 	[FSM_VECTOR4]          = "vector4",
+	[FSM_FVECTOR2]         = "fvector2",
+	[FSM_FVECTOR3]         = "fvector3",
+	[FSM_FVECTOR4]         = "fvector4",
 	[FSM_FIXED_FRACTION]   = "fixed_fraction",
 	[FSM_FIXED_UFRACTION]  = "fixed_ufraction",
 	[FSM_FLOAT_FRACTION]   = "float_fraction",
@@ -234,6 +237,13 @@ STATIC char *member_type_names[] = {
 	[FSM_FLOAT_VECTOR2]    = "float_vector2",
 	[FSM_FLOAT_VECTOR3]    = "float_vector3",
 	[FSM_FLOAT_VECTOR4]    = "float_vector4",
+	[FSM_FIXED_FVECTOR2]   = "fixed_fvector2",
+	[FSM_FIXED_FVECTOR3]   = "fixed_fvector3",
+	[FSM_FIXED_FVECTOR4]   = "fixed_fvector4",
+	[FSM_FLOAT_FVECTOR2]   = "float_fvector2",
+	[FSM_FLOAT_FVECTOR3]   = "float_fvector3",
+	[FSM_FLOAT_FVECTOR4]   = "float_fvector4",
+	[FSM_COLOUR_ALPHA]     = "colour_alpha",
 };
 
 static br_uint_16 scalarTypeConvert(br_datafile *df, br_uint_16 t)
@@ -250,6 +260,9 @@ static br_uint_16 scalarTypeConvert(br_datafile *df, br_uint_16 t)
 		case FSM_VECTOR2:	return FSM_FLOAT_VECTOR2;
 		case FSM_VECTOR3:	return FSM_FLOAT_VECTOR3;
 		case FSM_VECTOR4:	return FSM_FLOAT_VECTOR4;
+		case FSM_FVECTOR2:	return FSM_FLOAT_FVECTOR2;
+		case FSM_FVECTOR3:	return FSM_FLOAT_FVECTOR3;
+		case FSM_FVECTOR4:	return FSM_FLOAT_FVECTOR4;
 		default:			return t;
 		}
 		break;
@@ -262,6 +275,9 @@ static br_uint_16 scalarTypeConvert(br_datafile *df, br_uint_16 t)
 		case FSM_VECTOR2:	return FSM_FIXED_VECTOR2;
 		case FSM_VECTOR3:	return FSM_FIXED_VECTOR3;
 		case FSM_VECTOR4:	return FSM_FIXED_VECTOR4;
+		case FSM_FVECTOR2:	return FSM_FIXED_FVECTOR2;
+		case FSM_FVECTOR3:	return FSM_FIXED_FVECTOR3;
+		case FSM_FVECTOR4:	return FSM_FIXED_FVECTOR4;
 		default:			return t;
 		}
 		break;
@@ -269,9 +285,14 @@ static br_uint_16 scalarTypeConvert(br_datafile *df, br_uint_16 t)
 	default:
 		switch(t) {
 		case FSM_SCALAR:
+		case FSM_FRACTION:
+		case FSM_UFRACTION:
 		case FSM_VECTOR2:
 		case FSM_VECTOR3:
 		case FSM_VECTOR4:
+		case FSM_FVECTOR2:
+		case FSM_FVECTOR3:
+		case FSM_FVECTOR4:
 			BR_ERROR0("Incorrect scalar type");
 		default:
 			return t;
@@ -328,6 +349,7 @@ STATIC br_uint_32 DfStructWriteBinary(br_datafile *df, br_file_struct *str, void
 		case FSM_INT_32:
 		case FSM_UINT_32:
 		case FSM_ENUM_32:
+		case FSM_COLOUR_ALPHA:
 			BrFilePutChar(mp[BR_HTON_32(0)],df->h);
 
 		case FSM_COLOUR:
@@ -388,6 +410,30 @@ STATIC br_uint_32 DfStructWriteBinary(br_datafile *df, br_file_struct *str, void
 			}
 			break;
 
+		case FSM_FIXED_FVECTOR2:
+			n = 2;
+			goto put_fixed_fvector;
+
+		case FSM_FIXED_FVECTOR3:
+			n = 3;
+			goto put_fixed_fvector;
+
+		case FSM_FIXED_FVECTOR4:
+			n = 4;
+		put_fixed_fvector:
+			/*
+			 * Assumes fvector2 and fvector3 are reduced versions of fvector4
+			 */
+			for(i=0;i<n;i++) {
+				conv.f = BrFixedLSFToFloat(((br_fvector4_x *)mp)->v[i]);
+
+				BrFilePutChar(conv.b[BR_HTON_32(0)],df->h);
+				BrFilePutChar(conv.b[BR_HTON_32(1)],df->h);
+				BrFilePutChar(conv.b[BR_HTON_32(2)],df->h);
+				BrFilePutChar(conv.b[BR_HTON_32(3)],df->h);
+			}
+			break;
+
 		case FSM_FLOAT_VECTOR2:
 			n = 2;
 			goto put_float_vector;
@@ -404,6 +450,30 @@ STATIC br_uint_32 DfStructWriteBinary(br_datafile *df, br_file_struct *str, void
 			 */
 			for(i=0;i<n;i++) {
 				conv.f = ((br_vector4_f *)mp)->v[i];
+
+				BrFilePutChar(conv.b[BR_HTON_32(0)],df->h);
+				BrFilePutChar(conv.b[BR_HTON_32(1)],df->h);
+				BrFilePutChar(conv.b[BR_HTON_32(2)],df->h);
+				BrFilePutChar(conv.b[BR_HTON_32(3)],df->h);
+			}
+			break;
+
+		case FSM_FLOAT_FVECTOR2:
+			n = 2;
+			goto put_float_fvector;
+
+		case FSM_FLOAT_FVECTOR3:
+			n = 3;
+			goto put_float_fvector;
+
+		case FSM_FLOAT_FVECTOR4:
+			n = 4;
+		put_float_fvector:
+			/*
+			 * Assumes fvector2 and fvector3 are reduced versions of fvector4
+			 */
+			for(i=0;i<n;i++) {
+				conv.f = ((br_fvector4_f *)mp)->v[i];
 
 				BrFilePutChar(conv.b[BR_HTON_32(0)],df->h);
 				BrFilePutChar(conv.b[BR_HTON_32(1)],df->h);
@@ -479,6 +549,7 @@ STATIC br_uint_32 DfStructReadBinary(br_datafile *df, br_file_struct *str, void 
 		case FSM_INT_32:
 		case FSM_UINT_32:
 		case FSM_ENUM_32:
+		case FSM_COLOUR_ALPHA:
 			mp[BR_NTOH_32(0)] = BrFileGetChar(df->h);
 
 		case FSM_COLOUR:
@@ -577,6 +648,58 @@ STATIC br_uint_32 DfStructReadBinary(br_datafile *df, br_file_struct *str, void 
 			}
 			break;
 
+		case FSM_FIXED_FVECTOR2:
+			n = 2;
+			goto get_fixed_fvector;
+
+		case FSM_FIXED_FVECTOR3:
+			n = 3;
+			goto get_fixed_fvector;
+
+		case FSM_FIXED_FVECTOR4:
+			n = 4;
+		get_fixed_fvector:
+			/*
+			 * Assumes fvector2 and fvector3 are reduced versions of fvector4
+			 */
+			for(i=0;i<n;i++) {
+
+				conv.b[BR_NTOH_F(0)] = BrFileGetChar(df->h);
+				conv.b[BR_NTOH_F(1)] = BrFileGetChar(df->h);
+				conv.b[BR_NTOH_F(2)] = BrFileGetChar(df->h);
+				conv.b[BR_NTOH_F(3)] = BrFileGetChar(df->h);
+
+				((br_fvector4_x *)mp)->v[i] = BrFloatToFixedLSF(conv.f);
+
+			}
+			break;
+
+		case FSM_FLOAT_FVECTOR2:
+			n = 2;
+			goto get_float_fvector;
+
+		case FSM_FLOAT_FVECTOR3:
+			n = 3;
+			goto get_float_fvector;
+
+		case FSM_FLOAT_FVECTOR4:
+			n = 4;
+		get_float_fvector:
+			/*
+			 * Assumes fvector2 and fvector3 are reduced versions of fvector4
+			 */
+			for(i=0;i<n;i++) {
+
+				conv.b[BR_NTOH_F(0)] = BrFileGetChar(df->h);
+				conv.b[BR_NTOH_F(1)] = BrFileGetChar(df->h);
+				conv.b[BR_NTOH_F(2)] = BrFileGetChar(df->h);
+				conv.b[BR_NTOH_F(3)] = BrFileGetChar(df->h);
+
+				((br_fvector4_f *)mp)->v[i] = conv.f;
+
+			}
+			break;
+
 		case FSM_STRUCT:
 			DfStructReadBinary(df,sm->extra,mp);
 
@@ -641,6 +764,10 @@ STATIC br_uint_32 DfStructSizeBinary(br_datafile *df, br_file_struct *str, void 
 			break;
 
 		case FSM_COLOUR:
+			bytes += 3;
+			break;
+
+		case FSM_COLOUR_ALPHA:
 			bytes += 4;
 			break;
 
@@ -659,16 +786,22 @@ STATIC br_uint_32 DfStructSizeBinary(br_datafile *df, br_file_struct *str, void 
 		case FSM_DOUBLE:
 		case FSM_FLOAT_VECTOR2:
 		case FSM_FIXED_VECTOR2:
+		case FSM_FLOAT_FVECTOR2:
+		case FSM_FIXED_FVECTOR2:
 			bytes += 8;
 			break;
 
 		case FSM_FLOAT_VECTOR3:
 		case FSM_FIXED_VECTOR3:
+		case FSM_FLOAT_FVECTOR3:
+		case FSM_FIXED_FVECTOR3:
 			bytes += 12;
 			break;
 
 		case FSM_FLOAT_VECTOR4:
 		case FSM_FIXED_VECTOR4:
+		case FSM_FLOAT_FVECTOR4:
+		case FSM_FIXED_FVECTOR4:
 			bytes += 16;
 			break;
 
@@ -791,6 +924,14 @@ STATIC br_uint_32 StructWriteTextSub(br_datafile *df, br_file_struct *str, void 
 				BR_BLU(*((br_colour *)mp)));
 			break;
 
+		case FSM_COLOUR_ALPHA:
+			w = BrFilePrintf(df->h,"%d,%d,%d,%d",
+				BR_RED(*((br_colour *)mp)),
+				BR_GRN(*((br_colour *)mp)),
+				BR_BLU(*((br_colour *)mp)),
+				BR_ALPHA(*((br_colour *)mp)));
+			break;
+
 		case FSM_INT_32:
 			w = BrFilePrintf(df->h,"%d",*((br_int_32 *)mp));
 			break;
@@ -879,6 +1020,49 @@ STATIC br_uint_32 StructWriteTextSub(br_datafile *df, br_file_struct *str, void 
 				((br_vector4_f *)mp)->v[3]);
 			break;
 
+
+		case FSM_FIXED_FVECTOR2:
+			w = BrFilePrintf(df->h,"%g,%g",
+				BrFixedLSFToFloat(((br_fvector2_x *)mp)->v[0]),
+				BrFixedLSFToFloat(((br_fvector2_x *)mp)->v[1]));
+			break;
+
+		case FSM_FIXED_FVECTOR3:
+			w = BrFilePrintf(df->h,"%g,%g,%g",
+				BrFixedLSFToFloat(((br_fvector3_x *)mp)->v[0]),
+				BrFixedLSFToFloat(((br_fvector3_x *)mp)->v[1]),
+				BrFixedLSFToFloat(((br_fvector3_x *)mp)->v[2]));
+			break;
+
+		case FSM_FIXED_FVECTOR4:
+			w = BrFilePrintf(df->h,"%g,%g,%g,%g",
+				BrFixedLSFToFloat(((br_fvector4_x *)mp)->v[0]),
+				BrFixedLSFToFloat(((br_fvector4_x *)mp)->v[1]),
+				BrFixedLSFToFloat(((br_fvector4_x *)mp)->v[2]),
+				BrFixedLSFToFloat(((br_fvector4_x *)mp)->v[3]));
+			break;
+
+		case FSM_FLOAT_FVECTOR2:
+			w = BrFilePrintf(df->h,"%g,%g",
+				((br_fvector2_f *)mp)->v[0],
+				((br_fvector2_f *)mp)->v[1]);
+			break;
+
+		case FSM_FLOAT_FVECTOR3:
+			w = BrFilePrintf(df->h,"%g,%g,%g",
+				((br_fvector3_f *)mp)->v[0],
+				((br_fvector3_f *)mp)->v[1],
+				((br_fvector3_f *)mp)->v[2]);
+			break;
+
+		case FSM_FLOAT_FVECTOR4:
+			w = BrFilePrintf(df->h,"%g,%g,%g,%g",
+				((br_fvector4_f *)mp)->v[0],
+				((br_fvector4_f *)mp)->v[1],
+				((br_fvector4_f *)mp)->v[2],
+				((br_fvector4_f *)mp)->v[3]);
+			break;
+
 		case FSM_STRUCT:
 
 			w = BrFilePrintf(df->h,"%s",((br_file_struct *)sm->extra)->name);
@@ -946,7 +1130,7 @@ STATIC br_uint_32 DfStructReadText(br_datafile *df, br_file_struct *str, void *b
 
 STATIC br_uint_32 StructReadTextSub(br_datafile *df, br_file_struct *str, void *base)
 {
-	unsigned int m,r,g,b;
+	unsigned int m,r,g,b,a;
 	int i,n;
 	void *mp;
 	br_file_struct_member *sm;
@@ -1002,6 +1186,25 @@ STATIC br_uint_32 StructReadTextSub(br_datafile *df, br_file_struct *str, void *
 			b = BrStrToUL(ep+1,&ep,0);
 
 			*((br_colour *)mp) = BR_COLOUR_RGB(r,g,b);
+
+			break;
+
+		case FSM_COLOUR_ALPHA:
+			r = BrStrToUL(data,&ep,0);
+			if(*ep != ',')
+				BR_ERROR0("Incorrect colour");
+
+			g = BrStrToUL(ep+1,&ep,0);
+			if(*ep != ',')
+				BR_ERROR0("Incorrect colour");
+
+			b = BrStrToUL(ep+1,&ep,0);
+			if(*ep != ',')
+				BR_ERROR0("Incorrect colour");
+
+			a = BrStrToUL(ep+1,&ep,0);
+
+			*((br_colour *)mp) = BR_COLOUR_RGBA(r,g,b,a);
 
 			break;
 
@@ -1101,6 +1304,55 @@ STATIC br_uint_32 StructReadTextSub(br_datafile *df, br_file_struct *str, void *
 			}
 			break;
 
+		case FSM_FIXED_FVECTOR2:
+			n = 2;
+			goto get_fixed_fvector;
+
+		case FSM_FIXED_FVECTOR3:
+			n = 3;
+			goto get_fixed_fvector;
+
+		case FSM_FIXED_FVECTOR4:
+			n = 4;
+		get_fixed_fvector:
+			for(i=0; i< n; i++) {
+				while(*data == ',' || ISSPACE(*data))
+					data++;
+
+				if(*data == '\0')
+					BR_ERROR0("Incorrect vector");
+
+				((br_fvector4_x *)mp)->v[i] = BrFloatToFixedLSF(BrStrToF(data, NULL));
+
+				while(*data != '\0' && *data != ',' && !ISSPACE(*data))
+					data++;
+			}
+			break;
+
+		case FSM_FLOAT_FVECTOR2:
+			n = 2;
+			goto get_float_fvector;
+
+		case FSM_FLOAT_FVECTOR3:
+			n = 3;
+			goto get_float_fvector;
+
+		case FSM_FLOAT_FVECTOR4:
+			n = 4;
+		get_float_fvector:
+			for(i=0; i< n; i++) {
+				while(*data == ',' || ISSPACE(*data))
+					data++;
+
+				if(*data == '\0')
+					BR_ERROR0("Incorrect vector");
+
+				((br_fvector4_f *)mp)->v[i] = BrStrToF(data, NULL);
+
+				while(*data != '\0' && *data != ',' && !ISSPACE(*data))
+					data++;
+			}
+			break;
 
 		case FSM_STRUCT:
 			if(BrStrCmp(data,((br_file_struct *)sm->extra)->name))
