@@ -516,6 +516,8 @@ SPACE							token
 LIGHTING						boolean
 PRELIGHTING						boolean
 
+SEPARATE_SPECULAR               boolean
+
 FORCE_FRONT						boolean
 FORCE_BACK						boolean
 

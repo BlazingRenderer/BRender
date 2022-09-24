@@ -69,6 +69,10 @@ void BR_PUBLIC_ENTRY BrMaterialUpdate(br_material *mat, br_uint_16 flags)
 		tvp->v.s = BR_DIV(BrIntToScalar(mat->opacity), BR_SCALAR(255.0));
 		tvp++;
 
+		tvp->t = BRT_SEPARATE_SPECULAR_B;
+		tvp->v.b =(mat->flags & BR_MATF_LIGHT) && mat->ks && (mat->flags & BR_MATF_SEPARATE_SPECULAR);
+		tvp++;
+
 		tvp->t = BRT_MODULATE_B;
 		tvp->v.b = !!(mat->flags & (BR_MATF_LIGHT | BR_MATF_PRELIT)) ||
 			mat->colour != BR_COLOUR_RGB(255, 255, 255);
