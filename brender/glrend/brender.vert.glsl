@@ -49,7 +49,6 @@ layout(std140) uniform br_model_state
     mat4 normal_matrix;
     vec4 surface_colour;
 
-    vec4 ambient_colour; /* Material ambient colour. Is multiplied by surface_colour. */
     vec4 clear_colour;
     float ka; /* Ambient mod */
     float ks; /* Specular mod (doesn't seem to be used by Croc) */

@@ -71,10 +71,6 @@ typedef struct _GLSTATE_SURFACE
 	br_scalar	ks;
 	br_scalar	power;
 
-	br_scalar	ambient_r;
-	br_scalar	ambient_g;
-	br_scalar	ambient_b;
-
 	br_boolean	lighting;
 	br_boolean	force_front;
 	br_boolean	force_back;

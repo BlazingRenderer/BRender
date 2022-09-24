@@ -29,9 +29,6 @@ typedef struct br_material {
 	 */
 	br_scalar power;
 
-// Colour (=>intensity) of ambient light for true colour model. 
-	br_colour ambient_colour;
-	
 	/*
 	 * Controls how texture is rendered
 	 */

@@ -22,8 +22,6 @@ const br_material _DefaultScriptMaterial = {
 	.ka             = BR_UFRACTION(0.10),
 	.kd             = BR_UFRACTION(0.70),
 	.ks             = BR_UFRACTION(0.0),
-	
-	.ambient_colour = BR_COLOUR_RGB(26,26,26),
 
 	.power          = BR_SCALAR(20),
 	.flags          = BR_MATF_LIGHT,

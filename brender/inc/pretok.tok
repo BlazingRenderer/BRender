@@ -558,13 +558,6 @@ SPECULAR						float
 SPECULAR_POWER					fixed
 SPECULAR_POWER					float
 
-AMBIENT_R						fixed
-AMBIENT_R						float
-AMBIENT_G						fixed
-AMBIENT_G						float
-AMBIENT_B						fixed
-AMBIENT_B						float
-
 GLOBAL_AMBIENT					int_32
 GLOBAL_AMBIENT					colour_rgb
 

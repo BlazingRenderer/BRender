@@ -250,18 +250,6 @@ void BR_PUBLIC_ENTRY BrMaterialUpdate(br_material *mat, br_uint_16 flags)
 		tvp->v.s = mat->power;
 		tvp++;
 
-		tvp->t = BRT_AS_SCALAR(AMBIENT_R);
-		tvp->v.s = BR_MUL(BrFixedToScalar(BR_RED(mat->ambient_colour) << 8), BrFixedToScalar(BR_RED(mat->colour) << 8));
-		tvp++;
-
-		tvp->t = BRT_AS_SCALAR(AMBIENT_G);
-		tvp->v.s = BR_MUL(BrFixedToScalar(BR_GRN(mat->ambient_colour) << 8), BrFixedToScalar(BR_GRN(mat->colour) << 8));
-		tvp++;
-
-		tvp->t = BRT_AS_SCALAR(AMBIENT_B);
-		tvp->v.s = BR_MUL(BrFixedToScalar(BR_BLU(mat->ambient_colour) << 8), BrFixedToScalar(BR_BLU(mat->colour) << 8));
-		tvp++;
-
 		tvp->t = BRT_LIGHTING_B;
 		if(mat->flags & BR_MATF_PRELIT)
 			tvp->v.b = BR_FALSE;

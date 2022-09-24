@@ -73,11 +73,6 @@ static void apply_stored_properties(HVIDEO hVideo, HGLSTATE_STACK state, uint32_
         hModel->kd    = state->surface.kd;
         hModel->power = state->surface.power;
 
-        /* ambient_{r,g,b} are multiplied by the colour values. */
-        BrVector4Set(&hModel->ambient_colour,
-                     state->surface.ambient_r, state->surface.ambient_g,
-                     state->surface.ambient_g, state->surface.opacity);
-
         *unlit = !state->surface.lighting;
     }
 

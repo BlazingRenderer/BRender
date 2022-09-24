@@ -22,12 +22,6 @@ static const br_tv_template_entry GLSTATEI_SurfaceTemplateEntries[] = {
     {BRT_SPECULAR_F,       NULL, F(surface.ks),             Q | S | AF, BRTV_CONV_FLOAT_SCALAR,     0, TM_PART},
     {BRT_SPECULAR_POWER_X, NULL, F(surface.power),          Q | S | AX, BRTV_CONV_FIXED_SCALAR,     0, TM_PART},
     {BRT_SPECULAR_POWER_F, NULL, F(surface.power),          Q | S | AF, BRTV_CONV_FLOAT_SCALAR,     0, TM_PART},
-    {BRT_AMBIENT_R_X,      NULL, F(surface.ambient_r),      Q | S | AX, BRTV_CONV_FIXED_SCALAR,     0, TM_PART},
-    {BRT_AMBIENT_R_F,      NULL, F(surface.ambient_r),      Q | S | AF, BRTV_CONV_FLOAT_SCALAR,     0, TM_PART},
-    {BRT_AMBIENT_G_X,      NULL, F(surface.ambient_g),      Q | S | AX, BRTV_CONV_FIXED_SCALAR,     0, TM_PART},
-    {BRT_AMBIENT_G_F,      NULL, F(surface.ambient_g),      Q | S | AF, BRTV_CONV_FLOAT_SCALAR,     0, TM_PART},
-    {BRT_AMBIENT_B_X,      NULL, F(surface.ambient_b),      Q | S | AX, BRTV_CONV_FIXED_SCALAR,     0, TM_PART},
-    {BRT_AMBIENT_B_F,      NULL, F(surface.ambient_b),      Q | S | AF, BRTV_CONV_FLOAT_SCALAR,     0, TM_PART},
 
     {BRT_LIGHTING_B,       NULL, F(surface.lighting),       Q | S | A,  BRTV_CONV_COPY,             0, TM_PART | TM_INVALID_CC},
     {BRT_FORCE_FRONT_B,    NULL, F(surface.force_front),    Q | S | A,  BRTV_CONV_COPY,             0, TM_PART | TM_INVALID_CC},
@@ -47,9 +41,6 @@ static const GLSTATE_SURFACE s_Default = {
 	.kd				= BR_SCALAR(0.75),
 	.ks				= BR_SCALAR(0.0),
 	.power			= BR_SCALAR(20.0),
-	.ambient_r		= BR_SCALAR(0.0),
-	.ambient_g		= BR_SCALAR(0.0),
-	.ambient_b		= BR_SCALAR(0.0),
 
 	.lighting		= BR_FALSE,
 	.force_front	= BR_FALSE,

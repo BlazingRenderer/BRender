@@ -125,7 +125,6 @@ typedef struct _GLSTD140_MODEL_DATA {
     alignas(16) br_matrix4_f mvp;
     alignas(16) br_matrix4_f normal_matrix;
     alignas(16) br_vector4_f surface_colour;
-    alignas(16) br_vector4_f ambient_colour;
     alignas(16) br_vector4_f clear_colour;
     alignas(4) float         ka;
     alignas(4) float         ks;
