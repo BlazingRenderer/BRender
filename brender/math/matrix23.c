@@ -67,13 +67,13 @@ void BR_PUBLIC_ENTRY BrMatrix23Identity(br_matrix23 *mat)
 }
 
 /*
- *         ⁄                ø
- *         ≥  cosÈ  sinÈ  0 ≥
- *         ≥                ≥
- *         ≥ -sinÈ  cosÈ  0 ≥
- * R(È) =  ≥                ≥
- *         ≥   0     0    1 ≥
- *         ¿                Ÿ
+ *        ‚îå                ‚îê
+ *        ‚îÇ  cosŒò  sinŒò  0 ‚îÇ
+ *        ‚îÇ                ‚îÇ
+ *        ‚îÇ -sinŒò  cosŒò  0 ‚îÇ
+ * R(Œò) = ‚îÇ                ‚îÇ
+ *        ‚îÇ   0     0    1 ‚îÇ
+ *        ‚îî                ‚îò
  */
 void BR_PUBLIC_ENTRY BrMatrix23Rotate(br_matrix23 *mat, br_angle rz)
 {
@@ -88,13 +88,13 @@ void BR_PUBLIC_ENTRY BrMatrix23Rotate(br_matrix23 *mat, br_angle rz)
 }
 
 /*
- *            ⁄             ø
- *            ≥  1   0   0  ≥
- *            ≥             ≥
- *            ≥  0   1   0  ≥
- * T(dx,dy) = ≥             ≥
- *            ≥  dx  dy  1  ≥
- *            ¿             Ÿ
+ *            ‚îå             ‚îê
+ *            ‚îÇ  1   0   0  ‚îÇ
+ *            ‚îÇ             ‚îÇ
+ *            ‚îÇ  0   1   0  ‚îÇ
+ * T(dx,dy) = ‚îÇ             ‚îÇ
+ *            ‚îÇ  dx  dy  1  ‚îÇ
+ *            ‚îî             ‚îò
  */
 void BR_PUBLIC_ENTRY BrMatrix23Translate(br_matrix23 *mat, br_scalar dx, br_scalar dy)
 {
@@ -106,13 +106,13 @@ void BR_PUBLIC_ENTRY BrMatrix23Translate(br_matrix23 *mat, br_scalar dx, br_scal
 }
 
 /*
- *            ⁄             ø
- *            ≥  sx  0    0 ≥
- *            ≥             ≥
- *            ≥  0   sy   0 ≥
- * S(sx,sy) = ≥             ≥
- *            ≥  0   0    1 ≥
- *            ¿             Ÿ
+ *            ‚îå             ‚îê
+ *            ‚îÇ  sx  0    0 ‚îÇ
+ *            ‚îÇ             ‚îÇ
+ *            ‚îÇ  0   sy   0 ‚îÇ
+ * S(sx,sy) = ‚îÇ             ‚îÇ
+ *            ‚îÇ  0   0    1 ‚îÇ
+ *            ‚îî             ‚îò
  */
 void BR_PUBLIC_ENTRY BrMatrix23Scale(br_matrix23 *mat, br_scalar sx, br_scalar sy)
 {
@@ -124,13 +124,13 @@ void BR_PUBLIC_ENTRY BrMatrix23Scale(br_matrix23 *mat, br_scalar sx, br_scalar s
 }
 
 /*
- *              ⁄             ø
- *              ≥  1   sy   0 ≥
- *              ≥             ≥
- *              ≥  0   1    0 ≥
- * ShearX(sy) = ≥             ≥
- *              ≥  0   0    1 ≥
- *              ¿             Ÿ
+ *              ‚îå             ‚îê
+ *              ‚îÇ  1   sy   0 ‚îÇ
+ *              ‚îÇ             ‚îÇ
+ *              ‚îÇ  0   1    0 ‚îÇ
+ * ShearX(sy) = ‚îÇ             ‚îÇ
+ *              ‚îÇ  0   0    1 ‚îÇ
+ *              ‚îî             ‚îò
  */
 void BR_PUBLIC_ENTRY BrMatrix23ShearX(br_matrix23 *mat, br_scalar sy)
 {
@@ -142,13 +142,13 @@ void BR_PUBLIC_ENTRY BrMatrix23ShearX(br_matrix23 *mat, br_scalar sy)
 }
 
 /*
- *              ⁄             ø
- *              ≥  1   0    0 ≥
- *              ≥             ≥
- *              ≥  sx  1    0 ≥
- * ShearY(sx) = ≥             ≥
- *              ≥  0   0    1 ≥
- *              ¿             Ÿ
+ *              ‚îå             ‚îê
+ *              ‚îÇ  1   0    0 ‚îÇ
+ *              ‚îÇ             ‚îÇ
+ *              ‚îÇ  sx  1    0 ‚îÇ
+ * ShearY(sx) = ‚îÇ             ‚îÇ
+ *              ‚îÇ  0   0    1 ‚îÇ
+ *              ‚îî             ‚îò
  */
 void BR_PUBLIC_ENTRY BrMatrix23ShearY(br_matrix23 *mat, br_scalar sx)
 {
