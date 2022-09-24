@@ -112,7 +112,7 @@ enum {
 
     FID_MATERIAL_OLD,
     FID_PIXELMAP,
-    FID_RESERVED_0,
+    FID_MATERIAL,
     FID_LIGHT,
 
     FID_MODEL,
