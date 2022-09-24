@@ -100,6 +100,7 @@ enum {
     T_FOG_LOCAL,
     T_SUBDIVIDE,
 	T_QUAD_MAPPING,
+    T_INHIBIT_DEPTH_WRITE,
 
 	/*
 	 * Depth test modes
@@ -183,6 +184,7 @@ static const br_lexer_keyword keywords[] = {
     { "subdivide_tolerance",        T_SUBDIVIDE_TOLERANCE,  },
     { "subdivide",                  T_SUBDIVIDE,            },
     { "quad_mapping",               T_QUAD_MAPPING,         },
+    { "inhibit_depth_write",        T_INHIBIT_DEPTH_WRITE,  },
     { "gt",                         T_GT                    },
     { "ge",                         T_GE                    },
     { "eq",                         T_EQ                    },
@@ -253,6 +255,7 @@ STATIC br_uint_32 ParseMatFlags(br_lexer *l)
         case T_FOG_LOCAL:               f |= BR_MATF_FOG_LOCAL;                 break;
         case T_SUBDIVIDE:               f |= BR_MATF_SUBDIVIDE;                 break;
         case T_QUAD_MAPPING:            f |= BR_MATF_QUAD_MAPPING;              break;
+        case T_INHIBIT_DEPTH_WRITE:     f |= BR_MATF_INHIBIT_DEPTH_WRITE;       break;
 		default:
 			BrLexerError(l, "Unknown material flag");
 		}

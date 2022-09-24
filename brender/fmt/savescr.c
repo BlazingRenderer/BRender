@@ -38,6 +38,7 @@ STATIC const struct {
 	{ "subdivide"			, BR_MATF_SUBDIVIDE			},
 	{ "fog_local"			, BR_MATF_FOG_LOCAL			},
 	{ "quad_mapping"		, BR_MATF_QUAD_MAPPING		},
+	{ "inhibit_depth_write"	, BR_MATF_INHIBIT_DEPTH_WRITE},
 };
 
 STATIC const struct {
