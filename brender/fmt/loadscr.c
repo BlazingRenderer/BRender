@@ -76,7 +76,6 @@ enum {
 	T_LIGHT,
 	T_PRELIT,
 	T_SMOOTH,
-	T_FLAT,
 	T_GOURAUD,
 	T_ENVIRONMENT,
 	T_ENVIRONMENT_I,
@@ -97,8 +96,6 @@ enum {
     T_FOG_LOCAL,
     T_SUBDIVIDE,
 	T_QUAD_MAPPING,
-	T_NO_RENDER,
-	T_NO_SCALABILITY,
 };
 
 static const br_lexer_keyword keywords[] = {
@@ -125,7 +122,6 @@ static const br_lexer_keyword keywords[] = {
     { "light",                      T_LIGHT,                },
     { "prelit",                     T_PRELIT,               },
     { "smooth",                     T_SMOOTH,               },
-    { "flat",						T_FLAT,               },
     { "gouraud",                    T_GOURAUD,              },
     { "environment",                T_ENVIRONMENT,          },
     { "environment_i",              T_ENVIRONMENT_I,        },
@@ -152,8 +148,6 @@ static const br_lexer_keyword keywords[] = {
     { "subdivide_tolerance",        T_SUBDIVIDE_TOLERANCE,  },
     { "subdivide",                  T_SUBDIVIDE,            },
     { "quad_mapping",               T_QUAD_MAPPING,         },
-    { "no_render",                  T_NO_RENDER,            },
-    { "no_scalability",             T_NO_SCALABILITY,       },
 };
 
 static void BrLexerPrintPos(struct br_lexer *l)
@@ -184,7 +178,6 @@ STATIC br_uint_32 ParseMatFlags(br_lexer *l)
         case T_PRELIT:                  f |= BR_MATF_PRELIT;                    break;
 		case T_SMOOTH:
         case T_GOURAUD:                 f |= BR_MATF_SMOOTH;                    break;
-        case T_FLAT:	                f |= BR_MATF_FLAT;                    break;
 		case T_ENVIRONMENT_I:
         case T_ENVIRONMENT:             f |= BR_MATF_ENVIRONMENT_I;             break;
 		case T_ENVIRONMENT_L:
@@ -202,8 +195,6 @@ STATIC br_uint_32 ParseMatFlags(br_lexer *l)
         case T_FOG_LOCAL:               f |= BR_MATF_FOG_LOCAL;                 break;
         case T_SUBDIVIDE:               f |= BR_MATF_SUBDIVIDE;                 break;
         case T_QUAD_MAPPING:            f |= BR_MATF_QUAD_MAPPING;              break;
-        case T_NO_RENDER:               f |= BR_MATF_NO_RENDER;                 break;
-        case T_NO_SCALABILITY:          f |= BR_MATF_NO_SCALABILITY;            break;
 		default:
 			BrLexerError(l, "Unknown material flag");
 		}

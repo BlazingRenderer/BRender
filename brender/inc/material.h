@@ -133,28 +133,6 @@ enum {
 	BR_MATF_QUAD_MAPPING	= 0x00400000,
 
 	BR_MATF_FORCE_BACK = 0x00800000,
-
-	/*
-	 * This flag is ignored by BRender!  Strictly hacked in for Croc!  Don't use it if you don't know
-	 * what you are doing!
-	 */
-	BR_MATF_NO_RENDER = 0x01000000,
-
-	/*
-	 * This is also hacked in for Croc - it marks materials which the scalability shouldn't touch
-	 */
-	BR_MATF_NO_SCALABILITY = 0x02000000,
-
-	/*
-	 * This is also hacked in for Croc - it marks materials which are used for maps (prelit)
-	 */
-	BR_MATF_MAP = 0x04000000,
-
-	/*
-	 * This is also hacked in for Croc - it marks materials which shouldn't be smooth
-	 */
-
-	BR_MATF_FLAT = 0x08000000,
 };
 
 /*

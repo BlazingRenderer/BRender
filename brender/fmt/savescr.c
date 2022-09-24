@@ -23,7 +23,6 @@ STATIC const struct {
 	{ "light"				, BR_MATF_LIGHT				},
 	{ "prelit"				, BR_MATF_PRELIT			},
 	{ "smooth"				, BR_MATF_SMOOTH			},
-	{ "flat"				, BR_MATF_FLAT				},
 	{ "environment"			, BR_MATF_ENVIRONMENT_I		},
 	{ "environment_local"	, BR_MATF_ENVIRONMENT_L		},
 	{ "perspective"			, BR_MATF_PERSPECTIVE		},
@@ -38,8 +37,6 @@ STATIC const struct {
 	{ "mip_interpolation"	, BR_MATF_MIP_INTERPOLATION	},
 	{ "subdivide"			, BR_MATF_SUBDIVIDE			},
 	{ "fog_local"			, BR_MATF_FOG_LOCAL			},
-	{ "no_render"			, BR_MATF_NO_RENDER			},
-	{ "no_scalability"		, BR_MATF_NO_SCALABILITY	},
 	{ "quad_mapping"		, BR_MATF_QUAD_MAPPING		},
 };
 
