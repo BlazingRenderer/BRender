@@ -514,6 +514,7 @@ SPACE							token
 # Tokens used for surface state (handled by renderer)
 #
 LIGHTING						boolean
+PRELIGHTING						boolean
 
 FORCE_FRONT						boolean
 FORCE_BACK						boolean
@@ -525,6 +526,8 @@ COLOUR_SOURCE					token
 	NONE							none
 	SURFACE							none
 	GEOMETRY						none
+	PRIMITIVE						none
+	VERTEX							none
 OPACITY_SOURCE					token
 	NONE							none
 	SURFACE							none

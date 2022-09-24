@@ -53,6 +53,10 @@ void BR_PUBLIC_ENTRY BrMaterialUpdate(br_material *mat, br_uint_16 flags)
 	{
 		tvp = tva;
 
+		tvp->t = BRT_COLOUR_SOURCE_T;
+		tvp->v.t = mat->flags & (BR_MATF_LIGHT | BR_MATF_PRELIT) ? BRT_VERTEX : BRT_PRIMITIVE;
+		tvp++;
+
 		tvp->t = BRT_COLOUR_RGB;
 		tvp->v.rgb = mat->colour;
 		tvp++;
@@ -62,7 +66,8 @@ void BR_PUBLIC_ENTRY BrMaterialUpdate(br_material *mat, br_uint_16 flags)
 		tvp++;
 
 		tvp->t = BRT_MODULATE_B;
-		tvp->v.b = !!(mat->flags & (BR_MATF_LIGHT | BR_MATF_PRELIT));
+		tvp->v.b = !!(mat->flags & (BR_MATF_LIGHT | BR_MATF_PRELIT)) ||
+			mat->colour != BR_COLOUR_RGB(255, 255, 255);
 		tvp++;
 
 		tvp->t = BRT_BLEND_B;
@@ -312,14 +317,18 @@ void BR_PUBLIC_ENTRY BrMaterialUpdate(br_material *mat, br_uint_16 flags)
 		tvp++;
 
 		tvp->t = BRT_LIGHTING_B;
-		if(mat->flags & BR_MATF_PRELIT)
-			tvp->v.b = BR_FALSE;
-		else
-			tvp->v.b = !!(mat->flags & BR_MATF_LIGHT);
+		tvp->v.b = !!(mat->flags & BR_MATF_LIGHT);
+		tvp++;
+
+		tvp->t = BRT_PRELIGHTING_B;
+		tvp->v.b = mat->flags & BR_MATF_PRELIT && mat->flags & BR_MATF_LIGHT;
 		tvp++;
 
 		tvp->t = BRT_COLOUR_SOURCE_T;
-		tvp->v.t = (mat->flags & BR_MATF_PRELIT) ? BRT_GEOMETRY : BRT_SURFACE;
+		if(mat->flags & BR_MATF_PRELIT)
+			tvp->v.t = mat->flags & BR_MATF_LIGHT ? BRT_SURFACE : BRT_GEOMETRY;
+		else
+			tvp->v.t = BRT_SURFACE;
 		tvp++;
 
 		tvp->t = BRT_MAPPING_SOURCE_T;
