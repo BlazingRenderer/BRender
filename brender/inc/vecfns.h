@@ -193,18 +193,20 @@
  * v1=v2*scalar
  */
 #define BrVector3Scale(v1, v2, s) do {\
-	(v1)->v[0]=BR_MUL((v2)->v[0],(s));\
-	(v1)->v[1]=BR_MUL((v2)->v[1],(s));\
-	(v1)->v[2]=BR_MUL((v2)->v[2],(s));\
+	br_scalar __scale=(s); \
+	(v1)->v[0]=BR_MUL((v2)->v[0],__scale);\
+	(v1)->v[1]=BR_MUL((v2)->v[1],__scale);\
+	(v1)->v[2]=BR_MUL((v2)->v[2],__scale);\
 } while(0)
 
 /*
  * v1=v2/scalar
  */
 #define BrVector3InvScale(v1, v2, s) do {\
-	(v1)->v[0]=BR_DIV((v2)->v[0],(s));\
-	(v1)->v[1]=BR_DIV((v2)->v[1],(s));\
-	(v1)->v[2]=BR_DIV((v2)->v[2],(s));\
+	br_scalar __scale=1.0f/(s); \
+	(v1)->v[0]=BR_MUL((v2)->v[0],__scale);\
+	(v1)->v[1]=BR_MUL((v2)->v[1],__scale);\
+	(v1)->v[2]=BR_MUL((v2)->v[2],__scale);\
 } while(0)
 
 /*
