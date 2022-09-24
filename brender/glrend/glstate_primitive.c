@@ -12,6 +12,7 @@
 static const br_tv_template_entry GLSTATEI_PrimitiveTemplateEntries[] = {
     //{BRT_FORCE_FRONT_B,           NULL, F(prim.flags),               Q | S | A, BRTV_CONV_BIT,  PRIMF_FORCE_FRONT,   1},
     //{BRT_SMOOTH_B,                NULL, F(prim.flags),               Q | S | A, BRTV_CONV_BIT,  PRIMF_SMOOTH,        1},
+    //{BRT_SMOOTH_OPACITY_B,        NULL, F(prim.flags),               Q | S | A, BRTV_CONV_BIT,  PRIMF_SMOOTH_ALPHA,  1},
     {BRT_DECAL_B,                 NULL, F(prim.flags),               Q | S | A, BRTV_CONV_BIT,  PRIMF_DECAL,         1},
     //{BRT_DITHER_COLOUR_B,         NULL, F(prim.flags),               Q | S | A, BRTV_CONV_BIT,  PRIMF_DITHER_COLOUR, 1},
     //{BRT_DITHER_MAP_B,            NULL, F(prim.flags),               Q | S | A, BRTV_CONV_BIT,  PRIMF_DITHER_MAP,    1},
