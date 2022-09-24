@@ -936,7 +936,6 @@ TEXTURE_1					object
 DOUBLE_TEXTURE					boolean
 FOG_SCALE					uint_8
 USE_CONSTANT_ALPHA				boolean
-USE_CONSTANT_FOG				boolean
 USE_BACKGROUND_ALPHA				boolean
 MIP_MODIFIER					int_8
 MIP_MIN						uint_8

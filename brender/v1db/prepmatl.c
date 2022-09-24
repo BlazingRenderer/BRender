@@ -160,9 +160,6 @@ void BR_PUBLIC_ENTRY BrMaterialUpdate(br_material *mat, br_uint_16 flags)
 			tvp->t = BRT_FOG_SCALE_U8;
 			tvp->v.u8 = mat->opacity;
 			tvp++;
-			tvp->t = BRT_USE_CONSTANT_FOG_B;
-			tvp->v.b = !!(mat->flags_ext & BR_MATFX_CONSTANT_FOG);
-			tvp++;
 		}
 
 		tvp->t = BRT_Z_WRITE_T;
