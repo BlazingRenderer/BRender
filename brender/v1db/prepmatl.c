@@ -73,10 +73,6 @@ void BR_PUBLIC_ENTRY BrMaterialUpdate(br_material *mat, br_uint_16 flags)
 		tvp->v.b = !!(mat->flags & BR_MATF_SMOOTH);
 		tvp++;
 
-		tvp->t = BRT_ZTRANSPARENCY_B;
-		tvp->v.b = !!(mat->flags & BR_MATF_ZTRANSPARENCY);
-		tvp++;
-
 		if((mat->flags & BR_MATF_SUBDIVIDE))
 		{
 			tvp->t = BRT_PERSPECTIVE_T;

@@ -883,11 +883,6 @@ Z_WRITE						token_list
 	Z_WRITE_CONDITIONAL_NO_Z		none
 	Z_WRITE_CONDITIONAL			none
 
-
-# Indicates whether a transparent texturemap is Z transparent.
-ZTRANSPARENCY					boolean
-
-
 # Support for alpha blending modes.
 BLEND_MODE					token
 BLEND_MODE					token_list
