@@ -90,6 +90,10 @@ void BR_PUBLIC_ENTRY BrMaterialUpdate(br_material *mat, br_uint_16 flags)
 		tvp->v.b = !!(mat->flags & BR_MATF_SMOOTH);
 		tvp++;
 
+		tvp->t = BRT_SMOOTH_OPACITY_B;
+		tvp->v.b = !!(mat->flags & BR_MATF_SMOOTH_ALPHA);
+		tvp++;
+
 		tvp->t = BRT_DEPTH_WRITE_B;
 		tvp->v.b = !(mat->flags & BR_MATF_INHIBIT_DEPTH_WRITE);
 		tvp++;

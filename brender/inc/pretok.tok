@@ -316,6 +316,7 @@ GLOBAL							none
 # Tokens used for primitive state (handled by primitive layer)
 #
 SMOOTH							boolean
+SMOOTH_OPACITY					boolean
 DECAL							boolean
 DEPTH_WRITE						boolean
 COLOUR_WRITE					boolean
