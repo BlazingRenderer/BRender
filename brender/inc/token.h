@@ -24,7 +24,11 @@ typedef br_uint_32 br_token;
 /*
  * 0 is reserved to indicate NULL tokens
  */
+#ifdef __cplusplus
+#define BR_NULL_TOKEN ((const br_token)0)
+#else
 #define BR_NULL_TOKEN 0
+#endif
 
 /*
  * Maximum length (including terminating '\0') of an string value
