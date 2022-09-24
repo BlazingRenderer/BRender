@@ -99,6 +99,9 @@ typedef br_float br_ufraction;
 #define BR_POW(a,b)				((br_scalar)powf((a),(b)))
 #define BR_SQRT(a)				((br_scalar)sqrtf(a))
 
+#define BR_FLOOR(a)				((br_scalar)floorf(a))
+#define BR_CEIL(a)				((br_scalar)ceilf(a))
+
 /*
 * Make sure PI is defined
 */
