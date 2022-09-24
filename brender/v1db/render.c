@@ -911,7 +911,8 @@ void BR_PUBLIC_ENTRY BrZbSceneRenderBegin(br_actor *world,
 
 		RendererPartSet(v1db.renderer, BRT_HIDDEN_SURFACE, 0, BRT_V1ORDER_TABLE_P, BR_VALUE_PASSTHROUGH(v1db.default_order_table));
 		RendererPartSet(v1db.renderer, BRT_HIDDEN_SURFACE, 0, BRT_V1PRIMITIVE_HEAP_P, BR_VALUE_PASSTHROUGH(&v1db.heap));
-		RendererPartSet(v1db.renderer, BRT_HIDDEN_SURFACE, 0, BRT_TYPE_T, BR_VALUE_PASSTHROUGH(BRT_BUCKET_SORT_DEFERRED));
+		RendererPartSet(v1db.renderer, BRT_HIDDEN_SURFACE, 0, BRT_TYPE_T, BR_VALUE_PASSTHROUGH(BRT_BUCKET_SORT));
+		RendererPartSet(v1db.renderer, BRT_HIDDEN_SURFACE, 0, BRT_DIVERT_T, BR_VALUE_PASSTHROUGH(BRT_BLENDED));
 
 		v1db.default_render_data = v1db.default_order_table;
 
@@ -920,6 +921,7 @@ void BR_PUBLIC_ENTRY BrZbSceneRenderBegin(br_actor *world,
 	{
 
 		RendererPartSet(v1db.renderer, BRT_HIDDEN_SURFACE, 0, BRT_TYPE_T, BR_VALUE_PASSTHROUGH(BRT_NONE));
+		RendererPartSet(v1db.renderer, BRT_HIDDEN_SURFACE, 0, BRT_DIVERT_T, BR_VALUE_PASSTHROUGH(BRT_NONE));
 
 		v1db.default_render_data = NULL;
 	}
@@ -1067,6 +1069,7 @@ void BR_PUBLIC_ENTRY BrZsSceneRenderBegin(br_actor *world,
 	RendererPartSet(v1db.renderer, BRT_HIDDEN_SURFACE, 0, BRT_V1ORDER_TABLE_P, BR_VALUE_PASSTHROUGH(v1db.default_order_table));
 	RendererPartSet(v1db.renderer, BRT_HIDDEN_SURFACE, 0, BRT_V1PRIMITIVE_HEAP_P, BR_VALUE_PASSTHROUGH(&v1db.heap));
 	RendererPartSet(v1db.renderer, BRT_HIDDEN_SURFACE, 0, BRT_TYPE_T, BR_VALUE_PASSTHROUGH(BRT_BUCKET_SORT));
+	RendererPartSet(v1db.renderer, BRT_HIDDEN_SURFACE, 0, BRT_DIVERT_T, BR_VALUE_PASSTHROUGH(BRT_ALL));
 
 	v1db.default_render_data = v1db.default_order_table;
 

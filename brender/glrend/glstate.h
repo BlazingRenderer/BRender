@@ -111,6 +111,7 @@ typedef void insert_cbfn(
 typedef struct _GLSTATE_HIDDEN
 {
 	br_token			type;
+	br_token			divert;
 	br_order_table		*order_table;
 	br_primitive_heap	*heap;
 	insert_cbfn			*insert_fn;

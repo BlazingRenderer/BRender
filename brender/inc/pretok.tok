@@ -721,7 +721,11 @@ RENDER							boolean
 TYPE							token
 	NONE							none
 	BUCKET_SORT						none
-	BUCKET_SORT_DEFERRED			none
+
+DIVERT							token
+	NONE							none
+	ALL	   							none
+	BLENDED							none
 
 V1ORDER_TABLE					pointer
 V1PRIMITIVE_HEAP				pointer

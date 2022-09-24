@@ -11,6 +11,7 @@
 
 static const br_tv_template_entry GLSTATEI_HiddenTemplateEntries[] = {
     {BRT_TYPE_T,              NULL, F(hidden.type),        Q | S | A, BRTV_CONV_COPY, 0, TM_PART | TM_INVALID_PS | TM_INVALID_PM},
+    {BRT_DIVERT_T,            NULL, F(hidden.divert),      Q | S | A, BRTV_CONV_COPY, 0, TM_PART | TM_INVALID_PS | TM_INVALID_PM},
 
     {BRT_V1ORDER_TABLE_P,     NULL, F(hidden.order_table), Q | S | A, BRTV_CONV_COPY, 0, TM_PART},
     {BRT_V1PRIMITIVE_HEAP_P,  NULL, F(hidden.heap),        Q | S | A, BRTV_CONV_COPY, 0, TM_PART | TM_INVALID_PS | TM_INVALID_PM},
@@ -23,6 +24,7 @@ static const br_tv_template_entry GLSTATEI_HiddenTemplateEntries[] = {
 
 static const GLSTATE_HIDDEN s_Default = {
 	.type			= BRT_NONE,
+	.divert         = BRT_NONE,
 	.order_table	= NULL,
 	.heap			= NULL,
 	.insert_fn		= NULL,

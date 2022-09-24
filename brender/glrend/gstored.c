@@ -249,9 +249,6 @@ enum {
 
 static int get_render_mode(const GLSTATE_STACK *state)
 {
-    if(state->hidden.type == BRT_BUCKET_SORT)
-        return RM_OPAQUE;
-
     if(state->valid & GLSTATE_MASK_SURFACE) {
         if(state->surface.force_back)
             return RM_FORCE_BACK;
@@ -412,6 +409,22 @@ static br_uint_16 calculate_bucket(const br_order_table *ot, const GLSTATE_STACK
     return base + BrZsPrimitiveBucketSelect(&tmp_depth, BR_PRIMITIVE_POINT, ot->min_z, ot->max_z, count, ot->type);
 }
 
+static br_boolean want_defer(const GLSTATE_HIDDEN *hidden)
+{
+    if(hidden->type != BRT_BUCKET_SORT)
+        return BR_FALSE;
+
+    if(hidden->divert == BRT_NONE)
+        return BR_FALSE;
+
+    if(hidden->divert == BRT_ALL)
+        return BR_TRUE;
+
+    UASSERT(hidden->divert == BRT_BLENDED);
+
+    return hidden->order_table != NULL && hidden->heap != NULL;
+}
+
 static br_error V1Model_RenderStored(struct br_geometry_stored *self, br_renderer *renderer, br_boolean on_screen)
 {
     HGLSTATE_STACK state;
@@ -434,9 +447,7 @@ static br_error V1Model_RenderStored(struct br_geometry_stored *self, br_rendere
     );
     distance_from_zero = BrVector3Length(&pos);
 
-    defer = (state->hidden.type == BRT_BUCKET_SORT_DEFERRED &&
-             state->hidden.order_table != NULL &&
-             state->hidden.heap != NULL);
+    defer = want_defer(&state->hidden);
 
     for(int i = 0; i < self->model->ngroups; ++i) {
         struct v11group          *group     = self->model->groups + i;
