@@ -30,6 +30,7 @@ static const br_tv_template_entry GLSTATEI_SurfaceTemplateEntries[] = {
     {BRT_DEPTH_BIAS_F,     NULL, F(surface.depth_bias),     Q | S | A,  BRTV_CONV_FLOAT_SCALAR,     0, TM_PART | TM_INVALID_CC},
 
     {BRT_COLOUR_SOURCE_T,  NULL, F(surface.colour_source),  Q | S | A,  BRTV_CONV_COPY,             0, TM_PART | TM_INVALID_CC},
+    {BRT_OPACITY_SOURCE_T, NULL, F(surface.opacity_source), Q | S | A,  BRTV_CONV_COPY,             0, TM_PART | TM_INVALID_CC},
     {BRT_MAPPING_SOURCE_T, NULL, F(surface.mapping_source), Q | S | A,  BRTV_CONV_COPY,             0, TM_PART | TM_INVALID_CC},
 
     {BRT_MAP_MATRIX_M23_X, NULL, F(surface.map_transform),  Q | S | AX, BRTV_CONV_M23_FIXED_SCALAR, 0, TM_PART | TM_INVALID_CC},
@@ -48,6 +49,7 @@ static const GLSTATE_SURFACE s_Default = {
 	.force_front	= BR_FALSE,
 	.force_back		= BR_FALSE,
 	.colour_source	= BRT_SURFACE,
+	.opacity_source = BRT_SURFACE,
 	.mapping_source	= BRT_GEOMETRY_MAP,
 
 	.map_transform	= {{
