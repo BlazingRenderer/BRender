@@ -121,30 +121,6 @@ void BR_PUBLIC_ENTRY BrMaterialUpdate(br_material *mat, br_uint_16 flags)
 		tvp->v.t = (mat->flags & BR_MATF_MIP_INTERPOLATION) ? BRT_LINEAR : BRT_NONE;
 		tvp++;
 
-		tvp->t = BRT_FOG_B;
-		tvp->v.b = !!(mat->flags & BR_MATF_FOG_LOCAL);
-		tvp++;
-
-		tvp->t = BRT_FOG_T;
-		tvp->v.t = (mat->flags & BR_MATF_FOG_LOCAL) ? BRT_LINEAR : BRT_NONE;
-		tvp++;
-
-		if((mat->flags & BR_MATF_FOG_LOCAL))
-		{
-			tvp->t = BRT_AS_SCALAR(FOG_MIN);
-			tvp->v.s = mat->fog_min;
-			tvp++;
-			tvp->t = BRT_AS_SCALAR(FOG_MAX);
-			tvp->v.s = mat->fog_max;
-			tvp++;
-			tvp->t = BRT_FOG_RGB;
-			tvp->v.rgb = mat->fog_colour;
-			tvp++;
-			tvp->t = BRT_FOG_SCALE_U8;
-			tvp->v.u8 = mat->opacity;
-			tvp++;
-		}
-
 		tvp->t = BRT_DEPTH_TEST_T;
 
 		switch (mat->mode & BR_MATM_DEPTH_TEST_MASK) {
@@ -245,6 +221,30 @@ void BR_PUBLIC_ENTRY BrMaterialUpdate(br_material *mat, br_uint_16 flags)
 		}
 
 		tvp++;
+
+		tvp->t = BRT_FOG_B;
+		tvp->v.b = !!(mat->flags & BR_MATF_FOG_LOCAL);
+		tvp++;
+
+		tvp->t = BRT_FOG_T;
+		tvp->v.t = (mat->flags & BR_MATF_FOG_LOCAL) ? BRT_LINEAR : BRT_NONE;
+		tvp++;
+
+		if((mat->flags & BR_MATF_FOG_LOCAL))
+		{
+			tvp->t = BRT_AS_SCALAR(FOG_MIN);
+			tvp->v.s = mat->fog_min;
+			tvp++;
+			tvp->t = BRT_AS_SCALAR(FOG_MAX);
+			tvp->v.s = mat->fog_max;
+			tvp++;
+			tvp->t = BRT_FOG_RGB;
+			tvp->v.rgb = mat->fog_colour;
+			tvp++;
+			tvp->t = BRT_FOG_SCALE_U8;
+			tvp->v.u8 = mat->opacity;
+			tvp++;
+		}
 
 		tvp->t = BR_NULL_TOKEN;
 
