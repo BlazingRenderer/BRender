@@ -30,7 +30,8 @@ const br_material _DefaultScriptMaterial = {
 		BR_VECTOR2(0,1),
 		BR_VECTOR2(0,0),
 	}},
-	.mode           = BR_MATM_DEPTH_TEST_LE | BR_MATM_BLEND_MODE_STANDARD,
+	.mode           = BR_MATM_DEPTH_TEST_LE | BR_MATM_BLEND_MODE_STANDARD
+	                | BR_MATM_MAP_WIDTH_LIMIT_WRAP | BR_MATM_MAP_HEIGHT_LIMIT_WRAP,
 	.index_base     = 0,
 	.index_range    = 63,
 };
@@ -70,6 +71,8 @@ enum {
     T_SUBDIVIDE_TOLERANCE,
     T_DEPTH_TEST,
     T_BLEND_MODE,
+    T_MAP_WIDTH_LIMIT,
+    T_MAP_HEIGHT_LIMIT,
 
 	/*
 	 * Material flags
@@ -117,6 +120,13 @@ enum {
 	T_SUMMED,
 	T_DIMMED,
 	T_PREMULTIPLIED,
+
+	/*
+	 * Width and height limit modes
+	 */
+	T_WRAP,
+	T_CLAMP,
+	T_MIRROR,
 };
 
 static const br_lexer_keyword keywords[] = {
@@ -142,6 +152,8 @@ static const br_lexer_keyword keywords[] = {
     { "index_blend",                T_INDEX_BLEND,          },
     { "depth_test",                 T_DEPTH_TEST,           },
     { "blend_mode",                 T_BLEND_MODE,           },
+    { "map_width_limit",            T_MAP_WIDTH_LIMIT,      },
+    { "map_height_limit",           T_MAP_HEIGHT_LIMIT,     },
     { "light",                      T_LIGHT,                },
     { "prelit",                     T_PRELIT,               },
     { "smooth",                     T_SMOOTH,               },
@@ -191,6 +203,9 @@ static const br_lexer_keyword keywords[] = {
     { "summed",                     T_SUMMED,               },
     { "dimmed",                     T_DIMMED,               },
     { "premultiplied",              T_PREMULTIPLIED,        },
+    { "wrap",                       T_WRAP,                 },
+    { "clamp",                      T_CLAMP,                },
+    { "mirror",                     T_MIRROR,               },
 };
 
 static void BrLexerPrintPos(struct br_lexer *l)
@@ -382,6 +397,42 @@ STATIC br_material *ParseMaterial(br_lexer *l)
 				break;
 			default:
 				BrLexerError(l, "Unknown blend mode");
+			}
+			BrLexerAdvance(l);
+			break;
+
+		case T_MAP_WIDTH_LIMIT:
+			BrLexerAdvance(l); BrLexerExpect(l,T_EQUAL);
+			switch (BrLexerCurrent(l)) {
+			case T_WRAP:
+				mat->mode = (mat->mode & ~BR_MATM_MAP_WIDTH_LIMIT_MASK) | BR_MATM_MAP_WIDTH_LIMIT_WRAP;
+				break;
+			case T_CLAMP:
+				mat->mode = (mat->mode & ~BR_MATM_MAP_WIDTH_LIMIT_MASK) | BR_MATM_MAP_WIDTH_LIMIT_CLAMP;
+				break;
+			case T_MIRROR:
+				mat->mode = (mat->mode & ~BR_MATM_MAP_WIDTH_LIMIT_MASK) | BR_MATM_MAP_WIDTH_LIMIT_MIRROR;
+				break;
+			default:
+				BrLexerError(l, "Unknown width limit mode");
+			}
+			BrLexerAdvance(l);
+			break;
+
+		case T_MAP_HEIGHT_LIMIT:
+			BrLexerAdvance(l); BrLexerExpect(l,T_EQUAL);
+			switch (BrLexerCurrent(l)) {
+			case T_WRAP:
+				mat->mode = (mat->mode & ~BR_MATM_MAP_HEIGHT_LIMIT_MASK) | BR_MATM_MAP_HEIGHT_LIMIT_WRAP;
+				break;
+			case T_CLAMP:
+				mat->mode = (mat->mode & ~BR_MATM_MAP_HEIGHT_LIMIT_MASK) | BR_MATM_MAP_HEIGHT_LIMIT_CLAMP;
+				break;
+			case T_MIRROR:
+				mat->mode = (mat->mode & ~BR_MATM_MAP_HEIGHT_LIMIT_MASK) | BR_MATM_MAP_HEIGHT_LIMIT_MIRROR;
+				break;
+			default:
+				BrLexerError(l, "Unknown width limit mode");
 			}
 			BrLexerAdvance(l);
 			break;

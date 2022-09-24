@@ -121,19 +121,6 @@ void BR_PUBLIC_ENTRY BrMaterialUpdate(br_material *mat, br_uint_16 flags)
 		tvp->v.t = (mat->flags & BR_MATF_MIP_INTERPOLATION) ? BRT_LINEAR : BRT_NONE;
 		tvp++;
 
-		// Texture map wrapping.
-		tvp->t = BRT_MAP_WIDTH_LIMIT_T;
-		tvp->v.t = BRT_WRAP;
-		if(mat->flags_ext & BR_MATFX_TEXTURE0_MIRRORED_U) tvp->v.t = BRT_MIRROR;
-		if(mat->flags_ext & BR_MATFX_TEXTURE0_CLAMPED_U) tvp->v.t = BRT_CLAMP;
-		tvp++;
-
-		tvp->t = BRT_MAP_HEIGHT_LIMIT_T;
-		tvp->v.t = BRT_WRAP;
-		if(mat->flags_ext & BR_MATFX_TEXTURE0_MIRRORED_V) tvp->v.t = BRT_MIRROR;
-		if(mat->flags_ext & BR_MATFX_TEXTURE0_CLAMPED_V) tvp->v.t = BRT_CLAMP;
-		tvp++;
-
 		tvp->t = BRT_FOG_B;
 		tvp->v.b = !!(mat->flags & BR_MATF_FOG_LOCAL);
 		tvp++;
@@ -231,6 +218,44 @@ void BR_PUBLIC_ENTRY BrMaterialUpdate(br_material *mat, br_uint_16 flags)
 
 		tvp++;
 
+
+		tvp->t = BRT_MAP_WIDTH_LIMIT_T;
+
+		switch (mat->mode & BR_MATM_MAP_WIDTH_LIMIT_MASK) {
+
+		case BR_MATM_MAP_WIDTH_LIMIT_WRAP:
+			tvp->v.t = BRT_WRAP;
+			break;
+
+		case BR_MATM_MAP_WIDTH_LIMIT_CLAMP:
+			tvp->v.t = BRT_CLAMP;
+			break;
+
+		case BR_MATM_MAP_WIDTH_LIMIT_MIRROR:
+			tvp->v.t = BRT_MIRROR;
+			break;
+		}
+
+		tvp++;
+
+		tvp->t = BRT_MAP_HEIGHT_LIMIT_T;
+
+		switch (mat->mode & BR_MATM_MAP_HEIGHT_LIMIT_MASK) {
+
+		case BR_MATM_MAP_HEIGHT_LIMIT_WRAP:
+			tvp->v.t = BRT_WRAP;
+			break;
+
+		case BR_MATM_MAP_HEIGHT_LIMIT_CLAMP:
+			tvp->v.t = BRT_CLAMP;
+			break;
+
+		case BR_MATM_MAP_HEIGHT_LIMIT_MIRROR:
+			tvp->v.t = BRT_MIRROR;
+			break;
+		}
+
+		tvp++;
 
 		tvp->t = BR_NULL_TOKEN;
 
