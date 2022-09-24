@@ -331,10 +331,6 @@ static void actorRender(br_actor *ap,
 	if(ap->children == NULL && ap->type != BR_ACTOR_MODEL)
 		return;
 
-#if DEBUG && defined(_DEBUG)
-	if((!ap->model) && (ap->type == BR_ACTOR_MODEL))
-		printf("using default model\n");
-#endif
 	this_material = ap->material ? ap->material : material;
 	this_model = ap->model ? ap->model : model;
 	this_render_data = ap->render_data ? ap->render_data : render_data;
