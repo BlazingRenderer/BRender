@@ -10,13 +10,6 @@
 #ifndef _V1DB_P_H_
 #define _V1DB_P_H_
 
-br_error BR_PUBLIC_ENTRY BrBeginWrapper_Fixed(void);
-br_error BR_PUBLIC_ENTRY BrBeginWrapper_Float(void);
-br_error BR_PUBLIC_ENTRY BrEndWrapper(void);
-
-
-#define BrV1dbBeginWrapper BrV1dbBeginWrapper_Float
-
 /*
  * Setup - overide framework BrBegin/End with our own wrappers
  */
