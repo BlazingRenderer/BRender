@@ -71,8 +71,6 @@ typedef struct br_material {
 
     br_uint_32 flags_ext;
 
-    br_int_8  mip_modifier;
-    br_uint_8 min_mip, max_mip;
     br_uint_8 alpha_mode;
     br_uint_8 zbuffer_mode;
     br_uint_8 zbuffer_compare;
