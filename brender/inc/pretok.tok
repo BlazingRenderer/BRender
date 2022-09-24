@@ -371,13 +371,6 @@ COLOUR							token_list
 INDEX_BASE						int_32
 INDEX_RANGE						int_32
 
-ANTIALIASING					token
-ANTIALIASING					token_list
-	NONE							none
-	DEFAULT							none
-	BEST_SPEED						none
-	BEST_QUALITY					none
-
 MAP_ANTIALIASING				token
 MAP_ANTIALIASING				token_list
 	NONE							none

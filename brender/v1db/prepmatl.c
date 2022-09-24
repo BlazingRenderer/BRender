@@ -109,10 +109,6 @@ void BR_PUBLIC_ENTRY BrMaterialUpdate(br_material *mat, br_uint_16 flags)
 		tvp->v.i32 = mat->index_range;
 		tvp++;
 
-		tvp->t = BRT_ANTIALIASING_T;
-		tvp->v.t = (mat->flags_ext & BR_MATFX_EDGE_ANTIALIASING) ? BRT_DEFAULT : BRT_NONE;
-		tvp++;
-
 		tvp->t = BRT_MAP_ANTIALIASING_T;
 		tvp->v.t = (mat->flags & BR_MATF_MAP_ANTIALIASING) ? BRT_LINEAR : BRT_NONE;
 		tvp++;
