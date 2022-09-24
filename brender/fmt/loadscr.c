@@ -14,25 +14,26 @@ BR_RCS_ID("$Id: loadscr.c 2.15 1997/07/14 10:44:00 JOHNG Exp $")
  * Default material fields
  */
 br_material _DefaultScriptMaterial = {
-	0,
-	NULL,
-	BR_COLOUR_RGB(255,255,255),	/* colour			*/
-	255,						/* opacity			*/
+	._reserved      = 0,
+	.identifier     = NULL,
+	.colour         = BR_COLOUR_RGB(255,255,255),
+	.opacity        = 255,
 
-	BR_UFRACTION(0.10),			/* Indexed ka		*/
-	BR_UFRACTION(0.70),			/*         kd		*/
-	BR_UFRACTION(0.0),			/*         ks		*/
+	.ka             = BR_UFRACTION(0.10),
+	.kd             = BR_UFRACTION(0.70),
+	.ks             = BR_UFRACTION(0.0),
 	
-	BR_COLOUR_RGB(26,26,26),
+	.ambient_colour = BR_COLOUR_RGB(26,26,26),
 
-	BR_SCALAR(20),				/* power			*/
-	BR_MATF_LIGHT,				/* flags			*/
-	{{
-		BR_VECTOR2(1,0),		/* map transform	*/
+	.power          = BR_SCALAR(20),
+	.flags          = BR_MATF_LIGHT,
+	.map_transform  = {{
+		BR_VECTOR2(1,0),
 		BR_VECTOR2(0,1),
 		BR_VECTOR2(0,0),
 	}},
-	0,63,						/* index base/range	*/
+	.index_base     = 0,
+	.index_range    = 63,
 };
 
 enum {
