@@ -867,15 +867,6 @@ INTEL_486						none
 INTEL_PENTIUM 					none
 INTEL_PENTIUM_PRO				none
 
-
-# Support Z-buffer write modes.
-Z_WRITE						token
-Z_WRITE						token_list
-	Z_WRITE_NEVER				none
-	Z_WRITE_ALWAYS				none
-	Z_WRITE_CONDITIONAL_NO_Z		none
-	Z_WRITE_CONDITIONAL			none
-
 # Support for alpha blending modes.
 BLEND_MODE					token
 BLEND_MODE					token_list

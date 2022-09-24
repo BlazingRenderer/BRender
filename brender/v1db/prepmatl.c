@@ -145,17 +145,6 @@ void BR_PUBLIC_ENTRY BrMaterialUpdate(br_material *mat, br_uint_16 flags)
 			tvp++;
 		}
 
-		tvp->t = BRT_Z_WRITE_T;
-		switch(mat->zbuffer_mode)
-		{
-			case BR_MATZM_STANDARD: tvp->v.t = BRT_Z_WRITE_CONDITIONAL; break;
-			case BR_MATZM_ALWAYS_WRITE: tvp->v.t = BRT_Z_WRITE_ALWAYS; break;
-			case BR_MATZM_DONT_WRITE: tvp->v.t = BRT_Z_WRITE_CONDITIONAL_NO_Z; break;
-			case BR_MATZM_OFF: tvp->v.t = BRT_Z_WRITE_NEVER; break;
-			default: tvp->v.t = BRT_Z_WRITE_CONDITIONAL;
-		}
-		tvp++;
-
 		tvp->t = BRT_DEPTH_TEST_T;
 
 		switch (mat->mode & BR_MATM_DEPTH_TEST_MASK) {

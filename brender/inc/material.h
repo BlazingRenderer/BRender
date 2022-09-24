@@ -71,8 +71,6 @@ typedef struct br_material {
 	br_scalar fog_max;
 	br_colour fog_colour;
 
-    br_uint_8 zbuffer_mode;
-
     br_int_32 subdivide_tolerance;
 
 	br_scalar depth_bias;
@@ -167,15 +165,6 @@ enum {
 	BR_MATM_MAP_HEIGHT_LIMIT_WRAP	= 0x0000,
 	BR_MATM_MAP_HEIGHT_LIMIT_CLAMP	= 0x0080,
 	BR_MATM_MAP_HEIGHT_LIMIT_MIRROR	= 0x0100,
-};
-
-/* Bits for z buffer mode */
-
-enum {
-    BR_MATZM_STANDARD     = 0x00,
-    BR_MATZM_ALWAYS_WRITE = 0x01,
-    BR_MATZM_DONT_WRITE   = 0x02,
-    BR_MATZM_OFF          = 0x03
 };
 
 /*
