@@ -237,7 +237,7 @@
 #define BrVector3Normalise(v1,v2) do {\
 	br_scalar _scale;\
 	_scale = BR_LENGTH3((v2)->v[0],(v2)->v[1],(v2)->v[2]);\
-	if(_scale > (BR_SCALAR_EPSILON*2)) {\
+	if (!BR_SCALAR_LE_2_EPSILON(_scale)) {\
 		_scale = BR_RCP(_scale);\
 		(v1)->v[0]=BR_MUL((v2)->v[0],_scale);\
 		(v1)->v[1]=BR_MUL((v2)->v[1],_scale);\
@@ -331,7 +331,7 @@
 #define BrVector2Normalise(v1,v2) do {\
 	br_scalar _scale;\
 	_scale = BR_LENGTH2((v2)->v[0],(v2)->v[1]);\
-	if(_scale > (BR_SCALAR_EPSILON*2)) {\
+	if (!BR_SCALAR_LE_2_EPSILON(_scale)) {\
 		_scale = BR_RCP(_scale);\
 		(v1)->v[0]=BR_MUL((v2)->v[0],_scale);\
 		(v1)->v[1]=BR_MUL((v2)->v[1],_scale);\
