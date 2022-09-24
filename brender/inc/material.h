@@ -71,9 +71,6 @@ typedef struct br_material {
 
     br_uint_32 flags_ext;
 
-    br_pixelmap *colour_map_1;
-    br_matrix23 map_transform_1;
-
     br_int_8  mip_modifier;
     br_uint_8 min_mip, max_mip;
     br_uint_8 alpha_mode;
@@ -209,22 +206,19 @@ enum {
  * Flags to BrMaterialUpdate()
  */
 enum {
-	BR_MATU_MAP_TRANSFORM_0	= 0x0001,
+	BR_MATU_MAP_TRANSFORM	= 0x0001,
 	BR_MATU_RENDERING		= 0x0002,
 	BR_MATU_LIGHTING		= 0x0004,
 	BR_MATU_COLOURMAP		= 0x0008,
 	BR_MATU_SCREENDOOR		= 0x0010,
 	BR_MATU_EXTRA_SURF		= 0x0020,
 	BR_MATU_EXTRA_PRIM		= 0x0040,
-	BR_MATU_MAP_TRANSFORM_1	= 0x0080,
 	BR_MATU_ALL				= 0x7fff
 };
 
 /*
  * Backwards compatibility
  */
-
-#define BR_MATU_MAP_TRANSFORM   BR_MATU_MAP_TRANSFORM_0
 
 /*
  * Flags to BrMapUpdate()
