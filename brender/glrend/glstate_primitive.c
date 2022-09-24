@@ -19,6 +19,7 @@ static const br_tv_template_entry GLSTATEI_PrimitiveTemplateEntries[] = {
     {BRT_COLOUR_WRITE_B,          NULL, F(prim.flags),               Q | S | A, BRTV_CONV_BIT,  PRIMF_COLOUR_WRITE,  1},
     {BRT_BLEND_B,                 NULL, F(prim.flags),               Q | S | A, BRTV_CONV_BIT,  PRIMF_BLEND,         1},
     {BRT_MODULATE_B,              NULL, F(prim.flags),               Q | S | A, BRTV_CONV_BIT,  PRIMF_MODULATE,      1},
+    {BRT_COLOUR_KEY_B,            NULL, F(prim.flags),               Q | S | A, BRTV_CONV_BIT,  PRIMF_COLOUR_KEY,    1},
     {BRT_FOG_T,                   NULL, F(prim.fog_type),            Q | S | A, BRTV_CONV_COPY},
 
     {BRT_COLOUR_T,                NULL, F(prim.colour_type),         Q | S | A, BRTV_CONV_COPY, 0,                   1},
