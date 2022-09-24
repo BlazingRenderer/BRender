@@ -317,18 +317,18 @@ static void actorRender(br_actor *ap,
 	MarkStratAsNotDrawn(ap->user);
 
 	/*
-	 * Ignore actors with no children that are not models, and actors with renderstyle = NONE
-	 */
-	if(ap->children == NULL && ap->type != BR_ACTOR_MODEL)
-		return;
-
-	/*
 	 * See if this actor overrides default material, model, render_data or style
 	 */
 	if(ap->render_style != BR_RSTYLE_DEFAULT)
 		style = ap->render_style;
 
 	if(style == BR_RSTYLE_NONE)
+		return;
+
+	/*
+	 * Ignore actors with no children that are not models, and actors with renderstyle = NONE
+	 */
+	if(ap->children == NULL && ap->type != BR_ACTOR_MODEL)
 		return;
 
 #if DEBUG && defined(_DEBUG)
