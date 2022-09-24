@@ -14,11 +14,19 @@ stdenv.mkDerivation rec {
   ];
 
   installPhase = ''
-    mkdir -p $out/{bin,share/brender-samples/robot}
-    cp tools/mkranges/mkranges tools/mkshades/mkshades examples/robot/robot $out/bin
+    mkdir -p $out/{bin,share/brender-samples/{robot,dat}}
+    cp tools/mkranges/mkranges $out/bin
+    cp tools/mkshades/mkshades $out/bin
+    cp examples/robot/robot $out/bin
+    cp examples/cube/cube $out/bin
+
     cp ${src}/examples/robot/dat/* $out/share/brender-samples/robot
+    cp ${src}/examples/dat/* $out/share/brender-samples/dat
 
     wrapProgram $out/bin/robot \
       --chdir $out/share/brender-samples/robot
+
+    wrapProgram $out/bin/cube \
+      --set BRENDER_PATH $out/share/brender-samples/dat
   '';
 }
