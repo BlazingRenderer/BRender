@@ -199,6 +199,12 @@
 	(v1)->v[2]=BR_MUL((v2)->v[2],__scale);\
 } while(0)
 
+#define BrVector3Mul(v1, v2, v3) do {\
+    (v1)->v[0]=(v2)->v[0]*(v3)->v[0];\
+    (v1)->v[1]=(v2)->v[1]*(v3)->v[1];\
+    (v1)->v[2]=(v2)->v[2]*(v3)->v[2];\
+} while(0)
+
 /*
  * v1=v2/scalar
  */
