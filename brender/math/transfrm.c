@@ -39,7 +39,7 @@ br_uint_8 _CombineTransforms[BR_TRANSFORM_MAX][BR_TRANSFORM_MAX] = {
 /* IDT */	{ M34, MLP, QUT, EUL, LUP, TRA, IDT, },
 };
 
-void BR_PUBLIC_ENTRY BrTransformToMatrix34(br_matrix34 *mat,br_transform *xform)
+void BR_PUBLIC_ENTRY BrTransformToMatrix34(br_matrix34 *mat, const br_transform *xform)
 {
         UASSERT_MESSAGE("Destination matrix is NULL", mat != NULL);
         UASSERT_MESSAGE("Source transform is NULL", xform != NULL);
@@ -109,7 +109,7 @@ void BR_PUBLIC_ENTRY BrTransformToMatrix34(br_matrix34 *mat,br_transform *xform)
 }
 
 
-void BR_PUBLIC_ENTRY BrMatrix34PreTransform(br_matrix34 *mat,br_transform *xform)
+void BR_PUBLIC_ENTRY BrMatrix34PreTransform(br_matrix34 *mat, const br_transform *xform)
 {
 	br_matrix34 tmp;
 
@@ -123,7 +123,7 @@ void BR_PUBLIC_ENTRY BrMatrix34PreTransform(br_matrix34 *mat,br_transform *xform
 	BrMatrix34Pre(mat,&tmp);
 }
 
-void BR_PUBLIC_ENTRY BrMatrix34PostTransform(br_matrix34 *mat,br_transform *xform)
+void BR_PUBLIC_ENTRY BrMatrix34PostTransform(br_matrix34 *mat, const br_transform *xform)
 {
 	br_matrix34 tmp;
 
@@ -138,7 +138,7 @@ void BR_PUBLIC_ENTRY BrMatrix34PostTransform(br_matrix34 *mat,br_transform *xfor
 	BrMatrix34Post(mat,&tmp);
 }
 
-void BR_PUBLIC_ENTRY BrMatrix4PreTransform(br_matrix4 *mat, br_transform *xform)
+void BR_PUBLIC_ENTRY BrMatrix4PreTransform(br_matrix4 *mat, const br_transform *xform)
 {
 	br_matrix34 tmp;
 
@@ -156,7 +156,7 @@ void BR_PUBLIC_ENTRY BrMatrix4PreTransform(br_matrix4 *mat, br_transform *xform)
 /*
  * Convert a 3x4 into a transform
  */
-void BR_PUBLIC_ENTRY BrMatrix34ToTransform(br_transform *xform, br_matrix34 *mat)
+void BR_PUBLIC_ENTRY BrMatrix34ToTransform(br_transform *xform, const br_matrix34 *mat)
 {
         UASSERT_MESSAGE("Source matrix is NULL", mat != NULL);
         UASSERT_MESSAGE("Destination Transform is NULL", xform != NULL);
@@ -228,7 +228,7 @@ void BR_PUBLIC_ENTRY BrMatrix34ToTransform(br_transform *xform, br_matrix34 *mat
  * The destination type is retained. The operation tries
  * to keep as much information about the transform as possible
  */
-void BR_PUBLIC_ENTRY BrTransformToTransform(br_transform *dest,br_transform *src)
+void BR_PUBLIC_ENTRY BrTransformToTransform(br_transform *dest, const br_transform *src)
 {
 	br_matrix34 temp;
 

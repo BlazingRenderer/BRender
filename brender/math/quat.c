@@ -15,7 +15,7 @@
 
 BR_RCS_ID("$Id: quat.c 2.2 1996/12/04 16:12:53 OWAIN Exp $")
 
-br_quat * BR_PUBLIC_ENTRY BrQuatMul(br_quat *q, br_quat *l, br_quat *r)
+br_quat * BR_PUBLIC_ENTRY BrQuatMul(br_quat *q, const br_quat *l, const br_quat *r)
 {
 #if 1
 	/*
@@ -66,7 +66,7 @@ br_quat * BR_PUBLIC_ENTRY BrQuatMul(br_quat *q, br_quat *l, br_quat *r)
 	return q;
 }
 
-br_quat * BR_PUBLIC_ENTRY BrQuatNormalise(br_quat *q, br_quat *qq)
+br_quat * BR_PUBLIC_ENTRY BrQuatNormalise(br_quat *q, const br_quat *qq)
 {
 	br_scalar s = BR_DIV(S1,BR_LENGTH4(qqX,qqY,qqZ,qqW));
 
@@ -81,7 +81,7 @@ br_quat * BR_PUBLIC_ENTRY BrQuatNormalise(br_quat *q, br_quat *qq)
 	return q;
 }
 
-br_quat * BR_PUBLIC_ENTRY BrQuatInvert(br_quat *q, br_quat *qq)
+br_quat * BR_PUBLIC_ENTRY BrQuatInvert(br_quat *q, const br_quat *qq)
 {
         UASSERT_MESSAGE("Destination Quaternion is NULL", q != NULL);
         UASSERT_MESSAGE("Source Quaternion is NULL", qq != NULL);
@@ -94,7 +94,7 @@ br_quat * BR_PUBLIC_ENTRY BrQuatInvert(br_quat *q, br_quat *qq)
 	return q;
 }
 
-br_quat * BR_PUBLIC_ENTRY BrQuatSlerp(br_quat *q, br_quat *l, br_quat *r,
+br_quat * BR_PUBLIC_ENTRY BrQuatSlerp(br_quat *q, const br_quat *l, const br_quat *r,
 						br_scalar a, br_int_16 spins)
 {
 	int omega, omega_spin;
@@ -150,8 +150,7 @@ br_quat * BR_PUBLIC_ENTRY BrQuatSlerp(br_quat *q, br_quat *l, br_quat *r,
 	return q;
 }
 
-br_matrix34 * BR_PUBLIC_ENTRY BrQuatToMatrix34(br_matrix34 *mat,
-						br_quat *q)
+br_matrix34 * BR_PUBLIC_ENTRY BrQuatToMatrix34(br_matrix34 *mat, const br_quat *q)
 {
         br_scalar xs,ys,zs;
 	br_scalar wx,wy,wz;
@@ -190,7 +189,7 @@ br_matrix34 * BR_PUBLIC_ENTRY BrQuatToMatrix34(br_matrix34 *mat,
 	return mat;
 }
 
-br_quat * BR_PUBLIC_ENTRY BrMatrix34ToQuat(br_quat *q, br_matrix34 *mat)
+br_quat * BR_PUBLIC_ENTRY BrMatrix34ToQuat(br_quat *q, const br_matrix34 *mat)
 {
 	br_scalar tr,s;
 	int i,j,k;
@@ -235,7 +234,7 @@ br_quat * BR_PUBLIC_ENTRY BrMatrix34ToQuat(br_quat *q, br_matrix34 *mat)
 	return q;
 }
 
-br_matrix4 * BR_PUBLIC_ENTRY BrQuatToMatrix4(br_matrix4 *mat, br_quat *q)
+br_matrix4 * BR_PUBLIC_ENTRY BrQuatToMatrix4(br_matrix4 *mat, const br_quat *q)
 {
 	br_matrix34 tmp;
 
@@ -248,7 +247,7 @@ br_matrix4 * BR_PUBLIC_ENTRY BrQuatToMatrix4(br_matrix4 *mat, br_quat *q)
 	return mat;
 }
 
-br_quat * BR_PUBLIC_ENTRY BrMatrix4ToQuat(br_quat *q, br_matrix4 *mat)
+br_quat * BR_PUBLIC_ENTRY BrMatrix4ToQuat(br_quat *q, const br_matrix4 *mat)
 {
 	br_matrix34 tmp;
 

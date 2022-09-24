@@ -19,7 +19,7 @@ BR_RCS_ID("$Id: plane.c 2.4 1996/12/04 16:00:40 OWAIN Exp $")
  *
  * Returns != 0 if points were co-linear 
  */
-br_int_32 BR_PUBLIC_ENTRY BrPlaneEquation(br_vector4 *eqn, br_vector3 *v0, br_vector3 *v1, br_vector3 *v2)
+br_int_32 BR_PUBLIC_ENTRY BrPlaneEquation(br_vector4 *eqn, const br_vector3 *v0, const br_vector3 *v1, const br_vector3 *v2)
 {
 	br_vector3 a,b;
 	float ax,ay,az;

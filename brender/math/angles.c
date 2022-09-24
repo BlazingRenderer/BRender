@@ -57,7 +57,7 @@ static struct order_info {
 	{0},
 };
 
-br_matrix34 * BR_PUBLIC_ENTRY BrEulerToMatrix34(br_matrix34 *mat, br_euler *euler)
+br_matrix34 * BR_PUBLIC_ENTRY BrEulerToMatrix34(br_matrix34 *mat, const br_euler *euler)
 {
 	br_uint_8 o = eO;
 	br_angle ti,tj,th;
@@ -100,7 +100,7 @@ br_matrix34 * BR_PUBLIC_ENTRY BrEulerToMatrix34(br_matrix34 *mat, br_euler *eule
 	return mat;
 }
 
-br_euler * BR_PUBLIC_ENTRY BrMatrix34ToEuler(br_euler *euler, br_matrix34 *mat)
+br_euler * BR_PUBLIC_ENTRY BrMatrix34ToEuler(br_euler *euler, const br_matrix34 *mat)
 {
 	br_uint_8 o = eO; 
 	int a0,a1,a2;
@@ -160,7 +160,7 @@ br_euler * BR_PUBLIC_ENTRY BrMatrix34ToEuler(br_euler *euler, br_matrix34 *mat)
 	return euler;
 }
 
-br_matrix4 * BR_PUBLIC_ENTRY BrEulerToMatrix4(br_matrix4 *mat, br_euler *euler)
+br_matrix4 * BR_PUBLIC_ENTRY BrEulerToMatrix4(br_matrix4 *mat, const br_euler *euler)
 {
 	br_matrix34 tmp;
 
@@ -173,7 +173,7 @@ br_matrix4 * BR_PUBLIC_ENTRY BrEulerToMatrix4(br_matrix4 *mat, br_euler *euler)
 	return mat;
 }
 
-br_euler * BR_PUBLIC_ENTRY BrMatrix4ToEuler(br_euler *dest, br_matrix4 *mat)
+br_euler * BR_PUBLIC_ENTRY BrMatrix4ToEuler(br_euler *dest, const br_matrix4 *mat)
 {
 	br_matrix34 tmp;
 
@@ -184,7 +184,7 @@ br_euler * BR_PUBLIC_ENTRY BrMatrix4ToEuler(br_euler *dest, br_matrix4 *mat)
 	return BrMatrix34ToEuler(dest,&tmp);
 }
 
-br_quat * BR_PUBLIC_ENTRY BrEulerToQuat(br_quat *q, br_euler *euler)
+br_quat * BR_PUBLIC_ENTRY BrEulerToQuat(br_quat *q, const br_euler *euler)
 {
 	br_uint_8 o = eO; 
 	br_angle ti,tj,th;
@@ -230,8 +230,7 @@ br_quat * BR_PUBLIC_ENTRY BrEulerToQuat(br_quat *q, br_euler *euler)
 	return q;
 }
 
-br_euler * BR_PUBLIC_ENTRY BrQuatToEuler(br_euler *euler,
-						br_quat *q)
+br_euler * BR_PUBLIC_ENTRY BrQuatToEuler(br_euler *euler, const br_quat *q)
 {
 	br_matrix34 mat;
 
