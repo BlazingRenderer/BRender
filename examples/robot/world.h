@@ -28,6 +28,8 @@ typedef struct brwin_world {
     struct br_actor *light;
     struct br_actor *actor;
 
+    br_vue *vue;
+
 /*
  * What sort of update should be carried out
  */

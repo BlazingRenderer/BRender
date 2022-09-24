@@ -80,128 +80,6 @@ static void BR_CALLBACK ViewBoundsCallback(br_actor *actor,
 #define MAXFRAMES 100
 #define MAXTRANSFORMS 2000
 
-int total_frames;
-
-struct ani_transform {
-    br_actor    *actor;
-    br_matrix34 mat;
-};
-
-struct ani_frame {
-    struct ani_transform *transforms;
-    int                  ntransforms;
-};
-
-struct ani_frame     frames[MAXFRAMES];
-struct ani_transform transforms[MAXTRANSFORMS];
-
-
-/*
- * FUNCTION NAME: LoadVUE
- *
- * DESCRIPTION:   Load transformations for actor animation
- */
-void LoadVUE(char *file_name, br_actor *root)
-{
-    FILE                 *file;
-    br_model             *model;
-    char                 buff[1024];
-    char                 name[80];
-    float                v[4][3];
-    struct ani_transform *t = transforms;
-    int                  f  = -1, n, i;
-
-    file = fopen(file_name, "r");
-
-    while(!feof(file)) {
-        fgets(buff, 1024, file);
-
-        /*
-         * Is it a frame specification line?
-         */
-        if(sscanf(buff, "frame %d", &i) > 0) {
-            if(f > 0)
-                frames[f].ntransforms = t - frames[f].transforms;
-            f = i;
-            frames[f].transforms = t;
-        }
-
-        /*
-         * Or a transform specification?
-         */
-        if(sscanf(buff,
-                  "transform \"%[^\"]\" %f %f %f %f %f %f %f %f %f %f %f %f",
-                  name,
-                  &v[0][0], &v[0][1], &v[0][2],
-                  &v[1][0], &v[1][1], &v[1][2],
-                  &v[2][0], &v[2][1], &v[2][2],
-                  &v[3][0], &v[3][1], &v[3][2]) > 0) {
-            int k, l;
-
-            /*
-             * Found a transform so convert it to scalars
-             */
-            for(k = 0; k < 4; k++)
-                for(l = 0; l < 3; l++)
-                    t->mat.m[k][l] = BrFloatToScalar(v[k][l]);
-
-            t->actor = BrActorSearch(root, name);
-
-            if(t->actor != NULL)
-                t++;
-        }
-    }
-
-    fclose(file);
-
-    if(f > 0)
-        frames[f].ntransforms = t - frames[f].transforms;
-
-    total_frames = f + 1;
-
-} /* End of LoadVUE () */
-
-
-/*
- * FUNCTION NAME: ApplyVUE
- *
- * DESCRIPTION:   Play transformations
- *                These give the appearance of a robot walking.
- */
-void ApplyVUE(int frame_delta)
-{
-    static int current_frame = 0;            /* Current frame                   */
-
-    /*
-     * Play any VUE file
-     */
-    if(total_frames != 0) {
-        int i;
-
-        /*
-         * Clamp frame number to valid range
-         */
-        if(current_frame < 0)
-            current_frame = total_frames - 1;
-
-        if(current_frame >= total_frames)
-            current_frame = 0;
-
-        /*
-         * Apply animation to world
-         */
-        for(i = 0; i < frames[current_frame].ntransforms; i++)
-            frames[current_frame].transforms[i].actor->t.t.mat =
-                frames[current_frame].transforms[i].mat;
-
-        /*
-         * Move to next frame
-         */
-        current_frame += frame_delta;
-    }
-
-} /* End of ApplyVUE() */
-
 static br_pixelmap *BR_CALLBACK mapFindFailedLoad(const char *name)
 {
     br_pixelmap *pm, *pm2;
@@ -293,7 +171,8 @@ brwin_world *WorldAllocate(void)
     /*
      * Load the animation file
      */
-    LoadVUE("robo.vue", a);
+    world->vue = BrVueAllocate(MAXFRAMES, MAXTRANSFORMS);
+    BrLoadVUE("robo.vue", a, world->vue);
 
     /*
      * Turn to face camera
@@ -355,7 +234,7 @@ void WorldFree(brwin_world *world)
  */
 void WorldUpdate(brwin_world *world)
 {
-    ApplyVUE(1);
+    BrApplyVue(world->vue, world->actor);
 
 } /* End of WorldUpdate () */
 
