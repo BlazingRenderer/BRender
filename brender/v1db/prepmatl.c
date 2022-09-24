@@ -61,6 +61,10 @@ void BR_PUBLIC_ENTRY BrMaterialUpdate(br_material *mat, br_uint_16 flags)
 		tvp->v.rgb = mat->colour;
 		tvp++;
 
+		tvp->t = BRT_OPACITY_SOURCE_T;
+		tvp->v.t = mat->flags & BR_MATF_PREALPHA ? BRT_VERTEX : BRT_PRIMITIVE;
+		tvp++;
+
 		tvp->t = BRT_AS_SCALAR(OPACITY);
 		tvp->v.s = BR_DIV(BrIntToScalar(mat->opacity), BR_SCALAR(255.0));
 		tvp++;
@@ -71,7 +75,7 @@ void BR_PUBLIC_ENTRY BrMaterialUpdate(br_material *mat, br_uint_16 flags)
 		tvp++;
 
 		tvp->t = BRT_BLEND_B;
-		tvp->v.b = (mat->opacity < 255);
+		tvp->v.b = (mat->opacity < 255) || mat->flags & BR_MATF_PREALPHA;
 		tvp++;
 
 		tvp->t = BRT_SMOOTH_B;
@@ -329,6 +333,10 @@ void BR_PUBLIC_ENTRY BrMaterialUpdate(br_material *mat, br_uint_16 flags)
 			tvp->v.t = mat->flags & BR_MATF_LIGHT ? BRT_SURFACE : BRT_GEOMETRY;
 		else
 			tvp->v.t = BRT_SURFACE;
+		tvp++;
+
+		tvp->t = BRT_OPACITY_SOURCE_T;
+		tvp->v.t = (mat->flags & BR_MATF_PREALPHA) ? BRT_GEOMETRY : BRT_SURFACE;
 		tvp++;
 
 		tvp->t = BRT_MAPPING_SOURCE_T;

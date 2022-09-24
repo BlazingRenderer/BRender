@@ -532,6 +532,8 @@ OPACITY_SOURCE					token
 	NONE							none
 	SURFACE							none
 	GEOMETRY						none
+	PRIMITIVE						none
+	VERTEX							none
 MAPPING_SOURCE					token
 	NONE							none
 	ENVIRONMENT_LOCAL 				none
