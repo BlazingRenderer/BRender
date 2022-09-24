@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 1993-1995 by Argonaut Technologies Limited. All rights reserved.
  *
- * $Id: loadasc.c 2.3 1996/10/01 14:13:41 sam Exp $
+ * $Id: loadasc.c 1.1 1997/12/10 16:41:01 jon Exp $
  * $Locker: $
  *
  * Loader for 3D-Studio .ASC format
@@ -10,7 +10,7 @@
 #include "brender.h"
 #include "fmt.h"
 
-BR_RCS_ID("$Id: loadasc.c 2.3 1996/10/01 14:13:41 sam Exp $")
+BR_RCS_ID("$Id: loadasc.c 1.1 1997/12/10 16:41:01 jon Exp $")
 
 /*
  * Various keywords than can appear in 3D-Studio .ASC file

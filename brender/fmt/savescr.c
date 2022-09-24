@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 1993-1995 by Argonaut Technologies Limited. All rights reserved.
  *
- * $Id: savescr.c 2.6 1996/10/01 14:13:45 sam Exp $
+ * $Id: savescr.c 1.2 1998/03/05 20:24:07 jon Exp $
  * $Locker: $
  *
  * Save a Material Script file
@@ -9,7 +9,7 @@
 #include "brender.h"
 #include "fmt.h"
 
-BR_RCS_ID("$Id: savescr.c 2.6 1996/10/01 14:13:45 sam Exp $")
+BR_RCS_ID("$Id: savescr.c 1.2 1998/03/05 20:24:07 jon Exp $")
 
 /*
  * The default material used to load a script
@@ -88,7 +88,7 @@ STATIC void WriteScriptMaterial(br_material *mat, void *df)
 	int i,j;
 
 	BrFilePrintf(df,"\nmaterial = [\n");
-	
+
 	if(mat->identifier)
 		BrFilePrintf(df,"    identifier = \"%s\";\n",mat->identifier);
 
@@ -121,7 +121,7 @@ STATIC void WriteScriptMaterial(br_material *mat, void *df)
 
 	if(mat->ka != _DefaultScriptMaterial.ka)
 		BrFilePrintf(df,"    ambient = %f;\n",BrScalarToFloat(BrUFractionToScalar(mat->ka)));
-		
+
 	if(mat->kd != _DefaultScriptMaterial.kd)
 		BrFilePrintf(df,"    diffuse = %f;\n",BrScalarToFloat(BrUFractionToScalar(mat->kd)));
 
@@ -188,7 +188,7 @@ STATIC void WriteScriptMaterial(br_material *mat, void *df)
 			}
 
 	/*
-	 * Maps and Tables 
+	 * Maps and Tables
 	 */
 	if(mat->colour_map && mat->colour_map->identifier)
 		BrFilePrintf(df,"    colour_map = \"%s\";\n",mat->colour_map->identifier);
@@ -227,12 +227,12 @@ br_uint_32 BR_PUBLIC_ENTRY BrFmtScriptMaterialSaveMany(const char *filename,br_m
 	BrFilePutLine("# BRender Material Script",df);
 	BrFilePutLine("#",df);
 
-	if(materials) { 
+	if(materials) {
 		for(i=0; i<num; i++)
 			WriteScriptMaterial(materials[i],df);
 		count = num;
 	} else {
-		BrMaterialEnum(NULL,(br_material_enum_cbfn *)WriteScriptMaterial,df); 
+		BrMaterialEnum(NULL,(br_material_enum_cbfn *)WriteScriptMaterial,df);
 		count = BrMaterialCount(NULL);
 	}
 

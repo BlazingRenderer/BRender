@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 1993-1995 by Argonaut Technologies Limited. All rights reserved.
  *
- * $Id: fmt_p.h 1.1 1996/09/16 17:26:36 sam Exp $
+ * $Id: fmt_p.h 1.1 1997/12/10 16:41:00 jon Exp $
  * $Locker: $
  *
  * Function prototypes for foreign file format support

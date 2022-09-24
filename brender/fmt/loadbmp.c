@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 1993-1995 by Argonaut Technologies Limited. All rights reserved.
  *
- * $Id: loadbmp.c 2.5 1996/10/01 14:13:41 sam Exp $
+ * $Id: loadbmp.c 1.1 1997/12/10 16:41:01 jon Exp $
  * $Locker: $
  *
  * Loader for Windows .BMP format
@@ -11,7 +11,7 @@
 #include "brender.h"
 #include "fmt.h"
 
-BR_RCS_ID("$Id: loadbmp.c 2.5 1996/10/01 14:13:41 sam Exp $")
+BR_RCS_ID("$Id: loadbmp.c 1.1 1997/12/10 16:41:01 jon Exp $")
 
 int FileNumCol(void *tmp);
 

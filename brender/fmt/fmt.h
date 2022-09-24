@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 1993-1995 by Argonaut Technologies Limited. All rights reserved.
  *
- * $Id: fmt.h 1.3 1996/12/04 11:30:05 alistair Exp $
+ * $Id: fmt.h 1.2 1998/07/28 14:33:10 jon Exp $
  * $Locker: $
  *
  * Definitions for foreign file format support
@@ -118,8 +118,9 @@ enum {
 	BR_3DS_SET_HITHER			=	0x00000080,
 	BR_3DS_SET_YON				=	0x00000100,
 	BR_3DS_APPLY_SCALE			=	0x00000200,
-	BR_3DS_KEEP_REPEATED_MODELS     =       0x00000400,
+	BR_3DS_KEEP_REPEATED_MODELS	=	0x00000400,
 	BR_3DS_USE_MODEL_PIVOT		=	0x00000800,
+
 };
 
 

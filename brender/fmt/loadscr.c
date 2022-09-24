@@ -1,14 +1,14 @@
 /*
  * Copyright (c) 1993-1995 by Argonaut Technologies Limited. All rights reserved.
  *
- * $Id: loadscr.c 2.15 1997/07/14 10:44:00 JOHNG Exp $
+ * $Id: loadscr.c 1.2 1998/03/05 20:23:50 jon Exp $
  * $Locker: $
  *
  * Load a Material Script file
  */
 #include "brddi.h"
 
-BR_RCS_ID("$Id: loadscr.c 2.15 1997/07/14 10:44:00 JOHNG Exp $")
+BR_RCS_ID("$Id: loadscr.c 1.2 1998/03/05 20:23:50 jon Exp $")
 
 /*
  * Default material fields
@@ -276,7 +276,7 @@ STATIC br_material *ParseMaterial(br_lexer *l)
 {
 	br_material *mat;
 	br_vector3 v3;
-#if 0 
+#if 0
 	br_token_value token_buffer[512];
 	int i;
 #endif
@@ -319,7 +319,7 @@ STATIC br_material *ParseMaterial(br_lexer *l)
 
 		case T_OPACITY:
 			BrLexerAdvance(l); BrLexerExpect(l,T_EQUAL);
-                        mat->opacity = (br_uint_8)BrParseInteger(l);
+			mat->opacity = (br_uint_8)BrParseInteger(l);
 			break;
 
 		case T_KA:
@@ -517,11 +517,10 @@ STATIC br_material *ParseMaterial(br_lexer *l)
 			break;
 
 		default:
-                        BrLexerPrintPos(l);
-                        BR_WARNING1("Incorrect material member '%s' ignored",BrLexerString(l));
-                        while (BrLexerCurrent(l) != T_SEMICOLON) {
-                          BrLexerAdvance(l);
-                        }
+			BrLexerPrintPos(l);
+			BR_WARNING1("Incorrect material member '%s' ignored",BrLexerString(l));
+			while (BrLexerCurrent(l) != T_SEMICOLON)
+				BrLexerAdvance(l);
 		}
 		BrLexerExpect(l,T_SEMICOLON);
 	}
@@ -560,7 +559,7 @@ br_uint_32 BR_PUBLIC_ENTRY BrFmtScriptMaterialLoadMany(const char *filename,br_m
 	l = BrLexerAllocate(keywords, BR_ASIZE(keywords));
 	if(l == NULL)
 		return 0;
-		
+
 	BrLexerCommentSet(l,'#');
 	BrLexerErrorSet(l,lexerError);
 #if 0

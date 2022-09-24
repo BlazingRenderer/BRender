@@ -1,14 +1,14 @@
 /*
  * Copyright (c) 1993-1995 by Argonaut Technologies Limited. All rights reserved.
  *
- * $Id: loadnff.c 2.3 1996/10/01 14:13:43 sam Exp $
+ * $Id: loadnff.c 1.1 1997/12/10 16:41:02 jon Exp $
  * $Locker: $
  *
  * Loader for Eric Haines' NFF format
  */
 #include "brender.h"
 
-BR_RCS_ID("$Id: loadnff.c 2.3 1996/10/01 14:13:43 sam Exp $")
+BR_RCS_ID("$Id: loadnff.c 1.1 1997/12/10 16:41:02 jon Exp $")
 
 /*
  * Current line buffer
@@ -109,7 +109,7 @@ static int used_faces = 0;
 static int allocated_faces = 0;
 
 #define FACEALLOC_MIN	256
- 
+
 struct nff_face {
 	int v[3];
 	int patch;

@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 1993-1995 by Argonaut Technologies Limited. All rights reserved.
  *
- * $Id: loadgif.c 2.5 1996/10/01 14:13:42 sam Exp $
+ * $Id: loadgif.c 1.1 1997/12/10 16:41:02 jon Exp $
  * $Locker: $
  *
  * Loader for CompuServ .GIF format (PC format, not MAC)
@@ -14,7 +14,7 @@
 #include "brender.h"
 #include "fmt.h"
 
-BR_RCS_ID("$Id: loadgif.c 2.5 1996/10/01 14:13:42 sam Exp $")
+BR_RCS_ID("$Id: loadgif.c 1.1 1997/12/10 16:41:02 jon Exp $")
 
 #define RED	2
 #define GRN	1
@@ -44,7 +44,7 @@ enum {
     BR_GIF_COLOURMAP_SORTED	= 0x08,	/* (GIFheader.colourmapflags > x) important colours first	(GIF89a)	*/
     BR_GIF_COLOURMAP_ORIGIN	= 0x04,	/* (1 << ((GIFheader.colourmapflags >> x) +1) is the 			*/
     					/* number of bits/pixel GIF derived from. (GIF89a)		*/
-	
+
     BR_GIF_IMAGE_INTERLACED	= 0x40,	/* (ImageBlock.imageflags & x) image data is interlaced			*/
     BR_GIF_IMAGE_SORTED		= 0x20	/* (ImageBlock.imageflags & x) image colourmap sorted (GIF89a)		*/
 };
@@ -65,7 +65,7 @@ static struct {
     unsigned short left;		/* coordinates of upper left of image relative to screen	*/
     unsigned short top;
     unsigned short width;		/* width of image in pixels, number of bytes per unpacked line	*/
-    unsigned short depth;		/* depth of image in pixels					*/ 
+    unsigned short depth;		/* depth of image in pixels					*/
     char imageflags;			/* Flags similar to GIFheader.colourmapflags but for image block		*/
 } ImageBlock;
 
@@ -79,7 +79,7 @@ static struct {
 
 static char BlockSize;			/* size of GIF block						*/
 
-	
+
 br_pixelmap * BR_PUBLIC_ENTRY BrFmtGIFLoad(const char *name,br_uint_32 flags)
 {
 	void *fh;

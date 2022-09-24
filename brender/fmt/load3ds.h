@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 1993-1995 by Argonaut Technologies Limited. All rights reserved.
  *
- * $Id: load3ds.h 2.3 1996/10/03 11:44:45 sam Exp $
+ * $Id: load3ds.h 1.1 1997/12/10 16:41:01 jon Exp $
  * $Locker: $
  *
  * Definitions for 3D-Studio .3DS format loader

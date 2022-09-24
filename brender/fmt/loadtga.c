@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 1993-1995 by Argonaut Technologies Limited. All rights reserved.
  *
- * $Id: loadtga.c 2.5 1996/10/01 14:13:44 sam Exp $
+ * $Id: loadtga.c 1.1 1997/12/10 16:41:02 jon Exp $
  * $Locker: $
  *
  * Loader for .TGA format
@@ -13,7 +13,7 @@
 #include "brender.h"
 #include "fmt.h"
 
-BR_RCS_ID("$Id: loadtga.c 2.5 1996/10/01 14:13:44 sam Exp $")
+BR_RCS_ID("$Id: loadtga.c 1.1 1997/12/10 16:41:02 jon Exp $")
 
 #define RED	2
 #define GRN	1
@@ -55,15 +55,15 @@ enum {
 };
 
 static struct {
-    
+
     	char image_type;
 	char pixel_bits;
     	char supported;
 	void * (*read_func)(char *line,void *fh);			/* read 1 line of image data from file */
 	void (*copy_func)(br_pixelmap *map,char *line,int row);		/* copy 1 line of data to pixelmap */
-	
+
 } Supported_TGA_types[]={
-    
+
    	{BR_TGA_UNCOMPRESSED_PALETTE	, 8,	YES,	ReadLine_Uncomp_8,	CopyLine_8},
 	{BR_TGA_UNCOMPRESSED_RGB	, 15,	YES,	ReadLine_Uncomp_16,	CopyLine_16},
 	{BR_TGA_UNCOMPRESSED_RGB	, 16,	YES,	ReadLine_Uncomp_16,	CopyLine_16},

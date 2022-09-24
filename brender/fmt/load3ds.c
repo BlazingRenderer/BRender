@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 1993-1995 by Argonaut Technologies Limited. All rights reserved.
  *
- * $Id: load3ds.c 2.7 1997/04/30 17:56:31 jon Exp $
+ * $Id: load3ds.c 1.3 1998/07/28 14:33:23 jon Exp $
  * $Locker: $
  *
  * Loader for 3D-Studio .3DS format
@@ -12,7 +12,7 @@
 #include "load3ds.h"
 #include "brassert.h"
 
-BR_RCS_ID("$Id: load3ds.c 2.7 1997/04/30 17:56:31 jon Exp $")
+BR_RCS_ID("$Id: load3ds.c 1.3 1998/07/28 14:33:23 jon Exp $")
 
 /*
  * Default 3DS conversion options
@@ -238,7 +238,7 @@ STATIC Bool_t SkipRest(void *stream, Stack_t *top)
 	if(SkipBytes(stream, top->length - top->done)) {
 		top->done = top->length;
 		return TRUE;
-	}	
+	}
 
 	return FALSE;
 }
@@ -634,7 +634,7 @@ STATIC MaterialList_t * ConvertMaterial(MatEntry_t *mat_entry, PixmapList_t **pi
     /* Set the RGB true colour. This will only be used when rendering
      * 24-bit, but a clever application could use this to generate its
      * colour ramps.
-	 *	
+	 *
      * As per Sam's instructions, the diffuse colour is used as the
      * material's colour. The Ambient and specular colours only affect
      * Ka and Ks.
@@ -1462,7 +1462,7 @@ STATIC br_model * MakeModelFromMaps(NTriObj_t *n_tri_obj,
     BrStrCat(full_name,suffix);
 
     model = BrModelAllocate(full_name,n_vertices,n_faces);
-    
+
     /*
      * Set model updatable flags or BrSaveModelMany complains. aac
      */

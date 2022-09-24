@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 1993-1995 by Argonaut Technologies Limited. All rights reserved.
  *
- * $Id: loadiff.c 2.5 1996/10/01 14:13:43 sam Exp $
+ * $Id: loadiff.c 1.1 1997/12/10 16:41:02 jon Exp $
  * $Locker: $
  *
  * Loader for Amiga .IFF/.LBM format
@@ -10,7 +10,7 @@
 #include "brender.h"
 #include "fmt.h"
 
-BR_RCS_ID("$Id: loadiff.c 2.5 1996/10/01 14:13:43 sam Exp $")
+BR_RCS_ID("$Id: loadiff.c 1.1 1997/12/10 16:41:02 jon Exp $")
 
 static int readline(char *mblock,int bytes,void *fh);
 static void planes2bytes(br_pixelmap *pm,char *block,int line);
@@ -74,7 +74,7 @@ static struct {
 
 static unsigned char masktable[8] = {0x80,0x40,0x20,0x10,0x08,0x04,0x02,0x01 };
 static unsigned char bittable[8]  = {0x01,0x02,0x04,0x08,0x10,0x20,0x40,0x80 };
-	
+
 #pragma pack ()
 
 br_pixelmap * BR_PUBLIC_ENTRY BrFmtIFFLoad(const char *name,br_uint_32 flags)
