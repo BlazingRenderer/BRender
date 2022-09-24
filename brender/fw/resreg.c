@@ -50,7 +50,7 @@ br_resource_class * BR_PUBLIC_ENTRY BrResClassRemove(br_resource_class *rclass)
 	return r;
 }
 
-br_resource_class * BR_PUBLIC_ENTRY BrResClassFind(char *pattern)
+br_resource_class * BR_PUBLIC_ENTRY BrResClassFind(const char *pattern)
 {
 	return BrRegistryFind(&fw.reg_resource_classes,pattern);
 }
@@ -86,17 +86,17 @@ br_uint_32 BR_PUBLIC_ENTRY BrResClassRemoveMany(br_resource_class **items, int n
 	return r;
 }
 
-br_uint_32 BR_PUBLIC_ENTRY BrResClassFindMany(char *pattern, br_resource_class **items, int max)
+br_uint_32 BR_PUBLIC_ENTRY BrResClassFindMany(const char *pattern, br_resource_class **items, int max)
 {
 	return BrRegistryFindMany(&fw.reg_resource_classes, pattern, (void **)items, max);
 }
 
-br_uint_32 BR_PUBLIC_ENTRY BrResClassCount(char *pattern)
+br_uint_32 BR_PUBLIC_ENTRY BrResClassCount(const char *pattern)
 {
 	return BrRegistryCount(&fw.reg_resource_classes,pattern);
 }
 
-br_uint_32 BR_PUBLIC_ENTRY BrResClassEnum(char *pattern,
+br_uint_32 BR_PUBLIC_ENTRY BrResClassEnum(const char *pattern,
 		br_resclass_enum_cbfn *callback, void *arg)
 {
 	return BrRegistryEnum(&fw.reg_resource_classes,pattern,(br_enum_cbfn *)callback,arg);

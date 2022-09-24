@@ -36,20 +36,20 @@ br_error BR_PUBLIC_ENTRY BrFwEnd(void);
  */
 br_resource_class * BR_PUBLIC_ENTRY BrResClassAdd(br_resource_class *pixelmap);
 br_resource_class * BR_PUBLIC_ENTRY BrResClassRemove(br_resource_class *pixelmap);
-br_resource_class * BR_PUBLIC_ENTRY BrResClassFind(char *pattern);
-typedef br_resource_class * BR_CALLBACK br_resclass_find_cbfn(char *name);
+br_resource_class * BR_PUBLIC_ENTRY BrResClassFind(const char *pattern);
+typedef br_resource_class * BR_CALLBACK br_resclass_find_cbfn(const char *name);
 br_resclass_find_cbfn *BR_PUBLIC_ENTRY BrResClassFindHook(br_resclass_find_cbfn *hook);
 br_uint_32 BR_PUBLIC_ENTRY BrResClassAddMany(br_resource_class **items, int n);
 br_uint_32 BR_PUBLIC_ENTRY BrResClassRemoveMany(br_resource_class **items, int n);
-br_uint_32 BR_PUBLIC_ENTRY BrResClassFindMany(char *pattern, br_resource_class **items, int max);
-br_uint_32 BR_PUBLIC_ENTRY BrResClassCount(char *pattern);
+br_uint_32 BR_PUBLIC_ENTRY BrResClassFindMany(const char *pattern, br_resource_class **items, int max);
+br_uint_32 BR_PUBLIC_ENTRY BrResClassCount(const char *pattern);
 
 typedef br_uint_32 BR_CALLBACK br_resclass_enum_cbfn(br_resource_class *item, void *arg);
 
-br_uint_32 BR_PUBLIC_ENTRY BrResClassEnum(char *pattern,
+br_uint_32 BR_PUBLIC_ENTRY BrResClassEnum(const char *pattern,
 		br_resclass_enum_cbfn *callback, void *arg);
 
-char * BR_RESIDENT_ENTRY BrResClassIdentifier(br_uint_8 res_class);
+const char * BR_RESIDENT_ENTRY BrResClassIdentifier(br_uint_8 res_class);
 
 /*
  * Block pool allocator
@@ -117,13 +117,13 @@ int BR_PUBLIC_ENTRY BrFileEof(void *f);
 int BR_PUBLIC_ENTRY BrFileGetChar(void *f);
 void BR_PUBLIC_ENTRY BrFilePutChar(int c, void *f);
 br_size_t BR_PUBLIC_ENTRY BrFileRead(void *buf, br_size_t size, br_size_t n,void *f);
-br_size_t BR_PUBLIC_ENTRY BrFileWrite(void *buf, br_size_t size, br_size_t n, void *f);
+br_size_t BR_PUBLIC_ENTRY BrFileWrite(const void *buf, br_size_t size, br_size_t n, void *f);
 br_size_t BR_PUBLIC_ENTRY BrFileGetLine(char *buf, br_size_t buf_len, void * f);
-void BR_PUBLIC_ENTRY BrFilePutLine(char *buf, void * f);
+void BR_PUBLIC_ENTRY BrFilePutLine(const char *buf, void * f);
 void BR_PUBLIC_ENTRY BrFileAdvance(long int count, void *f);
 void * BR_PUBLIC_ENTRY BrFileLoad(void *res, const char *name, br_size_t *size);
 
-int BR_PUBLIC_ENTRY BrFilePrintf(void *f, char *fmt, ...) BR_PRINTF_ATTRIBUTE(2, 3);
+int BR_PUBLIC_ENTRY BrFilePrintf(void *f, const char *fmt, ...) BR_PRINTF_ATTRIBUTE(2, 3);
 
 br_int_32 BR_RESIDENT_ENTRY BrSprintf(char *buf, const char *fmt, ...) BR_PRINTF_ATTRIBUTE(2, 3);
 br_int_32 BR_RESIDENT_ENTRY BrSprintfN(char *buf, br_size_t buf_size, const char *fmt, ...) BR_PRINTF_ATTRIBUTE(3, 4);

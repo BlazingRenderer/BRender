@@ -138,7 +138,7 @@ void BR_RESIDENT_ENTRY _BrUAssert(const char *condition, const char *file, unsig
 /*
  * lexer.c
  */
-struct br_lexer * BR_RESIDENT_ENTRY BrLexerAllocate(struct br_lexer_keyword *keywords, int nkeywords);
+struct br_lexer * BR_RESIDENT_ENTRY BrLexerAllocate(const struct br_lexer_keyword *keywords, int nkeywords);
 void BR_RESIDENT_ENTRY BrLexerFree(struct br_lexer * l);
 char BR_RESIDENT_ENTRY BrLexerCommentSet(struct br_lexer * l, char eol_comment);
 br_lexer_error_cbfn * BR_RESIDENT_ENTRY BrLexerErrorSet(struct br_lexer * l, br_lexer_error_cbfn *error);

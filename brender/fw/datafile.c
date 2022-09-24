@@ -1656,14 +1656,14 @@ STATIC char *DfNameReadText(br_datafile *df, char *name)
 	return name;
 }
 
-STATIC int DfNameWriteText(br_datafile *df, char *name)
+STATIC int DfNameWriteText(br_datafile *df, const char *name)
 {
 	BrFilePrintf(df->h,"  name \"%s\"\n",name?name:"NULL");
 
 	return 0;
 }
 
-STATIC br_size_t DfNameSizeText(br_datafile *df, char *name)
+STATIC br_size_t DfNameSizeText(br_datafile *df, const char *name)
 {
 	return 1;
 }
@@ -1689,7 +1689,7 @@ STATIC char *DfNameReadBinary(br_datafile *df, char *name)
 	return name;
 }
 
-STATIC int DfNameWriteBinary(br_datafile *df, char *name)
+STATIC int DfNameWriteBinary(br_datafile *df, const char *name)
 {
 	if(name)
 		BrFileWrite(name,1,BrStrLen(name),df->h);
@@ -1698,7 +1698,7 @@ STATIC int DfNameWriteBinary(br_datafile *df, char *name)
 	return 0;
 }
 
-STATIC br_size_t DfNameSizeBinary(br_datafile *df, char *name)
+STATIC br_size_t DfNameSizeBinary(br_datafile *df, const char *name)
 {
 	if(name)
 		return BrStrLen(name)+1;
@@ -1871,7 +1871,7 @@ STATIC br_size_t BrNullBlockSize(br_datafile *df, void *base, int block_size, in
 	return 0;
 }
 
-STATIC int BrNullNameWrite(br_datafile *df, char *name)
+STATIC int BrNullNameWrite(br_datafile *df, const char *name)
 {
 	BR_FATAL0("Invald file primitive call");
 	return -1;
@@ -1883,7 +1883,7 @@ STATIC char * BrNullNameRead(br_datafile *df, char *name)
 	return NULL;
 }
 
-STATIC br_size_t BrNullNameSize(br_datafile *df, char *name)
+STATIC br_size_t BrNullNameSize(br_datafile *df, const char *name)
 {
 	BR_FATAL0("Invald file primitive call");
 	return 0;

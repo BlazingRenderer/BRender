@@ -415,9 +415,9 @@ typedef struct br_file_primitives {
 	void *		(*block_read)	(br_datafile *df, void *base, int *pcount, int size, int mtype);
 	br_size_t	(*block_size)	(br_datafile *df, void *base, int block_size, int block_stride, int block_count, int size);
 
-	int 		(*name_write)	(br_datafile *df, char *name);
+	int 		(*name_write)	(br_datafile *df, const char *name);
 	char *		(*name_read)	(br_datafile *df, char *name);
-	br_size_t	(*name_size)	(br_datafile *df, char *name);
+	br_size_t	(*name_size)	(br_datafile *df, const char *name);
 
 } br_file_primitives;
 

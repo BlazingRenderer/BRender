@@ -24,7 +24,7 @@ static void BR_CALLBACK lexerError(struct br_lexer *l, char *string)
 {
 }
 
-struct br_lexer * BR_RESIDENT_ENTRY BrLexerAllocate(struct br_lexer_keyword *keywords, int nkeywords)
+struct br_lexer * BR_RESIDENT_ENTRY BrLexerAllocate(const struct br_lexer_keyword *keywords, int nkeywords)
 {
 	struct br_lexer * l;
 

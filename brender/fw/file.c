@@ -159,7 +159,7 @@ UASSERT_MESSAGE("In BrFileRead",buf!=NULL);
 	return fw.fsys->read(buf,size,n,((br_file *)f)->raw_file);
 }
 
-br_size_t BR_PUBLIC_ENTRY BrFileWrite(void *buf, br_size_t size, br_size_t n, void *f)
+br_size_t BR_PUBLIC_ENTRY BrFileWrite(const void *buf, br_size_t size, br_size_t n, void *f)
 {
    UASSERT_MESSAGE("BrFileWrite",f!=NULL);
    UASSERT_MESSAGE("BrFileWrite",buf!=NULL);
@@ -178,7 +178,7 @@ br_size_t BR_PUBLIC_ENTRY BrFileGetLine(char *buf, br_size_t buf_len, void * f)
 	return fw.fsys->getline(buf,buf_len,((br_file *)f)->raw_file);
 }
 
-void BR_PUBLIC_ENTRY BrFilePutLine(char *buf, void * f)
+void BR_PUBLIC_ENTRY BrFilePutLine(const char *buf, void * f)
 {
 UASSERT_MESSAGE("BrFilePutLine",f!=NULL);
 
@@ -198,7 +198,7 @@ UASSERT_MESSAGE("In BrFileAdvance",f!=NULL);
 }
 
 
-int BR_PUBLIC_ENTRY BrFilePrintf(void *f, char *fmt, ...)
+int BR_PUBLIC_ENTRY BrFilePrintf(void *f, const char *fmt, ...)
 {
 	int n;
 	va_list args;

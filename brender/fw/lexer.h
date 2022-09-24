@@ -114,7 +114,7 @@ typedef struct br_lexer {
 	/*
 	 * Keywords to recognise
 	 */
-	struct br_lexer_keyword *keywords;
+	const struct br_lexer_keyword *keywords;
 	br_int_32 nkeywords;
 
 	/*

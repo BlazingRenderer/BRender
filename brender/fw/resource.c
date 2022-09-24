@@ -527,7 +527,7 @@ void BR_RESIDENT_ENTRY BrResDump(void *vres, br_putline_cbfn *putline, void *arg
 /*
  * REturn the name for a resource class
  */
-char * BR_RESIDENT_ENTRY BrResClassIdentifier(br_uint_8 res_class)
+const char * BR_RESIDENT_ENTRY BrResClassIdentifier(br_uint_8 res_class)
 {
 	br_resource_class *rclass;
 
