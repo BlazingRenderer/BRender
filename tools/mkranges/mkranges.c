@@ -1,8 +1,8 @@
 /*
  * Copyright (c) 1993-1995 Argonaut Technologies Limited. All rights reserved.
  *
- * $Id: mkranges.c 1.2 1995/03/01 16:08:38 sam Exp $
- * $Locker:  $
+ * $Id: mkranges.c 1.1 1997/12/10 16:58:24 jon Exp $
+ * $Locker: $
  *
  * Calculates a ramped palette
  *
@@ -36,7 +36,7 @@ int main(int argc, char ** argv)
 	int n,line_number=0;
 	FILE *infile;
 
-	BR_BANNER("MKRANGES","1994-1995","$Revision: 1.2 $");
+	BR_BANNER("MKRANGES","1994-1995","$Revision: 1.1 $");
 
 	if(argc != 3) {
 		fprintf(stderr,"Usage: mkranges <input-script> <output-pixmap>\n");
