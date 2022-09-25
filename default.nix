@@ -21,6 +21,7 @@ stdenv.mkDerivation rec {
     cp tools/mkfog/mkfog $out/bin
     cp tools/mkranges/mkranges $out/bin
     cp tools/mkshades/mkshades $out/bin
+    cp tools/paljoin/paljoin $out/bin
     cp examples/robot/robot $out/bin
     cp examples/cube/cube $out/bin
 
