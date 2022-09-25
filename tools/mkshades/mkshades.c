@@ -29,7 +29,7 @@
  */
 #define PAL_SIZE 256
 
-static void setShades(int total, br_pixelmap *table);
+static void SetShades(int total, br_pixelmap *table);
 static br_boolean isPalette(br_pixelmap *pm);
 
 static void setEntry8 (br_pixelmap *pm, int x, int y, int r, int g, int b);
