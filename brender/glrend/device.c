@@ -40,6 +40,16 @@ static struct br_tv_template_entry deviceTemplateEntries[] = {
 #undef A
 
 /*
+ * Structure used to unpack the device creation tokens/values
+ */
+typedef struct device_create_tokens {
+    SDL_Window *sdl_window;
+    char       *vertex_shader;
+    char       *fragment_shader;
+
+} device_create_tokens;
+
+/*
  * List of tokens which are not significant in matching (for output facilities)
  */
 static br_token insignificantMatchTokens[] = {
@@ -52,7 +62,7 @@ static br_token insignificantMatchTokens[] = {
 /*
  * Structure used to unpack driver arguments
  */
-#define F(f)   offsetof(br_device, f)
+#define F(f)   offsetof(device_create_tokens, f)
 
 static struct br_tv_template_entry deviceArgsTemplateEntries[] = {
     {BRT_WINDOW_HANDLE_H,            NULL, F(sdl_window),      BRTV_SET, BRTV_CONV_COPY,},
@@ -69,6 +79,12 @@ br_device *DeviceGLAllocate(const char *identifier, const char *arguments)
     br_token_value args_tv[256];
     br_int_32      count;
     br_tv_template *deviceArgs;
+
+    device_create_tokens tokens = {
+        .sdl_window      = NULL,
+        .vertex_shader   = NULL,
+        .fragment_shader = NULL,
+    };
 
     /*
      * Set up device block and resource anchor
@@ -87,13 +103,17 @@ br_device *DeviceGLAllocate(const char *identifier, const char *arguments)
             BR_ASIZE(deviceArgsTemplateEntries)
         );
         BrStringToTokenValue(args_tv, sizeof(args_tv), arguments);
-        BrTokenValueSetMany(self, &count, NULL, args_tv, deviceArgs);
+        BrTokenValueSetMany(&tokens, &count, NULL, args_tv, deviceArgs);
     }
 
-    if(self->sdl_window == NULL) {
+    if(tokens.sdl_window == NULL) {
         BrResFreeNoCallback(self);
         return NULL;
     }
+
+    self->sdl_window      = tokens.sdl_window;
+    self->vertex_shader   = tokens.vertex_shader;
+    self->fragment_shader = tokens.fragment_shader;
 
     if((self->sdl_context = SDL_GL_CreateContext(self->sdl_window)) == NULL) {
         BrResFreeNoCallback(self);
