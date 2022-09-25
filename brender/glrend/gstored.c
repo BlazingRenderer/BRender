@@ -86,7 +86,7 @@ static void build_vbo(br_geometry_stored *self, struct v11model_f *model, size_t
     }
 
     glBindBuffer(GL_ARRAY_BUFFER, self->gl_vbo);
-    glBufferData(GL_ARRAY_BUFFER, total_vertices * sizeof(gl_vertex_f), vtx, GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, (GLsizeiptr)(total_vertices * sizeof(gl_vertex_f)), vtx, GL_STATIC_DRAW);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     BrScratchFree(vtx);
 }
