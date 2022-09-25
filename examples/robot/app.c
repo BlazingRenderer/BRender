@@ -30,7 +30,7 @@
  ****************************************************************************/
 
 #include <stdlib.h>               /* Standard C information                 */
-#include <SDL2/SDL.h>             /* Master include file for SDL            */
+#include <SDL.h>                  /* Master include file for SDL            */
 #include <brender.h>              /* Master include file for BRender        */
 
 #include "world.h"                /* 3D world and views into it             */
@@ -85,14 +85,6 @@ static char primitive_heap[1500 * 1024];
  */
 int main(int argc, char **argv)
 {
-    SDL_GLContext *sdlContext;                  /* SDL OpenGL context        */
-
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 2);
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
-    SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 0);
-    SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, 0);
-
     /*
      * Init SDL
      */
@@ -120,9 +112,6 @@ int main(int argc, char **argv)
         );
         goto sdl_createwindow_failed;
     }
-
-    sdlContext = SDL_GL_CreateContext(sdlWindow);
-    SDL_GL_MakeCurrent(sdlWindow, sdlContext);
 
     /*
      * Initialize the renderer
