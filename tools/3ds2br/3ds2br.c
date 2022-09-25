@@ -85,8 +85,9 @@ FILE *fplog;
 /*
  * Display usage
  */
-void DisplayUsage(char *command)
+void DisplayUsage(const char *command)
 {
+    (void)command;
     fprintf(stdout,
             "Usage: 3ds2br <input file name> <options>\n"
 	    "       [ -h ]"
@@ -124,8 +125,7 @@ void DisplayUsage(char *command)
         "       [ -scale <factor> ]"
         "    Apply scaling to models and hierarchy\n"
         "       [ -modelpivot ]"
-        "    Use model pivot points instead of moving vertices\n",
-        command); 
+        "    Use model pivot points instead of moving vertices\n");
 }
 
 /*
@@ -403,9 +403,9 @@ Bool_t ParseArgv(FlagParseState_t *fp_state, char *argv[])
 /*
  * Message report callback
  */
-void BR_CALLBACK ReportCallback(char *string)
+void BR_CALLBACK ReportCallback(const char *string)
 {
-	fprintf(fplog, string);
+	fputs(string, fplog);
 }
 
 /*
