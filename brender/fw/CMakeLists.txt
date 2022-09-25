@@ -102,6 +102,7 @@ target_link_libraries(fw fw-headers)
 target_link_libraries(fw host)
 target_link_libraries(fw std)
 target_link_libraries(fw math)
+target_link_libraries(fw pixelmap)
 target_compile_definitions(fw PRIVATE __BR_V1DB__=0)
 
 set_property(TARGET fw PROPERTY FOLDER ${BRENDER_FOLDER})

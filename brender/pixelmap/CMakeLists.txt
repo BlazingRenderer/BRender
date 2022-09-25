@@ -49,6 +49,7 @@ add_library(pixelmap STATIC ${PIXELMAP_FILES} ${FONT_FILES})
 target_include_directories(pixelmap PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
 
 target_link_libraries(pixelmap pixelmap-headers)
+target_link_libraries(pixelmap fw)
 target_compile_definitions(pixelmap PRIVATE __BR_V1DB__=0)
 
 set_property(TARGET pixelmap PROPERTY FOLDER ${BRENDER_FOLDER})

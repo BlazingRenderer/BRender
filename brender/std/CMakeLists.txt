@@ -15,6 +15,7 @@ set(STD_FILES
 )
 add_library(std STATIC ${STD_FILES})
 target_link_libraries(std std-headers)
+target_link_libraries(std fw)
 target_compile_definitions(std PRIVATE __BR_V1DB__=0)
 
 set_property(TARGET std PROPERTY FOLDER ${BRENDER_FOLDER})
