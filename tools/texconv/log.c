@@ -26,6 +26,6 @@ void T_Log(const char *fmt, ...)
 	vsprintf(_scratch_string, fmt, args);
 	va_end(args);
 
-        fprintf(stdout, _scratch_string);
+        fputs(_scratch_string, stdout);
 }
 

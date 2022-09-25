@@ -9,6 +9,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <math.h>
+#include <inttypes.h>
 
 #include "brender.h"
 
@@ -530,7 +531,7 @@ br_uint_32 BR_CALLBACK T_PixelmapCbfn(br_pixelmap *item, void *arg)
 				cbfn_command->scale_x = cbfn_command->scale_y = size;
 
 #if defined _DEBUG || defined DEBUG
-				printf ("[m2] w:%ld h:%ld s:%ld ", item->width, item->height, size);
+				printf ("[m2] w:%" PRIu16 " h:%" PRIu16 " s:%" PRIu32 " ", item->width, item->height, size);
 #endif
 
 				pm = T_Scale(item, cbfn_command);
