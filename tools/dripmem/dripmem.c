@@ -17,8 +17,8 @@ struct mt_block {
 	size_t size;
 	int id;
 	int tag;
-	char *from;
-	char *type;
+	const char *from;
+	const char *type;
 	int flags;
 	int magic;
 };
@@ -54,7 +54,7 @@ static int MtCheckpointTotal;
 /*
  * Allocate a new block of memory
  */
-void *BR_CDECL _drip_alloc(size_t size, char *from, char *type)
+void *BR_CDECL _drip_alloc(size_t size, const char *from, const char *type)
 {
 	struct mt_block *mtb;
 
@@ -190,7 +190,7 @@ void BR_CDECL _drip_set_free(int flag)
  * Dump the current memeory chain to a file
  * (or stderr if filename == NULL)
  */
-void BR_CDECL _drip_checkpoint(char *filename, char *header, int dump_blocks)
+void BR_CDECL _drip_checkpoint(const char *filename, const char *header, int dump_blocks)
 {
 	struct mt_block *mtb;
 	FILE *ofh;
@@ -261,7 +261,7 @@ void BR_CDECL _drip_checkpoint(char *filename, char *header, int dump_blocks)
  * Dump the current memeory chain to a file
  * (or stderr if filename == NULL)
  */
-void BR_CDECL _drip_dump(char *filename, char *header)
+void BR_CDECL _drip_dump(const char *filename, const char *header)
 {
 	struct mt_block *mtb;
 	FILE *ofh;
