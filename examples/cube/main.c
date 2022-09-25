@@ -43,7 +43,6 @@ static void create_scene(br_actor **_world, br_actor **_camera, br_actor **_cube
 int main(int argc, char **argv)
 {
     SDL_Window    *sdl_window;
-    SDL_GLContext *sdl_context;
     br_pixelmap   *screen, *colour_buffer, *depth_buffer;
     int           width, height, ret = -1;
     br_error      r;
@@ -71,9 +70,6 @@ int main(int argc, char **argv)
         BrLogError("SDL", "Window creation error: %s", SDL_GetError());
         goto sdl_createwindow_failed;
     }
-
-    sdl_context = SDL_GL_CreateContext(sdl_window);
-    SDL_GL_MakeCurrent(sdl_window, sdl_context);
 
     BrBegin();
 
@@ -162,7 +158,6 @@ screen_creation_failed:
 
     BrEnd();
 
-    SDL_GL_DeleteContext(sdl_context);
     SDL_DestroyWindow(sdl_window);
 
 
