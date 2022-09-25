@@ -1,3 +1,4 @@
+#include <string.h>
 #include "drv.h"
 
 #define S BRTV_SET

@@ -1,6 +1,7 @@
 /*
  * Geometry format for version 1 models
  */
+#include <string.h>
 #include "drv.h"
 #include "glstate.h"
 #include "brassert.h"

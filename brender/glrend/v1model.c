@@ -1,6 +1,7 @@
 /*
  * Support routines for rendering models
  */
+#include <string.h>
 #include "drv.h"
 #include "brassert.h"
 

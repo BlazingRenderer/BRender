@@ -5,6 +5,7 @@
  * - Cleanup dangling pointers when a back/depth buffer is destroyed.
  */
 
+#include <string.h>
 #include <inttypes.h>
 #include <SDL_render.h>
 #include "drv.h"
