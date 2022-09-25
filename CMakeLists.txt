@@ -6,8 +6,12 @@ cmake_policy(SET CMP0072 NEW)
 
 find_package(Perl REQUIRED)
 
-# glrend needs this
-find_package(SDL2 REQUIRED)
+option(BRENDER_DISABLE_FINDSDL "Disable searching for SDL2" OFF)
+
+if(NOT BRENDER_DISABLE_FINDSDL)
+    # glrend needs this
+    find_package(SDL2 REQUIRED)
+endif()
 
 add_subdirectory(brender)
 
