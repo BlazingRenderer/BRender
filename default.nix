@@ -18,6 +18,7 @@ stdenv.mkDerivation rec {
     cp tools/3ds2br/3ds2br $out/bin
     cp tools/dquery/dquery $out/bin
     cp tools/mkblend/mkblend $out/bin
+    cp tools/mkfog/mkfog $out/bin
     cp tools/mkranges/mkranges $out/bin
     cp tools/mkshades/mkshades $out/bin
     cp examples/robot/robot $out/bin
