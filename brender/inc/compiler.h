@@ -117,6 +117,15 @@ typedef float br_float;
  */
 #define BR_WEAK __weak
 
+/*
+ * A function using the cdecl calling convention. x86 only.
+ */
+#ifdef __i386__
+#   define BR_CDECL __cdecl
+#else
+#   define BR_CDECL
+#endif
+
 #define BR_ASM_DATA
 #define BR_ASM_CALL __cdecl
 #define BR_ASM_CALLBACK __cdecl
@@ -170,6 +179,15 @@ typedef float br_float;
  * A function with weak linkage
  */
 #define BR_WEAK __attribute__((weak))
+
+/*
+ * A function using the cdecl calling convention. x86 only.
+ */
+#ifdef __i386__
+#   define BR_CDECL __attribute__((cdecl))
+#else
+#   define BR_CDECL
+#endif
 
 #define BR_ASM_DATA
 #define BR_ASM_CALL 
