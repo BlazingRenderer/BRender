@@ -8,6 +8,7 @@
  */
 #include <stdio.h>
 #include <stdlib.h>
+#include <inttypes.h>
 
 #include "brddi.h"
 
@@ -64,10 +65,10 @@ void ObjectInfo(br_object *h, br_boolean info)
 	br_size_t s;
 	void *mem;
 
-	fprintf(stdout, "%08x %-32s %-20s %d\n", h,
+	fprintf(stdout, "%08" PRIxPTR " %-32s %-20s %" PRIuPTR "\n", (br_uintptr_t)h,
 		ObjectIdentifier(h),
 		BrTokenIdentifier(ObjectType(h)),
-		ObjectSpace(h));
+		(br_uintptr_t)ObjectSpace(h));
 
 	if(!info)
 		return;
