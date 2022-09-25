@@ -130,7 +130,7 @@ typedef void BR_CALLBACK br_resourcefree_cbfn(void *res, br_uint_8 res_class, br
 typedef struct br_resource_class
 {
 	br_uint_32 reserved;
-	char *identifier;
+	const char *identifier;
 	br_uint_8 res_class;
 	br_resourcefree_cbfn *free_cb;
 	br_uint_32 alignment;	/* Alignment required for this class - 0 for default */
