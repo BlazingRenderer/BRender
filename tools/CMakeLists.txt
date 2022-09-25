@@ -1,5 +1,6 @@
 add_subdirectory(3ds2br)
 add_subdirectory(dquery)
 add_subdirectory(dripmem)
+add_subdirectory(mkblend)
 add_subdirectory(mkranges)
 add_subdirectory(mkshades)
