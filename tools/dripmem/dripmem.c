@@ -8,6 +8,7 @@
 #include <stdio.h>
 #include <malloc.h>
 #include <string.h>
+#include <inttypes.h>
 
 #include "dripmem.h"
 
@@ -62,7 +63,7 @@ void *BR_CDECL _drip_alloc(size_t size, const char *from, const char *type)
 	 * Write message to log
 	 */
 	if(MtLogging)
-		fprintf(stderr,"\tMALLOC(%d,%d);\n",MtCurrentID, size);
+		fprintf(stderr,"\tMALLOC(%d,%" PRIuPTR ");\n",MtCurrentID, (br_uintptr_t)size);
 
 	/*
 	 * Use underlying allocator to get block
@@ -223,8 +224,8 @@ void BR_CDECL _drip_checkpoint(const char *filename, const char *header, int dum
 			 */
 			if (dump_blocks)
 				n = fprintf(ofh,
-"ALLOCATED %10d (%d %s %s): %08x %d\n", mtb->id, mtb->tag,  mtb->from, mtb->type,
-				mtb+1, mtb->size);
+"ALLOCATED %10d (%d %s %s): %08" PRIxPTR " %" PRIuPTR "\n", mtb->id, mtb->tag,  mtb->from, mtb->type,
+				(br_uintptr_t)mtb+1, (br_uintptr_t)mtb->size);
 
 			mtb->flags &= ~MT_FLAG_ALLOCED;
 		}
@@ -236,8 +237,8 @@ void BR_CDECL _drip_checkpoint(const char *filename, const char *header, int dum
 			 */
 			if (dump_blocks)
 				n = fprintf(ofh,
-"FREED     %10d (%d %s %s): %08x %d\n", mtb->id, mtb->tag,  mtb->from, mtb->type,
-				mtb+1, mtb->size);
+"FREED     %10d (%d %s %s): %08" PRIxPTR " %" PRIuPTR "\n", mtb->id, mtb->tag,  mtb->from, mtb->type,
+				(br_uintptr_t)mtb+1, (br_uintptr_t)mtb->size);
 
 			/*
 		 	 * Unlink block from list
@@ -286,8 +287,8 @@ void BR_CDECL _drip_dump(const char *filename, const char *header)
 		 * Basic information about block
 		 */
 		n = fprintf(ofh,
-"%10d (%d %s %s): %08x %d\n", mtb->id, mtb->tag,  mtb->from, mtb->type,
-		mtb+1, mtb->size);
+"%10d (%d %s %s): %08" PRIxPTR " %" PRIuPTR "\n", mtb->id, mtb->tag,  mtb->from, mtb->type,
+		(br_uintptr_t)mtb+1, (br_uintptr_t)mtb->size);
 	}
 
 	if(filename)

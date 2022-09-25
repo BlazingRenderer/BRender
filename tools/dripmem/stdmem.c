@@ -10,6 +10,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <malloc.h>
+#include <inttypes.h>
 
 #include "brender.h"
 #include "dripmem.h"
@@ -27,7 +28,7 @@ static void * BR_CALLBACK BrStdlibAllocate(br_size_t size, br_uint_8 type)
 
 	if(m == NULL) {
 		char temp[256];
-		BrSprintf(temp, "BrStdlibAllocate: failed with size=%d, type=%d",size,type);
+		BrSprintf(temp, "BrStdlibAllocate: failed with size=%" PRIuPTR ", type=%d",(br_intptr_t)size,type);
 		_drip_checkpoint(NULL, temp, BR_TRUE);
 		_drip_dump(NULL, temp);
 		BR_ERROR(temp);
