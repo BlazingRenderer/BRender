@@ -70,10 +70,10 @@ static void create_vao(br_geometry_stored *self)
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
 
-static void build_vbo(br_geometry_stored *self, struct v11model_f *model, size_t totalVertices)
+static void build_vbo(br_geometry_stored *self, struct v11model_f *model, size_t total_vertices)
 {
     /* Collate and upload the vertex data. */
-    gl_vertex_f *vtx = (gl_vertex_f *)BrScratchAllocate(totalVertices * sizeof(gl_vertex_f));
+    gl_vertex_f *vtx = (gl_vertex_f *)BrScratchAllocate(total_vertices * sizeof(gl_vertex_f));
     ASSERT(vtx);
     gl_vertex_f    *nextVtx = vtx;
     for(br_uint_16 i        = 0; i < model->ngroups; ++i) {
@@ -86,15 +86,15 @@ static void build_vbo(br_geometry_stored *self, struct v11model_f *model, size_t
     }
 
     glBindBuffer(GL_ARRAY_BUFFER, self->gl_vbo);
-    glBufferData(GL_ARRAY_BUFFER, totalVertices * sizeof(gl_vertex_f), vtx, GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, total_vertices * sizeof(gl_vertex_f), vtx, GL_STATIC_DRAW);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     BrScratchFree(vtx);
 }
 
 
-static void build_ibo(br_geometry_stored *self, struct v11model_f *model, size_t totalFaces)
+static void build_ibo(br_geometry_stored *self, struct v11model_f *model, size_t total_faces)
 {
-    br_uint_16 *idx = (br_uint_16 *)BrScratchAllocate(totalFaces * 3 * sizeof(br_uint_16));
+    br_uint_16 *idx = (br_uint_16 *)BrScratchAllocate(total_faces * 3 * sizeof(br_uint_16));
 
     br_uint_16 *nextIdx    = idx;
     br_uint_16 offset      = 0;
