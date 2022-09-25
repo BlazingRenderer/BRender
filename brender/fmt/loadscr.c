@@ -13,7 +13,7 @@ BR_RCS_ID("$Id: loadscr.c 2.15 1997/07/14 10:44:00 JOHNG Exp $")
 /*
  * Default material fields
  */
-br_material _DefaultScriptMaterial = {
+const br_material _DefaultScriptMaterial = {
 	._reserved      = 0,
 	.identifier     = NULL,
 	.colour         = BR_COLOUR_RGB(255,255,255),
@@ -101,7 +101,7 @@ enum {
 	T_NO_SCALABILITY,
 };
 
-static br_lexer_keyword keywords[] = {
+static const br_lexer_keyword keywords[] = {
     { "material",                   T_MATERIAL,             },
     { "identifier",                 T_IDENTIFIER,           },
     { "name",                       T_NAME,                 },

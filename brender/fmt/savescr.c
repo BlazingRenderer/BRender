@@ -14,10 +14,10 @@ BR_RCS_ID("$Id: savescr.c 2.6 1996/10/01 14:13:45 sam Exp $")
 /*
  * The default material used to load a script
  */
-extern br_material _DefaultScriptMaterial;
+extern const br_material _DefaultScriptMaterial;
 
-STATIC struct {
-	char *name;
+STATIC const struct {
+	const char *name;
 	int value;
 } MaterialFlagNames[] = {
 	{ "light"				, BR_MATF_LIGHT				},

@@ -74,7 +74,7 @@ enum {
 /*
  * Type definition for a message reporting callback
  */
-typedef void BR_CALLBACK br_fmt_report_cbfn(char *string);
+typedef void BR_CALLBACK br_fmt_report_cbfn(const char *string);
 
 /*
  * Options structure passed to 3DS format loader
