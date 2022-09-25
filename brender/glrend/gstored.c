@@ -70,7 +70,7 @@ static void create_vao(br_geometry_stored *self)
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
 
-static void build_vbo(br_geometry_stored *self, struct v11model_f *model, size_t total_vertices)
+static void build_vbo(GLuint vbo, struct v11model_f *model, size_t total_vertices)
 {
     /* Collate and upload the vertex data. */
     gl_vertex_f *vtx = (gl_vertex_f *)BrScratchAllocate(total_vertices * sizeof(gl_vertex_f));
@@ -85,14 +85,14 @@ static void build_vbo(br_geometry_stored *self, struct v11model_f *model, size_t
         }
     }
 
-    glBindBuffer(GL_ARRAY_BUFFER, self->gl_vbo);
+    glBindBuffer(GL_ARRAY_BUFFER, vbo);
     glBufferData(GL_ARRAY_BUFFER, (GLsizeiptr)(total_vertices * sizeof(gl_vertex_f)), vtx, GL_STATIC_DRAW);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     BrScratchFree(vtx);
 }
 
 
-static void build_ibo(br_geometry_stored *self, struct v11model_f *model, size_t total_faces)
+static void build_ibo(GLuint ibo, struct v11model_f *model, size_t total_faces, gl_groupinfo *groups)
 {
     br_uint_16 *idx = (br_uint_16 *)BrScratchAllocate(total_faces * 3 * sizeof(br_uint_16));
 
@@ -109,10 +109,10 @@ static void build_ibo(br_geometry_stored *self, struct v11model_f *model, size_t
             *nextIdx++ = fp->vertices[2] + offset;
         }
 
-        self->groups[i].count  = (GLsizei)gp->nfaces * 3;
-        self->groups[i].offset = (void *)(br_uintptr_t)face_offset;
+        groups[i].count  = (GLsizei)gp->nfaces * 3;
+        groups[i].offset = (void *)(br_uintptr_t)face_offset;
 #if DEBUG
-        self->groups[i].group = model->groups + i;
+        groups[i].group = model->groups + i;
 #endif
 
         face_offset += (br_size_t)gp->nfaces * 3 * sizeof(br_uint_16);
@@ -120,7 +120,7 @@ static void build_ibo(br_geometry_stored *self, struct v11model_f *model, size_t
         offset += model->groups[i].nvertices;
     }
 
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, self->gl_ibo);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, (GLsizeiptr)face_offset, idx, GL_STATIC_DRAW);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
     BrScratchFree(idx);
@@ -153,8 +153,8 @@ br_geometry_stored *GeometryStoredGLAllocate(br_geometry_v1_model *gv1model, con
         total_faces += model->groups[i].nfaces;
     }
 
-    build_vbo(self, model, total_vertices);
-    build_ibo(self, model, total_faces);
+    build_vbo(self->gl_vbo, model, total_vertices);
+    build_ibo(self->gl_ibo, model, total_faces, self->groups);
 
     return (br_geometry_stored *)self;
 }
