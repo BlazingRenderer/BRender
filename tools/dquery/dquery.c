@@ -16,8 +16,8 @@ void ObjectDump(br_object *dev, char * pattern, br_boolean info);
 
 int main(int argc, char **argv)
 {
-	char *dev_name = "mcga";
-	char *dev_args = NULL;
+	const char *dev_name = "mcga";
+	const char *dev_args = NULL;
 	br_device *device = NULL;
 	br_error r;
 
