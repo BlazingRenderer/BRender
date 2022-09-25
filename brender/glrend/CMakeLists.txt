@@ -30,7 +30,6 @@ set(GLSTATE_FILES
 	./glstate_output.c
 	./glstate_primitive.c
 	./glstate_surface.c
-	./glstate_global.c
 )
 source_group("STATE" FILES ${GLSTATE_FILES})
 

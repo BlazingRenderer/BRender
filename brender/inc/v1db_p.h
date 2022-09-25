@@ -290,8 +290,6 @@ void BR_PUBLIC_ENTRY BrPointToScreenXYZOMany(br_vector3 *screens, br_uint_32 *ou
 
 void BR_PUBLIC_ENTRY BrSceneModelLight(br_model *model, br_material *default_material, br_actor *root, br_actor *a);
 
-br_colour BR_PUBLIC_ENTRY BrSceneAmbientLight(br_colour colour);
-
 void BR_PUBLIC_ENTRY BrModelToScreenQuery(br_matrix4 *dest);
 void BR_PUBLIC_ENTRY BrModelToViewQuery(br_matrix34 *dest);
 

@@ -127,8 +127,6 @@ br_error BR_PUBLIC_ENTRY BrV1dbBegin(void)
 	v1db.enabled_horizon_planes.name = "horizon plane";
 	v1db.enabled_horizon_planes.type = BR_ACTOR_HORIZON_PLANE;
 
-	v1db.ambient_colour = BR_COLOUR_RGB(0, 0, 0);
-
 	return BRE_OK;
 }
 

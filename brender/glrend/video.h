@@ -112,7 +112,6 @@ static_assert(sizeof(GLSTD140_LIGHT) % 16 == 0, "GLSTD140 is not aligned");
 
 typedef struct _GLSTD140_SCENE_DATA {
     alignas(16) br_vector4_f   eye_view;
-    alignas(16) br_vector4_f   global_ambient_colour;
     alignas(16) GLSTD140_LIGHT lights[BR_MAX_LIGHTS];
     alignas(4) uint32_t        num_lights;
 } GLSTD140_SCENE_DATA, *HGLSTD140_SCENE_DATA;

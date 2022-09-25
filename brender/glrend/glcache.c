@@ -161,13 +161,6 @@ GLSTATE_API void GLCACHE_UpdateScene(HGLCACHE hCache, HGLSTATE_STACK hState)
 	hCache->fbo = hState->output.colour->asBack.glFbo;
 
     BrVector4Set(&hCache->scene.eye_view, 0.0f, 0.0f, 1.0f, 0.0f);
-	BrVector4Set(
-        &hCache->scene.global_ambient_colour,
-		BR_RED(hState->global.ambient_colour) / 255.0f,
-		BR_GRN(hState->global.ambient_colour) / 255.0f,
-		BR_BLU(hState->global.ambient_colour) / 255.0f,
-		1.0f
-	);
 
 	GLCACHEI_ProcessSceneLights(hCache, hState->light);
 }

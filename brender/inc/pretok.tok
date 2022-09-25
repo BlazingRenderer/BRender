@@ -311,7 +311,6 @@ BOUNDS							none
 HIDDEN_SURFACE					none
 PRIMITIVE						none
 OUTPUT							none
-GLOBAL							none
 
 # Tokens used for primitive state (handled by primitive layer)
 #

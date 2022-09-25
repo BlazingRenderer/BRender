@@ -251,11 +251,6 @@ typedef struct _GLSTATE_OUTPUT
 	struct br_device_pixelmap *depth;
 } GLSTATE_OUTPUT, *HGLSTATE_OUTPUT;
 
-typedef struct _GLSTATE_GLOBAL
-{
-	br_colour ambient_colour;
-} GLSTATE_GLOBAL, *HGLSTATE_GLOBAL;
-
 typedef struct _GLSTATE_STACK
 {
 	GLSTATE_MATRIX matrix;
@@ -267,7 +262,6 @@ typedef struct _GLSTATE_STACK
 	GLSTATE_OUTPUT output;
 	GLSTATE_LIGHT light[GLSTATE_MAX_LIGHTS];
 	GLSTATE_HIDDEN hidden;
-	GLSTATE_GLOBAL global;
 
 	uint32_t valid;
 } GLSTATE_STACK, *HGLSTATE_STACK;
@@ -313,7 +307,6 @@ typedef struct _GLSTATE
 		struct br_tv_template *output;
 		struct br_tv_template *light[GLSTATE_MAX_LIGHTS];
 		struct br_tv_template *hidden;
-		struct br_tv_template *global;
 	} templates;
 
 	void *resourceAnchor;

@@ -14,7 +14,6 @@ void GLSTATEI_InitPrimitive(HGLSTATE hState);
 void GLSTATEI_InitOutput(HGLSTATE hState);
 void GLSTATEI_InitHidden(HGLSTATE hState);
 void GLSTATEI_InitLight(HGLSTATE hState);
-void GLSTATEI_InitGlobal(HGLSTATE hState);
 
 #if defined(__cplusplus)
 }

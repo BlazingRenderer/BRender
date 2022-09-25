@@ -20,7 +20,6 @@ struct br_light
 layout(std140) uniform br_scene_state
 {
     vec4 eye_view; /* Eye position in view-space */
-    vec4 global_ambient_colour;
     br_light lights[MAX_LIGHTS];
     uint num_lights;
 };

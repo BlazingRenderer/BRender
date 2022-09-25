@@ -12,7 +12,6 @@ GLSTATE_API void GLSTATE_Init(HGLSTATE hState, void *resAnchor)
 	GLSTATEI_InitOutput(hState);
 	GLSTATEI_InitHidden(hState);
 	GLSTATEI_InitLight(hState);
-	GLSTATEI_InitGlobal(hState);
 
 	hState->current = hState->stack;
 	GLSTATE_Copy(hState->current, &hState->default_, ~0u);
@@ -122,9 +121,6 @@ GLSTATE_API struct br_tv_template *GLSTATE_GetStateTemplate(HGLSTATE hState, br_
 			break;
 		case BRT_OUTPUT:
 			return hState->templates.output;
-	    case BRT_GLOBAL:
-	        return hState->templates.global;
-
 	}
 
 	return NULL;

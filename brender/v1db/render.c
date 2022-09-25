@@ -726,8 +726,6 @@ void BR_PUBLIC_ENTRY BrDbSceneRenderBegin(br_actor *world,
 	RendererPartSet(v1db.renderer, BRT_MATRIX, 0, BRT_AS_SCALAR(HITHER_Z), BR_VALUE_PASSTHROUGH(((br_camera *)camera->type_data)->hither_z));
 	RendererPartSet(v1db.renderer, BRT_MATRIX, 0, BRT_AS_SCALAR(YON_Z), BR_VALUE_PASSTHROUGH(((br_camera *)camera->type_data)->yon_z));
 
-	RendererPartSet(v1db.renderer, BRT_GLOBAL, 0, BRT_AS_COLOUR_RGB(GLOBAL_AMBIENT), BR_VALUE_PASSTHROUGH(v1db.ambient_colour));
-
 	/*
 	 * Collect transforms from camera to root
 	 *
@@ -1196,11 +1194,4 @@ br_renderbounds_cbfn * BR_PUBLIC_ENTRY BrZsRenderBoundsCallbackSet(br_renderboun
 	}
 	else
 		return BrDbSetRenderBoundsCallback(new_cbfn);
-}
-
-br_colour BR_PUBLIC_ENTRY BrSceneAmbientLight(br_colour colour)
-{
-	br_colour col = v1db.ambient_colour;
-	v1db.ambient_colour = colour;
-	return col;
 }

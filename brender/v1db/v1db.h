@@ -193,11 +193,6 @@ typedef struct br_v1db_state {
 	 */
 	br_pixelmap *colour_buffer;
 
-	/*
-	 * Ambient world colour.
-	 */
-	br_colour ambient_colour;
-
 } br_v1db_state;
 
 /*
