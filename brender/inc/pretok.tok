@@ -804,6 +804,7 @@ WINDOW_BUFFER_METHOD			token
 
 MSAA_SAMPLES						int_32
 
+OPENGL_EXT_PROCS				pointer
 OPENGL_VERTEX_SHADER				string
 OPENGL_FRAGMENT_SHADER				string
 TEMPORARY                           boolean

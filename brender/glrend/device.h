@@ -48,14 +48,14 @@ typedef struct br_device {
     VIDEO video;
 
     /*
-     * SDL window handle
+     * System-specific OpenGL function pointers.
      */
-    SDL_Window *sdl_window;
+    br_device_gl_ext_procs ext_procs;
 
     /*
-     * SDL OpenGL context
+     * OpenGL context
      */
-    SDL_GLContext *sdl_context;
+    void *gl_context;
 
     /*
      * Vertex shader source

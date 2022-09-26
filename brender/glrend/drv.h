@@ -11,7 +11,6 @@ extern "C" {
 #include <stdalign.h>
 #include <assert.h>
 
-#include <SDL_video.h>
 #include "glad/glad.h"
 
 #define BR_DEVICE_PRIVATE

@@ -13,7 +13,8 @@ extern "C" {
 /*
  * video.c
  */
-HVIDEO VIDEO_Open(HVIDEO hVideo, const char *vertShader, const char *fragShader);
+HVIDEO VIDEO_Open(HVIDEO hVideo, br_device_gl_getprocaddress_cbfn get_proc_address,
+                  const char *vertShader, const char *fragShader);
 
 void VIDEO_Close(HVIDEO hVideo);
 
@@ -110,6 +111,19 @@ void StoredGLRenderGroup(br_geometry_stored *self, br_renderer *renderer, const 
 
 #define RendererSceneBegin(self) ((br_error (*)(br_renderer *(self)))BR_CMETHOD_CALL(br_renderer,_reserved0,self))((br_renderer *)(self))
 #define RendererSceneEnd(self) ((br_error (*)(br_renderer *(self)))BR_CMETHOD_CALL(br_renderer,_reserved1,self))((br_renderer *)(self))
+
+/*
+ * Wrappers for br_device_gl_procs.
+ */
+void *DeviceGLCreateContext(br_device *self);
+
+void DeviceGLDeleteContext(br_device *self, void *ctx);
+
+br_error DeviceGLMakeCurrent(br_device *self, void *ctx);
+
+void DeviceGLSwapBuffers(br_device *self, br_device_pixelmap *pm);
+
+br_device_gl_getprocaddress_cbfn *DeviceGLGetGetProcAddress(br_device *self);
 
 /*
  * Hijack nulldev's no-op implementations.

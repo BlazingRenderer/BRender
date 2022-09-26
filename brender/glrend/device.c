@@ -43,9 +43,10 @@ static struct br_tv_template_entry deviceTemplateEntries[] = {
  * Structure used to unpack the device creation tokens/values
  */
 typedef struct device_create_tokens {
-    SDL_Window *sdl_window;
-    char       *vertex_shader;
-    char       *fragment_shader;
+    void                   *sdl_window;
+    br_device_gl_ext_procs *ext_procs;
+    char                   *vertex_shader;
+    char                   *fragment_shader;
 
 } device_create_tokens;
 
@@ -66,6 +67,7 @@ static br_token insignificantMatchTokens[] = {
 
 static struct br_tv_template_entry deviceArgsTemplateEntries[] = {
     {BRT_WINDOW_HANDLE_H,            NULL, F(sdl_window),      BRTV_SET, BRTV_CONV_COPY,},
+    {BRT_OPENGL_EXT_PROCS_P,         NULL, F(ext_procs),       BRTV_SET, BRTV_CONV_COPY,},
     {BRT_OPENGL_VERTEX_SHADER_STR,   NULL, F(vertex_shader),   BRTV_SET, BRTV_CONV_COPY,},
     {BRT_OPENGL_FRAGMENT_SHADER_STR, NULL, F(fragment_shader), BRTV_SET, BRTV_CONV_COPY,},
 };
@@ -82,6 +84,7 @@ br_device *DeviceGLAllocate(const char *identifier, const char *arguments)
 
     device_create_tokens tokens = {
         .sdl_window      = NULL,
+        .ext_procs       = NULL,
         .vertex_shader   = NULL,
         .fragment_shader = NULL,
     };
@@ -106,24 +109,36 @@ br_device *DeviceGLAllocate(const char *identifier, const char *arguments)
         BrTokenValueSetMany(&tokens, &count, NULL, args_tv, deviceArgs);
     }
 
-    if(tokens.sdl_window == NULL) {
+    /*
+     * If we're directly given an SDL_Window pointer, force SDL.
+     */
+    if(tokens.sdl_window != NULL) {
+        extern const br_device_gl_ext_procs sdl_procs;
+
+        self->ext_procs      = sdl_procs;
+        self->ext_procs.user = tokens.sdl_window;
+    } else if(tokens.ext_procs == NULL) {
         BrResFreeNoCallback(self);
         return NULL;
+    } else {
+        /*
+         * Make a copy, so they can't switch things out from under us.
+         */
+        self->ext_procs = *tokens.ext_procs;
     }
 
-    self->sdl_window      = tokens.sdl_window;
     self->vertex_shader   = tokens.vertex_shader;
     self->fragment_shader = tokens.fragment_shader;
 
-    if((self->sdl_context = SDL_GL_CreateContext(self->sdl_window)) == NULL) {
+    if((self->gl_context = DeviceGLCreateContext(self)) == NULL) {
         BrResFreeNoCallback(self);
         return NULL;
     }
 
-    if(SDL_GL_MakeCurrent(self->sdl_window, self->sdl_context) < 0)
+    if(DeviceGLMakeCurrent(self, self->gl_context) != BRE_OK)
         goto cleanup_context;
 
-    if(VIDEO_Open(&self->video, self->vertex_shader, self->fragment_shader) == NULL)
+    if(VIDEO_Open(&self->video, DeviceGLGetGetProcAddress(self), self->vertex_shader, self->fragment_shader) == NULL)
         goto cleanup_context;
 
     if((self->renderer_facility = RendererFacilityGLInit(self)) == NULL)
@@ -132,7 +147,7 @@ br_device *DeviceGLAllocate(const char *identifier, const char *arguments)
     return self;
 
 cleanup_context:
-    SDL_GL_DeleteContext(self->sdl_context);
+    DeviceGLDeleteContext(self, self->gl_context);
     BrResFree(self);
     return NULL;
 }
@@ -143,7 +158,7 @@ static void BR_CMETHOD_DECL(br_device_gl, free)(struct br_object *_self)
 
     VIDEO_Close(&self->video);
 
-    SDL_GL_DeleteContext(self->sdl_context);
+    DeviceGLDeleteContext(self, self->gl_context);
 
     /*
      * Remove attached objects

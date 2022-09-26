@@ -89,6 +89,9 @@ set(GLREND_FILES
 	./outfcty.c
 	./outfcty.h
 
+	./ext_procs.c
+	./ext_procs_sdl.c
+
 	./rendfcty.c
 	./rendfcty.h
 

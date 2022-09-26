@@ -7,7 +7,6 @@
 
 #include <string.h>
 #include <inttypes.h>
-#include <SDL_render.h>
 #include "drv.h"
 #include "brassert.h"
 
@@ -567,7 +566,7 @@ br_error BR_CMETHOD_DECL(br_device_pixelmap_gl, doubleBuffer)(br_device_pixelmap
     _GLREND_PreSwapHook(src->asBack.glFbo);
     while(glGetError() != GL_NO_ERROR);
 
-    SDL_GL_SwapWindow(self->device->sdl_window);
+    DeviceGLSwapBuffers(self->device, self);
     return BRE_OK;
 }
 
