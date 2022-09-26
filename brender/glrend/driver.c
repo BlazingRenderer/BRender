@@ -1,8 +1,5 @@
 #include "drv.h"
 
-/*
- * Main entry point for device.
- */
 br_device *BR_EXPORT BrDrvGLBegin(const char *arguments)
 {
     br_device *dev = DeviceGLAllocate("opengl", arguments);

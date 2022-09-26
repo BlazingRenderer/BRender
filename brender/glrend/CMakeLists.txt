@@ -107,6 +107,9 @@ add_library(glrend STATIC
 	${VIDEO_FILES}
 	${GLSTATE_FILES}
 
+	./include/brglrend.h
+	./include/brglrend_p.h
+
 	"${CMAKE_CURRENT_BINARY_DIR}/brender.vert.glsl.h"
 	"${CMAKE_CURRENT_BINARY_DIR}/brender.frag.glsl.h"
 )
@@ -117,6 +120,7 @@ if(NOT target_type STREQUAL STATIC_LIBRARY)
 endif()
 
 target_include_directories(glrend PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
+target_include_directories(glrend PUBLIC include)
 
 target_link_libraries(glrend glrend-glad)
 target_link_libraries(glrend SDL2::SDL2)

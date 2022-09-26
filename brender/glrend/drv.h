@@ -26,6 +26,7 @@ extern "C" {
 #define BR_RENDERER_PRIVATE
 
 #include "brddi.h"
+#include "brglrend.h"
 #include "formats.h"
 #include "pm.h"
 
