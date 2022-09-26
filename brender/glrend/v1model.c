@@ -262,7 +262,8 @@ void StoredGLRenderGroup(br_geometry_stored *self, br_renderer *renderer, const 
                  renderer->pixelmap->asBack.clearColour[2],
                  renderer->pixelmap->asBack.clearColour[3]
     );
-    glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(model), &model);
+
+    glBufferData(GL_UNIFORM_BUFFER, sizeof(model), &model, GL_STATIC_DRAW);
     glDrawElements(GL_TRIANGLES, groupinfo->count, GL_UNSIGNED_SHORT, groupinfo->offset);
 
 #if DEBUG && ENABLE_FACE_GROUP_COUNT
