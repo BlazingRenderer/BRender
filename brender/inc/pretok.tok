@@ -808,9 +808,6 @@ OPENGL_VERTEX_SHADER				string
 OPENGL_FRAGMENT_SHADER				string
 TEMPORARY                           boolean
 
-# Tokens for SDL
-SDL_DISPLAY_MODE        pointer
-
 # Tokens for system configuration
 
 REGISTRY						string

@@ -9,9 +9,5 @@ br_device *BR_EXPORT BrDrv1Begin(const char *arguments)
     if(!dev)
         return NULL;
 
-    /* List all the SDL screen modes */
-    if(OutputFacilityGLEnumerate(dev) != BRE_OK)
-        return NULL;
-
     return dev;
 }
