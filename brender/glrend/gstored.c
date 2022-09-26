@@ -7,16 +7,6 @@
 #include "brassert.h"
 #include "formats.h"
 
-#define ENABLE_FACE_GROUP_COUNT 1
-
-#if DEBUG && ENABLE_FACE_GROUP_COUNT
-extern int faceGroupCount;
-extern int modelsDrawnCount;
-extern int trianglesRenderedCount;
-extern int trianglesDrawnCount;
-extern int verticesRenderedCount;
-#endif
-
 /*
  * Default dispatch table for geometry type (defined at and of file)
  */
