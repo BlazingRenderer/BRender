@@ -112,8 +112,8 @@ add_library(glrend STATIC
 )
 
 get_target_property(target_type glrend TYPE)
-if(target_type STREQUAL STATIC_LIBRARY)
-	target_compile_definitions(glrend PRIVATE -DBrDrv1Begin=BrDrvGLBegin)
+if(NOT target_type STREQUAL STATIC_LIBRARY)
+	target_compile_definitions(glrend PRIVATE -DDEFINE_BR_ENTRY_POINT)
 endif()
 
 target_include_directories(glrend PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
