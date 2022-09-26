@@ -5,6 +5,7 @@
 #define BR_SCALAR_EPSILON               1.192092896e-7f
 
 #define DEBUG_DISABLE_LIGHTS            0
+#define DEBUG_DISABLE_LIGHT_AMBIENT     0
 #define DEBUG_DISABLE_LIGHT_DIRECTIONAL 0
 #define DEBUG_DISABLE_LIGHT_POINT       0
 #define DEBUG_DISABLE_LIGHT_POINTATTEN  0
@@ -89,6 +90,11 @@ float shadingFilter(in float i)
     i = floor(i * 255.0) / 255.0;
 #endif
     return i;
+}
+
+vec3 lightingColourAmbient(in vec4 p, in vec4 n, in br_light alp)
+{
+    return ka * alp.iclq.x * alp.colour.xyz;
 }
 
 vec3 lightingColourDirect(in vec4 p, in vec4 n, in br_light alp)
@@ -216,6 +222,12 @@ vec4 fragmain()
     directLightExists = false;
 
     for (uint i = 0u; i < num_lights; ++i) {
+#if !DEBUG_DISABLE_LIGHT_AMBIENT
+        if(lights[i].colour.w != 0.0) {
+            lightColour += lightingColourAmbient(position, normalDirection, lights[i]);
+            continue;
+        }
+#endif
         if (lights[i].position.w == 0) {
 #if !DEBUG_DISABLE_LIGHT_DIRECTIONAL
             directLightExists = true;

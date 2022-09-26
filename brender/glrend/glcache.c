@@ -92,7 +92,7 @@ void GLCACHEI_ProcessSceneLights(HGLCACHE hCache, const HGLSTATE_LIGHT lights)
 			BR_RED(hLight->colour) / 255.0f,
 			BR_GRN(hLight->colour) / 255.0f,
 			BR_BLU(hLight->colour) / 255.0f,
-			0.0f
+			hLight->type == BRT_AMBIENT ? 1.0f : 0.0f
 		);
 
 		if(hLight->type == BRT_SPOT)
