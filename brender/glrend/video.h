@@ -16,9 +16,6 @@ typedef struct _VIDEO_FONT {
 } VIDEO_FONT, *HVIDEO_FONT;
 
 typedef struct _VIDEO {
-    const char *version;
-    const char *vendor;
-    const char *renderer;
     GLint      maxUniformBlockSize;
     GLint      maxUniformBufferBindings;
     GLint      maxVertexUniformBlocks;

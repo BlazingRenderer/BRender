@@ -66,6 +66,10 @@ typedef struct br_device {
      * Fragment shader source
      */
     char *fragment_shader;
+
+    const char *gl_version;
+    const char *gl_vendor;
+    const char *gl_renderer;
 } br_device;
 
 #endif /* BR_DEVICE_PRIVATE */

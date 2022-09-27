@@ -849,6 +849,10 @@ MSAA_SAMPLES						int_32
 OPENGL_EXT_PROCS				pointer
 OPENGL_VERTEX_SHADER				string
 OPENGL_FRAGMENT_SHADER				string
+OPENGL_VERSION                      constant_string
+OPENGL_VENDOR                       constant_string
+OPENGL_RENDERER                     constant_string
+
 TEMPORARY                           boolean
 
 # Tokens for system configuration

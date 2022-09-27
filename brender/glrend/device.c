@@ -34,6 +34,9 @@ static struct br_tv_template_entry deviceTemplateEntries[] = {
     {BRT_CREATOR_CSTR,        NULL, A(deviceCreator), BRTV_QUERY | BRTV_ALL | BRTV_ABS, BRTV_CONV_COPY,},
     {BRT_TITLE_CSTR,          NULL, A(deviceTitle),   BRTV_QUERY | BRTV_ALL | BRTV_ABS, BRTV_CONV_COPY,},
     {BRT_PRODUCT_CSTR,        NULL, A(deviceProduct), BRTV_QUERY | BRTV_ALL | BRTV_ABS, BRTV_CONV_COPY,},
+    {BRT_OPENGL_VERSION_CSTR, NULL, F(gl_version),    BRTV_QUERY | BRTV_ALL,            BRTV_CONV_COPY,},
+    {BRT_OPENGL_VENDOR_CSTR,  NULL, F(gl_vendor),     BRTV_QUERY | BRTV_ALL,            BRTV_CONV_COPY,},
+    {BRT_OPENGL_RENDERER_CSTR,NULL, F(gl_renderer),   BRTV_QUERY | BRTV_ALL,            BRTV_CONV_COPY,},
 };
 
 #undef F
@@ -142,6 +145,14 @@ br_device *DeviceGLAllocate(const char *identifier, const char *arguments)
         BrLogError("GLREND", "Unable to load OpenGL functions.");
         goto cleanup_context;
     }
+
+    self->gl_version  = (const char *)glGetString(GL_VERSION);
+    self->gl_vendor   = (const char *)glGetString(GL_VENDOR);
+    self->gl_renderer = (const char *)glGetString(GL_RENDERER);
+
+    BrLogTrace("GLREND", "OpenGL Version  = %s", self->gl_version);
+    BrLogTrace("GLREND", "OpenGL Vendor   = %s", self->gl_vendor);
+    BrLogTrace("GLREND", "OpenGL Renderer = %s", self->gl_renderer);
 
     if(VIDEO_Open(&self->video, self->vertex_shader, self->fragment_shader) == NULL)
         goto cleanup_context;

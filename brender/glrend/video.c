@@ -154,14 +154,6 @@ HVIDEO VIDEO_Open(HVIDEO hVideo, const char *vertShader, const char *fragShader)
         return NULL;
     }
 
-    hVideo->version  = (const char *)glGetString(GL_VERSION);
-    hVideo->vendor   = (const char *)glGetString(GL_VENDOR);
-    hVideo->renderer = (const char *)glGetString(GL_RENDERER);
-
-    BrLogInfo("VIDEO", "OpenGL Version  = %s", hVideo->version);
-    BrLogInfo("VIDEO", "OpenGL Vendor   = %s", hVideo->vendor);
-    BrLogInfo("VIDEO", "OpenGL Renderer = %s", hVideo->renderer);
-
     glGetIntegerv(GL_MAX_UNIFORM_BLOCK_SIZE, &hVideo->maxUniformBlockSize);
     glGetIntegerv(GL_MAX_UNIFORM_BUFFER_BINDINGS, &hVideo->maxUniformBufferBindings);
     glGetIntegerv(GL_MAX_VERTEX_UNIFORM_BLOCKS, &hVideo->maxVertexUniformBlocks);
