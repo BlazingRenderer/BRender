@@ -36,12 +36,10 @@ typedef struct gl_groupinfo {
      */
     void *offset;
 
-#if DEBUG
     /*
      * The group itself
      */
     struct v11group_f *group;
-#endif
 
     /*
      * Stored renderer state for the group

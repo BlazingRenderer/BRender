@@ -5,17 +5,6 @@
 #include "drv.h"
 #include "brassert.h"
 
-#define ENABLE_FACE_GROUP_COUNT 1
-
-#if DEBUG && ENABLE_FACE_GROUP_COUNT
-extern int faceGroupCount;
-extern int modelsDrawnCount;
-extern int trianglesRenderedCount;
-extern int trianglesDrawnCount;
-extern int verticesRenderedCount;
-#endif
-
-
 /* Handy for debugging Croc. */
 static int is_croc_dome(HGLSTATE_STACK state)
 {
@@ -266,10 +255,8 @@ void StoredGLRenderGroup(br_geometry_stored *self, br_renderer *renderer, const 
     glBufferData(GL_UNIFORM_BUFFER, sizeof(model), &model, GL_STATIC_DRAW);
     glDrawElements(GL_TRIANGLES, groupinfo->count, GL_UNSIGNED_SHORT, groupinfo->offset);
 
-#if DEBUG && ENABLE_FACE_GROUP_COUNT
-    faceGroupCount++;
-    trianglesRenderedCount += groupinfo->group->nfaces;
-    trianglesDrawnCount += groupinfo->group->nfaces;
-    verticesRenderedCount += groupinfo->group->nfaces * 3;
-#endif
+    renderer->stats.face_group_count++;
+    renderer->stats.triangles_rendered_count += groupinfo->group->nfaces;
+    renderer->stats.triangles_drawn_count    += groupinfo->group->nfaces;
+    renderer->stats.vertices_rendered_count  += groupinfo->group->nfaces * 3;
 }

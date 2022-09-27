@@ -11,7 +11,11 @@ static const struct br_renderer_dispatch rendererDispatch;
 #define F(f) offsetof(struct br_renderer, f)
 
 static struct br_tv_template_entry rendererTemplateEntries[] = {
-    {BRT_IDENTIFIER_CSTR, NULL, F(identifier), BRTV_QUERY | BRTV_ALL, BRTV_CONV_COPY,},
+    {BRT_IDENTIFIER_CSTR,              NULL, F(identifier),                     BRTV_QUERY | BRTV_ALL, BRTV_CONV_COPY,},
+    {BRT_FACE_GROUP_COUNT_U32,         NULL, F(stats.face_group_count),         BRTV_QUERY | BRTV_ALL, BRTV_CONV_COPY,},
+    {BRT_TRIANGLES_DRAWN_COUNT_U32,    NULL, F(stats.triangles_drawn_count),    BRTV_QUERY | BRTV_ALL, BRTV_CONV_COPY,},
+    {BRT_TRIANGLES_RENDERED_COUNT_U32, NULL, F(stats.triangles_rendered_count), BRTV_QUERY | BRTV_ALL, BRTV_CONV_COPY,},
+    {BRT_VERTICES_RENDERED_COUNT_U32,  NULL, F(stats.vertices_rendered_count),  BRTV_QUERY | BRTV_ALL, BRTV_CONV_COPY,},
 };
 #undef F
 
@@ -57,6 +61,11 @@ static void BR_CMETHOD_DECL(br_renderer_gl, sceneBegin)(br_object *_self)
 
     self   = (br_renderer *)_self;
     hVideo = &self->device->video;
+
+    self->stats.face_group_count         = 0;
+    self->stats.triangles_drawn_count    = 0;
+    self->stats.triangles_rendered_count = 0;
+    self->stats.vertices_rendered_count  = 0;
 
     /* First draw call, so do all the per-scene crap */
     while(glGetError() != GL_NO_ERROR);

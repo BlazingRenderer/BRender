@@ -117,9 +117,7 @@ static void build_ibo(GLuint ibo, struct v11model_f *model, size_t total_faces, 
 
         groups[i].count  = (GLsizei)gp->nfaces * 3;
         groups[i].offset = (void *)(br_uintptr_t)face_offset;
-#if DEBUG
         groups[i].group = model->groups + i;
-#endif
 
         face_offset += (br_size_t)gp->nfaces * 3 * sizeof(br_uint_16);
 

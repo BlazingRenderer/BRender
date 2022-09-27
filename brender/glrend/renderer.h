@@ -44,6 +44,13 @@ typedef struct br_renderer {
     GLSTATE state;
 
     int has_begun;
+
+    struct {
+        br_uint_32 face_group_count;
+        br_uint_32 triangles_drawn_count;
+        br_uint_32 triangles_rendered_count;
+        br_uint_32 vertices_rendered_count;
+    } stats;
 } br_renderer;
 
 #endif

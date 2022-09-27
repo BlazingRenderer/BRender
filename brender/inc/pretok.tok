@@ -285,6 +285,13 @@ CACHED							boolean
 CACHED_SIZE						uint_32
 CACHED_TOTAL					uint_32
 
+# Tokens used for br_renderer
+#
+FACE_GROUP_COUNT          uint_32
+TRIANGLES_DRAWN_COUNT     uint_32
+TRIANGLES_RENDERED_COUNT  uint_32
+VERTICES_RENDERED_COUNT   uint_32
+
 # Tokens used for br_renderer_type::newRenderer
 #
 DESTINATION						object
