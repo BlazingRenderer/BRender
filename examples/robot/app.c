@@ -55,11 +55,6 @@ POINTL TrackingValues[4];
 
 #ifdef _DEBUG
 int trianglesInHierarchyCount = 0;
-int trianglesRenderedCount    = 0;
-int verticesRenderedCount     = 0;
-int trianglesDrawnCount       = 0;
-int faceGroupCount            = 0;
-int modelsDrawnCount          = 0;
 #endif
 
 static void BR_CALLBACK BrPMError(const char *message);
