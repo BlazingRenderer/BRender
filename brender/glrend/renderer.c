@@ -32,6 +32,9 @@ br_renderer *RendererGLAllocate(br_device *device, br_renderer_facility *facilit
     if(dest == NULL || ObjectDevice(dest) != device)
         return NULL;
 
+    if(dest->use_type != BRT_OFFSCREEN)
+        return NULL;
+
     self = BrResAllocate(facility, sizeof(*self), BR_MEMORY_OBJECT);
     self->dispatch          = &rendererDispatch;
     self->identifier        = facility->identifier;
