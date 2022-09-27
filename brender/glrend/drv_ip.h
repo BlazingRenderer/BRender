@@ -109,9 +109,6 @@ br_renderer_state_stored *RendererStateStoredGLAllocate(br_renderer *renderer, H
  */
 void StoredGLRenderGroup(br_geometry_stored *self, br_renderer *renderer, const gl_groupinfo *groupinfo);
 
-#define RendererSceneBegin(self) ((br_error (*)(br_renderer *(self)))BR_CMETHOD_CALL(br_renderer,_reserved0,self))((br_renderer *)(self))
-#define RendererSceneEnd(self) ((br_error (*)(br_renderer *(self)))BR_CMETHOD_CALL(br_renderer,_reserved1,self))((br_renderer *)(self))
-
 /*
  * Wrappers for br_device_gl_procs.
  */

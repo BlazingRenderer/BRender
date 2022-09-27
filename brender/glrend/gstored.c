@@ -433,10 +433,6 @@ static br_error V1Model_RenderStored(struct br_geometry_stored *self, br_rendere
     br_boolean     defer;
     br_scalar      distance_from_zero;
 
-    /* Call sceneBegin() if we haven't already. I hate doing it here. */
-    if(!renderer->has_begun)
-        renderer->dispatch->__reserved0((br_object *)renderer);
-
     state = renderer->state.current;
 
     BrVector3Set(

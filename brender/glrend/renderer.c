@@ -57,13 +57,9 @@ br_renderer *RendererGLAllocate(br_device *device, br_renderer_facility *facilit
     return (br_renderer *)self;
 }
 
-static void BR_CMETHOD_DECL(br_renderer_gl, sceneBegin)(br_object *_self)
+static void BR_CMETHOD_DECL(br_renderer_gl, sceneBegin)(br_renderer *self)
 {
-    br_renderer *self;
-    HVIDEO      hVideo;
-
-    self   = (br_renderer *)_self;
-    hVideo = &self->device->video;
+    HVIDEO hVideo = &self->device->video;
 
     self->stats.face_group_count         = 0;
     self->stats.triangles_drawn_count    = 0;
@@ -90,10 +86,8 @@ static void BR_CMETHOD_DECL(br_renderer_gl, sceneBegin)(br_object *_self)
     self->has_begun = 1;
 }
 
-void BR_CMETHOD_DECL(br_renderer_gl, sceneEnd)(br_object *_self)
+void BR_CMETHOD_DECL(br_renderer_gl, sceneEnd)(br_renderer *self)
 {
-    br_renderer *self = (br_renderer *)_self;
-
     glDisable(GL_CULL_FACE);
     glDisable(GL_DEPTH_TEST);
     glDisable(GL_BLEND);
@@ -440,7 +434,6 @@ static br_error BR_CMETHOD_DECL(br_renderer_gl, viewDistance)(br_renderer *self,
 
 static br_error BR_CMETHOD_DECL(br_renderer_gl, flush)(br_renderer *self, br_boolean wait)
 {
-    RendererSceneEnd(self);
     return BRE_OK;
 }
 
@@ -495,8 +488,8 @@ static br_error BR_CMETHOD_DECL(br_renderer_gl, focusLossEnd)(br_renderer *self)
  * Default dispatch table for renderer
  */
 static const struct br_renderer_dispatch rendererDispatch = {
-    .__reserved0            = BR_CMETHOD(br_renderer_gl, sceneBegin),
-    .__reserved1            = BR_CMETHOD(br_renderer_gl, sceneEnd),
+    .__reserved0            = NULL,
+    .__reserved1            = NULL,
     .__reserved2            = NULL,
     .__reserved3            = NULL,
     ._free                  = BR_CMETHOD(br_renderer_gl, free),
@@ -563,4 +556,6 @@ static const struct br_renderer_dispatch rendererDispatch = {
     ._frameEnd              = BR_CMETHOD(br_renderer_gl, frameEnd),
     ._focusLossBegin        = BR_CMETHOD(br_renderer_gl, focusLossBegin),
     ._focusLossEnd          = BR_CMETHOD(br_renderer_gl, focusLossEnd),
+    ._sceneBegin            = BR_CMETHOD(br_renderer_gl, sceneBegin),
+    ._sceneEnd              = BR_CMETHOD(br_renderer_gl, sceneEnd),
 };

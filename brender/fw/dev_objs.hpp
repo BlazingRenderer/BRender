@@ -359,6 +359,8 @@ class br_renderer : public br_object_container {
 		virtual br_error BR_METHOD frameEnd(void);
 		virtual br_error BR_METHOD focusLossBegin(void);
 		virtual br_error BR_METHOD focusLossEnd(void);
+		virtual void     BR_METHOD sceneBegin(void);
+		virtual void     BR_METHOD sceneEnd(void);
 };
 
 // Stored renderer state
