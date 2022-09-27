@@ -154,9 +154,6 @@ HVIDEO VIDEO_Open(HVIDEO hVideo, const char *vertShader, const char *fragShader)
         return NULL;
     }
 
-    glGetIntegerv(GL_MAJOR_VERSION, &hVideo->majorVersion);
-    glGetIntegerv(GL_MINOR_VERSION, &hVideo->minorVersion);
-
     hVideo->version  = (const char *)glGetString(GL_VERSION);
     hVideo->vendor   = (const char *)glGetString(GL_VENDOR);
     hVideo->renderer = (const char *)glGetString(GL_RENDERER);

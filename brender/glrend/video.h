@@ -16,8 +16,6 @@ typedef struct _VIDEO_FONT {
 } VIDEO_FONT, *HVIDEO_FONT;
 
 typedef struct _VIDEO {
-    GLint      majorVersion;
-    GLint      minorVersion;
     const char *version;
     const char *vendor;
     const char *renderer;
