@@ -13,8 +13,7 @@ extern "C" {
 /*
  * video.c
  */
-HVIDEO VIDEO_Open(HVIDEO hVideo, br_device_gl_getprocaddress_cbfn get_proc_address,
-                  const char *vertShader, const char *fragShader);
+HVIDEO VIDEO_Open(HVIDEO hVideo, const char *vertShader, const char *fragShader);
 
 void VIDEO_Close(HVIDEO hVideo);
 

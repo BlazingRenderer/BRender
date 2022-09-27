@@ -138,7 +138,12 @@ br_device *DeviceGLAllocate(const char *identifier, const char *arguments)
     if(DeviceGLMakeCurrent(self, self->gl_context) != BRE_OK)
         goto cleanup_context;
 
-    if(VIDEO_Open(&self->video, DeviceGLGetGetProcAddress(self), self->vertex_shader, self->fragment_shader) == NULL)
+    if(gladLoadGLLoader(DeviceGLGetGetProcAddress(self)) == 0) {
+        BrLogError("GLREND", "Unable to load OpenGL functions.");
+        goto cleanup_context;
+    }
+
+    if(VIDEO_Open(&self->video, self->vertex_shader, self->fragment_shader) == NULL)
         goto cleanup_context;
 
     if((self->renderer_facility = RendererFacilityGLInit(self)) == NULL)

@@ -147,16 +147,10 @@ static void VIDEOI_SetupTextures(HVIDEO hVideo)
     VIDEOI_BuildFontAtlas(hVideo, &hVideo->fonts.prop7x9, BrFontProp7x9, 256, 64);
 }
 
-HVIDEO VIDEO_Open(HVIDEO hVideo, br_device_gl_getprocaddress_cbfn get_proc_address,
-                  const char *vertShader, const char *fragShader)
+HVIDEO VIDEO_Open(HVIDEO hVideo, const char *vertShader, const char *fragShader)
 {
     if(hVideo == NULL) {
         BrLogError("VIDEO", "Invalid handle.");
-        return NULL;
-    }
-
-    if(gladLoadGLLoader(get_proc_address) == 0) {
-        BrLogError("VIDEO", "Unable to load OpenGL functions.");
         return NULL;
     }
 
