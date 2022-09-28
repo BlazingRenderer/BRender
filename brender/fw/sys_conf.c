@@ -730,7 +730,7 @@ static br_error	parseEntryLine(br_lexer *l, br_token_value *tv, br_size_t size)
 			}
 		}
 
-		switch (BrLexerCurrent(l)) {
+		switch ((int)BrLexerCurrent(l)) {
 
 		/*
 		 * Look for float or fixed

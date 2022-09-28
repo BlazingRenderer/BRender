@@ -32,7 +32,7 @@ br_resource_class * BR_PUBLIC_ENTRY BrResClassAdd(br_resource_class *rclass)
 	if(r != NULL)
 		fw.resource_class_index[rclass->res_class] = r;
 
-	return r; r;
+	return r;
 }
 
 br_resource_class * BR_PUBLIC_ENTRY BrResClassRemove(br_resource_class *rclass)
