@@ -233,7 +233,7 @@ STATIC br_uint_32 ParseMatFlags(br_lexer *l)
 	 * Read flag keywords until ]
 	 */
 	for(;;) {
-		switch(BrLexerCurrent(l)) {
+		switch((int)BrLexerCurrent(l)) {
         case T_LIGHT:                   f |= BR_MATF_LIGHT;                     break;
         case T_PRELIT:                  f |= BR_MATF_PRELIT;                    break;
 		case T_SMOOTH:
@@ -292,7 +292,7 @@ STATIC br_material *ParseMaterial(br_lexer *l)
 	BrLexerExpect(l,T_LSQUARE);
 
 	while(BrLexerCurrent(l) != T_RSQUARE) {
-		switch(BrLexerCurrent(l)) {
+		switch((int)BrLexerCurrent(l)) {
 		case T_IDENTIFIER:
 		case T_NAME:
 			BrLexerAdvance(l); BrLexerExpect(l,T_EQUAL); BrLexerCheck(l,T_STRING);
@@ -352,7 +352,7 @@ STATIC br_material *ParseMaterial(br_lexer *l)
 
 		case T_DEPTH_TEST:
 			BrLexerAdvance(l); BrLexerExpect(l,T_EQUAL);
-			switch (BrLexerCurrent(l)) {
+			switch ((int)BrLexerCurrent(l)) {
 			case T_GT:
 				mat->mode = (mat->mode & ~BR_MATM_DEPTH_TEST_MASK) | BR_MATM_DEPTH_TEST_GT;
 				break;
@@ -385,7 +385,7 @@ STATIC br_material *ParseMaterial(br_lexer *l)
 
 		case T_BLEND_MODE:
 			BrLexerAdvance(l); BrLexerExpect(l,T_EQUAL);
-			switch (BrLexerCurrent(l)) {
+			switch ((int)BrLexerCurrent(l)) {
 			case T_STANDARD:
 				mat->mode = (mat->mode & ~BR_MATM_BLEND_MODE_MASK) | BR_MATM_BLEND_MODE_STANDARD;
 				break;
@@ -406,7 +406,7 @@ STATIC br_material *ParseMaterial(br_lexer *l)
 
 		case T_MAP_WIDTH_LIMIT:
 			BrLexerAdvance(l); BrLexerExpect(l,T_EQUAL);
-			switch (BrLexerCurrent(l)) {
+			switch ((int)BrLexerCurrent(l)) {
 			case T_WRAP:
 				mat->mode = (mat->mode & ~BR_MATM_MAP_WIDTH_LIMIT_MASK) | BR_MATM_MAP_WIDTH_LIMIT_WRAP;
 				break;
@@ -424,7 +424,7 @@ STATIC br_material *ParseMaterial(br_lexer *l)
 
 		case T_MAP_HEIGHT_LIMIT:
 			BrLexerAdvance(l); BrLexerExpect(l,T_EQUAL);
-			switch (BrLexerCurrent(l)) {
+			switch ((int)BrLexerCurrent(l)) {
 			case T_WRAP:
 				mat->mode = (mat->mode & ~BR_MATM_MAP_HEIGHT_LIMIT_MASK) | BR_MATM_MAP_HEIGHT_LIMIT_WRAP;
 				break;
@@ -532,7 +532,7 @@ STATIC br_material *ParseMaterial(br_lexer *l)
 	BrLexerExpect(l,T_SEMICOLON);
 
 	return mat;
-};
+}
 
 static void BR_CALLBACK lexerError(struct br_lexer *l, char *string)
 {

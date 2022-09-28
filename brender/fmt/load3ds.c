@@ -2919,12 +2919,13 @@ STATIC br_actor * MakeEnclosingActor(Int_t depth,
         fill_actor->render_style = BR_RSTYLE_FACES;
         fill_actor->t.type = BR_TRANSFORM_IDENTITY;
 
-		if(pivot)
+		if(pivot) {
 			if (options->flags & BR_3DS_USE_MODEL_PIVOT)
 				BrVector3Copy(&fill_actor->model->pivot, pivot);
 			else
 				TranslateModelVertices(fill_actor->model,
 					-pivot->v[0],-pivot->v[1],-pivot->v[2]);
+		}
 
         if (BrActorAdd(actor,fill_actor) == NULL) {
             BrActorFree(actor);
@@ -2946,12 +2947,13 @@ STATIC br_actor * MakeEnclosingActor(Int_t depth,
         wire_actor->render_style = BR_RSTYLE_EDGES;
         wire_actor->t.type = BR_TRANSFORM_IDENTITY;
 
-		if(pivot)
+		if(pivot) {
 			if (options->flags & BR_3DS_USE_MODEL_PIVOT)
 				BrVector3Copy(&wire_actor->model->pivot, pivot);
 			else
 				TranslateModelVertices(wire_actor->model,
 					-pivot->v[0],-pivot->v[1],-pivot->v[2]);
+		}
 
         if (BrActorAdd(actor,wire_actor) == NULL) {
             BrActorFree(actor);
@@ -2968,13 +2970,13 @@ STATIC br_actor * MakeEnclosingActor(Int_t depth,
 		actor->render_style = BR_RSTYLE_FACES;
 		actor->type = BR_ACTOR_MODEL;
 
-		if(pivot)
+		if(pivot) {
 			if (options->flags & BR_3DS_USE_MODEL_PIVOT)
 				BrVector3Copy(&actor->model->pivot, pivot);
 			else
 				TranslateModelVertices(actor->model,
 					-pivot->v[0],-pivot->v[1],-pivot->v[2]);
-
+		}
     } else if (named_obj != NULL &&
 			named_obj->type == MODEL &&
         	named_obj->data.model->fill_model == NULL &&
@@ -2984,12 +2986,13 @@ STATIC br_actor * MakeEnclosingActor(Int_t depth,
 		actor->type = BR_ACTOR_MODEL;
 		actor->render_style = BR_RSTYLE_EDGES;
 
-		if(pivot)
+		if(pivot) {
 			if (options->flags & BR_3DS_USE_MODEL_PIVOT)
 				BrVector3Copy(&actor->model->pivot, pivot);
 			else
 				TranslateModelVertices(actor->model,
 					-pivot->v[0],-pivot->v[1],-pivot->v[2]);
+		}
 	}
 
 #if REPORT_MESSAGES

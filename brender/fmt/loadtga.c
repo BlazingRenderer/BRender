@@ -120,7 +120,8 @@ br_pixelmap * BR_PUBLIC_ENTRY BrFmtTGALoad(const char *name,br_uint_32 flags)
 	br_int_32 ystart,yend,dy;
 	br_uint_32 bytes_per_line,palette_size;
 
-	unsigned char *mblock,supported;
+	unsigned char supported;
+	char *mblock;
 
 	fh = BrFileOpenRead(name,0,NULL,&open_mode);
 
