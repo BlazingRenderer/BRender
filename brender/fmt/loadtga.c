@@ -35,10 +35,10 @@ static void * ReadLine_Comp_24(char *line,void *fh);		/* 24 bit, compressed		*/
 static void * ReadLine_Uncomp_32(char *line,void *fh);		/* 32 bit, uncompressed		*/
 static void * ReadLine_Comp_32(char *line,void *fh);		/* 32 bit, compressed		*/
 
-static void CopyLine_8(br_pixelmap *pm,char *line,int row);
-static void CopyLine_16(br_pixelmap *pm,char *line,int row);
-static void CopyLine_24(br_pixelmap *pm,char *line,int row);
-static void CopyLine_32(br_pixelmap *pm,char *line,int row);
+static void CopyLine_8(br_pixelmap *pm, const char *line, int row);
+static void CopyLine_16(br_pixelmap *pm, const char *line, int row);
+static void CopyLine_24(br_pixelmap *pm, const char *line, int row);
+static void CopyLine_32(br_pixelmap *pm, const char *line, int row);
 
 enum {
     	BR_TGA_UNCOMPRESSED_PALETTE	=	0x01,
@@ -60,7 +60,7 @@ static struct {
 	char pixel_bits;
     	char supported;
 	void * (*read_func)(char *line,void *fh);			/* read 1 line of image data from file */
-	void (*copy_func)(br_pixelmap *map,char *line,int row);		/* copy 1 line of data to pixelmap */
+	void (*copy_func)(br_pixelmap *map,const char *line,int row);		/* copy 1 line of data to pixelmap */
 
 } Supported_TGA_types[]={
 
@@ -488,7 +488,7 @@ static void * ReadLine_Comp_32(char *line,void *fh)
 	return line;
 }
 
-static void CopyLine_8(br_pixelmap *pm,char *line,int row)
+static void CopyLine_8(br_pixelmap *pm, const char *line, int row)
 {
    	br_int_32 xstart,xend,dx;
 	int i,j;
@@ -510,7 +510,7 @@ static void CopyLine_8(br_pixelmap *pm,char *line,int row)
 	    	((char *)(pm->pixels))[(row*pm->row_bytes)+j]=line[i];
 }
 
-static void CopyLine_16(br_pixelmap *pm,char *line,int row)
+static void CopyLine_16(br_pixelmap *pm, const char *line, int row)
 {
    	br_int_32 xstart,xend,dx;
 	int i,j;
@@ -535,7 +535,7 @@ static void CopyLine_16(br_pixelmap *pm,char *line,int row)
 	}
 
 }
-static void CopyLine_24(br_pixelmap *pm,char *line,int row)
+static void CopyLine_24(br_pixelmap *pm, const char *line, int row)
 {
    	br_int_32 xstart,xend,dx;
 	int i,j;
@@ -561,7 +561,7 @@ static void CopyLine_24(br_pixelmap *pm,char *line,int row)
 	}
 }
 
-static void CopyLine_32(br_pixelmap *pm,char *line,int row)
+static void CopyLine_32(br_pixelmap *pm, const char *line, int row)
 {
    	br_int_32 xstart,xend,dx;
 	int i,j;
