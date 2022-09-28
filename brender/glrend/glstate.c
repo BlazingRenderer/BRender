@@ -104,9 +104,6 @@ GLSTATE_API struct br_tv_template *GLSTATE_GetStateTemplate(HGLSTATE hState, br_
 		case BRT_PRIMITIVE:
 			return hState->templates.prim;
 
-		case BRT_ENABLE:
-			break;
-
 		case BRT_HIDDEN_SURFACE:
 			return hState->templates.hidden;
 		case BRT_LIGHT:
@@ -115,12 +112,15 @@ GLSTATE_API struct br_tv_template *GLSTATE_GetStateTemplate(HGLSTATE hState, br_
 
 			return hState->templates.light[index];
 
-		case BRT_BOUNDS:
-			break;
-		case BRT_CLIP:
-			break;
 		case BRT_OUTPUT:
 			return hState->templates.output;
+
+		case BRT_ENABLE:
+		case BRT_BOUNDS:
+		case BRT_CLIP:
+		default:
+			break;
+
 	}
 
 	return NULL;
