@@ -941,7 +941,7 @@ void BR_PUBLIC_ENTRY BrZbSceneRenderEnd(void)
 	/*
 	 * Draw any deferred primitives
 	 */
-	if(v1db.format_buckets != NULL)
+	if(v1db.format_buckets != NULL) {
 
 		if(v1db.primary_order_table) {
 
@@ -956,6 +956,7 @@ void BR_PUBLIC_ENTRY BrZbSceneRenderEnd(void)
 			 */
 			RenderOrderTableList();
 		}
+	}
 
 	/*
 	 * Overlay lattice if evaluation version
