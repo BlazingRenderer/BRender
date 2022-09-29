@@ -208,12 +208,6 @@ vec4 fragmain()
 
     vec4 normalDirection = normal;
 
-    // -- FIX: fixes BR_TWO_SIDED faces
-    /*if(gl_FrontFacing != true)
-    {
-        normalDirection *= -1.0;
-    }*/
-
     vec3 _colour = surface_colour.xyz * ka;
 
     /* This is shit, but this is the way the engine does it */

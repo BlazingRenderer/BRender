@@ -35,15 +35,31 @@ static void apply_stored_properties(HVIDEO hVideo, HGLSTATE_STACK state, uint32_
     states = state->valid & states;
 
     if(states & GLSTATE_MASK_CULL) {
+        /*
+         * Apply culling states. These are a bit confusing:
+         * BRT_ONE_SIDED - Simple, cull back faces. From BRT_ONE_SIDED.
+         *
+         * BRT_TWO_SIDED - This means the face is two-sided, not to cull
+         *                 both sides. From BR_MATF_TWO_SIDED. In the .3ds file
+         *                 format, the "two sided" flag means the material is
+         *                 visible from the back, or "not culled". fmt/load3ds.c
+         *                 sets BR_MATF_TWO_SIDED if this is set, so assume this is
+         *                 the correct behaviour.
+         *
+         * BRT_NONE      - Confusing, this is set if the material has
+         *                 BR_MATF_ALWAYS_VISIBLE, but is overridden if
+         *                 BR_MATF_TWO_SIDED is set. Assume it means the same
+         *                 as BR_MATF_TWO_SIDED.
+         */
         switch(state->cull.type) {
             case BRT_ONE_SIDED:
+            default: /* Default BRender policy, so default. */
                 glEnable(GL_CULL_FACE);
                 glCullFace(GL_BACK);
                 break;
+
             case BRT_TWO_SIDED:
-                /* Don't cull, is handled in the shader. */
             case BRT_NONE:
-            default:
                 glDisable(GL_CULL_FACE);
                 break;
         }
