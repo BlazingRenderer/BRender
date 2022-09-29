@@ -125,6 +125,7 @@ typedef struct _GLSTD140_MODEL_DATA {
     alignas(4) float         kd;
     alignas(4) float         power;
     alignas(4) uint32_t      unlit;
+    alignas(4) uint32_t      disable_colour_key;
 } GLSTD140_MODEL_DATA, *HGLSTD140_MODEL_DATA;
 #pragma pack(pop)
 

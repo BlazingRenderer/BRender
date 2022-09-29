@@ -93,6 +93,8 @@ static void apply_stored_properties(HVIDEO hVideo, HGLSTATE_STACK state, uint32_
     }
 
     if(states & GLSTATE_MASK_PRIMITIVE) {
+        hModel->disable_colour_key = !(state->prim.flags & PRIMF_COLOUR_KEY);
+
         if(state->prim.flags & PRIMF_DEPTH_WRITE)
             glDepthMask(GL_TRUE);
         else

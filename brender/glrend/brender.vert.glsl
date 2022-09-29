@@ -55,6 +55,7 @@ layout(std140) uniform br_model_state
     float kd; /* Diffuse mod */
     float power;
     uint unlit; /* Is this surface unlit? */
+    bool disable_colour_key;
 };
 
 #define SPECULAR_DOT()                    \

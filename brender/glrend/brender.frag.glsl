@@ -2,7 +2,6 @@
 
 #define MAX_LIGHTS                   48 /* Must match up with BRender */
 
-#define DEBUG_DISABLE_COLOUR_KEY     0
 #define ENABLE_GAMMA_CORRECTION      0
 #define ENABLE_SIMULATE_8BIT_COLOUR  0
 #define ENABLE_SIMULATE_16BIT_COLOUR 0
@@ -38,6 +37,7 @@ layout(std140) uniform br_model_state
     float kd; /* Diffuse mod */
     float power;
     uint unlit; /* Is this surface unlit? */
+    bool disable_colour_key;
 };
 
 in vec4 position;
@@ -80,11 +80,8 @@ void main()
 {
     vec4 texColour = texture(main_texture, uv);
 
-#if !DEBUG_DISABLE_COLOUR_KEY
-    /* Discard black, used for sprite transparency */
-    if (/*texColour.a < 0.01 || */ texColour.rgb == vec3(0.0, 0.0, 0.0))
+    if(!disable_colour_key && texColour.rgb == vec3(0.0, 0.0, 0.0))
         discard;
-#endif
 
     vec4 surfaceColour = surface_colour * texColour;
     vec3 fragColour = vec3(colour.rgb * texColour.rgb);
