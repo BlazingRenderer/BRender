@@ -103,11 +103,6 @@ static void apply_stored_properties(HVIDEO hVideo, HGLSTATE_STACK state, uint32_
         else
             glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
 
-        if(state->prim.flags & PRIMF_BLEND)
-            glEnable(GL_BLEND);
-        else
-            glDisable(GL_BLEND);
-
         GLenum depthFunc;
         switch(state->prim.depth_test) {
             case BRT_LESS:
@@ -193,6 +188,11 @@ static void apply_stored_properties(HVIDEO hVideo, HGLSTATE_STACK state, uint32_
         //		}
         //	}
         //}
+
+        if(state->prim.flags & PRIMF_BLEND)
+            glEnable(GL_BLEND);
+        else
+            glDisable(GL_BLEND);
 
         /* This seems to be the only way to see if something needs blending :/ */
         if(state->prim.index_blend != NULL) {
