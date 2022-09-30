@@ -213,8 +213,7 @@ typedef struct _GLSTATE_PRIMITIVE
 	//br_token	z_write;
 	br_token	depth_test;
 
-	// Neither is this
-	//br_token	blend_mode;
+	br_token	blend_mode;
 
 	/*
 	* Type of perspective correct rendering

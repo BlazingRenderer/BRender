@@ -27,7 +27,7 @@ static const br_tv_template_entry GLSTATEI_PrimitiveTemplateEntries[] = {
 
     //{BRT_Z_WRITE_T,               NULL, F(prim.z_write),             Q | S | A, BRTV_CONV_COPY, 0,                   1},
     {BRT_DEPTH_TEST_T,            NULL, F(prim.depth_test),          Q | S | A, BRTV_CONV_COPY, 0,                   1},
-    //{BRT_BLEND_MODE_T,            NULL, F(prim.blend_mode),          Q | S | A, BRTV_CONV_COPY, 0,                   1},
+    {BRT_BLEND_MODE_T,            NULL, F(prim.blend_mode),          Q | S | A, BRTV_CONV_COPY, 0,                   1},
 
     {BRT_INDEX_BASE_I32,          NULL, F(prim.index_base),          Q | S | A, BRTV_CONV_COPY, 0,                   1},
     {BRT_INDEX_RANGE_I32,         NULL, F(prim.index_range),         Q | S | A, BRTV_CONV_COPY, 0,                   1},
@@ -56,7 +56,7 @@ static const GLSTATE_PRIMITIVE s_Default = {
 	.colour_type			= BRT_DEFAULT,
 	//.z_write				= BRT_Z_WRITE_CONDITIONAL,
 	.depth_test				= BRT_LESS,
-	//.blend_mode			= BRT_NONE,
+	.blend_mode				= BRT_NONE,
 	.perspective_type		= BRT_NONE,	// BRT_NONE, BRT_SUBDIVIDE
 	.subdivide_tolerance	= 0,
 	.colour_map				= NULL,
