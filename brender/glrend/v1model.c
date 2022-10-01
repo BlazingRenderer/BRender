@@ -29,7 +29,7 @@ static int is_croc_dome(HGLSTATE_STACK state)
 static void apply_stored_properties(HVIDEO hVideo, HGLSTATE_STACK state, uint32_t states,
                                     br_boolean *unlit, HGLSTD140_MODEL_DATA hModel)
 {
-    glDisable(GL_BLEND);
+    br_boolean blending_on;
 
     /* Only use the states we want (if valid). */
     states = state->valid & states;
@@ -191,7 +191,8 @@ static void apply_stored_properties(HVIDEO hVideo, HGLSTATE_STACK state, uint32_
         //	}
         //}
 
-        if(state->prim.flags & PRIMF_BLEND)
+        blending_on = (state->prim.flags & PRIMF_BLEND) || (state->prim.colour_map != NULL && state->prim.colour_map->blended);
+        if(blending_on)
             glEnable(GL_BLEND);
         else
             glDisable(GL_BLEND);
