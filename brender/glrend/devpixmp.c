@@ -300,7 +300,7 @@ static br_error create_pixelmap(br_device_pixelmap **newpm, br_object *parent, b
     else if(msaa_samples > device->video.maxSamples)
         msaa_samples = device->video.maxSamples;
 
-    err = VIDEOI_BrPixelmapGetTypeDetails(type, &gl_internal_format, &gl_format, &gl_type, &gl_elem_bytes);
+    err = VIDEOI_BrPixelmapGetTypeDetails(type, &gl_internal_format, &gl_format, &gl_type, &gl_elem_bytes, NULL);
     if(err != BRE_OK)
         return err;
 
@@ -770,7 +770,7 @@ br_error BR_CMETHOD_DECL(br_device_pixelmap_gl, rectangleCopyFrom)(br_device_pix
     GLint      internalFormat;
     GLenum     format, type;
     GLsizeiptr elemBytes;
-    VIDEOI_BrPixelmapGetTypeDetails(dest->pm_type, &internalFormat, &format, &type, &elemBytes);
+    VIDEOI_BrPixelmapGetTypeDetails(dest->pm_type, &internalFormat, &format, &type, &elemBytes, NULL);
 
     glReadPixels(0, 0, self->pm_width, self->pm_height, format, type, dest->pm_pixels);
 

@@ -206,14 +206,16 @@ void VIDEO_Close(HVIDEO hVideo)
 }
 
 br_error VIDEOI_BrPixelmapGetTypeDetails(br_uint_8 pmType, GLint *internalFormat, GLenum *format, GLenum *type,
-                                         GLsizeiptr *elemBytes)
+                                         GLsizeiptr *elemBytes, br_boolean *blended)
 {
+    br_boolean is_blended = BR_FALSE;
     switch(pmType) {
         case BR_PMT_RGBA_8888_ARR:
             *internalFormat = GL_RGBA;
             *format         = GL_RGBA;
             *type           = GL_UNSIGNED_BYTE;
             *elemBytes      = 4;
+            is_blended      = BR_TRUE;
             break;
         case BR_PMT_RGB_555:
             //assert(!"RGB_555");
@@ -245,12 +247,14 @@ br_error VIDEOI_BrPixelmapGetTypeDetails(br_uint_8 pmType, GLint *internalFormat
             *format         = GL_RGBA;
             *type           = GL_UNSIGNED_INT_8_8_8_8;
             *elemBytes      = 4;
+            is_blended      = BR_TRUE;
             break;
         case BR_PMT_ARGB_8888:
             *internalFormat = GL_RGBA;
             *format         = GL_BGRA;
             *type           = GL_UNSIGNED_INT_8_8_8_8_REV;
             *elemBytes      = 4;
+            is_blended      = BR_TRUE;
             break;
         case BR_PMT_BGR_555:
             *internalFormat = GL_RGB;
@@ -263,12 +267,14 @@ br_error VIDEOI_BrPixelmapGetTypeDetails(br_uint_8 pmType, GLint *internalFormat
             *format         = GL_RGBA;
             *type           = GL_UNSIGNED_SHORT_4_4_4_4;
             *elemBytes      = 2;
+            is_blended      = BR_TRUE;
             break;
         case BR_PMT_ARGB_4444:
             *internalFormat = GL_RGBA;
             *format         = GL_BGRA;
             *type           = GL_UNSIGNED_SHORT_4_4_4_4_REV;
             *elemBytes      = 2;
+            is_blended      = BR_TRUE;
             break;
         case BR_PMT_RGB_332:
             *internalFormat = GL_RGB;
@@ -291,6 +297,10 @@ br_error VIDEOI_BrPixelmapGetTypeDetails(br_uint_8 pmType, GLint *internalFormat
         default:
             return BRE_FAIL;
     }
+
+    if(blended != NULL)
+       *blended = is_blended;
+
     return BRE_OK;
 }
 
@@ -302,7 +312,7 @@ void VIDEOI_BrPixelmapToExistingTexture(GLuint tex, br_pixelmap *pm)
     GLenum     format;
     GLenum     type;
     GLsizeiptr elemBytes;
-    VIDEOI_BrPixelmapGetTypeDetails(pm->type, &internalFormat, &format, &type, &elemBytes);
+    VIDEOI_BrPixelmapGetTypeDetails(pm->type, &internalFormat, &format, &type, &elemBytes, NULL);
 
     glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, pm->width, pm->height, 0, format, type, pm->pixels);
 
