@@ -157,7 +157,7 @@ static br_error updateMemory(br_buffer_stored *self, br_pixelmap *pm)
     if((pm->flags & BR_PMF_NO_ACCESS) || pm->pixels == NULL)
         return BRE_FAIL;
 
-    r = VIDEOI_BrPixelmapGetTypeDetails(pm->type, &internal_format, &format, &type, &elem_bytes, NULL);
+    r = VIDEOI_BrPixelmapGetTypeDetails(pm->type, &internal_format, &format, &type, &elem_bytes, &self->blended);
     if(r != BRE_OK)
         return r;
 

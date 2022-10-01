@@ -47,6 +47,8 @@ typedef struct br_buffer_stored
     GLenum gl_format;
     GLenum gl_type;
 
+    br_boolean blended;
+
     /*
      * Object query templates.
      * FIXME: These should be stored on the device, but that can't
