@@ -26,6 +26,45 @@ static int is_croc_dome(HGLSTATE_STACK state)
     return strstr(pm->identifier, "DOMEATLAS") == pm->identifier;
 }
 
+static void apply_blend_mode(HGLSTATE_STACK self)
+{
+    /* C_result = (C_source * F_Source) + (C_dest * F_dest) */
+
+    /* NB: srcAlpha and dstAlpha are all GL_ONE and GL_ZERO respectively. */
+    switch(self->prim.blend_mode) {
+        default:
+            /* fallthrough */
+        case BRT_BLEND_STANDARD:
+            /* fallthrough */
+        case BRT_BLEND_DIMMED:
+            /*
+             * 3dfx blending mode = 1
+             * Colour = (alpha * src) + ((1 - alpha) * dest)
+             * Alpha  = (1     * src) + (0           * dest)
+             */
+            glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ZERO);
+            break;
+
+        case BRT_BLEND_SUMMED:
+            /*
+             * 3fdx blending mode = 4
+             * Colour = (alpha * src) + (1 * dest)
+             * Alpha  = (1     * src) + (0 * dest)
+             */
+            glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE, GL_ONE, GL_ZERO);
+            break;
+
+        case BRT_BLEND_PREMULTIPLIED:
+            /*
+             * 3dfx qblending mode = 2
+             * Colour = (1 * src) + ((1 - alpha) * dest)
+             * Alpha  = (1 * src) + (0           * dest)
+             */
+            glBlendFuncSeparate(GL_ONE, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ZERO);
+            break;
+    }
+}
+
 static void apply_stored_properties(HVIDEO hVideo, HGLSTATE_STACK state, uint32_t states,
                                     br_boolean *unlit, HGLSTD140_MODEL_DATA hModel)
 {
@@ -192,17 +231,11 @@ static void apply_stored_properties(HVIDEO hVideo, HGLSTATE_STACK state, uint32_
         //}
 
         blending_on = (state->prim.flags & PRIMF_BLEND) || (state->prim.colour_map != NULL && state->prim.colour_map->blended);
-        if(blending_on)
+        if(blending_on) {
             glEnable(GL_BLEND);
-        else
+            apply_blend_mode(state);
+        } else {
             glDisable(GL_BLEND);
-
-        /* This seems to be the only way to see if something needs blending :/ */
-        if(state->prim.index_blend != NULL) {
-            glEnable(GL_BLEND);
-
-            glBlendEquation(GL_FUNC_ADD);
-            glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
         }
     }
 }
