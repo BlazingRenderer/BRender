@@ -9,8 +9,11 @@ stdenv.mkDerivation rec {
   nativeBuildInputs = [
     cmake
     perl
-    SDL2
     makeWrapper
+  ];
+
+  buildInputs = [
+    SDL2
   ];
 
   installPhase = ''
