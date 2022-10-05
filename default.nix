@@ -1,4 +1,4 @@
-{ stdenv, version, cmake, perl, SDL2, makeWrapper }:
+{ stdenv, version, cmake, perl, SDL2, makeBinaryWrapper }:
 stdenv.mkDerivation rec {
   inherit version;
 
@@ -9,7 +9,7 @@ stdenv.mkDerivation rec {
   nativeBuildInputs = [
     cmake
     perl
-    makeWrapper
+    makeBinaryWrapper
   ];
 
   buildInputs = [
