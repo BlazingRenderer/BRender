@@ -1,12 +1,13 @@
-# BRender Source Code, Croc version
+# Blazing Renderer (BRender), Croc version
 
-Now that the [BRender source code](https://github.com/foone/BRender-v1.3.2) has been released,
-I can now release the copies used in the various Croc DE versions.
+This is the Croc Definitive Edition fork of BRender, originally the internal version
+in the Croc source tree (later released [here](https://github.com/foone/BRender-1997)).
 
-These are copied straight out of the Croc source tree.
+It has since been updated to include all the changes from the latest-known version,
+[1.3.2](https://github.com/foone/BRender-v1.3.2). 
 
-A sample CMake project, two BRender tools (`mkranges` and `mkshades`), and the OS/2 Robot
-example application have been provided to demonstrate usage of the engine.
+Sample applications, (`robot` and `cube`) are included, as well as most of the original
+utilities released with the engine.
 
 Enjoy!
 
