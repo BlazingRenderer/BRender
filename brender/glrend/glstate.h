@@ -77,8 +77,6 @@ typedef struct _GLSTATE_SURFACE
 	br_scalar	depth_bias;
 
 	br_token	colour_source;
-	br_token	opacity_source;
-	br_token	mapping_source;
 
 	br_matrix23	map_transform;
 } GLSTATE_SURFACE, *HGLSTATE_SURFACE;
