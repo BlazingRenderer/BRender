@@ -260,6 +260,10 @@ CACHED							boolean
 CACHED_SIZE						uint_32
 CACHED_TOTAL					uint_32
 
+# Tokens used for GEOMETRY_V1_MODEL object information
+#
+STORED_ONLY						boolean
+
 # Tokens used for RENDERER_STATE_STORED object information
 #
 PARTS							uint_32
