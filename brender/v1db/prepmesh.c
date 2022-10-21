@@ -992,6 +992,7 @@ void BR_PUBLIC_ENTRY BrModelUpdate(br_model *model, br_uint_16 flags)
 	br_scalar centred_radius;
 	br_bounds3 old_bounds;
 	br_boolean centre_valid=BR_FALSE;
+	br_boolean stored_only=BR_FALSE;
 
 	/*
 	 * Do not do anything if model is marked as being pre-prepared
@@ -1233,14 +1234,12 @@ void BR_PUBLIC_ENTRY BrModelUpdate(br_model *model, br_uint_16 flags)
 
 	/*
 	 * Generate stored object, if renderer is available
-	 *
-	 * Hacked for glrend which doesn't support non-stored geometry.
 	 */
-	if(v1db.renderer && v1db.format_model /*&&
-		!(model->flags & BR_MODF_UPDATEABLE) &&
-		(model->flags & BR_MODF_FACES_ONLY)*/) {
+	if(v1db.renderer != NULL && v1db.format_model != NULL) {
+		(void)ObjectQuery(v1db.format_model, &stored_only, BRT_STORED_ONLY_B);
 
-		GenerateStoredModel(model);
+		if(stored_only || (!(model->flags & BR_MODF_UPDATEABLE) && (model->flags & BR_MODF_FACES_ONLY)))
+			GenerateStoredModel(model);
 	}
 }
 
