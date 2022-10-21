@@ -932,6 +932,47 @@ void RegenerateVertexNormals(struct v11model *v11m)
 	}
 }
 
+static void GenerateStoredModel(br_model *model)
+{
+	br_error r;
+	struct br_geometry_stored *sg;
+	br_boolean b;
+	br_token_value tv[] = {
+			{.t = BRT_CAN_SHARE_B, {.b = BR_TRUE}},
+			{.t = BR_NULL_TOKEN},
+	};
+
+	/*
+	 * Release any existing stored object
+	 */
+	if(model->stored) {
+		ObjectFree(model->stored);
+		model->stored = NULL;
+	}
+
+	/*
+	 * Try and generate a stored version of the model (as faces)
+	 */
+	r = GeometryV1ModelStoredNew(v1db.format_model, v1db.renderer, &sg, model->prepared, BRT_TRIANGLE, tv);
+
+	if((r == BRE_OK) && (sg != NULL)) {
+		/*
+		 * It worked, remember the pointer
+		 */
+		model->stored = sg;
+
+		/*
+		 * If the resulting buffer does not share any of the prepared data, ditch it
+		 */
+		r = ObjectQuery(sg,&b,BRT_SHARED_B);
+
+		if(r==BRE_OK && b == BR_FALSE) {
+			BrResFree(model->prepared);
+			model->prepared = NULL;
+		}
+	}
+}
+
 /*
  * Do all model preprocessing
  */
@@ -1199,43 +1240,7 @@ void BR_PUBLIC_ENTRY BrModelUpdate(br_model *model, br_uint_16 flags)
 		!(model->flags & BR_MODF_UPDATEABLE) &&
 		(model->flags & BR_MODF_FACES_ONLY)*/) {
 
-		br_error r;
-		struct br_geometry_stored *sg;
-		br_boolean b;
-		br_token_value tv[] = {
-			{BRT_CAN_SHARE_B, {.b = BR_TRUE}},
-			{0},
-		};
-
-		/*
-		 * Release any existing stored object
-		 */
-		if(model->stored) {
-			ObjectFree(model->stored);
-			model->stored = NULL;
-		}
-
-		/*
-		 * Try and generate a stored version of the model (as faces)
-		 */
-		r = GeometryV1ModelStoredNew(v1db.format_model, v1db.renderer, &sg, model->prepared, BRT_TRIANGLE, tv);
-
-		if((r == BRE_OK) && (sg != NULL)) {
-			/*
-			 * It worked, remember the pointer
-			 */
-			model->stored = sg;
-
-			/*
-			 * If the resulting buffer does not share any of the prepared data, ditch it
-			 */
-			r = ObjectQuery(sg,&b,BRT_SHARED_B);
-
-			if(r==BRE_OK && b == BR_FALSE) {
-				BrResFree(model->prepared);
-				model->prepared = NULL;
-			}
-		}
+		GenerateStoredModel(model);
 	}
 }
 
