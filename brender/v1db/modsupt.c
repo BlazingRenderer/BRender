@@ -226,7 +226,7 @@ void BR_PUBLIC_ENTRY BrModelFree(br_model *m)
 /*
  * Allocate a model of a given size
  */
-br_model * BR_PUBLIC_ENTRY BrModelAllocate(char *name, int nvertices, int nfaces)
+br_model * BR_PUBLIC_ENTRY BrModelAllocate(const char *name, int nvertices, int nfaces)
 {
 	br_model *m;
 

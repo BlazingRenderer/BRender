@@ -107,7 +107,7 @@ void BR_PUBLIC_ENTRY BrModelUpdate(br_model *model, br_uint_16 flags);
 void BR_PUBLIC_ENTRY BrModelApplyMap(br_model *model,int map_type, br_matrix34 *xform);
 br_matrix34 * BR_PUBLIC_ENTRY BrModelFitMap(br_model *model, int axis_0, int axis_1, br_matrix34 *transform);
 
-br_model * BR_PUBLIC_ENTRY BrModelAllocate(char *name, int nvertices, int nfaces);
+br_model * BR_PUBLIC_ENTRY BrModelAllocate(const char *name, int nvertices, int nfaces);
 void BR_PUBLIC_ENTRY BrModelFree(br_model *m);
 
 /*
