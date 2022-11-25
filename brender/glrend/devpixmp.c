@@ -639,17 +639,15 @@ br_error BR_CMETHOD_DECL(br_device_pixelmap_gl, rectangleCopy)(br_device_pixelma
 br_error BR_CMETHOD_DECL(br_device_pixelmap_gl, rectangleFill)(br_device_pixelmap *self,
                                                                br_rectangle *rect, br_uint_32 colour)
 {
-    ASSERT(self->use_type == BRT_OFFSCREEN || self->use_type == BRT_DEPTH);
-
-    float a = (float)((colour & 0xFF000000) >> 24) / 255.0f;
-    float r = (float)((colour & 0x00FF0000) >> 16) / 255.0f;
-    float g = (float)((colour & 0x0000FF00) >> 8) / 255.0f;
-    float b = (float)((colour & 0x000000FF) >> 0) / 255.0f;
+    GLuint     fbo;
+    GLbitfield mask;
+    float      a = (float)((colour & 0xFF000000) >> 24) / 255.0f;
+    float      r = (float)((colour & 0x00FF0000) >> 16) / 255.0f;
+    float      g = (float)((colour & 0x0000FF00) >>  8) / 255.0f;
+    float      b = (float)((colour & 0x000000FF) >>  0) / 255.0f;
 
     VIDEOI_BrRectToGL((br_pixelmap *)self, rect);
 
-    GLuint     fbo;
-    GLbitfield mask;
     if(self->use_type == BRT_OFFSCREEN) {
         fbo  = self->asBack.glFbo;
         mask = GL_COLOR_BUFFER_BIT;
@@ -665,11 +663,8 @@ br_error BR_CMETHOD_DECL(br_device_pixelmap_gl, rectangleFill)(br_device_pixelma
         glClearDepth(1.0f);
         self->asDepth.clearValue = 1.0f;
     } else {
-        fbo  = 0;
-        mask = GL_COLOR_BUFFER_BIT;
-        glClearColor(r, g, b, a);
+        return BRE_UNSUPPORTED;
     }
-
 
     glBindFramebuffer(GL_FRAMEBUFFER, fbo);
     glViewport(0, 0, self->pm_width, self->pm_height);
