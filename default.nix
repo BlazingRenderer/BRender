@@ -29,6 +29,7 @@ stdenv.mkDerivation rec {
     cp examples/mkres/mkres $out/bin
     cp examples/robot/robot $out/bin
     cp examples/cube/cube $out/bin
+    cp examples/devpmtest/devpmtest $out/bin
 
     cp ${src}/examples/robot/dat/* $out/share/brender-samples/robot
     cp ${src}/examples/dat/* $out/share/brender-samples/dat
@@ -37,6 +38,9 @@ stdenv.mkDerivation rec {
       --chdir $out/share/brender-samples/robot
 
     wrapProgram $out/bin/cube \
+      --set BRENDER_PATH $out/share/brender-samples/dat
+
+    wrapProgram $out/bin/devpmtest \
       --set BRENDER_PATH $out/share/brender-samples/dat
   '';
 }
