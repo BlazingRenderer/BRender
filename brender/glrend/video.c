@@ -304,15 +304,19 @@ br_error VIDEOI_BrPixelmapGetTypeDetails(br_uint_8 pmType, GLint *internalFormat
     return BRE_OK;
 }
 
-void VIDEOI_BrPixelmapToExistingTexture(GLuint tex, br_pixelmap *pm)
+br_error VIDEOI_BrPixelmapToExistingTexture(GLuint tex, br_pixelmap *pm)
 {
-    glBindTexture(GL_TEXTURE_2D, tex);
-
     GLint      internalFormat;
     GLenum     format;
     GLenum     type;
     GLsizeiptr elemBytes;
-    VIDEOI_BrPixelmapGetTypeDetails(pm->type, &internalFormat, &format, &type, &elemBytes, NULL);
+    br_error   r;
+
+    r = VIDEOI_BrPixelmapGetTypeDetails(pm->type, &internalFormat, &format, &type, &elemBytes, NULL);
+    if(r != BRE_OK)
+        return r;
+
+    glBindTexture(GL_TEXTURE_2D, tex);
 
     glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, pm->width, pm->height, 0, format, type, pm->pixels);
 
@@ -322,6 +326,8 @@ void VIDEOI_BrPixelmapToExistingTexture(GLuint tex, br_pixelmap *pm)
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
     glBindTexture(GL_TEXTURE_2D, 0);
+
+    return BRE_OK;
 }
 
 GLuint VIDEO_BrPixelmapToGLTexture(br_pixelmap *pm)
@@ -332,7 +338,8 @@ GLuint VIDEO_BrPixelmapToGLTexture(br_pixelmap *pm)
     GLuint tex;
     glGenTextures(1, &tex);
 
-    VIDEOI_BrPixelmapToExistingTexture(tex, pm);
+    if(VIDEOI_BrPixelmapToExistingTexture(tex, pm) != BRE_OK)
+        return 0;
 
     return tex;
 }

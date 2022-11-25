@@ -696,6 +696,8 @@ static void fuckfuck(br_device_pixelmap *self, br_rectangle *dr, br_pixelmap *sr
     patch_quad(self, dr, src, sr);
 
     GLuint srcTex = VIDEO_BrPixelmapToGLTexture(src);
+    if(srcTex == 0)
+        return;
 
     HVIDEO hVideo = &self->device->video;
 

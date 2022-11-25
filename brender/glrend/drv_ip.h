@@ -33,7 +33,7 @@ void VIDEOI_BuildFontAtlas(HVIDEO hVideo, HVIDEO_FONT hFont, br_font *font, br_i
 
 GLuint VIDEO_BrPixelmapToGLTexture(br_pixelmap *pm);
 
-void VIDEOI_BrPixelmapToExistingTexture(GLuint tex, br_pixelmap *pm);
+br_error VIDEOI_BrPixelmapToExistingTexture(GLuint tex, br_pixelmap *pm);
 
 br_error VIDEOI_BrPixelmapGetTypeDetails(br_uint_8 pmType, GLint *internalFormat, GLenum *format, GLenum *type,
                                          GLsizeiptr *elemBytes, br_boolean *blended);
