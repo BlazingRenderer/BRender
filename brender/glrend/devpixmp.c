@@ -554,10 +554,8 @@ void BR_WEAK _GLREND_PreSwapHook(GLuint fbo)
 
 br_error BR_CMETHOD_DECL(br_device_pixelmap_gl, doubleBuffer)(br_device_pixelmap *self, br_device_pixelmap *src)
 {
-    ASSERT(self->use_type == BRT_NONE && src->use_type == BRT_OFFSCREEN);
-
-    //br_pixelmap *fuck = self->device->video.fuck;
-    //BrPixelmapRectangleStretchCopy((br_pixelmap*)src, -src->pm_origin_x, -src->pm_origin_y, fuck->width, fuck->height, (br_pixelmap*)fuck, -fuck->origin_x, -fuck->origin_y, fuck->width, fuck->height);
+    if(self->use_type != BRT_NONE || src->use_type != BRT_OFFSCREEN)
+        return BRE_UNSUPPORTED;
 
     /* Blit the FBO to the screen and swap. */
     BrPixelmapCopy((br_pixelmap *)self, (br_pixelmap *)src);
