@@ -684,9 +684,20 @@ br_error BR_CMETHOD_DECL(br_device_pixelmap_gl, rectangleFill)(br_device_pixelma
     return BRE_OK;
 }
 
-static void fuckfuck(br_device_pixelmap *self, br_rectangle *dr, br_pixelmap *src, br_rectangle *sr)
+br_error BR_CMETHOD(br_device_pixelmap_gl, rectangleStretchCopyTo)(br_device_pixelmap *self, br_rectangle *dr,
+                                                                   br_device_pixelmap *_src, br_rectangle *sr)
 {
-    ASSERT(self->use_type == BRT_OFFSCREEN);
+    /* Pixelmap->Device, addressable stretch copy. */
+    HVIDEO      hVideo = &self->device->video;
+    br_pixelmap *src   = (br_pixelmap*)_src;
+    GLuint      tex;
+    br_matrix4  mvp;
+
+    if(self->use_type != BRT_OFFSCREEN)
+        return BRE_UNSUPPORTED;
+
+    if((tex = VIDEO_BrPixelmapToGLTexture(src)) == 0)
+        return BRE_FAIL;
 
     /* Convert the rects to OpenGL-coordinates */
     VIDEOI_BrRectToGL(src, sr);
@@ -695,11 +706,6 @@ static void fuckfuck(br_device_pixelmap *self, br_rectangle *dr, br_pixelmap *sr
     /* Patch the quad */
     patch_quad(self, dr, src, sr);
 
-    GLuint srcTex = VIDEO_BrPixelmapToGLTexture(src);
-    if(srcTex == 0)
-        return;
-
-    HVIDEO hVideo = &self->device->video;
 
     glDisable(GL_DEPTH_TEST);
     glBindFramebuffer(GL_FRAMEBUFFER, self->asBack.glFbo);
@@ -709,13 +715,12 @@ static void fuckfuck(br_device_pixelmap *self, br_rectangle *dr, br_pixelmap *sr
     /* Render it */
     glUseProgram(hVideo->defaultProgram.program);
 
-    br_matrix4 mvp;
     BrMatrix4Orthographic(&mvp, 0.0f, 1.0f, 0.0f, 1.0f, -1.0f, 1.0f);
     VIDEOI_D3DtoGLProjection(&mvp);
 
     glUniformMatrix4fv(hVideo->defaultProgram.uMVP, 1, GL_FALSE, (GLfloat *)&mvp);
     glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, srcTex);
+    glBindTexture(GL_TEXTURE_2D, tex);
     glUniform1i(hVideo->defaultProgram.uSampler, 0);
     glUniform1f(hVideo->defaultProgram.uVerticalFlip, 1);
 
@@ -723,16 +728,8 @@ static void fuckfuck(br_device_pixelmap *self, br_rectangle *dr, br_pixelmap *sr
     glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, NULL);
 
     glBindVertexArray(0);
-    glDeleteTextures(1, &srcTex);
+    glDeleteTextures(1, &tex);
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
-}
-
-
-br_error BR_CMETHOD(br_device_pixelmap_gl, rectangleStretchCopyTo)(br_device_pixelmap *self, br_rectangle *d,
-                                                                   br_device_pixelmap *src, br_rectangle *s)
-{
-    /* Pixelmap->Device, addressable stretch copy. */
-    fuckfuck(self, d, (br_pixelmap *)src, s);
     return BRE_OK;
 }
 
