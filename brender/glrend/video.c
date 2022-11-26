@@ -130,8 +130,6 @@ static GLuint VIDEOI_BuildCheckerboardTexture(void)
 
 HVIDEO VIDEO_Open(HVIDEO hVideo, const char *vertShader, const char *fragShader)
 {
-    br_error err;
-
     if(hVideo == NULL) {
         BrLogError("VIDEO", "Invalid handle.");
         return NULL;
@@ -166,23 +164,6 @@ HVIDEO VIDEO_Open(HVIDEO hVideo, const char *vertShader, const char *fragShader)
     /* Generate a magenta/black checkerboard texture. */
     hVideo->texture.checkerboard = VIDEOI_BuildCheckerboardTexture();
 
-    /*
-     * We can't use BRender's fonts directly, so build a POT texture with
-     * glyph from left-to-right. All fonts have 256 possible characters.
-     */
-
-    BrLogTrace("VIDEO", "Building fixed 3x5 font atlas.");
-    if(VIDEOI_BuildFontAtlas(&hVideo->fonts.fixed3x5, BrFontFixed3x5, 128, 64) != BRE_OK)
-        hVideo->fonts.fixed3x5.glTex = hVideo->texture.checkerboard;
-
-    BrLogTrace("VIDEO", "Building proportional 4x6 font atlas.");
-    if(VIDEOI_BuildFontAtlas(&hVideo->fonts.prop4x6, BrFontProp4x6, 128, 64) != BRE_OK)
-        hVideo->fonts.prop4x6.glTex = hVideo->texture.checkerboard;
-
-    BrLogTrace("VIDEO", "Building proportional 7x9 font atlas.");
-    if(VIDEOI_BuildFontAtlas(&hVideo->fonts.prop7x9, BrFontProp7x9, 256, 64) != BRE_OK)
-        hVideo->fonts.prop7x9.glTex = hVideo->texture.checkerboard;
-
     return hVideo;
 }
 
@@ -198,9 +179,6 @@ void VIDEO_Close(HVIDEO hVideo)
     glBindBuffer(GL_UNIFORM_BUFFER, 0);
 
     glDeleteTextures(1, &hVideo->texture.checkerboard);
-    glDeleteTextures(1, &hVideo->texture.fnt3x5);
-    glDeleteTextures(1, &hVideo->texture.fnt4x6);
-    glDeleteTextures(1, &hVideo->texture.fnt7x9);
     glDeleteTextures(1, &hVideo->texture.white);
 
     if(hVideo->brenderProgram.blockIndexScene != GL_INVALID_INDEX)

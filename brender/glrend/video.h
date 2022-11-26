@@ -8,13 +8,6 @@
 extern "C" {
 #endif
 
-typedef struct _VIDEO_FONT {
-    struct { float x0; float x1; float y0; float y1; } glyph[256];
-
-    GLuint  glTex;
-    br_font *font;
-} VIDEO_FONT, *HVIDEO_FONT;
-
 typedef struct _VIDEO {
     GLint      maxUniformBlockSize;
     GLint      maxUniformBufferBindings;
@@ -70,17 +63,7 @@ typedef struct _VIDEO {
     struct {
         GLuint white;
         GLuint checkerboard;
-        GLuint fnt3x5;
-        GLuint fnt4x6;
-        GLuint fnt7x9;
     } texture;
-
-    struct {
-        VIDEO_FONT fixed3x5;
-        VIDEO_FONT prop4x6;
-        VIDEO_FONT prop7x9;
-    }          fonts;
-
 } VIDEO, *HVIDEO;
 
 

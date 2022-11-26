@@ -70,6 +70,10 @@ typedef struct br_device {
     const char *gl_version;
     const char *gl_vendor;
     const char *gl_renderer;
+
+    br_font_gl font_fixed3x5;
+    br_font_gl font_prop4x6;
+    br_font_gl font_prop7x9;
 } br_device;
 
 #endif /* BR_DEVICE_PRIVATE */

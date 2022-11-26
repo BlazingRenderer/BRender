@@ -1,14 +1,14 @@
 #include "drv.h"
 #include "brassert.h"
 
-br_error VIDEOI_BuildFontAtlas(HVIDEO_FONT hFont, br_font *font, br_int_32 width, br_int_32 height)
+br_error FontGLBuildAtlas(br_font_gl *gl_font, br_font *font, br_int_32 width, br_int_32 height)
 {
     br_pixelmap  *pm;
     br_rectangle r = {.x = 0, .y = 0, .w = 0, .h = font->glyph_y};
     char         c[2];
     GLuint       tex;
 
-    hFont->font = font;
+    gl_font->font = font;
 
     if((pm = BrPixelmapAllocate(BR_PMT_RGBA_8888, width, height, NULL, BR_PMAF_NORMAL)) == NULL)
         return 0;
@@ -25,7 +25,7 @@ br_error VIDEOI_BuildFontAtlas(HVIDEO_FONT hFont, br_font *font, br_int_32 width
             --i;
             r.x = 0;
             r.y += r.h;
-            ASSERT(r.y <= pm->height);
+            UASSERT(r.y <= pm->height);
             continue;
         }
 
@@ -39,8 +39,8 @@ br_error VIDEOI_BuildFontAtlas(HVIDEO_FONT hFont, br_font *font, br_int_32 width
          *     just swap y0/y1.
          */
         VIDEOI_BrRectToUVs(pm, &r,
-                           &hFont->glyph[i].x0, &hFont->glyph[i].y1,
-                           &hFont->glyph[i].x1, &hFont->glyph[i].y0);
+                           &gl_font->glyph[i].x0, &gl_font->glyph[i].y1,
+                           &gl_font->glyph[i].x1, &gl_font->glyph[i].y0);
 
         r.x += r.w;
     }
@@ -48,7 +48,7 @@ br_error VIDEOI_BuildFontAtlas(HVIDEO_FONT hFont, br_font *font, br_int_32 width
     tex = VIDEO_BrPixelmapToGLTexture(pm);
     BrPixelmapFree(pm);
 
-    hFont->glTex = tex;
+    gl_font->tex = tex;
     if(tex == 0)
         return BRE_FAIL;
 

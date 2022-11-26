@@ -28,7 +28,7 @@ extern "C" {
 #include "brglrend.h"
 #include "formats.h"
 #include "pm.h"
-
+#include "font.h"
 #include "video.h"
 #include "glstate.h"
 

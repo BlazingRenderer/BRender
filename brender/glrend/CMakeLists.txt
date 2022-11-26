@@ -40,7 +40,6 @@ set(VIDEO_FILES
 	./shader_text.c
 	./video.c
 	./video.h
-	./video_fonts.c
 )
 source_group("VIDEO" FILES ${VIDEO_FILES})
 
@@ -99,6 +98,9 @@ set(GLREND_FILES
 
 	./devpixmp.c
 	./devpixmp.h
+
+	./font.c
+	./font.h
 
 	./template.h
 )

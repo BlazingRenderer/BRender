@@ -29,8 +29,6 @@ br_boolean VIDEOI_CompileTextShader(HVIDEO hVideo);
 
 br_boolean VIDEOI_CompileBRenderShader(HVIDEO hVideo, const char *vertPath, const char *fragPath);
 
-br_error VIDEOI_BuildFontAtlas(HVIDEO_FONT hFont, br_font *font, br_int_32 width, br_int_32 height);
-
 GLuint VIDEO_BrPixelmapToGLTexture(br_pixelmap *pm);
 
 br_error VIDEOI_BrPixelmapToExistingTexture(GLuint tex, br_pixelmap *pm);
@@ -107,6 +105,11 @@ br_renderer_state_stored *RendererStateStoredGLAllocate(br_renderer *renderer, H
  * renderer.c
  */
 void StoredGLRenderGroup(br_geometry_stored *self, br_renderer *renderer, const gl_groupinfo *groupinfo);
+
+/*
+ * font.c
+ */
+br_error FontGLBuildAtlas(br_font_gl *gl_font, br_font *font, br_int_32 width, br_int_32 height);
 
 /*
  * Wrappers for br_device_gl_procs.

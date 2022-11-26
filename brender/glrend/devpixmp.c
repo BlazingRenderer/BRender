@@ -793,13 +793,13 @@ br_error BR_CMETHOD(br_device_pixelmap_gl, text)(br_device_pixelmap *self, br_po
         return BRE_OK;
 
     /* Ensure we're a valid font. */
-    HVIDEO_FONT hFont;
+    br_font_gl *gl_font;
     if(font == BrFontFixed3x5)
-        hFont = &self->device->video.fonts.fixed3x5;
+        gl_font = &self->device->font_fixed3x5;
     else if(font == BrFontProp4x6)
-        hFont = &self->device->video.fonts.prop4x6;
+        gl_font = &self->device->font_prop4x6;
     else if(font == BrFontProp7x9)
-        hFont = &self->device->video.fonts.prop7x9;
+        gl_font = &self->device->font_prop7x9;
     else
         return BRE_FAIL;
 
@@ -829,7 +829,12 @@ br_error BR_CMETHOD(br_device_pixelmap_gl, text)(br_device_pixelmap *self, br_po
 
     glUniformMatrix4fv(hVideo->textProgram.uMVP, 1, GL_FALSE, (GLfloat *)&mvp);
     glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, hFont->glTex);
+
+    if(gl_font->tex != 0)
+        glBindTexture(GL_TEXTURE_2D, gl_font->tex);
+    else
+        glBindTexture(GL_TEXTURE_2D, hVideo->texture.checkerboard);
+
     glUniform1i(hVideo->textProgram.uSampler, 0);
     glUniform3fv(hVideo->textProgram.uColour, 1, col.v);
 
@@ -848,10 +853,10 @@ br_error BR_CMETHOD(br_device_pixelmap_gl, text)(br_device_pixelmap *self, br_po
 
         actually_patch_quad(&self->asBack.quad,
                             x0, y0, x1, y1,
-                            hFont->glyph[glyph].x0,
-                            hFont->glyph[glyph].y0,
-                            hFont->glyph[glyph].x1,
-                            hFont->glyph[glyph].y1
+                            gl_font->glyph[glyph].x0,
+                            gl_font->glyph[glyph].y0,
+                            gl_font->glyph[glyph].x1,
+                            gl_font->glyph[glyph].y1
         );
 
         glBindVertexArray(self->asBack.quad.textVao);

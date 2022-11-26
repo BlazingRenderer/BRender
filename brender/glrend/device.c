@@ -157,6 +157,20 @@ br_device *DeviceGLAllocate(const char *identifier, const char *arguments)
     if(VIDEO_Open(&self->video, self->vertex_shader, self->fragment_shader) == NULL)
         goto cleanup_context;
 
+    /*
+     * We can't use BRender's fonts directly, so build a POT texture with
+     * glyph from left-to-right. All fonts have 256 possible characters.
+     */
+
+    BrLogTrace("GLREND", "Building fixed 3x5 font atlas.");
+    (void)FontGLBuildAtlas(&self->font_fixed3x5, BrFontFixed3x5, 128, 64);
+
+    BrLogTrace("GLREND", "Building proportional 4x6 font atlas.");
+    (void)FontGLBuildAtlas(&self->font_prop4x6, BrFontProp4x6, 128, 64);
+
+    BrLogTrace("GLREND", "Building proportional 7x9 font atlas.");
+    (void)FontGLBuildAtlas(&self->font_prop7x9, BrFontProp7x9, 256, 64);
+
     if((self->renderer_facility = RendererFacilityGLInit(self)) == NULL)
         goto cleanup_context;
 
@@ -171,6 +185,10 @@ cleanup_context:
 static void BR_CMETHOD_DECL(br_device_gl, free)(struct br_object *_self)
 {
     br_device *self = (br_device *)_self;
+
+    glDeleteTextures(1, &self->font_prop7x9.tex);
+    glDeleteTextures(1, &self->font_prop4x6.tex);
+    glDeleteTextures(1, &self->font_fixed3x5.tex);
 
     VIDEO_Close(&self->video);
 
