@@ -95,39 +95,6 @@ GLuint VIDEOI_CreateAndCompileProgram(GLuint vert, GLuint frag)
     return program;
 }
 
-const static uint8_t whiteRGBA[] = {255, 255, 255, 255};
-
-static GLuint VIDEOI_BuildWhiteTexture(void)
-{
-    GLuint tex;
-
-    glGenTextures(1, &tex);
-    glBindTexture(GL_TEXTURE_2D, tex);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 1, 1, 0, GL_RGBA, GL_UNSIGNED_BYTE, whiteRGBA);
-    return tex;
-}
-
-extern const uint8_t VIDEOI_RawCheckerboard64x64[];
-
-static GLuint VIDEOI_BuildCheckerboardTexture(void)
-{
-    GLuint tex;
-
-    glGenTextures(1, &tex);
-    glBindTexture(GL_TEXTURE_2D, tex);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 64, 64, 0, GL_RGBA, GL_UNSIGNED_BYTE, VIDEOI_RawCheckerboard64x64);
-
-    return tex;
-}
-
 HVIDEO VIDEO_Open(HVIDEO hVideo, const char *vertShader, const char *fragShader)
 {
     if(hVideo == NULL) {
@@ -158,12 +125,6 @@ HVIDEO VIDEO_Open(HVIDEO hVideo, const char *vertShader, const char *fragShader)
         return NULL;
     }
 
-    /* Generate a 1x1 white texture. */
-    hVideo->texture.white = VIDEOI_BuildWhiteTexture();
-
-    /* Generate a magenta/black checkerboard texture. */
-    hVideo->texture.checkerboard = VIDEOI_BuildCheckerboardTexture();
-
     return hVideo;
 }
 
@@ -177,9 +138,6 @@ void VIDEO_Close(HVIDEO hVideo)
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
     glBindBuffer(GL_UNIFORM_BUFFER, 0);
-
-    glDeleteTextures(1, &hVideo->texture.checkerboard);
-    glDeleteTextures(1, &hVideo->texture.white);
 
     if(hVideo->brenderProgram.blockIndexScene != GL_INVALID_INDEX)
         glDeleteBuffers(1, &hVideo->brenderProgram.uboScene);

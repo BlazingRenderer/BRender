@@ -59,11 +59,6 @@ typedef struct _VIDEO {
 
         GLint mainTextureBinding;
     }          brenderProgram;
-
-    struct {
-        GLuint white;
-        GLuint checkerboard;
-    } texture;
 } VIDEO, *HVIDEO;
 
 

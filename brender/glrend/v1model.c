@@ -66,7 +66,7 @@ static void apply_blend_mode(HGLSTATE_STACK self)
 }
 
 static void apply_stored_properties(HVIDEO hVideo, HGLSTATE_STACK state, uint32_t states,
-                                    br_boolean *unlit, HGLSTD140_MODEL_DATA hModel)
+                                    br_boolean *unlit, HGLSTD140_MODEL_DATA hModel, GLuint tex_default)
 {
     br_boolean blending_on;
 
@@ -184,7 +184,7 @@ static void apply_stored_properties(HVIDEO hVideo, HGLSTATE_STACK state, uint32_
             //	//BrDebugBreak();
             //}
         } else {
-            glBindTexture(GL_TEXTURE_2D, hVideo->texture.white);
+            glBindTexture(GL_TEXTURE_2D, tex_default);
             glUniform1i(hVideo->brenderProgram.uniforms.main_texture, hVideo->brenderProgram.mainTextureBinding);
         }
 
@@ -283,10 +283,10 @@ void StoredGLRenderGroup(br_geometry_stored *self, br_renderer *renderer, const 
     if(stored) {
         apply_stored_properties(hVideo, &stored->state,
                                 GLSTATE_MASK_PRIMITIVE | GLSTATE_MASK_SURFACE | GLSTATE_MASK_CULL,
-                                &unlit, &model);
+                                &unlit, &model, self->device->tex_white);
     } else {
         /* If there's no stored state, apply all states from global. */
-        apply_stored_properties(hVideo, renderer->state.current, ~0u, &unlit, &model);
+        apply_stored_properties(hVideo, renderer->state.current, ~0u, &unlit, &model, self->device->tex_white);
     }
 
     model.unlit = (br_uint_32)unlit;

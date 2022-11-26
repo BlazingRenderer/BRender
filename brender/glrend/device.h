@@ -71,6 +71,9 @@ typedef struct br_device {
     const char *gl_vendor;
     const char *gl_renderer;
 
+    GLuint tex_white;
+    GLuint tex_checkerboard;
+
     br_font_gl font_fixed3x5;
     br_font_gl font_prop4x6;
     br_font_gl font_prop7x9;

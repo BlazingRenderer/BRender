@@ -77,6 +77,38 @@ static struct br_tv_template_entry deviceArgsTemplateEntries[] = {
 
 #undef F
 
+static GLuint build_white_texture(void)
+{
+    const static uint8_t white_rgba[] = {255, 255, 255, 255};
+
+    GLuint tex;
+
+    glGenTextures(1, &tex);
+    glBindTexture(GL_TEXTURE_2D, tex);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 1, 1, 0, GL_RGBA, GL_UNSIGNED_BYTE, white_rgba);
+    return tex;
+}
+
+static GLuint build_checkerboard_texture(void)
+{
+    extern const uint8_t checkerboard_rgba[];
+
+    GLuint tex;
+
+    glGenTextures(1, &tex);
+    glBindTexture(GL_TEXTURE_2D, tex);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 64, 64, 0, GL_RGBA, GL_UNSIGNED_BYTE, checkerboard_rgba);
+
+    return tex;
+}
 
 br_device *DeviceGLAllocate(const char *identifier, const char *arguments)
 {
@@ -157,6 +189,9 @@ br_device *DeviceGLAllocate(const char *identifier, const char *arguments)
     if(VIDEO_Open(&self->video, self->vertex_shader, self->fragment_shader) == NULL)
         goto cleanup_context;
 
+    self->tex_white = build_white_texture();
+    self->tex_checkerboard = build_checkerboard_texture();
+
     /*
      * We can't use BRender's fonts directly, so build a POT texture with
      * glyph from left-to-right. All fonts have 256 possible characters.
@@ -189,6 +224,8 @@ static void BR_CMETHOD_DECL(br_device_gl, free)(struct br_object *_self)
     glDeleteTextures(1, &self->font_prop7x9.tex);
     glDeleteTextures(1, &self->font_prop4x6.tex);
     glDeleteTextures(1, &self->font_fixed3x5.tex);
+    glDeleteTextures(1, &self->tex_checkerboard);
+    glDeleteTextures(1, &self->tex_white);
 
     VIDEO_Close(&self->video);
 

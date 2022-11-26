@@ -833,7 +833,7 @@ br_error BR_CMETHOD(br_device_pixelmap_gl, text)(br_device_pixelmap *self, br_po
     if(gl_font->tex != 0)
         glBindTexture(GL_TEXTURE_2D, gl_font->tex);
     else
-        glBindTexture(GL_TEXTURE_2D, hVideo->texture.checkerboard);
+        glBindTexture(GL_TEXTURE_2D, self->device->tex_checkerboard);
 
     glUniform1i(hVideo->textProgram.uSampler, 0);
     glUniform3fv(hVideo->textProgram.uColour, 1, col.v);
