@@ -67,16 +67,13 @@ typedef struct _VIDEO {
         GLint mainTextureBinding;
     }          brenderProgram;
 
-    union {
-        struct {
-            GLuint white;
-            GLuint checkerboard;
-            GLuint fnt3x5;
-            GLuint fnt4x6;
-            GLuint fnt7x9;
-        };
-        GLuint t[5];
-    }          texture;
+    struct {
+        GLuint white;
+        GLuint checkerboard;
+        GLuint fnt3x5;
+        GLuint fnt4x6;
+        GLuint fnt7x9;
+    } texture;
 
     struct {
         VIDEO_FONT fixed3x5;

@@ -1,17 +1,17 @@
 #include "drv.h"
 #include "brassert.h"
 
-void VIDEOI_BuildFontAtlas(HVIDEO hVideo, HVIDEO_FONT hFont, br_font *font, br_int_32 width, br_int_32 height)
+br_error VIDEOI_BuildFontAtlas(HVIDEO_FONT hFont, br_font *font, br_int_32 width, br_int_32 height)
 {
     br_pixelmap  *pm;
     br_rectangle r = {.x = 0, .y = 0, .w = 0, .h = font->glyph_y};
     char         c[2];
+    GLuint       tex;
 
-    if((pm = BrPixelmapAllocate(BR_PMT_RGBA_8888, width, height, NULL, BR_PMAF_NORMAL)) == NULL) {
-        hFont->glTex = hVideo->texture.checkerboard;
-        BrLogError("VIDEO", "Error generating atlas for font %hux%hu.", font->glyph_x, font->glyph_y);
-        return;
-    }
+    hFont->font = font;
+
+    if((pm = BrPixelmapAllocate(BR_PMT_RGBA_8888, width, height, NULL, BR_PMAF_NORMAL)) == NULL)
+        return 0;
 
     pm->origin_x = pm->origin_y = 0;
     BrPixelmapFill(pm, 0x00000000);
@@ -45,8 +45,12 @@ void VIDEOI_BuildFontAtlas(HVIDEO hVideo, HVIDEO_FONT hFont, br_font *font, br_i
         r.x += r.w;
     }
 
-    VIDEOI_BrPixelmapToExistingTexture(hFont->glTex, pm);
-
+    tex = VIDEO_BrPixelmapToGLTexture(pm);
     BrPixelmapFree(pm);
-    BrLogTrace("VIDEO", "Successfully built atlas for font %hux%hu.", font->glyph_x, font->glyph_y);
+
+    hFont->glTex = tex;
+    if(tex == 0)
+        return BRE_FAIL;
+
+    return BRE_OK;
 }

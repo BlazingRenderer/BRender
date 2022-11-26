@@ -29,7 +29,7 @@ br_boolean VIDEOI_CompileTextShader(HVIDEO hVideo);
 
 br_boolean VIDEOI_CompileBRenderShader(HVIDEO hVideo, const char *vertPath, const char *fragPath);
 
-void VIDEOI_BuildFontAtlas(HVIDEO hVideo, HVIDEO_FONT hFont, br_font *font, br_int_32 width, br_int_32 height);
+br_error VIDEOI_BuildFontAtlas(HVIDEO_FONT hFont, br_font *font, br_int_32 width, br_int_32 height);
 
 GLuint VIDEO_BrPixelmapToGLTexture(br_pixelmap *pm);
 

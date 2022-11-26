@@ -95,60 +95,43 @@ GLuint VIDEOI_CreateAndCompileProgram(GLuint vert, GLuint frag)
     return program;
 }
 
-static void VIDEOI_BuildWhiteTexture(GLuint tex)
+const static uint8_t whiteRGBA[] = {255, 255, 255, 255};
+
+static GLuint VIDEOI_BuildWhiteTexture(void)
 {
-    const static uint8_t whiteRGBA[] = {255, 255, 255, 255};
+    GLuint tex;
+
+    glGenTextures(1, &tex);
     glBindTexture(GL_TEXTURE_2D, tex);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 1, 1, 0, GL_RGBA, GL_UNSIGNED_BYTE, whiteRGBA);
+    return tex;
 }
 
 extern const uint8_t VIDEOI_RawCheckerboard64x64[];
 
-static void VIDEOI_BuildCheckerboardTexture(GLuint tex)
+static GLuint VIDEOI_BuildCheckerboardTexture(void)
 {
+    GLuint tex;
+
+    glGenTextures(1, &tex);
     glBindTexture(GL_TEXTURE_2D, tex);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 64, 64, 0, GL_RGBA, GL_UNSIGNED_BYTE, VIDEOI_RawCheckerboard64x64);
-}
 
-static void VIDEOI_SetupTextures(HVIDEO hVideo)
-{
-    /* Generate initial textures. */
-    glGenTextures(sizeof(hVideo->texture.t) / sizeof(GLuint), hVideo->texture.t);
-
-    /* Generate a 1x1 white texture. */
-    VIDEOI_BuildWhiteTexture(hVideo->texture.white);
-
-    /* Generate a magenta/black checkerboard texture. */
-    VIDEOI_BuildCheckerboardTexture(hVideo->texture.checkerboard);
-
-    /*
-     * We can't use BRender's fonts directly, so build a POT texture with
-     * glyph from left-to-right. All fonts have 256 possible characters.
-     */
-
-    hVideo->fonts.fixed3x5.glTex = hVideo->texture.fnt3x5;
-    hVideo->fonts.fixed3x5.font  = BrFontFixed3x5;
-    VIDEOI_BuildFontAtlas(hVideo, &hVideo->fonts.fixed3x5, BrFontFixed3x5, 128, 64);
-
-    hVideo->fonts.prop4x6.glTex = hVideo->texture.fnt4x6;
-    hVideo->fonts.prop4x6.font  = BrFontProp4x6;
-    VIDEOI_BuildFontAtlas(hVideo, &hVideo->fonts.prop4x6, BrFontProp4x6, 128, 64);
-
-    hVideo->fonts.prop7x9.glTex = hVideo->texture.fnt7x9;
-    hVideo->fonts.prop7x9.font  = BrFontProp7x9;
-    VIDEOI_BuildFontAtlas(hVideo, &hVideo->fonts.prop7x9, BrFontProp7x9, 256, 64);
+    return tex;
 }
 
 HVIDEO VIDEO_Open(HVIDEO hVideo, const char *vertShader, const char *fragShader)
 {
+    br_error err;
+
     if(hVideo == NULL) {
         BrLogError("VIDEO", "Invalid handle.");
         return NULL;
@@ -177,7 +160,28 @@ HVIDEO VIDEO_Open(HVIDEO hVideo, const char *vertShader, const char *fragShader)
         return NULL;
     }
 
-    VIDEOI_SetupTextures(hVideo);
+    /* Generate a 1x1 white texture. */
+    hVideo->texture.white = VIDEOI_BuildWhiteTexture();
+
+    /* Generate a magenta/black checkerboard texture. */
+    hVideo->texture.checkerboard = VIDEOI_BuildCheckerboardTexture();
+
+    /*
+     * We can't use BRender's fonts directly, so build a POT texture with
+     * glyph from left-to-right. All fonts have 256 possible characters.
+     */
+
+    BrLogTrace("VIDEO", "Building fixed 3x5 font atlas.");
+    if(VIDEOI_BuildFontAtlas(&hVideo->fonts.fixed3x5, BrFontFixed3x5, 128, 64) != BRE_OK)
+        hVideo->fonts.fixed3x5.glTex = hVideo->texture.checkerboard;
+
+    BrLogTrace("VIDEO", "Building proportional 4x6 font atlas.");
+    if(VIDEOI_BuildFontAtlas(&hVideo->fonts.prop4x6, BrFontProp4x6, 128, 64) != BRE_OK)
+        hVideo->fonts.prop4x6.glTex = hVideo->texture.checkerboard;
+
+    BrLogTrace("VIDEO", "Building proportional 7x9 font atlas.");
+    if(VIDEOI_BuildFontAtlas(&hVideo->fonts.prop7x9, BrFontProp7x9, 256, 64) != BRE_OK)
+        hVideo->fonts.prop7x9.glTex = hVideo->texture.checkerboard;
 
     return hVideo;
 }
@@ -193,7 +197,11 @@ void VIDEO_Close(HVIDEO hVideo)
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
     glBindBuffer(GL_UNIFORM_BUFFER, 0);
 
-    glDeleteTextures(sizeof(hVideo->texture.t) / sizeof(GLuint), hVideo->texture.t);
+    glDeleteTextures(1, &hVideo->texture.checkerboard);
+    glDeleteTextures(1, &hVideo->texture.fnt3x5);
+    glDeleteTextures(1, &hVideo->texture.fnt4x6);
+    glDeleteTextures(1, &hVideo->texture.fnt7x9);
+    glDeleteTextures(1, &hVideo->texture.white);
 
     if(hVideo->brenderProgram.blockIndexScene != GL_INVALID_INDEX)
         glDeleteBuffers(1, &hVideo->brenderProgram.uboScene);
