@@ -1,6 +1,7 @@
 #include <SDL.h>
 #include <brender.h>
 #include <brglrend.h>
+#include <brsdl.h>
 
 /*
  * Primitive heap - used by z-buffered renderer to defer drawing of blended primitives
@@ -44,11 +45,12 @@ static void create_scene(br_actor **_world, br_actor **_camera, br_actor **_cube
 int main(int argc, char **argv)
 {
     SDL_Window    *sdl_window;
-    br_pixelmap   *screen, *colour_buffer, *depth_buffer;
-    int           width, height, ret = -1;
+    br_pixelmap   *screen = NULL, *colour_buffer = NULL, *depth_buffer = NULL;
+    int           ret = -1;
     br_error      r;
-    br_actor      *world, *camera, *cube;
+    br_actor      *world = NULL, *camera = NULL, *cube = NULL;
     br_uint_64    ticks_last, ticks_now;
+    br_boolean    is_fullscreen = BR_FALSE;
 
 
     /*
@@ -67,10 +69,12 @@ int main(int argc, char **argv)
 
     SDL_SetHint(SDL_HINT_VIDEO_X11_NET_WM_BYPASS_COMPOSITOR, "0");
 
-    if((sdl_window = SDL_CreateWindow("BRender Sample Application", 0, 0, 1280, 720, SDL_WINDOW_OPENGL | SDL_WINDOW_ALLOW_HIGHDPI)) == NULL) {
+    if((sdl_window = SDL_CreateWindow("BRender Sample Application", 0, 0, 1280, 720, SDL_WINDOW_OPENGL | SDL_WINDOW_ALLOW_HIGHDPI | SDL_WINDOW_RESIZABLE)) == NULL) {
         BrLogError("SDL", "Window creation error: %s", SDL_GetError());
         goto sdl_createwindow_failed;
     }
+
+    SDL_SetWindowMinimumSize(sdl_window, 320, 200);
 
     BrBegin();
 
@@ -81,34 +85,11 @@ int main(int argc, char **argv)
         BrDevAddStatic(NULL, BrDrvGLBegin, args);
     }
 
-    SDL_GL_GetDrawableSize(sdl_window, &width, &height);
-
-    r = BrDevBeginVar(&screen, "opengl",
-                      BRT_WIDTH_I32, (br_int_32)width,
-                      BRT_HEIGHT_I32, (br_int_32)height,
-                      BRT_PIXEL_BITS_I32, 24,
-                      BR_NULL_TOKEN
-    );
-
-    if(r != BRE_OK) {
-        BrLogError("APP", "BrDevBeginVar() failed.");
+    r = BrSDLUtilOnResize(sdl_window, "opengl", &screen, &colour_buffer, &depth_buffer, primitive_heap, sizeof(primitive_heap), NULL);
+    if(r != BR_TRUE)
         goto screen_creation_failed;
-    }
 
-    if((colour_buffer = BrPixelmapMatchTypedSized(screen, BR_PMMATCH_OFFSCREEN, BR_PMT_RGB_888, width, height)) == NULL) {
-        BrLogError("APP", "BrPixelmapMatchTypedSized() failed.");
-        goto screen_creation_failed;
-    }
-
-    if((depth_buffer = BrPixelmapMatch(colour_buffer, BR_PMMATCH_DEPTH_16)) == NULL) {
-        BrLogError("APP", "BrPixelmapMatch() failed.");
-        goto screen_creation_failed;
-    }
-
-    screen->origin_x = colour_buffer->origin_x = depth_buffer->origin_x = (br_int_16)(width / 2);
-    screen->origin_y = colour_buffer->origin_y = depth_buffer->origin_y = (br_int_16)(height / 2);
-
-    BrRendererBegin(colour_buffer, NULL, NULL, primitive_heap, sizeof(primitive_heap));
+    is_fullscreen = BrSDLUtilSetFullscreen(sdl_window, BR_FALSE);
 
     create_scene(&world, &camera, &cube);
 
@@ -125,6 +106,20 @@ int main(int argc, char **argv)
             switch(evt.type) {
                 case SDL_QUIT:
                     goto done;
+                case SDL_WINDOWEVENT:
+                    switch(evt.window.event) {
+                        case SDL_WINDOWEVENT_SIZE_CHANGED:
+                            (void)BrSDLUtilOnResize(sdl_window, "opengl", &screen, &colour_buffer, &depth_buffer, primitive_heap, sizeof(primitive_heap), camera->type_data);
+                            break;
+                    }
+                    break;
+                case SDL_KEYDOWN: {
+                    if(BrSDLUtilIsAltEnter(&evt.key)) {
+                        is_fullscreen = BrSDLUtilSetFullscreen(sdl_window, !is_fullscreen);
+                        break;
+                    }
+                    break;
+                }
             }
         }
 
@@ -142,17 +137,9 @@ int main(int argc, char **argv)
 done:
     ret = 0;
 
+    BrSDLUtilCleanupScreen(&screen, &colour_buffer, &depth_buffer);
+
 screen_creation_failed:
-    BrRendererEnd();
-
-    if(depth_buffer != NULL)
-        BrPixelmapFree(depth_buffer);
-
-    if(colour_buffer != NULL)
-        BrPixelmapFree(colour_buffer);
-
-    if(screen != NULL)
-        BrPixelmapFree(screen);
 
     BrEnd();
 
