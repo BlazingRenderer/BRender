@@ -1,0 +1,13 @@
+# This material script file describes the appearance of the 
+# material "BLUE MATERIAL"
+
+material = [
+
+        name = "BLUE MATERIAL"; 
+        colour = [0,0,255];
+        ambient = 0.05;
+        diffuse = 0.55;
+        specular = 0.4;
+        power = 20;
+        flags = [light,smooth];
+        ];

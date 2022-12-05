@@ -1,0 +1,18 @@
+
+
+
+# This material script file describes the appearance of the
+# material "gold15"
+
+material = [
+
+        name = "gold15"; 
+        colour = [0,255,0];
+        ambient = 0.05;
+        diffuse = 0.55;
+        specular = 0.4;
+        power = 20;
+        flags = [];
+        map_transform = [[1,0], [0,1], [0,0]];
+        colour_map = "gold";
+        ];

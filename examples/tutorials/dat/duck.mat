@@ -1,0 +1,22 @@
+# BRender Material Script
+#
+
+material = [
+    identifier = "BLACK PLASTIC";
+    flags = [light, smooth];
+    colour = [0,0,0];
+    ambient = 0.000000;
+    diffuse = 0.000000;
+    specular = 1.000000;
+    power = 69.309998;
+];
+
+material = [
+    identifier = "YELLOW PLASTIC";
+    flags = [light, smooth];
+    colour = [202,179,52];
+    ambient = 0.679216;
+    diffuse = 0.679216;
+    specular = 0.741569;
+    power = 23.770000;
+];
