@@ -25,5 +25,6 @@ add_library(fmt STATIC ${FMT_FILES})
 
 target_link_libraries(fmt inc)
 target_link_libraries(fmt fw-headers)
+target_link_libraries(fmt v1db)
 
 set_property(TARGET fmt PROPERTY FOLDER ${BRENDER_FOLDER})
