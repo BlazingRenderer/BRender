@@ -1,0 +1,15 @@
+# BRender Material Script
+#
+
+material = [
+    identifier = "CHROME GIFMAP";
+    flags = [light];
+    ambient = 0.2;
+    diffuse = 0.500000;
+    specular = 0.6;
+    power = 20;
+    index_base = 64;
+    index_range = 31;
+    colour_map = "REFMAP";
+    index_shade = "shade_table";
+];

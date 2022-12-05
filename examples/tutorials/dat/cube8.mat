@@ -1,0 +1,17 @@
+# Materials for cube - 8-bit
+#
+
+
+# A plain blue texture 
+#
+material = [
+	identifier = "BLUE MATERIAL";
+	ambient = 0.05;
+	diffuse = 0.55;
+	specular = 0.40;
+	power = 10;
+	flags = [light,smooth];
+	index_base = 64;
+	index_range = 30;
+];
+

@@ -1,0 +1,14 @@
+
+
+
+# This material script file describes the appearance of the
+# material "earth_map"
+
+material = [
+
+        name = "earth_map"; 
+        flags = [];
+        map_transform = [[-1,0], [0,1], [0,0]];
+        colour_map = "earth";
+
+        ];
