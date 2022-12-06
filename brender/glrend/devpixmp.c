@@ -187,6 +187,12 @@ static void create_quad(br_device_pixelmap *self)
     glBindVertexArray(0);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+    /*
+     * Some of the above can fail if the user changes the shader.
+     * Drain all the errors to prevent them falling through to future checks.
+     */
+    while(glGetError() != GL_NO_ERROR);
 }
 
 

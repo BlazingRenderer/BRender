@@ -40,17 +40,21 @@ static void create_vao(br_geometry_stored *self)
     glEnableVertexAttribArray(hVideo->brenderProgram.attributes.aPosition);
     glVertexAttribPointer(hVideo->brenderProgram.attributes.aPosition, 3, GL_FLOAT, GL_FALSE, 0, NULL);
 
-    { /* gl_vertex_f */
-        glBindBuffer(GL_ARRAY_BUFFER, self->gl_vbo);
+    glBindBuffer(GL_ARRAY_BUFFER, self->gl_vbo);
 
+    if(hVideo->brenderProgram.attributes.aUV > 0) {
         glEnableVertexAttribArray(hVideo->brenderProgram.attributes.aUV);
         glVertexAttribPointer(hVideo->brenderProgram.attributes.aUV, 2, GL_FLOAT, GL_FALSE, sizeof(gl_vertex_f),
                               (void *)offsetof(gl_vertex_f, map));
+    }
 
+    if(hVideo->brenderProgram.attributes.aNormal > 0) {
         glEnableVertexAttribArray(hVideo->brenderProgram.attributes.aNormal);
         glVertexAttribPointer(hVideo->brenderProgram.attributes.aNormal, 3, GL_FLOAT, GL_FALSE, sizeof(gl_vertex_f),
                               (void *)offsetof(gl_vertex_f, n));
+    }
 
+    if(hVideo->brenderProgram.attributes.aColour > 0) {
         glVertexAttribPointer(hVideo->brenderProgram.attributes.aColour, 4, GL_UNSIGNED_BYTE, GL_TRUE,
                               sizeof(gl_vertex_f), (void *)offsetof(gl_vertex_f, c));
     }
