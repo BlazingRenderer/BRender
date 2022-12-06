@@ -17,7 +17,7 @@ stdenv.mkDerivation rec {
   ];
 
   installPhase = ''
-    mkdir -p $out/{bin,share/brender-samples/{robot,dat}}
+    mkdir -p $out/{bin,share/brender-samples/{robot,dat,tutorials}}
     cp tools/3ds2br/3ds2br $out/bin
     cp tools/dquery/dquery $out/bin
     cp tools/mkblend/mkblend $out/bin
@@ -42,5 +42,15 @@ stdenv.mkDerivation rec {
 
     wrapProgram $out/bin/devpmtest \
       --set BRENDER_PATH $out/share/brender-samples/dat
+
+
+    cp ${src}/examples/tutorials/dat/* $out/share/brender-samples/tutorials
+
+    for i in {1,2,3,4,5,5b,6,6b,7,7b,8,8b,9,10}; do
+      cp examples/tutorials/brtutor$i $out/bin
+
+      wrapProgram $out/bin/brtutor$i \
+        --chdir $out/share/brender-samples/tutorials
+    done
   '';
 }
