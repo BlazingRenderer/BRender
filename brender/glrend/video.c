@@ -162,10 +162,9 @@ br_error VIDEOI_BrPixelmapGetTypeDetails(br_uint_8 pmType, GLint *internalFormat
             is_blended      = BR_TRUE;
             break;
         case BR_PMT_RGB_555:
-            //assert(!"RGB_555");
             *internalFormat = GL_RGB;
-            *format         = GL_RGBA;
-            *type           = GL_UNSIGNED_SHORT_5_5_5_1;
+            *format         = GL_BGRA;
+            *type           = GL_UNSIGNED_SHORT_1_5_5_5_REV;
             *elemBytes      = 2;
             break;
         case BR_PMT_RGB_565:
