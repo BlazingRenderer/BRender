@@ -9,21 +9,17 @@
 
       default = brender-samples;
     };
+
+    mkShells = packages: builtins.mapAttrs (k: v: v.overrideAttrs(old: {
+      hardeningDisable = [ "all" ];
+    })) packages;
   in {
     packages.x86_64-linux   = mkPackages { pkgs = import nixpkgs { system = "x86_64-linux";   }; };
     packages.x86_64-darwin  = mkPackages { pkgs = import nixpkgs { system = "x86_64-darwin";  }; };
     packages.aarch64-darwin = mkPackages { pkgs = import nixpkgs { system = "aarch64-darwin"; }; };
 
-    devShells.x86_64-linux.default = self.packages.x86_64-linux.default.overrideAttrs(old: {
-      hardeningDisable = [ "all" ];
-    });
-
-    devShells.x86_64-darwin.default = self.packages.x86_64-darwin.default.overrideAttrs(old: {
-      hardeningDisable = [ "all" ];
-    });
-
-    devShells.aarch64-darwin.default = self.packages.aarch64-darwin.default.overrideAttrs(old: {
-      hardeningDisable = [ "all" ];
-    });
+    devShells.x86_64-linux   = mkShells self.packages.x86_64-linux;
+    devShells.x86_64-darwin  = mkShells self.packages.x86_64-darwin;
+    devShells.aarch64-darwin = mkShells self.packages.x86_64-darwin;
   };
 }
