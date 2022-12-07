@@ -26,6 +26,7 @@ stdenv.mkDerivation rec {
     cp tools/mkshades/mkshades $out/bin
     cp tools/paljoin/paljoin $out/bin
     cp tools/texconv/texconv $out/bin
+    cp tools/matconv/matconv $out/bin
     cp examples/mkres/mkres $out/bin
     cp examples/robot/robot $out/bin
     cp examples/cube/cube $out/bin
