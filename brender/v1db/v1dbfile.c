@@ -2424,7 +2424,7 @@ br_uint_32 BR_PUBLIC_ENTRY BrMaterialSaveMany(const char *filename,br_material *
 	if(df == NULL)
 		return 0;
 
-    FopWrite_FILE_INFO(df,FILE_TYPE_MATERIAL_OLD);
+    FopWrite_FILE_INFO(df,FILE_TYPE_MATERIAL);
 
 	if(materials) {
 		for(i=0; i<num; i++)
