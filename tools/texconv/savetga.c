@@ -15,7 +15,7 @@
 /*
  * TGA header, this format allows for structure packing by compiler
  */
-#pragma pack(1)
+#pragma pack(push, 1)
 
 static struct {
     	char identsize;			/* number of bytes between header and whatever next 	*/
@@ -53,8 +53,7 @@ static struct {
     	char blue,green,red;
 } palette_entry;
 
-#pragma pack()
-
+#pragma pack(pop)
 
 char *T_SaveTarga(br_pixelmap *pm, char *target)
 {

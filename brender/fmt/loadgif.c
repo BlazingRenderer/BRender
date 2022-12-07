@@ -49,7 +49,7 @@ enum {
     BR_GIF_IMAGE_SORTED		= 0x20	/* (ImageBlock.imageflags & x) image colourmap sorted (GIF89a)		*/
 };
 
-#pragma pack (1)
+#pragma pack(push, 1)
 
 static struct {
     char sig[6];			/* GIF signature, 'GIF87a' or 'GIF89a'				*/
@@ -75,7 +75,7 @@ static struct {
 	char blue;
 } RGB;					/* palette entry						*/
 
-#pragma pack ()
+#pragma pack(pop)
 
 static char BlockSize;			/* size of GIF block						*/
 

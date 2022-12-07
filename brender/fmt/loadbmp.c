@@ -43,7 +43,7 @@ static void *Compressed_8(br_pixelmap *pm,int line,void *fh);
 static void *Compressed_4(br_pixelmap *pm,int line,void *fh);
 
 
-#pragma pack (1)
+#pragma pack(push, 1)
 
 typedef struct {
 	short bfType;
@@ -88,7 +88,7 @@ static struct {
     char blue,green,red,pad;
 } RGB4;
 
-#pragma pack ()
+#pragma pack(pop)
 
 br_pixelmap * BR_PUBLIC_ENTRY BrFmtBMPLoad(const char *name,br_uint_32 flags)
 {

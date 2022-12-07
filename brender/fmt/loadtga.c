@@ -81,7 +81,7 @@ static struct {
 /*
  * TGA header, this format allows for structure packing by compiler
  */
-#pragma pack(1)
+#pragma pack(push, 1)
 
 static struct {
     	char identsize;			/* number of bytes between header and whatever next 	*/
@@ -108,7 +108,7 @@ static struct {
     	char blue,green,red,x;
 } RGB_32;
 
-#pragma pack()
+#pragma pack(pop)
 
 br_pixelmap * BR_PUBLIC_ENTRY BrFmtTGALoad(const char *name,br_uint_32 flags)
 {

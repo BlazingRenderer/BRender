@@ -40,7 +40,7 @@ static void planes2bytes(br_pixelmap *pm,char *block,int line);
 
 #define pixels2bytes(n)	((n+7)/8)
 
-#pragma pack (1)
+#pragma pack(push, 1)
 
 static struct {
 	char type[4];				/* iff/lbm sig, 'FORM','LIST' or 'CAT '			*/
@@ -75,7 +75,7 @@ static struct {
 static unsigned char masktable[8] = {0x80,0x40,0x20,0x10,0x08,0x04,0x02,0x01 };
 static unsigned char bittable[8]  = {0x01,0x02,0x04,0x08,0x10,0x20,0x40,0x80 };
 
-#pragma pack ()
+#pragma pack(pop)
 
 br_pixelmap * BR_PUBLIC_ENTRY BrFmtIFFLoad(const char *name,br_uint_32 flags)
 {
