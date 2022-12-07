@@ -42,13 +42,8 @@ br_pixelmap *BR_PUBLIC_ENTRY BrPixelmapDeCLUT(br_pixelmap *src)
             index = (br_int_32)BrPixelmapPixelGet(src, i, j);
             UASSERT(index <= 0xFF);
 
-            col = BrPixelmapPixelGet(map, 0, index - map->origin_y);
-            col = BR_COLOUR_RGBA(
-                (col & 0x00FF0000) >> 16,
-                (col & 0x0000FF00) >> 8,
-                (col & 0x000000FF) >> 0,
-                0xFF
-            );
+            col  = BrPixelmapPixelGet(map, 0, index - map->origin_y);
+            col |= BR_COLOUR_RGBA(0x00, 0x00, 0x00, 0xFF);
 
             /* Apply colour keying */
             if(src->flags & BR_PMF_KEYED_TRANSPARENCY) {
@@ -58,10 +53,7 @@ br_pixelmap *BR_PUBLIC_ENTRY BrPixelmapDeCLUT(br_pixelmap *src)
                 col = BR_COLOUR_RGBA(r, g, b, BR_COLOUR_RGB(r, g, b) == key ? 0x00 : 0xFF);
             }
 
-            BrPixelmapPixelSet(
-                newpm, i, j,
-                BR_RED(col) << 24 | BR_GRN(col) << 16 | BR_BLU(col) << 8 | BR_ALPHA(col) << 0
-            );
+            BrPixelmapPixelSet(newpm, i, j, col);
         }
     }
 
