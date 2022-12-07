@@ -181,8 +181,8 @@ br_error VIDEOI_BrPixelmapGetTypeDetails(br_uint_8 pmType, GLint *internalFormat
             break;
         case BR_PMT_RGBX_888:
             *internalFormat = GL_RGB;
-            *format         = GL_RGBA;
-            *type           = GL_UNSIGNED_INT_8_8_8_8;
+            *format         = GL_BGRA;
+            *type           = GL_UNSIGNED_INT_8_8_8_8_REV;
             *elemBytes      = 3;
             break;
         case BR_PMT_RGBA_8888:
