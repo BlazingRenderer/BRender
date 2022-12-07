@@ -10,6 +10,7 @@
       };
 
       brender-samples-clang = brender-samples.override { stdenv = pkgs.clangStdenv; };
+      brender-samples-clang8 = brender-samples.override { stdenv = pkgs.clang8Stdenv; };
 
       default = brender-samples;
     };
