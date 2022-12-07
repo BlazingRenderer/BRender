@@ -209,7 +209,7 @@ vec4 fragmain()
 
     vec4 normalDirection = normal;
 
-    vec3 _colour = surface_colour.xyz * ka;
+    vec3 _colour = surface_colour.xyz;
 
     /* This is shit, but this is the way the engine does it */
     vec3 lightColour = vec3(0.0);
