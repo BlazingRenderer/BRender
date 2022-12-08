@@ -19,12 +19,15 @@
 #	define alloca _alloca
 #endif
 
+#if defined(_WIN32)
+#	define WIN32_LEAN_AND_MEAN
+#	include <windows.h>
+#endif
+
 
 BR_RCS_ID("$Id: stdfile.c 1.1 1997/12/10 16:41:28 jon Exp $")
 
-#ifdef _WIN32
-#define WIN32_LEAN_AND_MEAN
-#include <windows.h>
+#if defined(_WIN32)
 static wchar_t *BrStdioToWinWchar(const char *utf8name, wchar_t *buf, br_size_t count)
 {
 	if(utf8name == NULL)
@@ -43,7 +46,7 @@ static wchar_t *BrStdioToWinWchar(const char *utf8name, wchar_t *buf, br_size_t 
 
 static FILE *BrStdioFopenUtf8(const char *utf8Name, const char *mode)
 {
-#ifdef _WIN32
+#if defined(_WIN32)
 	static wchar_t buf[4096];
 
 	wchar_t *name = BrStdioToWinWchar(utf8Name, buf, BR_ASIZE(buf));
@@ -52,7 +55,7 @@ static FILE *BrStdioFopenUtf8(const char *utf8Name, const char *mode)
 
 	br_size_t modelen = BrStrLen(mode);
 
-	const wchar_t *lmode = alloca(modelen * sizeof(wchar_t));
+	wchar_t *lmode = alloca(modelen * sizeof(wchar_t));
 	if(BrStdioToWinWchar(mode, lmode, modelen) == NULL)
 		return NULL;
 
