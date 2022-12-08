@@ -14,10 +14,13 @@
 #include "brender.h"
 #include "brassert.h"
 
+#if defined(_MSC_VER)
+#	include <malloc.h>
+#	define alloca _alloca
+#endif
+
 
 BR_RCS_ID("$Id: stdfile.c 1.1 1997/12/10 16:41:28 jon Exp $")
-
-
 
 #ifdef _WIN32
 #define WIN32_LEAN_AND_MEAN
