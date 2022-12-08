@@ -78,7 +78,6 @@ jobs:
           nix build -L .#brender-samples-win32
 
   build-msvc2022-win64:
-    if: ${{ false }}  # disable for now
     runs-on: windows-2022
     steps:
       - uses: actions/checkout@v2
