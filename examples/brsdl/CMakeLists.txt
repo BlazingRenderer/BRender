@@ -1,5 +1,12 @@
 project(brsdl)
 
+option(BRENDER_DISABLE_FINDSDL "Disable searching for SDL2" OFF)
+
+if(NOT BRENDER_DISABLE_FINDSDL)
+    # brsdl needs this
+    find_package(SDL2 REQUIRED)
+endif()
+
 add_library(brsdl STATIC
         util.c
         glrend.c
