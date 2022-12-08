@@ -30,6 +30,7 @@
  ****************************************************************************/
 
 #include <stdlib.h>               /* Standard C information                 */
+#include <string.h>               /* For memset()                           */
 #include <inttypes.h>             /* For PRIxPTR                            */
 #include <SDL.h>                  /* Master include file for SDL            */
 #include <brender.h>              /* Master include file for BRender        */
