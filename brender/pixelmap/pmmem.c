@@ -64,7 +64,7 @@ struct pm_type_info pmTypeInfo[] = {
 	[BR_PMT_RGBA_8888_ARR]	= { .bits = 32,	.file_size = 4, .align = 1, .channels = BR_PMCHAN_RGB | BR_PMCHAN_ALPHA },
 };
 
-_Static_assert(sizeof(pmTypeInfo) / sizeof(pmTypeInfo[0]) == BR_PMT_MAX, "Pixel type array size mismatch");
+BR_STATIC_ASSERT(sizeof(pmTypeInfo) / sizeof(pmTypeInfo[0]) == BR_PMT_MAX, "Pixel type array size mismatch");
 
 /*
  * Default dispatch table for device pixelmap (defined at end of file)

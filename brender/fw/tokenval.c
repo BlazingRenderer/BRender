@@ -999,7 +999,7 @@ br_error BR_RESIDENT_ENTRY BrTokenValueQueryAllSize(
 	return BRE_OK;
 }
 
-_Static_assert(sizeof(br_value_passthrough) == sizeof(br_value), "sizeof(br_value_passthrough) != sizeof(br_value)");
+BR_STATIC_ASSERT(sizeof(br_value_passthrough) == sizeof(br_value), "sizeof(br_value_passthrough) != sizeof(br_value)");
 
 br_error BR_RESIDENT_ENTRY BrTokenValueSet(
 	void *mem,
