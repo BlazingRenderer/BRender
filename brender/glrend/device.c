@@ -46,7 +46,6 @@ static struct br_tv_template_entry deviceTemplateEntries[] = {
  * Structure used to unpack the device creation tokens/values
  */
 typedef struct device_create_tokens {
-    void                   *sdl_window;
     br_device_gl_ext_procs *ext_procs;
     char                   *vertex_shader;
     char                   *fragment_shader;
@@ -57,7 +56,6 @@ typedef struct device_create_tokens {
  * List of tokens which are not significant in matching (for output facilities)
  */
 static br_token insignificantMatchTokens[] = {
-    BRT_WINDOW_HANDLE_H,
     BRT_MSAA_SAMPLES_I32,
     BRT_TEMPORARY_B,
     BR_NULL_TOKEN,
@@ -69,7 +67,6 @@ static br_token insignificantMatchTokens[] = {
 #define F(f)   offsetof(device_create_tokens, f)
 
 static struct br_tv_template_entry deviceArgsTemplateEntries[] = {
-    {BRT_WINDOW_HANDLE_H,            NULL, F(sdl_window),      BRTV_SET, BRTV_CONV_COPY,},
     {BRT_OPENGL_EXT_PROCS_P,         NULL, F(ext_procs),       BRTV_SET, BRTV_CONV_COPY,},
     {BRT_OPENGL_VERTEX_SHADER_STR,   NULL, F(vertex_shader),   BRTV_SET, BRTV_CONV_COPY,},
     {BRT_OPENGL_FRAGMENT_SHADER_STR, NULL, F(fragment_shader), BRTV_SET, BRTV_CONV_COPY,},
@@ -118,7 +115,6 @@ br_device *DeviceGLAllocate(const char *identifier, const char *arguments)
     br_tv_template *deviceArgs;
 
     device_create_tokens tokens = {
-        .sdl_window      = NULL,
         .ext_procs       = NULL,
         .vertex_shader   = NULL,
         .fragment_shader = NULL,
@@ -144,23 +140,15 @@ br_device *DeviceGLAllocate(const char *identifier, const char *arguments)
         BrTokenValueSetMany(&tokens, &count, NULL, args_tv, deviceArgs);
     }
 
-    /*
-     * If we're directly given an SDL_Window pointer, force SDL.
-     */
-    if(tokens.sdl_window != NULL) {
-        extern const br_device_gl_ext_procs sdl_procs;
-
-        self->ext_procs      = sdl_procs;
-        self->ext_procs.user = tokens.sdl_window;
-    } else if(tokens.ext_procs == NULL) {
+    if(tokens.ext_procs == NULL) {
         BrResFreeNoCallback(self);
         return NULL;
-    } else {
-        /*
-         * Make a copy, so they can't switch things out from under us.
-         */
-        self->ext_procs = *tokens.ext_procs;
     }
+
+    /*
+     * Make a copy, so they can't switch things out from under us.
+     */
+    self->ext_procs = *tokens.ext_procs;
 
     self->vertex_shader   = tokens.vertex_shader;
     self->fragment_shader = tokens.fragment_shader;

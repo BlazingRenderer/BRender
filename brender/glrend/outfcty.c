@@ -32,7 +32,6 @@ static struct br_tv_template_entry outputFacilityTemplateEntries[] = {
      * We don't use these, but we need BrDevBeginVar to accept them.
      * These are passed to pixelmapNew, which will handle them.
      */
-    {BRT_WINDOW_HANDLE_H,         NULL, 0,                    BRTV_QUERY | BRTV_ALL, BRTV_CONV_DIRECT,},
     {BRT_MSAA_SAMPLES_I32,        NULL, 0,                    BRTV_QUERY | BRTV_ALL, BRTV_CONV_DIRECT,},
 };
 

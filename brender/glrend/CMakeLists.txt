@@ -88,7 +88,6 @@ set(GLREND_FILES
 	./outfcty.h
 
 	./ext_procs.c
-	./ext_procs_sdl.c
 
 	./rendfcty.c
 	./rendfcty.h
@@ -132,7 +131,6 @@ target_include_directories(glrend PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
 target_include_directories(glrend PUBLIC include)
 
 target_link_libraries(glrend glrend-glad)
-target_link_libraries(glrend SDL2::SDL2)
 target_link_libraries(glrend fw)
 target_link_libraries(glrend v1db)
 target_link_libraries(glrend nulldev)
