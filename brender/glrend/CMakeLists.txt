@@ -123,6 +123,11 @@ if(NOT target_type STREQUAL STATIC_LIBRARY)
 	target_compile_definitions(glrend PRIVATE -DDEFINE_BR_ENTRY_POINT)
 endif()
 
+set_target_properties(glrend PROPERTIES
+	C_STANDARD 11
+	C_STANDARD_REQUIRED TRUE
+)
+
 target_include_directories(glrend PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
 target_include_directories(glrend PUBLIC include)
 
