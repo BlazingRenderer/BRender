@@ -140,10 +140,6 @@ typedef float br_float;
 #define BR_PRINTF_ATTRIBUTE(fmt, args)
 #define BR_SCANF_ATTRIBUTE(fmt, args)
 
-//#warning "WHAT THE FUCK IS THIS"
-#pragma warning(disable:4103)
-#pragma pack(4)
-
 /*
  * GNU C
  */
