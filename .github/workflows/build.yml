@@ -77,3 +77,15 @@ jobs:
       - run: |
           nix build -L .#brender-samples-win32
 
+  build-msvc2022-win64:
+    if: ${{ false }}  # disable for now
+    runs-on: windows-2022
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - run: vcpkg install --triplet x64-windows SDL2
+      - run: >
+          cmake -B build -G "Visual Studio 17 2022" -A x64 -DCMAKE_BUILD_TYPE=MinSizeRel
+          -DCMAKE_TOOLCHAIN_FILE="$env:VCPKG_INSTALLATION_ROOT/scripts/buildsystems/vcpkg.cmake"
+      - run: cmake --build build
