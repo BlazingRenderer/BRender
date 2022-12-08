@@ -64,12 +64,6 @@ typedef struct br_device_pixelmap {
     struct br_renderer *renderer;
 
     /* OpenGL crap */
-
-    GLint      glInternalFormat;
-    GLenum     glFormat;
-    GLenum     glType;
-    GLsizeiptr glElemBytes;
-
     union {
         struct {
             struct br_device_pixelmap *depthbuffer;
