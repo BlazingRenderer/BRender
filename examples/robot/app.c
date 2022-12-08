@@ -30,6 +30,7 @@
  ****************************************************************************/
 
 #include <stdlib.h>               /* Standard C information                 */
+#include <inttypes.h>             /* For PRIxPTR                            */
 #include <SDL.h>                  /* Master include file for SDL            */
 #include <brender.h>              /* Master include file for BRender        */
 #include <brglrend.h>             /* To get our OpenGL driver entry point   */
@@ -115,7 +116,7 @@ int main(int argc, char **argv)
 
     {
         char args[256];
-        snprintf(args, BR_ASIZE(args), "WINDOW_HANDLE=0x%" PRIxPTR, (intptr_t)sdlWindow);
+        BrSprintfN(args, BR_ASIZE(args), "WINDOW_HANDLE=0x%" PRIxPTR, (intptr_t)sdlWindow);
         BrDevAddStatic(NULL, BrDrvGLBegin, args);
     }
 

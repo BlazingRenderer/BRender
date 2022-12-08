@@ -2,6 +2,7 @@
 #include <brender.h>
 #include <brglrend.h>
 #include <brsdl.h>
+#include <inttypes.h>
 
 /*
  * Primitive heap - used by z-buffered renderer to defer drawing of blended primitives
@@ -81,7 +82,7 @@ int main(int argc, char **argv)
     {
         char args[256];
 
-        snprintf(args, BR_ASIZE(args), "WINDOW_HANDLE=0x%" PRIxPTR, (intptr_t)sdl_window);
+        BrSprintfN(args, BR_ASIZE(args), "WINDOW_HANDLE=0x%" PRIxPTR, (intptr_t)sdl_window);
         BrDevAddStatic(NULL, BrDrvGLBegin, args);
     }
 
