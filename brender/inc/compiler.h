@@ -99,11 +99,6 @@ typedef float br_float;
 #define BR_CALLBACK		__cdecl
 
 /*
- * A function with weak linkage
- */
-#define BR_WEAK __weak
-
-/*
  * A function using the cdecl calling convention. x86 only.
  */
 #ifdef __i386__
@@ -158,11 +153,6 @@ typedef float br_float;
  * A user defined callback function
  */
 #define BR_CALLBACK
-
-/*
- * A function with weak linkage
- */
-#define BR_WEAK __attribute__((weak))
 
 /*
  * A function using the cdecl calling convention. x86 only.
