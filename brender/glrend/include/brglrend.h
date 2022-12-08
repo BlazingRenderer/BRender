@@ -14,7 +14,7 @@ typedef br_error BR_CALLBACK br_device_gl_makecurrent_cbfn(struct br_device *dev
 typedef void BR_CALLBACK br_device_gl_swapbuffers_cbfn(struct br_device *dev, struct br_device_pixelmap *pm,
                                                        void *user);
 
-typedef void *BR_CALLBACK (br_device_gl_getprocaddress_cbfn)(const char *name);
+typedef void *BR_CALLBACK br_device_gl_getprocaddress_cbfn(const char *name);
 
 typedef struct br_device_gl_procs {
 
