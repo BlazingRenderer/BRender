@@ -1,3 +1,4 @@
+#include <inttypes.h>
 #include <brender.h>
 #include <brglrend.h>
 #include <SDL_video.h>
