@@ -329,10 +329,10 @@ static void actorRender(br_actor *ap,
 				/*
 				 * This is a model -  see if model's bounding box is on screen
 				 */
-			if((s = BrOnScreenCheck(&this_model->bounds)) != OSC_REJECT) {
-				BrLightCullReset();
-				BrDbModelRender(ap, this_model, this_material, this_render_data, style, s, 1);
-			}
+				if((s = BrOnScreenCheck(&this_model->bounds)) != OSC_REJECT) {
+					BrLightCullReset();
+					BrDbModelRender(ap, this_model, this_material, this_render_data, style, s, 1);
+				}
 			break;
 
 			case BR_ACTOR_BOUNDS:
@@ -390,14 +390,14 @@ static void actorRender(br_actor *ap,
 	{
 
 		case BR_ACTOR_MODEL:
-		/*
-		 * This is a model -  see if model's bounding box is on screen
-		 */
-		if((s = BrOnScreenCheck(&this_model->bounds)) != OSC_REJECT)
-		{
-			BrLightCullReset();
-			BrDbModelRender(ap, this_model, this_material, this_render_data, style, s, 1);
-		}
+			/*
+			 * This is a model -  see if model's bounding box is on screen
+			 */
+			if((s = BrOnScreenCheck(&this_model->bounds)) != OSC_REJECT)
+			{
+				BrLightCullReset();
+				BrDbModelRender(ap, this_model, this_material, this_render_data, style, s, 1);
+			}
 		break;
 
 		case BR_ACTOR_BOUNDS:
