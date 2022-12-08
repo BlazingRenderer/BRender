@@ -17,7 +17,7 @@ br_error DeviceGLMakeCurrent(br_device *self, void *ctx)
 
 void DeviceGLSwapBuffers(br_device *self, br_device_pixelmap *pm)
 {
-    return self->ext_procs.swap_buffers(self, pm, self->ext_procs.user);
+    self->ext_procs.swap_buffers(self, pm, self->ext_procs.user);
 }
 
 br_device_gl_getprocaddress_cbfn *DeviceGLGetGetProcAddress(br_device *self)
