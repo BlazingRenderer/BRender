@@ -5,10 +5,6 @@
 #include "SDL.h"
 #include "brsdl.h"
 
-#ifdef _DEBUG
-int trianglesInHierarchyCount = 0;
-#endif
-
 SDL_Window *sdl_window = NULL;
 br_pixelmap *screen = NULL, *colour_buffer = NULL, *_depth_buffer = NULL;
 br_error r;

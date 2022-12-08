@@ -3,10 +3,6 @@
 #include <brsdl.h>
 #include <inttypes.h>
 
-#ifdef _DEBUG
-int trianglesInHierarchyCount = 0;
-#endif
-
 /*
  * Primitive heap - used by z-buffered renderer to defer drawing of blended primitives
  */

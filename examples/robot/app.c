@@ -55,9 +55,6 @@ static brwin_view  *BrenderView;
 int    TrackingFlags = 0;
 POINTL TrackingValues[4];
 
-#ifdef _DEBUG
-int trianglesInHierarchyCount = 0;
-#endif
 
 static void BR_CALLBACK BrPMError(const char *message);
 
