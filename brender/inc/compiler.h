@@ -66,26 +66,12 @@ typedef float br_float;
  */
 #if defined (_MSC_VER)
 
-/* Handy for 64-bit porting. */
+/* Bot enough arguments for function-like macro invocation 'BR_PIXELMAP_MEMBERS_PREFIXED' */
+#pragma warning(disable: 4003)
 
-/* function' : pointer mismatch for actual parameter 'number' */
-#pragma warning(error: 4022)
-/* function' : actual parameter is not a pointer : parameter number */
-//#pragma warning(error: 2172) // This is an actual error
-/* operation' : different 'modifier' qualifiers */
-#pragma warning(error: 4090)
-/* variable' : pointer truncation from 'type' to 'type' */
-#pragma warning(error: 4311)
-/* operation' : conversion from 'type1' to 'type2' of greater size */
-#pragma warning(error: 4312)
-/* function' : 'format specifier' in format string conflicts with argument number of type 'type' */
-#pragma warning(error: 4313)
-/* type' : incompatible types - from 'type1' to 'type2' */
-#pragma warning(error: 4133)
+/* This function or variable may be unsafe. Consider using XXXXXX instead. */
+#pragma warning(disable: 4996)
 
-#pragma warning(error: 4024)
-#pragma warning(error: 4477)
-#pragma warning(error: 4047)
 /*
  * Function qualifiers
  */
