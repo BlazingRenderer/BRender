@@ -1,7 +1,6 @@
 #include <inttypes.h>
 #include <stdio.h>
 #include "dosio.h"
-#include "brglrend.h"
 
 #include "SDL.h"
 #include "brsdl.h"
@@ -69,14 +68,11 @@ static void InitSDL()
 
 void BR_CALLBACK _BrBeginHook(void)
 {
-	char args[256];
-
 	BrLogSetLevel(BR_LOG_TRACE);
 
 	InitSDL();
 
-	snprintf(args, BR_ASIZE(args), "WINDOW_HANDLE=0x%" PRIxPTR, (intptr_t) sdl_window);
-	BrDevAddStatic(NULL, BrDrvGLBegin, args);
+    BrSDLDevAddStaticGL(sdl_window);
 }
 
 void BR_CALLBACK _BrEndHook(void)
