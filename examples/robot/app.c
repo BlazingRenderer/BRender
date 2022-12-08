@@ -34,7 +34,7 @@
 #include <inttypes.h>             /* For PRIxPTR                            */
 #include <SDL.h>                  /* Master include file for SDL            */
 #include <brender.h>              /* Master include file for BRender        */
-#include <brglrend.h>             /* To get our OpenGL driver entry point   */
+#include <brsdl.h>                /* To get our OpenGL driver entry point   */
 #include "world.h"                /* 3D world and views into it             */
 #include "app.h"                  /* Application prototypes and defines     */
 
@@ -115,11 +115,7 @@ int main(int argc, char **argv)
      */
     BrBegin();
 
-    {
-        char args[256];
-        BrSprintfN(args, BR_ASIZE(args), "WINDOW_HANDLE=0x%" PRIxPTR, (intptr_t)sdlWindow);
-        BrDevAddStatic(NULL, BrDrvGLBegin, args);
-    }
+    BrSDLDevAddStaticGL(sdlWindow);
 
     if(getenv("BRENDER_PATH") == NULL)
         putenv("BRENDER_PATH=dat;../dat;../../dat;../../../dat");

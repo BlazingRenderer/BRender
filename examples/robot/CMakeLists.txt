@@ -8,4 +8,4 @@ add_executable(robot
 )
 
 target_compile_definitions(robot PUBLIC -DSDL_MAIN_HANDLED)
-target_link_libraries(robot PUBLIC BRender::Full)
+target_link_libraries(robot PUBLIC BRender::Full brsdl)
