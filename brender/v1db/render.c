@@ -32,10 +32,6 @@
 
 BR_RCS_ID("$Id: render.c 1.9 1998/11/12 13:16:45 johng Exp $")
 
-#if DEBUG 
-extern int trianglesInHierarchyCount;
-#endif
-
 
 
 
@@ -333,15 +329,6 @@ static void actorRender(br_actor *ap,
 				/*
 				 * This is a model -  see if model's bounding box is on screen
 				 */
-#if DEBUG
-			{
-				int a;
-				struct v11model *mdl = (struct v11model*)this_model->prepared;
-				for(a = 0; a < mdl->ngroups; a++) {
-					trianglesInHierarchyCount += mdl->groups[a].nfaces;
-				}
-			}
-#endif
 			if((s = BrOnScreenCheck(&this_model->bounds)) != OSC_REJECT) {
 				BrLightCullReset();
 				BrDbModelRender(ap, this_model, this_material, this_render_data, style, s, 1);
@@ -403,16 +390,6 @@ static void actorRender(br_actor *ap,
 	{
 
 		case BR_ACTOR_MODEL:
-#if DEBUG 
-		{
-			int a;
-			struct v11model *mdl = (struct v11model*)this_model->prepared;
-			for(a = 0; a < mdl->ngroups; a++)
-			{
-				trianglesInHierarchyCount += mdl->groups[a].nfaces;
-			}
-		}
-#endif
 		/*
 		 * This is a model -  see if model's bounding box is on screen
 		 */
