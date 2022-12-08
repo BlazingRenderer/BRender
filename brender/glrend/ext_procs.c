@@ -24,3 +24,9 @@ br_device_gl_getprocaddress_cbfn *DeviceGLGetGetProcAddress(br_device *self)
 {
     return self->ext_procs.get_proc_address;
 }
+
+void DeviceGLPreSwap(br_device *self, GLuint fbo)
+{
+    if(self->ext_procs.preswap_hook != NULL)
+        self->ext_procs.preswap_hook(self, fbo, self->ext_procs.user);
+}

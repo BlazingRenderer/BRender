@@ -53,4 +53,5 @@ const br_device_gl_ext_procs sdl_procs = {
     .make_current     = sdl_gl_make_current,
     .get_proc_address = sdl_gl_get_proc_address,
     .swap_buffers     = sdl_gl_swap_buffers,
+    .preswap_hook     = NULL,
 };

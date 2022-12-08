@@ -124,6 +124,8 @@ void DeviceGLSwapBuffers(br_device *self, br_device_pixelmap *pm);
 
 br_device_gl_getprocaddress_cbfn *DeviceGLGetGetProcAddress(br_device *self);
 
+void DeviceGLPreSwap(br_device *self, GLuint fbo);
+
 /*
  * Hijack nulldev's no-op implementations.
  * They're designed for this.

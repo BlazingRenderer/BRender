@@ -550,14 +550,6 @@ br_error BR_CMETHOD_DECL(br_device_pixelmap_gl, match)(br_device_pixelmap *self,
     return create_pixelmap(_newpm, (br_object *)self, mt.use_type, type, mt.width, mt.height, self->msaa_samples);
 }
 
-/*
- * Called before buffer swap. Use to render overlays, e.g. ImGui,
- */
-void BR_WEAK _GLREND_PreSwapHook(GLuint fbo)
-{
-    /* nop */
-}
-
 br_error BR_CMETHOD_DECL(br_device_pixelmap_gl, doubleBuffer)(br_device_pixelmap *self, br_device_pixelmap *src)
 {
     if(self->use_type != BRT_NONE || src->use_type != BRT_OFFSCREEN)
@@ -567,7 +559,7 @@ br_error BR_CMETHOD_DECL(br_device_pixelmap_gl, doubleBuffer)(br_device_pixelmap
     BrPixelmapCopy((br_pixelmap *)self, (br_pixelmap *)src);
 
     /* Call our hook */
-    _GLREND_PreSwapHook(src->asBack.glFbo);
+    DeviceGLPreSwap(self->device, src->asBack.glFbo);
     while(glGetError() != GL_NO_ERROR);
 
     DeviceGLSwapBuffers(self->device, self);

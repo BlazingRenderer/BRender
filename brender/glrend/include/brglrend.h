@@ -16,6 +16,8 @@ typedef void BR_CALLBACK br_device_gl_swapbuffers_cbfn(struct br_device *dev, st
 
 typedef void *BR_CALLBACK br_device_gl_getprocaddress_cbfn(const char *name);
 
+typedef void BR_CALLBACK br_device_gl_preswap_hook_cbfn(struct br_device *dev, unsigned int fbo, void *user);
+
 typedef struct br_device_gl_procs {
 
     br_device_gl_createcontext_cbfn  *create_context;
@@ -23,6 +25,7 @@ typedef struct br_device_gl_procs {
     br_device_gl_makecurrent_cbfn    *make_current;
     br_device_gl_getprocaddress_cbfn *get_proc_address;
     br_device_gl_swapbuffers_cbfn    *swap_buffers;
+    br_device_gl_preswap_hook_cbfn   *preswap_hook;
     void                             *user;
 
 } br_device_gl_ext_procs;
