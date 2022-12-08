@@ -1,6 +1,5 @@
 #include <SDL.h>
 #include <brender.h>
-#include <brglrend.h>
 #include <brsdl.h>
 #include <inttypes.h>
 
@@ -83,12 +82,7 @@ int main(int argc, char **argv)
 
     BrBegin();
 
-    {
-        char args[256];
-
-        BrSprintfN(args, BR_ASIZE(args), "WINDOW_HANDLE=0x%" PRIxPTR, (intptr_t)sdl_window);
-        BrDevAddStatic(NULL, BrDrvGLBegin, args);
-    }
+    BrSDLDevAddStaticGL(sdl_window);
 
     r = BrSDLUtilOnResize(sdl_window, "opengl", &screen, &colour_buffer, &depth_buffer, primitive_heap, sizeof(primitive_heap), NULL);
     if(r != BR_TRUE)
