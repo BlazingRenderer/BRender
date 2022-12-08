@@ -343,8 +343,6 @@ static br_error BR_CMETHOD_DECL(br_renderer_gl, modelMul)(br_renderer *self, br_
 
 static br_error BR_CMETHOD_DECL(br_renderer_gl, modelPopPushMul)(br_renderer *self, br_matrix34_f *m)
 {
-    br_matrix34 om = self->state.current->matrix.model_to_view;
-
     if(self->state.top == 0)
         return BRE_UNDERFLOW;
 
