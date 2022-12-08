@@ -34,6 +34,9 @@ br_boolean BrSDLUtilOnResize(SDL_Window *window, const char *driver, br_pixelmap
                              void *primitive_heap, br_size_t primitive_heap_size,
                              br_camera *camera);
 
+/* glrend.c */
+br_error BrSDLDevAddStaticGL(SDL_Window *window);
+
 #ifdef __cplusplus
 };
 #endif
