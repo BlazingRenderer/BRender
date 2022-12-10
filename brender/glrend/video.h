@@ -78,7 +78,7 @@ typedef struct _GLSTD140_LIGHT {
     /* (inner, outer), if (0.0, 0.0), then this is a point light. */
     alignas(16) br_vector2_f spot_angles;
 } GLSTD140_LIGHT, *HGLSTD140_LIGHT;
-static_assert(sizeof(GLSTD140_LIGHT) % 16 == 0, "GLSTD140 is not aligned");
+static_assert(sizeof(GLSTD140_LIGHT) % 16 == 0, "GLSTD140_LIGHT is not aligned");
 
 typedef struct _GLSTD140_SCENE_DATA {
     alignas(16) br_vector4_f   eye_view;
