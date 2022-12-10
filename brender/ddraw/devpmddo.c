@@ -137,6 +137,18 @@ void BrDD_SetPixelFormat( LPDDSURFACEDESC ddsd, int type )
             ddsd->ddpfPixelFormat.dwBBitMask = 0x001f ; 
           break ;
 
+		case BR_PMT_RGB_888:
+
+			// Pixel format is RGB-888
+
+			ddsd->ddpfPixelFormat.dwFlags = DDPF_RGB;
+			ddsd->ddpfPixelFormat.dwFourCC = BI_RGB;
+			ddsd->ddpfPixelFormat.dwRBitMask = 0x00ff0000;
+			ddsd->ddpfPixelFormat.dwGBitMask = 0x0000ff00;
+			ddsd->ddpfPixelFormat.dwBBitMask = 0x000000ff;
+			break;
+
+
        default : BR_ERROR0("Unsupported BRender pixel format. Sorry.");
     }            
 }
