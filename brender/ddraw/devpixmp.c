@@ -295,6 +295,8 @@ br_device_pixelmap * DevicePixelmapDirectDrawAllocate(br_device *dev, br_output_
 			return NULL;
 		}
 
+		break;
+
 	default:
 		BrResFree(self);
 		return NULL;
