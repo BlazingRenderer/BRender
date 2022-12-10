@@ -77,6 +77,9 @@ typedef struct _GLSTD140_LIGHT {
     alignas(16) br_vector4_f iclq;
     /* (inner, outer), if (0.0, 0.0), then this is a point light. */
     alignas(16) br_vector2_f spot_angles;
+
+    /* Pad out the structure to maintain alignment. */
+    alignas(4) float _pad0, _pad1;
 } GLSTD140_LIGHT, *HGLSTD140_LIGHT;
 static_assert(sizeof(GLSTD140_LIGHT) % 16 == 0, "GLSTD140_LIGHT is not aligned");
 
