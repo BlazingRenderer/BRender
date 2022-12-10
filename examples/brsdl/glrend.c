@@ -63,6 +63,6 @@ br_error BrSDLDevAddStaticGL(SDL_Window *window)
     };
 
     /* NB: glrend will make a copy of this, so it's safe to pass this through. */
-    snprintf(args, BR_ASIZE(args), "OPENGL_EXT_PROCS=0x%" PRIxPTR, (intptr_t)&procs);
+    SDL_snprintf(args, BR_ASIZE(args), "OPENGL_EXT_PROCS=0x%" PRIxPTR, (intptr_t)&procs);
     return BrDevAddStatic(NULL, BrDrvGLBegin, args);
 }
