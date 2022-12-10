@@ -55,7 +55,7 @@ static FILE *BrStdioFopenUtf8(const char *utf8Name, const char *mode)
 
 	br_size_t modelen = BrStrLen(mode);
 
-	wchar_t *lmode = alloca(modelen * sizeof(wchar_t));
+	wchar_t *lmode = alloca((modelen + 1) * sizeof(wchar_t));
 	if(BrStdioToWinWchar(mode, lmode, modelen) == NULL)
 		return NULL;
 
