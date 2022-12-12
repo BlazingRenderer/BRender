@@ -105,9 +105,6 @@ typedef union br_value_tag {
         struct br_token_value *tvl;
 } br_value ;
 
-//typedef br_uintptr_t br_value_passthrough;
-typedef br_uint_64 br_value_passthrough;
-
 /*
  * Token value pair
  */

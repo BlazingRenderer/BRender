@@ -999,8 +999,6 @@ br_error BR_RESIDENT_ENTRY BrTokenValueQueryAllSize(
 	return BRE_OK;
 }
 
-BR_STATIC_ASSERT(sizeof(br_value_passthrough) == sizeof(br_value), "sizeof(br_value_passthrough) != sizeof(br_value)");
-
 br_error BR_RESIDENT_ENTRY BrTokenValueSet(
 	void *mem,
 	br_uint_32 *pcombined_mask,
