@@ -109,12 +109,6 @@ typedef union br_value_tag {
 typedef br_uint_64 br_value_passthrough;
 
 /*
- * Used to signify the "intension" to pass to a br_value.
- * This should cast to the largest type in br_value, void*
- */
-#define BR_VALUE_PASSTHROUGH(x) ((br_value_passthrough)(x))
-
-/*
  * Token value pair
  */
 typedef struct br_token_value {
