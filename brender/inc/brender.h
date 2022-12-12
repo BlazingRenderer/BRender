@@ -134,9 +134,9 @@
 #include "brlists.h"
 #endif
 
-	/*
-	 * Function prototypes
-	 */
+/*
+ * Function prototypes
+ */
 #ifndef _NO_PROTOTYPES
 
 #ifndef _FW_P_H_
