@@ -10,8 +10,6 @@
 #ifndef _BRMATH_H_
 #define _BRMATH_H_
 
-#include <stdarg.h>
-
 #ifndef _NO_PROTOTYPES
 
 #ifdef __cplusplus
