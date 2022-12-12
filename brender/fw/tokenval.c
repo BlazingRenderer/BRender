@@ -1005,15 +1005,12 @@ br_error BR_RESIDENT_ENTRY BrTokenValueSet(
 	void *mem,
 	br_uint_32 *pcombined_mask,
 	br_token t,
-	br_value_passthrough value,
+	br_value value,
 	br_tv_template *template)
 {
 	br_int_32 o;
 	br_error r;
-	br_token_value tv;
-
-	tv.t = t;
-	BrMemCpy(&tv.v, &value, sizeof(tv.v));
+	br_token_value tv = { .t = t, .v = value };
 
 	/*
 	 * Make sure map info is built

@@ -95,7 +95,7 @@ br_error BR_RESIDENT_ENTRY BrTokenValueSet(
 	void *mem,
 	br_uint_32 *pcombined_mask,
 	br_token t,
-	br_value_passthrough value,
+	br_value value,
 	br_tv_template *_template);
 
 br_error BR_RESIDENT_ENTRY BrTokenValueSetMany(
