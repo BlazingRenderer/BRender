@@ -112,7 +112,7 @@ enum {
  */
 typedef br_error BR_CALLBACK br_tv_custom_query_cbfn(br_value *pvalue, void **extra, br_size_t *pextra_size,
 	void *block, const struct br_tv_template_entry *tep);
-typedef br_error BR_CALLBACK br_tv_custom_set_cbfn(void *block, br_value *pvalue, const struct br_tv_template_entry *tep);
+typedef br_error BR_CALLBACK br_tv_custom_set_cbfn(void *block, const br_value *pvalue, const struct br_tv_template_entry *tep);
 typedef br_size_t BR_CALLBACK br_tv_custom_extra_size_cbfn(void *block, const struct br_tv_template_entry *tep);
 
 typedef struct br_tv_custom {

@@ -458,7 +458,7 @@ static br_error ValueQuery(
  * Copy a token value to the given address.
  * This is required for 64-bit, as not everything is 4 bytes.
  */
-static void BrTokenCopy(void *mem, br_token_value *tv)
+static void BrTokenCopy(void *mem, const br_token_value *tv)
 {
 	br_size_t s;
 	/*
@@ -484,7 +484,7 @@ static void BrTokenCopy(void *mem, br_token_value *tv)
  */
 static br_error ValueSet(
 	void *block,				/* Destination memeory block				*/
-	br_token_value *tv,			/* Source value								*/
+	const br_token_value *tv,			/* Source value								*/
 	const br_tv_template_entry *tep)	/* Template entry to use for conversion		*/
 {
 	void *mem;
@@ -1008,7 +1008,7 @@ br_error BR_RESIDENT_ENTRY BrTokenValueSet(
 {
 	br_int_32 o;
 	br_error r;
-	br_token_value tv = { .t = t, .v = value };
+	const br_token_value tv = { .t = t, .v = value };
 
 	/*
 	 * Make sure map info is built
