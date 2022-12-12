@@ -76,6 +76,9 @@ typedef union br_value_tag {
 		br_colour		rgb;
 		struct br_object *o;
 		void			*h;
+		br_vector2      *v2;
+		br_vector3      *v3;
+		br_vector4      *v4;
 		br_vector2_i	*v2_i;
 		br_vector3_i	*v3_i;
 		br_vector4_i	*v4_i;
@@ -85,6 +88,9 @@ typedef union br_value_tag {
 		br_vector2_f	*v2_f;
 		br_vector3_f	*v3_f;
 		br_vector4_f	*v4_f;
+		br_matrix23		*m23;
+		br_matrix34		*m34;
+		br_matrix4		*m4;
 		br_matrix23_x	*m23_x;
 		br_matrix34_x	*m34_x;
 		br_matrix4_x	*m4_x;
