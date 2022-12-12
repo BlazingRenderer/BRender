@@ -1,7 +1,10 @@
 #ifndef _BRLOG_H_
 #define _BRLOG_H_
 
+#if !defined(__H2INC__)
 #include <stdarg.h>
+#endif
+
 #include "compiler.h"
 
 enum {
@@ -16,7 +19,11 @@ enum {
 /*
  * Instance of a log handler.
  */
+#if !defined(__H2INC__)
 typedef void BR_CALLBACK br_log_cbfn(br_uint_8 level, const char *component, const char *fmt, va_list ap);
+#else
+typedef void BR_CALLBACK br_log_cbfn(br_uint_8 level, const char *component, const char *fmt);
+#endif
 
 typedef struct br_loghandler {
     const char  *identifier;

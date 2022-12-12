@@ -9,7 +9,9 @@
 #ifndef _BREXCEPT_H_
 #define _BREXCEPT_H_
 
+#ifndef __H2INC__
 #include <setjmp.h>
+#endif
 
 /*
  * Exception types are the same as error types
@@ -27,8 +29,9 @@ typedef struct br_exception_handler {
     /*
      * setjmp/longjmp context to throw to
      */
-
+#ifndef __H2INC__
     jmp_buf context;
+#endif
 
 } br_exception_handler;
 

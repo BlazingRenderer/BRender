@@ -10,7 +10,9 @@
 #ifndef _BRSTDLIB_H_
 #define _BRSTDLIB_H_
 
+#if !defined(__H2INC__)
 #include <stdarg.h>
+#endif
 
 #ifndef _NO_PROTOTYPES
 #ifdef __cplusplus

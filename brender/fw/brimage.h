@@ -10,10 +10,14 @@
 
 typedef void *(*br_image_proc)(void *);
 
+#ifdef __H2INC__
+typedef void br_image_function_info;
+#else
 typedef struct br_image_function_info {
     const char   *name;
     br_image_proc proc;
 } br_image_function_info;
+#endif
 
 typedef struct br_image {
     /*

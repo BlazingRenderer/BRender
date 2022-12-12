@@ -9,15 +9,33 @@
 #ifndef _COMPILER_H_
 #define _COMPILER_H_
 
+#if defined(__H2INC__)
+typedef signed char    int8_t;
+typedef signed short   int16_t;
+typedef signed long    int32_t;
+typedef unsigned char  uint8_t;
+typedef unsigned short uint16_t;
+typedef unsigned long  uint32_t;
+typedef signed long    intptr_t;
+typedef unsigned long  uintptr_t;
+typedef unsigned long  size_t;
+typedef signed long    ssize_t;
+typedef signed long    ptrdiff_t;
+#else
 #include <stdint.h>
 #include <stddef.h>
+#endif
 
 /*
  * Fixed bitsize integers
  */
-
+#if defined(__H2INC__)
+typedef int32_t  br_int_64[2];
+typedef uint32_t br_uint_64[2];
+#else
 typedef int64_t  br_int_64;
 typedef uint64_t br_uint_64;
+#endif
 
 typedef int32_t  br_int_32;
 typedef uint32_t br_uint_32;
@@ -32,7 +50,7 @@ typedef uint8_t br_uint_8;
  * Generic size type (in case target environment does not have size_t)
  */
 typedef size_t br_size_t;
-#if defined(_MSC_VER)
+#if defined(_MSC_VER) && !defined(__H2INC__)
 #include <basetsd.h>
 typedef SSIZE_T ssize_t;
 #endif
@@ -184,6 +202,78 @@ typedef float br_float;
 #endif
 
 #define BR_STR(s) #s
+
+#if defined(__H2INC__)
+/*
+ * Avoid some tokens that masm chokes on
+ */
+#define align  _align
+#define seg    _seg
+#define offset _offset
+#define type   _type
+#define size   _size
+#define page   _page
+#define mask   _mask
+#define state  _state
+#define ptr    _ptr
+#define a      _a
+#define b      _b
+#define c      _c
+#define width  _width
+#define end    _end
+#define out    _out
+#define str    _str
+#define ax     _ax
+#define bx     _bx
+#define cx     _cx
+#define dx     _dx
+#define si     _si
+#define di     _di
+#define bp     _bp
+#define ip     _ip
+#define sp     _sp
+#define eax    _eax
+#define ebx    _ebx
+#define ecx    _ecx
+#define edx    _edx
+#define esi    _esi
+#define edi    _edi
+#define ebp    _ebp
+#define eip    _eip
+#define esp    _esp
+#define al     _al
+#define bl     _bl
+#define cl     _cl
+#define dl     _dl
+#define ah     _ah
+#define bh     _bh
+#define ch     _ch
+#define dh     _dh
+
+#define es     _es
+#define cs     _cs
+#define ds     _ds
+#define ss     _ss
+#define fs     _fs
+#define gs     _gs
+
+#define low    _low
+#define high   _high
+
+/*
+ * Supress compiler specific declarators
+ */
+#undef BR_CALLBACK
+#undef BR_ASM_DATA
+#undef BR_ASM_CALL
+#undef BR_ASM_CALLBACK
+
+#define BR_CALLBACK
+#define BR_ASM_DATA
+#define BR_ASM_CALL
+#define BR_ASM_CALLBACK
+
+#endif
 
 /*
  * Declare methods in C
