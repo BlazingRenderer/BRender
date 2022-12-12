@@ -211,17 +211,20 @@ static br_error BR_CMETHOD_DECL(br_renderer_gl, bufferStoredAvail)(br_renderer *
  * Setting current state
  */
 br_error BR_CMETHOD_DECL(br_renderer_gl, partSet)(br_renderer *self, br_token part, br_int_32 index, br_token t,
-                                                  br_value_passthrough value)
+                                                  br_value value)
 {
     br_error              r;
     br_uint_32            m;
     struct br_tv_template *tp;
+    br_value_passthrough  pthru;
 
     if((tp = GLSTATE_GetStateTemplate(&self->state, part, index)) == NULL)
         return BRE_FAIL;
 
+    BrMemCpy(&pthru, &value, sizeof(value));
+
     m = 0;
-    r = BrTokenValueSet(self->state.current, &m, t, BR_VALUE_PASSTHROUGH(value), tp);
+    r = BrTokenValueSet(self->state.current, &m, t, pthru, tp);
     if(m)
         GLSTATE_TemplateActions(&self->state, m);
 

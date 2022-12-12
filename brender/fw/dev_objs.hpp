@@ -265,7 +265,7 @@ class br_renderer : public br_object_container {
 			br_token use, br_token_value *tv);
 
 	// Writing current state
-		virtual br_error BR_METHOD partSet(br_token part, br_int_32 index, br_token t, br_value_passthrough pvalue);
+		virtual br_error BR_METHOD partSet(br_token part, br_int_32 index, br_token t, br_value value);
 		virtual br_error BR_METHOD partSetMany(br_token part, br_int_32 index, br_token_value * tv, br_int_32 *pcount);
 
 	// Reading current state

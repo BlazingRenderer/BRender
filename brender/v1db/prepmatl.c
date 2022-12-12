@@ -47,7 +47,7 @@ void BR_PUBLIC_ENTRY BrMaterialUpdate(br_material *mat, br_uint_16 flags)
 	 */
 
 	if(flags & BR_MATU_MAP_TRANSFORM)
-		RendererPartSet(v1db.renderer, BRT_SURFACE, 0, BRT_AS_MATRIX23_SCALAR(MAP_MATRIX), BR_VALUE_PASSTHROUGH(&mat->map_transform));
+		RendererPartSet(v1db.renderer, BRT_SURFACE, 0, BRT_AS_MATRIX23_SCALAR(MAP_MATRIX), (br_value){.m23 = &mat->map_transform});
 
 	if(flags & BR_MATU_RENDERING)
 	{
@@ -305,7 +305,7 @@ void BR_PUBLIC_ENTRY BrMaterialUpdate(br_material *mat, br_uint_16 flags)
 		if(mat->flags & BR_MATF_TWO_SIDED)
 			t = BRT_TWO_SIDED;
 
-		RendererPartSet(v1db.renderer, BRT_CULL, 0, BRT_TYPE_T, BR_VALUE_PASSTHROUGH(t));
+		RendererPartSet(v1db.renderer, BRT_CULL, 0, BRT_TYPE_T, (br_value){.t = t});
 	}
 
 	if(flags & BR_MATU_LIGHTING)

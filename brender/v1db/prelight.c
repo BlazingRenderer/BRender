@@ -58,7 +58,7 @@ void BR_PUBLIC_ENTRY BrSceneModelLight(br_model *model,
         BrMatrix34Pre(&m2v, &v1db.camera_path[0].m);
         RendererPartSet(v1db.renderer, BRT_MATRIX, 0,
                         BRT_AS_MATRIX34_SCALAR(MODEL_TO_VIEW),
-						BR_VALUE_PASSTHROUGH(&m2v));
+                        (br_value){.m34 = &m2v});
         RendererModelInvert(v1db.renderer);
     }
 
