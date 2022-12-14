@@ -57,8 +57,6 @@ br_renderer_facility *RendererFacilityGLInit(br_device *dev);
  */
 br_output_facility *OutputFacilityGLCreateTemporary(br_device *dev, br_token_value *tv);
 
-br_error OutputFacilityGLEnumerate(br_device *device);
-
 /*
  * renderer.cpp
  */
