@@ -31,12 +31,20 @@ static struct br_tv_template_entry devicePixelmapTemplateEntries[] = {
 #undef F
 
 struct pixelmapNewTokens {
+    br_int_32 width;
+    br_int_32 height;
+    br_int_32 pixel_bits;
+    br_uint_8 pixel_type;
     int msaa_samples;
 };
 
 #define F(f) offsetof(struct pixelmapNewTokens, f)
 static struct br_tv_template_entry pixelmapNewTemplateEntries[] = {
-    {BRT_MSAA_SAMPLES_I32, NULL, F(msaa_samples), BRTV_SET, BRTV_CONV_COPY,}
+    {BRT_WIDTH_I32,        NULL, F(width),        BRTV_SET, BRTV_CONV_COPY,},
+    {BRT_HEIGHT_I32,       NULL, F(height),       BRTV_SET, BRTV_CONV_COPY,},
+    {BRT_PIXEL_BITS_I32,   NULL, F(pixel_bits),   BRTV_SET, BRTV_CONV_COPY,},
+    {BRT_PIXEL_TYPE_U8,    NULL, F(pixel_type),   BRTV_SET, BRTV_CONV_COPY,},
+    {BRT_MSAA_SAMPLES_I32, NULL, F(msaa_samples), BRTV_SET, BRTV_CONV_COPY,},
 };
 #undef F
 
@@ -388,9 +396,15 @@ static br_error create_pixelmap(br_device_pixelmap **newpm, br_object *parent, b
 br_device_pixelmap *DevicePixelmapGLAllocate(br_device *device, br_output_facility *facility, br_token_value *tv)
 {
     br_device_pixelmap       *self;
-    struct pixelmapNewTokens pt = {.msaa_samples = 0};
     br_int_32                count;
     br_error                 err;
+    struct pixelmapNewTokens pt = {
+        .width        = -1,
+        .height       = -1,
+        .pixel_bits   = -1,
+        .pixel_type   = BR_PMT_MAX,
+        .msaa_samples = 0,
+    };
 
     if(device->templates.pixelmapNewTemplate == NULL) {
         device->templates.pixelmapNewTemplate = BrTVTemplateAllocate(
@@ -402,8 +416,32 @@ br_device_pixelmap *DevicePixelmapGLAllocate(br_device *device, br_output_facili
 
     BrTokenValueSetMany(&pt, &count, NULL, tv, device->templates.pixelmapNewTemplate);
 
-    err = create_pixelmap(&self, (br_object *)facility, BRT_NONE, facility->colour_type,
-                          facility->width, facility->height, pt.msaa_samples);
+    if(pt.width <= 0 || pt.height <= 0)
+        return NULL;
+
+    /*
+     * If the user's manually specified a type, use it.
+     * Otherwise, figure one out from the bit depth.
+     */
+    if(pt.pixel_type == BR_PMT_MAX) {
+        switch(pt.pixel_bits) {
+            case 16:
+                pt.pixel_type = BR_PMT_RGB_565;
+                break;
+            case 24:
+                pt.pixel_type = BR_PMT_RGB_888;
+                break;
+            case 32:
+                pt.pixel_type = BR_PMT_RGBX_888;
+                break;
+            default:
+                BrLogError("GLREND", "Unsupported pixel depth %d requested.", pt.pixel_bits);
+                return NULL;
+        }
+    }
+
+    err = create_pixelmap(&self, (br_object *)facility, BRT_NONE, pt.pixel_type,
+                          pt.width, pt.height, pt.msaa_samples);
     if(err != BRE_OK)
         return NULL;
 
