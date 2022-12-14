@@ -62,11 +62,6 @@ typedef struct br_output_facility {
     br_boolean indexed;
 
     /*
-     * The monitor this mode is on.
-     */
-    br_int_32 monitor;
-
-    /*
      * Renderer facilities to use, and default
      */
     struct br_renderer_facility *renderer_facility;

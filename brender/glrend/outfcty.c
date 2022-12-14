@@ -23,7 +23,6 @@ static struct br_tv_template_entry outputFacilityTemplateEntries[] = {
     {BRT_PIXEL_BITS_I32,          NULL, F(colour_bits),       BRTV_QUERY | BRTV_ALL, BRTV_CONV_COPY,},
     {BRT_PIXEL_TYPE_U8,           NULL, F(colour_type),       BRTV_QUERY | BRTV_ALL, BRTV_CONV_COPY,},
     {BRT_INDEXED_B,               NULL, F(indexed),           BRTV_QUERY | BRTV_ALL, BRTV_CONV_COPY,},
-    {BRT_WINDOW_MONITOR_I32,      NULL, F(monitor),           BRTV_QUERY | BRTV_ALL, BRTV_CONV_COPY,},
     {BRT_IDENTIFIER_CSTR,         NULL, F(identifier),        BRTV_QUERY | BRTV_ALL, BRTV_CONV_COPY,},
     {BRT_RENDERER_FACILITY_O,     NULL, F(renderer_facility), BRTV_QUERY | BRTV_ALL, BRTV_CONV_COPY,},
 
