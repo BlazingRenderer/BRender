@@ -12,19 +12,20 @@ static const struct br_output_facility_dispatch outputFacilityDispatch;
  * Output Type info. template
  */
 #define F(f) offsetof(br_output_facility, f)
+#define A(a) ((br_uintptr_t)(a))
 
 static struct br_tv_template_entry outputFacilityTemplateEntries[] = {
-    {BRT_WIDTH_I32,               NULL, F(width),             BRTV_QUERY | BRTV_ALL, BRTV_CONV_COPY,},
-    {BRT_WIDTH_MIN_I32,           NULL, F(width),             BRTV_QUERY | BRTV_ALL, BRTV_CONV_COPY,},
-    {BRT_WIDTH_MAX_I32,           NULL, F(max_width),         BRTV_QUERY | BRTV_ALL, BRTV_CONV_COPY,},
-    {BRT_HEIGHT_I32,              NULL, F(height),            BRTV_QUERY | BRTV_ALL, BRTV_CONV_COPY,},
-    {BRT_HEIGHT_MIN_I32,          NULL, F(height),            BRTV_QUERY | BRTV_ALL, BRTV_CONV_COPY,},
-    {BRT_HEIGHT_MAX_I32,          NULL, F(max_height),        BRTV_QUERY | BRTV_ALL, BRTV_CONV_COPY,},
-    {BRT_PIXEL_BITS_I32,          NULL, F(colour_bits),       BRTV_QUERY | BRTV_ALL, BRTV_CONV_COPY,},
-    {BRT_PIXEL_TYPE_U8,           NULL, F(colour_type),       BRTV_QUERY | BRTV_ALL, BRTV_CONV_COPY,},
-    {BRT_INDEXED_B,               NULL, F(indexed),           BRTV_QUERY | BRTV_ALL, BRTV_CONV_COPY,},
-    {BRT_IDENTIFIER_CSTR,         NULL, F(identifier),        BRTV_QUERY | BRTV_ALL, BRTV_CONV_COPY,},
-    {BRT_RENDERER_FACILITY_O,     NULL, F(renderer_facility), BRTV_QUERY | BRTV_ALL, BRTV_CONV_COPY,},
+    {BRT_WIDTH_I32,               NULL, A(-1),                BRTV_QUERY | BRTV_ALL | BRTV_ABS, BRTV_CONV_COPY,},
+    {BRT_WIDTH_MIN_I32,           NULL, A(1),                 BRTV_QUERY | BRTV_ALL | BRTV_ABS, BRTV_CONV_COPY,},
+    {BRT_WIDTH_MAX_I32,           NULL, F(max_width),         BRTV_QUERY | BRTV_ALL,            BRTV_CONV_COPY,},
+    {BRT_HEIGHT_I32,              NULL, A(-1),                BRTV_QUERY | BRTV_ALL | BRTV_ABS, BRTV_CONV_COPY,},
+    {BRT_HEIGHT_MIN_I32,          NULL, A(1),                 BRTV_QUERY | BRTV_ALL | BRTV_ABS, BRTV_CONV_COPY,},
+    {BRT_HEIGHT_MAX_I32,          NULL, F(max_height),        BRTV_QUERY | BRTV_ALL,            BRTV_CONV_COPY,},
+    {BRT_PIXEL_BITS_I32,          NULL, A(-1),                BRTV_QUERY | BRTV_ALL | BRTV_ABS, BRTV_CONV_COPY,},
+    {BRT_PIXEL_TYPE_U8,           NULL, A(BR_PMT_MAX),        BRTV_QUERY | BRTV_ALL | BRTV_ABS, BRTV_CONV_COPY,},
+    {BRT_INDEXED_B,               NULL, A(0),                 BRTV_QUERY | BRTV_ALL | BRTV_ABS, BRTV_CONV_COPY,},
+    {BRT_IDENTIFIER_CSTR,         NULL, F(identifier),        BRTV_QUERY | BRTV_ALL,            BRTV_CONV_COPY,},
+    {BRT_RENDERER_FACILITY_O,     NULL, F(renderer_facility), BRTV_QUERY | BRTV_ALL,            BRTV_CONV_COPY,},
 
     /*
      * We don't use these, but we need BrDevBeginVar to accept them.
@@ -34,6 +35,7 @@ static struct br_tv_template_entry outputFacilityTemplateEntries[] = {
 };
 
 #undef F
+#undef A
 
 br_output_facility *OutputFacilityGLInit(br_device *dev, br_renderer_facility *rendfcty)
 {

@@ -35,31 +35,10 @@ typedef struct br_output_facility {
     void *object_list;
 
     /*
-     * Size, minimum and maximum size of mode in pixels
-     */
-    br_int_32 width;
-    br_int_32 height;
-
-    /*
      * Maximum sizes (GL_MAX_VIEWPORT_DIMS).
      */
     br_int_32 max_width;
     br_int_32 max_height;
-
-    /*
-     * Bit depth
-     */
-    br_int_32 colour_bits;
-
-    /*
-     * Pixelmap types
-     */
-    br_int_32 colour_type;
-
-    /*
-     * Is there a CLUT?
-     */
-    br_boolean indexed;
 
     /*
      * Renderer facilities to use, and default
