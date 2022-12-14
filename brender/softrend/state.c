@@ -60,7 +60,7 @@ BR_RCS_ID("$Id: state.c 1.6 1998/11/13 16:23:39 jon Exp $");
  **/
 
 #define F(f) offsetof(struct state_all,f)
-#define P(f)	((br_int_32)(&(f)))
+#define P(f)	((br_uintptr_t)(&(f)))
 
 static const br_tv_template_entry partCullTemplateEntries[] = {
 	{BRT(TYPE_T),			F(cull.type),			Q | S | A,	BRTV_CONV_COPY,				0,TM_PART|TM_INVALID_CC},
@@ -103,12 +103,12 @@ static const br_tv_template_entry partSurfaceTemplateEntries[] = {
 /**************************************************************************
  ** Light
  **/
-static br_error BR_CALLBACK customLightingVolumeSet(void *block, br_uint_32 *pvalue, struct br_tv_template_entry *tep);
+static br_error BR_CALLBACK customLightingVolumeSet(void *block, br_value *pvalue, const struct br_tv_template_entry *tep);
 
 static const struct br_tv_custom customLightingVolumeConv = {
-	NULL,
-	customLightingVolumeSet,
-	NULL,
+    .query      = NULL,
+    .set        = customLightingVolumeSet,
+    .extra_size = NULL,
 };
 
 
@@ -564,12 +564,12 @@ void TouchModelToView(br_renderer *self)
 }
 
 
-static br_error BR_CALLBACK customLightingVolumeSet(void *block, br_uint_32 *pvalue, struct br_tv_template_entry *tep)
+static br_error BR_CALLBACK customLightingVolumeSet(void *block, br_value *pvalue, const struct br_tv_template_entry *tep)
 {
 	br_light_volume *volume, *new_volume;
 	br_uint_32 i;
-	
-	volume = (br_light_volume *)*pvalue;
+
+	volume = (br_light_volume *)pvalue->p;
 	new_volume = (br_light_volume *)((char *)block + tep->offset);
 
 	if (volume == NULL) {

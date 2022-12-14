@@ -18,7 +18,7 @@ BR_RCS_ID("$Id: object.c 1.1 1997/12/10 16:52:20 jon Exp $");
 /*
  * Methods for default object object
  */
-char * BR_CMETHOD_DECL(br_object_soft, identifier)(br_object *self)
+const char * BR_CMETHOD_DECL(br_object_soft, identifier)(br_object *self)
 {
 	return self->identifier;
 }

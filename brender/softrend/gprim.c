@@ -53,31 +53,33 @@ br_geometry_primitives * GeometryPrimitivesAllocate(br_renderer_facility *type, 
 	return self;
 }
 
-static void BR_CMETHOD_DECL(br_geometry_primitives_soft, free)(br_geometry_primitives *self)
+static void BR_CMETHOD_DECL(br_geometry_primitives_soft, free)(br_object *_self)
 {
+	br_geometry_primitives *self = (br_geometry_primitives*)_self;
 	ObjectContainerRemove(self->renderer_facility, (br_object *)self);
 
 	BrResFreeNoCallback(self);
 }
 
-static br_token BR_CMETHOD_DECL(br_geometry_primitives_soft, type)(br_geometry_primitives *self)
+static br_token BR_CMETHOD_DECL(br_geometry_primitives_soft, type)(br_object *self)
 {
 	return BRT_GEOMETRY_PRIMITIVES;
 }
 
-static br_boolean BR_CMETHOD_DECL(br_geometry_primitives_soft, isType)(br_geometry_primitives *self, br_token t)
+static br_boolean BR_CMETHOD_DECL(br_geometry_primitives_soft, isType)(br_object *self, br_token t)
 {
 	return (t == BRT_GEOMETRY_PRIMITIVES) || (t == BRT_GEOMETRY) || (t == BRT_OBJECT);
 }
 
-static br_int_32 BR_CMETHOD_DECL(br_geometry_primitives_soft, space)(br_geometry_primitives *self)
+static br_size_t BR_CMETHOD_DECL(br_geometry_primitives_soft, space)(br_object *self)
 {
 	return sizeof(br_geometry_primitives);
 }
 
-static struct br_tv_template * BR_CMETHOD_DECL(br_geometry_primitives_soft, templateQuery)
-	(br_geometry_primitives *self)
+static struct br_tv_template * BR_CMETHOD_DECL(br_geometry_primitives_soft, templateQuery)(br_object *_self)
 {
+    br_geometry_primitives *self = (br_geometry_primitives*)_self;
+
     if(self->device->templates.geometryPrimitivesTemplate == NULL)
        self->device->templates.geometryPrimitivesTemplate = BrTVTemplateAllocate(self->device,
         (br_tv_template_entry *)geometryPrimitivesTemplateEntries,
@@ -87,7 +89,7 @@ static struct br_tv_template * BR_CMETHOD_DECL(br_geometry_primitives_soft, temp
 }
 
 static br_error BR_CMETHOD_DECL(br_geometry_primitives_soft, storedAvail)(
-		struct br_geometry *self,
+		struct br_geometry_primitives *self,
 		br_int_32 *psize,
 		br_token_value *tv)
 {
@@ -95,107 +97,51 @@ static br_error BR_CMETHOD_DECL(br_geometry_primitives_soft, storedAvail)(
 }
 
 br_error BR_CMETHOD_DECL(br_geometry_primitives_soft, render)
-		(struct br_geometry *self, struct br_renderer *renderer, struct fmt_vertex *vertices, int nvertices, br_token type)
+		(struct br_geometry_primitives *self, struct br_renderer *renderer, struct fmt_vertex *vertices, int nvertices, br_token type)
 {
 	return BRE_FAIL;
 }
 
 br_error BR_CMETHOD_DECL(br_geometry_primitives_soft, renderOnScreen)
-		(struct br_geometry *self, struct br_renderer *renderer, struct fmt_vertex *vertices, int nvertices, br_token type)
+		(struct br_geometry_primitives *self, struct br_renderer *renderer, struct fmt_vertex *vertices, int nvertices, br_token type)
 {
 	return BRE_FAIL;
 }
 
 br_error BR_CMETHOD_DECL(br_geometry_primitives_soft, storedNew)
-		(struct br_geometry *self, struct br_renderer *renderer,
+		(struct br_geometry_primitives *self, struct br_renderer *renderer,
 		struct br_geometry_stored **psg, struct fmt_vertex *vertices, int nvertices, br_token type, br_token_value *tv)
 {
 	return BRE_FAIL;
 }
-
-#if BASED_FIXED
-br_error BR_CMETHOD_DECL(br_geometry_primitives_soft, renderFloatToFixed)
-		(struct br_geometry *self, struct br_renderer *renderer, struct fmt_vertex *vertices, int nvertices, br_token type)
-{
-	return BRE_FAIL;
-}
-
-br_error BR_CMETHOD_DECL(br_geometry_primitives_soft, renderOnScreenFloatToFixed)
-		(struct br_geometry *self, struct br_renderer *renderer, struct fmt_vertex *vertices, int nvertices, br_token type)
-{
-	return BRE_FAIL;
-}
-
-br_error BR_CMETHOD_DECL(br_geometry_primitives_soft, storedNewFloatToFixed)
-		(struct br_geometry *self, struct br_renderer *renderer,
-		struct br_geometry_stored **psg, struct fmt_vertex *vertices, int nvertices, br_token type, br_token_value *tv)
-{
-	return BRE_FAIL;
-}
-#endif
-
-#if BASED_FLOAT
-br_error BR_CMETHOD_DECL(br_geometry_primitives_soft, renderFixedToFloat)
-		(struct br_geometry *self, struct br_renderer *renderer, struct fmt_vertex *vertices, int nvertices, br_token type)
-{
-	return BRE_FAIL;
-}
-
-br_error BR_CMETHOD_DECL(br_geometry_primitives_soft, renderOnScreenFixedToFloat)
-		(struct br_geometry *self, struct br_renderer *renderer, struct fmt_vertex *vertices, int nvertices, br_token type)
-{
-	return BRE_FAIL;
-}
-
-br_error BR_CMETHOD_DECL(br_geometry_primitives_soft, storedNewFixedToFloat)
-		(struct br_geometry *self, struct br_renderer *renderer,
-		struct br_geometry_stored **psg, struct fmt_vertex *vertices, int nvertices, br_token type, br_token_value *tv)
-{
-	return BRE_FAIL;
-}
-#endif
 
 /*
  * Default dispatch table for renderer type
  */
 static const struct br_geometry_primitives_dispatch geometryPrimitivesDispatch = {
-	NULL,
-	NULL,
-	NULL,
-	NULL,
-	BR_CMETHOD_REF(br_geometry_primitives_soft,	free),
-	BR_CMETHOD_REF(br_object_soft,				identifier),
-	BR_CMETHOD_REF(br_geometry_primitives_soft,	type),
-	BR_CMETHOD_REF(br_geometry_primitives_soft,	isType),
-	BR_CMETHOD_REF(br_object_soft,				device),
-	BR_CMETHOD_REF(br_geometry_primitives_soft,	space),
+    .__reserved0 = NULL,
+    .__reserved1 = NULL,
+    .__reserved2 = NULL,
+    .__reserved3 = NULL,
+    ._free       = BR_CMETHOD_REF(br_geometry_primitives_soft, free),
+    ._identifier = BR_CMETHOD_REF(br_object_soft, identifier),
+    ._type       = BR_CMETHOD_REF(br_geometry_primitives_soft, type),
+    ._isType     = BR_CMETHOD_REF(br_geometry_primitives_soft, isType),
+    ._device     = BR_CMETHOD_REF(br_object_soft, device),
+    ._space      = BR_CMETHOD_REF(br_geometry_primitives_soft, space),
 
-	BR_CMETHOD_REF(br_geometry_primitives_soft,	templateQuery),
-	BR_CMETHOD_REF(br_object,					query),
-	BR_CMETHOD_REF(br_object,					queryBuffer),
-	BR_CMETHOD_REF(br_object,					queryMany),
-	BR_CMETHOD_REF(br_object,					queryManySize),
-	BR_CMETHOD_REF(br_object,					queryAll),
-	BR_CMETHOD_REF(br_object,					queryAllSize),
+    ._templateQuery = BR_CMETHOD_REF(br_geometry_primitives_soft, templateQuery),
+    ._query         = BR_CMETHOD_REF(br_object, query),
+    ._queryBuffer   = BR_CMETHOD_REF(br_object, queryBuffer),
+    ._queryMany     = BR_CMETHOD_REF(br_object, queryMany),
+    ._queryManySize = BR_CMETHOD_REF(br_object, queryManySize),
+    ._queryAll      = BR_CMETHOD_REF(br_object, queryAll),
+    ._queryAllSize  = BR_CMETHOD_REF(br_object, queryAllSize),
 
-#if BASED_FIXED
-	BR_CMETHOD_REF(br_geometry_primitives_soft,	renderFloatToFixed),
-	BR_CMETHOD_REF(br_geometry_primitives_soft,	render),
-	BR_CMETHOD_REF(br_geometry_primitives_soft,	renderOnScreenFloatToFixed),
-	BR_CMETHOD_REF(br_geometry_primitives_soft,	renderOnScreen),
-	BR_CMETHOD_REF(br_geometry_primitives_soft,	storedNewFloatToFixed),
-	BR_CMETHOD_REF(br_geometry_primitives_soft,	storedNew),
-#endif
+    ._render         = BR_CMETHOD_REF(br_geometry_primitives_soft, render),
+    ._renderOnScreen = BR_CMETHOD_REF(br_geometry_primitives_soft, renderOnScreen),
+    ._storedNew      = BR_CMETHOD_REF(br_geometry_primitives_soft, storedNew),
 
-#if BASED_FLOAT
-	BR_CMETHOD_REF(br_geometry_primitives_soft,	render),
-	BR_CMETHOD_REF(br_geometry_primitives_soft,	renderFixedToFloat),
-	BR_CMETHOD_REF(br_geometry_primitives_soft,	renderOnScreen),
-	BR_CMETHOD_REF(br_geometry_primitives_soft,	renderOnScreenFixedToFloat),
-	BR_CMETHOD_REF(br_geometry_primitives_soft,	storedNew),
-	BR_CMETHOD_REF(br_geometry_primitives_soft,	storedNewFixedToFloat),
-#endif
-
-	BR_CMETHOD_REF(br_geometry_primitives_soft,	storedAvail),
+    ._storedAvail = BR_CMETHOD_REF(br_geometry_primitives_soft, storedAvail),
 };
 

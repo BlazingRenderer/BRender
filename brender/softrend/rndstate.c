@@ -52,7 +52,7 @@ br_error CheckPrimitiveState(struct br_renderer *self)
  * Setting current state
  */
 br_error BR_CMETHOD_DECL(br_renderer_soft,partSet)
-		(struct br_renderer *self, br_token part, br_int_32 index, br_token t, br_uint_32 value)
+		(struct br_renderer *self, br_token part, br_int_32 index, br_token t, br_value value)
 {
 	br_error r;
 	struct state_all *sp = &self->state;
@@ -108,7 +108,7 @@ br_error BR_CMETHOD_DECL(br_renderer_soft,partSetMany)
  * Reading current state
  */
 br_error BR_CMETHOD_DECL(br_renderer_soft,partQuery)
-		(struct br_renderer *self, br_token part, br_int_32 index, br_uint_32 *pvalue, br_token t)
+		(struct br_renderer *self, br_token part, br_int_32 index, void *pvalue, br_token t)
 {
 	br_error r;
 	struct state_all *sp = &self->state;
@@ -123,7 +123,7 @@ br_error BR_CMETHOD_DECL(br_renderer_soft,partQuery)
 }
 
 br_error BR_CMETHOD_DECL(br_renderer_soft,partQueryBuffer)
-		(struct br_renderer *self, br_token part, br_int_32 index, br_uint_32 *pvalue, br_uint_32 *buffer, br_size_t buffer_size, br_token t)
+		(struct br_renderer *self, br_token part, br_int_32 index, void *pvalue, void *buffer, br_size_t buffer_size, br_token t)
 {
 	br_error r;
 	struct state_all *sp = &self->state;

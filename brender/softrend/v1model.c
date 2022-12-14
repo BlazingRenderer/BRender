@@ -16,7 +16,6 @@
 
 #include "vecifns.h"
 
-#include "timing.h"
 
 BR_RCS_ID("$Id: v1model.c 1.8 1998/07/21 11:35:57 jon Exp $");
 
@@ -980,7 +979,7 @@ static br_error V1Model_Render
 }
 
 br_error BR_CMETHOD_DECL(br_geometry_v1_model_soft, render)
-		(struct br_geometry *self, struct br_renderer *renderer, struct v11model *model,
+		(struct br_geometry_v1_model *self, struct br_renderer *renderer, struct v11model_f *model,
 		struct br_renderer_state_stored *default_state,
 		br_token type)
 {
@@ -992,7 +991,7 @@ br_error BR_CMETHOD_DECL(br_geometry_v1_model_soft, render)
 }
 
 br_error BR_CMETHOD_DECL(br_geometry_v1_model_soft, renderOnScreen)
-		(struct br_geometry *self, struct br_renderer *renderer, struct v11model *model,
+		(struct br_geometry_v1_model *self, struct br_renderer *renderer, struct v11model_f *model,
 		struct br_renderer_state_stored *default_state,
 		br_token type)
 {

@@ -216,8 +216,10 @@ br_renderer_state_stored * RendererStateStoredSoftAllocate(br_renderer *renderer
 	return self;
 }
 
-static void BR_CMETHOD_DECL(br_renderer_state_stored_soft, free)(br_renderer_state_stored *self)
+static void BR_CMETHOD_DECL(br_renderer_state_stored_soft, free)(br_object *_self)
 {
+	br_renderer_state_stored *self = (br_renderer_state_stored*)_self;
+
 	ObjectContainerRemove(self->renderer, (br_object *)self);
 
 	/*
@@ -226,24 +228,25 @@ static void BR_CMETHOD_DECL(br_renderer_state_stored_soft, free)(br_renderer_sta
 	BrResFreeNoCallback(self);
 }
 
-static br_token BR_CMETHOD_DECL(br_renderer_state_stored_soft, type)(br_renderer_state_stored *self)
+static br_token BR_CMETHOD_DECL(br_renderer_state_stored_soft, type)(br_object *self)
 {
 	return BRT_RENDERER_STATE_STORED;
 }
 
-static br_boolean BR_CMETHOD_DECL(br_renderer_state_stored_soft, isType)(br_renderer_state_stored *self, br_token t)
+static br_boolean BR_CMETHOD_DECL(br_renderer_state_stored_soft, isType)(br_object *self, br_token t)
 {
 	return (t == BRT_RENDERER_STATE_STORED) || (t == BRT_OBJECT);
 }
 
-static br_int_32 BR_CMETHOD_DECL(br_renderer_state_stored_soft, space)(br_renderer_state_stored *self)
+static br_size_t BR_CMETHOD_DECL(br_renderer_state_stored_soft, space)(br_object *self)
 {
 	return sizeof(br_renderer_state_stored);
 }
 
-static struct br_tv_template * BR_CMETHOD_DECL(br_renderer_state_stored_soft, templateQuery)
-	(br_renderer_state_stored *self)
+static struct br_tv_template * BR_CMETHOD_DECL(br_renderer_state_stored_soft, templateQuery)(br_object *_self)
 {
+    br_renderer_state_stored *self = (br_renderer_state_stored*)_self;
+
     if(self->device->templates.rendererStateStoredTemplate == NULL)
         self->device->templates.rendererStateStoredTemplate = BrTVTemplateAllocate(self->device,
             (br_tv_template_entry *)rendererStateStoredTemplateEntries,
@@ -256,23 +259,23 @@ static struct br_tv_template * BR_CMETHOD_DECL(br_renderer_state_stored_soft, te
  * Default dispatch table for renderer type (defined at and of file)
  */
 static const struct br_renderer_state_stored_dispatch rendererStateStoredDispatch = {
-	NULL,
-	NULL,
-	NULL,
-	NULL,
-	BR_CMETHOD_REF(br_renderer_state_stored_soft,		free),
-	BR_CMETHOD_REF(br_object_soft,						identifier),
-	BR_CMETHOD_REF(br_renderer_state_stored_soft,		type),
-	BR_CMETHOD_REF(br_renderer_state_stored_soft,		isType),
-	BR_CMETHOD_REF(br_object_soft,						device),
-	BR_CMETHOD_REF(br_renderer_state_stored_soft,		space),
+    .__reserved0 = NULL,
+    .__reserved1 = NULL,
+    .__reserved2 = NULL,
+    .__reserved3 = NULL,
+    ._free       = BR_CMETHOD_REF(br_renderer_state_stored_soft, free),
+    ._identifier = BR_CMETHOD_REF(br_object_soft, identifier),
+    ._type       = BR_CMETHOD_REF(br_renderer_state_stored_soft, type),
+    ._isType     = BR_CMETHOD_REF(br_renderer_state_stored_soft, isType),
+    ._device     = BR_CMETHOD_REF(br_object_soft, device),
+    ._space      = BR_CMETHOD_REF(br_renderer_state_stored_soft, space),
 
-	BR_CMETHOD_REF(br_renderer_state_stored_soft,		templateQuery),
-	BR_CMETHOD_REF(br_object,							query),
-	BR_CMETHOD_REF(br_object,							queryBuffer),
-	BR_CMETHOD_REF(br_object,							queryMany),
-	BR_CMETHOD_REF(br_object,							queryManySize),
-	BR_CMETHOD_REF(br_object,							queryAll),
-	BR_CMETHOD_REF(br_object,							queryAllSize),
+    ._templateQuery = BR_CMETHOD_REF(br_renderer_state_stored_soft, templateQuery),
+    ._query         = BR_CMETHOD_REF(br_object, query),
+    ._queryBuffer   = BR_CMETHOD_REF(br_object, queryBuffer),
+    ._queryMany     = BR_CMETHOD_REF(br_object, queryMany),
+    ._queryManySize = BR_CMETHOD_REF(br_object, queryManySize),
+    ._queryAll      = BR_CMETHOD_REF(br_object, queryAll),
+    ._queryAllSize  = BR_CMETHOD_REF(br_object, queryAllSize),
 };
 

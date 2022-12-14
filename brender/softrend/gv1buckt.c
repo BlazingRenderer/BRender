@@ -53,31 +53,34 @@ br_geometry_v1_buckets * GeometryV1BucketsAllocate(br_renderer_facility *type, c
 	return self;
 }
 
-static void BR_CMETHOD_DECL(br_geometry_v1_buckets_soft, free)(br_geometry_v1_buckets *self)
+static void BR_CMETHOD_DECL(br_geometry_v1_buckets_soft, free)(br_object *_self)
 {
+	br_geometry_v1_buckets *self = (br_geometry_v1_buckets*)_self;
+
 	ObjectContainerRemove(self->renderer_facility, (br_object *)self);
 
 	BrResFreeNoCallback(self);
 }
 
-static br_token BR_CMETHOD_DECL(br_geometry_v1_buckets_soft, type)(br_geometry_v1_buckets *self)
+static br_token BR_CMETHOD_DECL(br_geometry_v1_buckets_soft, type)(br_object *self)
 {
 	return BRT_GEOMETRY_V1_BUCKETS;
 }
 
-static br_boolean BR_CMETHOD_DECL(br_geometry_v1_buckets_soft, isType)(br_geometry_v1_buckets *self, br_token t)
+static br_boolean BR_CMETHOD_DECL(br_geometry_v1_buckets_soft, isType)(br_object *self, br_token t)
 {
 	return (t == BRT_GEOMETRY_PRIMITIVES) || (t == BRT_GEOMETRY) || (t == BRT_OBJECT);
 }
 
-static br_int_32 BR_CMETHOD_DECL(br_geometry_v1_buckets_soft, space)(br_geometry_v1_buckets *self)
+static br_size_t BR_CMETHOD_DECL(br_geometry_v1_buckets_soft, space)(br_object *self)
 {
 	return sizeof(br_geometry_v1_buckets);
 }
 
-static struct br_tv_template * BR_CMETHOD_DECL(br_geometry_v1_buckets_soft, templateQuery)
-	(br_geometry_v1_buckets *self)
+static struct br_tv_template * BR_CMETHOD_DECL(br_geometry_v1_buckets_soft, templateQuery)(br_object *_self)
 {
+	br_geometry_v1_buckets *self = (br_geometry_v1_buckets*)_self;
+
     if(self->device->templates.geometryV1BucketsTemplate == NULL)
         self->device->templates.geometryV1BucketsTemplate = BrTVTemplateAllocate(self->device,
             (br_tv_template_entry *)geometryV1BucketsTemplateEntries,
@@ -87,7 +90,7 @@ static struct br_tv_template * BR_CMETHOD_DECL(br_geometry_v1_buckets_soft, temp
 }
 
 br_error BR_CMETHOD_DECL(br_geometry_v1_buckets_soft, render)
-		(struct br_geometry *self, struct br_renderer *renderer, 
+		(struct br_geometry_v1_buckets *self, struct br_renderer *renderer,
 			struct br_primitive **buckets, br_int_32 nbuckets)
 {
 	struct br_primitive *p;
@@ -153,26 +156,26 @@ br_error BR_CMETHOD_DECL(br_geometry_v1_buckets_soft, render)
  * Default dispatch table for renderer type
  */
 static const struct br_geometry_v1_buckets_dispatch geometryV1BucketsDispatch = {
-	NULL,
-	NULL,
-	NULL,
-	NULL,
-	BR_CMETHOD_REF(br_geometry_v1_buckets_soft,	free),
-	BR_CMETHOD_REF(br_object_soft,				identifier),
-	BR_CMETHOD_REF(br_geometry_v1_buckets_soft,	type),
-	BR_CMETHOD_REF(br_geometry_v1_buckets_soft,	isType),
-	BR_CMETHOD_REF(br_object_soft,				device),
-	BR_CMETHOD_REF(br_geometry_v1_buckets_soft,	space),
+    .__reserved0 = NULL,
+    .__reserved1 = NULL,
+    .__reserved2 = NULL,
+    .__reserved3 = NULL,
+    ._free       = BR_CMETHOD_REF(br_geometry_v1_buckets_soft, free),
+    ._identifier = BR_CMETHOD_REF(br_object_soft, identifier),
+    ._type       = BR_CMETHOD_REF(br_geometry_v1_buckets_soft, type),
+    ._isType     = BR_CMETHOD_REF(br_geometry_v1_buckets_soft, isType),
+    ._device     = BR_CMETHOD_REF(br_object_soft, device),
+    ._space      = BR_CMETHOD_REF(br_geometry_v1_buckets_soft, space),
 
-	BR_CMETHOD_REF(br_geometry_v1_buckets_soft,	templateQuery),
-	BR_CMETHOD_REF(br_object,					query),
-	BR_CMETHOD_REF(br_object,					queryBuffer),
-	BR_CMETHOD_REF(br_object,					queryMany),
-	BR_CMETHOD_REF(br_object,					queryManySize),
-	BR_CMETHOD_REF(br_object,					queryAll),
-	BR_CMETHOD_REF(br_object,					queryAllSize),
+    ._templateQuery = BR_CMETHOD_REF(br_geometry_v1_buckets_soft, templateQuery),
+    ._query         = BR_CMETHOD_REF(br_object, query),
+    ._queryBuffer   = BR_CMETHOD_REF(br_object, queryBuffer),
+    ._queryMany     = BR_CMETHOD_REF(br_object, queryMany),
+    ._queryManySize = BR_CMETHOD_REF(br_object, queryManySize),
+    ._queryAll      = BR_CMETHOD_REF(br_object, queryAll),
+    ._queryAllSize  = BR_CMETHOD_REF(br_object, queryAllSize),
 
-	BR_CMETHOD_REF(br_geometry_v1_buckets_soft,	render),
-	BR_CMETHOD_REF(br_geometry_v1_buckets_soft,	render),
+    ._render         = BR_CMETHOD_REF(br_geometry_v1_buckets_soft, render),
+    ._renderOnScreen = BR_CMETHOD_REF(br_geometry_v1_buckets_soft, render),
 };
 

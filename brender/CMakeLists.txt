@@ -26,6 +26,11 @@ if(BRENDER_BUILD_DRIVERS)
 
     target_link_libraries(brender INTERFACE glrend)
 
+    if(BRENDER_BUILD_SOFT)
+        add_subdirectory(softrend)
+        target_link_libraries(brender INTERFACE softrend)
+    endif()
+
     if(WIN32)
         add_subdirectory(ddraw)
         target_link_libraries(brender INTERFACE ddraw)

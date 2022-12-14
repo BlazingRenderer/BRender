@@ -53,31 +53,34 @@ br_geometry_lighting * GeometryLightingAllocate(br_renderer_facility *type, char
 	return self;
 }
 
-static void BR_CMETHOD_DECL(br_geometry_lighting_soft, free)(br_geometry_lighting *self)
+static void BR_CMETHOD_DECL(br_geometry_lighting_soft, free)(br_object *_self)
 {
+	br_geometry_lighting *self = (br_geometry_lighting*)_self;
+
 	ObjectContainerRemove(self->renderer_facility, (br_object *)self);
 
 	BrResFreeNoCallback(self);
 }
 
-static br_token BR_CMETHOD_DECL(br_geometry_lighting_soft, type)(br_geometry_lighting *self)
+static br_token BR_CMETHOD_DECL(br_geometry_lighting_soft, type)(br_object  *self)
 {
         return BRT_GEOMETRY_LIGHTING;
 }
 
-static br_boolean BR_CMETHOD_DECL(br_geometry_lighting_soft, isType)(br_geometry_lighting *self, br_token t)
+static br_boolean BR_CMETHOD_DECL(br_geometry_lighting_soft, isType)(br_object *self, br_token t)
 {
         return (t == BRT_GEOMETRY_LIGHTING) || (t == BRT_GEOMETRY) || (t == BRT_OBJECT);
 }
 
-static br_int_32 BR_CMETHOD_DECL(br_geometry_lighting_soft, space)(br_geometry_lighting *self)
+static br_size_t BR_CMETHOD_DECL(br_geometry_lighting_soft, space)(br_object *self)
 {
         return sizeof(br_geometry_lighting);
 }
 
-static struct br_tv_template * BR_CMETHOD_DECL(br_geometry_lighting_soft, templateQuery)
-        (br_geometry_lighting *self)
+static struct br_tv_template * BR_CMETHOD_DECL(br_geometry_lighting_soft, templateQuery)(br_object *_self)
 {
+    br_geometry_lighting *self = (br_geometry_lighting*)_self;
+
     if(self->device->templates.geometryLightingTemplate == NULL)
         self->device->templates.geometryLightingTemplate = BrTVTemplateAllocate(self->device,
             (struct br_tv_template_entry *)geometryLightingTemplateEntries,
@@ -91,8 +94,8 @@ static struct br_tv_template * BR_CMETHOD_DECL(br_geometry_lighting_soft, templa
  */
 
 br_error BR_CMETHOD_DECL(br_geometry_lighting_soft, render)
-		(struct br_geometry *self, struct br_renderer *renderer, 
-                 br_vector3 *points, br_vector3 *normals,
+		(struct br_geometry_lighting *self, struct br_renderer *renderer,
+                 br_vector3_f *points, br_vector3_f *normals,
                  br_colour *colour_in, br_colour *colour_out,
                  br_uint_16 *redirect, int pstride, int nstride,
                  int cinstride, int coutstride, int nvertices)
@@ -168,61 +171,29 @@ br_error BR_CMETHOD_DECL(br_geometry_lighting_soft, render)
         return BRE_OK;
 }
 
-#if BASED_FIXED
-br_error BR_CMETHOD_DECL(br_geometry_lighting_soft, renderFloatToFixed)
-		(struct br_geometry *self, struct br_renderer *renderer, 
-                 br_vector3 *points, br_vector3 *normals,
-                 br_colour *colour_in, br_colour *colour_out,
-                 br_uint_16 *redirect, int pstride, int nstride,
-                 int cinstride, int coutstride, int nvertices)
-{
-	return BRE_FAIL;
-}
-#endif
-
-#if BASED_FLOAT
-br_error BR_CMETHOD_DECL(br_geometry_lighting_soft, renderFixedToFloat)
-		(struct br_geometry *self, struct br_renderer *renderer, 
-                 br_vector3 *points, br_vector3 *normals,
-                 br_colour *colour_in, br_colour *colour_out,
-                 br_uint_16 *redirect, int pstride, int nstride,
-                 int cinstride, int coutstride, int nvertices)
-{
-	return BRE_FAIL;
-}
-#endif
-
 /*
  * Default dispatch table for renderer type
  */
 static const struct br_geometry_lighting_dispatch geometryLightingDispatch = {
-	NULL,
-	NULL,
-	NULL,
-	NULL,
-	BR_CMETHOD_REF(br_geometry_lighting_soft,     free),
-	BR_CMETHOD_REF(br_object_soft,				identifier),
-	BR_CMETHOD_REF(br_geometry_lighting_soft,     type),
-	BR_CMETHOD_REF(br_geometry_lighting_soft,     isType),
-	BR_CMETHOD_REF(br_object_soft,				device),
-	BR_CMETHOD_REF(br_geometry_lighting_soft,     space),
+    .__reserved0 = NULL,
+    .__reserved1 = NULL,
+    .__reserved2 = NULL,
+    .__reserved3 = NULL,
+    ._free       = BR_CMETHOD_REF(br_geometry_lighting_soft, free),
+    ._identifier = BR_CMETHOD_REF(br_object_soft, identifier),
+    ._type       = BR_CMETHOD_REF(br_geometry_lighting_soft, type),
+    ._isType     = BR_CMETHOD_REF(br_geometry_lighting_soft, isType),
+    ._device     = BR_CMETHOD_REF(br_object_soft, device),
+    ._space      = BR_CMETHOD_REF(br_geometry_lighting_soft, space),
 
-	BR_CMETHOD_REF(br_geometry_lighting_soft,     templateQuery),
-	BR_CMETHOD_REF(br_object,					query),
-	BR_CMETHOD_REF(br_object,					queryBuffer),
-	BR_CMETHOD_REF(br_object,					queryMany),
-	BR_CMETHOD_REF(br_object,					queryManySize),
-	BR_CMETHOD_REF(br_object,					queryAll),
-	BR_CMETHOD_REF(br_object,					queryAllSize),
+    ._templateQuery = BR_CMETHOD_REF(br_geometry_lighting_soft, templateQuery),
+    ._query         = BR_CMETHOD_REF(br_object, query),
+    ._queryBuffer   = BR_CMETHOD_REF(br_object, queryBuffer),
+    ._queryMany     = BR_CMETHOD_REF(br_object, queryMany),
+    ._queryManySize = BR_CMETHOD_REF(br_object, queryManySize),
+    ._queryAll      = BR_CMETHOD_REF(br_object, queryAll),
+    ._queryAllSize  = BR_CMETHOD_REF(br_object, queryAllSize),
 
-#if BASED_FIXED
-	BR_CMETHOD_REF(br_geometry_lighting_soft,     renderFloatToFixed),
-	BR_CMETHOD_REF(br_geometry_lighting_soft,     render),
-#endif
-
-#if BASED_FLOAT
-	BR_CMETHOD_REF(br_geometry_lighting_soft,     render),
-	BR_CMETHOD_REF(br_geometry_lighting_soft,     renderFixedToFloat),
-#endif
+    ._render        = BR_CMETHOD_REF(br_geometry_lighting_soft, render),
 };
 

@@ -18,7 +18,7 @@ extern "C" {
 /*
  * object.c
  */
-char * BR_CMETHOD_DECL(br_object_soft, identifier)( br_object *self);
+const char * BR_CMETHOD_DECL(br_object_soft, identifier)( br_object *self);
 br_device *	BR_CMETHOD_DECL(br_object_soft, device)( br_object *self);
 
 /*
@@ -38,21 +38,6 @@ extern const br_token RendererPartsTokens[];
 
 br_renderer * RendererSoftAllocate(br_device *dev, struct br_renderer_facility *type, struct br_primitive_library *prims);
 
-br_error BR_CMETHOD_DECL(br_renderer_soft,commandModeSet)
-	(struct br_renderer *self, br_token mode);
-br_error BR_CMETHOD_DECL(br_renderer_soft,commandModeQuery)
-	(struct br_renderer *self, br_token *mode);
-br_error BR_CMETHOD_DECL(br_renderer_soft,commandModeDefault)
-	(struct br_renderer *self);
-br_error BR_CMETHOD_DECL(br_renderer_soft,commandModePush)
-	(struct br_renderer *self);
-br_error BR_CMETHOD_DECL(br_renderer_soft,commandModePop)
-	(struct br_renderer *self);
-br_error BR_CMETHOD_DECL(br_renderer_soft, flush)
-	(struct br_renderer *self, br_boolean wait);
-br_error BR_CMETHOD_DECL(br_renderer_soft, synchronise)
-	(struct br_renderer *self, br_token sync_type, br_boolean block);
-
 /*
  * rendstat.c
  */
@@ -60,16 +45,16 @@ br_error CheckPrimitiveState(struct br_renderer *self);
 
 br_error BR_CMETHOD_DECL(br_renderer_soft,partSet)
 		(struct br_renderer *self, br_token part, br_int_32 index,
-		br_token t, br_uint_32 value);
+		br_token t, br_value value);
 br_error BR_CMETHOD_DECL(br_renderer_soft,partSetMany)
 		(struct br_renderer *self, br_token part, br_int_32 index,
 		br_token_value * tv, br_int_32 *pcount);
 br_error BR_CMETHOD_DECL(br_renderer_soft,partQuery)
 		(struct br_renderer *self, br_token part, br_int_32 index,
-		br_uint_32 *pvalue, br_token t);
+         void *pvalue, br_token t);
 br_error BR_CMETHOD_DECL(br_renderer_soft,partQueryBuffer)
 		(struct br_renderer *self, br_token part, br_int_32 index,
-		br_uint_32 *pvalue, br_uint_32 *buffer, br_size_t buffer_size, br_token t);
+		void *pvalue, void *buffer, br_size_t buffer_size, br_token t);
 br_error BR_CMETHOD_DECL(br_renderer_soft,partQueryMany)(struct br_renderer *self,
 		br_token part, br_int_32 index,
 		br_token_value *tv, void *extra, br_size_t extra_size, br_int_32 *pcount);
@@ -154,12 +139,6 @@ br_error BR_CMETHOD_DECL(br_renderer_soft, testRender)(
 		union brp_vertex *v1,
 		union brp_vertex *v2);
 
-br_error BR_CMETHOD_DECL(br_renderer_soft, frameBegin)
-		(void);
-
-br_error BR_CMETHOD_DECL(br_renderer_soft, frameEnd)
-		(void);
-
 /*
  * sstate.c
  */
@@ -210,12 +189,12 @@ struct br_geometry_lighting * GeometryLightingAllocate(br_renderer_facility *typ
  * v1model.c
  */
 br_error BR_CMETHOD_DECL(br_geometry_v1_model_soft, render)
-		(struct br_geometry *self, struct br_renderer *renderer, struct v11model *model,
+		(struct br_geometry_v1_model *self, struct br_renderer *renderer, struct v11model_f *model,
 			struct br_renderer_state_stored *default_state,
 			br_token type);
 
 br_error BR_CMETHOD_DECL(br_geometry_v1_model_soft, renderOnScreen)
-		(struct br_geometry *self, struct br_renderer *renderer, struct v11model *model,
+		(struct br_geometry_v1_model *self, struct br_renderer *renderer, struct v11model_f *model,
 			struct br_renderer_state_stored *default_state,
 			br_token type);
 

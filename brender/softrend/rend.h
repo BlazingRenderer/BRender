@@ -376,14 +376,6 @@ extern _static_cache BR_ASM_DATA scache;
 		if((tv)->comp[C_SY] < scache.min.v[Y]) scache.min.v[Y] = (tv)->comp[C_SY]; \
 	}
 
-#if BASED_FIXED
-#define PrimitiveStateRangesQuery PrimitiveStateRangesQueryX
-#endif
-
-#if BASED_FLOAT
-#define PrimitiveStateRangesQuery PrimitiveStateRangesQueryF
-#endif
-
 /*
  * The level below which the fixed specular power function is zero
  */

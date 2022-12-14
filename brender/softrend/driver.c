@@ -32,7 +32,7 @@ br_uint_32 DriverTimestamp;
 /*
  * Main entry point for device - this may get redefined by the makefile
  */
-br_device * BR_EXPORT BrDrv1Begin(char *arguments)
+br_device * BR_EXPORT BrDrv1SoftRendBegin(const char *arguments)
 {
 	br_device *device;
 
@@ -58,3 +58,9 @@ br_device * BR_EXPORT BrDrv1Begin(char *arguments)
     return device;
 }
 
+#ifdef DEFINE_BR_ENTRY_POINT
+br_device *BR_EXPORT BrDrv1Begin(const char *arguments)
+{
+    return BrDrv1SoftRendBegin(arguments);
+}
+#endif

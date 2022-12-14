@@ -419,7 +419,7 @@ STATIC void BR_ASM_CALL averageVerticesOnScreen(struct br_renderer *renderer, br
 
 
 #if 0
-STATIC br_boolean subdivideCheck(brp_vertex *v0, brp_vertex *v1, brp_vertex *v2)
+static br_boolean subdivideCheck(brp_vertex *v0, brp_vertex *v1, brp_vertex *v2)
 {
 #if 0
     br_scalar lu,hu,lv,hv, q0,q1,q2;
@@ -496,13 +496,13 @@ void SubdivideSetThreshold(br_int_32 subdivide_tolerance)
  * Recursive function to subdivied a triangle - looks at outcode to see whether triangle should
  * be processed, and whether it is completely on screen
  */
-STATIC void triangleSubdivideCheck(int depth, struct brp_block *block, brp_vertex *v0, brp_vertex *v1, brp_vertex *v2,
+static void triangleSubdivideCheck(int depth, struct brp_block *block, brp_vertex *v0, brp_vertex *v1, brp_vertex *v2,
 	br_uint_16 (*fp_vertices)[3], br_uint_16 (*fp_edges)[3], br_vector4 *fp_eqn, struct temp_face *tfp);
-STATIC void triangleSubdivideOnScreen(int depth, struct brp_block *block, brp_vertex *v0, brp_vertex *v1, brp_vertex *v2,
+static void triangleSubdivideOnScreen(int depth, struct brp_block *block, brp_vertex *v0, brp_vertex *v1, brp_vertex *v2,
     br_uint_16 (*fp_vertices)[3], br_uint_16 (*fp_edges)[3], br_vector4 *fp_eqn, struct temp_face *tfp);
 
 
-STATIC void triangleSubdivide(int depth, struct brp_block *block, brp_vertex *v0, brp_vertex *v1, brp_vertex *v2,
+static void triangleSubdivide(int depth, struct brp_block *block, brp_vertex *v0, brp_vertex *v1, brp_vertex *v2,
 	br_uint_16 (*fp_vertices)[3], br_uint_16 (*fp_edges)[3], br_vector4 *fp_eqn, struct temp_face *tfp)
 {
 	br_uint_32 combined_codes;
@@ -525,7 +525,7 @@ STATIC void triangleSubdivide(int depth, struct brp_block *block, brp_vertex *v0
 /*
  * Special case of subdivision for on screen triangles
  */
-STATIC void triangleSubdivideOnScreen(int depth, struct brp_block *block, brp_vertex *v0, brp_vertex *v1, brp_vertex *v2,
+static void triangleSubdivideOnScreen(int depth, struct brp_block *block, brp_vertex *v0, brp_vertex *v1, brp_vertex *v2,
     br_uint_16 (*fp_vertices)[3], br_uint_16 (*fp_edges)[3], br_vector4 *fp_eqn, struct temp_face *tfp)
 {
     brp_vertex mid0,mid1,mid2;
@@ -554,7 +554,7 @@ STATIC void triangleSubdivideOnScreen(int depth, struct brp_block *block, brp_ve
  * Subdivide a triangle that might be off screen
  */
 
-STATIC void triangleSubdivideCheck(int depth, struct brp_block *block, brp_vertex *v0, brp_vertex *v1, brp_vertex *v2,
+static void triangleSubdivideCheck(int depth, struct brp_block *block, brp_vertex *v0, brp_vertex *v1, brp_vertex *v2,
 	br_uint_16 (*fp_vertices)[3], br_uint_16 (*fp_edges)[3], br_vector4 *fp_eqn, struct temp_face *tfp)
 {
     brp_vertex mid0,mid1,mid2;

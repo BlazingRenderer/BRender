@@ -28,7 +28,7 @@ static const struct br_renderer_facility_dispatch rendererFacilityDispatch;
 static const struct br_tv_template_entry rendererFacilityTemplateEntries[] = {
 	{BRT_IDENTIFIER_CSTR,	0,	F(identifier),		BRTV_QUERY | BRTV_ALL,	BRTV_CONV_COPY, },
 	{BRT_RENDERER_MAX_I32, 	0,	0,					BRTV_QUERY | BRTV_ALL,	BRTV_CONV_DIRECT, 1},
-	{BRT(PARTS_TL),				(br_int_32)&RendererPartsTokens,BRTV_QUERY | BRTV_ALL | BRTV_ABS,	BRTV_CONV_LIST, },
+	{BRT(PARTS_TL),				(br_uintptr_t)&RendererPartsTokens,BRTV_QUERY | BRTV_ALL | BRTV_ABS,	BRTV_CONV_LIST, },
 };
 #undef F
 
@@ -65,8 +65,10 @@ br_renderer_facility * RendererFacilitySoftAllocate(br_device *dev, char *identi
 	return self;
 }
 
-static void BR_CMETHOD_DECL(br_renderer_facility_soft, free)(br_renderer_facility *self)
+static void BR_CMETHOD_DECL(br_renderer_facility_soft, free)(br_object *_self)
 {
+    br_renderer_facility *self = (br_renderer_facility*)_self;
+
     /*
      * Detach rendererer from device
      */
@@ -80,24 +82,25 @@ static void BR_CMETHOD_DECL(br_renderer_facility_soft, free)(br_renderer_facilit
     BrResFreeNoCallback(self);
 }
 
-static br_token BR_CMETHOD_DECL(br_renderer_facility_soft, type)(br_renderer_facility *self)
+static br_token BR_CMETHOD_DECL(br_renderer_facility_soft, type)(br_object *self)
 {
 	return BRT_RENDERER_FACILITY;
 }
 
-static br_boolean BR_CMETHOD_DECL(br_renderer_facility_soft, isType)(br_renderer_facility *self, br_token t)
+static br_boolean BR_CMETHOD_DECL(br_renderer_facility_soft, isType)(br_object *self, br_token t)
 {
 	return (t == BRT_RENDERER_FACILITY) || (t == BRT_OBJECT_CONTAINER) || (t == BRT_OBJECT);
 }
 
-static br_int_32 BR_CMETHOD_DECL(br_renderer_facility_soft, space)(br_renderer_facility *self)
+static br_size_t BR_CMETHOD_DECL(br_renderer_facility_soft, space)(br_object *self)
 {
 	return sizeof(br_renderer_facility);
 }
 
-static struct br_tv_template * BR_CMETHOD_DECL(br_renderer_facility_soft, templateQuery)
-	(br_renderer_facility *self)
+static struct br_tv_template * BR_CMETHOD_DECL(br_renderer_facility_soft, templateQuery)(br_object *_self)
 {
+    br_renderer_facility *self = (br_renderer_facility*)_self;
+
     if(self->device->templates.rendererFacilityTemplate == NULL)
         self->device->templates.rendererFacilityTemplate = BrTVTemplateAllocate(self->device,
             (br_tv_template_entry *)rendererFacilityTemplateEntries,
@@ -106,7 +109,7 @@ static struct br_tv_template * BR_CMETHOD_DECL(br_renderer_facility_soft, templa
     return self->device->templates.rendererFacilityTemplate;
 }
 
-static br_error BR_CMETHOD_DECL(br_renderer_facility_soft, validDestination)(br_renderer *self, br_boolean *bp, br_object *h)
+static br_error BR_CMETHOD_DECL(br_renderer_facility_soft, validDestination)(br_renderer_facility *self, br_boolean *bp, br_object *h)
 {
 	return BRE_OK;
 }
@@ -193,47 +196,47 @@ static br_error BR_CMETHOD_DECL(br_renderer_facility_soft, rendererNew)
 	return BRE_OK;
 }
 
-static void * BR_CMETHOD_DECL(br_renderer_facility_soft,listQuery)(br_device *self)
+static void * BR_CMETHOD_DECL(br_renderer_facility_soft,listQuery)(br_object_container *_self)
 {
-	return self->object_list;
+	return ((br_renderer_facility*)_self)->object_list;
 }
 
 /*
  * Default dispatch table for renderer type (defined at and of file)
  */
 static const struct br_renderer_facility_dispatch rendererFacilityDispatch = {
-	NULL,
-	NULL,
-	NULL,
-	NULL,
-	BR_CMETHOD_REF(br_renderer_facility_soft,	free),
-	BR_CMETHOD_REF(br_object_soft,				identifier),
-	BR_CMETHOD_REF(br_renderer_facility_soft,	type),
-	BR_CMETHOD_REF(br_renderer_facility_soft,	isType),
-	BR_CMETHOD_REF(br_object_soft,				device),
-	BR_CMETHOD_REF(br_renderer_facility_soft,	space),
+    .__reserved0 = NULL,
+    .__reserved1 = NULL,
+    .__reserved2 = NULL,
+    .__reserved3 = NULL,
+    ._free       = BR_CMETHOD_REF(br_renderer_facility_soft, free),
+    ._identifier = BR_CMETHOD_REF(br_object_soft, identifier),
+    ._type       = BR_CMETHOD_REF(br_renderer_facility_soft, type),
+    ._isType     = BR_CMETHOD_REF(br_renderer_facility_soft, isType),
+    ._device     = BR_CMETHOD_REF(br_object_soft, device),
+    ._space      = BR_CMETHOD_REF(br_renderer_facility_soft, space),
 
-	BR_CMETHOD_REF(br_renderer_facility_soft,	templateQuery),
-	BR_CMETHOD_REF(br_object,					query),
-	BR_CMETHOD_REF(br_object,					queryBuffer),
-	BR_CMETHOD_REF(br_object,					queryMany),
-	BR_CMETHOD_REF(br_object,					queryManySize),
-	BR_CMETHOD_REF(br_object,					queryAll),
-	BR_CMETHOD_REF(br_object,					queryAllSize),
+    ._templateQuery = BR_CMETHOD_REF(br_renderer_facility_soft, templateQuery),
+    ._query         = BR_CMETHOD_REF(br_object, query),
+    ._queryBuffer   = BR_CMETHOD_REF(br_object, queryBuffer),
+    ._queryMany     = BR_CMETHOD_REF(br_object, queryMany),
+    ._queryManySize = BR_CMETHOD_REF(br_object, queryManySize),
+    ._queryAll      = BR_CMETHOD_REF(br_object, queryAll),
+    ._queryAllSize  = BR_CMETHOD_REF(br_object, queryAllSize),
 
-	BR_CMETHOD_REF(br_renderer_facility_soft,	listQuery),
-	BR_CMETHOD_REF(br_object_container,			tokensMatchBegin),
-	BR_CMETHOD_REF(br_object_container,			tokensMatch),
-	BR_CMETHOD_REF(br_object_container,			tokensMatchEnd),
-	BR_CMETHOD_REF(br_object_container,			addFront),
-	BR_CMETHOD_REF(br_object_container,			removeFront),
-	BR_CMETHOD_REF(br_object_container,			remove),
-	BR_CMETHOD_REF(br_object_container,			find),
-	BR_CMETHOD_REF(br_object_container,			findMany),
-	BR_CMETHOD_REF(br_object_container,			count),
+    ._listQuery        = BR_CMETHOD_REF(br_renderer_facility_soft, listQuery),
+    ._tokensMatchBegin = BR_CMETHOD_REF(br_object_container, tokensMatchBegin),
+    ._tokensMatch      = BR_CMETHOD_REF(br_object_container, tokensMatch),
+    ._tokensMatchEnd   = BR_CMETHOD_REF(br_object_container, tokensMatchEnd),
+    ._addFront         = BR_CMETHOD_REF(br_object_container, addFront),
+    ._removeFront      = BR_CMETHOD_REF(br_object_container, removeFront),
+    ._remove           = BR_CMETHOD_REF(br_object_container, remove),
+    ._find             = BR_CMETHOD_REF(br_object_container, find),
+    ._findMany         = BR_CMETHOD_REF(br_object_container, findMany),
+    ._count            = BR_CMETHOD_REF(br_object_container, count),
 
-	BR_CMETHOD_REF(br_renderer_facility_soft,	validDestination),
+    ._validDestination = BR_CMETHOD_REF(br_renderer_facility_soft, validDestination),
 
-	BR_CMETHOD_REF(br_renderer_facility_soft,	rendererNew),
+    ._rendererNew = BR_CMETHOD_REF(br_renderer_facility_soft, rendererNew),
 };
 
