@@ -20,12 +20,12 @@ typedef struct br_output_facility {
 	/*
 	 * Dispatch table
 	 */
-	struct br_output_facility_dispatch *dispatch;
+	const struct br_output_facility_dispatch *dispatch;
 
 	/*
 	 * Standard object identifier
 	 */
-	char *identifier;
+	const char *identifier;
 
    /*
     * Pointer to owning device

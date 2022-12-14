@@ -39,7 +39,7 @@ static const struct br_device_dispatch deviceDispatch;
  * Device info. template
  */
 #define _F(f)	offsetof(br_device, f)
-#define _A(f)    ((br_int_32)(f))
+#define _A(f)    ((br_uintptr_t)(f))
 
 static struct br_tv_template_entry deviceTemplateEntries[] = {
 	{BRT_IDENTIFIER_CSTR,	0,	_F(identifier),		BRTV_QUERY | BRTV_ALL,	BRTV_CONV_COPY, },
@@ -89,11 +89,11 @@ static struct br_tv_template deviceArgsTemplate = {
 /*
  * Set up a static device object
  */
-br_device *DeviceDirectDrawAllocate(char *id, char *arguments)
+br_device *DeviceDirectDrawAllocate(const char *id, const char *arguments)
 {
 	br_device *self;
 	br_token_value args_tv[256];
-	br_uint_32 count;
+	br_int_32 count;
 	LPDIRECTDRAW ddraw;
 
 	/*
@@ -168,9 +168,10 @@ br_device *DeviceDirectDrawAllocate(char *id, char *arguments)
 	return self ;
 }
 
-static void BR_CMETHOD_DECL(br_device_dd, free)\
-	(br_device *self)
+static void BR_CMETHOD_DECL(br_device_dd, free)(br_object *_self)
 {
+	br_device *self = (br_device*)_self;
+
 	/*
 	 * Release resources used by critical section object
 	 */
@@ -192,27 +193,25 @@ static void BR_CMETHOD_DECL(br_device_dd, free)\
 	BrResFreeNoCallback(self);
 }
 
-static br_token BR_CMETHOD_DECL(br_device_dd, type)\
-	(br_device *self)
+static br_token BR_CMETHOD_DECL(br_device_dd, type)(br_object *self)
 {
 	return BRT_DEVICE;
 }
 
-static br_boolean BR_CMETHOD_DECL(br_device_dd, isType)\
-	(br_device *self, br_token t)
+static br_boolean BR_CMETHOD_DECL(br_device_dd, isType)(br_object *self, br_token t)
 {
 	return (t == BRT_DEVICE) || (t == BRT_OBJECT_CONTAINER) || (t == BRT_OBJECT);
 }
 
-static br_int_32 BR_CMETHOD_DECL(br_device_dd, space)\
-	(br_device *self)
+static br_size_t BR_CMETHOD_DECL(br_device_dd, space)(br_object *self)
 {
 	return sizeof(br_device);
 }
 
-static struct br_tv_template * BR_CMETHOD_DECL(br_device_dd, templateQuery)\
-	(br_device *self)
+static struct br_tv_template * BR_CMETHOD_DECL(br_device_dd, templateQuery)(br_object *_self)
 {
+    br_device *self = (br_device*)_self;
+
     if(self->templates.deviceTemplate == NULL)
         self->templates.deviceTemplate = BrTVTemplateAllocate(self->res,
             deviceTemplateEntries,
@@ -221,10 +220,9 @@ static struct br_tv_template * BR_CMETHOD_DECL(br_device_dd, templateQuery)\
     return self->templates.deviceTemplate;
 }
 
-static void * BR_CMETHOD_DECL(br_device_dd, listQuery)\
-	(br_device *self)
+static void * BR_CMETHOD_DECL(br_device_dd, listQuery)(br_object_container *self)
 {
-	return self->object_list;
+	return ((br_device*)self)->object_list;
 }
 
 /*
@@ -232,7 +230,7 @@ static void * BR_CMETHOD_DECL(br_device_dd, listQuery)\
  *
  * makes a copy of token/value list
  */
-static struct token_match {
+struct token_match {
 	br_token_value *original;
 	br_token_value *query;	
 	br_int_32 n;
@@ -310,35 +308,35 @@ static void BR_CMETHOD_DECL(br_device_dd, tokensMatchEnd)
  * Default dispatch table for device
  */
 static const struct br_device_dispatch deviceDispatch = {
-	NULL,
-	NULL,
-	NULL,
-	NULL,
-	BR_CMETHOD_REF(br_device_dd,		free),
-	BR_CMETHOD_REF(br_object_dd,		identifier),
-	BR_CMETHOD_REF(br_device_dd,		type),
-	BR_CMETHOD_REF(br_device_dd,		isType),
-	BR_CMETHOD_REF(br_object_dd,		device),
-	BR_CMETHOD_REF(br_device_dd,		space),
+    .__reserved0 = NULL,
+    .__reserved1 = NULL,
+    .__reserved2 = NULL,
+    .__reserved3 = NULL,
+    ._free       = BR_CMETHOD_REF(br_device_dd, free),
+    ._identifier = BR_CMETHOD_REF(br_object_dd, identifier),
+    ._type       = BR_CMETHOD_REF(br_device_dd, type),
+    ._isType     = BR_CMETHOD_REF(br_device_dd, isType),
+    ._device     = BR_CMETHOD_REF(br_object_dd, device),
+    ._space      = BR_CMETHOD_REF(br_device_dd, space),
 
-	BR_CMETHOD_REF(br_device_dd,		templateQuery),
-	BR_CMETHOD_REF(br_object,			query),
-	BR_CMETHOD_REF(br_object, 			queryBuffer),
-	BR_CMETHOD_REF(br_object, 			queryMany),
-	BR_CMETHOD_REF(br_object, 			queryManySize),
-	BR_CMETHOD_REF(br_object, 			queryAll),
-	BR_CMETHOD_REF(br_object, 			queryAllSize),
+    ._templateQuery = BR_CMETHOD_REF(br_device_dd, templateQuery),
+    ._query         = BR_CMETHOD_REF(br_object, query),
+    ._queryBuffer   = BR_CMETHOD_REF(br_object, queryBuffer),
+    ._queryMany     = BR_CMETHOD_REF(br_object, queryMany),
+    ._queryManySize = BR_CMETHOD_REF(br_object, queryManySize),
+    ._queryAll      = BR_CMETHOD_REF(br_object, queryAll),
+    ._queryAllSize  = BR_CMETHOD_REF(br_object, queryAllSize),
 
-	BR_CMETHOD_REF(br_device_dd,		listQuery),
-	BR_CMETHOD_REF(br_device_dd,		tokensMatchBegin),
-	BR_CMETHOD_REF(br_device_dd,		tokensMatch),
-	BR_CMETHOD_REF(br_device_dd,		tokensMatchEnd),
-	BR_CMETHOD_REF(br_object_container,	addFront),
-	BR_CMETHOD_REF(br_object_container,	removeFront),
-	BR_CMETHOD_REF(br_object_container,	remove),
-	BR_CMETHOD_REF(br_object_container,	find),
-	BR_CMETHOD_REF(br_object_container, findMany),
-	BR_CMETHOD_REF(br_object_container, count),
+    ._listQuery        = BR_CMETHOD_REF(br_device_dd, listQuery),
+    ._tokensMatchBegin = BR_CMETHOD_REF(br_device_dd, tokensMatchBegin),
+    ._tokensMatch      = BR_CMETHOD_REF(br_device_dd, tokensMatch),
+    ._tokensMatchEnd   = BR_CMETHOD_REF(br_device_dd, tokensMatchEnd),
+    ._addFront         = BR_CMETHOD_REF(br_object_container, addFront),
+    ._removeFront      = BR_CMETHOD_REF(br_object_container, removeFront),
+    ._remove           = BR_CMETHOD_REF(br_object_container, remove),
+    ._find             = BR_CMETHOD_REF(br_object_container, find),
+    ._findMany         = BR_CMETHOD_REF(br_object_container, findMany),
+    ._count            = BR_CMETHOD_REF(br_object_container, count),
 };
 
 

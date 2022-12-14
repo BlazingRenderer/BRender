@@ -366,9 +366,11 @@ br_error OutputFacilityDirectDrawInitialise(br_device *dev)
 /*
  * Common object methods
  */
-static void BR_CMETHOD_DECL(br_output_facility_dd, free)(br_output_facility *self)
+static void BR_CMETHOD_DECL(br_output_facility_dd, free)(br_object *_self)
 {
-   ObjectContainerRemove( self->device, (br_object *)self);
+	br_output_facility *self = (br_output_facility*)_self;
+
+	ObjectContainerRemove( self->device, (br_object *)self);
 
 	/*
 	 * Remove attached objects
@@ -376,23 +378,25 @@ static void BR_CMETHOD_DECL(br_output_facility_dd, free)(br_output_facility *sel
 	ObjectContainerFree((br_object_container *)self, BR_NULL_TOKEN, NULL, NULL);
 }
 
-static br_token BR_CMETHOD_DECL(br_output_facility_dd, type)(br_output_facility *self)
+static br_token BR_CMETHOD_DECL(br_output_facility_dd, type)(br_object *self)
 {
 	return BRT_OUTPUT_FACILITY;
 }
 
-static br_boolean BR_CMETHOD_DECL(br_output_facility_dd, isType)(br_output_facility *self, br_token t)
+static br_boolean BR_CMETHOD_DECL(br_output_facility_dd, isType)(br_object *self, br_token t)
 {
 	return (t == BRT_OUTPUT_FACILITY) || (t == BRT_OBJECT_CONTAINER) || (t == BRT_OBJECT);
 }
 
-static br_int_32 BR_CMETHOD_DECL(br_output_facility_dd, space)(br_output_facility *self)
+static br_size_t BR_CMETHOD_DECL(br_output_facility_dd, space)(br_object *self)
 {
 	return sizeof(br_output_facility);
 }
 
-static struct br_tv_template * BR_CMETHOD_DECL(br_output_facility_dd, queryTemplate)(br_output_facility *self)
+static struct br_tv_template * BR_CMETHOD_DECL(br_output_facility_dd, queryTemplate)(br_object *_self)
 {
+    br_output_facility *self = (br_output_facility*)_self;
+
     if(self->device->templates.outputFacilityTemplate== NULL)
         self->device->templates.outputFacilityTemplate= BrTVTemplateAllocate(self->device->res,
             outputFacilityTemplateEntries,
@@ -439,59 +443,56 @@ static br_error BR_CMETHOD_DECL(br_output_facility_dd, clutNew)(br_output_facili
 	return BRE_FAIL;
 }
 
-static void * BR_CMETHOD_DECL(br_output_facility_dd, listQuery)
-	(br_device *self)
+static void * BR_CMETHOD_DECL(br_output_facility_dd, listQuery)(br_object_container *self)
 {
-	return self->object_list;
+	return ((br_output_facility*)self)->object_list;
 }
 
-static br_error BR_CMETHOD_DECL(br_output_facility_dd, queryCapability)(
+static br_error BR_CMETHOD_DECL(br_output_facility_dd, queryCapability)(br_output_facility *self,
     br_token_value *buffer_in, br_token_value *buffer_out, br_size_t size_buffer_out)
 {
 	return BRE_FAIL;
 }
 
 
-
 /*
  * Output facility dispatch table
  */
 static struct br_output_facility_dispatch outputFacilityDispatch = {
-	NULL,
-	NULL,
-	NULL,
-	NULL,
-	BR_CMETHOD_REF(br_output_facility_dd,	free),
-	BR_CMETHOD_REF(br_object_dd,		  	identifier),
-	BR_CMETHOD_REF(br_output_facility_dd,	type),
-	BR_CMETHOD_REF(br_output_facility_dd,	isType),
-	BR_CMETHOD_REF(br_object_dd,			device),
-	BR_CMETHOD_REF(br_output_facility_dd,	space),
+    .__reserved0 = NULL,
+    .__reserved1 = NULL,
+    .__reserved2 = NULL,
+    .__reserved3 = NULL,
+    ._free       = BR_CMETHOD_REF(br_output_facility_dd, free),
+    ._identifier = BR_CMETHOD_REF(br_object_dd, identifier),
+    ._type       = BR_CMETHOD_REF(br_output_facility_dd, type),
+    ._isType     = BR_CMETHOD_REF(br_output_facility_dd, isType),
+    ._device     = BR_CMETHOD_REF(br_object_dd, device),
+    ._space      = BR_CMETHOD_REF(br_output_facility_dd, space),
 
-	BR_CMETHOD_REF(br_output_facility_dd,	queryTemplate),
-	BR_CMETHOD_REF(br_object,				query),
-	BR_CMETHOD_REF(br_object,				queryBuffer),
-	BR_CMETHOD_REF(br_object,				queryMany),
-	BR_CMETHOD_REF(br_object,				queryManySize),
-	BR_CMETHOD_REF(br_object,				queryAll),
-	BR_CMETHOD_REF(br_object,				queryAllSize),
+    ._templateQuery = BR_CMETHOD_REF(br_output_facility_dd, queryTemplate),
+    ._query         = BR_CMETHOD_REF(br_object, query),
+    ._queryBuffer   = BR_CMETHOD_REF(br_object, queryBuffer),
+    ._queryMany     = BR_CMETHOD_REF(br_object, queryMany),
+    ._queryManySize = BR_CMETHOD_REF(br_object, queryManySize),
+    ._queryAll      = BR_CMETHOD_REF(br_object, queryAll),
+    ._queryAllSize  = BR_CMETHOD_REF(br_object, queryAllSize),
 
-	BR_CMETHOD_REF(br_output_facility_dd,	listQuery),
-	BR_CMETHOD_REF(br_object_container,		tokensMatchBegin),
-	BR_CMETHOD_REF(br_object_container,		tokensMatch),
-	BR_CMETHOD_REF(br_object_container,		tokensMatchEnd),
-	BR_CMETHOD_REF(br_object_container,		addFront),
-	BR_CMETHOD_REF(br_object_container,		removeFront),
-	BR_CMETHOD_REF(br_object_container,		remove),
-	BR_CMETHOD_REF(br_object_container,		find),
-	BR_CMETHOD_REF(br_object_container,		findMany),
-	BR_CMETHOD_REF(br_object_container,		count),
+    ._listQuery        = BR_CMETHOD_REF(br_output_facility_dd, listQuery),
+    ._tokensMatchBegin = BR_CMETHOD_REF(br_object_container, tokensMatchBegin),
+    ._tokensMatch      = BR_CMETHOD_REF(br_object_container, tokensMatch),
+    ._tokensMatchEnd   = BR_CMETHOD_REF(br_object_container, tokensMatchEnd),
+    ._addFront         = BR_CMETHOD_REF(br_object_container, addFront),
+    ._removeFront      = BR_CMETHOD_REF(br_object_container, removeFront),
+    ._remove           = BR_CMETHOD_REF(br_object_container, remove),
+    ._find             = BR_CMETHOD_REF(br_object_container, find),
+    ._findMany         = BR_CMETHOD_REF(br_object_container, findMany),
+    ._count            = BR_CMETHOD_REF(br_object_container, count),
 
-	BR_CMETHOD_REF(br_output_facility_dd,	validSource),
-	BR_CMETHOD_REF(br_output_facility_dd,	pixelmapNew),
-	BR_CMETHOD_REF(br_output_facility_dd,	clutNew),
-   BR_CMETHOD_REF(br_output_facility_dd,  queryCapability),
-
+    ._validSource     = BR_CMETHOD_REF(br_output_facility_dd, validSource),
+    ._pixelmapNew     = BR_CMETHOD_REF(br_output_facility_dd, pixelmapNew),
+    ._clutNew         = BR_CMETHOD_REF(br_output_facility_dd, clutNew),
+    ._queryCapability = BR_CMETHOD_REF(br_output_facility_dd, queryCapability),
 };
 
 

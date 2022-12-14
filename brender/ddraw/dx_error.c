@@ -7,7 +7,7 @@
 #include <stdarg.h>
 #include <stdio.h>
 
-char *ErrorToString(HRESULT error)
+static const char *ErrorToString(HRESULT error)
 {
     switch(error) {
         case DD_OK:
@@ -206,5 +206,3 @@ void Display_Error( char *string, HRESULT error )
 
 	BR_ERROR0( Message );
 }
-
-

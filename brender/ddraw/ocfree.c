@@ -43,5 +43,3 @@ br_error ObjectContainerFree(br_object_container *self, br_token type, char *pat
 
 	return BRE_OK;
 }
-
-

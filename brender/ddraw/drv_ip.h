@@ -18,13 +18,13 @@ extern "C" {
 /*
  * object.c
  */
-char * BR_CMETHOD_DECL(br_object_dd, identifier)(br_object *self);
+const char * BR_CMETHOD_DECL(br_object_dd, identifier)(br_object *self);
 br_device *	BR_CMETHOD_DECL(br_object_dd, device)(br_object *self);
 
 /*
  * device.c
  */
-br_device *DeviceDirectDrawAllocate(char *id, char *args);
+br_device *DeviceDirectDrawAllocate(const char *id, const char *args);
 
 /*
  * outfcty.c
@@ -36,10 +36,10 @@ br_error OutputFacilityDirectDrawInitialise(br_device *dev);
  */
 br_device_pixelmap * DevicePixelmapDirectDrawAllocate(br_device *dev, br_output_facility *type, br_token_value *tv);
 
-br_token BR_CMETHOD_DECL(br_device_pixelmap_dd, type)(br_device_pixelmap *self);
-br_boolean BR_CMETHOD_DECL(br_device_pixelmap_dd, isType)(br_device_pixelmap *self, br_token t);
-br_int_32 BR_CMETHOD_DECL(br_device_pixelmap_dd, space)(br_device_pixelmap *self);
-struct br_tv_template * BR_CMETHOD_DECL(br_device_pixelmap_dd, queryTemplate)(br_device_pixelmap *self);
+br_token BR_CMETHOD_DECL(br_device_pixelmap_dd, type)(br_object *self);
+br_boolean BR_CMETHOD_DECL(br_device_pixelmap_dd, isType)(br_object *self, br_token t);
+br_size_t BR_CMETHOD_DECL(br_device_pixelmap_dd, space)(br_object *self);
+struct br_tv_template * BR_CMETHOD_DECL(br_device_pixelmap_dd, queryTemplate)(br_object *self);
 
 /*
  * devpmddo.c
@@ -85,7 +85,7 @@ br_error BR_CMETHOD_DECL(br_device_pixelmap_ddo, pixelQuery)\
 /*
  * devclut.c
  */
-br_device_clut * DeviceClutDirectDrawAllocate(br_device *dev, br_device_pixelmap *dpm, char *identifier);
+br_device_clut * DeviceClutDirectDrawAllocate(br_device *dev, br_device_pixelmap *dpm, const char *identifier);
 
 /*
  * ocfree.c

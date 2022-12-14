@@ -21,7 +21,7 @@ BR_RCS_ID("$Id: devclut.c 1.1 1997/12/10 16:45:06 jon Exp $");
 /*
  * Default dispatch table for device_clut (defined at end of file)
  */
-static struct br_device_clut_dispatch deviceClutDispatch;
+static const struct br_device_clut_dispatch deviceClutDispatch;
 
 /*
  * Query template
@@ -37,7 +37,7 @@ static struct br_tv_template_entry deviceClutTemplateEntries[] = {
 /*
  * Create a new device CLUT
  */
-br_device_clut * DeviceClutDirectDrawAllocate(br_device *dev, br_device_pixelmap *devpm, char *identifier)
+br_device_clut * DeviceClutDirectDrawAllocate(br_device *dev, br_device_pixelmap *devpm, const char *identifier)
 {
 	int i, half_nstatic;
 	br_size_t size;
@@ -108,9 +108,10 @@ br_device_clut * DeviceClutDirectDrawAllocate(br_device *dev, br_device_pixelmap
 /*
  * br_device_clut_dd::free
  */
-static void BR_CMETHOD_DECL(br_device_clut_dd, free)\
-	(br_device_clut *self)
+static void BR_CMETHOD_DECL(br_device_clut_dd, free)(br_object *_self)
 {
+	br_device_clut *self = (br_device_clut*)_self;
+
 	/*
 	 * Detach CLUT from device
 	 */
@@ -127,27 +128,24 @@ static void BR_CMETHOD_DECL(br_device_clut_dd, free)\
 	BrResFreeNoCallback(self);
 }
 
-static br_token BR_CMETHOD_DECL(br_device_clut_dd, type)\
-	(br_device_clut *self)
+static br_token BR_CMETHOD_DECL(br_device_clut_dd, type)(br_object *self)
 {
 	return BRT_DEVICE_CLUT;
 }
 
-static br_boolean BR_CMETHOD_DECL(br_device_clut_dd, isType)\
-	(br_device_clut *self, br_token t)
+static br_boolean BR_CMETHOD_DECL(br_device_clut_dd, isType)(br_object *self, br_token t)
 {
 	return (t == BRT_DEVICE_CLUT) || (t == BRT_OBJECT);
 }
 
-static br_int_32 BR_CMETHOD_DECL(br_device_clut_dd, space)\
-	(br_device_clut *self)
+static br_size_t BR_CMETHOD_DECL(br_device_clut_dd, space)(br_object *self)
 {
 	return sizeof(br_device_clut);
 }
 
-static struct br_tv_template * BR_CMETHOD_DECL(br_device_clut_dd, queryTemplate)\
-	(br_device_clut *self)
+static struct br_tv_template * BR_CMETHOD_DECL(br_device_clut_dd, queryTemplate)(br_object *_self)
 {
+    br_device_clut *self = (br_device_clut*)_self;
     if(self->device->templates.deviceClutTemplate== NULL)
         self->device->templates.deviceClutTemplate= BrTVTemplateAllocate(self->device,
             deviceClutTemplateEntries,
@@ -278,30 +276,28 @@ static br_error BR_CMETHOD_DECL(br_device_clut_dd, entryQueryMany)\
 /*
  * Default dispatch table for device CLUT
  */
-static struct br_device_clut_dispatch deviceClutDispatch = {
-	NULL,
-	NULL,
-	NULL,
-	NULL,
-	BR_CMETHOD_REF(br_device_clut_dd,	free),
-	BR_CMETHOD_REF(br_object_dd,		identifier),
-	BR_CMETHOD_REF(br_device_clut_dd,	type),
-	BR_CMETHOD_REF(br_device_clut_dd,	isType),
-	BR_CMETHOD_REF(br_object_dd,		device),
-	BR_CMETHOD_REF(br_device_clut_dd,	space),
+static const struct br_device_clut_dispatch deviceClutDispatch = {
+    .__reserved0 = NULL,
+    .__reserved1 = NULL,
+    .__reserved2 = NULL,
+    .__reserved3 = NULL,
+    ._free       = BR_CMETHOD_REF(br_device_clut_dd, free),
+    ._identifier = BR_CMETHOD_REF(br_object_dd, identifier),
+    ._type       = BR_CMETHOD_REF(br_device_clut_dd, type),
+    ._isType     = BR_CMETHOD_REF(br_device_clut_dd, isType),
+    ._device     = BR_CMETHOD_REF(br_object_dd, device),
+    ._space      = BR_CMETHOD_REF(br_device_clut_dd, space),
 
-	BR_CMETHOD_REF(br_device_clut_dd,	queryTemplate),
-	BR_CMETHOD_REF(br_object,			query),
-	BR_CMETHOD_REF(br_object,			queryBuffer),
-	BR_CMETHOD_REF(br_object,			queryMany),
-	BR_CMETHOD_REF(br_object,			queryManySize),
-	BR_CMETHOD_REF(br_object,			queryAll),
-	BR_CMETHOD_REF(br_object,			queryAllSize),
+    ._templateQuery = BR_CMETHOD_REF(br_device_clut_dd, queryTemplate),
+    ._query         = BR_CMETHOD_REF(br_object, query),
+    ._queryBuffer   = BR_CMETHOD_REF(br_object, queryBuffer),
+    ._queryMany     = BR_CMETHOD_REF(br_object, queryMany),
+    ._queryManySize = BR_CMETHOD_REF(br_object, queryManySize),
+    ._queryAll      = BR_CMETHOD_REF(br_object, queryAll),
+    ._queryAllSize  = BR_CMETHOD_REF(br_object, queryAllSize),
 
-	BR_CMETHOD_REF(br_device_clut_dd,	entrySet),
-	BR_CMETHOD_REF(br_device_clut_dd,	entryQuery),
-	BR_CMETHOD_REF(br_device_clut_dd,	entrySetMany),
-	BR_CMETHOD_REF(br_device_clut_dd,	entryQueryMany),
+    ._entrySet       = BR_CMETHOD_REF(br_device_clut_dd, entrySet),
+    ._entryQuery     = BR_CMETHOD_REF(br_device_clut_dd, entryQuery),
+    ._entrySetMany   = BR_CMETHOD_REF(br_device_clut_dd, entrySetMany),
+    ._entryQueryMany = BR_CMETHOD_REF(br_device_clut_dd, entryQueryMany),
 };
-
-

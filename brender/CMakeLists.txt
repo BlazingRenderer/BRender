@@ -18,6 +18,12 @@ if(BRENDER_BUILD_DRIVERS)
     add_subdirectory(glrend)
 
     target_link_libraries(brender INTERFACE glrend)
+
+    if(WIN32)
+        add_subdirectory(ddraw)
+        target_link_libraries(brender INTERFACE ddraw)
+    endif()
+
 endif()
 
 ##
