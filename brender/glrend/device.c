@@ -56,6 +56,11 @@ typedef struct device_create_tokens {
  * List of tokens which are not significant in matching (for output facilities)
  */
 static br_token insignificantMatchTokens[] = {
+    BRT_WIDTH_I32,
+    BRT_HEIGHT_I32,
+    BRT_PIXEL_BITS_I32,
+    BRT_PIXEL_TYPE_U8,
+    BRT_WINDOW_MONITOR_I32,
     BRT_MSAA_SAMPLES_I32,
     BRT_TEMPORARY_B,
     BR_NULL_TOKEN,
@@ -291,6 +296,7 @@ static void *BR_CMETHOD_DECL(br_device_gl, listQuery)(struct br_object_container
 struct token_match {
     br_token_value *original;
     br_token_value *query;
+    br_token       type;
     br_int_32      n;
     void           *extra;
     br_size_t      extra_size;
@@ -302,13 +308,12 @@ void *BR_CMETHOD_DECL(br_device_gl, tokensMatchBegin)(struct br_object_container
     struct token_match *tm;
     br_int_32          i;
 
-    (void)t;
-
     if(tv == NULL)
         return NULL;
 
     tm = BrResAllocate(self->res, sizeof(*tm), BR_MEMORY_APPLICATION);
     tm->original = tv;
+    tm->type     = t;
 
     for(i = 0; tv[i].t != BR_NULL_TOKEN; i++);
 
@@ -352,7 +357,11 @@ br_boolean BR_CMETHOD_DECL(br_device_gl, tokensMatch)(struct br_object_container
     /*
      * Compare the two token lists
      */
-    return BrTokenValueComparePartial(tm->original, tm->query, insignificantMatchTokens);
+    if(tm->type == BRT_OUTPUT_FACILITY) {
+        return BrTokenValueComparePartial(tm->original, tm->query, insignificantMatchTokens);
+    } else {
+        return BrTokenValueCompare(tm->original, tm->query);
+    }
 }
 
 void BR_CMETHOD_DECL(br_device_gl, tokensMatchEnd)(struct br_object_container *self, void *arg)
@@ -362,26 +371,6 @@ void BR_CMETHOD_DECL(br_device_gl, tokensMatchEnd)(struct br_object_container *s
     if(arg)
         BrResFree(arg);
 }
-
-/*
- * Custom find implementation to create an appropriate output facility on-demand.
- */
-br_error BR_CMETHOD_DECL(br_device_gl, find)(br_object_container *self, br_object **ph, br_token type,
-                                             const char *pattern, br_token_value *tv)
-{
-    br_error r = BR_CMETHOD(br_object_container, find)(self, ph, type, pattern, tv);
-    if(r == BRE_OK)
-        return BRE_OK;
-
-    if(r == BRE_FAIL && type != BRT_OUTPUT_FACILITY)
-        return BRE_FAIL;
-
-    if(OutputFacilityGLCreateTemporary((br_device *)self, tv) == NULL)
-        return BRE_FAIL;
-
-    return BR_CMETHOD(br_object_container, find)(self, ph, type, pattern, tv);
-}
-
 
 /*
  * Default dispatch table for device
@@ -413,7 +402,7 @@ static const struct br_device_dispatch deviceDispatch = {
     ._addFront          = BR_CMETHOD_REF(br_object_container, addFront),
     ._removeFront       = BR_CMETHOD_REF(br_object_container, removeFront),
     ._remove            = BR_CMETHOD_REF(br_object_container, remove),
-    ._find              = BR_CMETHOD_REF(br_device_gl, find),
+    ._find              = BR_CMETHOD_REF(br_object_container, find),
     ._findMany          = BR_CMETHOD_REF(br_object_container, findMany),
     ._count             = BR_CMETHOD_REF(br_object_container, count),
 };
