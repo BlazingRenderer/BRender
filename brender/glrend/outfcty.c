@@ -26,7 +26,6 @@ static struct br_tv_template_entry outputFacilityTemplateEntries[] = {
     {BRT_WINDOW_MONITOR_I32,      NULL, F(monitor),           BRTV_QUERY | BRTV_ALL, BRTV_CONV_COPY,},
     {BRT_IDENTIFIER_CSTR,         NULL, F(identifier),        BRTV_QUERY | BRTV_ALL, BRTV_CONV_COPY,},
     {BRT_RENDERER_FACILITY_O,     NULL, F(renderer_facility), BRTV_QUERY | BRTV_ALL, BRTV_CONV_COPY,},
-    {BRT_TEMPORARY_B,             NULL, F(temporary),         BRTV_QUERY | BRTV_ALL, BRTV_CONV_COPY,},
 
     /*
      * We don't use these, but we need BrDevBeginVar to accept them.

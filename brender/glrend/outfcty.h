@@ -61,15 +61,6 @@ typedef struct br_output_facility {
     br_int_32 monitor;
 
     /*
-     * This is a "custom" output facility. Represents a
-     * "custom" screen resolution (ala resizing the window).
-     * It will be destroyed when all dependent pixelmaps are.
-     *
-     * If not set, this represents a screen mode.
-     */
-    br_boolean temporary;
-
-    /*
      * Renderer facilities to use, and default
      */
     struct br_renderer_facility *renderer_facility;

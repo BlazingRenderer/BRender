@@ -857,8 +857,6 @@ OPENGL_VERSION                      constant_string
 OPENGL_VENDOR                       constant_string
 OPENGL_RENDERER                     constant_string
 
-TEMPORARY                           boolean
-
 # Tokens for system configuration
 
 REGISTRY						string

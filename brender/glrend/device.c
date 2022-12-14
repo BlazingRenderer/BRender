@@ -62,7 +62,6 @@ static br_token insignificantMatchTokens[] = {
     BRT_PIXEL_TYPE_U8,
     BRT_WINDOW_MONITOR_I32,
     BRT_MSAA_SAMPLES_I32,
-    BRT_TEMPORARY_B,
     BR_NULL_TOKEN,
 };
 
