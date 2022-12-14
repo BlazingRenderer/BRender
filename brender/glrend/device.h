@@ -38,6 +38,11 @@ typedef struct br_device {
     struct device_templates templates;
 
     /*
+     * Device-wide output facility.
+     */
+    struct br_output_facility *output_facility;
+
+    /*
      * Device-wide renderer facility.
      */
     struct br_renderer_facility *renderer_facility;

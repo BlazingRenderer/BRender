@@ -90,6 +90,21 @@ static br_output_facility *OutputFacilityGLCreateMode(br_device *dev, br_uint_16
     return self;
 }
 
+br_output_facility *OutputFacilityGLInit(br_device *dev, br_renderer_facility *rendfcty)
+{
+    br_output_facility *self;
+
+    self = BrResAllocate(dev, sizeof(br_output_facility), BR_MEMORY_OBJECT);
+    self->identifier        = "OpenGL";
+    self->dispatch          = &outputFacilityDispatch;
+    self->device            = dev;
+    self->object_list       = BrObjectListAllocate(self);
+    self->renderer_facility = rendfcty;
+
+    ObjectContainerAddFront(dev, (br_object*)self);
+    return self;
+}
+
 br_output_facility *OutputFacilityGLCreateTemporary(br_device *dev, br_token_value *tv)
 {
     int        width = -1, height = -1, bpp = -1;

@@ -197,6 +197,9 @@ br_device *DeviceGLAllocate(const char *identifier, const char *arguments)
     if((self->renderer_facility = RendererFacilityGLInit(self)) == NULL)
         goto cleanup_context;
 
+    if((self->output_facility = OutputFacilityGLInit(self, self->renderer_facility)) == NULL)
+        goto cleanup_context;
+
     return self;
 
 cleanup_context:

@@ -55,6 +55,8 @@ br_renderer_facility *RendererFacilityGLInit(br_device *dev);
 /*
  * outfcty.c
  */
+br_output_facility *OutputFacilityGLInit(br_device *dev, br_renderer_facility *rendfcty);
+
 br_output_facility *OutputFacilityGLCreateTemporary(br_device *dev, br_token_value *tv);
 
 /*
