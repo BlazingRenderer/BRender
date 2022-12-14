@@ -848,6 +848,13 @@ WINDOW_BUFFER_METHOD			token
 	DIBSECTION						none
 	DIRECTDRAW						none
 
+# DirectDraw specific tokens
+
+
+DIRECTDRAW_DEVICENAME           constant_string
+LPDIRECTDRAWSURFACE             pointer
+
+
 MSAA_SAMPLES						int_32
 
 OPENGL_EXT_PROCS				pointer
