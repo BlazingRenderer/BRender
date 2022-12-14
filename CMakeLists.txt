@@ -4,6 +4,8 @@ project(BRenderSample)
 # Prefer glvnd
 cmake_policy(SET CMP0072 NEW)
 
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
+
 find_package(Perl REQUIRED)
 
 option(BRENDER_DISABLE_FINDSDL "Disable searching for SDL2" OFF)
