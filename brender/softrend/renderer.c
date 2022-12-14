@@ -366,6 +366,16 @@ br_error BR_CMETHOD_DECL(br_renderer_soft, focusLossEnd)(br_renderer *self)
 	return BRE_OK;
 }
 
+br_error BR_CMETHOD_DECL(br_renderer_soft, sceneBegin)(br_renderer *self)
+{
+    return BRE_OK;
+}
+
+br_error BR_CMETHOD_DECL(br_renderer_soft, sceneEnd)(br_renderer *self)
+{
+    return BRE_OK;
+}
+
 /*
  * Default dispatch table for renderer
  */
@@ -437,4 +447,6 @@ static const struct br_renderer_dispatch rendererDispatch = {
     ._frameEnd              = BR_CMETHOD_REF(br_renderer_soft, frameEnd),
     ._focusLossBegin        = BR_CMETHOD_REF(br_renderer_soft, focusLossBegin),
     ._focusLossEnd          = BR_CMETHOD_REF(br_renderer_soft, focusLossEnd),
+    ._sceneBegin            = BR_CMETHOD_REF(br_renderer_soft, sceneBegin),
+    ._sceneEnd              = BR_CMETHOD_REF(br_renderer_soft, sceneEnd),
 };
