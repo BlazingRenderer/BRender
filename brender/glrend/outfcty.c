@@ -37,59 +37,6 @@ static struct br_tv_template_entry outputFacilityTemplateEntries[] = {
 
 #undef F
 
-static int BrType_BPP(int type)
-{
-    switch(type) {
-        case BR_PMT_INDEX_8:
-            return 8;
-        case BR_PMT_RGB_555:
-            return 15;
-        case BR_PMT_RGB_565:
-            return 16;
-        case BR_PMT_RGB_888:
-            return 24;
-        case BR_PMT_RGBX_888:
-        case BR_PMT_RGBA_8888:
-        case BR_PMT_ARGB_8888:
-            return 32;
-        default:
-            return 0;
-    }
-}
-
-static br_output_facility *OutputFacilityGLCreateMode(br_device *dev, br_uint_16 type,
-                                                      br_int_32 width, br_int_32 height,
-                                                      br_int_32 monitorIndex, br_boolean temporary)
-{
-    br_output_facility *self;
-    char               tmp[64];
-
-    self = BrResAllocate(dev, sizeof(*self), BR_MEMORY_OBJECT);
-    self->dispatch    = &outputFacilityDispatch;
-    self->device      = dev;
-    self->object_list = BrObjectListAllocate(self);
-
-    /* Fill in display format */
-    self->colour_type = type;
-    self->colour_bits = BrType_BPP(type);
-    self->indexed     = (type <= BR_PMT_INDEX_8);
-    self->monitor     = monitorIndex;
-
-    self->width     = width;
-    self->height    = height;
-    self->temporary = temporary;
-
-    /* Attach a descriptive identifier */
-    BrSprintfN(tmp, sizeof(tmp) - 1, "%dx%dx%d", self->width, self->height, self->colour_bits);
-    BrLogTrace("GLREND", "Registering %sscreen mode %s.", temporary ? "temporary " : "", tmp);
-    self->identifier = BrResStrDup(self, tmp);
-
-    self->renderer_facility = dev->renderer_facility;
-
-    ObjectContainerAddFront(dev, (br_object *)self);
-    return self;
-}
-
 br_output_facility *OutputFacilityGLInit(br_device *dev, br_renderer_facility *rendfcty)
 {
     br_output_facility *self;
@@ -103,35 +50,6 @@ br_output_facility *OutputFacilityGLInit(br_device *dev, br_renderer_facility *r
 
     ObjectContainerAddFront(dev, (br_object*)self);
     return self;
-}
-
-br_output_facility *OutputFacilityGLCreateTemporary(br_device *dev, br_token_value *tv)
-{
-    int        width = -1, height = -1, bpp = -1;
-    br_uint_16 pmt;
-
-    for(br_token_value *v = tv; v->t != 0; ++v) {
-        if(v->t == BRT_WIDTH_I32)
-            width = v->v.i32;
-        else if(v->t == BRT_HEIGHT_I32)
-            height = v->v.i32;
-        else if(v->t == BRT_PIXEL_BITS_I32)
-            bpp = v->v.i32;
-    }
-
-    if(width <= 0 || height <= 0)
-        return NULL;
-
-    if(bpp == 16)
-        pmt = BR_PMT_RGB_565;
-    else if(bpp == 24)
-        pmt = BR_PMT_RGB_888;
-    else if(bpp == 32)
-        pmt = BR_PMT_RGBA_8888;
-    else
-        return NULL;
-
-    return OutputFacilityGLCreateMode(dev, pmt, width, height, -1, 1);
 }
 
 /*
