@@ -7,7 +7,7 @@ include fpsetup.inc
 include common.inc
 
 if PARTS and PART_8Z
-        externdef c TriangleRasterise_ZTI_I8_D16_32:proc
+	externdef c TriangleRasterise_ZTI_I8_D16_32:proc
 	externdef c TriangleRasterise_ZTI_I8_D16_64:proc
 	externdef c TriangleRasterise_ZTI_I8_D16_128:proc
 	externdef c TriangleRasterise_ZTI_I8_D16_256:proc

@@ -30,12 +30,10 @@ int	MatchCount = 0;
 static struct local_block primInfo_t8[] = {
 
 #if BASED_FLOAT
-#pragma message ("FLOAT")
 #include "prim_t8f.c"
 #endif
 
 #if BASED_FIXED
-#pragma message ("FIXED")
 #include "prim_t8x.c"
 #endif
 
@@ -52,12 +50,10 @@ static struct local_block primInfo_p8[] = {
 static struct local_block primInfo_t15[] = {
 
 #if BASED_FLOAT
-#pragma message ("FLOAT")
 #include "prm_t15f.c"
 #endif
 
 #if BASED_FIXED
-#pragma message ("FIXED")
 #include "prm_t15x.c"
 #endif
 
@@ -74,12 +70,10 @@ static struct local_block primInfo_p15[] = {
 static struct local_block primInfo_t16[] = {
 
 #if BASED_FLOAT
-#pragma message ("FLOAT")
 #include "prm_t16f.c"
 #endif
 
 #if BASED_FIXED
-#pragma message ("FIXED")
 #include "prm_t16x.c"
 #endif
 

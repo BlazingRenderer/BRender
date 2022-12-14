@@ -124,12 +124,12 @@ typedef struct br_primitive_state {
 	/*
 	 * Dispatch table
 	 */
-	struct br_primitive_state_dispatch *dispatch;
+	const struct br_primitive_state_dispatch *dispatch;
 
 	/*
 	 * Standard object identifier
 	 */
-	char *identifier;
+	const char *identifier;
 
     /*
      * Pointer to owning device

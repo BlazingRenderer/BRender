@@ -80,8 +80,9 @@ void SetupRenderBuffer(struct render_buffer *rb, br_device_pixelmap *pm)
 		pm->pm_base_y * pm->pm_row_bytes +
 		pm->pm_base_x * bpp;
 
+#if 0
 	rb->sel = (br_uint_16)pm->pm_pixels_qualifier;
-
+#endif
 	/*
 	 * See if there is a valid palette attached
 	 */
@@ -188,31 +189,34 @@ static br_error BR_CMETHOD_DECL(br_buffer_stored_soft, update)(
 	return BRE_OK;
 }
 
-static void BR_CMETHOD_DECL(br_buffer_stored_soft, free)(br_buffer_stored *self)
+static void BR_CMETHOD_DECL(br_buffer_stored_soft, free)(br_object *_self)
 {
+	br_buffer_stored *self = (br_buffer_stored*)_self;
+
 	ObjectContainerRemove(self->plib, (br_object *)self);
 
     BrResFreeNoCallback(self);
 }
 
-static br_token BR_CMETHOD_DECL(br_buffer_stored_soft, type)(br_buffer_stored *self)
+static br_token BR_CMETHOD_DECL(br_buffer_stored_soft, type)(br_object *self)
 {
 	return BRT_BUFFER_STORED;
 }
 
-static br_boolean BR_CMETHOD_DECL(br_buffer_stored_soft, isType)(br_buffer_stored *self, br_token t)
+static br_boolean BR_CMETHOD_DECL(br_buffer_stored_soft, isType)(br_object *self, br_token t)
 {
 	return (t == BRT_BUFFER_STORED) || (t == BRT_OBJECT);
 }
 
-static br_int_32 BR_CMETHOD_DECL(br_buffer_stored_soft, space)(br_buffer_stored *self)
+static br_size_t BR_CMETHOD_DECL(br_buffer_stored_soft, space)(br_object *self)
 {
 	return BrResSizeTotal(self);
 }
 
-static struct br_tv_template * BR_CMETHOD_DECL(br_buffer_stored_soft,templateQuery)
-	(br_buffer_stored *self)
+static struct br_tv_template * BR_CMETHOD_DECL(br_buffer_stored_soft,templateQuery)(br_object *_self)
 {
+    br_buffer_stored *self = (br_buffer_stored*)_self;
+
     if(self->device->templates.bufferStoredTemplate == NULL)
         self->device->templates.bufferStoredTemplate = BrTVTemplateAllocate(self->device,
             bufferStoredTemplateEntries, BR_ASIZE(bufferStoredTemplateEntries));
@@ -224,25 +228,25 @@ static struct br_tv_template * BR_CMETHOD_DECL(br_buffer_stored_soft,templateQue
  * Default dispatch table for device
  */
 static const struct br_buffer_stored_dispatch bufferStoredDispatch = {
-	NULL,
-	NULL,
-	NULL,
-	NULL,
-	BR_CMETHOD_REF(br_buffer_stored_soft,	free),
-	BR_CMETHOD_REF(br_object_softprim,		identifier),
-	BR_CMETHOD_REF(br_buffer_stored_soft,   type),
-	BR_CMETHOD_REF(br_buffer_stored_soft,   isType),
-	BR_CMETHOD_REF(br_object_softprim,		device),
-	BR_CMETHOD_REF(br_buffer_stored_soft,   space),
+    .__reserved0 = NULL,
+    .__reserved1 = NULL,
+    .__reserved2 = NULL,
+    .__reserved3 = NULL,
+    ._free       = BR_CMETHOD_REF(br_buffer_stored_soft, free),
+    ._identifier = BR_CMETHOD_REF(br_object_softprim, identifier),
+    ._type       = BR_CMETHOD_REF(br_buffer_stored_soft, type),
+    ._isType     = BR_CMETHOD_REF(br_buffer_stored_soft, isType),
+    ._device     = BR_CMETHOD_REF(br_object_softprim, device),
+    ._space      = BR_CMETHOD_REF(br_buffer_stored_soft, space),
 
-	BR_CMETHOD_REF(br_buffer_stored_soft,	templateQuery),
-	BR_CMETHOD_REF(br_object,				query),
-	BR_CMETHOD_REF(br_object, 				queryBuffer),
-	BR_CMETHOD_REF(br_object, 				queryMany),
-	BR_CMETHOD_REF(br_object, 				queryManySize),
-	BR_CMETHOD_REF(br_object, 				queryAll),
-	BR_CMETHOD_REF(br_object,	 			queryAllSize),
+    ._templateQuery = BR_CMETHOD_REF(br_buffer_stored_soft, templateQuery),
+    ._query         = BR_CMETHOD_REF(br_object, query),
+    ._queryBuffer   = BR_CMETHOD_REF(br_object, queryBuffer),
+    ._queryMany     = BR_CMETHOD_REF(br_object, queryMany),
+    ._queryManySize = BR_CMETHOD_REF(br_object, queryManySize),
+    ._queryAll      = BR_CMETHOD_REF(br_object, queryAll),
+    ._queryAllSize  = BR_CMETHOD_REF(br_object, queryAllSize),
 
-	BR_CMETHOD_REF(br_buffer_stored_soft,	update),
+    ._update = BR_CMETHOD_REF(br_buffer_stored_soft, update),
 };
 

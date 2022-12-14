@@ -8,7 +8,6 @@
  */
 #include "drv.h"
 #include "shortcut.h"
-#include "blockops.h"
 #include "brassert.h"
 
 static char rscid[] = "$Id: l_pi.c 1.1 1997/12/10 16:47:11 jon Exp $";

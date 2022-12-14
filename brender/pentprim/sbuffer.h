@@ -24,7 +24,7 @@ typedef struct br_buffer_stored {
 	/*
 	 * Dispatch table
 	 */
-	struct br_buffer_stored_dispatch *dispatch;
+	const struct br_buffer_stored_dispatch *dispatch;
 
 	/*
 	 * Standard object identifier

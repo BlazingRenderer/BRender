@@ -17,12 +17,12 @@ typedef struct br_primitive_library {
 	/*
 	 * Dispatch table
 	 */
-	struct br_primitive_library_dispatch *dispatch;
+	const struct br_primitive_library_dispatch *dispatch;
 
 	/*
 	 * Standard object identifier
 	 */
-	char *identifier;
+	const char *identifier;
 
     /*
      * Pointer to owning device
@@ -56,6 +56,3 @@ typedef struct br_primitive_library {
 };
 #endif
 #endif
-
-
-

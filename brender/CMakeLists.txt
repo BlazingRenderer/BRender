@@ -28,7 +28,8 @@ if(BRENDER_BUILD_DRIVERS)
 
     if(BRENDER_BUILD_SOFT)
         add_subdirectory(softrend)
-        target_link_libraries(brender INTERFACE softrend)
+        add_subdirectory(pentprim)
+        target_link_libraries(brender INTERFACE softrend pentprim)
     endif()
 
     if(WIN32)

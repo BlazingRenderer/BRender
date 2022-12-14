@@ -18,19 +18,19 @@ extern "C" {
 /*
  * object.c
  */
-char * BR_CMETHOD_DECL(br_object_softprim, identifier)( br_object *self);
+const char * BR_CMETHOD_DECL(br_object_softprim, identifier)( br_object *self);
 br_device *	BR_CMETHOD_DECL(br_object_softprim, device)( br_object *self);
 
 /*
  * device.c
  */
-br_device * DeviceSoftPrimAllocate(char *identifier);
+br_device * DeviceSoftPrimAllocate(const char *identifier);
 
 /*
  * plib.c
  */
 extern const br_token PrimPartsTokens[];
-struct br_primitive_library * PrimitiveLibrarySoftAllocate(struct br_device *dev, char * identifier, char *arguments);
+struct br_primitive_library * PrimitiveLibrarySoftAllocate(struct br_device *dev, const char * identifier, const char *arguments);
 
 /*
  * pstate.c

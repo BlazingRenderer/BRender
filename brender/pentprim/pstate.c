@@ -42,7 +42,7 @@ static const struct br_primitive_state_dispatch primitiveStateDispatch;
 #endif
 
 #define F(f)	offsetof(struct br_primitive_state, f)
-#define P(f)	((br_int_32)(&(f)))
+#define P(f)	((br_uintptr_t)(&(f)))
 
 static const struct br_tv_template_entry primitiveStateTemplateEntries[] = {
 	{BRT(IDENTIFIER_CSTR),		F(identifier),				Q | A,				BRTV_CONV_COPY,},
@@ -81,31 +81,34 @@ struct br_primitive_state * PrimitiveStateSoftAllocate(struct br_primitive_libra
 	return self;
 }
 
-static void BR_CMETHOD_DECL(br_primitive_state_soft, free)(br_primitive_state *self)
+static void BR_CMETHOD_DECL(br_primitive_state_soft, free)(br_object *_self)
 {
+	br_primitive_state *self = (br_primitive_state*)_self;
+
 	ObjectContainerRemove(self->plib, (br_object *)self);
 
 	BrResFreeNoCallback(self);
 }
 
-static br_token BR_CMETHOD_DECL(br_primitive_state_soft, type)(br_primitive_state *self)
+static br_token BR_CMETHOD_DECL(br_primitive_state_soft, type)(br_object *self)
 {
 	return BRT_PRIMITIVE_STATE;
 }
 
-static br_boolean BR_CMETHOD_DECL(br_primitive_state_soft, isType)(br_primitive_state *self, br_token t)
+static br_boolean BR_CMETHOD_DECL(br_primitive_state_soft, isType)(br_object *self, br_token t)
 {
 	return (t == BRT_PRIMITIVE_STATE) || (t == BRT_OBJECT_CONTAINER) || (t == BRT_OBJECT);
 }
 
-static br_int_32 BR_CMETHOD_DECL(br_primitive_state_soft, space)(br_primitive_state *self)
+static br_size_t BR_CMETHOD_DECL(br_primitive_state_soft, space)(br_object *self)
 {
 	return sizeof(br_primitive_state);
 }
 
-static struct br_tv_template * BR_CMETHOD_DECL(br_primitive_state_soft,templateQuery)
-	(br_primitive_state *self)
+static struct br_tv_template * BR_CMETHOD_DECL(br_primitive_state_soft,templateQuery)(br_object *_self)
 {
+    br_primitive_state *self = (br_primitive_state*)_self;
+
     if(self->device->templates.primitiveStateTemplate == NULL)
         self->device->templates.primitiveStateTemplate = BrTVTemplateAllocate(self->device,
             primitiveStateTemplateEntries,
@@ -210,7 +213,7 @@ static br_boolean outputSet(struct output_buffer *ob, br_device_pixelmap *new)
 }
 
 
-static br_error BR_CALLBACK customInputSet(void *block, br_uint_32 *pvalue, struct br_tv_template_entry *tep)
+static br_error BR_CALLBACK customInputSet(void *block, const br_value *pvalue, const struct br_tv_template_entry *tep)
 {
 	/*
 	 * XXX validate incoming object
@@ -218,10 +221,10 @@ static br_error BR_CALLBACK customInputSet(void *block, br_uint_32 *pvalue, stru
 
 	if(inputSet(
 		(struct input_buffer *)((char *)block + tep->offset), 
-		(br_buffer_stored *)*pvalue))
-		tep->mask = 1;
+		(br_buffer_stored *)pvalue->o))
+		((struct br_tv_template_entry*)tep)->mask = 1; /* FIXME: casting away const */
 	else
-		tep->mask = 0;
+		((struct br_tv_template_entry*)tep)->mask = 0; /* FIXME: casting away const */
 
 	return BRE_OK;
 }
@@ -232,7 +235,7 @@ static struct br_tv_custom customInputConv = {
 	NULL,
 };
 
-static br_error BR_CALLBACK customOutputSet(void *block, br_uint_32 *pvalue, struct br_tv_template_entry *tep)
+static br_error BR_CALLBACK customOutputSet(void *block, const br_value *pvalue, const struct br_tv_template_entry *tep)
 {
 	/*
 	 * XXX validate incoming object
@@ -240,10 +243,10 @@ static br_error BR_CALLBACK customOutputSet(void *block, br_uint_32 *pvalue, str
 
 	if(outputSet(
 		(struct output_buffer *)((char *)block + tep->offset), 
-		(br_device_pixelmap *)*pvalue))
-		tep->mask = 1;
+		(br_device_pixelmap *)pvalue->o))
+		((struct br_tv_template_entry*)tep)->mask = 1; /* FIXME: casting away const */
 	else
-		tep->mask = 0;
+		((struct br_tv_template_entry*)tep)->mask = 0; /* FIXME: casting away const */
 
 	return BRE_OK;
 }
@@ -258,7 +261,7 @@ static const struct br_tv_custom customOutputConv = {
  * Templates for state set/query
  */
 #define F(f) offsetof(struct br_primitive_state, f)
-#define P(f)	((br_int_32)(&(f)))
+#define P(f)	((br_uintptr_t)(&(f)))
 
 static br_tv_template_entry partPrimitiveTemplateEntries[] = {
 	{BRT(FORCE_FRONT_B),	F(prim.flags),			Q | S | A,	BRTV_CONV_BIT,	PRIMF_FORCE_FRONT,			1},
@@ -343,7 +346,7 @@ static br_error BR_CMETHOD_DECL(br_primitive_state_soft, partSet)(
 		br_token part,
 		br_int_32 index,
 		br_token t,
-		br_uint_32 value)
+		br_value value)
 {
 	br_error r;
 	br_tv_template *tp = findTemplate(self, part);
@@ -447,7 +450,7 @@ static br_error BR_CMETHOD_DECL(br_primitive_state_soft, partQuery)(
 		struct br_primitive_state *self,
 		br_token part,
 		br_int_32 index,
-		br_uint_32 *pvalue,
+		void *pvalue,
 		br_token t)
 {
 	br_tv_template *tp = findTemplate(self, part);
@@ -455,15 +458,15 @@ static br_error BR_CMETHOD_DECL(br_primitive_state_soft, partQuery)(
 	if(tp == NULL)
 		return BRE_FAIL;
 
-	return BrTokenValueQuery(pvalue, NULL, NULL, t,  self, tp);
+	return BrTokenValueQuery(pvalue, NULL, 0, t,  self, tp);
 }
 
 static br_error BR_CMETHOD_DECL(br_primitive_state_soft, partQueryBuffer)(
 		struct br_primitive_state *self,
 		br_token part,
 		br_int_32 index,
-		br_uint_32 *pvalue,
-		br_uint_32 *buffer,
+		void *pvalue,
+		void *buffer,
 		br_size_t buffer_size,
 		br_token t)
 {
@@ -643,41 +646,45 @@ static br_error BR_CMETHOD_DECL(br_primitive_state_soft, stateCopy)(
  * Default dispatch table for device
  */
 static const struct br_primitive_state_dispatch primitiveStateDispatch = {
-	NULL,
-	NULL,
-	NULL,
-	NULL,
-	BR_CMETHOD_REF(br_primitive_state_soft,	free),
-	BR_CMETHOD_REF(br_object_softprim,  	identifier),
-	BR_CMETHOD_REF(br_primitive_state_soft, type),
-	BR_CMETHOD_REF(br_primitive_state_soft, isType),
-	BR_CMETHOD_REF(br_object_softprim,		device),
-	BR_CMETHOD_REF(br_primitive_state_soft, space),
+    .__reserved0 = NULL,
+    .__reserved1 = NULL,
+    .__reserved2 = NULL,
+    .__reserved3 = NULL,
+    ._free       = BR_CMETHOD_REF(br_primitive_state_soft, free),
+    ._identifier = BR_CMETHOD_REF(br_object_softprim, identifier),
+    ._type       = BR_CMETHOD_REF(br_primitive_state_soft, type),
+    ._isType     = BR_CMETHOD_REF(br_primitive_state_soft, isType),
+    ._device     = BR_CMETHOD_REF(br_object_softprim, device),
+    ._space      = BR_CMETHOD_REF(br_primitive_state_soft, space),
 
-	BR_CMETHOD_REF(br_primitive_state_soft,	templateQuery),
-	BR_CMETHOD_REF(br_object,				query),
-	BR_CMETHOD_REF(br_object, 				queryBuffer),
-	BR_CMETHOD_REF(br_object, 				queryMany),
-	BR_CMETHOD_REF(br_object, 				queryManySize),
-	BR_CMETHOD_REF(br_object, 				queryAll),
-	BR_CMETHOD_REF(br_object,	 			queryAllSize),
+    ._templateQuery = BR_CMETHOD_REF(br_primitive_state_soft, templateQuery),
+    ._query         = BR_CMETHOD_REF(br_object, query),
+    ._queryBuffer   = BR_CMETHOD_REF(br_object, queryBuffer),
+    ._queryMany     = BR_CMETHOD_REF(br_object, queryMany),
+    ._queryManySize = BR_CMETHOD_REF(br_object, queryManySize),
+    ._queryAll      = BR_CMETHOD_REF(br_object, queryAll),
+    ._queryAllSize  = BR_CMETHOD_REF(br_object, queryAllSize),
 
-	BR_CMETHOD_REF(br_primitive_state_soft,	partSet),
-	BR_CMETHOD_REF(br_primitive_state_soft,	partSetMany),
-	BR_CMETHOD_REF(br_primitive_state_soft,	partQuery),
-	BR_CMETHOD_REF(br_primitive_state_soft,	partQueryBuffer),
-	BR_CMETHOD_REF(br_primitive_state_soft,	partQueryMany),
-	BR_CMETHOD_REF(br_primitive_state_soft,	partQueryManySize),
-	BR_CMETHOD_REF(br_primitive_state_soft,	partQueryAll),
-	BR_CMETHOD_REF(br_primitive_state_soft,	partQueryAllSize),
-	BR_CMETHOD_REF(br_primitive_state_soft,	partIndexQuery),
-	BR_CMETHOD_REF(br_primitive_state_soft,	stateDefault),
-	BR_CMETHOD_REF(br_primitive_state_soft,	stateCopy),
-	BR_CMETHOD_REF(br_primitive_state_soft,	renderBegin),
-	BR_CMETHOD_REF(br_primitive_state_soft,	renderEnd),
-	BR_CMETHOD_REF(br_primitive_state_soft,	rangesQueryF),
-	BR_CMETHOD_REF(br_primitive_state_soft,	rangesQueryX),
-    BR_CMETHOD_REF(br_primitive_state_soft, partQueryCapability),
-    BR_CMETHOD_REF(br_primitive_state_soft, stateQueryPerformance),
+    ._partSet               = BR_CMETHOD_REF(br_primitive_state_soft, partSet),
+    ._partSetMany           = BR_CMETHOD_REF(br_primitive_state_soft, partSetMany),
+    ._partQuery             = BR_CMETHOD_REF(br_primitive_state_soft, partQuery),
+    ._partQueryBuffer       = BR_CMETHOD_REF(br_primitive_state_soft, partQueryBuffer),
+    ._partQueryMany         = BR_CMETHOD_REF(br_primitive_state_soft, partQueryMany),
+    ._partQueryManySize     = BR_CMETHOD_REF(br_primitive_state_soft, partQueryManySize),
+    ._partQueryAll          = BR_CMETHOD_REF(br_primitive_state_soft, partQueryAll),
+    ._partQueryAllSize      = BR_CMETHOD_REF(br_primitive_state_soft, partQueryAllSize),
+    ._partIndexQuery        = BR_CMETHOD_REF(br_primitive_state_soft, partIndexQuery),
+    ._stateDefault          = BR_CMETHOD_REF(br_primitive_state_soft, stateDefault),
+    ._stateCopy             = BR_CMETHOD_REF(br_primitive_state_soft, stateCopy),
+    ._renderBegin           = BR_CMETHOD_REF(br_primitive_state_soft, renderBegin),
+    ._renderEnd             = BR_CMETHOD_REF(br_primitive_state_soft, renderEnd),
+#if BASED_FLOAT
+    ._rangesQuery           = BR_CMETHOD_REF(br_primitive_state_soft, rangesQueryF),
+#endif
+#if BASED_FIXED
+    ._rangesQuery           = BR_CMETHOD_REF(br_primitive_state_soft, rangesQueryX),
+#endif
+    ._partQueryCapability   = BR_CMETHOD_REF(br_primitive_state_soft, partQueryCapability),
+    ._stateQueryPerformance = BR_CMETHOD_REF(br_primitive_state_soft, stateQueryPerformance),
 };
 

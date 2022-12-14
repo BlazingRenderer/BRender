@@ -19,12 +19,12 @@ typedef struct br_device {
 	/*
 	 * Dispatch table
 	 */
-	struct br_device_dispatch *dispatch;
+	const struct br_device_dispatch *dispatch;
 
 	/*
 	 * Standard object identifier
 	 */
-	char *identifier;
+	const char *identifier;
 
     /*
      * Pointer to owning device
