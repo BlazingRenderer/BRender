@@ -485,7 +485,7 @@ class br_primitive_state : public br_object {
 	//
 		virtual br_error BR_METHOD renderBegin(class brp_block **rpb,
 				br_boolean *block_changed, br_boolean *ranges_changed, br_boolean no_render,
-				br_int_32 prim_type);
+				br_token prim_type);
 
 		virtual br_error BR_METHOD renderEnd(class brp_block *rpb);
 
