@@ -186,7 +186,7 @@ br_error BR_RESIDENT_ENTRY BrObjectContainerFree(struct br_object_container *sel
 /*
  * image.c
  */
-struct br_image * BR_RESIDENT_ENTRY BrImageReference(char *name);
+struct br_image * BR_RESIDENT_ENTRY BrImageReference(const char *name);
 void BR_RESIDENT_ENTRY BrImageDereference(struct br_image *image);
 void * BR_RESIDENT_ENTRY BrImageLookupName(struct br_image *img, char *name, br_uint_32 hint);
 void * BR_RESIDENT_ENTRY BrImageLookupOrdinal(struct br_image *img, br_uint_32 ordinal);

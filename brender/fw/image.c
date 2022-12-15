@@ -31,7 +31,7 @@ br_boolean BR_RESIDENT_ENTRY BrImageRemove(br_image *img)
 /*
  * Looks for an image in the currently loaded set
  */
-br_image * BR_RESIDENT_ENTRY BrImageFind(char *pattern)
+br_image * BR_RESIDENT_ENTRY BrImageFind(const char *pattern)
 {
 	char *c;
 	br_image *img;
@@ -57,7 +57,7 @@ br_image * BR_RESIDENT_ENTRY BrImageFind(char *pattern)
 /*
  * Try to buil a br_image via the host image loader
  */
-static br_image *imageLoadHost(char *name)
+static br_image *imageLoadHost(const char *name)
 {
 	br_image *img;
 	void *host_image;
@@ -79,9 +79,10 @@ static br_image *imageLoadHost(char *name)
 /*
  * Lookup a named image
  */
-br_image * BR_RESIDENT_ENTRY BrImageReference(char *name)
+br_image * BR_RESIDENT_ENTRY BrImageReference(const char *name)
 {
-    char *suffix,*scratch = BrScratchString();
+    const char *suffix;
+    char *scratch = BrScratchString();
 	br_image *img;
 
 #if 0
