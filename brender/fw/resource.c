@@ -441,7 +441,7 @@ br_size_t BR_RESIDENT_ENTRY BrResChildEnum(void *vres, br_resenum_cbfn *callback
 	ASSERT(callback != NULL);
 
 	BR_FOR_SIMPLELIST(&res->children,rp)
-		if(r = callback(ResToUser(rp),arg))
+		if((r = callback(ResToUser(rp),arg)))
 			return r;
 
 	return 0;

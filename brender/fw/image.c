@@ -39,7 +39,7 @@ br_image * BR_RESIDENT_ENTRY BrImageFind(char *pattern)
 	/*
 	 * Remove extension
 	 */
-	if(c = BrStrRChr(pattern, '.')) {
+	if((c = BrStrRChr(pattern, '.'))) {
 		if(!BrStrICmp(c, ".dll") || !BrStrICmp(c, ".bdd") || !BrStrICmp(c, ".bed"))
 			*c = '\0';
 	}
