@@ -166,11 +166,10 @@ br_image * BR_RESIDENT_ENTRY BrImageReference(char *name)
  	 * Add image to framework resources and current list
 	 */
 	if(img) {
-
 		/* Splat any extension from the identifier to avoid problems when searching for loaded image.  */
-
-	    for(suffix = img->identifier; *suffix && *suffix != '.'; suffix++);
-		if(suffix) *suffix='\0';
+		char *tmp;
+		if((tmp = BrStrChr(img->identifier, '.')) != NULL)
+			*tmp = '\0';
 
 		BrResAdd(fw.res, img);
 		BrImageAdd(img);
