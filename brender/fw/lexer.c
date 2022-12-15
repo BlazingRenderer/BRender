@@ -405,7 +405,7 @@ static void lexerAdvanceDump(struct br_lexer * l)
 
 	case T_INTEGER:
 		tname = "INTEGER";
-		BrSprintfN(val, BR_ASIZE(val), "%d",l->current.v.integer);
+		BrSprintfN(val, BR_ASIZE(val), "%" PRIuPTR,l->current.v.integer);
 		tvalue = val;
 		break;
 
