@@ -15,6 +15,7 @@
  * XXX
  *	Add optional source file/line tracking
  */
+#include <inttypes.h>
 #include "fw.h"
 #include "brassert.h"
 
@@ -505,12 +506,12 @@ STATIC void InternalResourceDump(struct resource_header *res, br_putline_cbfn *p
  	rclass= fw.resource_class_index[(unsigned char )res->class];
 
 	if(rclass == NULL) {
-		BrSprintf(cp, "0x%08x ??? (%02X)", res+1, res->class);
+		BrSprintf(cp, "0x%" PRIxPTR" ??? (%02X)", (br_uintptr_t)res+1, res->class);
 		putline(BrScratchString(),arg);
 		return;
 	}
 
-	BrSprintf(cp, "0x%08x %-20s %d", ResToUser(res), rclass->identifier, RES_SIZE_GET(res));
+	BrSprintf(cp, "0x%" PRIxPTR " %-20s %zu", (br_uintptr_t)ResToUser(res), rclass->identifier, RES_SIZE_GET(res));
 	putline(BrScratchString(),arg);
 
 	/*
