@@ -38,7 +38,7 @@ typedef void * BR_CALLBACK brfile_load_cbfn(void *res, const char *name, br_size
 
 
 typedef struct br_filesystem {
-	char *identifier;
+	const char *identifier;
 
 	/*
 	 * Inquire about attributes of file system
