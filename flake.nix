@@ -36,6 +36,6 @@
 
     devShells.x86_64-linux   = mkShells self.packages.x86_64-linux;
     devShells.x86_64-darwin  = mkShells self.packages.x86_64-darwin;
-    devShells.aarch64-darwin = mkShells self.packages.x86_64-darwin;
+    devShells.aarch64-darwin = mkShells self.packages.aarch64-darwin;
   };
 }
