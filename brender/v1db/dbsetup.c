@@ -40,20 +40,20 @@ br_registry_entry tableRegistryList[TABLE_LIMIT];
  * System resource classes
  */
 static br_resource_class resourceClasses[] = {
-	{0,"VERTICES",			BR_MEMORY_VERTICES, 		NULL },
-	{0,"FACES",				BR_MEMORY_FACES, 			NULL },
-	{0,"MODEL",				BR_MEMORY_MODEL, 			NULL },
-	{0,"MATERIAL",			BR_MEMORY_MATERIAL, 		NULL },
-	{0,"MATERIAL_INDEX",	BR_MEMORY_MATERIAL_INDEX,	NULL },
-	{0,"ACTOR",				BR_MEMORY_ACTOR, 			NULL },
-	{0,"LIGHT",				BR_MEMORY_LIGHT, 			NULL },
-	{0,"CAMERA",			BR_MEMORY_CAMERA, 			NULL },
-	{0,"BOUNDS",			BR_MEMORY_BOUNDS, 			NULL },
-	{0,"CLIP_PLANE",		BR_MEMORY_CLIP_PLANE,		NULL },
-	{0,"TRANSFORM",			BR_MEMORY_TRANSFORM, 		NULL },
-	{0,"ENABLED_ACTORS",	BR_MEMORY_ENABLED_ACTORS,	NULL },
-	{0,"PREPARED_MODEL",	BR_MEMORY_PREPARED_MODEL,	NULL,	32 },
-	{0,"ORDER_TABLE",		BR_MEMORY_ORDER_TABLE,		NULL,	32 },
+    {0, "VERTICES",       BR_MEMORY_VERTICES,       NULL,  0},
+    {0, "FACES",          BR_MEMORY_FACES,          NULL,  0},
+    {0, "MODEL",          BR_MEMORY_MODEL,          NULL,  0},
+    {0, "MATERIAL",       BR_MEMORY_MATERIAL,       NULL,  0},
+    {0, "MATERIAL_INDEX", BR_MEMORY_MATERIAL_INDEX, NULL,  0},
+    {0, "ACTOR",          BR_MEMORY_ACTOR,          NULL,  0},
+    {0, "LIGHT",          BR_MEMORY_LIGHT,          NULL,  0},
+    {0, "CAMERA",         BR_MEMORY_CAMERA,         NULL,  0},
+    {0, "BOUNDS",         BR_MEMORY_BOUNDS,         NULL,  0},
+    {0, "CLIP_PLANE",     BR_MEMORY_CLIP_PLANE,     NULL,  0},
+    {0, "TRANSFORM",      BR_MEMORY_TRANSFORM,      NULL,  0},
+    {0, "ENABLED_ACTORS", BR_MEMORY_ENABLED_ACTORS, NULL,  0},
+    {0, "PREPARED_MODEL", BR_MEMORY_PREPARED_MODEL, NULL, 32},
+    {0, "ORDER_TABLE",    BR_MEMORY_ORDER_TABLE,    NULL, 32},
 };
 
 br_error BR_PUBLIC_ENTRY BrV1dbBegin(void)
