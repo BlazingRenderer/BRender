@@ -138,7 +138,7 @@ static void create_quad(br_device_pixelmap *self)
 
     /* Create the crap needed for the operations quad. */
     memcpy(self->asBack.quad.tris, s_QuadData, sizeof(self->asBack.quad.tris));
-    static_assert(sizeof(self->asBack.quad.tris) == sizeof(s_QuadData), "Quad size mismatch");
+    BR_STATIC_ASSERT(sizeof(self->asBack.quad.tris) == sizeof(s_QuadData), "Quad size mismatch");
 
     { /* Build the buffers */
         glGenBuffers(2, self->asBack.quad.buffers);
