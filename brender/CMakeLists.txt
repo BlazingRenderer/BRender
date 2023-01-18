@@ -1,4 +1,7 @@
 set(BRENDER_FOLDER "Brender")
+
+add_library(brender INTERFACE)
+
 add_subdirectory(inc)
 add_subdirectory(host)
 add_subdirectory(fw)
@@ -8,11 +11,14 @@ add_subdirectory(pixelmap)
 add_subdirectory(std)
 add_subdirectory(v1db)
 
-add_subdirectory(nulldev)
-add_subdirectory(glrend)
+target_link_libraries(brender INTERFACE v1db)
 
-add_library(brender INTERFACE)
-target_link_libraries(brender INTERFACE v1db glrend)
+if(BRENDER_BUILD_DRIVERS)
+    add_subdirectory(nulldev)
+    add_subdirectory(glrend)
+
+    target_link_libraries(brender INTERFACE glrend)
+endif()
 
 ##
 # Full BRender, with drivers.
