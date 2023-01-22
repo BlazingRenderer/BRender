@@ -248,12 +248,12 @@ int BrRegistryEnum(br_registry *reg, const char *pattern,
 	 */
 	if(pattern == NULL) {
 		BR_FOR_LIST_R(&reg->list,e)
-			if(r = callback(e->item,arg))
+			if((r = callback(e->item,arg)))
 				return r;
 	} else {
 		BR_FOR_LIST_R(&reg->list,e)
 			if(BrNamePatternMatch(pattern,e->item->identifier))
-				if(r = callback(e->item,arg))
+				if((r = callback(e->item,arg)))
 					return r;
 	}
 	return 0;
