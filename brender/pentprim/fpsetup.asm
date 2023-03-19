@@ -1196,7 +1196,7 @@ SETUP_FLOAT_COLOUR_SHADETABLE macro
 	mov bl,byte ptr work.index_base
 	fstp qword ptr temporary_intensity
 	mov bh, byte ptr temporary_intensity+2
-	mov bl,[esi+ebx]
+	mov bl, byte ptr [esi+ebx]
 	mov byte ptr workspace.colour,bl
 endm
 
