@@ -15,6 +15,8 @@ stdenv.mkDerivation rec {
     makeBinaryWrapper
   ];
 
+  passthru.SDL2 = SDL2; # 'cause it's so damned hard to debug with CMake
+
   buildInputs = [
     SDL2
   ];
