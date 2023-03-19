@@ -20,7 +20,13 @@
         inherit crossSystem;
         system = "x86_64-linux";
       };
-    in crossPackages.callPackage ./default.nix { version = self.lastModifiedDate; };
+    in crossPackages.callPackage ./default.nix {
+      version = self.lastModifiedDate;
+
+      SDL2 = crossPackages.SDL2.override {
+        withStatic = crossPackages.hostPlatform.isWindows;
+      };
+    };
 
     mkShells = packages: builtins.mapAttrs (k: v: v.overrideAttrs(old: {
       hardeningDisable = [ "all" ];
