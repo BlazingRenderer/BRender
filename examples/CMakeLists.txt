@@ -8,3 +8,7 @@ add_subdirectory(tutorials)
 if(WIN32)
     add_subdirectory(ddrawtest)
 endif()
+
+if(BRENDER_BUILD_SOFT)
+    add_subdirectory(softcube)
+endif()
