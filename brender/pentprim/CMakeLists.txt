@@ -7,7 +7,48 @@ make_h2inc(pentprim "${CMAKE_CURRENT_SOURCE_DIR}/drv.h" "${CMAKE_CURRENT_BINARY_
 set(USE_MMX ON)
 
 set(ASM_FILES
-        magicsym.asm
+	magicsym.asm
+
+	safediv.asm
+	sar16.asm
+	decal.asm
+
+	t_piza.asm
+	ti8_piz.asm
+	ti8_pizp.asm
+	t15_pizp.asm
+	tt15_piz.asm
+	tt16_piz.asm
+	tt24_piz.asm
+
+	t_pia.asm
+	ti8_pi.asm
+	ti8_pip.asm
+	t15_pip.asm
+	tt15_pi.asm
+	tt16_pi.asm
+	tt24_pi.asm
+
+	zb8.asm
+	zb8sh.asm
+	zb8p2lit.asm
+	zb8p2fla.asm
+	zb8p2ulb.asm
+	zb8p2ltb.asm
+	zb8p2flb.asm
+	zb8p2unl.asm
+	zb8awtm.asm
+	zs8.asm
+	zs8p2unl.asm
+	zs8awtm.asm
+	fpsetup.asm
+	fti8_piz.asm
+
+	zb16p2ul.asm
+
+	pfpsetup.asm
+	fti8pizp.asm
+	fti8_pip.asm
 )
 
 set(INFOGEN ${CMAKE_CURRENT_SOURCE_DIR}/infogen.pl)
@@ -80,49 +121,7 @@ if(USE_MMX)
 	list(APPEND ASM_FILES ./setupdat.asm)
 
 	list(APPEND ASM_FILES ./gsetuptf.asm)
-	# fixed
-	#list(APPEND ASM_FILES ./gsetuptx.asm)
-
-	list(APPEND ASM_FILES ./safediv.asm)
-	list(APPEND ASM_FILES ./sar16.asm)
-	list(APPEND ASM_FILES ./decal.asm)
-
-	list(APPEND ASM_FILES ./t_piza.asm)
-	list(APPEND ASM_FILES ./ti8_piz.asm)
-	list(APPEND ASM_FILES ./ti8_pizp.asm)
-	list(APPEND ASM_FILES ./t15_pizp.asm)
-	list(APPEND ASM_FILES ./tt15_piz.asm)
-	list(APPEND ASM_FILES ./tt16_piz.asm)
-	list(APPEND ASM_FILES ./tt24_piz.asm)
-
-	list(APPEND ASM_FILES ./t_pia.asm)
-	list(APPEND ASM_FILES ./ti8_pi.asm)
-	list(APPEND ASM_FILES ./ti8_pip.asm)
-	list(APPEND ASM_FILES ./t15_pip.asm)
-	list(APPEND ASM_FILES ./tt15_pi.asm)
-	list(APPEND ASM_FILES ./tt16_pi.asm)
-	list(APPEND ASM_FILES ./tt24_pi.asm)
-
-	list(APPEND ASM_FILES ./zb8.asm)
-	list(APPEND ASM_FILES ./zb8sh.asm)
-	list(APPEND ASM_FILES ./zb8p2lit.asm)
-	list(APPEND ASM_FILES ./zb8p2fla.asm)
-	list(APPEND ASM_FILES ./zb8p2ulb.asm)
-	list(APPEND ASM_FILES ./zb8p2ltb.asm)
-	list(APPEND ASM_FILES ./zb8p2flb.asm)
-	list(APPEND ASM_FILES ./zb8p2unl.asm)
-	list(APPEND ASM_FILES ./zb8awtm.asm)
-	list(APPEND ASM_FILES ./zs8.asm)
-	list(APPEND ASM_FILES ./zs8p2unl.asm)
-	list(APPEND ASM_FILES ./zs8awtm.asm)
-	list(APPEND ASM_FILES ./fpsetup.asm)
-	list(APPEND ASM_FILES ./fti8_piz.asm)
-
-	list(APPEND ASM_FILES ./zb16p2ul.asm)
-
-	list(APPEND ASM_FILES ./pfpsetup.asm)
-	list(APPEND ASM_FILES ./fti8pizp.asm)
-	list(APPEND ASM_FILES ./fti8_pip.asm)
+	list(APPEND ASM_FILES ./gsetuptx.asm)
 
 	list(APPEND ASM_FILES ./rastrise.asm)
 	list(APPEND ASM_FILES ./xzuv.asm)
