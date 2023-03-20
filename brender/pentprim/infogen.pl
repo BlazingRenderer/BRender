@@ -321,102 +321,111 @@ sub print_entry {
 
 	print <<END;
 {
-	{
+	.p = {
 		/* Render function
 		 */
 #if AUTOLOAD
-		(brp_render_fn *)$entry, NULL,
+		.render = (brp_render_fn *)$entry,
+		.chain  = NULL,
 #else
-		(brp_render_fn *)$render, NULL,
+		.render = (brp_render_fn *)$render,
+		.chain  = NULL,
 #endif
 
-		"$identifier", NULL,
-		BRT_$type, $prim_flags_string,
+		.identifier = "$identifier",
+		._reserved0 = NULL,
+
+		.type  = BRT_$type,
+		.flags = $prim_flags_string,
 
 		/* components - constant and per vertex
 		 */
-		$constant_components_string,
-		$vertex_components_string,
+		.constant_components = $constant_components_string,
+		.vertex_components   = $vertex_components_string,
 
 		/* Component slots as - float, fixed or integer
 		 */
-		$convert_mask_f_string,
-		$convert_mask_x_string,
-		$convert_mask_i_string,
+		.convert_mask_f = $convert_mask_f_string,
+		.convert_mask_x = $convert_mask_x_string,
+		.convert_mask_i = $convert_mask_i_string,
 
 		/* Constant slots
 	 	 */
-		$constant_slots_string,
+		.constant_mask = $constant_slots_string,
 	},
 
 	/* Offset and scale for R,G,B,A
 	 */
-	{$colour_base,$alpha_base},
-	{$colour_scale,$alpha_scale},
+	.colour_offsets = {$colour_base,$alpha_base},
+	.colour_scales  = {$colour_scale,$alpha_scale},
 
 	/* range flags
 	 */
-	$range_flags_string,
+	.range_flags = $range_flags_string,
 
 	/* Work buffer
 	 */
-	&work,
+	.work = &work,
 
 	/* Masks
 	 */
-	$flags_mask_string,
-	$flags_cmp_string,
+	.flags_mask = $flags_mask_string,
+	.flags_cmp  = $flags_cmp_string,
 
 	/* Texture, depth and shade type
 	 */
-	$depth_type,
-	$texture_type,
-	$shade_type,
-	$blend_type,
-	$screendoor_type,
-	$lighting_type,
-	$bump_type,
-	$fog_type,
+	.depth_type      = $depth_type,
+	.texture_type    = $texture_type,
+	.shade_type      = $shade_type,
+	.blend_type      = $blend_type,
+	.screendoor_type = $screendoor_type,
+	.lighting_type   = $lighting_type,
+	.bump_type       = $bump_type,
+	.fog_type        = $fog_type,
 
 	/* Colour & Depth  row size
 	 */
-	$colour_row_size,$depth_row_size,
+	.colour_row_size = $colour_row_size,
+	.depth_row_size  = $depth_row_size,
 
 	/* Texture size
 	 */
-	$texture_width,$texture_height,
+	.map_width  = $texture_width,
+	.map_height = $texture_height,
 
 	/* Input colour type
 	 */
-	$input_colour_type,
+	.input_colour_type = $input_colour_type,
 
 	/* Autoload info
 	 */
 #if AUTOLOAD
-	$image,(void *)$image_entry,
+	.image_name = $image,
+	.entry_info = (void *)$image_entry,
 #else
-	NULL,NULL,
+	.image_name = NULL,
+	.entry_info = NULL,
 #endif
 END
 	print <<END if($generic_setup);
 	/* Generic setup info.
 	 */
-	{
-		$area_limit,
-		$param_size,
-		$pixel_stride,
-		$generic_setup,
+	.setup = {
+		.iarea_limit = $area_limit,
+		.param_size = $param_size,
+		.stride = $pixel_stride,
+		.setup_param = $generic_setup,
 
 #if AUTOLOAD
-                (void *)\"_$rasterise_rl_l\",
-                (void *)\"_$rasterise_lr_l\",
-                (void *)\"_$rasterise_rl_s\",
-                (void *)\"_$rasterise_lr_s\",
+		.rasterise_rl_l = (void *)\"_$rasterise_rl_l\",
+		.rasterise_lr_l = (void *)\"_$rasterise_lr_l\",
+		.rasterise_rl_s = (void *)\"_$rasterise_rl_s\",
+		.rasterise_lr_s = (void *)\"_$rasterise_lr_s\",
 #else
-		$rasterise_rl_l,
-		$rasterise_lr_l,
-		$rasterise_rl_s,
-		$rasterise_lr_s,
+		.rasterise_rl_l = $rasterise_rl_l,
+		.rasterise_lr_l = $rasterise_lr_l,
+		.rasterise_rl_s = $rasterise_rl_s,
+		.rasterise_lr_s = $rasterise_lr_s,
 #endif
 	}
 END
