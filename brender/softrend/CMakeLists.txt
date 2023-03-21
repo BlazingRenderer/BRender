@@ -5,10 +5,8 @@ include(h2inc)
 make_h2inc(softrend "${CMAKE_CURRENT_SOURCE_DIR}/drv.h" "${CMAKE_CURRENT_BINARY_DIR}/drv.inc")
 
 set(ASM_FILES
-        cull.asm
         gen_386.asm
         geometry.asm
-        v1m_386.asm
         face_386.asm
         subdiv.asm
 )
@@ -64,7 +62,6 @@ add_library(softrend STATIC
         state.h
         template.h
         timestmp.h
-        v1m_386.h
         zsrmacro.h
 
         "${CMAKE_CURRENT_BINARY_DIR}/drv.inc"

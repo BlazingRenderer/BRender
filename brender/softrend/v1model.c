@@ -98,7 +98,6 @@ static void GEOMETRY_CALL V1Faces_ScratchAllocate(struct br_geometry *self, stru
 /*
  * Pre Culling operations
  */
-#ifndef V1Face_CullNone
 static void GEOMETRY_CALL V1Face_CullNone(struct br_geometry *self, struct br_renderer *renderer)
 {
 	int f;
@@ -118,9 +117,7 @@ static void GEOMETRY_CALL V1Face_CullNone(struct br_geometry *self, struct br_re
 
 //        rend.nvisible_faces = rend.nfaces;
 }
-#endif
 
-#ifndef V1Face_OS_CullNone
 static void GEOMETRY_CALL V1Face_OS_CullNone(struct br_geometry *self, struct br_renderer *renderer)
 {
 	int f;
@@ -139,9 +136,7 @@ static void GEOMETRY_CALL V1Face_OS_CullNone(struct br_geometry *self, struct br
 
 //        rend.nvisible_faces = rend.nfaces;
 }
-#endif
 
-#ifndef V1Face_CullOneSidedPerspective
 static void GEOMETRY_CALL V1Face_CullOneSidedPerspective(struct br_geometry *self, struct br_renderer *renderer)
 {
 	int f,n;
@@ -170,13 +165,9 @@ static void GEOMETRY_CALL V1Face_CullOneSidedPerspective(struct br_geometry *sel
 //                rend.nvisible_faces++;
 	}
 }
-#endif
 
-#ifndef V1Face_OS_CullOneSidedPerspective
 #define V1Face_OS_CullOneSidedPerspective V1Face_CullOneSidedPerspective
-#endif
 
-#ifndef V1Face_CullOneSidedParallel
 static void GEOMETRY_CALL V1Face_CullOneSidedParallel(struct br_geometry *self, struct br_renderer *renderer)
 {
 	int f,n;
@@ -205,13 +196,9 @@ static void GEOMETRY_CALL V1Face_CullOneSidedParallel(struct br_geometry *self, 
 //                rend.nvisible_faces++;
 	}
 }
-#endif
 
-#ifndef V1Face_OS_CullOneSidedParallel
 #define V1Face_OS_CullOneSidedParallel V1Face_CullOneSidedParallel
-#endif
 
-#ifndef V1Face_CullTwoSidedPerspective
 static void GEOMETRY_CALL V1Face_CullTwoSidedPerspective(struct br_geometry *self, struct br_renderer *renderer)
 {
 	int f,df;
@@ -243,13 +230,9 @@ static void GEOMETRY_CALL V1Face_CullTwoSidedPerspective(struct br_geometry *sel
 
 //        rend.nvisible_faces = rend.nfaces;
 }
-#endif
 
-#ifndef V1Face_OS_CullTwoSidedPerspective
 #define V1Face_OS_CullTwoSidedPerspective V1Face_CullTwoSidedPerspective
-#endif
 
-#ifndef V1Face_CullTwoSidedParallel
 static void GEOMETRY_CALL V1Face_CullTwoSidedParallel(struct br_geometry *self, struct br_renderer *renderer)
 {
 	int f,df;
@@ -281,11 +264,8 @@ static void GEOMETRY_CALL V1Face_CullTwoSidedParallel(struct br_geometry *self, 
 
 //        rend.nvisible_faces = rend.nfaces;
 }
-#endif
 
-#ifndef V1Face_OS_CullTwoSidedParallel
 #define V1Face_OS_CullTwoSidedParallel V1Face_CullTwoSidedParallel
-#endif
 
 #ifndef V1Face_CullOneSided
 static void GEOMETRY_CALL V1Face_CullOneSided(struct br_geometry *self, struct br_renderer *renderer)
@@ -306,28 +286,6 @@ static void GEOMETRY_CALL V1Face_CullOneSided(struct br_geometry *self, struct b
 }
 #endif
 
-#if BASED_FLOAT
-#ifndef V1Face_CullOneSided_P6
-static void GEOMETRY_CALL V1Face_CullOneSided_P6(struct br_geometry *self, struct br_renderer *renderer)
-{
-	switch(renderer->state.matrix.view_to_screen_hint) {
-	case BRT_PERSPECTIVE:
-		V1Face_CullOneSidedPerspective_P6(self, renderer);
-		break;
-
-	case BRT_PARALLEL:
-		V1Face_CullOneSidedParallel(self, renderer);
-		break;
-
-	default:
-		V1Face_CullNone(self, renderer);
-		break;
-	}
-}
-#endif
-#endif
-
-#ifndef V1Face_OS_CullOneSided
 static void GEOMETRY_CALL V1Face_OS_CullOneSided(struct br_geometry *self, struct br_renderer *renderer)
 {
 	switch(renderer->state.matrix.view_to_screen_hint) {
@@ -344,9 +302,7 @@ static void GEOMETRY_CALL V1Face_OS_CullOneSided(struct br_geometry *self, struc
 		break;
 	}
 }
-#endif
 
-#ifndef V1Face_CullTwoSided
 static void GEOMETRY_CALL V1Face_CullTwoSided(struct br_geometry *self, struct br_renderer *renderer)
 {
 	switch(renderer->state.matrix.view_to_screen_hint) {
@@ -363,9 +319,7 @@ static void GEOMETRY_CALL V1Face_CullTwoSided(struct br_geometry *self, struct b
 		break;
 	}
 }
-#endif
 
-#ifndef V1Face_OS_CullTwoSided
 static void GEOMETRY_CALL V1Face_OS_CullTwoSided(struct br_geometry *self, struct br_renderer *renderer)
 {
 	switch(renderer->state.matrix.view_to_screen_hint) {
@@ -382,12 +336,10 @@ static void GEOMETRY_CALL V1Face_OS_CullTwoSided(struct br_geometry *self, struc
 		break;
 	}
 }
-#endif
 
 /*
  * Do per face work - find all the faces that are on screen
  */
-#ifndef V1Face_Outcode
 static void GEOMETRY_CALL V1Face_Outcode(struct br_geometry *self, struct br_renderer *renderer)
 {
 	int f;
@@ -434,9 +386,7 @@ static void GEOMETRY_CALL V1Face_Outcode(struct br_geometry *self, struct br_ren
 		}
 	}
 }
-#endif
 
-#ifndef V1Face_Render
 static void GEOMETRY_CALL V1Face_Render(struct br_geometry *self, struct br_renderer *renderer)
 {
 	br_uint_16 (*fp_vertices)[3] = rend.face_vertices;
@@ -472,9 +422,7 @@ static void GEOMETRY_CALL V1Face_Render(struct br_geometry *self, struct br_rend
 		}
 	}
 }
-#endif
 
-#ifndef V1Face_OS_Render
 void GEOMETRY_CALL V1Face_OS_Render(struct br_geometry *self, struct br_renderer *renderer)
 {
 	br_uint_16 (*fp_vertices)[3] = rend.face_vertices;
@@ -504,9 +452,7 @@ void GEOMETRY_CALL V1Face_OS_Render(struct br_geometry *self, struct br_renderer
 		}
 	}
 }
-#endif
 
-#ifndef V1Face_OSV_Render
 void GEOMETRY_CALL V1Face_OSV_Render(struct br_geometry *self, struct br_renderer *renderer)
 {
 	br_uint_16 (*fp_vertices)[3] = rend.face_vertices;
@@ -532,7 +478,6 @@ void GEOMETRY_CALL V1Face_OSV_Render(struct br_geometry *self, struct br_rendere
 			fp_vertices, fp_edges, fp_eqn, tfp);
 	}
 }
-#endif
 
 #if BASED_FIXED
 #define CONVERT_MASK_OTHER convert_mask_f
@@ -553,11 +498,6 @@ static void GEOMETRY_CALL V1Faces_GeometryFnsCull(struct br_renderer *renderer)
 
 	switch(renderer->state.cull.type) {
 	case BRT_ONE_SIDED:
-#if BASED_FLOAT
-		if (renderer->device->hostInfo.processor_type == BRT_INTEL_PENTIUM_PRO)
-			GeometryFunctionAdd(renderer, V1Face_CullOneSided_P6);
-		else
-#endif
 		GeometryFunctionAdd(renderer, V1Face_CullOneSided);
 		GeometryFunctionOnScreenAdd(renderer, V1Face_OS_CullOneSided);
 		break;
