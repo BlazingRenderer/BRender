@@ -19,7 +19,6 @@
 /*
  * Transform, project, outcode and update screen bounds of visible vertices 
  */
-#ifndef Vertex_TransformProjectOutcodeBounds
 static void GEOMETRY_CALL Vertex_TransformProjectOutcodeBounds(struct br_geometry *self, struct br_renderer *renderer)
 {
 	int v;
@@ -54,12 +53,10 @@ static void GEOMETRY_CALL Vertex_TransformProjectOutcodeBounds(struct br_geometr
 			}
 		}
 }
-#endif
 
 /*
  * Transform, project and outcode of visible vertices 
  */
-#ifndef Vertex_TransformProjectOutcode
 static void GEOMETRY_CALL Vertex_TransformProjectOutcode(struct br_geometry *self, struct br_renderer *renderer)
 {
 	int v;
@@ -92,12 +89,10 @@ static void GEOMETRY_CALL Vertex_TransformProjectOutcode(struct br_geometry *sel
 			}
 		}
 }
-#endif
 
 /*
  * Transform, project and update screen bounds of visible vertices 
  */
-#ifndef Vertex_OS_TransformProjectBounds
 static void GEOMETRY_CALL Vertex_OS_TransformProjectBounds(struct br_geometry *self, struct br_renderer *renderer)
 {
 	int v;
@@ -124,12 +119,10 @@ static void GEOMETRY_CALL Vertex_OS_TransformProjectBounds(struct br_geometry *s
 			UPDATE_BOUNDS(tvp);
 		}
 }
-#endif
 
 /*
  * Transform and project visible vertices 
  */
-#ifndef Vertex_OS_TransformProject
 static void GEOMETRY_CALL Vertex_OS_TransformProject(struct br_geometry *self, struct br_renderer *renderer)
 {
 	int v;
@@ -154,12 +147,10 @@ static void GEOMETRY_CALL Vertex_OS_TransformProject(struct br_geometry *self, s
 			PROJECT_VERTEX(tvp,tvp->comp[C_X],tvp->comp[C_Y],tvp->comp[C_Z],tvp->comp[C_W]);
 		}
 }
-#endif
 
 /*
  * Transform, project, light and update screen bounds of visible vertices 
  */
-#ifndef Vertex_OS_TransformProjectBoundsSurf
 static void GEOMETRY_CALL Vertex_OS_TransformProjectBoundsSurf(struct br_geometry *self, struct br_renderer *renderer)
 {
 	int v,i;
@@ -201,12 +192,10 @@ static void GEOMETRY_CALL Vertex_OS_TransformProjectBoundsSurf(struct br_geometr
 				renderer->state.cache.vertex_fns[i](renderer, vp_p, vp_map, vp_n, scache.colour, tvp->comp);
 		}
 }
-#endif
 
 /*
  * Transform, project and light visible vertices 
  */
-#ifndef Vertex_OS_TransformProjectSurf
 static void GEOMETRY_CALL Vertex_OS_TransformProjectSurf(struct br_geometry *self, struct br_renderer *renderer)
 {
 	int v,i;
@@ -246,12 +235,10 @@ static void GEOMETRY_CALL Vertex_OS_TransformProjectSurf(struct br_geometry *sel
 				renderer->state.cache.vertex_fns[i](renderer, vp_p, vp_map, vp_n, scache.colour, tvp->comp);
 		}
 }
-#endif
 
 /*
  * Transform, project, light and update screen bounds of visible vertices 
  */
-#ifndef Vertex_OS_TransformProjectBoundsGeom
 static void GEOMETRY_CALL Vertex_OS_TransformProjectBoundsGeom(struct br_geometry *self, struct br_renderer *renderer)
 {
 	int v,i;
@@ -293,7 +280,6 @@ static void GEOMETRY_CALL Vertex_OS_TransformProjectBoundsGeom(struct br_geometr
 				renderer->state.cache.vertex_fns[i](renderer, vp_p, vp_map, vp_n, rend.vertex_colours[v], tvp->comp);
 		}
 }
-#endif
 
 /*
  * Transform, project and light visible vertices 

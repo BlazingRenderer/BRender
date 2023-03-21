@@ -6,7 +6,6 @@ make_h2inc(softrend "${CMAKE_CURRENT_SOURCE_DIR}/drv.h" "${CMAKE_CURRENT_BINARY_
 
 set(ASM_FILES
         gen_386.asm
-        geometry.asm
         face_386.asm
         subdiv.asm
 )
