@@ -582,7 +582,7 @@ static void GEOMETRY_CALL AddReplicateConstant(struct br_geometry *self, struct 
 {
    	if(rend.block->constant_mask == (1 << C_I)) {
 		PrimBlockAddBoth(renderer, (brp_render_fn *)OpTriangleReplicateConstantI);
-	} else if(rend.block->constant_mask == (1 << C_R)|(1 << C_G)|(1 << C_B)) {
+	} else if(rend.block->constant_mask == ((1 << C_R)|(1 << C_G)|(1 << C_B))) {
 		PrimBlockAddBoth(renderer, (brp_render_fn *)OpTriangleReplicateConstantRGB);
 	} else {
 		PrimBlockAddBoth(renderer, (brp_render_fn *)OpTriangleReplicateConstant);
