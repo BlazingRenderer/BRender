@@ -8,7 +8,6 @@ set(ASM_FILES
         cull.asm
         gen_386.asm
         geometry.asm
-        magicsym.asm
         v1m_386.asm
         face_386.asm
         subdiv.asm
