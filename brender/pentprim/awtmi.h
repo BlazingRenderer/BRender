@@ -198,14 +198,14 @@ FNAME(struct brp_block *block, union brp_vertex *a,union brp_vertex *b,union brp
     work.awsl.dsource = work.awsl.du_int*SBPP+work.texture.stride_b*dv_int;
     work.awsl.edge = &work.top;
 
-    ASSERT(work.awsl.source_current>=work.texture.base);
+    ASSERT((void*)work.awsl.source_current>=work.texture.base);
 
     TNAME();
 
     work.awsl.end = (char *)work.colour.base + high16(b->comp_x[C_SX])*DBPP+high16(b->comp_x[C_SY])*work.colour.stride_b;
     work.awsl.edge = &work.bot;
 
-    ASSERT(work.awsl.source_current>=work.texture.base);
+    ASSERT((void*)work.awsl.source_current>=work.texture.base);
 
     TNAME();
 }
