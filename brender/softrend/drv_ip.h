@@ -359,7 +359,6 @@ void BR_ASM_CALL OpHeapAddTriangleConvert(struct brp_block *block, brp_vertex *v
  * Platform dependant downcoded geometry support
  */
 #ifdef __386__
-#include "gen_386.h"
 #endif
 
 /* Rampant optimism ...

@@ -186,7 +186,6 @@ void SURFACE_CALL SurfaceMapGeometryMapShift(br_renderer *self,
 }
 #endif
 
-#ifndef OpTriangleMapQuad
 void BR_ASM_CALL OpTriangleMapQuad(struct brp_block *block, union brp_vertex *v0, union brp_vertex *v1, union brp_vertex *v2,
 	br_uint_16 (*fp_vertices)[3], br_uint_16 (*fp_edges)[3], br_vector4 *fp_eqn, struct temp_face *tfp)
 {
@@ -277,7 +276,6 @@ void BR_ASM_CALL OpTriangleMapQuad(struct brp_block *block, union brp_vertex *v0
 
 	block->chain->render(block->chain, v0,v1,v2, fp_vertices, fp_edges, fp_eqn, tfp);
 }
-#endif
 
 
 

@@ -6,7 +6,6 @@ make_h2inc(softrend "${CMAKE_CURRENT_SOURCE_DIR}/drv.h" "${CMAKE_CURRENT_BINARY_
 
 set(ASM_FILES
         gen_386.asm
-        face_386.asm
         subdiv.asm
 )
 set_source_files_properties(${ASM_FILES} PROPERTIES COMPILE_OPTIONS "-safeseh")
@@ -45,7 +44,6 @@ add_library(softrend STATIC
         device.h
         drv.h
         drv_ip.h
-        face_386.h
         gen_386.h
         gprim.h
         gv1buckt.h
