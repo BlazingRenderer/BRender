@@ -81,6 +81,52 @@ br_pixelmap *mkres_make_checkerboard_pixelmap(const char *name)
     return pm;
 }
 
+br_pixelmap *mkres_make_checkerboard8_pixelmap(const char *name)
+{
+    br_pixelmap *pal, *pm;
+    br_colour *col;
+    const int BLACK   = 1;
+    const int MAGENTA = 2;
+
+    /* Build the palette */
+    if((pal = BrPixelmapAllocate(BR_PMT_RGBX_888, 1, 256, NULL, 0)) == NULL)
+        return NULL;
+
+    BrSprintf(BrScratchString(), "%s (palette)", name);
+    pal->identifier = BrResStrDup(pal, BrScratchString());
+
+    /* NB: anything at index 0 is transparent. */
+    col = pal->pixels;
+    col[BLACK]   = BR_COLOUR_RGB(0x00, 0x00, 0x00);
+    col[MAGENTA] = BR_COLOUR_RGB(0xFF, 0x00, 0xFF);
+
+    /* Build the map. */
+    if((pm = BrPixelmapAllocate(BR_PMT_INDEX_8, 64, 64, NULL, 0)) == NULL)
+        return NULL;
+
+    pm->identifier = BrResStrDup(pm, name);
+    pm->map = pal;
+
+    for(br_int_32 j = 0; j < pm->height; ++j) {
+        for(br_int_32 i = 0; i < pm->width; ++i) {
+            if(j < pm->height / 2) {
+                if(i < pm->width / 2)
+                    BrPixelmapPixelSet(pm, i, j, BLACK);
+                else
+                    BrPixelmapPixelSet(pm, i, j, MAGENTA);
+            } else {
+                if(i < pm->width / 2)
+                    BrPixelmapPixelSet(pm, i, j, MAGENTA);
+                else
+                    BrPixelmapPixelSet(pm, i, j, BLACK);
+            }
+        }
+    }
+
+    BrMapAdd(pm);
+    return pm;
+}
+
 br_material *mkres_make_checkerboard_material(const char *name, br_pixelmap *pm)
 {
     br_material *mat;
