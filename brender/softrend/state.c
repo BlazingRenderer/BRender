@@ -21,17 +21,8 @@ BR_RCS_ID("$Id: state.c 1.6 1998/11/13 16:23:39 jon Exp $");
 #define Q BRTV_QUERY
 #define A BRTV_ALL
 
-#if BASED_FIXED
-#define AX BRTV_ALL
-#else 
 #define AX 0
-#endif
-
-#if BASED_FLOAT
 #define AF BRTV_ALL
-#else 
-#define AF 0
-#endif
 
 /*
  * Bits used for template masks to indicate actions when a template entry is triggered

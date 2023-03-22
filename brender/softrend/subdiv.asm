@@ -208,8 +208,7 @@ assume reg1:ptr dword
 	fstp dest				;
 endm
 
-ifdef BASED_FLOAT
-if BASED_FLOAT
+
 averageVerticesOnScreen proc renderer:dword, m0:dword, m1:dword, m2:dword, v0:dword, v1:dword, v2:dword
 	mov edi,v1
 	mov esi,v2
@@ -281,8 +280,6 @@ commonComponents:
 
 	ret
 averageVerticesOnScreen endp
-endif
-endif
 
 subdivideCheck proc uses ebx ecx edx,
 	v0 : ptr brp_vertex,
@@ -290,98 +287,6 @@ subdivideCheck proc uses ebx ecx edx,
 	v2 : ptr brp_vertex
 
 		assume eax: ptr brp_vertex, ebx: ptr brp_vertex, ecx: ptr brp_vertex
-
-	if BASED_FIXED
-
-	; Fetch the absolute values of the homogenous Zs
-	;
-	; 6-9 cycles + 0-12 cycles branch misprediction
-	;
-		mov		eax,v0
-		mov		ebx,v1
-
-		mov		ecx,v2
-		mov		eax,[eax].comp_f[C_Z*4]
-
-		mov		ebx,[ebx].comp_f[C_Z*4]
-		mov		ecx,[ecx].comp_f[C_Z*4]
-
-		test	eax,eax
-		jns		v0_zpos
-		
-		neg		eax
-v0_zpos:
-
-		test	ebx,ebx
-		jns		v1_zpos
-		
-		neg		ebx
-v1_zpos:
-
-		test	ecx,ecx
-		jns		v2_zpos
-		
-		neg		ecx
-v2_zpos:
-
-	; get the order
-	;
-	; 4
-	;
-		xor		edx,edx
-		cmp		ebx,eax
-
-		rcl		edx,1
-		cmp		ecx,eax
-
-		rcl		edx,1
-		cmp		ecx,ebx
-
-		rcl		edx,1
-
-    ; If the ratio of the smallest and largest Z is greater
-    ; than a threshold, then subdivide
-    ;
-	; 17 + 0/4
-	;
-		fild	rend.subdivide_threshold	;	t
-
-		mov		eax,sort_table_2[edx*4]
-		mov		ebx,sort_table_0[edx*4]
-
-		mov		eax,[v0+eax]
-		mov		ebx,[v0+ebx]
-
-		fild	[eax].comp_f[C_Z*4]			;	zmax	t
-		fild	[ebx].comp_f[C_Z*4]			;	zmin	zmax	t
-		fxch	st(1)						;	zmax	zmin	t
-		fmulp	st(2),st(0)					;	zmin	zmax*t
-
-		fmul	fp_one_fixed				;	zmin*1	zmax*t
-		 fxch	st(1)						;	zmax*t	zmin*1
-
-		fstp	temp
-		fstp	temp2
-
-		mov		eax,temp
-		mov		ebx,temp2
-
-		and		eax,07fffffffh
-		and		ebx,07fffffffh
-
-		cmp		eax,ebx
-		jge		subdivide
-
-		mov		eax,BR_FALSE
-		ret
-
-subdivide:	
-		mov		eax,BR_TRUE
-		ret
-
-	endif	; BASED_FIXED
-
-	if BASED_FLOAT
 
 	; Sort the vertices in order of absolute value of homogeneous Z values
 	;
@@ -441,13 +346,9 @@ subdivide:
 		mov		eax,BR_TRUE
 		ret
 
-	endif	; BASED_FLOAT
-
 subdivideCheck endp
 
 
-ifdef BASED_FLOAT
-if BASED_FLOAT
 averageVertices proc renderer:dword, m0:dword, m1:dword, m2:dword, v0:dword, v1:dword, v2:dword
 ; There are a few probs with this code
 ; 1) Untested with user defined clip planes.
@@ -618,8 +519,7 @@ selectiveProjection:
 	TEST_AND_PROJECT_VERTEX ecx
 	ret
 averageVertices endp
-endif 
-endif
+
 
 .data
 
@@ -673,13 +573,9 @@ name&Table	dword OUTCODE_&gENameUCase or OUTCODE_N_&gENameUCase
 	dword 0
 endm
 
-ifdef BASED_FLOAT
-if BASED_FLOAT
         OUTCODE_TABLE rightLeft,RIGHT,LEFT
         OUTCODE_TABLE topBottom,TOP,BOTTOM
         OUTCODE_TABLE hitherYon,HITHER,YON
-endif
-endif
 
 
 end

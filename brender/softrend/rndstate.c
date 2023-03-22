@@ -385,18 +385,6 @@ br_error StateCopy(struct state_all *dest, struct state_all *src, br_uint_32 cop
 /*
  * Convertions routines for matrices fixed<->float
  */
-#if BASED_FIXED
-static void convertM34FloatToFixed(br_matrix34_x *dest, br_matrix34_f *src)
-{
-	int i,j;
-
-	for(i=0; i < 4; i++)
-		for(j=0; j < 3; j++)
-			dest->m[i][j] = BrFloatToFixed(src->m[i][j]);
-}
-#endif
-
-#if BASED_FLOAT
 static void convertM34FixedToFloat(br_matrix34_f *dest, br_matrix34_x *src)
 {
 	int i,j;
@@ -405,20 +393,12 @@ static void convertM34FixedToFloat(br_matrix34_f *dest, br_matrix34_x *src)
 		for(j=0; j < 3; j++)
 			dest->m[i][j] = BrFixedToFloat(src->m[i][j]);
 }
-#endif
 
 /*
  * Special case state manipulation for ease of use
  */
-
-#if BASED_FIXED
-br_error BR_CMETHOD_DECL(br_renderer_soft,modelMulX)
-		(struct br_renderer *self, br_matrix34_x *m)
-#endif
-#if BASED_FLOAT
 br_error BR_CMETHOD_DECL(br_renderer_soft,modelMulF)
 		(struct br_renderer *self, br_matrix34_f *m)
-#endif
 {
 	br_matrix34 om = self->state.matrix.model_to_view;
 
@@ -431,17 +411,9 @@ br_error BR_CMETHOD_DECL(br_renderer_soft,modelMulF)
 	return BRE_OK;
 }
 
-#if BASED_FIXED
-br_error BR_CMETHOD_DECL(br_renderer_soft,modelMulF)
-		(struct br_renderer *self, br_matrix34_f *m)
-#define CONV(d,s) convertM34FloatToFixed((br_matrix34_x *)(d),(br_matrix34_f *)(s))
-#endif
-
-#if BASED_FLOAT
 br_error BR_CMETHOD_DECL(br_renderer_soft,modelMulX)
 		(struct br_renderer *self, br_matrix34_x *m)
 #define CONV(d,s) convertM34FixedToFloat((br_matrix34_f *)(d),(br_matrix34_x *)(s))
-#endif
 {
 	br_matrix34 om = self->state.matrix.model_to_view;
 	br_matrix34 cm;
@@ -457,14 +429,8 @@ br_error BR_CMETHOD_DECL(br_renderer_soft,modelMulX)
 	return BRE_OK;
 }
 
-#if BASED_FIXED
-br_error BR_CMETHOD_DECL(br_renderer_soft,modelPopPushMulF)
-		(struct br_renderer *self, br_matrix34_f *m)
-#endif
-#if BASED_FLOAT
 br_error BR_CMETHOD_DECL(br_renderer_soft,modelPopPushMulX)
 		(struct br_renderer *self, br_matrix34_x *m)
-#endif
 {
 	br_matrix34 cm;
 	
@@ -485,14 +451,8 @@ br_error BR_CMETHOD_DECL(br_renderer_soft,modelPopPushMulX)
 	return BRE_OK;
 }
 
-#if BASED_FIXED
-br_error BR_CMETHOD_DECL(br_renderer_soft,modelPopPushMulX)
-		(struct br_renderer *self, br_matrix34_x *m)
-#endif
-#if BASED_FLOAT
 br_error BR_CMETHOD_DECL(br_renderer_soft,modelPopPushMulF)
 		(struct br_renderer *self, br_matrix34_f *m)
-#endif
 {
 	if(self->stack_top == 0)
 		return BRE_UNDERFLOW;
@@ -562,19 +522,6 @@ br_error BR_CMETHOD_DECL(br_renderer_soft,statePop)
 /*
  * Convertions routines for bounds fixed<->float
  */
-#if BASED_FIXED
-static void convertBounds3FloatToFixed(br_bounds3_x *dest, br_bounds3_f *src)
-{
-	int i;
-
-	for(i=0; i < 3; i++) {
-		dest->min.v[i] = BrFloatToFixed(src->min.v[i]);
-		dest->max.v[i] = BrFloatToFixed(src->max.v[i]);
-	}
-}
-#endif
-
-#if BASED_FLOAT
 static void convertBounds3FixedToFloat(br_bounds3_f *dest, br_bounds3_x *src)
 {
 	int i;
@@ -584,18 +531,10 @@ static void convertBounds3FixedToFloat(br_bounds3_f *dest, br_bounds3_x *src)
 		dest->max.v[i] = BrFixedToFloat(src->max.v[i]);
 	}
 }
-#endif
 
-#if BASED_FIXED
-br_error BR_CMETHOD_DECL(br_renderer_soft,boundsTestF)
-	(struct br_renderer *self, br_token *r, br_bounds3_f *bounds_in)
-#define BOUNDS_CONV(a,b) convertBounds3FloatToFixed((struct br_bounds3_x *)(a),(struct br_bounds3_f *)(b))
-#endif
-#if BASED_FLOAT
 br_error BR_CMETHOD_DECL(br_renderer_soft,boundsTestX)
 	(struct br_renderer *self, br_token *r, br_bounds3_x *bounds_in)
 #define BOUNDS_CONV(a,b) convertBounds3FixedToFloat((struct br_bounds3_f *)(a),(struct br_bounds3_x *)(b))
-#endif
 {
 	br_bounds3 bounds;
 
@@ -610,14 +549,8 @@ br_error BR_CMETHOD_DECL(br_renderer_soft,boundsTestX)
 	return BRE_OK;
 }
 
-#if BASED_FIXED
-br_error BR_CMETHOD_DECL(br_renderer_soft,boundsTestX)
-	(struct br_renderer *self, br_token *r, br_bounds3_x *bounds)
-#endif
-#if BASED_FLOAT
 br_error BR_CMETHOD_DECL(br_renderer_soft,boundsTestF)
 	(struct br_renderer *self, br_token *r, br_bounds3_f *bounds)
-#endif
 {
 	/*
 	 * XXX Cache check

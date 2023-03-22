@@ -174,18 +174,6 @@ void SURFACE_CALL SurfaceMapGeometryMapCopy(br_renderer *self,
 	comp[C_V] = map->v[1];
 }
 
-#if BASED_FIXED
-/*
- * Take U,V from vertex, assumeing offset == 0 and scales are a power of 2
- */
-void SURFACE_CALL SurfaceMapGeometryMapShift(br_renderer *self,
-	br_vector3 *p, br_vector2 *map, br_vector3 *n, br_colour colour, br_scalar *comp)
-{
-	comp[C_U] = (map->v[0] << self->state.cache.u_shift) + self->state.cache.map_transform.m[2][0];
-	comp[C_V] = (map->v[1] << self->state.cache.v_shift) + self->state.cache.map_transform.m[2][1];
-}
-#endif
-
 void BR_ASM_CALL OpTriangleMapQuad(struct brp_block *block, union brp_vertex *v0, union brp_vertex *v1, union brp_vertex *v2,
 	br_uint_16 (*fp_vertices)[3], br_uint_16 (*fp_edges)[3], br_vector4 *fp_eqn, struct temp_face *tfp)
 {

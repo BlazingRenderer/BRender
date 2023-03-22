@@ -113,13 +113,7 @@
 /*
  * Given dist, calculates attn
  */
-#if BASED_FIXED
-#define DIST_SQR(a) ((a) >= BR_SCALAR(180.0)? BR_SCALAR(32767.0): BR_SQR(a))
-#endif
-
-#if BASED_FLOAT
 #define DIST_SQR(a) BR_SQR(a)
-#endif
 
 #define CALCULATE_ATTENUATION() do {				\
 	br_scalar dist2 = DIST_SQR(dist);				\

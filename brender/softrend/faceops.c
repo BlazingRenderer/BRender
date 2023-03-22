@@ -347,70 +347,13 @@ void BR_ASM_CALL OpLineClip(struct brp_block *block, brp_vertex *v0, brp_vertex 
 /**
  ** Triangle subdivision
  **/
-#if BASED_FIXED
-void BR_ASM_CALL averageVertices(struct br_renderer *renderer, brp_vertex *dest, brp_vertex *src1, brp_vertex *src2);
-void BR_ASM_CALL averageVerticesOnScreen(struct br_renderer *renderer, brp_vertex *dest, brp_vertex *src1, brp_vertex *src2);
-#else
 void BR_ASM_CALL averageVerticesOnScreen(struct br_renderer *renderer, brp_vertex *dest1, brp_vertex *dest2, brp_vertex *dest3, brp_vertex *src1, brp_vertex *src2, brp_vertex *src3);
 void BR_ASM_CALL averageVertices(struct br_renderer *renderer, brp_vertex *dest1, brp_vertex *dest2, brp_vertex *dest3, brp_vertex *src1, brp_vertex *src2, brp_vertex *src3);
-#endif
+
 br_boolean BR_ASM_CALL subdivideCheck(brp_vertex *v0, brp_vertex *v1, brp_vertex *v2);
 /*
  * Find and project midpoint of two vertices
  */
-
-#if BASED_FIXED
-void BR_ASM_CALL averageVertices(struct br_renderer *renderer, brp_vertex *dest, brp_vertex *src1, brp_vertex *src2)
-{
-    dest->comp[C_X] = BR_CONST_DIV(BR_ADD(src1->comp[C_X], src2->comp[C_X]),2);
-    dest->comp[C_Y] = BR_CONST_DIV(BR_ADD(src1->comp[C_Y], src2->comp[C_Y]),2);
-
-    dest->comp[C_Z] = BR_CONST_DIV(BR_ADD(src1->comp[C_Z], src2->comp[C_Z]),2);
-    dest->comp[C_W] = BR_CONST_DIV(BR_ADD(src1->comp[C_W], src2->comp[C_W]),2);
-
-    dest->comp[C_U] = BR_CONST_DIV(BR_ADD(src1->comp[C_U], src2->comp[C_U]),2);
-    dest->comp[C_V] = BR_CONST_DIV(BR_ADD(src1->comp[C_V], src2->comp[C_V]),2);
-
-    dest->comp[C_I] = BR_CONST_DIV(BR_ADD(src1->comp[C_I], src2->comp[C_I]),2);
-    dest->comp[C_R] = BR_CONST_DIV(BR_ADD(src1->comp[C_R], src2->comp[C_R]),2);
-
-    dest->comp[C_G] = BR_CONST_DIV(BR_ADD(src1->comp[C_G], src2->comp[C_G]),2);
-    dest->comp[C_B] = BR_CONST_DIV(BR_ADD(src1->comp[C_B], src2->comp[C_B]),2);
-
-    dest->flags = OUTCODES_NOT;
-
-   	OUTCODE_POINT(dest->flags, (br_vector4 *)(dest->comp+C_X));
-
-	if(!(dest->flags & OUTCODES_ALL)) {
-        PROJECT_VERTEX_WRITE_Q(dest,dest->comp[C_X],dest->comp[C_Y],dest->comp[C_Z],dest->comp[C_W]);
-    }
-}
-#endif
-
-#if BASED_FIXED
-/*
- * Find and project midpoint of two vertices - on screen case
- */
-STATIC void BR_ASM_CALL averageVerticesOnScreen(struct br_renderer *renderer, brp_vertex *dest, brp_vertex *src1, brp_vertex *src2)
-{
-    dest->comp[C_X] = BR_CONST_DIV(BR_ADD(src1->comp[C_X], src2->comp[C_X]),2);
-    dest->comp[C_Y] = BR_CONST_DIV(BR_ADD(src1->comp[C_Y], src2->comp[C_Y]),2);
-
-    dest->comp[C_Z] = BR_CONST_DIV(BR_ADD(src1->comp[C_Z], src2->comp[C_Z]),2);
-    dest->comp[C_W] = BR_CONST_DIV(BR_ADD(src1->comp[C_W], src2->comp[C_W]),2);
-
-    dest->comp[C_U] = BR_CONST_DIV(BR_ADD(src1->comp[C_U], src2->comp[C_U]),2);
-    dest->comp[C_V] = BR_CONST_DIV(BR_ADD(src1->comp[C_V], src2->comp[C_V]),2);
-
-    dest->comp[C_I] = BR_CONST_DIV(BR_ADD(src1->comp[C_I], src2->comp[C_I]),2);
-    dest->comp[C_R] = BR_CONST_DIV(BR_ADD(src1->comp[C_R], src2->comp[C_R]),2);
-
-    dest->comp[C_G] = BR_CONST_DIV(BR_ADD(src1->comp[C_G], src2->comp[C_G]),2);
-    dest->comp[C_B] = BR_CONST_DIV(BR_ADD(src1->comp[C_B], src2->comp[C_B]),2);
-
-    PROJECT_VERTEX_WRITE_Q(dest,dest->comp[C_X],dest->comp[C_Y],dest->comp[C_Z],dest->comp[C_W]);
-}
-#endif
 
 /*
  * Test for whether a face should be subdivided
@@ -534,13 +477,8 @@ static void triangleSubdivideOnScreen(int depth, struct brp_block *block, brp_ve
         /*
          * Subdivide edges and reproject
          */
-#if BASED_FIXED
-		averageVerticesOnScreen(rend.renderer, &mid0, v0, v1);
-        averageVerticesOnScreen(rend.renderer, &mid1, v1, v2);
-        averageVerticesOnScreen(rend.renderer, &mid2, v2, v0);
-#else
 		averageVerticesOnScreen(rend.renderer,&mid1,&mid2,&mid0,v0,v1,v2);
-#endif
+
         triangleSubdivideOnScreen(depth-1, block, &mid0, &mid1, &mid2, fp_vertices, fp_edges, fp_eqn, tfp);
         triangleSubdivideOnScreen(depth-1, block, v0, &mid0, &mid2, fp_vertices, fp_edges, fp_eqn, tfp);
         triangleSubdivideOnScreen(depth-1, block, v1, &mid1, &mid0, fp_vertices, fp_edges, fp_eqn, tfp);
@@ -563,13 +501,7 @@ static void triangleSubdivideCheck(int depth, struct brp_block *block, brp_verte
         /*
          * Subdivide edges and reproject
          */
-#if BASED_FIXED
-		averageVertices(rend.renderer, &mid0, v0, v1);
-        averageVertices(rend.renderer, &mid1, v1, v2);
-        averageVertices(rend.renderer, &mid2, v2, v0);
-#else
 		averageVertices(rend.renderer,&mid1,&mid2,&mid0,v0,v1,v2);
-#endif
 
         triangleSubdivide(depth-1, block, &mid0, &mid1, &mid2, fp_vertices, fp_edges, fp_eqn, tfp);
         triangleSubdivide(depth-1, block, v0, &mid0, &mid2, fp_vertices, fp_edges, fp_eqn, tfp);

@@ -15,14 +15,8 @@
 
 BR_RCS_ID("$Id: driver.c 1.1 1997/12/10 16:51:45 jon Exp $");
 
-#if BASED_FIXED
-#define SHORT_SUFFIX "RNDX"
-#define LONG_SUFFIX "-Fixed"
-#endif
-#if BASED_FLOAT
 #define SHORT_SUFFIX "RNDF"
 #define LONG_SUFFIX "-Float"
-#endif
 
 /*
  * Driver-wide timestamp - the only static variable

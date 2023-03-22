@@ -127,17 +127,8 @@ static struct br_tv_custom customPartsConv = {
 #define _Q BRTV_QUERY
 #define _A BRTV_ALL
 
-#if BASED_FIXED
-#define _AX BRTV_ALL
-#else 
 #define _AX 0
-#endif
-
-#if BASED_FLOAT
 #define _AF BRTV_ALL
-#else 
-#define _AF 0
-#endif
 
 static struct br_tv_template_entry rendererTemplateEntries[] = {
 	{BRT(IDENTIFIER_CSTR),		F(identifier),				_Q | _A,	BRTV_CONV_COPY, },

@@ -168,27 +168,11 @@ typedef struct static_cache {
 	 */
 	br_matrix4 model_to_viewport;
 
-#if BASED_FIXED
-	/*
-	 * High words of bottom row of matrix
-	 */
-	br_scalar model_to_viewport_hi[4];
-#endif
-
 	/*
 	 * Combined surface colour & opacity
 	 */
 	br_colour colour;
 
-#if BASED_FIXED
-	br_uint_32	loop_count;
-
-	/*
-	 * Local copies of X,Y,Z scale and offset for ASM transform & project
-	 */
-	br_scalar	scale_x,scale_y,scale_z;
-	br_scalar	offset_x,offset_y,offset_z;
-#endif
 	/*
 	 * Local copy of bounds
 	 */
@@ -270,7 +254,6 @@ extern _static_cache BR_ASM_DATA scache;
 /*
  * Generic macro for projecting a vertex from homogenous coordinates
  */
-#if BASED_FLOAT
 #define PROJECT_VERTEX(tvp,sx,sy,sz,sw)										\
 	{																		\
 		br_scalar q = BR_DIV(S1,(sw));											\
@@ -298,38 +281,6 @@ extern _static_cache BR_ASM_DATA scache;
 			BR_MUL(renderer->state.cache.comp_scales[C_SZ],					\
 				BR_MUL((sz),(tvp)->comp[C_Q]));								\
 	}
-#endif
-
-/*
- * Fixed point versions do not multiply by Q because of possible accuracy problems
- * N.B. Writing out a fixed point Q is not very accurate so I write out a float
- * and convert to a fixed if necessary (unlikely)
- */
-#if BASED_FIXED
-#define PROJECT_VERTEX(tvp,sx,sy,sz,sw)										\
-	{																		\
-		(tvp)->comp[C_SX] = renderer->state.cache.comp_offsets[C_SX] +		\
-			BR_MULDIV(renderer->state.cache.comp_scales[C_SX],(sx),(sw));	\
-		(tvp)->comp[C_SY] = renderer->state.cache.comp_offsets[C_SY] +		\
-			BR_MULDIV(renderer->state.cache.comp_scales[C_SY],(sy),(sw));	\
-		(tvp)->comp[C_SZ] = renderer->state.cache.comp_offsets[C_SZ] +		\
-			BR_MULDIV(renderer->state.cache.comp_scales[C_SZ],(sz),(sw));	\
-	}
-
-#define PROJECT_VERTEX_WRITE_Q(tvp,sx,sy,sz,sw)								\
-	{																		\
-		(tvp)->comp_f[C_Q] = 1.0f / BrScalarToFloat(sw);						\
-		(tvp)->comp[C_SX] = renderer->state.cache.comp_offsets[C_SX] +		\
-			BR_MUL(renderer->state.cache.comp_scales[C_SX],					\
-				BrFloatToScalar(BrScalarToFloat(sx) * (tvp)->comp_f[C_Q]));	\
-		(tvp)->comp[C_SY] = renderer->state.cache.comp_offsets[C_SY] +		\
-			BR_MUL(renderer->state.cache.comp_scales[C_SY],					\
-				BrFloatToScalar(BrScalarToFloat(sy) * (tvp)->comp_f[C_Q]));	\
-		(tvp)->comp[C_SZ] = renderer->state.cache.comp_offsets[C_SZ] +		\
-			BR_MUL(renderer->state.cache.comp_scales[C_SZ],					\
-				BrFloatToScalar(BrScalarToFloat(sz) * (tvp)->comp_f[C_Q]));	\
-	}
-#endif
 
 /*
  * Transform into screen space - Inline expanded BrMatrix4ApplyP()

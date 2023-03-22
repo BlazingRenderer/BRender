@@ -823,27 +823,6 @@ static br_boolean sphereIntersectsCone(br_scalar sphere_radius, br_vector3 *cone
 	return axis_dot > BR_COS(sphere_angle + cone_angle);
 }
 
-
-/*
- * Build the tables of functions that evaluate per-vertex and per-primitive components
- */
-#if BASED_FIXED
-static br_boolean isPowerof2(br_int_32 x)
-{
-	return !((x-1) & x);
-}
-
-static br_uint_8 findShift(br_int_32 x)
-{
-	br_uint_8 b;
-
-	for(b=0; x; b++)
-		x /= 2;
-
-	return b;
-}
-#endif
-
 br_int_32 GenerateSurfaceFunctions(br_renderer *self, surface_fn **fns, br_uint_32 mask)
 {
 	br_int_32 f = 0;
@@ -880,22 +859,6 @@ br_int_32 GenerateSurfaceFunctions(br_renderer *self, surface_fn **fns, br_uint_
 				if(m->m[2][0] == BR_SCALAR(0) &&
 				   m->m[2][1] == BR_SCALAR(0))
 					fns[f-1] = SurfaceMapGeometryMapScale;
-
-#if BASED_FIXED
-				/*
-				 * Spot case where shifts can be used
-				 */
-				if( m->m[0][0] > BR_SCALAR(1) &&
-                	m->m[1][1] > BR_SCALAR(1) &&
-					isPowerof2(m->m[0][0]) &&
-					isPowerof2(m->m[1][1])) {
-
-					self->state.cache.u_shift = findShift(m->m[0][0]) - 17;
-					self->state.cache.v_shift = findShift(m->m[1][1]) - 17;
-
-					fns[f-1] = SurfaceMapGeometryMapShift;
-				}
-#endif
 
 				/*
 				 * Spot identity transform

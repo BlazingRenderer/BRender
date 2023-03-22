@@ -479,13 +479,7 @@ void GEOMETRY_CALL V1Face_OSV_Render(struct br_geometry *self, struct br_rendere
 	}
 }
 
-#if BASED_FIXED
-#define CONVERT_MASK_OTHER convert_mask_f
-#endif
-
-#if BASED_FLOAT
 #define CONVERT_MASK_OTHER convert_mask_x
-#endif
 
 /*
  * Select initial culling operations
@@ -589,14 +583,7 @@ static void GEOMETRY_CALL V1Faces_GeometryFnsUpdate(struct br_geometry *self, st
 	 * Divert primitives to order table if required
 	 */
 	if(divert) {
-#if BASED_FLOAT
 		if(rend.block->convert_mask_i || rend.block->convert_mask_x) {
-#endif
-#if BASED_FIXED
-		if ((rend.block->constant_components | rend.block->vertex_components) & CM_Q?
-			rend.block->convert_mask_i || (rend.block->convert_mask_f & ~(1 << C_Q)) || (rend.block->convert_mask_x & (1 << C_Q)):
-			rend.block->convert_mask_i || rend.block->convert_mask_f) {
-#endif
 			switch(rend.block->type) {
 			case BRT_POINT:
 				PrimBlockAddBoth(renderer, (brp_render_fn *)OpHeapAddPointConvert);
@@ -626,14 +613,7 @@ static void GEOMETRY_CALL V1Faces_GeometryFnsUpdate(struct br_geometry *self, st
 		/*
 		 * Convertion of parameters
 		 */
-#if BASED_FLOAT
 		if(rend.block->convert_mask_i || rend.block->convert_mask_x) {
-#endif
-#if BASED_FIXED
-		if ((rend.block->constant_components | rend.block->vertex_components) & CM_Q?
-			rend.block->convert_mask_i || (rend.block->convert_mask_f & ~(1 << C_Q)) || (rend.block->convert_mask_x & (1 << C_Q)):
-			rend.block->convert_mask_i || rend.block->convert_mask_f) {
-#endif
 			switch(rend.block->type) {
 			case BRT_POINT:
 				PrimBlockAddBoth(renderer, (brp_render_fn *)RenderConvert1);
@@ -872,19 +852,6 @@ static br_error V1Model_Render
 			renderer->state.timestamp_cache = Timestamp();
 		}
 
-#if BASED_FIXED
-		if(on_screen) {
-			scache.scale_x = renderer->state.cache.comp_scales[C_SX];
-			scache.scale_y = renderer->state.cache.comp_scales[C_SY];
-			scache.scale_z = renderer->state.cache.comp_scales[C_SZ];
-
-			scache.offset_x = renderer->state.cache.comp_offsets[C_SX];
-			scache.offset_y = renderer->state.cache.comp_offsets[C_SY];
-			scache.offset_z = renderer->state.cache.comp_offsets[C_SZ];
-
-			ModelToViewportUpdate();
-		}
-#endif
 		/*
 		 * Invoke the current set of renderer functions on the group
 		 */
