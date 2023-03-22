@@ -66,6 +66,21 @@ br_pixelmap *mkres_make_checkerboard8_pixelmap(const char *name)
     return pm;
 }
 
+br_pixelmap *mkres_make_checkerboard24_pixelmap(const char *name)
+{
+    br_pixelmap *pm;
+
+    if((pm = BrPixelmapAllocate(BR_PMT_RGB_888, 64, 64, NULL, 0)) == NULL)
+        return NULL;
+
+    pm->identifier = BrResStrDup(pm, name);
+
+    make_board(pm, BR_COLOUR_RGB(0, 0, 0), BR_COLOUR_RGB(0xFF, 0x00, 0xFF));
+
+    BrMapAdd(pm);
+    return pm;
+}
+
 br_material *mkres_make_checkerboard_material(const char *name, br_pixelmap *pm)
 {
     br_material *mat;

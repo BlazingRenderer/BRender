@@ -3,14 +3,15 @@
 
 br_pixelmap *mkres_make_checkerboard_pixelmap(const char *name);
 br_pixelmap *mkres_make_checkerboard8_pixelmap(const char *name);
+br_pixelmap *mkres_make_checkerboard24_pixelmap(const char *name);
 br_material *mkres_make_checkerboard_material(const char *name, br_pixelmap *pm);
 br_model *mkres_make_quad(const char *name);
 br_model *mkres_make_cube(const char *name);
 
 int main(int argc, char **argv)
 {
-    br_pixelmap *pm_checkerboard, *pm_checkerboard8;
-    br_material *mat_checkerboard, *mat_checkerboard8;
+    br_pixelmap *pm_checkerboard, *pm_checkerboard8, *pm_checkerboard24;
+    br_material *mat_checkerboard, *mat_checkerboard8, *mat_checkerboard24;
     br_model    *mdl_quad, *mdl_cube;
     int ret = 1;
 
@@ -26,6 +27,11 @@ int main(int argc, char **argv)
         goto done;
     }
 
+    if((pm_checkerboard24 = mkres_make_checkerboard24_pixelmap("checkerboard24.pix")) == NULL) {
+        fprintf(stderr, "failed to allocate checkerboard24 pixelmap\n");
+        goto done;
+    }
+
     if((mat_checkerboard = mkres_make_checkerboard_material("checkerboard.mat", pm_checkerboard)) == NULL) {
         fprintf(stderr, "failed to allocate checkboard material\n");
         goto done;
@@ -33,6 +39,11 @@ int main(int argc, char **argv)
 
     if((mat_checkerboard8 = mkres_make_checkerboard_material("checkerboard8.mat", pm_checkerboard8)) == NULL) {
         fprintf(stderr, "failed to allocate checkboard8 material\n");
+        goto done;
+    }
+
+    if((mat_checkerboard24 = mkres_make_checkerboard_material("checkerboard24.mat", pm_checkerboard24)) == NULL) {
+        fprintf(stderr, "failed to allocate checkboard24 material\n");
         goto done;
     }
 
@@ -50,8 +61,10 @@ int main(int argc, char **argv)
     BrModelSave("quad.dat", mdl_quad);
     BrPixelmapSave("checkerboard.pix", pm_checkerboard);
     BrPixelmapSave("checkerboard8.pix", pm_checkerboard8);
+    BrPixelmapSave("checkerboard24.pix", pm_checkerboard24);
     BrMaterialSave("checkerboard.mat", mat_checkerboard);
     BrMaterialSave("checkerboard8.mat", mat_checkerboard8);
+    BrMaterialSave("checkerboard24.mat", mat_checkerboard24);
 
     ret = 0;
 done:
