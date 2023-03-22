@@ -286,65 +286,65 @@ subdivideCheck proc uses ebx ecx edx,
 	v1 : ptr brp_vertex,
 	v2 : ptr brp_vertex
 
-		assume eax: ptr brp_vertex, ebx: ptr brp_vertex, ecx: ptr brp_vertex
+	assume eax: ptr brp_vertex, ebx: ptr brp_vertex, ecx: ptr brp_vertex
 
 	; Sort the vertices in order of absolute value of homogeneous Z values
 	;
-		mov		eax,v0
-		mov		ebx,v1
+	mov		eax,v0
+	mov		ebx,v1
 
-		mov		ecx,v2
-		mov		eax,[eax].comp_f[C_Z*4]
+	mov		ecx,v2
+	mov		eax,[eax].comp_f[C_Z*4]
 
-		mov		ebx,[ebx].comp_f[C_Z*4]
-		mov		ecx,[ecx].comp_f[C_Z*4]
+	mov		ebx,[ebx].comp_f[C_Z*4]
+	mov		ecx,[ecx].comp_f[C_Z*4]
 
-		and		eax,07fffffffh
-		and		ebx,07fffffffh
+	and		eax,07fffffffh
+	and		ebx,07fffffffh
 
-		and		ecx,07fffffffh
+	and		ecx,07fffffffh
 
-		xor		edx,edx
-		cmp		ebx,eax
+	xor		edx,edx
+	cmp		ebx,eax
 
-		rcl		edx,1
-		cmp		ecx,eax
+	rcl		edx,1
+	cmp		ecx,eax
 
-		rcl		edx,1
-		cmp		ecx,ebx
+	rcl		edx,1
+	cmp		ecx,ebx
 
-		rcl		edx,1
+	rcl		edx,1
 
     ; If the ratio of the smallest and largest Z is greater
     ; than a threshold, then subdivide
     ;
-		fld		rend.subdivide_threshold
+	fld		rend.subdivide_threshold
 
-		mov		eax,sort_table_2[edx*4]
-		mov		ebx,sort_table_0[edx*4]
+	mov		eax,sort_table_2[edx*4]
+	mov		ebx,sort_table_0[edx*4]
 
-		mov		eax,[v0+eax]
-		mov		ebx,[v0+ebx]
+	mov		eax,[v0+eax]
+	mov		ebx,[v0+ebx]
 
-		fmul	[eax].comp_f[C_Z*4]
+	fmul	[eax].comp_f[C_Z*4]
 
-		fstp	temp
+	fstp	temp
 
-		mov		eax,temp
-		mov		ebx,[ebx].comp_f[C_Z*4]
+	mov		eax,temp
+	mov		ebx,[ebx].comp_f[C_Z*4]
 
-		and		eax,07fffffffh
-		and		ebx,07fffffffh
+	and		eax,07fffffffh
+	and		ebx,07fffffffh
 
-		cmp		eax,ebx
-		jge		subdivide
+	cmp		eax,ebx
+	jge		subdivide
 
-		mov		eax,BR_FALSE
-		ret
+	mov		eax,BR_FALSE
+	ret
 
 subdivide:	
-		mov		eax,BR_TRUE
-		ret
+	mov		eax,BR_TRUE
+	ret
 
 subdivideCheck endp
 
@@ -573,9 +573,9 @@ name&Table	dword OUTCODE_&gENameUCase or OUTCODE_N_&gENameUCase
 	dword 0
 endm
 
-        OUTCODE_TABLE rightLeft,RIGHT,LEFT
-        OUTCODE_TABLE topBottom,TOP,BOTTOM
-        OUTCODE_TABLE hitherYon,HITHER,YON
+OUTCODE_TABLE rightLeft,RIGHT,LEFT
+OUTCODE_TABLE topBottom,TOP,BOTTOM
+OUTCODE_TABLE hitherYon,HITHER,YON
 
 
 end
