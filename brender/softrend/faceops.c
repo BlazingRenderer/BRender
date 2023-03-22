@@ -361,7 +361,6 @@ br_boolean BR_ASM_CALL subdivideCheck(brp_vertex *v0, brp_vertex *v1, brp_vertex
 #define SUBDIVIDE_THRESHOLD BR_SCALAR(0.9)
 
 
-#if 0
 static br_boolean subdivideCheck(brp_vertex *v0, brp_vertex *v1, brp_vertex *v2)
 {
 #if 0
@@ -420,7 +419,6 @@ static br_boolean subdivideCheck(brp_vertex *v0, brp_vertex *v1, brp_vertex *v2)
 
     return BR_TRUE;
 }
-#endif
 
 
 /*
