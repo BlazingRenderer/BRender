@@ -9,8 +9,7 @@ static void make_board(br_pixelmap *pm, br_uint_32 black, br_uint_32 magenta)
                     BrPixelmapPixelSet(pm, i, j, black);
                 else
                     BrPixelmapPixelSet(pm, i, j, magenta);
-            }
-            else {
+            } else {
                 if(i < pm->width / 2)
                     BrPixelmapPixelSet(pm, i, j, magenta);
                 else
@@ -38,9 +37,9 @@ br_pixelmap *mkres_make_checkerboard_pixelmap(const char *name)
 br_pixelmap *mkres_make_checkerboard8_pixelmap(const char *name)
 {
     br_pixelmap *pal, *pm;
-    br_colour *col;
-    const int BLACK   = 1;
-    const int MAGENTA = 2;
+    br_colour   *col;
+    const int    BLACK   = 1;
+    const int    MAGENTA = 2;
 
     /* Build the palette */
     if((pal = BrPixelmapAllocate(BR_PMT_RGBX_888, 1, 256, NULL, 0)) == NULL)
@@ -50,7 +49,7 @@ br_pixelmap *mkres_make_checkerboard8_pixelmap(const char *name)
     pal->identifier = BrResStrDup(pal, BrScratchString());
 
     /* NB: anything at index 0 is transparent. */
-    col = pal->pixels;
+    col          = pal->pixels;
     col[BLACK]   = BR_COLOUR_RGB(0x00, 0x00, 0x00);
     col[MAGENTA] = BR_COLOUR_RGB(0xFF, 0x00, 0xFF);
 
@@ -59,7 +58,7 @@ br_pixelmap *mkres_make_checkerboard8_pixelmap(const char *name)
         return NULL;
 
     pm->identifier = BrResStrDup(pm, name);
-    pm->map = pal;
+    pm->map        = pal;
 
     make_board(pm, BLACK, MAGENTA);
 
