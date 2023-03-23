@@ -26,5 +26,5 @@ if(target_type STREQUAL STATIC_LIBRARY)
     target_compile_definitions(ddraw PRIVATE -DBrDrv1Begin=BrDrv1DirectDrawBegin)
 endif()
 
-target_link_libraries(ddraw v1db)
+target_link_libraries(ddraw v1db dxguid)
 set_property(TARGET ddraw PROPERTY FOLDER ${BRENDER_FOLDER})
