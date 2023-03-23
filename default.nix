@@ -28,8 +28,10 @@ stdenv.mkDerivation rec {
       cp tools/$i/$i${binExtension} $out/bin
     done
 
-    for i in mkres robot cube devpmtest; do
-      cp examples/$i/$i${binExtension} $out/bin
+    for i in mkres robot cube devpmtest ddrawtest; do
+      if [[ -e examples/$i/$i${binExtension} ]]; then
+        cp examples/$i/$i${binExtension} $out/bin
+      fi
     done
 
     cp ${src}/examples/robot/dat/* $out/share/brender-samples/robot
