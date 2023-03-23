@@ -177,7 +177,7 @@ void _MemFill_A(char *dest, br_uint_32 pixels, br_uint_32 bpp, br_uint_32 colour
 		/* If 3 fill bytes are the same, just use 1bpp fill */
 		if((cols[0] == cols[1]) && (cols[0] == cols[2]))
 		{
-			_MemFill_A(dest, pixels, 1, colour);
+			_MemFill_A(dest, pixels * 3, 1, colour);
 		}
 		else for(br_uint_32 i = 0; i < pixels; ++i)
 		{
