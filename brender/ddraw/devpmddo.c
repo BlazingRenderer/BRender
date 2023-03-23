@@ -138,8 +138,9 @@ void BrDD_SetPixelFormat( LPDDSURFACEDESC ddsd, int type )
           break ;
 
 		case BR_PMT_RGB_888:
+		case BR_PMT_RGBX_888:
 
-			// Pixel format is RGB-888
+			// Pixel format is X?RGB-888
 
 			ddsd->ddpfPixelFormat.dwFlags = DDPF_RGB;
 			ddsd->ddpfPixelFormat.dwFourCC = BI_RGB;

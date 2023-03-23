@@ -297,6 +297,18 @@ br_device_pixelmap * DevicePixelmapDirectDrawAllocate(br_device *dev, br_output_
 
 		break;
 
+	case BR_PMT_RGBX_888:
+
+		if (!(ddsd.ddpfPixelFormat.dwFlags & DDPF_RGB) || (ddsd.ddpfPixelFormat.dwRGBBitCount != 32) ||
+			(ddsd.ddpfPixelFormat.dwRBitMask != 0x00ff0000) || (ddsd.ddpfPixelFormat.dwGBitMask != 0x0000ff00) ||
+			(ddsd.ddpfPixelFormat.dwBBitMask != 0x000000ff)) {
+
+			BrResFree(self);
+			return NULL;
+		}
+
+		break;
+
 	default:
 		BrResFree(self);
 		return NULL;

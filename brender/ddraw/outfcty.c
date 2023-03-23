@@ -80,7 +80,10 @@ br_error DirectDrawToBRenderSurfaceType( LPDDPIXELFORMAT format, br_uint_16 *pTy
 	} 
    else if((format->dwFlags & DDPF_RGB) && (format->dwRBitMask == 0x00ff0000) &&
 		(format->dwGBitMask == 0x0000ff00) && (format->dwBBitMask == 0x000000ff)) {
-		*pType = BR_PMT_RGB_888;
+		if(format->dwRGBBitCount == 24)
+			*pType = BR_PMT_RGB_888;
+		else if(format->dwRGBBitCount == 32)
+			*pType = BR_PMT_RGBX_888;
 	} 
    else return BRE_FAIL ;
 
