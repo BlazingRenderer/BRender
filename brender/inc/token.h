@@ -98,7 +98,7 @@ typedef union br_value_tag {
 		br_matrix34_f	*m34_f;
 		br_matrix4_f	*m4_f;
 		char *			str;
-		char *			cstr;
+		const char *	cstr;
 		struct br_object **ol;
 		br_token		*tl;
 		void *			*pl;

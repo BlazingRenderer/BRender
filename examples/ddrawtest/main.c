@@ -6,7 +6,7 @@
 #include <SDL.h>
 #include <SDL_syswm.h>
 
-static br_boolean log_outfcty(char *identifier, br_outfcty_desc *desc, void *args)
+static br_boolean log_outfcty(const char *identifier, br_outfcty_desc *desc, void *args)
 {
     struct br_device *dev;
     (void)args;

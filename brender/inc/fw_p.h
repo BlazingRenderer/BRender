@@ -232,9 +232,9 @@ void BR_PUBLIC_ENTRY BrDevPaletteSetEntryOld(int i,br_colour colour);
 /*
  * Callback function invoked when a device is enumerated
  */
-typedef br_boolean BR_CALLBACK br_device_enum_cbfn(char *identifer,
-    br_uint_32 version, char *creator, char *title, char *product,
-    char *product_version, void *args);
+typedef br_boolean BR_CALLBACK br_device_enum_cbfn(const char *identifer,
+    br_uint_32 version, const char *creator, const char *title, const char *product,
+    const char *product_version, void *args);
 
 /*
  * Callback function invoked when an output facility is enumerated
@@ -260,7 +260,7 @@ typedef struct br_outfcty_desc {
 
 } br_outfcty_desc;
 
-typedef br_boolean BR_CALLBACK br_outfcty_enum_cbfn(char *identifier,
+typedef br_boolean BR_CALLBACK br_outfcty_enum_cbfn(const char *identifier,
     br_outfcty_desc *desc, void *args);
 
 struct br_device_pixelmap;
