@@ -39,7 +39,8 @@ void BrDevLastBeginSet(br_pixelmap *pm)
 br_error BR_PUBLIC_ENTRY BrDevBeginVar(br_pixelmap **ppm, const char *setup_string, ...)
 {
 	va_list vl;
-	br_uint_32 i, n;
+	br_uint_32 i;
+	br_token n;
 	br_token_value tv[64];
 
 	/*
@@ -52,7 +53,7 @@ br_error BR_PUBLIC_ENTRY BrDevBeginVar(br_pixelmap **ppm, const char *setup_stri
 		if (i == BR_ASIZE(tv))
 			BR_FAILURE("Too many token value pairs");
 
-		if ((n = va_arg(vl, int)) == BR_NULL_TOKEN)
+		if ((n = va_arg(vl, br_token)) == BR_NULL_TOKEN)
 			break;
 
 		tv[i].t = n;
