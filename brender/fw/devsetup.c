@@ -56,7 +56,7 @@ br_error BR_PUBLIC_ENTRY BrDevBeginVar(br_pixelmap **ppm, const char *setup_stri
 			break;
 
 		tv[i].t = n;
-		tv[i].v = BrTokenValueVaArg(n, vl);
+		tv[i].v = BrTokenValueVaArg(n, &vl);
 	}
 
 	tv[i].t = BR_NULL_TOKEN;
