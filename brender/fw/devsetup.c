@@ -55,10 +55,8 @@ br_error BR_PUBLIC_ENTRY BrDevBeginVar(br_pixelmap **ppm, const char *setup_stri
 		if ((n = va_arg(vl, int)) == BR_NULL_TOKEN)
 			break;
 
-		*((int *)&tv[i].t) = n;
-
-		n = va_arg(vl, int);
-		*((int *)&tv[i].v.u32) = n;
+		tv[i].t = n;
+		tv[i].v = BrTokenValueVaArg(n, vl);
 	}
 
 	tv[i].t = BR_NULL_TOKEN;
