@@ -243,7 +243,7 @@ br_error BR_CMETHOD_DECL(br_object_container, count)(br_object_container *self,
 	struct object_list *hl;
 	struct object_list_entry *he;
 	void *tvarg;
-	int n = 0;
+	int n;
 
 	hl = ObjectContainerListQuery(self);
 	if(hl == NULL)
@@ -295,6 +295,8 @@ void * BR_CMETHOD_DECL(br_object_container, tokensMatchBegin)
 {
 	struct token_match *tm;
 	br_int_32 i;
+
+	(void)self;
 
 	if(tv == NULL)
 		return NULL;
@@ -350,6 +352,8 @@ br_boolean BR_CMETHOD_DECL(br_object_container, tokensMatch)
 void BR_CMETHOD_DECL(br_object_container, tokensMatchEnd)
 		(struct br_object_container *self, void *arg)
 {
+	(void)self;
+
 	if(arg)
 		BrResFree(arg);
 }
@@ -371,7 +375,7 @@ br_error BR_EXPORT BrObjectContainerFree(br_object_container *self, br_token typ
 	if(count == 0)
 		return BRE_OK;
 
-	handles = BrMemAllocate(count * sizeof(*handles), BR_MEMORY_DRIVER);
+	handles = BrMemAllocate(count * sizeof(br_object*), BR_MEMORY_DRIVER);
 
 	r = ObjectContainerFindMany(self, handles, count, &n, type, pattern, tv);
 
