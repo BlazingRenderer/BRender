@@ -2051,7 +2051,7 @@ br_boolean BR_RESIDENT_ENTRY BrTokenValueCompare(br_token_value *tv1, br_token_v
  * Compare two sets of token values for equality
  *
  * Allows a NULL terminated list of tokens which are not significant to the
- * comparision
+ * comparison.
  */
 br_boolean BR_RESIDENT_ENTRY BrTokenValueComparePartial(br_token_value *tv1, br_token_value *tv2, const br_token *insignificant)
 {
