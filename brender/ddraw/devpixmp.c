@@ -70,6 +70,7 @@ br_device_pixelmap * DevicePixelmapDirectDrawAllocate(br_device *dev, br_output_
 	RECT rect;
 	DWORD flags;
 	LPDIRECTDRAW ddraw;
+	void *ddraw2;
 	DDSURFACEDESC ddsd = { sizeof(DDSURFACEDESC) };
 	PALETTEENTRY *entries;
 
@@ -158,11 +159,12 @@ br_device_pixelmap * DevicePixelmapDirectDrawAllocate(br_device *dev, br_output_
 		return NULL ;
 	}
 
-	if (IDirectDraw_QueryInterface(ddraw, &IID_IDirectDraw2, &self->DD) != DD_OK) {
+	if (IDirectDraw_QueryInterface(ddraw, &IID_IDirectDraw2, &ddraw2) != DD_OK) {
 		IDirectDraw_Release(ddraw);
         BR_ERROR0("DirectDrawCreate failed.\n");
 		return NULL ;
 	}
+	self->DD = ddraw2;
 
 	IDirectDraw_Release(ddraw);
 

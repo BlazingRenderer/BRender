@@ -95,6 +95,7 @@ br_device *DeviceDirectDrawAllocate(const char *id, const char *arguments)
 	br_token_value args_tv[256];
 	br_int_32 count;
 	LPDIRECTDRAW ddraw;
+	void *ddraw2;
 
 	/*
 	 * Set up device block and resource anchor
@@ -152,11 +153,12 @@ br_device *DeviceDirectDrawAllocate(const char *id, const char *arguments)
 		return NULL ;
 	}
 
-	if (IDirectDraw_QueryInterface(ddraw, &IID_IDirectDraw2, &self->DD) != DD_OK) {
+	if (IDirectDraw_QueryInterface(ddraw, &IID_IDirectDraw2, &ddraw2) != DD_OK) {
 		IDirectDraw_Release(ddraw);
         BR_ERROR0("DirectDrawCreate failed.\n");
 		return NULL ;
 	}
+	self->DD = ddraw2;
 
 	IDirectDraw_Release(ddraw);
 
