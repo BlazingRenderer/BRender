@@ -108,7 +108,7 @@ br_error BR_RESIDENT_ENTRY BrTokenValueSetMany(
 void BR_RESIDENT_ENTRY BrTokenValueDump(br_token_value *tv, const char *prefix, br_putline_cbfn *putline, void *arg);
 br_error BR_RESIDENT_ENTRY BrStringToTokenValue(br_token_value *buffer, br_size_t buffer_size, const char *str);
 br_boolean BR_RESIDENT_ENTRY BrTokenValueCompare(br_token_value *tv1, br_token_value *tv2);
-br_boolean BR_RESIDENT_ENTRY BrTokenValueComparePartial(br_token_value *tv1, br_token_value *tv2, br_token *insignificant);
+br_boolean BR_RESIDENT_ENTRY BrTokenValueComparePartial(br_token_value *tv1, br_token_value *tv2, const br_token *insignificant);
 
 br_value BR_RESIDENT_ENTRY BrTokenValueVaArg(br_token token, va_list *ap);
 
