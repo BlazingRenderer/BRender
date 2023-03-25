@@ -564,12 +564,12 @@ static br_error BR_CMETHOD_DECL(br_device_pixelmap_dd, doubleBuffer)\
 			/*
 			 * For ModeX modes we blit to the offscreen buffer and flip
 			 */
-			if (self->output_facility->modex)
-
+			if (self->output_facility->modex) {
 				if (IDirectDrawSurface_Flip(self->surface, self->offscreen, DDFLIP_WAIT) == DD_OK)
 					return BRE_OK;
 				else
 					return BRE_FAIL;
+			}
 
 		   return BRE_OK;
 
