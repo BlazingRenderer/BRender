@@ -146,7 +146,7 @@ br_device *DeviceDirectDrawAllocate(const char *id, const char *arguments)
 	/*
 	 * Create a DirectDraw object
 	 */
-	if(self->create(NULL, &ddraw, NULL) != DD_OK)
+	if(DeviceDirectDrawDirectDrawCreate(self, NULL, &ddraw, NULL) != DD_OK)
 	{
         BR_ERROR0("DirectDrawCreate failed.\n");
 		return NULL ;

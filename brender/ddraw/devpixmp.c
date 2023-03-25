@@ -152,7 +152,7 @@ br_device_pixelmap * DevicePixelmapDirectDrawAllocate(br_device *dev, br_output_
 	/*
 	 * Create a DirectDraw object
 	 */
-	if(dev->create(NULL, &ddraw, NULL) != DD_OK)
+	if((DeviceDirectDrawDirectDrawCreate(dev, NULL, &ddraw, NULL) != DD_OK))
 	{
         BR_ERROR0("DirectDrawCreate failed.\n");
 		return NULL ;

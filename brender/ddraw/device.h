@@ -84,6 +84,8 @@ typedef struct br_device {
 #define DeviceDirectDrawCurrentMode(d) (((br_device *)d)->current_mode)
 #define DeviceDirectDrawCurrentModeSet(d,m) ((((br_device *)d)->current_mode) = m)
 #define DeviceDirectDrawClut(d) (((br_device *)d)->clut)
+#define DeviceDirectDrawDirectDrawCreate(self, lpGUID, lplpDD, pUnkOuter) \
+    ((HRESULT (WINAPI *)(GUID *,LPDIRECTDRAW *,IUnknown *))(self)->create)(lpGUID, lplpDD, pUnkOuter)
 
 #ifdef __cplusplus
 };
