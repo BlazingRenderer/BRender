@@ -9,6 +9,7 @@
 // The formatting of this file is important - it is parsed by classgen.pl to
 // produce C headers.
 
+// clang-format off
 
 
 #ifndef __CLASSGEN__
@@ -499,3 +500,4 @@ class br_primitive_state : public br_object {
 		virtual br_error BR_METHOD stateQueryPerformance(br_fixed_lu *speed);
 };
 
+// clang-format on
