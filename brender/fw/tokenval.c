@@ -2093,7 +2093,7 @@ br_boolean BR_RESIDENT_ENTRY BrTokenValueComparePartial(br_token_value *tv1, br_
 		case BRT_TOKEN_LIST:
 		case BRT_POINTER_LIST:
 			for(i=0;;i++) {
-				if(tv1->v.pl[i] != tv1->v.pl[i])
+				if(tv1->v.pl[i] != tv2->v.pl[i])
 					return BR_FALSE;
 				if(tv1->v.pl[i] == NULL)
 					break;
