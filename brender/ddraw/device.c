@@ -225,84 +225,15 @@ static void * BR_CMETHOD_DECL(br_device_dd, listQuery)(br_object_container *self
 	return ((br_device*)self)->object_list;
 }
 
-/*
- * Default token matching does nothing other than make all tokens match
- *
- * makes a copy of token/value list
- */
-struct token_match {
-	br_token_value *original;
-	br_token_value *query;	
-	br_int_32 n;
-	void *extra;
-	br_size_t extra_size;
-};
-
-
-static void * BR_CMETHOD_DECL(br_device_dd, tokensMatchBegin)
-		(struct br_object_container *self, br_token t, br_token_value *tv)
+static const br_tv_match_info *BR_CMETHOD_DECL(br_device_dd, tokensMatchInfoQuery)(br_object_container *self)
 {
-	struct token_match *tm;
-	br_int_32 i;
+    (void)self;
 
-	if(tv == NULL)
-		return NULL;
-
-	tm = BrResAllocate(self, sizeof(*tm), BR_MEMORY_APPLICATION);
-	tm->original = tv;
-
-	for(i=0; tv[i].t != BR_NULL_TOKEN; i++)
-		;
-
-	tm->n = i+1;
-	tm->query =	BrResAllocate(tm, tm->n * sizeof(br_token_value), BR_MEMORY_APPLICATION);
-	BrMemCpy(tm->query,tv, i * sizeof(br_token_value));
-	return (void *) tm;
+    return (const br_tv_match_info[]){
+        {.type = BRT_OUTPUT_FACILITY, .insignificant = insignificantMatchTokens},
+        {.type = BR_NULL_TOKEN,       .insignificant = NULL                    },
+    };
 }
-
-static br_boolean BR_CMETHOD_DECL(br_device_dd, tokensMatch)
-		(struct br_object_container *self, br_object *h, void *arg)
-{
-	struct token_match *tm = arg;
-	br_size_t s;
-	br_int_32 n;
-
-	if(arg == NULL)
-		return BR_TRUE;
-
-	/*
-	 * Make a query on the object and then compare with the original tokens
-	 */
-	ObjectQueryManySize(h, &s,tm->query);
-
-	if(s > tm->extra_size) {
-		if(tm->extra)
-			BrResFree(tm->extra);
-		tm->extra =	BrResAllocate(tm, s, BR_MEMORY_APPLICATION);
-		tm->extra_size = s;
-	}
-	
-	ObjectQueryMany(h, tm->query, tm->extra, tm->extra_size, &n);
-
-	/*
-	 * Ensure that all tokens were found
-	 */
-	if (tm->query[n].t != BR_NULL_TOKEN)
-		return BR_FALSE;
-
-	/*
-	 * Compare the two token lists
-	 */
-	return BrTokenValueComparePartial(tm->original, tm->query, insignificantMatchTokens);
-}
-
-static void BR_CMETHOD_DECL(br_device_dd, tokensMatchEnd)
-		(struct br_object_container *self, void *arg)
-{
-	if(arg)
-		BrResFree(arg);
-}
-
 
 /*
  * Default dispatch table for device
@@ -328,9 +259,10 @@ static const struct br_device_dispatch deviceDispatch = {
     ._queryAllSize  = BR_CMETHOD_REF(br_object, queryAllSize),
 
     ._listQuery        = BR_CMETHOD_REF(br_device_dd, listQuery),
-    ._tokensMatchBegin = BR_CMETHOD_REF(br_device_dd, tokensMatchBegin),
-    ._tokensMatch      = BR_CMETHOD_REF(br_device_dd, tokensMatch),
-    ._tokensMatchEnd   = BR_CMETHOD_REF(br_device_dd, tokensMatchEnd),
+    ._tokensMatchBegin = BR_CMETHOD_REF(br_object_container, tokensMatchBegin),
+    ._tokensMatch      = BR_CMETHOD_REF(br_object_container, tokensMatch),
+    ._tokensMatchEnd   = BR_CMETHOD_REF(br_object_container, tokensMatchEnd),
+    ._tokensMatchInfoQuery = BR_CMETHOD_REF(br_device_dd, tokensMatchInfoQuery),
     ._addFront         = BR_CMETHOD_REF(br_object_container, addFront),
     ._removeFront      = BR_CMETHOD_REF(br_object_container, removeFront),
     ._remove           = BR_CMETHOD_REF(br_object_container, remove),

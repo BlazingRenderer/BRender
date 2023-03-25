@@ -181,6 +181,8 @@ br_boolean BR_CMETHOD_DECL(br_object_container, tokensMatch)
 		(struct br_object_container *self, struct br_object *h, void *arg);
 void BR_CMETHOD_DECL(br_object_container, tokensMatchEnd)
 		(struct br_object_container *self, void *arg);
+const br_tv_match_info *BR_CMETHOD_DECL(br_object_container, tokensMatchInfoQuery)
+		(struct br_object_container *self);
 
 br_error BR_RESIDENT_ENTRY BrObjectContainerFree(struct br_object_container *self, br_token type, char *pattern, br_token_value *tv);
 

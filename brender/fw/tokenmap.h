@@ -156,6 +156,24 @@ enum br_tv_flag {
 	BRTV_ABS		= 0x0008	/* 'offset' member of template contains value	*/
 };
 
+/*
+ * Extra info for matching against specific object types.
+ */
+typedef struct br_tv_match_info {
+    /*
+     * Type of the object, e.g. BRT_OUTPUT_FACILITY.
+     */
+    br_token type;
+
+    /*
+     * List of tokens considered insignificant when matching
+     * against the above device type.
+     *
+     * Terminated by BR_NULL_TOKEN.
+     */
+    const br_token *insignificant;
+} br_tv_match_info;
+
 #endif
 
 

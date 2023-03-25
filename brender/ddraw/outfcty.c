@@ -485,6 +485,7 @@ static struct br_output_facility_dispatch outputFacilityDispatch = {
     ._tokensMatchBegin = BR_CMETHOD_REF(br_object_container, tokensMatchBegin),
     ._tokensMatch      = BR_CMETHOD_REF(br_object_container, tokensMatch),
     ._tokensMatchEnd   = BR_CMETHOD_REF(br_object_container, tokensMatchEnd),
+    ._tokensMatchInfoQuery = BR_CMETHOD_REF(br_object_container, tokensMatchInfoQuery),
     ._addFront         = BR_CMETHOD_REF(br_object_container, addFront),
     ._removeFront      = BR_CMETHOD_REF(br_object_container, removeFront),
     ._remove           = BR_CMETHOD_REF(br_object_container, remove),

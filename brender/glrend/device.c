@@ -55,7 +55,7 @@ typedef struct device_create_tokens {
 /*
  * List of tokens which are not significant in matching (for output facilities)
  */
-static br_token insignificantMatchTokens[] = {
+static const br_token insignificantMatchTokens[] = {
     BRT_WIDTH_I32,
     BRT_HEIGHT_I32,
     BRT_PIXEL_BITS_I32,
@@ -285,90 +285,14 @@ static void *BR_CMETHOD_DECL(br_device_gl, listQuery)(struct br_object_container
     return ((br_device *)self)->object_list;
 }
 
-
-/*
- * We can't use the default token matching unfortunately, as we need to ignore
- * the window handle and MSAA tokens.
- *
- * Taken from objectc.c
- */
-struct token_match {
-    br_token_value *original;
-    br_token_value *query;
-    br_token       type;
-    br_int_32      n;
-    void           *extra;
-    br_size_t      extra_size;
-};
-
-void *BR_CMETHOD_DECL(br_device_gl, tokensMatchBegin)(struct br_object_container *_self, br_token t, br_token_value *tv)
-{
-    br_device          *self = (br_device *)_self;
-    struct token_match *tm;
-    br_int_32          i;
-
-    if(tv == NULL)
-        return NULL;
-
-    tm = BrResAllocate(self->res, sizeof(*tm), BR_MEMORY_APPLICATION);
-    tm->original = tv;
-    tm->type     = t;
-
-    for(i = 0; tv[i].t != BR_NULL_TOKEN; i++);
-
-    tm->n     = i + 1;
-    tm->query = BrResAllocate(tm, tm->n * sizeof(br_token_value), BR_MEMORY_APPLICATION);
-    BrMemCpy(tm->query, tv, i * sizeof(br_token_value));
-    return (void *)tm;
-}
-
-br_boolean BR_CMETHOD_DECL(br_device_gl, tokensMatch)(struct br_object_container *self, br_object *h, void *arg)
-{
-    struct token_match *tm = arg;
-    br_size_t          s;
-    br_int_32          n;
-
-    (void)self;
-
-    if(arg == NULL)
-        return BR_TRUE;
-
-    /*
-     * Make a query on the object and then compare with the original tokens
-     */
-    ObjectQueryManySize(h, &s, tm->query);
-
-    if(s > tm->extra_size) {
-        if(tm->extra)
-            BrResFree(tm->extra);
-        tm->extra      = BrResAllocate(tm, s, BR_MEMORY_APPLICATION);
-        tm->extra_size = s;
-    }
-
-    ObjectQueryMany(h, tm->query, tm->extra, tm->extra_size, &n);
-
-    /*
-     * Ensure that all tokens were found
-     */
-    if(tm->query[n].t != BR_NULL_TOKEN)
-        return BR_FALSE;
-
-    /*
-     * Compare the two token lists
-     */
-    if(tm->type == BRT_OUTPUT_FACILITY) {
-        return BrTokenValueComparePartial(tm->original, tm->query, insignificantMatchTokens);
-    } else {
-        return BrTokenValueCompare(tm->original, tm->query);
-    }
-}
-
-void BR_CMETHOD_DECL(br_device_gl, tokensMatchEnd)(struct br_object_container *self, void *arg)
+static const br_tv_match_info *BR_CMETHOD_DECL(br_device_gl, tokensMatchInfoQuery)(br_object_container *self)
 {
     (void)self;
 
-    if(arg)
-        BrResFree(arg);
+    return (const br_tv_match_info[]){
+        {.type = BRT_OUTPUT_FACILITY, .insignificant = insignificantMatchTokens},
+        {.type = BR_NULL_TOKEN,       .insignificant = NULL                    },
+    };
 }
 
 /*
@@ -395,9 +319,10 @@ static const struct br_device_dispatch deviceDispatch = {
     ._queryAllSize      = BR_CMETHOD_REF(br_object, queryAllSize),
 
     ._listQuery         = BR_CMETHOD_REF(br_device_gl, listQuery),
-    ._tokensMatchBegin  = BR_CMETHOD_REF(br_device_gl, tokensMatchBegin),
-    ._tokensMatch       = BR_CMETHOD_REF(br_device_gl, tokensMatch),
-    ._tokensMatchEnd    = BR_CMETHOD_REF(br_device_gl, tokensMatchEnd),
+    ._tokensMatchBegin  = BR_CMETHOD_REF(br_object_container, tokensMatchBegin),
+    ._tokensMatch       = BR_CMETHOD_REF(br_object_container, tokensMatch),
+    ._tokensMatchEnd    = BR_CMETHOD_REF(br_object_container, tokensMatchEnd),
+    ._tokensMatchInfoQuery = BR_CMETHOD_REF(br_device_gl, tokensMatchInfoQuery),
     ._addFront          = BR_CMETHOD_REF(br_object_container, addFront),
     ._removeFront       = BR_CMETHOD_REF(br_object_container, removeFront),
     ._remove            = BR_CMETHOD_REF(br_object_container, remove),

@@ -283,7 +283,8 @@ br_error BR_CMETHOD_DECL(br_object_container, count)(br_object_container *self,
  */
 struct token_match {
 	br_token_value *original;
-	br_token_value *query;	
+	br_token_value *query;
+	br_token type;
 	br_int_32 n;
 	void *extra;
 	br_size_t extra_size;
@@ -303,6 +304,7 @@ void * BR_CMETHOD_DECL(br_object_container, tokensMatchBegin)
 
 	tm = BrResAllocate(fw.res, sizeof(*tm), BR_MEMORY_APPLICATION);
 	tm->original = tv;
+	tm->type     = t;
 
 	for(i=0; tv[i].t != BR_NULL_TOKEN; i++)
 		;
@@ -317,6 +319,7 @@ br_boolean BR_CMETHOD_DECL(br_object_container, tokensMatch)
 		(struct br_object_container *self, br_object *h, void *arg)
 {
 	struct token_match *tm = arg;
+	const br_tv_match_info *info;
 	br_size_t s;
 	br_int_32 n;
 
@@ -344,6 +347,15 @@ br_boolean BR_CMETHOD_DECL(br_object_container, tokensMatch)
 		return BR_FALSE;
 
 	/*
+	 * Check if we've got extra match requirements.
+	 */
+	info = ObjectContainerTokensMatchInfoQuery(self);
+	for(const br_tv_match_info *i = info; i->type != BR_NULL_TOKEN; ++i) {
+		if(tm->type == i->type)
+			return BrTokenValueComparePartial(tm->original, tm->query, i->insignificant);
+	}
+
+	/*
 	 * Compare the two token lists
 	 */
 	return BrTokenValueCompare(tm->original, tm->query);
@@ -356,6 +368,13 @@ void BR_CMETHOD_DECL(br_object_container, tokensMatchEnd)
 
 	if(arg)
 		BrResFree(arg);
+}
+
+const br_tv_match_info *BR_CMETHOD_DECL(br_object_container, tokensMatchInfoQuery)
+        (struct br_object_container *self)
+{
+    (void)self;
+    return (br_tv_match_info[]){{.type = BR_NULL_TOKEN}};
 }
 
 /*

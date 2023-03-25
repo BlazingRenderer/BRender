@@ -37,6 +37,7 @@ class br_map_stored;
 class br_table_stored;
 
 struct br_tv_template;
+struct br_tv_match_info;
 
 // The root abstract base class for all device objects
 //
@@ -81,6 +82,7 @@ class br_object_container : public br_object {
 		virtual	void * BR_METHOD tokensMatchBegin(br_token t, br_token_value *tv);
 		virtual	br_boolean BR_METHOD tokensMatch(class br_object *h, void *arg);
 		virtual	void BR_METHOD tokensMatchEnd(void *arg);
+		virtual	const struct br_tv_match_info* BR_METHOD tokensMatchInfoQuery(void);
 
 	public:
 		virtual	br_error BR_METHOD addFront(class br_object *h);

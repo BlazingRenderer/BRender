@@ -507,6 +507,7 @@ static const struct br_renderer_dispatch rendererDispatch = {
     ._tokensMatchBegin      = BR_CMETHOD(br_object_container, tokensMatchBegin),
     ._tokensMatch           = BR_CMETHOD(br_object_container, tokensMatch),
     ._tokensMatchEnd        = BR_CMETHOD(br_object_container, tokensMatchEnd),
+    ._tokensMatchInfoQuery  = BR_CMETHOD_REF(br_object_container, tokensMatchInfoQuery),
     ._addFront              = BR_CMETHOD(br_object_container, addFront),
     ._removeFront           = BR_CMETHOD(br_object_container, removeFront),
     ._remove                = BR_CMETHOD(br_object_container, remove),
