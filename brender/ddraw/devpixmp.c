@@ -13,7 +13,6 @@
 
 #include "drv.h"
 #include "pm.h"
-#include "host.h"
 #include "shortcut.h"
 #include "brassert.h"
 
@@ -533,7 +532,6 @@ static br_error BR_CMETHOD_DECL(br_device_pixelmap_dd, doubleBuffer)\
 {
 	POINT pt;
 	RECT srect, drect;
-	br_error error;
 
 	UASSERT(self != NULL);
 	UASSERT(src != NULL);
@@ -604,16 +602,19 @@ static br_error BR_CMETHOD_DECL(br_device_pixelmap_dd, doubleBuffer)\
 
 br_token BR_CMETHOD_DECL(br_device_pixelmap_dd, type)(br_object *self)
 {
+	(void)self;
 	return BRT_DEVICE_PIXELMAP;
 }
 
 br_boolean BR_CMETHOD_DECL(br_device_pixelmap_dd, isType)(br_object *self, br_token t)
 {
+	(void)self;
 	return (t == BRT_DEVICE_PIXELMAP) || (t == BRT_OBJECT);
 }
 
 br_size_t BR_CMETHOD_DECL(br_device_pixelmap_dd, space)(br_object *self)
 {
+	(void)self;
 	return sizeof(br_device_pixelmap);
 }
 
@@ -635,6 +636,10 @@ struct br_tv_template * BR_CMETHOD_DECL(br_device_pixelmap_dd, queryTemplate)(br
 br_error BR_CMETHOD_DECL(br_device_pixelmap_dd, allocateSub)\
 	(br_device_pixelmap *self, br_device_pixelmap **newpm, br_rectangle *rect)
 {
+	(void)self;
+	(void)newpm;
+	(void)rect;
+
 	/*
 	 * Method is not supported
 	 */
