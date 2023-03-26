@@ -42,13 +42,13 @@ static const struct br_device_dispatch deviceDispatch;
 #define _A(f)    ((br_uintptr_t)(f))
 
 static struct br_tv_template_entry deviceTemplateEntries[] = {
-	{BRT_IDENTIFIER_CSTR,	0,	_F(identifier),		BRTV_QUERY | BRTV_ALL,	BRTV_CONV_COPY, },
+	{BRT_IDENTIFIER_CSTR,	0,	_F(identifier),		BRTV_QUERY | BRTV_ALL,	BRTV_CONV_COPY, 0 },
    {BRT_VERSION_U32,           0,	0,  		            BRTV_QUERY | BRTV_ALL,	BRTV_CONV_DIRECT, DEVICE_VERSION},
    {BRT_BRENDER_VERSION_U32,   0,	0,	    	            BRTV_QUERY | BRTV_ALL,	BRTV_CONV_DIRECT, __BRENDER__},
    {BRT_DDI_VERSION_U32,       0,	0,	                    BRTV_QUERY | BRTV_ALL,	BRTV_CONV_DIRECT, __BRENDER_DDI__},
-   {BRT_CREATOR_CSTR,          0,	_A(deviceCreator),	    BRTV_QUERY | BRTV_ALL | BRTV_ABS,	BRTV_CONV_COPY, },
-   {BRT_TITLE_CSTR,            0,	_A(deviceTitle),	    BRTV_QUERY | BRTV_ALL | BRTV_ABS,	BRTV_CONV_COPY, },
-   {BRT_PRODUCT_CSTR,          0,	_A(deviceProduct),	    BRTV_QUERY | BRTV_ALL | BRTV_ABS,	BRTV_CONV_COPY, },
+   {BRT_CREATOR_CSTR,          0,	_A(deviceCreator),	    BRTV_QUERY | BRTV_ALL | BRTV_ABS,	BRTV_CONV_COPY, 0 },
+   {BRT_TITLE_CSTR,            0,	_A(deviceTitle),	    BRTV_QUERY | BRTV_ALL | BRTV_ABS,	BRTV_CONV_COPY, 0 },
+   {BRT_PRODUCT_CSTR,          0,	_A(deviceProduct),	    BRTV_QUERY | BRTV_ALL | BRTV_ABS,	BRTV_CONV_COPY, 0 },
 };
 #undef _F
 #undef _A
@@ -76,7 +76,7 @@ static br_token insignificantMatchTokens[] = {
 #define F(f)	offsetof(struct br_device, f)
 
 static struct br_tv_template_entry deviceArgsTemplateEntries[] = {
-	{BRT(WINDOW_HANDLE_H),	F(window),						BRTV_SET,	BRTV_CONV_COPY, },
+	{BRT(WINDOW_HANDLE_H),	F(window),						BRTV_SET,	BRTV_CONV_COPY },
 };
 #undef F
 

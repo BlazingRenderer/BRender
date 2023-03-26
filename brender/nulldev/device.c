@@ -16,7 +16,7 @@ static const struct br_device_dispatch deviceDispatch;
 #define F(f) offsetof(br_device, f)
 
 static const struct br_tv_template_entry deviceTemplateEntries[] = {
-    {BRT_IDENTIFIER_CSTR, NULL, F(identifier), BRTV_QUERY | BRTV_ALL, BRTV_CONV_COPY,},
+    {BRT_IDENTIFIER_CSTR, NULL, F(identifier), BRTV_QUERY | BRTV_ALL, BRTV_CONV_COPY},
 };
 #undef F
 

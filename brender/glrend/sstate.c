@@ -14,9 +14,9 @@ static const struct br_renderer_state_stored_dispatch rendererStateStoredDispatc
 #define F(f) offsetof(struct br_renderer_state_stored, f)
 
 static struct br_tv_template_entry rendererStateStoredTemplateEntries[] = {
-    {BRT_IDENTIFIER_CSTR, NULL, F(identifier),  BRTV_QUERY | BRTV_ALL, BRTV_CONV_COPY,},
-    {BRT_RENDERER_O,      NULL, F(renderer),    BRTV_QUERY | BRTV_ALL, BRTV_CONV_COPY,},
-    {BRT_PARTS_U32,       NULL, F(state.valid), BRTV_QUERY | BRTV_ALL, BRTV_CONV_COPY,},
+    {BRT_IDENTIFIER_CSTR, NULL, F(identifier),  BRTV_QUERY | BRTV_ALL, BRTV_CONV_COPY},
+    {BRT_RENDERER_O,      NULL, F(renderer),    BRTV_QUERY | BRTV_ALL, BRTV_CONV_COPY},
+    {BRT_PARTS_U32,       NULL, F(state.valid), BRTV_QUERY | BRTV_ALL, BRTV_CONV_COPY},
 };
 #undef F
 

@@ -849,11 +849,11 @@ struct match_off_tokens {
 #define F(f)	offsetof(struct match_off_tokens, f)
 
 static struct br_tv_template_entry matchOffTemplateEntries[] = {
-   {BRT_USE_T,           0,   F(use),               BRTV_SET,   BRTV_CONV_COPY, },
-   {BRT_PIXEL_BITS_I32,  0,   F(pixel_bits),         BRTV_SET,   BRTV_CONV_COPY, },
-   {BRT_WIDTH_I32,       0,   F(width),            BRTV_SET,   BRTV_CONV_COPY, },
-   {BRT_HEIGHT_I32,      0,   F(height),            BRTV_SET,   BRTV_CONV_COPY, },
-   {BRT_PIXEL_TYPE_U8,   0,   F(type),            BRTV_SET,   BRTV_CONV_COPY, },
+   {BRT_USE_T,           0,   F(use),               BRTV_SET,   BRTV_CONV_COPY },
+   {BRT_PIXEL_BITS_I32,  0,   F(pixel_bits),         BRTV_SET,   BRTV_CONV_COPY },
+   {BRT_WIDTH_I32,       0,   F(width),            BRTV_SET,   BRTV_CONV_COPY },
+   {BRT_HEIGHT_I32,      0,   F(height),            BRTV_SET,   BRTV_CONV_COPY },
+   {BRT_PIXEL_TYPE_U8,   0,   F(type),            BRTV_SET,   BRTV_CONV_COPY },
 };
 #undef F
 

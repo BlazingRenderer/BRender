@@ -77,17 +77,17 @@ static struct br_device_pixelmap_dispatch devicePixelmapDispatch;
 #define F(f)	offsetof(struct br_device_pixelmap, f)
 
 static struct br_tv_template_entry devicePixelmapTemplateEntries[] = {
-	{BRT_IDENTIFIER_CSTR,		NULL,	F(pm_identifier),	BRTV_QUERY | BRTV_ALL,	BRTV_CONV_COPY, },
-	{BRT_WIDTH_I32,				NULL,	F(pm_width),		BRTV_QUERY | BRTV_ALL,	BRTV_CONV_I32_U16, },
-	{BRT_HEIGHT_I32,			NULL,	F(pm_height),		BRTV_QUERY | BRTV_ALL,	BRTV_CONV_I32_U16, },
-	{BRT_PIXEL_TYPE_U8,			NULL,	F(pm_type),			BRTV_QUERY | BRTV_ALL,	BRTV_CONV_I32_U8, },
-	//{BRT_PIXEL_CHANNELS_I32,	NULL,	0,					BRTV_QUERY | BRTV_ALL,	BRTV_CONV_CUSTOM, },
-	//{BRT_PIXEL_CHANNELS_TL,		NULL,	0,					BRTV_QUERY | BRTV_ALL,	BRTV_CONV_CUSTOM, },
-	//{BRT_INDEXED_B,				NULL,	F(pm_indexed),		BRTV_QUERY | BRTV_ALL,	BRTV_CONV_CUSTOM, },
-	//{BRT_ORIGIN_V2_I,			NULL,	F(pm_indexed),		BRTV_QUERY | BRTV_ALL,	BRTV_CONV_CUSTOM, },
-	//{BRT_PIXEL_BITS_I32,		NULL,	F(pm_indexed),		BRTV_QUERY | BRTV_ALL,	BRTV_CONV_CUSTOM, },
-	//{BRT_WORD_BYTES_I32,		NULL,	F(pm_indexed),		BRTV_QUERY | BRTV_ALL,	BRTV_CONV_CUSTOM, },
-	//{BRT_MEMORY_MAPPED,			NULL,	F(pm_indexed),		BRTV_QUERY | BRTV_ALL,	BRTV_CONV_CUSTOM, },
+	{BRT_IDENTIFIER_CSTR,		NULL,	F(pm_identifier),	BRTV_QUERY | BRTV_ALL,	BRTV_CONV_COPY },
+	{BRT_WIDTH_I32,				NULL,	F(pm_width),		BRTV_QUERY | BRTV_ALL,	BRTV_CONV_I32_U16 },
+	{BRT_HEIGHT_I32,			NULL,	F(pm_height),		BRTV_QUERY | BRTV_ALL,	BRTV_CONV_I32_U16 },
+	{BRT_PIXEL_TYPE_U8,			NULL,	F(pm_type),			BRTV_QUERY | BRTV_ALL,	BRTV_CONV_I32_U8 },
+	//{BRT_PIXEL_CHANNELS_I32,	NULL,	0,					BRTV_QUERY | BRTV_ALL,	BRTV_CONV_CUSTOM },
+	//{BRT_PIXEL_CHANNELS_TL,		NULL,	0,					BRTV_QUERY | BRTV_ALL,	BRTV_CONV_CUSTOM },
+	//{BRT_INDEXED_B,				NULL,	F(pm_indexed),		BRTV_QUERY | BRTV_ALL,	BRTV_CONV_CUSTOM },
+	//{BRT_ORIGIN_V2_I,			NULL,	F(pm_indexed),		BRTV_QUERY | BRTV_ALL,	BRTV_CONV_CUSTOM },
+	//{BRT_PIXEL_BITS_I32,		NULL,	F(pm_indexed),		BRTV_QUERY | BRTV_ALL,	BRTV_CONV_CUSTOM },
+	//{BRT_WORD_BYTES_I32,		NULL,	F(pm_indexed),		BRTV_QUERY | BRTV_ALL,	BRTV_CONV_CUSTOM },
+	//{BRT_MEMORY_MAPPED,			NULL,	F(pm_indexed),		BRTV_QUERY | BRTV_ALL,	BRTV_CONV_CUSTOM },
 };
 #undef F
 
@@ -319,12 +319,12 @@ struct match_tokens {
 #define F(f)	offsetof(struct match_tokens, f)
 
 static struct br_tv_template_entry matchTemplateEntries[] = {
-	{BRT_USE_T,				NULL,	F(use),					BRTV_SET,	BRTV_CONV_COPY, },
-	{BRT_PIXEL_TYPE_U8,		NULL,	F(pixel_type),			BRTV_SET,	BRTV_CONV_COPY, },
-	{BRT_PIXEL_BITS_I32,	NULL,	F(pixel_bits),			BRTV_SET,	BRTV_CONV_COPY, },
-	{BRT_RENDERER_O,		NULL,	F(renderer),			BRTV_SET,	BRTV_CONV_COPY, },
-	{BRT_WIDTH_I32,			NULL,	F(width),				BRTV_SET,	BRTV_CONV_COPY, },
-	{BRT_HEIGHT_I32,		NULL,	F(height),				BRTV_SET,	BRTV_CONV_COPY, },
+	{BRT_USE_T,				NULL,	F(use),					BRTV_SET,	BRTV_CONV_COPY },
+	{BRT_PIXEL_TYPE_U8,		NULL,	F(pixel_type),			BRTV_SET,	BRTV_CONV_COPY },
+	{BRT_PIXEL_BITS_I32,	NULL,	F(pixel_bits),			BRTV_SET,	BRTV_CONV_COPY },
+	{BRT_RENDERER_O,		NULL,	F(renderer),			BRTV_SET,	BRTV_CONV_COPY },
+	{BRT_WIDTH_I32,			NULL,	F(width),				BRTV_SET,	BRTV_CONV_COPY },
+	{BRT_HEIGHT_I32,		NULL,	F(height),				BRTV_SET,	BRTV_CONV_COPY },
 };
 #undef F
 

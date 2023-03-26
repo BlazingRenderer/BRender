@@ -15,7 +15,7 @@ static const struct br_renderer_facility_dispatch rendererFacilityDispatch;
 #define F(f) offsetof(struct br_renderer_facility, f)
 
 static struct br_tv_template_entry rendererFacilityTemplateEntries[] = {
-    {BRT_IDENTIFIER_CSTR,  NULL, F(identifier), BRTV_QUERY | BRTV_ALL, BRTV_CONV_COPY,},
+    {BRT_IDENTIFIER_CSTR,  NULL, F(identifier), BRTV_QUERY | BRTV_ALL, BRTV_CONV_COPY, 0},
     {BRT_RENDERER_MAX_I32, NULL, 0,             BRTV_QUERY | BRTV_ALL, BRTV_CONV_DIRECT, 1},
 };
 
@@ -125,8 +125,8 @@ struct newRendererTokens {
 #define F(f) offsetof(struct newRendererTokens, f)
 
 static struct br_tv_template_entry rendererNewTemplateEntries[] = {
-    {BRT_DESTINATION_O,     NULL, F(dest), BRTV_SET, BRTV_CONV_COPY,},
-    {BRT_OUTPUT_FACILITY_O, NULL, F(dest), BRTV_SET, BRTV_CONV_COPY,},
+    {BRT_DESTINATION_O,     NULL, F(dest), BRTV_SET, BRTV_CONV_COPY},
+    {BRT_OUTPUT_FACILITY_O, NULL, F(dest), BRTV_SET, BRTV_CONV_COPY},
 };
 
 #undef F

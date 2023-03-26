@@ -29,20 +29,20 @@ static struct br_output_facility_dispatch outputFacilityDispatch;
 #define F(f)	offsetof(struct br_output_facility, f)
 
 static struct br_tv_template_entry outputFacilityTemplateEntries[] = {
-	{BRT(WIDTH_I32),				F(width),			BRTV_QUERY | BRTV_ALL,	BRTV_CONV_COPY, },
-	{BRT(WIDTH_MIN_I32),			F(width),			BRTV_QUERY | BRTV_ALL,	BRTV_CONV_COPY, },
-	{BRT(WIDTH_MAX_I32),			F(width),			BRTV_QUERY | BRTV_ALL,	BRTV_CONV_COPY, },
-	{BRT(HEIGHT_I32),				F(height),			BRTV_QUERY | BRTV_ALL,	BRTV_CONV_COPY, },
-	{BRT(HEIGHT_MIN_I32),			F(height),			BRTV_QUERY | BRTV_ALL,	BRTV_CONV_COPY, },
-	{BRT(HEIGHT_MAX_I32),			F(height),			BRTV_QUERY | BRTV_ALL,	BRTV_CONV_COPY, },
-	{BRT(PIXEL_BITS_I32),			F(colour_bits),		BRTV_QUERY | BRTV_ALL,	BRTV_CONV_COPY, },
-	{BRT(PIXEL_TYPE_U8),			F(colour_type),		BRTV_QUERY | BRTV_ALL,	BRTV_CONV_COPY, },
-	{BRT(INDEXED_B),  				F(indexed),			BRTV_QUERY | BRTV_ALL,	BRTV_CONV_COPY, },
-	{BRT(WINDOW_FULLSCREEN_B),		F(fullscreen),		BRTV_QUERY | BRTV_ALL,	BRTV_CONV_COPY, },
-	{BRT(IDENTIFIER_CSTR),			F(identifier),		BRTV_QUERY | BRTV_ALL,	BRTV_CONV_COPY, },
-	{DEV(IS_STANDARD_VGA_B),		F(standard_vga),	BRTV_QUERY | BRTV_ALL,	BRTV_CONV_COPY, },
-	{DEV(IS_MODEX_B),				F(modex),			BRTV_QUERY | BRTV_ALL,	BRTV_CONV_COPY, },
-	{BRT(WINDOW_HANDLE_H),			0,					BRTV_QUERY | BRTV_ALL,	BRTV_CONV_DIRECT, },
+	{BRT(WIDTH_I32),				F(width),			BRTV_QUERY | BRTV_ALL,	BRTV_CONV_COPY },
+	{BRT(WIDTH_MIN_I32),			F(width),			BRTV_QUERY | BRTV_ALL,	BRTV_CONV_COPY },
+	{BRT(WIDTH_MAX_I32),			F(width),			BRTV_QUERY | BRTV_ALL,	BRTV_CONV_COPY },
+	{BRT(HEIGHT_I32),				F(height),			BRTV_QUERY | BRTV_ALL,	BRTV_CONV_COPY },
+	{BRT(HEIGHT_MIN_I32),			F(height),			BRTV_QUERY | BRTV_ALL,	BRTV_CONV_COPY },
+	{BRT(HEIGHT_MAX_I32),			F(height),			BRTV_QUERY | BRTV_ALL,	BRTV_CONV_COPY },
+	{BRT(PIXEL_BITS_I32),			F(colour_bits),		BRTV_QUERY | BRTV_ALL,	BRTV_CONV_COPY },
+	{BRT(PIXEL_TYPE_U8),			F(colour_type),		BRTV_QUERY | BRTV_ALL,	BRTV_CONV_COPY },
+	{BRT(INDEXED_B),  				F(indexed),			BRTV_QUERY | BRTV_ALL,	BRTV_CONV_COPY },
+	{BRT(WINDOW_FULLSCREEN_B),		F(fullscreen),		BRTV_QUERY | BRTV_ALL,	BRTV_CONV_COPY },
+	{BRT(IDENTIFIER_CSTR),			F(identifier),		BRTV_QUERY | BRTV_ALL,	BRTV_CONV_COPY },
+	{DEV(IS_STANDARD_VGA_B),		F(standard_vga),	BRTV_QUERY | BRTV_ALL,	BRTV_CONV_COPY },
+	{DEV(IS_MODEX_B),				F(modex),			BRTV_QUERY | BRTV_ALL,	BRTV_CONV_COPY },
+	{BRT(WINDOW_HANDLE_H),			0,					BRTV_QUERY | BRTV_ALL,	BRTV_CONV_DIRECT },
 };
 
 #undef F

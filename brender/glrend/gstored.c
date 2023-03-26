@@ -18,9 +18,9 @@ static const struct br_geometry_stored_dispatch geometryStoredDispatch;
 #define F(f) offsetof(br_geometry_stored, f)
 
 static const struct br_tv_template_entry templateEntries[] = {
-    {BRT_IDENTIFIER_CSTR,   NULL, F(identifier), BRTV_QUERY | BRTV_ALL, BRTV_CONV_COPY,},
-    {BRT_GEOMETRY_V1_MODEL, NULL, F(gv1model),   BRTV_QUERY | BRTV_ALL, BRTV_CONV_COPY,},
-    {BRT_SHARED_B,          NULL, F(shared),     BRTV_QUERY | BRTV_ALL, BRTV_CONV_COPY,},
+    {BRT_IDENTIFIER_CSTR,   NULL, F(identifier), BRTV_QUERY | BRTV_ALL, BRTV_CONV_COPY},
+    {BRT_GEOMETRY_V1_MODEL, NULL, F(gv1model),   BRTV_QUERY | BRTV_ALL, BRTV_CONV_COPY},
+    {BRT_SHARED_B,          NULL, F(shared),     BRTV_QUERY | BRTV_ALL, BRTV_CONV_COPY},
 };
 #undef F
 
