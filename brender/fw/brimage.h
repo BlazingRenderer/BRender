@@ -8,17 +8,12 @@
 #ifndef _BRIMAGE_H_
 #define _BRIMAGE_H_
 
-/*
- * In-memory structure describing a loaded image
- */
-typedef struct br_image_section {
-	char *name;
-	void *base;
-	br_size_t mem_offset;
-	br_size_t mem_size;
-	br_uint_32 data_offset;
-	br_uint_32 data_size;
-} br_image_section;
+typedef void *(*br_image_proc)(void*);
+
+typedef struct br_image_function_info {
+    const char   *name;
+    br_image_proc proc;
+} br_image_function_info;
 
 typedef struct br_image {
 	/*
@@ -29,7 +24,7 @@ typedef struct br_image {
 	/*
 	 * DLL name
 	 */
-	char *identifier;
+	const char *identifier;
 
 	/*
 	 * Type of DLL - Resident, Host, Framework
@@ -42,30 +37,12 @@ typedef struct br_image {
 	br_int_32 ref_count;
 
 	/*
-	 * Table of exported functions
+	 * Table of exported functions. The ordinal is the function index.
+	 * Must be sorted by name, suitable for BrStrCmp().
+	 * Only valid if type != BR_IMG_HOST.
 	 */
-	br_uint_32 ordinal_base;
-	br_uint_32 n_functions;
-	void ** functions;
-
-	/*
-	 * Name -> ordinal lookup
-	 */
-	br_uint_32 n_names;
-	char		**names;
-	br_uint_16 *name_ordinals;
-
-	/*
-	 * Table of imported image pointers
-	 */
-	br_uint_16 n_imports;
-	struct br_image ** imports;
-
-	/*
-	 * Image sections
-	 */
-	br_uint_16 n_sections;
-	br_image_section *sections;
+	unsigned int n_functions;
+	const br_image_function_info *functions;
 
 	/*
 	 * Type specific pointer
@@ -82,11 +59,6 @@ enum {
 	BR_IMG_RESIDENT,
 	BR_IMG_HOST,
 };
-
-/*
- * Bogus type used to import functions
- */
-typedef void BR_PUBLIC_ENTRY br_resident_fn();
 
 #endif
 

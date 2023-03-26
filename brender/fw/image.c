@@ -12,8 +12,6 @@
 
 BR_RCS_ID("$Id: image.c 1.2 1998/06/23 13:46:15 jon Exp $")
 
-#define ARENA_ALIGN 4096
-
 br_boolean BR_RESIDENT_ENTRY BrImageAdd(br_image *img)
 {
 	BR_ADDHEAD(&fw.images,img);
@@ -54,26 +52,19 @@ br_image * BR_RESIDENT_ENTRY BrImageFind(const char *pattern)
 	return NULL;
 }
 
-/*
- * Try to buil a br_image via the host image loader
- */
-static br_image *imageLoadHost(const char *name)
+br_image *ImageLoad(const char *name)
 {
-	br_image *img;
-	void *host_image;
+    br_image *img;
+    void     *host_image;
 
-    host_image = HostImageLoad(name);
+    if((host_image = HostImageLoad(name)) == NULL)
+        return NULL;
 
-	if(host_image) {
-		img = BrResAllocate(NULL,sizeof(*img), BR_MEMORY_IMAGE);
-		img->identifier = BrResStrDup(img,name);
-		img->type = BR_IMG_HOST;
-		img->type_pointer = host_image;
-
-        return img;
-	}
-
-    return NULL;
+    img               = BrResAllocate(NULL, sizeof(br_image), BR_MEMORY_IMAGE);
+    img->identifier   = BrResStrDup(img, name);
+    img->type         = BR_IMG_HOST;
+    img->type_pointer = host_image;
+    return img;
 }
 
 /*
@@ -131,9 +122,6 @@ br_image * BR_RESIDENT_ENTRY BrImageReference(const char *name)
 		BrStrCat(scratch, ".BDD");
 		img = ImageLoad(scratch);
 
-        if(!img)
-            img = imageLoadHost(name);
-
         if(!img) {
        		BrStrCpy(scratch, name);
     		BrStrCat(scratch, ".DLL");
@@ -141,17 +129,9 @@ br_image * BR_RESIDENT_ENTRY BrImageReference(const char *name)
         }
 
     } else if(!BrStrICmp(suffix,".bdd") || !BrStrICmp(suffix,".bed")) {
-        if(!img)
-            img = ImageLoad(name);
-
-        if(!img)
-            img = imageLoadHost(name);
-    } else{
-        if(!img)
-            img = imageLoadHost(name);
-
-        if(!img)
-            img = ImageLoad(name);
+        img = ImageLoad(name);
+    } else {
+        img = ImageLoad(name);
     }
 
 	/*
@@ -175,30 +155,31 @@ br_image * BR_RESIDENT_ENTRY BrImageReference(const char *name)
 /*
  * Find a symbol in an image file
  */
-static void * imageLookupName(br_image *img, char *name, br_uint_32 hint)
+static void * imageLookupName(br_image *img, const char *name, size_t hint)
 {
-	int c,limit,base;
+	int c;
+	size_t limit,base;
 
 	/*
 	 * See if 'hint' matches
 	 */
-	if(hint < img->n_names && !BrStrCmp(name, img->names[hint]))
-		return img->functions[img->name_ordinals[hint]];
+	if(hint < img->n_functions && !BrStrCmp(name, img->functions[hint].name))
+		return img->functions[hint].proc;
 
 	/*
 	 * Binary search on name table	
 	 *
 	 * XXX
 	 */
-	limit = img->n_names;
+	limit = img->n_functions;
 	base = 0;
 
 	while(limit) {
 		/*
 		 * Compare with halfway point
 		 */
-		c = BrStrCmp(name, img->names[base+limit/2]);
-	
+		c = BrStrCmp(name, img->functions[base+limit/2].name);
+
 		if(c < 0) {
 			/*
 			 * Lower
@@ -214,10 +195,10 @@ static void * imageLookupName(br_image *img, char *name, br_uint_32 hint)
 			/*
 			 * Hit
 			 */
-			return img->functions[img->name_ordinals[base+limit/2]];
+			return img->functions[base+limit/2].proc;
 		}
 	}
-		
+
 	/*
 	 * No match
 	 */
@@ -240,12 +221,11 @@ void * BR_RESIDENT_ENTRY BrImageLookupName(br_image *img, char *name, br_uint_32
     /*
      * If this is a host library - just pass the request on
      */
-	if(img->type == BR_IMG_HOST ) {
-		ASSERT(img->type_pointer);
+	if(img->type == BR_IMG_HOST) {
+        ASSERT(img->type_pointer);
 
-		return HostImageLookupName(img->type_pointer, name, hint);
-	}
-
+        return HostImageLookupName(img->type_pointer, name, hint);
+    }
 
     /*
      * Try the name as provided
@@ -285,15 +265,10 @@ void * BR_RESIDENT_ENTRY BrImageLookupOrdinal(br_image *img, br_uint_32 ordinal)
 		return HostImageLookupOrdinal(img->type_pointer, ordinal);
 	}
 
-	ordinal -= img->ordinal_base;
+    if(ordinal >= img->n_functions)
+        return NULL;
 
-	/*
-	 * Check that ordinal exists
-	 */
-	if(ordinal > img->n_functions)
-		return NULL;
-
-	return img->functions[ordinal];
+    return (void*)img->functions[ordinal].proc;
 }
 
 void BR_RESIDENT_ENTRY BrImageDereference(br_image *image)
@@ -331,21 +306,9 @@ void BR_RESIDENT_ENTRY BrImageDereference(br_image *image)
 	BrResFree(image);
 }
 
-void BR_RESIDENT_ENTRY BrImageFree(br_image *image)
-{
-	int i;
-
-	/*
-	 * Dereference all referenced DLLs
-	 */
-	for(i=0; i < image->n_imports; i++)
-		BrImageDereference(image->imports[i]);
-}
-
 /*
  * Resource destructor
  */
 void BR_CALLBACK _BrImageFree(void *res, br_uint_8 res_class, br_size_t size)
 {
-	BrImageFree(res);
 }

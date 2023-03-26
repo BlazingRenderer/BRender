@@ -47,10 +47,6 @@ void BR_CALLBACK _BrObjectFree(void *res, br_uint_8 res_class, br_size_t size);
  * image.c
  */
 void BR_CALLBACK _BrImageFree(void *res, br_uint_8 res_class, br_size_t size);
-
-/*
- * loader.c
- */
 br_image *ImageLoad(const char *name);
 
 /*

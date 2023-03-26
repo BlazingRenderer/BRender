@@ -9,8 +9,21 @@
 #include "brddi.h"
 
 #include "host.h"
-#include "hostimg.h"
 #include "host_ip.h"
+
+static const br_image_function_info functions[] = {
+    {.name = "_HostInfo", .proc = (br_image_proc)HostInfo},
+};
+
+static br_image Image_BRHOST1 = {
+    .node         = {0},
+    .identifier   = "BRHOST1",
+    .type         = BR_IMG_RESIDENT,
+    .ref_count    = 0,
+    .n_functions  = BR_ASIZE(functions),
+    .functions    = functions,
+    .type_pointer = NULL,
+};
 
 void BR_PUBLIC_ENTRY HostBegin(void)
 {

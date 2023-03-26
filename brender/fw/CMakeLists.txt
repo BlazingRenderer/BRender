@@ -27,13 +27,6 @@ target_link_libraries(fw-headers INTERFACE host-headers)
 target_link_libraries(fw-headers INTERFACE fmt-headers)
 add_dependencies(fw-headers fw-dev-headers)
 
-add_custom_command(
-	OUTPUT fwimg.h fwimg.def
-	COMMAND "${PERL_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/../resgen.pl" "fwimg.h" "fwimg.def" < "${CMAKE_CURRENT_SOURCE_DIR}/fwimg.fns"
-	MAIN_DEPENDENCY "${CMAKE_CURRENT_SOURCE_DIR}/fwimg.fns"
-	DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/../resgen.pl"
-)
-
 set(FW_FILES
 	./assocarr.c
 	./brbegin.c
@@ -55,7 +48,6 @@ set(FW_FILES
 	./genfile.c
 	./image.c
 	./lexer.c
-	./loader.c
 	./log.c
 	./mem.c
 	./object.c
@@ -90,10 +82,6 @@ set(FW_FILES
 	./register.h
 	./shortcut.h
 	./tokenmap.h
-	./wincoff.h
-
-	${CMAKE_CURRENT_BINARY_DIR}/fwimg.h
-	./fwimg.fns
 )
 
 add_library(fw STATIC ${FW_FILES} ${FW_DEV_FILES})
