@@ -17,16 +17,6 @@
 #endif
 
 /*
- * Hard-wired registry limits for evaluation build
- */
-#if EVAL
-#define MODEL_LIMIT		5
-#define MATERIAL_LIMIT	10
-#define MAP_LIMIT		10
-#define TABLE_LIMIT		5
-#endif
-
-/*
  * Structure for maintaining enabled actors
  */
 typedef struct br_v1db_enable {

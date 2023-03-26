@@ -777,20 +777,6 @@ br_renderbounds_cbfn * BR_PUBLIC_ENTRY BrDbSetRenderBoundsCallback(br_renderboun
 }
 
 /*
- * Draw a sparse lattice of zero pixels into the output buffer
- */
-#if EVAL
-static void DrawLattice(br_pixelmap *pmap)
-{
-	int sx, sy;
-
-	for(sy = -pmap->origin_y + 32; sy < pmap->height; sy += 64)
-		for(sx = -pmap->origin_x + 32; sx < pmap->width; sx += 64)
-			BrPixelmapPixelSet(pmap, sx, sy, 0);
-}
-#endif
-
-/*
  * Compatibility functions
  */
 static void SetOrigin(br_pixelmap *buffer)
@@ -936,13 +922,6 @@ void BR_PUBLIC_ENTRY BrZbSceneRenderEnd(void)
 	}
 
 	/*
-	 * Overlay lattice if evaluation version
-	 */
-#if EVAL
-	DrawLattice(v1db.colour_buffer);
-#endif
-
-	/*
 	 * Tell the renderer to flush
 	 */
 	RendererFlush(v1db.renderer, BR_FALSE);
@@ -1072,13 +1051,6 @@ void BR_PUBLIC_ENTRY BrZsSceneRenderEnd(void)
 		 */
 		RenderOrderTableList();
 	}
-
-	/*
-	 * Overlay lattice if evaluation version
-	 */
-#if EVAL
-	DrawLattice(v1db.colour_buffer);
-#endif
 
 	/*
 	 * Tell the renderer to flush

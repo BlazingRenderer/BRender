@@ -14,16 +14,6 @@
 
 BR_RCS_ID("$Id: regsupt.c 1.3 1998/01/15 12:58:24 jon Exp $")
 
-/*
- * Declare static registry lists for evaluation build
- */
-#if EVAL
-extern br_registry_entry modelRegistryList[];
-extern br_registry_entry materialRegistryList[];
-extern br_registry_entry mapRegistryList[];
-extern br_registry_entry tableRegistryList[];
-#endif
-
 /**
  ** Specific versions of registry calls for each class
  **/
@@ -39,15 +29,7 @@ br_model * BR_PUBLIC_ENTRY BrModelAdd(br_model *model)
 	UASSERT(BrResCheck(model, 1));
 	UASSERT(BrResClass(model) == BR_MEMORY_MODEL);
 
-#if EVAL
-	if(v1db.reg_models.count >= MODEL_LIMIT) {
-		BR_FAILURE("Model registry limit exceeded");
-		return NULL;
-	}
-	BrRegistryAddStatic(&v1db.reg_models, modelRegistryList, model);
-#else
 	BrRegistryAdd(&v1db.reg_models, model);
-#endif
 
 	/*
 	 * Preprocess model and generate stored info
@@ -65,11 +47,7 @@ br_model * BR_PUBLIC_ENTRY BrModelRemove(br_model *model)
     UASSERT_MESSAGE("Invalid BrModelRemove pointer", model != NULL);
 	BrModelClear(model);
 
-#if EVAL
-	return BrRegistryRemoveStatic(&v1db.reg_models, model);
-#else
 	return BrRegistryRemove(&v1db.reg_models, model);
-#endif
 }
 
 br_model * BR_PUBLIC_ENTRY BrModelFind(const char *pattern)
@@ -136,15 +114,7 @@ br_material * BR_PUBLIC_ENTRY BrMaterialAdd(br_material *material)
 	UASSERT(BrResCheck(material, 1));
 	UASSERT(BrResClass(material) == BR_MEMORY_MATERIAL);
     UASSERT(material != NULL);
-#if EVAL
-	if(v1db.reg_materials.count >= MATERIAL_LIMIT) {
-		BR_FAILURE("Material registry limit exceeded");
-		return NULL;
-	}
-	BrRegistryAddStatic(&v1db.reg_materials, materialRegistryList, material);
-#else
 	BrRegistryAdd(&v1db.reg_materials, material);
-#endif
 
 	BrMaterialUpdate(material, BR_MATU_ALL);
 
@@ -156,11 +126,7 @@ br_material * BR_PUBLIC_ENTRY BrMaterialRemove(br_material *material)
     UASSERT(material != NULL);
 	BrMaterialClear(material);
 
-#if EVAL
-	return BrRegistryRemoveStatic(&v1db.reg_materials, material);
-#else
 	return BrRegistryRemove(&v1db.reg_materials, material);
-#endif
 }
 
 br_material * BR_PUBLIC_ENTRY BrMaterialFind(const char *pattern)
@@ -228,15 +194,7 @@ br_uint_32 BR_PUBLIC_ENTRY BrMaterialEnum(const char *pattern,
 br_pixelmap * BR_PUBLIC_ENTRY BrMapAdd(br_pixelmap *pixelmap)
 {
     UASSERT_MESSAGE("Invalid BrMapAdd pointer", pixelmap != NULL);
-#if EVAL
-	if(v1db.reg_textures.count >= MAP_LIMIT) {
-		BR_FAILURE("Map registry limit exceeded");
-		return NULL;
-	}
-	BrRegistryAddStatic(&v1db.reg_textures, mapRegistryList, pixelmap);
-#else
 	BrRegistryAdd(&v1db.reg_textures, pixelmap);
-#endif
 
 	BrMapUpdate(pixelmap, BR_MAPU_ALL);
 
@@ -248,11 +206,7 @@ br_pixelmap * BR_PUBLIC_ENTRY BrMapRemove(br_pixelmap *pixelmap)
     UASSERT_MESSAGE("Invalid BrMapRemove pointer", pixelmap != NULL);
 	BrBufferClear(pixelmap);
 
-#if EVAL
-	return BrRegistryRemoveStatic(&v1db.reg_textures, pixelmap);
-#else
 	return BrRegistryRemove(&v1db.reg_textures, pixelmap);
-#endif
 }
 
 br_pixelmap * BR_PUBLIC_ENTRY BrMapFind(const char *pattern)
@@ -324,16 +278,7 @@ br_pixelmap * BR_PUBLIC_ENTRY BrTableAdd(br_pixelmap *pixelmap)
 {
 
 	UASSERT_MESSAGE("Invalid BrTableAdd pointer", pixelmap != NULL);
-
-#if EVAL
-	if(v1db.reg_tables.count >= TABLE_LIMIT) {
-		BR_FAILURE("Table registry limit exceeded");
-		return NULL;
-	}
-	BrRegistryAddStatic(&v1db.reg_tables, tableRegistryList, pixelmap);
-#else
 	BrRegistryAdd(&v1db.reg_tables, pixelmap);
-#endif
 
 	BrTableUpdate(pixelmap, BR_TABU_ALL);
 
@@ -346,11 +291,7 @@ br_pixelmap * BR_PUBLIC_ENTRY BrTableRemove(br_pixelmap *pixelmap)
 
 	BrBufferClear(pixelmap);
 
-#if EVAL
-	return BrRegistryRemoveStatic(&v1db.reg_tables, pixelmap);
-#else
 	return BrRegistryRemove(&v1db.reg_tables, pixelmap);
-#endif
 }
 
 br_pixelmap * BR_PUBLIC_ENTRY BrTableFind(const char *pattern)

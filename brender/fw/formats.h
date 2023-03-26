@@ -11,12 +11,6 @@
 #ifndef _FORMATS_H_
 #define _FORMATS_H_
 
-
-// This was for restricting our evaluation version.
-#if EVAL
-#define PAD_SIZE (2048-32)
-#endif
-
 /**
  ** Generic vertex structure used for geometry formats
  **/
@@ -25,27 +19,18 @@ struct fmt_vertex {
 	br_vector3 p;			/* Point in model space				*/
 	br_vector2 map;			/* Mapping coordinates				*/
 	br_vector3 n;			/* Surface normal at vertex			*/
-#if EVAL
-	br_int_8 _pad[PAD_SIZE];
-#endif
 };
 
 struct fmt_vertex_x {
 	br_vector3_x p;			/* Point in model space				*/
 	br_vector2_x map;		/* Mapping coordinates				*/
 	br_vector3_x n;		    /* Surface normal at vertex			*/
-#if EVAL
-	br_int_8 _pad[PAD_SIZE];
-#endif
 };
 
 struct fmt_vertex_f {
 	br_vector3_f p;			/* Point in model space				*/
 	br_vector2_f map;		/* Mapping coordinates				*/
 	br_vector3_f n;		    /* Surface normal at vertex			*/
-#if EVAL
-	br_int_8 _pad[PAD_SIZE];
-#endif
 };
 /**
  ** Version 1.1 prepared model format

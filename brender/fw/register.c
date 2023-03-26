@@ -262,7 +262,7 @@ int BrRegistryEnum(br_registry *reg, const char *pattern,
 /**
  ** Variants for statically allocated registries
  **/
-#if EVAL
+
 /*
  * Initialise a registry
  */
@@ -347,21 +347,3 @@ void *BrRegistryRemoveStatic(br_registry *reg, void *item)
 
 	return r;
 }
-
-#else
-void *BrRegistryNewStatic(br_registry *reg, br_registry_entry *base, int limit)
-{
-	return NULL;
-}
-
-void *BrRegistryAddStatic(br_registry *reg, br_registry_entry *base, void *item)
-{
-	return NULL;
-}
-
-void *BrRegistryRemoveStatic(br_registry *reg, void *item)
-{
-	return NULL;
-}
-#endif
-

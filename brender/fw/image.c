@@ -110,7 +110,6 @@ br_image * BR_RESIDENT_ENTRY BrImageReference(const char *name)
      * The search order depends on the extension
      *
      * No Suffix:
-     *      ImageLoad(xxx.BED) (If eval. version)
      *      ImageLoad(xxx.BDD)
      *      ImageLoadHost(xxx)
      *      ImageLoad(xxx.DLL)
@@ -128,17 +127,9 @@ br_image * BR_RESIDENT_ENTRY BrImageReference(const char *name)
         ;
 
     if(*suffix == '\0') {
-#if EVAL
-   		BrStrCpy(scratch, name);
-		BrStrCat(scratch, ".BED");
-        img = ImageLoad(scratch);
-#endif
-
-        if(!img) {
-       		BrStrCpy(scratch, name);
-    		BrStrCat(scratch, ".BDD");
-            img = ImageLoad(scratch);
-        }
+		BrStrCpy(scratch, name);
+		BrStrCat(scratch, ".BDD");
+		img = ImageLoad(scratch);
 
         if(!img)
             img = imageLoadHost(name);

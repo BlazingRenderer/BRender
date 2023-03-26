@@ -26,16 +26,6 @@ extern br_material *SetupDefaultMaterial();
 
 
 
-#if EVAL
-/*
- * Static registry lists for evaluation build
- */
-br_registry_entry modelRegistryList[MODEL_LIMIT];
-br_registry_entry materialRegistryList[MATERIAL_LIMIT];
-br_registry_entry mapRegistryList[MAP_LIMIT];
-br_registry_entry tableRegistryList[TABLE_LIMIT];
-#endif
-
 /*
  * System resource classes
  */
@@ -76,17 +66,10 @@ br_error BR_PUBLIC_ENTRY BrV1dbBegin(void)
 	/*
 	 * Initialise all registries
 	 */
-#if EVAL
-	BrRegistryNewStatic(&v1db.reg_models, modelRegistryList, MODEL_LIMIT);
-	BrRegistryNewStatic(&v1db.reg_materials, materialRegistryList, MATERIAL_LIMIT);
-	BrRegistryNewStatic(&v1db.reg_textures, mapRegistryList, MAP_LIMIT);
-	BrRegistryNewStatic(&v1db.reg_tables, tableRegistryList, TABLE_LIMIT);
-#else
 	BrRegistryNew(&v1db.reg_models);
 	BrRegistryNew(&v1db.reg_materials);
 	BrRegistryNew(&v1db.reg_textures);
 	BrRegistryNew(&v1db.reg_tables);
-#endif
 
 	/*
 	 * Allocate the zero sized base resource instance

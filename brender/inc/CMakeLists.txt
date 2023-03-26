@@ -70,7 +70,6 @@ target_compile_definitions(inc INTERFACE
 	BASED_FIXED=0
 	BASED_FLOAT=1
 	PARANOID=1
-	EVAL=0
 )
 
 
