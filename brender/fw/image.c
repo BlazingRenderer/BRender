@@ -152,57 +152,25 @@ br_image * BR_RESIDENT_ENTRY BrImageReference(const char *name)
 	return img;
 }
 
+static int bsearchFn(const void *a, const void *b)
+{
+    const char *name = a;
+    const br_image_function_info *fb = b;
+    return BrStrCmp(name, fb->name);
+}
+
 /*
  * Find a symbol in an image file
  */
 static void * imageLookupName(br_image *img, const char *name, size_t hint)
 {
-	int c;
-	size_t limit,base;
-
 	/*
 	 * See if 'hint' matches
 	 */
 	if(hint < img->n_functions && !BrStrCmp(name, img->functions[hint].name))
 		return img->functions[hint].proc;
 
-	/*
-	 * Binary search on name table	
-	 *
-	 * XXX
-	 */
-	limit = img->n_functions;
-	base = 0;
-
-	while(limit) {
-		/*
-		 * Compare with halfway point
-		 */
-		c = BrStrCmp(name, img->functions[base+limit/2].name);
-
-		if(c < 0) {
-			/*
-			 * Lower
-			 */
-			limit = limit/2;
-		} else if(c > 0) {
-			/*
-			 * Higher
-			 */
-			base += limit/2+1;
-			limit = limit - (limit/2+1);
-		} else {
-			/*
-			 * Hit
-			 */
-			return img->functions[base+limit/2].proc;
-		}
-	}
-
-	/*
-	 * No match
-	 */
-	return NULL;
+	return BrBSearch(name, img->functions, img->n_functions, sizeof(br_image_function_info), bsearchFn);
 }
 
 /*
