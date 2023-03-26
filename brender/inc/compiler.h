@@ -200,6 +200,7 @@ typedef float br_float;
 #define BR_CMETHOD(t,m)					(_M_##t##_##m)
 #define BR_CMETHOD_REF(t,m) 		(_M_##t##_##m)
 #define BR_CMETHOD_CALL(t,m,o) 		(((t *)(o))->dispatch->_##m)
+#define BR_CMETHOD_STR(t,m) 		BR_STR(_M_##t##_##m)
 
 /*
  * Backwards compatability
