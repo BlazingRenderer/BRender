@@ -164,7 +164,6 @@ void BrDD_SetPixelFormat( LPDDSURFACEDESC ddsd, int type )
 br_error BufferDirectDrawAllocateOff(br_device_pixelmap *self, br_device_pixelmap **newpm, int w, int h, int type )
 {
 	int width;
-	br_uint_16 qual;
 	br_device *dev;
 	br_device_pixelmap *devpm;
 	LPDIRECTDRAWSURFACE surface;
