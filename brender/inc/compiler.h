@@ -183,6 +183,8 @@ typedef float br_float;
 #	error "Unknown Compiler"
 #endif
 
+#define BR_STR(s) #s
+
 /*
  * Declare methods in C
  */
