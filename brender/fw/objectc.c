@@ -373,8 +373,10 @@ void BR_CMETHOD_DECL(br_object_container, tokensMatchEnd)
 const br_tv_match_info *BR_CMETHOD_DECL(br_object_container, tokensMatchInfoQuery)
         (struct br_object_container *self)
 {
+    static const br_tv_match_info matchinfo[] = {{.type = BR_NULL_TOKEN}};
+
     (void)self;
-    return (br_tv_match_info[]){{.type = BR_NULL_TOKEN}};
+    return matchinfo;
 }
 
 /*

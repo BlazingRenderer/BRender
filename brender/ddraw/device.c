@@ -229,12 +229,13 @@ static void * BR_CMETHOD_DECL(br_device_dd, listQuery)(br_object_container *self
 
 static const br_tv_match_info *BR_CMETHOD_DECL(br_device_dd, tokensMatchInfoQuery)(br_object_container *self)
 {
-    (void)self;
-
-    return (const br_tv_match_info[]){
+    static const br_tv_match_info matchinfo[] = {
         {.type = BRT_OUTPUT_FACILITY, .insignificant = insignificantMatchTokens},
         {.type = BR_NULL_TOKEN,       .insignificant = NULL                    },
     };
+
+    (void)self;
+    return matchinfo;
 }
 
 /*
