@@ -251,6 +251,7 @@ static const br_image_function_info functions[] = {
     REGMETHOD(BrAbort),
     REGMETHOD(BrAddHead),
     REGMETHOD(BrAddTail),
+    REGMETHOD(BrBSearch),
     REGMETHOD(BrDevAdd),
     REGMETHOD(BrDevAddStatic),
     REGMETHOD(BrDevBegin),

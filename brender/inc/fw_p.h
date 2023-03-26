@@ -73,6 +73,11 @@ void *BR_RESIDENT_ENTRY BrSwapBlock(void *block, int count, int size);
 typedef int BR_CALLBACK br_qsort_cbfn(const void *, const void *);
 void BR_RESIDENT_ENTRY BrQsort(void *basep, unsigned int nelems, unsigned int size,
                             br_qsort_cbfn *comp);
+
+typedef int BR_CALLBACK br_bsearch_cbfn(const void *, const void *);
+void *BR_RESIDENT_ENTRY BrBSearch(const void *key, const void *base, unsigned int nmemb, unsigned int size,
+                                  br_bsearch_cbfn *comp);
+
 /*
  * Diagnostic generation
  */

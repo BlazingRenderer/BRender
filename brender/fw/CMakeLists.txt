@@ -31,6 +31,7 @@ set(FW_FILES
 	./assocarr.c
 	./brbegin.c
 	./brbhook.c
+	./brbsearch.c
 	./brlists.c
 	./brqsort.c
 	./bswap.c
