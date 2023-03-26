@@ -55,9 +55,22 @@ typedef struct br_image {
  * Possible types of DLL
  */
 enum {
-	BR_IMG_FRAMEWORK = 1,
-	BR_IMG_RESIDENT,
-	BR_IMG_HOST,
+    /*
+     * A library loaded by BRender itself.
+     * These are no longer used, this definition is only
+     * provided for compatibility.
+     */
+    BR_IMG_FRAMEWORK = 1,
+
+    /*
+     * A statically-linked, or memory-resident library.
+     */
+    BR_IMG_RESIDENT,
+
+    /*
+     * A host-loaded library, e.g. from LoadLibrary() or dlopen().
+     */
+    BR_IMG_HOST,
 };
 
 #endif
