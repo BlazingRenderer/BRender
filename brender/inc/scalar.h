@@ -47,7 +47,7 @@ typedef br_float br_ufraction;
 /*
  * Macros for type conversion
  */
-#define BrFloatToScalar(f)	(f)
+#define BrFloatToScalar(f)	((br_scalar)f)
 #define BrScalarToFloat(c)	(c)
 
 #define BrIntToScalar(i)	((br_scalar)(i))
