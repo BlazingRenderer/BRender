@@ -12,7 +12,6 @@ set(HOST_FILES
 	./host.h
 	./host_ip.h
 	./host_p.h
-	./hostimg.h
 )
 
 add_library(host STATIC ${HOST_FILES})
