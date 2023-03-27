@@ -54,9 +54,9 @@ typedef struct br_colour_range {
 #define BR_GRN(c) (((c) >> 8) & 0xFF)
 #define BR_BLU(c) ((c) & 0xFF)
 
-#define BR_RED_565(c) (((c) >> 11 & 31))
+#define BR_RED_565(c) (((c) >> 11) & 31)
 #define BR_GRN_565(c) (((c) >> 5) & 63)
-#define BR_BLU_565(c) ((c) & 31)
+#define BR_BLU_565(c) (((c) >> 0) & 31)
 
 #endif
 
