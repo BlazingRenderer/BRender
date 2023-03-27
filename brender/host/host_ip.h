@@ -17,13 +17,13 @@ extern "C" {
 /*
  * Windows configuration
  */
-//char * BR_RESIDENT_ENTRY GetWinProfileString(char *name);
-char * BR_RESIDENT_ENTRY GetWinRegistryValue(char *name);
+// char * BR_RESIDENT_ENTRY GetWinProfileString(char *name);
+char *BR_RESIDENT_ENTRY GetWinRegistryValue(char *name);
 
 /*
  * cpuid.asm
  */
-//void BR_ASM_CALL CPUInfo(br_token *cpu_type, br_uint_32 *features);
+// void BR_ASM_CALL CPUInfo(br_token *cpu_type, br_uint_32 *features);
 
 /* CPUInfo.c
  *
@@ -36,5 +36,3 @@ void CPUInfo(br_token *cpu_type, br_uint_32 *features);
 #endif
 
 #endif
-
-

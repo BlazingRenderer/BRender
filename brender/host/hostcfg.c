@@ -12,128 +12,106 @@
 #include "brender.h"
 #include "host.h"
 
-
 #ifdef __WIN_32__
 #define DEFAULT_DEVICE "DDRAW"
 #else
 #define DEFAULT_DEVICE "MCGA"
 #endif
 
-
-
-
-
 // Read requested environment variable. If not set, use one of our
 // defaults if applicable.
 
-
-char * BR_RESIDENT_ENTRY HostDefaultDevice()
+char *BR_RESIDENT_ENTRY HostDefaultDevice()
 {
-   return DEFAULT_DEVICE ;
+    return DEFAULT_DEVICE;
 }
-
-
-
-
 
 #ifdef __WIN_32__
 
 #include <windows.h>
 
-
-br_boolean BR_RESIDENT_ENTRY HostIniSectionExists( const char *ini_file, const char *section_name )
+br_boolean BR_RESIDENT_ENTRY HostIniSectionExists(const char *ini_file, const char *section_name)
 {
-	DWORD Size ;
-	
-	char TmpBuffer[5];
-    
-	Size = GetPrivateProfileSectionA( section_name, TmpBuffer, 5, ini_file );
-   
-   return( Size != 0 );
+    DWORD Size;
+
+    char TmpBuffer[5];
+
+    Size = GetPrivateProfileSectionA(section_name, TmpBuffer, 5, ini_file);
+
+    return (Size != 0);
 }
 
-
-br_error BR_RESIDENT_ENTRY HostIniQuery( const char *ini_file, const char *section_name,
-                                         const char *entry, char *Buffer, int max,
-                                         br_uint_16 *size )
+br_error BR_RESIDENT_ENTRY HostIniQuery(const char *ini_file, const char *section_name, const char *entry, char *Buffer,
+                                        int max, br_uint_16 *size)
 
 {
-   *size = (int) GetPrivateProfileStringA( section_name, entry,
-                                          "", Buffer,
-                                          max, ini_file );
+    *size = (int)GetPrivateProfileStringA(section_name, entry, "", Buffer, max, ini_file);
 
-   return BRE_OK ;
+    return BRE_OK;
 }
 
-
-br_error BR_RESIDENT_ENTRY HostRegistryQuery( const void *hKey, const char *Path,
-                             const char *entry, char *Buffer,
-                             br_uint_16 max, br_uint_16 *size )
+br_error BR_RESIDENT_ENTRY HostRegistryQuery(const void *hKey, const char *Path, const char *entry, char *Buffer,
+                                             br_uint_16 max, br_uint_16 *size)
 {
-   HKEY key ,key2;
-   DWORD type ;
-   DWORD dwsize = 0 ;
+    HKEY  key, key2;
+    DWORD type;
+    DWORD dwsize = 0;
 
-   if ( hKey )
-      key = (HKEY) hKey ;
+    if(hKey)
+        key = (HKEY)hKey;
     else
-      key = HKEY_LOCAL_MACHINE ;
+        key = HKEY_LOCAL_MACHINE;
 
-    *size = 0 ;
+    *size = 0;
 
-   if ( RegOpenKeyExA( key, Path, 0, KEY_READ, &key2 ) != ERROR_SUCCESS )
-       return BRE_FAIL ;
+    if(RegOpenKeyExA(key, Path, 0, KEY_READ, &key2) != ERROR_SUCCESS)
+        return BRE_FAIL;
 
-   dwsize = (DWORD) max ;
+    dwsize = (DWORD)max;
 
-   if ( RegQueryValueExA( key2, entry, NULL, &type, (LPBYTE)Buffer, &dwsize ) != ERROR_SUCCESS )
-      return BRE_FAIL ;
- 
-   if ( type != REG_SZ )
-   {
-      BR_ERROR0("Registry entry type is not a string");
-      return BRE_FAIL ;
-   } 
+    if(RegQueryValueExA(key2, entry, NULL, &type, (LPBYTE)Buffer, &dwsize) != ERROR_SUCCESS)
+        return BRE_FAIL;
 
-   *size = (br_uint_16) dwsize ;
+    if(type != REG_SZ) {
+        BR_ERROR0("Registry entry type is not a string");
+        return BRE_FAIL;
+    }
 
-   return BRE_OK ;
+    *size = (br_uint_16)dwsize;
+
+    return BRE_OK;
 }
 
-
-br_error BR_RESIDENT_ENTRY HostIniReadSection(const char *filename, const char *section,
-                                              char *buffer, br_size_t size)
+br_error BR_RESIDENT_ENTRY HostIniReadSection(const char *filename, const char *section, char *buffer, br_size_t size)
 {
-	br_size_t chars;
+    br_size_t chars;
 
-	chars = GetPrivateProfileSectionA(section, buffer, size, filename);
+    chars = GetPrivateProfileSectionA(section, buffer, size, filename);
 
-	/*
-	 * According to the documentation, the value returned is the number
-	 * of characters copied into the buffer, and is (size - 2) if the
-	 * buffer was not large enough.  Seems strange, but anyway...
-	 */
-	if (chars == size - 2)
-		return BRE_OVERFLOW;
+    /*
+     * According to the documentation, the value returned is the number
+     * of characters copied into the buffer, and is (size - 2) if the
+     * buffer was not large enough.  Seems strange, but anyway...
+     */
+    if(chars == size - 2)
+        return BRE_OVERFLOW;
 
-	return BRE_OK;
+    return BRE_OK;
 }
 
-br_error BR_RESIDENT_ENTRY HostIniWriteSection(const char *filename, const char *section,
-                                              char *buffer, br_size_t size)
+br_error BR_RESIDENT_ENTRY HostIniWriteSection(const char *filename, const char *section, char *buffer, br_size_t size)
 {
-	/*
-	 * Check that the section is correctly terminated
-	 */
-	if (buffer[size - 1] != '\0' || buffer[size - 2] != '\0')
-		return BRE_FAIL;
+    /*
+     * Check that the section is correctly terminated
+     */
+    if(buffer[size - 1] != '\0' || buffer[size - 2] != '\0')
+        return BRE_FAIL;
 
-	if (WritePrivateProfileSectionA(section, buffer, filename))
-		return BRE_OK;
-	else
-		return BRE_FAIL;
+    if(WritePrivateProfileSectionA(section, buffer, filename))
+        return BRE_OK;
+    else
+        return BRE_FAIL;
 }
-
 
 /*
  * Reads all values in a registry key and returns them in the same format
@@ -143,226 +121,211 @@ br_error BR_RESIDENT_ENTRY HostIniWriteSection(const char *filename, const char 
  *
  * The key should be passed with permission to read
  */
-br_error BR_RESIDENT_ENTRY HostRegistryReadKey(const void *key, const char *subkey,
-                                               char *buffer, br_size_t size)
+br_error BR_RESIDENT_ENTRY HostRegistryReadKey(const void *key, const char *subkey, char *buffer, br_size_t size)
 {
-	HKEY hkey;
-	DWORD num_values, max_name_len, max_value_len, name_len, value_len, type, dword;
-	char *name, *value;
-	br_uint_32 i;
-	br_error r = BRE_OK;
+    HKEY       hkey;
+    DWORD      num_values, max_name_len, max_value_len, name_len, value_len, type, dword;
+    char      *name, *value;
+    br_uint_32 i;
+    br_error   r = BRE_OK;
 
-	if (RegOpenKeyExA(key? (HKEY)key: HKEY_LOCAL_MACHINE, subkey, 0, KEY_READ, &hkey) != ERROR_SUCCESS)
-		return BRE_FAIL;
+    if(RegOpenKeyExA(key ? (HKEY)key : HKEY_LOCAL_MACHINE, subkey, 0, KEY_READ, &hkey) != ERROR_SUCCESS)
+        return BRE_FAIL;
 
-	if (RegQueryInfoKeyA(hkey, NULL, NULL, NULL, NULL, NULL, NULL,
-		&num_values, &max_name_len, &max_value_len, NULL, NULL) != ERROR_SUCCESS) {
-		RegCloseKey(hkey);
-		return BRE_FAIL;
-	}
+    if(RegQueryInfoKeyA(hkey, NULL, NULL, NULL, NULL, NULL, NULL, &num_values, &max_name_len, &max_value_len, NULL,
+                        NULL) != ERROR_SUCCESS) {
+        RegCloseKey(hkey);
+        return BRE_FAIL;
+    }
 
-	name = BrMemAllocate(max_name_len + 1, BR_MEMORY_SCRATCH);
-	if (name == NULL) {
-		RegCloseKey(hkey);
-		return BRE_FAIL;
-	}
+    name = BrMemAllocate(max_name_len + 1, BR_MEMORY_SCRATCH);
+    if(name == NULL) {
+        RegCloseKey(hkey);
+        return BRE_FAIL;
+    }
 
-	value = BrMemAllocate(max_value_len, BR_MEMORY_SCRATCH);
-	if (value == NULL) {
-		BrMemFree(name);
-		RegCloseKey(hkey);
-		return BRE_FAIL;
-	}
+    value = BrMemAllocate(max_value_len, BR_MEMORY_SCRATCH);
+    if(value == NULL) {
+        BrMemFree(name);
+        RegCloseKey(hkey);
+        return BRE_FAIL;
+    }
 
-	for (i = 0; i < num_values; i++) {
+    for(i = 0; i < num_values; i++) {
 
-		name_len = max_name_len + 1;
-		value_len = max_value_len;
+        name_len  = max_name_len + 1;
+        value_len = max_value_len;
 
-		if (RegEnumValueA(hkey, i, name, &name_len, NULL, &type, (LPBYTE)value, &value_len) != ERROR_SUCCESS)
-			continue;
+        if(RegEnumValueA(hkey, i, name, &name_len, NULL, &type, (LPBYTE)value, &value_len) != ERROR_SUCCESS)
+            continue;
 
-		if (size < name_len + 2) {
-			r = BRE_OVERFLOW;
-			break;
-		}
-			
-		/*
-		 * Ought to check that the name is a valid identifier
-		 */
+        if(size < name_len + 2) {
+            r = BRE_OVERFLOW;
+            break;
+        }
 
-		/*
-		 * Write the entry out according to the type of data
-		 */
-		switch (type) {
+        /*
+         * Ought to check that the name is a valid identifier
+         */
 
-			case REG_DWORD_LITTLE_ENDIAN:
+        /*
+         * Write the entry out according to the type of data
+         */
+        switch(type) {
 
-				dword = *(DWORD *)value;
-				BrSprintf(value, "%d", dword);
-				value_len = BrStrLen(value);
+            case REG_DWORD_LITTLE_ENDIAN:
 
-				goto string;
-					
-			case REG_DWORD_BIG_ENDIAN:
+                dword = *(DWORD *)value;
+                BrSprintf(value, "%d", dword);
+                value_len = BrStrLen(value);
 
-				dword = *(BYTE *)value << 24 |
-					*(BYTE *)(value + 1) << 16 |
-					*(BYTE *)(value + 2) << 8 |
-					*(BYTE *)(value + 3);
-				BrSprintf(value, "%d", dword);
-				value_len = BrStrLen(value);
+                goto string;
 
-				goto string;
+            case REG_DWORD_BIG_ENDIAN:
 
-			case REG_NONE:
+                dword = *(BYTE *)value << 24 | *(BYTE *)(value + 1) << 16 | *(BYTE *)(value + 2) << 8 |
+                        *(BYTE *)(value + 3);
+                BrSprintf(value, "%d", dword);
+                value_len = BrStrLen(value);
 
-				if (size < name_len + 1)
-					r = BRE_OVERFLOW;
+                goto string;
 
-				BrMemCpy(buffer, name, name_len + 1);
+            case REG_NONE:
 
-				buffer += name_len + 1;
-				size -= name_len + 1;
+                if(size < name_len + 1)
+                    r = BRE_OVERFLOW;
 
-				break;
-					
-			case REG_SZ:
-			string:
+                BrMemCpy(buffer, name, name_len + 1);
 
-				if (size < name_len + 1 + value_len)
-					r = BRE_OVERFLOW;
-					
-				BrMemCpy(buffer, name, name_len);
-				buffer[name_len] = '=';
-				BrMemCpy(buffer + name_len + 1, value, value_len);
+                buffer += name_len + 1;
+                size -= name_len + 1;
 
-				buffer += name_len + 1 + value_len;
-				size -= name_len + 1 + value_len;
+                break;
 
-				break;
+            case REG_SZ:
+string:
 
-			case REG_BINARY:
-			case REG_EXPAND_SZ:
-			case REG_LINK:
-			case REG_MULTI_SZ:
-			case REG_RESOURCE_LIST:
-			default:
-				break;
-		}
-	}
+                if(size < name_len + 1 + value_len)
+                    r = BRE_OVERFLOW;
 
-	/*
-	 * Terminate buffer
-	 */
-	*buffer++ = '\0';
+                BrMemCpy(buffer, name, name_len);
+                buffer[name_len] = '=';
+                BrMemCpy(buffer + name_len + 1, value, value_len);
 
-	BrMemFree(value);
-	BrMemFree(name);
-	RegCloseKey(hkey);
+                buffer += name_len + 1 + value_len;
+                size -= name_len + 1 + value_len;
 
-	return r;
+                break;
+
+            case REG_BINARY:
+            case REG_EXPAND_SZ:
+            case REG_LINK:
+            case REG_MULTI_SZ:
+            case REG_RESOURCE_LIST:
+            default:
+                break;
+        }
+    }
+
+    /*
+     * Terminate buffer
+     */
+    *buffer++ = '\0';
+
+    BrMemFree(value);
+    BrMemFree(name);
+    RegCloseKey(hkey);
+
+    return r;
 }
 
-br_error BR_RESIDENT_ENTRY HostRegistryWriteKey(const void *key, const char *subkey,
-                                                char *buffer, br_size_t size)
+br_error BR_RESIDENT_ENTRY HostRegistryWriteKey(const void *key, const char *subkey, char *buffer, br_size_t size)
 {
-	HKEY hkey;
-	DWORD disposition, value_len;
-	char *name, *value, separator;
-	br_error r = BRE_OK;
+    HKEY     hkey;
+    DWORD    disposition, value_len;
+    char    *name, *value, separator;
+    br_error r = BRE_OK;
 
-	if (subkey != NULL) {
-		if (RegCreateKeyExA(key? (HKEY)key: HKEY_LOCAL_MACHINE, subkey, 0,
-			"", REG_OPTION_NON_VOLATILE, KEY_WRITE,
-			NULL, &hkey, &disposition) != ERROR_SUCCESS)
-			return BRE_FAIL;
-	} else {
-		if (RegOpenKeyExA(key? (HKEY)key: HKEY_LOCAL_MACHINE, NULL, 0, KEY_WRITE, &hkey) != ERROR_SUCCESS)
-			return BRE_FAIL;
-	}
+    if(subkey != NULL) {
+        if(RegCreateKeyExA(key ? (HKEY)key : HKEY_LOCAL_MACHINE, subkey, 0, "", REG_OPTION_NON_VOLATILE, KEY_WRITE,
+                           NULL, &hkey, &disposition) != ERROR_SUCCESS)
+            return BRE_FAIL;
+    } else {
+        if(RegOpenKeyExA(key ? (HKEY)key : HKEY_LOCAL_MACHINE, NULL, 0, KEY_WRITE, &hkey) != ERROR_SUCCESS)
+            return BRE_FAIL;
+    }
 
-	name = buffer;
+    name = buffer;
 
-	while (*name != '\0') {
+    while(*name != '\0') {
 
-		for (value = name; *value != '=' && *value != ':' && *value != '\0'; value++);
+        for(value = name; *value != '=' && *value != ':' && *value != '\0'; value++)
+            ;
 
-		separator = *value;
-		*value++ = '\0';
+        separator = *value;
+        *value++  = '\0';
 
-		value_len = BrStrLen(value) + 1;
+        value_len = BrStrLen(value) + 1;
 
-		if (RegSetValueExA((HKEY)hkey, name, 0, REG_SZ, (LPBYTE)value, value_len) != ERROR_SUCCESS)
-			r = BRE_FAIL;
+        if(RegSetValueExA((HKEY)hkey, name, 0, REG_SZ, (LPBYTE)value, value_len) != ERROR_SUCCESS)
+            r = BRE_FAIL;
 
-		*(value - 1) = separator;
+        *(value - 1) = separator;
 
-		name = value + value_len;
-	}
+        name = value + value_len;
+    }
 
-	RegCloseKey(hkey);
+    RegCloseKey(hkey);
 
-	return r;
+    return r;
 }
 
 #else
 
-
 // INI file & registry queries are currently only defined under Windows.
 // We should add ini file parsing from DOS if anyone can be arsed.
 
-
-
-br_boolean BR_RESIDENT_ENTRY HostIniSectionExists( const char *ini_file, const char *section_name )
+br_boolean BR_RESIDENT_ENTRY HostIniSectionExists(const char *ini_file, const char *section_name)
 {
-   return BR_FALSE ;
+    return BR_FALSE;
 }
 
-br_error BR_RESIDENT_ENTRY HostIniQuery( const char *ini_file, const char *section_name,
-                                            const char *entry, char *Buffer, int max,
-                                            br_uint_16 *size )
+br_error BR_RESIDENT_ENTRY HostIniQuery(const char *ini_file, const char *section_name, const char *entry, char *Buffer,
+                                        int max, br_uint_16 *size)
 {
-   *size = 0 ;
-   *Buffer = '\0' ;
+    *size   = 0;
+    *Buffer = '\0';
 
-   return BRE_FAIL ;
+    return BRE_FAIL;
 }
 
-
-br_error BR_RESIDENT_ENTRY HostRegistryQuery( const void *hKey, const char *Path,
-                            const char *entry, char *Buffer,
-                            br_uint_16 max, br_uint_16 *size )
+br_error BR_RESIDENT_ENTRY HostRegistryQuery(const void *hKey, const char *Path, const char *entry, char *Buffer,
+                                             br_uint_16 max, br_uint_16 *size)
 {
-   *size = 0 ;
-   *Buffer = '\0' ;
+    *size   = 0;
+    *Buffer = '\0';
 
-   return BRE_FAIL ;
+    return BRE_FAIL;
 }
 
-
-br_error BR_RESIDENT_ENTRY HostIniReadSection(const char *filename, const char *section,
-                                              char *buffer, br_size_t size)
+br_error BR_RESIDENT_ENTRY HostIniReadSection(const char *filename, const char *section, char *buffer, br_size_t size)
 {
-	return BRE_FAIL;
+    return BRE_FAIL;
 }
 
-br_error BR_RESIDENT_ENTRY HostIniWriteSection(const char *filename, const char *section,
-                                              char *buffer, br_size_t size)
+br_error BR_RESIDENT_ENTRY HostIniWriteSection(const char *filename, const char *section, char *buffer, br_size_t size)
 {
-	return BRE_FAIL;
+    return BRE_FAIL;
 }
 
-br_error BR_RESIDENT_ENTRY HostRegistryReadKey(const void *key, const char *subkey,
-                                               char *buffer, br_size_t size)
+br_error BR_RESIDENT_ENTRY HostRegistryReadKey(const void *key, const char *subkey, char *buffer, br_size_t size)
 {
-	return BRE_FAIL;
+    return BRE_FAIL;
 }
 
-br_error BR_RESIDENT_ENTRY HostRegistryWriteKey(const void *key, const char *subkey,
-                                                char *buffer, br_size_t size)
+br_error BR_RESIDENT_ENTRY HostRegistryWriteKey(const void *key, const char *subkey, char *buffer, br_size_t size)
 {
-	return BRE_FAIL;
+    return BRE_FAIL;
 }
 
 #endif
