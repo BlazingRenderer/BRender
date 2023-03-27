@@ -12,7 +12,6 @@
 
 BR_RCS_ID("$Id: math.c 1.2 1998/07/20 21:52:44 jon Exp $")
 
-
 float BR_PUBLIC_ENTRY BrFloatFloor(float f)
 {
     return floorf(f);
@@ -30,11 +29,10 @@ float BR_PUBLIC_ENTRY BrFloatSqrt(float f)
 
 float BR_PUBLIC_ENTRY BrFloatPow(float a, float b)
 {
-    return powf(a,b);
+    return powf(a, b);
 }
 
 float BR_PUBLIC_ENTRY BrFloatAtan2(float x, float y)
 {
-    return atan2f(x,y);
+    return atan2f(x, y);
 }
-

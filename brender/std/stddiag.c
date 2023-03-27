@@ -15,39 +15,37 @@ BR_RCS_ID("$Id: stddiag.c 1.1 1997/12/10 16:41:28 jon Exp $")
 
 static void BR_CALLBACK BrStdioWarning(const char *message)
 {
-	fflush(stdout);
-	fputs(message,stderr);
-	fputc('\n',stderr);
-	fflush(stderr);
+    fflush(stdout);
+    fputs(message, stderr);
+    fputc('\n', stderr);
+    fflush(stderr);
 }
 
 static void BR_CALLBACK BrStdioFailure(const char *message)
 {
-	/*
-	 * Close down all devices etc.
-	 */
-	BrEnd();
+    /*
+     * Close down all devices etc.
+     */
+    BrEnd();
 
-	fflush(stdout);
-	fputs(message,stderr);
-	fputc('\n',stderr);
-	fflush(stderr);
-	
-	exit(10);
+    fflush(stdout);
+    fputs(message, stderr);
+    fputc('\n', stderr);
+    fflush(stderr);
+
+    exit(10);
 }
 
 /*
  * ErrorHandler structure
  */
 br_diaghandler BrStdioDiagHandler = {
-	"Stdio DiagHandler",
-	BrStdioWarning,
-	BrStdioFailure,
+    "Stdio DiagHandler",
+    BrStdioWarning,
+    BrStdioFailure,
 };
 
 /*
  * Override default
  */
-br_diaghandler * BR_ASM_DATA _BrDefaultDiagHandler = &BrStdioDiagHandler;
-
-
+br_diaghandler *BR_ASM_DATA _BrDefaultDiagHandler = &BrStdioDiagHandler;

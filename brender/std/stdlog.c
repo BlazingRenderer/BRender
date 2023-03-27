@@ -32,10 +32,10 @@ static void BR_CALLBACK BrStdioLogProc(br_uint_8 level, const char *component, c
 
 br_loghandler BrStdioLogHandler = {
     .identifier = "Stdio LogHandler",
-    .handler = BrStdioLogProc,
+    .handler    = BrStdioLogProc,
 };
 
 /*
  * Override default
  */
-br_loghandler * BR_ASM_DATA _BrDefaultLogHandler = &BrStdioLogHandler;
+br_loghandler *BR_ASM_DATA _BrDefaultLogHandler = &BrStdioLogHandler;

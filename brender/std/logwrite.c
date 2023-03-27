@@ -14,6 +14,5 @@ BR_RCS_ID("$Id: logwrite.c 1.1 1997/12/10 16:41:28 jon Exp $")
 
 int BR_PUBLIC_ENTRY BrLogWrite(void *buffer, br_size_t s, br_size_t n)
 {
-	return fwrite(buffer, s, n, stderr);
+    return fwrite(buffer, s, n, stderr);
 }
-
