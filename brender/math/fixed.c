@@ -62,10 +62,10 @@ br_angle BR_PUBLIC_ENTRY BrFixedATan2(br_fixed_ls x, br_fixed_ls y)
 
 br_fixed_ls BR_PUBLIC_ENTRY BrFixedSqrt(br_fixed_ls a)
 {
-	return BrFloatToFixed(BrFloatSqrt(BrFixedToFloat(a)));
+    return BrFloatToFixed(BrFloatSqrt(BrFixedToFloat(a)));
 }
 
 br_fixed_ls BR_PUBLIC_ENTRY BrFixedPow(br_fixed_ls a, br_fixed_ls b)
 {
-	return BrFloatToFixed(BrFloatPow(BrFixedToFloat(a),BrFixedToFloat(b)));
+    return BrFloatToFixed(BrFloatPow(BrFixedToFloat(a), BrFixedToFloat(b)));
 }
