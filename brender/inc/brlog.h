@@ -14,12 +14,12 @@ enum {
 };
 
 /*
-* Instance of a log handler.
-*/
+ * Instance of a log handler.
+ */
 typedef void BR_CALLBACK br_log_cbfn(br_uint_8 level, const char *component, const char *fmt, va_list ap);
 
 typedef struct br_loghandler {
-    const char *identifier;
+    const char  *identifier;
     br_log_cbfn *handler;
 } br_loghandler;
 

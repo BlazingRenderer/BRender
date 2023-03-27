@@ -17,7 +17,7 @@ enum {
     BR_ORDER_TABLE_NEW_BOUNDS   = 0x0001,
     BR_ORDER_TABLE_INIT_BOUNDS  = 0x0002,
 
-    BR_ORDER_TABLE_CONVEX       = 0x0004,
+    BR_ORDER_TABLE_CONVEX = 0x0004,
 
     BR_ORDER_TABLE_SORT_NEAR   = 0x0008,
     BR_ORDER_TABLE_SORT_FAR    = 0x0010,
@@ -140,7 +140,7 @@ typedef struct br_order_table {
  */
 typedef struct br_primitive_heap {
     br_uint_8 *base;
-    br_size_t size;
+    br_size_t  size;
     br_uint_8 *current;
 } br_primitive_heap;
 
@@ -154,4 +154,3 @@ typedef struct {
 } ot_vertex;
 
 #endif
-

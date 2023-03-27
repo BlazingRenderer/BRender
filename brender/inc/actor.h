@@ -5,7 +5,7 @@
  * $Locker: $
  *
  * Definitons for an Actor
-	Last change:  TN   15 Apr 97    4:14 pm
+    Last change:  TN   15 Apr 97    4:14 pm
  */
 #ifndef _ACTOR_H_
 #define _ACTOR_H_
@@ -18,16 +18,16 @@
  * Basic types of actor
  */
 enum {
-	BR_ACTOR_NONE,
-	BR_ACTOR_MODEL,
-	BR_ACTOR_LIGHT,
-	BR_ACTOR_CAMERA,
-	_BR_ACTOR_RESERVED,
-	BR_ACTOR_BOUNDS,
-	BR_ACTOR_BOUNDS_CORRECT,
-	BR_ACTOR_CLIP_PLANE,
-	BR_ACTOR_HORIZON_PLANE,
-	BR_ACTOR_MAX
+    BR_ACTOR_NONE,
+    BR_ACTOR_MODEL,
+    BR_ACTOR_LIGHT,
+    BR_ACTOR_CAMERA,
+    _BR_ACTOR_RESERVED,
+    BR_ACTOR_BOUNDS,
+    BR_ACTOR_BOUNDS_CORRECT,
+    BR_ACTOR_CLIP_PLANE,
+    BR_ACTOR_HORIZON_PLANE,
+    BR_ACTOR_MAX
 };
 
 /*
@@ -36,95 +36,94 @@ enum {
  * (unlike model & material which are inherited from the nearest ancestor)
  */
 enum {
-	BR_RSTYLE_DEFAULT,
-	BR_RSTYLE_NONE,
-	BR_RSTYLE_POINTS,
-	BR_RSTYLE_EDGES,
-	BR_RSTYLE_FACES,
-	BR_RSTYLE_BOUNDING_POINTS,
-	BR_RSTYLE_BOUNDING_EDGES,
-	BR_RSTYLE_BOUNDING_FACES,
+    BR_RSTYLE_DEFAULT,
+    BR_RSTYLE_NONE,
+    BR_RSTYLE_POINTS,
+    BR_RSTYLE_EDGES,
+    BR_RSTYLE_FACES,
+    BR_RSTYLE_BOUNDING_POINTS,
+    BR_RSTYLE_BOUNDING_EDGES,
+    BR_RSTYLE_BOUNDING_FACES,
     BR_RSTYLE_ANTIALIASED_LINES,
     BR_RSTYLE_ANTIALIASED_FACES,
-	BR_RSTYLE_MAX
+    BR_RSTYLE_MAX
 };
 
 /*
  * The actor structure
  */
 typedef struct br_actor {
-	/*
-	 * Doubly linked list of siblings
-	 * br_actor can be used as br_simple_node
-	 */
-	struct br_actor *next;
-	struct br_actor **prev;
+    /*
+     * Doubly linked list of siblings
+     * br_actor can be used as br_simple_node
+     */
+    struct br_actor  *next;
+    struct br_actor **prev;
 
-	/*
-	 * First in list of children, or NULL if none
-	 * br_actor.children can be used as br_simple_list
-	 */
-	struct br_actor *children;
+    /*
+     * First in list of children, or NULL if none
+     * br_actor.children can be used as br_simple_list
+     */
+    struct br_actor *children;
 
-	/*
-	 * Parent, or NULL, if no higher parent
-	 */
-	struct br_actor *parent;
+    /*
+     * Parent, or NULL, if no higher parent
+     */
+    struct br_actor *parent;
 
-	/*
-	 * Depth of actor from furthest ancestor
-	 */
-	br_uint_16 depth;
+    /*
+     * Depth of actor from furthest ancestor
+     */
+    br_uint_16 depth;
 
-	/*
-	 * Type of actor
-	 */
-	br_uint_8 type;
+    /*
+     * Type of actor
+     */
+    br_uint_8 type;
 
-	/*
-	 * Optional name of actor
-	 */
-	char *identifier;
+    /*
+     * Optional name of actor
+     */
+    char *identifier;
 
-	/*
-	 * Reference to model associated with this actor, NULL will inherit
-	 * from parent (root inherits default_model)
-	 */
-	br_model *model;
+    /*
+     * Reference to model associated with this actor, NULL will inherit
+     * from parent (root inherits default_model)
+     */
+    br_model *model;
 
-	/*
-	 * Default material for model - NULL will inherit from parent. Root
-	 * inherits default material
-	 */
-	br_material *material;
+    /*
+     * Default material for model - NULL will inherit from parent. Root
+     * inherits default material
+     */
+    br_material *material;
 
-	/*
-	 * Render style for actor, and all it's decendants if not BR_RSTYLE_DEFAULT
-	 */
-	br_uint_8 render_style;
+    /*
+     * Render style for actor, and all it's decendants if not BR_RSTYLE_DEFAULT
+     */
+    br_uint_8 render_style;
 
-	/*
-	 * Reference to renderer specific data associated with this actor - NULL will
-	 * inherit from parent (root inherits default data)
-	 */
-	void *render_data;
+    /*
+     * Reference to renderer specific data associated with this actor - NULL will
+     * inherit from parent (root inherits default data)
+     */
+    void *render_data;
 
-	/*
-	 * Postiton of this actor within parent space
-	 */
-	br_transform t;
+    /*
+     * Postiton of this actor within parent space
+     */
+    br_transform t;
 
-	/*
-	 * Reference to any type specific data block
-	 */
-	void *type_data;
+    /*
+     * Reference to any type specific data block
+     */
+    void *type_data;
 
-	/*
-	 * Reserved for user data
-	 */
-	void *user;
+    /*
+     * Reserved for user data
+     */
+    void *user;
 
 } br_actor;
 
 #endif
-

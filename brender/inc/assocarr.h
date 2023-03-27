@@ -10,11 +10,9 @@
 #define _ASSOCARR_H_
 
 typedef struct br_associative_array {
-
-	br_token_value *tv;
-	br_uint_16 num_elements;
-	br_uint_16 max_elements;
-
+    br_token_value *tv;
+    br_uint_16      num_elements;
+    br_uint_16      max_elements;
 } br_associative_array;
 
 #endif

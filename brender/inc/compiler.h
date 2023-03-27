@@ -16,16 +16,16 @@
  * Fixed bitsize integers
  */
 
-typedef int64_t br_int_64;
+typedef int64_t  br_int_64;
 typedef uint64_t br_uint_64;
 
-typedef int32_t br_int_32;
+typedef int32_t  br_int_32;
 typedef uint32_t br_uint_32;
 
-typedef int16_t br_int_16;
+typedef int16_t  br_int_16;
 typedef uint16_t br_uint_16;
 
-typedef int8_t br_int_8;
+typedef int8_t  br_int_8;
 typedef uint8_t br_uint_8;
 
 /*
@@ -33,11 +33,11 @@ typedef uint8_t br_uint_8;
  */
 typedef size_t br_size_t;
 #if defined(_MSC_VER)
-#	include <basetsd.h>
+#include <basetsd.h>
 typedef SSIZE_T ssize_t;
 #endif
 
-typedef intptr_t br_intptr_t;
+typedef intptr_t  br_intptr_t;
 typedef uintptr_t br_uintptr_t;
 
 typedef ptrdiff_t br_ptrdiff_t;
@@ -47,10 +47,10 @@ typedef ptrdiff_t br_ptrdiff_t;
  */
 typedef int br_boolean;
 
-#define BR_TRUE		1
-#define BR_FALSE	0
+#define BR_TRUE       1
+#define BR_FALSE      0
 
-#define BR_BOOLEAN(a)	((a) != 0)
+#define BR_BOOLEAN(a) ((a) != 0)
 
 /*
  * 32 bit floating point
@@ -64,13 +64,13 @@ typedef float br_float;
 /*
  * Microsoft Visual C++
  */
-#if defined (_MSC_VER)
+#if defined(_MSC_VER)
 
 /* Bot enough arguments for function-like macro invocation 'BR_PIXELMAP_MEMBERS_PREFIXED' */
-#pragma warning(disable: 4003)
+#pragma warning(disable : 4003)
 
 /* This function or variable may be unsafe. Consider using XXXXXX instead. */
-#pragma warning(disable: 4996)
+#pragma warning(disable : 4996)
 
 /*
  * Function qualifiers
@@ -78,45 +78,45 @@ typedef float br_float;
 /*
  * Public entry point into library
  */
-#define BR_PUBLIC		__cdecl
-#define BR_PUBLIC_VA	__cdecl /* varargs version */
+#define BR_PUBLIC    __cdecl
+#define BR_PUBLIC_VA __cdecl /* varargs version */
 
 /*
  * Entry point exported to drivers via modules
  */
-#define BR_EXPORT		__cdecl
-#define BR_EXPORT_VA 	__cdecl /* varargs version */
+#define BR_EXPORT    __cdecl
+#define BR_EXPORT_VA __cdecl /* varargs version */
 
 /*
  * A driver object method
  */
-#define BR_METHOD		__cdecl
-#define BR_METHOD_VA	__cdecl	/* varargs version */
+#define BR_METHOD    __cdecl
+#define BR_METHOD_VA __cdecl /* varargs version */
 
 /*
  * A user defined callback function
  */
-#define BR_CALLBACK		__cdecl
+#define BR_CALLBACK __cdecl
 
 /*
  * A function using the cdecl calling convention. x86 only.
  */
 #ifdef __i386__
-#   define BR_CDECL __cdecl
+#define BR_CDECL __cdecl
 #else
-#   define BR_CDECL
+#define BR_CDECL
 #endif
 
 #define BR_ASM_DATA
-#define BR_ASM_CALL __cdecl
-#define BR_ASM_CALLBACK __cdecl
+#define BR_ASM_CALL      __cdecl
+#define BR_ASM_CALLBACK  __cdecl
 
-#define BR_SUFFIX_HOST "-VISUALC"
+#define BR_SUFFIX_HOST   "-VISUALC"
 
-#define BR_HAS_FAR	0
+#define BR_HAS_FAR       0
 
-#define BR_ENDIAN_BIG		0
-#define BR_ENDIAN_LITTLE	1
+#define BR_ENDIAN_BIG    0
+#define BR_ENDIAN_LITTLE 1
 
 #define BR_PRINTF_ATTRIBUTE(fmt, args)
 #define BR_SCANF_ATTRIBUTE(fmt, args)
@@ -126,7 +126,7 @@ typedef float br_float;
 /*
  * GNU C
  */
-#elif defined (__GNUC__)
+#elif defined(__GNUC__)
 
 /*
  * Function qualifiers
@@ -134,20 +134,20 @@ typedef float br_float;
 /*
  * Public entry point into library
  */
-#define BR_PUBLIC		
-#define BR_PUBLIC_VA	/* varargs version */
+#define BR_PUBLIC
+#define BR_PUBLIC_VA /* varargs version */
 
 /*
  * Entry point exported to drivers via modules
  */
-#define BR_EXPORT		
-#define BR_EXPORT_VA 	/* varargs version */
+#define BR_EXPORT
+#define BR_EXPORT_VA /* varargs version */
 
 /*
  * A driver object method
  */
-#define BR_METHOD		
-#define BR_METHOD_VA	/* varargs version */
+#define BR_METHOD
+#define BR_METHOD_VA /* varargs version */
 
 /*
  * A user defined callback function
@@ -158,29 +158,29 @@ typedef float br_float;
  * A function using the cdecl calling convention. x86 only.
  */
 #ifdef __i386__
-#   define BR_CDECL __attribute__((cdecl))
+#define BR_CDECL __attribute__((cdecl))
 #else
-#   define BR_CDECL
+#define BR_CDECL
 #endif
 
 #define BR_ASM_DATA
-#define BR_ASM_CALL 
-#define BR_ASM_CALLBACK 
+#define BR_ASM_CALL
+#define BR_ASM_CALLBACK
 
-#define BR_SUFFIX_HOST "-GCC"
+#define BR_SUFFIX_HOST                 "-GCC"
 
-#define BR_HAS_FAR	0
+#define BR_HAS_FAR                     0
 
-#define BR_ENDIAN_BIG		0
-#define BR_ENDIAN_LITTLE	1
+#define BR_ENDIAN_BIG                  0
+#define BR_ENDIAN_LITTLE               1
 
 #define BR_PRINTF_ATTRIBUTE(fmt, args) __attribute__((format(printf, fmt, args)))
-#define BR_SCANF_ATTRIBUTE(fmt, args)  __attribute__((format(scanf,  fmt, args)))
+#define BR_SCANF_ATTRIBUTE(fmt, args)  __attribute__((format(scanf, fmt, args)))
 
-#define BR_STATIC_ASSERT(cond, msg) _Static_assert((cond), msg)
+#define BR_STATIC_ASSERT(cond, msg)    _Static_assert((cond), msg)
 
 #else
-#	error "Unknown Compiler"
+#error "Unknown Compiler"
 #endif
 
 #define BR_STR(s) #s
@@ -188,28 +188,28 @@ typedef float br_float;
 /*
  * Declare methods in C
  */
-#define BR_CMETHOD_DECL(t,m)     	BR_METHOD _M_##t##_##m
-#define BR_CMETHOD_VA_DECL(t,m)    	BR_METHOD _M_##t##_##m
-#define BR_CMETHOD_PTR_DECL(t,m) 	(BR_METHOD * _##m)
-#define BR_CMETHOD_VA_PTR_DECL(t,m) (BR_METHOD * _##m)
+#define BR_CMETHOD_DECL(t, m)        BR_METHOD _M_##t##_##m
+#define BR_CMETHOD_VA_DECL(t, m)     BR_METHOD _M_##t##_##m
+#define BR_CMETHOD_PTR_DECL(t, m)    (BR_METHOD * _##m)
+#define BR_CMETHOD_VA_PTR_DECL(t, m) (BR_METHOD * _##m)
 
 /*
  * Reference methods in C
  */
 
-#define BR_CMETHOD(t,m)					(_M_##t##_##m)
-#define BR_CMETHOD_REF(t,m) 		(_M_##t##_##m)
-#define BR_CMETHOD_CALL(t,m,o) 		(((t *)(o))->dispatch->_##m)
-#define BR_CMETHOD_STR(t,m) 		BR_STR(_M_##t##_##m)
+#define BR_CMETHOD(t, m)         (_M_##t##_##m)
+#define BR_CMETHOD_REF(t, m)     (_M_##t##_##m)
+#define BR_CMETHOD_CALL(t, m, o) (((t *)(o))->dispatch->_##m)
+#define BR_CMETHOD_STR(t, m)     BR_STR(_M_##t##_##m)
 
 /*
  * Backwards compatability
  */
 #define BR_RESIDENT_ENTRY BR_EXPORT
-#define BR_PUBLIC_ENTRY BR_PUBLIC
+#define BR_PUBLIC_ENTRY   BR_PUBLIC
 
 #ifdef _DEBUG
-#	define DEBUG 1
+#define DEBUG 1
 #endif
 
 #ifndef DEBUG
@@ -227,20 +227,20 @@ typedef float br_float;
 /*
  * Macros for producing banners & copyright messages
  */
-#define BR_BANNER(title,year,revision)do {\
-	static const char _revision[] = revision;\
-	fprintf(stderr,title);\
-	fwrite(_revision+10,1,sizeof(_revision)-12,stderr);\
-	fprintf(stderr,"Copyright (C) " year " by Argonaut Technologies Limited\n");\
-} while(0);
+#define BR_BANNER(title, year, revision)                                              \
+    do {                                                                              \
+        static const char _revision[] = revision;                                     \
+        fprintf(stderr, title);                                                       \
+        fwrite(_revision + 10, 1, sizeof(_revision) - 12, stderr);                    \
+        fprintf(stderr, "Copyright (C) " year " by Argonaut Technologies Limited\n"); \
+    } while(0);
 
 #if !defined(ADD_RCS_ID)
 #define ADD_RCS_ID 0
 #endif
 
 #if ADD_RCS_ID
-#define BR_RCS_ID(str) \
-static const char rscid[] = str;
+#define BR_RCS_ID(str) static const char rscid[] = str;
 #else
 #define BR_RCS_ID(str)
 #endif
@@ -248,19 +248,19 @@ static const char rscid[] = str;
 /*
  * Useful macro for sizing an array
  */
-#define BR_ASIZE(a) (sizeof(a)/sizeof(*a))
+#define BR_ASIZE(a) (sizeof(a) / sizeof(*a))
 
 /*
  * Make sure NULL is defined
  */
 #ifndef NULL
-#define NULL	0
+#define NULL 0
 #endif
 
 #if defined(_WIN32)
-#	ifndef __WIN_32__
-#		define __WIN_32__
-#	endif
+#ifndef __WIN_32__
+#define __WIN_32__
+#endif
 #endif
 
 #endif

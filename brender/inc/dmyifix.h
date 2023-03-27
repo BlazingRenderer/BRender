@@ -6,5 +6,3 @@
  *
  * Dummy inline fixed ops. file to stop stupid dependency generators complaining
  */
-
-

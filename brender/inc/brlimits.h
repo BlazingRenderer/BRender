@@ -13,7 +13,7 @@
 /*
  * Maximum length of an item's name
  */
-#define BR_MAX_NAME	256
+#define BR_MAX_NAME 256
 
 /*
  * Maximum number of active lights

@@ -10,14 +10,14 @@
 #define _QUAT_H_
 
 typedef struct br_quat {
-	br_scalar x;
-	br_scalar y;
-	br_scalar z;
-	br_scalar w;
+    br_scalar x;
+    br_scalar y;
+    br_scalar z;
+    br_scalar w;
 } br_quat;
 
+// clang-format off
 #define BR_QUAT(x,y,z,w) {BR_SCALAR(x),BR_SCALAR(y),BR_SCALAR(z),BR_SCALAR(w)}
+// clang-format on
 
 #endif
-
-

@@ -13,7 +13,7 @@
 /*
  * Version number
  */
-#define BR_VERSION(major,minor,point) ((major) * 65536 + (minor) * 256 + (point))
+#define BR_VERSION(major, minor, point) ((major)*65536 + (minor)*256 + (point))
 
 // #define __BRENDER__  BR_VERSION(1,3,0)
 #define __BRENDER__ 0x010300
@@ -88,7 +88,6 @@
 #include "transfrm.h"
 #endif
 
-
 /**
  ** Pixelmap support
  **/
@@ -123,7 +122,6 @@
 #include "order.h"
 #endif
 
-
 // Associative arrays
 
 #ifndef _ASSOCARR_H_
@@ -143,7 +141,6 @@
 #include "fw_p.h"
 #endif
 
-
 #ifndef _MATH_P_H_
 #include "math_p.h"
 #endif
@@ -152,12 +149,9 @@
 #include "pm_p.h"
 #endif
 
-
 #ifndef _SYSCON_P_H_
 #include "syscn_p.h"
 #endif
-
-
 
 #endif
 
@@ -177,11 +171,8 @@
 
 #include "compend.h"
 
-
 // Associative arrays
 
 #include "assoca_p.h"
 
-
 #endif
-

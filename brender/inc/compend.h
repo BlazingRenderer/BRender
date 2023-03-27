@@ -10,6 +10,3 @@
 #define _COMPEND_H_
 
 #endif
-
-
-

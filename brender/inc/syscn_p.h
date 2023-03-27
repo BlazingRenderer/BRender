@@ -15,12 +15,11 @@ extern "C" {
 
 #ifndef _NO_PROTOTYPES
 
-
-br_error BrSystemConfigBegin();
-br_error BR_PUBLIC_ENTRY BrSystemConfigLoad( br_token t, const char *Param1, const void *Param2 );
-br_error BR_PUBLIC_ENTRY BrSystemConfigSave( br_token t, const char *Param1, const void *Param2 );
-br_error BR_PUBLIC_ENTRY BrSystemConfigQueryString( br_token t, char *string, int max_size );
-br_error BR_PUBLIC_ENTRY BrSystemConfigSetString( br_token t, const char *string );
+br_error                 BrSystemConfigBegin();
+br_error BR_PUBLIC_ENTRY BrSystemConfigLoad(br_token t, const char *Param1, const void *Param2);
+br_error BR_PUBLIC_ENTRY BrSystemConfigSave(br_token t, const char *Param1, const void *Param2);
+br_error BR_PUBLIC_ENTRY BrSystemConfigQueryString(br_token t, char *string, int max_size);
+br_error BR_PUBLIC_ENTRY BrSystemConfigSetString(br_token t, const char *string);
 
 br_error BR_PUBLIC_ENTRY BrSystemConfigSet(br_token t, br_value v);
 br_error BR_PUBLIC_ENTRY BrSystemConfigQuery(br_token t, br_value *v);

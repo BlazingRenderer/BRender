@@ -29,21 +29,16 @@ br_fixed_ls BR_PUBLIC_ENTRY BrFixedMul(br_fixed_ls a, br_fixed_ls b);
 
 /* result = a*b + c*d
  */
-br_fixed_ls BrFixedMac2(br_fixed_ls a, br_fixed_ls b,
-						br_fixed_ls c, br_fixed_ls d);
+br_fixed_ls BrFixedMac2(br_fixed_ls a, br_fixed_ls b, br_fixed_ls c, br_fixed_ls d);
 
 /* result = a*b + c*d + e*f
  */
-br_fixed_ls BrFixedMac3(br_fixed_ls a, br_fixed_ls b,
-						br_fixed_ls c, br_fixed_ls d,
-						br_fixed_ls e, br_fixed_ls f);
+br_fixed_ls BrFixedMac3(br_fixed_ls a, br_fixed_ls b, br_fixed_ls c, br_fixed_ls d, br_fixed_ls e, br_fixed_ls f);
 
 /* result = a*b + c*d + e*f + g*h
  */
-br_fixed_ls BrFixedMac4(br_fixed_ls a, br_fixed_ls b,
-						br_fixed_ls c, br_fixed_ls d,
-						br_fixed_ls e, br_fixed_ls f,
-						br_fixed_ls g, br_fixed_ls h);
+br_fixed_ls BrFixedMac4(br_fixed_ls a, br_fixed_ls b, br_fixed_ls c, br_fixed_ls d, br_fixed_ls e, br_fixed_ls f,
+                        br_fixed_ls g, br_fixed_ls h);
 
 /* result = a*a
  */
@@ -51,21 +46,14 @@ br_fixed_ls BR_PUBLIC_ENTRY BrFixedSqr(br_fixed_ls a);
 
 /* result = a*a + b*b
  */
-br_fixed_ls BR_PUBLIC_ENTRY BrFixedSqr2(br_fixed_ls a,
-									    br_fixed_ls b);
+br_fixed_ls BR_PUBLIC_ENTRY BrFixedSqr2(br_fixed_ls a, br_fixed_ls b);
 
 /* result = a*a + b*b + c*c
  */
-br_fixed_ls BR_PUBLIC_ENTRY BrFixedSqr3(br_fixed_ls a,
-									    br_fixed_ls b,
-									    br_fixed_ls c);
+br_fixed_ls BR_PUBLIC_ENTRY BrFixedSqr3(br_fixed_ls a, br_fixed_ls b, br_fixed_ls c);
 /* result = a*a + b*b + c*c + d*d
  */
-br_fixed_ls BR_PUBLIC_ENTRY BrFixedSqr4(br_fixed_ls a,
-									    br_fixed_ls b,
-									    br_fixed_ls c,
-									    br_fixed_ls d);
-
+br_fixed_ls BR_PUBLIC_ENTRY BrFixedSqr4(br_fixed_ls a, br_fixed_ls b, br_fixed_ls c, br_fixed_ls d);
 
 /* result = sqrt(a*a + b*b)
  */
@@ -73,16 +61,11 @@ br_fixed_ls BR_ASM_CALL BrFixedLength2(br_fixed_ls a, br_fixed_ls b);
 
 /* result = sqrt(a*a + b*b + c*c)
  */
-br_fixed_ls BR_ASM_CALL BrFixedLength3(br_fixed_ls a,
-									   br_fixed_ls b,
-									   br_fixed_ls c);
+br_fixed_ls BR_ASM_CALL BrFixedLength3(br_fixed_ls a, br_fixed_ls b, br_fixed_ls c);
 
 /* result = sqrt(a*a + b*b + c*c + d*d)
  */
-br_fixed_ls BR_ASM_CALL BrFixedLength4(br_fixed_ls a,
-									   br_fixed_ls b,
-									   br_fixed_ls c,
-									   br_fixed_ls d);
+br_fixed_ls BR_ASM_CALL BrFixedLength4(br_fixed_ls a, br_fixed_ls b, br_fixed_ls c, br_fixed_ls d);
 
 /* result = 1/sqrt(a*a + b*b) (low precision)
  */
@@ -90,16 +73,11 @@ br_fixed_ls BR_ASM_CALL BrFixedRLength2(br_fixed_ls a, br_fixed_ls b);
 
 /* result = 1/sqrt(a*a + b*b + c*c) (low precision)
  */
-br_fixed_ls BR_ASM_CALL BrFixedRLength3(br_fixed_ls a,
-										br_fixed_ls b,
-										br_fixed_ls c);
+br_fixed_ls BR_ASM_CALL BrFixedRLength3(br_fixed_ls a, br_fixed_ls b, br_fixed_ls c);
 
 /* result = 1/sqrt(a*a + b*b + c*c + d*d) (low precision)
  */
-br_fixed_ls BR_ASM_CALL BrFixedRLength4(br_fixed_ls a,
-										br_fixed_ls b,
-										br_fixed_ls c,
-										br_fixed_ls d);
+br_fixed_ls BR_ASM_CALL BrFixedRLength4(br_fixed_ls a, br_fixed_ls b, br_fixed_ls c, br_fixed_ls d);
 
 /* result = a/b
  */
@@ -117,33 +95,23 @@ br_fixed_ls BR_ASM_CALL BrFixedDivR(br_fixed_ls a, br_fixed_ls b);
  */
 br_fixed_ls BR_ASM_CALL _FixedDivP(br_fixed_ls a, br_fixed_ls b);
 
-
 /* result = a*b/c
  */
-br_fixed_ls BR_ASM_CALL BrFixedMulDiv(br_fixed_ls a,
-									  br_fixed_ls b,
-									  br_fixed_ls c);
+br_fixed_ls BR_ASM_CALL BrFixedMulDiv(br_fixed_ls a, br_fixed_ls b, br_fixed_ls c);
 
 /* result = (a*b + c*d)/e
  */
-br_fixed_ls BR_ASM_CALL BrFixedMac2Div(br_fixed_ls a, br_fixed_ls b,
-									br_fixed_ls c, br_fixed_ls d,
-									br_fixed_ls e);
+br_fixed_ls BR_ASM_CALL BrFixedMac2Div(br_fixed_ls a, br_fixed_ls b, br_fixed_ls c, br_fixed_ls d, br_fixed_ls e);
 
 /* result = (a*b + c*d + e*f)/g
  */
-br_fixed_ls BR_ASM_CALL BrFixedMac3Div(br_fixed_ls a, br_fixed_ls b,
-									br_fixed_ls c, br_fixed_ls d,
-									br_fixed_ls e, br_fixed_ls f,
-									br_fixed_ls g);
+br_fixed_ls BR_ASM_CALL BrFixedMac3Div(br_fixed_ls a, br_fixed_ls b, br_fixed_ls c, br_fixed_ls d, br_fixed_ls e,
+                                       br_fixed_ls f, br_fixed_ls g);
 
 /* result = (a*b + c*d + e*f + g*h)/i
  */
-br_fixed_ls BR_ASM_CALL BrFixedMac4Div(br_fixed_ls a, br_fixed_ls b,
-									br_fixed_ls c, br_fixed_ls d,
-									br_fixed_ls e, br_fixed_ls f,
-									br_fixed_ls g, br_fixed_ls h,
-									br_fixed_ls i);
+br_fixed_ls BR_ASM_CALL BrFixedMac4Div(br_fixed_ls a, br_fixed_ls b, br_fixed_ls c, br_fixed_ls d, br_fixed_ls e,
+                                       br_fixed_ls f, br_fixed_ls g, br_fixed_ls h, br_fixed_ls i);
 /* result = 1.0/a
  */
 br_fixed_ls BR_ASM_CALL BrFixedRcp(br_fixed_ls a);
@@ -154,21 +122,17 @@ br_fixed_ls BR_ASM_CALL BrFixedRcp(br_fixed_ls a);
 
 /* result = a*b + c*d - a & c are fractions
  */
-br_fixed_ls BR_ASM_CALL BrFixedFMac2(br_fixed_lsf a, br_fixed_ls b,
-									 br_fixed_lsf c, br_fixed_ls d);
+br_fixed_ls BR_ASM_CALL BrFixedFMac2(br_fixed_lsf a, br_fixed_ls b, br_fixed_lsf c, br_fixed_ls d);
 
 /* result = a*b + c*d + e*f - a,c & e are fractions
  */
-br_fixed_ls BR_ASM_CALL BrFixedFMac3(br_fixed_lsf a, br_fixed_ls b,
-									 br_fixed_lsf c, br_fixed_ls d,
-									 br_fixed_lsf e, br_fixed_ls f);
+br_fixed_ls BR_ASM_CALL BrFixedFMac3(br_fixed_lsf a, br_fixed_ls b, br_fixed_lsf c, br_fixed_ls d, br_fixed_lsf e,
+                                     br_fixed_ls f);
 
 /* result = a*b + c*d + e*f + g*h (a,c,e,g are fractions)
  */
-br_fixed_ls BR_ASM_CALL BrFixedFMac4(br_fixed_ls a, br_fixed_ls b,
-									br_fixed_ls c, br_fixed_ls d,
-									br_fixed_ls e, br_fixed_ls f,
-									br_fixed_ls g, br_fixed_ls h);
+br_fixed_ls BR_ASM_CALL BrFixedFMac4(br_fixed_ls a, br_fixed_ls b, br_fixed_ls c, br_fixed_ls d, br_fixed_ls e,
+                                     br_fixed_ls f, br_fixed_ls g, br_fixed_ls h);
 
 /*
  * Misc. support  functions
@@ -186,7 +150,7 @@ br_angle BR_PUBLIC_ENTRY BrFixedATan2(br_fixed_ls x, br_fixed_ls y);
 br_angle BR_ASM_CALL BrFixedATan2Fast(br_fixed_ls x, br_fixed_ls y);
 
 br_fixed_ls BR_PUBLIC_ENTRY BrFixedSqrt(br_fixed_ls a);
-br_fixed_ls BR_PUBLIC_ENTRY BrFixedPow(br_fixed_ls a,br_fixed_ls b);
+br_fixed_ls BR_PUBLIC_ENTRY BrFixedPow(br_fixed_ls a, br_fixed_ls b);
 
 /*
  * Integer sqrt functions
@@ -251,12 +215,12 @@ void BR_PUBLIC_ENTRY BrMatrix34TApplyP(br_vector3 *A, const br_vector3 *B, const
 void BR_PUBLIC_ENTRY BrMatrix34TApply(br_vector4 *A, const br_vector4 *B, const br_matrix34 *C);
 
 br_scalar BR_PUBLIC_ENTRY BrMatrix34Inverse(br_matrix34 *out, const br_matrix34 *in);
-void BR_PUBLIC_ENTRY BrMatrix34LPInverse(br_matrix34 *A, const br_matrix34 *B);
-void BR_PUBLIC_ENTRY BrMatrix34LPNormalise(br_matrix34 *A, const br_matrix34 *B);
+void BR_PUBLIC_ENTRY      BrMatrix34LPInverse(br_matrix34 *A, const br_matrix34 *B);
+void BR_PUBLIC_ENTRY      BrMatrix34LPNormalise(br_matrix34 *A, const br_matrix34 *B);
 
-void BR_PUBLIC_ENTRY BrMatrix34RollingBall(br_matrix34 *mat, int dx,int dy, int radius);
+void BR_PUBLIC_ENTRY BrMatrix34RollingBall(br_matrix34 *mat, int dx, int dy, int radius);
 
-br_matrix34 * BR_PUBLIC_ENTRY BrBoundsToMatrix34( br_matrix34 *mat, const br_bounds *bounds);
+br_matrix34 *BR_PUBLIC_ENTRY BrBoundsToMatrix34(br_matrix34 *mat, const br_bounds *bounds);
 
 void BR_PUBLIC_ENTRY BrMatrix34ApplyBounds(br_bounds *A, const br_bounds *B, const br_matrix34 *C);
 
@@ -270,52 +234,43 @@ void BR_PUBLIC_ENTRY BrMatrix4Mul(br_matrix4 *A, const br_matrix4 *B, const br_m
 void BR_PUBLIC_ENTRY BrMatrix4Identity(br_matrix4 *mat);
 void BR_PUBLIC_ENTRY BrMatrix4Scale(br_matrix4 *mat, br_scalar sx, br_scalar sy, br_scalar sz);
 
-void BR_PUBLIC_ENTRY BrMatrix4Transpose(br_matrix4 *A);
+void BR_PUBLIC_ENTRY      BrMatrix4Transpose(br_matrix4 *A);
 br_scalar BR_PUBLIC_ENTRY BrMatrix4Inverse(br_matrix4 *A, const br_matrix4 *B);
-void BR_PUBLIC_ENTRY BrMatrix4Adjoint(br_matrix4 *A, const br_matrix4 *B);
+void BR_PUBLIC_ENTRY      BrMatrix4Adjoint(br_matrix4 *A, const br_matrix4 *B);
 br_scalar BR_PUBLIC_ENTRY BrMatrix4Determinant(const br_matrix4 *mat);
 
-void BR_PUBLIC_ENTRY BrMatrix4Perspective(br_matrix4 *mat,
-		br_angle field_of_view,
-		br_scalar aspect,
-		br_scalar hither,
-		br_scalar yon);
+void BR_PUBLIC_ENTRY BrMatrix4Perspective(br_matrix4 *mat, br_angle field_of_view, br_scalar aspect, br_scalar hither,
+                                          br_scalar yon);
 
-void BR_PUBLIC_ENTRY BrMatrix4Orthographic(br_matrix4 *mat,
-		br_scalar left,
-		br_scalar right,
-		br_scalar bottom,
-		br_scalar top,
-		br_scalar hither,
-		br_scalar yon);
+void BR_PUBLIC_ENTRY BrMatrix4Orthographic(br_matrix4 *mat, br_scalar left, br_scalar right, br_scalar bottom,
+                                           br_scalar top, br_scalar hither, br_scalar yon);
 
 void BR_PUBLIC_ENTRY BrMatrix4ApplyV(br_vector4 *A, const br_vector3 *B, const br_matrix4 *C);
 void BR_PUBLIC_ENTRY BrMatrix4ApplyP(br_vector4 *A, const br_vector3 *B, const br_matrix4 *C);
-void BR_PUBLIC_ENTRY BrMatrix4Apply(br_vector4 *A,  const br_vector4 *B, const br_matrix4 *C);
+void BR_PUBLIC_ENTRY BrMatrix4Apply(br_vector4 *A, const br_vector4 *B, const br_matrix4 *C);
 
 void BR_PUBLIC_ENTRY BrMatrix4TApplyV(br_vector4 *A, const br_vector3 *B, const br_matrix4 *C);
 void BR_PUBLIC_ENTRY BrMatrix4TApplyP(br_vector4 *A, const br_vector3 *B, const br_matrix4 *C);
-void BR_PUBLIC_ENTRY BrMatrix4TApply(br_vector4 *A,  const br_vector4 *B, const br_matrix4 *C);
+void BR_PUBLIC_ENTRY BrMatrix4TApply(br_vector4 *A, const br_vector4 *B, const br_matrix4 *C);
 
 void BR_PUBLIC_ENTRY BrMatrix4Pre34(br_matrix4 *A, const br_matrix34 *B);
 void BR_PUBLIC_ENTRY BrMatrix4Mul34(br_matrix4 *A, const br_matrix34 *B, const br_matrix4 *C);
 void BR_PUBLIC_ENTRY BrMatrix4Copy34(br_matrix4 *A, const br_matrix34 *B);
 void BR_PUBLIC_ENTRY BrMatrix34Copy4(br_matrix34 *A, const br_matrix4 *B);
 
-
 /**
  ** 2D Vectors
  **/
-void BR_PUBLIC_ENTRY BrVector2Copy(br_vector2 *v1, const br_vector2 *v2);
-void BR_PUBLIC_ENTRY BrVector2Set(br_vector2 *v1, br_scalar s1, br_scalar s2);
-void BR_PUBLIC_ENTRY BrVector2SetInt(br_vector2 *v1, int i1, int i2);
-void BR_PUBLIC_ENTRY BrVector2SetFloat(br_vector2 *v1, float f1, float f2);
-void BR_PUBLIC_ENTRY BrVector2Negate(br_vector2 *v1, const br_vector2 *v2);
-void BR_PUBLIC_ENTRY BrVector2Add(br_vector2 *v1, const br_vector2 *v2, const br_vector2 *v3);
-void BR_PUBLIC_ENTRY BrVector2Accumulate(br_vector2 *v1, const br_vector2 *v2);
-void BR_PUBLIC_ENTRY BrVector2Sub(br_vector2 *v1, const br_vector2 *v2, const br_vector2 *v3);
-void BR_PUBLIC_ENTRY BrVector2Scale(br_vector2 *v1, const br_vector2 *v2, br_scalar s);
-void BR_PUBLIC_ENTRY BrVector2InvScale(br_vector2 *v1, const br_vector2 *v2, br_scalar s);
+void BR_PUBLIC_ENTRY      BrVector2Copy(br_vector2 *v1, const br_vector2 *v2);
+void BR_PUBLIC_ENTRY      BrVector2Set(br_vector2 *v1, br_scalar s1, br_scalar s2);
+void BR_PUBLIC_ENTRY      BrVector2SetInt(br_vector2 *v1, int i1, int i2);
+void BR_PUBLIC_ENTRY      BrVector2SetFloat(br_vector2 *v1, float f1, float f2);
+void BR_PUBLIC_ENTRY      BrVector2Negate(br_vector2 *v1, const br_vector2 *v2);
+void BR_PUBLIC_ENTRY      BrVector2Add(br_vector2 *v1, const br_vector2 *v2, const br_vector2 *v3);
+void BR_PUBLIC_ENTRY      BrVector2Accumulate(br_vector2 *v1, const br_vector2 *v2);
+void BR_PUBLIC_ENTRY      BrVector2Sub(br_vector2 *v1, const br_vector2 *v2, const br_vector2 *v3);
+void BR_PUBLIC_ENTRY      BrVector2Scale(br_vector2 *v1, const br_vector2 *v2, br_scalar s);
+void BR_PUBLIC_ENTRY      BrVector2InvScale(br_vector2 *v1, const br_vector2 *v2, br_scalar s);
 br_scalar BR_PUBLIC_ENTRY BrVector2Dot(br_vector2 *v1, const br_vector2 *v2);
 br_scalar BR_PUBLIC_ENTRY BrVector2Length(br_vector2 *v1);
 br_scalar BR_PUBLIC_ENTRY BrVector2LengthSquared(br_vector2 *v1);
@@ -323,18 +278,18 @@ br_scalar BR_PUBLIC_ENTRY BrVector2LengthSquared(br_vector2 *v1);
 /**
  ** 3D VECTORS
  **/
-void BR_PUBLIC_ENTRY BrVector3Copy(br_vector3 *v1, const br_vector3 *v2);
-void BR_PUBLIC_ENTRY BrVector3Set(br_vector3 *v1, br_scalar s1, br_scalar s2, br_scalar s3);
-void BR_PUBLIC_ENTRY BrVector3SetInt(br_vector3 *v1, int i1, int i2, int i3);
-void BR_PUBLIC_ENTRY BrVector3SetFloat(br_vector3 *v1, float f1, float f2, float f3);
-void BR_PUBLIC_ENTRY BrVector3Negate(br_vector3 *v1, const br_vector3 *v2);
-void BR_PUBLIC_ENTRY BrVector3Add(br_vector3 *v1, const br_vector3 *v2, const br_vector3 *v3);
-void BR_PUBLIC_ENTRY BrVector3Accumulate(br_vector3 *v1, const br_vector3 *v2);
-void BR_PUBLIC_ENTRY BrVector3Sub(br_vector3 *v1, const br_vector3 *v2, const br_vector3 *v3);
-void BR_PUBLIC_ENTRY BrVector3Scale(br_vector3 *v1, const br_vector3 *v2, br_scalar s);
-void BR_PUBLIC_ENTRY BrVector3InvScale(br_vector3 *v1, const br_vector3 *v2, br_scalar s);
+void BR_PUBLIC_ENTRY      BrVector3Copy(br_vector3 *v1, const br_vector3 *v2);
+void BR_PUBLIC_ENTRY      BrVector3Set(br_vector3 *v1, br_scalar s1, br_scalar s2, br_scalar s3);
+void BR_PUBLIC_ENTRY      BrVector3SetInt(br_vector3 *v1, int i1, int i2, int i3);
+void BR_PUBLIC_ENTRY      BrVector3SetFloat(br_vector3 *v1, float f1, float f2, float f3);
+void BR_PUBLIC_ENTRY      BrVector3Negate(br_vector3 *v1, const br_vector3 *v2);
+void BR_PUBLIC_ENTRY      BrVector3Add(br_vector3 *v1, const br_vector3 *v2, const br_vector3 *v3);
+void BR_PUBLIC_ENTRY      BrVector3Accumulate(br_vector3 *v1, const br_vector3 *v2);
+void BR_PUBLIC_ENTRY      BrVector3Sub(br_vector3 *v1, const br_vector3 *v2, const br_vector3 *v3);
+void BR_PUBLIC_ENTRY      BrVector3Scale(br_vector3 *v1, const br_vector3 *v2, br_scalar s);
+void BR_PUBLIC_ENTRY      BrVector3InvScale(br_vector3 *v1, const br_vector3 *v2, br_scalar s);
 br_scalar BR_PUBLIC_ENTRY BrVector3Dot(br_vector3 *v1, const br_vector3 *v2);
-void BR_PUBLIC_ENTRY BrVector3Cross(br_vector3 *v1, const br_vector3 *v2, const br_vector3 *v3);
+void BR_PUBLIC_ENTRY      BrVector3Cross(br_vector3 *v1, const br_vector3 *v2, const br_vector3 *v3);
 br_scalar BR_PUBLIC_ENTRY BrVector3Length(br_vector3 *v1);
 br_scalar BR_PUBLIC_ENTRY BrVector3LengthSquared(br_vector3 *v1);
 
@@ -342,7 +297,8 @@ void BR_PUBLIC_ENTRY BrVector3Normalise(br_vector3 *v1, const br_vector3 *v2);
 void BR_PUBLIC_ENTRY BrVector3NormaliseQuick(br_vector3 *v1, const br_vector3 *v2);
 void BR_PUBLIC_ENTRY BrVector3NormaliseLP(br_vector3 *v1, const br_vector3 *v2);
 
-br_int_32 BR_PUBLIC_ENTRY BrPlaneEquation(br_vector4 *eqn, const br_vector3 *v0, const br_vector3 *v1, const br_vector3 *v2);
+br_int_32 BR_PUBLIC_ENTRY BrPlaneEquation(br_vector4 *eqn, const br_vector3 *v0, const br_vector3 *v1,
+                                          const br_vector3 *v2);
 
 /*
  * 2D vectors
@@ -353,34 +309,34 @@ void BR_PUBLIC_ENTRY BrVector2Normalise(br_vector2 *v1, const br_vector2 *v2);
  ** 4D Vectors
  **/
 br_scalar BR_PUBLIC_ENTRY BrVector4Dot(br_vector4 *v1, const br_vector4 *v2);
-void BR_PUBLIC_ENTRY BrVector4Copy(br_vector4 *v1, const br_vector4 *v2);
+void BR_PUBLIC_ENTRY      BrVector4Copy(br_vector4 *v1, const br_vector4 *v2);
 
 /*
  * Euler Angles
  */
-br_matrix34 * BR_PUBLIC_ENTRY BrEulerToMatrix34(br_matrix34 *mat, const br_euler *euler);
-br_euler * BR_PUBLIC_ENTRY BrMatrix34ToEuler(br_euler *euler, const br_matrix34 *mat);
+br_matrix34 *BR_PUBLIC_ENTRY BrEulerToMatrix34(br_matrix34 *mat, const br_euler *euler);
+br_euler *BR_PUBLIC_ENTRY    BrMatrix34ToEuler(br_euler *euler, const br_matrix34 *mat);
 
-br_matrix4 * BR_PUBLIC_ENTRY BrEulerToMatrix4(br_matrix4 *mat, const br_euler *src);
-br_euler * BR_PUBLIC_ENTRY BrMatrix4ToEuler(br_euler *dest, const br_matrix4 *mat);
+br_matrix4 *BR_PUBLIC_ENTRY BrEulerToMatrix4(br_matrix4 *mat, const br_euler *src);
+br_euler *BR_PUBLIC_ENTRY   BrMatrix4ToEuler(br_euler *dest, const br_matrix4 *mat);
 
-br_quat * BR_PUBLIC_ENTRY BrEulerToQuat(br_quat *quat, const br_euler *euler);
-br_euler * BR_PUBLIC_ENTRY BrQuatToEuler(br_euler *euler, const br_quat *quat);
+br_quat *BR_PUBLIC_ENTRY  BrEulerToQuat(br_quat *quat, const br_euler *euler);
+br_euler *BR_PUBLIC_ENTRY BrQuatToEuler(br_euler *euler, const br_quat *quat);
 
 /*
  * Quaternions
  */
-br_quat * BR_PUBLIC_ENTRY BrQuatMul(br_quat *q, const br_quat *l, const br_quat *r);
-br_quat * BR_PUBLIC_ENTRY BrQuatNormalise(br_quat *q, const br_quat *qq);
-br_quat * BR_PUBLIC_ENTRY BrQuatInvert(br_quat *q, const br_quat *qq);
+br_quat *BR_PUBLIC_ENTRY BrQuatMul(br_quat *q, const br_quat *l, const br_quat *r);
+br_quat *BR_PUBLIC_ENTRY BrQuatNormalise(br_quat *q, const br_quat *qq);
+br_quat *BR_PUBLIC_ENTRY BrQuatInvert(br_quat *q, const br_quat *qq);
 
-br_quat * BR_PUBLIC_ENTRY BrQuatSlerp(br_quat *q, const br_quat *l, const br_quat *r,br_scalar t, br_int_16 spins);
+br_quat *BR_PUBLIC_ENTRY BrQuatSlerp(br_quat *q, const br_quat *l, const br_quat *r, br_scalar t, br_int_16 spins);
 
-br_matrix34 * BR_PUBLIC_ENTRY BrQuatToMatrix34(br_matrix34 *mat, const br_quat *q);
-br_quat * BR_PUBLIC_ENTRY BrMatrix34ToQuat(br_quat *q, const br_matrix34 *mat);
+br_matrix34 *BR_PUBLIC_ENTRY BrQuatToMatrix34(br_matrix34 *mat, const br_quat *q);
+br_quat *BR_PUBLIC_ENTRY     BrMatrix34ToQuat(br_quat *q, const br_matrix34 *mat);
 
-br_matrix4 * BR_PUBLIC_ENTRY BrQuatToMatrix4(br_matrix4 *mat, const br_quat *q);
-br_quat * BR_PUBLIC_ENTRY BrMatrix4ToQuat(br_quat *q, const br_matrix4 *mat);
+br_matrix4 *BR_PUBLIC_ENTRY BrQuatToMatrix4(br_matrix4 *mat, const br_quat *q);
+br_quat *BR_PUBLIC_ENTRY    BrMatrix4ToQuat(br_quat *q, const br_matrix4 *mat);
 
 /*
  * Transforms
@@ -430,8 +386,8 @@ void BR_PUBLIC_ENTRY BrMatrix23TApplyV(br_vector2 *A, const br_vector2 *B, const
 void BR_PUBLIC_ENTRY BrMatrix23TApplyP(br_vector2 *A, const br_vector2 *B, const br_matrix23 *C);
 
 br_scalar BR_PUBLIC_ENTRY BrMatrix23Inverse(br_matrix23 *out, const br_matrix23 *in);
-void BR_PUBLIC_ENTRY BrMatrix23LPInverse(br_matrix23 *A, const br_matrix23 *B);
-void BR_PUBLIC_ENTRY BrMatrix23LPNormalise(br_matrix23 *A, const br_matrix23 *B);
+void BR_PUBLIC_ENTRY      BrMatrix23LPInverse(br_matrix23 *A, const br_matrix23 *B);
+void BR_PUBLIC_ENTRY      BrMatrix23LPNormalise(br_matrix23 *A, const br_matrix23 *B);
 
 /*
  * Backwards compatibility
