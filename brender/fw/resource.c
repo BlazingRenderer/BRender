@@ -16,6 +16,7 @@
  *	Add optional source file/line tracking
  */
 #include <inttypes.h>
+#include <stdio.h>
 #include "fw.h"
 #include "brassert.h"
 
@@ -478,6 +479,43 @@ char *BR_RESIDENT_ENTRY BrResStrDup(void *vparent, const char *str)
     BrStrCpy(nstr, str);
 
     return nstr;
+}
+
+char *BR_RESIDENT_ENTRY BrResVSprintf(void *vparent, const char *fmt, va_list ap)
+{
+    char   *s;
+    int     nreq;
+    va_list ap2;
+
+    va_copy(ap2, ap);
+    nreq = vsnprintf(NULL, 0, fmt, ap2);
+    va_end(ap2);
+
+    if(nreq < 0)
+        return NULL;
+
+    ++nreq;
+    if((s = BrResAllocate(vparent, (size_t)nreq, BR_MEMORY_STRING)) == NULL)
+        return NULL;
+
+    if(vsnprintf(s, (size_t)nreq, fmt, ap) != nreq - 1) {
+        BrResFree(s);
+        return NULL;
+    }
+
+    return s;
+}
+
+char *BR_RESIDENT_ENTRY BrResSprintf(void *vparent, const char *fmt, ...)
+{
+    char   *s;
+    va_list ap;
+
+    va_start(ap, fmt);
+    s = BrResVSprintf(vparent, fmt, ap);
+    va_end(ap);
+
+    return s;
 }
 
 #if DEBUG

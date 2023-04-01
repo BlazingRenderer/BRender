@@ -153,6 +153,8 @@ void *BR_RESIDENT_ENTRY BrResAllocate(void *vparent, br_size_t size, br_uint_8 r
 void BR_RESIDENT_ENTRY  BrResFree(void *vres);
 void BR_RESIDENT_ENTRY  BrResFreeNoCallback(void *vres);
 char *BR_RESIDENT_ENTRY BrResStrDup(void *vparent, const char *str);
+char *BR_RESIDENT_ENTRY BrResVSprintf(void *vparent, const char *fmt, va_list ap);
+char *BR_RESIDENT_ENTRY BrResSprintf(void *vparent, const char *fmt, ...) BR_PRINTF_ATTRIBUTE(2, 3);
 
 void *BR_RESIDENT_ENTRY       BrResAdd(void *vparent, void *vres);
 void *BR_RESIDENT_ENTRY       BrResRemove(void *vres);
