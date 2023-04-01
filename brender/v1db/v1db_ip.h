@@ -53,8 +53,10 @@ br_error BrLightCullReset(void);
 /*
  * modrend.c
  */
-extern void (*RenderStyleCalls[])(br_actor *actor, br_model *model, br_material *material, void *render_data,
-                                  br_uint_8 style, int on_screen);
+typedef void br_render_style_call_fn(br_actor *actor, br_model *model, br_material *material, void *render_data,
+                                     br_uint_8 style, int on_screen);
+
+extern br_render_style_call_fn *const RenderStyleCalls[];
 
 /*
  * otable.c

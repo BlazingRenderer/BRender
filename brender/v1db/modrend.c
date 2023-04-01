@@ -282,7 +282,7 @@ static void boundingBoxRenderFaces(br_actor *actor, br_model *model, br_material
 /*
  * Table of rendering functions indexed by style
  */
-void (*RenderStyleCalls[])(br_actor *actor, br_model *model, br_material *material, void *render_data, br_uint_8 style, int on_screen) = {
+br_render_style_call_fn *const RenderStyleCalls[] = {
     renderFaces,             /* BR_RSTYLE_DEFAULT           */
     nullRender,              /* BR_RSTYLE_NONE              */
     renderPoints,            /* BR_RSTYLE_POINTS            */
