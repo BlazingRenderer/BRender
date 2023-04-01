@@ -328,7 +328,6 @@ int BR_PUBLIC_ENTRY BrScenePick2D(br_actor *world, br_actor *camera, br_pixelmap
              ((eqn.v[Y] > 0) ? (bounds->max.v[Y]) : (bounds->min.v[Y])), eqn.v[Z],           \
              ((eqn.v[Z] > 0) ? (bounds->max.v[Z]) : (bounds->min.v[Z]))) < eqn.v[W])
 
-#pragma optimize("g", off)
 static int PickBoundsTestBox(br_bounds *model_bounds, br_bounds *bounds, br_matrix34 *m_to_p)
 {
     br_matrix34 p_to_m;
