@@ -94,7 +94,6 @@ br_error DirectDrawToBRenderSurfaceType(LPDDPIXELFORMAT format, br_uint_16 *pTyp
  */
 HRESULT FAR PASCAL EnumCallback(LPDDSURFACEDESC ddsd, LPVOID context)
 {
-    char                tmp[64];
     br_uint_16          colour_type;
     br_device          *dev;
     br_output_facility *self;
@@ -146,8 +145,7 @@ HRESULT FAR PASCAL EnumCallback(LPDDSURFACEDESC ddsd, LPVOID context)
     /*
      * Attach a descriptive identifier
      */
-    BrSprintfN(tmp, sizeof(tmp) - 1, "F:%dx%dx%d", self->width, self->height, self->colour_bits);
-    self->identifier = BrResStrDup(self, tmp);
+    self->identifier = BrResSprintf(self, "F:%dx%dx%d", self->width, self->height, self->colour_bits);
 
     return DDENUMRET_OK;
 }
@@ -157,7 +155,6 @@ HRESULT FAR PASCAL EnumCallback(LPDDSURFACEDESC ddsd, LPVOID context)
  */
 br_error OutputFacilityDirectDrawInitialise(br_device *dev)
 {
-    char                 tmp[64];
     br_output_facility  *self;
     DDSURFACEDESC        ddsd = {sizeof(DDSURFACEDESC)};
     br_uint_16           colour_type;
@@ -211,8 +208,7 @@ br_error OutputFacilityDirectDrawInitialise(br_device *dev)
     /*
      * Attach a descriptive identifier
      */
-    BrSprintfN(tmp, sizeof(tmp) - 1, "W:%dx%dx%d", self->width, self->height, self->colour_bits);
-    self->identifier = BrResStrDup(self, tmp);
+    self->identifier = BrResSprintf(self, "W:%dx%dx%d", self->width, self->height, self->colour_bits);
 
     /*
      * Enumerate and record available fullscreen modes, if possible

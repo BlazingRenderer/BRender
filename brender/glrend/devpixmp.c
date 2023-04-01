@@ -288,7 +288,6 @@ static br_error create_pixelmap(br_device_pixelmap **newpm, br_object *parent, b
     br_device_pixelmap *pm, *ppm;
     br_output_facility *outfcty;
     br_device          *device;
-    char                buf[128];
     const char         *tag;
     GLint               gl_internal_format;
     GLenum              gl_format, gl_type;
@@ -336,12 +335,10 @@ static br_error create_pixelmap(br_device_pixelmap **newpm, br_object *parent, b
             return BRE_FAIL;
     }
 
-    BrSprintfN(buf, sizeof(buf), "%" PRIu16 "x%" PRIu16 " (%s)", width, height, tag);
-
     pm                  = BrResAllocate(device, sizeof(br_device_pixelmap), BR_MEMORY_OBJECT);
     pm->dispatch        = &devicePixelmapDispatch;
     pm->output_facility = outfcty;
-    pm->pm_identifier   = BrResStrDup(pm, buf);
+    pm->pm_identifier   = BrResSprintf(pm, "%" PRIu16 "x%" PRIu16 " (%s)", width, height, tag);
     pm->device          = device;
     pm->use_type        = use_type;
     pm->msaa_samples    = msaa_samples;
