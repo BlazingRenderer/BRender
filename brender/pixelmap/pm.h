@@ -56,6 +56,3 @@ extern struct br_pixelmap_state BR_ASM_DATA _pixelmap;
 #endif
 
 #endif
-
-
-

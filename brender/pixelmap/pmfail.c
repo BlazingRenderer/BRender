@@ -3,8 +3,7 @@
  */
 #include "pm.h"
 
-br_error BR_CMETHOD_DECL(br_device_pixelmap_fail, allocateSub)(br_device_pixelmap *self,
-                                                               br_device_pixelmap **newpm,
+br_error BR_CMETHOD_DECL(br_device_pixelmap_fail, allocateSub)(br_device_pixelmap *self, br_device_pixelmap **newpm,
                                                                br_rectangle *rect)
 {
     return BRE_FAIL;
@@ -21,8 +20,7 @@ br_error BR_CMETHOD_DECL(br_device_pixelmap_fail, pixelSet)(br_device_pixelmap *
     return BRE_FAIL;
 }
 
-br_error BR_CMETHOD_DECL(br_device_pixelmap_fail, line)(br_device_pixelmap *self, br_point *s, br_point *e,
-                                                        br_uint_32 colour)
+br_error BR_CMETHOD_DECL(br_device_pixelmap_fail, line)(br_device_pixelmap *self, br_point *s, br_point *e, br_uint_32 colour)
 {
     return BRE_FAIL;
 }
@@ -44,14 +42,13 @@ br_error BR_CMETHOD_DECL(br_device_pixelmap_fail, rowQuery)(br_device_pixelmap *
     return BRE_FAIL;
 }
 
-br_error BR_CMETHOD_DECL(br_device_pixelmap_fail, rowSet)(br_device_pixelmap *self, void *buffer,
-                                                          br_size_t buffer_size, br_uint_32 row)
+br_error BR_CMETHOD_DECL(br_device_pixelmap_fail, rowSet)(br_device_pixelmap *self, void *buffer, br_size_t buffer_size,
+                                                          br_uint_32 row)
 {
     return BRE_FAIL;
 }
 
-br_error BR_CMETHOD_DECL(br_device_pixelmap_fail, pixelQuery)(br_device_pixelmap *self, br_uint_32 *pcolour,
-                                                              br_point *p)
+br_error BR_CMETHOD_DECL(br_device_pixelmap_fail, pixelQuery)(br_device_pixelmap *self, br_uint_32 *pcolour, br_point *p)
 {
     return BRE_FAIL;
 }
@@ -62,8 +59,7 @@ br_error BR_CMETHOD_DECL(br_device_pixelmap_fail, pixelAddressQuery)(br_device_p
     return BRE_FAIL;
 }
 
-br_error BR_CMETHOD_DECL(br_device_pixelmap_fail, pixelAddressSet)(br_device_pixelmap *self, void *ptr,
-                                                                   br_uint_32 *qual)
+br_error BR_CMETHOD_DECL(br_device_pixelmap_fail, pixelAddressSet)(br_device_pixelmap *self, void *ptr, br_uint_32 *qual)
 {
     return BRE_FAIL;
 }
@@ -73,8 +69,7 @@ br_error BR_CMETHOD_DECL(br_device_pixelmap_fail, flush)(br_device_pixelmap *sel
     return BRE_OK;
 }
 
-br_error BR_CMETHOD_DECL(br_device_pixelmap_fail, synchronise)(br_device_pixelmap *self,
-                                                               br_token sync_type, br_boolean block)
+br_error BR_CMETHOD_DECL(br_device_pixelmap_fail, synchronise)(br_device_pixelmap *self, br_token sync_type, br_boolean block)
 {
     return BRE_FAIL;
 }
@@ -89,13 +84,12 @@ br_error BR_CMETHOD_DECL(br_device_pixelmap_fail, directUnlock)(br_device_pixelm
     return BRE_FAIL;
 }
 
-br_error BR_CMETHOD_DECL(br_device_pixelmap_fail, getControls)(br_device_pixelmap *self, br_display_controls * controls)
+br_error BR_CMETHOD_DECL(br_device_pixelmap_fail, getControls)(br_device_pixelmap *self, br_display_controls *controls)
 {
     return BRE_FAIL;
 }
 
-br_error BR_CMETHOD_DECL(br_device_pixelmap_fail, setControls)(br_device_pixelmap *self, br_display_controls * controls)
+br_error BR_CMETHOD_DECL(br_device_pixelmap_fail, setControls)(br_device_pixelmap *self, br_display_controls *controls)
 {
     return BRE_FAIL;
 }
-

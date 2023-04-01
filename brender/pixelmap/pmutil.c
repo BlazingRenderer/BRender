@@ -7,7 +7,7 @@
 br_pixelmap *BR_PUBLIC_ENTRY BrPixelmapDeCLUT(br_pixelmap *src)
 {
     br_pixelmap *newpm, *map;
-    br_colour   key;
+    br_colour    key;
 
     // TODO: Support more than just BR_PMT_INDEX_8
     if(src == NULL || src->type != BR_PMT_INDEX_8 || (src->flags & BR_PMF_NO_ACCESS))
@@ -18,10 +18,8 @@ br_pixelmap *BR_PUBLIC_ENTRY BrPixelmapDeCLUT(br_pixelmap *src)
     if(map == NULL || map->type != BR_PMT_RGBX_888 || map->width != 1 || (map->flags & BR_PMF_NO_ACCESS))
         return NULL;
 
-    newpm = BrPixelmapAllocate(
-        (src->flags & BR_PMF_KEYED_TRANSPARENCY) ? BR_PMT_RGBA_8888 : BR_PMT_RGBX_888,
-        src->width, src->height, NULL, BR_PMAF_NORMAL
-    );
+    newpm = BrPixelmapAllocate((src->flags & BR_PMF_KEYED_TRANSPARENCY) ? BR_PMT_RGBA_8888 : BR_PMT_RGBX_888,
+                               src->width, src->height, NULL, BR_PMAF_NORMAL);
     if(newpm == NULL)
         return NULL;
 
@@ -42,7 +40,7 @@ br_pixelmap *BR_PUBLIC_ENTRY BrPixelmapDeCLUT(br_pixelmap *src)
             index = (br_int_32)BrPixelmapPixelGet(src, i, j);
             UASSERT(index <= 0xFF);
 
-            col  = BrPixelmapPixelGet(map, 0, index - map->origin_y);
+            col = BrPixelmapPixelGet(map, 0, index - map->origin_y);
             col |= BR_COLOUR_RGBA(0x00, 0x00, 0x00, 0xFF);
 
             /* Apply colour keying */
@@ -50,7 +48,7 @@ br_pixelmap *BR_PUBLIC_ENTRY BrPixelmapDeCLUT(br_pixelmap *src)
                 br_uint_8 r = BR_RED(col);
                 br_uint_8 g = BR_GRN(col);
                 br_uint_8 b = BR_BLU(col);
-                col = BR_COLOUR_RGBA(r, g, b, BR_COLOUR_RGB(r, g, b) == key ? 0x00 : 0xFF);
+                col         = BR_COLOUR_RGBA(r, g, b, BR_COLOUR_RGB(r, g, b) == key ? 0x00 : 0xFF);
             }
 
             BrPixelmapPixelSet(newpm, i, j, col);
