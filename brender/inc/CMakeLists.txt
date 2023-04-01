@@ -66,7 +66,6 @@ add_library(inc STATIC
 )
 target_include_directories(inc INTERFACE . ${CMAKE_CURRENT_BINARY_DIR})
 target_compile_definitions(inc INTERFACE
-	STATIC=static
 	BASED_FIXED=0
 	BASED_FLOAT=1
 	PARANOID=1

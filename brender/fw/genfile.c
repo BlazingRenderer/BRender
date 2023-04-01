@@ -56,14 +56,14 @@ br_file_enum_member file_type_FM[] = {
 };
 // clang-format off
 
-STATIC _FILE_ENUM(file_type);
+static _FILE_ENUM(file_type);
 
 #define _STRUCT_NAME struct file_info
-STATIC br_file_struct_member file_info_FM[] = {
+static br_file_struct_member file_info_FM[] = {
     _ENUM_32(type, file_type_F),
     _UINT_32(version),
 };
-STATIC _FILE_STRUCT(file_info);
+static _FILE_STRUCT(file_info);
 #undef _STRUCT_NAME
 
 #if 0

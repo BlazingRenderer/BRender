@@ -16,7 +16,7 @@ BR_RCS_ID("$Id: savescr.c 1.2 1998/03/05 20:24:07 jon Exp $")
  */
 extern const br_material _DefaultScriptMaterial;
 
-STATIC const struct {
+static const struct {
     const char *name;
     int         value;
 } MaterialFlagNames[] = {
@@ -41,7 +41,7 @@ STATIC const struct {
     {"inhibit_depth_write", BR_MATF_INHIBIT_DEPTH_WRITE},
 };
 
-STATIC const struct {
+static const struct {
     const char *name;
     int         value;
 } DepthTestNames[] = {
@@ -55,7 +55,7 @@ STATIC const struct {
     {"al", BR_MATM_DEPTH_TEST_AL},
 };
 
-STATIC const struct {
+static const struct {
     const char *name;
     int         value;
 } BlendModeNames[] = {
@@ -65,7 +65,7 @@ STATIC const struct {
     {"premultiplied", BR_MATM_BLEND_MODE_PREMULTIPLIED},
 };
 
-STATIC const struct {
+static const struct {
     const char *name;
     int         value;
 } WidthLimitNames[] = {
@@ -74,7 +74,7 @@ STATIC const struct {
     {"mirror", BR_MATM_MAP_WIDTH_LIMIT_MIRROR},
 };
 
-STATIC const struct {
+static const struct {
     const char *name;
     int         value;
 } HeightLimitNames[] = {
@@ -83,7 +83,7 @@ STATIC const struct {
     {"mirror", BR_MATM_MAP_HEIGHT_LIMIT_MIRROR},
 };
 
-STATIC void WriteScriptMaterial(br_material *mat, void *df)
+static void WriteScriptMaterial(br_material *mat, void *df)
 {
     int i, j;
 

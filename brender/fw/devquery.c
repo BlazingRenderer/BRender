@@ -12,7 +12,7 @@
 
 BR_RCS_ID("$Id: devquery.c 1.2 1997/12/11 13:34:07 jon Exp $")
 
-STATIC br_boolean deviceEnum(br_device *dev, br_device_enum_cbfn *cbfn, void *args)
+static br_boolean deviceEnum(br_device *dev, br_device_enum_cbfn *cbfn, void *args)
 {
     br_size_t       s;
     void           *mem;
@@ -147,7 +147,7 @@ br_error BR_PUBLIC_ENTRY BrDeviceEnum(br_device_enum_cbfn *cbfn, void *args)
     return BRE_OK;
 }
 
-STATIC br_boolean outfctyEnum(br_object *outfcty, br_outfcty_enum_cbfn *cbfn, void *args)
+static br_boolean outfctyEnum(br_object *outfcty, br_outfcty_enum_cbfn *cbfn, void *args)
 {
     br_size_t       s;
     void           *mem;

@@ -191,7 +191,7 @@ static struct v11group bounds_face_groups[] = {
 };
 // clang-format on
 
-STATIC struct v11model bounds_prepared = {
+static struct v11model bounds_prepared = {
     .size    = 0,
     .flags   = 0,
     .ngroups = 1,
@@ -199,7 +199,7 @@ STATIC struct v11model bounds_prepared = {
     .groups  = bounds_face_groups,
 };
 
-STATIC struct br_model bounds_model = {
+static struct br_model bounds_model = {
     ._reserved    = 0,
     .identifier   = "Bounds",
     .vertices     = NULL,

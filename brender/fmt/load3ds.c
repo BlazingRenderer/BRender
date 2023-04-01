@@ -17,7 +17,7 @@ BR_RCS_ID("$Id: load3ds.c 1.3 1998/07/28 14:33:23 jon Exp $")
 /*
  * Default 3DS conversion options
  */
-STATIC br_3ds_options _BrDefault3DSOptions = {
+static br_3ds_options _BrDefault3DSOptions = {
     /*
      * Flags
      */
@@ -41,7 +41,7 @@ STATIC br_3ds_options _BrDefault3DSOptions = {
 /*
  * Report a message
  */
-STATIC void ReportMessage(br_fmt_report_cbfn *report, char *fmt, ...)
+static void ReportMessage(br_fmt_report_cbfn *report, char *fmt, ...)
 {
     va_list args;
 
@@ -55,7 +55,7 @@ STATIC void ReportMessage(br_fmt_report_cbfn *report, char *fmt, ...)
 /*
  * Read a character from a stream
  */
-STATIC Bool_t ReadChar(void *stream, char *result)
+static Bool_t ReadChar(void *stream, char *result)
 {
     int c;
 
@@ -73,7 +73,7 @@ STATIC Bool_t ReadChar(void *stream, char *result)
  * Read a byte from a stream
  * and cast to an 8 bit unsigned integer
  */
-STATIC Bool_t ReadUInt8(void *stream, br_uint_8 *result)
+static Bool_t ReadUInt8(void *stream, br_uint_8 *result)
 {
     int b;
 
@@ -92,7 +92,7 @@ STATIC Bool_t ReadUInt8(void *stream, br_uint_8 *result)
  * Read a byte from a stream
  * and cast to an 8 bit signed integer
  */
-STATIC Bool_t ReadInt8(void *stream, br_int_8 *result)
+static Bool_t ReadInt8(void *stream, br_int_8 *result)
 {
 	int b;
 
@@ -110,7 +110,7 @@ STATIC Bool_t ReadInt8(void *stream, br_int_8 *result)
  * Read two bytes from a stream
  * and convert to a 16 bit unsigned integer
  */
-STATIC Bool_t ReadUInt16(void *stream, br_uint_16 *result)
+static Bool_t ReadUInt16(void *stream, br_uint_16 *result)
 {
     int lsb, msb;
 
@@ -130,7 +130,7 @@ STATIC Bool_t ReadUInt16(void *stream, br_uint_16 *result)
  * Read two bytes from a stream
  * and convert to a 16 bit signed integer
  */
-STATIC Bool_t ReadInt16(void *stream, br_int_16 *result)
+static Bool_t ReadInt16(void *stream, br_int_16 *result)
 {
     int lsb, msb;
 
@@ -150,7 +150,7 @@ STATIC Bool_t ReadInt16(void *stream, br_int_16 *result)
  * Read four bytes from a stream
  * and convert to a 32 bit unsigned integer
  */
-STATIC Bool_t ReadUInt32(void *stream, br_uint_32 *result)
+static Bool_t ReadUInt32(void *stream, br_uint_32 *result)
 {
     int i, b[4];
 
@@ -169,7 +169,7 @@ STATIC Bool_t ReadUInt32(void *stream, br_uint_32 *result)
  * Read four bytes from a stream
  * and convert to a 32 bit signed integer
  */
-STATIC Bool_t ReadInt32(void *stream, br_int_32 *result)
+static Bool_t ReadInt32(void *stream, br_int_32 *result)
 {
     int i, b[4];
 
@@ -188,7 +188,7 @@ STATIC Bool_t ReadInt32(void *stream, br_int_32 *result)
  * Read four bytes from a stream
  * and convert to a 32 bit IEEE float
  */
-STATIC Bool_t ReadFloat(void *stream, Float_t *result)
+static Bool_t ReadFloat(void *stream, Float_t *result)
 {
     br_uint_32 f;
 
@@ -205,7 +205,7 @@ STATIC Bool_t ReadFloat(void *stream, Float_t *result)
 /*
  * Block copy
  */
-STATIC void BlockCopy(void *dest, void *src, Int_t n_bytes)
+static void BlockCopy(void *dest, void *src, Int_t n_bytes)
 {
     Int_t i;
     char *src_bp, *dest_bp;
@@ -222,7 +222,7 @@ STATIC void BlockCopy(void *dest, void *src, Int_t n_bytes)
 /*
  * Skip bytes in a stream
  */
-STATIC Bool_t SkipBytes(void *stream, int bytes)
+static Bool_t SkipBytes(void *stream, int bytes)
 {
     int i, c;
 
@@ -239,7 +239,7 @@ STATIC Bool_t SkipBytes(void *stream, int bytes)
  * Skip all remaining bytes in the chunk
  * currently at the top of the stack
  */
-STATIC Bool_t SkipRest(void *stream, Stack_t *top)
+static Bool_t SkipRest(void *stream, Stack_t *top)
 {
     UASSERT((stream != NULL) && (top != NULL));
 
@@ -255,7 +255,7 @@ STATIC Bool_t SkipRest(void *stream, Stack_t *top)
  * Read a chunk header from the input stream
  * into the top of the stack
  */
-STATIC Bool_t ReadHeader(void *stream, Stack_t *top)
+static Bool_t ReadHeader(void *stream, Stack_t *top)
 {
     br_uint_16 id_tag;
     br_uint_32 length;
@@ -279,7 +279,7 @@ STATIC Bool_t ReadHeader(void *stream, Stack_t *top)
  * Read a NULL-terminated string of length
  * less than 'max_n_bytes' into 'buffer' from the input stream
  */
-STATIC Bool_t ReadString(void *stream, Stack_t *top, Int_t max_n_bytes, char *buffer)
+static Bool_t ReadString(void *stream, Stack_t *top, Int_t max_n_bytes, char *buffer)
 {
     Int_t i;
 
@@ -303,7 +303,7 @@ STATIC Bool_t ReadString(void *stream, Stack_t *top, Int_t max_n_bytes, char *bu
  * Read an RGB triple of floating point values
  * into the top of the stack
  */
-STATIC Bool_t ReadColorF(void *stream, Stack_t *top)
+static Bool_t ReadColorF(void *stream, Stack_t *top)
 {
     Color_t *color;
 
@@ -332,7 +332,7 @@ STATIC Bool_t ReadColorF(void *stream, Stack_t *top)
  * Read an RGB triple of unsigned bytes, convert them
  * to floating point values, and copy into the top of the stack
  */
-STATIC Bool_t ReadColor24(void *stream, Stack_t *top)
+static Bool_t ReadColor24(void *stream, Stack_t *top)
 {
     br_uint_8 red, green, blue;
     Color_t  *color;
@@ -358,7 +358,7 @@ STATIC Bool_t ReadColor24(void *stream, Stack_t *top)
 /*
  * Convert a colour from the 'Color_t' type to BRender's 'br_colour' type
  */
-STATIC br_colour ConvertColor(Color_t *color)
+static br_colour ConvertColor(Color_t *color)
 {
     return BR_COLOUR_RGB((float)(255.0 * color->red), (float)(255.0 * color->green), (float)(255.0 * color->blue));
 }
@@ -366,7 +366,7 @@ STATIC br_colour ConvertColor(Color_t *color)
 /*
  * Take a 'Color_t' and return it's grey-scale intensity
  */
-STATIC br_ufraction GreyscaleOfColor(Color_t *color)
+static br_ufraction GreyscaleOfColor(Color_t *color)
 {
     return BrScalarToUFraction(
         BrFloatToScalar((float)((color->red * RED_GREYSCALE_FACTOR) + (color->green * GREEN_GREYSCALE_FACTOR) +
@@ -377,7 +377,7 @@ STATIC br_ufraction GreyscaleOfColor(Color_t *color)
  * Read an XYZ triple from the input stream, convert to a 'br_vector3',
  * and reflect in the planes y=z and z=0 if required
  */
-STATIC Bool_t ReadPoint(void *stream, Stack_t *top, br_vector3 *vector, br_3ds_options *options)
+static Bool_t ReadPoint(void *stream, Stack_t *top, br_vector3 *vector, br_3ds_options *options)
 {
     Int_t   i;
     Float_t coords[3];
@@ -412,7 +412,7 @@ STATIC Bool_t ReadPoint(void *stream, Stack_t *top, br_vector3 *vector, br_3ds_o
  * Initialise a pixmap reference so that it refers
  * to neither a texture map nor a reflection map
  */
-STATIC void InitialisePixmapRef(PixmapRef_t *pixmap_ref)
+static void InitialisePixmapRef(PixmapRef_t *pixmap_ref)
 {
     UASSERT(pixmap_ref != NULL);
 
@@ -423,7 +423,7 @@ STATIC void InitialisePixmapRef(PixmapRef_t *pixmap_ref)
 /*
  * De-allocate any memory used by the name of a referenced pixmap
  */
-STATIC void DismantlePixmapRef(PixmapRef_t *pixmap_ref)
+static void DismantlePixmapRef(PixmapRef_t *pixmap_ref)
 {
     UASSERT(pixmap_ref != NULL);
 
@@ -440,7 +440,7 @@ STATIC void DismantlePixmapRef(PixmapRef_t *pixmap_ref)
  * greater strength has been found, update the reference to
  * refer to the newly found pixmap
  */
-STATIC void UpdatePixmapRef(PixmapRef_t *exist_ref, PixmapRef_t *new_ref)
+static void UpdatePixmapRef(PixmapRef_t *exist_ref, PixmapRef_t *new_ref)
 {
     UASSERT((exist_ref != NULL) && (new_ref != NULL));
 
@@ -463,7 +463,7 @@ STATIC void UpdatePixmapRef(PixmapRef_t *exist_ref, PixmapRef_t *new_ref)
  * Each map that gets created this way gets threaded into a list, a
  * pointer to which is passed as the "maps" parameter.
  */
-STATIC br_pixelmap *GetPixelmap(char *mat_mapname, PixmapList_t **pixmap_list)
+static br_pixelmap *GetPixelmap(char *mat_mapname, PixmapList_t **pixmap_list)
 {
     char         *identifier, *suffix;
     br_pixelmap  *pixelmap;
@@ -534,7 +534,7 @@ STATIC br_pixelmap *GetPixelmap(char *mat_mapname, PixmapList_t **pixmap_list)
 /*
  * De-allocate pixmap list nodes
  */
-STATIC void DeallocatePixmapListNodes(PixmapList_t *pixmap_list)
+static void DeallocatePixmapListNodes(PixmapList_t *pixmap_list)
 {
     PixmapList_t *dud;
 
@@ -548,7 +548,7 @@ STATIC void DeallocatePixmapListNodes(PixmapList_t *pixmap_list)
 /*
  * De-allocate entire pixmap list
  */
-STATIC void DeallocatePixmapList(PixmapList_t *pixmap_list)
+static void DeallocatePixmapList(PixmapList_t *pixmap_list)
 {
     PixmapList_t *dud;
 
@@ -564,7 +564,7 @@ STATIC void DeallocatePixmapList(PixmapList_t *pixmap_list)
  * Initialise a material entry so that all
  * of its optional properties are turned off
  */
-STATIC void InitialiseMatEntry(MatEntry_t *mat_entry)
+static void InitialiseMatEntry(MatEntry_t *mat_entry)
 {
     UASSERT(mat_entry != NULL);
 
@@ -591,7 +591,7 @@ STATIC void InitialiseMatEntry(MatEntry_t *mat_entry)
  * De-allocate any memory used by the names of
  * a material entry and any pixmap it may refer to
  */
-STATIC void DismantleMatEntry(MatEntry_t *mat_entry)
+static void DismantleMatEntry(MatEntry_t *mat_entry)
 {
     UASSERT(mat_entry != NULL);
 
@@ -611,7 +611,7 @@ STATIC void DismantleMatEntry(MatEntry_t *mat_entry)
  *
  * Each material that is converted is threaded into a list.
  */
-STATIC MaterialList_t *ConvertMaterial(MatEntry_t *mat_entry, PixmapList_t **pixmap_list, br_3ds_options *options)
+static MaterialList_t *ConvertMaterial(MatEntry_t *mat_entry, PixmapList_t **pixmap_list, br_3ds_options *options)
 {
     br_material    *material;
     br_pixelmap    *colour_map;
@@ -782,7 +782,7 @@ STATIC MaterialList_t *ConvertMaterial(MatEntry_t *mat_entry, PixmapList_t **pix
  * Given a list of converted materials, attempt to
  * find one with a specific name
  */
-STATIC MaterialList_t *LookupMaterial(char *name, MaterialList_t *list)
+static MaterialList_t *LookupMaterial(char *name, MaterialList_t *list)
 {
     MaterialList_t *item;
 
@@ -799,7 +799,7 @@ STATIC MaterialList_t *LookupMaterial(char *name, MaterialList_t *list)
  * Return TRUE if a material specifies filled faces,
  * otherwise return FALSE
  */
-STATIC Bool_t FillMat(MaterialList_t *material_link)
+static Bool_t FillMat(MaterialList_t *material_link)
 {
     return (material_link == NULL || material_link->mat_shading != WIREFRAME);
 }
@@ -808,7 +808,7 @@ STATIC Bool_t FillMat(MaterialList_t *material_link)
  * Return TRUE if the material specifies wire-framed faces,
  * otherwise return FALSE
  */
-STATIC Bool_t WireMat(MaterialList_t *material_link)
+static Bool_t WireMat(MaterialList_t *material_link)
 {
     return (material_link != NULL && material_link->mat_shading == WIREFRAME);
 }
@@ -816,7 +816,7 @@ STATIC Bool_t WireMat(MaterialList_t *material_link)
 /*
  * De-allocate material list nodes
  */
-STATIC void DeallocateMaterialListNodes(MaterialList_t *material_list)
+static void DeallocateMaterialListNodes(MaterialList_t *material_list)
 {
     MaterialList_t *dud;
 
@@ -830,7 +830,7 @@ STATIC void DeallocateMaterialListNodes(MaterialList_t *material_list)
 /*
  * De-allocate entire material list
  */
-STATIC void DeallocateMaterialList(MaterialList_t *material_list)
+static void DeallocateMaterialList(MaterialList_t *material_list)
 {
     MaterialList_t *dud;
 
@@ -846,7 +846,7 @@ STATIC void DeallocateMaterialList(MaterialList_t *material_list)
  * De-allocate the memory used to assign
  * a specific material to a group of faces
  */
-STATIC void DeallocateMshMatGroups(MshMatGroup_t *msh_mat_groups)
+static void DeallocateMshMatGroups(MshMatGroup_t *msh_mat_groups)
 {
     MshMatGroup_t *dud;
 
@@ -864,7 +864,7 @@ STATIC void DeallocateMshMatGroups(MshMatGroup_t *msh_mat_groups)
 /*
  * Clear all references to pixelmaps in converted materials
  */
-STATIC void ClearMaterialPixelmaps(br_fmt_results *results)
+static void ClearMaterialPixelmaps(br_fmt_results *results)
 {
     br_uint_32   i;
     br_material *material;
@@ -881,7 +881,7 @@ STATIC void ClearMaterialPixelmaps(br_fmt_results *results)
 /*
  * Clear all references to materials in converted model faces
  */
-STATIC void ClearModelMaterials(br_fmt_results *results)
+static void ClearModelMaterials(br_fmt_results *results)
 {
     br_uint_16 f;
     br_uint_32 i;
@@ -899,7 +899,7 @@ STATIC void ClearModelMaterials(br_fmt_results *results)
 /*
  * Initialise a new point array
  */
-STATIC void InitialisePointArray(PointArray_t *point_array)
+static void InitialisePointArray(PointArray_t *point_array)
 {
     UASSERT(point_array != NULL);
 
@@ -911,7 +911,7 @@ STATIC void InitialisePointArray(PointArray_t *point_array)
  * into the top of the stack, converting them
  * to BRender's 'br_vector3' structure
  */
-STATIC State_t ReadPointArray(void *stream, Stack_t *top, br_3ds_options *options)
+static State_t ReadPointArray(void *stream, Stack_t *top, br_3ds_options *options)
 {
     br_uint_16  n_vertices;
     br_vector3 *vertices;
@@ -946,7 +946,7 @@ STATIC State_t ReadPointArray(void *stream, Stack_t *top, br_3ds_options *option
 /*
  * De-allocate the memory used by a point array
  */
-STATIC void DismantlePointArray(PointArray_t *point_array)
+static void DismantlePointArray(PointArray_t *point_array)
 {
     UASSERT(point_array != NULL);
 
@@ -959,7 +959,7 @@ STATIC void DismantlePointArray(PointArray_t *point_array)
 /*
  * Initialise a face array
  */
-STATIC void InitialiseFaceArray(FaceArray_t *face_array)
+static void InitialiseFaceArray(FaceArray_t *face_array)
 {
     UASSERT(face_array != NULL);
 
@@ -973,7 +973,7 @@ STATIC void InitialiseFaceArray(FaceArray_t *face_array)
  * into the top of the stack, converting the edge
  * visibility flags into BRender co-planarity flags
  */
-STATIC State_t ReadFaceArray(void *stream, Stack_t *top)
+static State_t ReadFaceArray(void *stream, Stack_t *top)
 {
     br_uint_16 n_faces;
     br_uint_16 visibility;
@@ -1035,7 +1035,7 @@ STATIC State_t ReadFaceArray(void *stream, Stack_t *top)
  * De-allocate any memory used by a face array,
  * their smoothing groups, and their material references
  */
-STATIC void DismantleFaceArray(FaceArray_t *face_array)
+static void DismantleFaceArray(FaceArray_t *face_array)
 {
     UASSERT(face_array != NULL);
 
@@ -1060,7 +1060,7 @@ STATIC void DismantleFaceArray(FaceArray_t *face_array)
  * remembering to make sure the material for those
  * faces has been defined
  */
-STATIC State_t ReadMshMatGroup(void *stream, Stack_t *top, MaterialList_t *material_list)
+static State_t ReadMshMatGroup(void *stream, Stack_t *top, MaterialList_t *material_list)
 {
     char            buffer[17];
     br_uint_16      n_indexes;
@@ -1129,7 +1129,7 @@ STATIC State_t ReadMshMatGroup(void *stream, Stack_t *top, MaterialList_t *mater
  * 32 bit to 16 bit smoothing groups before placing
  * them at the top of the stack
  */
-STATIC State_t ReadSmoothGroup(void *stream, Stack_t *top, br_uint_16 n_faces, br_3ds_options *options)
+static State_t ReadSmoothGroup(void *stream, Stack_t *top, br_uint_16 n_faces, br_3ds_options *options)
 {
     br_uint_16  i, j;
     br_uint_16  n_used;
@@ -1231,7 +1231,7 @@ STATIC State_t ReadSmoothGroup(void *stream, Stack_t *top, br_uint_16 n_faces, b
 /*
  * Initialise a list of texture coordinates
  */
-STATIC void InitialiseTexVerts(TexVerts_t *tex_verts)
+static void InitialiseTexVerts(TexVerts_t *tex_verts)
 {
     UASSERT(tex_verts != NULL);
 
@@ -1243,7 +1243,7 @@ STATIC void InitialiseTexVerts(TexVerts_t *tex_verts)
  * from the input stream, convert them to the 'br_vector2'
  * structure, and place them at the top of the stack
  */
-STATIC State_t ReadTexVerts(void *stream, Stack_t *top)
+static State_t ReadTexVerts(void *stream, Stack_t *top)
 {
     br_uint_16  n_texverts;
     br_vector2 *texverts;
@@ -1284,7 +1284,7 @@ STATIC State_t ReadTexVerts(void *stream, Stack_t *top)
  * De-allocate the memory used to store
  * texture coordinates for each vertex
  */
-STATIC void DismantleTexVerts(TexVerts_t *tex_verts)
+static void DismantleTexVerts(TexVerts_t *tex_verts)
 {
     UASSERT(tex_verts != NULL);
 
@@ -1299,7 +1299,7 @@ STATIC void DismantleTexVerts(TexVerts_t *tex_verts)
  * top of the stack, converting it for a right-handed
  * coordinate system
  */
-STATIC State_t ReadMeshMatrix(void *stream, Stack_t *top, br_3ds_options *options)
+static State_t ReadMeshMatrix(void *stream, Stack_t *top, br_3ds_options *options)
 {
     br_vector3   row;
     br_matrix34 *mesh_matrix;
@@ -1326,7 +1326,7 @@ STATIC State_t ReadMeshMatrix(void *stream, Stack_t *top, br_3ds_options *option
  * Allocate a new named object structure, setting
  * it's name to the one supplied
  */
-STATIC NamedObj_t *AllocateNamedObj(char *name)
+static NamedObj_t *AllocateNamedObj(char *name)
 {
     NamedObj_t *obj;
 
@@ -1357,7 +1357,7 @@ STATIC NamedObj_t *AllocateNamedObj(char *name)
  * De-allocate a list of converted named objects,
  * but leave any attached BRender models alone
  */
-STATIC void DeallocateNamedObjListNodes(NamedObj_t *objects)
+static void DeallocateNamedObjListNodes(NamedObj_t *objects)
 {
     NamedObj_t *dud;
 
@@ -1383,7 +1383,7 @@ STATIC void DeallocateNamedObjListNodes(NamedObj_t *objects)
 /*
  * De-allocate and entire list of named objects
  */
-STATIC void DeallocateNamedObjList(NamedObj_t *objects)
+static void DeallocateNamedObjList(NamedObj_t *objects)
 {
     NamedObj_t *dud;
 
@@ -1416,7 +1416,7 @@ STATIC void DeallocateNamedObjList(NamedObj_t *objects)
  * Take a face map of materials and a vertex re-mapping array,
  * allocate a new 'br_model', and fill it up
  */
-STATIC br_model *MakeModelFromMaps(NTriObj_t *n_tri_obj, Bool_t (*material_type)(MaterialList_t *), char *name,
+static br_model *MakeModelFromMaps(NTriObj_t *n_tri_obj, Bool_t (*material_type)(MaterialList_t *), char *name,
                                    char *suffix, Int_t n_vertices, Int_t n_faces, br_uint_16 *vertex_map,
                                    MaterialList_t **face_map)
 {
@@ -1559,7 +1559,7 @@ STATIC br_model *MakeModelFromMaps(NTriObj_t *n_tri_obj, Bool_t (*material_type)
 /*
  * Apply a matrix to all vertices in a point array
  */
-STATIC void ApplyMatrixToPointArray(PointArray_t *point_array, br_matrix34 *matrix)
+static void ApplyMatrixToPointArray(PointArray_t *point_array, br_matrix34 *matrix)
 {
     br_vector3 new_vertex;
     Int_t      i;
@@ -1577,7 +1577,7 @@ STATIC void ApplyMatrixToPointArray(PointArray_t *point_array, br_matrix34 *matr
  * and set 'from_world' to it, unless it is singular
  * in which case both are set to the identity
  */
-STATIC void CreateFromWorldMatrix(NamedObj_t *named_obj, br_3ds_options *options)
+static void CreateFromWorldMatrix(NamedObj_t *named_obj, br_3ds_options *options)
 {
     br_scalar det;
 
@@ -1599,7 +1599,7 @@ STATIC void CreateFromWorldMatrix(NamedObj_t *named_obj, br_3ds_options *options
 /*
  * Make a 'Model_t' and put into a 'NamedObj_t'
  */
-STATIC State_t ConvertNTriObj(NTriObj_t *n_tri_obj, NamedObj_t *named_obj, br_3ds_options *options)
+static State_t ConvertNTriObj(NTriObj_t *n_tri_obj, NamedObj_t *named_obj, br_3ds_options *options)
 {
     char            *name;
     br_uint_16      *fill_vertex_map;
@@ -1824,7 +1824,7 @@ STATIC State_t ConvertNTriObj(NTriObj_t *n_tri_obj, NamedObj_t *named_obj, br_3d
  * target and bank angle of an object. Used to generate the
  * 'to_world' matrix for cameras and lights.
  */
-STATIC void MakeMatrixFromTarget(br_matrix34 *trans, br_vector3 *posn, br_vector3 *target, Float_t bank_angle_deg)
+static void MakeMatrixFromTarget(br_matrix34 *trans, br_vector3 *posn, br_vector3 *target, Float_t bank_angle_deg)
 {
     br_vector3  viewvec, v_normed;
     br_angle    bank_angle_br, altitude, azimuth;
@@ -1859,7 +1859,7 @@ STATIC void MakeMatrixFromTarget(br_matrix34 *trans, br_vector3 *posn, br_vector
 /*
  * Make a 'Camera_t' and put it into a 'NamedObj_t'
  */
-STATIC State_t ConvertNCamera(NCamera_t *n_camera, NamedObj_t *named_obj, br_3ds_options *options)
+static State_t ConvertNCamera(NCamera_t *n_camera, NamedObj_t *named_obj, br_3ds_options *options)
 {
     br_angle  fov;
     Camera_t *camera;
@@ -1905,7 +1905,7 @@ STATIC State_t ConvertNCamera(NCamera_t *n_camera, NamedObj_t *named_obj, br_3ds
 /*
  * Make a 'Light_t and put it into a 'NameObj_t'
  */
-STATIC State_t ConvertNDLight(NDLight_t *n_d_light, NamedObj_t *named_obj, br_3ds_options *options)
+static State_t ConvertNDLight(NDLight_t *n_d_light, NamedObj_t *named_obj, br_3ds_options *options)
 {
     Light_t *light;
 
@@ -1968,7 +1968,7 @@ STATIC State_t ConvertNDLight(NDLight_t *n_d_light, NamedObj_t *named_obj, br_3d
  * Initialise all component parts of a 3DS triangle
  * mesh object, ready to read in the enclosed chunks
  */
-STATIC void InitialiseNTriObj(NTriObj_t *n_tri_obj)
+static void InitialiseNTriObj(NTriObj_t *n_tri_obj)
 {
     UASSERT(n_tri_obj != NULL);
 
@@ -1980,7 +1980,7 @@ STATIC void InitialiseNTriObj(NTriObj_t *n_tri_obj)
 /*
  * De-allocate all memory used to hold a 3DS triangle mesh object
  */
-STATIC void DismantleNTriObj(NTriObj_t *n_tri_obj)
+static void DismantleNTriObj(NTriObj_t *n_tri_obj)
 {
     UASSERT(n_tri_obj != NULL);
 
@@ -1992,7 +1992,7 @@ STATIC void DismantleNTriObj(NTriObj_t *n_tri_obj)
 /*
  * Actor enumeration callback used to count cameras
  */
-STATIC br_uint_32 BR_CALLBACK CountCameras(br_actor *actor, void *arg)
+static br_uint_32 BR_CALLBACK CountCameras(br_actor *actor, void *arg)
 {
     br_uint_32 *count = (br_uint_32 *)arg;
 
@@ -2005,7 +2005,7 @@ STATIC br_uint_32 BR_CALLBACK CountCameras(br_actor *actor, void *arg)
 /*
  * Actor enumeration callback used to fill table of cameras
  */
-STATIC br_uint_32 BR_CALLBACK FindCameras(br_actor *actor, void *arg)
+static br_uint_32 BR_CALLBACK FindCameras(br_actor *actor, void *arg)
 {
     br_camera ***camera = (br_camera ***)arg;
 
@@ -2019,7 +2019,7 @@ STATIC br_uint_32 BR_CALLBACK FindCameras(br_actor *actor, void *arg)
  * Actor enumeration callback used to detach
  * camera type data resources from parent actors
  */
-STATIC br_uint_32 BR_CALLBACK DetachCameras(br_actor *actor, void *arg)
+static br_uint_32 BR_CALLBACK DetachCameras(br_actor *actor, void *arg)
 {
     br_fmt_results *results = (br_fmt_results *)arg;
 
@@ -2032,7 +2032,7 @@ STATIC br_uint_32 BR_CALLBACK DetachCameras(br_actor *actor, void *arg)
 /*
  * Collect cameras and generate an array of pointers
  */
-STATIC void CollectCameras(br_fmt_results *results, br_actor *actor)
+static void CollectCameras(br_fmt_results *results, br_actor *actor)
 {
     br_uint_32  count;
     br_camera **camera;
@@ -2064,7 +2064,7 @@ STATIC void CollectCameras(br_fmt_results *results, br_actor *actor)
 /*
  * Actor enumeration callback used to count lights
  */
-STATIC br_uint_32 BR_CALLBACK CountLights(br_actor *actor, void *arg)
+static br_uint_32 BR_CALLBACK CountLights(br_actor *actor, void *arg)
 {
     br_uint_32 *count = (br_uint_32 *)arg;
 
@@ -2077,7 +2077,7 @@ STATIC br_uint_32 BR_CALLBACK CountLights(br_actor *actor, void *arg)
 /*
  * Actor enumeration callback used to fill table of lights
  */
-STATIC br_uint_32 BR_CALLBACK FindLights(br_actor *actor, void *arg)
+static br_uint_32 BR_CALLBACK FindLights(br_actor *actor, void *arg)
 {
     br_light ***light = (br_light ***)arg;
 
@@ -2091,7 +2091,7 @@ STATIC br_uint_32 BR_CALLBACK FindLights(br_actor *actor, void *arg)
  * Actor enumeration callback used to detach
  * light type data resources from parent actors
  */
-STATIC br_uint_32 BR_CALLBACK DetachLights(br_actor *actor, void *arg)
+static br_uint_32 BR_CALLBACK DetachLights(br_actor *actor, void *arg)
 {
     br_fmt_results *results = (br_fmt_results *)arg;
 
@@ -2104,7 +2104,7 @@ STATIC br_uint_32 BR_CALLBACK DetachLights(br_actor *actor, void *arg)
 /*
  * Collect lights and generate an array of pointers
  */
-STATIC void CollectLights(br_fmt_results *results, br_actor *actor)
+static void CollectLights(br_fmt_results *results, br_actor *actor)
 {
     br_uint_32 count;
     br_light **light;
@@ -2136,7 +2136,7 @@ STATIC void CollectLights(br_fmt_results *results, br_actor *actor)
 /*
  * Scale a model
  */
-STATIC void ModelScale(br_model *model, br_vector3 *scale)
+static void ModelScale(br_model *model, br_vector3 *scale)
 {
     br_uint_32 v;
 
@@ -2150,7 +2150,7 @@ STATIC void ModelScale(br_model *model, br_vector3 *scale)
 /*
  * Apply a scaling to all models
  */
-STATIC void ScaleModels(NamedObj_t *list, br_scalar scale)
+static void ScaleModels(NamedObj_t *list, br_scalar scale)
 {
     br_vector3  vscale;
     NamedObj_t *item;
@@ -2170,7 +2170,7 @@ STATIC void ScaleModels(NamedObj_t *list, br_scalar scale)
 /*
  * Collect models and generate an array of pointers
  */
-STATIC void CollectModels(br_fmt_results *results, NamedObj_t *list)
+static void CollectModels(br_fmt_results *results, NamedObj_t *list)
 {
     Int_t       i, count;
     NamedObj_t *item;
@@ -2220,7 +2220,7 @@ STATIC void CollectModels(br_fmt_results *results, NamedObj_t *list)
 /*
  * Collect pixelmaps and generate an array of pointers
  */
-STATIC void CollectPixelmaps(br_fmt_results *results, PixmapList_t *list)
+static void CollectPixelmaps(br_fmt_results *results, PixmapList_t *list)
 {
     Int_t         i, count;
     PixmapList_t *item;
@@ -2258,7 +2258,7 @@ STATIC void CollectPixelmaps(br_fmt_results *results, PixmapList_t *list)
 /*
  * Collect materials and generate an array of pointers
  */
-STATIC void CollectMaterials(br_fmt_results *results, MaterialList_t *list)
+static void CollectMaterials(br_fmt_results *results, MaterialList_t *list)
 {
     Int_t           i, count;
     MaterialList_t *item;
@@ -2298,7 +2298,7 @@ STATIC void CollectMaterials(br_fmt_results *results, MaterialList_t *list)
  * Actor enumeration callback used to attach
  * actors to actor hierarchy table as resources
  */
-STATIC br_uint_32 BR_CALLBACK ResAddHierarchy(br_actor *actor, void *arg)
+static br_uint_32 BR_CALLBACK ResAddHierarchy(br_actor *actor, void *arg)
 {
     br_fmt_results *results = (br_fmt_results *)arg;
 
@@ -2310,7 +2310,7 @@ STATIC br_uint_32 BR_CALLBACK ResAddHierarchy(br_actor *actor, void *arg)
 /*
  * Actor enumeration callback used to clear references to models
  */
-STATIC br_uint_32 BR_CALLBACK ClearActorModels(br_actor *actor, void *arg)
+static br_uint_32 BR_CALLBACK ClearActorModels(br_actor *actor, void *arg)
 {
     actor->model = NULL;
 
@@ -2320,7 +2320,7 @@ STATIC br_uint_32 BR_CALLBACK ClearActorModels(br_actor *actor, void *arg)
 /*
  * Actor enumeration callback used to clear references to materials
  */
-STATIC br_uint_32 BR_CALLBACK ClearActorMaterials(br_actor *actor, void *arg)
+static br_uint_32 BR_CALLBACK ClearActorMaterials(br_actor *actor, void *arg)
 {
     actor->material = NULL;
 
@@ -2330,7 +2330,7 @@ STATIC br_uint_32 BR_CALLBACK ClearActorMaterials(br_actor *actor, void *arg)
 /*
  * Actor enumeration callback used to scale hierarchy
  */
-STATIC br_uint_32 BR_CALLBACK ScaleTransform(br_actor *actor, void *arg)
+static br_uint_32 BR_CALLBACK ScaleTransform(br_actor *actor, void *arg)
 {
     BrVector3Scale(&actor->t.t.translate.t, &actor->t.t.translate.t, *((br_scalar *)arg));
 
@@ -2340,7 +2340,7 @@ STATIC br_uint_32 BR_CALLBACK ScaleTransform(br_actor *actor, void *arg)
 /*
  * Scale an actor hierarchy
  */
-STATIC void ScaleHierarchy(br_actor *actor, br_scalar scale)
+static void ScaleHierarchy(br_actor *actor, br_scalar scale)
 {
     BrVector3Scale(&actor->t.t.translate.t, &actor->t.t.translate.t, scale);
 
@@ -2351,7 +2351,7 @@ STATIC void ScaleHierarchy(br_actor *actor, br_scalar scale)
  * Read a light from the input stream and
  * leave it pushed onto the stack
  */
-STATIC State_t ReadNDLight(void *stream, Stack_t *top, br_3ds_options *options)
+static State_t ReadNDLight(void *stream, Stack_t *top, br_3ds_options *options)
 {
     NDLight_t *n_d_light;
 
@@ -2381,7 +2381,7 @@ STATIC State_t ReadNDLight(void *stream, Stack_t *top, br_3ds_options *options)
  * Read a spotlight form the input stream and
  * leave it pushed on the stack
  */
-STATIC State_t ReadDlSpotlight(void *stream, Stack_t *top, br_3ds_options *options)
+static State_t ReadDlSpotlight(void *stream, Stack_t *top, br_3ds_options *options)
 {
     DlSpotlight_t *dl_spotlight;
 
@@ -2417,7 +2417,7 @@ STATIC State_t ReadDlSpotlight(void *stream, Stack_t *top, br_3ds_options *optio
  * Read a camera from the input stream, skipping all
  * enclosed chunks, and leave it pushed on the stack
  */
-STATIC State_t ReadNCamera(void *stream, Stack_t *top, br_3ds_options *options)
+static State_t ReadNCamera(void *stream, Stack_t *top, br_3ds_options *options)
 {
     NCamera_t *n_camera;
 
@@ -2452,7 +2452,7 @@ STATIC State_t ReadNCamera(void *stream, Stack_t *top, br_3ds_options *options)
 /*
  * Find a named object
  */
-STATIC NamedObj_t *LookupNamedObj(char *name, NamedObj_t *named_objs)
+static NamedObj_t *LookupNamedObj(char *name, NamedObj_t *named_objs)
 {
     NamedObj_t *obj;
 
@@ -2471,7 +2471,7 @@ STATIC NamedObj_t *LookupNamedObj(char *name, NamedObj_t *named_objs)
  * Initialise a node header so that it cannot be referenced as
  * a parent, and has it's own parent set to the root of the hierarchy
  */
-STATIC void InitialiseNodeHdr(NodeHdr_t *node_hdr)
+static void InitialiseNodeHdr(NodeHdr_t *node_hdr)
 {
     UASSERT(node_hdr != NULL);
 
@@ -2484,7 +2484,7 @@ STATIC void InitialiseNodeHdr(NodeHdr_t *node_hdr)
  * Read a node header from the input stream and
  * leave it pushed onto the top of the stack
  */
-STATIC State_t ReadNodeHdr(void *stream, Stack_t *top, Int_t index, NamedObj_t *named_objs)
+static State_t ReadNodeHdr(void *stream, Stack_t *top, Int_t index, NamedObj_t *named_objs)
 {
     char       buffer[12];
     br_int_16  parent;
@@ -2530,7 +2530,7 @@ STATIC State_t ReadNodeHdr(void *stream, Stack_t *top, Int_t index, NamedObj_t *
 /*
  * Allocate a new node tag and initialise it's node header
  */
-STATIC NodeTag_t *AllocateNodeTag(void)
+static NodeTag_t *AllocateNodeTag(void)
 {
     NodeTag_t *node_tag;
 
@@ -2550,7 +2550,7 @@ STATIC NodeTag_t *AllocateNodeTag(void)
 /*
  * Compare strings
  */
-STATIC Bool_t SameString(char *a, char *b)
+static Bool_t SameString(char *a, char *b)
 {
     return ((a == NULL && b == NULL) || (a != NULL && b != NULL && BrStrCmp(a, b) == 0));
 }
@@ -2560,7 +2560,7 @@ STATIC Bool_t SameString(char *a, char *b)
  * making sure that it cannot be confused with any node
  * tags already in the list
  */
-STATIC Bool_t InsertNodeTag(NodeTag_t *new_tag, NodeTag_t **tags)
+static Bool_t InsertNodeTag(NodeTag_t *new_tag, NodeTag_t **tags)
 {
     NodeTag_t  *tag;
     NodeTag_t **link;
@@ -2600,7 +2600,7 @@ STATIC Bool_t InsertNodeTag(NodeTag_t *new_tag, NodeTag_t **tags)
 /*
  * De-allocate all memory used by a list of node tags
  */
-STATIC void DeallocateNodeTags(NodeTag_t *node_tags)
+static void DeallocateNodeTags(NodeTag_t *node_tags)
 {
     NodeTag_t *dud;
 
@@ -2620,7 +2620,7 @@ STATIC void DeallocateNodeTags(NodeTag_t *node_tags)
  * Allocate a new actor with a specified name and type,
  * and with the default rendering style and identity transform
  */
-STATIC br_actor *AllocateNamedActor(char *name, br_uint_8 type)
+static br_actor *AllocateNamedActor(char *name, br_uint_8 type)
 {
     br_actor *actor;
 
@@ -2647,7 +2647,7 @@ STATIC br_actor *AllocateNamedActor(char *name, br_uint_8 type)
 /*
  * Report actor information
  */
-STATIC void DisplayActor(Int_t depth, br_actor *actor, br_3ds_options *options)
+static void DisplayActor(Int_t depth, br_actor *actor, br_3ds_options *options)
 {
     Int_t i, indent_depth;
 
@@ -2694,7 +2694,7 @@ STATIC void DisplayActor(Int_t depth, br_actor *actor, br_3ds_options *options)
 /*
  * Translate a model's vertices
  */
-STATIC void TranslateModelVertices(br_model *m, br_scalar x, br_scalar y, br_scalar z)
+static void TranslateModelVertices(br_model *m, br_scalar x, br_scalar y, br_scalar z)
 {
     int i;
 
@@ -2708,7 +2708,7 @@ STATIC void TranslateModelVertices(br_model *m, br_scalar x, br_scalar y, br_sca
 /*
  * Create a small hierarchy for a named object
  */
-STATIC br_actor *MakeEnclosingActor(Int_t depth, char *instance_name, NamedObj_t *named_obj, br_matrix34 *world_to_parent,
+static br_actor *MakeEnclosingActor(Int_t depth, char *instance_name, NamedObj_t *named_obj, br_matrix34 *world_to_parent,
                                     br_matrix34 *world_to_actor_ret, br_vector3 *pivot, br_3ds_options *options)
 {
     char      *actor_name;
@@ -2956,7 +2956,7 @@ STATIC br_actor *MakeEnclosingActor(Int_t depth, char *instance_name, NamedObj_t
  * and if they can be recursed on, add them as children
  * to the 'actor' parameter
  */
-STATIC Bool_t CollectDescendents(Int_t depth, br_actor *actor, Int_t parent, NodeTag_t *node_tags,
+static Bool_t CollectDescendents(Int_t depth, br_actor *actor, Int_t parent, NodeTag_t *node_tags,
                                  br_matrix34 *world_to_parent, br_3ds_options *options)
 {
     br_actor   *child;
@@ -2999,7 +2999,7 @@ STATIC Bool_t CollectDescendents(Int_t depth, br_actor *actor, Int_t parent, Nod
 /*
  * Allocate a root actor and build a hierarchy
  */
-STATIC br_actor *BuildComplexHierarchy(NodeTag_t *node_tags, br_3ds_options *options)
+static br_actor *BuildComplexHierarchy(NodeTag_t *node_tags, br_3ds_options *options)
 {
     br_actor   *world;
     br_matrix34 world_to_world;
@@ -3029,7 +3029,7 @@ STATIC br_actor *BuildComplexHierarchy(NodeTag_t *node_tags, br_3ds_options *opt
  * Allocate a root actor and add all named
  * object actors to it as children
  */
-STATIC br_actor *BuildFlatHierarchy(NamedObj_t *named_objs, br_3ds_options *options)
+static br_actor *BuildFlatHierarchy(NamedObj_t *named_objs, br_3ds_options *options)
 {
     br_actor   *world, *child;
     br_matrix34 world_to_world;

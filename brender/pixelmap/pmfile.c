@@ -24,7 +24,7 @@ BR_RCS_ID("$Id: pmfile.c 1.1 1997/12/10 16:41:26 jon Exp $")
  ** Pixelmap
  **/
 // clang-format off
-STATIC br_file_enum_member pixelmap_type_FM[] = {
+static br_file_enum_member pixelmap_type_FM[] = {
     _ENUM_MEMBER(BR_PMT_INDEX_1),
     _ENUM_MEMBER(BR_PMT_INDEX_2),
     _ENUM_MEMBER(BR_PMT_INDEX_4),
@@ -43,10 +43,10 @@ STATIC br_file_enum_member pixelmap_type_FM[] = {
 };
 // clang-format on
 
-STATIC _FILE_ENUM(pixelmap_type);
+static _FILE_ENUM(pixelmap_type);
 
 #define _STRUCT_NAME struct br_pixelmap
-STATIC br_file_struct_member br_old_pixelmap_FM[] = {
+static br_file_struct_member br_old_pixelmap_FM[] = {
     _ENUM_8(type, pixelmap_type_F),
     _UINT_16(row_bytes),
     _UINT_16(width),
@@ -56,7 +56,7 @@ STATIC br_file_struct_member br_old_pixelmap_FM[] = {
     _ASCIZ(identifier),
 };
 
-STATIC br_file_struct_member br_pixelmap_FM[] = {
+static br_file_struct_member br_pixelmap_FM[] = {
     _ENUM_8(type, pixelmap_type_F),
     _UINT_16(row_bytes),
     _UINT_16(width),
@@ -67,12 +67,12 @@ STATIC br_file_struct_member br_pixelmap_FM[] = {
     _ASCIZ(identifier),
 };
 
-STATIC _FILE_STRUCT(br_pixelmap);
-STATIC _FILE_STRUCT(br_old_pixelmap);
+static _FILE_STRUCT(br_pixelmap);
+static _FILE_STRUCT(br_old_pixelmap);
 
 #undef _STRUCT_NAME
 
-STATIC int FopWrite_PIXELMAP(br_datafile *df, br_pixelmap *pixelmap)
+static int FopWrite_PIXELMAP(br_datafile *df, br_pixelmap *pixelmap)
 {
     br_pixelmap pmap = *pixelmap;
 
@@ -84,7 +84,7 @@ STATIC int FopWrite_PIXELMAP(br_datafile *df, br_pixelmap *pixelmap)
     return 0;
 }
 
-STATIC int FopRead_OLD_PIXELMAP(br_datafile *df, br_uint_32 id, br_uint_32 length, br_uint_32 count)
+static int FopRead_OLD_PIXELMAP(br_datafile *df, br_uint_32 id, br_uint_32 length, br_uint_32 count)
 {
     br_pixelmap *pp;
 
@@ -107,7 +107,7 @@ STATIC int FopRead_OLD_PIXELMAP(br_datafile *df, br_uint_32 id, br_uint_32 lengt
     return 0;
 }
 
-STATIC int FopRead_PIXELMAP(br_datafile *df, br_uint_32 id, br_uint_32 length, br_uint_32 count)
+static int FopRead_PIXELMAP(br_datafile *df, br_uint_32 id, br_uint_32 length, br_uint_32 count)
 {
     br_pixelmap *pp;
 
@@ -133,7 +133,7 @@ STATIC int FopRead_PIXELMAP(br_datafile *df, br_uint_32 id, br_uint_32 length, b
 /**
  ** Pixel bytes
  **/
-STATIC int FopWrite_PIXELS(br_datafile *df, br_pixelmap *pixelmap)
+static int FopWrite_PIXELS(br_datafile *df, br_pixelmap *pixelmap)
 {
     int   size        = DevicePixelmapFileBytes(pixelmap);
     int   bytes       = DevicePixelmapPixelBytes(pixelmap);
@@ -168,7 +168,7 @@ STATIC int FopWrite_PIXELS(br_datafile *df, br_pixelmap *pixelmap)
     return 0;
 }
 
-STATIC int FopRead_PIXELS(br_datafile *df, br_uint_32 id, br_uint_32 length, br_uint_32 count)
+static int FopRead_PIXELS(br_datafile *df, br_uint_32 id, br_uint_32 length, br_uint_32 count)
 {
     int          icount;
     br_pixelmap *pp;
@@ -188,14 +188,14 @@ STATIC int FopRead_PIXELS(br_datafile *df, br_uint_32 id, br_uint_32 length, br_
 /**
  ** Connecting a map to an indexed pixelmap
  **/
-STATIC int FopWrite_ADD_MAP(br_datafile *df)
+static int FopWrite_ADD_MAP(br_datafile *df)
 {
     df->prims->chunk_write(df, FID_ADD_MAP, 0);
 
     return 0;
 }
 
-STATIC int FopRead_ADD_MAP(br_datafile *df, br_uint_32 id, br_uint_32 length, br_uint_32 count)
+static int FopRead_ADD_MAP(br_datafile *df, br_uint_32 id, br_uint_32 length, br_uint_32 count)
 {
     br_pixelmap *pp, *map;
 
@@ -216,7 +216,7 @@ STATIC int FopRead_ADD_MAP(br_datafile *df, br_uint_32 id, br_uint_32 length, br
 /*
  * Load a group of pixelmaps from a file
  */
-STATIC br_chunks_table_entry PixelmapLoadEntries[] = {
+static br_chunks_table_entry PixelmapLoadEntries[] = {
     {FID_END,          0, FopRead_END         },
     {FID_PIXELMAP,     0, FopRead_PIXELMAP    },
     {FID_PIXELS,       0, FopRead_PIXELS      },
@@ -224,7 +224,7 @@ STATIC br_chunks_table_entry PixelmapLoadEntries[] = {
     {FID_OLD_PIXELMAP, 0, FopRead_OLD_PIXELMAP},
 };
 
-STATIC br_chunks_table PixelmapLoadTable = {
+static br_chunks_table PixelmapLoadTable = {
     BR_ASIZE(PixelmapLoadEntries),
     PixelmapLoadEntries,
 };
@@ -258,7 +258,7 @@ br_uint_32 BR_PUBLIC_ENTRY BrPixelmapLoadMany(const char *filename, br_pixelmap 
 /*
  * Save a group of pixelmaps to a file
  */
-STATIC int WritePixelmap(br_pixelmap *pp, br_datafile *df)
+static int WritePixelmap(br_pixelmap *pp, br_datafile *df)
 {
     // Lock the pixelmap because we want to access it's pixels
 

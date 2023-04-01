@@ -219,7 +219,7 @@ static void BrLexerPrintPos(struct br_lexer *l)
     BR_WARNING1("In file %s", pos);
 }
 
-STATIC br_uint_32 ParseMatFlags(br_lexer *l)
+static br_uint_32 ParseMatFlags(br_lexer *l)
 {
     br_uint_32 f = 0;
 
@@ -275,7 +275,7 @@ STATIC br_uint_32 ParseMatFlags(br_lexer *l)
     return f;
 }
 
-STATIC br_material *ParseMaterial(br_lexer *l)
+static br_material *ParseMaterial(br_lexer *l)
 {
     br_material *mat;
     br_vector3   v3;

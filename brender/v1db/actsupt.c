@@ -115,7 +115,7 @@ br_actor *BR_PUBLIC_ENTRY BrActorSearch(br_actor *root, char *pattern)
 /*
  * Recursive function to propgate depth number down a hierachy
  */
-STATIC void RenumberActor(br_actor *a, int d)
+static void RenumberActor(br_actor *a, int d)
 {
     br_actor *ac;
 
@@ -331,7 +331,7 @@ br_actor *BR_PUBLIC_ENTRY BrActorAllocate(br_uint_8 type, void *type_data)
 /*
  * Free an actor
  */
-STATIC void InternalActorFree(br_actor *a)
+static void InternalActorFree(br_actor *a)
 {
 
     UASSERT_MESSAGE("NULL actor pointer", a != NULL);
@@ -705,7 +705,7 @@ void BR_PUBLIC_ENTRY BrActorToScreenMatrix4(br_matrix4 *m, br_actor *a, br_actor
  *
  *
  */
-STATIC void ActorToBounds(br_bounds *dest, br_actor *ap, br_model *model)
+static void ActorToBounds(br_bounds *dest, br_actor *ap, br_model *model)
 {
     br_actor *a;
     br_bounds new;

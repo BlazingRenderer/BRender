@@ -66,7 +66,7 @@ float tri_filter(float t)
 #define B                (1.0F / 3.0F)
 #define C                (1.0F / 3.0F)
 
-STATIC float Mitchell_filter(float t)
+static float Mitchell_filter(float t)
 {
     float tt;
 
