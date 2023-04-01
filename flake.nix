@@ -38,9 +38,11 @@
     };
 
     packages.x86_64-darwin  = mkPackages { system = "x86_64-darwin"; };
+    packages.aarch64-linux  = mkPackages { system = "aarch64-linux"; };
     packages.aarch64-darwin = mkPackages { system = "aarch64-darwin"; };
 
     devShells.x86_64-linux   = mkShells self.packages.x86_64-linux;
+    devShells.aarch64-linux  = mkShells self.packages.aarch64-linux;
     devShells.x86_64-darwin  = mkShells self.packages.x86_64-darwin;
     devShells.aarch64-darwin = mkShells self.packages.aarch64-darwin;
   };
