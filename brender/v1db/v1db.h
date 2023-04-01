@@ -222,8 +222,5 @@ extern br_v1db_state BR_ASM_DATA v1db;
 
 #endif
 
-#ifdef __cplusplus
-};
-#endif
 #endif
 
