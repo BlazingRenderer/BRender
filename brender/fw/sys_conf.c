@@ -636,18 +636,15 @@ static br_error	parseEntryLine(br_lexer *l, br_token_value *tv, br_size_t size)
 	br_boolean negative;
 
 	static struct {
-
 		br_token token;
-		char *name;
-
+		const char *name;
 	} config_strings[] = {
-
-		BRT_BRENDER_PATH_STR, "BRENDER_PATH",
-		BRT_BRENDER_DRIVERS_STR, "BRENDER_DRIVERS",
-		BRT_BRENDER_DEVICES_STR, "BRENDER_DEVICES",
-		BRT_DEFAULT_DEVICE_STR, "BRENDER_DEFAULT_DEVICE",
-		BRT_DEFAULT_DEVICE_STR, "BRENDER_DOS_GFX",
-		BRT_BRENDER_USE_MMX_B, "BRENDER_USE_MMX",
+		{BRT_BRENDER_PATH_STR,    "BRENDER_PATH"},
+		{BRT_BRENDER_DRIVERS_STR, "BRENDER_DRIVERS"},
+		{BRT_BRENDER_DEVICES_STR, "BRENDER_DEVICES"},
+		{BRT_DEFAULT_DEVICE_STR,  "BRENDER_DEFAULT_DEVICE"},
+		{BRT_DEFAULT_DEVICE_STR,  "BRENDER_DOS_GFX"},
+		{BRT_BRENDER_USE_MMX_B,   "BRENDER_USE_MMX"},
 	};
 
 	/*
