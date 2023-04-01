@@ -10,22 +10,14 @@
 #define F(f) offsetof(GLSTATE_STACK,f)
 
 static const br_tv_template_entry GLSTATEI_PrimitiveTemplateEntries[] = {
-    //{BRT_FORCE_FRONT_B,           NULL, F(prim.flags),               Q | S | A, BRTV_CONV_BIT,  PRIMF_FORCE_FRONT,   1},
-    //{BRT_SMOOTH_B,                NULL, F(prim.flags),               Q | S | A, BRTV_CONV_BIT,  PRIMF_SMOOTH,        1},
-    //{BRT_SMOOTH_OPACITY_B,        NULL, F(prim.flags),               Q | S | A, BRTV_CONV_BIT,  PRIMF_SMOOTH_ALPHA,  1},
-    {BRT_DECAL_B,                 NULL, F(prim.flags),               Q | S | A, BRTV_CONV_BIT,  PRIMF_DECAL,         1},
-    //{BRT_DITHER_COLOUR_B,         NULL, F(prim.flags),               Q | S | A, BRTV_CONV_BIT,  PRIMF_DITHER_COLOUR, 1},
-    //{BRT_DITHER_MAP_B,            NULL, F(prim.flags),               Q | S | A, BRTV_CONV_BIT,  PRIMF_DITHER_MAP,    1},
     {BRT_DEPTH_WRITE_B,           NULL, F(prim.flags),               Q | S | A, BRTV_CONV_BIT,  PRIMF_DEPTH_WRITE,   1},
     {BRT_COLOUR_WRITE_B,          NULL, F(prim.flags),               Q | S | A, BRTV_CONV_BIT,  PRIMF_COLOUR_WRITE,  1},
     {BRT_BLEND_B,                 NULL, F(prim.flags),               Q | S | A, BRTV_CONV_BIT,  PRIMF_BLEND,         1},
     {BRT_MODULATE_B,              NULL, F(prim.flags),               Q | S | A, BRTV_CONV_BIT,  PRIMF_MODULATE,      1},
     {BRT_COLOUR_KEY_B,            NULL, F(prim.flags),               Q | S | A, BRTV_CONV_BIT,  PRIMF_COLOUR_KEY,    1},
-    {BRT_FOG_T,                   NULL, F(prim.fog_type),            Q | S | A, BRTV_CONV_COPY},
 
     {BRT_COLOUR_T,                NULL, F(prim.colour_type),         Q | S | A, BRTV_CONV_COPY, 0,                   1},
 
-    //{BRT_Z_WRITE_T,               NULL, F(prim.z_write),             Q | S | A, BRTV_CONV_COPY, 0,                   1},
     {BRT_DEPTH_TEST_T,            NULL, F(prim.depth_test),          Q | S | A, BRTV_CONV_COPY, 0,                   1},
     {BRT_BLEND_MODE_T,            NULL, F(prim.blend_mode),          Q | S | A, BRTV_CONV_COPY, 0,                   1},
 
@@ -54,7 +46,6 @@ static const GLSTATE_PRIMITIVE s_Default = {
 	.index_base				= 0,
 	.index_range			= 0,
 	.colour_type			= BRT_DEFAULT,
-	//.z_write				= BRT_Z_WRITE_CONDITIONAL,
 	.depth_test				= BRT_LESS,
 	.blend_mode				= BRT_NONE,
 	.perspective_type		= BRT_NONE,	// BRT_NONE, BRT_SUBDIVIDE
@@ -66,7 +57,6 @@ static const GLSTATE_PRIMITIVE s_Default = {
 	.screendoor				= NULL,
 	.lighting				= NULL,
 	.bump					= NULL,
-	.fog_type				= BRT_NONE,
 	.filter					= BRT_NONE,
 	.mip_filter				= BRT_NONE,
 };

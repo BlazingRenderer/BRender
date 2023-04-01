@@ -124,66 +124,22 @@ enum
 	/*
 	* The public flags
 	*/
-	PRIMF_FORCE_FRONT_BIT,
-	PRIMF_SMOOTH_BIT,
-	PRIMF_SMOOTH_ALPHA_BIT,
-	PRIMF_DECAL_BIT,
-
-	PRIMF_DITHER_COLOUR_BIT,
-	PRIMF_DITHER_MAP_BIT,
 	PRIMF_DEPTH_WRITE_BIT,
 	PRIMF_COLOUR_WRITE_BIT,
 
-	PRIMF_INDEXED_COLOUR_BIT,
 	PRIMF_BLEND_BIT,
 	PRIMF_MODULATE_BIT,
 	PRIMF_COLOUR_KEY_BIT,
-
-	PRIMF_FOG_BIT,
-
-	/*
-	* Internal flags using for matching
-	*/
-	PRIMF_OPAQUE_MAP_BIT,
-	PRIMF_NO_SKIP_BIT,
-	PRIMF_PERSPECTIVE_BIT,
-	PRIMF_POWER2_BIT,
-	PRIMF_STRIDE_POSITIVE_BIT,
-	PRIMF_PALETTE_BIT,
-	PRIMF_RANGE_ZERO_BIT,
 };
 
 
 enum
 {
-	PRIMF_FORCE_FRONT = (1 << PRIMF_FORCE_FRONT_BIT),
-	PRIMF_SMOOTH = (1 << PRIMF_SMOOTH_BIT),
-	PRIMF_SMOOTH_ALPHA = (1 << PRIMF_SMOOTH_ALPHA_BIT),
-	PRIMF_DECAL = (1 << PRIMF_DECAL_BIT),
-	PRIMF_DITHER_COLOUR = (1 << PRIMF_DITHER_COLOUR_BIT),
-	PRIMF_DITHER_MAP = (1 << PRIMF_DITHER_MAP_BIT),
 	PRIMF_DEPTH_WRITE = (1 << PRIMF_DEPTH_WRITE_BIT),
 	PRIMF_COLOUR_WRITE = (1 << PRIMF_COLOUR_WRITE_BIT),
-	PRIMF_INDEXED_COLOUR = (1 << PRIMF_INDEXED_COLOUR_BIT),
 	PRIMF_BLEND = (1 << PRIMF_BLEND_BIT),
 	PRIMF_MODULATE = (1 << PRIMF_MODULATE_BIT),
 	PRIMF_COLOUR_KEY = (1 << PRIMF_COLOUR_KEY_BIT),
-	PRIMF_FOG = (1 << PRIMF_FOG_BIT),
-
-	PRIMF_OPAQUE_MAP = (1 << PRIMF_OPAQUE_MAP_BIT),
-	PRIMF_NO_SKIP = (1 << PRIMF_NO_SKIP_BIT),
-	PRIMF_PERSPECTIVE = (1 << PRIMF_PERSPECTIVE_BIT),
-	PRIMF_POWER2 = (1 << PRIMF_POWER2_BIT),
-	PRIMF_STRIDE_POSITIVE = (1 << PRIMF_STRIDE_POSITIVE_BIT),
-	PRIMF_PALETTE = (1 << PRIMF_PALETTE_BIT),
-
-	PRIMF_INTERNAL = (PRIMF_OPAQUE_MAP |
-	PRIMF_NO_SKIP |
-					  PRIMF_PERSPECTIVE |
-					  PRIMF_POWER2 |
-					  PRIMF_PALETTE),
-
-	PRIMF_RANGE_ZERO = (1 << PRIMF_RANGE_ZERO_BIT),
 };
 
 struct br_buffer_stored;
@@ -206,9 +162,6 @@ typedef struct _GLSTATE_PRIMITIVE
 	*/
 	br_token	colour_type;
 
-	// This isn't used at all in the engine.
-	// prepmatl.c:173. Do a find all for BRT_Z_WRITE_CONDITIONAL
-	//br_token	z_write;
 	br_token	depth_test;
 
 	br_token	blend_mode;
@@ -229,11 +182,6 @@ typedef struct _GLSTATE_PRIMITIVE
 	struct br_buffer_stored *screendoor;
 	struct br_buffer_stored *lighting;
 	struct br_buffer_stored *bump;
-
-	/*
-	* Fog flag
-	*/
-	br_token        fog_type;
 
 	/* Texture filtering. BRT_NONE or BRT_LINEAR */
 	br_token		filter;
