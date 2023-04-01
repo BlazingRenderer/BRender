@@ -3,8 +3,8 @@
  */
 #include "drv.h"
 
-#define DEVICE_TITLE "OpenGL v3.2"
-#define DEVICE_VERSION BR_VERSION(1,0,0)
+#define DEVICE_TITLE   "OpenGL v3.2"
+#define DEVICE_VERSION BR_VERSION(1, 0, 0)
 #define DEVICE_CREATOR "crocguy0688 <crocguy0688@protonmail.com>"
 #define DEVICE_PRODUCT "OpenGL"
 
@@ -22,21 +22,20 @@ static const char deviceCreator[] = DEVICE_CREATOR;
 
 static const char deviceProduct[] = DEVICE_PRODUCT;
 
-
 #define F(f) offsetof(br_device, f)
 #define A(a) ((br_uintptr_t)(a))
 
 static struct br_tv_template_entry deviceTemplateEntries[] = {
-    {BRT_IDENTIFIER_CSTR,     NULL, F(identifier),    BRTV_QUERY | BRTV_ALL,            BRTV_CONV_COPY, 0},
-    {BRT_VERSION_U32,         NULL, 0,                BRTV_QUERY | BRTV_ALL,            BRTV_CONV_DIRECT, DEVICE_VERSION},
-    {BRT_BRENDER_VERSION_U32, NULL, 0,                BRTV_QUERY | BRTV_ALL,            BRTV_CONV_DIRECT, __BRENDER__},
-    {BRT_DDI_VERSION_U32,     NULL, 0,                BRTV_QUERY | BRTV_ALL,            BRTV_CONV_DIRECT, __BRENDER_DDI__},
-    {BRT_CREATOR_CSTR,        NULL, A(deviceCreator), BRTV_QUERY | BRTV_ALL | BRTV_ABS, BRTV_CONV_COPY, 0},
-    {BRT_TITLE_CSTR,          NULL, A(deviceTitle),   BRTV_QUERY | BRTV_ALL | BRTV_ABS, BRTV_CONV_COPY, 0},
-    {BRT_PRODUCT_CSTR,        NULL, A(deviceProduct), BRTV_QUERY | BRTV_ALL | BRTV_ABS, BRTV_CONV_COPY, 0},
-    {BRT_OPENGL_VERSION_CSTR, NULL, F(gl_version),    BRTV_QUERY | BRTV_ALL,            BRTV_CONV_COPY, 0},
-    {BRT_OPENGL_VENDOR_CSTR,  NULL, F(gl_vendor),     BRTV_QUERY | BRTV_ALL,            BRTV_CONV_COPY, 0},
-    {BRT_OPENGL_RENDERER_CSTR,NULL, F(gl_renderer),   BRTV_QUERY | BRTV_ALL,            BRTV_CONV_COPY, 0},
+    {BRT_IDENTIFIER_CSTR,      NULL, F(identifier),    BRTV_QUERY | BRTV_ALL,            BRTV_CONV_COPY,   0              },
+    {BRT_VERSION_U32,          NULL, 0,                BRTV_QUERY | BRTV_ALL,            BRTV_CONV_DIRECT, DEVICE_VERSION },
+    {BRT_BRENDER_VERSION_U32,  NULL, 0,                BRTV_QUERY | BRTV_ALL,            BRTV_CONV_DIRECT, __BRENDER__    },
+    {BRT_DDI_VERSION_U32,      NULL, 0,                BRTV_QUERY | BRTV_ALL,            BRTV_CONV_DIRECT, __BRENDER_DDI__},
+    {BRT_CREATOR_CSTR,         NULL, A(deviceCreator), BRTV_QUERY | BRTV_ALL | BRTV_ABS, BRTV_CONV_COPY,   0              },
+    {BRT_TITLE_CSTR,           NULL, A(deviceTitle),   BRTV_QUERY | BRTV_ALL | BRTV_ABS, BRTV_CONV_COPY,   0              },
+    {BRT_PRODUCT_CSTR,         NULL, A(deviceProduct), BRTV_QUERY | BRTV_ALL | BRTV_ABS, BRTV_CONV_COPY,   0              },
+    {BRT_OPENGL_VERSION_CSTR,  NULL, F(gl_version),    BRTV_QUERY | BRTV_ALL,            BRTV_CONV_COPY,   0              },
+    {BRT_OPENGL_VENDOR_CSTR,   NULL, F(gl_vendor),     BRTV_QUERY | BRTV_ALL,            BRTV_CONV_COPY,   0              },
+    {BRT_OPENGL_RENDERER_CSTR, NULL, F(gl_renderer),   BRTV_QUERY | BRTV_ALL,            BRTV_CONV_COPY,   0              },
 };
 
 #undef F
@@ -55,6 +54,7 @@ typedef struct device_create_tokens {
 /*
  * List of tokens which are not significant in matching (for output facilities)
  */
+// clang-format off
 static const br_token insignificantMatchTokens[] = {
     BRT_WIDTH_I32,
     BRT_HEIGHT_I32,
@@ -64,11 +64,12 @@ static const br_token insignificantMatchTokens[] = {
     BRT_MSAA_SAMPLES_I32,
     BR_NULL_TOKEN,
 };
+// clang-format on
 
 /*
  * Structure used to unpack driver arguments
  */
-#define F(f)   offsetof(device_create_tokens, f)
+#define F(f) offsetof(device_create_tokens, f)
 
 static struct br_tv_template_entry deviceArgsTemplateEntries[] = {
     {BRT_OPENGL_EXT_PROCS_P,         NULL, F(ext_procs),       BRTV_SET, BRTV_CONV_COPY},
@@ -114,8 +115,8 @@ static GLuint build_checkerboard_texture(void)
 br_device *DeviceGLAllocate(const char *identifier, const char *arguments)
 {
     br_device      *self;
-    br_token_value args_tv[256];
-    br_int_32      count;
+    br_token_value  args_tv[256];
+    br_int_32       count;
     br_tv_template *deviceArgs;
 
     device_create_tokens tokens = {
@@ -127,7 +128,7 @@ br_device *DeviceGLAllocate(const char *identifier, const char *arguments)
     /*
      * Set up device block and resource anchor
      */
-    self = BrResAllocate(NULL, sizeof(*self), BR_MEMORY_OBJECT);
+    self              = BrResAllocate(NULL, sizeof(*self), BR_MEMORY_OBJECT);
     self->res         = BrResAllocate(self, 0, BR_MEMORY_DRIVER);
     self->identifier  = identifier;
     self->dispatch    = &deviceDispatch;
@@ -135,11 +136,7 @@ br_device *DeviceGLAllocate(const char *identifier, const char *arguments)
     self->object_list = BrObjectListAllocate(self);
 
     if(arguments != NULL) {
-        deviceArgs = BrTVTemplateAllocate(
-            self,
-            deviceArgsTemplateEntries,
-            BR_ASIZE(deviceArgsTemplateEntries)
-        );
+        deviceArgs = BrTVTemplateAllocate(self, deviceArgsTemplateEntries, BR_ASIZE(deviceArgsTemplateEntries));
         BrStringToTokenValue(args_tv, sizeof(args_tv), arguments);
         BrTokenValueSetMany(&tokens, &count, NULL, args_tv, deviceArgs);
     }
@@ -181,7 +178,7 @@ br_device *DeviceGLAllocate(const char *identifier, const char *arguments)
     if(VIDEO_Open(&self->video, self->vertex_shader, self->fragment_shader) == NULL)
         goto cleanup_context;
 
-    self->tex_white = build_white_texture();
+    self->tex_white        = build_white_texture();
     self->tex_checkerboard = build_checkerboard_texture();
 
     /*
@@ -270,11 +267,8 @@ static struct br_tv_template *BR_CMETHOD_DECL(br_device_gl, templateQuery)(struc
     br_device *self = (br_device *)_self;
 
     if(self->templates.deviceTemplate == NULL) {
-        self->templates.deviceTemplate = BrTVTemplateAllocate(
-            self,
-            (br_tv_template_entry *)deviceTemplateEntries,
-            BR_ASIZE(deviceTemplateEntries)
-        );
+        self->templates.deviceTemplate = BrTVTemplateAllocate(self, (br_tv_template_entry *)deviceTemplateEntries,
+                                                              BR_ASIZE(deviceTemplateEntries));
     }
 
     return self->templates.deviceTemplate;
@@ -300,34 +294,34 @@ static const br_tv_match_info *BR_CMETHOD_DECL(br_device_gl, tokensMatchInfoQuer
  * Default dispatch table for device
  */
 static const struct br_device_dispatch deviceDispatch = {
-    .__reserved0        = NULL,
-    .__reserved1        = NULL,
-    .__reserved2        = NULL,
-    .__reserved3        = NULL,
-    ._free              = BR_CMETHOD_REF(br_device_gl, free),
-    ._identifier        = BR_CMETHOD_REF(br_device_gl, identifier),
-    ._type              = BR_CMETHOD_REF(br_device_gl, type),
-    ._isType            = BR_CMETHOD_REF(br_device_gl, isType),
-    ._device            = BR_CMETHOD_REF(br_device_gl, device),
-    ._space             = BR_CMETHOD_REF(br_device_gl, space),
+    .__reserved0 = NULL,
+    .__reserved1 = NULL,
+    .__reserved2 = NULL,
+    .__reserved3 = NULL,
+    ._free       = BR_CMETHOD_REF(br_device_gl, free),
+    ._identifier = BR_CMETHOD_REF(br_device_gl, identifier),
+    ._type       = BR_CMETHOD_REF(br_device_gl, type),
+    ._isType     = BR_CMETHOD_REF(br_device_gl, isType),
+    ._device     = BR_CMETHOD_REF(br_device_gl, device),
+    ._space      = BR_CMETHOD_REF(br_device_gl, space),
 
-    ._templateQuery     = BR_CMETHOD_REF(br_device_gl, templateQuery),
-    ._query             = BR_CMETHOD_REF(br_object, query),
-    ._queryBuffer       = BR_CMETHOD_REF(br_object, queryBuffer),
-    ._queryMany         = BR_CMETHOD_REF(br_object, queryMany),
-    ._queryManySize     = BR_CMETHOD_REF(br_object, queryManySize),
-    ._queryAll          = BR_CMETHOD_REF(br_object, queryAll),
-    ._queryAllSize      = BR_CMETHOD_REF(br_object, queryAllSize),
+    ._templateQuery = BR_CMETHOD_REF(br_device_gl, templateQuery),
+    ._query         = BR_CMETHOD_REF(br_object, query),
+    ._queryBuffer   = BR_CMETHOD_REF(br_object, queryBuffer),
+    ._queryMany     = BR_CMETHOD_REF(br_object, queryMany),
+    ._queryManySize = BR_CMETHOD_REF(br_object, queryManySize),
+    ._queryAll      = BR_CMETHOD_REF(br_object, queryAll),
+    ._queryAllSize  = BR_CMETHOD_REF(br_object, queryAllSize),
 
-    ._listQuery         = BR_CMETHOD_REF(br_device_gl, listQuery),
-    ._tokensMatchBegin  = BR_CMETHOD_REF(br_object_container, tokensMatchBegin),
-    ._tokensMatch       = BR_CMETHOD_REF(br_object_container, tokensMatch),
-    ._tokensMatchEnd    = BR_CMETHOD_REF(br_object_container, tokensMatchEnd),
+    ._listQuery            = BR_CMETHOD_REF(br_device_gl, listQuery),
+    ._tokensMatchBegin     = BR_CMETHOD_REF(br_object_container, tokensMatchBegin),
+    ._tokensMatch          = BR_CMETHOD_REF(br_object_container, tokensMatch),
+    ._tokensMatchEnd       = BR_CMETHOD_REF(br_object_container, tokensMatchEnd),
     ._tokensMatchInfoQuery = BR_CMETHOD_REF(br_device_gl, tokensMatchInfoQuery),
-    ._addFront          = BR_CMETHOD_REF(br_object_container, addFront),
-    ._removeFront       = BR_CMETHOD_REF(br_object_container, removeFront),
-    ._remove            = BR_CMETHOD_REF(br_object_container, remove),
-    ._find              = BR_CMETHOD_REF(br_object_container, find),
-    ._findMany          = BR_CMETHOD_REF(br_object_container, findMany),
-    ._count             = BR_CMETHOD_REF(br_object_container, count),
+    ._addFront             = BR_CMETHOD_REF(br_object_container, addFront),
+    ._removeFront          = BR_CMETHOD_REF(br_object_container, removeFront),
+    ._remove               = BR_CMETHOD_REF(br_object_container, remove),
+    ._find                 = BR_CMETHOD_REF(br_object_container, find),
+    ._findMany             = BR_CMETHOD_REF(br_object_container, findMany),
+    ._count                = BR_CMETHOD_REF(br_object_container, count),
 };

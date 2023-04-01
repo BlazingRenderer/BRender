@@ -35,7 +35,7 @@ br_renderer *RendererGLAllocate(br_device *device, br_renderer_facility *facilit
     if(dest->use_type != BRT_OFFSCREEN)
         return NULL;
 
-    self = BrResAllocate(facility, sizeof(*self), BR_MEMORY_OBJECT);
+    self                    = BrResAllocate(facility, sizeof(*self), BR_MEMORY_OBJECT);
     self->dispatch          = &rendererDispatch;
     self->identifier        = facility->identifier;
     self->device            = device;
@@ -44,7 +44,7 @@ br_renderer *RendererGLAllocate(br_device *device, br_renderer_facility *facilit
     self->renderer_facility = facility;
     self->state_pool        = BrPoolAllocate(sizeof(GLSTATE_STACK), 1024, BR_MEMORY_OBJECT_DATA);
 
-    ObjectContainerAddFront(facility, (br_object*)self);
+    ObjectContainerAddFront(facility, (br_object *)self);
 
     GLSTATE_Init(&self->state, self->device);
 
@@ -67,7 +67,8 @@ static void BR_CMETHOD_DECL(br_renderer_gl, sceneBegin)(br_renderer *self)
     self->stats.vertices_rendered_count  = 0;
 
     /* First draw call, so do all the per-scene crap */
-    while(glGetError() != GL_NO_ERROR);
+    while(glGetError() != GL_NO_ERROR)
+        ;
 
     GLCACHE_Reset(&self->state.cache);
     GLCACHE_UpdateScene(&self->state.cache, self->state.current);
@@ -143,11 +144,8 @@ static struct br_tv_template *BR_CMETHOD_DECL(br_renderer_gl, templateQuery)(br_
     br_renderer *self = (br_renderer *)_self;
 
     if(self->device->templates.rendererTemplate == NULL) {
-        self->device->templates.rendererTemplate = BrTVTemplateAllocate(
-            self->device,
-            rendererTemplateEntries,
-            BR_ASIZE(rendererTemplateEntries)
-        );
+        self->device->templates.rendererTemplate = BrTVTemplateAllocate(self->device, rendererTemplateEntries,
+                                                                        BR_ASIZE(rendererTemplateEntries));
     }
 
     return self->device->templates.rendererTemplate;
@@ -183,9 +181,8 @@ static br_error BR_CMETHOD_DECL(br_renderer_gl, stateStoredAvail)(br_renderer *s
     return BRE_FAIL;
 }
 
-static br_error BR_CMETHOD_DECL(br_renderer_gl, bufferStoredNew)(br_renderer *self, br_buffer_stored **psm,
-                                                                 br_token use, br_device_pixelmap *pm,
-                                                                 br_token_value *tv)
+static br_error BR_CMETHOD_DECL(br_renderer_gl, bufferStoredNew)(br_renderer *self, br_buffer_stored **psm, br_token use,
+                                                                 br_device_pixelmap *pm, br_token_value *tv)
 {
     br_buffer_stored *sm;
 
@@ -206,15 +203,13 @@ static br_error BR_CMETHOD_DECL(br_renderer_gl, bufferStoredAvail)(br_renderer *
     return BRE_FAIL;
 }
 
-
 /*
  * Setting current state
  */
-br_error BR_CMETHOD_DECL(br_renderer_gl, partSet)(br_renderer *self, br_token part, br_int_32 index, br_token t,
-                                                  br_value value)
+br_error BR_CMETHOD_DECL(br_renderer_gl, partSet)(br_renderer *self, br_token part, br_int_32 index, br_token t, br_value value)
 {
-    br_error              r;
-    br_uint_32            m;
+    br_error               r;
+    br_uint_32             m;
     struct br_tv_template *tp;
 
     if((tp = GLSTATE_GetStateTemplate(&self->state, part, index)) == NULL)
@@ -228,12 +223,11 @@ br_error BR_CMETHOD_DECL(br_renderer_gl, partSet)(br_renderer *self, br_token pa
     return r;
 }
 
-static br_error
-BR_CMETHOD_DECL(br_renderer_gl, partSetMany)(br_renderer *self, br_token part, br_int_32 index, br_token_value *tv,
-                                             br_int_32 *pcount)
+static br_error BR_CMETHOD_DECL(br_renderer_gl, partSetMany)(br_renderer *self, br_token part, br_int_32 index,
+                                                             br_token_value *tv, br_int_32 *pcount)
 {
-    br_error              r;
-    br_uint_32            m;
+    br_error               r;
+    br_uint_32             m;
     struct br_tv_template *tp;
 
     if((tp = GLSTATE_GetStateTemplate(&self->state, part, index)) == NULL)
@@ -258,8 +252,7 @@ static br_error BR_CMETHOD_DECL(br_renderer_gl, partQuery)(br_renderer *self, br
 }
 
 static br_error BR_CMETHOD_DECL(br_renderer_gl, partQueryBuffer)(br_renderer *self, br_token part, br_int_32 index,
-                                                                 void *pvalue, void *buffer,
-                                                                 br_size_t buffer_size, br_token t)
+                                                                 void *pvalue, void *buffer, br_size_t buffer_size, br_token t)
 {
     struct br_tv_template *tp;
 
@@ -329,7 +322,6 @@ static br_error BR_CMETHOD_DECL(br_renderer_gl, commandModePop)(br_renderer *sel
     return BRE_FAIL;
 }
 
-
 static br_error BR_CMETHOD_DECL(br_renderer_gl, modelMul)(br_renderer *self, br_matrix34_f *m)
 {
     br_matrix34 om = self->state.current->matrix.model_to_view;
@@ -346,11 +338,7 @@ static br_error BR_CMETHOD_DECL(br_renderer_gl, modelPopPushMul)(br_renderer *se
     if(self->state.top == 0)
         return BRE_UNDERFLOW;
 
-    BrMatrix34Mul(
-        &self->state.current->matrix.model_to_view,
-        (br_matrix34 *)m,
-        &self->state.stack[0].matrix.model_to_view
-    );
+    BrMatrix34Mul(&self->state.current->matrix.model_to_view, (br_matrix34 *)m, &self->state.stack[0].matrix.model_to_view);
 
     self->state.current->matrix.model_to_view_hint = BRT_NONE;
 
@@ -381,15 +369,13 @@ static br_error BR_CMETHOD_DECL(br_renderer_gl, statePop)(br_renderer *self, br_
     return GLSTATE_Pop(&self->state, mask) ? BRE_OK : BRE_OVERFLOW;
 }
 
-static br_error
-BR_CMETHOD_DECL(br_renderer_gl, stateSave)(br_renderer *self, br_renderer_state_stored *save, br_uint_32 mask)
+static br_error BR_CMETHOD_DECL(br_renderer_gl, stateSave)(br_renderer *self, br_renderer_state_stored *save, br_uint_32 mask)
 {
     GLSTATE_Copy(&save->state, self->state.current, mask);
     return BRE_OK;
 }
 
-static br_error
-BR_CMETHOD_DECL(br_renderer_gl, stateRestore)(br_renderer *self, br_renderer_state_stored *save, br_uint_32 mask)
+static br_error BR_CMETHOD_DECL(br_renderer_gl, stateRestore)(br_renderer *self, br_renderer_state_stored *save, br_uint_32 mask)
 {
     GLSTATE_Copy(self->state.current, &save->state, mask);
     return BRE_OK;
@@ -401,8 +387,7 @@ static br_error BR_CMETHOD_DECL(br_renderer_gl, stateDefault)(br_renderer *self,
     return BRE_OK;
 }
 
-static br_error BR_CMETHOD_DECL(br_renderer_gl, stateMask)(br_renderer *self, br_uint_32 *mask,
-                                                           br_token *parts, int n_parts)
+static br_error BR_CMETHOD_DECL(br_renderer_gl, stateMask)(br_renderer *self, br_uint_32 *mask, br_token *parts, int n_parts)
 {
     BrLogTrace("GLREND", "%s", __FUNCTION__);
     return BRE_FAIL;
@@ -416,7 +401,6 @@ static br_error BR_CMETHOD_DECL(br_renderer_gl, boundsTest)(br_renderer *self, b
     *r = GLOnScreenCheck(&m2s, bounds);
     return BRE_OK;
 }
-
 
 static br_error BR_CMETHOD_DECL(br_renderer_gl, coverageTest)(br_renderer *self, br_float *r, br_bounds3_f *bounds)
 {
@@ -454,7 +438,6 @@ static br_error BR_CMETHOD_DECL(br_renderer_gl, partQueryCapability)(br_renderer
     return BRE_FAIL;
 }
 
-
 static br_error BR_CMETHOD_DECL(br_renderer_gl, stateQueryPerformance)(br_renderer *self, br_fixed_lu *speed)
 {
     BrLogTrace("GLREND", "%s", __FUNCTION__);
@@ -481,39 +464,38 @@ static br_error BR_CMETHOD_DECL(br_renderer_gl, focusLossEnd)(br_renderer *self)
     return BRE_OK;
 }
 
-
 /*
  * Default dispatch table for renderer
  */
 static const struct br_renderer_dispatch rendererDispatch = {
-    .__reserved0            = NULL,
-    .__reserved1            = NULL,
-    .__reserved2            = NULL,
-    .__reserved3            = NULL,
-    ._free                  = BR_CMETHOD(br_renderer_gl, free),
-    ._identifier            = BR_CMETHOD(br_renderer_gl, identifier),
-    ._type                  = BR_CMETHOD(br_renderer_gl, type),
-    ._isType                = BR_CMETHOD(br_renderer_gl, isType),
-    ._device                = BR_CMETHOD(br_renderer_gl, device),
-    ._space                 = BR_CMETHOD(br_renderer_gl, space),
-    ._templateQuery         = BR_CMETHOD(br_renderer_gl, templateQuery),
-    ._query                 = BR_CMETHOD(br_object, query),
-    ._queryBuffer           = BR_CMETHOD(br_object, queryBuffer),
-    ._queryMany             = BR_CMETHOD(br_object, queryMany),
-    ._queryManySize         = BR_CMETHOD(br_object, queryManySize),
-    ._queryAll              = BR_CMETHOD(br_object, queryAll),
-    ._queryAllSize          = BR_CMETHOD(br_object, queryAllSize),
-    ._listQuery             = BR_CMETHOD(br_renderer_gl, listQuery),
-    ._tokensMatchBegin      = BR_CMETHOD(br_object_container, tokensMatchBegin),
-    ._tokensMatch           = BR_CMETHOD(br_object_container, tokensMatch),
-    ._tokensMatchEnd        = BR_CMETHOD(br_object_container, tokensMatchEnd),
-    ._tokensMatchInfoQuery  = BR_CMETHOD_REF(br_object_container, tokensMatchInfoQuery),
-    ._addFront              = BR_CMETHOD(br_object_container, addFront),
-    ._removeFront           = BR_CMETHOD(br_object_container, removeFront),
-    ._remove                = BR_CMETHOD(br_object_container, remove),
-    ._find                  = BR_CMETHOD(br_object_container, find),
-    ._findMany              = BR_CMETHOD(br_object_container, findMany),
-    ._count                 = BR_CMETHOD(br_object_container, count),
+    .__reserved0           = NULL,
+    .__reserved1           = NULL,
+    .__reserved2           = NULL,
+    .__reserved3           = NULL,
+    ._free                 = BR_CMETHOD(br_renderer_gl, free),
+    ._identifier           = BR_CMETHOD(br_renderer_gl, identifier),
+    ._type                 = BR_CMETHOD(br_renderer_gl, type),
+    ._isType               = BR_CMETHOD(br_renderer_gl, isType),
+    ._device               = BR_CMETHOD(br_renderer_gl, device),
+    ._space                = BR_CMETHOD(br_renderer_gl, space),
+    ._templateQuery        = BR_CMETHOD(br_renderer_gl, templateQuery),
+    ._query                = BR_CMETHOD(br_object, query),
+    ._queryBuffer          = BR_CMETHOD(br_object, queryBuffer),
+    ._queryMany            = BR_CMETHOD(br_object, queryMany),
+    ._queryManySize        = BR_CMETHOD(br_object, queryManySize),
+    ._queryAll             = BR_CMETHOD(br_object, queryAll),
+    ._queryAllSize         = BR_CMETHOD(br_object, queryAllSize),
+    ._listQuery            = BR_CMETHOD(br_renderer_gl, listQuery),
+    ._tokensMatchBegin     = BR_CMETHOD(br_object_container, tokensMatchBegin),
+    ._tokensMatch          = BR_CMETHOD(br_object_container, tokensMatch),
+    ._tokensMatchEnd       = BR_CMETHOD(br_object_container, tokensMatchEnd),
+    ._tokensMatchInfoQuery = BR_CMETHOD_REF(br_object_container, tokensMatchInfoQuery),
+    ._addFront             = BR_CMETHOD(br_object_container, addFront),
+    ._removeFront          = BR_CMETHOD(br_object_container, removeFront),
+    ._remove               = BR_CMETHOD(br_object_container, remove),
+    ._find                 = BR_CMETHOD(br_object_container, find),
+    ._findMany             = BR_CMETHOD(br_object_container, findMany),
+    ._count                = BR_CMETHOD(br_object_container, count),
 
     ._validDestination      = BR_CMETHOD(br_renderer_gl, validDestination),
     ._stateStoredNew        = BR_CMETHOD(br_renderer_gl, stateStoredNew),

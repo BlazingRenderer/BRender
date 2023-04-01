@@ -42,5 +42,3 @@ typedef struct br_geometry_v1_model {
 };
 #endif
 #endif
-
-

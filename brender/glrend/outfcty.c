@@ -15,23 +15,23 @@ static const struct br_output_facility_dispatch outputFacilityDispatch;
 #define A(a) ((br_uintptr_t)(a))
 
 static struct br_tv_template_entry outputFacilityTemplateEntries[] = {
-    {BRT_WIDTH_I32,               NULL, A(-1),                BRTV_QUERY | BRTV_ALL | BRTV_ABS, BRTV_CONV_COPY},
-    {BRT_WIDTH_MIN_I32,           NULL, A(1),                 BRTV_QUERY | BRTV_ALL | BRTV_ABS, BRTV_CONV_COPY},
-    {BRT_WIDTH_MAX_I32,           NULL, F(max_width),         BRTV_QUERY | BRTV_ALL,            BRTV_CONV_COPY},
-    {BRT_HEIGHT_I32,              NULL, A(-1),                BRTV_QUERY | BRTV_ALL | BRTV_ABS, BRTV_CONV_COPY},
-    {BRT_HEIGHT_MIN_I32,          NULL, A(1),                 BRTV_QUERY | BRTV_ALL | BRTV_ABS, BRTV_CONV_COPY},
-    {BRT_HEIGHT_MAX_I32,          NULL, F(max_height),        BRTV_QUERY | BRTV_ALL,            BRTV_CONV_COPY},
-    {BRT_PIXEL_BITS_I32,          NULL, A(-1),                BRTV_QUERY | BRTV_ALL | BRTV_ABS, BRTV_CONV_COPY},
-    {BRT_PIXEL_TYPE_U8,           NULL, A(BR_PMT_MAX),        BRTV_QUERY | BRTV_ALL | BRTV_ABS, BRTV_CONV_COPY},
-    {BRT_INDEXED_B,               NULL, A(0),                 BRTV_QUERY | BRTV_ALL | BRTV_ABS, BRTV_CONV_COPY},
-    {BRT_IDENTIFIER_CSTR,         NULL, F(identifier),        BRTV_QUERY | BRTV_ALL,            BRTV_CONV_COPY},
-    {BRT_RENDERER_FACILITY_O,     NULL, F(renderer_facility), BRTV_QUERY | BRTV_ALL,            BRTV_CONV_COPY},
+    {BRT_WIDTH_I32,           NULL, A(-1),                BRTV_QUERY | BRTV_ALL | BRTV_ABS, BRTV_CONV_COPY  },
+    {BRT_WIDTH_MIN_I32,       NULL, A(1),                 BRTV_QUERY | BRTV_ALL | BRTV_ABS, BRTV_CONV_COPY  },
+    {BRT_WIDTH_MAX_I32,       NULL, F(max_width),         BRTV_QUERY | BRTV_ALL,            BRTV_CONV_COPY  },
+    {BRT_HEIGHT_I32,          NULL, A(-1),                BRTV_QUERY | BRTV_ALL | BRTV_ABS, BRTV_CONV_COPY  },
+    {BRT_HEIGHT_MIN_I32,      NULL, A(1),                 BRTV_QUERY | BRTV_ALL | BRTV_ABS, BRTV_CONV_COPY  },
+    {BRT_HEIGHT_MAX_I32,      NULL, F(max_height),        BRTV_QUERY | BRTV_ALL,            BRTV_CONV_COPY  },
+    {BRT_PIXEL_BITS_I32,      NULL, A(-1),                BRTV_QUERY | BRTV_ALL | BRTV_ABS, BRTV_CONV_COPY  },
+    {BRT_PIXEL_TYPE_U8,       NULL, A(BR_PMT_MAX),        BRTV_QUERY | BRTV_ALL | BRTV_ABS, BRTV_CONV_COPY  },
+    {BRT_INDEXED_B,           NULL, A(0),                 BRTV_QUERY | BRTV_ALL | BRTV_ABS, BRTV_CONV_COPY  },
+    {BRT_IDENTIFIER_CSTR,     NULL, F(identifier),        BRTV_QUERY | BRTV_ALL,            BRTV_CONV_COPY  },
+    {BRT_RENDERER_FACILITY_O, NULL, F(renderer_facility), BRTV_QUERY | BRTV_ALL,            BRTV_CONV_COPY  },
 
-    /*
-     * We don't use these, but we need BrDevBeginVar to accept them.
-     * These are passed to pixelmapNew, which will handle them.
-     */
-    {BRT_MSAA_SAMPLES_I32,        NULL, 0,                    BRTV_QUERY | BRTV_ALL, BRTV_CONV_DIRECT,},
+ /*
+  * We don't use these, but we need BrDevBeginVar to accept them.
+  * These are passed to pixelmapNew, which will handle them.
+  */
+    {BRT_MSAA_SAMPLES_I32,    NULL, 0,                    BRTV_QUERY | BRTV_ALL,            BRTV_CONV_DIRECT},
 };
 
 #undef F
@@ -40,9 +40,9 @@ static struct br_tv_template_entry outputFacilityTemplateEntries[] = {
 br_output_facility *OutputFacilityGLInit(br_device *dev, br_renderer_facility *rendfcty)
 {
     br_output_facility *self;
-    GLint dims[2];
+    GLint               dims[2];
 
-    self = BrResAllocate(dev, sizeof(br_output_facility), BR_MEMORY_OBJECT);
+    self                    = BrResAllocate(dev, sizeof(br_output_facility), BR_MEMORY_OBJECT);
     self->identifier        = "OpenGL";
     self->dispatch          = &outputFacilityDispatch;
     self->device            = dev;
@@ -53,7 +53,7 @@ br_output_facility *OutputFacilityGLInit(br_device *dev, br_renderer_facility *r
     self->max_width  = dims[0];
     self->max_height = dims[1];
 
-    ObjectContainerAddFront(dev, (br_object*)self);
+    ObjectContainerAddFront(dev, (br_object *)self);
     return self;
 }
 
@@ -107,17 +107,13 @@ static struct br_tv_template *BR_CMETHOD_DECL(br_output_facility_sdl, queryTempl
     br_output_facility *self = (br_output_facility *)_self;
 
     if(self->device->templates.outputFacilityTemplate == NULL)
-        self->device->templates.outputFacilityTemplate = BrTVTemplateAllocate(
-            self->device,
-            outputFacilityTemplateEntries,
-            BR_ASIZE(outputFacilityTemplateEntries)
-        );
+        self->device->templates.outputFacilityTemplate = BrTVTemplateAllocate(self->device, outputFacilityTemplateEntries,
+                                                                              BR_ASIZE(outputFacilityTemplateEntries));
 
     return self->device->templates.outputFacilityTemplate;
 }
 
-static br_error BR_CMETHOD_DECL(br_output_facility_sdl, validSource)(br_output_facility *self,
-                                                                     br_boolean *bp, br_object *h)
+static br_error BR_CMETHOD_DECL(br_output_facility_sdl, validSource)(br_output_facility *self, br_boolean *bp, br_object *h)
 {
     (void)self;
     (void)bp;
@@ -128,8 +124,8 @@ static br_error BR_CMETHOD_DECL(br_output_facility_sdl, validSource)(br_output_f
 /*
  * Instantiate an output pixelmap from the output type
  */
-static br_error BR_CMETHOD_DECL(br_output_facility_sdl, pixelmapNew)
-    (br_output_facility *self, br_device_pixelmap **ppmap, br_token_value *tv)
+static br_error BR_CMETHOD_DECL(br_output_facility_sdl, pixelmapNew)(br_output_facility  *self,
+                                                                     br_device_pixelmap **ppmap, br_token_value *tv)
 {
     br_device_pixelmap *pm;
 
@@ -149,8 +145,8 @@ static br_error BR_CMETHOD_DECL(br_output_facility_sdl, pixelmapNew)
 /*
  * Cannot create new CLUTs, stuck with the single hardware one
  */
-static br_error BR_CMETHOD_DECL(br_output_facility_sdl, clutNew)(br_output_facility *self,
-                                                                 br_device_clut **pclut, br_token_value *tv)
+static br_error BR_CMETHOD_DECL(br_output_facility_sdl, clutNew)(br_output_facility *self, br_device_clut **pclut,
+                                                                 br_token_value *tv)
 {
     (void)self;
     (void)pclut;
@@ -158,8 +154,8 @@ static br_error BR_CMETHOD_DECL(br_output_facility_sdl, clutNew)(br_output_facil
     return BRE_FAIL;
 }
 
-static br_error BR_CMETHOD_DECL(br_output_facility_sdl, queryCapability)(
-    br_output_facility *self, br_token_value *buffer_in, br_token_value *buffer_out, br_size_t size_buffer_out)
+static br_error BR_CMETHOD_DECL(br_output_facility_sdl, queryCapability)(br_output_facility *self, br_token_value *buffer_in,
+                                                                         br_token_value *buffer_out, br_size_t size_buffer_out)
 {
     (void)self;
     (void)buffer_in;
@@ -167,7 +163,6 @@ static br_error BR_CMETHOD_DECL(br_output_facility_sdl, queryCapability)(
     (void)size_buffer_out;
     return BRE_FAIL;
 }
-
 
 static void *BR_CMETHOD_DECL(br_output_facility_sdl, listQuery)(struct br_object_container *self)
 {
@@ -178,42 +173,39 @@ static void *BR_CMETHOD_DECL(br_output_facility_sdl, listQuery)(struct br_object
  * Output facility dispatch table
  */
 static const struct br_output_facility_dispatch outputFacilityDispatch = {
-    .__reserved0        = NULL,
-    .__reserved1        = NULL,
-    .__reserved2        = NULL,
-    .__reserved3        = NULL,
-    ._free              = BR_CMETHOD_REF(br_output_facility_sdl, free),
-    ._identifier        = BR_CMETHOD_REF(br_output_facility_sdl, identifier),
-    ._type              = BR_CMETHOD_REF(br_output_facility_sdl, type),
-    ._isType            = BR_CMETHOD_REF(br_output_facility_sdl, isType),
-    ._device            = BR_CMETHOD_REF(br_output_facility_sdl, device),
-    ._space             = BR_CMETHOD_REF(br_output_facility_sdl, space),
+    .__reserved0 = NULL,
+    .__reserved1 = NULL,
+    .__reserved2 = NULL,
+    .__reserved3 = NULL,
+    ._free       = BR_CMETHOD_REF(br_output_facility_sdl, free),
+    ._identifier = BR_CMETHOD_REF(br_output_facility_sdl, identifier),
+    ._type       = BR_CMETHOD_REF(br_output_facility_sdl, type),
+    ._isType     = BR_CMETHOD_REF(br_output_facility_sdl, isType),
+    ._device     = BR_CMETHOD_REF(br_output_facility_sdl, device),
+    ._space      = BR_CMETHOD_REF(br_output_facility_sdl, space),
 
-    ._templateQuery     = BR_CMETHOD_REF(br_output_facility_sdl, queryTemplate),
-    ._query             = BR_CMETHOD_REF(br_object, query),
-    ._queryBuffer       = BR_CMETHOD_REF(br_object, queryBuffer),
-    ._queryMany         = BR_CMETHOD_REF(br_object, queryMany),
-    ._queryManySize     = BR_CMETHOD_REF(br_object, queryManySize),
-    ._queryAll          = BR_CMETHOD_REF(br_object, queryAll),
-    ._queryAllSize      = BR_CMETHOD_REF(br_object, queryAllSize),
+    ._templateQuery = BR_CMETHOD_REF(br_output_facility_sdl, queryTemplate),
+    ._query         = BR_CMETHOD_REF(br_object, query),
+    ._queryBuffer   = BR_CMETHOD_REF(br_object, queryBuffer),
+    ._queryMany     = BR_CMETHOD_REF(br_object, queryMany),
+    ._queryManySize = BR_CMETHOD_REF(br_object, queryManySize),
+    ._queryAll      = BR_CMETHOD_REF(br_object, queryAll),
+    ._queryAllSize  = BR_CMETHOD_REF(br_object, queryAllSize),
 
-    ._listQuery         = BR_CMETHOD_REF(br_output_facility_sdl, listQuery),
-    ._tokensMatchBegin  = BR_CMETHOD_REF(br_object_container, tokensMatchBegin),
-    ._tokensMatch       = BR_CMETHOD_REF(br_object_container, tokensMatch),
-    ._tokensMatchEnd    = BR_CMETHOD_REF(br_object_container, tokensMatchEnd),
+    ._listQuery            = BR_CMETHOD_REF(br_output_facility_sdl, listQuery),
+    ._tokensMatchBegin     = BR_CMETHOD_REF(br_object_container, tokensMatchBegin),
+    ._tokensMatch          = BR_CMETHOD_REF(br_object_container, tokensMatch),
+    ._tokensMatchEnd       = BR_CMETHOD_REF(br_object_container, tokensMatchEnd),
     ._tokensMatchInfoQuery = BR_CMETHOD_REF(br_object_container, tokensMatchInfoQuery),
-    ._addFront          = BR_CMETHOD_REF(br_object_container, addFront),
-    ._removeFront       = BR_CMETHOD_REF(br_object_container, removeFront),
-    ._remove            = BR_CMETHOD_REF(br_object_container, remove),
-    ._find              = BR_CMETHOD_REF(br_object_container, find),
-    ._findMany          = BR_CMETHOD_REF(br_object_container, findMany),
-    ._count             = BR_CMETHOD_REF(br_object_container, count),
+    ._addFront             = BR_CMETHOD_REF(br_object_container, addFront),
+    ._removeFront          = BR_CMETHOD_REF(br_object_container, removeFront),
+    ._remove               = BR_CMETHOD_REF(br_object_container, remove),
+    ._find                 = BR_CMETHOD_REF(br_object_container, find),
+    ._findMany             = BR_CMETHOD_REF(br_object_container, findMany),
+    ._count                = BR_CMETHOD_REF(br_object_container, count),
 
-    ._validSource       = BR_CMETHOD_REF(br_output_facility_sdl, validSource),
-    ._pixelmapNew       = BR_CMETHOD_REF(br_output_facility_sdl, pixelmapNew),
-    ._clutNew           = BR_CMETHOD_REF(br_output_facility_sdl, clutNew),
-    ._queryCapability   = BR_CMETHOD_REF(br_output_facility_sdl, queryCapability),
+    ._validSource     = BR_CMETHOD_REF(br_output_facility_sdl, validSource),
+    ._pixelmapNew     = BR_CMETHOD_REF(br_output_facility_sdl, pixelmapNew),
+    ._clutNew         = BR_CMETHOD_REF(br_output_facility_sdl, clutNew),
+    ._queryCapability = BR_CMETHOD_REF(br_output_facility_sdl, queryCapability),
 };
-
-
-

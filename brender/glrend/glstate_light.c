@@ -1,15 +1,16 @@
 #include <string.h>
 #include "drv.h"
 
-#define S BRTV_SET
-#define Q BRTV_QUERY
-#define A BRTV_ALL
+#define S    BRTV_SET
+#define Q    BRTV_QUERY
+#define A    BRTV_ALL
 
-#define AX 0
-#define AF BRTV_ALL
+#define AX   0
+#define AF   BRTV_ALL
 
-#define F(f) offsetof(GLSTATE_STACK,f)
+#define F(f) offsetof(GLSTATE_STACK, f)
 
+// clang-format off
 static const br_tv_template_entry GLSTATEI_LightTemplateEntries[] = {
     {BRT_TYPE_T,          NULL, F(light[0].type),           Q | S | A,  BRTV_CONV_COPY,            0, TM_PART | TM_INDEX | TM_INVALID_PS | TM_INVALID_PM},
     {BRT_SPACE_T,         NULL, F(light[0].lighting_space), Q | S | A,  BRTV_CONV_COPY,            0, TM_PART | TM_INDEX | TM_INVALID_PS | TM_INVALID_PM},
@@ -31,15 +32,16 @@ static const br_tv_template_entry GLSTATEI_LightTemplateEntries[] = {
     {BRT_ATTENUATION_Q_F, NULL, F(light[0].attenuation_q),  Q | S | AF, BRTV_CONV_FLOAT_SCALAR,    0, TM_PART | TM_INDEX | TM_INVALID_PS | TM_INVALID_PM},
     {BRT_ATTENUATION_Q_X, NULL, F(light[0].attenuation_q),  Q | S | AF, BRTV_CONV_FIXED_SCALAR,    0, TM_PART | TM_INDEX | TM_INVALID_PS | TM_INVALID_PM},
 };
+// clang-format on
 
 static const GLSTATE_LIGHT s_Default = {
-	.type			= BRT_NONE,
-	.lighting_space	= BRT_MODEL,
-	.position		= BR_VECTOR3(0,0,0),
-	.direction		= BR_VECTOR3(0,0,0),
-	.colour			= BR_COLOUR_RGB(255, 255, 255),
-	.spot_outer		= BR_ANGLE_DEG(30.0),
-	.spot_inner		= BR_ANGLE_DEG(20.0)
+    .type           = BRT_NONE,
+    .lighting_space = BRT_MODEL,
+    .position       = BR_VECTOR3(0, 0, 0),
+    .direction      = BR_VECTOR3(0, 0, 0),
+    .colour         = BR_COLOUR_RGB(255, 255, 255),
+    .spot_outer     = BR_ANGLE_DEG(30.0),
+    .spot_inner     = BR_ANGLE_DEG(20.0),
 };
 
 static br_tv_template_entry s_LightStates[GLSTATE_MAX_LIGHTS][BR_ASIZE(GLSTATEI_LightTemplateEntries)];
@@ -47,21 +49,17 @@ static br_tv_template_entry s_LightStates[GLSTATE_MAX_LIGHTS][BR_ASIZE(GLSTATEI_
 void GLSTATEI_InitLight(HGLSTATE hState)
 {
 
-	/* Create a different template list for each light. */
-	for(int i = 0; i < GLSTATE_MAX_LIGHTS; ++i)
-	{
-		memcpy(&s_LightStates[i], GLSTATEI_LightTemplateEntries, sizeof(GLSTATEI_LightTemplateEntries));
+    /* Create a different template list for each light. */
+    for(int i = 0; i < GLSTATE_MAX_LIGHTS; ++i) {
+        memcpy(&s_LightStates[i], GLSTATEI_LightTemplateEntries, sizeof(GLSTATEI_LightTemplateEntries));
 
-		for(int j = 0; j < BR_ASIZE(GLSTATEI_LightTemplateEntries); ++j)
-			s_LightStates[i][j].offset += sizeof(GLSTATE_LIGHT) * i;
+        for(int j = 0; j < BR_ASIZE(GLSTATEI_LightTemplateEntries); ++j)
+            s_LightStates[i][j].offset += sizeof(GLSTATE_LIGHT) * i;
 
-		hState->templates.light[i] = BrTVTemplateAllocate(
-			hState->resourceAnchor,
-			s_LightStates[i],
-			BR_ASIZE(s_LightStates[i])
-		);
-		hState->default_.light[i] = s_Default;
-	}
+        hState->templates.light[i] = BrTVTemplateAllocate(hState->resourceAnchor, s_LightStates[i],
+                                                          BR_ASIZE(s_LightStates[i]));
+        hState->default_.light[i]  = s_Default;
+    }
 
-	hState->default_.valid |= GLSTATE_MASK_LIGHT;
+    hState->default_.valid |= GLSTATE_MASK_LIGHT;
 }

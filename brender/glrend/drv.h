@@ -14,10 +14,10 @@ extern "C" {
  * Define the alignas() to nothing, and hope our #pragma packs and
  * padding variables handle it.
  */
-#	define alignas(x)
+#define alignas(x)
 
 #else
-#	include <stdalign.h>
+#include <stdalign.h>
 #endif
 
 #include <assert.h>

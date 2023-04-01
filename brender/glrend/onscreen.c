@@ -26,27 +26,23 @@
  * XXX Could probably write a mean version of this is assembler
  */
 
-#define MAKE_EQN(sign, row) {\
-    eqn.v[X] =  model_to_screen->m[0][3] sign model_to_screen->m[0][row];\
-    eqn.v[Y] =  model_to_screen->m[1][3] sign model_to_screen->m[1][row];\
-    eqn.v[Z] =  model_to_screen->m[2][3] sign model_to_screen->m[2][row];\
-    eqn.v[W] =-(model_to_screen->m[3][3] sign model_to_screen->m[3][row]);\
+#define MAKE_EQN(sign, row)                                                     \
+    {                                                                           \
+        eqn.v[X] = model_to_screen->m[0][3] sign model_to_screen->m[0][row];    \
+        eqn.v[Y] = model_to_screen->m[1][3] sign model_to_screen->m[1][row];    \
+        eqn.v[Z] = model_to_screen->m[2][3] sign model_to_screen->m[2][row];    \
+        eqn.v[W] = -(model_to_screen->m[3][3] sign model_to_screen->m[3][row]); \
     }
 
-#define TEST_NOT_IN\
-        (BR_MAC3(\
-            eqn.v[X],((eqn.v[X]>0)?(bounds->min.v[X]):(bounds->max.v[X])),\
-            eqn.v[Y],((eqn.v[Y]>0)?(bounds->min.v[Y]):(bounds->max.v[Y])),\
-            eqn.v[Z],((eqn.v[Z]>0)?(bounds->min.v[Z]):(bounds->max.v[Z]))) <\
-            eqn.v[W])
+#define TEST_NOT_IN                                                                          \
+    (BR_MAC3(eqn.v[X], ((eqn.v[X] > 0) ? (bounds->min.v[X]) : (bounds->max.v[X])), eqn.v[Y], \
+             ((eqn.v[Y] > 0) ? (bounds->min.v[Y]) : (bounds->max.v[Y])), eqn.v[Z],           \
+             ((eqn.v[Z] > 0) ? (bounds->min.v[Z]) : (bounds->max.v[Z]))) < eqn.v[W])
 
-#define TEST_OUT\
-        (BR_MAC3(\
-            eqn.v[X],((eqn.v[X]>0)?(bounds->max.v[X]):(bounds->min.v[X])),\
-            eqn.v[Y],((eqn.v[Y]>0)?(bounds->max.v[Y]):(bounds->min.v[Y])),\
-            eqn.v[Z],((eqn.v[Z]>0)?(bounds->max.v[Z]):(bounds->min.v[Z]))) <\
-            eqn.v[W])
-
+#define TEST_OUT                                                                             \
+    (BR_MAC3(eqn.v[X], ((eqn.v[X] > 0) ? (bounds->max.v[X]) : (bounds->min.v[X])), eqn.v[Y], \
+             ((eqn.v[Y] > 0) ? (bounds->max.v[Y]) : (bounds->min.v[Y])), eqn.v[Z],           \
+             ((eqn.v[Z] > 0) ? (bounds->max.v[Z]) : (bounds->min.v[Z]))) < eqn.v[W])
 
 br_token GLOnScreenCheck(const br_matrix4 *model_to_screen, const br_bounds3_f *bounds)
 {
@@ -54,8 +50,8 @@ br_token GLOnScreenCheck(const br_matrix4 *model_to_screen, const br_bounds3_f *
     br_vector4 eqn;
 
     /*
-    * Left	  - screen space plane eqn. = ( 1, 0, 0, 1)
-    */
+     * Left	  - screen space plane eqn. = ( 1, 0, 0, 1)
+     */
     MAKE_EQN(+, 0);
 
     if(TEST_OUT)
@@ -121,4 +117,3 @@ br_token GLOnScreenCheck(const br_matrix4 *model_to_screen, const br_bounds3_f *
 
     return accept ? BRT_ACCEPT : BRT_PARTIAL;
 }
-

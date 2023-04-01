@@ -67,16 +67,16 @@ typedef struct br_device_pixelmap {
     union {
         struct {
             struct br_device_pixelmap *depthbuffer;
-            GLuint                    glFbo;
-            GLuint                    glTex;
-            GLfloat                   clearColour[4];
+            GLuint                     glFbo;
+            GLuint                     glTex;
+            GLfloat                    clearColour[4];
 
             br_device_pixelmap_gl_quad quad;
         } asBack;
         struct {
             struct br_device_pixelmap *backbuffer;
-            GLuint                    glDepth;
-            GLfloat                   clearValue;
+            GLuint                     glDepth;
+            GLfloat                    clearValue;
         } asDepth;
     };
 
@@ -88,5 +88,3 @@ typedef struct br_device_pixelmap {
 };
 #endif
 #endif
-
-

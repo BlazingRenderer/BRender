@@ -65,8 +65,8 @@ static void apply_blend_mode(HGLSTATE_STACK self)
     }
 }
 
-static void apply_stored_properties(HVIDEO hVideo, HGLSTATE_STACK state, uint32_t states,
-                                    br_boolean *unlit, HGLSTD140_MODEL_DATA hModel, GLuint tex_default)
+static void apply_stored_properties(HVIDEO hVideo, HGLSTATE_STACK state, uint32_t states, br_boolean *unlit,
+                                    HGLSTD140_MODEL_DATA hModel, GLuint tex_default)
 {
     br_boolean blending_on;
 
@@ -179,10 +179,10 @@ static void apply_stored_properties(HVIDEO hVideo, HGLSTATE_STACK state, uint32_
             glBindTexture(GL_TEXTURE_2D, state->prim.colour_map->gl_tex);
             glUniform1i(hVideo->brenderProgram.uniforms.main_texture, hVideo->brenderProgram.mainTextureBinding);
 
-            //if(state->prim.colour_map->source->flags & BR_PMF_KEYED_TRANSPARENCY)
+            // if(state->prim.colour_map->source->flags & BR_PMF_KEYED_TRANSPARENCY)
             //{
             //	//BrDebugBreak();
-            //}
+            // }
         } else {
             glBindTexture(GL_TEXTURE_2D, tex_default);
             glUniform1i(hVideo->brenderProgram.uniforms.main_texture, hVideo->brenderProgram.mainTextureBinding);
@@ -216,7 +216,7 @@ static void apply_stored_properties(HVIDEO hVideo, HGLSTATE_STACK state, uint32_
         if(GLAD_GL_EXT_texture_filter_anisotropic)
             glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, maxAnisotropy);
 
-        //if(state->prim.colour_map)
+        // if(state->prim.colour_map)
         //{
         //	if(state->prim.colour_map->source)
         //	{
@@ -228,7 +228,7 @@ static void apply_stored_properties(HVIDEO hVideo, HGLSTATE_STACK state, uint32_
         //			}
         //		}
         //	}
-        //}
+        // }
 
         blending_on = (state->prim.flags & PRIMF_BLEND) || (state->prim.colour_map != NULL && state->prim.colour_map->blended);
         if(blending_on) {
@@ -242,11 +242,11 @@ static void apply_stored_properties(HVIDEO hVideo, HGLSTATE_STACK state, uint32_
 
 void StoredGLRenderGroup(br_geometry_stored *self, br_renderer *renderer, const gl_groupinfo *groupinfo)
 {
-    HGLCACHE                 hCache  = &renderer->state.cache;
-    HVIDEO                   hVideo  = &self->device->video;
+    HGLCACHE                  hCache = &renderer->state.cache;
+    HVIDEO                    hVideo = &self->device->video;
     br_renderer_state_stored *stored = groupinfo->stored;
-    br_boolean               unlit;
-    GLSTD140_MODEL_DATA      model;
+    br_boolean                unlit;
+    GLSTD140_MODEL_DATA       model;
 
     /* Update the per-model cache (matrices and lights) */
     GLCACHE_UpdateModel(hCache, &renderer->state.current->matrix);
@@ -281,8 +281,7 @@ void StoredGLRenderGroup(br_geometry_stored *self, br_renderer *renderer, const 
 
     unlit = BR_TRUE;
     if(stored) {
-        apply_stored_properties(hVideo, &stored->state,
-                                GLSTATE_MASK_PRIMITIVE | GLSTATE_MASK_SURFACE | GLSTATE_MASK_CULL,
+        apply_stored_properties(hVideo, &stored->state, GLSTATE_MASK_PRIMITIVE | GLSTATE_MASK_SURFACE | GLSTATE_MASK_CULL,
                                 &unlit, &model, self->device->tex_white);
     } else {
         /* If there's no stored state, apply all states from global. */
@@ -290,18 +289,14 @@ void StoredGLRenderGroup(br_geometry_stored *self, br_renderer *renderer, const 
     }
 
     model.unlit = (br_uint_32)unlit;
-    BrVector4Set(&model.clear_colour,
-                 renderer->pixelmap->asBack.clearColour[0],
-                 renderer->pixelmap->asBack.clearColour[1],
-                 renderer->pixelmap->asBack.clearColour[2],
-                 renderer->pixelmap->asBack.clearColour[3]
-    );
+    BrVector4Set(&model.clear_colour, renderer->pixelmap->asBack.clearColour[0], renderer->pixelmap->asBack.clearColour[1],
+                 renderer->pixelmap->asBack.clearColour[2], renderer->pixelmap->asBack.clearColour[3]);
 
     glBufferData(GL_UNIFORM_BUFFER, sizeof(model), &model, GL_STATIC_DRAW);
     glDrawElements(GL_TRIANGLES, groupinfo->count, GL_UNSIGNED_SHORT, groupinfo->offset);
 
     renderer->stats.face_group_count++;
     renderer->stats.triangles_rendered_count += groupinfo->group->nfaces;
-    renderer->stats.triangles_drawn_count    += groupinfo->group->nfaces;
-    renderer->stats.vertices_rendered_count  += groupinfo->group->nfaces * 3;
+    renderer->stats.triangles_drawn_count += groupinfo->group->nfaces;
+    renderer->stats.vertices_rendered_count += groupinfo->group->nfaces * 3;
 }

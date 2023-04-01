@@ -23,12 +23,12 @@ static struct br_tv_template_entry rendererStateStoredTemplateEntries[] = {
 /*
  * Allocate a stored state
  */
-br_renderer_state_stored *RendererStateStoredGLAllocate(br_renderer *renderer, HGLSTATE_STACK base_state,
-                                                        br_uint_32 m, br_token_value *tv)
+br_renderer_state_stored *RendererStateStoredGLAllocate(br_renderer *renderer, HGLSTATE_STACK base_state, br_uint_32 m,
+                                                        br_token_value *tv)
 {
     br_renderer_state_stored *self;
 
-    self = BrResAllocate(renderer, sizeof(*self), BR_MEMORY_OBJECT);
+    self             = BrResAllocate(renderer, sizeof(*self), BR_MEMORY_OBJECT);
     self->dispatch   = &rendererStateStoredDispatch;
     self->identifier = "Renderer-State-Stored";
     self->device     = ObjectDevice(renderer);
@@ -82,10 +82,8 @@ static struct br_tv_template *BR_CMETHOD_DECL(br_renderer_state_stored_gl, templ
 
     if(self->device->templates.rendererStateStoredTemplate == NULL) {
         self->device->templates.rendererStateStoredTemplate = BrTVTemplateAllocate(
-            self->device,
-            (br_tv_template_entry *)rendererStateStoredTemplateEntries,
-            BR_ASIZE(rendererStateStoredTemplateEntries)
-        );
+            self->device, (br_tv_template_entry *)rendererStateStoredTemplateEntries,
+            BR_ASIZE(rendererStateStoredTemplateEntries));
     }
 
     return self->device->templates.rendererStateStoredTemplate;
@@ -95,16 +93,16 @@ static struct br_tv_template *BR_CMETHOD_DECL(br_renderer_state_stored_gl, templ
  * Default dispatch table for renderer type (defined at and of file)
  */
 static const struct br_renderer_state_stored_dispatch rendererStateStoredDispatch = {
-    .__reserved0    = NULL,
-    .__reserved1    = NULL,
-    .__reserved2    = NULL,
-    .__reserved3    = NULL,
-    ._free          = BR_CMETHOD_REF(br_renderer_state_stored_gl, free),
-    ._identifier    = BR_CMETHOD_REF(br_renderer_state_stored_gl, identifier),
-    ._type          = BR_CMETHOD_REF(br_renderer_state_stored_gl, type),
-    ._isType        = BR_CMETHOD_REF(br_renderer_state_stored_gl, isType),
-    ._device        = BR_CMETHOD_REF(br_renderer_state_stored_gl, device),
-    ._space         = BR_CMETHOD_REF(br_renderer_state_stored_gl, space),
+    .__reserved0 = NULL,
+    .__reserved1 = NULL,
+    .__reserved2 = NULL,
+    .__reserved3 = NULL,
+    ._free       = BR_CMETHOD_REF(br_renderer_state_stored_gl, free),
+    ._identifier = BR_CMETHOD_REF(br_renderer_state_stored_gl, identifier),
+    ._type       = BR_CMETHOD_REF(br_renderer_state_stored_gl, type),
+    ._isType     = BR_CMETHOD_REF(br_renderer_state_stored_gl, isType),
+    ._device     = BR_CMETHOD_REF(br_renderer_state_stored_gl, device),
+    ._space      = BR_CMETHOD_REF(br_renderer_state_stored_gl, space),
 
     ._templateQuery = BR_CMETHOD_REF(br_renderer_state_stored_gl, templateQuery),
     ._query         = BR_CMETHOD_REF(br_object, query),
@@ -114,4 +112,3 @@ static const struct br_renderer_state_stored_dispatch rendererStateStoredDispatc
     ._queryAll      = BR_CMETHOD_REF(br_object, queryAll),
     ._queryAllSize  = BR_CMETHOD_REF(br_object, queryAllSize),
 };
-

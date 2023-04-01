@@ -40,8 +40,8 @@ GLuint VIDEOI_CreateAndCompileShader(GLenum type, const char *shader, size_t siz
 GLuint VIDEOI_LoadAndCompileShader(GLenum type, const char *path, const char *default_data, size_t default_size)
 {
     GLchar *source;
-    size_t size;
-    GLuint shader;
+    size_t  size;
+    GLuint  shader;
 
     if(path == NULL || (source = BrFileLoad(NULL, path, &size)) == NULL) {
         source = (GLchar *)default_data;
@@ -90,7 +90,6 @@ GLuint VIDEOI_CreateAndCompileProgram(GLuint vert, GLuint frag)
         glDeleteProgram(program);
         program = 0;
     }
-
 
     return program;
 }
@@ -243,7 +242,7 @@ br_error VIDEOI_BrPixelmapGetTypeDetails(br_uint_8 pmType, GLint *internalFormat
     }
 
     if(blended != NULL)
-       *blended = is_blended;
+        *blended = is_blended;
 
     return BRE_OK;
 }

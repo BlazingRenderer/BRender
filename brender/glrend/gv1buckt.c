@@ -28,7 +28,7 @@ br_geometry_v1_buckets *GeometryV1BucketsGLAllocate(br_renderer_facility *type, 
 {
     br_geometry_v1_buckets *self;
 
-    self = BrResAllocate(type, sizeof(*self), BR_MEMORY_OBJECT);
+    self                    = BrResAllocate(type, sizeof(*self), BR_MEMORY_OBJECT);
     self->dispatch          = &geometryV1BucketsDispatch;
     self->identifier        = id;
     self->device            = type->device;
@@ -51,7 +51,6 @@ static const char *BR_CMETHOD(br_geometry_v1_buckets_gl, identifier)(br_object *
 {
     return ((br_geometry_v1_buckets *)self)->identifier;
 }
-
 
 static br_token BR_CMETHOD_DECL(br_geometry_v1_buckets_gl, type)(br_object *self)
 {
@@ -79,10 +78,7 @@ static struct br_tv_template *BR_CMETHOD_DECL(br_geometry_v1_buckets_gl, templat
 
     if(self->device->templates.geometryV1BucketsTemplate == NULL) {
         self->device->templates.geometryV1BucketsTemplate = BrTVTemplateAllocate(
-            self->device,
-            (br_tv_template_entry *)geometryV1BucketsTemplateEntries,
-            BR_ASIZE(geometryV1BucketsTemplateEntries)
-        );
+            self->device, (br_tv_template_entry *)geometryV1BucketsTemplateEntries, BR_ASIZE(geometryV1BucketsTemplateEntries));
     }
 
     return self->device->templates.geometryV1BucketsTemplate;
@@ -112,7 +108,7 @@ br_error BR_CMETHOD_DECL(br_geometry_v1_buckets_gl, render)(br_geometry_v1_bucke
              */
             if(p->type == BRT_GEOMETRY_STORED) {
                 br_geometry_stored *geom      = (br_geometry_stored *)p->v[0];
-                HGLSTATE_STACK     state      = (HGLSTATE_STACK)p->v[1];
+                HGLSTATE_STACK      state     = (HGLSTATE_STACK)p->v[1];
                 const gl_groupinfo *groupinfo = (gl_groupinfo *)p->v[2];
 
                 ASSERT(ObjectIsType((br_object *)geom, BRT_GEOMETRY_STORED));
@@ -137,26 +133,25 @@ br_error BR_CMETHOD_DECL(br_geometry_v1_buckets_gl, render)(br_geometry_v1_bucke
  * Default dispatch table for renderer type
  */
 static const struct br_geometry_v1_buckets_dispatch geometryV1BucketsDispatch = {
-    .__reserved0        = NULL,
-    .__reserved1        = NULL,
-    .__reserved2        = NULL,
-    .__reserved3        = NULL,
-    ._free              = BR_CMETHOD_REF(br_geometry_v1_buckets_gl, free),
-    ._identifier        = BR_CMETHOD_REF(br_geometry_v1_buckets_gl, identifier),
-    ._type              = BR_CMETHOD_REF(br_geometry_v1_buckets_gl, type),
-    ._isType            = BR_CMETHOD_REF(br_geometry_v1_buckets_gl, isType),
-    ._device            = BR_CMETHOD_REF(br_geometry_v1_buckets_gl, device),
-    ._space             = BR_CMETHOD_REF(br_geometry_v1_buckets_gl, space),
+    .__reserved0 = NULL,
+    .__reserved1 = NULL,
+    .__reserved2 = NULL,
+    .__reserved3 = NULL,
+    ._free       = BR_CMETHOD_REF(br_geometry_v1_buckets_gl, free),
+    ._identifier = BR_CMETHOD_REF(br_geometry_v1_buckets_gl, identifier),
+    ._type       = BR_CMETHOD_REF(br_geometry_v1_buckets_gl, type),
+    ._isType     = BR_CMETHOD_REF(br_geometry_v1_buckets_gl, isType),
+    ._device     = BR_CMETHOD_REF(br_geometry_v1_buckets_gl, device),
+    ._space      = BR_CMETHOD_REF(br_geometry_v1_buckets_gl, space),
 
-    ._templateQuery     = BR_CMETHOD_REF(br_geometry_v1_buckets_gl, templateQuery),
-    ._query             = BR_CMETHOD_REF(br_object, query),
-    ._queryBuffer       = BR_CMETHOD_REF(br_object, queryBuffer),
-    ._queryMany         = BR_CMETHOD_REF(br_object, queryMany),
-    ._queryManySize     = BR_CMETHOD_REF(br_object, queryManySize),
-    ._queryAll          = BR_CMETHOD_REF(br_object, queryAll),
-    ._queryAllSize      = BR_CMETHOD_REF(br_object, queryAllSize),
+    ._templateQuery = BR_CMETHOD_REF(br_geometry_v1_buckets_gl, templateQuery),
+    ._query         = BR_CMETHOD_REF(br_object, query),
+    ._queryBuffer   = BR_CMETHOD_REF(br_object, queryBuffer),
+    ._queryMany     = BR_CMETHOD_REF(br_object, queryMany),
+    ._queryManySize = BR_CMETHOD_REF(br_object, queryManySize),
+    ._queryAll      = BR_CMETHOD_REF(br_object, queryAll),
+    ._queryAllSize  = BR_CMETHOD_REF(br_object, queryAllSize),
 
-    ._render            = BR_CMETHOD_REF(br_geometry_v1_buckets_gl, render),
-    ._renderOnScreen    = BR_CMETHOD_REF(br_geometry_v1_buckets_gl, render),
+    ._render         = BR_CMETHOD_REF(br_geometry_v1_buckets_gl, render),
+    ._renderOnScreen = BR_CMETHOD_REF(br_geometry_v1_buckets_gl, render),
 };
-

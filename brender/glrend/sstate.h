@@ -14,29 +14,29 @@ extern "C" {
  * Private state of geometry format
  */
 typedef struct br_renderer_state_stored {
-	/*
-	 * Dispatch table
-	 */
-	const struct br_renderer_state_stored_dispatch *dispatch;
+    /*
+     * Dispatch table
+     */
+    const struct br_renderer_state_stored_dispatch *dispatch;
 
-	/*
-	 * Standard object identifier
-	 */
-	const char *identifier;
+    /*
+     * Standard object identifier
+     */
+    const char *identifier;
 
     /*
      * Pointer to owning device
      */
     struct br_device *device;
 
-	/*
-	 * Saved state
-	 */
+    /*
+     * Saved state
+     */
 
-	 /*
-	 * Pointer to renderer that this state is asociated with
-	 */
-	struct br_renderer *renderer;
+    /*
+     * Pointer to renderer that this state is asociated with
+     */
+    struct br_renderer *renderer;
 
     GLSTATE_STACK state;
 } br_renderer_state_stored;
@@ -47,6 +47,3 @@ typedef struct br_renderer_state_stored {
 };
 #endif
 #endif
-
-
-

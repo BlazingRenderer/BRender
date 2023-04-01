@@ -3,7 +3,7 @@
 
 br_error FontGLBuildAtlas(br_font_gl *gl_font, br_font *font, br_int_32 width, br_int_32 height)
 {
-    br_pixelmap  *pm;
+    br_pixelmap *pm;
     br_rectangle r = {.x = 0, .y = 0, .w = 0, .h = font->glyph_y};
     char         c[2];
     GLuint       tex;
@@ -38,9 +38,8 @@ br_error FontGLBuildAtlas(br_font_gl *gl_font, br_font *font, br_int_32 width, b
          * * The origin of the atlas is being set to top-left@(0,0), so
          *     just swap y0/y1.
          */
-        VIDEOI_BrRectToUVs(pm, &r,
-                           &gl_font->glyph[i].x0, &gl_font->glyph[i].y1,
-                           &gl_font->glyph[i].x1, &gl_font->glyph[i].y0);
+        VIDEOI_BrRectToUVs(pm, &r, &gl_font->glyph[i].x0, &gl_font->glyph[i].y1, &gl_font->glyph[i].x1,
+                           &gl_font->glyph[i].y0);
 
         r.x += r.w;
     }

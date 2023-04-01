@@ -9,12 +9,12 @@ extern "C" {
 #endif
 
 typedef struct _VIDEO {
-    GLint      maxUniformBlockSize;
-    GLint      maxUniformBufferBindings;
-    GLint      maxVertexUniformBlocks;
-    GLint      maxFragmentUniformBlocks;
-    GLint      maxSamples;
-    GLfloat    maxAnisotropy;
+    GLint   maxUniformBlockSize;
+    GLint   maxUniformBufferBindings;
+    GLint   maxVertexUniformBlocks;
+    GLint   maxFragmentUniformBlocks;
+    GLint   maxSamples;
+    GLfloat maxAnisotropy;
 
     struct {
         GLuint program;
@@ -24,7 +24,7 @@ typedef struct _VIDEO {
         GLint  uSampler;      /* Sampler, sampler2D */
         GLint  uMVP;          /* Model-View-Projection Matrix, mat4 */
         GLint  uVerticalFlip; /* Boolean (actually a float). Should the image be vertically flipped. */
-    }          defaultProgram;
+    } defaultProgram;
 
     struct {
         GLuint program;
@@ -33,21 +33,21 @@ typedef struct _VIDEO {
         GLint  uSampler;  /* Sampler, sampler2D */
         GLint  uMVP;      /* Model-View-Projection Matrix, mat4 */
         GLint  uColour;   /* Text colour, vec3 */
-    }          textProgram;
+    } textProgram;
 
     struct {
         GLuint program;
 
         struct {
             GLint aPosition; /* Vectex Position, vec3 */
-            GLint aUV; /* UV, vec2 */
-            GLint aNormal; /* Vertex Normal, vec3 */
-            GLint aColour; /* Vertex colour, vec4 */
-        }      attributes;
+            GLint aUV;       /* UV, vec2 */
+            GLint aNormal;   /* Vertex Normal, vec3 */
+            GLint aColour;   /* Vertex colour, vec4 */
+        } attributes;
 
         struct {
             GLint main_texture; /* sampler2D */
-        }      uniforms;
+        } uniforms;
 
         GLuint uboScene;
         GLuint blockIndexScene;
@@ -58,9 +58,8 @@ typedef struct _VIDEO {
         GLuint blockBindingModel;
 
         GLint mainTextureBinding;
-    }          brenderProgram;
+    } brenderProgram;
 } VIDEO, *HVIDEO;
-
 
 #pragma pack(push, 16)
 /* std140-compatible light structure */
@@ -84,12 +83,12 @@ typedef struct _GLSTD140_LIGHT {
 BR_STATIC_ASSERT(sizeof(GLSTD140_LIGHT) % 16 == 0, "GLSTD140_LIGHT is not aligned");
 
 typedef struct _GLSTD140_SCENE_DATA {
-    alignas(16) br_vector4_f   eye_view;
+    alignas(16) br_vector4_f eye_view;
     alignas(16) GLSTD140_LIGHT lights[BR_MAX_LIGHTS];
-    alignas(4) uint32_t        num_lights;
+    alignas(4) uint32_t num_lights;
 } GLSTD140_SCENE_DATA, *HGLSTD140_SCENE_DATA;
 BR_STATIC_ASSERT(sizeof(((GLSTD140_SCENE_DATA *)NULL)->lights) == sizeof(GLSTD140_LIGHT) * BR_MAX_LIGHTS,
-              "std::array<GLSTD140_LIGHT> fucked up");
+                 "std::array<GLSTD140_LIGHT> fucked up");
 
 typedef struct _GLSTD140_MODEL_DATA {
     alignas(16) br_matrix4_f model_view;
@@ -98,12 +97,12 @@ typedef struct _GLSTD140_MODEL_DATA {
     alignas(16) br_matrix4_f normal_matrix;
     alignas(16) br_vector4_f surface_colour;
     alignas(16) br_vector4_f clear_colour;
-    alignas(4) float         ka;
-    alignas(4) float         ks;
-    alignas(4) float         kd;
-    alignas(4) float         power;
-    alignas(4) uint32_t      unlit;
-    alignas(4) uint32_t      disable_colour_key;
+    alignas(4) float ka;
+    alignas(4) float ks;
+    alignas(4) float kd;
+    alignas(4) float power;
+    alignas(4) uint32_t unlit;
+    alignas(4) uint32_t disable_colour_key;
 } GLSTD140_MODEL_DATA, *HGLSTD140_MODEL_DATA;
 #pragma pack(pop)
 

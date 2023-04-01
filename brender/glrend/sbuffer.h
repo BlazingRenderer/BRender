@@ -13,8 +13,7 @@ extern "C" {
 /*
  * Block structure
  */
-typedef struct br_buffer_stored
-{
+typedef struct br_buffer_stored {
     /*
      * Dispatch table
      */
@@ -25,7 +24,7 @@ typedef struct br_buffer_stored
      */
     const char *identifier;
 
-    br_device *device;
+    br_device   *device;
     br_renderer *renderer;
 
     /*
@@ -63,5 +62,3 @@ typedef struct br_buffer_stored
 };
 #endif
 #endif
-
-

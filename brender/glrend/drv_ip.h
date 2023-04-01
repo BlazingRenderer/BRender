@@ -70,8 +70,8 @@ br_device_pixelmap *DevicePixelmapGLAllocate(br_device *device, br_output_facili
 /*
  * sbuffer.c
  */
-struct br_buffer_stored *BufferStoredGLAllocate(br_renderer *renderer,
-                                                br_token use, struct br_device_pixelmap *pm, br_token_value *tv);
+struct br_buffer_stored *BufferStoredGLAllocate(br_renderer *renderer, br_token use, struct br_device_pixelmap *pm,
+                                                br_token_value *tv);
 
 /*
  * gv1buckt.c
@@ -96,8 +96,8 @@ br_token GLOnScreenCheck(const br_matrix4 *model_to_screen, const br_bounds3_f *
 /*
  * sstate.c
  */
-br_renderer_state_stored *RendererStateStoredGLAllocate(br_renderer *renderer, HGLSTATE_STACK base_state,
-                                                        br_uint_32 m, br_token_value *tv);
+br_renderer_state_stored *RendererStateStoredGLAllocate(br_renderer *renderer, HGLSTATE_STACK base_state, br_uint_32 m,
+                                                        br_token_value *tv);
 
 /*
  * renderer.c

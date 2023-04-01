@@ -68,7 +68,7 @@ static void create_vao(br_geometry_stored *self)
 
 static void build_vbo_posn(br_geometry_stored *self, struct v11model *model, size_t total_vertices)
 {
-    br_vector3_f *vtx = BrScratchAllocate(total_vertices * sizeof(br_vector3_f));
+    br_vector3_f *vtx  = BrScratchAllocate(total_vertices * sizeof(br_vector3_f));
     br_vector3_f *next = vtx;
 
     for(br_uint_16 i = 0; i < model->ngroups; ++i) {
@@ -88,12 +88,12 @@ static void build_vbo(GLuint vbo, struct v11model *model, size_t total_vertices)
     /* Collate and upload the vertex data. */
     gl_vertex_f *vtx = (gl_vertex_f *)BrScratchAllocate(total_vertices * sizeof(gl_vertex_f));
     ASSERT(vtx);
-    gl_vertex_f    *nextVtx = vtx;
-    for(br_uint_16 i        = 0; i < model->ngroups; ++i) {
+    gl_vertex_f *nextVtx = vtx;
+    for(br_uint_16 i = 0; i < model->ngroups; ++i) {
         const struct v11group *gp = model->groups + i;
         for(br_uint_16 v = 0; v < gp->nvertices; ++v, ++nextVtx) {
-            nextVtx->map = *(br_vector2_f*)(gp->map + v);
-            nextVtx->n   = *(br_vector3_f*)(gp->normal + v);
+            nextVtx->map = *(br_vector2_f *)(gp->map + v);
+            nextVtx->n   = *(br_vector3_f *)(gp->normal + v);
             nextVtx->c   = gp->vertex_colours[v];
         }
     }
@@ -102,27 +102,26 @@ static void build_vbo(GLuint vbo, struct v11model *model, size_t total_vertices)
     BrScratchFree(vtx);
 }
 
-
 static void build_ibo(GLuint ibo, struct v11model *model, size_t total_faces, gl_groupinfo *groups)
 {
     br_uint_16 *idx = (br_uint_16 *)BrScratchAllocate(total_faces * 3 * sizeof(br_uint_16));
 
-    br_uint_16 *nextIdx    = idx;
-    br_uint_16 offset      = 0;
-    br_size_t  face_offset = 0;
+    br_uint_16 *nextIdx     = idx;
+    br_uint_16  offset      = 0;
+    br_size_t   face_offset = 0;
 
     for(br_uint_16 i = 0; i < model->ngroups; ++i) {
         const struct v11group *gp = model->groups + i;
-        for(br_uint_16          f   = 0; f < gp->nfaces; ++f) {
+        for(br_uint_16 f = 0; f < gp->nfaces; ++f) {
             const br_vector3_u16 *fp = gp->vertex_numbers + f;
-            *nextIdx++ = fp->v[0] + offset;
-            *nextIdx++ = fp->v[1] + offset;
-            *nextIdx++ = fp->v[2] + offset;
+            *nextIdx++               = fp->v[0] + offset;
+            *nextIdx++               = fp->v[1] + offset;
+            *nextIdx++               = fp->v[2] + offset;
         }
 
         groups[i].count  = (GLsizei)gp->nfaces * 3;
         groups[i].offset = (void *)(br_uintptr_t)face_offset;
-        groups[i].group = model->groups + i;
+        groups[i].group  = model->groups + i;
 
         face_offset += (br_size_t)gp->nfaces * 3 * sizeof(br_uint_16);
 
@@ -136,10 +135,10 @@ static void build_ibo(GLuint ibo, struct v11model *model, size_t total_faces, gl
 
 br_geometry_stored *GeometryStoredGLAllocate(br_geometry_v1_model *gv1model, const char *id, struct v11model *model)
 {
-    size_t             total_vertices, total_faces;
+    size_t              total_vertices, total_faces;
     br_geometry_stored *self;
 
-    self = BrResAllocate(gv1model->renderer_facility->object_list, sizeof(*self), BR_MEMORY_OBJECT);
+    self             = BrResAllocate(gv1model->renderer_facility->object_list, sizeof(*self), BR_MEMORY_OBJECT);
     self->dispatch   = &geometryStoredDispatch;
     self->identifier = id;
     self->device     = gv1model->device;
@@ -175,7 +174,6 @@ br_geometry_stored *GeometryStoredGLAllocate(br_geometry_v1_model *gv1model, con
     return (br_geometry_stored *)self;
 }
 
-
 static void BR_CMETHOD(br_geometry_stored_gl, free)(br_object *_self)
 {
     br_geometry_stored *self = (br_geometry_stored *)_self;
@@ -188,7 +186,6 @@ static void BR_CMETHOD(br_geometry_stored_gl, free)(br_object *_self)
     glDeleteBuffers(1, &self->gl_ibo);
     BrResFreeNoCallback(self);
 }
-
 
 static const char *BR_CMETHOD(br_geometry_stored_gl, identifier)(br_object *self)
 {
@@ -215,16 +212,13 @@ static br_size_t BR_CMETHOD(br_geometry_stored_gl, space)(br_object *self)
     return sizeof(br_geometry_stored);
 }
 
-
 static struct br_tv_template *BR_CMETHOD(br_geometry_stored_gl, templateQuery)(br_object *_self)
 {
     br_geometry_stored *self = (br_geometry_stored *)_self;
 
     if(self->device->templates.geometryStoredTemplate == NULL) {
-        self->device->templates.geometryStoredTemplate = BrTVTemplateAllocate(
-            self->device, templateEntries,
-            BR_ASIZE(templateEntries)
-        );
+        self->device->templates.geometryStoredTemplate = BrTVTemplateAllocate(self->device, templateEntries,
+                                                                              BR_ASIZE(templateEntries));
     }
 
     return self->device->templates.geometryStoredTemplate;
@@ -241,7 +235,6 @@ static br_primitive *heapPrimitiveAdd(br_primitive_heap *heap, br_token type)
     heap->current += sizeof(br_primitive);
     return p;
 }
-
 
 enum {
     RM_FORCE_BACK  = 0,
@@ -432,19 +425,15 @@ static br_boolean want_defer(const GLSTATE_HIDDEN *hidden)
 static br_error V1Model_RenderStored(struct br_geometry_stored *self, br_renderer *renderer, br_boolean on_screen)
 {
     HGLSTATE_STACK state;
-    br_primitive   *prim;
+    br_primitive  *prim;
     br_vector3     pos;
     br_boolean     defer;
     br_scalar      distance_from_zero;
 
     state = renderer->state.current;
 
-    BrVector3Set(
-        &pos,
-        state->matrix.model_to_view.m[3][0],
-        state->matrix.model_to_view.m[3][1],
-        state->matrix.model_to_view.m[3][2]
-    );
+    BrVector3Set(&pos, state->matrix.model_to_view.m[3][0], state->matrix.model_to_view.m[3][1],
+                 state->matrix.model_to_view.m[3][2]);
     distance_from_zero = BrVector3Length(&pos);
 
     defer = want_defer(&state->hidden);
@@ -462,16 +451,16 @@ static br_error V1Model_RenderStored(struct br_geometry_stored *self, br_rendere
 
         if(defer) {
             br_order_table *ot = state->hidden.order_table;
-            br_uint_16     bucket;
-            HGLSTATE_STACK tmpstate;
+            br_uint_16      bucket;
+            HGLSTATE_STACK  tmpstate;
 
             tmpstate = BrPoolBlockAllocate(renderer->state_pool);
 
-            prim = heapPrimitiveAdd(state->hidden.heap, BRT_GEOMETRY_STORED);
+            prim         = heapPrimitiveAdd(state->hidden.heap, BRT_GEOMETRY_STORED);
             prim->stored = stored;
-            prim->v[0] = self;
-            prim->v[1] = tmpstate;
-            prim->v[2] = groupinfo;
+            prim->v[0]   = self;
+            prim->v[1]   = tmpstate;
+            prim->v[2]   = groupinfo;
 
             *tmpstate = *state;
 
@@ -479,18 +468,12 @@ static br_error V1Model_RenderStored(struct br_geometry_stored *self, br_rendere
              * If the user set a function defer to them.
              */
             if(state->hidden.insert_fn != NULL) {
-                state->hidden.insert_fn(
-                    prim,
-                    state->hidden.insert_arg1,
-                    state->hidden.insert_arg2,
-                    state->hidden.insert_arg3,
-                    ot,
-                    &prim->depth
-                );
+                state->hidden.insert_fn(prim, state->hidden.insert_arg1, state->hidden.insert_arg2,
+                                        state->hidden.insert_arg3, ot, &prim->depth);
                 continue;
             }
 
-            bucket = calculate_bucket(ot, stored ? &stored->state : state, &distance_from_zero);
+            bucket      = calculate_bucket(ot, stored ? &stored->state : state, &distance_from_zero);
             prim->depth = distance_from_zero;
             BrZsOrderTablePrimitiveInsert(ot, prim, bucket);
         } else {
@@ -511,25 +494,25 @@ static br_error BR_CMETHOD(br_geometry_stored_gl, renderOnScreen)(br_geometry_st
 }
 
 static const struct br_geometry_stored_dispatch geometryStoredDispatch = {
-    .__reserved0        = NULL,
-    .__reserved1        = NULL,
-    .__reserved2        = NULL,
-    .__reserved3        = NULL,
-    ._free              = BR_CMETHOD(br_geometry_stored_gl, free),
-    ._identifier        = BR_CMETHOD(br_geometry_stored_gl, identifier),
-    ._type              = BR_CMETHOD(br_geometry_stored_gl, type),
-    ._isType            = BR_CMETHOD(br_geometry_stored_gl, isType),
-    ._device            = BR_CMETHOD(br_geometry_stored_gl, device),
-    ._space             = BR_CMETHOD(br_geometry_stored_gl, space),
+    .__reserved0 = NULL,
+    .__reserved1 = NULL,
+    .__reserved2 = NULL,
+    .__reserved3 = NULL,
+    ._free       = BR_CMETHOD(br_geometry_stored_gl, free),
+    ._identifier = BR_CMETHOD(br_geometry_stored_gl, identifier),
+    ._type       = BR_CMETHOD(br_geometry_stored_gl, type),
+    ._isType     = BR_CMETHOD(br_geometry_stored_gl, isType),
+    ._device     = BR_CMETHOD(br_geometry_stored_gl, device),
+    ._space      = BR_CMETHOD(br_geometry_stored_gl, space),
 
-    ._templateQuery     = BR_CMETHOD(br_geometry_stored_gl, templateQuery),
-    ._query             = BR_CMETHOD(br_object, query),
-    ._queryBuffer       = BR_CMETHOD(br_object, queryBuffer),
-    ._queryMany         = BR_CMETHOD(br_object, queryMany),
-    ._queryManySize     = BR_CMETHOD(br_object, queryManySize),
-    ._queryAll          = BR_CMETHOD(br_object, queryAll),
-    ._queryAllSize      = BR_CMETHOD(br_object, queryAllSize),
+    ._templateQuery = BR_CMETHOD(br_geometry_stored_gl, templateQuery),
+    ._query         = BR_CMETHOD(br_object, query),
+    ._queryBuffer   = BR_CMETHOD(br_object, queryBuffer),
+    ._queryMany     = BR_CMETHOD(br_object, queryMany),
+    ._queryManySize = BR_CMETHOD(br_object, queryManySize),
+    ._queryAll      = BR_CMETHOD(br_object, queryAll),
+    ._queryAllSize  = BR_CMETHOD(br_object, queryAllSize),
 
-    ._render            = BR_CMETHOD(br_geometry_stored_gl, render),
-    ._renderOnScreen    = BR_CMETHOD(br_geometry_stored_gl, renderOnScreen),
+    ._render         = BR_CMETHOD(br_geometry_stored_gl, render),
+    ._renderOnScreen = BR_CMETHOD(br_geometry_stored_gl, renderOnScreen),
 };

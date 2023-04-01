@@ -52,4 +52,3 @@ typedef struct br_output_facility {
 };
 #endif
 #endif
-

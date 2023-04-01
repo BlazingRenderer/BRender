@@ -11,7 +11,6 @@
  */
 static struct br_buffer_stored_dispatch bufferStoredDispatch;
 
-
 /*
  * Primitive state info. template
  */
@@ -23,12 +22,11 @@ static struct br_tv_template_entry bufferStoredTemplateEntries[] = {
 
 #undef F
 
-
 /*
  * Set up a static device object
  */
-struct br_buffer_stored *BufferStoredGLAllocate(br_renderer *renderer,
-                                                br_token use, struct br_device_pixelmap *pm, br_token_value *tv)
+struct br_buffer_stored *BufferStoredGLAllocate(br_renderer *renderer, br_token use, struct br_device_pixelmap *pm,
+                                                br_token_value *tv)
 {
     struct br_buffer_stored *self;
     char                    *ident;
@@ -77,11 +75,8 @@ struct br_buffer_stored *BufferStoredGLAllocate(br_renderer *renderer,
     self->device     = ObjectDevice(renderer);
     self->renderer   = renderer;
     self->gl_tex     = 0;
-    self->templates  = BrTVTemplateAllocate(
-        self,
-        (br_tv_template_entry *)bufferStoredTemplateEntries,
-        BR_ASIZE(bufferStoredTemplateEntries)
-    );
+    self->templates  = BrTVTemplateAllocate(self, (br_tv_template_entry *)bufferStoredTemplateEntries,
+                                            BR_ASIZE(bufferStoredTemplateEntries));
 
     BufferStoredUpdate(self, pm, tv);
 
@@ -110,7 +105,7 @@ static br_boolean is_compatible(br_buffer_stored *self, br_pixelmap *pm, GLenum 
 static const char *gl_strerror(GLenum err)
 {
     static char errbuf[64];
-    const char  *s;
+    const char *s;
 
     switch(err) {
         case 0:
@@ -203,10 +198,8 @@ static br_error updateMemory(br_buffer_stored *self, br_pixelmap *pm)
     return BRE_OK;
 }
 
-static br_error BR_CMETHOD_DECL(br_buffer_stored_gl, update)(
-    struct br_buffer_stored *self,
-    struct br_device_pixelmap *pm,
-    br_token_value *tv)
+static br_error BR_CMETHOD_DECL(br_buffer_stored_gl, update)(struct br_buffer_stored   *self,
+                                                             struct br_device_pixelmap *pm, br_token_value *tv)
 {
     br_device *pm_device;
     (void)tv;
@@ -277,16 +270,16 @@ static struct br_tv_template *BR_CMETHOD_DECL(br_buffer_stored_gl, templateQuery
  * Default dispatch table for device
  */
 static struct br_buffer_stored_dispatch bufferStoredDispatch = {
-    .__reserved0    = NULL,
-    .__reserved1    = NULL,
-    .__reserved2    = NULL,
-    .__reserved3    = NULL,
-    ._free          = BR_CMETHOD_REF(br_buffer_stored_gl, free),
-    ._identifier    = BR_CMETHOD_REF(br_buffer_stored_gl, identifier),
-    ._type          = BR_CMETHOD_REF(br_buffer_stored_gl, type),
-    ._isType        = BR_CMETHOD_REF(br_buffer_stored_gl, isType),
-    ._device        = BR_CMETHOD_REF(br_buffer_stored_gl, device),
-    ._space         = BR_CMETHOD_REF(br_buffer_stored_gl, space),
+    .__reserved0 = NULL,
+    .__reserved1 = NULL,
+    .__reserved2 = NULL,
+    .__reserved3 = NULL,
+    ._free       = BR_CMETHOD_REF(br_buffer_stored_gl, free),
+    ._identifier = BR_CMETHOD_REF(br_buffer_stored_gl, identifier),
+    ._type       = BR_CMETHOD_REF(br_buffer_stored_gl, type),
+    ._isType     = BR_CMETHOD_REF(br_buffer_stored_gl, isType),
+    ._device     = BR_CMETHOD_REF(br_buffer_stored_gl, device),
+    ._space      = BR_CMETHOD_REF(br_buffer_stored_gl, space),
 
     ._templateQuery = BR_CMETHOD_REF(br_buffer_stored_gl, templateQuery),
     ._query         = BR_CMETHOD_REF(br_object, query),
@@ -296,5 +289,5 @@ static struct br_buffer_stored_dispatch bufferStoredDispatch = {
     ._queryAll      = BR_CMETHOD_REF(br_object, queryAll),
     ._queryAllSize  = BR_CMETHOD_REF(br_object, queryAllSize),
 
-    ._update        = BR_CMETHOD_REF(br_buffer_stored_gl, update),
+    ._update = BR_CMETHOD_REF(br_buffer_stored_gl, update),
 };

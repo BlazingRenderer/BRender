@@ -31,7 +31,6 @@ typedef struct br_renderer {
      */
     void *object_list;
 
-
     br_device_pixelmap   *pixelmap;
     br_renderer_facility *renderer_facility;
 
@@ -59,5 +58,3 @@ typedef struct br_renderer {
 };
 #endif
 #endif
-
-

@@ -1,14 +1,15 @@
 #include "drv.h"
 
-#define S BRTV_SET
-#define Q BRTV_QUERY
-#define A BRTV_ALL
+#define S    BRTV_SET
+#define Q    BRTV_QUERY
+#define A    BRTV_ALL
 
-#define AX 0
-#define AF BRTV_ALL
+#define AX   0
+#define AF   BRTV_ALL
 
-#define F(f) offsetof(GLSTATE_STACK,f)
+#define F(f) offsetof(GLSTATE_STACK, f)
 
+// clang-format off
 static const br_tv_template_entry GLSTATEI_SurfaceTemplateEntries[] = {
     {BRT_COLOUR_RGB,       NULL, F(surface.colour),         Q | S | AX, BRTV_CONV_COPY,             0, TM_PART},
 
@@ -34,35 +35,33 @@ static const br_tv_template_entry GLSTATEI_SurfaceTemplateEntries[] = {
     {BRT_MAP_MATRIX_M23_X, NULL, F(surface.map_transform),  Q | S | AX, BRTV_CONV_M23_FIXED_SCALAR, 0, TM_PART | TM_INVALID_CC},
     {BRT_MAP_MATRIX_M23_F, NULL, F(surface.map_transform),  Q | S | AF, BRTV_CONV_M23_FLOAT_SCALAR, 0, TM_PART | TM_INVALID_CC},
 };
+// clang-format on
 
 static const GLSTATE_SURFACE s_Default = {
-	.colour			= BR_COLOUR_RGB(255,255,255),
-	.opacity		= BR_SCALAR(1.0),
-	.ka				= BR_SCALAR(0.0),
-	.kd				= BR_SCALAR(0.75),
-	.ks				= BR_SCALAR(0.0),
-	.power			= BR_SCALAR(20.0),
+    .colour  = BR_COLOUR_RGB(255, 255, 255),
+    .opacity = BR_SCALAR(1.0),
+    .ka      = BR_SCALAR(0.0),
+    .kd      = BR_SCALAR(0.75),
+    .ks      = BR_SCALAR(0.0),
+    .power   = BR_SCALAR(20.0),
 
-	.lighting		= BR_FALSE,
-	.force_front	= BR_FALSE,
-	.force_back		= BR_FALSE,
-	.colour_source	= BRT_SURFACE,
+    .lighting      = BR_FALSE,
+    .force_front   = BR_FALSE,
+    .force_back    = BR_FALSE,
+    .colour_source = BRT_SURFACE,
 
-	.map_transform	= {{
-		BR_VECTOR2(1,0),
-		BR_VECTOR2(0,1),
-		BR_VECTOR2(0,0),
-	}},
+    .map_transform = {{
+        BR_VECTOR2(1, 0),
+        BR_VECTOR2(0, 1),
+        BR_VECTOR2(0, 0),
+    }},
 };
 
 void GLSTATEI_InitSurface(HGLSTATE hState)
 {
-	hState->templates.surface = BrTVTemplateAllocate(
-		hState->resourceAnchor,
-		GLSTATEI_SurfaceTemplateEntries,
-		BR_ASIZE(GLSTATEI_SurfaceTemplateEntries)
-	);
+    hState->templates.surface = BrTVTemplateAllocate(hState->resourceAnchor, GLSTATEI_SurfaceTemplateEntries,
+                                                     BR_ASIZE(GLSTATEI_SurfaceTemplateEntries));
 
-	hState->default_.surface = s_Default;
-	hState->default_.valid |= GLSTATE_MASK_SURFACE;
+    hState->default_.surface = s_Default;
+    hState->default_.valid |= GLSTATE_MASK_SURFACE;
 }

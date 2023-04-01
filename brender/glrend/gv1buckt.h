@@ -42,6 +42,3 @@ typedef struct br_geometry_v1_buckets {
 };
 #endif
 #endif
-
-
-

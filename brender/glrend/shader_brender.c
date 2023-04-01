@@ -19,7 +19,6 @@ static void VIDEOI_GetShaderVariables(HVIDEO hVideo)
     glBindBufferBase(GL_UNIFORM_BUFFER, hVideo->brenderProgram.blockBindingModel, hVideo->brenderProgram.uboModel);
     glBufferData(GL_UNIFORM_BUFFER, sizeof(GLSTD140_MODEL_DATA), NULL, GL_DYNAMIC_DRAW);
 
-
     hVideo->brenderProgram.attributes.aPosition  = glGetAttribLocation(hVideo->brenderProgram.program, "aPosition");
     hVideo->brenderProgram.attributes.aUV        = glGetAttribLocation(hVideo->brenderProgram.program, "aUV");
     hVideo->brenderProgram.attributes.aNormal    = glGetAttribLocation(hVideo->brenderProgram.program, "aNormal");
@@ -37,43 +36,38 @@ br_boolean VIDEOI_CompileBRenderShader(HVIDEO hVideo, const char *vertPath, cons
     hVideo->brenderProgram.blockBindingModel  = 2;
 
     {
-#define _MAX(a, b) ((a)>(b)?(a):(b))
+#define _MAX(a, b) ((a) > (b) ? (a) : (b))
         int neededSize = _MAX(sizeof(GLSTD140_SCENE_DATA), sizeof(GLSTD140_MODEL_DATA));
 #undef _MAX
         if(hVideo->maxUniformBlockSize < neededSize) {
-            BrLogError("VIDEO", "GL_MAX_UNIFORM_BLOCK_SIZE too small, got %d, needed %d.",
-                       hVideo->maxUniformBlockSize, neededSize);
+            BrLogError("VIDEO", "GL_MAX_UNIFORM_BLOCK_SIZE too small, got %d, needed %d.", hVideo->maxUniformBlockSize,
+                       neededSize);
             return BR_FALSE;
         }
     }
 
     if(hVideo->maxUniformBufferBindings < 2) {
-        BrLogError("VIDEO", "GL_MAX_UNIFORM_BUFFER_BINDINGS too small, got %d, needed 2.",
-                   hVideo->maxUniformBufferBindings);
+        BrLogError("VIDEO", "GL_MAX_UNIFORM_BUFFER_BINDINGS too small, got %d, needed 2.", hVideo->maxUniformBufferBindings);
         return BR_FALSE;
     }
 
     /* br_model_state */
     if(hVideo->maxVertexUniformBlocks < 1) {
-        BrLogError("VIDEO", "GL_MAX_VERTEX_UNIFORM_BLOCKS too small, got %d, needed 1.",
-                   hVideo->maxVertexUniformBlocks);
+        BrLogError("VIDEO", "GL_MAX_VERTEX_UNIFORM_BLOCKS too small, got %d, needed 1.", hVideo->maxVertexUniformBlocks);
         return BR_FALSE;
     }
 
     /* br_model_state, br_scene_state */
     if(hVideo->maxFragmentUniformBlocks < 2) {
-        BrLogError("VIDEO", "GL_MAX_FRAGMENT_UNIFORM_BLOCKS too small, got %d, needed 2.",
-                   hVideo->maxFragmentUniformBlocks);
+        BrLogError("VIDEO", "GL_MAX_FRAGMENT_UNIFORM_BLOCKS too small, got %d, needed 2.", hVideo->maxFragmentUniformBlocks);
         return BR_FALSE;
     }
 
-    vert = VIDEOI_LoadAndCompileShader(GL_VERTEX_SHADER, vertPath, g_DefaultVertexShader,
-                                       sizeof(g_DefaultVertexShader));
+    vert = VIDEOI_LoadAndCompileShader(GL_VERTEX_SHADER, vertPath, g_DefaultVertexShader, sizeof(g_DefaultVertexShader));
     if(!vert)
         return BR_FALSE;
 
-    frag = VIDEOI_LoadAndCompileShader(GL_FRAGMENT_SHADER, fragPath, g_DefaultFragmentShader,
-                                       sizeof(g_DefaultFragmentShader));
+    frag = VIDEOI_LoadAndCompileShader(GL_FRAGMENT_SHADER, fragPath, g_DefaultFragmentShader, sizeof(g_DefaultFragmentShader));
     if(!frag) {
         glDeleteShader(vert);
         return BR_FALSE;
@@ -106,7 +100,8 @@ br_boolean VIDEOI_CompileBRenderShader(HVIDEO hVideo, const char *vertPath, cons
         VIDEOI_GetShaderVariables(hVideo);
     }
 
-    while(glGetError() != GL_NO_ERROR);
+    while(glGetError() != GL_NO_ERROR)
+        ;
 
     return hVideo->brenderProgram.program != 0;
 }

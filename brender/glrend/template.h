@@ -51,4 +51,3 @@ struct device_templates {
 };
 #endif
 #endif
-
