@@ -30,6 +30,7 @@
 
     mkShells = packages: builtins.mapAttrs (k: v: v.overrideAttrs(old: {
       hardeningDisable = [ "all" ];
+      nativeBuildInputs = old.nativeBuildInputs ++ v.devTools;
     })) packages;
   in {
     packages.x86_64-linux = (mkPackages { system = "x86_64-linux"; }) // {

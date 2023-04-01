@@ -1,4 +1,4 @@
-{ stdenv, version, cmake, perl, SDL2, makeBinaryWrapper }:
+{ stdenv, version, cmake, perl, SDL2, makeBinaryWrapper, clang-tools }:
 let
   binExtension = "${stdenv.hostPlatform.extensions.executable}";
 in
@@ -16,6 +16,10 @@ stdenv.mkDerivation rec {
   ];
 
   passthru.SDL2 = SDL2; # 'cause it's so damned hard to debug with CMake
+
+  passthru.devTools = [
+    clang-tools
+  ];
 
   buildInputs = [
     SDL2
