@@ -41,10 +41,10 @@ br_order_table *BR_PUBLIC_ENTRY BrZsOrderTableAllocate(br_uint_16 size, br_uint_
     /*
      * Fill in other order table members
      */
-    order_table->size = size;
-    order_table->next = NULL;
-    order_table->flags = flags;
-    order_table->type  = type;
+    order_table->size   = size;
+    order_table->next   = NULL;
+    order_table->flags  = flags;
+    order_table->type   = type;
     order_table->visits = 0;
     order_table->min_z  = BR_SCALAR(0.0);
     order_table->max_z  = BR_SCALAR(0.0);
@@ -76,7 +76,6 @@ br_order_table *BR_PUBLIC_ENTRY BrZsActorOrderTableSet(br_actor *actor, br_order
     return order_table;
 }
 
-
 /*
  * Get a pointer to an actor's order table
  */
@@ -86,7 +85,6 @@ br_order_table *BR_PUBLIC_ENTRY BrZsActorOrderTableGet(br_actor *actor)
 
     return (br_order_table *)actor->render_data;
 }
-
 
 /*
  * Clear an order table
@@ -99,7 +97,6 @@ br_order_table *BR_PUBLIC_ENTRY BrZsOrderTableClear(br_order_table *order_table)
 
     return order_table;
 }
-
 
 /*
  * Basic insertion sort, this should be quick enough provided we have enough buckets.
@@ -153,9 +150,7 @@ static void InsertSortOrderTablePrimitive(br_primitive **bucket, br_primitive *p
 /*
  * Insert a primitive into an order table
  */
-void BR_PUBLIC_ENTRY BrZsOrderTablePrimitiveInsert(br_order_table *order_table,
-                                                   br_primitive *primitive,
-                                                   br_uint_16 bucket)
+void BR_PUBLIC_ENTRY BrZsOrderTablePrimitiveInsert(br_order_table *order_table, br_primitive *primitive, br_uint_16 bucket)
 {
     UASSERT(primitive != NULL);
     UASSERT(order_table != NULL);
@@ -164,7 +159,7 @@ void BR_PUBLIC_ENTRY BrZsOrderTablePrimitiveInsert(br_order_table *order_table,
     if(order_table->flags & BR_ORDER_TABLE_BUCKET_SORT) {
         InsertSortOrderTablePrimitive(order_table->table + bucket, primitive);
     } else {
-        primitive->next = order_table->table[bucket];
+        primitive->next            = order_table->table[bucket];
         order_table->table[bucket] = primitive;
     }
 }
@@ -172,12 +167,8 @@ void BR_PUBLIC_ENTRY BrZsOrderTablePrimitiveInsert(br_order_table *order_table,
 /*
  * Select a bucket, given vertices, bounds, size and sort type
  */
-br_uint_16 BR_PUBLIC_ENTRY BrZsPrimitiveBucketSelect(br_scalar *z,
-                                                     br_uint_16 type,
-                                                     br_scalar min_z,
-                                                     br_scalar max_z,
-                                                     br_uint_16 size,
-                                                     br_uint_16 sort_type)
+br_uint_16 BR_PUBLIC_ENTRY BrZsPrimitiveBucketSelect(br_scalar *z, br_uint_16 type, br_scalar min_z, br_scalar max_z,
+                                                     br_uint_16 size, br_uint_16 sort_type)
 {
     br_uint_16 bucket;
     br_scalar  zprim, range, scale;
@@ -186,7 +177,7 @@ br_uint_16 BR_PUBLIC_ENTRY BrZsPrimitiveBucketSelect(br_scalar *z,
     UASSERT_MESSAGE("BrZsPrimitiveBucketSelect NULL pointer", z != NULL);
 
     /*
-      * Determine sort value
+     * Determine sort value
      */
     switch(type) {
 
@@ -201,7 +192,6 @@ br_uint_16 BR_PUBLIC_ENTRY BrZsPrimitiveBucketSelect(br_scalar *z,
         case BR_PRIMITIVE_POINT:
             zprim = z[0];
             break;
-
     }
 
     /*
@@ -209,28 +199,33 @@ br_uint_16 BR_PUBLIC_ENTRY BrZsPrimitiveBucketSelect(br_scalar *z,
      */
     range = BR_SUB(max_z, min_z);
     UASSERT_MESSAGE("Divide by zero error, max_z - min_z = 0", range != 0);
-    if(range > BR_SCALAR(MINIMUM_RANGE)) scale = BR_DIV(BrIntToScalar(size), range);
-    else scale = BR_SCALAR(1.0 / (float)MINIMUM_RANGE);
+    if(range > BR_SCALAR(MINIMUM_RANGE))
+        scale = BR_DIV(BrIntToScalar(size), range);
+    else
+        scale = BR_SCALAR(1.0 / (float)MINIMUM_RANGE);
 
     /*
      * Select bucket and clamp to range
      */
     zprim = BR_SUB(zprim, min_z);
-    if(zprim < BR_SCALAR(0.0)) zprim = BR_SCALAR(0.0);
+    if(zprim < BR_SCALAR(0.0))
+        zprim = BR_SCALAR(0.0);
     bucket = BrScalarToInt(BR_MUL(scale, zprim));
-    if(bucket >= size) bucket = size - 1;
+    if(bucket >= size)
+        bucket = size - 1;
 
     return bucket;
 }
-
 
 /*
  * Enable the primary order table
  */
 void BR_PUBLIC_ENTRY BrZsOrderTablePrimaryEnable(br_order_table *order_table)
 {
-    if(order_table) v1db.primary_order_table = order_table;
-    else v1db.primary_order_table = v1db.default_order_table;
+    if(order_table)
+        v1db.primary_order_table = order_table;
+    else
+        v1db.primary_order_table = v1db.default_order_table;
 }
 
 /*
@@ -253,7 +248,8 @@ void InsertOrderTableList(br_order_table *order_table)
     /*
      * Do not insert primary order table
      */
-    if(order_table == v1db.primary_order_table) return;
+    if(order_table == v1db.primary_order_table)
+        return;
 
     if(v1db.order_table_list == NULL) {
 
@@ -261,7 +257,7 @@ void InsertOrderTableList(br_order_table *order_table)
          * Add as the first order table
          */
         v1db.order_table_list = order_table;
-        order_table->next = NULL;
+        order_table->next     = NULL;
 
     } else {
 
@@ -280,31 +276,30 @@ void InsertOrderTableList(br_order_table *order_table)
              * Search for position
              */
             previous_table = current_table;
-            current_table = current_table->next;
+            current_table  = current_table->next;
 
             while(current_table != NULL) {
                 if(current_table->sort_z >= order_table->sort_z) {
                     previous_table = current_table;
-                    current_table = current_table->next;
-                } else break;
+                    current_table  = current_table->next;
+                } else
+                    break;
             }
 
             previous_table->next = order_table;
             order_table->next    = current_table;
-
         }
     }
 }
-
 
 /*
  * Set order table bounds and Z scale factor given a source bounds
  */
 void SetOrderTableBounds(br_bounds *bounds, br_order_table *order_table)
 {
-    br_uint_32 i;
-    br_scalar  element;
-    br_scalar  min_z, max_z;
+    br_uint_32  i;
+    br_scalar   element;
+    br_scalar   min_z, max_z;
     br_vector3 *min, *max;
 
     /*
@@ -335,7 +330,6 @@ void SetOrderTableBounds(br_bounds *bounds, br_order_table *order_table)
 
         order_table->min_z = min_z;
         order_table->max_z = max_z;
-
     }
 
     SetOrderTableRange(order_table);
@@ -380,11 +374,9 @@ void RenderOrderTableList(void)
     while(order_table != NULL) {
         GeometryV1BucketsRender(v1db.format_buckets, v1db.renderer, order_table->table, order_table->size);
         order_table->visits = 0;
-        order_table = order_table->next;
-
+        order_table         = order_table->next;
     }
 }
-
 
 /*
  * Render primitives in the root order table and
@@ -392,10 +384,10 @@ void RenderOrderTableList(void)
  */
 void RenderPrimaryOrderTable(void)
 {
-    br_uint_16     m, size;
-    br_scalar      bucket_size;
-    br_scalar      min_z, max_z;
-    br_primitive   **bucket;
+    br_uint_16      m, size;
+    br_scalar       bucket_size;
+    br_scalar       min_z, max_z;
+    br_primitive  **bucket;
     br_order_table *order_table;
 
     ASSERT(v1db.primary_order_table);
@@ -410,9 +402,9 @@ void RenderPrimaryOrderTable(void)
         return;
     }
 
-    min_z = v1db.primary_order_table->min_z;
-    max_z = v1db.primary_order_table->max_z;
-    size  = v1db.primary_order_table->size;
+    min_z  = v1db.primary_order_table->min_z;
+    max_z  = v1db.primary_order_table->max_z;
+    size   = v1db.primary_order_table->size;
     bucket = v1db.primary_order_table->table + (size - 1);
 
     /*
@@ -422,12 +414,12 @@ void RenderPrimaryOrderTable(void)
     order_table = v1db.order_table_list;
     while(order_table != NULL) {
 
-        if(order_table->sort_z < max_z) break;
+        if(order_table->sort_z < max_z)
+            break;
 
         GeometryV1BucketsRender(v1db.format_buckets, v1db.renderer, order_table->table, order_table->size);
         order_table->visits = 0;
-        order_table = order_table->next;
-
+        order_table         = order_table->next;
     }
 
     /*
@@ -451,14 +443,13 @@ void RenderPrimaryOrderTable(void)
         max_z -= bucket_size;
         while(order_table != NULL) {
 
-            if(order_table->sort_z < max_z) break;
+            if(order_table->sort_z < max_z)
+                break;
 
             GeometryV1BucketsRender(v1db.format_buckets, v1db.renderer, order_table->table, order_table->size);
             order_table->visits = 0;
-            order_table = order_table->next;
-
+            order_table         = order_table->next;
         }
-
     }
 
     /*
@@ -468,8 +459,7 @@ void RenderPrimaryOrderTable(void)
 
         GeometryV1BucketsRender(v1db.format_buckets, v1db.renderer, order_table->table, order_table->size);
         order_table->visits = 0;
-        order_table = order_table->next;
-
+        order_table         = order_table->next;
     }
 
     /*
@@ -477,4 +467,3 @@ void RenderPrimaryOrderTable(void)
      */
     v1db.primary_order_table->visits = 0;
 }
-

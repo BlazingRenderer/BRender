@@ -24,22 +24,17 @@ BR_RCS_ID("$Id: prelight.c 1.2 1998/07/16 17:56:14 johng Exp $")
  * If 'a' != NULL, The values are generated as if the model were attached to
  * the actor 'a', otherwise the model will be in the current frame
  */
-void BR_PUBLIC_ENTRY BrSceneModelLight(br_model *model,
-            br_material *default_material, br_actor *root, br_actor *a)
+void BR_PUBLIC_ENTRY BrSceneModelLight(br_model *model, br_material *default_material, br_actor *root, br_actor *a)
 {
-    int i;
+    int              i;
     struct v11model *v11m;
     struct v11group *group;
-    br_matrix34 m2v;
+    br_matrix34      m2v;
 
-    UASSERT_MESSAGE("NULL model pointer passed to BrSceneModelLight",
-                    model);
-    UASSERT_MESSAGE("NULL material pointer passed to BrSceneModelLight",
-                    default_material);
-    UASSERT_MESSAGE("Unprepared model passed to BrSceneModelLight",
-                    model->prepared);
-    UASSERT_MESSAGE("Unprepared material passed to BrSceneModelLight",
-                    default_material->stored);
+    UASSERT_MESSAGE("NULL model pointer passed to BrSceneModelLight", model);
+    UASSERT_MESSAGE("NULL material pointer passed to BrSceneModelLight", default_material);
+    UASSERT_MESSAGE("Unprepared model passed to BrSceneModelLight", model->prepared);
+    UASSERT_MESSAGE("Unprepared material passed to BrSceneModelLight", default_material->stored);
 
     v11m = model->prepared;
 
@@ -47,29 +42,24 @@ void BR_PUBLIC_ENTRY BrSceneModelLight(br_model *model,
     RendererStatePush(v1db.renderer, BR_STATE_ALL);
 
     /* Alter state to suite chosen material */
-    RendererStateRestore(v1db.renderer, default_material->stored,
-        BR_STATE_ALL);
+    RendererStateRestore(v1db.renderer, default_material->stored, BR_STATE_ALL);
 
     /* If root & actor pointers are passed in, then set the model to view
      * matrix to be the inverse of [camera_to_root][root_to_model]
      */
-    if((root != NULL) && (a != NULL)){
+    if((root != NULL) && (a != NULL)) {
         BrActorToActorMatrix34(&m2v, root, a);
         BrMatrix34Pre(&m2v, &v1db.camera_path[0].m);
-        RendererPartSet(v1db.renderer, BRT_MATRIX, 0,
-                        BRT_AS_MATRIX34_SCALAR(MODEL_TO_VIEW),
-                        (br_value){.m34 = &m2v});
+        RendererPartSet(v1db.renderer, BRT_MATRIX, 0, BRT_AS_MATRIX34_SCALAR(MODEL_TO_VIEW), (br_value){.m34 = &m2v});
         RendererModelInvert(v1db.renderer);
     }
 
     /* Light vertices in all groups */
-    for(i = 0, group = v11m->groups; i < v11m->ngroups; i++, group++){
+    for(i = 0, group = v11m->groups; i < v11m->ngroups; i++, group++) {
         if((group->stored))
-            RendererStateRestore(v1db.renderer, group->stored,
-                BR_STATE_ALL);
+            RendererStateRestore(v1db.renderer, group->stored, BR_STATE_ALL);
         else
-            RendererStateRestore(v1db.renderer, default_material->stored,
-                BR_STATE_ALL);
+            RendererStateRestore(v1db.renderer, default_material->stored, BR_STATE_ALL);
 #if 0
         GeometryLightingRender(v1db.format_lighting, v1db.renderer,
             (br_vector3_f*)&group->vertices->p, (br_vector3_f*)&group->vertices->n,
@@ -86,4 +76,3 @@ void BR_PUBLIC_ENTRY BrSceneModelLight(br_model *model,
     /* Restore previous state */
     RendererStatePop(v1db.renderer, BR_STATE_ALL);
 }
-

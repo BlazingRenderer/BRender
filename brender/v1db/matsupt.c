@@ -16,21 +16,21 @@ BR_RCS_ID("$Id: matsupt.c 1.2 1998/03/05 20:24:12 jon Exp $")
 /*
  * Allocate a material
  */
-br_material * BR_PUBLIC_ENTRY BrMaterialAllocate(const char *name)
+br_material *BR_PUBLIC_ENTRY BrMaterialAllocate(const char *name)
 {
-	br_material *m;
+    br_material *m;
 
-	m = BrResAllocate(v1db.res,sizeof(*m),BR_MEMORY_MATERIAL);
+    m = BrResAllocate(v1db.res, sizeof(*m), BR_MEMORY_MATERIAL);
 
-	*m = *v1db.default_material;
-	m->stored = NULL;
+    *m        = *v1db.default_material;
+    m->stored = NULL;
 
-	if(name)
-		m->identifier = BrResStrDup(m, name);
-	else
-		m->identifier = NULL;
+    if(name)
+        m->identifier = BrResStrDup(m, name);
+    else
+        m->identifier = NULL;
 
-	return m;
+    return m;
 }
 
 /*
@@ -38,9 +38,7 @@ br_material * BR_PUBLIC_ENTRY BrMaterialAllocate(const char *name)
  */
 void BR_PUBLIC_ENTRY BrMaterialFree(br_material *m)
 {
-	UASSERT(m != NULL);
+    UASSERT(m != NULL);
 
-	BrResFree(m);
+    BrResFree(m);
 }
-
-

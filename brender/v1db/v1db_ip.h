@@ -19,7 +19,7 @@ extern "C" {
  */
 br_boolean ActorToRoot(br_actor *a, br_actor *root, br_matrix34 *m);
 br_boolean ActorToRootTyped(br_actor *a, br_actor *world, br_matrix34 *m, br_int_32 *type);
-br_token CameraToScreenMatrix4(br_matrix4 *mat, br_actor *camera);
+br_token   CameraToScreenMatrix4(br_matrix4 *mat, br_actor *camera);
 
 /*
  * prepmap.c
@@ -44,7 +44,7 @@ void BrModelClearPrepared(br_model *model);
 void BrSetupLights(br_actor *world, br_matrix34 *world_to_view, br_int_32 w2vt);
 void BrSetupClipPlanes(br_actor *world, br_matrix34 *world_to_view, br_int_32 w2vt, br_matrix4 *view_to_screen);
 void BrSetupEnvironment(br_actor *world, br_matrix34 *world_to_view, br_int_32 w2vt);
-void BrSetupHorizons(br_actor *world,	br_matrix34 *world_to_view, br_int_32 w2vt);
+void BrSetupHorizons(br_actor *world, br_matrix34 *world_to_view, br_int_32 w2vt);
 
 void BrActorEnableCheck(br_actor *a);
 
@@ -53,13 +53,8 @@ br_error BrLightCullReset(void);
 /*
  * modrend.c
  */
-extern void (*RenderStyleCalls[])(
-				br_actor *actor,
-				br_model *model,
-				br_material *material,
-				void *render_data,
-				br_uint_8 style,
-				int on_screen);
+extern void (*RenderStyleCalls[])(br_actor *actor, br_model *model, br_material *material, void *render_data,
+                                  br_uint_8 style, int on_screen);
 
 /*
  * otable.c
@@ -76,5 +71,3 @@ void SetOrderTableBounds(br_bounds *bounds, br_order_table *order_table);
 
 #endif
 #endif
-
-

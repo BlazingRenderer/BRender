@@ -29,4 +29,3 @@ br_order_table _BrDefaultOrderTable = {
     .type   = BR_SORT_AVERAGE,             /* Sort type        */
     .visits = 0                            /* Visit count      */
 };
-
