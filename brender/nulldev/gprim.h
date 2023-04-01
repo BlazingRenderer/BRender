@@ -14,25 +14,25 @@ extern "C" {
  * Private state of geometry format
  */
 typedef struct br_geometry_primitives {
-	/*
-	 * Dispatch table
-	 */
-	const struct br_geometry_primitives_dispatch *dispatch;
+    /*
+     * Dispatch table
+     */
+    const struct br_geometry_primitives_dispatch *dispatch;
 
-	/*
-	 * Standard object identifier
-	 */
-	const char *identifier;
+    /*
+     * Standard object identifier
+     */
+    const char *identifier;
 
     /*
      * Pointer to owning device
      */
     struct br_device *device;
 
-	/*
-	 * Renderer type this format is associated with
-	 */
-	struct br_renderer_facility *renderer_facility;
+    /*
+     * Renderer type this format is associated with
+     */
+    struct br_renderer_facility *renderer_facility;
 
     /*
      * Object query templates
@@ -46,6 +46,3 @@ typedef struct br_geometry_primitives {
 };
 #endif
 #endif
-
-
-

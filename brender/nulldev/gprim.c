@@ -34,15 +34,12 @@ br_geometry_primitives *GeometryPrimitivesNullAllocate(br_renderer_facility *typ
     if((self = BrResAllocate(type, sizeof(*self), BR_MEMORY_OBJECT)) == NULL)
         return NULL;
 
-    self->dispatch = &geometryPrimitivesDispatch;
-    self->identifier = id;
+    self->dispatch          = &geometryPrimitivesDispatch;
+    self->identifier        = id;
     self->renderer_facility = type;
-    self->device = ObjectDevice(type);
-    self->templates = BrTVTemplateAllocate(
-        self,
-        (br_tv_template_entry *)geometryPrimitivesTemplateEntries,
-        BR_ASIZE(geometryPrimitivesTemplateEntries)
-    );
+    self->device            = ObjectDevice(type);
+    self->templates         = BrTVTemplateAllocate(self, (br_tv_template_entry *)geometryPrimitivesTemplateEntries,
+                                                   BR_ASIZE(geometryPrimitivesTemplateEntries));
 
     if(self->templates == NULL) {
         BrResFreeNoCallback(self);
@@ -93,29 +90,30 @@ static struct br_tv_template *BR_CMETHOD_DECL(br_geometry_primitives_null, templ
     return ((br_geometry_primitives *)self)->templates;
 }
 
-br_error BR_CMETHOD_DECL(br_geometry_primitives_null, render)
-    (struct br_geometry_primitives *self, struct br_renderer *renderer, struct fmt_vertex *vertices, int nvertices,
-     br_token type)
+br_error BR_CMETHOD_DECL(br_geometry_primitives_null, render)(struct br_geometry_primitives *self,
+                                                              struct br_renderer *renderer, struct fmt_vertex *vertices,
+                                                              int nvertices, br_token type)
 {
     return BRE_FAIL;
 }
 
-br_error BR_CMETHOD_DECL(br_geometry_primitives_null, renderOnScreen)
-    (struct br_geometry_primitives *self, struct br_renderer *renderer, struct fmt_vertex *vertices, int nvertices,
-     br_token type)
+br_error BR_CMETHOD_DECL(br_geometry_primitives_null,
+                         renderOnScreen)(struct br_geometry_primitives *self, struct br_renderer *renderer,
+                                         struct fmt_vertex *vertices, int nvertices, br_token type)
 {
     return BRE_FAIL;
 }
 
-br_error BR_CMETHOD_DECL(br_geometry_primitives_null, storedNew)
-    (struct br_geometry_primitives *self, struct br_renderer *renderer,
-     struct br_geometry_stored **psg, struct fmt_vertex *vertices, int nvertices, br_token type, br_token_value *tv)
+br_error BR_CMETHOD_DECL(br_geometry_primitives_null,
+                         storedNew)(struct br_geometry_primitives *self, struct br_renderer *renderer,
+                                    struct br_geometry_stored **psg, struct fmt_vertex *vertices, int nvertices,
+                                    br_token type, br_token_value *tv)
 {
     return BRE_FAIL;
 }
 
-static br_error BR_CMETHOD_DECL(br_geometry_primitives_null, storedAvail)
-    (struct br_geometry_primitives *self, br_int_32 *psize, br_token_value *tv)
+static br_error BR_CMETHOD_DECL(br_geometry_primitives_null, storedAvail)(struct br_geometry_primitives *self,
+                                                                          br_int_32 *psize, br_token_value *tv)
 {
     return BRE_FAIL;
 }
@@ -124,29 +122,28 @@ static br_error BR_CMETHOD_DECL(br_geometry_primitives_null, storedAvail)
  * Default dispatch table for renderer type
  */
 static const struct br_geometry_primitives_dispatch geometryPrimitivesDispatch = {
-    .__reserved0        = NULL,
-    .__reserved1        = NULL,
-    .__reserved2        = NULL,
-    .__reserved3        = NULL,
-    ._free              = BR_CMETHOD_REF(br_geometry_primitives_null, free),
-    ._identifier        = BR_CMETHOD_REF(br_geometry_primitives_null, identifier),
-    ._type              = BR_CMETHOD_REF(br_geometry_primitives_null, type),
-    ._isType            = BR_CMETHOD_REF(br_geometry_primitives_null, isType),
-    ._device            = BR_CMETHOD_REF(br_geometry_primitives_null, device),
-    ._space             = BR_CMETHOD_REF(br_geometry_primitives_null, space),
+    .__reserved0 = NULL,
+    .__reserved1 = NULL,
+    .__reserved2 = NULL,
+    .__reserved3 = NULL,
+    ._free       = BR_CMETHOD_REF(br_geometry_primitives_null, free),
+    ._identifier = BR_CMETHOD_REF(br_geometry_primitives_null, identifier),
+    ._type       = BR_CMETHOD_REF(br_geometry_primitives_null, type),
+    ._isType     = BR_CMETHOD_REF(br_geometry_primitives_null, isType),
+    ._device     = BR_CMETHOD_REF(br_geometry_primitives_null, device),
+    ._space      = BR_CMETHOD_REF(br_geometry_primitives_null, space),
 
-    ._templateQuery     = BR_CMETHOD_REF(br_geometry_primitives_null, templateQuery),
-    ._query             = BR_CMETHOD_REF(br_object, query),
-    ._queryBuffer       = BR_CMETHOD_REF(br_object, queryBuffer),
-    ._queryMany         = BR_CMETHOD_REF(br_object, queryMany),
-    ._queryManySize     = BR_CMETHOD_REF(br_object, queryManySize),
-    ._queryAll          = BR_CMETHOD_REF(br_object, queryAll),
-    ._queryAllSize      = BR_CMETHOD_REF(br_object, queryAllSize),
+    ._templateQuery = BR_CMETHOD_REF(br_geometry_primitives_null, templateQuery),
+    ._query         = BR_CMETHOD_REF(br_object, query),
+    ._queryBuffer   = BR_CMETHOD_REF(br_object, queryBuffer),
+    ._queryMany     = BR_CMETHOD_REF(br_object, queryMany),
+    ._queryManySize = BR_CMETHOD_REF(br_object, queryManySize),
+    ._queryAll      = BR_CMETHOD_REF(br_object, queryAll),
+    ._queryAllSize  = BR_CMETHOD_REF(br_object, queryAllSize),
 
-    ._render            = BR_CMETHOD_REF(br_geometry_primitives_null, render),
-    ._renderOnScreen    = BR_CMETHOD_REF(br_geometry_primitives_null, renderOnScreen),
-    ._storedNew         = BR_CMETHOD_REF(br_geometry_primitives_null, storedNew),
+    ._render         = BR_CMETHOD_REF(br_geometry_primitives_null, render),
+    ._renderOnScreen = BR_CMETHOD_REF(br_geometry_primitives_null, renderOnScreen),
+    ._storedNew      = BR_CMETHOD_REF(br_geometry_primitives_null, storedNew),
 
-    ._storedAvail       = BR_CMETHOD_REF(br_geometry_primitives_null, storedAvail),
+    ._storedAvail = BR_CMETHOD_REF(br_geometry_primitives_null, storedAvail),
 };
-

@@ -30,20 +30,17 @@ static const struct br_tv_template_entry geometryLightingTemplateEntries[] = {
 br_geometry_lighting *GeometryLightingNullAllocate(br_renderer_facility *type, const char *id)
 {
     br_geometry_lighting *self;
-    struct br_device *device = ObjectDevice(type);
+    struct br_device     *device = ObjectDevice(type);
 
     if((self = BrResAllocate(device, sizeof(*self), BR_MEMORY_OBJECT)) == NULL)
         return NULL;
 
-    self->dispatch = &geometryLightingDispatch;
-    self->identifier = id;
-    self->device = device;
+    self->dispatch          = &geometryLightingDispatch;
+    self->identifier        = id;
+    self->device            = device;
     self->renderer_facility = type;
-    self->templates = BrTVTemplateAllocate(
-        self,
-        geometryLightingTemplateEntries,
-        BR_ASIZE(geometryLightingTemplateEntries)
-    );
+    self->templates         = BrTVTemplateAllocate(self, geometryLightingTemplateEntries,
+                                                   BR_ASIZE(geometryLightingTemplateEntries));
 
     if(self->templates == NULL) {
         BrResFreeNoCallback(self);
@@ -97,12 +94,10 @@ static struct br_tv_template *BR_CMETHOD_DECL(br_geometry_lighting_null, templat
 /*
  * Lighting function calling facility
  */
-br_error BR_CMETHOD_DECL(br_geometry_lighting_null, render)
-    (struct br_geometry_lighting *self, struct br_renderer *renderer,
-     br_vector3_f *points, br_vector3_f *normals,
-     br_colour *colour_in, br_colour *colour_out,
-     br_uint_16 *redirect, int pstride, int nstride,
-     int cinstride, int coutstride, int nvertices)
+br_error BR_CMETHOD_DECL(br_geometry_lighting_null,
+                         render)(struct br_geometry_lighting *self, struct br_renderer *renderer, br_vector3_f *points,
+                                 br_vector3_f *normals, br_colour *colour_in, br_colour *colour_out, br_uint_16 *redirect,
+                                 int pstride, int nstride, int cinstride, int coutstride, int nvertices)
 {
     return BRE_FAIL;
 }
@@ -111,16 +106,16 @@ br_error BR_CMETHOD_DECL(br_geometry_lighting_null, render)
  * Default dispatch table for renderer type
  */
 static const struct br_geometry_lighting_dispatch geometryLightingDispatch = {
-    .__reserved0    = NULL,
-    .__reserved1    = NULL,
-    .__reserved2    = NULL,
-    .__reserved3    = NULL,
-    ._free          = BR_CMETHOD_REF(br_geometry_lighting_null, free),
-    ._identifier    = BR_CMETHOD_REF(br_geometry_lighting_null, identifier),
-    ._type          = BR_CMETHOD_REF(br_geometry_lighting_null, type),
-    ._isType        = BR_CMETHOD_REF(br_geometry_lighting_null, isType),
-    ._device        = BR_CMETHOD_REF(br_geometry_lighting_null, device),
-    ._space         = BR_CMETHOD_REF(br_geometry_lighting_null, space),
+    .__reserved0 = NULL,
+    .__reserved1 = NULL,
+    .__reserved2 = NULL,
+    .__reserved3 = NULL,
+    ._free       = BR_CMETHOD_REF(br_geometry_lighting_null, free),
+    ._identifier = BR_CMETHOD_REF(br_geometry_lighting_null, identifier),
+    ._type       = BR_CMETHOD_REF(br_geometry_lighting_null, type),
+    ._isType     = BR_CMETHOD_REF(br_geometry_lighting_null, isType),
+    ._device     = BR_CMETHOD_REF(br_geometry_lighting_null, device),
+    ._space      = BR_CMETHOD_REF(br_geometry_lighting_null, space),
 
     ._templateQuery = BR_CMETHOD_REF(br_geometry_lighting_null, templateQuery),
     ._query         = BR_CMETHOD_REF(br_object, query),
@@ -130,6 +125,5 @@ static const struct br_geometry_lighting_dispatch geometryLightingDispatch = {
     ._queryAll      = BR_CMETHOD_REF(br_object, queryAll),
     ._queryAllSize  = BR_CMETHOD_REF(br_object, queryAllSize),
 
-    ._render        = BR_CMETHOD_REF(br_geometry_lighting_null, render),
+    ._render = BR_CMETHOD_REF(br_geometry_lighting_null, render),
 };
-

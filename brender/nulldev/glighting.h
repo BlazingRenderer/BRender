@@ -46,6 +46,3 @@ typedef struct br_geometry_lighting {
 };
 #endif
 #endif
-
-
-

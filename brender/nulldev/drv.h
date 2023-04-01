@@ -20,8 +20,8 @@ extern "C" {
 #include "glighting.h"
 
 /*
-* Pull in private prototypes
-*/
+ * Pull in private prototypes
+ */
 #ifndef _NO_PROTOTYPES
 
 #include "drv_ip.h"
