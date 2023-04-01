@@ -9,7 +9,7 @@
 #ifndef _BRDDI_H_
 #define _BRDDI_H_
 
-#define __BRENDER_DDI__ BR_VERSION(1,1,0)
+#define __BRENDER_DDI__ BR_VERSION(1, 1, 0)
 
 /*
  * Pull in all the public definitions/declarations
@@ -66,4 +66,3 @@ struct fmt_vertex;
 
 #endif
 #endif
-

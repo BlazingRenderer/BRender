@@ -56,26 +56,26 @@ struct v11face_f {
 
 // This groups together all the faces with the same material.
 struct v11group {
-	void *stored;					/* Group material (or NULL) 			*/
+    void *stored; /* Group material (or NULL) 			*/
 
-//	struct v11face *faces;  	 	/* faces in group						*/
-	br_vector3_u16 *vertex_numbers;
-	br_vector3_u16 *edges;
-	br_vector4 * eqn;
-    br_colour *face_colours;   		/* Colour for geometry				    */
-    br_uint_16 *face_user;          /* Per face user data                   */
-	br_uint_8 *face_flags;			/* Per face flags                       */
+    //	struct v11face *faces;  	 	/* faces in group						*/
+    br_vector3_u16 *vertex_numbers;
+    br_vector3_u16 *edges;
+    br_vector4     *eqn;
+    br_colour      *face_colours; /* Colour for geometry				    */
+    br_uint_16     *face_user;    /* Per face user data                   */
+    br_uint_8      *face_flags;   /* Per face flags                       */
 
-//	struct fmt_vertex *vertices;	/* vertices in group					*/
-	br_vector3 * position;
-	br_vector2 * map;
-	br_vector3 * normal;
-    br_colour *vertex_colours;   	/* Colour for geometry				    */
-    br_uint_16 *vertex_user;        /* Per vertex user data                 */
+    //	struct fmt_vertex *vertices;	/* vertices in group					*/
+    br_vector3 *position;
+    br_vector2 *map;
+    br_vector3 *normal;
+    br_colour  *vertex_colours; /* Colour for geometry				    */
+    br_uint_16 *vertex_user;    /* Per vertex user data                 */
 
-	br_uint_16 nfaces;				/* Number of faces in this group		*/
-	br_uint_16 nvertices;			/* Number of vertices in this group		*/
-	br_uint_16 nedges;				/* Number of edges in this group		*/
+    br_uint_16 nfaces;    /* Number of faces in this group		*/
+    br_uint_16 nvertices; /* Number of vertices in this group		*/
+    br_uint_16 nedges;    /* Number of edges in this group		*/
 };
 
 #if 0
@@ -115,17 +115,17 @@ struct v11group_f {
 #endif
 
 struct v11model {
-	br_size_t size;
-	br_uint_32 flags;
-	br_uint_16 ngroups;
-	br_vector3 pivot;
+    br_size_t  size;
+    br_uint_32 flags;
+    br_uint_16 ngroups;
+    br_vector3 pivot;
 
-	struct v11group *groups;
+    struct v11group *groups;
 
-	br_bounds bounds;
-	br_scalar radius;
-	br_vector3 centre;
-	br_scalar centred_radius;
+    br_bounds  bounds;
+    br_scalar  radius;
+    br_vector3 centre;
+    br_scalar  centred_radius;
 };
 
 #if 0

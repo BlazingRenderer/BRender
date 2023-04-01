@@ -23,7 +23,7 @@ void BR_RESIDENT_ENTRY BrLogV(br_uint_8 level, const char *component, const char
     if(level > fw.log_level)
         return;
 
-     fw.log->handler(level, component, fmt, ap);
+    fw.log->handler(level, component, fmt, ap);
 }
 
 void BR_RESIDENT_ENTRY BrLog(br_uint_8 level, const char *component, const char *fmt, ...)

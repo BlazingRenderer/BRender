@@ -24,26 +24,26 @@ BR_RCS_ID("$Id: resource.c 1.1 1997/12/10 16:41:10 jon Exp $")
 /*
  * The granularity of resource sizes
  */
-#define BR_RES_GRANULARITY_SHIFT	2
-#define BR_RES_GRANULARITY			(1<<BR_RES_GRANULARITY_SHIFT)
-#define BR_RES_MAGIC				0xDEADBEEF
+#define BR_RES_GRANULARITY_SHIFT 2
+#define BR_RES_GRANULARITY       (1 << BR_RES_GRANULARITY_SHIFT)
+#define BR_RES_MAGIC             0xDEADBEEF
 
-#define BR_RES_DEFAULT_ALIGN		8
+#define BR_RES_DEFAULT_ALIGN     8
 
 /*
  * The control structure prepended onto resource blocks
  */
 struct resource_header {
-	br_simple_node node;
-	br_simple_list children;
+    br_simple_node node;
+    br_simple_list children;
 
-	br_size_t size;
+    br_size_t size;
 
-	br_uint_8 class;	/* Class of resource	*/
+    br_uint_8 class; /* Class of resource	*/
 
 #if BR_RES_TAGGING
-	void *magic_ptr;
-	br_uint_32 magic_num;
+    void      *magic_ptr;
+    br_uint_32 magic_num;
 #endif
 };
 
@@ -55,11 +55,12 @@ struct resource_header {
 /*
  * Set size of a resource block
  */
-#define RES_SIZE_SET(r,s) do {\
-	(r)->size = (s) >> BR_RES_GRANULARITY_SHIFT;		\
-} while(0)
+#define RES_SIZE_SET(r, s)                           \
+    do {                                             \
+        (r)->size = (s) >> BR_RES_GRANULARITY_SHIFT; \
+    } while(0)
 
-#define ALIGN(ptr,a) (((br_uintptr_t)(ptr)+((a)-1)) & ~((a)-1))
+#define ALIGN(ptr, a) (((br_uintptr_t)(ptr) + ((a)-1)) & ~((a)-1))
 
 #if BR_RES_TAGGING
 #define ISRESOURCE(res) ((res->magic_ptr == res) && (res->magic_num == BR_RES_MAGIC))
@@ -72,32 +73,32 @@ struct resource_header {
  */
 STATIC void *ResToUser(struct resource_header *r)
 {
-	br_int_32 align;
+    br_int_32 align;
 
-	/*
-	 * Find the required alignment
-	 */
-	ASSERT(fw.resource_class_index[r->class] != NULL);
+    /*
+     * Find the required alignment
+     */
+    ASSERT(fw.resource_class_index[r->class] != NULL);
 
-	align = fw.resource_class_index[r->class]->alignment;
+    align = fw.resource_class_index[r->class]->alignment;
 
-	if(align <= 0)
-		align = BR_RES_DEFAULT_ALIGN;
+    if(align <= 0)
+        align = BR_RES_DEFAULT_ALIGN;
 
-	/*
-	 * Check for no-zero and power of 2
-	 */
-	ASSERT(align && (((align-1) & align) == 0));
+    /*
+     * Check for no-zero and power of 2
+     */
+    ASSERT(align && (((align - 1) & align) == 0));
 
-	/*
-	 * Move over the resource_header
-	 */
-	r++;
+    /*
+     * Move over the resource_header
+     */
+    r++;
 
-	/*
-	 * Bump pointer up to next boundary
-	 */
-	return (void *)ALIGN(r,align);
+    /*
+     * Bump pointer up to next boundary
+     */
+    return (void *)ALIGN(r, align);
 }
 
 /*
@@ -105,30 +106,30 @@ STATIC void *ResToUser(struct resource_header *r)
  */
 STATIC struct resource_header *UserToRes(void *r)
 {
-	br_uint_8 *p = r;
+    br_uint_8 *p = r;
 
-	/*
-	 * the last byte of the resource will always be non-zero -
-	 * the class id, or the magic number
-	 *
-	 * Move pointer back until we hit it
-	 */
-	while(*(p - 1) == 0)
-		--p;
+    /*
+     * the last byte of the resource will always be non-zero -
+     * the class id, or the magic number
+     *
+     * Move pointer back until we hit it
+     */
+    while(*(p - 1) == 0)
+        --p;
 
-	/* Account for any excess structure padding the compiler's added. */
+        /* Account for any excess structure padding the compiler's added. */
 #if BR_RES_TAGGING
-	p -= offsetof(struct resource_header, magic_num) + sizeof(((struct resource_header*)NULL)->magic_num);
+    p -= offsetof(struct resource_header, magic_num) + sizeof(((struct resource_header *)NULL)->magic_num);
 #else
-	p -= offsetof(struct resource_header, class) + sizeof(((struct resource_header*)NULL)->class);
+    p -= offsetof(struct resource_header, class) + sizeof(((struct resource_header *)NULL)->class);
 #endif
 
-	struct resource_header *res = p;
+    struct resource_header *res = p;
 #if BR_RES_TAGGING
-	UASSERT(res->magic_ptr == res);
-	UASSERT(res->magic_num == BR_RES_MAGIC);
+    UASSERT(res->magic_ptr == res);
+    UASSERT(res->magic_num == BR_RES_MAGIC);
 #endif
-	return res;
+    return res;
 }
 
 /*
@@ -139,76 +140,76 @@ STATIC struct resource_header *UserToRes(void *r)
  *
  * Returns a pointer to the first byte of the resource data
  */
-void * BR_RESIDENT_ENTRY BrResAllocate(void *vparent, br_size_t size, br_uint_8 res_class)
+void *BR_RESIDENT_ENTRY BrResAllocate(void *vparent, br_size_t size, br_uint_8 res_class)
 {
-	struct resource_header *res;
-	struct resource_header *parent;
-	br_int_32 malign,calign,pad;
-	br_ptrdiff_t actual_pad;
+    struct resource_header *res;
+    struct resource_header *parent;
+    br_int_32               malign, calign, pad;
+    br_ptrdiff_t            actual_pad;
 
-	UASSERT(fw.resource_class_index[res_class] != NULL);
+    UASSERT(fw.resource_class_index[res_class] != NULL);
 
-	/*
-	 * Work out size (rounded up to granularity)
-	 */
-	size = ALIGN(size+sizeof(struct resource_header),BR_RES_GRANULARITY);
+    /*
+     * Work out size (rounded up to granularity)
+     */
+    size = ALIGN(size + sizeof(struct resource_header), BR_RES_GRANULARITY);
 
-	/*
-	 * Get memory alignment
-	 */
-	malign = BrMemAlign(res_class);
-	ASSERT(malign && (((malign-1) & malign) == 0));
+    /*
+     * Get memory alignment
+     */
+    malign = BrMemAlign(res_class);
+    ASSERT(malign && (((malign - 1) & malign) == 0));
 
-	/*
-	 * Get class alignment
-	 */
-	calign = fw.resource_class_index[res_class]->alignment;
+    /*
+     * Get class alignment
+     */
+    calign = fw.resource_class_index[res_class]->alignment;
 
-	if(calign <= 0)
-		calign = BR_RES_DEFAULT_ALIGN;
+    if(calign <= 0)
+        calign = BR_RES_DEFAULT_ALIGN;
 
-	ASSERT(calign && (((calign-1) & calign) == 0));
+    ASSERT(calign && (((calign - 1) & calign) == 0));
 
-	/*
-	 * Work out how much padding to add at end of block
-	 */
-	pad = (calign-1) & ~(malign-1);
-	res = BrMemAllocate(size + pad, res_class);
+    /*
+     * Work out how much padding to add at end of block
+     */
+    pad = (calign - 1) & ~(malign - 1);
+    res = BrMemAllocate(size + pad, res_class);
 
-	/*
-	 * Since loads of BrResAllocate calls check for NULL returns we
-	 * might as well return NULL sometimes!
-	 */
-	if (res == NULL)
-		return NULL;
+    /*
+     * Since loads of BrResAllocate calls check for NULL returns we
+     * might as well return NULL sometimes!
+     */
+    if(res == NULL)
+        return NULL;
 
-	/*
-	 * Check to see if memory allocator lied about alignment
-	 */
-	actual_pad = (ALIGN(res,calign)-((br_uintptr_t)res));
-	ASSERT(actual_pad <= pad);
+    /*
+     * Check to see if memory allocator lied about alignment
+     */
+    actual_pad = (ALIGN(res, calign) - ((br_uintptr_t)res));
+    ASSERT(actual_pad <= pad);
 
-	if(actual_pad > pad)
-		BR_FAILURE0("Memory allocator broke alignment");
+    if(actual_pad > pad)
+        BR_FAILURE0("Memory allocator broke alignment");
 
-	res->class = res_class;
-	RES_SIZE_SET(res,size);
-	BrSimpleNewList(&res->children);
+    res->class = res_class;
+    RES_SIZE_SET(res, size);
+    BrSimpleNewList(&res->children);
 
 #if BR_RES_TAGGING
-	res->magic_num = BR_RES_MAGIC;
-	res->magic_ptr = res;
+    res->magic_num = BR_RES_MAGIC;
+    res->magic_ptr = res;
 #endif
 
-	if(vparent) {
-		parent = UserToRes(vparent);
-		BR_SIMPLEADDHEAD(&parent->children,res);
-	}
+    if(vparent) {
+        parent = UserToRes(vparent);
+        BR_SIMPLEADDHEAD(&parent->children, res);
+    }
 
-	/*
-	 * Return pointer to used data
-	 */
-	return ResToUser(res);
+    /*
+     * Return pointer to used data
+     */
+    return ResToUser(res);
 }
 
 /*
@@ -220,60 +221,58 @@ void * BR_RESIDENT_ENTRY BrResAllocate(void *vparent, br_size_t size, br_uint_8 
  */
 STATIC void BrResInternalFree(struct resource_header *res, br_boolean callback)
 {
-	int c;
-	void *r;
+    int   c;
+    void *r;
 
-	UASSERT(ISRESOURCE(res));
+    UASSERT(ISRESOURCE(res));
 
-	/*
-	 * Ignore free requests on things that are already being freed
-	 */
-	if(res->class == BR_MEMORY_FREE)
-		return;
+    /*
+     * Ignore free requests on things that are already being freed
+     */
+    if(res->class == BR_MEMORY_FREE)
+        return;
 
-	UASSERT(fw.resource_class_index[res->class] != NULL);
+    UASSERT(fw.resource_class_index[res->class] != NULL);
 
+    /*
+     * Remember class ID and mark object as being freed
+     */
+    c          = res->class;
+    r          = ResToUser(res);
+    res->class = BR_MEMORY_FREE;
 
-	/*
-	 * Remember class ID and mark object as being freed
-	 */
-	c = res->class;
-	r = ResToUser(res);
-	res->class = BR_MEMORY_FREE;
+    if(callback) {
+        /*
+         * Call class destructor
+         */
+        if(fw.resource_class_index[c]->free_cb)
+            fw.resource_class_index[c]->free_cb(r, (br_uint_8)c, RES_SIZE_GET(res));
+    }
 
-	if(callback) {
-		/*
-		 * Call class destructor
-		 */
-		if(fw.resource_class_index[c]->free_cb)
-			fw.resource_class_index[c]->free_cb(
-				r,(br_uint_8)c, RES_SIZE_GET(res));
-	}
+    /*
+     * Free any children
+     */
+    while(BR_SIMPLEHEAD(&res->children))
+        BrResInternalFree((struct resource_header *)BR_SIMPLEREMOVE(BR_SIMPLEHEAD(&res->children)), BR_TRUE);
 
-	/*
-	 * Free any children
-	 */
-	while(BR_SIMPLEHEAD(&res->children))
-		BrResInternalFree((struct resource_header *)BR_SIMPLEREMOVE(BR_SIMPLEHEAD(&res->children)), BR_TRUE);
-
-	/*
-	 * Remove from any parent list
-	 */
-	if(BR_SIMPLEINSERTED(res))
-		BR_SIMPLEREMOVE(res);
+    /*
+     * Remove from any parent list
+     */
+    if(BR_SIMPLEINSERTED(res))
+        BR_SIMPLEREMOVE(res);
 
 #if BR_RES_TAGGING
-	/*
-	 * Make sure memory is no longer tagged as a resource
-	 */
-	res->magic_num = 1;
-	res->magic_ptr = NULL;
+    /*
+     * Make sure memory is no longer tagged as a resource
+     */
+    res->magic_num = 1;
+    res->magic_ptr = NULL;
 #endif
 
-	/*
-	 * Release block
-	 */
-	BrMemFree(res);
+    /*
+     * Release block
+     */
+    BrMemFree(res);
 }
 
 /*
@@ -281,71 +280,71 @@ STATIC void BrResInternalFree(struct resource_header *res, br_boolean callback)
  */
 void BR_RESIDENT_ENTRY BrResFree(void *vres)
 {
-	UASSERT(vres != NULL);
+    UASSERT(vres != NULL);
 
-	BrResInternalFree(UserToRes(vres), BR_TRUE);
+    BrResInternalFree(UserToRes(vres), BR_TRUE);
 }
 
 void BR_RESIDENT_ENTRY BrResFreeNoCallback(void *vres)
 {
-	UASSERT(vres != NULL);
+    UASSERT(vres != NULL);
 
-	BrResInternalFree(UserToRes(vres), BR_FALSE);
+    BrResInternalFree(UserToRes(vres), BR_FALSE);
 }
 
 /*
  * Add a resource as a child of another
  */
-void * BR_RESIDENT_ENTRY BrResAdd(void *vparent, void *vres)
+void *BR_RESIDENT_ENTRY BrResAdd(void *vparent, void *vres)
 {
-	struct resource_header *res = UserToRes(vres);
-	struct resource_header *parent = UserToRes(vparent);
+    struct resource_header *res    = UserToRes(vres);
+    struct resource_header *parent = UserToRes(vparent);
 
-	UASSERT(vres != NULL);
-	UASSERT(vparent != NULL);
+    UASSERT(vres != NULL);
+    UASSERT(vparent != NULL);
 
-	UASSERT(ISRESOURCE(res));
-	UASSERT(ISRESOURCE(parent));
+    UASSERT(ISRESOURCE(res));
+    UASSERT(ISRESOURCE(parent));
 
-	/*
-	 * Remove from any parent list
-	 */
-	if(BR_SIMPLEINSERTED(res))
-		BR_SIMPLEREMOVE(res);
+    /*
+     * Remove from any parent list
+     */
+    if(BR_SIMPLEINSERTED(res))
+        BR_SIMPLEREMOVE(res);
 
-	BR_SIMPLEADDHEAD(&parent->children,res);
+    BR_SIMPLEADDHEAD(&parent->children, res);
 
-	return vres;
+    return vres;
 }
 
 /*
  * Remove resource from parent
  */
-void * BR_RESIDENT_ENTRY BrResRemove(void *vres)
+void *BR_RESIDENT_ENTRY BrResRemove(void *vres)
 {
-	struct resource_header *res = UserToRes(vres);
+    struct resource_header *res = UserToRes(vres);
 
-	UASSERT(vres != NULL);
+    UASSERT(vres != NULL);
 
-	UASSERT(ISRESOURCE(res));
+    UASSERT(ISRESOURCE(res));
 
-	BR_SIMPLEREMOVE(res);
+    BR_SIMPLEREMOVE(res);
 
-	return vres;
+    return vres;
 }
 
 /*
  * Return the class of a given resource
  */
-br_uint_8 BR_RESIDENT_ENTRY BrResClass(void * vres)
+br_uint_8 BR_RESIDENT_ENTRY BrResClass(void *vres)
 {
-	struct resource_header *res = UserToRes(vres);
+    struct resource_header *res = UserToRes(vres);
 
-	UASSERT(vres != NULL);
+    UASSERT(vres != NULL);
 
-	UASSERT(ISRESOURCE(res));
+    UASSERT(ISRESOURCE(res));
 
-	return  res->class;
+    return res->class;
 }
 
 #if 0
@@ -369,21 +368,21 @@ void * BR_RESIDENT_ENTRY BrResParent(void * vres)
  */
 br_boolean BR_RESIDENT_ENTRY BrResIsChild(void *vparent, void *vchild)
 {
-	struct resource_header *parent = UserToRes(vparent);
-	struct resource_header *child = UserToRes(vchild);
-	struct resource_header *cp;
+    struct resource_header *parent = UserToRes(vparent);
+    struct resource_header *child  = UserToRes(vchild);
+    struct resource_header *cp;
 
-	UASSERT(vparent != NULL);
-	UASSERT(vchild != NULL);
+    UASSERT(vparent != NULL);
+    UASSERT(vchild != NULL);
 
-	UASSERT(ISRESOURCE(parent));
-	UASSERT(ISRESOURCE(child));
+    UASSERT(ISRESOURCE(parent));
+    UASSERT(ISRESOURCE(child));
 
-	BR_FOR_SIMPLELIST(&parent->children,cp)
-		if(cp == child)
-			return BR_TRUE;
+    BR_FOR_SIMPLELIST(&parent->children, cp)
+        if(cp == child)
+            return BR_TRUE;
 
-	return BR_FALSE;
+    return BR_FALSE;
 }
 
 /*
@@ -391,12 +390,12 @@ br_boolean BR_RESIDENT_ENTRY BrResIsChild(void *vparent, void *vchild)
  */
 br_size_t BR_RESIDENT_ENTRY BrResSize(void *vres)
 {
-	struct resource_header *res = UserToRes(vres);
+    struct resource_header *res = UserToRes(vres);
 
-	UASSERT(vres != NULL);
-	UASSERT(ISRESOURCE(res));
+    UASSERT(vres != NULL);
+    UASSERT(ISRESOURCE(res));
 
-	return RES_SIZE_GET(res) - sizeof(struct resource_header);
+    return RES_SIZE_GET(res) - sizeof(struct resource_header);
 }
 
 /*
@@ -405,26 +404,26 @@ br_size_t BR_RESIDENT_ENTRY BrResSize(void *vres)
 
 static br_size_t BR_CALLBACK ResSizeTotal(void *vres, void *ptr)
 {
-	/*
-	 * Accumulate this size...
-	 */
-	*(br_size_t*)ptr += BrResSize(vres);
+    /*
+     * Accumulate this size...
+     */
+    *(br_size_t *)ptr += BrResSize(vres);
 
-	/*
-	 * ...then add the sizes of all the children
-	 */
-	BrResChildEnum(vres, ResSizeTotal, ptr);
+    /*
+     * ...then add the sizes of all the children
+     */
+    BrResChildEnum(vres, ResSizeTotal, ptr);
 
-	return 0;
+    return 0;
 }
 
 br_size_t BR_RESIDENT_ENTRY BrResSizeTotal(void *vres)
 {
-	br_size_t total = 0;
+    br_size_t total = 0;
 
-	ResSizeTotal(vres, &total);
+    ResSizeTotal(vres, &total);
 
-	return total;
+    return total;
 }
 
 /*
@@ -432,19 +431,19 @@ br_size_t BR_RESIDENT_ENTRY BrResSizeTotal(void *vres)
  */
 br_size_t BR_RESIDENT_ENTRY BrResChildEnum(void *vres, br_resenum_cbfn *callback, void *arg)
 {
-	struct resource_header *res = UserToRes(vres);
-	struct resource_header *rp;
-	br_size_t r;
+    struct resource_header *res = UserToRes(vres);
+    struct resource_header *rp;
+    br_size_t               r;
 
-	UASSERT(vres != NULL);
-	UASSERT(ISRESOURCE(res));
-	ASSERT(callback != NULL);
+    UASSERT(vres != NULL);
+    UASSERT(ISRESOURCE(res));
+    ASSERT(callback != NULL);
 
-	BR_FOR_SIMPLELIST(&res->children,rp)
-		if((r = callback(ResToUser(rp),arg)))
-			return r;
+    BR_FOR_SIMPLELIST(&res->children, rp)
+        if((r = callback(ResToUser(rp), arg)))
+            return r;
 
-	return 0;
+    return 0;
 }
 
 /*
@@ -454,31 +453,31 @@ br_size_t BR_RESIDENT_ENTRY BrResChildEnum(void *vres, br_resenum_cbfn *callback
 br_uint_32 BR_RESIDENT_ENTRY BrResCheck(void *vres, int no_tag)
 {
 #if BR_RES_TAGGING
-	struct resource_header *res = UserToRes(vres);
+    struct resource_header *res = UserToRes(vres);
 
-	return (res->magic_ptr == res) && (res->magic_num == BR_RES_MAGIC);
+    return (res->magic_ptr == res) && (res->magic_num == BR_RES_MAGIC);
 #else
-	return no_tag;
+    return no_tag;
 #endif
 }
 
 /*
  * strdup() equivalent
  */
-char * BR_RESIDENT_ENTRY BrResStrDup(void *vparent, const char *str)
+char *BR_RESIDENT_ENTRY BrResStrDup(void *vparent, const char *str)
 {
-	br_size_t l;
-	char *nstr;
+    br_size_t l;
+    char     *nstr;
 
-	UASSERT(str != NULL);
+    UASSERT(str != NULL);
 
-	l = BrStrLen(str);
+    l = BrStrLen(str);
 
-	nstr = BrResAllocate(vparent,l+1,BR_MEMORY_STRING);
+    nstr = BrResAllocate(vparent, l + 1, BR_MEMORY_STRING);
 
-	BrStrCpy(nstr,str);
+    BrStrCpy(nstr, str);
 
-	return nstr;
+    return nstr;
 }
 
 #if DEBUG
@@ -489,57 +488,56 @@ char * BR_RESIDENT_ENTRY BrResStrDup(void *vparent, const char *str)
  */
 STATIC void InternalResourceDump(struct resource_header *res, br_putline_cbfn *putline, void *arg, int level)
 {
-	int i;
-	char *cp = BrScratchString();
-	struct resource_header *child;
-	br_resource_class *rclass;
+    int                     i;
+    char                   *cp = BrScratchString();
+    struct resource_header *child;
+    br_resource_class      *rclass;
 
-	/*
-	 * Blank out first bit of line
-	 */
-	for(i=0; i< level*2; i++)
-		*cp++ = ' ';
+    /*
+     * Blank out first bit of line
+     */
+    for(i = 0; i < level * 2; i++)
+        *cp++ = ' ';
 
-	/*
-	 * Describe resource
-	 */
- 	rclass= fw.resource_class_index[(unsigned char )res->class];
+    /*
+     * Describe resource
+     */
+    rclass = fw.resource_class_index[(unsigned char)res->class];
 
-	if(rclass == NULL) {
-		BrSprintf(cp, "0x%" PRIxPTR" ??? (%02X)", (br_uintptr_t)res+1, res->class);
-		putline(BrScratchString(),arg);
-		return;
-	}
+    if(rclass == NULL) {
+        BrSprintf(cp, "0x%" PRIxPTR " ??? (%02X)", (br_uintptr_t)res + 1, res->class);
+        putline(BrScratchString(), arg);
+        return;
+    }
 
-	BrSprintf(cp, "0x%" PRIxPTR " %-20s %zu", (br_uintptr_t)ResToUser(res), rclass->identifier, RES_SIZE_GET(res));
-	putline(BrScratchString(),arg);
+    BrSprintf(cp, "0x%" PRIxPTR " %-20s %zu", (br_uintptr_t)ResToUser(res), rclass->identifier, RES_SIZE_GET(res));
+    putline(BrScratchString(), arg);
 
-	/*
-	 * Display any children
-	 */
-	BR_FOR_SIMPLELIST(&res->children,child)
-		InternalResourceDump(child, putline, arg, level+1);
+    /*
+     * Display any children
+     */
+    BR_FOR_SIMPLELIST(&res->children, child)
+        InternalResourceDump(child, putline, arg, level + 1);
 }
 #endif
 
 void BR_RESIDENT_ENTRY BrResDump(void *vres, br_putline_cbfn *putline, void *arg)
 {
 #if DEBUG
-	struct resource_header *res = UserToRes(vres);
+    struct resource_header *res = UserToRes(vres);
 
-	InternalResourceDump(res, putline, arg, 0);
+    InternalResourceDump(res, putline, arg, 0);
 #endif
 }
 
 /*
  * Return the name for a resource class
  */
-const char * BR_RESIDENT_ENTRY BrResClassIdentifier(br_uint_8 res_class)
+const char *BR_RESIDENT_ENTRY BrResClassIdentifier(br_uint_8 res_class)
 {
-	br_resource_class *rclass;
+    br_resource_class *rclass;
 
- 	rclass = fw.resource_class_index[res_class];
+    rclass = fw.resource_class_index[res_class];
 
-	return rclass?rclass->identifier:"<NULL>";
-
+    return rclass ? rclass->identifier : "<NULL>";
 }

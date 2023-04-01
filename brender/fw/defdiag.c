@@ -22,14 +22,13 @@ static void BrNullFailure(const char *message)
  * DiagHandler structure
  */
 br_diaghandler BrNullDiagHandler = {
-	"Null DiagHandler",
-	BrNullWarning,
-	BrNullFailure,
+    "Null DiagHandler",
+    BrNullWarning,
+    BrNullFailure,
 };
 
 // Nope, we're using std now
 ///*
 // * Global variable that can be overridden by linking something first
 // */
-//br_diaghandler *_BrDefaultDiagHandler = &BrNullDiagHandler;
-
+// br_diaghandler *_BrDefaultDiagHandler = &BrNullDiagHandler;

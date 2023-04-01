@@ -12,7 +12,7 @@
 
 BR_RCS_ID("$Id: devlist.c 1.1 1997/12/10 16:41:06 jon Exp $")
 
-extern br_framework_state BR_ASM_DATA fw ;
+extern br_framework_state BR_ASM_DATA fw;
 
 /* Add drivers specified in the BRENDER_DRIVERS configuration entry
  * This is only done once, so check it has not already been done
@@ -20,88 +20,84 @@ extern br_framework_state BR_ASM_DATA fw ;
 
 static br_error AddRequestedDrivers()
 {
-	char devstr[256];
-    static br_boolean bAlreadyDone = BR_FALSE ;
+    char              devstr[256];
+    static br_boolean bAlreadyDone = BR_FALSE;
 
-    if ( !fw.bAlreadyLoadedDrivers )
-    {
-       BrSystemConfigQueryString( BRT_BRENDER_DRIVERS_STR, devstr, BR_ASIZE(devstr) );
+    if(!fw.bAlreadyLoadedDrivers) {
+        BrSystemConfigQueryString(BRT_BRENDER_DRIVERS_STR, devstr, BR_ASIZE(devstr));
 
-       if ( *devstr != '\0' )
-          BrDevAddConfig(devstr);
+        if(*devstr != '\0')
+            BrDevAddConfig(devstr);
 
-       fw.bAlreadyLoadedDrivers = BR_TRUE ;
+        fw.bAlreadyLoadedDrivers = BR_TRUE;
     }
 
-    return BRE_OK ;
+    return BRE_OK;
 }
-
-
-
 
 /*
  * Instantiate a device and add it to internal list given entry point
  */
 static br_error devAdd(br_device **pdev, br_device_begin_fn *dev_begin, const char *args, br_image *image)
 {
-	int i;
-	br_device *dev;
-	struct br_open_device *new_slots;
+    int                    i;
+    br_device             *dev;
+    struct br_open_device *new_slots;
 
-	/*
-	 * Cal the driver entry point, which should return a pointer to
-	 * device object, or NULL if things went wrong
-	 */
-	dev = dev_begin(args);
+    /*
+     * Cal the driver entry point, which should return a pointer to
+     * device object, or NULL if things went wrong
+     */
+    dev = dev_begin(args);
 
-	if(dev == NULL)
-		return BRE_FAIL;
+    if(dev == NULL)
+        return BRE_FAIL;
 
-	/*
-	 * Got device, find free slot
-	 */
-	for(i=0; i < fw.ndev_slots; i++) {
-		if(fw.dev_slots[i].dev == NULL) {
-			/*
-			 * Fill in slot, including optional image pointer
-			 */
-			fw.dev_slots[i].dev = dev;
+    /*
+     * Got device, find free slot
+     */
+    for(i = 0; i < fw.ndev_slots; i++) {
+        if(fw.dev_slots[i].dev == NULL) {
+            /*
+             * Fill in slot, including optional image pointer
+             */
+            fw.dev_slots[i].dev   = dev;
             fw.dev_slots[i].image = image;
 
-			if(pdev)
-				*pdev = dev;
-			return BRE_OK;
-		}
-	}
+            if(pdev)
+                *pdev = dev;
+            return BRE_OK;
+        }
+    }
 
-	/*
-	 * Need to expand array
-	 */
-	new_slots = BrResAllocate(dev, (fw.ndev_slots+NDEV_SLOTS) * sizeof(*fw.dev_slots), BR_MEMORY_DRIVER );
+    /*
+     * Need to expand array
+     */
+    new_slots = BrResAllocate(dev, (fw.ndev_slots + NDEV_SLOTS) * sizeof(*fw.dev_slots), BR_MEMORY_DRIVER);
 
-	if(new_slots == NULL) {
-		ObjectFree(dev);
-		return BRE_NO_MEMORY;
-	}
+    if(new_slots == NULL) {
+        ObjectFree(dev);
+        return BRE_NO_MEMORY;
+    }
 
-	for(i=0; i < fw.ndev_slots; i++)
-		new_slots[i] = fw.dev_slots[i];
+    for(i = 0; i < fw.ndev_slots; i++)
+        new_slots[i] = fw.dev_slots[i];
 
-	BrResFree(fw.dev_slots);
+    BrResFree(fw.dev_slots);
 
-	/*
-	 * Fill in slot, including optional image pointer
-	 */
-	fw.dev_slots = new_slots;
-	new_slots[fw.ndev_slots].dev = dev;
-	new_slots[fw.ndev_slots].image = image;
+    /*
+     * Fill in slot, including optional image pointer
+     */
+    fw.dev_slots                   = new_slots;
+    new_slots[fw.ndev_slots].dev   = dev;
+    new_slots[fw.ndev_slots].image = image;
 
-	fw.ndev_slots += NDEV_SLOTS;
+    fw.ndev_slots += NDEV_SLOTS;
 
-	if(pdev)
-		*pdev = dev;
+    if(pdev)
+        *pdev = dev;
 
-	return BRE_OK;
+    return BRE_OK;
 }
 
 /*
@@ -109,34 +105,34 @@ static br_error devAdd(br_device **pdev, br_device_begin_fn *dev_begin, const ch
  */
 br_error BR_RESIDENT_ENTRY BrDevAdd(br_device **pdev, const char *image, const char *args)
 {
-	br_image *dev_image;
-	br_device_begin_fn *dev_begin;
+    br_image           *dev_image;
+    br_device_begin_fn *dev_begin;
 
-	ASSERT(image != NULL);
+    ASSERT(image != NULL);
 
-	/*
-	 * Try and load up device
-	 */
-	dev_image = BrImageReference(image);
+    /*
+     * Try and load up device
+     */
+    dev_image = BrImageReference(image);
 
-	if(dev_image == NULL) {
-		return BRE_FAIL;
-	}
-
-	/*
-	 * Look up the driver entry point
-	 */
-	dev_begin = BrImageLookupName(dev_image, "BrDrv1Begin",0);
-
-	if(dev_begin == NULL) {
-        BrImageDereference(dev_image);
-		return BRE_FAIL;
+    if(dev_image == NULL) {
+        return BRE_FAIL;
     }
 
-	/*
-	 * Add device to internal list, remebering the iamge pointer for later
-	 */
-	return devAdd(pdev, dev_begin, args, dev_image);
+    /*
+     * Look up the driver entry point
+     */
+    dev_begin = BrImageLookupName(dev_image, "BrDrv1Begin", 0);
+
+    if(dev_begin == NULL) {
+        BrImageDereference(dev_image);
+        return BRE_FAIL;
+    }
+
+    /*
+     * Add device to internal list, remebering the iamge pointer for later
+     */
+    return devAdd(pdev, dev_begin, args, dev_image);
 }
 
 /*
@@ -144,9 +140,9 @@ br_error BR_RESIDENT_ENTRY BrDevAdd(br_device **pdev, const char *image, const c
  */
 br_error BR_RESIDENT_ENTRY BrDevAddStatic(br_device **pdev, br_device_begin_fn *dev_begin, const char *args)
 {
-	/*
-	 * Add to internal list, with a NULL image pointer
-	 */
+    /*
+     * Add to internal list, with a NULL image pointer
+     */
     return devAdd(pdev, dev_begin, args, NULL);
 }
 
@@ -155,16 +151,16 @@ br_error BR_RESIDENT_ENTRY BrDevAddStatic(br_device **pdev, br_device_begin_fn *
  */
 br_error BR_RESIDENT_ENTRY BrDevCheckAdd(br_device **pdev, const char *name, const char *args)
 {
-	/*
-	 * Is device already there?
-	 */
-	if(BrDevFind(pdev, name) == BRE_OK)
-		return BRE_OK;
+    /*
+     * Is device already there?
+     */
+    if(BrDevFind(pdev, name) == BRE_OK)
+        return BRE_OK;
 
-	/*
-	 * Add it
-	 */
-	return BrDevAdd(pdev, name, args);
+    /*
+     * Add it
+     */
+    return BrDevAdd(pdev, name, args);
 }
 
 /*
@@ -175,64 +171,64 @@ br_error BR_RESIDENT_ENTRY BrDevCheckAdd(br_device **pdev, const char *name, con
 br_error BR_RESIDENT_ENTRY BrDevAddConfig(const char *config)
 {
     const char *end;
-	char *dev, *arg;
-	char tmp[512];
+    char       *dev, *arg;
+    char        tmp[512];
 
-	br_size_t n;
+    br_size_t n;
 
-	for(;;) {
-		/*
-		 * Find next semi. or end of string
-		 */
-		for(end = config; *end != '\0' && *end != ';' ; end++)
-			;
+    for(;;) {
+        /*
+         * Find next semi. or end of string
+         */
+        for(end = config; *end != '\0' && *end != ';'; end++)
+            ;
 
-		n = end - config;
+        n = end - config;
 
-		if(n) {
-			/*
-			 * Make a copy of this device string
-			 */
-			BrMemCpy(tmp, config, n);
-			tmp[n] = '\0';
-			dev = tmp;
+        if(n) {
+            /*
+             * Make a copy of this device string
+             */
+            BrMemCpy(tmp, config, n);
+            tmp[n] = '\0';
+            dev    = tmp;
 
-			/*
-			 * Find device arguments
-			 */
-			for(arg = tmp; *arg != '\0' && *arg != ',' && *arg != ':'; arg++)
-				;
+            /*
+             * Find device arguments
+             */
+            for(arg = tmp; *arg != '\0' && *arg != ',' && *arg != ':'; arg++)
+                ;
 
-			if(*arg) {
-				*arg = '\0';
-				arg++;
-			}
+            if(*arg) {
+                *arg = '\0';
+                arg++;
+            }
 
-			/*
-			 * Add the device
-			 */
-			while(BrIsSpace(*dev))
-				dev++;
+            /*
+             * Add the device
+             */
+            while(BrIsSpace(*dev))
+                dev++;
 
-			n = BrStrLen(dev);
+            n = BrStrLen(dev);
 
-			if(n) {
-				while(BrIsSpace(dev[n-1])) {
-					dev[n-1] = '\0';
-					n--;
-				}
+            if(n) {
+                while(BrIsSpace(dev[n - 1])) {
+                    dev[n - 1] = '\0';
+                    n--;
+                }
 
-				BrDevAdd(NULL, dev, arg);
-			}
-		}
+                BrDevAdd(NULL, dev, arg);
+            }
+        }
 
-		if(*end == ';')
-			config = end+1;
-		else
-			break;
-	}
+        if(*end == ';')
+            config = end + 1;
+        else
+            break;
+    }
 
-	return BRE_OK;
+    return BRE_OK;
 }
 
 /*
@@ -240,32 +236,32 @@ br_error BR_RESIDENT_ENTRY BrDevAddConfig(const char *config)
  */
 br_error BR_RESIDENT_ENTRY BrDevRemove(br_device *dev)
 {
-	int i;
+    int i;
 
-	/*
-	 * Find device in list
-	 */
-	for(i=0; i < fw.ndev_slots; i++) {
-		if(fw.dev_slots[i].dev == dev) {
+    /*
+     * Find device in list
+     */
+    for(i = 0; i < fw.ndev_slots; i++) {
+        if(fw.dev_slots[i].dev == dev) {
 
-			/*
-			 * Found it - release object
-			 */
-			ObjectFree(dev);
+            /*
+             * Found it - release object
+             */
+            ObjectFree(dev);
 
-			/*
-			 * If there was an image associated with device, dereference it
-			 */
-			if(fw.dev_slots[i].image) {
+            /*
+             * If there was an image associated with device, dereference it
+             */
+            if(fw.dev_slots[i].image) {
                 BrImageDereference(fw.dev_slots[i].image);
-			}
+            }
 
-			fw.dev_slots[i].dev = NULL;
-			fw.dev_slots[i].image = NULL;
-		}
-	}
+            fw.dev_slots[i].dev   = NULL;
+            fw.dev_slots[i].image = NULL;
+        }
+    }
 
-	return BRE_OK;
+    return BRE_OK;
 }
 
 /*
@@ -273,47 +269,47 @@ br_error BR_RESIDENT_ENTRY BrDevRemove(br_device *dev)
  */
 br_error BR_RESIDENT_ENTRY BrDevFind(struct br_device **pdev, const char *pattern)
 {
-	int i,c;
+    int i, c;
 
-   AddRequestedDrivers();
+    AddRequestedDrivers();
 
-	for(i=0,c=0; i < fw.ndev_slots; i++) {
-		if(fw.dev_slots[i].dev) {
-			if(BrNamePatternMatch(pattern,ObjectIdentifier(fw.dev_slots[i].dev))) {
-				if(pdev)
-					*pdev = fw.dev_slots[i].dev;
-				return BRE_OK;
-			}
-		}
-	}
+    for(i = 0, c = 0; i < fw.ndev_slots; i++) {
+        if(fw.dev_slots[i].dev) {
+            if(BrNamePatternMatch(pattern, ObjectIdentifier(fw.dev_slots[i].dev))) {
+                if(pdev)
+                    *pdev = fw.dev_slots[i].dev;
+                return BRE_OK;
+            }
+        }
+    }
 
-	return BRE_FAIL;
+    return BRE_FAIL;
 }
 
 /*
  * Fill in an array of pointers to loaded devices mathcing pattern
  */
-br_error BR_RESIDENT_ENTRY BrDevFindMany(struct br_device **devices, br_int_32 *ndevices, br_int_32 max_devices, const char *pattern)
+br_error BR_RESIDENT_ENTRY BrDevFindMany(struct br_device **devices, br_int_32 *ndevices, br_int_32 max_devices,
+                                         const char *pattern)
 {
-	int i,c;
+    int i, c;
 
-   AddRequestedDrivers();
+    AddRequestedDrivers();
 
-	for(i=0,c=0; i < fw.ndev_slots; i++) {
-		if(fw.dev_slots[i].dev &&
-			BrNamePatternMatch(pattern,ObjectIdentifier(fw.dev_slots[i].dev))) {
+    for(i = 0, c = 0; i < fw.ndev_slots; i++) {
+        if(fw.dev_slots[i].dev && BrNamePatternMatch(pattern, ObjectIdentifier(fw.dev_slots[i].dev))) {
 
-			if(++c >= max_devices)
-				return BRE_OVERFLOW;
+            if(++c >= max_devices)
+                return BRE_OVERFLOW;
 
-			devices[c] = fw.dev_slots[i].dev;
-		}
-	}
+            devices[c] = fw.dev_slots[i].dev;
+        }
+    }
 
-	if(ndevices)
-		*ndevices = c;
+    if(ndevices)
+        *ndevices = c;
 
-	return BRE_OK;
+    return BRE_OK;
 }
 
 /*
@@ -321,19 +317,18 @@ br_error BR_RESIDENT_ENTRY BrDevFindMany(struct br_device **devices, br_int_32 *
  */
 br_error BR_RESIDENT_ENTRY BrDevCount(br_int_32 *ndevices, const char *pattern)
 {
-	int i,c;
+    int i, c;
 
-   AddRequestedDrivers();
+    AddRequestedDrivers();
 
-	for(i=0,c=0; i < fw.ndev_slots; i++)
-		if(fw.dev_slots[i].dev &&
-			BrNamePatternMatch(pattern,ObjectIdentifier(fw.dev_slots[i].dev)))
-			c++;
+    for(i = 0, c = 0; i < fw.ndev_slots; i++)
+        if(fw.dev_slots[i].dev && BrNamePatternMatch(pattern, ObjectIdentifier(fw.dev_slots[i].dev)))
+            c++;
 
-	if(ndevices)
-		*ndevices = c;
+    if(ndevices)
+        *ndevices = c;
 
-	return BRE_OK;
+    return BRE_OK;
 }
 
 /*
@@ -341,64 +336,65 @@ br_error BR_RESIDENT_ENTRY BrDevCount(br_int_32 *ndevices, const char *pattern)
  */
 br_error BR_RESIDENT_ENTRY BrDevContainedFind(struct br_object **ph, br_token type, const char *pattern, br_token_value *tv)
 {
-	int i;
+    int i;
 
-   AddRequestedDrivers();
+    AddRequestedDrivers();
 
-	for(i=0; i < fw.ndev_slots; i++)
-		if(fw.dev_slots[i].dev && (ObjectContainerFind(fw.dev_slots[i].dev, ph, type, pattern, tv) == BRE_OK))
-				return BRE_OK;
+    for(i = 0; i < fw.ndev_slots; i++)
+        if(fw.dev_slots[i].dev && (ObjectContainerFind(fw.dev_slots[i].dev, ph, type, pattern, tv) == BRE_OK))
+            return BRE_OK;
 
-	return BRE_FAIL;
+    return BRE_FAIL;
 }
 
 br_error BR_RESIDENT_ENTRY BrDevContainedFindMany(struct br_object **objects, br_int_32 max_objects,
-			br_int_32 *pnum_objects, br_token type, const char *pattern, br_token_value *tv)
+                                                  br_int_32 *pnum_objects, br_token type, const char *pattern,
+                                                  br_token_value *tv)
 {
-	int i;
-	br_int_32 n,total = 0;
-	br_error r;
+    int       i;
+    br_int_32 n, total = 0;
+    br_error  r;
 
-   AddRequestedDrivers();
+    AddRequestedDrivers();
 
-	for(i=0; i < fw.ndev_slots; i++) {
-		if(fw.dev_slots[i].dev) {
-			r = ObjectContainerFindMany(fw.dev_slots[i].dev, objects, max_objects, &n, type, pattern, tv);
-			if(r != BRE_OK)
-				return r;
+    for(i = 0; i < fw.ndev_slots; i++) {
+        if(fw.dev_slots[i].dev) {
+            r = ObjectContainerFindMany(fw.dev_slots[i].dev, objects, max_objects, &n, type, pattern, tv);
+            if(r != BRE_OK)
+                return r;
 
-			objects += n;
-			max_objects -= n;
-			total += n;
-		}
-	}
+            objects += n;
+            max_objects -= n;
+            total += n;
+        }
+    }
 
-	if(pnum_objects)
-		*pnum_objects = total;
+    if(pnum_objects)
+        *pnum_objects = total;
 
-	return BRE_OK;
+    return BRE_OK;
 }
 
 br_error BR_RESIDENT_ENTRY BrDevContainedCount(br_int_32 *pcount, br_token type, const char *pattern, br_token_value *tv)
 {
-	int i;
-	br_int_32 n,total = 0;
-	br_error r;
+    int       i;
+    br_int_32 n, total = 0;
+    br_error  r;
 
-   AddRequestedDrivers();
+    AddRequestedDrivers();
 
-	for(i=0; i < fw.ndev_slots; i++) {
-		if(fw.dev_slots[i].dev) {
-			r = ObjectContainerCount(fw.dev_slots[i].dev, &n, type, pattern, tv);
-			if(r != BRE_OK)
-				return r;
+    for(i = 0; i < fw.ndev_slots; i++) {
+        if(fw.dev_slots[i].dev) {
+            r = ObjectContainerCount(fw.dev_slots[i].dev, &n, type, pattern, tv);
+            if(r != BRE_OK)
+                return r;
 
-			total += n;
-		}
-	}
+            total += n;
+        }
+    }
 
-	if(pcount)
-		*pcount = total;
+    if(pcount)
+        *pcount = total;
 
-	return BRE_OK;
+    return BRE_OK;
 }

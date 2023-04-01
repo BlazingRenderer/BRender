@@ -8,7 +8,7 @@
 #ifndef _BRIMAGE_H_
 #define _BRIMAGE_H_
 
-typedef void *(*br_image_proc)(void*);
+typedef void *(*br_image_proc)(void *);
 
 typedef struct br_image_function_info {
     const char   *name;
@@ -16,38 +16,38 @@ typedef struct br_image_function_info {
 } br_image_function_info;
 
 typedef struct br_image {
-	/*
-	 * Anchor block for list of images
-	 */
-	br_node node;
+    /*
+     * Anchor block for list of images
+     */
+    br_node node;
 
-	/*
-	 * DLL name
-	 */
-	const char *identifier;
+    /*
+     * DLL name
+     */
+    const char *identifier;
 
-	/*
-	 * Type of DLL - Resident, Host, Framework
-	 */
-	br_int_32 type;
+    /*
+     * Type of DLL - Resident, Host, Framework
+     */
+    br_int_32 type;
 
-	/*
-	 * Number of references to this DLL
-	 */
-	br_int_32 ref_count;
+    /*
+     * Number of references to this DLL
+     */
+    br_int_32 ref_count;
 
-	/*
-	 * Table of exported functions. The ordinal is the function index.
-	 * Must be sorted by name, suitable for BrStrCmp().
-	 * Only valid if type != BR_IMG_HOST.
-	 */
-	unsigned int n_functions;
-	const br_image_function_info *functions;
+    /*
+     * Table of exported functions. The ordinal is the function index.
+     * Must be sorted by name, suitable for BrStrCmp().
+     * Only valid if type != BR_IMG_HOST.
+     */
+    unsigned int                  n_functions;
+    const br_image_function_info *functions;
 
-	/*
-	 * Type specific pointer
-	 */
-	void	*type_pointer;
+    /*
+     * Type specific pointer
+     */
+    void *type_pointer;
 
 } br_image;
 
@@ -74,4 +74,3 @@ enum {
 };
 
 #endif
-

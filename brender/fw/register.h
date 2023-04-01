@@ -17,34 +17,34 @@
  * to the item's name
  */
 typedef struct br_registry_entry {
-		struct br_node node;
-		struct {
-			br_uintptr_t reserved;
-			char *identifier;
-		} *item;
+    struct br_node node;
+    struct {
+        br_uintptr_t reserved;
+        char        *identifier;
+    } * item;
 } br_registry_entry;
 
-typedef void * BR_CALLBACK br_find_failed_cbfn(const char *pattern);
-typedef br_uint_32 BR_CALLBACK br_enum_cbfn (void *item, void *arg);
+typedef void *BR_CALLBACK      br_find_failed_cbfn(const char *pattern);
+typedef br_uint_32 BR_CALLBACK br_enum_cbfn(void *item, void *arg);
 
 /*
  * Base structure for registry
  */
 typedef struct br_registery {
-		/*
-		 * Anchor structure
-		 */
-		struct br_list list;
+    /*
+     * Anchor structure
+     */
+    struct br_list list;
 
-		/*
-		 * Number of items in list
-		 */
-		int count;
+    /*
+     * Number of items in list
+     */
+    int count;
 
-		/*
-		 * Hook that is called when RegistryFind fails
-		 */
-		br_find_failed_cbfn *find_failed_hook;
+    /*
+     * Hook that is called when RegistryFind fails
+     */
+    br_find_failed_cbfn *find_failed_hook;
 
 } br_registry;
 

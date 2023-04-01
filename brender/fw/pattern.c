@@ -43,68 +43,68 @@ BR_RCS_ID("$Id: pattern.c 1.1 1997/12/10 16:41:09 jon Exp $")
  */
 
 #if 1 /* case insensitive for the moment */
-#define UPPER(c) (( (c) >= 'a' && (c) <= 'z' )?((c) - ('a'-'A')):(c))
-#define MATCH_CHAR(a,b) (UPPER(a) == UPPER(b))
+#define UPPER(c)         (((c) >= 'a' && (c) <= 'z') ? ((c) - ('a' - 'A')) : (c))
+#define MATCH_CHAR(a, b) (UPPER(a) == UPPER(b))
 #else
-#define MATCH_CHAR(a,b) ((a) == (b))
+#define MATCH_CHAR(a, b) ((a) == (b))
 #endif
 
 br_boolean BR_RESIDENT_ENTRY BrNamePatternMatch(const char *p, const char *s)
 {
-	const char *cp;
+    const char *cp;
 
-	/*
-	 * A NULL pattern matches everything
-	 */
-	if(p == NULL)
-		return BR_TRUE;
+    /*
+     * A NULL pattern matches everything
+     */
+    if(p == NULL)
+        return BR_TRUE;
 
-	/*
-	 * A NULL string never matches
-	 */
-	if(s == NULL)
-		return BR_FALSE;
+    /*
+     * A NULL string never matches
+     */
+    if(s == NULL)
+        return BR_FALSE;
 
-	for(;;) switch(*p) {
+    for(;;)
+        switch(*p) {
 
-	case '/':
-	case '\0':
-		/*
-		 * Empty pattern only matches empty string
-		 */
-		return *s == '\0';
+            case '/':
+            case '\0':
+                /*
+                 * Empty pattern only matches empty string
+                 */
+                return *s == '\0';
 
-	case '*':
-		/*
-		 * Match p+1 in any position from s to end of s
-		 */
-		cp = s;
-		do
-			if(BrNamePatternMatch(p+1,cp))
-				return 1;
-		while (*cp++);
+            case '*':
+                /*
+                 * Match p+1 in any position from s to end of s
+                 */
+                cp = s;
+                do
+                    if(BrNamePatternMatch(p + 1, cp))
+                        return 1;
+                while(*cp++);
 
-		return BR_FALSE;
+                return BR_FALSE;
 
-	case '?':
-		/*
-		 * Match any character followed by matching(p+1, s+1)
-		 */
-		if(*s == '\0')
-			return BR_FALSE;
+            case '?':
+                /*
+                 * Match any character followed by matching(p+1, s+1)
+                 */
+                if(*s == '\0')
+                    return BR_FALSE;
 
-		p++, s++;	/* Tail recurse */
-		continue;	
+                p++, s++; /* Tail recurse */
+                continue;
 
-	default:
-		/*
-		 * Match this character followed by matching(p+1, s+1)
-		 */
-		if(!MATCH_CHAR(*s,*p))
-			return BR_FALSE;
+            default:
+                /*
+                 * Match this character followed by matching(p+1, s+1)
+                 */
+                if(!MATCH_CHAR(*s, *p))
+                    return BR_FALSE;
 
-		p++, s++;	/* Tail recurse */
-		continue;
-	}	
+                p++, s++; /* Tail recurse */
+                continue;
+        }
 }
-

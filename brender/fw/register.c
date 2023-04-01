@@ -20,19 +20,19 @@ BR_RCS_ID("$Id: register.c 1.1 1997/12/10 16:41:09 jon Exp $")
  */
 void *BrRegistryNew(br_registry *reg)
 {
-	UASSERT(reg != NULL);
+    UASSERT(reg != NULL);
 
-	/*
-	 * Intitialise linked list
-	 */
-	BrNewList(&reg->list);
+    /*
+     * Intitialise linked list
+     */
+    BrNewList(&reg->list);
 
-	/*
-	 * List is empty
-	 */
-	reg->count = 0;
+    /*
+     * List is empty
+     */
+    reg->count = 0;
 
-	return reg;
+    return reg;
 }
 
 /*
@@ -40,21 +40,21 @@ void *BrRegistryNew(br_registry *reg)
  */
 void *BrRegistryClear(br_registry *reg)
 {
-	br_registry_entry *e;
+    br_registry_entry *e;
 
-	UASSERT(reg != NULL);
+    UASSERT(reg != NULL);
 
-	while(e = BR_HEAD(&reg->list), BR_NEXT(e)) {
-		BR_REMOVE(e);
-		BrResFree(e);
-	}
+    while(e = BR_HEAD(&reg->list), BR_NEXT(e)) {
+        BR_REMOVE(e);
+        BrResFree(e);
+    }
 
-	/*
-	 * List is empty
-	 */
-	reg->count = 0;
+    /*
+     * List is empty
+     */
+    reg->count = 0;
 
-	return reg;
+    return reg;
 }
 
 /*
@@ -62,18 +62,18 @@ void *BrRegistryClear(br_registry *reg)
  */
 void *BrRegistryAdd(br_registry *reg, void *item)
 {
-	br_registry_entry *e;
+    br_registry_entry *e;
 
-	UASSERT(reg != NULL);
-	UASSERT(item != NULL);
+    UASSERT(reg != NULL);
+    UASSERT(item != NULL);
 
-	e = BrResAllocate(fw.res,sizeof(*e),BR_MEMORY_REGISTRY);
-	e->item = item;
-	BR_ADDHEAD(reg,e);
+    e       = BrResAllocate(fw.res, sizeof(*e), BR_MEMORY_REGISTRY);
+    e->item = item;
+    BR_ADDHEAD(reg, e);
 
-	reg->count++;
+    reg->count++;
 
-	return item;
+    return item;
 }
 
 /*
@@ -81,17 +81,17 @@ void *BrRegistryAdd(br_registry *reg, void *item)
  */
 int BrRegistryAddMany(br_registry *reg, void **items, int n)
 {
-	int i;
-	UASSERT(reg != NULL);
-	UASSERT(items != NULL);
+    int i;
+    UASSERT(reg != NULL);
+    UASSERT(items != NULL);
 
-	/*
-	 * Walk through table adding items
-	 */
-	for(i=0; i < n; i++)
-		BrRegistryAdd(reg,*items++);
+    /*
+     * Walk through table adding items
+     */
+    for(i = 0; i < n; i++)
+        BrRegistryAdd(reg, *items++);
 
-	return n;
+    return n;
 }
 
 /*
@@ -99,35 +99,35 @@ int BrRegistryAddMany(br_registry *reg, void **items, int n)
  */
 void *BrRegistryRemove(br_registry *reg, void *item)
 {
-	br_registry_entry *e;
-	void *r;
+    br_registry_entry *e;
+    void              *r;
 
-	UASSERT(reg != NULL);
-	UASSERT(item != NULL);
+    UASSERT(reg != NULL);
+    UASSERT(item != NULL);
 
-	/*
-	 * Find item in list
-	 */
-	BR_FOR_LIST(&reg->list,e)
-		if(e->item == item)
-			break;
+    /*
+     * Find item in list
+     */
+    BR_FOR_LIST(&reg->list, e)
+        if(e->item == item)
+            break;
 
-	/*
-	 * If item was not in list, return NULL
-	 */
-	if(!BR_NEXT(e))
-		return NULL;
+    /*
+     * If item was not in list, return NULL
+     */
+    if(!BR_NEXT(e))
+        return NULL;
 
-	/*
-	 * Take item of list, remember contents, and free node
-	 */
-	BR_REMOVE(e);
-	r = e->item;
-	BrResFree(e);
+    /*
+     * Take item of list, remember contents, and free node
+     */
+    BR_REMOVE(e);
+    r = e->item;
+    BrResFree(e);
 
-	reg->count--;
+    reg->count--;
 
-	return r;
+    return r;
 }
 
 /*
@@ -135,20 +135,20 @@ void *BrRegistryRemove(br_registry *reg, void *item)
  */
 int BrRegistryRemoveMany(br_registry *reg, void **items, int n)
 {
-	int i,r;
+    int i, r;
 
-	UASSERT(reg != NULL);
-	UASSERT(items != NULL);
+    UASSERT(reg != NULL);
+    UASSERT(items != NULL);
 
-	/*
-	 * Remove all the items from a table, keeping a count of how
-	 * many were actually removed
-	 */
-	for(i=0, r=0; i < n; i++)
-		if(BrRegistryRemove(reg,*items++))
-			r++;
+    /*
+     * Remove all the items from a table, keeping a count of how
+     * many were actually removed
+     */
+    for(i = 0, r = 0; i < n; i++)
+        if(BrRegistryRemove(reg, *items++))
+            r++;
 
-	return r;
+    return r;
 }
 
 /*
@@ -158,48 +158,48 @@ int BrRegistryRemoveMany(br_registry *reg, void **items, int n)
  */
 void *BrRegistryFind(br_registry *reg, const char *pattern)
 {
-	br_registry_entry *e;
+    br_registry_entry *e;
 
-	UASSERT(reg != NULL);
+    UASSERT(reg != NULL);
 
-	/*
-	 * Find item in list
-	 */
-	BR_FOR_LIST(&reg->list,e)
-		if(BrNamePatternMatch(pattern,e->item->identifier))
-			return e->item;
+    /*
+     * Find item in list
+     */
+    BR_FOR_LIST(&reg->list, e)
+        if(BrNamePatternMatch(pattern, e->item->identifier))
+            return e->item;
 
-	if(reg->find_failed_hook)
-		return reg->find_failed_hook(pattern);
-	else
-		return NULL;
+    if(reg->find_failed_hook)
+        return reg->find_failed_hook(pattern);
+    else
+        return NULL;
 }
 
 int BrRegistryFindMany(br_registry *reg, const char *pattern, void **items, int max)
 {
-	br_registry_entry *e;
-	int n=0;
+    br_registry_entry *e;
+    int                n = 0;
 
-	/*
-	 * Find all matching items in list
-	 */
-	BR_FOR_LIST(&reg->list,e) {
-		/*
-		 * make sure there is space in output table
-		 */
-		if(n >= max)
-			break;
+    /*
+     * Find all matching items in list
+     */
+    BR_FOR_LIST(&reg->list, e) {
+        /*
+         * make sure there is space in output table
+         */
+        if(n >= max)
+            break;
 
-		/*
-		 * If entry matches, add to table
-		 */
-		if(BrNamePatternMatch(pattern,e->item->identifier)) {
-			*items++ = e->item;
-			n++;
-		}
-	}
+        /*
+         * If entry matches, add to table
+         */
+        if(BrNamePatternMatch(pattern, e->item->identifier)) {
+            *items++ = e->item;
+            n++;
+        }
+    }
 
-	return n;
+    return n;
 }
 
 /*
@@ -209,54 +209,53 @@ int BrRegistryFindMany(br_registry *reg, const char *pattern, void **items, int 
  */
 int BrRegistryCount(br_registry *reg, const char *pattern)
 {
-	br_registry_entry *e;
-	int n;
+    br_registry_entry *e;
+    int                n;
 
-	UASSERT(reg != NULL);
+    UASSERT(reg != NULL);
 
-	if(pattern == NULL)
-		return reg->count;
+    if(pattern == NULL)
+        return reg->count;
 
-	/*
-	 * Find all matching items in list
-	 */
-	n = 0;
+    /*
+     * Find all matching items in list
+     */
+    n = 0;
 
-	BR_FOR_LIST(&reg->list,e)
-		if(BrNamePatternMatch(pattern,e->item->identifier))
-			n++;
+    BR_FOR_LIST(&reg->list, e)
+        if(BrNamePatternMatch(pattern, e->item->identifier))
+            n++;
 
-	return n;
+    return n;
 }
 
 /*
  * Call a function for every item in a registry. Stop early if callback
  * returns !=0, and return that value
  */
-int BrRegistryEnum(br_registry *reg, const char *pattern,
-		br_enum_cbfn *callback, void *arg)
+int BrRegistryEnum(br_registry *reg, const char *pattern, br_enum_cbfn *callback, void *arg)
 {
-	br_registry_entry *e;
-	int r;
+    br_registry_entry *e;
+    int                r;
 
-	UASSERT(reg != NULL);
-	UASSERT(callback != NULL);
+    UASSERT(reg != NULL);
+    UASSERT(callback != NULL);
 
-	/*
-	 * If pattern in NULL, invoke callback for _EVERYTHING_
-	 * else invoke callback for items that match pattern
-	 */
-	if(pattern == NULL) {
-		BR_FOR_LIST_R(&reg->list,e)
-			if((r = callback(e->item,arg)))
-				return r;
-	} else {
-		BR_FOR_LIST_R(&reg->list,e)
-			if(BrNamePatternMatch(pattern,e->item->identifier))
-				if((r = callback(e->item,arg)))
-					return r;
-	}
-	return 0;
+    /*
+     * If pattern in NULL, invoke callback for _EVERYTHING_
+     * else invoke callback for items that match pattern
+     */
+    if(pattern == NULL) {
+        BR_FOR_LIST_R(&reg->list, e)
+            if((r = callback(e->item, arg)))
+                return r;
+    } else {
+        BR_FOR_LIST_R(&reg->list, e)
+            if(BrNamePatternMatch(pattern, e->item->identifier))
+                if((r = callback(e->item, arg)))
+                    return r;
+    }
+    return 0;
 }
 
 /**
@@ -268,28 +267,28 @@ int BrRegistryEnum(br_registry *reg, const char *pattern,
  */
 void *BrRegistryNewStatic(br_registry *reg, br_registry_entry *base, int limit)
 {
-	int i;
+    int i;
 
-	UASSERT(reg != NULL);
-	UASSERT(base != NULL);
+    UASSERT(reg != NULL);
+    UASSERT(base != NULL);
 
-	/*
-	 * Intitialise linked list
-	 */
-	BrNewList(&reg->list);
+    /*
+     * Intitialise linked list
+     */
+    BrNewList(&reg->list);
 
-	/*
-	 * Clear static entries
-	 */
-	for(i = 0; i < limit; i++)
-		base[i].node.next = NULL;
+    /*
+     * Clear static entries
+     */
+    for(i = 0; i < limit; i++)
+        base[i].node.next = NULL;
 
-	/*
-	 * List is empty
-	 */
-	reg->count = 0;
+    /*
+     * List is empty
+     */
+    reg->count = 0;
 
-	return reg;
+    return reg;
 }
 
 /*
@@ -297,19 +296,20 @@ void *BrRegistryNewStatic(br_registry *reg, br_registry_entry *base, int limit)
  */
 void *BrRegistryAddStatic(br_registry *reg, br_registry_entry *base, void *item)
 {
-	br_registry_entry *e;
+    br_registry_entry *e;
 
-	UASSERT(reg != NULL);
-	UASSERT(base != NULL);
-	UASSERT(item != NULL);
+    UASSERT(reg != NULL);
+    UASSERT(base != NULL);
+    UASSERT(item != NULL);
 
-	for(e = base; e->node.next != NULL; e++);
-	e->item = item;
-	BR_ADDHEAD(reg, e);
+    for(e = base; e->node.next != NULL; e++)
+        ;
+    e->item = item;
+    BR_ADDHEAD(reg, e);
 
-	reg->count++;
+    reg->count++;
 
-	return item;
+    return item;
 }
 
 /*
@@ -317,33 +317,33 @@ void *BrRegistryAddStatic(br_registry *reg, br_registry_entry *base, void *item)
  */
 void *BrRegistryRemoveStatic(br_registry *reg, void *item)
 {
-	br_registry_entry *e;
-	void *r;
+    br_registry_entry *e;
+    void              *r;
 
-	UASSERT(reg != NULL);
-	UASSERT(item != NULL);
+    UASSERT(reg != NULL);
+    UASSERT(item != NULL);
 
-	/*
-	 * Find item in list
-	 */
-	BR_FOR_LIST(&reg->list,e)
-		if(e->item == item)
-			break;
+    /*
+     * Find item in list
+     */
+    BR_FOR_LIST(&reg->list, e)
+        if(e->item == item)
+            break;
 
-	/*
-	 * If item was not in list, return NULL
-	 */
-	if(!BR_NEXT(e))
-		return NULL;
+    /*
+     * If item was not in list, return NULL
+     */
+    if(!BR_NEXT(e))
+        return NULL;
 
-	/*
-	 * Take item off list, remember contents, and free node
-	 */
-	BR_REMOVE(e);
-	r = e->item;
-	e->node.next = NULL;
+    /*
+     * Take item off list, remember contents, and free node
+     */
+    BR_REMOVE(e);
+    r            = e->item;
+    e->node.next = NULL;
 
-	reg->count--;
+    reg->count--;
 
-	return r;
+    return r;
 }

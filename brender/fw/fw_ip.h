@@ -29,25 +29,22 @@ int BR_PUBLIC_ENTRY BrLogWrite(void *buffer, br_size_t s, br_size_t n);
  */
 void BR_CALLBACK _BrFileFree(void *res, br_uint_8 res_class, br_size_t size);
 
-
 /*
  * token.c
  */
-void BrTokenBegin(void);
+void     BrTokenBegin(void);
 br_token BrTokenFindType(br_token *ptype, char *base, br_token *types, br_size_t ntypes);
-
 
 /*
  * object.c
  */
 void BR_CALLBACK _BrObjectFree(void *res, br_uint_8 res_class, br_size_t size);
 
-
 /*
  * image.c
  */
 void BR_CALLBACK _BrImageFree(void *res, br_uint_8 res_class, br_size_t size);
-br_image *ImageLoad(const char *name);
+br_image        *ImageLoad(const char *name);
 
 /*
  * brbhook.c
@@ -60,4 +57,3 @@ void BR_CALLBACK _BrEndHook(void);
 #endif
 #endif
 #endif
-

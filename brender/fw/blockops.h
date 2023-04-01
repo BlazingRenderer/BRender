@@ -12,12 +12,12 @@
 
 __inline void BrBlockFill(void *dest_ptr, br_int_32 value, br_int_32 dwords)
 {
-	memset(dest_ptr, value, dwords*4);
+    memset(dest_ptr, value, dwords * 4);
 }
 
 __inline void BrBlockCopy(void *dest_ptr, void *src_ptr, br_int_32 dwords)
 {
-	memcpy(dest_ptr, src_ptr, dwords*4);
+    memcpy(dest_ptr, src_ptr, dwords * 4);
 }
 
 #endif /* _BLOCKOPS_H_ */

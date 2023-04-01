@@ -22,23 +22,23 @@ typedef br_error br_exception;
  * Exception handler - allocated as a resource
  */
 typedef struct br_exception_handler {
-	struct br_exception_handler *prev;
+    struct br_exception_handler *prev;
 
-	/*
-	 * setjmp/longjmp context to throw to
-	 */
+    /*
+     * setjmp/longjmp context to throw to
+     */
 
-	jmp_buf context;
+    jmp_buf context;
 
 } br_exception_handler;
 
 /*
  * Public macros
  */
-#define BrExceptionBegin(evp) (_BrExceptionValueFetch((br_exception)setjmp(_BrExceptionCatch()->context),(evp)))
-#define BrExceptionEnd() _BrExceptionEnd()
+#define BrExceptionBegin(evp)    (_BrExceptionValueFetch((br_exception)setjmp(_BrExceptionCatch()->context), (evp)))
+#define BrExceptionEnd()         _BrExceptionEnd()
 
-#define BrExceptionThrow(et,ev) _BrExceptionThrow((br_exception)(ev),(void *)(ev))
-#define BR_EXCEPTION_RESOURCE _BrExceptionResource()
+#define BrExceptionThrow(et, ev) _BrExceptionThrow((br_exception)(ev), (void *)(ev))
+#define BR_EXCEPTION_RESOURCE    _BrExceptionResource()
 
 #endif

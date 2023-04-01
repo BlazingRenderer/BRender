@@ -12,41 +12,40 @@ BR_RCS_ID("$Id: deffile.c 1.1 1997/12/10 16:41:06 jon Exp $")
 
 static br_uint_32 BrNullAttributes(void)
 {
-	return  0;
+    return 0;
 }
 
 static void BrNullOther(void)
 {
-	BR_FATAL0("Invald file system call");
+    BR_FATAL0("Invald file system call");
 }
 
 /*
  * Filesystem structure
  */
 br_filesystem BrNullFilesystem = {
-	"Null Filesystem",		/* identifier */
+    "Null Filesystem", /* identifier */
 
-	BrNullAttributes,		/* attributes */
-	(void *)BrNullOther,	/* open_read  */
-	(void *)BrNullOther,	/* openwrite  */
-	(void *)BrNullOther,	/* close      */
-	(void *)BrNullOther,	/* eof		  */
+    BrNullAttributes,    /* attributes */
+    (void *)BrNullOther, /* open_read  */
+    (void *)BrNullOther, /* openwrite  */
+    (void *)BrNullOther, /* close      */
+    (void *)BrNullOther, /* eof		  */
 
-	(void *)BrNullOther,	/* getchar	  */
-	(void *)BrNullOther,	/* putchar	  */
+    (void *)BrNullOther, /* getchar	  */
+    (void *)BrNullOther, /* putchar	  */
 
-	(void *)BrNullOther,	/* read		  */
-	(void *)BrNullOther,	/* write	  */
+    (void *)BrNullOther, /* read		  */
+    (void *)BrNullOther, /* write	  */
 
-	(void *)BrNullOther,	/* getline	  */
-	(void *)BrNullOther,	/* putline	  */
+    (void *)BrNullOther, /* getline	  */
+    (void *)BrNullOther, /* putline	  */
 
-	(void *)BrNullOther,	/* advance	  */
+    (void *)BrNullOther, /* advance	  */
 };
 
 // Nope, we're using std now
 ///*
 // * Global variable that can be overridden by linking something first
 // */
-//br_filesystem *_BrDefaultFilesystem = &BrNullFilesystem;
-
+// br_filesystem *_BrDefaultFilesystem = &BrNullFilesystem;

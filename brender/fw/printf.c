@@ -12,28 +12,28 @@
 
 BR_RCS_ID("$Id: printf.c 1.1 1997/12/10 16:41:09 jon Exp $")
 
-br_int_32 BR_RESIDENT_ENTRY BrSprintf(char * buf, const char *fmt, ...)
+br_int_32 BR_RESIDENT_ENTRY BrSprintf(char *buf, const char *fmt, ...)
 {
-	int n;
-	va_list args;
+    int     n;
+    va_list args;
 
-	va_start(args, fmt);
-	n = BrVSprintf(buf, fmt, args);
-	va_end(args);
+    va_start(args, fmt);
+    n = BrVSprintf(buf, fmt, args);
+    va_end(args);
 
-	return n;
+    return n;
 }
 
-br_int_32 BR_RESIDENT_ENTRY BrSprintfN(char * buf, br_size_t buf_size, const char *fmt, ...)
+br_int_32 BR_RESIDENT_ENTRY BrSprintfN(char *buf, br_size_t buf_size, const char *fmt, ...)
 {
-	int n;
-	va_list args;
+    int     n;
+    va_list args;
 
-	va_start(args, fmt);
-	n = BrVSprintf(buf, fmt, args);
-	va_end(args);
+    va_start(args, fmt);
+    n = BrVSprintf(buf, fmt, args);
+    va_end(args);
 
-	return n;
+    return n;
 #if 0
 	unsigned int n;
 	char tmp[512];
@@ -56,26 +56,26 @@ br_int_32 BR_RESIDENT_ENTRY BrSprintfN(char * buf, br_size_t buf_size, const cha
 
 int BR_RESIDENT_ENTRY BrLogPrintf(const char *fmt, ...)
 {
-	int n;
-	va_list args;
+    int     n;
+    va_list args;
 
-	va_start(args, fmt);
-	n = BrVSprintf(BrScratchString(), fmt, args);
-	va_end(args);
+    va_start(args, fmt);
+    n = BrVSprintf(BrScratchString(), fmt, args);
+    va_end(args);
 
-	BrLogWrite(BrScratchString(), 1, n);
+    BrLogWrite(BrScratchString(), 1, n);
 
-	return n;
+    return n;
 }
 
 br_int_32 BR_RESIDENT_ENTRY BrSScanf(char *str, const char *fmt, ...)
 {
-	int n;
-	va_list args;
+    int     n;
+    va_list args;
 
-	va_start(args, fmt);
-	n = BrVSScanf(str, fmt, args);
-	va_end(args);
+    va_start(args, fmt);
+    n = BrVSScanf(str, fmt, args);
+    va_end(args);
 
-	return n;
+    return n;
 }

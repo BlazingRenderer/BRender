@@ -16,33 +16,33 @@ BR_RCS_ID("$Id: pool.c 1.1 1997/12/10 16:41:09 jon Exp $")
 #undef PoolFree
 #endif
 
-br_pool * BR_PUBLIC_ENTRY BrPoolAllocate(int block_size, int chunk_size, br_uint_8 mem_type)
+br_pool *BR_PUBLIC_ENTRY BrPoolAllocate(int block_size, int chunk_size, br_uint_8 mem_type)
 {
-	br_pool * pool = BrResAllocate(NULL,sizeof(*pool),BR_MEMORY_POOL);
+    br_pool *pool = BrResAllocate(NULL, sizeof(*pool), BR_MEMORY_POOL);
 
-	pool->free = NULL;
+    pool->free = NULL;
 
-	if(block_size < sizeof(br_pool_block))
-		block_size = sizeof(br_pool_block);
+    if(block_size < sizeof(br_pool_block))
+        block_size = sizeof(br_pool_block);
 
-	pool->block_size = (block_size + BR_POOL_ALIGN)  & ~BR_POOL_ALIGN;
-	pool->chunk_size = chunk_size;
-	pool->mem_type = mem_type;
+    pool->block_size = (block_size + BR_POOL_ALIGN) & ~BR_POOL_ALIGN;
+    pool->chunk_size = chunk_size;
+    pool->mem_type   = mem_type;
 #if BR_POOL_DEBUG
-	pool->count = 0;
-	pool->max_count = 0;
+    pool->count     = 0;
+    pool->max_count = 0;
 #endif
 
-	return pool;
+    return pool;
 }
 
 void BR_PUBLIC_ENTRY BrPoolFree(br_pool *pool)
 {
-	UASSERT(BrResCheck(pool,1));
-	UASSERT(BrResClass(pool) == BR_MEMORY_POOL);
-	UASSERT(pool != NULL);
+    UASSERT(BrResCheck(pool, 1));
+    UASSERT(BrResClass(pool) == BR_MEMORY_POOL);
+    UASSERT(pool != NULL);
 
-	BrResFree(pool);
+    BrResFree(pool);
 }
 
 /*
@@ -54,32 +54,30 @@ void BR_PUBLIC_ENTRY BrPoolFree(br_pool *pool)
 
 STATIC int BR_CALLBACK PoolBlockRelink(char *chunk, br_pool *pool)
 {
-	br_uint_32 size;
-	br_pool_block *free_ptr;
+    br_uint_32     size;
+    br_pool_block *free_ptr;
 
-	/*
-	 * Ignore blocks that are not of the appropriate type
-	 */
-	if(BrResClass(chunk) != (br_uint_8) pool->mem_type)
-		return 0;
+    /*
+     * Ignore blocks that are not of the appropriate type
+     */
+    if(BrResClass(chunk) != (br_uint_8)pool->mem_type)
+        return 0;
 
-	/*
-	 * Go through block linking it into free list
-	 */
-	free_ptr = pool->free;
+    /*
+     * Go through block linking it into free list
+     */
+    free_ptr = pool->free;
 
-	for(size = BrResSize(chunk);
-		size >= pool->block_size;
-		size -= pool->block_size) {
+    for(size = BrResSize(chunk); size >= pool->block_size; size -= pool->block_size) {
 
-		((br_pool_block *)chunk)->next = free_ptr;
-		free_ptr = (br_pool_block *)chunk;
-		chunk += pool->block_size;
-	}
+        ((br_pool_block *)chunk)->next = free_ptr;
+        free_ptr                       = (br_pool_block *)chunk;
+        chunk += pool->block_size;
+    }
 
-	pool->free = free_ptr;
+    pool->free = free_ptr;
 
-	return 0;
+    return 0;
 }
 
 /*
@@ -88,64 +86,63 @@ STATIC int BR_CALLBACK PoolBlockRelink(char *chunk, br_pool *pool)
  */
 void BR_ASM_CALLBACK BrPoolAddChunk(br_pool *pool)
 {
-	br_pool_block *bp;
+    br_pool_block *bp;
 
-	/*
-	 * Allocate a new block of the appropriate size
-	 */
-	bp = BrResAllocate(pool,pool->block_size * pool->chunk_size,
-		(br_uint_8)pool->mem_type);
+    /*
+     * Allocate a new block of the appropriate size
+     */
+    bp = BrResAllocate(pool, pool->block_size * pool->chunk_size, (br_uint_8)pool->mem_type);
 
-	/*
-	 * Link the block in chunk into free list
-	 */
-	PoolBlockRelink((char *)bp, pool);
+    /*
+     * Link the block in chunk into free list
+     */
+    PoolBlockRelink((char *)bp, pool);
 }
 
-void * BR_PUBLIC_ENTRY BrPoolBlockAllocate(br_pool *pool)
+void *BR_PUBLIC_ENTRY BrPoolBlockAllocate(br_pool *pool)
 {
-	br_pool_block *bp;
+    br_pool_block *bp;
 
-	if(pool->free == NULL)
-		BrPoolAddChunk(pool);
+    if(pool->free == NULL)
+        BrPoolAddChunk(pool);
 
 #if BR_POOL_DEBUG
-	if(++pool->count > pool->max_count)
-		pool->max_count = pool->count;
+    if(++pool->count > pool->max_count)
+        pool->max_count = pool->count;
 #endif
 
-	bp = pool->free;
-	pool->free = bp->next;
-	return bp;
+    bp         = pool->free;
+    pool->free = bp->next;
+    return bp;
 }
 
-void BR_PUBLIC_ENTRY BrPoolBlockFree(br_pool *pool,void *b)
+void BR_PUBLIC_ENTRY BrPoolBlockFree(br_pool *pool, void *b)
 {
-	br_pool_block *bp = (br_pool_block *)b;
+    br_pool_block *bp = (br_pool_block *)b;
 
-	bp->next = pool->free;
-	pool->free = bp;
+    bp->next   = pool->free;
+    pool->free = bp;
 
 #if BR_POOL_DEBUG
-	pool->count--;
+    pool->count--;
 #endif
 }
 
 void BR_PUBLIC_ENTRY BrPoolEmpty(br_pool *pool)
 {
-	/*
-	 * Clear out free list
-	 */
-	pool->free = NULL;
+    /*
+     * Clear out free list
+     */
+    pool->free = NULL;
 
-	/*
-	 * Go through each child resource and add
-	 * appropriate chunks to the free list
-	 */
-	BrResChildEnum(pool, (br_resenum_cbfn *)PoolBlockRelink, pool);
+    /*
+     * Go through each child resource and add
+     * appropriate chunks to the free list
+     */
+    BrResChildEnum(pool, (br_resenum_cbfn *)PoolBlockRelink, pool);
 
 #if BR_POOL_DEBUG
-	pool->count = 0;
-	pool->max_count = 0;
+    pool->count     = 0;
+    pool->max_count = 0;
 #endif
 }
