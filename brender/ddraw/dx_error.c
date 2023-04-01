@@ -41,9 +41,11 @@ static const char *ErrorToString(HRESULT error)
         case DDERR_HEIGHTALIGN:
             return "Height of rectangle provided is not a multiple of reqd alignment.\0";
         case DDERR_HWNDALREADYSET:
-            return "The CooperativeLevel HWND has already been set. It can not be reset while the process has surfaces or palettes created.\0";
+            return "The CooperativeLevel HWND has already been set. It can not be reset while the process has surfaces "
+                   "or palettes created.\0";
         case DDERR_HWNDSUBCLASSED:
-            return "HWND used by DirectDraw CooperativeLevel has been subclassed, this prevents DirectDraw from restoring state.\0";
+            return "HWND used by DirectDraw CooperativeLevel has been subclassed, this prevents DirectDraw from "
+                   "restoring state.\0";
         case DDERR_IMPLICITLYCREATED:
             return "This surface can not be restored because it is an implicitly created surface.\0";
         case DDERR_INCOMPATIBLEPRIMARY:
@@ -63,7 +65,8 @@ static const char *ErrorToString(HRESULT error)
         case DDERR_INVALIDPIXELFORMAT:
             return "The pixel format was invalid as specified.\0";
         case DDERR_INVALIDPOSITION:
-            return "Returned when the position of the overlay on the destination is no longer legal for that destination.\0";
+            return "Returned when the position of the overlay on the destination is no longer legal for that "
+                   "destination.\0";
         case DDERR_INVALIDRECT:
             return "Rectangle provided was invalid.\0";
         case DDERR_LOCKEDSURFACES:
@@ -71,7 +74,8 @@ static const char *ErrorToString(HRESULT error)
         case DDERR_NO3D:
             return "There is no 3D present.\0";
         case DDERR_NOALPHAHW:
-            return "Operation could not be carried out because there is no alpha accleration hardware present or available.\0";
+            return "Operation could not be carried out because there is no alpha accleration hardware present or "
+                   "available.\0";
         case DDERR_NOBLTHW:
             return "No blitter hardware present.\0";
         case DDERR_NOCLIPLIST:
@@ -79,11 +83,13 @@ static const char *ErrorToString(HRESULT error)
         case DDERR_NOCLIPPERATTACHED:
             return "No clipper object attached to surface object.\0";
         case DDERR_NOCOLORCONVHW:
-            return "Operation could not be carried out because there is no color conversion hardware present or available.\0";
+            return "Operation could not be carried out because there is no color conversion hardware present or "
+                   "available.\0";
         case DDERR_NOCOLORKEY:
             return "Surface doesn't currently have a color key\0";
         case DDERR_NOCOLORKEYHW:
-            return "Operation could not be carried out because there is no hardware support of the destination color key.\0";
+            return "Operation could not be carried out because there is no hardware support of the destination color "
+                   "key.\0";
         case DDERR_NOCOOPERATIVELEVELSET:
             return "Create function called without DirectDraw object method SetCooperativeLevel being called.\0";
         case DDERR_NODC:
@@ -91,21 +97,25 @@ static const char *ErrorToString(HRESULT error)
         case DDERR_NODDROPSHW:
             return "No DirectDraw ROP hardware.\0";
         case DDERR_NODIRECTDRAWHW:
-            return "A hardware-only DirectDraw object creation was attempted but the driver did not support any hardware.\0";
+            return "A hardware-only DirectDraw object creation was attempted but the driver did not support any "
+                   "hardware.\0";
         case DDERR_NOEMULATION:
             return "Software emulation not available.\0";
         case DDERR_NOEXCLUSIVEMODE:
-            return "Operation requires the application to have exclusive mode but the application does not have exclusive mode.\0";
+            return "Operation requires the application to have exclusive mode but the application does not have "
+                   "exclusive mode.\0";
         case DDERR_NOFLIPHW:
             return "Flipping visible surfaces is not supported.\0";
         case DDERR_NOGDI:
             return "There is no GDI present.\0";
         case DDERR_NOHWND:
-            return "Clipper notification requires an HWND or no HWND has previously been set as the CooperativeLevel HWND.\0";
+            return "Clipper notification requires an HWND or no HWND has previously been set as the CooperativeLevel "
+                   "HWND.\0";
         case DDERR_NOMIRRORHW:
             return "Operation could not be carried out because there is no hardware present or available.\0";
         case DDERR_NOOVERLAYDEST:
-            return "Returned when GetOverlayPosition is called on an overlay that UpdateOverlay has never been called on to establish a destination.\0";
+            return "Returned when GetOverlayPosition is called on an overlay that UpdateOverlay has never been called "
+                   "on to establish a destination.\0";
         case DDERR_NOOVERLAYHW:
             return "Operation could not be carried out because there is no overlay hardware present or available.\0";
         case DDERR_NOPALETTEATTACHED:
@@ -113,35 +123,42 @@ static const char *ErrorToString(HRESULT error)
         case DDERR_NOPALETTEHW:
             return "No hardware support for 16 or 256 color palettes.\0";
         case DDERR_NORASTEROPHW:
-            return "Operation could not be carried out because there is no appropriate raster op hardware present or available.\0";
+            return "Operation could not be carried out because there is no appropriate raster op hardware present or "
+                   "available.\0";
         case DDERR_NOROTATIONHW:
             return "Operation could not be carried out because there is no rotation hardware present or available.\0";
         case DDERR_NOSTRETCHHW:
             return "Operation could not be carried out because there is no hardware support for stretching.\0";
         case DDERR_NOT4BITCOLOR:
-            return "DirectDrawSurface is not in 4 bit color palette and the requested operation requires 4 bit color palette.\0";
+            return "DirectDrawSurface is not in 4 bit color palette and the requested operation requires 4 bit color "
+                   "palette.\0";
         case DDERR_NOT4BITCOLORINDEX:
-            return "DirectDrawSurface is not in 4 bit color index palette and the requested operation requires 4 bit color index palette.\0";
+            return "DirectDrawSurface is not in 4 bit color index palette and the requested operation requires 4 bit "
+                   "color index palette.\0";
         case DDERR_NOT8BITCOLOR:
             return "DirectDrawSurface is not in 8 bit color mode and the requested operation requires 8 bit color.\0";
         case DDERR_NOTAOVERLAYSURFACE:
             return "Returned when an overlay member is called for a non-overlay surface.\0";
         case DDERR_NOTEXTUREHW:
-            return "Operation could not be carried out because there is no texture mapping hardware present or available.\0";
+            return "Operation could not be carried out because there is no texture mapping hardware present or "
+                   "available.\0";
         case DDERR_NOTFLIPPABLE:
             return "An attempt has been made to flip a surface that is not flippable.\0";
         case DDERR_NOTFOUND:
             return "Requested item was not found.\0";
         case DDERR_NOTLOCKED:
-            return "Surface was not locked.  An attempt to unlock a surface that was not locked at all, or by this process, has been attempted.\0";
+            return "Surface was not locked.  An attempt to unlock a surface that was not locked at all, or by this "
+                   "process, has been attempted.\0";
         case DDERR_NOTPALETTIZED:
             return "The surface being used is not a palette-based surface.\0";
         case DDERR_NOVSYNCHW:
-            return "Operation could not be carried out because there is no hardware support for vertical blank synchronized operations.\0";
+            return "Operation could not be carried out because there is no hardware support for vertical blank "
+                   "synchronized operations.\0";
         case DDERR_NOZBUFFERHW:
             return "Operation could not be carried out because there is no hardware support for zbuffer blitting.\0";
         case DDERR_NOZOVERLAYHW:
-            return "Overlay surfaces could not be z layered based on their BltOrder because the hardware does not support z layering of overlays.\0";
+            return "Overlay surfaces could not be z layered based on their BltOrder because the hardware does not "
+                   "support z layering of overlays.\0";
         case DDERR_OUTOFCAPS:
             return "The hardware needed for the requested operation has already been allocated.\0";
         case DDERR_OUTOFMEMORY:
@@ -169,7 +186,8 @@ static const char *ErrorToString(HRESULT error)
         case DDERR_SURFACEISOBSCURED:
             return "Access to surface refused because the surface is obscured.\0";
         case DDERR_SURFACELOST:
-            return "Access to this surface is being refused because the surface memory is gone. The DirectDrawSurface object representing this surface should have Restore called on it.\0";
+            return "Access to this surface is being refused because the surface memory is gone. The DirectDrawSurface "
+                   "object representing this surface should have Restore called on it.\0";
         case DDERR_SURFACENOTATTACHED:
             return "The requested surface is not attached.\0";
         case DDERR_TOOBIGHEIGHT:
@@ -187,7 +205,8 @@ static const char *ErrorToString(HRESULT error)
         case DDERR_VERTICALBLANKINPROGRESS:
             return "Vertical blank is in progress.\0";
         case DDERR_WASSTILLDRAWING:
-            return "Informs DirectDraw that the previous Blt which is transfering information to or from this Surface is incomplete.\0";
+            return "Informs DirectDraw that the previous Blt which is transfering information to or from this Surface "
+                   "is incomplete.\0";
         case DDERR_WRONGMODE:
             return "This surface can not be restored because it was created in a different mode.\0";
         case DDERR_XALIGN:
@@ -197,12 +216,11 @@ static const char *ErrorToString(HRESULT error)
     }
 }
 
-
-void Display_Error( char *string, HRESULT error )
+void Display_Error(char *string, HRESULT error)
 {
-	char Message[255];
-	
-	BrSprintf( Message, "%s : %s\n", string, ErrorToString(error) );
+    char Message[255];
 
-	BR_ERROR0( Message );
+    BrSprintf(Message, "%s : %s\n", string, ErrorToString(error));
+
+    BR_ERROR0(Message);
 }

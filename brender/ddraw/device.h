@@ -16,80 +16,78 @@ extern "C" {
  * Private state of device
  */
 typedef struct br_device {
-	/*
-	 * Dispatch table
-	 */
-	const struct br_device_dispatch *dispatch;
+    /*
+     * Dispatch table
+     */
+    const struct br_device_dispatch *dispatch;
 
-	/*
-	 * Standard object identifier
-	 */
-	const char *identifier;
+    /*
+     * Standard object identifier
+     */
+    const char *identifier;
 
-   /*
-    * Pointer to owning device
-    */
+    /*
+     * Pointer to owning device
+     */
 
-   struct br_device *device;
+    struct br_device *device;
 
-	/*
-	 * List of objects associated with this device
-	 */
-	void *object_list;
+    /*
+     * List of objects associated with this device
+     */
+    void *object_list;
 
-	/*
-	 * Anchor for all device's resources
-	 */
-	void *res;
+    /*
+     * Anchor for all device's resources
+     */
+    void *res;
 
-	/*
-	 * Critical section object
-	 */
-	CRITICAL_SECTION csection;
+    /*
+     * Critical section object
+     */
+    CRITICAL_SECTION csection;
 
-	/*
-	 * DirectDraw module handle
-	 */
-	HMODULE hddraw;
+    /*
+     * DirectDraw module handle
+     */
+    HMODULE hddraw;
 
-	/*
-	 * DirectDraw object
-	 */
-	LPDIRECTDRAW2 DD;
+    /*
+     * DirectDraw object
+     */
+    LPDIRECTDRAW2 DD;
 
-	/*
-	 * HWND to be used for enumeration (to allow use of ModeX modes)
-	 */
-	HWND window;
+    /*
+     * HWND to be used for enumeration (to allow use of ModeX modes)
+     */
+    HWND window;
 
-	/*
-	 * Address of DirectDrawCreate function
-	 */
-	FARPROC create;
+    /*
+     * Address of DirectDrawCreate function
+     */
+    FARPROC create;
 
-	/*
-	 * Number of output facilities available
-	 */
-	br_uint_32 output_facility_count;
+    /*
+     * Number of output facilities available
+     */
+    br_uint_32 output_facility_count;
 
-   struct device_templates templates;
+    struct device_templates templates;
 
 } br_device;
 
 /*
  * Some useful inline operations
  */
-#define DeviceDirectDrawResource(d) (((br_device *)d)->res)
-#define DeviceDirectDrawOriginalMode(d) (((br_device *)d)->original_mode)
-#define DeviceDirectDrawCurrentMode(d) (((br_device *)d)->current_mode)
-#define DeviceDirectDrawCurrentModeSet(d,m) ((((br_device *)d)->current_mode) = m)
-#define DeviceDirectDrawClut(d) (((br_device *)d)->clut)
+#define DeviceDirectDrawResource(d)          (((br_device *)d)->res)
+#define DeviceDirectDrawOriginalMode(d)      (((br_device *)d)->original_mode)
+#define DeviceDirectDrawCurrentMode(d)       (((br_device *)d)->current_mode)
+#define DeviceDirectDrawCurrentModeSet(d, m) ((((br_device *)d)->current_mode) = m)
+#define DeviceDirectDrawClut(d)              (((br_device *)d)->clut)
 #define DeviceDirectDrawDirectDrawCreate(self, lpGUID, lplpDD, pUnkOuter) \
-    ((HRESULT (WINAPI *)(GUID *,LPDIRECTDRAW *,IUnknown *))(self)->create)(lpGUID, lplpDD, pUnkOuter)
+    ((HRESULT(WINAPI *)(GUID *, LPDIRECTDRAW *, IUnknown *))(self)->create)(lpGUID, lplpDD, pUnkOuter)
 
 #ifdef __cplusplus
 };
 #endif
 #endif
-
-

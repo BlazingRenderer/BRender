@@ -19,13 +19,12 @@ struct device_templates {
     struct br_tv_template *devicePixelmapTemplate;
     struct br_tv_template *deviceClutTemplate;
     struct br_tv_template *outputFacilityTemplate;
-    struct br_tv_template *hwndTemplate ;
-    struct br_tv_template *matchTemplate ;
-    struct br_tv_template *matchOffTemplate ;
+    struct br_tv_template *hwndTemplate;
+    struct br_tv_template *matchTemplate;
+    struct br_tv_template *matchOffTemplate;
 };
 
 #ifdef __cplusplus
 };
 #endif
 #endif
-

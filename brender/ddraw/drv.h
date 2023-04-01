@@ -47,8 +47,8 @@
  * Macros that expand to the first two arguments of a template entry
  * Builtin or device token
  */
-#define BRT(t)	BRT_##t,0
-#define DEV(t)	0,#t
+#define BRT(t) BRT_##t, 0
+#define DEV(t) 0, #t
 
 /*
  * Round up to the nearest multiple of four
@@ -60,21 +60,23 @@
  */
 #if 0
 
-#define CSBegin(p) do {\
-	br_device *dev;\
-	dev = ObjectDirectDrawDevice(p);\
-	ASSERT(dev != NULL);\
-	ASSERT(dev->csection != NULL);\
-	EnterCriticalSection(dev->csection);\
-} while(0)
+#define CSBegin(p)                           \
+    do {                                     \
+        br_device *dev;                      \
+        dev = ObjectDirectDrawDevice(p);     \
+        ASSERT(dev != NULL);                 \
+        ASSERT(dev->csection != NULL);       \
+        EnterCriticalSection(dev->csection); \
+    } while(0)
 
-#define CSEnd(p) do {\
-	br_device *dev;\
-	dev = ObjectDirectDrawDevice(p);\
-	ASSERT(dev != NULL);\
-	ASSERT(dev->csection != NULL);\
-	LeaveCriticalSection(dev->csection);\
-} while(0)
+#define CSEnd(p)                             \
+    do {                                     \
+        br_device *dev;                      \
+        dev = ObjectDirectDrawDevice(p);     \
+        ASSERT(dev != NULL);                 \
+        ASSERT(dev->csection != NULL);       \
+        LeaveCriticalSection(dev->csection); \
+    } while(0)
 
 #else
 
@@ -95,6 +97,7 @@
 #endif
 
 #ifdef __cplusplus
-};
+}
+;
 #endif
 #endif

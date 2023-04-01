@@ -17,29 +17,25 @@ extern "C" {
  * Private state of device pixelmap
  */
 typedef struct br_object {
-	/*
-	 * Dispatch table
-	 */
-	struct br_object_dispatch *dispatch;
+    /*
+     * Dispatch table
+     */
+    struct br_object_dispatch *dispatch;
 
-	/*
-	 * Standard object identifier
-	 */
-	char *identifier;
+    /*
+     * Standard object identifier
+     */
+    char *identifier;
 
-   /*
-    * Device pointer
-    */
+    /*
+     * Device pointer
+     */
 
-   br_device *device;
-
+    br_device *device;
 
 } br_object;
-
 
 #ifdef __cplusplus
 };
 #endif
 #endif
-
-

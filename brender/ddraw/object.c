@@ -21,16 +21,15 @@ BR_RCS_ID("$Id: object.c 1.1 1997/12/10 16:45:22 jon Exp $");
 /*
  * Get the identifier associated with a object
  */
-const char * BR_CMETHOD_DECL(br_object_dd, identifier)(br_object *self)
+const char *BR_CMETHOD_DECL(br_object_dd, identifier)(br_object *self)
 {
-	return self->identifier;
+    return self->identifier;
 }
 
 /*
  * Find the device associated with a object
  */
-br_device *	BR_CMETHOD_DECL(br_object_dd, device)(br_object *self)
+br_device *BR_CMETHOD_DECL(br_object_dd, device)(br_object *self)
 {
-	return self->device ;
+    return self->device;
 }
-

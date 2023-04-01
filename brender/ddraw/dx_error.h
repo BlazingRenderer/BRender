@@ -1,3 +1,2 @@
-void Display_Error( char *string, HRESULT error );
-
+void Display_Error(char *string, HRESULT error);
 

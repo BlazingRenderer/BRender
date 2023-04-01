@@ -17,46 +17,46 @@ extern "C" {
  * Private state of device CLUT
  */
 typedef struct br_device_clut {
-	/*
-	 * Dispatch table
-	 */
-	const struct br_device_clut_dispatch *dispatch;
+    /*
+     * Dispatch table
+     */
+    const struct br_device_clut_dispatch *dispatch;
 
-	/*
-	 * Standard handle identifier
-	 */
-	char const *identifier;
+    /*
+     * Standard handle identifier
+     */
+    char const *identifier;
 
-   /*
-    * Device pointer
-    */
+    /*
+     * Device pointer
+     */
 
-   br_device *device;
+    br_device *device;
 
-	/*
-	 * System palette size
-	 */
-	int syspal_size;
+    /*
+     * System palette size
+     */
+    int syspal_size;
 
-	/*
-	 * Number of static colours in the system palette
-	 */
-	int nstatic;
+    /*
+     * Number of static colours in the system palette
+     */
+    int nstatic;
 
-	/*
-	 * Parent device pixelmap
-	 */
-	br_device_pixelmap *devpm;
+    /*
+     * Parent device pixelmap
+     */
+    br_device_pixelmap *devpm;
 
-	/*
-	 * Windows logical palette
-	 */
-	LOGPALETTE *logpalette;
+    /*
+     * Windows logical palette
+     */
+    LOGPALETTE *logpalette;
 
-	/*
-	 * Palette handle
-	 */
-	HPALETTE palette;
+    /*
+     * Palette handle
+     */
+    HPALETTE palette;
 
 } br_device_clut;
 
@@ -64,5 +64,3 @@ typedef struct br_device_clut {
 };
 #endif
 #endif
-
-
