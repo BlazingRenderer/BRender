@@ -1,0 +1,41 @@
+# tools: cosmetics
+fdac433e2e2f9d3a12e85d30bf22b92778fbbf14
+
+# brender: STATIC -> static
+d86414c5d6654af676585dccdb8a9eb33d864e1d
+
+# brender: nulldev: cosmetics
+1c576a75d37642817332b64fbc529c4d49fc55b2
+
+# brender: glrend: cosmetics
+77ac098b11cd4ba55205ebeefd08459c701647e5
+
+# brender: glrend: glad: disable clang-format
+73247de872b929e43df87b378025251f432d69dd
+
+# brender: ddraw: cosmetics
+8ddcf4c1b6c88991fb219d08f6135cd2d0709aef
+
+# brender: v1db: cosmetics
+6a0d2f5940126b22e6a60e2dce863f8f6ed9a260
+
+# brender: pixelmap: cosmetics
+e65cae067da593347f8828fcff3e7d25b18e95ce
+
+# brender: fw: cosmetics
+9198e12889b9a34a559b91808c7c32aea41c3409
+
+# brender: fmt: cosmetics
+2274cb00e0b7d84f01a32db445db694b60ee057b
+
+# brender: host: cosmetics
+6a69e65e26772dea3f81aef4e70e07b37fa99bc2
+
+# brender: math: cosmetics
+12ddb3f18a322971806bc367b4e8ecd8b68f4b73
+
+# brender: std: cosmetics
+605a97600884df949723a26112ee9b261722437a
+
+# brender: inc: cosmetics
+4a933a462304f4350b04a9d09ba9145e2f46c038
