@@ -28,7 +28,7 @@ BR_RCS_ID("$Id: driver.c 1.1 1997/12/10 16:45:15 jon Exp $");
 /*
  * Main entry point for device - this may get redefined by the makefile
  */
-br_device *BR_EXPORT BrDrv1Begin(char *arguments)
+br_device *BR_EXPORT BrDrv1DirectDrawBegin(char *arguments)
 {
     br_device *dev;
 
@@ -54,3 +54,10 @@ br_device *BR_EXPORT BrDrv1Begin(char *arguments)
 
     return dev;
 }
+
+#ifdef DEFINE_BR_ENTRY_POINT
+br_device *BR_EXPORT BrDrv1Begin(const char *arguments)
+{
+    return BrDrv1DirectDrawBegin(arguments);
+}
+#endif

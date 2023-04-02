@@ -23,7 +23,7 @@ add_library(ddraw STATIC
 
 get_target_property(target_type ddraw TYPE)
 if(target_type STREQUAL STATIC_LIBRARY)
-    target_compile_definitions(ddraw PRIVATE -DBrDrv1Begin=BrDrv1DirectDrawBegin)
+    target_compile_definitions(ddraw PRIVATE -DDEFINE_BR_ENTRY_POINT)
 endif()
 
 target_link_libraries(ddraw v1db dxguid)
