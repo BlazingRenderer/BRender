@@ -18,49 +18,49 @@
 /*
  * Lookup table that tells everything needed about supported pixelmaps
  */
+// clang-format off
 t_pixelmap_type_info PixelmapTypes[] = {
+    {NULL,             NULL,              NULL,                  0, BR_PMT_INDEX_1,        "BR_PMT_INDEX_1",        "Not supported"                              },
+    {NULL,             NULL,              NULL,                  0, BR_PMT_INDEX_2,        "BR_PMT_INDEX_2",        "Not supported"                              },
+    {T_Read_Index_4,   T_Write_Index_4,   T_Read_Flip_Index_4,   1, BR_PMT_INDEX_4,        "BR_PMT_INDEX_4",        "4 bit indexed"                              },
+    {T_Read_Index_8,   T_Write_Index_8,   T_Read_Flip_Index_8,   1, BR_PMT_INDEX_8,        "BR_PMT_INDEX_8",        "8 bit indexed"                              },
 
-	NULL, NULL, NULL, 0, BR_PMT_INDEX_1, "BR_PMT_INDEX_1", "Not supported",
-	NULL, NULL, NULL, 0, BR_PMT_INDEX_2, "BR_PMT_INDEX_2", "Not supported",
-	T_Read_Index_4, T_Write_Index_4, T_Read_Flip_Index_4, 1, BR_PMT_INDEX_4, "BR_PMT_INDEX_4", "4 bit indexed",
-	T_Read_Index_8, T_Write_Index_8, T_Read_Flip_Index_8, 1, BR_PMT_INDEX_8, "BR_PMT_INDEX_8", "8 bit indexed",
+    {T_Read_RGB_555,   T_Write_RGB_555,   T_Read_RGB_555,        0, BR_PMT_RGB_555,        "BR_PMT_RGB_555",        "RGB 16 bit 5 bits per colour component"     },
+    {T_Read_RGB_565,   T_Write_RGB_565,   T_Read_RGB_565,        0, BR_PMT_RGB_565,        "BR_PMT_RGB_565",        "RGB 16 bit 5,6,5 bit colour components"     },
+    {T_Read_RGB_888,   T_Write_RGB_888,   T_Read_RGB_888,        0, BR_PMT_RGB_888,        "BR_PMT_RGB_888",        "RGB 24 bit 8 bits per colour component"     },
+    {T_Read_RGBX_888,  T_Write_RGBX_888,  T_Read_RGBX_888,       0, BR_PMT_RGBX_888,       "BR_PMT_RGBX_888",       "RGB 32 bit 8 bits per colour component"     },
+    {T_Read_RGBX_888,  T_Write_RGBX_888,  T_Read_RGBX_888,       0, BR_PMT_RGBA_8888,      "BR_PMT_RGBA_8888", "RGBA 32 bit 8 bits per colour component"         },
 
-	T_Read_RGB_555, T_Write_RGB_555, T_Read_RGB_555, 0, BR_PMT_RGB_555, "BR_PMT_RGB_555", "RGB 16 bit 5 bits per colour component",
-	T_Read_RGB_565, T_Write_RGB_565, T_Read_RGB_565, 0, BR_PMT_RGB_565, "BR_PMT_RGB_565", "RGB 16 bit 5,6,5 bit colour components",
-	T_Read_RGB_888, T_Write_RGB_888, T_Read_RGB_888, 0, BR_PMT_RGB_888, "BR_PMT_RGB_888", "RGB 24 bit 8 bits per colour component",
-	T_Read_RGBX_888, T_Write_RGBX_888, T_Read_RGBX_888, 0, BR_PMT_RGBX_888, "BR_PMT_RGBX_888", "RGB 32 bit 8 bits per colour component",
-	T_Read_RGBX_888, T_Write_RGBX_888, T_Read_RGBX_888, 0, BR_PMT_RGBA_8888, "BR_PMT_RGBA_8888", "RGBA 32 bit 8 bits per colour component",
+    {NULL,             NULL,              NULL,                  0, BR_PMT_YUYV_8888,      "BR_PMT_YUYV_8888",      "Not supported"                              },
+    {NULL,             NULL,              NULL,                  0, BR_PMT_YUV_888,        "BR_PMT_YUV_888",        "Not supported"                              },
+    {NULL,             NULL,              NULL,                  0, BR_PMT_DEPTH_16,       "BR_PMT_DEPTH_16",       "Not supported"                              },
+    {NULL,             NULL,              NULL,                  0, BR_PMT_DEPTH_32,       "BR_PMT_DEPTH_32",       "Not supported"                              },
+    {T_Read_Alpha_8,   T_Write_Alpha_8,   T_Read_Alpha_8,        1, BR_PMT_ALPHA_8,        "BR_PMT_ALPHA_8",        "Opacity map"                                },
 
-	NULL, NULL, NULL, 0, BR_PMT_YUYV_8888, "BR_PMT_YUYV_8888", "Not supported",
-	NULL, NULL, NULL, 0, BR_PMT_YUV_888, "BR_PMT_YUV_888", "Not supported",
-	NULL, NULL, NULL, 0, BR_PMT_DEPTH_16, "BR_PMT_DEPTH_16", "Not supported",
-	NULL, NULL, NULL, 0, BR_PMT_DEPTH_32, "BR_PMT_DEPTH_32", "Not supported",
-	T_Read_Alpha_8, T_Write_Alpha_8, T_Read_Alpha_8, 1, BR_PMT_ALPHA_8, "BR_PMT_ALPHA_8", "Opacity map",
+    {T_Read_IndexA_88, NULL,              T_Read_Flip_IndexA_88, 0, BR_PMT_INDEXA_88,      "BR_PMT_INDEXA_88",      "Opacity + index"                            },
+    {NULL,             NULL,              NULL,                  0, BR_PMT_NORMAL_INDEX_8, "BR_PMT_NORMAL_INDEX_8", "Not supported"                              },
+    {NULL,             NULL,              NULL,                  0, BR_PMT_NORMAL_XYZ,     "BR_PMT_NORMAL_XYZ",     "Not supported"                              },
+    {T_Read_BGR_555,   T_Write_BGR_555,   T_Read_BGR_555,        0, BR_PMT_BGR_555,        "BR_PMT_BGR_555",        "Reversed 16 bit 5 bits per colour component"},
+    {T_Read_ARGB_4444, T_Write_ARGB_4444, T_Read_ARGB_4444,      0, BR_PMT_ARGB_4444,      "BR_PMT_ARGB_4444",      "ARGB 16 bit 4 bits per colour component"    },
 
-	T_Read_IndexA_88, NULL, T_Read_Flip_IndexA_88, 0, BR_PMT_INDEXA_88, "BR_PMT_INDEXA_88", "Opacity + index",
-	NULL, NULL, NULL, 0, BR_PMT_NORMAL_INDEX_8, "BR_PMT_NORMAL_INDEX_8","Not supported",
-	NULL, NULL, NULL, 0, BR_PMT_NORMAL_XYZ, "BR_PMT_NORMAL_XYZ", "Not supported",
-	T_Read_BGR_555, T_Write_BGR_555, T_Read_BGR_555, 0, BR_PMT_BGR_555, "BR_PMT_BGR_555", "Reversed 16 bit 5 bits per colour component",
-    T_Read_ARGB_4444, T_Write_ARGB_4444, T_Read_ARGB_4444, 0, BR_PMT_ARGB_4444, "BR_PMT_ARGB_4444", "ARGB 16 bit 4 bits per colour component",
+    {NULL,             NULL,              NULL,                  0, BR_PMT_RBG_bab,        "BR_PMT_RGB_bab",        "Not supported"                              },
+    {NULL,             NULL,              NULL,                  0, BR_PMT_RBG_1aba,       "BR_PMT_RGB_1aba",       "Not supported"                              },
+    {NULL,             NULL,              NULL,                  0, BR_PMT_RGB_332,        "BR_PMT_RGB_332",        "Not supported"                              },
+    {NULL,             NULL,              NULL,                  0, BR_PMT_DEPTH_8,        "BR_PMT_DEPTH_8",        "Not supported"                              },
+    {NULL,             NULL,              NULL,                  0, BR_PMT_ARGB_8888,      "BR_PMT_ARGB_8888",      "Not supported"                              },
+    {NULL,             NULL,              NULL,                  0, BR_PMT_ALPHA_4,        "BR_PMT_ALPHA_4",        "Not supported"                              },
+    {NULL,             NULL,              NULL,                  0, BR_PMT_INDEXA_44,      "BR_PMT_INDEXA_44",      "Not supported"                              },
+    {NULL,             NULL,              NULL,                  0, BR_PMT_DEPTH_15,       "BR_PMT_DEPTH_15",       "Not supported"                              },
+    {NULL,             NULL,              NULL,                  0, BR_PMT_DEPTH_31,       "BR_PMT_DEPTH_31",       "Not supported"                              },
+    {NULL,             NULL,              NULL,                  0, BR_PMT_DEPTH_FP16,     "BR_PMT_DEPTH_FP16",     "Not supported"                              },
+    {NULL,             NULL,              NULL,                  0, BR_PMT_DEPTH_FP15,     "BR_PMT_DEPTH_FP15",     "Not supported"                              },
 
-    NULL, NULL, NULL, 0, BR_PMT_RBG_bab     , "BR_PMT_RGB_bab", "Not supported",
-    NULL, NULL, NULL, 0, BR_PMT_RBG_1aba    , "BR_PMT_RGB_1aba", "Not supported",
-	NULL, NULL, NULL, 0, BR_PMT_RGB_332		, "BR_PMT_RGB_332", "Not supported",
-	NULL, NULL, NULL, 0, BR_PMT_DEPTH_8		, "BR_PMT_DEPTH_8", "Not supported",
-	NULL, NULL, NULL, 0, BR_PMT_ARGB_8888	, "BR_PMT_ARGB_8888", "Not supported",
-	NULL, NULL, NULL, 0, BR_PMT_ALPHA_4		, "BR_PMT_ALPHA_4", "Not supported",
-	NULL, NULL, NULL, 0, BR_PMT_INDEXA_44	, "BR_PMT_INDEXA_44", "Not supported",
-	NULL, NULL, NULL, 0, BR_PMT_DEPTH_15	, "BR_PMT_DEPTH_15", "Not supported",
-	NULL, NULL, NULL, 0, BR_PMT_DEPTH_31	, "BR_PMT_DEPTH_31", "Not supported",
-	NULL, NULL, NULL, 0, BR_PMT_DEPTH_FP16	, "BR_PMT_DEPTH_FP16", "Not supported",
-	NULL, NULL, NULL, 0, BR_PMT_DEPTH_FP15	, "BR_PMT_DEPTH_FP15", "Not supported",
-											                      
-	NULL, NULL, NULL, 0, BR_PMT_RGBA_5551	, "BR_PMT_RGBA_5551", "Not supported",
-	NULL, NULL, NULL, 0, BR_PMT_ARGB_1555	, "BR_PMT_ARGB_1555", "Not supported",
+    {NULL,             NULL,              NULL,                  0, BR_PMT_RGBA_5551,      "BR_PMT_RGBA_5551",      "Not supported"                              },
+    {NULL,             NULL,              NULL,                  0, BR_PMT_ARGB_1555,      "BR_PMT_ARGB_1555",      "Not supported"                              },
 
-    T_Read_RGBA_4444, T_Write_RGBA_4444, T_Read_RGBA_4444, 0, BR_PMT_RGBA_4444, "BR_PMT_RGBA_4444", "RGBA 16 bit 4 bits per colour component",
-
+    {T_Read_RGBA_4444, T_Write_RGBA_4444, T_Read_RGBA_4444,      0, BR_PMT_RGBA_4444,      "BR_PMT_RGBA_4444",      "RGBA 16 bit 4 bits per colour component"    },
 };
+// clang-format on
 
 int PixelmapTypesSize = BR_ASIZE(PixelmapTypes);
 
