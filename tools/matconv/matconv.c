@@ -11,19 +11,18 @@ enum {
     MODE_TO_SCR = 2,
 };
 
-
 static br_pixelmap *find_failed_hook(const char *name)
 {
     br_pixelmap *pix = BrPixelmapAllocate(BR_PMT_RGB_888, 8, 8, NULL, BR_PMAF_NORMAL);
-    pix->identifier = BrResStrDup(pix, name);
+    pix->identifier  = BrResStrDup(pix, name);
     return pix;
 }
 
 int main(int argc, char **argv)
 {
-    int         mode = MODE_NONE;
+    int          mode = MODE_NONE;
     const char  *infile, *outfile;
-    br_uint_32  num_read, num_written;
+    br_uint_32   num_read, num_written;
     br_material *material[MAX_MATERIALS];
 
     if(argc != 4) {
@@ -63,7 +62,6 @@ int main(int argc, char **argv)
     else
         num_written = BrFmtScriptMaterialSaveMany(outfile, material, (br_uint_16)num_read);
 
-
     if(num_written == 0) {
         fprintf(stderr, "Unable to write output file.\n");
         BrEnd();
@@ -71,11 +69,9 @@ int main(int argc, char **argv)
     }
 
     if(num_read != num_written) {
-        fprintf(stderr, "WARNING: num read (%" PRIu32 ") != num written (%" PRIu32 ")\n",
-                num_read, num_written);
+        fprintf(stderr, "WARNING: num read (%" PRIu32 ") != num written (%" PRIu32 ")\n", num_read, num_written);
     }
 
     BrEnd();
     return 0;
 }
-

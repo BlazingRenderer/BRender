@@ -17,10 +17,10 @@
  */
 t_list *T_NewList(t_list *list)
 {
-	list->head = NULL;
-	list->tail = NULL;
+    list->head = NULL;
+    list->tail = NULL;
 
-	return list;
+    return list;
 }
 
 /*
@@ -28,20 +28,20 @@ t_list *T_NewList(t_list *list)
  */
 t_list *T_AddHead(t_list *list, void *add_node)
 {
-	t_list_node *node = (t_list_node *)add_node;
-	
-	node->prev = NULL;
-	node->next = list->head;
+    t_list_node *node = (t_list_node *)add_node;
 
-	/*
-	 * trap case of empty list
-	 */
-	if(list->head == NULL)
-		list->tail = node;
+    node->prev = NULL;
+    node->next = list->head;
 
-	list->head = node;
+    /*
+     * trap case of empty list
+     */
+    if(list->head == NULL)
+        list->tail = node;
 
-	return list;
+    list->head = node;
+
+    return list;
 }
 
 /*
@@ -49,22 +49,22 @@ t_list *T_AddHead(t_list *list, void *add_node)
  */
 t_list *T_AddTail(t_list *list, void *add_node)
 {
-	t_list_node *node = (t_list_node *)add_node;
-    
-	node->prev = list->tail;
-	node->next = NULL;
+    t_list_node *node = (t_list_node *)add_node;
 
-	/*
-	 * trap case of empty list
-	 */
-	if(list->head == NULL)
-		list->head = node;
-	else
-		list->tail->next = node;
+    node->prev = list->tail;
+    node->next = NULL;
 
-	list->tail = node;
-    
-	return list;    
+    /*
+     * trap case of empty list
+     */
+    if(list->head == NULL)
+        list->head = node;
+    else
+        list->tail->next = node;
+
+    list->tail = node;
+
+    return list;
 }
 
 /*
@@ -72,24 +72,24 @@ t_list *T_AddTail(t_list *list, void *add_node)
  */
 void *T_RemoveHead(t_list *list)
 {
-	t_list_node *node;
+    t_list_node *node;
 
-	node = list->head;
+    node = list->head;
 
-	/*
-	 * trap case of empty list
-	 */
-	if(list->head != NULL) {
+    /*
+     * trap case of empty list
+     */
+    if(list->head != NULL) {
 
-		list->head = list->head->next;
-		
-		if(list->head == NULL)
-			list->tail = NULL;
-		else 
-			list->head->prev = NULL;
-	}
+        list->head = list->head->next;
 
-	return node;    
+        if(list->head == NULL)
+            list->tail = NULL;
+        else
+            list->head->prev = NULL;
+    }
+
+    return node;
 }
 
 /*
@@ -97,22 +97,22 @@ void *T_RemoveHead(t_list *list)
  */
 void *T_RemoveTail(t_list *list)
 {
-	t_list_node *node;
+    t_list_node *node;
 
-	node = list->tail;
+    node = list->tail;
 
-	/*
-	 * trap case of empty list
-	 */
-	if(list->head != NULL) {
+    /*
+     * trap case of empty list
+     */
+    if(list->head != NULL) {
 
-		list->tail = list->tail->prev;
+        list->tail = list->tail->prev;
 
-		if(list->tail == NULL)
-			list->head = NULL;
-		else
-			list->tail->next = NULL;
-	}
+        if(list->tail == NULL)
+            list->head = NULL;
+        else
+            list->tail->next = NULL;
+    }
 
-	return node;
+    return node;
 }

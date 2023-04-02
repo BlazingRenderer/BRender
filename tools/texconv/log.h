@@ -9,15 +9,13 @@
 #define _LOG_H_
 
 #ifdef __cplusplus
-	extern "C" {
+extern "C" {
 #endif
 
-	void T_Log(const char *fmt, ...);
-
+void T_Log(const char *fmt, ...);
 
 #ifdef __cplusplus
-	}
+}
 #endif
-
 
 #endif

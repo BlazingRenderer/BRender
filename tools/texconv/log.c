@@ -16,16 +16,14 @@
 
 static char _scratch_string[4096];
 
-
 void T_Log(const char *fmt, ...)
 {
-	int n;
-	va_list args;
+    int     n;
+    va_list args;
 
-	va_start(args, fmt);
-	vsprintf(_scratch_string, fmt, args);
-	va_end(args);
+    va_start(args, fmt);
+    vsprintf(_scratch_string, fmt, args);
+    va_end(args);
 
-        fputs(_scratch_string, stdout);
+    fputs(_scratch_string, stdout);
 }
-

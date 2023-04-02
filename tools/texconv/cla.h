@@ -10,12 +10,12 @@
 
 typedef struct t_cla {
 
-	t_list_node node;
-	char *command;
+    t_list_node node;
+    char       *command;
 
-	br_int_32 ivalue;
-	br_float fvalue;
-    
+    br_int_32 ivalue;
+    br_float  fvalue;
+
 } t_cla;
 
 br_uint_32 T_DecodeCLA(int argc, char **argv, t_list *list);

@@ -35,10 +35,8 @@ br_colour T_Read_Flip_IndexA_88(char *pixels, br_float fract);
 br_colour T_Read_Flip_Index_4(char *pixels, br_float fract);
 br_colour T_Read_Flip_Index_8(char *pixels, br_float fract);
 
-br_uint_32 T_ConvertPixelmaps(t_pixelmap_cbfn_info *cbfn_command);
+br_uint_32   T_ConvertPixelmaps(t_pixelmap_cbfn_info *cbfn_command);
 br_pixelmap *T_ConvertDirectPixelmap(br_pixelmap *item, t_pixelmap_cbfn_info *cbfn_command);
 br_pixelmap *T_ConvertIndexedPixelmap(br_pixelmap *item, t_pixelmap_cbfn_info *cbfn_command);
 
-
 #endif
-

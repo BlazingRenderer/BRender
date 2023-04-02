@@ -69,19 +69,19 @@ int PixelmapTypesSize = BR_ASIZE(PixelmapTypes);
  */
 char *T_EncodePixelmapType(br_int_32 type)
 {
-	int i;
-	char *type_str;
+    int   i;
+    char *type_str;
 
-	for(i=0; i<PixelmapTypesSize; i++)
-		if(type == PixelmapTypes[i].type) {
-			type_str = PixelmapTypes[i].identifier;
-			break;
-		}
+    for(i = 0; i < PixelmapTypesSize; i++)
+        if(type == PixelmapTypes[i].type) {
+            type_str = PixelmapTypes[i].identifier;
+            break;
+        }
 
-	if(i >= PixelmapTypesSize)
-		BR_ERROR1("Unknown pixelmap type '%d'", type);
+    if(i >= PixelmapTypesSize)
+        BR_ERROR1("Unknown pixelmap type '%d'", type);
 
-	return type_str;
+    return type_str;
 }
 
 /*
@@ -89,34 +89,34 @@ char *T_EncodePixelmapType(br_int_32 type)
  */
 br_uint_32 T_GenerateMapTable(t_pixelmap_cbfn_info *cbfn_command)
 {
-	cbfn_command->nmaps = BrMapCount(NULL);
-	cbfn_command->map_table = BrResAllocate(res_anchor,
-		sizeof(*cbfn_command->map_table) * cbfn_command->nmaps, BR_MEMORY_APPLICATION);
-	
-	cbfn_command->count = 0;
-	cbfn_command->type = T_CBFN_GENERATE_MAP_TABLE;
+    cbfn_command->nmaps     = BrMapCount(NULL);
+    cbfn_command->map_table = BrResAllocate(res_anchor, sizeof(*cbfn_command->map_table) * cbfn_command->nmaps,
+                                            BR_MEMORY_APPLICATION);
 
-	/*
-	 * Generate map table
-	 */
-	BrMapEnum(NULL, T_PixelmapCbfn, cbfn_command);
+    cbfn_command->count = 0;
+    cbfn_command->type  = T_CBFN_GENERATE_MAP_TABLE;
 
-	return cbfn_command->nmaps;
+    /*
+     * Generate map table
+     */
+    BrMapEnum(NULL, T_PixelmapCbfn, cbfn_command);
+
+    return cbfn_command->nmaps;
 }
 
 br_uint_32 T_CountIndexedMaps(t_pixelmap_cbfn_info *cbfn_command)
 {
-	cbfn_command->type = T_CBFN_COUNT_PALETTES;
-	cbfn_command->count = 0;
-	cbfn_command->npals = 0;
+    cbfn_command->type  = T_CBFN_COUNT_PALETTES;
+    cbfn_command->count = 0;
+    cbfn_command->npals = 0;
 
-	/*
-	 * count number of pixelmaps with maps
-	 */
-	BrMapEnum(NULL, T_PixelmapCbfn, cbfn_command);
-	cbfn_command->nmaps = cbfn_command->npals;
+    /*
+     * count number of pixelmaps with maps
+     */
+    BrMapEnum(NULL, T_PixelmapCbfn, cbfn_command);
+    cbfn_command->nmaps = cbfn_command->npals;
 
-	return cbfn_command->nmaps;
+    return cbfn_command->nmaps;
 }
 
 /*
@@ -124,19 +124,19 @@ br_uint_32 T_CountIndexedMaps(t_pixelmap_cbfn_info *cbfn_command)
  */
 br_int_32 T_DecodePixelmapType(char *type_string)
 {
-	br_int_32 type;
-	int i;
+    br_int_32 type;
+    int       i;
 
-	for(i=0; i<PixelmapTypesSize; i++)
-		if(BrStrICmp(type_string, PixelmapTypes[i].identifier) == 0) {
-			type = PixelmapTypes[i].type;
-			break;
-		}
+    for(i = 0; i < PixelmapTypesSize; i++)
+        if(BrStrICmp(type_string, PixelmapTypes[i].identifier) == 0) {
+            type = PixelmapTypes[i].type;
+            break;
+        }
 
-	if(i >= PixelmapTypesSize)
-		BR_ERROR1("Unknown pixelmap type '%s'", type_string);
-	    
-	return type;
+    if(i >= PixelmapTypesSize)
+        BR_ERROR1("Unknown pixelmap type '%s'", type_string);
+
+    return type;
 }
 
 /*
@@ -145,554 +145,543 @@ br_int_32 T_DecodePixelmapType(char *type_string)
 br_pixelmap *T_Convert(br_pixelmap *item, t_pixelmap_cbfn_info *cbfn_command)
 {
 
-	br_pixelmap *pm;
+    br_pixelmap *pm;
 
-	/*
-	 * check if source and destination are both supported
-	 */
-	if(PixelmapTypes[item->type].read_pixel_fn == NULL)
-		BR_ERROR4("Unable to convert '%s' of type %s to %s. %s source not supported.",
-			item->identifier, T_EncodePixelmapType(item->type),
-			T_EncodePixelmapType(cbfn_command->new_type), T_EncodePixelmapType(cbfn_command->new_type));
+    /*
+     * check if source and destination are both supported
+     */
+    if(PixelmapTypes[item->type].read_pixel_fn == NULL)
+        BR_ERROR4("Unable to convert '%s' of type %s to %s. %s source not supported.", item->identifier,
+                  T_EncodePixelmapType(item->type), T_EncodePixelmapType(cbfn_command->new_type),
+                  T_EncodePixelmapType(cbfn_command->new_type));
 
-	if(PixelmapTypes[cbfn_command->new_type].write_pixel_fn == NULL)
-		BR_ERROR2("Unable to convert to type %s. %s target not supported.",
-			T_EncodePixelmapType(cbfn_command->new_type), T_EncodePixelmapType(cbfn_command->new_type));
+    if(PixelmapTypes[cbfn_command->new_type].write_pixel_fn == NULL)
+        BR_ERROR2("Unable to convert to type %s. %s target not supported.",
+                  T_EncodePixelmapType(cbfn_command->new_type), T_EncodePixelmapType(cbfn_command->new_type));
 
-	switch(cbfn_command->type) {
+    switch(cbfn_command->type) {
 
-		case T_CBFN_FLIP_X_PIXELMAP:
-		case T_CBFN_FLIP_Y_PIXELMAP:
+        case T_CBFN_FLIP_X_PIXELMAP:
+        case T_CBFN_FLIP_Y_PIXELMAP:
 
-			pm = T_ConvertDirectPixelmap(item, cbfn_command);
-			
-			if(item->map) {
+            pm = T_ConvertDirectPixelmap(item, cbfn_command);
 
-				br_uint_32 type;
+            if(item->map) {
 
-				/*
-				 * make copy of palette
-				 */
-				cbfn_command->new_type = item->map->type;
-				type = cbfn_command->type;
-				cbfn_command->type = T_CBFN_CONVERT_PIXELMAP;
-				
-				pm->map = T_Convert(item->map, cbfn_command);
+                br_uint_32 type;
 
-				cbfn_command->type = type;
-			}
+                /*
+                 * make copy of palette
+                 */
+                cbfn_command->new_type = item->map->type;
+                type                   = cbfn_command->type;
+                cbfn_command->type     = T_CBFN_CONVERT_PIXELMAP;
 
-			break;
+                pm->map = T_Convert(item->map, cbfn_command);
 
-		default:
-			if(PixelmapTypes[cbfn_command->new_type].needs_palette == 1)
-				pm = T_ConvertIndexedPixelmap(item, cbfn_command);
-			else
-				pm = T_ConvertDirectPixelmap(item, cbfn_command);
+                cbfn_command->type = type;
+            }
 
-			break;
-	}
-	
-	return pm;
+            break;
+
+        default:
+            if(PixelmapTypes[cbfn_command->new_type].needs_palette == 1)
+                pm = T_ConvertIndexedPixelmap(item, cbfn_command);
+            else
+                pm = T_ConvertDirectPixelmap(item, cbfn_command);
+
+            break;
+    }
+
+    return pm;
 }
 
-br_pixelmap *T_Scale(br_pixelmap *item, t_pixelmap_cbfn_info *cbfn_command) {
+br_pixelmap *T_Scale(br_pixelmap *item, t_pixelmap_cbfn_info *cbfn_command)
+{
 
-	br_pixelmap *temp_pm, *pm;
-	br_int_32 temp_type;
+    br_pixelmap *temp_pm, *pm;
+    br_int_32    temp_type;
 
-	temp_type = item->type; /* save this for later */
+    temp_type = item->type; /* save this for later */
 
-	cbfn_command->new_type = BR_PMT_RGB_888;
-	cbfn_command->threshold = alpha_threshold;
+    cbfn_command->new_type  = BR_PMT_RGB_888;
+    cbfn_command->threshold = alpha_threshold;
 
-	temp_pm = T_Convert(item, cbfn_command);
+    temp_pm = T_Convert(item, cbfn_command);
 
-	BrScaleBegin();
-			
-	pm = BrPixelmapScale(temp_pm, cbfn_command->scale_x, cbfn_command->scale_y, cbfn_command->fwidth);
+    BrScaleBegin();
 
-	BrScaleEnd();
+    pm = BrPixelmapScale(temp_pm, cbfn_command->scale_x, cbfn_command->scale_y, cbfn_command->fwidth);
 
-	BrPixelmapFree(temp_pm);
+    BrScaleEnd();
 
-	cbfn_command->new_type = temp_type;
-	cbfn_command->threshold = alpha_threshold;
+    BrPixelmapFree(temp_pm);
 
-	switch(cbfn_command->new_type) {
-			
-		case BR_PMT_INDEX_8:
-		case BR_PMT_ALPHA_8:
+    cbfn_command->new_type  = temp_type;
+    cbfn_command->threshold = alpha_threshold;
 
-			cbfn_command->range = cbfn_command->height = 256;
-			cbfn_command->base = 0;
+    switch(cbfn_command->new_type) {
 
-			break;
-		case BR_PMT_INDEX_4:
+        case BR_PMT_INDEX_8:
+        case BR_PMT_ALPHA_8:
 
-			cbfn_command->range = cbfn_command->height = 16;
-			cbfn_command->base = 0;
+            cbfn_command->range = cbfn_command->height = 256;
+            cbfn_command->base                         = 0;
 
-			break;
-	}
-	temp_pm = T_Convert(pm, cbfn_command);
-	BrPixelmapFree(pm);
+            break;
+        case BR_PMT_INDEX_4:
 
-	temp_pm->identifier = BrMemStrDup(item->identifier);
+            cbfn_command->range = cbfn_command->height = 16;
+            cbfn_command->base                         = 0;
 
-	return temp_pm;
+            break;
+    }
+    temp_pm = T_Convert(pm, cbfn_command);
+    BrPixelmapFree(pm);
+
+    temp_pm->identifier = BrMemStrDup(item->identifier);
+
+    return temp_pm;
 }
 
 /*
  * generic map registry callback function
  */
 br_uint_32 BR_CALLBACK T_PixelmapCbfn(br_pixelmap *item, void *arg)
-{    
-	t_pixelmap_cbfn_info *cbfn_command = (t_pixelmap_cbfn_info *)arg;
-	br_pixelmap *pm;
-	br_uint_32 ret = 0;
-	int i;
+{
+    t_pixelmap_cbfn_info *cbfn_command = (t_pixelmap_cbfn_info *)arg;
+    br_pixelmap          *pm;
+    br_uint_32            ret = 0;
+    int                   i;
 
-	cbfn_command->current_pixelmap = item;
+    cbfn_command->current_pixelmap = item;
 
-	switch(cbfn_command->type) {
+    switch(cbfn_command->type) {
 
-		/*
-		 * generate a table of pixelmap pointers
-		 */
-		case T_CBFN_GENERATE_MAP_TABLE:
-		
-			cbfn_command->map_table[cbfn_command->count++] = item;
-		break;
+        /*
+         * generate a table of pixelmap pointers
+         */
+        case T_CBFN_GENERATE_MAP_TABLE:
 
-		/*
-		 * generate a table of pixelmaps
-		 * indexed pixelmaps have no palettes
-		 */
-		case T_CBFN_GENERATE_IMAGE_TABLE:
-		    
-			if(item->map != NULL) {
-				    
-				pm = BrResAllocate(cbfn_command, sizeof(br_pixelmap), BR_MEMORY_APPLICATION);
-				*pm = *item;
-				pm->map = NULL;
-			} else
-				pm = item;
-				
-			cbfn_command->map_table[cbfn_command->count++] = pm;
-		break;
+            cbfn_command->map_table[cbfn_command->count++] = item;
+            break;
 
-		/*
-		 * generate a table of palettes
-		 */
-		case T_CBFN_GENERATE_PALETTE_TABLE:
+        /*
+         * generate a table of pixelmaps
+         * indexed pixelmaps have no palettes
+         */
+        case T_CBFN_GENERATE_IMAGE_TABLE:
 
-			if(item->map != NULL) {
-			     i = 0;
-			     while (i < cbfn_command->count) {
-				if (cbfn_command->map_table[i] != item->map)
-				  i++;
-				else break;
-			     }
-			     if (i == cbfn_command->count)
-			     cbfn_command->map_table[cbfn_command->count++] = item->map;
-			}    
-		break;
+            if(item->map != NULL) {
 
-		/*
-		 * generate mip levels
-		 */
-		case T_CBFN_GENERATE_MIP_LEVELS: {
+                pm      = BrResAllocate(cbfn_command, sizeof(br_pixelmap), BR_MEMORY_APPLICATION);
+                *pm     = *item;
+                pm->map = NULL;
+            } else
+                pm = item;
 
-			int level = 0;
-			int width, height;
-			t_pixelmap_list_type *tpm;
-			char _scratch_string[256];
-			char _base_string[256];
+            cbfn_command->map_table[cbfn_command->count++] = pm;
+            break;
 
-			strcpy(_base_string, item->identifier);
-			cbfn_command->new_type = item->type;
+        /*
+         * generate a table of palettes
+         */
+        case T_CBFN_GENERATE_PALETTE_TABLE:
 
-			T_Log("Generating mip levels for '%s' (%s)\n", item->identifier, T_EncodePixelmapType(item->type));
+            if(item->map != NULL) {
+                i = 0;
+                while(i < cbfn_command->count) {
+                    if(cbfn_command->map_table[i] != item->map)
+                        i++;
+                    else
+                        break;
+                }
+                if(i == cbfn_command->count)
+                    cbfn_command->map_table[cbfn_command->count++] = item->map;
+            }
+            break;
 
-			sprintf(_scratch_string, "%s_%d", _base_string, level);
-			item->identifier = BrMemStrDup(_scratch_string);
-			T_Log("   Level %d '%s' (%d,%d)\n", level++, item->identifier, item->width, item->height);
+        /*
+         * generate mip levels
+         */
+        case T_CBFN_GENERATE_MIP_LEVELS: {
 
-			for(width = item->width >> 1, height = item->height >> 1; (width > 0) && (height > 0); width >>= 1, height >>= 1, level++) {
-				/*
-				 * generate mip level
-				 */
-				cbfn_command->scale_x = width;
-				cbfn_command->scale_y = height;
-				cbfn_command->fwidth = (width > 3)?3:width;
+            int                   level = 0;
+            int                   width, height;
+            t_pixelmap_list_type *tpm;
+            char                  _scratch_string[256];
+            char                  _base_string[256];
 
-				tpm = BrResAllocate(cbfn_command, sizeof(*tpm), BR_MEMORY_APPLICATION);
+            strcpy(_base_string, item->identifier);
+            cbfn_command->new_type = item->type;
 
-				tpm->pixelmap = T_Scale(item, cbfn_command);
+            T_Log("Generating mip levels for '%s' (%s)\n", item->identifier, T_EncodePixelmapType(item->type));
 
-				/*
-				 * keep this!
-				 */
-				T_AddTail(cbfn_command->pixelmap_list, tpm);
+            sprintf(_scratch_string, "%s_%d", _base_string, level);
+            item->identifier = BrMemStrDup(_scratch_string);
+            T_Log("   Level %d '%s' (%d,%d)\n", level++, item->identifier, item->width, item->height);
 
-				sprintf(_scratch_string, "%s_%d", _base_string, level);
-				tpm->pixelmap->identifier = BrMemStrDup(_scratch_string);
-				T_Log("   Level %d '%s' (%d,%d)\n", level, tpm->pixelmap->identifier, width, height);
-				
-				cbfn_command->count++;
-			}
-		}
-		break;
+            for(width = item->width >> 1, height = item->height >> 1; (width > 0) && (height > 0);
+                width >>= 1, height >>= 1, level++) {
+                /*
+                 * generate mip level
+                 */
+                cbfn_command->scale_x = width;
+                cbfn_command->scale_y = height;
+                cbfn_command->fwidth  = (width > 3) ? 3 : width;
 
-		/*
-		 * count number of pixelmaps that have palette (pm->map)
-		 */
-		case T_CBFN_COUNT_PALETTES:
-		
-			if(item->map != NULL)
-				cbfn_command->npals++;
+                tpm = BrResAllocate(cbfn_command, sizeof(*tpm), BR_MEMORY_APPLICATION);
 
-		break;
+                tpm->pixelmap = T_Scale(item, cbfn_command);
 
-		/*
-		 * convert pixelmap from one type to another
-		 * store new pixelmap in convert table[count]
-		 */
-		case T_CBFN_CONVERT_PIXELMAP:
+                /*
+                 * keep this!
+                 */
+                T_AddTail(cbfn_command->pixelmap_list, tpm);
 
-			pm = T_Convert(item, cbfn_command);
+                sprintf(_scratch_string, "%s_%d", _base_string, level);
+                tpm->pixelmap->identifier = BrMemStrDup(_scratch_string);
+                T_Log("   Level %d '%s' (%d,%d)\n", level, tpm->pixelmap->identifier, width, height);
 
-			cbfn_command->convert_table[cbfn_command->count++] = pm;
+                cbfn_command->count++;
+            }
+        } break;
 
-			T_Log("Converted '%s' %s (%d bit) to %s (%d bit)", item->identifier, T_EncodePixelmapType(item->type),
-				BrPixelmapPixelSize(item), T_EncodePixelmapType(pm->type), BrPixelmapPixelSize(pm));
+        /*
+         * count number of pixelmaps that have palette (pm->map)
+         */
+        case T_CBFN_COUNT_PALETTES:
 
-			if(PixelmapTypes[pm->type].needs_palette == 1)
-				T_Log(" with palette type %s (%d bit)", T_EncodePixelmapType(pm->map->type),
-					BrPixelmapPixelSize(pm->map));
+            if(item->map != NULL)
+                cbfn_command->npals++;
 
-			T_Log("\n");
-		break;
+            break;
 
-		/*
-		 * convert pixelmap->map to another type
-		 */
-		case T_CBFN_CONVERT_PALETTES:
+        /*
+         * convert pixelmap from one type to another
+         * store new pixelmap in convert table[count]
+         */
+        case T_CBFN_CONVERT_PIXELMAP:
 
-			if(item->map) {
+            pm = T_Convert(item, cbfn_command);
 
-				cbfn_command->new_type = palette_type;
-				pm = T_Convert(item->map, cbfn_command);
+            cbfn_command->convert_table[cbfn_command->count++] = pm;
 
-				cbfn_command->map_table[cbfn_command->count] = item;
-				cbfn_command->convert_table[cbfn_command->count++] = pm;
+            T_Log("Converted '%s' %s (%d bit) to %s (%d bit)", item->identifier, T_EncodePixelmapType(item->type),
+                  BrPixelmapPixelSize(item), T_EncodePixelmapType(pm->type), BrPixelmapPixelSize(pm));
 
-				T_Log("Converted palette from '%s' (%s) from %s to %s\n",
-					item->identifier, T_EncodePixelmapType(item->type),
-					T_EncodePixelmapType(item->map->type), T_EncodePixelmapType(pm->type));
-			}
+            if(PixelmapTypes[pm->type].needs_palette == 1)
+                T_Log(" with palette type %s (%d bit)", T_EncodePixelmapType(pm->map->type), BrPixelmapPixelSize(pm->map));
 
-		break;
-		
-		/*
-		 * remap pixelmap
-		 */
-		case T_CBFN_REMAP_PIXELMAP:
+            T_Log("\n");
+            break;
 
-			switch(item->type) {
+        /*
+         * convert pixelmap->map to another type
+         */
+        case T_CBFN_CONVERT_PALETTES:
 
-				default:
-				case BR_PMT_INDEX_8:
+            if(item->map) {
 
-					cbfn_command->height = 256;
-					cbfn_command->new_type = BR_PMT_INDEX_8;
-				
-					break;
-					
-				case BR_PMT_INDEX_4:
+                cbfn_command->new_type = palette_type;
+                pm                     = T_Convert(item->map, cbfn_command);
 
-					cbfn_command->height = 16;
-					cbfn_command->new_type = BR_PMT_INDEX_4;
-				
-					break;
-			}
+                cbfn_command->map_table[cbfn_command->count]       = item;
+                cbfn_command->convert_table[cbfn_command->count++] = pm;
 
-			pm = T_Convert(item, cbfn_command);
-				
-			cbfn_command->convert_table[cbfn_command->count++] = pm;
+                T_Log("Converted palette from '%s' (%s) from %s to %s\n", item->identifier, T_EncodePixelmapType(item->type),
+                      T_EncodePixelmapType(item->map->type), T_EncodePixelmapType(pm->type));
+            }
 
-			T_Log("Remapped '%s' %s (%d bit) to %s (%d bit)", item->identifier, T_EncodePixelmapType(item->type),
-				BrPixelmapPixelSize(item), T_EncodePixelmapType(pm->type), BrPixelmapPixelSize(pm));
+            break;
 
-			if(PixelmapTypes[pm->type].needs_palette == 1)
-				T_Log(" with palette type %s (%d bit, %d,%d)", T_EncodePixelmapType(pm->map->type),
-					BrPixelmapPixelSize(pm->map), cbfn_command->base, cbfn_command->range);
+        /*
+         * remap pixelmap
+         */
+        case T_CBFN_REMAP_PIXELMAP:
 
-			T_Log("\n");
+            switch(item->type) {
 
-		break;
+                default:
+                case BR_PMT_INDEX_8:
 
-		/*
-		 * quantize pixelmap to palette
-		 */
-		case T_CBFN_QUANTIZE_PIXELMAP:
+                    cbfn_command->height   = 256;
+                    cbfn_command->new_type = BR_PMT_INDEX_8;
 
-			switch(cbfn_command->current_palette->height) {
+                    break;
 
-				case 16:
-					cbfn_command->new_type = BR_PMT_INDEX_4;
-					cbfn_command->height = 16;
-					
-					break;
-				default:
-					cbfn_command->new_type = BR_PMT_INDEX_8;
-					cbfn_command->height = 256;
+                case BR_PMT_INDEX_4:
 
-					break;                      
-			}
+                    cbfn_command->height   = 16;
+                    cbfn_command->new_type = BR_PMT_INDEX_4;
 
-			pm = T_Convert(item, cbfn_command);
+                    break;
+            }
 
-			cbfn_command->convert_table[cbfn_command->count++] = pm;
+            pm = T_Convert(item, cbfn_command);
 
-			T_Log("Quantized '%s' %s (%d bit) to %s (%d bit)", item->identifier, T_EncodePixelmapType(item->type),
-				BrPixelmapPixelSize(item), T_EncodePixelmapType(pm->type), BrPixelmapPixelSize(pm));
+            cbfn_command->convert_table[cbfn_command->count++] = pm;
 
-			if(PixelmapTypes[pm->type].needs_palette == 1)
-				T_Log(" with palette type %s (%d bit, %d,%d)", T_EncodePixelmapType(pm->map->type),
-					BrPixelmapPixelSize(pm->map), cbfn_command->base, cbfn_command->range);
+            T_Log("Remapped '%s' %s (%d bit) to %s (%d bit)", item->identifier, T_EncodePixelmapType(item->type),
+                  BrPixelmapPixelSize(item), T_EncodePixelmapType(pm->type), BrPixelmapPixelSize(pm));
 
-			T_Log("\n");
-			
-		break;
+            if(PixelmapTypes[pm->type].needs_palette == 1)
+                T_Log(" with palette type %s (%d bit, %d,%d)", T_EncodePixelmapType(pm->map->type),
+                      BrPixelmapPixelSize(pm->map), cbfn_command->base, cbfn_command->range);
 
-		/*
-		 * assign palette to all indexed pixelmaps
-		 */
-		case T_CBFN_ASSIGN_PALETTE:
+            T_Log("\n");
 
-			switch(item->type) {
+            break;
 
-				case BR_PMT_INDEX_4:
-				case BR_PMT_INDEX_8:
-				case BR_PMT_ALPHA_8:
-						/*
-						 * this may lead to stry palettes in memory
-						 */
-						item->map = cbfn_command->current_palette;
-						break;
-			}
+        /*
+         * quantize pixelmap to palette
+         */
+        case T_CBFN_QUANTIZE_PIXELMAP:
 
-			cbfn_command->map_table[cbfn_command->count] = NULL;
-			cbfn_command->convert_table[cbfn_command->count++] = item;
-			
-			T_Log("Assigned palette '%s' (%s) to '%s'\n", cbfn_command->current_palette->identifier,
-				T_EncodePixelmapType(cbfn_command->current_palette->type),
-				item->identifier,
-				T_EncodePixelmapType(item->type));
+            switch(cbfn_command->current_palette->height) {
 
-		break;
+                case 16:
+                    cbfn_command->new_type = BR_PMT_INDEX_4;
+                    cbfn_command->height   = 16;
 
-		/*
-		 * scale pixelmap
-		 */
-		case T_CBFN_SCALE_PIXELMAP:
+                    break;
+                default:
+                    cbfn_command->new_type = BR_PMT_INDEX_8;
+                    cbfn_command->height   = 256;
 
-			pm = T_Scale(item, cbfn_command);
+                    break;
+            }
 
-			cbfn_command->convert_table[cbfn_command->count++] = pm;
+            pm = T_Convert(item, cbfn_command);
 
-			T_Log("Scaled '%s' (%s) to %d,%d\n", pm->identifier, T_EncodePixelmapType(pm->type),
-				pm->width, pm->height);
+            cbfn_command->convert_table[cbfn_command->count++] = pm;
 
-		break;
+            T_Log("Quantized '%s' %s (%d bit) to %s (%d bit)", item->identifier, T_EncodePixelmapType(item->type),
+                  BrPixelmapPixelSize(item), T_EncodePixelmapType(pm->type), BrPixelmapPixelSize(pm));
 
-		/*
-		 * square pixelmap
-		 */
-		case T_CBFN_SQUARE_PIXELMAP:
-			{
-				// Find the largest side and ...
-				br_int_32 size = (item->width > item->height ?
-								 item->width : item->height);
+            if(PixelmapTypes[pm->type].needs_palette == 1)
+                T_Log(" with palette type %s (%d bit, %d,%d)", T_EncodePixelmapType(pm->map->type),
+                      BrPixelmapPixelSize(pm->map), cbfn_command->base, cbfn_command->range);
 
-				double poweroftwo = ceil(log ((double) size) / log(2));
+            T_Log("\n");
+
+            break;
+
+        /*
+         * assign palette to all indexed pixelmaps
+         */
+        case T_CBFN_ASSIGN_PALETTE:
+
+            switch(item->type) {
+
+                case BR_PMT_INDEX_4:
+                case BR_PMT_INDEX_8:
+                case BR_PMT_ALPHA_8:
+                    /*
+                     * this may lead to stry palettes in memory
+                     */
+                    item->map = cbfn_command->current_palette;
+                    break;
+            }
+
+            cbfn_command->map_table[cbfn_command->count]       = NULL;
+            cbfn_command->convert_table[cbfn_command->count++] = item;
+
+            T_Log("Assigned palette '%s' (%s) to '%s'\n", cbfn_command->current_palette->identifier,
+                  T_EncodePixelmapType(cbfn_command->current_palette->type), item->identifier,
+                  T_EncodePixelmapType(item->type));
+
+            break;
+
+        /*
+         * scale pixelmap
+         */
+        case T_CBFN_SCALE_PIXELMAP:
+
+            pm = T_Scale(item, cbfn_command);
+
+            cbfn_command->convert_table[cbfn_command->count++] = pm;
+
+            T_Log("Scaled '%s' (%s) to %d,%d\n", pm->identifier, T_EncodePixelmapType(pm->type), pm->width, pm->height);
+
+            break;
+
+        /*
+         * square pixelmap
+         */
+        case T_CBFN_SQUARE_PIXELMAP: {
+            // Find the largest side and ...
+            br_int_32 size = (item->width > item->height ? item->width : item->height);
+
+            double poweroftwo = ceil(log((double)size) / log(2));
 
 #if defined _DEBUG || defined DEBUG
-				printf ("[m1] p:%lf ", poweroftwo);
+            printf("[m1] p:%lf ", poweroftwo);
 #endif
 
+            // ... calculate the smallest power of 2 not smaller than this value ...
+            size = (br_int_32)pow(2, poweroftwo);
 
-				// ... calculate the smallest power of 2 not smaller than this value ...
-				size = (br_int_32) pow (2, poweroftwo);
-
-				// ... which I now assign as the requested pixelmap size.
-				cbfn_command->scale_x = cbfn_command->scale_y = size;
+            // ... which I now assign as the requested pixelmap size.
+            cbfn_command->scale_x = cbfn_command->scale_y = size;
 
 #if defined _DEBUG || defined DEBUG
-				printf ("[m2] w:%" PRIu16 " h:%" PRIu16 " s:%" PRIu32 " ", item->width, item->height, size);
+            printf("[m2] w:%" PRIu16 " h:%" PRIu16 " s:%" PRIu32 " ", item->width, item->height, size);
 #endif
 
-				pm = T_Scale(item, cbfn_command);
+            pm = T_Scale(item, cbfn_command);
 
-				cbfn_command->convert_table[cbfn_command->count++] = pm;
+            cbfn_command->convert_table[cbfn_command->count++] = pm;
 
-				T_Log("Scaled '%s' (%s) to %d,%d\n", pm->identifier, T_EncodePixelmapType(pm->type),
-					pm->width, pm->height);
-			}
-		break;
+            T_Log("Scaled '%s' (%s) to %d,%d\n", pm->identifier, T_EncodePixelmapType(pm->type), pm->width, pm->height);
+        } break;
 
-		/*
-		 * flip y
-		 */
-		case T_CBFN_FLIP_Y_PIXELMAP:
+        /*
+         * flip y
+         */
+        case T_CBFN_FLIP_Y_PIXELMAP:
 
-			cbfn_command->new_type = item->type;
+            cbfn_command->new_type = item->type;
 
-			pm = T_Convert(item, cbfn_command);
+            pm = T_Convert(item, cbfn_command);
 
-			cbfn_command->convert_table[cbfn_command->count++] = pm;
+            cbfn_command->convert_table[cbfn_command->count++] = pm;
 
-			T_Log("Flipped '%s' (%s) top/bottom\n", pm->identifier, T_EncodePixelmapType(pm->type));
-		break;
+            T_Log("Flipped '%s' (%s) top/bottom\n", pm->identifier, T_EncodePixelmapType(pm->type));
+            break;
 
-		/*
-		 * flip x
-		 */
-		case T_CBFN_FLIP_X_PIXELMAP:
+        /*
+         * flip x
+         */
+        case T_CBFN_FLIP_X_PIXELMAP:
 
-			cbfn_command->new_type = item->type;
+            cbfn_command->new_type = item->type;
 
-			pm = T_Convert(item, cbfn_command);
+            pm = T_Convert(item, cbfn_command);
 
-			cbfn_command->convert_table[cbfn_command->count++] = pm;
+            cbfn_command->convert_table[cbfn_command->count++] = pm;
 
-			T_Log("Flipped '%s' (%s) left/right\n", pm->identifier, T_EncodePixelmapType(pm->type));
-		break;
+            T_Log("Flipped '%s' (%s) left/right\n", pm->identifier, T_EncodePixelmapType(pm->type));
+            break;
 
-		/*
-		 * reset origin
-		 */
-		case T_CBFN_SET_ORIGIN:
+        /*
+         * reset origin
+         */
+        case T_CBFN_SET_ORIGIN:
 
-			item->origin_x = cbfn_command->origin_x;
-			item->origin_y = cbfn_command->origin_y;
+            item->origin_x = cbfn_command->origin_x;
+            item->origin_y = cbfn_command->origin_y;
 
-			T_Log("Origin of '%s' set to %d,%d\n", item->identifier, item->origin_x, item->origin_y);
+            T_Log("Origin of '%s' set to %d,%d\n", item->identifier, item->origin_x, item->origin_y);
 
-		break;
+            break;
 
-		/*
-		 * toggle high/wide palettes
-		 */
-		case T_CBFN_FLIP_HIGH_WIDE_PALETTES:
+        /*
+         * toggle high/wide palettes
+         */
+        case T_CBFN_FLIP_HIGH_WIDE_PALETTES:
 
-			if(item->map) {
+            if(item->map) {
 
-				cbfn_command->new_type = item->map->type;
-				
-				pm = T_Convert(item->map, cbfn_command);
+                cbfn_command->new_type = item->map->type;
 
-				cbfn_command->map_table[cbfn_command->count] = item;
-				cbfn_command->convert_table[cbfn_command->count++] = pm;
+                pm = T_Convert(item->map, cbfn_command);
 
-				T_Log("Flipped palette (%s) from '%s' (%s) from %d,%d to %d,%d\n",
-					T_EncodePixelmapType(item->map->type),
-					item->identifier,
-					T_EncodePixelmapType(item->type),
-					pm->height, pm->width, pm->width, pm->height);
-			}
-		
-		break;
+                cbfn_command->map_table[cbfn_command->count]       = item;
+                cbfn_command->convert_table[cbfn_command->count++] = pm;
+
+                T_Log("Flipped palette (%s) from '%s' (%s) from %d,%d to %d,%d\n", T_EncodePixelmapType(item->map->type),
+                      item->identifier, T_EncodePixelmapType(item->type), pm->height, pm->width, pm->width, pm->height);
+            }
+
+            break;
 
 #ifndef DISABLE_VIEWING
-		case T_CBFN_VIEW_PIXELMAPS:
+        case T_CBFN_VIEW_PIXELMAPS:
 
-			pm = DOSGfxBegin(NULL);
+            pm = DOSGfxBegin(NULL);
 
-			if(pm->type == item->type) {
+            if(pm->type == item->type) {
 
-				int w,h,x,y;
-				br_pixelmap *palette;
-				br_int_16 orgx,orgy;
+                int          w, h, x, y;
+                br_pixelmap *palette;
+                br_int_16    orgx, orgy;
 
-				orgx = item->origin_x;
-				orgy = item->origin_y;
+                orgx = item->origin_x;
+                orgy = item->origin_y;
 
-				item->origin_x = 0;
-				item->origin_y = 0;
+                item->origin_x = 0;
+                item->origin_y = 0;
 
-				w = (item->width>pm->width)?pm->width:item->width;
-				h = (item->height>pm->height)?pm->height:item->height;
+                w = (item->width > pm->width) ? pm->width : item->width;
+                h = (item->height > pm->height) ? pm->height : item->height;
 
-				x = (pm->width - w) >> 1;
-				y = (pm->height - h) >> 1;
+                x = (pm->width - w) >> 1;
+                y = (pm->height - h) >> 1;
 
-				if(item->map != NULL) {
-					/*
-					 * convert palette to BR_PMT_RGBX_888
-					 */
-					cbfn_command->new_type = BR_PMT_RGBX_888;
-					palette = T_Convert(item->map, cbfn_command);
+                if(item->map != NULL) {
+                    /*
+                     * convert palette to BR_PMT_RGBX_888
+                     */
+                    cbfn_command->new_type = BR_PMT_RGBX_888;
+                    palette                = T_Convert(item->map, cbfn_command);
 
-					/*
-					 * convert high/wide
-					 */
-					if(palette->width > palette->height) {
+                    /*
+                     * convert high/wide
+                     */
+                    if(palette->width > palette->height) {
 
-						br_pixelmap *temp_pm;
-						br_uint_32 old_type;                                
+                        br_pixelmap *temp_pm;
+                        br_uint_32   old_type;
 
-						cbfn_command->new_type = palette->type;
-						old_type = cbfn_command->type;
-						cbfn_command->type = T_CBFN_FLIP_HIGH_WIDE_PALETTES;
-				
-						temp_pm = T_Convert(palette, cbfn_command);
+                        cbfn_command->new_type = palette->type;
+                        old_type               = cbfn_command->type;
+                        cbfn_command->type     = T_CBFN_FLIP_HIGH_WIDE_PALETTES;
 
-						BrPixelmapFree(palette);
+                        temp_pm = T_Convert(palette, cbfn_command);
 
-						palette = temp_pm;
-						cbfn_command->type = old_type;
-					}
-					
-					DOSGfxPaletteSet(palette);
+                        BrPixelmapFree(palette);
 
-					BrPixelmapFree(palette);
-				}
-				
-				BrPixelmapRectangleCopy(pm,x,y,item,0,0,w,h);
-	
-				item->origin_x = orgx;
-				item->origin_y = orgy;
+                        palette            = temp_pm;
+                        cbfn_command->type = old_type;
+                    }
 
-				if(getch() == 's') {
+                    DOSGfxPaletteSet(palette);
 
-					br_pixelmap *temp_pm;
+                    BrPixelmapFree(palette);
+                }
 
-					temp_pm = BrPixelmapAllocate(pm->type, pm->width, pm->height, NULL, 0);
-					BrPixelmapRectangleCopy(temp_pm, 0, 0, pm, 0, 0, pm->width, pm->height);
-									    
-					BrPixelmapSave("out.pix", temp_pm);
+                BrPixelmapRectangleCopy(pm, x, y, item, 0, 0, w, h);
 
-					BrPixelmapFree(temp_pm);
-				}
-			
-				DOSGfxEnd();
+                item->origin_x = orgx;
+                item->origin_y = orgy;
 
-			} else {
-				DOSGfxEnd();
+                if(getch() == 's') {
 
-				T_Log("Cannot display '%s' (%s) to screen pixelmap of type %s. Press any key.\n",
-					item->identifier, T_EncodePixelmapType(item->type),
-					T_EncodePixelmapType(pm->type));
+                    br_pixelmap *temp_pm;
 
-				getch();
-			}
+                    temp_pm = BrPixelmapAllocate(pm->type, pm->width, pm->height, NULL, 0);
+                    BrPixelmapRectangleCopy(temp_pm, 0, 0, pm, 0, 0, pm->width, pm->height);
 
-		break;
+                    BrPixelmapSave("out.pix", temp_pm);
+
+                    BrPixelmapFree(temp_pm);
+                }
+
+                DOSGfxEnd();
+
+            } else {
+                DOSGfxEnd();
+
+                T_Log("Cannot display '%s' (%s) to screen pixelmap of type %s. Press any key.\n", item->identifier,
+                      T_EncodePixelmapType(item->type), T_EncodePixelmapType(pm->type));
+
+                getch();
+            }
+
+            break;
 #endif
-	}
+    }
 
-	return ret;
+    return ret;
 }

@@ -9,14 +9,14 @@
 #define _SAVEPIX_H_
 
 typedef struct Output_Types {
-	char *name;
-	br_uint_32 type;
+    char      *name;
+    br_uint_32 type;
 } Output_Types;
 
 extern Output_Types OutputFileTypes[];
-extern int OutputFileTypesSize;
-extern int OutputType;
+extern int          OutputFileTypesSize;
+extern int          OutputType;
 
-void T_OutputPixelmap(char *filename,br_uint_32 type);
+void T_OutputPixelmap(char *filename, br_uint_32 type);
 
 #endif

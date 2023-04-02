@@ -35,154 +35,152 @@
 #define PAL_SIZE 256
 
 void SetShades(int total, char *table);
-int IsPalette(br_pixelmap *pm);
+int  IsPalette(br_pixelmap *pm);
 
 /*
  * Options
  */
-int NumShades = 256;
-int DestBase = 0;
-int DestRange = 256;
-float Hither = 0.1;
-float Yon = 100.0;
-float MinFog = -1.0;
-float MaxFog = -1.0;
-int FogR = 128, FogG = 128, FogB = 128;
+int   NumShades = 256;
+int   DestBase  = 0;
+int   DestRange = 256;
+float Hither    = 0.1;
+float Yon       = 100.0;
+float MinFog    = -1.0;
+float MaxFog    = -1.0;
+int   FogR = 128, FogG = 128, FogB = 128;
 
-char *SrcPalName = NULL;
+char *SrcPalName  = NULL;
 char *DestPalName = NULL;
-char *OutputName = NULL;
+char *OutputName  = NULL;
 
 /*
  * The two palettes
  */
-br_pixelmap *SrcPalette,*DestPalette;
+br_pixelmap *SrcPalette, *DestPalette;
 
-int main(int argc, char ** argv)
+int main(int argc, char **argv)
 {
-	char	*cp;
-	br_pixelmap *shades_map;
-	int i;
+    char        *cp;
+    br_pixelmap *shades_map;
+    int          i;
 
-    BR_BANNER("MKFOG","1996","$Revision: 1.1 $");
+    BR_BANNER("MKFOG", "1996", "$Revision: 1.1 $");
 
-	BrBegin();
-	
-	while (argv++, --argc) {
-		if (**argv == '-') {
-			/*
-			 * Got one or more flags
-			 */
-			for (cp = *argv + 1; *cp; cp++) {
+    BrBegin();
 
-                if (strchr("odnrcfs", *cp)) {
-					argv++;
-					if(--argc == 0)
-						BR_ERROR1("The %c option requires an argument", *cp);
-				}
+    while(argv++, --argc) {
+        if(**argv == '-') {
+            /*
+             * Got one or more flags
+             */
+            for(cp = *argv + 1; *cp; cp++) {
 
-				switch (*cp) {
+                if(strchr("odnrcfs", *cp)) {
+                    argv++;
+                    if(--argc == 0)
+                        BR_ERROR1("The %c option requires an argument", *cp);
+                }
 
-				default:
-					BR_ERROR1("unknown option '%c'\n", *cp);
-					break;
+                switch(*cp) {
 
-				/*
-				 * Usage
-				 */
-				case '?':
-                    fprintf(stdout,
-"usage: mkfog <palette> [options]\n"
-"\n"
-"    Generates a fog table to shade indices from a source palette into\n"
-"    a destination palette.\n"
-"\n"
-"        <palette>             Source palette\n"
-"        -o <fog-table>        Output fog table pixmap\n"
-"        [-d <dest-palette>]   Destination palette if different from source\n"
-"        [-n <num_shades>]     Number of shades to generate (default = 256)\n"
-"        [-r <base>,<size>]    Range in output palette (default = 0,256)\n"
-"        [-c <hither>,<yon>]   Camera settings (default = 0.1,100)\n"
-"        [-f <min>,<max>]      Fog range (default = hither,yon)\n"
-"        [-s <r>,<g>,<b>]      Fog shade (default = 128,128,128)\n");
-					exit(0);
+                    default:
+                        BR_ERROR1("unknown option '%c'\n", *cp);
+                        break;
 
-				/*
-				 * Output filename
-				 */
-				case 'o':
-					if(OutputName != NULL)
-						BR_ERROR0("Output name specified twice");
+                    /*
+                     * Usage
+                     */
+                    case '?':
+                        fprintf(stdout, "usage: mkfog <palette> [options]\n"
+                                        "\n"
+                                        "    Generates a fog table to shade indices from a source palette into\n"
+                                        "    a destination palette.\n"
+                                        "\n"
+                                        "        <palette>             Source palette\n"
+                                        "        -o <fog-table>        Output fog table pixmap\n"
+                                        "        [-d <dest-palette>]   Destination palette if different from source\n"
+                                        "        [-n <num_shades>]     Number of shades to generate (default = 256)\n"
+                                        "        [-r <base>,<size>]    Range in output palette (default = 0,256)\n"
+                                        "        [-c <hither>,<yon>]   Camera settings (default = 0.1,100)\n"
+                                        "        [-f <min>,<max>]      Fog range (default = hither,yon)\n"
+                                        "        [-s <r>,<g>,<b>]      Fog shade (default = 128,128,128)\n");
+                        exit(0);
 
-					OutputName = *argv;
-					break;
+                    /*
+                     * Output filename
+                     */
+                    case 'o':
+                        if(OutputName != NULL)
+                            BR_ERROR0("Output name specified twice");
 
-				/*
-				 * Destination palette
-				 */
-				case 'd':
-					if(DestPalName != NULL)
-						BR_ERROR0("Destination palette name specified twice");
+                        OutputName = *argv;
+                        break;
 
-					DestPalName = *argv;
-					break;
+                    /*
+                     * Destination palette
+                     */
+                    case 'd':
+                        if(DestPalName != NULL)
+                            BR_ERROR0("Destination palette name specified twice");
 
-				/*
-				 * Number of shades
-				 */
-				case 'n':
-					NumShades = atoi(*argv);
-					break;
+                        DestPalName = *argv;
+                        break;
 
-				/*
-				 * Range in destination palette
-				 */
-				case 'r':
-					if(sscanf(*argv,"%d,%d",&DestBase,&DestRange) != 2)
-						BR_ERROR0("Invalid range");
-					break;
-                                /*
-                                 * Camera settings
-                                 */
-                                case 'c':
-                                        if(sscanf(*argv,"%g,%g",&Hither,&Yon) != 2)
-                                                BR_ERROR0("Invalid camera settings");
-                                        if(Hither <= 0.0 || Yon <= Hither)
-                                                BR_ERROR0("Invalid camera settings");
-					break;
-                                /*
-                                 * Fog setings
-                                 */
-                                case 'f':
-                                        if(sscanf(*argv,"%g,%g",&MinFog,&MaxFog) != 2){
-                                                BR_ERROR0("Invalid fog settings");
-                                        }
-                                        if(MinFog <= 0.0 || MaxFog <= MinFog)
-                                                BR_ERROR0("Invalid fog settings");
-					break;
-                                /*
-                                 * Fog shade
-                                 */
-                                case 's':
-                                        if(sscanf(*argv,"%d,%d,%d",&FogR,&FogG,&FogB) != 3){
-                                                BR_ERROR0("Invalid fog settings");
-                                        }
-                                        if(FogR < 0   || FogG < 0   || FogB < 0  ||
-                                           FogR > 255 || FogG > 255 || FogB > 255)
-                                                BR_ERROR0("Invalid fog settings");
-					break;
-				}
-			}
-		} else {
-			/*
-			 * Source palette name
-			 */
-			if(SrcPalName != NULL)
-				BR_ERROR0("Source palette name specified twice");
+                    /*
+                     * Number of shades
+                     */
+                    case 'n':
+                        NumShades = atoi(*argv);
+                        break;
 
-			SrcPalName = *argv;
-		}
-	}
+                    /*
+                     * Range in destination palette
+                     */
+                    case 'r':
+                        if(sscanf(*argv, "%d,%d", &DestBase, &DestRange) != 2)
+                            BR_ERROR0("Invalid range");
+                        break;
+                    /*
+                     * Camera settings
+                     */
+                    case 'c':
+                        if(sscanf(*argv, "%g,%g", &Hither, &Yon) != 2)
+                            BR_ERROR0("Invalid camera settings");
+                        if(Hither <= 0.0 || Yon <= Hither)
+                            BR_ERROR0("Invalid camera settings");
+                        break;
+                    /*
+                     * Fog setings
+                     */
+                    case 'f':
+                        if(sscanf(*argv, "%g,%g", &MinFog, &MaxFog) != 2) {
+                            BR_ERROR0("Invalid fog settings");
+                        }
+                        if(MinFog <= 0.0 || MaxFog <= MinFog)
+                            BR_ERROR0("Invalid fog settings");
+                        break;
+                    /*
+                     * Fog shade
+                     */
+                    case 's':
+                        if(sscanf(*argv, "%d,%d,%d", &FogR, &FogG, &FogB) != 3) {
+                            BR_ERROR0("Invalid fog settings");
+                        }
+                        if(FogR < 0 || FogG < 0 || FogB < 0 || FogR > 255 || FogG > 255 || FogB > 255)
+                            BR_ERROR0("Invalid fog settings");
+                        break;
+                }
+            }
+        } else {
+            /*
+             * Source palette name
+             */
+            if(SrcPalName != NULL)
+                BR_ERROR0("Source palette name specified twice");
+
+            SrcPalName = *argv;
+        }
+    }
 #if 0
 	printf("SrcPalName  = %s\n",SrcPalName?SrcPalName:"<NULL>");
 	printf("DestPalName = %s\n",DestPalName?DestPalName:"<NULL>");
@@ -192,60 +190,60 @@ int main(int argc, char ** argv)
 	printf("DestRange   = %d\n",DestRange);
 #endif
 
-        if(MinFog == -1)
-                MinFog = Hither;
-        if(MaxFog == -1)
-                MaxFog = Yon;
+    if(MinFog == -1)
+        MinFog = Hither;
+    if(MaxFog == -1)
+        MaxFog = Yon;
 
-        /*
-	 * Read in palette files
-	 */
-	if(SrcPalName == NULL)
-		BR_ERROR0("No source palette given");
+    /*
+     * Read in palette files
+     */
+    if(SrcPalName == NULL)
+        BR_ERROR0("No source palette given");
 
-	SrcPalette = BrPixelmapLoad(SrcPalName);
-	if(SrcPalette == NULL)
-		BR_ERROR1("Could not read '%s'",SrcPalName);
-		
-	if(!IsPalette(SrcPalette))
-		if(SrcPalette->map && IsPalette(SrcPalette->map))
-			SrcPalette = SrcPalette->map;
-		else
-			BR_ERROR1("'%s' does not contain a valid palette",SrcPalName);
+    SrcPalette = BrPixelmapLoad(SrcPalName);
+    if(SrcPalette == NULL)
+        BR_ERROR1("Could not read '%s'", SrcPalName);
 
-	if(DestPalName == NULL)
-	    	DestPalName = SrcPalName;
+    if(!IsPalette(SrcPalette))
+        if(SrcPalette->map && IsPalette(SrcPalette->map))
+            SrcPalette = SrcPalette->map;
+        else
+            BR_ERROR1("'%s' does not contain a valid palette", SrcPalName);
 
-	DestPalette = BrPixelmapLoad(DestPalName);
+    if(DestPalName == NULL)
+        DestPalName = SrcPalName;
 
-	if(DestPalette == NULL)
-		BR_ERROR1("Could not read '%s'",DestPalName);
+    DestPalette = BrPixelmapLoad(DestPalName);
 
-	if(!IsPalette(DestPalette))
-		if(DestPalette->map && IsPalette(DestPalette->map))
-			DestPalette = DestPalette->map;
-		else
-			BR_ERROR1("'%s' does not contain a valid palette",DestPalName);
-	    
-	/*
-	 * Allocate pixelmap for shades
-	 */
- 	shades_map = BrPixelmapAllocate(BR_PMT_INDEX_8,256,NumShades,NULL,0);
-	shades_map->identifier = "shade_table";
+    if(DestPalette == NULL)
+        BR_ERROR1("Could not read '%s'", DestPalName);
 
-	/*
-	 * Calculate shade table
-	 */
-        SetShades(NumShades, shades_map->pixels);
+    if(!IsPalette(DestPalette))
+        if(DestPalette->map && IsPalette(DestPalette->map))
+            DestPalette = DestPalette->map;
+        else
+            BR_ERROR1("'%s' does not contain a valid palette", DestPalName);
 
-	/*
-	 * Write out shade file
-	 */
-	BrPixelmapSave(OutputName,shades_map);
+    /*
+     * Allocate pixelmap for shades
+     */
+    shades_map             = BrPixelmapAllocate(BR_PMT_INDEX_8, 256, NumShades, NULL, 0);
+    shades_map->identifier = "shade_table";
 
-	BrEnd();
+    /*
+     * Calculate shade table
+     */
+    SetShades(NumShades, shades_map->pixels);
 
-	return 0;
+    /*
+     * Write out shade file
+     */
+    BrPixelmapSave(OutputName, shades_map);
+
+    BrEnd();
+
+    return 0;
 }
 
 /*
@@ -253,9 +251,7 @@ int main(int argc, char ** argv)
  */
 int IsPalette(br_pixelmap *pm)
 {
-	return (pm->type == BR_PMT_RGBX_888 &&
-	        pm->width == 1 &&
-			pm->height == PAL_SIZE);
+    return (pm->type == BR_PMT_RGBX_888 && pm->width == 1 && pm->height == PAL_SIZE);
 }
 
 /*
@@ -264,12 +260,14 @@ int IsPalette(br_pixelmap *pm)
  */
 void MakeColour(int r, int g, int b, int fr, int fg, int fb, int *nr, int *ng, int *nb, float level)
 {
-        if(level > 1) level = 1;
-        if(level < 0) level = 0;
+    if(level > 1)
+        level = 1;
+    if(level < 0)
+        level = 0;
 
-        *nr = level*fr + (1.0-level)*r;
-        *ng = level*fg + (1.0-level)*g;
-        *nb = level*fb + (1.0-level)*b;
+    *nr = level * fr + (1.0 - level) * r;
+    *ng = level * fg + (1.0 - level) * g;
+    *nb = level * fb + (1.0 - level) * b;
 }
 
 /*
@@ -277,65 +275,62 @@ void MakeColour(int r, int g, int b, int fr, int fg, int fb, int *nr, int *ng, i
  */
 void SetShades(int total, char *table)
 {
-	int c,n,c3,n3,i,near_c,min_d,d;
-	int r,g,b,cr,cg,cb,rd,gd,bd,j;
-	char *op;
-        br_actor *camera;
-        br_scalar viewz;
+    int       c, n, c3, n3, i, near_c, min_d, d;
+    int       r, g, b, cr, cg, cb, rd, gd, bd, j;
+    char     *op;
+    br_actor *camera;
+    br_scalar viewz;
 
-	br_colour *cp,*dp;
+    br_colour *cp, *dp;
 
-        camera = BrActorAllocate(BR_ACTOR_CAMERA, NULL);
-        ((br_camera *)camera->type_data)->hither_z = BrFloatToScalar(Hither);
-        ((br_camera *)camera->type_data)->yon_z = BrFloatToScalar(Yon);
+    camera                                     = BrActorAllocate(BR_ACTOR_CAMERA, NULL);
+    ((br_camera *)camera->type_data)->hither_z = BrFloatToScalar(Hither);
+    ((br_camera *)camera->type_data)->yon_z    = BrFloatToScalar(Yon);
 
-        for(c=0, cp = SrcPalette->pixels; c< PAL_SIZE; c++, cp++) {
+    for(c = 0, cp = SrcPalette->pixels; c < PAL_SIZE; c++, cp++) {
 
-		/*
-		 * Fetch source colour
-		 */
-		cr = BR_RED(*cp);
-		cg = BR_GRN(*cp);
-		cb = BR_BLU(*cp);
+        /*
+         * Fetch source colour
+         */
+        cr = BR_RED(*cp);
+        cg = BR_GRN(*cp);
+        cb = BR_BLU(*cp);
 
-		op = table++;
+        op = table++;
 
-		/*
-		 * For each shade level...
-		 */
- 		for(i=0; i< total; i++) {
+        /*
+         * For each shade level...
+         */
+        for(i = 0; i < total; i++) {
 
-                        viewz = BrScreenZToCamera(camera,
-                          BR_SCALAR(((float)i/(float)total)*65536.0-32768.0));
+            viewz = BrScreenZToCamera(camera, BR_SCALAR(((float)i / (float)total) * 65536.0 - 32768.0));
 
-			/*
-			 * Light source colour ->RGB
-			 */
-                        MakeColour(cr,cg,cb,FogR,FogG,FogB,&r,&g,&b,
-                                   (BrScalarToFloat(viewz)+MinFog)/
-                                        (MinFog-MaxFog));
+            /*
+             * Light source colour ->RGB
+             */
+            MakeColour(cr, cg, cb, FogR, FogG, FogB, &r, &g, &b, (BrScalarToFloat(viewz) + MinFog) / (MinFog - MaxFog));
 
-			/*
-			 * Look for nearest colour in destination palette
-			 */
-			near_c = 127;
-			min_d = INT_MAX;
+            /*
+             * Look for nearest colour in destination palette
+             */
+            near_c = 127;
+            min_d  = INT_MAX;
 
-			for(n=DestBase, dp = DestPalette->pixels; n < (DestBase+DestRange); n++) {
+            for(n = DestBase, dp = DestPalette->pixels; n < (DestBase + DestRange); n++) {
 
-				rd = BR_RED(dp[n]) - r;
-				gd = BR_GRN(dp[n]) - g;
-				bd = BR_BLU(dp[n]) - b;
+                rd = BR_RED(dp[n]) - r;
+                gd = BR_GRN(dp[n]) - g;
+                bd = BR_BLU(dp[n]) - b;
 
-				d = rd*rd + gd*gd + bd*bd;
+                d = rd * rd + gd * gd + bd * bd;
 
-				if (d < min_d) {
-	 					min_d = d;
-						near_c = n;
-				}
-			}
-			*op = near_c;
-			op += PAL_SIZE;
-		}
-	}
+                if(d < min_d) {
+                    min_d  = d;
+                    near_c = n;
+                }
+            }
+            *op = near_c;
+            op += PAL_SIZE;
+        }
+    }
 }
