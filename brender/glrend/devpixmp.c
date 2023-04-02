@@ -534,8 +534,8 @@ br_error BR_CMETHOD_DECL(br_device_pixelmap_gl, match)(br_device_pixelmap *self,
     br_int_32                  count;
     br_uint_8                  type;
     struct pixelmapMatchTokens mt = {
-        .width      = -1,
-        .height     = -1,
+        .width      = self->pm_width,
+        .height     = self->pm_height,
         .pixel_bits = -1,
         .type       = BR_PMT_MAX,
         .use_type   = BRT_NONE,
@@ -564,9 +564,7 @@ br_error BR_CMETHOD_DECL(br_device_pixelmap_gl, match)(br_device_pixelmap *self,
         if(mt.pixel_bits != 16)
             return BRE_FAIL;
 
-        type      = BR_PMT_DEPTH_16;
-        mt.width  = self->pm_width;
-        mt.height = self->pm_height;
+        type = BR_PMT_DEPTH_16;
     } else if(mt.type != BR_PMT_MAX) {
         type = mt.type;
     } else {
