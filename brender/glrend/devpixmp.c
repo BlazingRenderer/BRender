@@ -376,7 +376,7 @@ static br_error create_pixelmap(br_device_pixelmap **newpm, br_object *parent, b
 
     if(recreate_renderbuffers(pm) != BRE_OK) {
         delete_gl_resources(pm);
-        BrResFreeNoCallback(newpm);
+        BrResFreeNoCallback(pm);
         return BRE_FAIL;
     }
 
