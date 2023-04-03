@@ -971,4 +971,7 @@ static struct br_device_pixelmap_dispatch devicePixelmapDispatch_ddo = {
 
     ._directLock   = BR_CMETHOD_REF(br_device_pixelmap_ddo, directLock),
     ._directUnlock = BR_CMETHOD_REF(br_device_pixelmap_ddo, directUnlock),
+
+    ._getControls = BR_CMETHOD_REF(br_device_pixelmap_gen, getControls),
+    ._setControls = BR_CMETHOD_REF(br_device_pixelmap_gen, setControls),
 };
