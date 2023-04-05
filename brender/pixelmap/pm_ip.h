@@ -270,16 +270,18 @@ br_error GeneralRectangleStretchCopy(struct br_device_pixelmap *dst, br_rectangl
 /*
  * genclip.c
  */
-br_clip_result BR_RESIDENT_ENTRY PixelmapPointClip(br_point *out, br_point *in, br_pixelmap *pm);
-br_clip_result BR_RESIDENT_ENTRY PixelmapLineClip(br_point *s_out, br_point *e_out, br_point *s_in, br_point *e_in,
-                                                  br_pixelmap *pm);
-br_clip_result BR_RESIDENT_ENTRY PixelmapRectangleClip(br_rectangle *out, br_rectangle *in, br_pixelmap *pm);
-br_clip_result BR_RESIDENT_ENTRY PixelmapRectangleClipTwo(br_rectangle *r_out, br_point *p_out, br_rectangle *r_in,
-                                                          br_point *p_in, br_pixelmap *pm_dst, br_pixelmap *pm_src);
-br_clip_result BR_RESIDENT_ENTRY PixelmapRectanglesClipTwo(br_rectangle *s_out, br_rectangle *d_out, br_rectangle *s_in,
-                                                           br_rectangle *d_in, br_pixelmap *pm_dst, br_pixelmap *pm_src);
-br_clip_result BR_RESIDENT_ENTRY PixelmapCopyBitsClip(br_rectangle *r_out, br_point *p_out, br_rectangle *r_in,
-                                                      br_point *p_in, br_pixelmap *pm_dst);
+br_clip_result BR_RESIDENT_ENTRY PixelmapPointClip(br_point *out, const br_point *in, const br_pixelmap *pm);
+br_clip_result BR_RESIDENT_ENTRY PixelmapLineClip(br_point *s_out, br_point *e_out, const br_point *s_in,
+                                                  const br_point *e_in, const br_pixelmap *pm);
+br_clip_result BR_RESIDENT_ENTRY PixelmapRectangleClip(br_rectangle *out, const br_rectangle *in, const br_pixelmap *pm);
+br_clip_result BR_RESIDENT_ENTRY PixelmapRectangleClipTwo(br_rectangle *r_out, br_point *p_out,
+                                                          const br_rectangle *r_in, const br_point *p_in,
+                                                          const br_pixelmap *pm_dst, const br_pixelmap *pm_src);
+br_clip_result BR_RESIDENT_ENTRY PixelmapRectanglesClipTwo(br_rectangle *s_out, br_rectangle *d_out,
+                                                           const br_rectangle *s_in, const br_rectangle *d_in,
+                                                           const br_pixelmap *pm_dst, const br_pixelmap *pm_src);
+br_clip_result BR_RESIDENT_ENTRY PixelmapCopyBitsClip(br_rectangle *r_out, br_point *p_out, const br_rectangle *r_in,
+                                                      const br_point *p_in, const br_pixelmap *pm_dst);
 
 #include "memloops.h"
 
