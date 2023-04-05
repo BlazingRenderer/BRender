@@ -2,14 +2,62 @@
 #include <brender.h>
 #include <brsdl.h>
 
+/*
+ * HSL -> RGB conversion code modified from https://gist.github.com/ciembor/1494530
+ */
+
+/*
+ * Converts an HUE to r, g or b.
+ * returns float in the set [0, 1].
+ */
+float hue2rgb(float p, float q, float t)
+{
+
+    if(t < 0.0f)
+        t += 1.0f;
+    if(t > 1.0f)
+        t -= 1.0f;
+    if(t < 1.0f / 6.0f)
+        return p + (q - p) * 6.0f * t;
+    if(t < 1.0f / 2.0f)
+        return q;
+    if(t < 2.0f / 3.0f)
+        return p + (q - p) * (2.0f / 3.0f - t) * 6.0f;
+
+    return p;
+}
+
+/*
+ * Converts an HSL color value to RGB. Conversion formula
+ * adapted from http://en.wikipedia.org/wiki/HSL_color_space.
+ * Assumes h, s, and l are contained in the set [0, 1] and
+ * returns RGB in the set [0, 255].
+ */
+br_colour hsl2rgb(float h, float s, float l)
+{
+    float p, q;
+
+    if(0 == s) {
+        /* achromatic */
+        return BR_COLOUR_RGB((br_colour)(l * 255.0f), (br_colour)(l * 255.0f), (br_colour)(l * 255.0f));
+    }
+
+    q = l < 0.5 ? l * (1 + s) : l + s - l * s;
+    p = 2 * l - q;
+    return BR_COLOUR_RGB((br_colour)(hue2rgb(p, q, h + 1.0f / 3.0f) * 255.0f), (br_colour)(hue2rgb(p, q, h) * 255.0f),
+                         (br_colour)(hue2rgb(p, q, h - 1.0f / 3.0f) * 255.0f));
+}
+
 int main(int argc, char **argv)
 {
     SDL_Window  *sdl_window;
-    br_pixelmap *screen, *colour_buffer, *depth_buffer;
-    int          width, height, ret = -1;
+    br_pixelmap *screen = NULL, *colour_buffer = NULL, *depth_buffer = NULL;
+    int          width, height;
+    int          ret = -1;
     br_error     r;
     br_uint_64   ticks_last, ticks_now;
-    br_pixelmap *checkerboard, *last_frame;
+    br_pixelmap *checkerboard, *last_frame_memory, *last_frame_device, *rainbow_rect;
+    float        h, s, l;
 
     /*
      * Init SDL
@@ -47,7 +95,7 @@ int main(int argc, char **argv)
         goto screen_creation_failed;
     }
 
-    if((colour_buffer = BrPixelmapMatchTypedSized(screen, BR_PMMATCH_OFFSCREEN, BR_PMT_RGB_888, width, height)) == NULL) {
+    if((colour_buffer = BrPixelmapMatchTypedSized(screen, BR_PMMATCH_OFFSCREEN, BR_PMT_RGBX_888, width, height)) == NULL) {
         BrLogError("APP", "BrPixelmapMatchTypedSized() failed.");
         goto screen_creation_failed;
     }
@@ -65,10 +113,21 @@ int main(int argc, char **argv)
 
     ticks_last = SDL_GetTicks64();
 
-    last_frame = BrPixelmapAllocate(BR_PMT_RGBA_8888, colour_buffer->width, colour_buffer->height, NULL, BR_PMAF_NORMAL);
+    last_frame_memory = BrPixelmapAllocate(colour_buffer->type, colour_buffer->width, colour_buffer->height, NULL,
+                                           BR_PMAF_NORMAL);
+    last_frame_device = BrPixelmapMatch(colour_buffer, BR_PMMATCH_OFFSCREEN);
+
+    rainbow_rect = BrPixelmapAllocate(BR_PMT_RGBX_888, 128, 128, NULL, BR_PMAF_NORMAL);
+    BrPixelmapFill(rainbow_rect, BR_COLOUR_RGB(0, 0, 0));
+
+    /* Create a rotating rainbow gradient for effect. */
+    h = 0.0f;
+    s = 1.0f;
+    l = 0.5f;
 
     for(SDL_Event evt;;) {
-        float dt;
+        br_colour col;
+        float     dt;
 
         ticks_now  = SDL_GetTicks64();
         dt         = (float)(ticks_now - ticks_last) / 1000.0f;
@@ -117,14 +176,39 @@ int main(int argc, char **argv)
         BrPixelmapRectangleStretchCopy(colour_buffer, -128, -128, 256, 256, checkerboard, 0, 0, checkerboard->width,
                                        checkerboard->height);
 
-        /* Draw the previous frame (black initially) in the top-right corner. */
-        BrPixelmapRectangleStretchCopy(colour_buffer, 160, -320, 1280 / 3, 720 / 3, last_frame, 0, 0, last_frame->width,
-                                       last_frame->height);
+        /*
+         * Draw the previous frame (black initially) in the top-right corner.
+         * Tests memory->device stretch copy.
+         */
+        BrPixelmapRectangleStretchCopy(colour_buffer, 160, -320, 1280 / 3, 720 / 3, last_frame_memory, 0, 0,
+                                       last_frame_memory->width, last_frame_memory->height);
+        BrPixelmapText(colour_buffer, 160, -340, 0xFF0000FF, BrFontProp7x9, "Memory copy");
+
+        /*
+         * Draw the previous frame (black initially) underneath it.
+         * Tests device->device stretch copy.
+         */
+        BrPixelmapRectangleStretchCopy(colour_buffer, 160, 0, 1280 / 3, 720 / 3, last_frame_device, -last_frame_device->origin_x,
+                                       -last_frame_device->origin_y, last_frame_device->width, last_frame_device->height);
+        BrPixelmapText(colour_buffer, 160, -20, 0xFF0000FF, BrFontProp7x9, "Device copy");
+
+        /*
+         * Put our rainbow rect somewhere.
+         * Tests memory->device non-stretch copy.
+         */
+        h   = fmodf(h + dt * 0.1f, 1.0f);
+        col = hsl2rgb(h, s, l);
+        BrPixelmapFill(rainbow_rect, col);
+        BrPixelmapRectangleCopy(colour_buffer, -500, 0, rainbow_rect, -rainbow_rect->base_x, -rainbow_rect->base_y,
+                                rainbow_rect->width, rainbow_rect->height);
 
         BrPixelmapDoubleBuffer(screen, colour_buffer);
 
-        /* Capture the last frame. */
-        BrPixelmapCopy(last_frame, colour_buffer);
+        /* Capture the last frame, using a device->memory copy. */
+        BrPixelmapCopy(last_frame_memory, colour_buffer);
+
+        /* Capture the last frame, using a device->device copy. */
+        BrPixelmapCopy(last_frame_device, colour_buffer);
     }
 
 done:
