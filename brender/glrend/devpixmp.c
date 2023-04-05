@@ -643,8 +643,8 @@ br_error BR_CMETHOD_DECL(br_device_pixelmap_gl, rectangleCopy)(br_device_pixelma
 {
     /* Device->Device non-addressable same-size copy. */
     br_rectangle r = {
-        .x = -self->pm_origin_x,
-        .y = -self->pm_origin_y,
+        .x = p->x,
+        .y = p->y,
         .w = self->pm_width,
         .h = self->pm_height,
     };
@@ -747,15 +747,13 @@ br_error BR_CMETHOD_DECL(br_device_pixelmap_gl, rectangleCopyTo)(br_device_pixel
 {
     /* Pixelmap->Device, addressable same-size copy. */
 
-    /* FIXME: Still have no idea what p is for. */
-
-    /* Do a stretch copy with no stretching. */
     br_rectangle r = {
-        .x = -self->pm_origin_x,
-        .y = -self->pm_origin_y,
-        .w = self->pm_width,
-        .h = self->pm_height,
+        .x = p->x,
+        .y = p->y,
+        .w = src->pm_width,
+        .h = src->pm_height,
     };
+
     return BR_CMETHOD(br_device_pixelmap_gl, rectangleStretchCopyTo)(self, &r, src, sr);
 }
 
