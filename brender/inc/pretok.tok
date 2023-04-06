@@ -848,6 +848,8 @@ WINDOW_BUFFER_METHOD			token
 	DIBSECTION						none
 	DIRECTDRAW						none
 
+SURFACE_HANDLE          handle
+
 # DirectDraw specific tokens
 
 
