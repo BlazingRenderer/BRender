@@ -652,11 +652,6 @@ br_error BR_CMETHOD_DECL(br_device_pixelmap_mem, fill)(br_device_pixelmap *self,
             _MemFill_A(DevicePixelmapMemAddress(self, 0, self->pm_height - 1, bytes), self->pm_width * self->pm_height,
                        bytes, colour);
 
-    else if((self->pm_row_bytes & 7) == 0)
-
-        _MemRectFill_A(DevicePixelmapMemAddress(self, 0, 0, bytes), self->pm_width, self->pm_height, self->pm_row_bytes,
-                       bytes, colour);
-
     else {
 
         char      *d;
@@ -1027,15 +1022,6 @@ br_error BR_CMETHOD_DECL(br_device_pixelmap_mem, rectangleFill)(br_device_pixelm
         else
             _MemFill_A(DevicePixelmapMemAddress(self, arect.x, arect.y + arect.h - 1, bytes), arect.w * arect.h, bytes,
                        colour);
-
-    /*
-     * Rectangle fill only works when qword alignment is the same from row
-     * to row
-     */
-    else if((self->pm_row_bytes & 7) == 0)
-
-        _MemRectFill_A(DevicePixelmapMemAddress(self, arect.x, arect.y, bytes), arect.w, arect.h, self->pm_row_bytes,
-                       bytes, colour);
 
     else {
 

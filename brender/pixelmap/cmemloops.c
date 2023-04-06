@@ -173,17 +173,6 @@ void _MemFill_A(char *dest, br_uint_32 pixels, br_uint_32 bpp, br_uint_32 colour
     }
 }
 
-void _MemRectFill_A(char *dest, br_uint_32 pwidth, br_uint_32 pheight, br_int_32 d_stride, br_uint_32 bpp, br_uint_32 colour)
-{
-
-    /* Called like:
-     *_MemRectFill_A(DevicePixelmapMemAddress(self,0,0,bytes),self->pm_pixels_qualifier,
-     * 		self->pm_width,self->pm_height, self->pm_row_bytes, bytes, colour);
-     */
-
-    MemFill8((br_uint_8 *)dest, (br_uint_8)colour, (d_stride * pwidth) * pheight);
-}
-
 void _MemRectCopy_A(char *dest, const char *src, br_uint_16 pwidth, br_uint_16 pheight, br_int_32 d_stride,
                     br_int_32 s_stride, br_uint_32 bpp)
 {
