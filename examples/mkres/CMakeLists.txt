@@ -5,5 +5,6 @@ add_executable(mkres
         quad.c
         cube.c
         checkerboard.c
+        smpte.c
 )
 target_link_libraries(mkres BRender::Core)
