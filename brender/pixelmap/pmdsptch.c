@@ -506,7 +506,7 @@ br_error DispatchRectangleStretchCopy(br_device_pixelmap *self, br_rectangle *r,
         /*
          * Spot case of copying from device (to addressable memory)
          */
-        return DevicePixelmapRectangleStretchCopyFrom(src, r, (br_device_pixelmap *)self, s);
+        return DevicePixelmapRectangleStretchCopyFrom(src, s, (br_device_pixelmap *)self, r);
     else
         /*
          * Otherwise use a general copy with intermediate buffer
