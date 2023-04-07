@@ -159,13 +159,22 @@ class br_device_pixelmap : public br_object {
 
 		virtual br_error BR_METHOD rectangle(br_rectangle *rect, br_uint_32 colour);
 		virtual br_error BR_METHOD rectangle2(br_rectangle *rect, br_uint_32 colour_tl, br_uint_32 colour_br);
+
+		// Device -> device non-stretch
 		virtual br_error BR_METHOD rectangleCopy(br_point *p, class br_device_pixelmap *src, br_rectangle *src_rect);
+		// Memory -> device non-stretch
 		virtual br_error BR_METHOD rectangleCopyTo(br_point *p, class br_device_pixelmap *src, br_rectangle *src_rect);
+		// Device -> Memory non-stretch, device pixels non-addressable
+		//   If pixels were addressable, would go via rectangleCopyTo() on the other pixelmap.
 		virtual br_error BR_METHOD rectangleCopyFrom(br_point *p, class br_device_pixelmap *src, br_rectangle *src_rect);
 
+		// Device -> device stretch
 		virtual br_error BR_METHOD rectangleStretchCopy(br_rectangle *r,class br_device_pixelmap *s,br_rectangle *q);
+		// Memory -> device stretch
 		virtual br_error BR_METHOD rectangleStretchCopyTo(br_rectangle *r,class br_device_pixelmap *s,br_rectangle *q);
-		virtual br_error BR_METHOD rectangleStretchCopyFrom(br_rectangle *r,class br_device_pixelmap *s,br_rectangle *q);
+		// Device -> Memory stretch, device pixels non-addressable
+		//   If pixels were addressable, would go via rectangleCopyTo() on the other pixelmap.
+		virtual br_error BR_METHOD rectangleStretchCopyFrom(br_rectangle *src_rect,class br_device_pixelmap *dst,br_rectangle *dst_rect);
 
 		virtual br_error BR_METHOD rectangleFill(br_rectangle *rect, br_uint_32 colour);
 
