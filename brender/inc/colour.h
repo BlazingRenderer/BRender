@@ -34,8 +34,10 @@ typedef struct br_colour_range {
 #define BR_COLOUR_ARGB(a, r, g, b) \
     ((((br_colour)(a)) << 24) | (((br_colour)(r)) << 16) | (((br_colour)(g)) << 8) | ((br_colour)(b)))
 
-#define BR_COLOUR_565(r, g, b) \
+#define BR_COLOUR_RGB_565(r, g, b) \
     (((((r) >> 3) << 11) & 0xF800) | ((((g) >> 2) << 5) & 0x07E0) | ((((b) >> 3) << 0) & 0x001F))
+
+#define BR_COLOUR_565(r, g, b) BR_COLOUR_RGB_565(r, g, b)
 
 #define BR_COLOUR_RGB_555(r, g, b) \
     (((((r) >> 3) << 10) & 0x7C00) | ((((g) >> 3) << 5) & 0x03E0) | ((((b) >> 3) << 0) & 0x001F))
