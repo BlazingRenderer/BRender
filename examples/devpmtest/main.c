@@ -57,7 +57,9 @@ int main(int argc, char **argv)
     br_error     r;
     br_uint_64   ticks_last, ticks_now;
     br_pixelmap *checkerboard, *last_frame_memory, *last_frame_device, *rainbow_rect;
+    br_pixelmap *last_frame_hxw;
     float        h, s, l;
+    int          want_screenshot;
 
     /*
      * Init SDL
@@ -82,6 +84,8 @@ int main(int argc, char **argv)
     }
 
     BrBegin();
+
+    BrLogSetLevel(BR_LOG_TRACE);
 
     BrSDLDevAddStaticGL(sdl_window);
 
@@ -120,6 +124,8 @@ int main(int argc, char **argv)
     rainbow_rect = BrPixelmapAllocate(BR_PMT_RGBX_888, 128, 128, NULL, BR_PMAF_NORMAL);
     BrPixelmapFill(rainbow_rect, BR_COLOUR_RGB(0, 0, 0));
 
+    last_frame_hxw = BrPixelmapAllocate(BR_PMT_RGBX_888, colour_buffer->height, colour_buffer->width, NULL, BR_PMAF_NORMAL);
+
     /* Create a rotating rainbow gradient for effect. */
     h = 0.0f;
     s = 1.0f;
@@ -133,10 +139,15 @@ int main(int argc, char **argv)
         dt         = (float)(ticks_now - ticks_last) / 1000.0f;
         ticks_last = ticks_now;
 
+        want_screenshot = 0;
         while(SDL_PollEvent(&evt) > 0) {
             switch(evt.type) {
                 case SDL_QUIT:
                     goto done;
+                case SDL_KEYDOWN: {
+                    if(evt.key.keysym.sym == SDLK_F5)
+                        want_screenshot = 1;
+                }
             }
         }
 
@@ -172,7 +183,10 @@ int main(int argc, char **argv)
                             dt * 1000);
         }
 
-        /* Put a checkerboard in the center */
+        /*
+         * Put a checkerboard in the center.
+         * Tests memory->device non-stretch copy.
+         */
         BrPixelmapRectangleStretchCopy(colour_buffer, -128, -128, 256, 256, checkerboard, 0, 0, checkerboard->width,
                                        checkerboard->height);
 
@@ -182,7 +196,7 @@ int main(int argc, char **argv)
          */
         BrPixelmapRectangleStretchCopy(colour_buffer, 160, -320, 1280 / 3, 720 / 3, last_frame_memory, 0, 0,
                                        last_frame_memory->width, last_frame_memory->height);
-        BrPixelmapText(colour_buffer, 160, -340, 0xFF0000FF, BrFontProp7x9, "Memory copy");
+        BrPixelmapText(colour_buffer, 160, -340, 0xFF0000FF, BrFontProp7x9, "Memory->device stretch copy");
 
         /*
          * Draw the previous frame (black initially) underneath it.
@@ -190,25 +204,95 @@ int main(int argc, char **argv)
          */
         BrPixelmapRectangleStretchCopy(colour_buffer, 160, 0, 1280 / 3, 720 / 3, last_frame_device, -last_frame_device->origin_x,
                                        -last_frame_device->origin_y, last_frame_device->width, last_frame_device->height);
-        BrPixelmapText(colour_buffer, 160, -20, 0xFF0000FF, BrFontProp7x9, "Device copy");
+        BrPixelmapText(colour_buffer, 160, -20, 0xFF0000FF, BrFontProp7x9, "Device->device stretch copy");
+
+        /*
+         * Tests a device->memory non-stretch copy, with device memory non-addressable.
+         * Hack to invoke rectangleStretchCopyFrom().
+         */
+        {
+            last_frame_device->flags |= BR_PMF_NO_ACCESS;
+            BrPixelmapRectangleStretchCopy(last_frame_hxw, -last_frame_hxw->origin_x, -last_frame_hxw->origin_y,
+                                           last_frame_hxw->width, last_frame_hxw->height, last_frame_device,
+                                           -last_frame_device->origin_x, -last_frame_device->origin_y,
+                                           last_frame_device->width, last_frame_device->height);
+            last_frame_device->flags &= ~BR_PMF_NO_ACCESS;
+
+            BrPixelmapRectangleStretchCopy(colour_buffer, -colour_buffer->origin_x + 20, -colour_buffer->origin_y + 100,
+                                           last_frame_hxw->width / 6, last_frame_hxw->height / 6, last_frame_hxw,
+                                           -last_frame_hxw->origin_x, -last_frame_hxw->origin_y, last_frame_hxw->width,
+                                           last_frame_hxw->height);
+        }
 
         /*
          * Put our rainbow rect somewhere.
-         * Tests memory->device non-stretch copy.
+         * Tests:
+         *  - Whole fill
+         *  - Memory->device non-stretch copy
+         *  - Line drawing
          */
-        h   = fmodf(h + dt * 0.1f, 1.0f);
-        col = hsl2rgb(h, s, l);
-        BrPixelmapFill(rainbow_rect, col);
-        BrPixelmapRectangleCopy(colour_buffer, -500, 0, rainbow_rect, -rainbow_rect->base_x, -rainbow_rect->base_y,
-                                rainbow_rect->width, rainbow_rect->height);
+        {
+            const br_int_32 base_x = -rainbow_rect->width / 2;
+            const br_int_32 base_y = -rainbow_rect->height / 2;
+
+            h   = fmodf(h + dt * 0.1f, 1.0f);
+            col = hsl2rgb(h, s, l);
+            BrPixelmapFill(rainbow_rect, col);
+            BrPixelmapRectangleCopy(colour_buffer, base_x, base_y, rainbow_rect, -rainbow_rect->origin_x,
+                                    -rainbow_rect->origin_y, rainbow_rect->width, rainbow_rect->height);
+
+            /*
+             * Draw a grid over the rainbow rect using the opposite hue.
+             */
+            col = hsl2rgb(1.0f - h, s, l);
+
+            for(int i = 0; i < 17; ++i) {
+                int x1 = base_x;
+                int x2 = x1 + 128;
+                int y1 = base_y + (i * 8);
+                int y2 = base_y + (i * 8);
+                BrPixelmapLine(colour_buffer, x1, y1, x2, y2, col);
+            }
+
+            for(int i = 0; i < 17; ++i) {
+                int x1 = base_x + (i * 8);
+                int x2 = base_x + (i * 8);
+                int y1 = base_y;
+                int y2 = y1 + 128;
+                BrPixelmapLine(colour_buffer, x1, y1, x2, y2, col);
+            }
+        }
+
+        /*
+         * Draw an outline of dots around the screen.
+         */
+        {
+            const int base_x = -colour_buffer->origin_x;
+            const int base_y = -colour_buffer->origin_y;
+
+            for(int i = 0; i < colour_buffer->width / 10; ++i) {
+                BrPixelmapPixelSet(colour_buffer, base_x + (i * 10), base_y, BR_COLOUR_RGB(255, 255, 255));
+                BrPixelmapPixelSet(colour_buffer, base_x + (i * 10), -base_y - 1, BR_COLOUR_RGB(255, 255, 255));
+            }
+
+            for(int i = 0; i < colour_buffer->height / 10; ++i) {
+                BrPixelmapPixelSet(colour_buffer, base_x, base_y + (i * 10), BR_COLOUR_RGB(255, 255, 255));
+                BrPixelmapPixelSet(colour_buffer, -base_x - 1, base_y + (i * 10), BR_COLOUR_RGB(255, 255, 255));
+            }
+        }
 
         BrPixelmapDoubleBuffer(screen, colour_buffer);
 
-        /* Capture the last frame, using a device->memory copy. */
+        /* Capture the last frame, using a device->memory non-stretch copy. */
         BrPixelmapCopy(last_frame_memory, colour_buffer);
 
-        /* Capture the last frame, using a device->device copy. */
+        /* Capture the last frame, using a device->device non-stretch copy. */
         BrPixelmapCopy(last_frame_device, colour_buffer);
+
+        if(want_screenshot) {
+            BrLogInfo("APP", "Saving screenshot to devpmtest.pix");
+            BrPixelmapSave("devpmtest.pix", last_frame_memory);
+        }
     }
 
 done:
