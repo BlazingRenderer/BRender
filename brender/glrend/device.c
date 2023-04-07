@@ -267,8 +267,7 @@ static struct br_tv_template *BR_CMETHOD_DECL(br_device_gl, templateQuery)(struc
     br_device *self = (br_device *)_self;
 
     if(self->templates.deviceTemplate == NULL) {
-        self->templates.deviceTemplate = BrTVTemplateAllocate(self, (br_tv_template_entry *)deviceTemplateEntries,
-                                                              BR_ASIZE(deviceTemplateEntries));
+        self->templates.deviceTemplate = BrTVTemplateAllocate(self, deviceTemplateEntries, BR_ASIZE(deviceTemplateEntries));
     }
 
     return self->templates.deviceTemplate;

@@ -11,7 +11,7 @@
 #define F(f) offsetof(GLSTATE_STACK, f)
 
 // clang-format off
-static const br_tv_template_entry GLSTATEI_LightTemplateEntries[] = {
+static br_tv_template_entry GLSTATEI_LightTemplateEntries[] = {
     {BRT_TYPE_T,          NULL, F(light[0].type),           Q | S | A,  BRTV_CONV_COPY,            0, TM_PART | TM_INDEX | TM_INVALID_PS | TM_INVALID_PM},
     {BRT_SPACE_T,         NULL, F(light[0].lighting_space), Q | S | A,  BRTV_CONV_COPY,            0, TM_PART | TM_INDEX | TM_INVALID_PS | TM_INVALID_PM},
     {BRT_POSITION_V3_X,   NULL, F(light[0].position),       Q | S | AX, BRTV_CONV_V3_FIXED_SCALAR, 0, TM_PART | TM_INDEX | TM_INVALID_PS | TM_INVALID_PM},

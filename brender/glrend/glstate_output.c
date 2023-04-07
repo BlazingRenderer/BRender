@@ -9,7 +9,7 @@
 
 #define F(f) offsetof(GLSTATE_STACK, f)
 
-static const br_tv_template_entry GLSTATEI_OutputTemplateEntries[] = {
+static br_tv_template_entry GLSTATEI_OutputTemplateEntries[] = {
     {BRT_COLOUR_BUFFER_O, NULL, F(output.colour), Q | S | A, BRTV_CONV_COPY},
     {BRT_DEPTH_BUFFER_O,  NULL, F(output.depth),  Q | S | A, BRTV_CONV_COPY},
 };

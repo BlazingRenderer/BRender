@@ -14,7 +14,7 @@ static const struct br_geometry_v1_buckets_dispatch geometryV1BucketsDispatch;
  */
 #define F(f) offsetof(struct br_geometry_v1_buckets, f)
 
-static const struct br_tv_template_entry geometryV1BucketsTemplateEntries[] = {
+static struct br_tv_template_entry geometryV1BucketsTemplateEntries[] = {
     {BRT_IDENTIFIER_CSTR,     0, F(identifier),        BRTV_QUERY | BRTV_ALL, BRTV_CONV_COPY},
     {BRT_RENDERER_FACILITY_O, 0, F(renderer_facility), BRTV_QUERY | BRTV_ALL, BRTV_CONV_COPY},
     {BRT_FACILITY_O,          0, F(renderer_facility), BRTV_QUERY,            BRTV_CONV_COPY},

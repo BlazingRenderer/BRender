@@ -23,8 +23,8 @@ typedef struct br_tv_template_entry {
 } br_tv_template_entry;
 
 typedef struct br_tv_template {
-    int                                n_entries;
-    const struct br_tv_template_entry *entries;
+    int                          n_entries;
+    struct br_tv_template_entry *entries;
 
     /*
      * Cached mapping information

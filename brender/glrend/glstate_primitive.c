@@ -9,7 +9,7 @@
 
 #define F(f) offsetof(GLSTATE_STACK, f)
 
-static const br_tv_template_entry GLSTATEI_PrimitiveTemplateEntries[] = {
+static br_tv_template_entry GLSTATEI_PrimitiveTemplateEntries[] = {
     {BRT_DEPTH_WRITE_B,           NULL, F(prim.flags),               Q | S | A, BRTV_CONV_BIT,        PRIMF_DEPTH_WRITE,  1},
     {BRT_COLOUR_WRITE_B,          NULL, F(prim.flags),               Q | S | A, BRTV_CONV_BIT,        PRIMF_COLOUR_WRITE, 1},
     {BRT_BLEND_B,                 NULL, F(prim.flags),               Q | S | A, BRTV_CONV_BIT,        PRIMF_BLEND,        1},

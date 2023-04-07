@@ -56,7 +56,7 @@ br_int_32 BR_RESIDENT_ENTRY BrTokenFindMany(char *pattern, br_token *tokens, br_
 /*
  * tokenval.c
  */
-br_tv_template *BR_RESIDENT_ENTRY BrTVTemplateAllocate(void *res, const br_tv_template_entry *entries, int n_entries);
+br_tv_template *BR_RESIDENT_ENTRY BrTVTemplateAllocate(void *res, br_tv_template_entry *entries, int n_entries);
 
 void BR_RESIDENT_ENTRY BrTVTemplateFree(br_tv_template *t);
 

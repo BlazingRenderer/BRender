@@ -15,7 +15,7 @@ BR_RCS_ID("$Id: tokenval.c 1.3 1998/05/20 15:25:02 jon Exp $")
 /*
  * Allocate a new template structure
  */
-br_tv_template *BR_RESIDENT_ENTRY BrTVTemplateAllocate(void *res, const br_tv_template_entry *entries, int n_entries)
+br_tv_template *BR_RESIDENT_ENTRY BrTVTemplateAllocate(void *res, br_tv_template_entry *entries, int n_entries)
 {
     br_tv_template *t;
 

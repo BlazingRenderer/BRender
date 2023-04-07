@@ -13,7 +13,7 @@
 #define F(f) offsetof(GLSTATE_STACK, f)
 
 // clang-format off
-static const br_tv_template_entry GLSTATEI_MatrixTemplateEntries[] = {
+static br_tv_template_entry GLSTATEI_MatrixTemplateEntries[] = {
     {BRT_MODEL_TO_VIEW_M34_X,        NULL, F(matrix.model_to_view),            Q | S | AX, BRTV_CONV_M34_FIXED_SCALAR, 0, TM_PART | TM_M2V | TM_CLEAR_M2V_HINT | TM_INVALID_PM | TM_INVALID_V2M | TM_INVALID_M2S},
     {BRT_MODEL_TO_VIEW_M34_F,        NULL, F(matrix.model_to_view),            Q | S | AF, BRTV_CONV_M34_FLOAT_SCALAR, 0, TM_PART | TM_M2V | TM_CLEAR_M2V_HINT | TM_INVALID_PM | TM_INVALID_V2M | TM_INVALID_M2S},
     {BRT_VIEW_TO_ENVIRONMENT_M34_X,  NULL, F(matrix.view_to_environment),      Q | S | AX, BRTV_CONV_M34_FIXED_SCALAR, 0, TM_PART | TM_INVALID_PS | TM_INVALID_PM},

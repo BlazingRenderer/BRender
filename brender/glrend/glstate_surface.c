@@ -10,7 +10,7 @@
 #define F(f) offsetof(GLSTATE_STACK, f)
 
 // clang-format off
-static const br_tv_template_entry GLSTATEI_SurfaceTemplateEntries[] = {
+static br_tv_template_entry GLSTATEI_SurfaceTemplateEntries[] = {
     {BRT_COLOUR_RGB,       NULL, F(surface.colour),         Q | S | AX, BRTV_CONV_COPY,             0, TM_PART},
 
     {BRT_OPACITY_X,        NULL, F(surface.opacity),        Q | S | AX, BRTV_CONV_FIXED_SCALAR,     0, TM_PART},

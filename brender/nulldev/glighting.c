@@ -17,7 +17,7 @@ static const struct br_geometry_lighting_dispatch geometryLightingDispatch;
  */
 #define F(f) offsetof(struct br_geometry_lighting, f)
 
-static const struct br_tv_template_entry geometryLightingTemplateEntries[] = {
+static struct br_tv_template_entry geometryLightingTemplateEntries[] = {
     {BRT_IDENTIFIER_CSTR,     NULL, F(identifier),        BRTV_QUERY | BRTV_ALL, BRTV_CONV_COPY},
     {BRT_RENDERER_FACILITY_O, NULL, F(renderer_facility), BRTV_QUERY | BRTV_ALL, BRTV_CONV_COPY},
     {BRT_FACILITY_O,          NULL, F(renderer_facility), BRTV_QUERY,            BRTV_CONV_COPY},

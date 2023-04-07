@@ -10,7 +10,7 @@
 #define F(f) offsetof(GLSTATE_STACK, f)
 
 // clang-format off
-static const br_tv_template_entry GLSTATEI_HiddenTemplateEntries[] = {
+static br_tv_template_entry GLSTATEI_HiddenTemplateEntries[] = {
     {BRT_TYPE_T,              NULL, F(hidden.type),        Q | S | A, BRTV_CONV_COPY, 0, TM_PART | TM_INVALID_PS | TM_INVALID_PM},
     {BRT_DIVERT_T,            NULL, F(hidden.divert),      Q | S | A, BRTV_CONV_COPY, 0, TM_PART | TM_INVALID_PS | TM_INVALID_PM},
 
