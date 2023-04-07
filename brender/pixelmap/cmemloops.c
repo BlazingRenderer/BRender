@@ -164,9 +164,9 @@ void _MemFill_A(char *dest, br_uint_32 pixels, br_uint_32 bpp, br_uint_32 colour
             _MemFill_A(dest, pixels * 3, 1, colour);
         } else
             for(br_uint_32 i = 0; i < pixels; ++i) {
-                *dest++ = (colour & 0x00FF0000) >> 16;
-                *dest++ = (colour & 0x0000FF00) >> 8;
-                *dest++ = (colour & 0x000000FF) >> 0;
+                *dest++ = BR_BLU(colour);
+                *dest++ = BR_GRN(colour);
+                *dest++ = BR_RED(colour);
             }
     } else if(bpp == 1) {
         MemFill8(dest, (br_uint_8)(colour & 0xFF), pixels);
