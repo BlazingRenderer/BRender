@@ -17,6 +17,13 @@ if(BRENDER_BUILD_DRIVERS)
     add_subdirectory(nulldev)
     add_subdirectory(glrend)
 
+    if(TARGET SDL2::SDL2)
+        add_subdirectory(sdl2dev)
+        target_link_libraries(brender INTERFACE sdl2dev)
+    else()
+        message("SDL2 not found, not building sdl2dev")
+    endif()
+
     target_link_libraries(brender INTERFACE glrend)
 
     if(WIN32)
