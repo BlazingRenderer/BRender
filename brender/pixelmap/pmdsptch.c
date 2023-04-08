@@ -369,8 +369,7 @@ void BR_PUBLIC_ENTRY BrPixelmapFill(br_pixelmap *dst, br_uint_32 colour)
     DevicePixelmapFill(dst, colour);
 }
 
-void BR_PUBLIC_ENTRY BrPixelmapRectangle(br_pixelmap *dst, br_int_32 x, br_int_32 y, br_int_32 w, br_int_32 h,
-                                         br_uint_32 colour)
+void BR_PUBLIC_ENTRY BrPixelmapRectangle(br_pixelmap *dst, br_int_32 x, br_int_32 y, br_int_32 w, br_int_32 h, br_uint_32 colour)
 {
     br_rectangle r;
 
@@ -518,9 +517,8 @@ void BR_PUBLIC_ENTRY BrPixelmapRectangleCopy(br_pixelmap *dst, br_int_32 dx, br_
     DispatchRectangleCopy((br_device_pixelmap *)dst, &p, (br_device_pixelmap *)src, &r);
 }
 
-void BR_PUBLIC_ENTRY BrPixelmapRectangleStretchCopy(br_pixelmap *dst, br_int_32 dx, br_int_32 dy, br_int_32 dw,
-                                                    br_int_32 dh, br_pixelmap *src, br_int_32 sx, br_int_32 sy,
-                                                    br_int_32 sw, br_int_32 sh)
+void BR_PUBLIC_ENTRY BrPixelmapRectangleStretchCopy(br_pixelmap *dst, br_int_32 dx, br_int_32 dy, br_int_32 dw, br_int_32 dh,
+                                                    br_pixelmap *src, br_int_32 sx, br_int_32 sy, br_int_32 sw, br_int_32 sh)
 {
     br_rectangle s;
     br_rectangle d;
@@ -685,8 +683,7 @@ void BR_PUBLIC_ENTRY BrPixelmapCopy(br_pixelmap *dst, br_pixelmap *src)
     DispatchCopy((br_device_pixelmap *)dst, (br_device_pixelmap *)src);
 }
 
-void BR_PUBLIC_ENTRY BrPixelmapLine(br_pixelmap *dst, br_int_32 x1, br_int_32 y1, br_int_32 x2, br_int_32 y2,
-                                    br_uint_32 colour)
+void BR_PUBLIC_ENTRY BrPixelmapLine(br_pixelmap *dst, br_int_32 x1, br_int_32 y1, br_int_32 x2, br_int_32 y2, br_uint_32 colour)
 {
     br_point s, e;
 
