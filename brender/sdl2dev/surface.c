@@ -133,6 +133,13 @@ static br_error maybe_allocate_surface(SDL_Surface **out_surf, br_boolean *chang
     if((result = BRenderToSDLPixelFormat(pm->type, &format, &bpp)) != BRE_OK)
         return result;
 
+    /*
+     * If we're blitting from an indexed format, there's a few things to keep in mind:
+     *   1. BRender pixelmaps may not have a map or a CLUT attached, in which case it's expected
+     *      that the destination's CLUT is used.
+     *   2. The destination may not have a CLUT (i.e. it won't if it's not indexed).
+     *  In this case, just fail the blit.
+     */
     if(SDL_ISPIXELFORMAT_INDEXED(format)) {
         clut = DevicePixelmapSDL2GetCLUT(pm);
         if(pm->map == NULL && clut == NULL && dst_clut == NULL)
@@ -142,6 +149,9 @@ static br_error maybe_allocate_surface(SDL_Surface **out_surf, br_boolean *chang
     if((surf = SDL_CreateRGBSurfaceWithFormatFrom(pm->pixels, pm->width, pm->height, bpp, pm->row_bytes, format)) == NULL)
         return BRE_FAIL;
 
+    /*
+     * Now actually handle all the CLUT stuff mentioned above.
+     */
     if(SDL_ISPIXELFORMAT_INDEXED(format)) {
         UASSERT(!(pm->map == NULL && clut == NULL && dst_clut == NULL));
 
