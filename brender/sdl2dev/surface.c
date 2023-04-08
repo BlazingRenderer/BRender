@@ -280,6 +280,32 @@ br_error DeviceClutSDL2CopyToSurface(SDL_Surface *surf, br_pixelmap *pm, br_devi
     return BRE_FAIL;
 }
 
+static int xblit(SDL_Surface *src, const SDL_Rect *sr, SDL_Surface *dst, SDL_Rect *dr, br_sdl_blit_cbfn blit)
+{
+    /*
+     * Handle two special cases that SDL doesn't support.
+     *   1. Regular blitting from INDEX* -> XRGB8888
+     *   2. Scaled  blitting from INDEX* -> anything
+     *
+     * Go via an intermediate surface (possibly again). This is slow, and indexed pixelmaps
+     * should be de-indexed at load-time. See BrPixelmapDeCLUT().
+     */
+    if(SDL_ISPIXELFORMAT_INDEXED(src->format->format) &&
+       (dst->format->format == SDL_PIXELFORMAT_XRGB8888 || blit == SDL_BlitScaled)) {
+        int          r;
+        SDL_Surface *newsrc;
+
+        if((newsrc = SDL_ConvertSurfaceFormat(src, SDL_PIXELFORMAT_XRGB8888, 0)) == NULL)
+            return -1;
+
+        r = blit(newsrc, sr, dst, dr);
+        SDL_FreeSurface(newsrc);
+        return r;
+    }
+
+    return blit(src, sr, dst, dr);
+}
+
 br_error DevicePixelmapSDL2BlitSurface(br_pixelmap *src, SDL_Rect *sr, br_pixelmap *dst, SDL_Rect *dr, br_sdl_blit_cbfn blit)
 {
     br_error     result;
@@ -295,7 +321,7 @@ br_error DevicePixelmapSDL2BlitSurface(br_pixelmap *src, SDL_Rect *sr, br_pixelm
      * If both surfaces expose an SDL surface - we can blit directly.
      */
     if(dst_surf != NULL && src_surf != NULL) {
-        if(blit(src_surf, sr, dst_surf, dr) == 0)
+        if(xblit(src_surf, sr, dst_surf, dr, blit) == 0)
             return BRE_OK;
 
         BrLogTrace("SDL2", "Blit from %s->%s failed: %s", src->identifier, dst->identifier, SDL_GetError());
@@ -314,7 +340,7 @@ br_error DevicePixelmapSDL2BlitSurface(br_pixelmap *src, SDL_Rect *sr, br_pixelm
     if((result = maybe_allocate_surface(&dst_surf, &free_dst, dst, NULL)) != BRE_OK)
         goto cleanup;
 
-    if(blit(src_surf, sr, dst_surf, dr) == 0)
+    if(xblit(src_surf, sr, dst_surf, dr, blit) == 0)
         result = BRE_OK;
     else
         BrLogTrace("SDL2", "Blit from %s->%s failed: %s", src->identifier, dst->identifier, SDL_GetError());
