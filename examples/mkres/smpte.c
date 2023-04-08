@@ -17,7 +17,108 @@ typedef struct br_smpte_colours {
 
     br_colour plugeL;
     br_colour plugeR;
+
+    const br_colour *palette;
+    br_int_32        palsize;
 } br_smpte_colours;
+
+const static br_colour palette4[16] = {
+    [0] = BR_COLOUR_RGBA(0, 0, 0, 255),        [1] = BR_COLOUR_RGBA(104, 104, 104, 255),
+    [2] = BR_COLOUR_RGBA(180, 180, 180, 255),  [3] = BR_COLOUR_RGBA(180, 180, 16, 255),
+    [4] = BR_COLOUR_RGBA(16, 180, 180, 255),   [5] = BR_COLOUR_RGBA(16, 180, 16, 255),
+    [6] = BR_COLOUR_RGBA(180, 16, 180, 255),   [7] = BR_COLOUR_RGBA(180, 16, 16, 255),
+    [8] = BR_COLOUR_RGBA(16, 16, 180, 255),    [9] = BR_COLOUR_RGBA(16, 16, 16, 255),
+    [10] = BR_COLOUR_RGBA(235, 235, 235, 255), [11] = BR_COLOUR_RGBA(72, 16, 118, 255),
+    [12] = BR_COLOUR_RGBA(106, 52, 16, 255),   [13] = BR_COLOUR_RGBA(16, 70, 106, 255),
+    [14] = BR_COLOUR_RGBA(9, 9, 9, 255),       [15] = BR_COLOUR_RGBA(29, 29, 29, 255),
+};
+
+const static br_smpte_colours smpte_index_4 = {
+    .palette   = palette4,
+    .palsize   = BR_ASIZE(palette4),
+    .grey40    = 1,
+    .white75   = 2,
+    .yellow75  = 3,
+    .cyan75    = 4,
+    .green75   = 5,
+    .magenta75 = 6,
+    .red75     = 7,
+    .blue75    = 8,
+    .black75   = 9,
+    .white100  = 10,
+    .plusQ     = 11,
+    .plusI     = 12,
+    .minusI    = 13,
+    .plugeL    = 14,
+    .plugeR    = 15,
+};
+
+const static br_colour palette8[256] = {
+    [0] = BR_COLOUR_RGBA(0, 0, 0, 255),        [1] = BR_COLOUR_RGBA(104, 104, 104, 255),
+    [2] = BR_COLOUR_RGBA(180, 180, 180, 255),  [3] = BR_COLOUR_RGBA(180, 180, 16, 255),
+    [4] = BR_COLOUR_RGBA(16, 180, 180, 255),   [5] = BR_COLOUR_RGBA(16, 180, 16, 255),
+    [6] = BR_COLOUR_RGBA(180, 16, 180, 255),   [7] = BR_COLOUR_RGBA(180, 16, 16, 255),
+    [8] = BR_COLOUR_RGBA(16, 16, 180, 255),    [9] = BR_COLOUR_RGBA(16, 16, 16, 255),
+    [10] = BR_COLOUR_RGBA(235, 235, 235, 255), [11] = BR_COLOUR_RGBA(72, 16, 118, 255),
+    [12] = BR_COLOUR_RGBA(106, 52, 16, 255),   [13] = BR_COLOUR_RGBA(16, 70, 106, 255),
+    [14] = BR_COLOUR_RGBA(9, 9, 9, 255),       [15] = BR_COLOUR_RGBA(29, 29, 29, 255),
+};
+
+const static br_smpte_colours smpte_index_8 = {
+    .palette   = palette8,
+    .palsize   = BR_ASIZE(palette8),
+    .grey40    = 1,
+    .white75   = 2,
+    .yellow75  = 3,
+    .cyan75    = 4,
+    .green75   = 5,
+    .magenta75 = 6,
+    .red75     = 7,
+    .blue75    = 8,
+    .black75   = 9,
+    .white100  = 10,
+    .plusQ     = 11,
+    .plusI     = 12,
+    .minusI    = 13,
+    .plugeL    = 14,
+    .plugeR    = 15,
+};
+
+const static br_smpte_colours smpte_rgb_555 = {
+    .grey40    = BR_COLOUR_RGB_555(104, 104, 104),
+    .white75   = BR_COLOUR_RGB_555(180, 180, 180),
+    .yellow75  = BR_COLOUR_RGB_555(180, 180, 16),
+    .cyan75    = BR_COLOUR_RGB_555(16, 180, 180),
+    .green75   = BR_COLOUR_RGB_555(16, 180, 16),
+    .magenta75 = BR_COLOUR_RGB_555(180, 16, 180),
+    .red75     = BR_COLOUR_RGB_555(180, 16, 16),
+    .blue75    = BR_COLOUR_RGB_555(16, 16, 180),
+    .black75   = BR_COLOUR_RGB_555(16, 16, 16),
+    .white100  = BR_COLOUR_RGB_555(235, 235, 235),
+    .plusQ     = BR_COLOUR_RGB_555(72, 16, 118),
+    .plusI     = BR_COLOUR_RGB_555(106, 52, 16),
+    .minusI    = BR_COLOUR_RGB_555(16, 70, 106),
+    .plugeL    = BR_COLOUR_RGB_555(9, 9, 9),
+    .plugeR    = BR_COLOUR_RGB_555(29, 29, 29),
+};
+
+const static br_smpte_colours smpte_rgb_565 = {
+    .grey40    = BR_COLOUR_565(104, 104, 104),
+    .white75   = BR_COLOUR_565(180, 180, 180),
+    .yellow75  = BR_COLOUR_565(180, 180, 16),
+    .cyan75    = BR_COLOUR_565(16, 180, 180),
+    .green75   = BR_COLOUR_565(16, 180, 16),
+    .magenta75 = BR_COLOUR_565(180, 16, 180),
+    .red75     = BR_COLOUR_565(180, 16, 16),
+    .blue75    = BR_COLOUR_565(16, 16, 180),
+    .black75   = BR_COLOUR_565(16, 16, 16),
+    .white100  = BR_COLOUR_565(235, 235, 235),
+    .plusQ     = BR_COLOUR_565(72, 16, 118),
+    .plusI     = BR_COLOUR_565(106, 52, 16),
+    .minusI    = BR_COLOUR_565(16, 70, 106),
+    .plugeL    = BR_COLOUR_565(9, 9, 9),
+    .plugeR    = BR_COLOUR_565(29, 29, 29),
+};
 
 const static br_smpte_colours smpte_rgba_8888 = {
     .grey40    = BR_COLOUR_RGBA(104, 104, 104, 255),
@@ -35,6 +136,24 @@ const static br_smpte_colours smpte_rgba_8888 = {
     .minusI    = BR_COLOUR_RGBA(16, 70, 106, 255),
     .plugeL    = BR_COLOUR_RGBA(9, 9, 9, 255),
     .plugeR    = BR_COLOUR_RGBA(29, 29, 29, 255),
+};
+
+const static br_smpte_colours smpte_bgr_555 = {
+    .grey40    = BR_COLOUR_BGR_555(104, 104, 104),
+    .white75   = BR_COLOUR_BGR_555(180, 180, 180),
+    .yellow75  = BR_COLOUR_BGR_555(16, 180, 180),
+    .cyan75    = BR_COLOUR_BGR_555(180, 180, 16),
+    .green75   = BR_COLOUR_BGR_555(16, 180, 16),
+    .magenta75 = BR_COLOUR_BGR_555(180, 16, 180),
+    .red75     = BR_COLOUR_BGR_555(16, 16, 180),
+    .blue75    = BR_COLOUR_BGR_555(180, 16, 16),
+    .black75   = BR_COLOUR_BGR_555(16, 16, 16),
+    .white100  = BR_COLOUR_BGR_555(235, 235, 235),
+    .plusQ     = BR_COLOUR_BGR_555(118, 16, 72),
+    .plusI     = BR_COLOUR_BGR_555(16, 52, 106),
+    .minusI    = BR_COLOUR_BGR_555(106, 70, 16),
+    .plugeL    = BR_COLOUR_BGR_555(9, 9, 9),
+    .plugeR    = BR_COLOUR_BGR_555(29, 29, 29),
 };
 
 #define SMPTE_NUM_BARS       7
@@ -172,8 +291,14 @@ const static struct {
     br_uint_8               type;
     const br_smpte_colours *colours;
 } colour_types[] = {
+  //{.type = BR_PMT_INDEX_4,   .colours = &smpte_index_4  }, /* BrPixelmapRectangleFill() does not work with this. */
+    {.type = BR_PMT_INDEX_8,   .colours = &smpte_index_8  },
+    {.type = BR_PMT_RGB_555,   .colours = &smpte_rgb_555  },
+    {.type = BR_PMT_RGB_565,   .colours = &smpte_rgb_565  },
+    {.type = BR_PMT_RGB_888,   .colours = &smpte_rgba_8888}, /* Ignores the alpha part. */
     {.type = BR_PMT_RGBA_8888, .colours = &smpte_rgba_8888},
-    {.type = BR_PMT_RGBX_888,  .colours = &smpte_rgba_8888},
+    {.type = BR_PMT_RGBX_888,  .colours = &smpte_rgba_8888}, /* Ignores the alpha part. */
+    {.type = BR_PMT_BGR_555,   .colours = &smpte_bgr_555  },
 };
 
 br_pixelmap *mkres_make_smtpe_bars(br_uint_8 type, br_int_16 width)
@@ -195,5 +320,11 @@ br_pixelmap *mkres_make_smtpe_bars(br_uint_8 type, br_int_16 width)
     pm             = BrPixelmapAllocate(type, width, height, NULL, BR_PMAF_NORMAL);
     pm->identifier = BrResStrDup(pm, "SMPTE");
     fill_smpte(pm, colours);
+
+    if(colours->palette != NULL) {
+        pm->map = BrPixelmapAllocate(BR_PMT_RGBX_888, 1, colours->palsize, (void *)colours->palette, BR_PMAF_NORMAL);
+        pm->map->identifier = BrResStrDup(pm->map, "SMPTE (palette)");
+    }
+
     return pm;
 }
