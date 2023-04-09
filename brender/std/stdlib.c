@@ -146,7 +146,7 @@ br_int_32 BR_RESIDENT_ENTRY BrVSprintf(char *buf, const char *fmt, va_list args)
     return vsprintf(buf, fmt, args);
 }
 
-br_int_32 BR_RESIDENT_ENTRY BrVSprintfN(char *buf, br_size_t buf_size, char *fmt, va_list args)
+br_int_32 BR_RESIDENT_ENTRY BrVSprintfN(char *buf, br_size_t buf_size, const char *fmt, va_list args)
 {
     unsigned int n;
     char         tmp[512];

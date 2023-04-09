@@ -49,7 +49,7 @@ br_boolean BR_PUBLIC_ENTRY BrIsPrint(int c);
 
 br_int_32 BR_RESIDENT_ENTRY BrVSScanf(const char *str, const char *fmt, va_list args);
 br_int_32 BR_RESIDENT_ENTRY BrVSprintf(char *buf, const char *fmt, va_list args);
-br_int_32 BR_RESIDENT_ENTRY BrVSprintfN(char *buf, br_size_t buf_size, char *fmt, va_list args);
+br_int_32 BR_RESIDENT_ENTRY BrVSprintfN(char *buf, br_size_t buf_size, const char *fmt, va_list args);
 
 #ifdef __cplusplus
 };
