@@ -237,7 +237,7 @@ br_error VIDEOI_BrPixelmapGetTypeDetails(br_uint_8 pmType, GLint *internalFormat
             *elemBytes      = 2;
             break;
         default:
-            BrLogError("GLREND", "Unsupported BRender texture format %d.", pmType);
+            BrLogTrace("GLREND", "Unsupported BRender texture format %d.", pmType);
             return BRE_FAIL;
     }
 
