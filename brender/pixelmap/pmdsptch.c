@@ -84,9 +84,9 @@ br_pixelmap *BR_PUBLIC_ENTRY BrPixelmapMatch(br_pixelmap *src, br_uint_8 match_t
     br_pixelmap *new;
 
     br_token_value tv[] = {
-        {BRT_USE_T, 0},
-        {0,         0},
-        {0,         0},
+        {.t = BRT_USE_T,     .v = 0},
+        {.t = BR_NULL_TOKEN, .v = 0},
+        {.t = BR_NULL_TOKEN, .v = 0},
     };
 
     UASSERT_MESSAGE("Invalid match type", match_type < BR_PMMATCH_MAX);
@@ -169,19 +169,16 @@ br_pixelmap *BR_PUBLIC_ENTRY BrPixelmapMatchSized(br_pixelmap *src, br_uint_8 ma
     br_pixelmap *new;
 
     br_token_value tv[] = {
-        {BRT_USE_T,      0},
-        {BRT_WIDTH_I32,  0},
-        {BRT_HEIGHT_I32, 0},
-        {0,              0},
-        {0,              0},
+        {.t = BRT_USE_T,      .v = 0              },
+        {.t = BRT_WIDTH_I32,  .v = {.i32 = width} },
+        {.t = BRT_HEIGHT_I32, .v = {.i32 = height}},
+        {.t = BR_NULL_TOKEN,  .v = 0              },
+        {.t = BR_NULL_TOKEN,  .v = 0              },
     };
 
     UASSERT_MESSAGE("Invalid match type", match_type < BR_PMMATCH_MAX);
 
     CheckDispatch(src);
-
-    tv[1].v.i32 = width;
-    tv[2].v.i32 = height;
 
     switch(match_type) {
 
@@ -228,18 +225,16 @@ br_pixelmap *BR_PUBLIC_ENTRY BrPixelmapMatchTyped(br_pixelmap *src, br_uint_8 ma
     br_pixelmap *new;
 
     br_token_value tv[] = {
-        {BRT_USE_T,         0},
-        {BRT_PIXEL_TYPE_U8, 0},
-        {0,                 0},
-        {0,                 0},
+        {.t = BRT_USE_T,         .v = 0                    },
+        {.t = BRT_PIXEL_TYPE_U8, .v = {.u8 = pixelmap_type}},
+        {.t = BR_NULL_TOKEN,     .v = 0                    },
+        {.t = BR_NULL_TOKEN,     .v = 0                    },
     };
 
     UASSERT_MESSAGE("Invalid match type", match_type < BR_PMMATCH_MAX);
     UASSERT_MESSAGE("Invalid pixelmap type", pixelmap_type < BR_PMT_MAX);
 
     CheckDispatch(src);
-
-    tv[1].v.u8 = pixelmap_type;
 
     switch(match_type) {
 
@@ -294,22 +289,18 @@ br_pixelmap *BR_PUBLIC_ENTRY BrPixelmapMatchTypedSized(br_pixelmap *src, br_uint
     br_pixelmap *new;
 
     br_token_value tv[] = {
-        {BRT_USE_T,         0},
-        {BRT_WIDTH_I32,     0},
-        {BRT_HEIGHT_I32,    0},
-        {BRT_PIXEL_TYPE_U8, 0},
-        {0,                 0},
-        {0,                 0},
+        {.t = BRT_USE_T,         .v = 0                    },
+        {.t = BRT_WIDTH_I32,     .v = {.i32 = width}       },
+        {.t = BRT_HEIGHT_I32,    .v = {.i32 = height}      },
+        {.t = BRT_PIXEL_TYPE_U8, .v = {.u8 = pixelmap_type}},
+        {.t = BR_NULL_TOKEN,     .v = 0                    },
+        {.t = BR_NULL_TOKEN,     .v = 0                    },
     };
 
     UASSERT_MESSAGE("Invalid match type", match_type < BR_PMMATCH_MAX);
     UASSERT_MESSAGE("Invalid pixelmap type", pixelmap_type < BR_PMT_MAX);
 
     CheckDispatch(src);
-
-    tv[3].v.u8  = pixelmap_type;
-    tv[1].v.i32 = width;
-    tv[2].v.i32 = height;
 
     switch(match_type) {
 
@@ -363,8 +354,8 @@ br_pixelmap *BR_PUBLIC_ENTRY BrPixelmapClone(br_pixelmap *src)
     br_pixelmap *new;
 
     br_token_value tv[] = {
-        {BRT_USE_T, {.t = BRT_CLONE}},
-        {0,         0               },
+        {.t = BRT_USE_T,     .v = {.t = BRT_CLONE}},
+        {.t = BR_NULL_TOKEN, .v = 0               },
     };
 
     CheckDispatch(src);
