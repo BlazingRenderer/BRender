@@ -84,14 +84,14 @@ void BR_PUBLIC_ENTRY       BrPixelmapCopy(br_pixelmap *dst, br_pixelmap *src);
 void BR_PUBLIC_ENTRY       BrPixelmapLine(br_pixelmap *dst, br_int_32 x1, br_int_32 y1, br_int_32 x2, br_int_32 y2,
                                           br_uint_32 colour);
 void BR_PUBLIC_ENTRY       BrPixelmapText(br_pixelmap *dst, br_int_32 x, br_int_32 y, br_uint_32 colour, br_font *font,
-                                          char *text);
+                                          const char *text);
 void BR_PUBLIC_ENTRY       BrPixelmapTextF(br_pixelmap *dst, br_int_32 x, br_int_32 y, br_uint_32 colour, br_font *font,
-                                           char *fmt, ...);
+                                           const char *fmt, ...);
 
 void BR_PUBLIC_ENTRY BrPixelmapCopyBits(br_pixelmap *dst, br_int_32 x, br_int_32 y, br_uint_8 *src, br_int_32 s_stride,
                                         br_int_32 start_bit, br_int_32 end_bit, br_int_32 nrows, br_uint_32 colour);
 
-br_uint_16 BR_PUBLIC_ENTRY BrPixelmapTextWidth(br_pixelmap *dst, br_font *font, char *text);
+br_uint_16 BR_PUBLIC_ENTRY BrPixelmapTextWidth(br_pixelmap *dst, br_font *font, const char *text);
 br_uint_16 BR_PUBLIC_ENTRY BrPixelmapTextHeight(br_pixelmap *dst, br_font *font);
 
 void BR_PUBLIC_ENTRY BrPixelmapDoubleBuffer(br_pixelmap *dst, br_pixelmap *src);

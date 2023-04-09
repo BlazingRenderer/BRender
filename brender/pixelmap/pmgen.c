@@ -504,7 +504,7 @@ br_error BR_CMETHOD_DECL(br_device_pixelmap_gen, line)(br_device_pixelmap *self,
 }
 
 br_error BR_CMETHOD_DECL(br_device_pixelmap_gen, text)(br_device_pixelmap *self, br_point *point, br_font *font,
-                                                       char *text, br_uint_32 colour)
+                                                       const char *text, br_uint_32 colour)
 {
     br_rectangle r;
     br_point     p;
@@ -576,7 +576,7 @@ br_error BR_CMETHOD_DECL(br_device_pixelmap_gen, text)(br_device_pixelmap *self,
 }
 
 br_error BR_CMETHOD_DECL(br_device_pixelmap_gen, textBounds)(br_device_pixelmap *self, br_rectangle *rect,
-                                                             br_font *font, char *text)
+                                                             br_font *font, const char *text)
 {
     int i, j;
 

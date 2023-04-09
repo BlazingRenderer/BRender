@@ -190,8 +190,8 @@ class br_device_pixelmap : public br_object {
 
 	// Text
 
-		virtual br_error BR_METHOD text(br_point *point, br_font *font, char *text, br_uint_32 colour);
-		virtual br_error BR_METHOD textBounds(br_rectangle *rect, struct br_font *font, char *text);
+		virtual br_error BR_METHOD text(br_point *point, br_font *font, const char *text, br_uint_32 colour);
+		virtual br_error BR_METHOD textBounds(br_rectangle *rect, struct br_font *font, const char *text);
 
 
 	// Row read/write

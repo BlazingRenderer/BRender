@@ -150,9 +150,9 @@ br_error BR_CMETHOD_DECL(br_device_pixelmap_gen, rectangle2)(struct br_device_pi
 br_error BR_CMETHOD_DECL(br_device_pixelmap_gen, line)(struct br_device_pixelmap *self, br_point *s, br_point *e,
                                                        br_uint_32 colour);
 br_error BR_CMETHOD_DECL(br_device_pixelmap_gen, text)(struct br_device_pixelmap *self, br_point *point, br_font *font,
-                                                       char *text, br_uint_32 colour);
+                                                       const char *text, br_uint_32 colour);
 br_error BR_CMETHOD_DECL(br_device_pixelmap_gen, textBounds)(struct br_device_pixelmap *self, br_rectangle *rect,
-                                                             br_font *font, char *text);
+                                                             br_font *font, const char *text);
 br_error BR_CMETHOD_DECL(br_device_pixelmap_gen, copyBits)(struct br_device_pixelmap *self, br_point *point,
                                                            br_uint_8 *src, br_uint_16 s_stride, br_rectangle *bit_rect,
                                                            br_uint_32 colour);

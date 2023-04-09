@@ -796,8 +796,8 @@ br_error BR_CMETHOD_DECL(br_device_pixelmap_gl, rectangleCopyFrom)(br_device_pix
     return BRE_OK;
 }
 
-br_error BR_CMETHOD(br_device_pixelmap_gl, text)(br_device_pixelmap *self, br_point *point, br_font *font, char *text,
-                                                 br_uint_32 colour)
+br_error BR_CMETHOD(br_device_pixelmap_gl, text)(br_device_pixelmap *self, br_point *point, br_font *font,
+                                                 const char *text, br_uint_32 colour)
 {
     /* Quit if off top, bottom or right screen */
     br_int_32 x = point->x + self->pm_origin_x;

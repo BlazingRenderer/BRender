@@ -705,7 +705,7 @@ void BR_PUBLIC_ENTRY BrPixelmapDoubleBuffer(br_pixelmap *dst, br_pixelmap *src)
     DevicePixelmapDoubleBuffer(dst, (br_device_pixelmap *)src);
 }
 
-void BR_PUBLIC_ENTRY BrPixelmapText(br_pixelmap *dst, br_int_32 x, br_int_32 y, br_uint_32 colour, br_font *font, char *text)
+void BR_PUBLIC_ENTRY BrPixelmapText(br_pixelmap *dst, br_int_32 x, br_int_32 y, br_uint_32 colour, br_font *font, const char *text)
 {
     br_point p;
 
@@ -720,7 +720,7 @@ void BR_PUBLIC_ENTRY BrPixelmapText(br_pixelmap *dst, br_int_32 x, br_int_32 y, 
 }
 
 void BR_PUBLIC_ENTRY BrPixelmapTextF(br_pixelmap *dst, br_int_32 x, br_int_32 y, br_uint_32 colour, br_font *font,
-                                     char *fmt, ...)
+                                     const char *fmt, ...)
 {
     char    *ss = BrScratchString();
     br_point p;
@@ -743,10 +743,10 @@ void BR_PUBLIC_ENTRY BrPixelmapTextF(br_pixelmap *dst, br_int_32 x, br_int_32 y,
     DevicePixelmapText(dst, &p, font, ss, colour);
 }
 
-br_uint_16 BR_PUBLIC_ENTRY BrPixelmapTextWidth(br_pixelmap *dst, br_font *font, char *text)
+br_uint_16 BR_PUBLIC_ENTRY BrPixelmapTextWidth(br_pixelmap *dst, br_font *font, const char *text)
 {
-    int i, j, w;
-
+    size_t     i, j;
+    br_uint_16 w;
     CheckDispatch(dst);
 
     if(!text)
