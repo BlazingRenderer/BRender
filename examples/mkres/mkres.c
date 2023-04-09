@@ -79,6 +79,7 @@ int main(int argc, char **argv)
             {.type = BR_PMT_RGBA_8888, .name = "rgba_8888"},
             {.type = BR_PMT_RGBX_888,  .name = "rgbx_888" },
             {.type = BR_PMT_BGR_555,   .name = "bgr_555"  },
+            {.type = BR_PMT_ARGB_4444, .name = "argb_4444"},
         };
 
         for(int i = 0; i < BR_ASIZE(smpte_formats); ++i) {
