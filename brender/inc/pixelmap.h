@@ -32,8 +32,8 @@ enum {
     BR_PMT_RGB_555,   /* 16 bits per pixel */
     BR_PMT_RGB_565,   /* 16 bits per pixel */
     BR_PMT_RGB_888,   /* 24 bits per pixel */
-    BR_PMT_RGBX_888,  /* 32 bits per pixel */
-    BR_PMT_RGBA_8888, /* 32 bits per pixel */
+    BR_PMT_RGBX_888,  /* 32 bits per pixel, actually XRGB */
+    BR_PMT_RGBA_8888, /* 32 bits per pixel, actually ARGB */
 
     /*
      * YUV
