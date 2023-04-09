@@ -37,6 +37,7 @@ static struct br_tv_template_entry outputFacilityTemplateEntries[] = {
     {BRT_WINDOW_HANDLE_H,    NULL, (br_uintptr_t)NULL,     BRTV_QUERY | BRTV_ALL, BRTV_CONV_DIRECT, 0},
     {BRT_WINDOW_NAME_CSTR,   NULL, (br_uintptr_t)NULL,     BRTV_QUERY | BRTV_ALL, BRTV_CONV_DIRECT, 0},
     {BRT_USE_T,              NULL, (br_uintptr_t)BRT_NONE, BRTV_QUERY | BRTV_ALL, BRTV_CONV_DIRECT, 0},
+    {BRT_HIDPI_B,            NULL, (br_uintptr_t)BR_FALSE, BRTV_QUERY | BRTV_ALL, BRTV_CONV_DIRECT, 0},
 };
 
 #undef F
@@ -49,17 +50,19 @@ struct pixelmapNewTokens {
     SDL_Window  *window;
     SDL_Surface *surface;
     br_token     use_type;
+    br_uint_32   flags;
 };
 
 #define F(f) offsetof(struct pixelmapNewTokens, f)
 static struct br_tv_template_entry pixelmapNewTemplateEntries[] = {
-    {BRT_WINDOW_NAME_CSTR, NULL, F(title),      BRTV_SET, BRTV_CONV_COPY},
-    {BRT_WIDTH_I32,        NULL, F(width),      BRTV_SET, BRTV_CONV_COPY},
-    {BRT_HEIGHT_I32,       NULL, F(height),     BRTV_SET, BRTV_CONV_COPY},
-    {BRT_PIXEL_TYPE_U8,    NULL, F(pixel_type), BRTV_SET, BRTV_CONV_COPY},
-    {BRT_WINDOW_HANDLE_H,  NULL, F(window),     BRTV_SET, BRTV_CONV_COPY},
-    {BRT_SURFACE_HANDLE_H, NULL, F(surface),    BRTV_SET, BRTV_CONV_COPY},
-    {BRT_USE_T,            NULL, F(use_type),   BRTV_SET, BRTV_CONV_COPY},
+    {BRT_WINDOW_NAME_CSTR, NULL, F(title),      BRTV_SET, BRTV_CONV_COPY, 0                       },
+    {BRT_WIDTH_I32,        NULL, F(width),      BRTV_SET, BRTV_CONV_COPY, 0                       },
+    {BRT_HEIGHT_I32,       NULL, F(height),     BRTV_SET, BRTV_CONV_COPY, 0                       },
+    {BRT_PIXEL_TYPE_U8,    NULL, F(pixel_type), BRTV_SET, BRTV_CONV_COPY, 0                       },
+    {BRT_WINDOW_HANDLE_H,  NULL, F(window),     BRTV_SET, BRTV_CONV_COPY, 0                       },
+    {BRT_SURFACE_HANDLE_H, NULL, F(surface),    BRTV_SET, BRTV_CONV_COPY, 0                       },
+    {BRT_USE_T,            NULL, F(use_type),   BRTV_SET, BRTV_CONV_COPY, 0                       },
+    {BRT_HIDPI_B,          NULL, F(flags),      BRTV_SET, BRTV_CONV_BIT,  SDL_WINDOW_ALLOW_HIGHDPI},
 };
 #undef F
 
@@ -273,6 +276,7 @@ static br_error BR_CMETHOD_DECL(br_output_facility_sdl2, pixelmapNew)(br_output_
         .pixel_type = BR_PMT_MAX,
         .window     = NULL,
         .use_type   = BRT_NONE,
+        .flags      = 0,
     };
 
     if(self->device->templates.pixelmapNewTemplate == NULL) {
@@ -318,7 +322,7 @@ static br_error BR_CMETHOD_DECL(br_output_facility_sdl2, pixelmapNew)(br_output_
 
     if(is_window) {
         if(is_new) {
-            window = SDL_CreateWindow(pt.title, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, pt.width, pt.height, 0);
+            window = SDL_CreateWindow(pt.title, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, pt.width, pt.height, pt.flags);
             if(window == NULL) {
                 BrLogError("SDL2", "Error creating window: %s", SDL_GetError());
                 return BRE_FAIL;

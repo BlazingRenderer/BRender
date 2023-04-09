@@ -850,6 +850,9 @@ WINDOW_BUFFER_METHOD			token
 
 SURFACE_HANDLE          handle
 
+# Mainly to request HiDPI surfaces from SDL
+HIDPI                   boolean
+
 # DirectDraw specific tokens
 
 

@@ -135,6 +135,7 @@ static const br_token insignificantMatchTokens[] = {
     BRT_WINDOW_NAME_CSTR,
     BRT_SURFACE_HANDLE_H,
     BRT_USE_T,
+    BRT_HIDPI_B,
     BR_NULL_TOKEN,
 };
 // clang-format on
