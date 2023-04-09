@@ -81,6 +81,12 @@ br_error DeviceClutSDL2CopyToSurface(SDL_Surface *surf, br_pixelmap *pm, br_devi
  */
 br_error DevicePixelmapSDL2BlitSurface(br_pixelmap *src, SDL_Rect *sr, br_pixelmap *dst, SDL_Rect *dr, br_sdl_blit_cbfn blit);
 
+/*
+ * glrend.c
+ */
+br_error    DevicePixelmapSDL2CreateGL(const pixelmap_new_tokens *pt, br_device_pixelmap **ppmap);
+SDL_Window *DevicePixelmapSDL2GetWindowGL(br_pixelmap *pm);
+
 #ifdef __cplusplus
 };
 #endif

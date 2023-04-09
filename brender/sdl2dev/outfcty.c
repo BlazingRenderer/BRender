@@ -38,22 +38,12 @@ static struct br_tv_template_entry outputFacilityTemplateEntries[] = {
     {BRT_WINDOW_NAME_CSTR,   NULL, (br_uintptr_t)NULL,     BRTV_QUERY | BRTV_ALL, BRTV_CONV_DIRECT, 0},
     {BRT_USE_T,              NULL, (br_uintptr_t)BRT_NONE, BRTV_QUERY | BRTV_ALL, BRTV_CONV_DIRECT, 0},
     {BRT_HIDPI_B,            NULL, (br_uintptr_t)BR_FALSE, BRTV_QUERY | BRTV_ALL, BRTV_CONV_DIRECT, 0},
+    {BRT_OPENGL_B,           NULL, (br_uintptr_t)BR_FALSE, BRTV_QUERY | BRTV_ALL, BRTV_CONV_DIRECT, 0},
 };
 
 #undef F
 
-struct pixelmapNewTokens {
-    const char  *title;
-    br_int_32    width;
-    br_int_32    height;
-    br_uint_8    pixel_type;
-    SDL_Window  *window;
-    SDL_Surface *surface;
-    br_token     use_type;
-    br_uint_32   flags;
-};
-
-#define F(f) offsetof(struct pixelmapNewTokens, f)
+#define F(f) offsetof(struct pixelmap_new_tokens, f)
 static struct br_tv_template_entry pixelmapNewTemplateEntries[] = {
     {BRT_WINDOW_NAME_CSTR, NULL, F(title),      BRTV_SET, BRTV_CONV_COPY, 0                       },
     {BRT_WIDTH_I32,        NULL, F(width),      BRTV_SET, BRTV_CONV_COPY, 0                       },
@@ -63,6 +53,7 @@ static struct br_tv_template_entry pixelmapNewTemplateEntries[] = {
     {BRT_SURFACE_HANDLE_H, NULL, F(surface),    BRTV_SET, BRTV_CONV_COPY, 0                       },
     {BRT_USE_T,            NULL, F(use_type),   BRTV_SET, BRTV_CONV_COPY, 0                       },
     {BRT_HIDPI_B,          NULL, F(flags),      BRTV_SET, BRTV_CONV_BIT,  SDL_WINDOW_ALLOW_HIGHDPI},
+    {BRT_OPENGL_B,         NULL, F(flags),      BRTV_SET, BRTV_CONV_BIT,  SDL_WINDOW_OPENGL       },
 };
 #undef F
 
@@ -269,7 +260,7 @@ static br_error BR_CMETHOD_DECL(br_output_facility_sdl2, pixelmapNew)(br_output_
     Uint32              format  = SDL_PIXELFORMAT_UNKNOWN;
     int                 bpp     = -1;
 
-    struct pixelmapNewTokens pt = {
+    struct pixelmap_new_tokens pt = {
         .title      = NULL,
         .width      = -1,
         .height     = -1,
@@ -319,6 +310,12 @@ static br_error BR_CMETHOD_DECL(br_output_facility_sdl2, pixelmapNew)(br_output_
         if(pt.title == NULL)
             pt.title = DEFAULT_WINDOW_TITLE;
     }
+
+    /*
+     * If wanting OpenGL, forward things on.
+     */
+    if(pt.flags & SDL_WINDOW_OPENGL)
+        return DevicePixelmapSDL2CreateGL(&pt, ppmap);
 
     if(is_window) {
         if(is_new) {

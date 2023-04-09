@@ -875,6 +875,8 @@ OPENGL_PROFILE                      token
   OPENGL_PROFILE_COMPATIBILITY      none
   OPENGL_PROFILE_CORE               none
 
+OPENGL                              boolean
+
 # Tokens for system configuration
 
 REGISTRY						string

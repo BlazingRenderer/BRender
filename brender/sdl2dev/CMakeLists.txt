@@ -24,6 +24,8 @@ add_library(sdl2dev STATIC
         devclut.h
 
         surface.c
+
+        glrend.c
 )
 
 get_target_property(target_type sdl2dev TYPE)
@@ -33,7 +35,7 @@ endif()
 
 target_compile_definitions(sdl2dev PRIVATE -DNO_MEMORY_FALLBACK=1)
 
-target_link_libraries(sdl2dev fw pixelmap)
+target_link_libraries(sdl2dev fw pixelmap glrend)
 target_link_libraries(sdl2dev SDL2::SDL2)
 
 set_property(TARGET sdl2dev PROPERTY FOLDER ${BRENDER_FOLDER})
