@@ -133,6 +133,8 @@ void DeviceGLDrawQuadText(br_device_pixelmap_gl_quad *self);
  * util.c
  */
 br_error DevicePixelmapGLBindFramebuffer(GLenum target, br_device_pixelmap *pm);
+GLuint   DeviceGLBuildWhiteTexture(void);
+GLuint   DeviceGLBuildCheckerboardTexture(void);
 
 /*
  * Wrappers for br_device_gl_procs.
