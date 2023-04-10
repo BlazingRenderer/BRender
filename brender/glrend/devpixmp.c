@@ -602,34 +602,40 @@ br_error BR_CMETHOD_DECL(br_device_pixelmap_gl, rectangleCopyTo)(br_device_pixel
  * Device->Pixelmap, addressable same-size copy.
  */
 br_error BR_CMETHOD_DECL(br_device_pixelmap_gl, rectangleCopyFrom)(br_device_pixelmap *self, br_point *p,
-                                                                   br_device_pixelmap *dest, br_rectangle *dr)
+                                                                   br_device_pixelmap *dest, br_rectangle *r)
 {
-    br_error err;
-
-    /* Need contig pixels. */
-    if(!(dest->pm_flags & BR_PMF_LINEAR))
-        return BRE_FAIL;
-
-    br_rectangle glDr = *dr;
-    VIDEOI_BrRectToGL((br_pixelmap *)dest, &glDr);
-
-    /* Only do fullscreen copies */
-    if(glDr.x != 0 && glDr.y != 0 && glDr.w != self->pm_width && glDr.h != self->pm_height)
-        return BRE_FAIL;
-
+    br_error   err;
     GLint      internalFormat;
     GLenum     format, type;
     GLsizeiptr elemBytes;
-    VIDEOI_BrPixelmapGetTypeDetails(dest->pm_type, &internalFormat, &format, &type, &elemBytes, NULL);
+    void      *rowTemp;
+
+    UASSERT(p->x == -self->pm_origin_x);
+    UASSERT(p->y == -self->pm_origin_y);
+
+    /*
+     * Need contig pixels and whole rows.
+     */
+    if(!(dest->pm_flags & (BR_PMF_LINEAR | BR_PMF_ROW_WHOLEPIXELS)))
+        return BRE_FAIL;
+
+    /*
+     * Flip to bottom-up. It's already been clipped.
+     */
+    r->y = self->pm_height - r->h - r->y;
+
+    if((err = VIDEOI_BrPixelmapGetTypeDetails(dest->pm_type, &internalFormat, &format, &type, &elemBytes, NULL)) != BRE_OK)
+        return err;
 
     if((err = DevicePixelmapGLBindFramebuffer(GL_READ_FRAMEBUFFER, self)) != BRE_OK)
         return err;
 
-    glReadPixels(0, 0, self->pm_width, self->pm_height, format, type, dest->pm_pixels);
+    glReadPixels(r->x, r->y, r->w, r->h, format, type, dest->pm_pixels);
 
-    void *rowTemp = BrScratchAllocate(dest->pm_row_bytes);
-
-    /* Flip it */
+    /*
+     * Flip it
+     */
+    rowTemp = BrScratchAllocate(dest->pm_row_bytes);
     for(br_uint_16 j = 0; j < dest->pm_height / 2; ++j) {
         void *top = (void *)((br_uintptr_t)dest->pm_pixels + (j * dest->pm_row_bytes));
         void *bot = (void *)((br_uintptr_t)dest->pm_pixels + ((dest->pm_height - j - 1) * dest->pm_row_bytes));
