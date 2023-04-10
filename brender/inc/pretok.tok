@@ -864,6 +864,12 @@ OPENGL_VERSION                      constant_string
 OPENGL_VENDOR                       constant_string
 OPENGL_RENDERER                     constant_string
 
+OPENGL_VERSION_MAJOR                uint_8
+OPENGL_VERSION_MINOR                uint_8
+OPENGL_PROFILE                      token
+  OPENGL_PROFILE_COMPATIBILITY      none
+  OPENGL_PROFILE_CORE               none
+
 # Tokens for system configuration
 
 REGISTRY						string
