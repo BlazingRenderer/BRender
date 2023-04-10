@@ -284,7 +284,7 @@ GLuint VIDEO_BrPixelmapToGLTexture(br_pixelmap *pm)
     return tex;
 }
 
-void VIDEOI_BrRectToGL(br_pixelmap *pm, br_rectangle *r)
+void VIDEOI_BrRectToGL(const br_pixelmap *pm, br_rectangle *r)
 {
     br_rectangle out;
     PixelmapRectangleClip(&out, r, pm);
@@ -294,7 +294,7 @@ void VIDEOI_BrRectToGL(br_pixelmap *pm, br_rectangle *r)
     r->y = pm->height - r->h - r->y;
 }
 
-void VIDEOI_BrRectToUVs(br_pixelmap *pm, br_rectangle *r, float *x0, float *y0, float *x1, float *y1)
+void VIDEOI_BrRectToUVs(const br_pixelmap *pm, const br_rectangle *r, float *x0, float *y0, float *x1, float *y1)
 {
     *x0 = (float)r->x / (float)pm->width;
     *y0 = (float)r->y / (float)pm->height;

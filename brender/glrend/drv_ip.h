@@ -36,9 +36,9 @@ br_error VIDEOI_BrPixelmapToExistingTexture(GLuint tex, br_pixelmap *pm);
 br_error VIDEOI_BrPixelmapGetTypeDetails(br_uint_8 pmType, GLint *internalFormat, GLenum *format, GLenum *type,
                                          GLsizeiptr *elemBytes, br_boolean *blended);
 
-void VIDEOI_BrRectToGL(br_pixelmap *pm, br_rectangle *r);
+void VIDEOI_BrRectToGL(const br_pixelmap *pm, br_rectangle *r);
 
-void VIDEOI_BrRectToUVs(br_pixelmap *pm, br_rectangle *r, float *x0, float *y0, float *x1, float *y1);
+void VIDEOI_BrRectToUVs(const br_pixelmap *pm, const br_rectangle *r, float *x0, float *y0, float *x1, float *y1);
 
 br_matrix4 *VIDEOI_D3DtoGLProjection(br_matrix4 *m);
 
