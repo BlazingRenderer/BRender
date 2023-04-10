@@ -104,6 +104,7 @@ set(GLREND_FILES
 	./template.h
 
 	./quad.c
+	./util.c
 )
 
 add_library(glrend STATIC

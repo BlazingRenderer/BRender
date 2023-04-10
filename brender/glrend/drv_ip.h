@@ -130,6 +130,11 @@ void DeviceGLDrawQuad(br_device_pixelmap_gl_quad *self);
 void DeviceGLDrawQuadText(br_device_pixelmap_gl_quad *self);
 
 /*
+ * util.c
+ */
+br_error DevicePixelmapGLBindFramebuffer(GLenum target, br_device_pixelmap *pm);
+
+/*
  * Wrappers for br_device_gl_procs.
  */
 void *DeviceGLCreateContext(br_device *self);

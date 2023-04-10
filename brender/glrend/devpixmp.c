@@ -598,10 +598,13 @@ br_error BR_CMETHOD_DECL(br_device_pixelmap_gl, rectangleCopyTo)(br_device_pixel
     return BR_CMETHOD(br_device_pixelmap_gl, rectangleStretchCopyTo)(self, &r, src, sr);
 }
 
+/*
+ * Device->Pixelmap, addressable same-size copy.
+ */
 br_error BR_CMETHOD_DECL(br_device_pixelmap_gl, rectangleCopyFrom)(br_device_pixelmap *self, br_point *p,
                                                                    br_device_pixelmap *dest, br_rectangle *dr)
 {
-    /* Device->Pixelmap, addressable same-size copy. */
+    br_error err;
 
     /* Need contig pixels. */
     if(!(dest->pm_flags & BR_PMF_LINEAR))
@@ -618,6 +621,9 @@ br_error BR_CMETHOD_DECL(br_device_pixelmap_gl, rectangleCopyFrom)(br_device_pix
     GLenum     format, type;
     GLsizeiptr elemBytes;
     VIDEOI_BrPixelmapGetTypeDetails(dest->pm_type, &internalFormat, &format, &type, &elemBytes, NULL);
+
+    if((err = DevicePixelmapGLBindFramebuffer(GL_READ_FRAMEBUFFER, self)) != BRE_OK)
+        return err;
 
     glReadPixels(0, 0, self->pm_width, self->pm_height, format, type, dest->pm_pixels);
 
