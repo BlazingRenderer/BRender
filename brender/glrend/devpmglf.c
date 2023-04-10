@@ -58,6 +58,7 @@ br_device_pixelmap *DevicePixelmapGLAllocateFront(br_device *dev, br_output_faci
 {
     br_device_pixelmap      *self;
     br_int_32                count;
+    GLint                    red_bits = 0, grn_bits = 0, blu_bits = 0, alpha_bits = 0;
     struct pixelmapNewTokens pt = {
         .width           = -1,
         .height          = -1,
@@ -120,6 +121,27 @@ br_device_pixelmap *DevicePixelmapGLAllocateFront(br_device *dev, br_output_faci
     BrLogTrace("GLREND", "OpenGL Version  = %s", self->asFront.gl_version);
     BrLogTrace("GLREND", "OpenGL Vendor   = %s", self->asFront.gl_vendor);
     BrLogTrace("GLREND", "OpenGL Renderer = %s", self->asFront.gl_renderer);
+
+    /*
+     * Try to figure out the actual format we got.
+     * This isn't a big deal if we don't know what it is - we can only be written to by a doubleBuffer().
+     */
+    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+    glGetFramebufferAttachmentParameteriv(GL_DRAW_FRAMEBUFFER, GL_BACK_LEFT, GL_FRAMEBUFFER_ATTACHMENT_RED_SIZE, &red_bits);
+    glGetFramebufferAttachmentParameteriv(GL_DRAW_FRAMEBUFFER, GL_BACK_LEFT, GL_FRAMEBUFFER_ATTACHMENT_GREEN_SIZE, &grn_bits);
+    glGetFramebufferAttachmentParameteriv(GL_DRAW_FRAMEBUFFER, GL_BACK_LEFT, GL_FRAMEBUFFER_ATTACHMENT_BLUE_SIZE, &blu_bits);
+    glGetFramebufferAttachmentParameteriv(GL_DRAW_FRAMEBUFFER, GL_BACK_LEFT, GL_FRAMEBUFFER_ATTACHMENT_ALPHA_SIZE, &alpha_bits);
+
+    if(red_bits == 5 && grn_bits == 6 && blu_bits == 5) {
+        self->pm_type = BR_PMT_RGB_565;
+    } else if(red_bits == 8 && grn_bits == 8 && blu_bits == 8 && alpha_bits == 0) {
+        self->pm_type = BR_PMT_RGBX_888;
+    } else if(red_bits == 8 && grn_bits == 8 && blu_bits == 8 && alpha_bits == 8) {
+        self->pm_type = BR_PMT_RGBA_8888;
+    } else {
+        BrLogWarn("GLREND", "OpenGL gave us an unknown screen format (R%dG%dB%dA%d), soldiering on...", red_bits,
+                  grn_bits, blu_bits, alpha_bits);
+    }
 
     if(VIDEO_Open(&self->asFront.video, pt.vertex_shader, pt.fragment_shader) == NULL)
         goto cleanup_context;
