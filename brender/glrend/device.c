@@ -22,6 +22,8 @@ static const char deviceCreator[] = DEVICE_CREATOR;
 
 static const char deviceProduct[] = DEVICE_PRODUCT;
 
+// clang-format off
+
 #define F(f) offsetof(br_device, f)
 #define A(a) ((br_uintptr_t)(a))
 
@@ -33,10 +35,19 @@ static struct br_tv_template_entry deviceTemplateEntries[] = {
     {BRT_CREATOR_CSTR,        NULL, A(deviceCreator), BRTV_QUERY | BRTV_ALL | BRTV_ABS, BRTV_CONV_COPY,   0              },
     {BRT_TITLE_CSTR,          NULL, A(deviceTitle),   BRTV_QUERY | BRTV_ALL | BRTV_ABS, BRTV_CONV_COPY,   0              },
     {BRT_PRODUCT_CSTR,        NULL, A(deviceProduct), BRTV_QUERY | BRTV_ALL | BRTV_ABS, BRTV_CONV_COPY,   0              },
-};
 
+
+     /*
+      * Minimum version of OpenGL supported by this driver.
+      * Other devices (e.g. SDL) may query these to create appropriate windows.
+      */
+    {BRT_OPENGL_VERSION_MAJOR_U8, NULL, 0, BRTV_QUERY | BRTV_ALL, BRTV_CONV_DIRECT, 3                      },
+    {BRT_OPENGL_VERSION_MINOR_U8, NULL, 0, BRTV_QUERY | BRTV_ALL, BRTV_CONV_DIRECT, 2                      },
+    {BRT_OPENGL_PROFILE_T,        NULL, 0, BRTV_QUERY | BRTV_ALL, BRTV_CONV_DIRECT, BRT_OPENGL_PROFILE_CORE},
+};
 #undef F
 #undef A
+// clang-format on
 
 /*
  * List of tokens which are not significant in matching (for output facilities)
