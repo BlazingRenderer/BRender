@@ -644,6 +644,12 @@ br_error BR_CMETHOD(br_device_pixelmap_gl, text)(br_device_pixelmap *self, br_po
     br_int_32 x = point->x + self->pm_origin_x;
     br_int_32 y = point->y + self->pm_origin_y;
 
+    /*
+     * Make sure we're an offscreen pixelmap.
+     */
+    if(self->use_type != BRT_OFFSCREEN)
+        return BRE_UNSUPPORTED;
+
     if(y <= -font->glyph_y || y >= self->pm_height || x >= self->pm_width)
         return BRE_OK;
 
