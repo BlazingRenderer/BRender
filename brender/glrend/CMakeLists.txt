@@ -102,6 +102,8 @@ set(GLREND_FILES
 	./font.h
 
 	./template.h
+
+	./quad.c
 )
 
 add_library(glrend STATIC

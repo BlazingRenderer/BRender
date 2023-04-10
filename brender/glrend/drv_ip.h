@@ -110,6 +110,26 @@ void StoredGLRenderGroup(br_geometry_stored *self, br_renderer *renderer, const 
 br_error FontGLBuildAtlas(br_font_gl *gl_font, br_font *font, br_int_32 width, br_int_32 height);
 
 /*
+ * quad.c
+ */
+
+void DeviceGLInitQuad(br_device_pixelmap_gl_quad *self, HVIDEO hVideo);
+void DeviceGLFiniQuad(br_device_pixelmap_gl_quad *self);
+
+/*
+ * Patch the X/Y and U/V coordinates.
+ * X/Y = rect of destination
+ * U/V = rect of source
+ * Rects are in OpenGL coordianges -- (0,0) at bottom-left
+ */
+void DeviceGLPatchQuad(br_device_pixelmap_gl_quad *self, const br_pixelmap *dst, const br_rectangle *dr,
+                       const br_pixelmap *src, const br_rectangle *sr);
+void DeviceGLPatchQuadFont(br_device_pixelmap_gl_quad *self, const br_pixelmap *dst, const br_rectangle *dr,
+                           const br_font_gl *font, br_uint_8 glyph);
+void DeviceGLDrawQuad(br_device_pixelmap_gl_quad *self);
+void DeviceGLDrawQuadText(br_device_pixelmap_gl_quad *self);
+
+/*
  * Wrappers for br_device_gl_procs.
  */
 void *DeviceGLCreateContext(br_device *self);
