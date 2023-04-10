@@ -24,10 +24,8 @@ br_uint_16 BR_RESIDENT_ENTRY BrPixelmapFileSize(br_pixelmap *pm);
  */
 struct br_device_pixelmap *DevicePixelmapMemAllocate(br_uint_8 type, br_uint_16 w, br_uint_16 h, void *pixels, int flags);
 
-br_error BR_CMETHOD_DECL(br_device_pixelmap_mem, validSource)(struct br_device_pixelmap *self, br_boolean *bp,
-                                                              br_object *h);
-br_error BR_CMETHOD_DECL(br_device_pixelmap_mem, resize)(struct br_device_pixelmap *self, br_int_32 width,
-                                                         br_int_32 height);
+br_error BR_CMETHOD_DECL(br_device_pixelmap_mem, validSource)(struct br_device_pixelmap *self, br_boolean *bp, br_object *h);
+br_error BR_CMETHOD_DECL(br_device_pixelmap_mem, resize)(struct br_device_pixelmap *self, br_int_32 width, br_int_32 height);
 br_error BR_CMETHOD_DECL(br_device_pixelmap_mem, match)(struct br_device_pixelmap  *self,
                                                         struct br_device_pixelmap **newpm, br_token_value *tv);
 br_error BR_CMETHOD_DECL(br_device_pixelmap_mem, allocateSub)(struct br_device_pixelmap  *self,
@@ -39,14 +37,12 @@ br_error BR_CMETHOD_DECL(br_device_pixelmap_mem, allocateSub)(struct br_device_p
 br_error BR_CMETHOD_DECL(br_device_pixelmap_mem, copyTo)(struct br_device_pixelmap *self, struct br_device_pixelmap *src);
 br_error BR_CMETHOD_DECL(br_device_pixelmap_mem, copyFrom)(struct br_device_pixelmap *self, struct br_device_pixelmap *src);
 br_error BR_CMETHOD_DECL(br_device_pixelmap_mem, fill)(struct br_device_pixelmap *self, br_uint_32 colour);
-br_error BR_CMETHOD_DECL(br_device_pixelmap_mem, doubleBuffer)(struct br_device_pixelmap *self,
-                                                               struct br_device_pixelmap *src);
+br_error BR_CMETHOD_DECL(br_device_pixelmap_mem, doubleBuffer)(struct br_device_pixelmap *self, struct br_device_pixelmap *src);
 
 br_error BR_CMETHOD_DECL(br_device_pixelmap_mem, copyDirty)(struct br_device_pixelmap *self, struct br_device_pixelmap *src,
                                                             br_rectangle *dirty, br_int_32 num_rects);
-br_error BR_CMETHOD_DECL(br_device_pixelmap_mem, copyToDirty)(struct br_device_pixelmap *self,
-                                                              struct br_device_pixelmap *src, br_rectangle *dirty,
-                                                              br_int_32 num_rects);
+br_error BR_CMETHOD_DECL(br_device_pixelmap_mem, copyToDirty)(struct br_device_pixelmap *self, struct br_device_pixelmap *src,
+                                                              br_rectangle *dirty, br_int_32 num_rects);
 br_error BR_CMETHOD_DECL(br_device_pixelmap_mem, copyFromDirty)(struct br_device_pixelmap *self,
                                                                 struct br_device_pixelmap *src, br_rectangle *dirty,
                                                                 br_int_32 num_rects);
@@ -68,19 +64,16 @@ br_error BR_CMETHOD_DECL(br_device_pixelmap_mem, rectangleCopyFrom)(struct br_de
 
 br_error BR_CMETHOD_DECL(br_device_pixelmap_mem, rectangleStretchCopyTo)(struct br_device_pixelmap *self, br_rectangle *d,
                                                                          struct br_device_pixelmap *mem, br_rectangle *s);
-br_error BR_CMETHOD_DECL(br_device_pixelmap_mem,
-                         rectangleStretchCopyFrom)(struct br_device_pixelmap *self, br_rectangle *d,
-                                                   struct br_device_pixelmap *mem, br_rectangle *s);
+br_error BR_CMETHOD_DECL(br_device_pixelmap_mem, rectangleStretchCopyFrom)(struct br_device_pixelmap *self, br_rectangle *d,
+                                                                           struct br_device_pixelmap *mem, br_rectangle *s);
 
 br_error BR_CMETHOD_DECL(br_device_pixelmap_mem, rectangleFill)(struct br_device_pixelmap *self, br_rectangle *rect,
                                                                 br_uint_32 colour);
-br_error BR_CMETHOD_DECL(br_device_pixelmap_mem, pixelSet)(struct br_device_pixelmap *self, br_point *point,
-                                                           br_uint_32 colour);
+br_error BR_CMETHOD_DECL(br_device_pixelmap_mem, pixelSet)(struct br_device_pixelmap *self, br_point *point, br_uint_32 colour);
 br_error BR_CMETHOD_DECL(br_device_pixelmap_mem, line)(struct br_device_pixelmap *self, br_point *s, br_point *e,
                                                        br_uint_32 colour);
-br_error BR_CMETHOD_DECL(br_device_pixelmap_mem, copyBits)(struct br_device_pixelmap *self, br_point *point,
-                                                           br_uint_8 *src, br_uint_16 s_stride, br_rectangle *bit_rect,
-                                                           br_uint_32 colour);
+br_error BR_CMETHOD_DECL(br_device_pixelmap_mem, copyBits)(struct br_device_pixelmap *self, br_point *point, br_uint_8 *src,
+                                                           br_uint_16 s_stride, br_rectangle *bit_rect, br_uint_32 colour);
 
 br_error BR_CMETHOD_DECL(br_device_pixelmap_mem, rowSize)(struct br_device_pixelmap *self, br_size_t *sizep);
 
@@ -102,8 +95,7 @@ br_error BR_CMETHOD_DECL(br_device_pixelmap_mem, pixelAddressQuery)(struct br_de
 /*
  * Updating the pixelmap
  */
-br_error BR_CMETHOD_DECL(br_device_pixelmap_mem, pixelAddressSet)(struct br_device_pixelmap *self, void *ptr,
-                                                                  br_uint_32 *qual);
+br_error BR_CMETHOD_DECL(br_device_pixelmap_mem, pixelAddressSet)(struct br_device_pixelmap *self, void *ptr, br_uint_32 *qual);
 br_error BR_CMETHOD_DECL(br_device_pixelmap_mem, originSet)(struct br_device_pixelmap *self, br_point *p);
 
 /*
@@ -127,13 +119,11 @@ br_error BR_CMETHOD_DECL(br_device_pixelmap_gen, copy)(struct br_device_pixelmap
 br_error BR_CMETHOD_DECL(br_device_pixelmap_gen, copyTo)(struct br_device_pixelmap *self, struct br_device_pixelmap *src);
 br_error BR_CMETHOD_DECL(br_device_pixelmap_gen, copyFrom)(struct br_device_pixelmap *self, struct br_device_pixelmap *src);
 br_error BR_CMETHOD_DECL(br_device_pixelmap_gen, fill)(struct br_device_pixelmap *self, br_uint_32 colour);
-br_error BR_CMETHOD_DECL(br_device_pixelmap_gen, doubleBuffer)(struct br_device_pixelmap *self,
-                                                               struct br_device_pixelmap *src);
+br_error BR_CMETHOD_DECL(br_device_pixelmap_gen, doubleBuffer)(struct br_device_pixelmap *self, struct br_device_pixelmap *src);
 br_error BR_CMETHOD_DECL(br_device_pixelmap_gen, copyDirty)(struct br_device_pixelmap *self, struct br_device_pixelmap *src,
                                                             br_rectangle *dirty, br_int_32 num_rects);
-br_error BR_CMETHOD_DECL(br_device_pixelmap_gen, copyToDirty)(struct br_device_pixelmap *self,
-                                                              struct br_device_pixelmap *src, br_rectangle *dirty,
-                                                              br_int_32 num_rects);
+br_error BR_CMETHOD_DECL(br_device_pixelmap_gen, copyToDirty)(struct br_device_pixelmap *self, struct br_device_pixelmap *src,
+                                                              br_rectangle *dirty, br_int_32 num_rects);
 br_error BR_CMETHOD_DECL(br_device_pixelmap_gen, copyFromDirty)(struct br_device_pixelmap *self,
                                                                 struct br_device_pixelmap *src, br_rectangle *dirty,
                                                                 br_int_32 num_rects);
@@ -153,9 +143,8 @@ br_error BR_CMETHOD_DECL(br_device_pixelmap_gen, text)(struct br_device_pixelmap
                                                        const char *text, br_uint_32 colour);
 br_error BR_CMETHOD_DECL(br_device_pixelmap_gen, textBounds)(struct br_device_pixelmap *self, br_rectangle *rect,
                                                              br_font *font, const char *text);
-br_error BR_CMETHOD_DECL(br_device_pixelmap_gen, copyBits)(struct br_device_pixelmap *self, br_point *point,
-                                                           br_uint_8 *src, br_uint_16 s_stride, br_rectangle *bit_rect,
-                                                           br_uint_32 colour);
+br_error BR_CMETHOD_DECL(br_device_pixelmap_gen, copyBits)(struct br_device_pixelmap *self, br_point *point, br_uint_8 *src,
+                                                           br_uint_16 s_stride, br_rectangle *bit_rect, br_uint_32 colour);
 
 br_error BR_CMETHOD_DECL(br_device_pixelmap_gen, originSet)(struct br_device_pixelmap *self, br_point *p);
 br_error BR_CMETHOD_DECL(br_device_pixelmap_gen, flush)(struct br_device_pixelmap *self);
@@ -163,30 +152,23 @@ br_error BR_CMETHOD_DECL(br_device_pixelmap_gen, synchronise)(struct br_device_p
                                                               br_boolean block);
 br_error BR_CMETHOD_DECL(br_device_pixelmap_gen, directLock)(struct br_device_pixelmap *self, br_boolean block);
 br_error BR_CMETHOD_DECL(br_device_pixelmap_gen, directUnlock)(struct br_device_pixelmap *self);
-br_error BR_CMETHOD_DECL(br_device_pixelmap_gen, getControls)(struct br_device_pixelmap *self,
-                                                              br_display_controls       *controls);
-br_error BR_CMETHOD_DECL(br_device_pixelmap_gen, setControls)(struct br_device_pixelmap *self,
-                                                              br_display_controls       *controls);
+br_error BR_CMETHOD_DECL(br_device_pixelmap_gen, getControls)(struct br_device_pixelmap *self, br_display_controls *controls);
+br_error BR_CMETHOD_DECL(br_device_pixelmap_gen, setControls)(struct br_device_pixelmap *self, br_display_controls *controls);
 
 /*
  * pmnull.c
  */
-br_error BR_CMETHOD_DECL(br_device_pixelmap_null, validSource)(struct br_device_pixelmap *self, br_boolean *bp,
-                                                               br_object *h);
-br_error BR_CMETHOD_DECL(br_device_pixelmap_null, resize)(struct br_device_pixelmap *self, br_int_32 width,
-                                                          br_int_32 height);
+br_error BR_CMETHOD_DECL(br_device_pixelmap_null, validSource)(struct br_device_pixelmap *self, br_boolean *bp, br_object *h);
+br_error BR_CMETHOD_DECL(br_device_pixelmap_null, resize)(struct br_device_pixelmap *self, br_int_32 width, br_int_32 height);
 br_error BR_CMETHOD_DECL(br_device_pixelmap_null, copyTo)(struct br_device_pixelmap *self, struct br_device_pixelmap *src);
-br_error BR_CMETHOD_DECL(br_device_pixelmap_null, copyFrom)(struct br_device_pixelmap *self,
-                                                            struct br_device_pixelmap *src);
+br_error BR_CMETHOD_DECL(br_device_pixelmap_null, copyFrom)(struct br_device_pixelmap *self, struct br_device_pixelmap *src);
 br_error BR_CMETHOD_DECL(br_device_pixelmap_null, fill)(struct br_device_pixelmap *self, br_uint_32 colour);
 br_error BR_CMETHOD_DECL(br_device_pixelmap_null, doubleBuffer)(struct br_device_pixelmap *self,
                                                                 struct br_device_pixelmap *src);
-br_error BR_CMETHOD_DECL(br_device_pixelmap_null, copyDirty)(struct br_device_pixelmap *self,
-                                                             struct br_device_pixelmap *src, br_rectangle *dirty,
-                                                             br_int_32 num_rects);
-br_error BR_CMETHOD_DECL(br_device_pixelmap_null, copyToDirty)(struct br_device_pixelmap *self,
-                                                               struct br_device_pixelmap *src, br_rectangle *dirty,
-                                                               br_int_32 num_rects);
+br_error BR_CMETHOD_DECL(br_device_pixelmap_null, copyDirty)(struct br_device_pixelmap *self, struct br_device_pixelmap *src,
+                                                             br_rectangle *dirty, br_int_32 num_rects);
+br_error BR_CMETHOD_DECL(br_device_pixelmap_null, copyToDirty)(struct br_device_pixelmap *self, struct br_device_pixelmap *src,
+                                                               br_rectangle *dirty, br_int_32 num_rects);
 br_error BR_CMETHOD_DECL(br_device_pixelmap_null, copyFromDirty)(struct br_device_pixelmap *self,
                                                                  struct br_device_pixelmap *src, br_rectangle *dirty,
                                                                  br_int_32 num_rects);
@@ -199,25 +181,20 @@ br_error BR_CMETHOD_DECL(br_device_pixelmap_null, rectangleCopyTo)(struct br_dev
                                                                    struct br_device_pixelmap *src, br_rectangle *r);
 br_error BR_CMETHOD_DECL(br_device_pixelmap_null, rectangleCopyFrom)(struct br_device_pixelmap *self, br_point *p,
                                                                      struct br_device_pixelmap *mem, br_rectangle *r);
-br_error BR_CMETHOD_DECL(br_device_pixelmap_null, rectangleStretchCopyTo)(struct br_device_pixelmap *self,
-                                                                          br_rectangle *d, struct br_device_pixelmap *mem,
-                                                                          br_rectangle *s);
-br_error BR_CMETHOD_DECL(br_device_pixelmap_null,
-                         rectangleStretchCopyFrom)(struct br_device_pixelmap *self, br_rectangle *d,
-                                                   struct br_device_pixelmap *mem, br_rectangle *s);
+br_error BR_CMETHOD_DECL(br_device_pixelmap_null, rectangleStretchCopyTo)(struct br_device_pixelmap *self, br_rectangle *d,
+                                                                          struct br_device_pixelmap *mem, br_rectangle *s);
+br_error BR_CMETHOD_DECL(br_device_pixelmap_null, rectangleStretchCopyFrom)(struct br_device_pixelmap *self, br_rectangle *d,
+                                                                            struct br_device_pixelmap *mem, br_rectangle *s);
 br_error BR_CMETHOD_DECL(br_device_pixelmap_null, rectangleFill)(struct br_device_pixelmap *self, br_rectangle *rect,
                                                                  br_uint_32 colour);
-br_error BR_CMETHOD_DECL(br_device_pixelmap_null, pixelSet)(struct br_device_pixelmap *self, br_point *p,
-                                                            br_uint_32 colour);
-br_error BR_CMETHOD_DECL(br_device_pixelmap_null, copyBits)(struct br_device_pixelmap *self, br_point *point,
-                                                            br_uint_8 *src, br_uint_16 s_stride, br_rectangle *bit_rect,
-                                                            br_uint_32 colour);
+br_error BR_CMETHOD_DECL(br_device_pixelmap_null, pixelSet)(struct br_device_pixelmap *self, br_point *p, br_uint_32 colour);
+br_error BR_CMETHOD_DECL(br_device_pixelmap_null, copyBits)(struct br_device_pixelmap *self, br_point *point, br_uint_8 *src,
+                                                            br_uint_16 s_stride, br_rectangle *bit_rect, br_uint_32 colour);
 br_error BR_CMETHOD_DECL(br_device_pixelmap_null, pixelQuery)(struct br_device_pixelmap *self, br_uint_32 *pcolour,
                                                               br_point *p);
 br_error BR_CMETHOD_DECL(br_device_pixelmap_null, pixelAddressQuery)(struct br_device_pixelmap *self, void **pptr,
                                                                      br_uint_32 *pqual, br_point *p);
-br_error BR_CMETHOD_DECL(br_device_pixelmap_null, pixelAddressSet)(struct br_device_pixelmap *self, void *ptr,
-                                                                   br_uint_32 *qual);
+br_error BR_CMETHOD_DECL(br_device_pixelmap_null, pixelAddressSet)(struct br_device_pixelmap *self, void *ptr, br_uint_32 *qual);
 
 /*
  * pmfail.c
@@ -244,23 +221,19 @@ br_error BR_CMETHOD_DECL(br_device_pixelmap_fail, pixelQuery)(struct br_device_p
                                                               br_point *p);
 br_error BR_CMETHOD_DECL(br_device_pixelmap_fail, pixelAddressQuery)(struct br_device_pixelmap *self, void **pptr,
                                                                      br_uint_32 *pqual, br_point *p);
-br_error BR_CMETHOD_DECL(br_device_pixelmap_fail, pixelAddressSet)(struct br_device_pixelmap *self, void *ptr,
-                                                                   br_uint_32 *qual);
+br_error BR_CMETHOD_DECL(br_device_pixelmap_fail, pixelAddressSet)(struct br_device_pixelmap *self, void *ptr, br_uint_32 *qual);
 br_error BR_CMETHOD_DECL(br_device_pixelmap_fail, flush)(struct br_device_pixelmap *self);
 br_error BR_CMETHOD_DECL(br_device_pixelmap_fail, synchronise)(struct br_device_pixelmap *self, br_token sync_type,
                                                                br_boolean block);
 br_error BR_CMETHOD_DECL(br_device_pixelmap_fail, directLock)(struct br_device_pixelmap *self, br_boolean block);
 br_error BR_CMETHOD_DECL(br_device_pixelmap_fail, directUnlock)(struct br_device_pixelmap *self);
-br_error BR_CMETHOD_DECL(br_device_pixelmap_fail, getControls)(struct br_device_pixelmap *self,
-                                                               br_display_controls       *controls);
-br_error BR_CMETHOD_DECL(br_device_pixelmap_fail, setControls)(struct br_device_pixelmap *self,
-                                                               br_display_controls       *controls);
+br_error BR_CMETHOD_DECL(br_device_pixelmap_fail, getControls)(struct br_device_pixelmap *self, br_display_controls *controls);
+br_error BR_CMETHOD_DECL(br_device_pixelmap_fail, setControls)(struct br_device_pixelmap *self, br_display_controls *controls);
 
 /*
  * gencopy.c
  */
-br_error GeneralRectangleCopy(struct br_device_pixelmap *dest, br_point *p, struct br_device_pixelmap *src,
-                              br_rectangle *r);
+br_error GeneralRectangleCopy(struct br_device_pixelmap *dest, br_point *p, struct br_device_pixelmap *src, br_rectangle *r);
 
 br_error GeneralCopy(struct br_device_pixelmap *dst, struct br_device_pixelmap *src);
 
