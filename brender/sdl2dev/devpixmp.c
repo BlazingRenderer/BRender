@@ -248,6 +248,12 @@ static br_error BR_CMETHOD_DECL(br_device_pixelmap_sdl2, resize)(br_device_pixel
         return BRE_OK;
 
     /*
+     * Can't resize a non-owned surface.
+     */
+    if(!self->owned)
+        return BRE_FAIL;
+
+    /*
      * Can always resize a window.
      */
     if(self->window != NULL) {
@@ -259,12 +265,6 @@ static br_error BR_CMETHOD_DECL(br_device_pixelmap_sdl2, resize)(br_device_pixel
         }
     } else {
         ASSERT(self->surface != NULL);
-
-        /*
-         * Can't resize a non-owned surface.
-         */
-        if(!self->owned)
-            return BRE_FAIL;
 
         surface = SDL_CreateRGBSurfaceWithFormat(0, width, height, self->surface->format->BitsPerPixel,
                                                  self->surface->format->format);
