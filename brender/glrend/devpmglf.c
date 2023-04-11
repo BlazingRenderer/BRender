@@ -179,6 +179,8 @@ static void BR_CMETHOD_DECL(br_device_pixelmap_glf, free)(br_object *_self)
 {
     br_device_pixelmap *self = (br_device_pixelmap *)_self;
 
+    BrLogTrace("GLREND", "Freeing %s", self->pm_identifier);
+
     UASSERT(self->asFront.num_refs == 0);
 
     glDeleteTextures(1, &self->asFront.font_prop7x9.tex);

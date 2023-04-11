@@ -109,6 +109,8 @@ void BR_CMETHOD_DECL(br_device_pixelmap_gl, free)(br_object *_self)
 {
     br_device_pixelmap *self = (br_device_pixelmap *)_self;
 
+    BrLogTrace("GLREND", "Freeing %s", self->pm_identifier);
+
     delete_gl_resources(self);
 
     ObjectContainerRemove(self->output_facility, (br_object *)self);
