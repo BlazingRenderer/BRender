@@ -693,7 +693,6 @@ br_error BR_CMETHOD_DECL(br_device_pixelmap_sdl2, match)(br_device_pixelmap *sel
                                                          br_token_value *tv)
 {
     br_int_32           count;
-    br_error            result;
     br_device_pixelmap *pm;
     SDL_Surface        *surface;
     Uint32              format;
@@ -743,13 +742,17 @@ br_error BR_CMETHOD_DECL(br_device_pixelmap_sdl2, match)(br_device_pixelmap *sel
     }
 
     if((pm = DevicePixelmapSDL2Allocate(self->device, NULL, NULL, surface, BR_TRUE)) == NULL)
-        result = BRE_FAIL;
-    else
-        result = BRE_OK;
+        return BRE_FAIL;
+
+    /*
+     * Copy origin over
+     */
+    pm->pm_origin_x = self->pm_origin_x;
+    pm->pm_origin_y = self->pm_origin_y;
 
     *newpm = pm;
 
-    return result;
+    return BRE_OK;
 }
 
 /*
