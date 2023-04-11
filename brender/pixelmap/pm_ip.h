@@ -154,6 +154,7 @@ br_error BR_CMETHOD_DECL(br_device_pixelmap_gen, directLock)(struct br_device_pi
 br_error BR_CMETHOD_DECL(br_device_pixelmap_gen, directUnlock)(struct br_device_pixelmap *self);
 br_error BR_CMETHOD_DECL(br_device_pixelmap_gen, getControls)(struct br_device_pixelmap *self, br_display_controls *controls);
 br_error BR_CMETHOD_DECL(br_device_pixelmap_gen, setControls)(struct br_device_pixelmap *self, br_display_controls *controls);
+br_error BR_CMETHOD_DECL(br_device_pixelmap_gen, handleWindowEvent)(struct br_device_pixelmap *self, void *arg);
 
 /*
  * pmnull.c

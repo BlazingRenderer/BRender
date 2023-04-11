@@ -809,4 +809,6 @@ static const struct br_device_pixelmap_dispatch devicePixelmapDispatch = {
     ._directUnlock = BR_CMETHOD_REF(br_device_pixelmap_fail, directUnlock),
     ._getControls  = BR_CMETHOD_REF(br_device_pixelmap_fail, getControls),
     ._setControls  = BR_CMETHOD_REF(br_device_pixelmap_fail, setControls),
+
+    ._handleWindowEvent = BR_CMETHOD_REF(br_device_pixelmap_gen, handleWindowEvent),
 };

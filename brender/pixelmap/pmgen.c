@@ -659,3 +659,8 @@ br_error BR_CMETHOD_DECL(br_device_pixelmap_gen, setControls)(br_device_pixelmap
 {
     return BRE_FAIL;
 }
+
+br_error BR_CMETHOD_DECL(br_device_pixelmap_gen, handleWindowEvent)(br_device_pixelmap *self, void *arg)
+{
+    return BRE_OK;
+}

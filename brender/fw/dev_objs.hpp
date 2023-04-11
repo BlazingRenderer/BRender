@@ -230,6 +230,10 @@ class br_device_pixelmap : public br_object {
 	//
 		virtual br_error BR_METHOD getControls(br_display_controls *controls);
 		virtual br_error BR_METHOD setControls(br_display_controls *controls);
+
+	// Handle an event for our attached window, e.g. the user resized it
+	//
+		virtual br_error BR_METHOD handleWindowEvent(void *arg);
 };
 
 // A device Colour LookUp Table
