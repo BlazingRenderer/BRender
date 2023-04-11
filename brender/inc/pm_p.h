@@ -159,6 +159,8 @@ br_pixelmap *BR_PUBLIC_ENTRY BrPixelmapMakeMipMap(br_pixelmap *source, br_uint_3
 br_error BR_PUBLIC_ENTRY BrPixelmapGetControls(br_pixelmap *pm, br_display_controls *controls);
 br_error BR_PUBLIC_ENTRY BrPixelmapSetControls(br_pixelmap *pm, br_display_controls *controls);
 
+br_error BR_PUBLIC_ENTRY BrPixelmapHandleWindowEvent(br_pixelmap *src, void *arg);
+
 /*
  * Convert an BR_PMT_INDEX_8 pixelmap to a BR_PMT_RGBA_8888 or BR_PMT_RGBX_888
  * pixelmap, depending on keyed transparency.

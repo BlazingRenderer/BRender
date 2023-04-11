@@ -970,3 +970,12 @@ br_error BR_PUBLIC_ENTRY BrPixelmapSetControls(br_pixelmap *src, br_display_cont
 
     return DevicePixelmapSetControls(src, controls);
 }
+
+br_error BR_PUBLIC_ENTRY BrPixelmapHandleWindowEvent(br_pixelmap *src, void *arg)
+{
+    UASSERT(src);
+
+    CheckDispatch(src);
+
+    return DevicePixelmapHandleWindowEvent(src, arg);
+}
