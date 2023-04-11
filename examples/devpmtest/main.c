@@ -693,6 +693,12 @@ int main(int argc, char **argv)
 done:
     ret = 0;
 
+    for(size_t i = 0; i < BR_ASIZE(tests); ++i) {
+        br_drawtest *test = tests + i;
+        if(test->fini != NULL && !test->_failed)
+            test->fini(test->_user);
+    }
+
 screen_creation_failed:
     if(colour_buffer != NULL)
         BrPixelmapFree(colour_buffer);
