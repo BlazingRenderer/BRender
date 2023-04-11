@@ -157,7 +157,13 @@ void DevicePixelmapGLExtSwapBuffers(br_device_pixelmap *self);
 
 br_device_pixelmap_gl_getprocaddress_cbfn *DevicePixelmapGLExtGetGetProcAddress(br_device_pixelmap *self);
 
+br_error DevicePixelmapGLExtResize(br_device_pixelmap *self, br_int_32 w, br_int_32 h);
+
 void DevicePixelmapGLExtPreSwap(br_device_pixelmap *self, GLuint fbo);
+
+void DevicePixelmapGLExtFree(br_device_pixelmap *self);
+
+br_error DevicePixelmapGLExtHandleWindowEvent(br_device_pixelmap *self, void *arg);
 
 /*
  * Hijack nulldev's no-op implementations.

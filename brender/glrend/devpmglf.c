@@ -194,6 +194,9 @@ static void BR_CMETHOD_DECL(br_device_pixelmap_glf, free)(br_object *_self)
     DevicePixelmapGLExtDeleteContext(self, self->asFront.gl_context);
 
     ObjectContainerRemove(self->output_facility, (br_object *)self);
+
+    DevicePixelmapGLExtFree(self);
+
     BrResFreeNoCallback(self);
 }
 
@@ -239,7 +242,10 @@ struct br_tv_template *BR_CMETHOD_DECL(br_device_pixelmap_glf, templateQuery)(br
 
 br_error BR_CMETHOD_DECL(br_device_pixelmap_glf, resize)(br_device_pixelmap *self, br_int_32 width, br_int_32 height)
 {
-    UASSERT(self->use_type == BRT_NONE);
+    br_error err;
+
+    if((err = DevicePixelmapGLExtResize(self, width, height)) != BRE_OK)
+        return err;
 
     /*
      * Resizing, assumed to have been done externally
@@ -299,6 +305,11 @@ br_error BR_CMETHOD_DECL(br_device_pixelmap_glf, doubleBuffer)(br_device_pixelma
         ;
 
     return BRE_OK;
+}
+
+br_error BR_CMETHOD_DECL(br_device_pixelmap_glf, handleWindowEvent)(br_device_pixelmap *self, void *arg)
+{
+    return DevicePixelmapGLExtHandleWindowEvent(self, arg);
 }
 
 /*
@@ -374,5 +385,5 @@ static const struct br_device_pixelmap_dispatch devicePixelmapFrontDispatch = {
     ._getControls  = BR_CMETHOD_REF(br_device_pixelmap_fail, getControls),
     ._setControls  = BR_CMETHOD_REF(br_device_pixelmap_fail, setControls),
 
-    ._handleWindowEvent = BR_CMETHOD_REF(br_device_pixelmap_gen, handleWindowEvent),
+    ._handleWindowEvent = BR_CMETHOD_REF(br_device_pixelmap_glf, handleWindowEvent),
 };
