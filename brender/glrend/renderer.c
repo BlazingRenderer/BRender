@@ -59,7 +59,7 @@ br_renderer *RendererGLAllocate(br_device *device, br_renderer_facility *facilit
 
 static void BR_CMETHOD_DECL(br_renderer_gl, sceneBegin)(br_renderer *self)
 {
-    HVIDEO hVideo = &DeviceGLGetScreen(self->device)->asFront.video;
+    HVIDEO hVideo = &self->pixelmap->screen->asFront.video;
 
     self->stats.face_group_count         = 0;
     self->stats.triangles_drawn_count    = 0;

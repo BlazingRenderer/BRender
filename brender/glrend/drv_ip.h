@@ -91,7 +91,8 @@ br_geometry_v1_model *GeometryV1ModelGLAllocate(br_renderer_facility *type, cons
 /*
  * gstored.c
  */
-br_geometry_stored *GeometryStoredGLAllocate(br_geometry_v1_model *gv1model, const char *id, struct v11model *model);
+br_geometry_stored *GeometryStoredGLAllocate(br_geometry_v1_model *gv1model, const char *id, br_renderer *r,
+                                             struct v11model *model);
 
 /*
  * onscreen.c
@@ -141,7 +142,6 @@ br_error DevicePixelmapGLBindFramebuffer(GLenum target, br_device_pixelmap *pm);
 GLuint   DeviceGLBuildWhiteTexture(void);
 GLuint   DeviceGLBuildCheckerboardTexture(void);
 
-br_device_pixelmap *DeviceGLGetScreen(br_device *self);
 br_uint_8           DeviceGLTypeOrBits(br_uint_8 pixel_type, br_int_32 pixel_bits);
 
 /*

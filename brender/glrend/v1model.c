@@ -243,7 +243,7 @@ static void apply_stored_properties(HVIDEO hVideo, HGLSTATE_STACK state, uint32_
 void StoredGLRenderGroup(br_geometry_stored *self, br_renderer *renderer, const gl_groupinfo *groupinfo)
 {
     HGLCACHE                  hCache = &renderer->state.cache;
-    br_device_pixelmap       *screen = DeviceGLGetScreen(self->device);
+    br_device_pixelmap       *screen = renderer->pixelmap->screen;
     HVIDEO                    hVideo = &screen->asFront.video;
     br_renderer_state_stored *stored = groupinfo->stored;
     br_boolean                unlit;

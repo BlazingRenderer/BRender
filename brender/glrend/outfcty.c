@@ -49,7 +49,6 @@ br_output_facility *OutputFacilityGLInit(br_device *dev, br_renderer_facility *r
     self->device            = dev;
     self->object_list       = BrObjectListAllocate(self);
     self->renderer_facility = rendfcty;
-    self->screen            = NULL;
 
     ObjectContainerAddFront(dev, (br_object *)self);
     return self;
@@ -128,12 +127,6 @@ static br_error BR_CMETHOD_DECL(br_output_facility_sdl, pixelmapNew)(br_output_f
     br_device_pixelmap *pm;
 
     /*
-     * Only one screen pixelmap supported.
-     */
-    if(self->screen != NULL)
-        return BRE_FAIL;
-
-    /*
      * Create a device pixelmap structure representing display memory
      */
     pm = DevicePixelmapGLAllocateFront(self->device, self, tv);
@@ -141,8 +134,7 @@ static br_error BR_CMETHOD_DECL(br_output_facility_sdl, pixelmapNew)(br_output_f
     if(pm == NULL)
         return BRE_FAIL;
 
-    self->screen = pm;
-    *ppmap       = pm;
+    *ppmap = pm;
 
     return BRE_OK;
 }

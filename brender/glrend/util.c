@@ -57,11 +57,6 @@ br_error DevicePixelmapGLBindFramebuffer(GLenum target, br_device_pixelmap *pm)
     return BRE_OK;
 }
 
-br_device_pixelmap *DeviceGLGetScreen(br_device *self)
-{
-    return self->output_facility->screen;
-}
-
 br_uint_8 DeviceGLTypeOrBits(br_uint_8 pixel_type, br_int_32 pixel_bits)
 {
     if(pixel_type != BR_PMT_MAX)

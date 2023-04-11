@@ -204,6 +204,8 @@ br_error BR_CMETHOD_DECL(br_device_pixelmap_gl, match)(br_device_pixelmap *self,
         .use_type   = BRT_NONE,
     };
 
+    hVideo = &self->screen->asFront.video;
+
     if(self->device->templates.pixelmapMatchTemplate == NULL) {
         self->device->templates.pixelmapMatchTemplate = BrTVTemplateAllocate(self->device, pixelmapMatchTemplateEntries,
                                                                              BR_ASIZE(pixelmapMatchTemplateEntries));
@@ -284,8 +286,6 @@ br_error BR_CMETHOD_DECL(br_device_pixelmap_gl, match)(br_device_pixelmap *self,
     pm->pm_origin_y = 0;
     pm->pm_base_x   = 0;
     pm->pm_origin_y = 0;
-
-    hVideo = &DeviceGLGetScreen(self->device)->asFront.video;
 
     if(mt.use_type == BRT_OFFSCREEN) {
         pm->asBack.depthbuffer = NULL;
@@ -422,7 +422,7 @@ br_error BR_CMETHOD(br_device_pixelmap_gl, rectangleStretchCopyTo)(br_device_pix
                                                                    br_device_pixelmap *_src, br_rectangle *sr)
 {
     /* Pixelmap->Device, addressable stretch copy. */
-    HVIDEO       hVideo = &DeviceGLGetScreen(self->device)->asFront.video;
+    HVIDEO       hVideo = &self->screen->asFront.video;
     br_pixelmap *src    = (br_pixelmap *)_src;
     GLuint       tex;
     br_matrix4   mvp;
@@ -534,8 +534,6 @@ br_error BR_CMETHOD_DECL(br_device_pixelmap_gl, rectangleCopyFrom)(br_device_pix
 br_error BR_CMETHOD(br_device_pixelmap_gl, text)(br_device_pixelmap *self, br_point *point, br_font *font,
                                                  const char *text, br_uint_32 colour)
 {
-    br_device_pixelmap *screen = DeviceGLGetScreen(self->device);
-
     /* Quit if off top, bottom or right screen */
     br_int_32 x = point->x + self->pm_origin_x;
     br_int_32 y = point->y + self->pm_origin_y;
@@ -552,16 +550,16 @@ br_error BR_CMETHOD(br_device_pixelmap_gl, text)(br_device_pixelmap *self, br_po
     /* Ensure we're a valid font. */
     br_font_gl *gl_font;
     if(font == BrFontFixed3x5)
-        gl_font = &screen->asFront.font_fixed3x5;
+        gl_font = &self->screen->asFront.font_fixed3x5;
     else if(font == BrFontProp4x6)
-        gl_font = &screen->asFront.font_prop4x6;
+        gl_font = &self->screen->asFront.font_prop4x6;
     else if(font == BrFontProp7x9)
-        gl_font = &screen->asFront.font_prop7x9;
+        gl_font = &self->screen->asFront.font_prop7x9;
     else
         return BRE_FAIL;
 
     /* Set up the render state. The font UVs match the texture, so no need to flip here. */
-    HVIDEO hVideo = &screen->asFront.video;
+    HVIDEO hVideo = &self->screen->asFront.video;
 
     glBindFramebuffer(GL_FRAMEBUFFER, self->asBack.glFbo);
     glViewport(0, 0, self->pm_width, self->pm_height);
@@ -588,7 +586,7 @@ br_error BR_CMETHOD(br_device_pixelmap_gl, text)(br_device_pixelmap *self, br_po
     if(gl_font->tex != 0)
         glBindTexture(GL_TEXTURE_2D, gl_font->tex);
     else
-        glBindTexture(GL_TEXTURE_2D, screen->asFront.tex_checkerboard);
+        glBindTexture(GL_TEXTURE_2D, self->screen->asFront.tex_checkerboard);
 
     glUniform1i(hVideo->textProgram.uSampler, 0);
     glUniform3fv(hVideo->textProgram.uColour, 1, col.v);

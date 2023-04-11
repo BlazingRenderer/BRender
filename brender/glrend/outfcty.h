@@ -35,11 +35,6 @@ typedef struct br_output_facility {
     void *object_list;
 
     /*
-     * Current screen pixelmap. Only one of these allowed.
-     */
-    struct br_device_pixelmap *screen;
-
-    /*
      * Renderer facilities to use, and default
      */
     struct br_renderer_facility *renderer_facility;

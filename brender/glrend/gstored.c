@@ -24,10 +24,8 @@ static struct br_tv_template_entry templateEntries[] = {
 };
 #undef F
 
-static void create_vao(br_geometry_stored *self)
+static void create_vao(br_geometry_stored *self, HVIDEO hVideo)
 {
-    HVIDEO hVideo = &DeviceGLGetScreen(self->device)->asFront.video;
-
     glGenVertexArrays(1, &self->gl_vao);
     glGenBuffers(1, &self->gl_vbo_posn);
     glGenBuffers(1, &self->gl_vbo);
@@ -133,7 +131,7 @@ static void build_ibo(GLuint ibo, struct v11model *model, size_t total_faces, gl
     BrScratchFree(idx);
 }
 
-br_geometry_stored *GeometryStoredGLAllocate(br_geometry_v1_model *gv1model, const char *id, struct v11model *model)
+br_geometry_stored *GeometryStoredGLAllocate(br_geometry_v1_model *gv1model, const char *id, br_renderer *r, struct v11model *model)
 {
     size_t              total_vertices, total_faces;
     br_geometry_stored *self;
@@ -151,7 +149,7 @@ br_geometry_stored *GeometryStoredGLAllocate(br_geometry_v1_model *gv1model, con
 
     self->groups = BrResAllocate(gv1model, sizeof(gl_groupinfo) * model->ngroups, BR_MEMORY_OBJECT_DATA);
 
-    create_vao(self);
+    create_vao(self, &r->pixelmap->screen->asFront.video);
 
     total_vertices = 0;
     total_faces    = 0;
