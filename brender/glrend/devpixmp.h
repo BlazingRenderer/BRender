@@ -63,6 +63,12 @@ typedef struct br_device_pixelmap {
      */
     struct br_renderer *renderer;
 
+    /*
+     * Current screen pixelmap. Valid on ALL types. The screen points to itself.
+     * NB: This is mainly used to retrieve the context-level OpenGL state.
+     */
+    struct br_device_pixelmap *screen;
+
     /* OpenGL crap */
     union {
         struct {
@@ -91,6 +97,8 @@ typedef struct br_device_pixelmap {
             br_font_gl font_fixed3x5;
             br_font_gl font_prop4x6;
             br_font_gl font_prop7x9;
+
+            br_int_32 num_refs;
         } asFront;
         struct {
             struct br_device_pixelmap *depthbuffer;

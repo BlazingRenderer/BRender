@@ -113,6 +113,8 @@ void BR_CMETHOD_DECL(br_device_pixelmap_gl, free)(br_object *_self)
 
     ObjectContainerRemove(self->output_facility, (br_object *)self);
 
+    --self->screen->asFront.num_refs;
+
     BrResFreeNoCallback(self);
 }
 
@@ -271,6 +273,8 @@ br_error BR_CMETHOD_DECL(br_device_pixelmap_gl, match)(br_device_pixelmap *self,
     pm->output_facility = self->output_facility;
     pm->use_type        = mt.use_type;
     // pm->msaa_samples =
+    pm->screen = self->screen;
+    ++self->screen->asFront.num_refs;
 
     pm->pm_type     = mt.type;
     pm->pm_width    = mt.width;

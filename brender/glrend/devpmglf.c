@@ -90,6 +90,7 @@ br_device_pixelmap *DevicePixelmapGLAllocateFront(br_device *dev, br_output_faci
     self->output_facility = outfcty;
     self->use_type        = BRT_NONE;
     self->msaa_samples    = pt.msaa_samples;
+    self->screen          = self;
 
     self->pm_type   = pt.pixel_type;
     self->pm_width  = pt.width;
@@ -163,6 +164,8 @@ br_device_pixelmap *DevicePixelmapGLAllocateFront(br_device *dev, br_output_faci
     BrLogTrace("GLREND", "Building proportional 7x9 font atlas.");
     (void)FontGLBuildAtlas(&self->asFront.font_prop7x9, BrFontProp7x9, 256, 64);
 
+    self->asFront.num_refs = 0;
+
     ObjectContainerAddFront(self->output_facility, (br_object *)self);
     return self;
 
@@ -175,6 +178,8 @@ cleanup_context:
 static void BR_CMETHOD_DECL(br_device_pixelmap_glf, free)(br_object *_self)
 {
     br_device_pixelmap *self = (br_device_pixelmap *)_self;
+
+    UASSERT(self->asFront.num_refs == 0);
 
     glDeleteTextures(1, &self->asFront.font_prop7x9.tex);
     glDeleteTextures(1, &self->asFront.font_prop4x6.tex);
