@@ -1,6 +1,15 @@
 /*
  * Device pixelmap methods
+ *
+ * Note for sub-pixelmaps:
+ * - pm_pixels is still the top-left of the original image. It is NOT offset.
+ * - pm_base_x, and pm_base_y are the top-left coordinates of the rect.
+ * - When doing operations, points/rects are clipped against the local coordinates first,
+ *   and are then converted to global coordinates by adding pm_base_{x,y}.
+ * - As pm_base_{x,y} is 0 on regular pixelmaps, this logic doesn't need to be special-cased.
+ * - Double buffering to a sub-pixelmap is explicitly NOT supported.
  */
+
 #include <stddef.h>
 
 #include "drv.h"
@@ -90,11 +99,16 @@ static struct br_tv_template_entry devicePixelmapTemplateEntries[] = {
 
 /*
  * Resync after the surface has been changed.
- * FIXME: this doesn't account for subsurfaces.
  */
 static br_error resync(br_device_pixelmap *self)
 {
     SDL_Renderer *renderer;
+
+    /*
+     * It is an error to call this on a subsurface.
+     */
+    if(!self->owned)
+        return BRE_UNSUPPORTED;
 
     self->pm_width  = self->surface->w;
     self->pm_height = self->surface->h;
@@ -184,10 +198,10 @@ static void BR_CMETHOD_DECL(br_device_pixelmap_sdl2, free)(br_object *_self)
     if(self->output_facility != NULL)
         ObjectContainerRemove(self->output_facility, (br_object *)self);
 
-    if(self->renderer != NULL)
-        SDL_DestroyRenderer(self->renderer);
-
     if(self->owned) {
+        if(self->renderer != NULL)
+            SDL_DestroyRenderer(self->renderer);
+
         if(self->window != NULL) {
             SDL_DestroyWindow(self->window);
         } else {
@@ -328,8 +342,9 @@ static br_error BR_CMETHOD_DECL(br_device_pixelmap_sdl2, allocateSub)(br_device_
     if(self->pm_width != pm->pm_width)
         pm->pm_flags &= ~BR_PMF_LINEAR;
 
-    pm->owned   = BR_FALSE;
-    pm->surface = self->surface;
+    pm->owned    = BR_FALSE;
+    pm->surface  = self->surface;
+    pm->renderer = self->renderer;
 
     *newpm = pm;
 
@@ -341,7 +356,21 @@ static br_error BR_CMETHOD_DECL(br_device_pixelmap_sdl2, allocateSub)(br_device_
  */
 static br_error BR_CMETHOD_DECL(br_device_pixelmap_sdl2, copy)(br_device_pixelmap *self, br_device_pixelmap *src)
 {
-    if(SDL_BlitSurface(src->surface, NULL, self->surface, NULL) < 0)
+    SDL_Rect     drect;
+    br_rectangle r = {
+        .x = -self->pm_origin_x,
+        .y = -self->pm_origin_y,
+        .w = src->pm_width,
+        .h = src->pm_height,
+    };
+
+    if(DevicePixelmapSDL2RectangleClip(&drect, &r, (const br_pixelmap *)self) == BR_CLIP_REJECT)
+        return BRE_OK;
+
+    drect.x += self->pm_base_x;
+    drect.y += self->pm_base_y;
+
+    if(SDL_BlitSurface(src->surface, NULL, self->surface, &drect) < 0)
         return BRE_FAIL;
 
     return BRE_OK;
@@ -360,8 +389,8 @@ static br_error BR_CMETHOD_DECL(br_device_pixelmap_sdl2, rectangleCopyTo)(br_dev
         return BRE_OK;
 
     drect = (SDL_Rect){
-        .x = dpoint.x,
-        .y = dpoint.y,
+        .x = dpoint.x + self->pm_base_x,
+        .y = dpoint.y + self->pm_base_y,
         .w = srect.w,
         .h = srect.h,
     };
@@ -401,8 +430,8 @@ static br_error BR_CMETHOD_DECL(br_device_pixelmap_sdl2, rectangleCopyFrom)(br_d
         return BRE_OK;
 
     drect = (SDL_Rect){
-        .x = dpoint.x,
-        .y = dpoint.y,
+        .x = dpoint.x + self->pm_base_x,
+        .y = dpoint.y + self->pm_base_y,
         .w = srect.w,
         .h = srect.h,
     };
@@ -441,6 +470,9 @@ static br_error BR_CMETHOD_DECL(br_device_pixelmap_sdl2, rectangleStretchCopyTo)
     if(DevicePixelmapSDL2RectangleClip(&drect, d, (const br_pixelmap *)self) == BR_CLIP_REJECT)
         return BRE_OK;
 
+    drect.x += self->pm_base_x;
+    drect.y += self->pm_base_y;
+
     if(DevicePixelmapSDL2BlitSurface((br_pixelmap *)src, &srect, (br_pixelmap *)self, &drect, SDL_BlitScaled) == BRE_OK)
         return BRE_OK;
 
@@ -476,6 +508,9 @@ static br_error BR_CMETHOD_DECL(br_device_pixelmap_sdl2, rectangleStretchCopyFro
     if(DevicePixelmapSDL2RectangleClip(&drect, d, (const br_pixelmap *)dest) == BR_CLIP_REJECT)
         return BRE_OK;
 
+    drect.x += self->pm_base_x;
+    drect.y += self->pm_base_y;
+
     if(DevicePixelmapSDL2BlitSurface((br_pixelmap *)self, &srect, (br_pixelmap *)dest, &drect, SDL_BlitScaled) == BRE_OK)
         return BRE_OK;
 
@@ -503,6 +538,9 @@ static br_error BR_CMETHOD_DECL(br_device_pixelmap_sdl2, pixelSet)(br_device_pix
 
     if(DevicePixelmapSDL2PointClip(&point, p, (const br_pixelmap *)self) == BR_CLIP_REJECT)
         goto memory_fallback;
+
+    point.x += self->pm_base_x;
+    point.y += self->pm_base_y;
 
     SDL_GetRGBA(colour, self->surface->format, &col.r, &col.g, &col.b, &col.a);
 
@@ -541,6 +579,12 @@ static br_error BR_CMETHOD_DECL(br_device_pixelmap_sdl2, line)(br_device_pixelma
     if(DevicePixelmapSDL2LineClip(&spoint, &epoint, s, e, (const br_pixelmap *)self) == BR_CLIP_REJECT)
         return BRE_OK;
 
+    spoint.x += self->pm_base_x;
+    spoint.y += self->pm_base_y;
+
+    epoint.x += self->pm_base_x;
+    epoint.y += self->pm_base_y;
+
     SDL_GetRGBA(colour, self->surface->format, &col.r, &col.g, &col.b, &col.a);
 
     if(SDL_SetRenderDrawColor(self->renderer, col.r, col.g, col.b, col.a) < 0)
@@ -576,6 +620,9 @@ static br_error BR_CMETHOD_DECL(br_device_pixelmap_sdl2, rectangleFill)(br_devic
 
     if(DevicePixelmapSDL2RectangleClip(&rect, r, (const br_pixelmap *)self) == BR_CLIP_REJECT)
         return BRE_OK;
+
+    rect.x += self->pm_base_x;
+    rect.y += self->pm_base_y;
 
     if(SDL_FillRect(self->surface, &rect, colour) < 0)
         return BRE_FAIL;
@@ -649,6 +696,12 @@ static br_error BR_CMETHOD_DECL(br_device_pixelmap_sdl2, doubleBuffer)(br_device
 
     UASSERT(self != NULL);
     UASSERT(src != NULL);
+
+    /*
+     * Don't allow double-buffering to sub-pixelmaps.
+     */
+    if(!self->owned)
+        return BRE_UNSUPPORTED;
 
     if((src_surf = DevicePixelmapSDL2GetSurface((br_pixelmap *)src, BR_FALSE)) != NULL) {
         if(SDL_BlitSurface(src_surf, NULL, self->surface, NULL) < 0)
