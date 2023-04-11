@@ -799,14 +799,19 @@ int main(int argc, char **argv)
 
     BrLogSetLevel(BR_LOG_DEBUG);
 
-    BrSDLDevAddStaticGL(sdl_window);
+    BrSDLDevAddStaticGL();
 
     SDL_GL_GetDrawableSize(sdl_window, &width, &height);
 
     void *anchor = BrResAllocate(NULL, 0, BR_MEMORY_ANCHOR);
 
-    r = BrDevBeginVar(&screen, "opengl", BRT_WIDTH_I32, (br_int_32)width, BRT_HEIGHT_I32, (br_int_32)height,
-                      BRT_PIXEL_BITS_I32, 24, BR_NULL_TOKEN);
+    br_device_gl_ext_procs procs = BrSDLMakeGLProcs(sdl_window);
+    r = BrDevBeginVar(&screen, "opengl",
+                      BRT_WIDTH_I32, (br_int_32)width,
+                      BRT_HEIGHT_I32, (br_int_32)height,
+                      BRT_PIXEL_BITS_I32, 24,
+                      BRT_OPENGL_EXT_PROCS_P, &procs,
+                      BR_NULL_TOKEN);
 
     if(r != BRE_OK) {
         BrLogError("APP", "BrDevBeginVar() failed.");

@@ -26,7 +26,7 @@ static struct br_tv_template_entry templateEntries[] = {
 
 static void create_vao(br_geometry_stored *self)
 {
-    HVIDEO hVideo = &self->gv1model->device->video;
+    HVIDEO hVideo = &DeviceGLGetScreen(self->device)->asFront.video;
 
     glGenVertexArrays(1, &self->gl_vao);
     glGenBuffers(1, &self->gl_vbo_posn);

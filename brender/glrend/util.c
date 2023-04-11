@@ -56,3 +56,27 @@ br_error DevicePixelmapGLBindFramebuffer(GLenum target, br_device_pixelmap *pm)
     glBindFramebuffer(target, fbo);
     return BRE_OK;
 }
+
+br_device_pixelmap *DeviceGLGetScreen(br_device *self)
+{
+    return self->output_facility->screen;
+}
+
+br_uint_8 DeviceGLTypeOrBits(br_uint_8 pixel_type, br_int_32 pixel_bits)
+{
+    if(pixel_type != BR_PMT_MAX)
+        return pixel_type;
+
+    switch(pixel_bits) {
+        case 16:
+            return BR_PMT_RGB_565;
+        case 24:
+            return BR_PMT_RGB_888;
+        case 32:
+            return BR_PMT_RGBX_888;
+        default:
+            break;
+    }
+
+    return BR_PMT_MAX;
+}

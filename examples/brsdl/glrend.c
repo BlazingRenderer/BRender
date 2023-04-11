@@ -1,13 +1,12 @@
-#include <inttypes.h>
 #include <brender.h>
 #include <brglrend.h>
 #include <SDL_video.h>
 
-static void *sdl_gl_create_context(struct br_device *dev, void *user)
+static void *sdl_gl_create_context(br_pixelmap *pm, void *user)
 {
     void *ctx;
 
-    (void)dev;
+    (void)pm;
 
     if((ctx = SDL_GL_CreateContext((SDL_Window *)user)) == NULL) {
         BrLogError("SDL", "OpenGL context creation failed: %s", SDL_GetError());
@@ -17,16 +16,16 @@ static void *sdl_gl_create_context(struct br_device *dev, void *user)
     return ctx;
 }
 
-static void sdl_gl_delete_context(struct br_device *dev, void *ctx, void *user)
+static void sdl_gl_delete_context(br_pixelmap *pm, void *ctx, void *user)
 {
-    (void)dev;
+    (void)pm;
     (void)user;
     SDL_GL_DeleteContext(ctx);
 }
 
-static br_error sdl_gl_make_current(struct br_device *dev, void *ctx, void *user)
+static br_error sdl_gl_make_current(br_pixelmap *pm, void *ctx, void *user)
 {
-    (void)dev;
+    (void)pm;
 
     if(SDL_GL_MakeCurrent((SDL_Window *)user, (SDL_GLContext)ctx) < 0) {
         BrLogError("SDL", "OpenGL MakeCurrent failed: %s", SDL_GetError());
@@ -36,23 +35,20 @@ static br_error sdl_gl_make_current(struct br_device *dev, void *ctx, void *user
     return BRE_OK;
 }
 
-
 static void *sdl_gl_get_proc_address(const char *name)
 {
     return SDL_GL_GetProcAddress(name);
 }
 
-static void sdl_gl_swap_buffers(struct br_device *dev, struct br_device_pixelmap *pm, void *user)
+static void sdl_gl_swap_buffers(br_pixelmap *pm, void *user)
 {
-    (void)dev;
     (void)pm;
     SDL_GL_SwapWindow((SDL_Window *)user);
 }
 
-br_error BrSDLDevAddStaticGL(SDL_Window *window)
+br_device_gl_ext_procs BrSDLMakeGLProcs(SDL_Window *window)
 {
-    char                   args[256];
-    br_device_gl_ext_procs procs = {
+    return (br_device_gl_ext_procs){
         .create_context   = sdl_gl_create_context,
         .delete_context   = sdl_gl_delete_context,
         .make_current     = sdl_gl_make_current,
@@ -61,8 +57,9 @@ br_error BrSDLDevAddStaticGL(SDL_Window *window)
         .preswap_hook     = NULL,
         .user             = window,
     };
+}
 
-    /* NB: glrend will make a copy of this, so it's safe to pass this through. */
-    SDL_snprintf(args, BR_ASIZE(args), "OPENGL_EXT_PROCS=0x%" PRIxPTR, (intptr_t)&procs);
-    return BrDevAddStatic(NULL, BrDrvGLBegin, args);
+br_error BrSDLDevAddStaticGL(void)
+{
+    return BrDevAddStatic(NULL, BrDrvGLBegin, NULL);
 }

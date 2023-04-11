@@ -35,10 +35,9 @@ typedef struct br_output_facility {
     void *object_list;
 
     /*
-     * Maximum sizes (GL_MAX_VIEWPORT_DIMS).
+     * Current screen pixelmap. Only one of these allowed.
      */
-    br_int_32 max_width;
-    br_int_32 max_height;
+    struct br_device_pixelmap *screen;
 
     /*
      * Renderer facilities to use, and default

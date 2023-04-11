@@ -65,7 +65,12 @@ br_renderer *RendererGLAllocate(br_device *device, br_renderer_facility *facilit
 /*
  * devpixmp.c
  */
-br_device_pixelmap *DevicePixelmapGLAllocate(br_device *device, br_output_facility *facility, br_token_value *tv);
+br_error BR_CMETHOD_DECL(br_device_pixelmap_gl, match)(br_device_pixelmap *self, br_device_pixelmap **newpm,
+                                                       br_token_value *tv);
+/*
+ * devpmgl.c
+ */
+br_device_pixelmap *DevicePixelmapGLAllocateFront(br_device *dev, br_output_facility *outfcty, br_token_value *tv);
 
 /*
  * sbuffer.c
@@ -136,20 +141,23 @@ br_error DevicePixelmapGLBindFramebuffer(GLenum target, br_device_pixelmap *pm);
 GLuint   DeviceGLBuildWhiteTexture(void);
 GLuint   DeviceGLBuildCheckerboardTexture(void);
 
+br_device_pixelmap *DeviceGLGetScreen(br_device *self);
+br_uint_8           DeviceGLTypeOrBits(br_uint_8 pixel_type, br_int_32 pixel_bits);
+
 /*
  * Wrappers for br_device_gl_procs.
  */
-void *DeviceGLCreateContext(br_device *self);
+void *DevicePixelmapGLExtCreateContext(br_device_pixelmap *self);
 
-void DeviceGLDeleteContext(br_device *self, void *ctx);
+void DevicePixelmapGLExtDeleteContext(br_device_pixelmap *self, void *ctx);
 
-br_error DeviceGLMakeCurrent(br_device *self, void *ctx);
+br_error DevicePixelmapGLExtMakeCurrent(br_device_pixelmap *self, void *ctx);
 
-void DeviceGLSwapBuffers(br_device *self, br_device_pixelmap *pm);
+void DevicePixelmapGLExtSwapBuffers(br_device_pixelmap *self);
 
-br_device_gl_getprocaddress_cbfn *DeviceGLGetGetProcAddress(br_device *self);
+br_device_pixelmap_gl_getprocaddress_cbfn *DevicePixelmapGLExtGetGetProcAddress(br_device_pixelmap *self);
 
-void DeviceGLPreSwap(br_device *self, GLuint fbo);
+void DevicePixelmapGLExtPreSwap(br_device_pixelmap *self, GLuint fbo);
 
 /*
  * Hijack nulldev's no-op implementations.

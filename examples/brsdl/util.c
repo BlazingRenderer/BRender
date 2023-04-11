@@ -24,7 +24,7 @@ void BrSDLUtilCleanupScreen(br_pixelmap **screen, br_pixelmap **colour_buffer,
     *colour_buffer = *depth_buffer = *screen = NULL;
 }
 
-br_boolean BrSDLUtilResizeScreen(const char *driver, br_pixelmap **screen,
+br_boolean BrSDLUtilResizeScreen(const char *driver, SDL_Window *window, br_pixelmap **screen,
                                  br_pixelmap **colour_buffer, br_pixelmap **depth_buffer,
                                  void *primitive_heap, br_size_t primitive_heap_size,
                                  br_int_16 width, br_int_16 height, br_int_16 initial_bpp)
@@ -32,6 +32,7 @@ br_boolean BrSDLUtilResizeScreen(const char *driver, br_pixelmap **screen,
     br_error    r;
     br_pixelmap *tmp;
     br_int_16   origin_x, origin_y;
+    br_device_gl_ext_procs glprocs;
 
     if(*screen != NULL && (*screen)->width == width && (*screen)->height == height)
         return BR_TRUE;
@@ -70,10 +71,12 @@ br_boolean BrSDLUtilResizeScreen(const char *driver, br_pixelmap **screen,
 full_cleanup:
     BrSDLUtilCleanupScreen(screen, colour_buffer, depth_buffer);
 
+    glprocs = BrSDLMakeGLProcs(window);
     r = BrDevBeginVar(&tmp, driver,
                       BRT_WIDTH_I32, (br_int_32)width,
                       BRT_HEIGHT_I32, (br_int_32)height,
                       BRT_PIXEL_BITS_I32, (br_int_32)initial_bpp,
+                      BRT_OPENGL_EXT_PROCS_P, &glprocs,
                       BR_NULL_TOKEN
     );
 
@@ -147,7 +150,7 @@ br_boolean BrSDLUtilOnResize(SDL_Window *window, const char *driver, br_pixelmap
     if(width == 0 || height == 0)
         return BR_TRUE;
 
-    if(BrSDLUtilResizeScreen(driver, screen, colour_buffer, depth_buffer, primitive_heap, primitive_heap_size, (br_int_16)width, (br_int_16)height, 24) != BR_TRUE)
+    if(BrSDLUtilResizeScreen(driver, window, screen, colour_buffer, depth_buffer, primitive_heap, primitive_heap_size, (br_int_16)width, (br_int_16)height, 24) != BR_TRUE)
         return BR_FALSE;
 
     if(camera != NULL)

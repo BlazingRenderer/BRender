@@ -62,7 +62,7 @@ void BR_CALLBACK _BrBeginHook(void)
 
     InitSDL();
 
-    BrSDLDevAddStaticGL(sdl_window);
+    BrSDLDevAddStaticGL();
 }
 
 void BR_CALLBACK _BrEndHook(void)

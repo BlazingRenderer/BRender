@@ -243,7 +243,8 @@ static void apply_stored_properties(HVIDEO hVideo, HGLSTATE_STACK state, uint32_
 void StoredGLRenderGroup(br_geometry_stored *self, br_renderer *renderer, const gl_groupinfo *groupinfo)
 {
     HGLCACHE                  hCache = &renderer->state.cache;
-    HVIDEO                    hVideo = &self->device->video;
+    br_device_pixelmap       *screen = DeviceGLGetScreen(self->device);
+    HVIDEO                    hVideo = &screen->asFront.video;
     br_renderer_state_stored *stored = groupinfo->stored;
     br_boolean                unlit;
     GLSTD140_MODEL_DATA       model;
@@ -282,10 +283,10 @@ void StoredGLRenderGroup(br_geometry_stored *self, br_renderer *renderer, const 
     unlit = BR_TRUE;
     if(stored) {
         apply_stored_properties(hVideo, &stored->state, GLSTATE_MASK_PRIMITIVE | GLSTATE_MASK_SURFACE | GLSTATE_MASK_CULL,
-                                &unlit, &model, self->device->tex_white);
+                                &unlit, &model, screen->asFront.tex_white);
     } else {
         /* If there's no stored state, apply all states from global. */
-        apply_stored_properties(hVideo, renderer->state.current, ~0u, &unlit, &model, self->device->tex_white);
+        apply_stored_properties(hVideo, renderer->state.current, ~0u, &unlit, &model, screen->asFront.tex_white);
     }
 
     model.unlit = (br_uint_32)unlit;

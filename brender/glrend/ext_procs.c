@@ -1,32 +1,39 @@
 #include "drv.h"
+#include <brassert.h>
 
-void *DeviceGLCreateContext(br_device *self)
+void *DevicePixelmapGLExtCreateContext(br_device_pixelmap *self)
 {
-    return self->ext_procs.create_context(self, self->ext_procs.user);
+    UASSERT(self->use_type == BRT_NONE);
+    return self->asFront.ext_procs.create_context((br_pixelmap *)self, self->asFront.ext_procs.user);
 }
 
-void DeviceGLDeleteContext(br_device *self, void *ctx)
+void DevicePixelmapGLExtDeleteContext(br_device_pixelmap *self, void *ctx)
 {
-    self->ext_procs.delete_context(self, ctx, self->ext_procs.user);
+    UASSERT(self->use_type == BRT_NONE);
+    self->asFront.ext_procs.delete_context((br_pixelmap *)self, ctx, self->asFront.ext_procs.user);
 }
 
-br_error DeviceGLMakeCurrent(br_device *self, void *ctx)
+br_error DevicePixelmapGLExtMakeCurrent(br_device_pixelmap *self, void *ctx)
 {
-    return self->ext_procs.make_current(self, ctx, self->ext_procs.user);
+    UASSERT(self->use_type == BRT_NONE);
+    return self->asFront.ext_procs.make_current((br_pixelmap *)self, ctx, self->asFront.ext_procs.user);
 }
 
-void DeviceGLSwapBuffers(br_device *self, br_device_pixelmap *pm)
+void DevicePixelmapGLExtSwapBuffers(br_device_pixelmap *self)
 {
-    self->ext_procs.swap_buffers(self, pm, self->ext_procs.user);
+    UASSERT(self->use_type == BRT_NONE);
+    self->asFront.ext_procs.swap_buffers((br_pixelmap *)self, self->asFront.ext_procs.user);
 }
 
-br_device_gl_getprocaddress_cbfn *DeviceGLGetGetProcAddress(br_device *self)
+br_device_pixelmap_gl_getprocaddress_cbfn *DevicePixelmapGLExtGetGetProcAddress(br_device_pixelmap *self)
 {
-    return self->ext_procs.get_proc_address;
+    UASSERT(self->use_type == BRT_NONE);
+    return self->asFront.ext_procs.get_proc_address;
 }
 
-void DeviceGLPreSwap(br_device *self, GLuint fbo)
+void DevicePixelmapGLExtPreSwap(br_device_pixelmap *self, GLuint fbo)
 {
-    if(self->ext_procs.preswap_hook != NULL)
-        self->ext_procs.preswap_hook(self, fbo, self->ext_procs.user);
+    UASSERT(self->use_type == BRT_NONE);
+    if(self->asFront.ext_procs.preswap_hook != NULL)
+        self->asFront.ext_procs.preswap_hook((br_pixelmap *)self, fbo, self->asFront.ext_procs.user);
 }

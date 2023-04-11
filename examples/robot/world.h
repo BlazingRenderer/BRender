@@ -77,6 +77,7 @@ typedef struct brwin_view {
     int  frame_count;                  /*  - the frame count                 */
     int  frame_rate;                   /*  - the frame rate                  */
 
+    SDL_Window         *window;        /* SDL Window                         */
     struct br_pixelmap *screen;        /* Front buffer                       */
     struct br_pixelmap *colour_buffer; /* Rendering buffers - for color      */
     struct br_pixelmap *depth_buffer;  /*  - for depth                       */

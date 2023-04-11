@@ -78,7 +78,7 @@ int main(int argc, char **argv)
 
     BrBegin();
 
-    BrSDLDevAddStaticGL(sdl_window);
+    BrSDLDevAddStaticGL();
 
     r = BrSDLUtilOnResize(sdl_window, "opengl", &screen, &colour_buffer, &depth_buffer, primitive_heap,
                           sizeof(primitive_heap), NULL);

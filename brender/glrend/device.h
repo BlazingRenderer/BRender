@@ -46,42 +46,6 @@ typedef struct br_device {
      * Device-wide renderer facility.
      */
     struct br_renderer_facility *renderer_facility;
-
-    /*
-     * Device-wide VIDEO instance.
-     */
-    VIDEO video;
-
-    /*
-     * System-specific OpenGL function pointers.
-     */
-    br_device_gl_ext_procs ext_procs;
-
-    /*
-     * OpenGL context
-     */
-    void *gl_context;
-
-    /*
-     * Vertex shader source
-     */
-    char *vertex_shader;
-
-    /*
-     * Fragment shader source
-     */
-    char *fragment_shader;
-
-    const char *gl_version;
-    const char *gl_vendor;
-    const char *gl_renderer;
-
-    GLuint tex_white;
-    GLuint tex_checkerboard;
-
-    br_font_gl font_fixed3x5;
-    br_font_gl font_prop4x6;
-    br_font_gl font_prop7x9;
 } br_device;
 
 #endif /* BR_DEVICE_PRIVATE */

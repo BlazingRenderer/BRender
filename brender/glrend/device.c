@@ -26,30 +26,17 @@ static const char deviceProduct[] = DEVICE_PRODUCT;
 #define A(a) ((br_uintptr_t)(a))
 
 static struct br_tv_template_entry deviceTemplateEntries[] = {
-    {BRT_IDENTIFIER_CSTR,      NULL, F(identifier),    BRTV_QUERY | BRTV_ALL,            BRTV_CONV_COPY,   0              },
-    {BRT_VERSION_U32,          NULL, 0,                BRTV_QUERY | BRTV_ALL,            BRTV_CONV_DIRECT, DEVICE_VERSION },
-    {BRT_BRENDER_VERSION_U32,  NULL, 0,                BRTV_QUERY | BRTV_ALL,            BRTV_CONV_DIRECT, __BRENDER__    },
-    {BRT_DDI_VERSION_U32,      NULL, 0,                BRTV_QUERY | BRTV_ALL,            BRTV_CONV_DIRECT, __BRENDER_DDI__},
-    {BRT_CREATOR_CSTR,         NULL, A(deviceCreator), BRTV_QUERY | BRTV_ALL | BRTV_ABS, BRTV_CONV_COPY,   0              },
-    {BRT_TITLE_CSTR,           NULL, A(deviceTitle),   BRTV_QUERY | BRTV_ALL | BRTV_ABS, BRTV_CONV_COPY,   0              },
-    {BRT_PRODUCT_CSTR,         NULL, A(deviceProduct), BRTV_QUERY | BRTV_ALL | BRTV_ABS, BRTV_CONV_COPY,   0              },
-    {BRT_OPENGL_VERSION_CSTR,  NULL, F(gl_version),    BRTV_QUERY | BRTV_ALL,            BRTV_CONV_COPY,   0              },
-    {BRT_OPENGL_VENDOR_CSTR,   NULL, F(gl_vendor),     BRTV_QUERY | BRTV_ALL,            BRTV_CONV_COPY,   0              },
-    {BRT_OPENGL_RENDERER_CSTR, NULL, F(gl_renderer),   BRTV_QUERY | BRTV_ALL,            BRTV_CONV_COPY,   0              },
+    {BRT_IDENTIFIER_CSTR,     NULL, F(identifier),    BRTV_QUERY | BRTV_ALL,            BRTV_CONV_COPY,   0              },
+    {BRT_VERSION_U32,         NULL, 0,                BRTV_QUERY | BRTV_ALL,            BRTV_CONV_DIRECT, DEVICE_VERSION },
+    {BRT_BRENDER_VERSION_U32, NULL, 0,                BRTV_QUERY | BRTV_ALL,            BRTV_CONV_DIRECT, __BRENDER__    },
+    {BRT_DDI_VERSION_U32,     NULL, 0,                BRTV_QUERY | BRTV_ALL,            BRTV_CONV_DIRECT, __BRENDER_DDI__},
+    {BRT_CREATOR_CSTR,        NULL, A(deviceCreator), BRTV_QUERY | BRTV_ALL | BRTV_ABS, BRTV_CONV_COPY,   0              },
+    {BRT_TITLE_CSTR,          NULL, A(deviceTitle),   BRTV_QUERY | BRTV_ALL | BRTV_ABS, BRTV_CONV_COPY,   0              },
+    {BRT_PRODUCT_CSTR,        NULL, A(deviceProduct), BRTV_QUERY | BRTV_ALL | BRTV_ABS, BRTV_CONV_COPY,   0              },
 };
 
 #undef F
 #undef A
-
-/*
- * Structure used to unpack the device creation tokens/values
- */
-typedef struct device_create_tokens {
-    br_device_gl_ext_procs *ext_procs;
-    char                   *vertex_shader;
-    char                   *fragment_shader;
-
-} device_create_tokens;
 
 /*
  * List of tokens which are not significant in matching (for output facilities)
@@ -62,35 +49,17 @@ static const br_token insignificantMatchTokens[] = {
     BRT_PIXEL_TYPE_U8,
     BRT_WINDOW_MONITOR_I32,
     BRT_MSAA_SAMPLES_I32,
+    BRT_WINDOW_HANDLE_H,
+    BRT_OPENGL_EXT_PROCS_P,
+    BRT_OPENGL_VERTEX_SHADER_STR,
+    BRT_OPENGL_FRAGMENT_SHADER_STR,
     BR_NULL_TOKEN,
 };
 // clang-format on
 
-/*
- * Structure used to unpack driver arguments
- */
-#define F(f) offsetof(device_create_tokens, f)
-
-static struct br_tv_template_entry deviceArgsTemplateEntries[] = {
-    {BRT_OPENGL_EXT_PROCS_P,         NULL, F(ext_procs),       BRTV_SET, BRTV_CONV_COPY},
-    {BRT_OPENGL_VERTEX_SHADER_STR,   NULL, F(vertex_shader),   BRTV_SET, BRTV_CONV_COPY},
-    {BRT_OPENGL_FRAGMENT_SHADER_STR, NULL, F(fragment_shader), BRTV_SET, BRTV_CONV_COPY},
-};
-
-#undef F
-
 br_device *DeviceGLAllocate(const char *identifier, const char *arguments)
 {
-    br_device      *self;
-    br_token_value  args_tv[256];
-    br_int_32       count;
-    br_tv_template *deviceArgs;
-
-    device_create_tokens tokens = {
-        .ext_procs       = NULL,
-        .vertex_shader   = NULL,
-        .fragment_shader = NULL,
-    };
+    br_device *self;
 
     /*
      * Set up device block and resource anchor
@@ -102,93 +71,22 @@ br_device *DeviceGLAllocate(const char *identifier, const char *arguments)
     self->device      = self;
     self->object_list = BrObjectListAllocate(self);
 
-    if(arguments != NULL) {
-        deviceArgs = BrTVTemplateAllocate(self, deviceArgsTemplateEntries, BR_ASIZE(deviceArgsTemplateEntries));
-        BrStringToTokenValue(args_tv, sizeof(args_tv), arguments);
-        BrTokenValueSetMany(&tokens, &count, NULL, args_tv, deviceArgs);
-    }
-
-    if(tokens.ext_procs == NULL) {
+    if((self->renderer_facility = RendererFacilityGLInit(self)) == NULL) {
         BrResFreeNoCallback(self);
         return NULL;
     }
 
-    /*
-     * Make a copy, so they can't switch things out from under us.
-     */
-    self->ext_procs = *tokens.ext_procs;
-
-    self->vertex_shader   = tokens.vertex_shader;
-    self->fragment_shader = tokens.fragment_shader;
-
-    if((self->gl_context = DeviceGLCreateContext(self)) == NULL) {
+    if((self->output_facility = OutputFacilityGLInit(self, self->renderer_facility)) == NULL) {
         BrResFreeNoCallback(self);
         return NULL;
     }
-
-    if(DeviceGLMakeCurrent(self, self->gl_context) != BRE_OK)
-        goto cleanup_context;
-
-    if(gladLoadGLLoader(DeviceGLGetGetProcAddress(self)) == 0) {
-        BrLogError("GLREND", "Unable to load OpenGL functions.");
-        goto cleanup_context;
-    }
-
-    self->gl_version  = (const char *)glGetString(GL_VERSION);
-    self->gl_vendor   = (const char *)glGetString(GL_VENDOR);
-    self->gl_renderer = (const char *)glGetString(GL_RENDERER);
-
-    BrLogTrace("GLREND", "OpenGL Version  = %s", self->gl_version);
-    BrLogTrace("GLREND", "OpenGL Vendor   = %s", self->gl_vendor);
-    BrLogTrace("GLREND", "OpenGL Renderer = %s", self->gl_renderer);
-
-    if(VIDEO_Open(&self->video, self->vertex_shader, self->fragment_shader) == NULL)
-        goto cleanup_context;
-
-    self->tex_white        = DeviceGLBuildWhiteTexture();
-    self->tex_checkerboard = DeviceGLBuildCheckerboardTexture();
-
-    /*
-     * We can't use BRender's fonts directly, so build a POT texture with
-     * glyph from left-to-right. All fonts have 256 possible characters.
-     */
-
-    BrLogTrace("GLREND", "Building fixed 3x5 font atlas.");
-    (void)FontGLBuildAtlas(&self->font_fixed3x5, BrFontFixed3x5, 128, 64);
-
-    BrLogTrace("GLREND", "Building proportional 4x6 font atlas.");
-    (void)FontGLBuildAtlas(&self->font_prop4x6, BrFontProp4x6, 128, 64);
-
-    BrLogTrace("GLREND", "Building proportional 7x9 font atlas.");
-    (void)FontGLBuildAtlas(&self->font_prop7x9, BrFontProp7x9, 256, 64);
-
-    if((self->renderer_facility = RendererFacilityGLInit(self)) == NULL)
-        goto cleanup_context;
-
-    if((self->output_facility = OutputFacilityGLInit(self, self->renderer_facility)) == NULL)
-        goto cleanup_context;
 
     return self;
-
-cleanup_context:
-    DeviceGLDeleteContext(self, self->gl_context);
-    BrResFree(self);
-    return NULL;
 }
 
 static void BR_CMETHOD_DECL(br_device_gl, free)(struct br_object *_self)
 {
     br_device *self = (br_device *)_self;
-
-    glDeleteTextures(1, &self->font_prop7x9.tex);
-    glDeleteTextures(1, &self->font_prop4x6.tex);
-    glDeleteTextures(1, &self->font_fixed3x5.tex);
-    glDeleteTextures(1, &self->tex_checkerboard);
-    glDeleteTextures(1, &self->tex_white);
-
-    VIDEO_Close(&self->video);
-
-    DeviceGLDeleteContext(self, self->gl_context);
 
     /*
      * Remove attached objects

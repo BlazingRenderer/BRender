@@ -97,6 +97,7 @@ set(GLREND_FILES
 
 	./devpixmp.c
 	./devpixmp.h
+	./devpmglf.c
 
 	./font.c
 	./font.h

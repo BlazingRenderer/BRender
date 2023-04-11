@@ -6,7 +6,6 @@
  */
 
 #include <string.h>
-#include <inttypes.h>
 #include "drv.h"
 #include "brassert.h"
 
@@ -30,35 +29,17 @@ static struct br_tv_template_entry devicePixelmapTemplateEntries[] = {
 };
 #undef F
 
-struct pixelmapNewTokens {
-    br_int_32 width;
-    br_int_32 height;
-    br_int_32 pixel_bits;
-    br_uint_8 pixel_type;
-    int       msaa_samples;
-};
-
-#define F(f) offsetof(struct pixelmapNewTokens, f)
-static struct br_tv_template_entry pixelmapNewTemplateEntries[] = {
-    {BRT_WIDTH_I32,        NULL, F(width),        BRTV_SET, BRTV_CONV_COPY},
-    {BRT_HEIGHT_I32,       NULL, F(height),       BRTV_SET, BRTV_CONV_COPY},
-    {BRT_PIXEL_BITS_I32,   NULL, F(pixel_bits),   BRTV_SET, BRTV_CONV_COPY},
-    {BRT_PIXEL_TYPE_U8,    NULL, F(pixel_type),   BRTV_SET, BRTV_CONV_COPY},
-    {BRT_MSAA_SAMPLES_I32, NULL, F(msaa_samples), BRTV_SET, BRTV_CONV_COPY},
-};
-#undef F
-
 /*
  * (Re)create the renderbuffers and attach them to the framebuffer.
  */
 static br_error recreate_renderbuffers(br_device_pixelmap *self)
 {
-    ASSERT(self->use_type == BRT_OFFSCREEN || self->use_type == BRT_DEPTH);
+    UASSERT(self->use_type == BRT_OFFSCREEN || self->use_type == BRT_DEPTH);
 
     if(self->use_type == BRT_OFFSCREEN) {
         const GLenum draw_buffers[1] = {GL_COLOR_ATTACHMENT0};
 
-        ASSERT(self->asBack.glFbo != 0);
+        UASSERT(self->asBack.glFbo != 0);
 
         /* Delete */
         glDeleteRenderbuffers(1, &self->asBack.glTex);
@@ -79,7 +60,7 @@ static br_error recreate_renderbuffers(br_device_pixelmap *self)
         glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, self->asBack.glTex);
         glDrawBuffers(1, draw_buffers);
     } else if(self->use_type == BRT_DEPTH) {
-        ASSERT(self->asDepth.backbuffer->asBack.glFbo != 0);
+        UASSERT(self->asDepth.backbuffer->asBack.glFbo != 0);
 
         /* Delete */
         glDeleteRenderbuffers(1, &self->asDepth.glDepth);
@@ -122,163 +103,6 @@ static void delete_gl_resources(br_device_pixelmap *self)
         /* Cleanup the quad */
         DeviceGLFiniQuad(&self->asBack.quad);
     }
-}
-
-static br_error create_pixelmap(br_device_pixelmap **newpm, br_object *parent, br_token use_type, br_uint_8 type,
-                                br_uint_16 width, br_uint_16 height, br_int_32 msaa_samples)
-{
-    br_device_pixelmap *pm, *ppm;
-    br_output_facility *outfcty;
-    br_device          *device;
-    const char         *tag;
-    GLint               gl_internal_format;
-    GLenum              gl_format, gl_type;
-    GLsizeiptr          gl_elem_bytes;
-    br_error            err;
-
-    device = ObjectDevice(parent);
-
-    if(ObjectIsType(parent, BRT_OUTPUT_FACILITY)) {
-        ASSERT(use_type == BRT_NONE);
-        ppm     = NULL;
-        outfcty = (br_output_facility *)parent;
-    } else if(ObjectIsType(parent, BRT_DEVICE_PIXELMAP)) {
-        ppm     = ((br_device_pixelmap *)parent);
-        outfcty = ppm->output_facility;
-    } else {
-        return BRE_FAIL;
-    }
-
-    if(msaa_samples < 0)
-        msaa_samples = 0;
-    else if(msaa_samples > device->video.maxSamples)
-        msaa_samples = device->video.maxSamples;
-
-    err = VIDEOI_BrPixelmapGetTypeDetails(type, &gl_internal_format, &gl_format, &gl_type, &gl_elem_bytes, NULL);
-    if(err != BRE_OK)
-        return err;
-
-    switch(use_type) {
-        case BRT_NONE:
-            ASSERT(ObjectIsType(parent, BRT_OUTPUT_FACILITY));
-            tag = "Screen";
-            break;
-        case BRT_NO_RENDER:
-            use_type = BRT_OFFSCREEN;
-        case BRT_OFFSCREEN:
-            ASSERT(ObjectIsType(parent, BRT_DEVICE_PIXELMAP));
-            tag = "Backbuffer";
-            break;
-        case BRT_DEPTH:
-            ASSERT(ObjectIsType(parent, BRT_DEVICE_PIXELMAP));
-            tag = "Depth";
-            break;
-        default:
-            return BRE_FAIL;
-    }
-
-    pm                  = BrResAllocate(device, sizeof(br_device_pixelmap), BR_MEMORY_OBJECT);
-    pm->dispatch        = &devicePixelmapDispatch;
-    pm->output_facility = outfcty;
-    pm->pm_identifier   = BrResSprintf(pm, "%" PRIu16 "x%" PRIu16 " (%s)", width, height, tag);
-    pm->device          = device;
-    pm->use_type        = use_type;
-    pm->msaa_samples    = msaa_samples;
-
-    pm->pm_type   = type;
-    pm->pm_width  = width;
-    pm->pm_height = height;
-    pm->pm_flags  = BR_PMF_NO_ACCESS;
-
-    if(use_type == BRT_NONE) {
-        pm->pm_origin_x = 0;
-        pm->pm_origin_y = 0;
-        pm->pm_base_x   = 0;
-        pm->pm_base_y   = 0;
-
-        *newpm = pm;
-        ObjectContainerAddFront(outfcty, (br_object *)pm);
-        return BRE_OK;
-    }
-
-    pm->pm_origin_x = ppm->pm_origin_x;
-    pm->pm_origin_y = ppm->pm_origin_y;
-    pm->pm_base_x   = ppm->pm_base_x;
-    pm->pm_base_y   = ppm->pm_base_y;
-
-    if(use_type == BRT_OFFSCREEN) {
-        pm->asBack.depthbuffer = NULL;
-        glGenFramebuffers(1, &pm->asBack.glFbo);
-        DeviceGLInitQuad(&pm->asBack.quad, &pm->device->video);
-    } else {
-        ASSERT(use_type == BRT_DEPTH);
-        ppm->asBack.depthbuffer = pm;
-        pm->asDepth.backbuffer  = ppm;
-    }
-
-    if(recreate_renderbuffers(pm) != BRE_OK) {
-        delete_gl_resources(pm);
-        BrResFreeNoCallback(pm);
-        return BRE_FAIL;
-    }
-
-    *newpm = pm;
-    ObjectContainerAddFront(outfcty, (br_object *)pm);
-    return BRE_OK;
-}
-
-/*
- * Create a new device pixelmap and set a display mode
- */
-br_device_pixelmap *DevicePixelmapGLAllocate(br_device *device, br_output_facility *facility, br_token_value *tv)
-{
-    br_device_pixelmap      *self;
-    br_int_32                count;
-    br_error                 err;
-    struct pixelmapNewTokens pt = {
-        .width        = -1,
-        .height       = -1,
-        .pixel_bits   = -1,
-        .pixel_type   = BR_PMT_MAX,
-        .msaa_samples = 0,
-    };
-
-    if(device->templates.pixelmapNewTemplate == NULL) {
-        device->templates.pixelmapNewTemplate = BrTVTemplateAllocate(device, pixelmapNewTemplateEntries,
-                                                                     BR_ASIZE(pixelmapNewTemplateEntries));
-    }
-
-    BrTokenValueSetMany(&pt, &count, NULL, tv, device->templates.pixelmapNewTemplate);
-
-    if(pt.width <= 0 || pt.height <= 0)
-        return NULL;
-
-    /*
-     * If the user's manually specified a type, use it.
-     * Otherwise, figure one out from the bit depth.
-     */
-    if(pt.pixel_type == BR_PMT_MAX) {
-        switch(pt.pixel_bits) {
-            case 16:
-                pt.pixel_type = BR_PMT_RGB_565;
-                break;
-            case 24:
-                pt.pixel_type = BR_PMT_RGB_888;
-                break;
-            case 32:
-                pt.pixel_type = BR_PMT_RGBX_888;
-                break;
-            default:
-                BrLogError("GLREND", "Unsupported pixel depth %d requested.", pt.pixel_bits);
-                return NULL;
-        }
-    }
-
-    err = create_pixelmap(&self, (br_object *)facility, BRT_NONE, pt.pixel_type, pt.width, pt.height, pt.msaa_samples);
-    if(err != BRE_OK)
-        return NULL;
-
-    return self;
 }
 
 void BR_CMETHOD_DECL(br_device_pixelmap_gl, free)(br_object *_self)
@@ -334,20 +158,9 @@ struct br_tv_template *BR_CMETHOD_DECL(br_device_pixelmap_gl, templateQuery)(br_
 
 br_error BR_CMETHOD_DECL(br_device_pixelmap_gl, resize)(br_device_pixelmap *self, br_int_32 width, br_int_32 height)
 {
-    /* Front buffer, ¯\_(ツ)_/¯ */
-    if(self->use_type == BRT_NONE) {
-        self->pm_width  = width;
-        self->pm_height = height;
-        return BRE_OK;
-    }
-
-    if(self->use_type == BRT_OFFSCREEN || self->use_type == BRT_DEPTH) {
-        self->pm_width  = width;
-        self->pm_height = height;
-        return recreate_renderbuffers(self);
-    }
-
-    return BRE_FAIL;
+    self->pm_width  = width;
+    self->pm_height = height;
+    return recreate_renderbuffers(self);
 }
 
 /*
@@ -371,10 +184,16 @@ static struct br_tv_template_entry pixelmapMatchTemplateEntries[] = {
 };
 #undef F
 
-br_error BR_CMETHOD_DECL(br_device_pixelmap_gl, match)(br_device_pixelmap *self, br_device_pixelmap **_newpm, br_token_value *tv)
+br_error BR_CMETHOD_DECL(br_device_pixelmap_gl, match)(br_device_pixelmap *self, br_device_pixelmap **newpm, br_token_value *tv)
 {
     br_int_32                  count;
-    br_uint_8                  type;
+    br_error                   err;
+    br_device_pixelmap        *pm;
+    const char                *typestring;
+    GLint                      gl_internal_format;
+    GLenum                     gl_format, gl_type;
+    GLsizeiptr                 gl_elem_bytes;
+    HVIDEO                     hVideo;
     struct pixelmapMatchTokens mt = {
         .width      = self->pm_width,
         .height     = self->pm_height,
@@ -388,64 +207,120 @@ br_error BR_CMETHOD_DECL(br_device_pixelmap_gl, match)(br_device_pixelmap *self,
                                                                              BR_ASIZE(pixelmapMatchTemplateEntries));
     }
 
-    BrTokenValueSetMany(&mt, &count, NULL, tv, self->device->templates.pixelmapMatchTemplate);
+    err = BrTokenValueSetMany(&mt, &count, NULL, tv, self->device->templates.pixelmapMatchTemplate);
+    if(err != BRE_OK)
+        return err;
 
     if(mt.use_type == BRT_NO_RENDER)
         mt.use_type = BRT_OFFSCREEN;
 
-    if(mt.use_type == BRT_DEPTH) {
-        /* Depth buffers must be matched with the backbuffer */
-        if(self->use_type != BRT_OFFSCREEN)
-            return BRE_FAIL;
+    switch(mt.use_type) {
+        case BRT_OFFSCREEN:
+            typestring = "Backbuffer";
+            break;
+        case BRT_DEPTH:
+            typestring = "Depth";
 
-        /* Can't have >1 depth buffer */
-        if(self->asBack.depthbuffer != NULL)
-            return BRE_FAIL;
+            /*
+             * Depth buffers must be matched with the backbuffer.
+             */
+            if(self->use_type != BRT_OFFSCREEN)
+                return BRE_UNSUPPORTED;
 
-        /* Not supporting non-16bpp depth buffers */
-        if(mt.pixel_bits != 16)
-            return BRE_FAIL;
+            /*
+             * Can't have >1 depth buffer.
+             */
+            if(self->asBack.depthbuffer != NULL)
+                return BRE_FAIL;
 
-        type = BR_PMT_DEPTH_16;
-    } else if(mt.type != BR_PMT_MAX) {
-        type = mt.type;
-    } else {
-        type = self->pm_type;
+            /*
+             * Not supporting non-16bpp depth buffers.
+             */
+            if(mt.pixel_bits != 16)
+                return BRE_UNSUPPORTED;
+
+            mt.type = BR_PMT_DEPTH_16;
+            break;
+        default:
+            return BRE_UNSUPPORTED;
     }
 
-    return create_pixelmap(_newpm, (br_object *)self, mt.use_type, type, mt.width, mt.height, self->msaa_samples);
-}
-
-br_error BR_CMETHOD_DECL(br_device_pixelmap_gl, doubleBuffer)(br_device_pixelmap *self, br_device_pixelmap *src)
-{
-    if(self->use_type != BRT_NONE || src->use_type != BRT_OFFSCREEN)
+    /*
+     * Only allow backbuffers to be instantiated from the frontbuffer.
+     */
+    if(self->use_type == BRT_NONE && mt.use_type != BRT_OFFSCREEN)
         return BRE_UNSUPPORTED;
 
-    /* Blit the FBO to the screen and swap. */
-    BrPixelmapCopy((br_pixelmap *)self, (br_pixelmap *)src);
+    if(mt.type == BR_PMT_MAX)
+        mt.type = self->pm_type;
 
-    /* Call our hook */
-    DeviceGLPreSwap(self->device, src->asBack.glFbo);
-    while(glGetError() != GL_NO_ERROR)
-        ;
+    err = VIDEOI_BrPixelmapGetTypeDetails(mt.type, &gl_internal_format, &gl_format, &gl_type, &gl_elem_bytes, NULL);
+    if(err != BRE_OK)
+        return err;
+    /*
+    if(msaa_samples < 0)
+        msaa_samples = 0;
+    else if(msaa_samples > hVideo->maxSamples)
+        msaa_samples = hVideo->maxSamples;
+         */
 
-    DeviceGLSwapBuffers(self->device, self);
+    pm                  = BrResAllocate(self->device, sizeof(br_device_pixelmap), BR_MEMORY_OBJECT);
+    pm->dispatch        = &devicePixelmapDispatch;
+    pm->pm_identifier   = BrResSprintf(pm, "OpenGL:%s:%dx%d", typestring, mt.width, mt.height);
+    pm->device          = self->device;
+    pm->output_facility = self->output_facility;
+    pm->use_type        = mt.use_type;
+    // pm->msaa_samples =
+
+    pm->pm_type     = mt.type;
+    pm->pm_width    = mt.width;
+    pm->pm_height   = mt.height;
+    pm->pm_flags    = BR_PMF_NO_ACCESS;
+    pm->pm_origin_x = 0;
+    pm->pm_origin_y = 0;
+    pm->pm_base_x   = 0;
+    pm->pm_origin_y = 0;
+
+    hVideo = &DeviceGLGetScreen(self->device)->asFront.video;
+
+    if(mt.use_type == BRT_OFFSCREEN) {
+        pm->asBack.depthbuffer = NULL;
+        glGenFramebuffers(1, &pm->asBack.glFbo);
+        DeviceGLInitQuad(&pm->asBack.quad, hVideo);
+    } else {
+        UASSERT(mt.use_type == BRT_DEPTH);
+        self->asBack.depthbuffer = pm;
+        pm->asDepth.backbuffer   = self;
+    }
+
+    if(recreate_renderbuffers(pm) != BRE_OK) {
+        --self->screen->asFront.num_refs;
+        delete_gl_resources(pm);
+        BrResFreeNoCallback(pm);
+        return BRE_FAIL;
+    }
+
+    *newpm = pm;
+    ObjectContainerAddFront(self->output_facility, (br_object *)pm);
     return BRE_OK;
 }
 
 br_error BR_CMETHOD_DECL(br_device_pixelmap_gl, rectangleStretchCopy)(br_device_pixelmap *self, br_rectangle *d,
                                                                       br_device_pixelmap *src, br_rectangle *s)
 {
-    /* Device->Device non-addressable stretch copy */
+    /*
+     * Device->Device non-addressable stretch copy.
+     */
     GLbitfield bits;
     GLuint     srcFbo, dstFbo;
-    if(self->use_type == BRT_NONE) {
-        if(src->use_type != BRT_OFFSCREEN)
-            return BRE_FAIL;
-        dstFbo = 0;
-        srcFbo = src->asBack.glFbo;
-        bits   = GL_COLOR_BUFFER_BIT;
-    } else if(self->use_type == BRT_OFFSCREEN) {
+
+    /*
+     * Refusing copy/blit to screen.
+     */
+    if(self->use_type == BRT_NONE)
+        return BRE_FAIL;
+
+    if(self->use_type == BRT_OFFSCREEN) {
         if(src->use_type != BRT_OFFSCREEN)
             return BRE_FAIL;
         dstFbo = self->asBack.glFbo;
@@ -462,7 +337,9 @@ br_error BR_CMETHOD_DECL(br_device_pixelmap_gl, rectangleStretchCopy)(br_device_
         return BRE_FAIL;
     }
 
-    /* Ignore self-blit. */
+    /*
+     * Ignore self-blit.
+     */
     if(self == src)
         return BRE_OK;
 
@@ -502,6 +379,7 @@ br_error BR_CMETHOD_DECL(br_device_pixelmap_gl, rectangleFill)(br_device_pixelma
     float      r = (float)((colour & 0x00FF0000) >> 16) / 255.0f;
     float      g = (float)((colour & 0x0000FF00) >> 8) / 255.0f;
     float      b = (float)((colour & 0x000000FF) >> 0) / 255.0f;
+    // TODO: handle the colour format correctly
 
     VIDEOI_BrRectToGL((br_pixelmap *)self, rect);
 
@@ -514,7 +392,7 @@ br_error BR_CMETHOD_DECL(br_device_pixelmap_gl, rectangleFill)(br_device_pixelma
         self->asBack.clearColour[2] = b;
         self->asBack.clearColour[3] = a;
     } else if(self->use_type == BRT_DEPTH) {
-        ASSERT(colour == 0xFFFFFFFF);
+        UASSERT(colour == 0xFFFFFFFF);
         fbo  = self->asBack.depthbuffer->asBack.glFbo;
         mask = GL_DEPTH_BUFFER_BIT;
         glClearDepth(1.0f);
@@ -540,7 +418,7 @@ br_error BR_CMETHOD(br_device_pixelmap_gl, rectangleStretchCopyTo)(br_device_pix
                                                                    br_device_pixelmap *_src, br_rectangle *sr)
 {
     /* Pixelmap->Device, addressable stretch copy. */
-    HVIDEO       hVideo = &self->device->video;
+    HVIDEO       hVideo = &DeviceGLGetScreen(self->device)->asFront.video;
     br_pixelmap *src    = (br_pixelmap *)_src;
     GLuint       tex;
     br_matrix4   mvp;
@@ -652,6 +530,8 @@ br_error BR_CMETHOD_DECL(br_device_pixelmap_gl, rectangleCopyFrom)(br_device_pix
 br_error BR_CMETHOD(br_device_pixelmap_gl, text)(br_device_pixelmap *self, br_point *point, br_font *font,
                                                  const char *text, br_uint_32 colour)
 {
+    br_device_pixelmap *screen = DeviceGLGetScreen(self->device);
+
     /* Quit if off top, bottom or right screen */
     br_int_32 x = point->x + self->pm_origin_x;
     br_int_32 y = point->y + self->pm_origin_y;
@@ -668,16 +548,16 @@ br_error BR_CMETHOD(br_device_pixelmap_gl, text)(br_device_pixelmap *self, br_po
     /* Ensure we're a valid font. */
     br_font_gl *gl_font;
     if(font == BrFontFixed3x5)
-        gl_font = &self->device->font_fixed3x5;
+        gl_font = &screen->asFront.font_fixed3x5;
     else if(font == BrFontProp4x6)
-        gl_font = &self->device->font_prop4x6;
+        gl_font = &screen->asFront.font_prop4x6;
     else if(font == BrFontProp7x9)
-        gl_font = &self->device->font_prop7x9;
+        gl_font = &screen->asFront.font_prop7x9;
     else
         return BRE_FAIL;
 
     /* Set up the render state. The font UVs match the texture, so no need to flip here. */
-    HVIDEO hVideo = &self->device->video;
+    HVIDEO hVideo = &screen->asFront.video;
 
     glBindFramebuffer(GL_FRAMEBUFFER, self->asBack.glFbo);
     glViewport(0, 0, self->pm_width, self->pm_height);
@@ -704,7 +584,7 @@ br_error BR_CMETHOD(br_device_pixelmap_gl, text)(br_device_pixelmap *self, br_po
     if(gl_font->tex != 0)
         glBindTexture(GL_TEXTURE_2D, gl_font->tex);
     else
-        glBindTexture(GL_TEXTURE_2D, self->device->tex_checkerboard);
+        glBindTexture(GL_TEXTURE_2D, screen->asFront.tex_checkerboard);
 
     glUniform1i(hVideo->textProgram.uSampler, 0);
     glUniform3fv(hVideo->textProgram.uColour, 1, col.v);
@@ -769,7 +649,7 @@ static const struct br_device_pixelmap_dispatch devicePixelmapDispatch = {
     ._copyTo       = BR_CMETHOD_REF(br_device_pixelmap_gen, copyTo),
     ._copyFrom     = BR_CMETHOD_REF(br_device_pixelmap_gen, copyFrom),
     ._fill         = BR_CMETHOD_REF(br_device_pixelmap_gen, fill),
-    ._doubleBuffer = BR_CMETHOD_REF(br_device_pixelmap_gl, doubleBuffer),
+    ._doubleBuffer = BR_CMETHOD_REF(br_device_pixelmap_fail, doubleBuffer),
 
     ._copyDirty         = BR_CMETHOD_REF(br_device_pixelmap_gen, copyDirty),
     ._copyToDirty       = BR_CMETHOD_REF(br_device_pixelmap_gen, copyToDirty),

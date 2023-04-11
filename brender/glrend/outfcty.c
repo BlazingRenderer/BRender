@@ -15,23 +15,25 @@ static const struct br_output_facility_dispatch outputFacilityDispatch;
 #define A(a) ((br_uintptr_t)(a))
 
 static struct br_tv_template_entry outputFacilityTemplateEntries[] = {
-    {BRT_WIDTH_I32,           NULL, A(-1),                BRTV_QUERY | BRTV_ALL | BRTV_ABS, BRTV_CONV_COPY  },
-    {BRT_WIDTH_MIN_I32,       NULL, A(1),                 BRTV_QUERY | BRTV_ALL | BRTV_ABS, BRTV_CONV_COPY  },
-    {BRT_WIDTH_MAX_I32,       NULL, F(max_width),         BRTV_QUERY | BRTV_ALL,            BRTV_CONV_COPY  },
-    {BRT_HEIGHT_I32,          NULL, A(-1),                BRTV_QUERY | BRTV_ALL | BRTV_ABS, BRTV_CONV_COPY  },
-    {BRT_HEIGHT_MIN_I32,      NULL, A(1),                 BRTV_QUERY | BRTV_ALL | BRTV_ABS, BRTV_CONV_COPY  },
-    {BRT_HEIGHT_MAX_I32,      NULL, F(max_height),        BRTV_QUERY | BRTV_ALL,            BRTV_CONV_COPY  },
-    {BRT_PIXEL_BITS_I32,      NULL, A(-1),                BRTV_QUERY | BRTV_ALL | BRTV_ABS, BRTV_CONV_COPY  },
-    {BRT_PIXEL_TYPE_U8,       NULL, A(BR_PMT_MAX),        BRTV_QUERY | BRTV_ALL | BRTV_ABS, BRTV_CONV_COPY  },
-    {BRT_INDEXED_B,           NULL, A(0),                 BRTV_QUERY | BRTV_ALL | BRTV_ABS, BRTV_CONV_COPY  },
-    {BRT_IDENTIFIER_CSTR,     NULL, F(identifier),        BRTV_QUERY | BRTV_ALL,            BRTV_CONV_COPY  },
-    {BRT_RENDERER_FACILITY_O, NULL, F(renderer_facility), BRTV_QUERY | BRTV_ALL,            BRTV_CONV_COPY  },
+    {BRT_WIDTH_I32,                  NULL, A(-1),                BRTV_QUERY | BRTV_ALL | BRTV_ABS, BRTV_CONV_COPY  },
+    {BRT_WIDTH_MIN_I32,              NULL, A(1),                 BRTV_QUERY | BRTV_ALL | BRTV_ABS, BRTV_CONV_COPY  },
+    {BRT_HEIGHT_I32,                 NULL, A(-1),                BRTV_QUERY | BRTV_ALL | BRTV_ABS, BRTV_CONV_COPY  },
+    {BRT_HEIGHT_MIN_I32,             NULL, A(1),                 BRTV_QUERY | BRTV_ALL | BRTV_ABS, BRTV_CONV_COPY  },
+    {BRT_PIXEL_BITS_I32,             NULL, A(-1),                BRTV_QUERY | BRTV_ALL | BRTV_ABS, BRTV_CONV_COPY  },
+    {BRT_PIXEL_TYPE_U8,              NULL, A(BR_PMT_MAX),        BRTV_QUERY | BRTV_ALL | BRTV_ABS, BRTV_CONV_COPY  },
+    {BRT_INDEXED_B,                  NULL, A(0),                 BRTV_QUERY | BRTV_ALL | BRTV_ABS, BRTV_CONV_COPY  },
+    {BRT_IDENTIFIER_CSTR,            NULL, F(identifier),        BRTV_QUERY | BRTV_ALL,            BRTV_CONV_COPY  },
+    {BRT_RENDERER_FACILITY_O,        NULL, F(renderer_facility), BRTV_QUERY | BRTV_ALL,            BRTV_CONV_COPY  },
 
  /*
   * We don't use these, but we need BrDevBeginVar to accept them.
   * These are passed to pixelmapNew, which will handle them.
   */
-    {BRT_MSAA_SAMPLES_I32,    NULL, 0,                    BRTV_QUERY | BRTV_ALL,            BRTV_CONV_DIRECT},
+    {BRT_MSAA_SAMPLES_I32,           NULL, 0,                    BRTV_QUERY | BRTV_ALL,            BRTV_CONV_DIRECT},
+    {BRT_WINDOW_HANDLE_H,            NULL, 0,                    BRTV_QUERY | BRTV_ALL,            BRTV_CONV_DIRECT},
+    {BRT_OPENGL_EXT_PROCS_P,         NULL, 0,                    BRTV_QUERY | BRTV_ALL,            BRTV_CONV_DIRECT},
+    {BRT_OPENGL_VERTEX_SHADER_STR,   NULL, 0,                    BRTV_QUERY | BRTV_ALL,            BRTV_CONV_DIRECT},
+    {BRT_OPENGL_FRAGMENT_SHADER_STR, NULL, 0,                    BRTV_QUERY | BRTV_ALL,            BRTV_CONV_DIRECT},
 };
 
 #undef F
@@ -40,7 +42,6 @@ static struct br_tv_template_entry outputFacilityTemplateEntries[] = {
 br_output_facility *OutputFacilityGLInit(br_device *dev, br_renderer_facility *rendfcty)
 {
     br_output_facility *self;
-    GLint               dims[2];
 
     self                    = BrResAllocate(dev, sizeof(br_output_facility), BR_MEMORY_OBJECT);
     self->identifier        = "OpenGL";
@@ -48,10 +49,7 @@ br_output_facility *OutputFacilityGLInit(br_device *dev, br_renderer_facility *r
     self->device            = dev;
     self->object_list       = BrObjectListAllocate(self);
     self->renderer_facility = rendfcty;
-
-    glGetIntegerv(GL_MAX_VIEWPORT_DIMS, dims);
-    self->max_width  = dims[0];
-    self->max_height = dims[1];
+    self->screen            = NULL;
 
     ObjectContainerAddFront(dev, (br_object *)self);
     return self;
@@ -130,14 +128,21 @@ static br_error BR_CMETHOD_DECL(br_output_facility_sdl, pixelmapNew)(br_output_f
     br_device_pixelmap *pm;
 
     /*
+     * Only one screen pixelmap supported.
+     */
+    if(self->screen != NULL)
+        return BRE_FAIL;
+
+    /*
      * Create a device pixelmap structure representing display memory
      */
-    pm = DevicePixelmapGLAllocate(self->device, self, tv);
+    pm = DevicePixelmapGLAllocateFront(self->device, self, tv);
 
     if(pm == NULL)
         return BRE_FAIL;
 
-    *ppmap = pm;
+    self->screen = pm;
+    *ppmap       = pm;
 
     return BRE_OK;
 }

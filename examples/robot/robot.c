@@ -54,6 +54,7 @@
 
 #include <brender.h>              /* Master include file for BRender        */
 #include <brassert.h>             /* Assertion macros                       */
+#include <brsdl.h>
 
 #include "world.h"                /* 3D world and views into it             */
 #include "app.h"                  /* Application prototypes and defines     */
@@ -269,10 +270,12 @@ void ViewBufferSet(brwin_view *view)
     if(view->screen)
         BrPixelmapFree(view->screen);
 
+    br_device_gl_ext_procs glprocs = BrSDLMakeGLProcs(view->window);
     result = BrDevBeginVar(&view->screen, "opengl",
                            BRT_WIDTH_I32, view->ulWidth,
                            BRT_HEIGHT_I32, view->ulHeight,
                            BRT_PIXEL_BITS_I32, 24,
+                           BRT_OPENGL_EXT_PROCS_P, &glprocs,
                            BR_NULL_TOKEN
     );
 

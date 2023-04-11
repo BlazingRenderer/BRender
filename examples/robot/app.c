@@ -112,7 +112,7 @@ int main(int argc, char **argv)
      */
     BrBegin();
 
-    BrSDLDevAddStaticGL(sdlWindow);
+    BrSDLDevAddStaticGL();
 
     if(getenv("BRENDER_PATH") == NULL)
         putenv("BRENDER_PATH=dat;../dat;../../dat;../../../dat");
@@ -127,6 +127,7 @@ int main(int argc, char **argv)
     BrenderView->world    = BrenderWorld;
     BrenderView->ulWidth  = width;
     BrenderView->ulHeight = height;
+    BrenderView->window   = sdlWindow;
 
     ViewBufferSet(BrenderView);
 

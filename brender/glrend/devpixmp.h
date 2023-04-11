@@ -66,6 +66,33 @@ typedef struct br_device_pixelmap {
     /* OpenGL crap */
     union {
         struct {
+            /*
+             * System-specific OpenGL function pointers.
+             */
+            br_device_gl_ext_procs ext_procs;
+
+            /*
+             * Device-wide VIDEO instance.
+             */
+            VIDEO video;
+
+            /*
+             * OpenGL context
+             */
+            void *gl_context;
+
+            const char *gl_version;
+            const char *gl_vendor;
+            const char *gl_renderer;
+
+            GLuint tex_white;
+            GLuint tex_checkerboard;
+
+            br_font_gl font_fixed3x5;
+            br_font_gl font_prop4x6;
+            br_font_gl font_prop7x9;
+        } asFront;
+        struct {
             struct br_device_pixelmap *depthbuffer;
             GLuint                     glFbo;
             GLuint                     glTex;
@@ -79,7 +106,6 @@ typedef struct br_device_pixelmap {
             GLfloat                    clearValue;
         } asDepth;
     };
-
 } br_device_pixelmap;
 
 #endif
