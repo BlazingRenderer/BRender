@@ -1,14 +1,23 @@
+/*
+ * BRender Cube Example
+ *
+ * This is meant to be a simple example of how to get a basic BRender OpenGL window
+ * up and running, supporting window resizing, ALT+ENTER fullscreen, etc., with some _very_
+ * basic geometry.
+ *
+ * If you want to make it more complex - don't.
+ */
 #include <SDL.h>
 #include <brender.h>
-#include <brsdl.h>
-#include <inttypes.h>
+#include <brglrend.h>
+#include <brsdl2dev.h>
 
 /*
  * Primitive heap - used by z-buffered renderer to defer drawing of blended primitives
  */
 static uint8_t primitive_heap[1500 * 1024];
 
-static void create_scene(br_actor **_world, br_actor **_camera, br_actor **_cube)
+static void create_scene(br_pixelmap *screen, br_actor **_world, br_actor **_camera, br_actor **_cube)
 {
     br_actor       *world, *camera, *cube;
     br_camera      *camdata;
@@ -26,7 +35,7 @@ static void create_scene(br_actor **_world, br_actor **_camera, br_actor **_cube
     camdata                = camera->type_data;
     camdata->field_of_view = BR_ANGLE_DEG(60);
     camdata->hither_z      = BR_SCALAR(0.1);
-    camdata->aspect        = BR_SCALAR(1280) / BR_SCALAR(720);
+    camdata->aspect        = BR_DIV(BR_SCALAR(screen->width), BR_SCALAR(screen->height));
 
     order_table->min_z = camdata->hither_z;
     order_table->max_z = camdata->yon_z;
@@ -42,52 +51,60 @@ static void create_scene(br_actor **_world, br_actor **_camera, br_actor **_cube
     *_cube   = cube;
 }
 
+void _BrBeginHook(void)
+{
+    BrDevAddStatic(NULL, BrDrv1SDL2Begin, NULL);
+    BrDevAddStatic(NULL, BrDrvGLBegin, NULL);
+}
+
+void _BrEndHook(void)
+{
+}
+
 int main(int argc, char **argv)
 {
-    SDL_Window  *sdl_window;
     br_pixelmap *screen = NULL, *colour_buffer = NULL, *depth_buffer = NULL;
     int          ret = -1;
     br_error     r;
     br_actor    *world = NULL, *camera = NULL, *cube = NULL;
     br_uint_64   ticks_last, ticks_now;
     br_boolean   is_fullscreen = BR_FALSE;
+    SDL_Window  *window;
 
     /*
-     * Init SDL
+     * QoL for those poor X11 users.
      */
-    if(SDL_Init(SDL_INIT_VIDEO) < 0) {
-        BrLogError("SDL", "Initialisation error: %s", SDL_GetError());
-        goto sdl_init_failed;
-    }
-
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 2);
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
-    SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 0);
-    SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, 0);
-
     SDL_SetHint(SDL_HINT_VIDEO_X11_NET_WM_BYPASS_COMPOSITOR, "0");
-
-    if((sdl_window = SDL_CreateWindow("BRender Sample Application", 0, 0, 1280, 720,
-                                      SDL_WINDOW_OPENGL | SDL_WINDOW_ALLOW_HIGHDPI | SDL_WINDOW_RESIZABLE)) == NULL) {
-        BrLogError("SDL", "Window creation error: %s", SDL_GetError());
-        goto sdl_createwindow_failed;
-    }
-
-    SDL_SetWindowMinimumSize(sdl_window, 320, 200);
 
     BrBegin();
 
-    BrSDLDevAddStaticGL();
-
-    r = BrSDLUtilOnResize(sdl_window, "opengl", &screen, &colour_buffer, &depth_buffer, primitive_heap,
-                          sizeof(primitive_heap), NULL);
-    if(r != BR_TRUE)
+    // clang-format off
+    r = BrDevBeginVar(&screen, "SDL2",
+                      BRT_WIDTH_I32,        1280,
+                      BRT_HEIGHT_I32,       720,
+                      BRT_PIXEL_TYPE_U8,    BR_PMT_RGB_888,
+                      BRT_WINDOW_NAME_CSTR, "BRender Cube Example",
+                      BRT_HIDPI_B,          BR_TRUE,
+                      BRT_RESIZABLE_B,      BR_TRUE,
+                      BRT_OPENGL_B,         BR_TRUE,
+                      BR_NULL_TOKEN);
+    // clang-format on
+    if(r != BRE_OK)
         goto screen_creation_failed;
 
-    is_fullscreen = BrSDLUtilSetFullscreen(sdl_window, BR_FALSE);
+    screen->origin_x = (br_int_16)(screen->width / 2);
+    screen->origin_y = (br_int_16)(screen->height / 2);
 
-    create_scene(&world, &camera, &cube);
+    if(BrSDLUtilResizeBuffers(screen, &colour_buffer, &depth_buffer) != BRE_OK)
+        goto buffer_create_failed;
+
+    window = BrSDLUtilGetWindow(screen);
+    SDL_SetWindowFullscreen(window, 0);
+    is_fullscreen = BR_FALSE;
+
+    BrRendererBegin(colour_buffer, NULL, NULL, primitive_heap, sizeof(primitive_heap));
+
+    create_scene(screen, &world, &camera, &cube);
 
     ticks_last = SDL_GetTicks64();
 
@@ -103,16 +120,44 @@ int main(int argc, char **argv)
                 case SDL_QUIT:
                     goto done;
                 case SDL_WINDOWEVENT:
+                    /*
+                     * Window event, pass it to the driver.
+                     */
+                    if(BrPixelmapHandleWindowEvent(screen, &evt.window) != BRE_OK) {
+                        BrLogError("APP", "Error handling window event");
+                        goto buffer_create_failed;
+                    }
+
                     switch(evt.window.event) {
                         case SDL_WINDOWEVENT_SIZE_CHANGED:
-                            (void)BrSDLUtilOnResize(sdl_window, "opengl", &screen, &colour_buffer, &depth_buffer,
-                                                    primitive_heap, sizeof(primitive_heap), camera->type_data);
+                            /*
+                             * The main screen should have been resized above.
+                             * Update its origin and resize the framebuffer.
+                             */
+                            screen->origin_x = (br_int_16)(screen->width / 2);
+                            screen->origin_y = (br_int_16)(screen->height / 2);
+
+                            if(BrSDLUtilResizeBuffers(screen, &colour_buffer, &depth_buffer) != BRE_OK) {
+                                BrLogError("APP", "Error resizing window buffers");
+                                goto buffer_create_failed;
+                            }
+
+                            /*
+                             * Update the camera's aspect ratio to match the camera.
+                             */
+                            ((br_camera *)camera->type_data)->aspect = BR_DIV(BR_SCALAR(screen->width),
+                                                                              BR_SCALAR(screen->height));
                             break;
                     }
                     break;
                 case SDL_KEYDOWN: {
                     if(BrSDLUtilIsAltEnter(&evt.key)) {
-                        is_fullscreen = BrSDLUtilSetFullscreen(sdl_window, !is_fullscreen);
+                        if(is_fullscreen) {
+                            SDL_SetWindowFullscreen(window, 0);
+                        } else {
+                            SDL_SetWindowFullscreen(window, SDL_WINDOW_FULLSCREEN_DESKTOP);
+                        }
+                        is_fullscreen = !is_fullscreen;
                         break;
                     }
                     break;
@@ -134,20 +179,16 @@ int main(int argc, char **argv)
 done:
     ret = 0;
 
-    BrSDLUtilCleanupScreen(&screen, &colour_buffer, &depth_buffer);
+    BrRendererEnd();
+
+    BrPixelmapFree(depth_buffer);
+    BrPixelmapFree(colour_buffer);
+
+buffer_create_failed:
+    BrPixelmapFree(screen);
 
 screen_creation_failed:
 
     BrEnd();
-
-    SDL_DestroyWindow(sdl_window);
-
-sdl_createwindow_failed:
-    /*
-     * Close down SDL
-     */
-    SDL_Quit();
-
-sdl_init_failed:
     return ret;
 }
