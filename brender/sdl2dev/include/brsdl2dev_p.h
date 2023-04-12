@@ -20,6 +20,11 @@ struct br_device *BR_EXPORT BrDrv1SDL2Begin(const char *arguments);
  */
 br_error BrSDLUtilResizeBuffers(br_pixelmap *screen, br_pixelmap **colour_buffer, br_pixelmap **depth_buffer);
 
+/*
+ * Does the given SDL_KeyboardEvent represent an Alt+Enter.
+ */
+br_boolean BrSDLUtilIsAltEnter(const struct SDL_KeyboardEvent *evt);
+
 #endif /* _NO_PROTOTYPES */
 
 #ifdef __cplusplus

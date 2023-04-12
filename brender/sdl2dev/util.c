@@ -78,3 +78,17 @@ full_cleanup:
 
     return BRE_OK;
 }
+
+br_boolean BrSDLUtilIsAltEnter(const SDL_KeyboardEvent *evt)
+{
+    if(evt->repeat)
+        return BR_FALSE;
+
+    if(evt->state != SDL_PRESSED)
+        return BR_FALSE;
+
+    if(!(evt->keysym.mod & KMOD_ALT))
+        return BR_FALSE;
+
+    return evt->keysym.scancode == SDL_SCANCODE_RETURN;
+}

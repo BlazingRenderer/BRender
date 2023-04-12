@@ -5,6 +5,8 @@
 #error Please include brender.h first
 #endif
 
+struct SDL_KeyboardEvent;
+
 /*
  * Function prototypes
  */
