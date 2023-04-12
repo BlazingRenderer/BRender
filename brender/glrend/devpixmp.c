@@ -306,6 +306,12 @@ br_error BR_CMETHOD_DECL(br_device_pixelmap_gl, match)(br_device_pixelmap *self,
         return BRE_FAIL;
     }
 
+    /*
+     * Copy origin over.
+     */
+    pm->pm_origin_x = self->pm_origin_x;
+    pm->pm_origin_y = self->pm_origin_y;
+
     *newpm = pm;
     ObjectContainerAddFront(self->output_facility, (br_object *)pm);
     return BRE_OK;
