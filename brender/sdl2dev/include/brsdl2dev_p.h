@@ -25,6 +25,12 @@ br_error BrSDLUtilResizeBuffers(br_pixelmap *screen, br_pixelmap **colour_buffer
  */
 br_boolean BrSDLUtilIsAltEnter(const struct SDL_KeyboardEvent *evt);
 
+/*
+ * Retrieve the SDL_Window* from a device.
+ * With great power, comes great responsibility.
+ */
+struct SDL_Window *BrSDLUtilGetWindow(br_pixelmap *pm);
+
 #endif /* _NO_PROTOTYPES */
 
 #ifdef __cplusplus

@@ -6,6 +6,7 @@
 #endif
 
 struct SDL_KeyboardEvent;
+struct SDL_Window;
 
 /*
  * Function prototypes
