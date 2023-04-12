@@ -27,6 +27,8 @@ add_library(sdl2dev STATIC
 
         glrend.c
 
+        util.c
+
         include/brsdl2dev.h
         include/brsdl2dev_p.h
 )

@@ -12,6 +12,14 @@ extern "C" {
  */
 struct br_device *BR_EXPORT BrDrv1SDL2Begin(const char *arguments);
 
+/*
+ * Attempt to resize the back and depth buffers to match the screen, falling
+ * back to recreation upon failure. Buffers will be created if NULL.
+ *
+ * Convenience method.
+ */
+br_error BrSDLUtilResizeBuffers(br_pixelmap *screen, br_pixelmap **colour_buffer, br_pixelmap **depth_buffer);
+
 #endif /* _NO_PROTOTYPES */
 
 #ifdef __cplusplus
