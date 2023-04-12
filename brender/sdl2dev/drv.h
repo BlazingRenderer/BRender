@@ -30,6 +30,7 @@ extern "C" {
 #define MAX_CLUT_ENTRIES 256
 
 #include "brddi.h"
+#include "brsdl2dev.h"
 #include "template.h"
 #include "device.h"
 #include "outfcty.h"
