@@ -39,6 +39,7 @@ br_output_facility *OutputFacilitySDL2CreateGeneric(br_device *dev);
 br_device_pixelmap *DevicePixelmapSDL2Allocate(br_device *dev, br_output_facility *outfcty, SDL_Window *window,
                                                SDL_Surface *surface, br_boolean owned);
 br_boolean          DevicePixelmapSDL2IsOurs(const br_pixelmap *pm);
+void               *DevicePixelmapSDLMemAddress(br_device_pixelmap *self, br_int_32 x, br_int_32 y);
 
 /*
  * devclut.c

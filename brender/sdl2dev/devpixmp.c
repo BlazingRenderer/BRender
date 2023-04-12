@@ -630,27 +630,78 @@ static br_error BR_CMETHOD_DECL(br_device_pixelmap_sdl2, rectangleFill)(br_devic
     return BRE_OK;
 }
 
+void *DevicePixelmapSDLMemAddress(br_device_pixelmap *self, br_int_32 x, br_int_32 y)
+{
+    return (void *)((br_uintptr_t)self->pm_pixels + ((self->pm_base_y + y) * self->surface->pitch) +
+                    ((self->pm_base_x + x) * self->surface->format->BytesPerPixel));
+}
+
 static br_error BR_CMETHOD_DECL(br_device_pixelmap_sdl2, pixelQuery)(br_device_pixelmap *self, br_uint_32 *pcolour, br_point *p)
 {
-#if NO_MEMORY_FALLBACK
-    return BRE_FAIL;
-#else
-    br_error err, result;
+    br_error  err;
+    SDL_Point ap;
+    uint8_t  *pixel;
+    br_colour col;
 
-    /*
-     * No nice way to do this is SDL, so fall back to the memory implementation.
-     */
+    switch(self->surface->format->BytesPerPixel) {
+        case 1:
+        case 2:
+        case 3:
+        case 4:
+            break;
+        default:
+            return BRE_FAIL;
+    }
+
+    if(DevicePixelmapSDL2PointClip(&ap, p, (br_pixelmap *)self) == BR_CLIP_REJECT)
+        return BRE_FAIL;
 
     if((err = DevicePixelmapDirectLock(self, BR_FALSE)) != BRE_OK)
         return err;
 
-    result = BR_CMETHOD(br_device_pixelmap_mem, pixelQuery)(self, pcolour, p);
+    pixel = DevicePixelmapSDLMemAddress(self, ap.x, ap.y);
+
+    /*
+     * This is not nice to do in SDL.
+     */
+    switch(self->surface->format->BytesPerPixel) {
+        case 1:
+            col = *pixel;
+            break;
+        case 2:
+            col = *((uint16_t *)pixel);
+            break;
+        case 3:
+            col = (*(pixel + 2) << 16) | (*(pixel + 1) << 8) | (*pixel);
+            break;
+        case 4:
+            col = *((uint32_t *)pixel);
+            break;
+        default:
+            UASSERT(0);
+    }
 
     if((err = DevicePixelmapDirectUnlock(self)) != BRE_OK)
         return err;
 
-    return result;
-#endif
+    *pcolour = col;
+    return BRE_OK;
+}
+
+br_error BR_CMETHOD_DECL(br_device_pixelmap_sdl2, pixelAddressQuery)(br_device_pixelmap *self, void **pptr,
+                                                                     br_uint_32 *pqual, br_point *p)
+{
+    SDL_Point ap;
+
+    (void)pqual;
+
+    if(DevicePixelmapSDL2PointClip(&ap, p, (br_pixelmap *)self) == BR_CLIP_REJECT)
+        return BRE_FAIL;
+
+    if(pptr != NULL)
+        *pptr = DevicePixelmapSDLMemAddress(self, ap.x, ap.y);
+
+    return BRE_OK;
 }
 
 static br_error BR_CMETHOD_DECL(br_device_pixelmap_sdl2, directLock)(br_device_pixelmap *self, br_boolean block)
@@ -895,7 +946,7 @@ static const struct br_device_pixelmap_dispatch devicePixelmapDispatch = {
     ._rowSet   = BR_CMETHOD_REF(br_device_pixelmap_fail, rowSet),
 
     ._pixelQuery        = BR_CMETHOD_REF(br_device_pixelmap_sdl2, pixelQuery),
-    ._pixelAddressQuery = BR_CMETHOD_REF(br_device_pixelmap_fail, pixelAddressQuery),
+    ._pixelAddressQuery = BR_CMETHOD_REF(br_device_pixelmap_sdl2, pixelAddressQuery),
 
     ._pixelAddressSet = BR_CMETHOD_REF(br_device_pixelmap_fail, pixelAddressSet),
     ._originSet       = BR_CMETHOD_REF(br_device_pixelmap_gen, originSet),
