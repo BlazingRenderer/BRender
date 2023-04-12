@@ -1,7 +1,8 @@
 #include <SDL.h>
 #include <brender.h>
-#include <brsdl.h>
 #include <brddi.h> /* To poke the device's CLUT. */
+#include <brglrend.h>
+#include <brsdl2dev.h>
 
 /*
  * HSL -> RGB conversion code modified from https://gist.github.com/ciembor/1494530
@@ -762,74 +763,21 @@ static br_drawtest tests[] = {
 };
 // clang-format on
 
-int main(int argc, char **argv)
+void BR_CALLBACK _BrBeginHook(void)
 {
-    SDL_Window  *sdl_window;
-    br_pixelmap *screen = NULL, *colour_buffer = NULL;
-    int          width, height;
-    int          ret = -1;
-    br_error     r;
-    br_uint_64   ticks_last, ticks_now;
-    int          want_screenshot;
-    int          test_index = 0;
+    BrDevAddStatic(NULL, BrDrv1SDL2Begin, NULL);
+    BrDevAddStatic(NULL, BrDrvGLBegin, NULL);
+}
 
-    /*
-     * Init SDL
-     */
-    if(SDL_Init(SDL_INIT_VIDEO) < 0) {
-        BrLogError("SDL", "Initialisation error: %s", SDL_GetError());
-        goto sdl_init_failed;
-    }
+void BR_CALLBACK _BrEndHook(void)
+{
+}
 
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 2);
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
-    SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 0);
-    SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, 0);
-
-    SDL_SetHint(SDL_HINT_VIDEO_X11_NET_WM_BYPASS_COMPOSITOR, "0");
-
-    if((sdl_window = SDL_CreateWindow("BRender Sample Application", 0, 0, 1280, 720,
-                                      SDL_WINDOW_OPENGL | SDL_WINDOW_ALLOW_HIGHDPI)) == NULL) {
-        BrLogError("SDL", "Window creation error: %s", SDL_GetError());
-        goto sdl_createwindow_failed;
-    }
-
-    BrBegin();
-
-    BrLogSetLevel(BR_LOG_DEBUG);
-
-    BrSDLDevAddStaticGL();
-
-    SDL_GL_GetDrawableSize(sdl_window, &width, &height);
-
-    void *anchor = BrResAllocate(NULL, 0, BR_MEMORY_ANCHOR);
-
-    br_device_gl_ext_procs procs = BrSDLMakeGLProcs(sdl_window);
-    r = BrDevBeginVar(&screen, "opengl",
-                      BRT_WIDTH_I32, (br_int_32)width,
-                      BRT_HEIGHT_I32, (br_int_32)height,
-                      BRT_PIXEL_BITS_I32, 24,
-                      BRT_OPENGL_EXT_PROCS_P, &procs,
-                      BR_NULL_TOKEN);
-
-    if(r != BRE_OK) {
-        BrLogError("APP", "BrDevBeginVar() failed.");
-        goto screen_creation_failed;
-    }
-
-    if((colour_buffer = BrPixelmapMatch(screen, BR_PMMATCH_OFFSCREEN)) == NULL) {
-        BrLogError("APP", "BrPixelmapMatchTypedSized() failed.");
-        goto screen_creation_failed;
-    }
-
-    screen->origin_x = colour_buffer->origin_x = (br_int_16)(width / 2);
-    screen->origin_y = colour_buffer->origin_y = (br_int_16)(height / 2);
-
-    ticks_last = SDL_GetTicks64();
-
+static void init_tests(void *anchor, br_pixelmap *screen, br_pixelmap *colour_buffer)
+{
     for(size_t i = 0; i < BR_ASIZE(tests); ++i) {
         br_drawtest *test = tests + i;
+        br_error     r;
 
         test->_user = BrResAllocate(anchor, test->user_size, BR_MEMORY_APPLICATION);
 
@@ -842,6 +790,69 @@ int main(int argc, char **argv)
             BrLogError("APP", "Error initialising test %s", test->name);
         }
     }
+}
+
+static void cleanup_tests(void)
+{
+    for(size_t i = 0; i < BR_ASIZE(tests); ++i) {
+        br_drawtest *test = tests + i;
+        if(test->fini != NULL && !test->_failed)
+            test->fini(test->_user);
+
+        if(test->_user != NULL)
+            memset(test->_user, 0, test->user_size);
+
+        test->_failed = BR_FALSE;
+    }
+}
+
+int main(int argc, char **argv)
+{
+    br_pixelmap *screen = NULL, *colour_buffer = NULL;
+    int          width = 1280, height = 720;
+    int          ret = -1;
+    br_error     r;
+    br_uint_64   ticks_last, ticks_now;
+    int          want_screenshot;
+    int          test_index = 0;/* BR_ASIZE(tests) - 1; */
+
+    BrBegin();
+
+    BrLogSetLevel(BR_LOG_DEBUG);
+
+    void *anchor = BrResAllocate(NULL, 0, BR_MEMORY_ANCHOR);
+
+    // clang-format off
+    r = BrDevBeginVar(&screen, "SDL2",
+                      BRT_WIDTH_I32,      (br_int_32)width,
+                      BRT_HEIGHT_I32,     (br_int_32)height,
+                      BRT_PIXEL_BITS_I32, 24,
+                      BRT_HIDPI_B,        BR_TRUE,
+                      /* Set these if you dare... */
+                      BRT_RESIZABLE_B,    BR_TRUE,
+                      BRT_OPENGL_B,       BR_FALSE,
+                      BR_NULL_TOKEN);
+    // clang-format on
+
+    if(r != BRE_OK) {
+        BrLogError("APP", "BrDevBeginVar() failed.");
+        goto screen_creation_failed;
+    }
+
+    width  = screen->width;
+    height = screen->height;
+
+    if((colour_buffer = BrPixelmapMatch(screen, BR_PMMATCH_OFFSCREEN)) == NULL) {
+        BrLogError("APP", "BrPixelmapMatchTypedSized() failed.");
+        goto screen_creation_failed;
+    }
+
+    screen->origin_x = colour_buffer->origin_x = (br_int_16)(width / 2);
+    screen->origin_y = colour_buffer->origin_y = (br_int_16)(height / 2);
+
+    ticks_last = SDL_GetTicks64();
+
+    init_tests(anchor, screen, colour_buffer);
 
     for(SDL_Event evt;;) {
         float dt;
@@ -855,6 +866,28 @@ int main(int argc, char **argv)
             switch(evt.type) {
                 case SDL_QUIT:
                     goto done;
+                case SDL_WINDOWEVENT:
+                    if(BrPixelmapHandleWindowEvent(screen, &evt.window) != BRE_OK) {
+                        BrLogError("APP", "Error handling window event");
+                        goto done;
+                    }
+
+                    switch(evt.window.event) {
+                        case SDL_WINDOWEVENT_SIZE_CHANGED: {
+                            br_pixelmap *ncol;
+                            screen->origin_x = (br_int_16)(screen->width / 2);
+                            screen->origin_y = (br_int_16)(screen->height / 2);
+
+                            ncol          = BrPixelmapResize(colour_buffer, screen->width, screen->height);
+                            colour_buffer = ncol;
+
+                            cleanup_tests();
+                            init_tests(anchor, screen, colour_buffer);
+
+                            break;
+                        }
+                    }
+                    break;
                 case SDL_KEYDOWN: {
                     switch(evt.key.keysym.sym) {
                         case SDLK_F5:
@@ -938,11 +971,7 @@ int main(int argc, char **argv)
 done:
     ret = 0;
 
-    for(size_t i = 0; i < BR_ASIZE(tests); ++i) {
-        br_drawtest *test = tests + i;
-        if(test->fini != NULL && !test->_failed)
-            test->fini(test->_user);
-    }
+    cleanup_tests();
 
 screen_creation_failed:
     if(colour_buffer != NULL)
@@ -955,14 +984,5 @@ screen_creation_failed:
 
     BrEnd();
 
-    SDL_DestroyWindow(sdl_window);
-
-sdl_createwindow_failed:
-    /*
-     * Close down SDL
-     */
-    SDL_Quit();
-
-sdl_init_failed:
     return ret;
 }
