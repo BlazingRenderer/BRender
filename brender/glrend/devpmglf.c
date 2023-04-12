@@ -10,22 +10,45 @@
  */
 static const struct br_device_pixelmap_dispatch devicePixelmapFrontDispatch;
 
+static br_error custom_query(br_value *pvalue, void **extra, br_size_t *pextra_size, void *block,
+                             const struct br_tv_template_entry *tep)
+{
+    const br_device_pixelmap *self = block;
+
+    switch(tep->token) {
+        case BRT_OPENGL_EXT_PROCS_P:
+            pvalue->p = (void *)&self->asFront.ext_procs;
+            break;
+        default:
+            return BRE_UNKNOWN;
+    }
+
+    return BRE_OK;
+}
+
+static const br_tv_custom custom = {
+    .query      = custom_query,
+    .set        = NULL,
+    .extra_size = NULL,
+};
+
 /*
  * Device pixelmap info. template
  */
 #define F(f)  offsetof(br_device_pixelmap, f)
 #define FF(f) offsetof(br_device_pixelmap, asFront.f)
 static struct br_tv_template_entry devicePixelmapFrontTemplateEntries[] = {
-    {BRT_WIDTH_I32,            NULL, F(pm_width),        BRTV_QUERY | BRTV_ALL, BRTV_CONV_I32_U16},
-    {BRT_HEIGHT_I32,           NULL, F(pm_height),       BRTV_QUERY | BRTV_ALL, BRTV_CONV_I32_U16},
-    {BRT_PIXEL_TYPE_U8,        NULL, F(pm_type),         BRTV_QUERY | BRTV_ALL, BRTV_CONV_I32_U8 },
-    {BRT_OUTPUT_FACILITY_O,    NULL, F(output_facility), BRTV_QUERY | BRTV_ALL, BRTV_CONV_COPY   },
-    {BRT_FACILITY_O,           NULL, F(output_facility), BRTV_QUERY,            BRTV_CONV_COPY   },
-    {BRT_IDENTIFIER_CSTR,      NULL, F(pm_identifier),   BRTV_QUERY | BRTV_ALL, BRTV_CONV_COPY   },
-    {BRT_MSAA_SAMPLES_I32,     NULL, F(msaa_samples),    BRTV_QUERY | BRTV_ALL, BRTV_CONV_COPY   },
-    {BRT_OPENGL_VERSION_CSTR,  NULL, FF(gl_version),     BRTV_QUERY | BRTV_ALL, BRTV_CONV_COPY   },
-    {BRT_OPENGL_VENDOR_CSTR,   NULL, FF(gl_vendor),      BRTV_QUERY | BRTV_ALL, BRTV_CONV_COPY   },
-    {BRT_OPENGL_RENDERER_CSTR, NULL, FF(gl_renderer),    BRTV_QUERY | BRTV_ALL, BRTV_CONV_COPY   },
+    {BRT_WIDTH_I32,            NULL, F(pm_width),        BRTV_QUERY | BRTV_ALL, BRTV_CONV_I32_U16, 0                    },
+    {BRT_HEIGHT_I32,           NULL, F(pm_height),       BRTV_QUERY | BRTV_ALL, BRTV_CONV_I32_U16, 0                    },
+    {BRT_PIXEL_TYPE_U8,        NULL, F(pm_type),         BRTV_QUERY | BRTV_ALL, BRTV_CONV_I32_U8,  0                    },
+    {BRT_OUTPUT_FACILITY_O,    NULL, F(output_facility), BRTV_QUERY | BRTV_ALL, BRTV_CONV_COPY,    0                    },
+    {BRT_FACILITY_O,           NULL, F(output_facility), BRTV_QUERY,            BRTV_CONV_COPY,    0                    },
+    {BRT_IDENTIFIER_CSTR,      NULL, F(pm_identifier),   BRTV_QUERY | BRTV_ALL, BRTV_CONV_COPY,    0                    },
+    {BRT_MSAA_SAMPLES_I32,     NULL, F(msaa_samples),    BRTV_QUERY | BRTV_ALL, BRTV_CONV_COPY,    0                    },
+    {BRT_OPENGL_EXT_PROCS_P,   NULL, 0,                  BRTV_QUERY | BRTV_ALL, BRTV_CONV_CUSTOM,  (br_uintptr_t)&custom},
+    {BRT_OPENGL_VERSION_CSTR,  NULL, FF(gl_version),     BRTV_QUERY | BRTV_ALL, BRTV_CONV_COPY,    0                    },
+    {BRT_OPENGL_VENDOR_CSTR,   NULL, FF(gl_vendor),      BRTV_QUERY | BRTV_ALL, BRTV_CONV_COPY,    0                    },
+    {BRT_OPENGL_RENDERER_CSTR, NULL, FF(gl_renderer),    BRTV_QUERY | BRTV_ALL, BRTV_CONV_COPY,    0                    },
 };
 #undef FF
 #undef F
