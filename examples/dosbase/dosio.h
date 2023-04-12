@@ -16,8 +16,7 @@ void InitializeSampleZBuffer(br_pixelmap **screen_buffer, br_pixelmap **back_buf
  * Big difference with InitializeSampleZBuffer, `BrBegin()` is NOT called on this function, because `BrMemAllocate`
  * won't work, and you'll need that to allocate `primitive`
  */
-void InitializeSampleZSort(br_pixelmap **screen_buffer, br_pixelmap **back_buffer,
-						   void *primitive, br_uint_32 primitiveCount);
+void InitializeSampleZSort(br_pixelmap **screen_buffer, br_pixelmap **back_buffer, void *primitive, br_uint_32 primitiveCount);
 
 bool UpdateSample(br_actor *camera, float *dt);
 
@@ -25,4 +24,4 @@ bool UpdateSampleWithKeyHandler(br_actor *camera, float *dt, void (*keyCallback)
 
 br_actor *CreateSampleCamera(br_actor *parent);
 
-#endif //BRENDERSAMPLE_DOSIO_H
+#endif // BRENDERSAMPLE_DOSIO_H
