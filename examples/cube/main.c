@@ -18,12 +18,12 @@ static void create_scene(br_actor **_world, br_actor **_camera, br_actor **_cube
     BrMapFindHook(BrMapFindFailedLoad);
     BrMaterialFindHook(BrMaterialFindFailedLoad);
 
-    world       = BrActorAllocate(BR_ACTOR_NONE, NULL);
+    world = BrActorAllocate(BR_ACTOR_NONE, NULL);
     order_table = BrZsOrderTableAllocate(1024, BR_ORDER_TABLE_LEAVE_BOUNDS | BR_ORDER_TABLE_BUCKET_SORT, BR_SORT_AVERAGE);
     BrZsActorOrderTableSet(world, order_table);
 
-    camera  = BrActorAdd(world, BrActorAllocate(BR_ACTOR_CAMERA, NULL));
-    camdata = camera->type_data;
+    camera                 = BrActorAdd(world, BrActorAllocate(BR_ACTOR_CAMERA, NULL));
+    camdata                = camera->type_data;
     camdata->field_of_view = BR_ANGLE_DEG(60);
     camdata->hither_z      = BR_SCALAR(0.1);
     camdata->aspect        = BR_SCALAR(1280) / BR_SCALAR(720);
@@ -33,7 +33,7 @@ static void create_scene(br_actor **_world, br_actor **_camera, br_actor **_cube
 
     BrMatrix34Translate(&camera->t.t.mat, BR_SCALAR(0), BR_SCALAR(0), BR_SCALAR(2));
 
-    cube = BrActorAdd(world, BrActorAllocate(BR_ACTOR_MODEL, NULL));
+    cube           = BrActorAdd(world, BrActorAllocate(BR_ACTOR_MODEL, NULL));
     cube->model    = BrModelFind("cube.dat");
     cube->material = BrMaterialFind("checkerboard.mat");
 
@@ -44,14 +44,13 @@ static void create_scene(br_actor **_world, br_actor **_camera, br_actor **_cube
 
 int main(int argc, char **argv)
 {
-    SDL_Window    *sdl_window;
-    br_pixelmap   *screen = NULL, *colour_buffer = NULL, *depth_buffer = NULL;
-    int           ret = -1;
-    br_error      r;
-    br_actor      *world = NULL, *camera = NULL, *cube = NULL;
-    br_uint_64    ticks_last, ticks_now;
-    br_boolean    is_fullscreen = BR_FALSE;
-
+    SDL_Window  *sdl_window;
+    br_pixelmap *screen = NULL, *colour_buffer = NULL, *depth_buffer = NULL;
+    int          ret = -1;
+    br_error     r;
+    br_actor    *world = NULL, *camera = NULL, *cube = NULL;
+    br_uint_64   ticks_last, ticks_now;
+    br_boolean   is_fullscreen = BR_FALSE;
 
     /*
      * Init SDL
@@ -69,7 +68,8 @@ int main(int argc, char **argv)
 
     SDL_SetHint(SDL_HINT_VIDEO_X11_NET_WM_BYPASS_COMPOSITOR, "0");
 
-    if((sdl_window = SDL_CreateWindow("BRender Sample Application", 0, 0, 1280, 720, SDL_WINDOW_OPENGL | SDL_WINDOW_ALLOW_HIGHDPI | SDL_WINDOW_RESIZABLE)) == NULL) {
+    if((sdl_window = SDL_CreateWindow("BRender Sample Application", 0, 0, 1280, 720,
+                                      SDL_WINDOW_OPENGL | SDL_WINDOW_ALLOW_HIGHDPI | SDL_WINDOW_RESIZABLE)) == NULL) {
         BrLogError("SDL", "Window creation error: %s", SDL_GetError());
         goto sdl_createwindow_failed;
     }
@@ -80,7 +80,8 @@ int main(int argc, char **argv)
 
     BrSDLDevAddStaticGL(sdl_window);
 
-    r = BrSDLUtilOnResize(sdl_window, "opengl", &screen, &colour_buffer, &depth_buffer, primitive_heap, sizeof(primitive_heap), NULL);
+    r = BrSDLUtilOnResize(sdl_window, "opengl", &screen, &colour_buffer, &depth_buffer, primitive_heap,
+                          sizeof(primitive_heap), NULL);
     if(r != BR_TRUE)
         goto screen_creation_failed;
 
@@ -104,7 +105,8 @@ int main(int argc, char **argv)
                 case SDL_WINDOWEVENT:
                     switch(evt.window.event) {
                         case SDL_WINDOWEVENT_SIZE_CHANGED:
-                            (void)BrSDLUtilOnResize(sdl_window, "opengl", &screen, &colour_buffer, &depth_buffer, primitive_heap, sizeof(primitive_heap), camera->type_data);
+                            (void)BrSDLUtilOnResize(sdl_window, "opengl", &screen, &colour_buffer, &depth_buffer,
+                                                    primitive_heap, sizeof(primitive_heap), camera->type_data);
                             break;
                     }
                     break;
@@ -139,7 +141,6 @@ screen_creation_failed:
     BrEnd();
 
     SDL_DestroyWindow(sdl_window);
-
 
 sdl_createwindow_failed:
     /*
