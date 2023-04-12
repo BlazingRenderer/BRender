@@ -28,7 +28,7 @@ stdenv.mkDerivation rec {
   installPhase = ''
     mkdir -p $out/{bin,share/brender-samples/{robot,dat,tutorials}}
 
-    for i in 3ds2br dquery mkblend mkfog mkranges mkshades paljoin texconv matconv; do
+    for i in 3ds2br dquery mkblend mkfog mkranges mkshades paljoin texconv texview matconv; do
       cp tools/$i/$i${binExtension} $out/bin
     done
 
