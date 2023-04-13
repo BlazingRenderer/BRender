@@ -54,7 +54,7 @@ static void create_scene(br_pixelmap *screen, br_actor **_world, br_actor **_cam
 void _BrBeginHook(void)
 {
     BrDevAddStatic(NULL, BrDrv1SDL2Begin, NULL);
-    BrDevAddStatic(NULL, BrDrvGLBegin, NULL);
+    BrDevAddStatic(NULL, BrDrv1GLBegin, NULL);
 }
 
 void _BrEndHook(void)

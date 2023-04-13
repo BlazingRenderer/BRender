@@ -10,7 +10,7 @@ extern "C" {
 /*
  * Main entry point for device.
  */
-struct br_device *BR_EXPORT BrDrvGLBegin(const char *arguments);
+struct br_device *BR_EXPORT BrDrv1GLBegin(const char *arguments);
 
 #endif /* _NO_PROTOTYPES */
 

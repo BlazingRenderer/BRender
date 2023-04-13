@@ -20,7 +20,7 @@ static uint8_t primitive_heap[1500 * 1024];
 void BR_CALLBACK _BrBeginHook(void)
 {
     BrLogSetLevel(BR_LOG_TRACE);
-    BrDevAddStatic(NULL, BrDrvGLBegin, NULL);
+    BrDevAddStatic(NULL, BrDrv1GLBegin, NULL);
     BrDevAddStatic(NULL, BrDrv1SDL2Begin, NULL);
 }
 

@@ -35,7 +35,7 @@ void _BrBeginHook(void)
     BrLogSetLevel(BR_LOG_TRACE);
 
     BrDevAddStatic(NULL, BrDrv1SDL2Begin, NULL);
-    BrDevAddStatic(NULL, BrDrvGLBegin, NULL);
+    BrDevAddStatic(NULL, BrDrv1GLBegin, NULL);
 }
 
 void _BrEndHook(void)

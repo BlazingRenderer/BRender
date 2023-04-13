@@ -766,7 +766,7 @@ static br_drawtest tests[] = {
 void BR_CALLBACK _BrBeginHook(void)
 {
     BrDevAddStatic(NULL, BrDrv1SDL2Begin, NULL);
-    BrDevAddStatic(NULL, BrDrvGLBegin, NULL);
+    BrDevAddStatic(NULL, BrDrv1GLBegin, NULL);
 }
 
 void BR_CALLBACK _BrEndHook(void)
