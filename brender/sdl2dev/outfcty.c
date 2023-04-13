@@ -38,6 +38,7 @@ static struct br_tv_template_entry outputFacilityTemplateEntries[] = {
     {BRT_WINDOW_NAME_CSTR,   NULL, (br_uintptr_t)NULL,     BRTV_QUERY | BRTV_ALL, BRTV_CONV_DIRECT, 0},
     {BRT_USE_T,              NULL, (br_uintptr_t)BRT_NONE, BRTV_QUERY | BRTV_ALL, BRTV_CONV_DIRECT, 0},
     {BRT_HIDPI_B,            NULL, (br_uintptr_t)BR_FALSE, BRTV_QUERY | BRTV_ALL, BRTV_CONV_DIRECT, 0},
+    {BRT_RESIZABLE_B,        NULL, (br_uintptr_t)BR_FALSE, BRTV_QUERY | BRTV_ALL, BRTV_CONV_DIRECT, 0},
     {BRT_OPENGL_B,           NULL, (br_uintptr_t)BR_FALSE, BRTV_QUERY | BRTV_ALL, BRTV_CONV_DIRECT, 0},
 };
 
@@ -53,6 +54,7 @@ static struct br_tv_template_entry pixelmapNewTemplateEntries[] = {
     {BRT_SURFACE_HANDLE_H, NULL, F(surface),    BRTV_SET, BRTV_CONV_COPY, 0                       },
     {BRT_USE_T,            NULL, F(use_type),   BRTV_SET, BRTV_CONV_COPY, 0                       },
     {BRT_HIDPI_B,          NULL, F(flags),      BRTV_SET, BRTV_CONV_BIT,  SDL_WINDOW_ALLOW_HIGHDPI},
+    {BRT_RESIZABLE_B,      NULL, F(flags),      BRTV_SET, BRTV_CONV_BIT,  SDL_WINDOW_RESIZABLE    },
     {BRT_OPENGL_B,         NULL, F(flags),      BRTV_SET, BRTV_CONV_BIT,  SDL_WINDOW_OPENGL       },
 };
 #undef F

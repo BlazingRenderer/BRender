@@ -136,6 +136,7 @@ static const br_token insignificantMatchTokens[] = {
     BRT_SURFACE_HANDLE_H,
     BRT_USE_T,
     BRT_HIDPI_B,
+    BRT_RESIZABLE_B,
     BRT_OPENGL_B,
     BR_NULL_TOKEN,
 };

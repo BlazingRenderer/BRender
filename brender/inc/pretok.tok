@@ -853,6 +853,8 @@ SURFACE_HANDLE          handle
 # Mainly to request HiDPI surfaces from SDL
 HIDPI                   boolean
 
+RESIZABLE               boolean
+
 # DirectDraw specific tokens
 
 
