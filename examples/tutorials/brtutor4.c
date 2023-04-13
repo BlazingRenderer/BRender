@@ -85,8 +85,6 @@ int main()
 		BrMatrix34PostRotateY(&sat->t.t.mat, BR_ANGLE_DEG(3.0));
 	}
 	/* Close down */
-	BrPixelmapFree(depth_buffer);
-	BrPixelmapFree(back_buffer);
 	BrZbEnd();
 	DOSGfxEnd();
 	BrEnd();

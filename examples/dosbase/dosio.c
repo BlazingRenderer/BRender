@@ -1,9 +1,8 @@
 #include <inttypes.h>
-#include <stdio.h>
 #include "dosio.h"
-
-#include "SDL.h"
-#include "brsdl.h"
+#include <SDL.h>
+#include <brglrend.h>
+#include <brsdl2dev.h>
 
 SDL_Window  *sdl_window = NULL;
 br_pixelmap *screen = NULL, *colour_buffer = NULL, *_depth_buffer = NULL;
@@ -18,51 +17,11 @@ int screen_width, screen_height;
  */
 static uint8_t primitive_heap[1500 * 1024];
 
-static void DestroySDL()
-{
-    if(sdl_window) {
-        SDL_DestroyWindow(sdl_window);
-    }
-
-    SDL_Quit();
-}
-
-static void InitSDL()
-{
-    /*
-     * Init SDL
-     */
-    if(SDL_Init(SDL_INIT_VIDEO) < 0) {
-        BrLogError("SDL", "Initialisation error: %s", SDL_GetError());
-        DestroySDL();
-        exit(1);
-    }
-
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 2);
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
-    SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 0);
-    SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, 0);
-
-    SDL_SetHint(SDL_HINT_VIDEO_X11_NET_WM_BYPASS_COMPOSITOR, "0");
-
-    if((sdl_window = SDL_CreateWindow("BRender Sample Application", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 1280,
-                                      720, SDL_WINDOW_OPENGL | SDL_WINDOW_ALLOW_HIGHDPI | SDL_WINDOW_RESIZABLE)) == NULL) {
-        BrLogError("SDL", "Window creation error: %s", SDL_GetError());
-        DestroySDL();
-        exit(2);
-    }
-
-    SDL_SetWindowMinimumSize(sdl_window, 320, 200);
-}
-
 void BR_CALLBACK _BrBeginHook(void)
 {
     BrLogSetLevel(BR_LOG_TRACE);
-
-    InitSDL();
-
-    BrSDLDevAddStaticGL();
+    BrDevAddStatic(NULL, BrDrvGLBegin, NULL);
+    BrDevAddStatic(NULL, BrDrv1SDL2Begin, NULL);
 }
 
 void BR_CALLBACK _BrEndHook(void)
@@ -71,25 +30,59 @@ void BR_CALLBACK _BrEndHook(void)
 
 br_pixelmap *BR_PUBLIC_ENTRY DOSGfxBegin(const char *setup_string)
 {
-    SDL_GL_GetDrawableSize(sdl_window, &screen_width, &screen_height);
+    // clang-format off
+    r = BrDevBeginVar(&screen, "SDL2",
+                      BRT_WIDTH_I32,     1280,
+                      BRT_HEIGHT_I32,    720,
+                      BRT_PIXEL_TYPE_U8, BR_PMT_RGB_888,
+                      BRT_HIDPI_B,       BR_TRUE,
+                      BRT_RESIZABLE_B,   BR_TRUE,
+                      BRT_OPENGL_B,      BR_TRUE,
+                      BR_NULL_TOKEN);
+    // clang-format on
 
-    r = BrSDLUtilOnResize(sdl_window, "opengl", &screen, &colour_buffer, &_depth_buffer, primitive_heap,
-                          sizeof(primitive_heap), NULL);
-    if(r != BR_TRUE) {
-        DestroySDL();
-        exit(4);
+    if(r != BRE_OK) {
+        return NULL;
     }
 
-    is_fullscreen = BrSDLUtilSetFullscreen(sdl_window, BR_FALSE);
+    sdl_window = BrSDLUtilGetWindow(screen);
 
+    screen->origin_x = (br_int_16)(screen->width / 2);
+    screen->origin_y = (br_int_16)(screen->height / 2);
+
+    r = BrSDLUtilResizeBuffers(screen, &colour_buffer, &_depth_buffer);
+    if(r != BRE_OK) {
+        BrPixelmapFree(screen);
+        return NULL;
+    }
+
+    screen_width  = screen->width;
+    screen_height = screen->height;
+    is_fullscreen = BR_FALSE;
+    SDL_SetWindowFullscreen(sdl_window, 0);
+
+    BrRendererBegin(colour_buffer, NULL, NULL, primitive_heap, sizeof(primitive_heap));
     return screen;
 }
 
 void BR_PUBLIC_ENTRY DOSGfxEnd()
 {
-    DestroySDL();
+    BrRendererEnd();
 
-    BrDevEndOld();
+    if(_depth_buffer != NULL)
+        BrPixelmapFree(_depth_buffer);
+
+    _depth_buffer = NULL;
+
+    if(colour_buffer != NULL)
+        BrPixelmapFree(colour_buffer);
+
+    colour_buffer = NULL;
+
+    if(screen != NULL)
+        BrPixelmapFree(screen);
+
+    screen = NULL;
 }
 
 bool UpdateSample(br_actor *camera, float *dt)
@@ -111,18 +104,34 @@ bool UpdateSampleWithKeyHandler(br_actor *camera, float *dt, void (*keyCallback)
                 return false;
             }
             case SDL_WINDOWEVENT: {
+                if(BrPixelmapHandleWindowEvent(screen, &evt.window) != BRE_OK) {
+                    BrLogError("APP", "Error handling window event");
+                    return false;
+                }
+
                 switch(evt.window.event) {
                     case SDL_WINDOWEVENT_SIZE_CHANGED:
-                        SDL_GL_GetDrawableSize(sdl_window, &screen_width, &screen_height);
-                        (void)BrSDLUtilOnResize(sdl_window, "opengl", &screen, &colour_buffer, &_depth_buffer,
-                                                primitive_heap, sizeof(primitive_heap), camera->type_data);
+                        screen->origin_x = (br_int_16)(screen->width / 2);
+                        screen->origin_y = (br_int_16)(screen->height / 2);
+
+                        if(BrSDLUtilResizeBuffers(screen, &colour_buffer, &_depth_buffer) != BRE_OK) {
+                            BrLogError("APP", "Error resizing window buffers");
+                            return false;
+                        }
+
+                        ((br_camera *)camera->type_data)->aspect = BR_DIV(BR_SCALAR(screen->width), BR_SCALAR(screen->height));
                         break;
                 }
                 break;
             }
             case SDL_KEYDOWN: {
                 if(BrSDLUtilIsAltEnter(&evt.key)) {
-                    is_fullscreen = BrSDLUtilSetFullscreen(sdl_window, !is_fullscreen);
+                    if(is_fullscreen) {
+                        SDL_SetWindowFullscreen(sdl_window, 0);
+                    } else {
+                        SDL_SetWindowFullscreen(sdl_window, SDL_WINDOW_FULLSCREEN_DESKTOP);
+                    }
+                    is_fullscreen = !is_fullscreen;
                     break;
                 } else if(keyCallback != NULL) {
                     keyCallback(&evt.key);

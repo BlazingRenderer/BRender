@@ -78,8 +78,6 @@ int main()
 	}
 	/* Close down */
 
-	BrPixelmapFree(depth_buffer);
-	BrPixelmapFree(back_buffer);
 	BrZbEnd();
 	DOSGfxEnd();
 	BrEnd();

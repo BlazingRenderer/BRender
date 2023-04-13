@@ -3,5 +3,5 @@ add_library(dosbase
 		dosio.h
 		dosio.c
 		)
-target_link_libraries(dosbase BRender::Full brsdl)
+target_link_libraries(dosbase BRender::Full)
 target_include_directories(dosbase PUBLIC .)
