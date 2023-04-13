@@ -461,6 +461,91 @@ static void device2mem_swap(br_pixelmap *screen, br_pixelmap *backbuffer, void *
     BrPixelmapCopy(state->last_frame_device, backbuffer);
 }
 
+typedef struct br_submap_state {
+    br_pixelmap    *checkerboard_memory;
+    br_pixelmap    *checkerboard_device;
+    br_pixelmap    *middle_square;
+    br_pixelmap    *left_square;
+    br_pixelmap    *left_square2;
+    linepoint_state linepoint;
+} br_submap_state;
+
+void submap_fini(void *user)
+{
+    br_submap_state *state = user;
+
+    if(state->left_square2 != NULL)
+        BrPixelmapFree(state->left_square2);
+
+    if(state->left_square != NULL)
+        BrPixelmapFree(state->left_square);
+
+    if(state->middle_square != NULL)
+        BrPixelmapFree(state->middle_square);
+
+    if(state->checkerboard_device != NULL)
+        BrPixelmapFree(state->checkerboard_device);
+
+    if(state->checkerboard_memory != NULL)
+        BrPixelmapFree(state->checkerboard_memory);
+}
+
+static br_error submap_init(void *user, br_pixelmap *screen, br_pixelmap *backbuffer, void *arg)
+{
+    br_submap_state *state = user;
+
+    if((state->checkerboard_memory = BrPixelmapLoad("checkerboard.pix")) == NULL)
+        return BRE_FAIL;
+
+    if((state->checkerboard_device = BrPixelmapMatchSized(backbuffer, BR_PMMATCH_OFFSCREEN, state->checkerboard_memory->width,
+                                                          state->checkerboard_memory->height)) == NULL) {
+        submap_fini(user);
+        return BRE_FAIL;
+    }
+
+    BrPixelmapCopy(state->checkerboard_device, state->checkerboard_memory);
+
+    if((state->middle_square = BrPixelmapAllocateSub(backbuffer, -300, -300, 600, 600)) == NULL) {
+        submap_fini(user);
+        return BRE_FAIL;
+    }
+
+    state->middle_square->origin_x = (br_int_16)(state->middle_square->width / 2);
+    state->middle_square->origin_y = (br_int_16)(state->middle_square->height / 2);
+
+    if((state->left_square = BrPixelmapAllocateSub(backbuffer, -backbuffer->origin_x + 20, 0, state->checkerboard_memory->width,
+                                                   state->checkerboard_memory->height)) == NULL) {
+        submap_fini(user);
+        return BRE_FAIL;
+    }
+
+    state->left_square->origin_x = (br_int_16)(state->left_square->width / 2);
+    state->left_square->origin_y = (br_int_16)(state->left_square->height / 2);
+
+    if((state->left_square2 = BrPixelmapAllocateSub(
+            backbuffer, -backbuffer->origin_x + 20 + state->checkerboard_memory->width + 20, 0,
+            state->checkerboard_memory->width, state->checkerboard_memory->height)) == NULL) {
+        submap_fini(user);
+        return BRE_FAIL;
+    }
+
+    (void)linepoint_init(&state->linepoint, NULL, state->middle_square, arg);
+
+    return BRE_OK;
+}
+
+void submap_draw(br_pixelmap *dest, float dt, void *user)
+{
+    br_submap_state *state = user;
+
+    BrPixelmapFill(state->middle_square, 0xFFFFFFFF);
+    linepoint_draw(state->middle_square, dt, &state->linepoint);
+
+    BrPixelmapCopy(state->left_square, state->checkerboard_memory);
+    BrPixelmapCopy(state->left_square2, state->checkerboard_device);
+    // BrPixelmapFill(state->left_square2, 0xFFFFFFFF);
+}
+
 typedef br_error(br_drawtest_init_cbfn)(void *user, br_pixelmap *screen, br_pixelmap *backbuffer, void *arg);
 typedef void(br_drawtest_draw_cbfn)(br_pixelmap *dest, float dt, void *user);
 typedef void(br_drawtest_swap_cbfn)(br_pixelmap *screen, br_pixelmap *backbuffer, void *user);
@@ -517,6 +602,14 @@ static br_drawtest tests[] = {
         .post      = device2mem_swap,
         .fini      = device2mem_fini,
         .user_size = sizeof(br_device2mem_state),
+        .arg       = NULL,
+    },
+    {
+        .name      = "Sub-pixelmap Test",
+        .init      = submap_init,
+        .draw      = submap_draw,
+        .fini      = submap_fini,
+        .user_size = sizeof(br_submap_state),
         .arg       = NULL,
     },
 };
