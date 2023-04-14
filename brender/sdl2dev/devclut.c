@@ -123,8 +123,10 @@ static br_error BR_CMETHOD_DECL(br_device_clut_sdl2, entryQueryMany)(br_device_c
     if(index + count >= self->pal->ncolors)
         return BRE_OVERFLOW;
 
-    for(size_t i = 0; i < count; ++i)
-        entries[i] = BR_COLOUR_RGB(self->pal->colors[i].r, self->pal->colors[i].g, self->pal->colors[i].b);
+    for(br_int_32 i = 0; i < count; ++i) {
+        SDL_Color col = self->pal->colors[index + i];
+        entries[i]    = BR_COLOUR_RGB(col.r, col.g, col.b);
+    }
 
     return BRE_OK;
 }
