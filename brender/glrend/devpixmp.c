@@ -25,7 +25,7 @@ static struct br_tv_template_entry devicePixelmapTemplateEntries[] = {
     {BRT_OUTPUT_FACILITY_O, NULL, F(output_facility), BRTV_QUERY | BRTV_ALL, BRTV_CONV_COPY   },
     {BRT_FACILITY_O,        NULL, F(output_facility), BRTV_QUERY,            BRTV_CONV_COPY   },
     {BRT_IDENTIFIER_CSTR,   NULL, F(pm_identifier),   BRTV_QUERY | BRTV_ALL, BRTV_CONV_COPY   },
-    {BRT_MSAA_SAMPLES_I32,  NULL, F(msaa_samples),    BRTV_QUERY | BRTV_ALL, BRTV_CONV_COPY   }
+    {BRT_MSAA_SAMPLES_I32,  NULL, F(msaa_samples),    BRTV_QUERY | BRTV_ALL, BRTV_CONV_COPY   },
 };
 #undef F
 
@@ -176,15 +176,17 @@ struct pixelmapMatchTokens {
     br_int_32 pixel_bits;
     br_uint_8 type;
     br_token  use_type;
+    br_int_32 msaa_samples;
 };
 
 #define F(f) offsetof(struct pixelmapMatchTokens, f)
 static struct br_tv_template_entry pixelmapMatchTemplateEntries[] = {
-    {BRT_WIDTH_I32,      NULL, F(width),      BRTV_SET, BRTV_CONV_COPY},
-    {BRT_HEIGHT_I32,     NULL, F(height),     BRTV_SET, BRTV_CONV_COPY},
-    {BRT_PIXEL_BITS_I32, NULL, F(pixel_bits), BRTV_SET, BRTV_CONV_COPY},
-    {BRT_PIXEL_TYPE_U8,  NULL, F(type),       BRTV_SET, BRTV_CONV_COPY},
-    {BRT_USE_T,          NULL, F(use_type),   BRTV_SET, BRTV_CONV_COPY},
+    {BRT_WIDTH_I32,        NULL, F(width),        BRTV_SET, BRTV_CONV_COPY},
+    {BRT_HEIGHT_I32,       NULL, F(height),       BRTV_SET, BRTV_CONV_COPY},
+    {BRT_PIXEL_BITS_I32,   NULL, F(pixel_bits),   BRTV_SET, BRTV_CONV_COPY},
+    {BRT_PIXEL_TYPE_U8,    NULL, F(type),         BRTV_SET, BRTV_CONV_COPY},
+    {BRT_USE_T,            NULL, F(use_type),     BRTV_SET, BRTV_CONV_COPY},
+    {BRT_MSAA_SAMPLES_I32, NULL, F(msaa_samples), BRTV_SET, BRTV_CONV_COPY},
 };
 #undef F
 
@@ -199,11 +201,12 @@ br_error BR_CMETHOD_DECL(br_device_pixelmap_gl, match)(br_device_pixelmap *self,
     GLsizeiptr                 gl_elem_bytes;
     HVIDEO                     hVideo;
     struct pixelmapMatchTokens mt = {
-        .width      = self->pm_width,
-        .height     = self->pm_height,
-        .pixel_bits = -1,
-        .type       = BR_PMT_MAX,
-        .use_type   = BRT_NONE,
+        .width        = self->pm_width,
+        .height       = self->pm_height,
+        .pixel_bits   = -1,
+        .type         = BR_PMT_MAX,
+        .use_type     = BRT_NONE,
+        .msaa_samples = 0,
     };
 
     hVideo = &self->screen->asFront.video;
@@ -263,12 +266,11 @@ br_error BR_CMETHOD_DECL(br_device_pixelmap_gl, match)(br_device_pixelmap *self,
     err = VIDEOI_BrPixelmapGetTypeDetails(mt.type, &gl_internal_format, &gl_format, &gl_type, &gl_elem_bytes, NULL);
     if(err != BRE_OK)
         return err;
-    /*
-    if(msaa_samples < 0)
-        msaa_samples = 0;
-    else if(msaa_samples > hVideo->maxSamples)
-        msaa_samples = hVideo->maxSamples;
-         */
+
+    if(mt.msaa_samples < 0)
+        mt.msaa_samples = 0;
+    else if(mt.msaa_samples > hVideo->maxSamples)
+        mt.msaa_samples = hVideo->maxSamples;
 
     pm                  = BrResAllocate(self->device, sizeof(br_device_pixelmap), BR_MEMORY_OBJECT);
     pm->dispatch        = &devicePixelmapDispatch;
@@ -276,8 +278,8 @@ br_error BR_CMETHOD_DECL(br_device_pixelmap_gl, match)(br_device_pixelmap *self,
     pm->device          = self->device;
     pm->output_facility = self->output_facility;
     pm->use_type        = mt.use_type;
-    // pm->msaa_samples =
-    pm->screen = self->screen;
+    pm->msaa_samples    = mt.msaa_samples;
+    pm->screen          = self->screen;
     ++self->screen->asFront.num_refs;
 
     pm->pm_type     = mt.type;
