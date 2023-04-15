@@ -4,6 +4,8 @@ project(BRender)
 # Prefer glvnd
 cmake_policy(SET CMP0072 NEW)
 
+cmake_policy(SET CMP0079 NEW)
+
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 
 find_package(Perl REQUIRED)
@@ -20,7 +22,11 @@ if(BRENDER_BUILD_SOFT AND (NOT WIN32 OR NOT MSVC OR (NOT CMAKE_GENERATOR_PLATFOR
 	message(FATAL_ERROR "Can only build the software renderer on 32-bit Windows using MSVC.")
 endif()
 
-add_subdirectory(brender)
+add_subdirectory(core)
+
+if(BRENDER_BUILD_DRIVERS)
+    add_subdirectory(drivers)
+endif()
 
 option(BRENDER_BUILD_TOOLS    "Build Tools"    ON)
 option(BRENDER_BUILD_EXAMPLES "Build Examples" ON)
