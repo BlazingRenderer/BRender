@@ -1,6 +1,7 @@
 #include <SDL.h>
 #include <brender.h>
 #include <brsdl.h>
+#include <brddi.h> /* To poke the device's CLUT. */
 
 /*
  * HSL -> RGB conversion code modified from https://gist.github.com/ciembor/1494530
@@ -546,6 +547,144 @@ void submap_draw(br_pixelmap *dest, float dt, void *user)
     // BrPixelmapFill(state->left_square2, 0xFFFFFFFF);
 }
 
+typedef struct pixelquery_state {
+    br_pixelmap *tex8;
+    br_pixelmap *tex16;
+    br_pixelmap *tex24;
+    br_pixelmap *tex32;
+} pixelquery_state;
+
+static void pixelquery_fini(void *user)
+{
+    pixelquery_state *state = user;
+
+    if(state->tex32 != NULL) {
+        BrPixelmapFree(state->tex32);
+    }
+    state->tex32 = NULL;
+
+    if(state->tex24 != NULL) {
+        BrPixelmapFree(state->tex24);
+    }
+    state->tex24 = NULL;
+
+    if(state->tex16 != NULL) {
+        BrPixelmapFree(state->tex16);
+    }
+    state->tex16 = NULL;
+
+    if(state->tex8 != NULL) {
+        BrPixelmapFree(state->tex8);
+    }
+    state->tex8 = NULL;
+}
+
+static br_pixelmap *pm2dev(br_pixelmap *dst, br_pixelmap *pm)
+{
+    br_pixelmap *new_pm;
+
+    if((new_pm = BrPixelmapMatchTypedSized(dst, BR_PMMATCH_OFFSCREEN, pm->type, pm->width, pm->height)) == NULL)
+        return NULL;
+
+    if(pm->map != NULL)
+        BrPixelmapPaletteSet(new_pm, pm->map);
+
+    BrPixelmapCopy(new_pm, pm);
+    return new_pm;
+}
+
+static br_pixelmap *load2dev(br_pixelmap *dst, const char *name)
+{
+    br_pixelmap *pm;
+    br_pixelmap *devpm;
+
+    if((pm = BrPixelmapLoad(name)) == NULL) {
+        BrLogError("APP", "Unable to load %s", name);
+        return NULL;
+    }
+
+    devpm = pm2dev(dst, pm);
+    BrPixelmapFree(pm);
+
+    if(devpm == NULL) {
+        BrLogError("APP", "Unable to convert memory pixelmap to device pixelmap");
+        return NULL;
+    }
+
+    return devpm;
+}
+
+static br_error pixelquery_init(void *user, br_pixelmap *screen, br_pixelmap *backbuffer, void *arg)
+{
+    pixelquery_state *state = user;
+
+    if((state->tex8 = load2dev(backbuffer, "smpte_type03_index_8_small.pix")) == NULL) {
+        pixelquery_fini(state);
+        return BRE_FAIL;
+    }
+
+    if((state->tex16 = load2dev(backbuffer, "smpte_type05_rgb_565_small.pix")) == NULL) {
+        pixelquery_fini(state);
+        return BRE_FAIL;
+    }
+
+    if((state->tex24 = load2dev(backbuffer, "smpte_type06_rgb_888_small.pix")) == NULL) {
+        pixelquery_fini(state);
+        return BRE_FAIL;
+    }
+
+    if((state->tex32 = load2dev(backbuffer, "smpte_type07_rgbx_888_small.pix")) == NULL) {
+        pixelquery_fini(state);
+        return BRE_FAIL;
+    }
+    return BRE_OK;
+}
+
+static void draw_pixelbypixel(br_pixelmap *dest, br_pixelmap *pm, br_int_32 base_x, br_int_32 base_y)
+{
+    br_colour       col;
+    br_device_clut *clut;
+
+    base_x -= pm->width / 2;
+    base_y -= pm->height / 2;
+
+    clut = NULL;
+    ObjectQuery(pm, &clut, BRT_CLUT_O);
+
+    for(br_int_32 y = 0; y < pm->height; ++y) {
+        for(br_int_32 x = 0; x < pm->width; ++x) {
+            br_uint_8 r, g, b;
+
+            col = BrPixelmapPixelGet(pm, -pm->origin_x + x, -pm->origin_y + y);
+
+            if(clut != NULL)
+                DeviceClutEntryQuery(clut, &col, col);
+
+            if(pm->type == BR_PMT_RGB_565) {
+                r = BR_RED_565(col) << 3;
+                g = BR_GRN_565(col) << 2;
+                b = BR_BLU_565(col) << 3;
+            } else {
+                r = BR_RED(col);
+                g = BR_GRN(col);
+                b = BR_BLU(col);
+            }
+
+            BrPixelmapPixelSet(dest, base_x + x, base_y + y, BR_COLOUR_RGBA(r, g, b, 0xFF));
+        }
+    }
+}
+
+static void pixelquery_draw(br_pixelmap *dest, float dt, void *user)
+{
+    pixelquery_state *state = user;
+
+    draw_pixelbypixel(dest, state->tex8, -84, -64);
+    draw_pixelbypixel(dest, state->tex16, 84, -64);
+    draw_pixelbypixel(dest, state->tex24, -84, 64);
+    draw_pixelbypixel(dest, state->tex32, 84, 64);
+}
+
 typedef br_error(br_drawtest_init_cbfn)(void *user, br_pixelmap *screen, br_pixelmap *backbuffer, void *arg);
 typedef void(br_drawtest_draw_cbfn)(br_pixelmap *dest, float dt, void *user);
 typedef void(br_drawtest_swap_cbfn)(br_pixelmap *screen, br_pixelmap *backbuffer, void *user);
@@ -610,6 +749,14 @@ static br_drawtest tests[] = {
         .draw      = submap_draw,
         .fini      = submap_fini,
         .user_size = sizeof(br_submap_state),
+        .arg       = NULL,
+    },
+    {
+        .name      = "pixelQuery() Test",
+        .init      = pixelquery_init,
+        .draw      = pixelquery_draw,
+        .fini      = pixelquery_fini,
+        .user_size = sizeof(pixelquery_state),
         .arg       = NULL,
     },
 };
