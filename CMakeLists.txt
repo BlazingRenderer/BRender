@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.12)
-project(BRenderSample)
+project(BRender)
 
 # Prefer glvnd
 cmake_policy(SET CMP0072 NEW)
