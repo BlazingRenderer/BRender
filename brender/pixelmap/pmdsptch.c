@@ -158,7 +158,7 @@ br_pixelmap *BR_PUBLIC_ENTRY BrPixelmapMatch(br_pixelmap *src, br_uint_8 match_t
             break;
     }
 
-    if(DevicePixelmapMatch(src, (br_device_pixelmap **)&new, tv))
+    if((new = BrPixelmapMatchTV(src, tv)) == NULL)
         return NULL;
 
     return new;
@@ -208,7 +208,7 @@ br_pixelmap *BR_PUBLIC_ENTRY BrPixelmapMatchSized(br_pixelmap *src, br_uint_8 ma
             break;
     }
 
-    if(DevicePixelmapMatch(src, (br_device_pixelmap **)&new, tv))
+    if((new = BrPixelmapMatchTV(src, tv)) == NULL)
         return NULL;
 
     if(new->width != width || new->height != height) {
@@ -271,7 +271,7 @@ br_pixelmap *BR_PUBLIC_ENTRY BrPixelmapMatchTyped(br_pixelmap *src, br_uint_8 ma
             break;
     }
 
-    if(DevicePixelmapMatch(src, (br_device_pixelmap **)&new, tv))
+    if((new = BrPixelmapMatchTV(src, tv)) == NULL)
         return NULL;
 
     if(new->type != pixelmap_type) {
@@ -337,7 +337,7 @@ br_pixelmap *BR_PUBLIC_ENTRY BrPixelmapMatchTypedSized(br_pixelmap *src, br_uint
             break;
     }
 
-    if(DevicePixelmapMatch(src, (br_device_pixelmap **)&new, tv))
+    if((new = BrPixelmapMatchTV(src, tv)) == NULL)
         return NULL;
 
     if(new->type != pixelmap_type || new->width != width || new->height != height) {
@@ -345,6 +345,34 @@ br_pixelmap *BR_PUBLIC_ENTRY BrPixelmapMatchTypedSized(br_pixelmap *src, br_uint
         BrPixelmapFree(new);
         return NULL;
     }
+
+    return new;
+}
+
+br_pixelmap *BR_PUBLIC_ENTRY BrPixelmapMatchTV(br_pixelmap *src, br_token_value *tv)
+{
+    br_pixelmap *new;
+    br_token use = BR_NULL_TOKEN;
+
+    for(const br_token_value *t = tv; t->t != BR_NULL_TOKEN; ++t) {
+        if(t->t == BRT_USE_T)
+            use = t->v.t;
+    }
+
+    switch(use) {
+        case BRT_OFFSCREEN:
+        case BRT_HIDDEN:
+        case BRT_HIDDEN_BUFFER:
+        case BRT_NO_RENDER:
+        case BRT_DEPTH:
+        case BRT_CLONE:
+            break;
+        default:
+            return NULL;
+    }
+
+    if(DevicePixelmapMatch(src, (br_device_pixelmap **)&new, tv) != BRE_OK)
+        return NULL;
 
     return new;
 }
@@ -360,7 +388,7 @@ br_pixelmap *BR_PUBLIC_ENTRY BrPixelmapClone(br_pixelmap *src)
 
     CheckDispatch(src);
 
-    if(DevicePixelmapMatch(src, (br_device_pixelmap **)&new, tv))
+    if((new = BrPixelmapMatchTV(src, tv)) == NULL)
         return NULL;
 
     return new;
