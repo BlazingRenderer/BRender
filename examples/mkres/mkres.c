@@ -84,21 +84,27 @@ int main(int argc, char **argv)
         const static struct {
             br_uint_8   type;
             const char *name;
+            br_int_16   width;
         } smpte_formats[] = {
-            {.type = BR_PMT_INDEX_8,   .name = "index_8"  },
-            {.type = BR_PMT_RGB_555,   .name = "rgb_555"  },
-            {.type = BR_PMT_RGB_565,   .name = "rgb_565"  },
-            {.type = BR_PMT_RGB_888,   .name = "rgb_888"  },
-            {.type = BR_PMT_RGBA_8888, .name = "rgba_8888"},
-            {.type = BR_PMT_RGBX_888,  .name = "rgbx_888" },
-            {.type = BR_PMT_BGR_555,   .name = "bgr_555"  },
-            {.type = BR_PMT_ARGB_4444, .name = "argb_4444"},
+            {.type = BR_PMT_INDEX_8,   .name = "index_8",        .width = 672},
+            {.type = BR_PMT_RGB_555,   .name = "rgb_555",        .width = 672},
+            {.type = BR_PMT_RGB_565,   .name = "rgb_565",        .width = 672},
+            {.type = BR_PMT_RGB_888,   .name = "rgb_888",        .width = 672},
+            {.type = BR_PMT_RGBA_8888, .name = "rgba_8888",      .width = 672},
+            {.type = BR_PMT_RGBX_888,  .name = "rgbx_888",       .width = 672},
+            {.type = BR_PMT_BGR_555,   .name = "bgr_555",        .width = 672},
+            {.type = BR_PMT_ARGB_4444, .name = "argb_4444",      .width = 672},
+
+            {.type = BR_PMT_INDEX_8,   .name = "index_8_small",  .width = 128},
+            {.type = BR_PMT_RGB_565,   .name = "rgb_565_small",  .width = 128},
+            {.type = BR_PMT_RGB_888,   .name = "rgb_888_small",  .width = 128},
+            {.type = BR_PMT_RGBX_888,  .name = "rgbx_888_small", .width = 128},
         };
 
         for(int i = 0; i < BR_ASIZE(smpte_formats); ++i) {
             br_pixelmap *smpte;
 
-            if((smpte = mkres_make_smtpe_bars(smpte_formats[i].type, 672)) == NULL) {
+            if((smpte = mkres_make_smtpe_bars(smpte_formats[i].type, smpte_formats[i].width)) == NULL) {
                 fprintf(stderr, "failed to create %s SMPTE pixelmap\n", smpte_formats[i].name);
                 continue;
             }
