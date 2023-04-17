@@ -138,7 +138,7 @@ endif()
 
 set_source_files_properties(${ASM_FILES} PROPERTIES COMPILE_OPTIONS "-safeseh")
 
-add_library(pentprim STATIC
+add_library(pentprim
         awtm.c
         awtmi.h
         awtmz.c
@@ -192,11 +192,18 @@ target_compile_definitions(pentprim PRIVATE "-DPARTS=0xffff")
 set_source_files_properties(${ASM_FILES} PROPERTIES COMPILE_DEFINITIONS "PARTS=0ffffh")
 
 get_target_property(target_type pentprim TYPE)
-if(NOT target_type STREQUAL STATIC_LIBRARY)
+if(NOT target_type STREQUAL SHARED_LIBRARY)
     target_compile_definitions(pentprim PRIVATE -DDEFINE_BR_ENTRY_POINT)
 endif()
 
-target_link_libraries(pentprim PRIVATE v1db)
+target_link_libraries(pentprim PRIVATE BRender::DDI)
 target_include_directories(pentprim PRIVATE ../softrend) # FIXME
 target_include_directories(pentprim PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
-set_property(TARGET pentprim PROPERTY FOLDER ${BRENDER_FOLDER})
+
+set_target_properties(pentprim PROPERTIES
+		EXPORT_NAME "Drivers::SoftPrim"
+		FOLDER "BRender/Drivers"
+		OUTPUT_NAME "softprmf"
+		)
+
+add_library(BRender::Drivers::SoftPrim ALIAS pentprim)

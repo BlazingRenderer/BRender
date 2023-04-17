@@ -8,3 +8,4 @@ add_executable(mkres
         smpte.c
 )
 target_link_libraries(mkres BRender::Core)
+set_property(TARGET mkres PROPERTY FOLDER "BRender/Examples")

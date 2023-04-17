@@ -28,3 +28,5 @@ add_executable(texconv
 )
 target_compile_definitions(texconv PRIVATE -DDISABLE_VIEWING)
 target_link_libraries(texconv PRIVATE BRender::Core)
+
+install(TARGETS texconv)

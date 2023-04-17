@@ -3,7 +3,10 @@ function(add_example name)
 			${name}.c
 			)
 	target_link_libraries(${name} dosbase)
-	set_property(TARGET ${name} PROPERTY VS_DEBUGGER_WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/dat")
+	set_target_properties(${name} PROPERTIES
+			VS_DEBUGGER_WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/dat"
+			FOLDER "BRender/Examples/Tutorials"
+	)
 endfunction()
 
 add_example(brtutor1)

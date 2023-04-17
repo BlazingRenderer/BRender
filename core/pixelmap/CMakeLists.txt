@@ -1,46 +1,64 @@
 project(pixelmap)
 
-add_library(pixelmap-headers INTERFACE)
-target_include_directories(pixelmap-headers INTERFACE .)
-target_link_libraries(pixelmap-headers INTERFACE fw-headers)
-target_link_libraries(pixelmap-headers INTERFACE math-headers)
+target_include_directories(brender-inc INTERFACE
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+        $<INSTALL_INTERFACE:include>
+        )
+
+target_include_directories(brender-inc-ddi INTERFACE
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/ddi>
+        $<INSTALL_INTERFACE:ddi>
+        )
+
+set(DDI_FILES
+        ddi/pm.h
+        ddi/pm_ip.h
+        ddi/memloops.h
+        )
+
+set(INC_FILES
+        )
 
 set(PIXELMAP_FILES
-	./fontptrs.c
-	./genclip.c
-	./gencopy.c
-	./mipsupt.c
-	./pixelmap.c
-	./pmdsptch.c
-	./pmfail.c
-	./pmfile.c
-	./pmgen.c
-	./pmmem.c
-	./pmnull.c
-	./pmsetup.c
-	./pmutil.c
-	./quantize.c
-	./scale.c
-	./cmemloops.c
+        fontptrs.c
+        genclip.c
+        gencopy.c
+        mipsupt.c
+        pixelmap.c
+        pmdsptch.c
+        pmfail.c
+        pmfile.c
+        pmgen.c
+        pmmem.c
+        pmmem.h
+        pmnull.c
+        pmsetup.c
+        pmutil.c
+        quantize.c
+        scale.c
+        cmemloops.c
 
-	./pm.h
-	./pm_ip.h
-	./pmmem.h
-)
+        fnt3x5.c
+        fntp4x6.c
+        fntp7x9.c
+        )
 
-set(FONT_FILES
-	./fnt3x5.c
-	./fntp4x6.c
-	./fntp7x9.c
-)
-source_group("Fonts" FILES ${FONT_FILES})
+add_library(pixelmap OBJECT ${PIXELMAP_FILES})
 
-add_library(pixelmap STATIC ${PIXELMAP_FILES} ${FONT_FILES})
+target_sources(pixelmap INTERFACE
+        FILE_SET include
+        TYPE HEADERS
+        BASE_DIRS include
+        FILES ${INC_FILES}
+        )
+
+target_sources(pixelmap INTERFACE
+        FILE_SET ddi
+        TYPE HEADERS
+        BASE_DIRS ${CMAKE_CURRENT_BINARY_DIR} ddi
+        FILES ${DDI_FILES}
+        )
+
 target_include_directories(pixelmap PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
-
-target_link_libraries(pixelmap pixelmap-headers)
-target_link_libraries(pixelmap fw)
 target_compile_definitions(pixelmap PRIVATE __BR_V1DB__=0)
-
-set_property(TARGET pixelmap PROPERTY FOLDER ${BRENDER_FOLDER})
-
+target_link_libraries(pixelmap PRIVATE brender-inc-ddi)

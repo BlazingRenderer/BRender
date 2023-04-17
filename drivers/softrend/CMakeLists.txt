@@ -9,7 +9,7 @@ set(ASM_FILES
 )
 set_source_files_properties(${ASM_FILES} PROPERTIES COMPILE_OPTIONS "-safeseh")
 
-add_library(softrend STATIC
+add_library(softrend
         alpha.c
         clip.c
         convert.c
@@ -65,11 +65,17 @@ add_library(softrend STATIC
 )
 
 get_target_property(target_type softrend TYPE)
-if(NOT target_type STREQUAL STATIC_LIBRARY)
+if(target_type STREQUAL SHARED_LIBRARY)
     target_compile_definitions(softrend PRIVATE -DDEFINE_BR_ENTRY_POINT)
 endif()
 
 target_compile_definitions(softrend PRIVATE -D__386__)
 
-target_link_libraries(softrend PRIVATE v1db)
-set_property(TARGET softrend PROPERTY FOLDER ${BRENDER_FOLDER})
+target_link_libraries(softrend PRIVATE BRender::DDI)
+
+set_target_properties(softrend PROPERTIES
+        EXPORT_NAME "Drivers::SoftRend"
+        FOLDER "BRender/Drivers"
+        )
+
+add_library(BRender::Drivers::SoftRend ALIAS softrend)

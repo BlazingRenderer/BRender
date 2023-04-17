@@ -5,3 +5,4 @@ add_library(dosbase
 		)
 target_link_libraries(dosbase BRender::Full)
 target_include_directories(dosbase PUBLIC .)
+set_property(TARGET dosbase PROPERTY FOLDER "BRender/Examples")

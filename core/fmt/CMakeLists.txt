@@ -1,30 +1,54 @@
 project(fmt)
 
-add_library(fmt-headers INTERFACE)
-target_include_directories(fmt-headers INTERFACE .)
-target_link_libraries(fmt-headers INTERFACE inc)
+target_include_directories(brender-inc INTERFACE
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+        $<INSTALL_INTERFACE:include>
+        )
+
+target_include_directories(brender-inc-ddi INTERFACE
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/ddi>
+        $<INSTALL_INTERFACE:ddi>
+        )
+
+set(DDI_FILES
+        )
+
+set(INC_FILES
+        include/fmt.h
+        include/fmt_p.h
+        )
 
 set(FMT_FILES
-	./load3ds.c
-	./loadasc.c
-	./loadbmp.c
-	./loadgif.c
-	./loadiff.c
-	./loadnff.c
-	./loadscr.c
-	./loadtga.c
-	./loadvue.c
-	./savescr.c
+        load3ds.c
+        load3ds.h
+        loadasc.c
+        loadbmp.c
+        loadgif.c
+        loadiff.c
+        loadnff.c
+        loadscr.c
+        loadtga.c
+        loadvue.c
+        savescr.c
+        )
 
-	./fmt.h
-	./fmt_p.h
-	./load3ds.h
-)
+add_library(fmt OBJECT
+        ${FMT_FILES}
+        )
 
-add_library(fmt STATIC ${FMT_FILES})
+target_sources(fmt INTERFACE
+        FILE_SET include
+        TYPE HEADERS
+        BASE_DIRS include
+        FILES ${INC_FILES}
+        )
 
-target_link_libraries(fmt inc)
-target_link_libraries(fmt fw-headers)
-target_link_libraries(fmt v1db)
+target_sources(fmt INTERFACE
+        FILE_SET ddi
+        TYPE HEADERS
+        BASE_DIRS ddi
+        FILES ${DDI_FILES}
+        )
 
-set_property(TARGET fmt PROPERTY FOLDER ${BRENDER_FOLDER})
+target_include_directories(fmt PRIVATE .)
+target_link_libraries(fmt PRIVATE brender-inc-ddi)

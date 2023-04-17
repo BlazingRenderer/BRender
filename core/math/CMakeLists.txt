@@ -1,33 +1,56 @@
 project(math)
 
-add_library(math-headers INTERFACE)
-target_include_directories(math-headers INTERFACE .)
-target_link_libraries(math-headers INTERFACE host-headers)
+target_include_directories(brender-inc INTERFACE
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+        $<INSTALL_INTERFACE:include>
+        )
+
+target_include_directories(brender-inc-ddi INTERFACE
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/ddi>
+        $<INSTALL_INTERFACE:ddi>
+        )
+
+set(DDI_FILES
+        ddi/math_ip.h
+        ddi/vecifns.h
+        )
+
+set(INC_FILES
+        include/brmath.h
+        )
 
 set(MATH_FILES
-	./angles.c
-	./fixed.c
-	./matrix4.c
-	./matrix23.c
-	./matrix34.c
-	./plane.c
-	./quat.c
-	./scalar.c
-	./transfrm.c
-	./vector.c
+        angles.c
+        fixed.c
+        matrix4.c
+        matrix23.c
+        matrix34.c
+        plane.c
+        quat.c
+        scalar.c
+        transfrm.c
+        vector.c
+        )
 
-	./brmath.h
-	./math_ip.h
-	./vecifns.h
-)
+add_library(math OBJECT ${MATH_FILES})
 
-add_library(math STATIC ${MATH_FILES})
-target_link_libraries(math PUBLIC math-headers)
+target_sources(math INTERFACE
+        FILE_SET include
+        TYPE HEADERS
+        BASE_DIRS include
+        FILES ${INC_FILES}
+        )
+
+target_sources(math INTERFACE
+        FILE_SET ddi
+        TYPE HEADERS
+        BASE_DIRS ddi
+        FILES ${DDI_FILES}
+        )
+
 target_compile_definitions(math PRIVATE __BR_V1DB__=0)
+target_link_libraries(math PRIVATE brender-inc-ddi)
 
-if(NOT WIN32)
-	target_link_libraries(math PUBLIC m)
-endif()
-
-set_property(TARGET math PROPERTY FOLDER ${BRENDER_FOLDER})
-
+if (NOT WIN32)
+    target_link_libraries(math PUBLIC m)
+endif ()

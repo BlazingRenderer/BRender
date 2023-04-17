@@ -1,6 +1,6 @@
 project(ddraw)
 
-add_library(ddraw STATIC
+add_library(ddraw
         devclut.c
         devclut.h
         device.c
@@ -22,9 +22,15 @@ add_library(ddraw STATIC
 )
 
 get_target_property(target_type ddraw TYPE)
-if(target_type STREQUAL STATIC_LIBRARY)
+if(target_type STREQUAL SHARED_LIBRARY)
     target_compile_definitions(ddraw PRIVATE -DDEFINE_BR_ENTRY_POINT)
 endif()
 
-target_link_libraries(ddraw v1db dxguid)
-set_property(TARGET ddraw PROPERTY FOLDER ${BRENDER_FOLDER})
+target_link_libraries(ddraw PRIVATE BRender::DDI dxguid)
+
+set_target_properties(ddraw PROPERTIES
+        EXPORT_NAME "Drivers::DDRAW"
+        FOLDER "BRender/Drivers"
+        )
+
+add_library(BRender::Drivers::DDRAW ALIAS ddraw)
