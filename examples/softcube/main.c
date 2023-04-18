@@ -1,6 +1,7 @@
 #include <inttypes.h>
 #include <brender.h>
 #include <brddi.h>
+#include <priminfo.h>
 #include <brsdl2dev.h>
 #include <stdio.h>
 #include <SDL.h>
@@ -31,6 +32,7 @@ static void draw_info(br_pixelmap *screen, br_material *mat)
     br_token   pstate_token = BR_NULL_TOKEN;
     br_object *primstate = NULL;
     br_uint_16 font_height = 0;
+    brp_block *block;
 
     if((pstate_token = BrTokenFind("PRIMITIVE_STATE_O")) == BR_NULL_TOKEN)
         return;
@@ -40,14 +42,6 @@ static void draw_info(br_pixelmap *screen, br_material *mat)
     if(primstate == NULL)
         return;
 
-    struct {
-        struct {
-            void *render;
-            struct local_block *chain;
-            const char *identifier;
-        } p;
-    } *block;
-
     ObjectQuery(primstate, &block, BRT_PRIMITIVE_BLOCK_P);
     if(block == NULL)
         return;
@@ -55,7 +49,7 @@ static void draw_info(br_pixelmap *screen, br_material *mat)
     font_height = BrPixelmapTextHeight(screen, BrFontProp7x9);
 
     BrPixelmapTextF(screen, -(screen->width / 2) + font_height, -(screen->height / 2) + font_height, 0xFFFFFFFF,
-        BrFontProp7x9, "Rasteriser: %s", block->p.identifier);
+        BrFontProp7x9, "Rasteriser: %s", block->identifier);
 }
 
 int main(int argc, char **argv)
