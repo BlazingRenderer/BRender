@@ -49,7 +49,7 @@ add_library(softrend
         lighting.h
         lightmac.h
         object.h
-        priminfo.h
+        ddi/priminfo.h
         renderer.h
         rendfcty.h
         rend.h
@@ -69,6 +69,7 @@ if(target_type STREQUAL SHARED_LIBRARY)
     target_compile_definitions(softrend PRIVATE -DDEFINE_BR_ENTRY_POINT)
 endif()
 
+target_include_directories(softrend PRIVATE ddi)
 target_compile_definitions(softrend PRIVATE -D__386__)
 
 target_link_libraries(softrend PRIVATE BRender::DDI)

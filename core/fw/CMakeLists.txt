@@ -1,5 +1,11 @@
 project(fw)
 
+##
+# A bit hacky, but there's ONE file in softrend that needs to be in the DDI.
+# Do the needful.
+##
+set(SOFTREND_DDI_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../../drivers/softrend/ddi)
+
 target_include_directories(brender-inc INTERFACE
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
         $<INSTALL_INTERFACE:include>
@@ -8,6 +14,7 @@ target_include_directories(brender-inc INTERFACE
 target_include_directories(brender-inc-ddi INTERFACE
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/ddi>
         $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>
+        $<BUILD_INTERFACE:${SOFTREND_DDI_DIR}>
         $<INSTALL_INTERFACE:ddi>
         )
 
@@ -52,6 +59,8 @@ set(DDI_FILES
         ddi/tokenmap.h
 
         ${CMAKE_CURRENT_BINARY_DIR}/dev_objs.cgh
+
+        ${SOFTREND_DDI_DIR}/priminfo.h
         )
 
 set(INC_FILES
@@ -113,7 +122,7 @@ target_sources(fw INTERFACE
 target_sources(fw INTERFACE
         FILE_SET ddi
         TYPE HEADERS
-        BASE_DIRS ddi ${CMAKE_CURRENT_BINARY_DIR}
+        BASE_DIRS ddi ${CMAKE_CURRENT_BINARY_DIR} ${SOFTREND_DDI_DIR}
         FILES ${DDI_FILES}
         )
 
