@@ -473,8 +473,8 @@ sort_table_2	dword	2*4
 temp			dword	0
 temp2			dword	0
 
-fp_one			dword	1.0f
-fp_half			dword	0.5f
+fp_one			dword	1.0
+fp_half			dword	0.5
 fp_one_fixed	dword	65536.0
 
 dotProduct dword ?
