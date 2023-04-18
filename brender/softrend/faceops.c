@@ -350,7 +350,6 @@ void BR_ASM_CALL OpLineClip(struct brp_block *block, brp_vertex *v0, brp_vertex 
 void BR_ASM_CALL averageVerticesOnScreen(struct br_renderer *renderer, brp_vertex *dest1, brp_vertex *dest2, brp_vertex *dest3, brp_vertex *src1, brp_vertex *src2, brp_vertex *src3);
 void BR_ASM_CALL averageVertices(struct br_renderer *renderer, brp_vertex *dest1, brp_vertex *dest2, brp_vertex *dest3, brp_vertex *src1, brp_vertex *src2, brp_vertex *src3);
 
-br_boolean BR_ASM_CALL subdivideCheck(brp_vertex *v0, brp_vertex *v1, brp_vertex *v2);
 /*
  * Find and project midpoint of two vertices
  */
