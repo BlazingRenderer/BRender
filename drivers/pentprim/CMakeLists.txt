@@ -197,7 +197,6 @@ if(NOT target_type STREQUAL SHARED_LIBRARY)
 endif()
 
 target_link_libraries(pentprim PRIVATE BRender::DDI)
-target_include_directories(pentprim PRIVATE ../softrend) # FIXME
 target_include_directories(pentprim PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
 
 set_target_properties(pentprim PROPERTIES
