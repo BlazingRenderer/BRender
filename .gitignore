@@ -1,5 +1,7 @@
 /cmake-build-*/
 **/.idea/
+**/.vs/
+**/.vscode/
 /result
 /result-*
-
+/build/
