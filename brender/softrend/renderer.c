@@ -357,14 +357,12 @@ br_error BR_CMETHOD_DECL(br_renderer_soft, focusLossEnd)(br_renderer *self)
 	return BRE_OK;
 }
 
-br_error BR_CMETHOD_DECL(br_renderer_soft, sceneBegin)(br_renderer *self)
+void BR_CMETHOD_DECL(br_renderer_soft, sceneBegin)(br_renderer *self)
 {
-    return BRE_OK;
 }
 
-br_error BR_CMETHOD_DECL(br_renderer_soft, sceneEnd)(br_renderer *self)
+void BR_CMETHOD_DECL(br_renderer_soft, sceneEnd)(br_renderer *self)
 {
-    return BRE_OK;
 }
 
 /*
