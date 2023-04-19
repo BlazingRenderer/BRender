@@ -12,7 +12,6 @@ jobs:
         installable:
           - "brender-samples"
           - "brender-samples-clang"
-          - "brender-samples-clang8"
           - "brender-samples-win64"
           - "brender-samples-win32"
     steps:
