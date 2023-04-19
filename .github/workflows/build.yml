@@ -19,6 +19,7 @@ jobs:
     strategy:
       matrix:
         installable:
+          - "brender"
           - "brender-samples"
           - "brender-samples-clang"
           - "brender-samples-win64"
