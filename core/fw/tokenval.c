@@ -535,52 +535,42 @@ static br_error ValueSet(void                       *block, /* Destination memeo
         case BRTV_CONV_V2_FIXED_FLOAT:
             t = 2;
             goto convert_to_float;
-            break;
 
         case BRTV_CONV_V2_FLOAT_FIXED:
             t = 2;
             goto convert_to_fixed;
-            break;
 
         case BRTV_CONV_V3_FIXED_FLOAT:
             t = 3;
             goto convert_to_float;
-            break;
 
         case BRTV_CONV_V3_FLOAT_FIXED:
             t = 3;
             goto convert_to_fixed;
-            break;
 
         case BRTV_CONV_V4_FIXED_FLOAT:
             t = 4;
             goto convert_to_float;
-            break;
 
         case BRTV_CONV_V4_FLOAT_FIXED:
             t = 4;
             goto convert_to_fixed;
-            break;
 
         case BRTV_CONV_M23_FIXED_FLOAT:
             t = 6;
             goto convert_to_float;
-            break;
 
         case BRTV_CONV_M23_FLOAT_FIXED:
             t = 6;
             goto convert_to_fixed;
-            break;
 
         case BRTV_CONV_M4_FIXED_FLOAT:
             t = 16;
             goto convert_to_float;
-            break;
 
         case BRTV_CONV_M4_FLOAT_FIXED:
             t = 16;
             goto convert_to_fixed;
-            break;
 
         case BRTV_CONV_M34_FIXED_FLOAT:
             t = 12;
