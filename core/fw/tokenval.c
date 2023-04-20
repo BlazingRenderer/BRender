@@ -2157,26 +2157,6 @@ br_boolean BR_RESIDENT_ENTRY BrTokenValueComparePartial(br_token_value *tv1, br_
     }
 }
 
-/*
- * Duplicate a set of tokens into a new allocated buffer
- */
-br_error BrTokenValueDup(br_token_value **dstp, br_token_value *src)
-{
-    int             c;
-    br_token_value *tv;
-
-    /*
-     * Find out how many tokens/value pairs there are, and
-     * the size of any extra info
-     */
-
-    c = 0;
-    for(tv = src; tv->t != BR_NULL_TOKEN; tv++)
-        c++;
-
-    return BRE_OK;
-}
-
 br_value BR_RESIDENT_ENTRY BrTokenValueVaArg(br_token token, va_list *ap)
 {
     switch(BrTokenType(token)) {
