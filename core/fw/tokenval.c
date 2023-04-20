@@ -1246,7 +1246,7 @@ void BR_RESIDENT_ENTRY BrTokenValueDump(br_token_value *tv, const char *prefix, 
                 break;
 
             case BRT_UINT_64:
-                BrSprintf(value, "%" PRIu64 " (0x%016" PRIx64 ")", tv->v.u64);
+                BrSprintf(value, "%" PRIu64 " (0x%016" PRIx64 ")", tv->v.u64, tv->v.u64);
                 break;
 
             case BRT_FIXED:
