@@ -818,8 +818,7 @@ br_error BR_RESIDENT_ENTRY BrTokenValueQueryMany(br_token_value *tv, void *extra
  * Work out how much extra storage would be needed for the values described in the given
  * token/value list
  */
-br_error BR_RESIDENT_ENTRY BrTokenValueQueryManySize(br_size_t *psize, br_token_value *tv, void *block,
-                                                     br_tv_template *template)
+br_error BR_RESIDENT_ENTRY BrTokenValueQueryManySize(br_size_t *psize, br_token_value *tv, void *block, br_tv_template *template)
 {
     br_int_32 o;
     br_size_t extra_size = 0;
@@ -1994,8 +1993,7 @@ br_boolean BR_RESIDENT_ENTRY BrTokenValueCompare(br_token_value *tv1, br_token_v
  * Allows a NULL terminated list of tokens which are not significant to the
  * comparison.
  */
-br_boolean BR_RESIDENT_ENTRY BrTokenValueComparePartial(br_token_value *tv1, br_token_value *tv2,
-                                                        const br_token *insignificant)
+br_boolean BR_RESIDENT_ENTRY BrTokenValueComparePartial(br_token_value *tv1, br_token_value *tv2, const br_token *insignificant)
 {
     int             i;
     const br_token *t;
