@@ -338,7 +338,7 @@ typedef float br_float;
 /*
  * Useful macro for sizing an array
  */
-#define BR_ASIZE(a) (sizeof(a) / sizeof(*a))
+#define BR_ASIZE(a) (sizeof(a) / sizeof(a[0]))
 
 /*
  * Make sure NULL is defined
