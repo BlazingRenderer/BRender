@@ -52,6 +52,7 @@ add_library(BRender::DDI ALIAS brender-ddi)
 
 option(BRENDER_BUILD_TOOLS "Build Tools" ON)
 option(BRENDER_BUILD_EXAMPLES "Build Examples" ON)
+option(BRENDER_DISABLE_INSTALL "Disable installation" OFF)
 
 if (BRENDER_BUILD_TOOLS)
     add_subdirectory(tools)
@@ -61,4 +62,6 @@ if (BRENDER_BUILD_EXAMPLES AND BRENDER_BUILD_DRIVERS AND TARGET SDL2::SDL2)
     add_subdirectory(examples)
 endif ()
 
-include(cmake/packaging.cmake)
+if (NOT BRENDER_DISABLE_INSTALL)
+    include(cmake/packaging.cmake)
+endif ()
