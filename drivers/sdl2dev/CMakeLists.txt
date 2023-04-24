@@ -1,9 +1,5 @@
 project(sdl2dev)
 
-if (NOT BRENDER_DISABLE_FINDSDL)
-    find_package(SDL2 REQUIRED)
-endif ()
-
 set(INC_FILES
         include/brsdl2dev.h
         include/brsdl2dev_p.h
