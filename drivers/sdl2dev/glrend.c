@@ -178,7 +178,9 @@ static br_error create_gl_pixelmap(SDL_Window *window, br_device *gldev, br_devi
         {.t = BR_NULL_TOKEN,          .v = 0                },
     };
 
-    SDL_GetWindowSizeInPixels(window, &width, &height);
+    SDL_GL_GetDrawableSize(window, &width, &height);
+    /* FIXME: Switch to this once SDL on Ubuntu LTS is new-enough. */
+    //SDL_GetWindowSizeInPixels(window, &width, &height);
     tv[0].v.i32 = (br_int_32)width;
     tv[1].v.i32 = (br_int_32)height;
 
