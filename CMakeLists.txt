@@ -18,7 +18,7 @@ endif ()
 
 option(BRENDER_DISABLE_FINDSDL "Disable searching for SDL2" OFF)
 if (NOT BRENDER_DISABLE_FINDSDL)
-    find_package(SDL2 2.26)
+    find_package(SDL2)
 endif ()
 
 option(BRENDER_BUILD_DRIVERS "Build Drivers" ON)
