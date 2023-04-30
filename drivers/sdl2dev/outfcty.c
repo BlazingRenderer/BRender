@@ -40,6 +40,7 @@ static struct br_tv_template_entry outputFacilityTemplateEntries[] = {
     {BRT_HIDPI_B,            NULL, (br_uintptr_t)BR_FALSE, BRTV_QUERY | BRTV_ALL, BRTV_CONV_DIRECT, 0},
     {BRT_RESIZABLE_B,        NULL, (br_uintptr_t)BR_FALSE, BRTV_QUERY | BRTV_ALL, BRTV_CONV_DIRECT, 0},
     {BRT_OPENGL_B,           NULL, (br_uintptr_t)BR_FALSE, BRTV_QUERY | BRTV_ALL, BRTV_CONV_DIRECT, 0},
+    {BRT_SDL_EXT_PROCS_P,    NULL, 0,                      BRTV_QUERY | BRTV_ALL, BRTV_CONV_DIRECT, 0},
 };
 
 #undef F
@@ -56,6 +57,7 @@ static struct br_tv_template_entry pixelmapNewTemplateEntries[] = {
     {BRT_HIDPI_B,          NULL, F(flags),      BRTV_SET, BRTV_CONV_BIT,  SDL_WINDOW_ALLOW_HIGHDPI},
     {BRT_RESIZABLE_B,      NULL, F(flags),      BRTV_SET, BRTV_CONV_BIT,  SDL_WINDOW_RESIZABLE    },
     {BRT_OPENGL_B,         NULL, F(flags),      BRTV_SET, BRTV_CONV_BIT,  SDL_WINDOW_OPENGL       },
+    {BRT_SDL_EXT_PROCS_P,  NULL, F(ext_procs),  BRTV_SET, BRTV_CONV_COPY, 0                       },
 };
 #undef F
 

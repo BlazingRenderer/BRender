@@ -62,6 +62,9 @@ static br_error custom_query(br_value *pvalue, void **extra, br_size_t *pextra_s
         case BRT_MEMORY_MAPPED_B:
             pvalue->b = self->pm_pixels != NULL;
             break;
+        case BRT_SDL_EXT_PROCS_P:
+            pvalue->p = (void *)&self->ext_procs;
+            break;
         default:
             return BRE_UNKNOWN;
     }
@@ -92,6 +95,7 @@ static struct br_tv_template_entry devicePixelmapTemplateEntries[] = {
     {BRT(CLUT_O),             F(clut),            BRTV_QUERY | BRTV_ALL, BRTV_CONV_COPY,    0                    },
     {BRT(WINDOW_HANDLE_H),    F(window),          BRTV_QUERY,            BRTV_CONV_COPY,    0                    },
     {BRT(SURFACE_HANDLE_H),   F(surface),         BRTV_QUERY,            BRTV_CONV_COPY,    0                    },
+    {BRT(SDL_EXT_PROCS_P),    0,                  BRTV_QUERY | BRTV_ALL, BRTV_CONV_CUSTOM,  (br_uintptr_t)&custom},
     {DEV(SDL_SURFACE_H),      F(surface),         BRTV_QUERY,            BRTV_CONV_COPY,    0                    },
 };
 
@@ -745,6 +749,12 @@ static br_error BR_CMETHOD_DECL(br_device_pixelmap_sdl2, directUnlock)(br_device
     return BRE_OK;
 }
 
+static void DevicePixelmapSDLExtPreSwap(br_device_pixelmap *self)
+{
+    if(self->ext_procs.preswap != NULL)
+        self->ext_procs.preswap((br_pixelmap *)self, self->ext_procs.user);
+}
+
 static br_error BR_CMETHOD_DECL(br_device_pixelmap_sdl2, doubleBuffer)(br_device_pixelmap *self, br_device_pixelmap *src)
 {
     SDL_Surface *src_surf;
@@ -761,6 +771,8 @@ static br_error BR_CMETHOD_DECL(br_device_pixelmap_sdl2, doubleBuffer)(br_device
     if((src_surf = DevicePixelmapSDL2GetSurface((br_pixelmap *)src, BR_FALSE)) != NULL) {
         if(SDL_BlitSurface(src_surf, NULL, self->surface, NULL) < 0)
             return BRE_FAIL;
+
+        DevicePixelmapSDLExtPreSwap(self);
 
         if(self->window != NULL)
             SDL_UpdateWindowSurface(self->window);

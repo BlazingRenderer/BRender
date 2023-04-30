@@ -855,6 +855,8 @@ HIDPI                   boolean
 
 RESIZABLE               boolean
 
+SDL_EXT_PROCS           pointer
+
 # DirectDraw specific tokens
 
 

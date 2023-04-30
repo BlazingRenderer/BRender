@@ -9,14 +9,15 @@ extern "C" {
 #endif
 
 typedef struct pixelmap_new_tokens {
-    const char  *title;
-    br_int_32    width;
-    br_int_32    height;
-    br_uint_8    pixel_type;
-    SDL_Window  *window;
-    SDL_Surface *surface;
-    br_token     use_type;
-    br_uint_32   flags;
+    const char              *title;
+    br_int_32                width;
+    br_int_32                height;
+    br_uint_8                pixel_type;
+    SDL_Window              *window;
+    SDL_Surface             *surface;
+    br_token                 use_type;
+    br_uint_32               flags;
+    br_device_sdl_ext_procs *ext_procs;
 } pixelmap_new_tokens;
 
 /*
@@ -65,6 +66,11 @@ typedef struct br_device_pixelmap {
     SDL_Window *window;
 
     struct br_device_clut *clut;
+
+    /*
+     * Application-specific external procedures (callbacks).
+     */
+    br_device_sdl_ext_procs ext_procs;
 } br_device_pixelmap;
 
 #ifdef __cplusplus

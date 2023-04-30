@@ -1,5 +1,6 @@
 #include "drv.h"
 #include <brglrend.h>
+#include <brsdl2dev.h>
 #include <brassert.h>
 
 #define OPENGL_DEVICE_NAME "opengl"
@@ -7,6 +8,8 @@
 typedef struct sdl_gl_state {
     SDL_Window *window;
     int         in_resize_callback;
+
+    br_device_sdl_ext_procs ext_procs;
 } sdl_gl_state;
 
 static void *sdl_gl_create_context(br_pixelmap *dev, void *user)
@@ -110,6 +113,17 @@ static br_error sdl_gl_handle_window_event(br_pixelmap *pm, void *arg, void *use
     return BRE_OK;
 }
 
+static void sdl_gl_preswap_hook(br_pixelmap *pm, unsigned int fbo, void *user)
+{
+    sdl_gl_state *state = user;
+
+    (void)pm;
+    (void)fbo;
+
+    if(state->ext_procs.preswap != NULL)
+        state->ext_procs.preswap(pm, state->ext_procs.user);
+}
+
 static br_error configure_device(br_device *dev)
 {
     br_int_32      count  = 0;
@@ -147,7 +161,8 @@ static br_error configure_device(br_device *dev)
     return BRE_OK;
 }
 
-static br_error create_gl_pixelmap(SDL_Window *window, br_device *gldev, br_device_pixelmap **ppmap)
+static br_error create_gl_pixelmap(SDL_Window *window, br_device *gldev, br_device_sdl_ext_procs *ext_procs,
+                                   br_device_pixelmap **ppmap)
 {
 
     br_error      err;
@@ -157,25 +172,25 @@ static br_error create_gl_pixelmap(SDL_Window *window, br_device *gldev, br_devi
     br_object    *outfctygl;
     sdl_gl_state *state;
 
-    br_device_gl_ext_procs ext_procs = {
+    br_device_gl_ext_procs gl_ext_procs = {
         .create_context      = sdl_gl_create_context,
         .delete_context      = sdl_gl_delete_context,
         .make_current        = sdl_gl_make_current,
         .get_proc_address    = sdl_gl_get_proc_address,
         .resize              = sdl_gl_resize,
         .swap_buffers        = sdl_gl_swap_buffers,
-        .preswap_hook        = NULL,
+        .preswap_hook        = sdl_gl_preswap_hook,
         .free                = sdl_gl_free,
         .handle_window_event = sdl_gl_handle_window_event,
         .user                = window,
     };
 
     br_token_value tv[] = {
-        {.t = BRT_WIDTH_I32,          .v = 0                },
-        {.t = BRT_HEIGHT_I32,         .v = 0                },
-        {.t = BRT_PIXEL_TYPE_U8,      .v = 0                },
-        {.t = BRT_OPENGL_EXT_PROCS_P, .v = {.h = &ext_procs}},
-        {.t = BR_NULL_TOKEN,          .v = 0                },
+        {.t = BRT_WIDTH_I32,          .v = 0                   },
+        {.t = BRT_HEIGHT_I32,         .v = 0                   },
+        {.t = BRT_PIXEL_TYPE_U8,      .v = 0                   },
+        {.t = BRT_OPENGL_EXT_PROCS_P, .v = {.h = &gl_ext_procs}},
+        {.t = BR_NULL_TOKEN,          .v = 0                   },
     };
 
     SDL_GL_GetDrawableSize(window, &width, &height);
@@ -203,9 +218,13 @@ static br_error create_gl_pixelmap(SDL_Window *window, br_device *gldev, br_devi
     *state = (sdl_gl_state){
         .window             = window,
         .in_resize_callback = 0,
+        .ext_procs          = (br_device_sdl_ext_procs){.preswap = NULL, .user = NULL},
     };
 
-    ext_procs.user = state;
+    if(ext_procs != NULL)
+        state->ext_procs = *ext_procs;
+
+    gl_ext_procs.user = state;
 
     /*
      * Create the screen pixelmap.
@@ -258,7 +277,7 @@ br_error DevicePixelmapSDL2CreateGL(const pixelmap_new_tokens *pt, br_device_pix
         return BRE_FAIL;
     }
 
-    return create_gl_pixelmap(window, gldev, ppmap);
+    return create_gl_pixelmap(window, gldev, pt->ext_procs, ppmap);
 }
 
 SDL_Window *DevicePixelmapSDL2GetWindowGL(br_pixelmap *pm)
