@@ -447,7 +447,7 @@ static br_error BR_CMETHOD_DECL(br_device_pixelmap_sdl2, rectangleCopyFrom)(br_d
     if((err = DevicePixelmapDirectLock(self, BR_FALSE)) != BRE_OK)
         return err;
 
-    result = BR_CMETHOD(br_device_pixelmap_mem, rectangleCopyFrom)(self, p, src, r);
+    result = BR_CMETHOD(br_device_pixelmap_mem, rectangleCopyFrom)(self, p, dest, r);
 
     if((err = DevicePixelmapDirectUnlock(self)) != BRE_OK)
         return err;
@@ -522,7 +522,7 @@ static br_error BR_CMETHOD_DECL(br_device_pixelmap_sdl2, rectangleStretchCopyFro
     if((err = DevicePixelmapDirectLock(self, BR_FALSE)) != BRE_OK)
         return err;
 
-    result = BR_CMETHOD(br_device_pixelmap_mem, rectangleStretchCopyFrom)(self, d, src, s);
+    result = BR_CMETHOD(br_device_pixelmap_mem, rectangleStretchCopyFrom)(self, s, dest, d);
 
     if((err = DevicePixelmapDirectUnlock(self)) != BRE_OK)
         return err;
@@ -552,21 +552,23 @@ static br_error BR_CMETHOD_DECL(br_device_pixelmap_sdl2, pixelSet)(br_device_pix
 
     return BRE_OK;
 
-memory_fallback:
+memory_fallback:;
 #if NO_MEMORY_FALLBACK
     return BRE_FAIL;
 #else
-    br_error err, result;
+    {
+        br_error err, result;
 
-    if((err = DevicePixelmapDirectLock(self, BR_FALSE)) != BRE_OK)
-        return err;
+        if((err = DevicePixelmapDirectLock(self, BR_FALSE)) != BRE_OK)
+            return err;
 
-    result = BR_CMETHOD(br_device_pixelmap_mem, pixelSet)(self, p, colour);
+        result = BR_CMETHOD(br_device_pixelmap_mem, pixelSet)(self, p, colour);
 
-    if((err = DevicePixelmapDirectUnlock(self)) != BRE_OK)
-        return err;
+        if((err = DevicePixelmapDirectUnlock(self)) != BRE_OK)
+            return err;
 
-    return result;
+        return result;
+    }
 #endif
 }
 
@@ -595,21 +597,23 @@ static br_error BR_CMETHOD_DECL(br_device_pixelmap_sdl2, line)(br_device_pixelma
 
     return BRE_OK;
 
-memory_fallback:
+memory_fallback:;
 #if NO_MEMORY_FALLBACK
     return BRE_FAIL;
 #else
-    br_error err, result;
+    {
+        br_error err, result;
 
-    if((err = DevicePixelmapDirectLock(self, BR_FALSE)) != BRE_OK)
-        return err;
+        if((err = DevicePixelmapDirectLock(self, BR_FALSE)) != BRE_OK)
+            return err;
 
-    result = BR_CMETHOD(br_device_pixelmap_mem, line)(self, s, e, colour);
+        result = BR_CMETHOD(br_device_pixelmap_mem, line)(self, s, e, colour);
 
-    if((err = DevicePixelmapDirectUnlock(self)) != BRE_OK)
-        return err;
+        if((err = DevicePixelmapDirectUnlock(self)) != BRE_OK)
+            return err;
 
-    return result;
+        return result;
+    }
 #endif
 }
 
