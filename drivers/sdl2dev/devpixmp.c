@@ -768,23 +768,21 @@ static br_error BR_CMETHOD_DECL(br_device_pixelmap_sdl2, doubleBuffer)(br_device
     if(!self->owned)
         return BRE_UNSUPPORTED;
 
-    if((src_surf = DevicePixelmapSDL2GetSurface((br_pixelmap *)src, BR_FALSE)) != NULL) {
-        if(SDL_BlitSurface(src_surf, NULL, self->surface, NULL) < 0)
-            return BRE_FAIL;
+    /*
+     * It doesn't make sense to double-buffer from a memory pixelmap.
+     */
+    if((src_surf = DevicePixelmapSDL2GetSurface((br_pixelmap *)src, BR_FALSE)) == NULL)
+        return BRE_UNSUPPORTED;
 
-        DevicePixelmapSDLExtPreSwap(self);
+    if(SDL_BlitSurface(src_surf, NULL, self->surface, NULL) < 0)
+        return BRE_FAIL;
 
-        if(self->window != NULL)
-            SDL_UpdateWindowSurface(self->window);
+    DevicePixelmapSDLExtPreSwap(self);
 
-        return BRE_OK;
-    }
+    if(self->window != NULL)
+        SDL_UpdateWindowSurface(self->window);
 
-#if NO_MEMORY_FALLBACK
-    return BRE_FAIL;
-#else
-    return BR_CMETHOD(br_device_pixelmap_mem, doubleBuffer)(self, src);
-#endif
+    return BRE_OK;
 }
 
 /*
