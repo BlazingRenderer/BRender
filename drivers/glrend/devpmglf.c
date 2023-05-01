@@ -93,7 +93,7 @@ br_device_pixelmap *DevicePixelmapGLAllocateFront(br_device *dev, br_output_faci
         .fragment_shader = NULL,
     };
 
-    if(dev->templates.pixelmapGLNewTemplate == NULL) {
+    if(dev->templates.pixelmapNewTemplate == NULL) {
         dev->templates.pixelmapNewTemplate = BrTVTemplateAllocate(dev, pixelmapNewTemplateEntries,
                                                                   BR_ASIZE(pixelmapNewTemplateEntries));
     }

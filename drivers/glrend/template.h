@@ -33,8 +33,6 @@ struct device_templates {
     struct br_tv_template *pixelmapMatchTemplate;
     struct br_tv_template *rendererNewTemplate;
 
-    struct br_tv_template *pixelmapGLNewTemplate;
-
     /*
      * Parts templates
      */
