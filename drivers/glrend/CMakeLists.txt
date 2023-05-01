@@ -1,6 +1,6 @@
 project(glrend)
 
-find_package(OpenGL REQUIRED)
+find_package(OpenGL REQUIRED COMPONENTS OpenGL)
 
 add_custom_command(
         OUTPUT brender.vert.glsl.h
