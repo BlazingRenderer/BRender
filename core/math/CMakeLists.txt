@@ -51,6 +51,7 @@ target_sources(math INTERFACE
 target_compile_definitions(math PRIVATE __BR_V1DB__=0)
 target_link_libraries(math PRIVATE brender-inc-ddi)
 
-if (NOT WIN32)
-    target_link_libraries(math PUBLIC m)
+find_library(math_library m)
+if (math_library)
+    target_link_libraries(math PUBLIC ${math_library})
 endif ()
