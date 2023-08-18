@@ -3,6 +3,10 @@
 # Added to by each target.
 ##
 add_library(brender-inc INTERFACE)
+target_include_directories(brender-inc INTERFACE
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+        $<INSTALL_INTERFACE:include/brender>
+        )
 
 ##
 # BRender DDI - superset of the public includes.

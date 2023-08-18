@@ -29,4 +29,6 @@ add_executable(texconv
 target_compile_definitions(texconv PRIVATE -DDISABLE_VIEWING)
 target_link_libraries(texconv PRIVATE BRender::Core)
 
-install(TARGETS texconv)
+if (NOT BRENDER_DISABLE_INSTALL)
+	install(TARGETS texconv DESTINATION ${CMAKE_INSTALL_BINDIR})
+endif ()

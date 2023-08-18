@@ -14,7 +14,7 @@ target_sources(sdl2dev-headers INTERFACE
         )
 target_include_directories(sdl2dev-headers INTERFACE
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-        $<INSTALL_INTERFACE:drivers/sdl2dev/include>
+        $<INSTALL_INTERFACE:include/brender/sdl2dev>
         )
 
 set_target_properties(sdl2dev-headers PROPERTIES

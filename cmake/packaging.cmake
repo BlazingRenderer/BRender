@@ -2,47 +2,59 @@
 # Add all core targets to the "Core" export, and
 # configure their "include" and "ddi" filesets to be copied.
 ##
+
+include(GNUInstallDirs)
+
+install(TARGETS
+        brender brender-ddi
+        EXPORT Core
+        DESTINATION ${CMAKE_INSTALL_LIBDIR}/brender
+        )
+
 install(TARGETS
         brender-inc brender-inc-ddi
         inc fmt fw host math nulldev pixelmap std v1db
-        brender brender-ddi
         EXPORT Core
-        FILE_SET include DESTINATION include
-        FILE_SET ddi DESTINATION ddi
+        FILE_SET include DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/brender
+        FILE_SET ddi DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/brender/ddi
         )
 
 if (BRENDER_BUILD_DRIVERS)
     if (TARGET glrend)
         install(TARGETS glrend-headers
                 EXPORT Core
-                FILE_SET include DESTINATION drivers/glrend/include
+                FILE_SET include DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/brender/glrend
                 )
 
         install(TARGETS glrend
                 EXPORT Core
+                DESTINATION ${CMAKE_INSTALL_LIBDIR}/brender
                 )
     endif()
 
     if (TARGET sdl2dev)
         install(TARGETS sdl2dev-headers
                 EXPORT Core
-                FILE_SET include DESTINATION drivers/sdl2dev/include
+                FILE_SET include DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/brender/sdl2dev
                 )
 
         install(TARGETS sdl2dev
                 EXPORT Core
+                DESTINATION ${CMAKE_INSTALL_LIBDIR}/brender
                 )
     endif()
 
     if (TARGET softrend)
         install(TARGETS softrend
                 EXPORT Core
+                DESTINATION ${CMAKE_INSTALL_LIBDIR}/brender
                 )
     endif()
 
     if (TARGET pentprim)
         install(TARGETS pentprim
                 EXPORT Core
+                DESTINATION ${CMAKE_INSTALL_LIBDIR}/brender
                 )
     endif()
 
@@ -76,3 +88,7 @@ install(FILES
         ${CMAKE_CURRENT_BINARY_DIR}/BRenderConfigVersion.cmake
         DESTINATION lib/cmake/brender
         )
+
+# pkg-config
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/cmake/brender.pc.in ${CMAKE_CURRENT_BINARY_DIR}/brender.pc @ONLY)
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/brender.pc DESTINATION ${CMAKE_INSTALL_PREFIX}/lib/pkgconfig)
