@@ -326,6 +326,10 @@ int main(int argc, char **argv)
 done:
     ret = 0;
 
+    BrActorFree(world->root);
+    BrVueFree(world->vue);
+    BrResFree(world);
+
     BrRendererEnd();
 
     BrPixelmapFree(depth_buffer);
