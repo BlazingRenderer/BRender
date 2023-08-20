@@ -84,4 +84,10 @@ typedef br_uint_32 br_error;
 #define BRE_DEV_DIRECTDRAW_ERROR     BR_ERROR_MAKE(BR_ECLASS_DEVICE, 13) // Direct Draw returned an error not covered by other codes
 // clang-format on
 
+/* error class structure for printing error strings */
+typedef struct br_error_class {
+    const char  *classname;
+    const char **subclasses;
+} br_error_class;
+
 #endif

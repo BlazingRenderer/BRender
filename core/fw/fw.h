@@ -77,6 +77,7 @@ typedef struct br_framework_state {
      */
     br_error last_error_type;
     void   **last_error_value;
+    char     last_error_string[128];
 
     /*
      * List of loaded images

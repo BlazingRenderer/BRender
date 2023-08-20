@@ -196,6 +196,7 @@ char *BR_RESIDENT_ENTRY     BrScratchString(void);
  * Error retrieval
  */
 br_error BR_RESIDENT_ENTRY BrGetLastError(void **valuep);
+const char *BR_RESIDENT_ENTRY BrStrError(br_error error);
 
 /*
  * Device mangement
