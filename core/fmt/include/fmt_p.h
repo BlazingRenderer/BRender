@@ -65,6 +65,16 @@ void BR_PUBLIC_ENTRY    BrVueFree(br_vue *vue);
 void BR_PUBLIC_ENTRY    BrLoadVUE(const char *file_name, br_actor *root, br_vue *vue);
 void BR_PUBLIC_ENTRY    BrApplyVue(br_vue *vue, br_actor *actors);
 
+/*
+ * .PNG files
+ */
+br_pixelmap *BR_PUBLIC_ENTRY BrFmtPNGLoad(const char *name);
+
+/*
+ * .JPG files
+ */
+br_pixelmap *BR_PUBLIC_ENTRY BrFmtJPGLoad(const char *name);
+
 #ifdef __cplusplus
 };
 #endif

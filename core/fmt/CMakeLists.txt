@@ -27,6 +27,7 @@ set(FMT_FILES
         loadiff.c
         loadnff.c
         loadscr.c
+        loadstb.c
         loadtga.c
         loadvue.c
         savescr.c
