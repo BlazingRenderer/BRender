@@ -47,6 +47,7 @@ br_pixelmap *BR_PUBLIC_ENTRY BrPixelmapMatchTypedSized(br_pixelmap *src, br_uint
 br_pixelmap *BR_PUBLIC_ENTRY BrPixelmapMatchTV(br_pixelmap *src, br_token_value *tv);
 
 br_pixelmap *BR_PUBLIC_ENTRY BrPixelmapClone(br_pixelmap *src);
+br_pixelmap *BR_PUBLIC_ENTRY BrPixelmapCloneTyped(br_pixelmap *src, br_uint_8 type);
 
 br_pixelmap *BR_PUBLIC_ENTRY BrPixelmapDirectLock(br_pixelmap *src, br_boolean block);
 br_pixelmap *BR_PUBLIC_ENTRY BrPixelmapDirectUnlock(br_pixelmap *src);

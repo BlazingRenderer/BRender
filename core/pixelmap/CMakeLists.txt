@@ -25,6 +25,7 @@ set(PIXELMAP_FILES
         gencopy.c
         mipsupt.c
         pixelmap.c
+        pmclone.c
         pmdsptch.c
         pmfail.c
         pmfile.c
