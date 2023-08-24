@@ -147,6 +147,16 @@ typedef struct br_vue {
     struct vue_frame *frames;
 } br_vue;
 
+/*
+ * Image type enumerations
+ */
+enum {
+    BR_FMT_IMAGE_PNG = 0x0001,
+    BR_FMT_IMAGE_JPG = 0x0002,
+    BR_FMT_IMAGE_BMP = 0x0003,
+    BR_FMT_IMAGE_TGA = 0x0004,
+};
+
 #ifndef _FMT_P_H_
 #include "fmt_p.h"
 #endif

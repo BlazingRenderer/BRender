@@ -75,6 +75,11 @@ br_pixelmap *BR_PUBLIC_ENTRY BrFmtPNGLoad(const char *name);
  */
 br_pixelmap *BR_PUBLIC_ENTRY BrFmtJPGLoad(const char *name);
 
+/*
+ * Image files
+ */
+br_uint_32 BR_PUBLIC_ENTRY BrFmtImageSave(const char *name, br_pixelmap *pm, br_uint_8 type);
+
 #ifdef __cplusplus
 };
 #endif

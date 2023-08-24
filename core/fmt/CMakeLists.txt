@@ -32,6 +32,7 @@ set(FMT_FILES
         loadtga.c
         loadvue.c
         savescr.c
+        savestb.c
         )
 
 add_library(fmt OBJECT

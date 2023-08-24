@@ -14,7 +14,7 @@ void BR_RESIDENT_ENTRY  FmtSTBFileAdvance(void *user, int n);
 int BR_RESIDENT_ENTRY   FmtSTBFileEof(void *user);
 
 /*
- * stb_image_write defines & header
+ * stb_image defines & header
  */
 #define STBI_NO_STDIO
 #define STBI_FAILURE_USERMSG
@@ -22,6 +22,15 @@ int BR_RESIDENT_ENTRY   FmtSTBFileEof(void *user);
 #define STBI_FREE(p)       FmtSTBFree(p)
 #define STBI_REALLOC(p, s) FmtSTBRealloc(p, s)
 #include "stb_image.h"
+
+/*
+ * stb_image_write defines & header
+ */
+#define STBI_WRITE_NO_STDIO
+#define STBIW_MALLOC(s)     FmtSTBMalloc(s)
+#define STBIW_FREE(p)       FmtSTBFree(p)
+#define STBIW_REALLOC(p, s) FmtSTBRealloc(p, s)
+#include "stb_image_write.h"
 
 /*
  * file writing cbfn structure
