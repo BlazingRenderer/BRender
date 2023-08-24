@@ -24,10 +24,10 @@ if (TARGET dosio)
             EXPORT Core
             FILE_SET include DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/brender/dosio
             )
-    
+
     install(TARGETS dosio
             EXPORT Core
-            ${CMAKE_INSTALL_LIBDIR}/brender
+            DESTINATION ${CMAKE_INSTALL_LIBDIR}/brender
             )
 endif()
 
