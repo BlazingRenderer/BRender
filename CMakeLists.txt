@@ -35,6 +35,16 @@ if (BRENDER_BUILD_DRIVERS)
 endif ()
 
 ##
+# Optional BRender DOSIO compatibility layer
+#3
+if (TARGET SDL2::SDL2)
+    add_subdirectory(dosio)
+    target_link_libraries(brender-full INTERFACE dosio)
+else ()
+    message("SDL2 not found, not building dosio")
+endif ()
+
+##
 # Core BRender, no drivers, no DDI.
 ##
 add_library(BRender::Core ALIAS brender)

@@ -19,6 +19,18 @@ install(TARGETS
         FILE_SET ddi DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/brender/ddi
         )
 
+if (TARGET dosio)
+    install(TARGETS dosio-headers
+            EXPORT Core
+            FILE_SET include DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/brender/dosio
+            )
+    
+    install(TARGETS dosio
+            EXPORT Core
+            ${CMAKE_INSTALL_LIBDIR}/brender
+            )
+endif()
+
 if (BRENDER_BUILD_DRIVERS)
     if (TARGET glrend)
         install(TARGETS glrend-headers
