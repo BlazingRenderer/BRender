@@ -19,6 +19,7 @@ set(INC_FILES
         )
 
 set(FMT_FILES
+        brstb.c
         load3ds.c
         load3ds.h
         loadasc.c
