@@ -9,6 +9,8 @@
 #ifndef _FMT_P_H_
 #define _FMT_P_H_
 
+#ifndef _NO_PROTOTYPES
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -82,5 +84,6 @@ br_uint_32 BR_PUBLIC_ENTRY BrFmtImageSave(const char *name, br_pixelmap *pm, br_
 
 #ifdef __cplusplus
 };
+#endif
 #endif
 #endif
