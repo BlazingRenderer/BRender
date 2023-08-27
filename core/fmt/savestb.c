@@ -50,19 +50,19 @@ br_uint_32 BR_PUBLIC_ENTRY BrFmtImageSave(const char *name, br_pixelmap *pm, br_
      */
     switch(type) {
         case BR_FMT_IMAGE_PNG:
-            ret = stbi_write_png_to_func(FmtSTBFileRead, file, dst->width, dst->height, 4, dst->pixels, dst->row_bytes);
+            ret = stbi_write_png_to_func(FmtSTBFileWrite, file, dst->width, dst->height, 4, dst->pixels, dst->row_bytes);
             break;
 
         case BR_FMT_IMAGE_JPG:
-            ret = stbi_write_jpg_to_func(FmtSTBFileRead, file, dst->width, dst->height, 4, dst->pixels, 100);
+            ret = stbi_write_jpg_to_func(FmtSTBFileWrite, file, dst->width, dst->height, 4, dst->pixels, 100);
             break;
 
         case BR_FMT_IMAGE_BMP:
-            ret = stbi_write_bmp_to_func(FmtSTBFileRead, file, dst->width, dst->height, 4, dst->pixels);
+            ret = stbi_write_bmp_to_func(FmtSTBFileWrite, file, dst->width, dst->height, 4, dst->pixels);
             break;
 
         case BR_FMT_IMAGE_TGA:
-            ret = stbi_write_tga_to_func(FmtSTBFileRead, file, dst->width, dst->height, 4, dst->pixels);
+            ret = stbi_write_tga_to_func(FmtSTBFileWrite, file, dst->width, dst->height, 4, dst->pixels);
             break;
     }
 
