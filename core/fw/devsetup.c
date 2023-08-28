@@ -318,42 +318,6 @@ br_error BR_PUBLIC_ENTRY BrDevBeginTV(br_pixelmap **ppm, const char *setup_strin
 }
 
 /*
- * Functions for backwards comatibility
- */
-br_pixelmap *BR_PUBLIC_ENTRY BrDevBeginOld(const char *setup_string)
-{
-    br_pixelmap *s;
-
-    if(BrDevLastBeginQuery())
-        BR_ERROR0("Device already active");
-
-    if(BrDevBegin(&s, setup_string) != BRE_OK)
-        BR_ERROR0("Could not start driver");
-
-    return s;
-}
-
-void BR_PUBLIC_ENTRY BrDevEndOld(void)
-{
-    if(BrDevLastBeginQuery())
-        BrPixelmapFree(BrDevLastBeginQuery());
-
-    BrDevLastBeginSet(NULL);
-}
-
-void BR_PUBLIC_ENTRY BrDevPaletteSetOld(br_pixelmap *pm)
-{
-    if(BrDevLastBeginQuery())
-        BrPixelmapPaletteSet(BrDevLastBeginQuery(), pm);
-}
-
-void BR_PUBLIC_ENTRY BrDevPaletteSetEntryOld(int i, br_colour colour)
-{
-    if(BrDevLastBeginQuery())
-        BrPixelmapPaletteEntrySet(BrDevLastBeginQuery(), i, colour);
-}
-
-/*
  * Find a renderer from a destination pixelmap according to standard rules
  */
 br_error BR_RESIDENT_ENTRY BrRendererFacilityFind(br_renderer_facility **prf, br_device_pixelmap *destination,
