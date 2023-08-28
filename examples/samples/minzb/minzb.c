@@ -11,6 +11,21 @@
 #include "brender.h"
 #include "dosio.h"
 
+#include "brglrend.h"
+#include "brsdl2dev.h"
+#include "mcga.h"
+
+void _BrBeginHook(void)
+{
+    BrDevAddStatic(NULL, BrDrv1SDL2Begin, NULL);
+    BrDevAddStatic(NULL, BrDrv1GLBegin, NULL);
+    BrDevAddStatic(NULL, BrDrv1MCGABegin, NULL);
+}
+
+void _BrEndHook(void)
+{
+}
+
 /*
  * The screen, offscreen buffer, and the depth buffer
  */
