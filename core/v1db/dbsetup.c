@@ -419,54 +419,6 @@ void BR_PUBLIC_ENTRY BrRendererEnd(void)
 }
 
 /*
- * V1.1 compatibility entry points
- */
-void BR_PUBLIC_ENTRY BrZbBegin(br_uint_8 colour_type, br_uint_8 depth_type)
-{
-    if(!v1db.zs_active && !v1db.zb_active)
-        if(BrV1dbRendererBegin((br_device_pixelmap *)BrDevLastBeginQuery(), NULL) != BRE_OK)
-            BR_ERROR0("Failed to load renderer\n");
-
-    v1db.zb_active = BR_TRUE;
-}
-
-void BR_PUBLIC_ENTRY BrZsBegin(br_uint_8 colour_type, void *primitive, br_uint_32 size)
-{
-    UASSERT_MESSAGE("BrZsBegin NULL pointer to an allocated block of memory", primitive != NULL);
-
-    if(!v1db.zs_active && !v1db.zb_active)
-        if(BrV1dbRendererBegin((br_device_pixelmap *)BrDevLastBeginQuery(), NULL) != BRE_OK)
-            BR_ERROR0("Failed to load renderer\n");
-
-    v1db.zs_active = BR_TRUE;
-
-    /*
-     * Save primitive root and size
-     */
-    v1db.heap.base = primitive;
-    v1db.heap.size = size;
-}
-
-void BR_PUBLIC_ENTRY BrZbEnd(void)
-{
-    v1db.zb_active = BR_FALSE;
-
-    /*
-     * If both renderers are inactive then close down renderer
-     */
-    if(!v1db.zs_active && v1db.renderer)
-        BrV1dbRendererEnd();
-}
-
-void BR_PUBLIC_ENTRY BrZsEnd(void)
-{
-    v1db.zs_active = BR_FALSE;
-
-    if(!v1db.zb_active && v1db.renderer)
-        BrV1dbRendererEnd();
-}
-
-/*
  * Wrappers that are used to replace BrBegin() and BrEnd()
  */
 #undef BrBegin

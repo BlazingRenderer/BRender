@@ -13,7 +13,7 @@ install(TARGETS
 
 install(TARGETS
         brender-inc brender-inc-ddi
-        inc fmt fw host math nulldev pixelmap std v1db
+        inc fmt fw host math nulldev pixelmap std v1db v1compat
         EXPORT Core
         FILE_SET include DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/brender
         FILE_SET ddi DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/brender/ddi
