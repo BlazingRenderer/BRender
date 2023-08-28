@@ -16,6 +16,7 @@ set(INC_FILES
         )
 
 set(V1COMPAT_FILES
+        device.c
         zb.c
         zs.c
         )
