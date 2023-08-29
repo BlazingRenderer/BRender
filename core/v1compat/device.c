@@ -24,12 +24,12 @@ br_pixelmap *BR_PUBLIC_ENTRY BrDevBeginOld(const char *setup_string)
     br_pixelmap *s;
 
     if(BrDevLastBeginQuery()) {
-        BR_FAILURE("Device already active");
+        BrLogError("V1COMPAT", "Device already active");
         return NULL;
     }
 
     if(BrDevBegin(&s, setup_string) != BRE_OK) {
-        BR_FAILURE("Could not start driver");
+        BrLogError("V1COMPAT", "Could not start driver");
         return NULL;
     }
 

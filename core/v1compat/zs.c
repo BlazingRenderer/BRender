@@ -12,9 +12,9 @@ void BR_PUBLIC_ENTRY BrZsBegin(br_uint_8 colour_type, void *primitive, br_uint_3
 {
     if(!zs_active && !zb_active)
         if(BrV1dbRendererBegin(BrDevLastBeginQuery(), NULL) != BRE_OK)
-            BR_FAILURE("Failed to load renderer");
-
-    zb_active = BR_TRUE;
+            BrLogError("V1COMPAT", "Failed to load renderer");
+        else
+            zs_active = BR_TRUE;
 }
 
 /*
