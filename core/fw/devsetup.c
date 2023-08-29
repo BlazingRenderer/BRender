@@ -17,23 +17,6 @@
 BR_RCS_ID("$Id: devsetup.c 1.2 1997/12/11 13:33:10 jon Exp $")
 
 /*
- * XXX A very nasty hack to get around limitiations of v1.1.x
- *
- * BrZbBegin() does not get access to the destination screen!
- */
-static br_pixelmap *last_begin_screen;
-
-br_pixelmap *BrDevLastBeginQuery(void)
-{
-    return last_begin_screen;
-}
-
-void BrDevLastBeginSet(br_pixelmap *pm)
-{
-    last_begin_screen = pm;
-}
-
-/*
  * Produce a new output screen pixelmap from a list of token value pairs
  */
 br_error BR_PUBLIC_ENTRY BrDevBeginVar(br_pixelmap **ppm, const char *setup_string, ...)
@@ -303,14 +286,6 @@ br_error BR_PUBLIC_ENTRY BrDevBeginTV(br_pixelmap **ppm, const char *setup_strin
     r = OutputFacilityPixelmapNew(output_facility, (br_device_pixelmap **)&screen, tv);
     if(r != BRE_OK)
         return r;
-
-    /*
-     * Horrible hack to let some V1.1 compatibility functions know what the
-     * last created screen was (a likely candidate for renderer destinations
-     * and palette ops.)
-     */
-
-    BrDevLastBeginSet(screen);
 
     *ppm = screen;
 

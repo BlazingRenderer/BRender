@@ -53,17 +53,6 @@ void BR_PUBLIC_ENTRY BrPixelmapFree(br_pixelmap *src)
 
     CheckDispatch(src);
 
-#if 1
-    /*
-     * Gross V1.1 compatibity problem
-     *
-     * If user free's the current DosGfxBegin() pixelmap -
-     * mark it as unused
-     */
-    if(BrDevLastBeginQuery() == src)
-        BrDevLastBeginSet(NULL);
-#endif
-
     ObjectFree(src);
 }
 
