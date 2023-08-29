@@ -229,10 +229,6 @@ br_error BR_RESIDENT_ENTRY BrDevContainedCount(br_int_32 *pcount, br_token type,
 br_error BR_PUBLIC_ENTRY     BrDevBegin(br_pixelmap **ppm, const char *setup_string);
 br_error BR_PUBLIC_ENTRY     BrDevBeginVar(br_pixelmap **ppm, const char *device_name, ...);
 br_error BR_PUBLIC_ENTRY     BrDevBeginTV(br_pixelmap **ppm, const char *device_name, br_token_value *tv);
-br_pixelmap *BR_PUBLIC_ENTRY BrDevBeginOld(const char *setup_string);
-void BR_PUBLIC_ENTRY         BrDevEndOld(void);
-void BR_PUBLIC_ENTRY         BrDevPaletteSetOld(br_pixelmap *pm);
-void BR_PUBLIC_ENTRY         BrDevPaletteSetEntryOld(int i, br_colour colour);
 
 /*
  * Callback function invoked when a device is enumerated
