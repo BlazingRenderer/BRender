@@ -82,6 +82,11 @@ br_pixelmap *BR_PUBLIC_ENTRY BrFmtJPGLoad(const char *name);
  */
 br_uint_32 BR_PUBLIC_ENTRY BrFmtImageSave(const char *name, br_pixelmap *pm, br_uint_8 type);
 
+/*
+ * .PCX files
+ */
+br_pixelmap *BR_PUBLIC_ENTRY BrFmtPCXLoad(const char *name);
+
 #ifdef __cplusplus
 };
 #endif

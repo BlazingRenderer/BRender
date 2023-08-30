@@ -27,6 +27,7 @@ set(FMT_FILES
         loadgif.c
         loadiff.c
         loadnff.c
+        loadpcx.c
         loadscr.c
         loadstb.c
         loadtga.c
