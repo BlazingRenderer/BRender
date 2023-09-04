@@ -43,10 +43,13 @@ br_colour index_8_read(const br_uint_8 *pixels, const br_pixelmap *pm)
 
 void index_8_write(br_uint_8 *pixels, br_colour colour)
 {
-    /*
-     todo: real palette conversion
-     */
-    *pixels = (br_uint_8)colour;
+    br_uint_8 rgb[3] = {
+        [0] = BR_RED(colour),
+        [1] = BR_GRN(colour),
+        [2] = BR_BLU(colour),
+    };
+
+    BrQuantMapColours(0, rgb, pixels, 1);
 }
 
 /*
@@ -423,6 +426,46 @@ br_pixelmap *BR_PUBLIC_ENTRY BrPixelmapCloneTyped(br_pixelmap *src, br_uint_8 ty
     dst_pixels = (br_uint_8 *)(dst->pixels) + (dst->base_y * dst->row_bytes) + (dst->base_x * (dst_bits >> 3));
 
     /*
+     * check if we need to quantize
+     */
+    if(type == BR_PMT_INDEX_8) {
+
+        /*
+         * begin quantization
+         */
+        BrQuantBegin();
+
+        /*
+         * create palette pixelmap
+         */
+        dst->map = BrPixelmapAllocate(BR_PMT_RGBX_888, 1, 256, NULL, BR_PMAF_NORMAL);
+        BrResAdd(dst, dst->map);
+
+        /*
+         * add rgb values to quantizer
+         */
+        for(int y = -src->origin_y; y < -src->origin_y + src->height; y++) {
+            for(int x = -src->origin_x; x < -src->origin_x + src->width; x++) {
+                br_uint_8 *pixel  = (br_uint_8 *)src_pixels + (x + src->origin_x) * (src_bits >> 3);
+                br_colour  colour = src_converter->read(pixel, src);
+                br_uint_8  rgb[3] = {
+                    [0] = BR_RED(colour),
+                    [1] = BR_GRN(colour),
+                    [2] = BR_BLU(colour),
+                };
+
+                BrQuantAddColours(rgb, 1);
+            }
+        }
+
+        /*
+         * create quantized palette
+         */
+        BrQuantMakePalette(0, 256, dst->map);
+        BrQuantPrepareMapping(0, 256, dst->map);
+    }
+
+    /*
      * pixel conversion loop
      */
     for(int y = -src->origin_y; y < -src->origin_y + src->height; y++) {
@@ -462,6 +505,13 @@ br_pixelmap *BR_PUBLIC_ENTRY BrPixelmapCloneTyped(br_pixelmap *src, br_uint_8 ty
          */
         src_pixels = (br_uint_8 *)src_pixels + src->row_bytes;
         dst_pixels = (br_uint_8 *)dst_pixels + dst->row_bytes;
+    }
+
+    /*
+     * end quantization
+     */
+    if(type == BR_PMT_INDEX_8) {
+        BrQuantEnd();
     }
 
     return dst;
