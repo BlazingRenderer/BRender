@@ -43,7 +43,6 @@ set_source_files_properties(${FW_DEV_FILES} PROPERTIES HEADER_FILE_ONLY TRUE)
 add_custom_target(fw-generated DEPENDS ${GENERATED_FILES})
 
 set(DDI_FILES
-        ddi/blockops.h
         ddi/brassert.h
         ddi/brddi.h
         ddi/brddi_p.h
