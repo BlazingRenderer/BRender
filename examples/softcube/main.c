@@ -7,9 +7,6 @@
 #include <SDL.h>
 #include <assert.h>
 
-#define WIN32_LEAN_AND_MEAN
-#include <windows.h>
-
 void BR_CALLBACK _BrBeginHook(void)
 {
     struct br_device * BR_EXPORT BrDrv1SoftPrimBegin(const char *arguments);
@@ -61,11 +58,6 @@ int main(int argc, char **argv)
     br_colour clear_colour;
     br_error err;
 
-#if 0 //defined(_DEBUG)
-    if(!IsDebuggerPresent())
-        MessageBoxA(NULL, "ATTACH DEBUGGER NOW", "ATTACH DEBUGGER NOW", MB_OK);
-#endif
-
     BrBegin();
 
     BrLogSetLevel(BR_LOG_DEBUG);
@@ -77,7 +69,7 @@ int main(int argc, char **argv)
     );
 
     if(err != BRE_OK) {
-        BrDevBeginVar(NULL, "BrDevBeginVar() failed", "BRender Error", MB_OK | MB_ICONERROR);
+        BrLogError("APP", "BrDevBeginVar() failed");
         goto create_fail;
     }
 
@@ -95,12 +87,12 @@ int main(int argc, char **argv)
     }
 
     if(colour_buffer == NULL) {
-        MessageBoxA(NULL, "BrPixelmapAllocate() failed", "BRender Error", MB_OK | MB_ICONERROR);
+        BrLogError("APP", "BrPixelmapAllocate() failed");
         goto create_fail;
     }
 
     if((depth_buffer = BrPixelmapMatch(colour_buffer, BR_PMMATCH_DEPTH_16)) == NULL) {
-        MessageBoxA(NULL, "BrPixelmapMatch() failed", "BRender Error", MB_OK | MB_ICONERROR);
+        BrLogError("APP", "BrPixelmapMatch() failed");
         goto create_fail;
     }
 
