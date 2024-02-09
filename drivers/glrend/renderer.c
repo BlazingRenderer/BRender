@@ -59,7 +59,8 @@ br_renderer *RendererGLAllocate(br_device *device, br_renderer_facility *facilit
 
 static void BR_CMETHOD_DECL(br_renderer_gl, sceneBegin)(br_renderer *self)
 {
-    HVIDEO hVideo = &self->pixelmap->screen->asFront.video;
+    HVIDEO              hVideo        = &self->pixelmap->screen->asFront.video;
+    br_device_pixelmap *colour_target = NULL, *depth_target = NULL;
 
     self->stats.face_group_count         = 0;
     self->stats.triangles_drawn_count    = 0;
@@ -69,6 +70,26 @@ static void BR_CMETHOD_DECL(br_renderer_gl, sceneBegin)(br_renderer *self)
     /* First draw call, so do all the per-scene crap */
     while(glGetError() != GL_NO_ERROR)
         ;
+
+    if(self->state.current->valid & BR_STATE_OUTPUT) {
+        colour_target = self->state.current->output.colour;
+        depth_target  = self->state.current->output.depth;
+    }
+
+    if(colour_target != NULL && ObjectDevice(colour_target) != self->device) {
+        BR_ERROR0("Can't render to a non-device colour pixelmap");
+    }
+
+    if(depth_target != NULL && ObjectDevice(depth_target) != self->device) {
+        BR_ERROR0("Can't render to a non-device depth pixelmap");
+    }
+
+    /*
+     * TODO: Consider if we want to handle depth-only renders.
+     */
+    if(colour_target == NULL) {
+        BR_ERROR("Can't render without a destination");
+    }
 
     GLCACHE_Reset(&self->state.cache);
     GLCACHE_UpdateScene(&self->state.cache, self->state.current);
