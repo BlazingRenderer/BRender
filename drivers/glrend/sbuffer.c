@@ -180,7 +180,7 @@ static br_error updateMemory(br_buffer_stored *self, br_pixelmap *pm)
     glTexImage2D(GL_TEXTURE_2D, 0, internal_format, pm->width, pm->height, 0, format, type, pm->pixels);
 
     if((err = glGetError()) != 0) {
-        BrLogError("GLREND", "glGenTextures() failed with %s", gl_strerror(err));
+        BrLogError("GLREND", "glTexImage2D() failed with %s", gl_strerror(err));
         glBindTexture(GL_TEXTURE_2D, 0);
         return BRE_FAIL;
     }
