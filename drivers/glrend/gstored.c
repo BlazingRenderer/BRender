@@ -24,21 +24,18 @@ static struct br_tv_template_entry templateEntries[] = {
 };
 #undef F
 
-static void create_vao(br_geometry_stored *self, HVIDEO hVideo)
+static GLuint create_vao(HVIDEO hVideo, GLuint vbo_posn, GLuint vbo, GLuint ibo)
 {
-    glGenVertexArrays(1, &self->gl_vao);
-    glGenBuffers(1, &self->gl_vbo_posn);
-    glGenBuffers(1, &self->gl_vbo);
-    glGenBuffers(1, &self->gl_ibo);
-
-    glBindVertexArray(self->gl_vao);
+    GLuint vao;
+    glGenVertexArrays(1, &vao);
+    glBindVertexArray(vao);
 
     /* Separate buffer for positions. Makes it easier on tiling (i.e. mobile) GPUs. */
-    glBindBuffer(GL_ARRAY_BUFFER, self->gl_vbo_posn);
+    glBindBuffer(GL_ARRAY_BUFFER, vbo_posn);
     glEnableVertexAttribArray(hVideo->brenderProgram.attributes.aPosition);
     glVertexAttribPointer(hVideo->brenderProgram.attributes.aPosition, 3, GL_FLOAT, GL_FALSE, 0, NULL);
 
-    glBindBuffer(GL_ARRAY_BUFFER, self->gl_vbo);
+    glBindBuffer(GL_ARRAY_BUFFER, vbo);
 
     if(hVideo->brenderProgram.attributes.aUV >= 0) {
         glEnableVertexAttribArray(hVideo->brenderProgram.attributes.aUV);
@@ -57,17 +54,16 @@ static void create_vao(br_geometry_stored *self, HVIDEO hVideo)
                               sizeof(gl_vertex_f), (void *)offsetof(gl_vertex_f, c));
     }
 
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, self->gl_ibo);
-
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
     glBindVertexArray(0);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    return vao;
 }
 
-static void build_vbo_posn(br_geometry_stored *self, struct v11model *model, size_t total_vertices)
+static GLuint build_vbo_posn(const struct v11model *model, size_t total_vertices)
 {
     br_vector3_f *vtx  = BrScratchAllocate(total_vertices * sizeof(br_vector3_f));
     br_vector3_f *next = vtx;
+    GLuint        buf;
 
     for(br_uint_16 i = 0; i < model->ngroups; ++i) {
         const struct v11group *gp = model->groups + i;
@@ -75,18 +71,20 @@ static void build_vbo_posn(br_geometry_stored *self, struct v11model *model, siz
         next += gp->nvertices;
     }
 
-    glBindBuffer(GL_ARRAY_BUFFER, self->gl_vbo_posn);
+    glGenBuffers(1, &buf);
+    glBindBuffer(GL_ARRAY_BUFFER, buf);
     glBufferData(GL_ARRAY_BUFFER, (GLsizeiptr)(total_vertices * sizeof(br_vector3_f)), vtx, GL_STATIC_DRAW);
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
     BrScratchFree(vtx);
+    return buf;
 }
 
-static void build_vbo(GLuint vbo, struct v11model *model, size_t total_vertices)
+static GLuint build_vbo(const struct v11model *model, size_t total_vertices)
 {
     /* Collate and upload the vertex data. */
-    gl_vertex_f *vtx = (gl_vertex_f *)BrScratchAllocate(total_vertices * sizeof(gl_vertex_f));
-    ASSERT(vtx);
+    gl_vertex_f *vtx     = (gl_vertex_f *)BrScratchAllocate(total_vertices * sizeof(gl_vertex_f));
     gl_vertex_f *nextVtx = vtx;
+    GLuint       buf;
+
     for(br_uint_16 i = 0; i < model->ngroups; ++i) {
         const struct v11group *gp = model->groups + i;
         for(br_uint_16 v = 0; v < gp->nvertices; ++v, ++nextVtx) {
@@ -96,13 +94,17 @@ static void build_vbo(GLuint vbo, struct v11model *model, size_t total_vertices)
         }
     }
 
+    glGenBuffers(1, &buf);
+    glBindBuffer(GL_ARRAY_BUFFER, buf);
     glBufferData(GL_ARRAY_BUFFER, (GLsizeiptr)(total_vertices * sizeof(gl_vertex_f)), vtx, GL_STATIC_DRAW);
     BrScratchFree(vtx);
+    return buf;
 }
 
-static void build_ibo(GLuint ibo, struct v11model *model, size_t total_faces, gl_groupinfo *groups)
+static GLuint build_ibo(const struct v11model *model, size_t total_faces, gl_groupinfo *groups)
 {
     br_uint_16 *idx = (br_uint_16 *)BrScratchAllocate(total_faces * 3 * sizeof(br_uint_16));
+    GLuint      buf;
 
     br_uint_16 *nextIdx     = idx;
     br_uint_16  offset      = 0;
@@ -126,9 +128,11 @@ static void build_ibo(GLuint ibo, struct v11model *model, size_t total_faces, gl
         offset += model->groups[i].nvertices;
     }
 
+    glGenBuffers(1, &buf);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, buf);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, (GLsizeiptr)face_offset, idx, GL_STATIC_DRAW);
-
     BrScratchFree(idx);
+    return buf;
 }
 
 br_geometry_stored *GeometryStoredGLAllocate(br_geometry_v1_model *gv1model, const char *id, br_renderer *r, struct v11model *model)
@@ -149,8 +153,6 @@ br_geometry_stored *GeometryStoredGLAllocate(br_geometry_v1_model *gv1model, con
 
     self->groups = BrResAllocate(gv1model, sizeof(gl_groupinfo) * model->ngroups, BR_MEMORY_OBJECT_DATA);
 
-    create_vao(self, &r->pixelmap->screen->asFront.video);
-
     total_vertices = 0;
     total_faces    = 0;
     for(br_uint_16 i = 0; i < model->ngroups; ++i) {
@@ -158,15 +160,14 @@ br_geometry_stored *GeometryStoredGLAllocate(br_geometry_v1_model *gv1model, con
         total_faces += model->groups[i].nfaces;
     }
 
-    glBindBuffer(GL_ARRAY_BUFFER, self->gl_vbo_posn);
-    build_vbo_posn(self, model, total_vertices);
+    glBindVertexArray(0);
 
-    glBindBuffer(GL_ARRAY_BUFFER, self->gl_vbo);
-    build_vbo(self->gl_vbo, model, total_vertices);
+    self->gl_vbo_posn = build_vbo_posn(model, total_vertices);
+    self->gl_vbo      = build_vbo(model, total_vertices);
+    self->gl_ibo      = build_ibo(model, total_faces, self->groups);
+    self->gl_vao      = create_vao(&r->pixelmap->screen->asFront.video, self->gl_vbo_posn, self->gl_vbo, self->gl_ibo);
 
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, self->gl_ibo);
-    build_ibo(self->gl_ibo, model, total_faces, self->groups);
-
+    glBindVertexArray(0);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     return (br_geometry_stored *)self;
