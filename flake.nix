@@ -1,6 +1,8 @@
 {
   description = "BRender";
 
+  inputs.nixpkgs.url = github:NixOS/nixpkgs;
+
   outputs = { self, nixpkgs, ... }: let
     mkPackages = { system }: let
       pkgs = import nixpkgs { inherit system; };
