@@ -59,5 +59,9 @@ stdenv.mkDerivation rec {
       wrapProgram $out/bin/brtutor$i${binExtension} \
         --chdir $out/share/brender-samples/tutorials
     done
+
+    for i in minzb; do
+      cp examples/samples/$i/$i${binExtension} $out/bin
+    done
   '';
 }
