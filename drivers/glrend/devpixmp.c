@@ -34,6 +34,8 @@ static struct br_tv_template_entry devicePixelmapTemplateEntries[] = {
  */
 static br_error recreate_renderbuffers(br_device_pixelmap *self)
 {
+    GLenum binding_point = self->msaa_samples > 1 ? GL_TEXTURE_2D_MULTISAMPLE : GL_TEXTURE_2D;
+
     UASSERT(self->use_type == BRT_OFFSCREEN || self->use_type == BRT_DEPTH);
 
     if(self->use_type == BRT_OFFSCREEN) {
@@ -42,44 +44,47 @@ static br_error recreate_renderbuffers(br_device_pixelmap *self)
         UASSERT(self->asBack.glFbo != 0);
 
         /* Delete */
-        glDeleteRenderbuffers(1, &self->asBack.glTex);
+        glDeleteTextures(1, &self->asBack.glTex);
 
         /* Create */
-        glGenRenderbuffers(1, &self->asBack.glTex);
-        glBindRenderbuffer(GL_RENDERBUFFER, self->asBack.glTex);
+        glGenTextures(1, &self->asBack.glTex);
+        glBindTexture(binding_point, self->asBack.glTex);
 
-        if(self->msaa_samples)
-            glRenderbufferStorageMultisample(GL_RENDERBUFFER, self->msaa_samples, GL_RGBA8, self->pm_width, self->pm_height);
-        else
-            glRenderbufferStorage(GL_RENDERBUFFER, GL_RGBA8, self->pm_width, self->pm_height);
+        if(self->msaa_samples) {
+            glTexImage2DMultisample(binding_point, self->msaa_samples, GL_RGBA8, self->pm_width, self->pm_height, GL_TRUE);
+        } else {
+            glTexImage2D(binding_point, 0, GL_RGBA8, self->pm_width, self->pm_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+        }
 
-        glBindRenderbuffer(GL_RENDERBUFFER, 0);
+        glBindTexture(binding_point, 0);
 
         /* Attach */
         glBindFramebuffer(GL_FRAMEBUFFER, self->asBack.glFbo);
-        glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, self->asBack.glTex);
+        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, binding_point, self->asBack.glTex, 0);
         glDrawBuffers(1, draw_buffers);
     } else if(self->use_type == BRT_DEPTH) {
         UASSERT(self->asDepth.backbuffer->asBack.glFbo != 0);
 
         /* Delete */
-        glDeleteRenderbuffers(1, &self->asDepth.glDepth);
+        glGenTextures(1, &self->asDepth.glDepth);
 
         /* Create */
-        glGenRenderbuffers(1, &self->asDepth.glDepth);
-        glBindRenderbuffer(GL_RENDERBUFFER, self->asDepth.glDepth);
+        glGenTextures(1, &self->asDepth.glDepth);
+        glBindTexture(binding_point, self->asDepth.glDepth);
 
-        if(self->msaa_samples)
-            glRenderbufferStorageMultisample(GL_RENDERBUFFER, self->msaa_samples, GL_DEPTH_COMPONENT24, self->pm_width,
-                                             self->pm_height);
-        else
-            glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, self->pm_width, self->pm_height);
+        if(self->msaa_samples) {
+            glTexImage2DMultisample(binding_point, self->msaa_samples, GL_DEPTH_COMPONENT, self->pm_width,
+                                    self->pm_height, GL_TRUE);
+        } else {
+            glTexImage2D(binding_point, 0, GL_DEPTH_COMPONENT, self->pm_width, self->pm_height, 0, GL_DEPTH_COMPONENT,
+                         GL_UNSIGNED_BYTE, NULL);
+        }
 
-        glBindRenderbuffer(GL_RENDERBUFFER, 0);
+        glBindTexture(binding_point, 0);
 
         /* Attach */
         glBindFramebuffer(GL_FRAMEBUFFER, self->asDepth.backbuffer->asBack.glFbo);
-        glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, self->asDepth.glDepth);
+        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, binding_point, self->asDepth.glDepth, 0);
     }
 
     if(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
@@ -95,10 +100,10 @@ static void delete_gl_resources(br_device_pixelmap *self)
     if(self->use_type == BRT_DEPTH) {
         // FIXME: We should be destroyed before our parent.
         // FIXME: If we haven't, should I bind the parent and detach?
-        glDeleteRenderbuffers(1, &self->asDepth.glDepth);
+        glDeleteTextures(1, &self->asDepth.glDepth);
     } else if(self->use_type == BRT_OFFSCREEN) {
         glDeleteFramebuffers(1, &self->asBack.glFbo);
-        glDeleteRenderbuffers(1, &self->asBack.glTex);
+        glDeleteTextures(1, &self->asBack.glTex);
 
         /* Cleanup the quad */
         DeviceGLFiniQuad(&self->asBack.quad);
