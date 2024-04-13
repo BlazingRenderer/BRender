@@ -277,7 +277,12 @@ br_error DevicePixelmapSDL2CreateGL(const pixelmap_new_tokens *pt, br_device_pix
         return BRE_FAIL;
     }
 
-    return create_gl_pixelmap(window, gldev, pt->ext_procs, ppmap);
+    if(create_gl_pixelmap(window, gldev, pt->ext_procs, ppmap) != BRE_OK) {
+        SDL_DestroyWindow(window);
+        return BRE_FAIL;
+    }
+
+    return BRE_OK;
 }
 
 SDL_Window *DevicePixelmapSDL2GetWindowGL(br_pixelmap *pm)
