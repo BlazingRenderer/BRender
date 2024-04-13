@@ -60,7 +60,7 @@ stdenv.mkDerivation rec {
         --chdir $out/share/brender-samples/tutorials
     done
 
-    for i in minzb; do
+    for i in minzb minzs; do
       cp examples/samples/$i/$i${binExtension} $out/bin
     done
   '';
