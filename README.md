@@ -1,20 +1,32 @@
-# Blazing Renderer (BRender), Croc version
+# Blazing Renderer (BRender)
 
-This is the Croc Definitive Edition fork of BRender, originally the internal version
-in the Croc source tree (later released [here](https://github.com/foone/BRender-1997)).
+This is an updated, modernized fork of [BRender](https://blazingrender.net/),
+based on the following source code releases:
 
-It has since been updated to include all the changes from the latest-known version,
-[1.3.2](https://github.com/foone/BRender-v1.3.2). 
+- [BRender-1997](https://github.com/foone/BRender-1997)
+- [BRender-v1.3.2](https://github.com/foone/BRender-v1.3.2)
 
-Sample applications, (`robot` and `cube`) are included, as well as most of the original
-utilities released with the engine.
+There are OpenGL and SDL2 drivers, as well as an x86-specific software rendering
+backend used as the reference implementation.
+
+Sample applications (`robot` and `cube`) are included, as well as most of the
+original utilities released with the engine.
 
 Enjoy!
+
+## Building
+
+Building is done through CMake.
+
+```
+mkdir cmake-build & cd cmake-build
+cmake ..
+make
+```
 
 ## License
 
 This is released under the MIT license.
-
 
 Copyright (c) 1998 Argonaut Software Limited 
 
