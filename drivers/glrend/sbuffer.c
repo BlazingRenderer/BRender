@@ -211,11 +211,11 @@ static br_error BR_CMETHOD_DECL(br_buffer_stored_gl, update)(struct br_buffer_st
     if(pm_device == NULL) {
         return updateMemory(self, (br_pixelmap *)pm);
     } else if(pm_device == self->device) {
-        /*
-         * The pixelmaps came from this device, copy it directly.
-         * TODO: this
-         */
-        return BRE_FAIL;
+        ASSERT(self->source == NULL || self->source == pm);
+        self->gl_tex       = 0; /* Unused for us. */
+        self->source       = (br_pixelmap *)pm;
+        self->source_flags = pm->pm_flags;
+        return BRE_OK;
     } else {
         /*
          * The pixelmap is from another device, we can't use it
@@ -268,6 +268,24 @@ static struct br_tv_template *BR_CMETHOD_DECL(br_buffer_stored_gl, templateQuery
 
 GLuint BufferStoredGLGetTexture(br_buffer_stored *self)
 {
+    if(self->source == NULL)
+        return self->gl_tex;
+
+    if(ObjectDevice(self->source) == self->device) {
+        br_device_pixelmap *pm = (br_device_pixelmap *)self->source;
+        switch(pm->use_type) {
+            case BRT_NONE:
+            default:
+                return 0;
+
+            case BRT_OFFSCREEN:
+                return pm->asBack.glTex;
+
+            case BRT_DEPTH:
+                return pm->asDepth.glDepth;
+        }
+    }
+
     return self->gl_tex;
 }
 
