@@ -60,8 +60,15 @@ stdenv.mkDerivation rec {
         --chdir $out/share/brender-samples/tutorials
     done
 
-    for i in minzb minzs; do
+    for i in minzb minzs sheet; do
       cp examples/samples/$i/$i${binExtension} $out/bin
+
+      if  [[ -e ${src}/examples/samples/$i/dat ]]; then
+        mkdir -p $out/share/brender-samples/samples/$i
+        cp ${src}/examples/samples/$i/dat/* $out/share/brender-samples/samples/$i
+        wrapProgram $out/bin/$i${binExtension} \
+          --chdir $out/share/brender-samples/samples/$i
+      fi
     done
   '';
 }
