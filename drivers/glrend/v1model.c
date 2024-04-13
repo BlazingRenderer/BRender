@@ -176,7 +176,7 @@ static void apply_stored_properties(HVIDEO hVideo, HGLSTATE_STACK state, uint32_
         glDepthFunc(depthFunc);
 
         if(state->prim.colour_map) {
-            glBindTexture(GL_TEXTURE_2D, state->prim.colour_map->gl_tex);
+            glBindTexture(GL_TEXTURE_2D, BufferStoredGLGetTexture(state->prim.colour_map));
             glUniform1i(hVideo->brenderProgram.uniforms.main_texture, hVideo->brenderProgram.mainTextureBinding);
 
             // if(state->prim.colour_map->source->flags & BR_PMF_KEYED_TRANSPARENCY)

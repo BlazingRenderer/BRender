@@ -266,6 +266,11 @@ static struct br_tv_template *BR_CMETHOD_DECL(br_buffer_stored_gl, templateQuery
     return ((br_buffer_stored *)_self)->templates;
 }
 
+GLuint BufferStoredGLGetTexture(br_buffer_stored *self)
+{
+    return self->gl_tex;
+}
+
 /*
  * Default dispatch table for device
  */

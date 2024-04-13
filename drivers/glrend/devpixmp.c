@@ -468,7 +468,7 @@ br_error BR_CMETHOD(br_device_pixelmap_gl, rectangleStretchCopyTo)(br_device_pix
 
     glUniformMatrix4fv(hVideo->defaultProgram.uMVP, 1, GL_FALSE, (GLfloat *)&mvp);
     glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, tex);
+    glBindTexture(GL_TEXTURE_2D, BufferStoredGLGetTexture((br_buffer_stored *)src->stored));
     glUniform1i(hVideo->defaultProgram.uSampler, 0);
     glUniform1f(hVideo->defaultProgram.uVerticalFlip, 1);
 
@@ -549,6 +549,8 @@ br_error BR_CMETHOD_DECL(br_device_pixelmap_gl, rectangleCopyFrom)(br_device_pix
 br_error BR_CMETHOD(br_device_pixelmap_gl, text)(br_device_pixelmap *self, br_point *point, br_font *font,
                                                  const char *text, br_uint_32 colour)
 {
+    GLuint tex;
+
     /* Quit if off top, bottom or right screen */
     br_int_32 x = point->x + self->pm_origin_x;
     br_int_32 y = point->y + self->pm_origin_y;

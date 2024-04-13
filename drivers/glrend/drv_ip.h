@@ -78,6 +78,8 @@ br_device_pixelmap *DevicePixelmapGLAllocateFront(br_device *dev, br_output_faci
 struct br_buffer_stored *BufferStoredGLAllocate(br_renderer *renderer, br_token use, struct br_device_pixelmap *pm,
                                                 br_token_value *tv);
 
+GLenum BufferStoredGLGetTexture(br_buffer_stored *self);
+
 /*
  * gv1buckt.c
  */
