@@ -17,9 +17,7 @@
  * return	0 everything ok,
  * 		-1 some error occurred
  */
- 
+
 int BrenderIntro(br_pixelmap *screen);
 
-
 #endif
-
