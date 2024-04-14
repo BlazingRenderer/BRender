@@ -208,6 +208,7 @@ static br_error create_gl_pixelmap(SDL_Window *window, br_device *gldev, br_devi
      */
     outfctygl = NULL;
     if((err = ObjectContainerFind(gldev, &outfctygl, BRT_OUTPUT_FACILITY, NULL, tv)) != BRE_OK) {
+        BrLogError("SDL2", "Unable to find suitable output facility.");
         return err;
     }
 
@@ -230,6 +231,7 @@ static br_error create_gl_pixelmap(SDL_Window *window, br_device *gldev, br_devi
      * Create the screen pixelmap.
      */
     if((err = OutputFacilityPixelmapNew(outfctygl, (void *)&pm, tv)) != BRE_OK) {
+        BrLogError("SDL2", "Unable to create new screen pixelmap.");
         BrResFree(state);
         return err;
     }
