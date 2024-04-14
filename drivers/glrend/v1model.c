@@ -5,27 +5,6 @@
 #include "drv.h"
 #include "brassert.h"
 
-/* Handy for debugging Croc. */
-static int is_croc_dome(HGLSTATE_STACK state)
-{
-    br_buffer_stored *stored;
-    br_pixelmap      *pm;
-
-    if(!(state->valid & GLSTATE_MASK_PRIMITIVE))
-        return 0;
-
-    if((stored = state->prim.colour_map) == NULL)
-        return 0;
-
-    if((pm = stored->source) == NULL)
-        return 0;
-
-    if(pm->identifier == NULL)
-        return 0;
-
-    return strstr(pm->identifier, "DOMEATLAS") == pm->identifier;
-}
-
 static void apply_blend_mode(HGLSTATE_STACK self)
 {
     /* C_result = (C_source * F_Source) + (C_dest * F_dest) */
