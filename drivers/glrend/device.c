@@ -5,7 +5,7 @@
 
 #define DEVICE_TITLE   "OpenGL v3.2"
 #define DEVICE_VERSION BR_VERSION(1, 0, 0)
-#define DEVICE_CREATOR "crocguy0688 <crocguy0688@protonmail.com>"
+#define DEVICE_CREATOR "Zane van Iperen"
 #define DEVICE_PRODUCT "OpenGL"
 
 /*
