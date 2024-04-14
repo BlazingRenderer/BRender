@@ -1085,3 +1085,12 @@ void BR_PUBLIC_ENTRY BrMatrix34PostShearZ(br_matrix34 *mat, br_scalar sx, br_sca
     BrMatrix34Mul(&mattmp2, mat, &mattmp1);
     BrMatrix34Copy(mat, &mattmp2);
 }
+
+void BR_PUBLIC_ENTRY BrMatrix34FixedToFloat(br_matrix34_f *A, const br_matrix34_x *B)
+{
+    for(int i = 0; i < 4; ++i) {
+        for(int j = 0; j < 3; ++j) {
+            A->m[i][j] = BrFixedToFloat(B->m[i][j]);
+        }
+    }
+}
