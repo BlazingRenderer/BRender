@@ -7,3 +7,9 @@ target_compile_definitions(sheet PUBLIC -DSDL_MAIN_HANDLED)
 target_link_libraries(sheet BRender::Full dosbase)
 set_property(TARGET sheet PROPERTY VS_DEBUGGER_WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/dat")
 set_property(TARGET sheet PROPERTY FOLDER "BRender/Examples/Samples")
+
+set(SHEET_FILES 8ball.pix earth.pix rivrock1.pix shade.tab sheet.mat sph32.dat std.pal wirscrn2.pix)
+
+foreach(file ${SHEET_FILES})
+        configure_file(${CMAKE_CURRENT_SOURCE_DIR}/dat/${file} ${CMAKE_CURRENT_BINARY_DIR}/${file} COPYONLY)
+endforeach()
