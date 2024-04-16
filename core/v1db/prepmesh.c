@@ -361,7 +361,7 @@ static void Smoothing(br_model *model, br_scalar crease_limit, struct prep_verte
 
     for(outer = start; outer < end; outer++) {
 
-#if 1 // Kludging flat shading for Croc
+#if 0 // Kludging flat shading for Croc
         /*
          * Kludge normals on all flat shaded faces
          */
