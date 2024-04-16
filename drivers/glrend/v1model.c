@@ -44,6 +44,57 @@ static void apply_blend_mode(HGLSTATE_STACK self)
     }
 }
 
+static void apply_depth_properties(HGLSTATE_STACK state, uint32_t states)
+{
+    /* Only use the states we want (if valid). */
+    states = state->valid & states;
+
+    if(states & GLSTATE_MASK_SURFACE) {
+        if(state->surface.force_front || state->surface.force_back)
+            glDisable(GL_DEPTH_TEST);
+        else
+            glEnable(GL_DEPTH_TEST);
+    }
+
+    if(states & GLSTATE_MASK_PRIMITIVE) {
+        if(state->prim.flags & PRIMF_DEPTH_WRITE)
+            glDepthMask(GL_TRUE);
+        else
+            glDepthMask(GL_FALSE);
+
+        GLenum depthFunc;
+        switch(state->prim.depth_test) {
+            case BRT_LESS:
+                depthFunc = GL_LESS;
+                break;
+            case BRT_GREATER:
+                depthFunc = GL_GREATER;
+                break;
+            case BRT_LESS_OR_EQUAL:
+                depthFunc = GL_LEQUAL;
+                break;
+            case BRT_GREATER_OR_EQUAL:
+                depthFunc = GL_GEQUAL;
+                break;
+            case BRT_EQUAL:
+                depthFunc = GL_EQUAL;
+                break;
+            case BRT_NOT_EQUAL:
+                depthFunc = GL_NOTEQUAL;
+                break;
+            case BRT_NEVER:
+                depthFunc = GL_NEVER;
+                break;
+            case BRT_ALWAYS:
+                depthFunc = GL_ALWAYS;
+                break;
+            default:
+                depthFunc = GL_LESS;
+        }
+        glDepthFunc(depthFunc);
+    }
+}
+
 static void apply_stored_properties(HVIDEO hVideo, HGLSTATE_STACK state, uint32_t states, br_boolean *unlit,
                                     HGLSTD140_MODEL_DATA hModel, GLuint tex_default)
 {
@@ -85,11 +136,6 @@ static void apply_stored_properties(HVIDEO hVideo, HGLSTATE_STACK state, uint32_
 
     *unlit = BR_FALSE;
     if(states & GLSTATE_MASK_SURFACE) {
-        if(state->surface.force_front || state->surface.force_back)
-            glDisable(GL_DEPTH_TEST);
-        else
-            glEnable(GL_DEPTH_TEST);
-
         glActiveTexture(GL_TEXTURE0);
 
         if(state->surface.colour_source == BRT_SURFACE) {
@@ -113,46 +159,10 @@ static void apply_stored_properties(HVIDEO hVideo, HGLSTATE_STACK state, uint32_
     if(states & GLSTATE_MASK_PRIMITIVE) {
         hModel->disable_colour_key = !(state->prim.flags & PRIMF_COLOUR_KEY);
 
-        if(state->prim.flags & PRIMF_DEPTH_WRITE)
-            glDepthMask(GL_TRUE);
-        else
-            glDepthMask(GL_FALSE);
-
         if(state->prim.flags & PRIMF_COLOUR_WRITE)
             glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
         else
             glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
-
-        GLenum depthFunc;
-        switch(state->prim.depth_test) {
-            case BRT_LESS:
-                depthFunc = GL_LESS;
-                break;
-            case BRT_GREATER:
-                depthFunc = GL_GREATER;
-                break;
-            case BRT_LESS_OR_EQUAL:
-                depthFunc = GL_LEQUAL;
-                break;
-            case BRT_GREATER_OR_EQUAL:
-                depthFunc = GL_GEQUAL;
-                break;
-            case BRT_EQUAL:
-                depthFunc = GL_EQUAL;
-                break;
-            case BRT_NOT_EQUAL:
-                depthFunc = GL_NOTEQUAL;
-                break;
-            case BRT_NEVER:
-                depthFunc = GL_NEVER;
-                break;
-            case BRT_ALWAYS:
-                depthFunc = GL_ALWAYS;
-                break;
-            default:
-                depthFunc = GL_LESS;
-        }
-        glDepthFunc(depthFunc);
 
         if(state->prim.colour_map) {
             glBindTexture(GL_TEXTURE_2D, BufferStoredGLGetTexture(state->prim.colour_map));
@@ -217,6 +227,8 @@ static void apply_stored_properties(HVIDEO hVideo, HGLSTATE_STACK state, uint32_
             glDisable(GL_BLEND);
         }
     }
+
+    apply_depth_properties(state, states);
 }
 
 void StoredGLRenderGroup(br_geometry_stored *self, br_renderer *renderer, const gl_groupinfo *groupinfo)
