@@ -295,7 +295,6 @@ static br_uint_16 calculate_bucket(const br_order_table *ot, const GLSTATE_STACK
 {
     const br_scalar ratio_force_frontback = BR_SCALAR(0.05);
     const br_scalar ratio_transparent     = BR_SCALAR(0.10);
-    br_boolean      have_depth_buffer     = (state->valid & GLSTATE_MASK_OUTPUT) && state->output.depth != NULL;
     br_uint_16      count_forced, count_opaque, count_trans;
     int             render_mode;
     br_scalar       ot_size;
@@ -395,12 +394,7 @@ static br_uint_16 calculate_bucket(const br_order_table *ot, const GLSTATE_STACK
         default:
             base      = count_forced + count_trans;
             count     = count_opaque;
-
-            /*
-             * Sort front-to-back if we have a depth buffer.
-             */
-            if(have_depth_buffer)
-                tmp_depth = -tmp_depth;
+            tmp_depth = -tmp_depth;
             break;
         case RM_FORCE_BACK:
             base  = count_forced + count_trans + count_opaque;
