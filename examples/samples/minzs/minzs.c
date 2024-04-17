@@ -42,7 +42,7 @@ int       main(int argc, char **argv)
      * Build the world
      */
     world    = BrActorAllocate(BR_ACTOR_NONE, NULL);
-    observer = BrActorAdd(world, BrActorAllocate(BR_ACTOR_CAMERA, NULL));
+    observer = CreateSampleCamera(world);
     BrLightEnable(BrActorAdd(world, BrActorAllocate(BR_ACTOR_LIGHT, NULL)));
 
     a                    = BrActorAdd(world, BrActorAllocate(BR_ACTOR_MODEL, NULL));
