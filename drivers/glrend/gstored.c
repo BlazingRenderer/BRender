@@ -300,6 +300,7 @@ static br_uint_16 calculate_bucket(const br_order_table *ot, const GLSTATE_STACK
     br_scalar       ot_size;
     br_uint_16      base, count;
     br_scalar       tmp_depth;
+    br_boolean      force_btf = (state->valid & GLSTATE_MASK_OUTPUT) && state->output.depth == NULL;
 
     ASSERT(BR_ADD(BR_MUL(ratio_force_frontback, BR_SCALAR(2)), ratio_transparent) < BR_SCALAR(1.0));
 
@@ -392,9 +393,11 @@ static br_uint_16 calculate_bucket(const br_order_table *ot, const GLSTATE_STACK
             break;
         case RM_OPAQUE:
         default:
-            base      = count_forced + count_trans;
-            count     = count_opaque;
-            tmp_depth = -tmp_depth;
+            base  = count_forced + count_trans;
+            count = count_opaque;
+
+            if(!force_btf)
+                tmp_depth = -tmp_depth;
             break;
         case RM_FORCE_BACK:
             base  = count_forced + count_trans + count_opaque;

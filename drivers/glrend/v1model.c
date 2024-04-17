@@ -46,14 +46,28 @@ static void apply_blend_mode(HGLSTATE_STACK self)
 
 static void apply_depth_properties(HGLSTATE_STACK state, uint32_t states)
 {
+    br_boolean depth_valid = BR_TRUE; /* Defaulting to BR_TRUE to keep existing behaviour. */
+    GLenum     depth_test  = GL_NONE;
+
     /* Only use the states we want (if valid). */
     states = state->valid & states;
 
+    if(states & GLSTATE_MASK_OUTPUT) {
+        depth_valid = state->output.depth != NULL;
+    }
+
     if(states & GLSTATE_MASK_SURFACE) {
         if(state->surface.force_front || state->surface.force_back)
-            glDisable(GL_DEPTH_TEST);
+            depth_test = GL_FALSE;
         else
+            depth_test = GL_TRUE;
+    }
+
+    if(depth_valid == BR_TRUE) {
+        if(depth_test == GL_TRUE)
             glEnable(GL_DEPTH_TEST);
+        else if(depth_test == GL_FALSE)
+            glDisable(GL_DEPTH_TEST);
     }
 
     if(states & GLSTATE_MASK_PRIMITIVE) {
