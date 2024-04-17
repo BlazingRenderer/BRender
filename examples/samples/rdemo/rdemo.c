@@ -205,7 +205,6 @@ int main(void)
     ((br_camera *)camera->type_data)->field_of_view = BR_ANGLE_DEG(45.0);
     ((br_camera *)camera->type_data)->hither_z      = BR_SCALAR(0.1);
     ((br_camera *)camera->type_data)->yon_z         = BR_SCALAR(20.0);
-    ((br_camera *)camera->type_data)->aspect        = BR_SCALAR(1.46);
     camera->t.type                                  = BR_TRANSFORM_MATRIX34;
     BrMatrix34Translate(&camera->t.t.mat, BR_SCALAR(0.0), BR_SCALAR(0.0), BR_SCALAR(2.0));
 
