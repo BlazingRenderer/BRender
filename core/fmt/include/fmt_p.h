@@ -87,6 +87,11 @@ br_uint_32 BR_PUBLIC_ENTRY BrFmtImageSave(const char *name, br_pixelmap *pm, br_
  */
 br_pixelmap *BR_PUBLIC_ENTRY BrFmtPCXLoad(const char *name);
 
+/*
+ * .GLTF files
+ */
+br_error BrFmtGLTFSave(const char *name, const br_model *model, void *res);
+
 #ifdef __cplusplus
 };
 #endif

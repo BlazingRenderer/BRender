@@ -34,10 +34,18 @@ set(FMT_FILES
         loadvue.c
         savescr.c
         savestb.c
+        savegltf.c
 
         stb_image.h
         stb_image_write.h
         dr_pcx.h
+
+        cbase64.h
+        cbase64.c
+
+        cgltf.h
+        cgltf_write.h
+        cgltf.c
         )
 
 add_library(fmt OBJECT
