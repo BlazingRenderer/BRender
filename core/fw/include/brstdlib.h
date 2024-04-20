@@ -44,6 +44,7 @@ double BR_PUBLIC_ENTRY        BrStrToD(const char *nptr, char **endptr);
 long int BR_PUBLIC_ENTRY      BrStrToL(const char *nptr, char **endptr, int base);
 long long int BR_PUBLIC_ENTRY BrStrToLL(const char *nptr, char **endptr, int base);
 unsigned long BR_PUBLIC_ENTRY BrStrToUL(const char *nptr, char **endptr, int base);
+unsigned long long BR_PUBLIC_ENTRY BrStrToULL(const char *nptr, char **endptr, int base);
 
 br_boolean BR_PUBLIC_ENTRY BrIsAlpha(int c);
 br_boolean BR_PUBLIC_ENTRY BrIsDigit(int c);
