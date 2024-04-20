@@ -116,6 +116,11 @@ long int BR_PUBLIC_ENTRY BrStrToL(const char *nptr, char **endptr, int base)
     return strtol(nptr, endptr, base);
 }
 
+long long int BR_PUBLIC_ENTRY BrStrToLL(const char *nptr, char **endptr, int base)
+{
+    return strtoll(nptr, endptr, base);
+}
+
 unsigned long BR_PUBLIC_ENTRY BrStrToUL(const char *nptr, char **endptr, int base)
 {
     return strtoul(nptr, endptr, base);

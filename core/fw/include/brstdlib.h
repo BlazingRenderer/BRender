@@ -42,6 +42,7 @@ char *BR_PUBLIC_ENTRY BrGetEnv(const char *name);
 float BR_PUBLIC_ENTRY         BrStrToF(const char *nptr, char **endptr);
 double BR_PUBLIC_ENTRY        BrStrToD(const char *nptr, char **endptr);
 long int BR_PUBLIC_ENTRY      BrStrToL(const char *nptr, char **endptr, int base);
+long long int BR_PUBLIC_ENTRY BrStrToLL(const char *nptr, char **endptr, int base);
 unsigned long BR_PUBLIC_ENTRY BrStrToUL(const char *nptr, char **endptr, int base);
 
 br_boolean BR_PUBLIC_ENTRY BrIsAlpha(int c);

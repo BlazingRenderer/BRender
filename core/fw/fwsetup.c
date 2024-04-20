@@ -392,6 +392,7 @@ static const br_image_function_info functions[] = {
     REGMETHOD(BrStrToD),
     REGMETHOD(BrStrToF),
     REGMETHOD(BrStrToL),
+    REGMETHOD(BrStrToLL),
     REGMETHOD(BrStrToUL),
     REGMETHOD(BrStringToTokenValue),
     REGMETHOD(BrSwap16),
