@@ -1,10 +1,9 @@
-return() # Until I get it compiling.
-
 project(brintro)
 
 add_executable(brintro
-        brintro.c
-        brintro.h
+        main.c
+        intro.c
+        intro.h
 )
 target_compile_definitions(brintro PUBLIC -DSDL_MAIN_HANDLED)
 target_link_libraries(brintro BRender::Full)

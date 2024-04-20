@@ -26,19 +26,20 @@ stdenv.mkDerivation rec {
   ];
 
   installPhase = ''
-    mkdir -p $out/{bin,share/brender-samples/{robot,dat,tutorials}}
+    mkdir -p $out/{bin,share/brender-samples/{robot,brintro,dat,tutorials}}
 
     for i in 3ds2br dquery mkblend mkfog mkranges mkshades paljoin texconv texview matconv; do
       cp tools/$i/$i${binExtension} $out/bin
     done
 
-    for i in mkres robot cube devpmtest ddrawtest; do
+    for i in mkres robot cube devpmtest ddrawtest brintro; do
       if [[ -e examples/$i/$i${binExtension} ]]; then
         cp examples/$i/$i${binExtension} $out/bin
       fi
     done
 
     cp ${src}/examples/robot/dat/* $out/share/brender-samples/robot
+    cp ${src}/examples/brintro/dat/* $out/share/brender-samples/brintro
     cp ${src}/examples/dat/* $out/share/brender-samples/dat
 
     wrapProgram $out/bin/robot${binExtension} \
@@ -49,6 +50,9 @@ stdenv.mkDerivation rec {
 
     wrapProgram $out/bin/devpmtest${binExtension} \
       --set BRENDER_PATH $out/share/brender-samples/dat
+
+    wrapProgram $out/bin/brintro${binExtension} \
+      --set BRENDER_PATH $out/share/brender-samples/brintro
 
 
     cp ${src}/examples/tutorials/dat/* $out/share/brender-samples/tutorials
