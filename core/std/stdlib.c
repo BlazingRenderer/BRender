@@ -13,6 +13,7 @@
 #include <stddef.h>
 #include <ctype.h>
 #include <stdarg.h>
+#include <limits.h>
 
 #include "brender.h"
 
@@ -129,6 +130,42 @@ unsigned long BR_PUBLIC_ENTRY BrStrToUL(const char *nptr, char **endptr, int bas
 unsigned long long BR_PUBLIC_ENTRY BrStrToULL(const char *nptr, char **endptr, int base)
 {
     return strtoul(nptr, endptr, base);
+}
+
+int BR_PUBLIC_ENTRY BrAToI(const char *nptr)
+{
+    char    *end;
+    long int result;
+
+    result = BrStrToL(nptr, &end, 10);
+    if(nptr == end)
+        return 0;
+
+    if(result > INT_MAX)
+        return INT_MAX;
+
+    if(result < INT_MIN)
+        return INT_MIN;
+
+    return (int)result;
+}
+
+long BR_PUBLIC_ENTRY BrAToL(const char *nptr)
+{
+    char *end;
+    return BrStrToL(nptr, &end, 10);
+}
+
+long long BR_PUBLIC_ENTRY BrAToLL(const char *nptr)
+{
+    char *end;
+    return BrStrToLL(nptr, &end, 10);
+}
+
+float BR_PUBLIC_ENTRY BrAToF(const char *nptr)
+{
+    char *end;
+    return BrStrToF(nptr, &end);
 }
 
 br_boolean BR_PUBLIC_ENTRY BrIsAlpha(int c)
