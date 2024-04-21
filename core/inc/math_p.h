@@ -270,6 +270,7 @@ void BR_PUBLIC_ENTRY      BrVector2SetFloat(br_vector2 *v1, float f1, float f2);
 void BR_PUBLIC_ENTRY      BrVector2Negate(br_vector2 *v1, const br_vector2 *v2);
 void BR_PUBLIC_ENTRY      BrVector2Add(br_vector2 *v1, const br_vector2 *v2, const br_vector2 *v3);
 void BR_PUBLIC_ENTRY      BrVector2Accumulate(br_vector2 *v1, const br_vector2 *v2);
+void BR_PUBLIC_ENTRY      BrVector2AccumulateScale(br_vector2 *v1, const br_vector2 *v2, br_scalar s);
 void BR_PUBLIC_ENTRY      BrVector2Sub(br_vector2 *v1, const br_vector2 *v2, const br_vector2 *v3);
 void BR_PUBLIC_ENTRY      BrVector2Scale(br_vector2 *v1, const br_vector2 *v2, br_scalar s);
 void BR_PUBLIC_ENTRY      BrVector2InvScale(br_vector2 *v1, const br_vector2 *v2, br_scalar s);
@@ -287,7 +288,9 @@ void BR_PUBLIC_ENTRY      BrVector3SetFloat(br_vector3 *v1, float f1, float f2, 
 void BR_PUBLIC_ENTRY      BrVector3Negate(br_vector3 *v1, const br_vector3 *v2);
 void BR_PUBLIC_ENTRY      BrVector3Add(br_vector3 *v1, const br_vector3 *v2, const br_vector3 *v3);
 void BR_PUBLIC_ENTRY      BrVector3Accumulate(br_vector3 *v1, const br_vector3 *v2);
+void BR_PUBLIC_ENTRY      BrVector3AccumulateScale(br_vector3 *v1, const br_vector3 *v2, br_scalar s);
 void BR_PUBLIC_ENTRY      BrVector3Sub(br_vector3 *v1, const br_vector3 *v2, const br_vector3 *v3);
+void BR_PUBLIC_ENTRY      BrVector3Mul(br_vector3 *v1, const br_vector3 *v2, const br_vector3 *v3);
 void BR_PUBLIC_ENTRY      BrVector3Scale(br_vector3 *v1, const br_vector3 *v2, br_scalar s);
 void BR_PUBLIC_ENTRY      BrVector3InvScale(br_vector3 *v1, const br_vector3 *v2, br_scalar s);
 br_scalar BR_PUBLIC_ENTRY BrVector3Dot(br_vector3 *v1, const br_vector3 *v2);
@@ -310,8 +313,12 @@ void BR_PUBLIC_ENTRY BrVector2Normalise(br_vector2 *v1, const br_vector2 *v2);
 /**
  ** 4D Vectors
  **/
+void BR_PUBLIC_ENTRY      BrVector4Set(br_vector4 *v1, br_scalar s1, br_scalar s2, br_scalar s3, br_scalar s4);
 br_scalar BR_PUBLIC_ENTRY BrVector4Dot(br_vector4 *v1, const br_vector4 *v2);
 void BR_PUBLIC_ENTRY      BrVector4Copy(br_vector4 *v1, const br_vector4 *v2);
+void BR_PUBLIC_ENTRY      BrVector4Negate(br_vector4 *v1, const br_vector4 *v2);
+void BR_PUBLIC_ENTRY      BrVector4Scale(br_vector4 *v1, const br_vector4 *v2, br_scalar s);
+void BR_PUBLIC_ENTRY      BrVector4Normalise(br_vector4 *v1, const br_vector4 *v2);
 
 /*
  * Euler Angles
@@ -401,14 +408,5 @@ void BR_PUBLIC_ENTRY      BrMatrix23LPNormalise(br_matrix23 *A, const br_matrix2
 };
 #endif
 #endif /* _NO_PROTOTYPES */
-
-/*
- * Inline versions of vector ops.
- */
-#ifndef _NO_VECTOR_MACROS
-#ifndef _VECFNS_H_
-#include "vecfns.h"
-#endif
-#endif
 
 #endif

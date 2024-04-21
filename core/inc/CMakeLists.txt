@@ -78,7 +78,6 @@ set(INC_FILES
         token.h
         transfrm.h
         v1db_p.h
-        vecfns.h
         ${CMAKE_CURRENT_BINARY_DIR}/pretok.h
         )
 

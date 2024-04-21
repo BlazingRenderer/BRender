@@ -4,13 +4,7 @@
  * $Id: vector.c 1.1 1997/12/10 16:41:23 jon Exp $
  * $Locker: $
  *
- * Vector op. - some of these are redefined as macros in vecfns.h
- * for speed. (but the real functions still exist for debugging purposes)
- *
  */
-
-#undef _NO_VECTOR_MACROS
-#define _NO_VECTOR_MACROS 1
 
 #include "brender.h"
 #include "shortcut.h"
@@ -21,6 +15,10 @@ BR_RCS_ID("$Id: vector.c 1.1 1997/12/10 16:41:23 jon Exp $")
 /**
  ** 2D Vectors
  **/
+
+/*
+ * v1=v2
+ */
 void BR_PUBLIC_ENTRY BrVector2Copy(br_vector2 *v1, const br_vector2 *v2)
 {
     UASSERT_MESSAGE("Destination Vector is NULL", v1 != NULL);
@@ -95,6 +93,18 @@ void BR_PUBLIC_ENTRY BrVector2Accumulate(br_vector2 *v1, const br_vector2 *v2)
 }
 
 /*
+ * v1+=v2*scalar
+ */
+void BR_PUBLIC_ENTRY BrVector2AccumulateScale(br_vector2 *v1, const br_vector2 *v2, br_scalar s)
+{
+    UASSERT_MESSAGE("Destination Vector is NULL", v1 != NULL);
+    UASSERT_MESSAGE("Source Vector is NULL", v2 != NULL);
+
+    v1->v[0] += BR_MUL(v2->v[0], s);
+    v1->v[1] += BR_MUL(v2->v[1], s);
+}
+
+/*
  * v1=v2-v3
  */
 void BR_PUBLIC_ENTRY BrVector2Sub(br_vector2 *v1, const br_vector2 *v2, const br_vector2 *v3)
@@ -160,6 +170,29 @@ br_scalar BR_PUBLIC_ENTRY BrVector2LengthSquared(br_vector2 *v1)
     UASSERT_MESSAGE("Subject Vector is NULL", v1 != NULL);
 
     return BR_SQR2(v1->v[0], v1->v[1]);
+}
+
+/*
+ * v1 = v2/|v2|
+ */
+void BR_PUBLIC_ENTRY BrVector2Normalise(br_vector2 *v1, const br_vector2 *v2)
+{
+    br_scalar scale;
+
+    UASSERT_MESSAGE("Destination Vector is NULL", v1 != NULL);
+    UASSERT_MESSAGE("Source Vector is NULL", v2 != NULL);
+
+    scale = BR_LENGTH2(v2->v[0], v2->v[1]);
+
+    if(scale > BR_SCALAR_EPSILON * 2) {
+        scale = BR_RCP(scale);
+
+        v1->v[0] = BR_MUL(v2->v[0], scale);
+        v1->v[1] = BR_MUL(v2->v[1], scale);
+    } else {
+        v1->v[0] = BR_SCALAR(1.0);
+        v1->v[1] = BR_SCALAR(0.0);
+    }
 }
 
 /**
@@ -250,6 +283,19 @@ void BR_PUBLIC_ENTRY BrVector3Accumulate(br_vector3 *v1, const br_vector3 *v2)
 }
 
 /*
+ * v1+=v2*scalar
+ */
+void BR_PUBLIC_ENTRY BrVector3AccumulateScale(br_vector3 *v1, const br_vector3 *v2, br_scalar s)
+{
+    UASSERT_MESSAGE("Destination Vector is NULL", v1 != NULL);
+    UASSERT_MESSAGE("Source Vector is NULL", v2 != NULL);
+
+    v1->v[0] += BR_MUL(v2->v[0], s);
+    v1->v[1] += BR_MUL(v2->v[1], s);
+    v1->v[2] += BR_MUL(v2->v[2], s);
+}
+
+/*
  * v1=v2-v3
  */
 void BR_PUBLIC_ENTRY BrVector3Sub(br_vector3 *v1, const br_vector3 *v2, const br_vector3 *v3)
@@ -261,6 +307,20 @@ void BR_PUBLIC_ENTRY BrVector3Sub(br_vector3 *v1, const br_vector3 *v2, const br
     v1->v[0] = v2->v[0] - v3->v[0];
     v1->v[1] = v2->v[1] - v3->v[1];
     v1->v[2] = v2->v[2] - v3->v[2];
+}
+
+/*
+ * v1 = v2*v3, element-wise.
+ */
+void BR_PUBLIC_ENTRY BrVector3Mul(br_vector3 *v1, const br_vector3 *v2, const br_vector3 *v3)
+{
+    UASSERT_MESSAGE("Destination Vector is NULL", v1 != NULL);
+    UASSERT_MESSAGE("Left hand Source Vector is NULL", v2 != NULL);
+    UASSERT_MESSAGE("Right hand Source Vector is NULL", v3 != NULL);
+
+    v1->v[0] = BR_MUL(v2->v[0], v3->v[0]);
+    v1->v[1] = BR_MUL(v2->v[1], v3->v[1]);
+    v1->v[2] = BR_MUL(v2->v[2], v3->v[2]);
 }
 
 /*
@@ -349,8 +409,7 @@ void BR_PUBLIC_ENTRY BrVector3Normalise(br_vector3 *v1, const br_vector3 *v2)
     scale = BR_LENGTH3(v2->v[0], v2->v[1], v2->v[2]);
 
     if(scale > BR_SCALAR_EPSILON * 2) {
-
-        scale = BR_DIV(BR_SCALAR(1.0), scale);
+        scale = BR_RCP(scale);
 
         v1->v[0] = BR_MUL(v2->v[0], scale);
         v1->v[1] = BR_MUL(v2->v[1], scale);
@@ -361,6 +420,20 @@ void BR_PUBLIC_ENTRY BrVector3Normalise(br_vector3 *v1, const br_vector3 *v2)
         v1->v[1] = BR_SCALAR(0.0);
         v1->v[2] = BR_SCALAR(0.0);
     }
+}
+
+/*
+ * v1 = v2/|v2|
+ */
+void BR_PUBLIC_ENTRY BrVector3NormaliseQuick(br_vector3 *v1, const br_vector3 *v2)
+{
+    br_scalar scale;
+
+    UASSERT_MESSAGE("Destination Vector is NULL", v1 != NULL);
+    UASSERT_MESSAGE("Source Vector is NULL", v2 != NULL);
+
+    scale = BR_RCP(BR_LENGTH3(v2->v[0], v2->v[1], v2->v[2]));
+    BrVector3Scale(v1, v2, scale);
 }
 
 /*
@@ -385,6 +458,20 @@ void BR_PUBLIC_ENTRY BrVector3NormaliseLP(br_vector3 *v1, const br_vector3 *v2)
 /**
  ** 4D Vectors
  **/
+
+/*
+ * v1=(s1,s2,s3,s4)
+ */
+void BR_PUBLIC_ENTRY BrVector4Set(br_vector4 *v1, br_scalar s1, br_scalar s2, br_scalar s3, br_scalar s4)
+{
+    UASSERT_MESSAGE("Destination Vector is NULL", v1 != NULL);
+
+    v1->v[0] = s1;
+    v1->v[1] = s2;
+    v1->v[2] = s3;
+    v1->v[3] = s4;
+}
+
 /*
  *  = v1.v2
  */
@@ -408,6 +495,61 @@ void BR_PUBLIC_ENTRY BrVector4Copy(br_vector4 *v1, const br_vector4 *v2)
     v1->v[1] = v2->v[1];
     v1->v[2] = v2->v[2];
     v1->v[3] = v2->v[3];
+}
+
+/*
+ * v1=-v2
+ */
+void BR_PUBLIC_ENTRY BrVector4Negate(br_vector4 *v1, const br_vector4 *v2)
+{
+    UASSERT_MESSAGE("Destination Vector is NULL", v1 != NULL);
+    UASSERT_MESSAGE("Source Vector is NULL", v1 != NULL);
+
+    v1->v[0] = -v2->v[0];
+    v1->v[1] = -v2->v[1];
+    v1->v[2] = -v2->v[2];
+    v1->v[3] = -v2->v[3];
+}
+
+/*
+ * v1=v2*scalar
+ */
+void BR_PUBLIC_ENTRY BrVector4Scale(br_vector4 *v1, const br_vector4 *v2, br_scalar s)
+{
+    UASSERT_MESSAGE("Destination Vector is NULL", v1 != NULL);
+    UASSERT_MESSAGE("Source Vector is NULL", v2 != NULL);
+
+    v1->v[0] = BR_MUL(v2->v[0], (s));
+    v1->v[1] = BR_MUL(v2->v[1], (s));
+    v1->v[2] = BR_MUL(v2->v[2], (s));
+    v1->v[3] = BR_MUL(v2->v[3], (s));
+}
+
+/*
+ * v1 = v2/|v2|
+ */
+void BR_PUBLIC_ENTRY BrVector4Normalise(br_vector4 *v1, const br_vector4 *v2)
+{
+    br_scalar scale;
+
+    UASSERT_MESSAGE("Destination Vector is NULL", v1 != NULL);
+    UASSERT_MESSAGE("Source Vector is NULL", v2 != NULL);
+
+    scale = BR_LENGTH4(v2->v[0], v2->v[1], v2->v[2], v2->v[3]);
+
+    if(scale > BR_SCALAR_EPSILON * 2) {
+        scale = BR_RCP(scale);
+
+        v1->v[0] = BR_MUL(v2->v[0], scale);
+        v1->v[1] = BR_MUL(v2->v[1], scale);
+        v1->v[1] = BR_MUL(v2->v[2], scale);
+        v1->v[1] = BR_MUL(v2->v[3], scale);
+    } else {
+        v1->v[0] = BR_SCALAR(1.0);
+        v1->v[1] = BR_SCALAR(0.0);
+        v1->v[2] = BR_SCALAR(0.0);
+        v1->v[3] = BR_SCALAR(0.0);
+    }
 }
 
 /**
@@ -499,27 +641,4 @@ void BrFVector3NormaliseLP(br_fvector3 *v1, br_vector3 *v2)
     v1->v[0] = (br_fraction)BR_MUL(v2->v[0], scale);
     v1->v[1] = (br_fraction)BR_MUL(v2->v[1], scale);
     v1->v[2] = (br_fraction)BR_MUL(v2->v[2], scale);
-}
-
-/*
- * v1 = v2/|v2|
- */
-void BR_PUBLIC_ENTRY BrVector2Normalise(br_vector2 *v1, const br_vector2 *v2)
-{
-    br_scalar scale;
-
-    scale = BR_LENGTH2(v2->v[0], v2->v[1]);
-
-    UASSERT_MESSAGE("Destination Vector is NULL", v1 != NULL);
-    UASSERT_MESSAGE("Source Vector is NULL", v2 != NULL);
-
-    if(scale > BR_SCALAR_EPSILON * 2) {
-        scale = BR_DIV(BR_SCALAR(1.0), scale);
-
-        v1->v[0] = BR_MUL(v2->v[0], scale);
-        v1->v[1] = BR_MUL(v2->v[1], scale);
-    } else {
-        v1->v[0] = BR_SCALAR(1.0);
-        v1->v[1] = BR_SCALAR(0.0);
-    }
 }
