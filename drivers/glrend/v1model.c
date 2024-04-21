@@ -275,10 +275,10 @@ void StoredGLRenderGroup(br_geometry_stored *self, br_renderer *renderer, const 
     }
 #endif
 
-    model.projection    = *(br_matrix4_f *)&hCache->model.p;
-    model.model_view    = *(br_matrix4_f *)&hCache->model.mv;
-    model.mvp           = *(br_matrix4_f *)&hCache->model.mvp;
-    model.normal_matrix = *(br_matrix4_f *)&hCache->model.normal;
+    model.projection    = hCache->model.p;
+    model.model_view    = hCache->model.mv;
+    model.mvp           = hCache->model.mvp;
+    model.normal_matrix = hCache->model.normal;
 
     glBindVertexArray(self->gl_vao);
 

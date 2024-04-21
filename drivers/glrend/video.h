@@ -65,17 +65,17 @@ typedef struct _VIDEO {
 /* std140-compatible light structure */
 typedef struct _GLSTD140_LIGHT {
     /* (X, Y, Z, T), if T == 0, direct, otherwise point/spot */
-    alignas(16) br_vector4_f position;
+    alignas(16) br_vector4 position;
     /* (X, Y, Z, 0), normalised */
-    alignas(16) br_vector4_f direction;
+    alignas(16) br_vector4 direction;
     /* (X, Y, Z, 0), normalised */
-    alignas(16) br_vector4_f half;
+    alignas(16) br_vector4 half;
     /* (R, G, B, 0) */
-    alignas(16) br_vector4_f colour;
+    alignas(16) br_vector4 colour;
     /* (intensity, constant, linear, attenutation) */
-    alignas(16) br_vector4_f iclq;
+    alignas(16) br_vector4 iclq;
     /* (inner, outer), if (0.0, 0.0), then this is a point light. */
-    alignas(16) br_vector2_f spot_angles;
+    alignas(16) br_vector2 spot_angles;
 
     /* Pad out the structure to maintain alignment. */
     alignas(4) float _pad0, _pad1;
@@ -83,7 +83,7 @@ typedef struct _GLSTD140_LIGHT {
 BR_STATIC_ASSERT(sizeof(GLSTD140_LIGHT) % 16 == 0, "GLSTD140_LIGHT is not aligned");
 
 typedef struct _GLSTD140_SCENE_DATA {
-    alignas(16) br_vector4_f eye_view;
+    alignas(16) br_vector4 eye_view;
     alignas(16) GLSTD140_LIGHT lights[BR_MAX_LIGHTS];
     alignas(4) uint32_t num_lights;
 } GLSTD140_SCENE_DATA, *HGLSTD140_SCENE_DATA;
@@ -91,12 +91,12 @@ BR_STATIC_ASSERT(sizeof(((GLSTD140_SCENE_DATA *)NULL)->lights) == sizeof(GLSTD14
                  "std::array<GLSTD140_LIGHT> fucked up");
 
 typedef struct _GLSTD140_MODEL_DATA {
-    alignas(16) br_matrix4_f model_view;
-    alignas(16) br_matrix4_f projection;
-    alignas(16) br_matrix4_f mvp;
-    alignas(16) br_matrix4_f normal_matrix;
-    alignas(16) br_vector4_f surface_colour;
-    alignas(16) br_vector4_f clear_colour;
+    alignas(16) br_matrix4 model_view;
+    alignas(16) br_matrix4 projection;
+    alignas(16) br_matrix4 mvp;
+    alignas(16) br_matrix4 normal_matrix;
+    alignas(16) br_vector4 surface_colour;
+    alignas(16) br_vector4 clear_colour;
     alignas(4) float ka;
     alignas(4) float ks;
     alignas(4) float kd;
