@@ -173,9 +173,9 @@ br_scalar BR_PUBLIC_ENTRY BrVector2LengthSquared(br_vector2 *v1)
 }
 
 /*
- * v1 = v2/|v2|
+ * v1 = v2/|v2|, or (0, 0) if |v2| == 0
  */
-void BR_PUBLIC_ENTRY BrVector2Normalise(br_vector2 *v1, const br_vector2 *v2)
+br_boolean BR_PUBLIC_ENTRY BrVector2Normalise0(br_vector2 *v1, const br_vector2 *v2)
 {
     br_scalar scale;
 
@@ -189,10 +189,23 @@ void BR_PUBLIC_ENTRY BrVector2Normalise(br_vector2 *v1, const br_vector2 *v2)
 
         v1->v[0] = BR_MUL(v2->v[0], scale);
         v1->v[1] = BR_MUL(v2->v[1], scale);
+
+        return BR_TRUE;
     } else {
-        v1->v[0] = BR_SCALAR(1.0);
+        v1->v[0] = BR_SCALAR(0.0);
         v1->v[1] = BR_SCALAR(0.0);
+
+        return BR_FALSE;
     }
+}
+
+/*
+ * v1 = v2/|v2|, or (1, 0) if |v2| == 0
+ */
+void BR_PUBLIC_ENTRY BrVector2Normalise(br_vector2 *v1, const br_vector2 *v2)
+{
+    if(!BrVector2Normalise0(v1, v2))
+        v1->v[0] = BR_SCALAR(1.0);
 }
 
 /**
@@ -397,9 +410,9 @@ br_scalar BR_PUBLIC_ENTRY BrVector3LengthSquared(br_vector3 *v1)
 }
 
 /*
- * v1 = v2/|v2|
+ * v1 = v2/|v2|, or (0, 0, 0) if |v2| == 0
  */
-void BR_PUBLIC_ENTRY BrVector3Normalise(br_vector3 *v1, const br_vector3 *v2)
+br_boolean BR_PUBLIC_ENTRY BrVector3Normalise0(br_vector3 *v1, const br_vector3 *v2)
 {
     br_scalar scale;
 
@@ -415,11 +428,23 @@ void BR_PUBLIC_ENTRY BrVector3Normalise(br_vector3 *v1, const br_vector3 *v2)
         v1->v[1] = BR_MUL(v2->v[1], scale);
         v1->v[2] = BR_MUL(v2->v[2], scale);
 
+        return BR_TRUE;
     } else {
-        v1->v[0] = BR_SCALAR(1.0);
+        v1->v[0] = BR_SCALAR(0.0);
         v1->v[1] = BR_SCALAR(0.0);
         v1->v[2] = BR_SCALAR(0.0);
+
+        return BR_FALSE;
     }
+}
+
+/*
+ * v1 = v2/|v2|, or (1, 0, 0) if |v2| == 0
+ */
+void BR_PUBLIC_ENTRY BrVector3Normalise(br_vector3 *v1, const br_vector3 *v2)
+{
+    if(BrVector3Normalise0(v1, v2) != BR_TRUE)
+        v1->v[0] = BR_SCALAR(1.0);
 }
 
 /*
@@ -526,9 +551,9 @@ void BR_PUBLIC_ENTRY BrVector4Scale(br_vector4 *v1, const br_vector4 *v2, br_sca
 }
 
 /*
- * v1 = v2/|v2|
+ * v1 = v2/|v2|, or (0, 0, 0, 0) if |v2| == 0
  */
-void BR_PUBLIC_ENTRY BrVector4Normalise(br_vector4 *v1, const br_vector4 *v2)
+br_boolean BR_PUBLIC_ENTRY BrVector4Normalise0(br_vector4 *v1, const br_vector4 *v2)
 {
     br_scalar scale;
 
@@ -544,12 +569,25 @@ void BR_PUBLIC_ENTRY BrVector4Normalise(br_vector4 *v1, const br_vector4 *v2)
         v1->v[1] = BR_MUL(v2->v[1], scale);
         v1->v[1] = BR_MUL(v2->v[2], scale);
         v1->v[1] = BR_MUL(v2->v[3], scale);
+
+        return BR_TRUE;
     } else {
-        v1->v[0] = BR_SCALAR(1.0);
+        v1->v[0] = BR_SCALAR(0.0);
         v1->v[1] = BR_SCALAR(0.0);
         v1->v[2] = BR_SCALAR(0.0);
         v1->v[3] = BR_SCALAR(0.0);
+
+        return BR_FALSE;
     }
+}
+
+/*
+ * v1 = v2/|v2|, or (1, 0, 0, 0) if |v2| == 0
+ */
+void BR_PUBLIC_ENTRY BrVector4Normalise(br_vector4 *v1, const br_vector4 *v2)
+{
+    if(!BrVector4Normalise0(v1, v2))
+        v1->v[0] = BR_SCALAR(1.0);
 }
 
 /**

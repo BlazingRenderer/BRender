@@ -298,9 +298,10 @@ void BR_PUBLIC_ENTRY      BrVector3Cross(br_vector3 *v1, const br_vector3 *v2, c
 br_scalar BR_PUBLIC_ENTRY BrVector3Length(br_vector3 *v1);
 br_scalar BR_PUBLIC_ENTRY BrVector3LengthSquared(br_vector3 *v1);
 
-void BR_PUBLIC_ENTRY BrVector3Normalise(br_vector3 *v1, const br_vector3 *v2);
-void BR_PUBLIC_ENTRY BrVector3NormaliseQuick(br_vector3 *v1, const br_vector3 *v2);
-void BR_PUBLIC_ENTRY BrVector3NormaliseLP(br_vector3 *v1, const br_vector3 *v2);
+br_boolean BR_PUBLIC_ENTRY BrVector3Normalise0(br_vector3 *v1, const br_vector3 *v2);
+void BR_PUBLIC_ENTRY       BrVector3Normalise(br_vector3 *v1, const br_vector3 *v2);
+void BR_PUBLIC_ENTRY       BrVector3NormaliseQuick(br_vector3 *v1, const br_vector3 *v2);
+void BR_PUBLIC_ENTRY       BrVector3NormaliseLP(br_vector3 *v1, const br_vector3 *v2);
 
 br_int_32 BR_PUBLIC_ENTRY BrPlaneEquation(br_vector4 *eqn, const br_vector3 *v0, const br_vector3 *v1,
                                           const br_vector3 *v2);
@@ -308,17 +309,19 @@ br_int_32 BR_PUBLIC_ENTRY BrPlaneEquation(br_vector4 *eqn, const br_vector3 *v0,
 /*
  * 2D vectors
  */
-void BR_PUBLIC_ENTRY BrVector2Normalise(br_vector2 *v1, const br_vector2 *v2);
+br_boolean BR_PUBLIC_ENTRY BrVector2Normalise0(br_vector2 *v1, const br_vector2 *v2);
+void BR_PUBLIC_ENTRY       BrVector2Normalise(br_vector2 *v1, const br_vector2 *v2);
 
 /**
  ** 4D Vectors
  **/
-void BR_PUBLIC_ENTRY      BrVector4Set(br_vector4 *v1, br_scalar s1, br_scalar s2, br_scalar s3, br_scalar s4);
-br_scalar BR_PUBLIC_ENTRY BrVector4Dot(br_vector4 *v1, const br_vector4 *v2);
-void BR_PUBLIC_ENTRY      BrVector4Copy(br_vector4 *v1, const br_vector4 *v2);
-void BR_PUBLIC_ENTRY      BrVector4Negate(br_vector4 *v1, const br_vector4 *v2);
-void BR_PUBLIC_ENTRY      BrVector4Scale(br_vector4 *v1, const br_vector4 *v2, br_scalar s);
-void BR_PUBLIC_ENTRY      BrVector4Normalise(br_vector4 *v1, const br_vector4 *v2);
+void BR_PUBLIC_ENTRY       BrVector4Set(br_vector4 *v1, br_scalar s1, br_scalar s2, br_scalar s3, br_scalar s4);
+br_scalar BR_PUBLIC_ENTRY  BrVector4Dot(br_vector4 *v1, const br_vector4 *v2);
+void BR_PUBLIC_ENTRY       BrVector4Copy(br_vector4 *v1, const br_vector4 *v2);
+void BR_PUBLIC_ENTRY       BrVector4Negate(br_vector4 *v1, const br_vector4 *v2);
+void BR_PUBLIC_ENTRY       BrVector4Scale(br_vector4 *v1, const br_vector4 *v2, br_scalar s);
+br_boolean BR_PUBLIC_ENTRY BrVector4Normalise0(br_vector4 *v1, const br_vector4 *v2);
+void BR_PUBLIC_ENTRY       BrVector4Normalise(br_vector4 *v1, const br_vector4 *v2);
 
 /*
  * Euler Angles
