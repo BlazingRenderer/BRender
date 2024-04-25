@@ -72,7 +72,7 @@ typedef br_float br_ufraction;
 #define BR_MUL(a, b)                          ((a) * (b))
 #define BR_SQR(a)                             ((a) * (a))
 
-#define BR_ABS(a)                             ((br_scalar)fabs(a))
+#define BR_ABS(a)                             ((br_scalar)fabsf(a))
 #define BR_NEG(a)                             (-(a))
 
 #define BR_DIV(a, b)                          ((a) / (b))
