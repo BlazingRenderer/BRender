@@ -457,6 +457,8 @@ br_error BR_CMETHOD_DECL(br_device_pixelmap_gl, rectangleFill)(br_device_pixelma
 
     glDisable(GL_SCISSOR_TEST);
 
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
     return BRE_OK;
 }
 
