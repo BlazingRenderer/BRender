@@ -22,8 +22,6 @@ static const char deviceCreator[] = DEVICE_CREATOR;
 
 static const char deviceProduct[] = DEVICE_PRODUCT;
 
-// clang-format off
-
 #define F(f) offsetof(br_device, f)
 #define A(a) ((br_uintptr_t)(a))
 
@@ -47,7 +45,6 @@ static struct br_tv_template_entry deviceTemplateEntries[] = {
 };
 #undef F
 #undef A
-// clang-format on
 
 /*
  * List of tokens which are not significant in matching (for output facilities)
