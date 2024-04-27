@@ -5,6 +5,16 @@
 #error Please include brender.h first
 #endif
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+extern br_token BRT_OPENGL_TEXTURE_U32;
+
+#ifdef __cplusplus
+}
+#endif
+
 typedef void *BR_CALLBACK br_device_pixelmap_gl_createcontext_cbfn(br_pixelmap *pm, void *user);
 
 typedef void BR_CALLBACK br_device_pixelmap_gl_deletecontext_cbfn(br_pixelmap *pm, void *ctx, void *user);
