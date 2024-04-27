@@ -119,6 +119,8 @@ void BR_CMETHOD_DECL(br_renderer_gl, sceneEnd)(br_renderer *self)
 
     glBindTexture(GL_TEXTURE_2D, 0);
     glBindBuffer(GL_UNIFORM_BUFFER, 0);
+    glBindVertexArray(0);
+
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
     glUseProgram(0);
     self->has_begun = 0;
