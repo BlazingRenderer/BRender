@@ -46,6 +46,13 @@ extern "C" {
 #include "gv1buckt.h"
 
 /*
+ * Macros that expand to the first two arguments of a template entry
+ * Builtin or device token
+ */
+#define BRT(t) BRT_##t, 0
+#define DEV(t) 0, #t
+
+/*
  * Pull in private prototypes
  */
 #ifndef _NO_PROTOTYPES

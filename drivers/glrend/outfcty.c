@@ -15,25 +15,25 @@ static const struct br_output_facility_dispatch outputFacilityDispatch;
 #define A(a) ((br_uintptr_t)(a))
 
 static struct br_tv_template_entry outputFacilityTemplateEntries[] = {
-    {BRT_WIDTH_I32,                  NULL, A(-1),                BRTV_QUERY | BRTV_ALL | BRTV_ABS, BRTV_CONV_COPY  },
-    {BRT_WIDTH_MIN_I32,              NULL, A(1),                 BRTV_QUERY | BRTV_ALL | BRTV_ABS, BRTV_CONV_COPY  },
-    {BRT_HEIGHT_I32,                 NULL, A(-1),                BRTV_QUERY | BRTV_ALL | BRTV_ABS, BRTV_CONV_COPY  },
-    {BRT_HEIGHT_MIN_I32,             NULL, A(1),                 BRTV_QUERY | BRTV_ALL | BRTV_ABS, BRTV_CONV_COPY  },
-    {BRT_PIXEL_BITS_I32,             NULL, A(-1),                BRTV_QUERY | BRTV_ALL | BRTV_ABS, BRTV_CONV_COPY  },
-    {BRT_PIXEL_TYPE_U8,              NULL, A(BR_PMT_MAX),        BRTV_QUERY | BRTV_ALL | BRTV_ABS, BRTV_CONV_COPY  },
-    {BRT_INDEXED_B,                  NULL, A(0),                 BRTV_QUERY | BRTV_ALL | BRTV_ABS, BRTV_CONV_COPY  },
-    {BRT_IDENTIFIER_CSTR,            NULL, F(identifier),        BRTV_QUERY | BRTV_ALL,            BRTV_CONV_COPY  },
-    {BRT_RENDERER_FACILITY_O,        NULL, F(renderer_facility), BRTV_QUERY | BRTV_ALL,            BRTV_CONV_COPY  },
+    {BRT(WIDTH_I32),                  A(-1),                BRTV_QUERY | BRTV_ALL | BRTV_ABS, BRTV_CONV_COPY  },
+    {BRT(WIDTH_MIN_I32),              A(1),                 BRTV_QUERY | BRTV_ALL | BRTV_ABS, BRTV_CONV_COPY  },
+    {BRT(HEIGHT_I32),                 A(-1),                BRTV_QUERY | BRTV_ALL | BRTV_ABS, BRTV_CONV_COPY  },
+    {BRT(HEIGHT_MIN_I32),             A(1),                 BRTV_QUERY | BRTV_ALL | BRTV_ABS, BRTV_CONV_COPY  },
+    {BRT(PIXEL_BITS_I32),             A(-1),                BRTV_QUERY | BRTV_ALL | BRTV_ABS, BRTV_CONV_COPY  },
+    {BRT(PIXEL_TYPE_U8),              A(BR_PMT_MAX),        BRTV_QUERY | BRTV_ALL | BRTV_ABS, BRTV_CONV_COPY  },
+    {BRT(INDEXED_B),                  A(0),                 BRTV_QUERY | BRTV_ALL | BRTV_ABS, BRTV_CONV_COPY  },
+    {BRT(IDENTIFIER_CSTR),            F(identifier),        BRTV_QUERY | BRTV_ALL,            BRTV_CONV_COPY  },
+    {BRT(RENDERER_FACILITY_O),        F(renderer_facility), BRTV_QUERY | BRTV_ALL,            BRTV_CONV_COPY  },
 
- /*
-  * We don't use these, but we need BrDevBeginVar to accept them.
-  * These are passed to pixelmapNew, which will handle them.
-  */
-    {BRT_MSAA_SAMPLES_I32,           NULL, 0,                    BRTV_QUERY | BRTV_ALL,            BRTV_CONV_DIRECT},
-    {BRT_WINDOW_HANDLE_H,            NULL, 0,                    BRTV_QUERY | BRTV_ALL,            BRTV_CONV_DIRECT},
-    {BRT_OPENGL_EXT_PROCS_P,         NULL, 0,                    BRTV_QUERY | BRTV_ALL,            BRTV_CONV_DIRECT},
-    {BRT_OPENGL_VERTEX_SHADER_STR,   NULL, 0,                    BRTV_QUERY | BRTV_ALL,            BRTV_CONV_DIRECT},
-    {BRT_OPENGL_FRAGMENT_SHADER_STR, NULL, 0,                    BRTV_QUERY | BRTV_ALL,            BRTV_CONV_DIRECT},
+    /*
+     * We don't use these, but we need BrDevBeginVar to accept them.
+     * These are passed to pixelmapNew, which will handle them.
+     */
+    {BRT(MSAA_SAMPLES_I32),           0,                    BRTV_QUERY | BRTV_ALL,            BRTV_CONV_DIRECT},
+    {BRT(WINDOW_HANDLE_H),            0,                    BRTV_QUERY | BRTV_ALL,            BRTV_CONV_DIRECT},
+    {BRT(OPENGL_EXT_PROCS_P),         0,                    BRTV_QUERY | BRTV_ALL,            BRTV_CONV_DIRECT},
+    {BRT(OPENGL_VERTEX_SHADER_STR),   0,                    BRTV_QUERY | BRTV_ALL,            BRTV_CONV_DIRECT},
+    {BRT(OPENGL_FRAGMENT_SHADER_STR), 0,                    BRTV_QUERY | BRTV_ALL,            BRTV_CONV_DIRECT},
 };
 
 #undef F
