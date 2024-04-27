@@ -14,18 +14,44 @@
  */
 static const struct br_device_pixelmap_dispatch devicePixelmapDispatch;
 
+static br_error custom_query(br_value *pvalue, void **extra, br_size_t *pextra_size, void *block,
+                             const struct br_tv_template_entry *tep)
+{
+    const br_device_pixelmap *self = block;
+
+    if(tep->token == BRT_OPENGL_TEXTURE_U32) {
+        if(self->use_type == BRT_OFFSCREEN)
+            pvalue->u32 = self->asBack.glTex;
+        else if(self->use_type == BRT_DEPTH)
+            pvalue->u32 = self->asDepth.glDepth;
+        else
+            pvalue->u32 = 0;
+
+        return BRE_OK;
+    }
+
+    return BRE_UNKNOWN;
+}
+
+static const br_tv_custom custom = {
+    .query      = custom_query,
+    .set        = NULL,
+    .extra_size = NULL,
+};
+
 /*
  * Device pixelmap info. template
  */
 #define F(f) offsetof(struct br_device_pixelmap, f)
 static struct br_tv_template_entry devicePixelmapTemplateEntries[] = {
-    {BRT(WIDTH_I32),         F(pm_width),        BRTV_QUERY | BRTV_ALL, BRTV_CONV_I32_U16},
-    {BRT(HEIGHT_I32),        F(pm_height),       BRTV_QUERY | BRTV_ALL, BRTV_CONV_I32_U16},
-    {BRT(PIXEL_TYPE_U8),     F(pm_type),         BRTV_QUERY | BRTV_ALL, BRTV_CONV_I32_U8 },
-    {BRT(OUTPUT_FACILITY_O), F(output_facility), BRTV_QUERY | BRTV_ALL, BRTV_CONV_COPY   },
-    {BRT(FACILITY_O),        F(output_facility), BRTV_QUERY,            BRTV_CONV_COPY   },
-    {BRT(IDENTIFIER_CSTR),   F(pm_identifier),   BRTV_QUERY | BRTV_ALL, BRTV_CONV_COPY   },
-    {BRT(MSAA_SAMPLES_I32),  F(msaa_samples),    BRTV_QUERY | BRTV_ALL, BRTV_CONV_COPY   },
+    {BRT(WIDTH_I32),          F(pm_width),        BRTV_QUERY | BRTV_ALL, BRTV_CONV_I32_U16, 0                    },
+    {BRT(HEIGHT_I32),         F(pm_height),       BRTV_QUERY | BRTV_ALL, BRTV_CONV_I32_U16, 0                    },
+    {BRT(PIXEL_TYPE_U8),      F(pm_type),         BRTV_QUERY | BRTV_ALL, BRTV_CONV_I32_U8,  0                    },
+    {BRT(OUTPUT_FACILITY_O),  F(output_facility), BRTV_QUERY | BRTV_ALL, BRTV_CONV_COPY,    0                    },
+    {BRT(FACILITY_O),         F(output_facility), BRTV_QUERY,            BRTV_CONV_COPY,    0                    },
+    {BRT(IDENTIFIER_CSTR),    F(pm_identifier),   BRTV_QUERY | BRTV_ALL, BRTV_CONV_COPY,    0                    },
+    {BRT(MSAA_SAMPLES_I32),   F(msaa_samples),    BRTV_QUERY | BRTV_ALL, BRTV_CONV_COPY,    0                    },
+    {DEV(OPENGL_TEXTURE_U32), 0,                  BRTV_QUERY | BRTV_ALL, BRTV_CONV_CUSTOM,  (br_uintptr_t)&custom},
 };
 #undef F
 
