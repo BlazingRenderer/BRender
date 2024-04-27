@@ -49,6 +49,7 @@ static br_error recreate_renderbuffers(br_device_pixelmap *self)
         /* Create */
         glGenTextures(1, &self->asBack.glTex);
         glBindTexture(binding_point, self->asBack.glTex);
+        glTexParameteri(binding_point, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 
         if(self->msaa_samples) {
             glTexImage2DMultisample(binding_point, self->msaa_samples, GL_RGBA8, self->pm_width, self->pm_height, GL_TRUE);
