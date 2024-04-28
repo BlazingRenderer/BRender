@@ -272,8 +272,12 @@ static br_error BR_CMETHOD_DECL(br_renderer_gl, partSetMany)(br_renderer *self, 
 static br_error BR_CMETHOD_DECL(br_renderer_gl, partQuery)(br_renderer *self, br_token part, br_int_32 index,
                                                            void *pvalue, br_token t)
 {
-    BrLogTrace("GLREND", "%s", __FUNCTION__);
-    return BRE_FAIL;
+    struct br_tv_template *tp;
+
+    if((tp = GLSTATE_GetStateTemplate(&self->state, part, index)) == NULL)
+        return BRE_FAIL;
+
+    return BrTokenValueQuery(pvalue, NULL, 0, t, self->state.current, tp);
 }
 
 static br_error BR_CMETHOD_DECL(br_renderer_gl, partQueryBuffer)(br_renderer *self, br_token part, br_int_32 index,
@@ -291,34 +295,83 @@ static br_error BR_CMETHOD_DECL(br_renderer_gl, partQueryMany)(br_renderer *self
                                                                br_token_value *tv, void *extra, br_size_t extra_size,
                                                                br_int_32 *pcount)
 {
-    BrLogTrace("GLREND", "%s", __FUNCTION__);
-    return BRE_FAIL;
+    struct br_tv_template *tp;
+
+    if((tp = GLSTATE_GetStateTemplate(&self->state, part, index)) == NULL)
+        return BRE_FAIL;
+
+    return BrTokenValueQueryMany(tv, extra, extra_size, pcount, self->state.current, tp);
 }
 
 static br_error BR_CMETHOD_DECL(br_renderer_gl, partQueryManySize)(br_renderer *self, br_token part, br_int_32 index,
                                                                    br_size_t *pextra_size, br_token_value *tv)
 {
-    BrLogTrace("GLREND", "%s", __FUNCTION__);
-    return BRE_FAIL;
+    struct br_tv_template *tp;
+
+    if((tp = GLSTATE_GetStateTemplate(&self->state, part, index)) == NULL)
+        return BRE_FAIL;
+
+    return BrTokenValueQueryManySize(pextra_size, tv, self->state.current, tp);
 }
 
 static br_error BR_CMETHOD_DECL(br_renderer_gl, partQueryAll)(br_renderer *self, br_token part, br_int_32 index,
                                                               br_token_value *buffer, br_size_t buffer_size)
 {
-    BrLogTrace("GLREND", "%s", __FUNCTION__);
-    return BRE_FAIL;
+    struct br_tv_template *tp;
+
+    if((tp = GLSTATE_GetStateTemplate(&self->state, part, index)) == NULL)
+        return BRE_FAIL;
+
+    return BrTokenValueQueryAll(buffer, buffer_size, self->state.current, tp);
 }
 
 static br_error BR_CMETHOD_DECL(br_renderer_gl, partQueryAllSize)(br_renderer *self, br_token part, br_int_32 index,
                                                                   br_size_t *psize)
 {
-    BrLogTrace("GLREND", "%s", __FUNCTION__);
-    return BRE_FAIL;
+    struct br_tv_template *tp;
+
+    if((tp = GLSTATE_GetStateTemplate(&self->state, part, index)) == NULL)
+        return BRE_FAIL;
+
+    return BrTokenValueQueryAllSize(psize, self->state.current, tp);
 }
 
 static br_error BR_CMETHOD_DECL(br_renderer_gl, partIndexQuery)(br_renderer *self, br_token part, br_int_32 *pnindex)
 {
-    BrLogTrace("GLREND", "%s", __FUNCTION__);
+    (void)self;
+
+    if(pnindex == NULL)
+        return BRE_FAIL;
+
+    switch(part) {
+        /* Renderer states. */
+        case BRT_CULL:
+        case BRT_SURFACE:
+        case BRT_MATRIX:
+        case BRT_ENABLE:
+        case BRT_BOUNDS:
+        case BRT_HIDDEN_SURFACE:
+            *pnindex = 1;
+            return BRE_OK;
+
+        case BRT_LIGHT:
+            *pnindex = GLSTATE_MAX_LIGHTS;
+            return BRE_OK;
+
+        case BRT_CLIP:
+            /* TODO: implement clip states */
+            return BRE_FAIL;
+
+        /* Primitive states. */
+        case BRT_OUTPUT:
+        case BRT_PRIMITIVE:
+            *pnindex = 1;
+            return BRE_OK;
+
+        default:
+            break;
+    }
+
     return BRE_FAIL;
 }
 
@@ -414,8 +467,60 @@ static br_error BR_CMETHOD_DECL(br_renderer_gl, stateDefault)(br_renderer *self,
 
 static br_error BR_CMETHOD_DECL(br_renderer_gl, stateMask)(br_renderer *self, br_uint_32 *mask, br_token *parts, int n_parts)
 {
-    BrLogTrace("GLREND", "%s", __FUNCTION__);
-    return BRE_FAIL;
+    br_uint_32 m;
+
+    (void)self;
+
+    if(mask == NULL)
+        return BRE_FAIL;
+
+    m = 0;
+    for(int i = 0; i < n_parts; i++) {
+        switch(parts[i]) {
+            case BRT_SURFACE:
+                m |= GLSTATE_MASK_SURFACE;
+                break;
+
+            case BRT_MATRIX:
+                m |= GLSTATE_MASK_MATRIX;
+                break;
+
+            case BRT_ENABLE:
+                m |= GLSTATE_MASK_ENABLE;
+                break;
+
+            case BRT_LIGHT:
+                m |= GLSTATE_MASK_LIGHT;
+                break;
+
+            case BRT_CLIP:
+                m |= GLSTATE_MASK_CLIP;
+                break;
+
+            case BRT_BOUNDS:
+                m |= GLSTATE_MASK_BOUNDS;
+                break;
+
+            case BRT_CULL:
+                m |= GLSTATE_MASK_CULL;
+                break;
+
+            case BRT_OUTPUT:
+                m |= GLSTATE_MASK_OUTPUT;
+                break;
+
+            case BRT_PRIMITIVE:
+                m |= GLSTATE_MASK_PRIMITIVE;
+                break;
+
+            default:
+                break;
+        }
+    }
+
+    *mask = m;
+
+    return BRE_OK;
 }
 
 static br_error BR_CMETHOD_DECL(br_renderer_gl, boundsTest)(br_renderer *self, br_token *r, br_bounds3_f *bounds)
