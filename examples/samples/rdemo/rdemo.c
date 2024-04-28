@@ -284,7 +284,7 @@ int main(void)
 
         /* Place rotated earth and moon */
 
-        ++theta;
+        theta += dt * 25;
 
         BrMatrix34Scale(&earth->t.t.mat, BR_SCALAR(0.35), BR_SCALAR(0.35), BR_SCALAR(0.35));
         BrMatrix34PostRotateX(&earth->t.t.mat, BR_ANGLE_DEG(90));
