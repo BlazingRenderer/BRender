@@ -105,10 +105,10 @@ open(STDOUT,">pretok.c");
 foreach $t (sort(keys %token_val)) {
 	$len = length($t) - length($type_ext{$token_val{$t}});
 
-	printf("\t{ {0,}, %-32s%-24s%-32s%8d},\n",
-		"\"$t\",",
-		"$token_prefix$type_tok{$token_val{$t}},",
-        "$token_prefix$t,",
+	printf("\t{ .node = {0,}, .identifier = %-32s, .type = %-24s, .token = %-32s, .base_length = %8d},\n",
+		"\"$t\"",
+		"$token_prefix$type_tok{$token_val{$t}}",
+		"$token_prefix$t",
 		$len);
 }
 
@@ -127,9 +127,9 @@ foreach $t (sort({length($type_ext{$b}) <=> length($type_ext{$a})} keys %type_to
 	} else {
 		$tsize = "0";
 	}
-	printf("\t{ %-24s%-24s%8d, %-32s},\n",
-	    "\"$type_ext{$t}\",",
-	    "$token_prefix$type_tok{$t},",
+	printf("\t{ .identifier = %-24s, .type = %-24s, .length = %8d, .size = %-32s},\n",
+	    "\"$type_ext{$t}\"",
+	    "$token_prefix$type_tok{$t}",
 	    length($type_ext{$t}),
 		$tsize
 	);
