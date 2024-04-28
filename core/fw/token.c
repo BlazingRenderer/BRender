@@ -172,7 +172,7 @@ br_token BR_RESIDENT_ENTRY BrTokenType(br_token t)
 /*
  * Count the number of registered tokens maching the given pattern
  */
-br_int_32 BR_RESIDENT_ENTRY BrTokenCount(char *pattern)
+br_int_32 BR_RESIDENT_ENTRY BrTokenCount(const char *pattern)
 {
     br_token_entry *te;
     int             n = 0;
@@ -207,7 +207,7 @@ br_size_t BR_RESIDENT_ENTRY BrTokenSize(br_token t)
 /*
  * Find the first token matching the given pattern
  */
-br_token BR_RESIDENT_ENTRY BrTokenFind(char *pattern)
+br_token BR_RESIDENT_ENTRY BrTokenFind(const char *pattern)
 {
     br_token_entry *te;
 
@@ -224,7 +224,7 @@ br_token BR_RESIDENT_ENTRY BrTokenFind(char *pattern)
 /*
  * Find all the tokens matching a given pattern
  */
-br_int_32 BR_RESIDENT_ENTRY BrTokenFindMany(char *pattern, br_token *tokens, br_int_32 max_tokens)
+br_int_32 BR_RESIDENT_ENTRY BrTokenFindMany(const char *pattern, br_token *tokens, br_int_32 max_tokens)
 {
     br_token_entry *te;
     int             n = 0;
@@ -255,7 +255,7 @@ br_int_32 BR_RESIDENT_ENTRY BrTokenFindMany(char *pattern, br_token *tokens, br_
  * Internal special case of find - look for a token given the base name and a list of acceptable types
  * (in order of importance)
  */
-br_token BrTokenFindType(br_token *ptype, char *base, br_token *types, br_size_t ntypes)
+br_token BrTokenFindType(br_token *ptype, const char *base, const br_token *types, br_size_t ntypes)
 {
     br_token_entry *te;
     br_size_t       l, t;

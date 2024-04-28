@@ -33,7 +33,7 @@ void BR_CALLBACK _BrFileFree(void *res, br_uint_8 res_class, br_size_t size);
  * token.c
  */
 void     BrTokenBegin(void);
-br_token BrTokenFindType(br_token *ptype, char *base, br_token *types, br_size_t ntypes);
+br_token BrTokenFindType(br_token *ptype, const char *base, const br_token *types, br_size_t ntypes);
 
 /*
  * object.c

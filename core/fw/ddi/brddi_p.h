@@ -48,10 +48,10 @@ br_error BR_RESIDENT_ENTRY BrLastErrorGet(void **valuep);
 br_token BR_RESIDENT_ENTRY  BrTokenCreate(const char *identifier, br_token type);
 char *BR_RESIDENT_ENTRY     BrTokenIdentifier(br_token t);
 br_token BR_RESIDENT_ENTRY  BrTokenType(br_token t);
-br_int_32 BR_RESIDENT_ENTRY BrTokenCount(char *pattern);
+br_int_32 BR_RESIDENT_ENTRY BrTokenCount(const char *pattern);
 br_size_t BR_RESIDENT_ENTRY BrTokenSize(br_token t);
-br_token BR_RESIDENT_ENTRY  BrTokenFind(char *pattern);
-br_int_32 BR_RESIDENT_ENTRY BrTokenFindMany(char *pattern, br_token *tokens, br_int_32 max_tokens);
+br_token BR_RESIDENT_ENTRY  BrTokenFind(const char *pattern);
+br_int_32 BR_RESIDENT_ENTRY BrTokenFindMany(const char *pattern, br_token *tokens, br_int_32 max_tokens);
 
 /*
  * tokenval.c
