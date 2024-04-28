@@ -567,9 +567,6 @@ SPECULAR						float
 SPECULAR_POWER					fixed
 SPECULAR_POWER					float
 
-GLOBAL_AMBIENT					int_32
-GLOBAL_AMBIENT					colour_rgb
-
 MAP_MATRIX						matrix23_float
 MAP_MATRIX						matrix23_fixed
 
