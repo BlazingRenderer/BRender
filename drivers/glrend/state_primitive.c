@@ -7,9 +7,9 @@
 #define AX   0
 #define AF   BRTV_ALL
 
-#define F(f) offsetof(GLSTATE_STACK, f)
+#define F(f) offsetof(state_stack, f)
 
-static br_tv_template_entry GLSTATEI_PrimitiveTemplateEntries[] = {
+static br_tv_template_entry template_entries[] = {
     {BRT_DEPTH_WRITE_B,           NULL, F(prim.flags),               Q | S | A, BRTV_CONV_BIT,        PRIMF_DEPTH_WRITE,  1},
     {BRT_COLOUR_WRITE_B,          NULL, F(prim.flags),               Q | S | A, BRTV_CONV_BIT,        PRIMF_COLOUR_WRITE, 1},
     {BRT_BLEND_B,                 NULL, F(prim.flags),               Q | S | A, BRTV_CONV_BIT,        PRIMF_BLEND,        1},
@@ -41,7 +41,7 @@ static br_tv_template_entry GLSTATEI_PrimitiveTemplateEntries[] = {
     {BRT_MIP_INTERPOLATION_T,     NULL, F(prim.mip_filter),          Q | S | A, BRTV_CONV_COPY,       0,                  0},
 };
 
-static const GLSTATE_PRIMITIVE s_Default = {
+static const state_primitive default_state = {
     .flags               = PRIMF_COLOUR_WRITE | PRIMF_DEPTH_WRITE,
     .index_base          = 0,
     .index_range         = 0,
@@ -61,11 +61,10 @@ static const GLSTATE_PRIMITIVE s_Default = {
     .mip_filter          = BRT_NONE,
 };
 
-void GLSTATEI_InitPrimitive(HGLSTATE hState)
+void StateGLInitPrimitive(state_all *state)
 {
-    hState->templates.prim = BrTVTemplateAllocate(hState->resourceAnchor, GLSTATEI_PrimitiveTemplateEntries,
-                                                  BR_ASIZE(GLSTATEI_PrimitiveTemplateEntries));
+    state->templates.prim = BrTVTemplateAllocate(state->res, template_entries, BR_ASIZE(template_entries));
 
-    hState->default_.prim = s_Default;
-    hState->default_.valid |= GLSTATE_MASK_PRIMITIVE;
+    state->default_.prim = default_state;
+    state->default_.valid |= MASK_STATE_PRIMITIVE;
 }

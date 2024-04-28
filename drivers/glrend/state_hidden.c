@@ -7,10 +7,9 @@
 #define AX   0
 #define AF   BRTV_ALL
 
-#define F(f) offsetof(GLSTATE_STACK, f)
+#define F(f) offsetof(state_stack, f)
 
-// clang-format off
-static br_tv_template_entry GLSTATEI_HiddenTemplateEntries[] = {
+static br_tv_template_entry template_entries[] = {
     {BRT_TYPE_T,              NULL, F(hidden.type),        Q | S | A, BRTV_CONV_COPY, 0, TM_PART | TM_INVALID_PS | TM_INVALID_PM},
     {BRT_DIVERT_T,            NULL, F(hidden.divert),      Q | S | A, BRTV_CONV_COPY, 0, TM_PART | TM_INVALID_PS | TM_INVALID_PM},
 
@@ -22,9 +21,8 @@ static br_tv_template_entry GLSTATEI_HiddenTemplateEntries[] = {
     {BRT_V1INSERT_ARG2_P,     NULL, F(hidden.insert_arg2), Q | S | A, BRTV_CONV_COPY, 0, TM_PART                                },
     {BRT_V1INSERT_ARG3_P,     NULL, F(hidden.insert_arg3), Q | S | A, BRTV_CONV_COPY, 0, TM_PART                                },
 };
-// clang-format on
 
-static const GLSTATE_HIDDEN s_Default = {
+static const state_hidden default_state = {
     .type        = BRT_NONE,
     .divert      = BRT_NONE,
     .order_table = NULL,
@@ -35,11 +33,10 @@ static const GLSTATE_HIDDEN s_Default = {
     .insert_arg3 = NULL,
 };
 
-void GLSTATEI_InitHidden(HGLSTATE hState)
+void StateGLInitHidden(state_all *state)
 {
-    hState->templates.hidden = BrTVTemplateAllocate(hState->resourceAnchor, GLSTATEI_HiddenTemplateEntries,
-                                                    BR_ASIZE(GLSTATEI_HiddenTemplateEntries));
+    state->templates.hidden = BrTVTemplateAllocate(state->res, template_entries, BR_ASIZE(template_entries));
 
-    hState->default_.hidden = s_Default;
-    // hState->default_.valid |= GLSTATE_MASK_HIDDEN;
+    state->default_.hidden = default_state;
+    /* state->default_.valid |= GLSTATE_MASK_HIDDEN; */
 }

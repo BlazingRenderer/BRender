@@ -5,7 +5,7 @@
 #include "drv.h"
 #include "brassert.h"
 
-static void apply_blend_mode(HGLSTATE_STACK self)
+static void apply_blend_mode(state_stack *self)
 {
     /* C_result = (C_source * F_Source) + (C_dest * F_dest) */
 
@@ -44,7 +44,7 @@ static void apply_blend_mode(HGLSTATE_STACK self)
     }
 }
 
-static void apply_depth_properties(HGLSTATE_STACK state, uint32_t states)
+static void apply_depth_properties(state_stack *state, uint32_t states)
 {
     br_boolean depth_valid = BR_TRUE; /* Defaulting to BR_TRUE to keep existing behaviour. */
     GLenum     depth_test  = GL_NONE;
@@ -52,11 +52,11 @@ static void apply_depth_properties(HGLSTATE_STACK state, uint32_t states)
     /* Only use the states we want (if valid). */
     states = state->valid & states;
 
-    if(states & GLSTATE_MASK_OUTPUT) {
+    if(states & MASK_STATE_OUTPUT) {
         depth_valid = state->output.depth != NULL;
     }
 
-    if(states & GLSTATE_MASK_SURFACE) {
+    if(states & MASK_STATE_SURFACE) {
         if(state->surface.force_front || state->surface.force_back)
             depth_test = GL_FALSE;
         else
@@ -70,7 +70,7 @@ static void apply_depth_properties(HGLSTATE_STACK state, uint32_t states)
             glDisable(GL_DEPTH_TEST);
     }
 
-    if(states & GLSTATE_MASK_PRIMITIVE) {
+    if(states & MASK_STATE_PRIMITIVE) {
         if(state->prim.flags & PRIMF_DEPTH_WRITE)
             glDepthMask(GL_TRUE);
         else
@@ -109,15 +109,15 @@ static void apply_depth_properties(HGLSTATE_STACK state, uint32_t states)
     }
 }
 
-static void apply_stored_properties(HVIDEO hVideo, HGLSTATE_STACK state, uint32_t states, br_boolean *unlit,
-                                    HGLSTD140_MODEL_DATA hModel, GLuint tex_default)
+static void apply_stored_properties(HVIDEO hVideo, state_stack *state, uint32_t states, br_boolean *unlit,
+                                    shader_data_model *model, GLuint tex_default)
 {
     br_boolean blending_on;
 
     /* Only use the states we want (if valid). */
     states = state->valid & states;
 
-    if(states & GLSTATE_MASK_CULL) {
+    if(states & MASK_STATE_CULL) {
         /*
          * Apply culling states. These are a bit confusing:
          * BRT_ONE_SIDED - Simple, cull back faces. From BRT_ONE_SIDED.
@@ -149,7 +149,7 @@ static void apply_stored_properties(HVIDEO hVideo, HGLSTATE_STACK state, uint32_
     }
 
     *unlit = BR_FALSE;
-    if(states & GLSTATE_MASK_SURFACE) {
+    if(states & MASK_STATE_SURFACE) {
         glActiveTexture(GL_TEXTURE0);
 
         if(state->surface.colour_source == BRT_SURFACE) {
@@ -157,21 +157,21 @@ static void apply_stored_properties(HVIDEO hVideo, HGLSTATE_STACK state, uint32_
             float      r      = BR_RED(colour) / 255.0f;
             float      g      = BR_GRN(colour) / 255.0f;
             float      b      = BR_BLU(colour) / 255.0f;
-            BrVector4Set(&hModel->surface_colour, r, g, b, state->surface.opacity);
+            BrVector4Set(&model->surface_colour, r, g, b, state->surface.opacity);
         } else {
-            BrVector4Set(&hModel->surface_colour, 1.0f, 1.0f, 1.0f, state->surface.opacity);
+            BrVector4Set(&model->surface_colour, 1.0f, 1.0f, 1.0f, state->surface.opacity);
         }
 
-        hModel->ka    = state->surface.ka;
-        hModel->ks    = state->surface.ks;
-        hModel->kd    = state->surface.kd;
-        hModel->power = state->surface.power;
+        model->ka    = state->surface.ka;
+        model->ks    = state->surface.ks;
+        model->kd    = state->surface.kd;
+        model->power = state->surface.power;
 
         *unlit = !state->surface.lighting;
     }
 
-    if(states & GLSTATE_MASK_PRIMITIVE) {
-        hModel->disable_colour_key = !(state->prim.flags & PRIMF_COLOUR_KEY);
+    if(states & MASK_STATE_PRIMITIVE) {
+        model->disable_colour_key = !(state->prim.flags & PRIMF_COLOUR_KEY);
 
         if(state->prim.flags & PRIMF_COLOUR_WRITE)
             glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
@@ -247,15 +247,15 @@ static void apply_stored_properties(HVIDEO hVideo, HGLSTATE_STACK state, uint32_
 
 void StoredGLRenderGroup(br_geometry_stored *self, br_renderer *renderer, const gl_groupinfo *groupinfo)
 {
-    HGLCACHE                  hCache = &renderer->state.cache;
+    state_cache              *cache  = &renderer->state.cache;
     br_device_pixelmap       *screen = renderer->pixelmap->screen;
     HVIDEO                    hVideo = &screen->asFront.video;
     br_renderer_state_stored *stored = groupinfo->stored;
     br_boolean                unlit;
-    GLSTD140_MODEL_DATA       model;
+    shader_data_model         model;
 
     /* Update the per-model cache (matrices and lights) */
-    GLCACHE_UpdateModel(hCache, &renderer->state.current->matrix);
+    StateGLUpdateModel(cache, &renderer->state.current->matrix);
 
 #if DEBUG
     { /* Check that sceneBegin() actually did it's shit. */
@@ -275,10 +275,10 @@ void StoredGLRenderGroup(br_geometry_stored *self, br_renderer *renderer, const 
     }
 #endif
 
-    model.projection    = hCache->model.p;
-    model.model_view    = hCache->model.mv;
-    model.mvp           = hCache->model.mvp;
-    model.normal_matrix = hCache->model.normal;
+    model.projection    = cache->model.p;
+    model.model_view    = cache->model.mv;
+    model.mvp           = cache->model.mvp;
+    model.normal_matrix = cache->model.normal;
 
     glBindVertexArray(self->gl_vao);
 
@@ -287,7 +287,7 @@ void StoredGLRenderGroup(br_geometry_stored *self, br_renderer *renderer, const 
 
     unlit = BR_TRUE;
     if(stored) {
-        apply_stored_properties(hVideo, &stored->state, GLSTATE_MASK_PRIMITIVE | GLSTATE_MASK_SURFACE | GLSTATE_MASK_CULL,
+        apply_stored_properties(hVideo, &stored->state, MASK_STATE_PRIMITIVE | MASK_STATE_SURFACE | MASK_STATE_CULL,
                                 &unlit, &model, screen->asFront.tex_white);
     } else {
         /* If there's no stored state, apply all states from global. */

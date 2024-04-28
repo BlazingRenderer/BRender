@@ -38,7 +38,7 @@ typedef struct br_renderer_state_stored {
      */
     struct br_renderer *renderer;
 
-    GLSTATE_STACK state;
+    state_stack state;
 } br_renderer_state_stored;
 
 #endif

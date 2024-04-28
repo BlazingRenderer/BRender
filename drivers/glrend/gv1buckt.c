@@ -108,7 +108,7 @@ br_error BR_CMETHOD_DECL(br_geometry_v1_buckets_gl, render)(br_geometry_v1_bucke
              */
             if(p->type == BRT_GEOMETRY_STORED) {
                 br_geometry_stored *geom      = (br_geometry_stored *)p->v[0];
-                HGLSTATE_STACK      state     = (HGLSTATE_STACK)p->v[1];
+                state_stack        *state     = (state_stack*)p->v[1];
                 const gl_groupinfo *groupinfo = (gl_groupinfo *)p->v[2];
 
                 ASSERT(ObjectIsType((br_object *)geom, BRT_GEOMETRY_STORED));

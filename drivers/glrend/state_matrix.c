@@ -10,10 +10,10 @@
 #define AX   0
 #define AF   BRTV_ALL
 
-#define F(f) offsetof(GLSTATE_STACK, f)
+#define F(f) offsetof(state_stack, f)
 
 // clang-format off
-static br_tv_template_entry GLSTATEI_MatrixTemplateEntries[] = {
+static br_tv_template_entry template_entries[] = {
     {BRT_MODEL_TO_VIEW_M34_X,        NULL, F(matrix.model_to_view),            Q | S | AX, BRTV_CONV_M34_FIXED_SCALAR, 0, TM_PART | TM_M2V | TM_CLEAR_M2V_HINT | TM_INVALID_PM | TM_INVALID_V2M | TM_INVALID_M2S},
     {BRT_MODEL_TO_VIEW_M34_F,        NULL, F(matrix.model_to_view),            Q | S | AF, BRTV_CONV_M34_FLOAT_SCALAR, 0, TM_PART | TM_M2V | TM_CLEAR_M2V_HINT | TM_INVALID_PM | TM_INVALID_V2M | TM_INVALID_M2S},
     {BRT_VIEW_TO_ENVIRONMENT_M34_X,  NULL, F(matrix.view_to_environment),      Q | S | AX, BRTV_CONV_M34_FIXED_SCALAR, 0, TM_PART | TM_INVALID_PS | TM_INVALID_PM},
@@ -31,19 +31,33 @@ static br_tv_template_entry GLSTATEI_MatrixTemplateEntries[] = {
 // clang-format on
 #undef F
 
-static GLSTATE_MATRIX s_Default = {
-    .model_to_view  = {{BR_VECTOR3(1, 0, 0), BR_VECTOR3(0, 1, 0), BR_VECTOR3(0, 0, 1), BR_VECTOR3(0, 0, 0)}},
-    .view_to_screen = {{BR_VECTOR4(1, 0, 0, 0), BR_VECTOR4(0, 1, 0, 0), BR_VECTOR4(0, 0, 1, 0), BR_VECTOR4(0, 0, 0, 1)}},
-    .view_to_environment = {{BR_VECTOR3(1, 0, 0), BR_VECTOR3(0, 1, 0), BR_VECTOR3(0, 0, 1), BR_VECTOR3(0, 0, 0)}},
+static state_matrix default_state = {
+    .model_to_view       = {{
+        BR_VECTOR3(1, 0, 0),
+        BR_VECTOR3(0, 1, 0),
+        BR_VECTOR3(0, 0, 1),
+        BR_VECTOR3(0, 0, 0),
+    }},
+    .view_to_screen      = {{
+        BR_VECTOR4(1, 0, 0, 0),
+        BR_VECTOR4(0, 1, 0, 0),
+        BR_VECTOR4(0, 0, 1, 0),
+        BR_VECTOR4(0, 0, 0, 1),
+    }},
+    .view_to_environment = {{
+        BR_VECTOR3(1, 0, 0),
+        BR_VECTOR3(0, 1, 0),
+        BR_VECTOR3(0, 0, 1),
+        BR_VECTOR3(0, 0, 0),
+    }},
     .model_to_view_hint  = BRT_LENGTH_PRESERVING,
     .view_to_screen_hint = BRT_PARALLEL,
 };
 
-void GLSTATEI_InitMatrix(HGLSTATE hState)
+void StateGLInitMatrix(state_all *state)
 {
-    hState->templates.matrix = BrTVTemplateAllocate(hState->resourceAnchor, GLSTATEI_MatrixTemplateEntries,
-                                                    BR_ASIZE(GLSTATEI_MatrixTemplateEntries));
+    state->templates.matrix = BrTVTemplateAllocate(state->res, template_entries, BR_ASIZE(template_entries));
 
-    hState->default_.matrix = s_Default;
-    hState->default_.valid |= GLSTATE_MASK_MATRIX;
+    state->default_.matrix = default_state;
+    state->default_.valid |= MASK_STATE_MATRIX;
 }

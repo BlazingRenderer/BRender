@@ -3,7 +3,7 @@
  */
 #include <string.h>
 #include "drv.h"
-#include "glstate.h"
+#include "state.h"
 #include "brassert.h"
 #include "formats.h"
 
@@ -243,9 +243,9 @@ enum {
     RM_MAX         = 4,
 };
 
-static int get_render_mode(const GLSTATE_STACK *state)
+static int get_render_mode(const state_stack *state)
 {
-    if(state->valid & GLSTATE_MASK_SURFACE) {
+    if(state->valid & MASK_STATE_SURFACE) {
         if(state->surface.force_back)
             return RM_FORCE_BACK;
 
@@ -257,7 +257,7 @@ static int get_render_mode(const GLSTATE_STACK *state)
             return RM_TRANS;
     }
 
-    if(state->valid & GLSTATE_MASK_PRIMITIVE) {
+    if(state->valid & MASK_STATE_PRIMITIVE) {
         /* Blend flags set? Defer.*/
         if(state->prim.flags & PRIMF_BLEND)
             return RM_TRANS;
@@ -291,7 +291,7 @@ static int get_render_mode(const GLSTATE_STACK *state)
  * BtF = Back-to-front
  * TtB = Front-to-back
  */
-static br_uint_16 calculate_bucket(const br_order_table *ot, const GLSTATE_STACK *state, br_scalar *depth)
+static br_uint_16 calculate_bucket(const br_order_table *ot, const state_stack *state, br_scalar *depth)
 {
     const br_scalar ratio_force_frontback = BR_SCALAR(0.05);
     const br_scalar ratio_transparent     = BR_SCALAR(0.10);
@@ -300,7 +300,7 @@ static br_uint_16 calculate_bucket(const br_order_table *ot, const GLSTATE_STACK
     br_scalar       ot_size;
     br_uint_16      base, count;
     br_scalar       tmp_depth;
-    br_boolean      force_btf = (state->valid & GLSTATE_MASK_OUTPUT) && state->output.depth == NULL;
+    br_boolean      force_btf = (state->valid & MASK_STATE_OUTPUT) && state->output.depth == NULL;
 
     ASSERT(BR_ADD(BR_MUL(ratio_force_frontback, BR_SCALAR(2)), ratio_transparent) < BR_SCALAR(1.0));
 
@@ -408,7 +408,7 @@ static br_uint_16 calculate_bucket(const br_order_table *ot, const GLSTATE_STACK
     return base + BrZsPrimitiveBucketSelect(&tmp_depth, BR_PRIMITIVE_POINT, ot->min_z, ot->max_z, count, ot->type);
 }
 
-static br_boolean want_defer(const GLSTATE_HIDDEN *hidden)
+static br_boolean want_defer(const state_hidden *hidden)
 {
     if(hidden->type != BRT_BUCKET_SORT)
         return BR_FALSE;
@@ -426,7 +426,7 @@ static br_boolean want_defer(const GLSTATE_HIDDEN *hidden)
 
 static br_error V1Model_RenderStored(struct br_geometry_stored *self, br_renderer *renderer, br_boolean on_screen)
 {
-    HGLSTATE_STACK state;
+    state_stack *state;
     br_primitive  *prim;
     br_vector3     pos;
     br_boolean     defer;
@@ -454,7 +454,7 @@ static br_error V1Model_RenderStored(struct br_geometry_stored *self, br_rendere
         if(defer) {
             br_order_table *ot = state->hidden.order_table;
             br_uint_16      bucket;
-            HGLSTATE_STACK  tmpstate;
+            state_stack    *tmpstate;
 
             tmpstate = BrPoolBlockAllocate(renderer->state_pool);
 

@@ -17,18 +17,17 @@ add_custom_command(
 )
 
 set(GLSTATE_FILES
-        glcache.c
-        glstate.c
-        glstate.h
-        glstate_clip.c
-        glstate_cull.c
-        glstate_hidden.c
-        glstate_ip.h
-        glstate_light.c
-        glstate_matrix.c
-        glstate_output.c
-        glstate_primitive.c
-        glstate_surface.c
+        cache.c
+        state.c
+        state.h
+        state_clip.c
+        state_cull.c
+        state_hidden.c
+        state_light.c
+        state_matrix.c
+        state_output.c
+        state_primitive.c
+        state_surface.c
         )
 source_group("STATE" FILES ${GLSTATE_FILES})
 

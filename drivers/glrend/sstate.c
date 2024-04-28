@@ -23,7 +23,7 @@ static struct br_tv_template_entry rendererStateStoredTemplateEntries[] = {
 /*
  * Allocate a stored state
  */
-br_renderer_state_stored *RendererStateStoredGLAllocate(br_renderer *renderer, HGLSTATE_STACK base_state, br_uint_32 m,
+br_renderer_state_stored *RendererStateStoredGLAllocate(br_renderer *renderer, state_stack *base_state, br_uint_32 m,
                                                         br_token_value *tv)
 {
     br_renderer_state_stored *self;
@@ -34,7 +34,7 @@ br_renderer_state_stored *RendererStateStoredGLAllocate(br_renderer *renderer, H
     self->device     = ObjectDevice(renderer);
     self->renderer   = renderer;
 
-    GLSTATE_Copy(&self->state, base_state, m);
+    StateGLCopy(&self->state, base_state, m);
     ObjectContainerAddFront(renderer, (br_object *)self);
     return self;
 }

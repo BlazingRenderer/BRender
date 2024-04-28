@@ -31,7 +31,7 @@ extern "C" {
 #include "pm.h"
 #include "font.h"
 #include "video.h"
-#include "glstate.h"
+#include "state.h"
 
 #include "template.h"
 #include "device.h"

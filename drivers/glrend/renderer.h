@@ -35,12 +35,12 @@ typedef struct br_renderer {
     br_renderer_facility *renderer_facility;
 
     /*
-     * Pool of GLSTATE_STACK, used for snapshotting state
+     * Pool of state_stack, used for snapshotting state
      * when deferring.
      */
     br_pool *state_pool;
 
-    GLSTATE state;
+    state_all state;
 
     int has_begun;
 

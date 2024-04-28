@@ -1,8 +1,8 @@
 /*
  * VIDEO structures
  */
-#ifndef _VIDEO_H_
-#define _VIDEO_H_
+#ifndef VIDEO_H_
+#define VIDEO_H_
 
 #ifdef __cplusplus
 extern "C" {
@@ -63,7 +63,7 @@ typedef struct _VIDEO {
 
 #pragma pack(push, 16)
 /* std140-compatible light structure */
-typedef struct _GLSTD140_LIGHT {
+typedef struct shader_data_light {
     /* (X, Y, Z, T), if T == 0, direct, otherwise point/spot */
     alignas(16) br_vector4 position;
     /* (X, Y, Z, 0), normalised */
@@ -79,18 +79,18 @@ typedef struct _GLSTD140_LIGHT {
 
     /* Pad out the structure to maintain alignment. */
     alignas(4) float _pad0, _pad1;
-} GLSTD140_LIGHT, *HGLSTD140_LIGHT;
-BR_STATIC_ASSERT(sizeof(GLSTD140_LIGHT) % 16 == 0, "GLSTD140_LIGHT is not aligned");
+} shader_data_light;
+BR_STATIC_ASSERT(sizeof(shader_data_light) % 16 == 0, "shader_data_light is not aligned");
 
-typedef struct _GLSTD140_SCENE_DATA {
+typedef struct shader_data_scene {
     alignas(16) br_vector4 eye_view;
-    alignas(16) GLSTD140_LIGHT lights[BR_MAX_LIGHTS];
+    alignas(16) shader_data_light lights[BR_MAX_LIGHTS];
     alignas(4) uint32_t num_lights;
-} GLSTD140_SCENE_DATA, *HGLSTD140_SCENE_DATA;
-BR_STATIC_ASSERT(sizeof(((GLSTD140_SCENE_DATA *)NULL)->lights) == sizeof(GLSTD140_LIGHT) * BR_MAX_LIGHTS,
-                 "std::array<GLSTD140_LIGHT> fucked up");
+} shader_data_scene;
+BR_STATIC_ASSERT(sizeof(((shader_data_scene *)NULL)->lights) == sizeof(shader_data_light) * BR_MAX_LIGHTS,
+                 "std::array<shader_data_light> fucked up");
 
-typedef struct _GLSTD140_MODEL_DATA {
+typedef struct shader_data_model {
     alignas(16) br_matrix4 model_view;
     alignas(16) br_matrix4 projection;
     alignas(16) br_matrix4 mvp;
@@ -103,10 +103,10 @@ typedef struct _GLSTD140_MODEL_DATA {
     alignas(4) float power;
     alignas(4) uint32_t unlit;
     alignas(4) uint32_t disable_colour_key;
-} GLSTD140_MODEL_DATA, *HGLSTD140_MODEL_DATA;
+} shader_data_model;
 #pragma pack(pop)
 
 #ifdef __cplusplus
 };
 #endif
-#endif /* _VIDEO_H_ */
+#endif /* VIDEO_H_ */

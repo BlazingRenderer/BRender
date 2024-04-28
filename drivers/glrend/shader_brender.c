@@ -10,14 +10,14 @@ static void VIDEOI_GetShaderVariables(HVIDEO hVideo)
     glUniformBlockBinding(hVideo->brenderProgram.program, hVideo->brenderProgram.blockIndexScene,
                           hVideo->brenderProgram.blockBindingScene);
     glBindBufferBase(GL_UNIFORM_BUFFER, hVideo->brenderProgram.blockBindingScene, hVideo->brenderProgram.uboScene);
-    glBufferData(GL_UNIFORM_BUFFER, sizeof(GLSTD140_SCENE_DATA), NULL, GL_DYNAMIC_DRAW);
+    glBufferData(GL_UNIFORM_BUFFER, sizeof(shader_data_scene), NULL, GL_DYNAMIC_DRAW);
 
     glGenBuffers(1, &hVideo->brenderProgram.uboModel);
     glBindBuffer(GL_UNIFORM_BUFFER, hVideo->brenderProgram.uboModel);
     glUniformBlockBinding(hVideo->brenderProgram.program, hVideo->brenderProgram.blockIndexModel,
                           hVideo->brenderProgram.blockBindingModel);
     glBindBufferBase(GL_UNIFORM_BUFFER, hVideo->brenderProgram.blockBindingModel, hVideo->brenderProgram.uboModel);
-    glBufferData(GL_UNIFORM_BUFFER, sizeof(GLSTD140_MODEL_DATA), NULL, GL_DYNAMIC_DRAW);
+    glBufferData(GL_UNIFORM_BUFFER, sizeof(shader_data_model), NULL, GL_DYNAMIC_DRAW);
 
     hVideo->brenderProgram.attributes.aPosition  = glGetAttribLocation(hVideo->brenderProgram.program, "aPosition");
     hVideo->brenderProgram.attributes.aUV        = glGetAttribLocation(hVideo->brenderProgram.program, "aUV");
@@ -37,7 +37,7 @@ br_boolean VIDEOI_CompileBRenderShader(HVIDEO hVideo, const char *vertPath, cons
 
     {
 #define _MAX(a, b) ((a) > (b) ? (a) : (b))
-        int neededSize = _MAX(sizeof(GLSTD140_SCENE_DATA), sizeof(GLSTD140_MODEL_DATA));
+        int neededSize = _MAX(sizeof(shader_data_scene), sizeof(shader_data_model));
 #undef _MAX
         if(hVideo->maxUniformBlockSize < neededSize) {
             BrLogError("VIDEO", "GL_MAX_UNIFORM_BLOCK_SIZE too small, got %d, needed %d.", hVideo->maxUniformBlockSize,

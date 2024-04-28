@@ -65,8 +65,8 @@ br_renderer *RendererGLAllocate(br_device *device, br_renderer_facility *facilit
 /*
  * devpixmp.c
  */
-br_error BR_CMETHOD_DECL(br_device_pixelmap_gl, match)(br_device_pixelmap *self, br_device_pixelmap **newpm,
-                                                       br_token_value *tv);
+br_error BR_CMETHOD_DECL(br_device_pixelmap_gl, match) (br_device_pixelmap *self, br_device_pixelmap **newpm,
+                                                        br_token_value *tv);
 /*
  * devpmgl.c
  */
@@ -104,8 +104,34 @@ br_token GLOnScreenCheck(const br_matrix4 *model_to_screen, const br_bounds3_f *
 /*
  * sstate.c
  */
-br_renderer_state_stored *RendererStateStoredGLAllocate(br_renderer *renderer, HGLSTATE_STACK base_state, br_uint_32 m,
+br_renderer_state_stored *RendererStateStoredGLAllocate(br_renderer *renderer, state_stack *base_state, br_uint_32 m,
                                                         br_token_value *tv);
+
+/*
+ * state.c and friends
+ */
+void StateGLInit(state_all *state, void *res);
+void StateGLInitMatrix(state_all *state);
+void StateGLInitCull(state_all *state);
+void StateGLInitClip(state_all *state);
+void StateGLInitSurface(state_all *state);
+void StateGLInitPrimitive(state_all *state);
+void StateGLInitOutput(state_all *state);
+void StateGLInitHidden(state_all *state);
+void StateGLInitLight(state_all *state);
+
+struct br_tv_template *StateGLGetStateTemplate(state_all *state, br_token part, br_int_32 index);
+void                   StateGLTemplateActions(state_all *state, uint32_t mask);
+
+void StateGLReset(state_cache *cache);
+
+br_boolean StateGLPush(state_all *state, uint32_t mask);
+br_boolean StateGLPop(state_all *state, uint32_t mask);
+void       StateGLDefault(state_all *state, uint32_t mask);
+
+void StateGLUpdateScene(state_cache *cache, state_stack *state);
+void StateGLUpdateModel(state_cache *cache, state_matrix *matrix);
+void StateGLCopy(state_stack *dst, state_stack *src, uint32_t mask);
 
 /*
  * renderer.c
@@ -144,7 +170,7 @@ br_error DevicePixelmapGLBindFramebuffer(GLenum target, br_device_pixelmap *pm);
 GLuint   DeviceGLBuildWhiteTexture(void);
 GLuint   DeviceGLBuildCheckerboardTexture(void);
 
-br_uint_8           DeviceGLTypeOrBits(br_uint_8 pixel_type, br_int_32 pixel_bits);
+br_uint_8 DeviceGLTypeOrBits(br_uint_8 pixel_type, br_int_32 pixel_bits);
 
 /*
  * Wrappers for br_device_gl_procs.

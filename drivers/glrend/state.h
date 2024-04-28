@@ -1,26 +1,25 @@
-#ifndef _STATE_H
-#define _STATE_H
+#ifndef STATE_H_
+#define STATE_H_
 
 #include "drv.h"
 
-#define GLSTATE_API
-#define GLSTATE_MAX_COUNT  64
-#define GLSTATE_MAX_LIGHTS BR_MAX_LIGHTS
-#define GLSTATE_MAX_CLIP_PLANES 6
+#define MAX_STATE_STACK         64
+#define MAX_STATE_LIGHTS        BR_MAX_LIGHTS
+#define MAX_STATE_CLIP_PLANES   BR_MAX_CLIP_PLANES
 
 /*
  * State masks - these should match the BR_STATE_* enums.
  */
 enum {
-    GLSTATE_MASK_SURFACE   = BR_STATE_SURFACE,
-    GLSTATE_MASK_MATRIX    = BR_STATE_MATRIX,
-    GLSTATE_MASK_ENABLE    = BR_STATE_ENABLE,
-    GLSTATE_MASK_LIGHT     = BR_STATE_LIGHT,
-    GLSTATE_MASK_CLIP      = BR_STATE_CLIP,
-    GLSTATE_MASK_BOUNDS    = BR_STATE_BOUNDS,
-    GLSTATE_MASK_CULL      = BR_STATE_CULL,
-    GLSTATE_MASK_OUTPUT    = BR_STATE_OUTPUT,
-    GLSTATE_MASK_PRIMITIVE = BR_STATE_PRIMITIVE,
+    MASK_STATE_SURFACE    = BR_STATE_SURFACE,
+    MASK_STATE_MATRIX     = BR_STATE_MATRIX,
+    MASK_STATE_ENABLE     = BR_STATE_ENABLE,
+    MASK_STATE_LIGHT      = BR_STATE_LIGHT,
+    MASK_STATE_CLIP       = BR_STATE_CLIP,
+    MASK_STATE_BOUNDS     = BR_STATE_BOUNDS,
+    MASK_STATE_CULL       = BR_STATE_CULL,
+    MASK_STATE_OUTPUT     = BR_STATE_OUTPUT,
+    MASK_STATE_PRIMITIVE  = BR_STATE_PRIMITIVE,
 };
 
 /*
@@ -43,12 +42,12 @@ enum {
 #define TM_INVALID_M2S    0x08000 /* set Update Model To Screen								*/
 #define TM_INVALID_CC     0x10000 /* set Update Copied Cache									*/
 
-typedef struct _GLSTATE_CLIP {
+typedef struct state_clip {
     br_token   type;
     br_vector4 plane;
-} GLSTATE_CLIP, *HGLSTATE_CLIP;
+} state_clip;
 
-typedef struct _GLSTATE_MATRIX {
+typedef struct state_matrix {
     br_matrix34 model_to_view;
     br_matrix4  view_to_screen;
     br_matrix34 view_to_environment;
@@ -59,15 +58,14 @@ typedef struct _GLSTATE_MATRIX {
 
     br_scalar hither_z;
     br_scalar yon_z;
+} state_matrix;
 
-} GLSTATE_MATRIX, *HGLSTATE_MATRIX;
-
-typedef struct _GLSTATE_CULL {
+typedef struct state_cull {
     br_token type;
     br_token space;
-} GLSTATE_CULL, *HGLSTATE_CULL;
+} state_cull;
 
-typedef struct _GLSTATE_SURFACE {
+typedef struct state_surface {
     br_colour colour;
 
     br_scalar opacity;
@@ -84,9 +82,9 @@ typedef struct _GLSTATE_SURFACE {
     br_token colour_source;
 
     br_matrix23 map_transform;
-} GLSTATE_SURFACE, *HGLSTATE_SURFACE;
+} state_surface;
 
-typedef struct _GLSTATE_LIGHT {
+typedef struct state_light {
     br_token type;
     br_token lighting_space;
 
@@ -101,12 +99,12 @@ typedef struct _GLSTATE_LIGHT {
     br_scalar attenuation_l;
     br_scalar attenuation_c;
     br_scalar attenuation_q;
-} GLSTATE_LIGHT, *HGLSTATE_LIGHT;
+} state_light;
 
 typedef void insert_cbfn(br_primitive *primitive, void *arg1, void *arg2, void *arg3, br_order_table *order_table,
                          br_scalar *z);
 
-typedef struct _GLSTATE_HIDDEN {
+typedef struct state_hidden {
     br_token           type;
     br_token           divert;
     br_order_table    *order_table;
@@ -115,7 +113,7 @@ typedef struct _GLSTATE_HIDDEN {
     void              *insert_arg1;
     void              *insert_arg2;
     void              *insert_arg3;
-} GLSTATE_HIDDEN, *HGLSTATE_HIDDEN;
+} state_hidden;
 
 /*
  * state.prim.flags
@@ -142,7 +140,7 @@ enum {
 
 struct br_buffer_stored;
 
-typedef struct _GLSTATE_PRIMITIVE {
+typedef struct state_primitive {
     /*
      * flags
      */
@@ -185,32 +183,32 @@ typedef struct _GLSTATE_PRIMITIVE {
 
     /* Mipmap filtering. BRT_NONE or BRT_LINEAR */
     br_token mip_filter;
-} GLSTATE_PRIMITIVE, *HGLSTATE_PRIMITIVE;
+} state_primitive;
 
-typedef struct _GLSTATE_OUTPUT {
+typedef struct state_output {
     struct br_device_pixelmap *colour;
     struct br_device_pixelmap *depth;
-} GLSTATE_OUTPUT, *HGLSTATE_OUTPUT;
+} state_output;
 
-typedef struct _GLSTATE_STACK {
-    GLSTATE_MATRIX matrix;
+typedef struct state_stack {
+    state_matrix matrix;
 
     /* Used for texture/materials */
-    GLSTATE_CLIP      clip[GLSTATE_MAX_CLIP_PLANES];
-    GLSTATE_CULL      cull;
-    GLSTATE_SURFACE   surface;
-    GLSTATE_PRIMITIVE prim;
-    GLSTATE_OUTPUT    output;
-    GLSTATE_LIGHT     light[GLSTATE_MAX_LIGHTS];
-    GLSTATE_HIDDEN    hidden;
+    state_clip      clip[MAX_STATE_CLIP_PLANES];
+    state_cull      cull;
+    state_surface   surface;
+    state_primitive prim;
+    state_output    output;
+    state_light     light[MAX_STATE_LIGHTS];
+    state_hidden    hidden;
 
-    uint32_t valid;
-} GLSTATE_STACK, *HGLSTATE_STACK;
+    br_uint_32 valid;
+} state_stack;
 
-typedef struct _GLCACHE {
+typedef struct {
     GLuint fbo;
 
-    alignas(16) GLSTD140_SCENE_DATA scene;
+    alignas(16) shader_data_scene scene;
 
     struct {
         br_matrix4 p;
@@ -226,56 +224,29 @@ typedef struct _GLCACHE {
     */
     br_matrix34 model_to_environment;
 
-} GLCACHE, *HGLCACHE;
+} state_cache;
 
-typedef struct _GLSTATE {
-    GLSTATE_STACK  default_;
-    GLSTATE_STACK *current;
-    GLSTATE_STACK  stack[GLSTATE_MAX_COUNT];
-    int            top;
+typedef struct state_all {
+    state_stack  default_;
+    state_stack *current;
+    state_stack  stack[MAX_STATE_STACK];
+    int          top;
 
-    GLCACHE cache;
+    state_cache cache;
 
     struct {
-        struct br_tv_template *clip[GLSTATE_MAX_CLIP_PLANES];
+        struct br_tv_template *clip[MAX_STATE_CLIP_PLANES];
         struct br_tv_template *matrix;
         struct br_tv_template *cull;
         struct br_tv_template *surface;
         struct br_tv_template *prim;
         struct br_tv_template *output;
-        struct br_tv_template *light[GLSTATE_MAX_LIGHTS];
+        struct br_tv_template *light[MAX_STATE_LIGHTS];
         struct br_tv_template *hidden;
     } templates;
 
-    void *resourceAnchor;
+    void *res;
 
-} GLSTATE, *HGLSTATE;
+} state_all;
 
-#if defined(__cplusplus)
-extern "C" {
-#endif
-
-/*
-** Initialise the state stack.
-** - Allocates part templates
-**/
-GLSTATE_API void       GLSTATE_Init(HGLSTATE hState, void *resAnchor);
-GLSTATE_API br_boolean GLSTATE_Push(HGLSTATE hState, uint32_t mask);
-GLSTATE_API br_boolean GLSTATE_Pop(HGLSTATE hState, uint32_t mask);
-GLSTATE_API void       GLSTATE_Default(HGLSTATE hState, uint32_t mask);
-GLSTATE_API void       GLSTATE_TemplateActions(HGLSTATE hState, uint32_t mask);
-
-GLSTATE_API struct br_tv_template *GLSTATE_GetStateTemplate(HGLSTATE hState, br_token part, br_int_32 index);
-
-GLSTATE_API void GLSTATE_Copy(HGLSTATE_STACK hDest, HGLSTATE_STACK hSrc, uint32_t mask);
-
-GLSTATE_API void GLCACHE_UpdateScene(HGLCACHE hCache, HGLSTATE_STACK hState);
-GLSTATE_API void GLCACHE_UpdateModel(HGLCACHE hCache, HGLSTATE_MATRIX hMatrix);
-
-GLSTATE_API void GLCACHE_Reset(HGLCACHE hCache);
-
-#if defined(__cplusplus)
-}
-#endif
-
-#endif /* _STATE_H */
+#endif /* STATE_H_ */
