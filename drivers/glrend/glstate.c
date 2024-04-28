@@ -6,6 +6,7 @@ GLSTATE_API void GLSTATE_Init(HGLSTATE hState, void *resAnchor)
     hState->resourceAnchor = resAnchor;
 
     GLSTATEI_InitMatrix(hState);
+    GLSTATEI_InitClip(hState);
     GLSTATEI_InitCull(hState);
     GLSTATEI_InitSurface(hState);
     GLSTATEI_InitPrimitive(hState);
@@ -27,6 +28,11 @@ GLSTATE_API void GLSTATE_Copy(HGLSTATE_STACK hDest, HGLSTATE_STACK hSrc, uint32_
 
     if(mask & GLSTATE_MASK_MATRIX)
         hDest->matrix = hSrc->matrix;
+
+    if(mask & GLSTATE_MASK_CLIP) {
+        for(int i = 0; i < GLSTATE_MAX_CLIP_PLANES; ++i)
+            hDest->clip[i] = hSrc->clip[i];
+    }
 
     if(mask & GLSTATE_MASK_CULL)
         hDest->cull = hSrc->cull;
@@ -95,6 +101,12 @@ GLSTATE_API struct br_tv_template *GLSTATE_GetStateTemplate(HGLSTATE hState, br_
         case BRT_MATRIX:
             return hState->templates.matrix;
 
+        case BRT_CLIP:
+            if(index >= GLSTATE_MAX_CLIP_PLANES)
+                return NULL;
+
+            return hState->templates.clip[index];
+
         case BRT_CULL:
             return hState->templates.cull;
 
@@ -117,7 +129,6 @@ GLSTATE_API struct br_tv_template *GLSTATE_GetStateTemplate(HGLSTATE hState, br_
 
         case BRT_ENABLE:
         case BRT_BOUNDS:
-        case BRT_CLIP:
         default:
             break;
     }

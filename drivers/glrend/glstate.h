@@ -6,6 +6,7 @@
 #define GLSTATE_API
 #define GLSTATE_MAX_COUNT  64
 #define GLSTATE_MAX_LIGHTS BR_MAX_LIGHTS
+#define GLSTATE_MAX_CLIP_PLANES 6
 
 /*
  * State masks - these should match the BR_STATE_* enums.
@@ -41,6 +42,11 @@ enum {
 #define TM_INVALID_V2M    0x04000 /* set Update View To Model									*/
 #define TM_INVALID_M2S    0x08000 /* set Update Model To Screen								*/
 #define TM_INVALID_CC     0x10000 /* set Update Copied Cache									*/
+
+typedef struct _GLSTATE_CLIP {
+    br_token   type;
+    br_vector4 plane;
+} GLSTATE_CLIP, *HGLSTATE_CLIP;
 
 typedef struct _GLSTATE_MATRIX {
     br_matrix34 model_to_view;
@@ -190,6 +196,7 @@ typedef struct _GLSTATE_STACK {
     GLSTATE_MATRIX matrix;
 
     /* Used for texture/materials */
+    GLSTATE_CLIP      clip[GLSTATE_MAX_CLIP_PLANES];
     GLSTATE_CULL      cull;
     GLSTATE_SURFACE   surface;
     GLSTATE_PRIMITIVE prim;
@@ -230,6 +237,7 @@ typedef struct _GLSTATE {
     GLCACHE cache;
 
     struct {
+        struct br_tv_template *clip[GLSTATE_MAX_CLIP_PLANES];
         struct br_tv_template *matrix;
         struct br_tv_template *cull;
         struct br_tv_template *surface;

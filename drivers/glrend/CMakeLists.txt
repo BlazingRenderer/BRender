@@ -20,6 +20,7 @@ set(GLSTATE_FILES
         glcache.c
         glstate.c
         glstate.h
+        glstate_clip.c
         glstate_cull.c
         glstate_hidden.c
         glstate_ip.h

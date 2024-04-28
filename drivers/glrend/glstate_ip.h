@@ -9,6 +9,7 @@ extern "C" {
 
 void GLSTATEI_InitMatrix(HGLSTATE hState);
 void GLSTATEI_InitCull(HGLSTATE hState);
+void GLSTATEI_InitClip(HGLSTATE hState);
 void GLSTATEI_InitSurface(HGLSTATE hState);
 void GLSTATEI_InitPrimitive(HGLSTATE hState);
 void GLSTATEI_InitOutput(HGLSTATE hState);

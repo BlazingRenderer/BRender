@@ -359,8 +359,8 @@ static br_error BR_CMETHOD_DECL(br_renderer_gl, partIndexQuery)(br_renderer *sel
             return BRE_OK;
 
         case BRT_CLIP:
-            /* TODO: implement clip states */
-            return BRE_FAIL;
+            *pnindex = GLSTATE_MAX_CLIP_PLANES;
+            return BRE_OK;
 
         /* Primitive states. */
         case BRT_OUTPUT:
