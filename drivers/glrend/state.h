@@ -80,6 +80,7 @@ typedef struct state_surface {
     br_scalar  depth_bias;
 
     br_token colour_source;
+    br_token mapping_source;
 
     br_matrix23 map_transform;
 } state_surface;
