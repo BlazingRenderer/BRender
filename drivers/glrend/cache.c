@@ -58,7 +58,9 @@ static void ProcessSceneLights(state_cache *cache, const state_light *lights)
 static void UpdateMatrices(state_cache *cache, state_matrix *matrix)
 {
     if(matrix->view_to_environment_hint != BRT_DONT_CARE) {
-        BrMatrix34Mul(&cache->model_to_environment, &matrix->model_to_view, &matrix->view_to_environment);
+        br_matrix34 tmp;
+        BrMatrix34Mul(&tmp, &matrix->model_to_view, &matrix->view_to_environment);
+        BrMatrix4Copy34(&cache->model.environment, &tmp);
     }
 
     /*
@@ -124,6 +126,7 @@ void StateGLReset(state_cache *cache)
     BrMatrix4Identity(&cache->model.mv);
     BrMatrix4Identity(&cache->model.mvp);
     BrMatrix4Identity(&cache->model.normal);
+    BrMatrix4Identity(&cache->model.environment);
 
     BrVector4Set(&cache->scene.eye_view, 0, 0, 0, 0);
 

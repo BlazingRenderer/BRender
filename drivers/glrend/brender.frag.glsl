@@ -29,6 +29,7 @@ layout(std140) uniform br_model_state
     mat4 projection;
     mat4 mvp;
     mat4 normal_matrix;
+    mat4 environment;
     vec4 surface_colour;
 
     vec4 clear_colour;

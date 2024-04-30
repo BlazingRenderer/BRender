@@ -95,6 +95,7 @@ typedef struct shader_data_model {
     alignas(16) br_matrix4 projection;
     alignas(16) br_matrix4 mvp;
     alignas(16) br_matrix4 normal_matrix;
+    alignas(16) br_matrix4 environment_matrix;
     alignas(16) br_vector4 surface_colour;
     alignas(16) br_vector4 clear_colour;
     alignas(4) float ka;

@@ -216,15 +216,8 @@ typedef struct {
         br_matrix4 mv;
         br_matrix4 mvp;
         br_matrix4 normal;
+        br_matrix4 environment;
     } model;
-
-    /*
-    ** Not really sure what this is for.
-    ** Keeping it around just in case.
-    ** This is per-model.
-    */
-    br_matrix34 model_to_environment;
-
 } state_cache;
 
 typedef struct state_all {
