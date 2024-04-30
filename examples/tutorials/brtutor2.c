@@ -2,83 +2,95 @@
  * Copyright (c) 1996 Argonaut Technologies Limited. All rights reserved.
  * Program to display a scene containing a Box, a Sphere and a Torus
  */
+#include <brdemo.h>
 
-#include <stddef.h>
-#include "brender.h"
-#include "dosio.h"
+typedef struct br_demo_tut2 {
+    br_actor *box;
+    br_actor *torus;
+    br_actor *sphere;
+} br_demo_tut2;
 
-int main()
+br_error Tutorial2Init(br_demo *demo)
 {
-	br_pixelmap *screen_buffer, *back_buffer, *depth_buffer, *palette;
-	br_actor *world, *observer, *light, *box, *sphere, *torus;
-	int i;
-	br_camera *camera_data;
-	/************* Initialise BRender and Graphics Hardware *********************/
-	InitializeSampleZBuffer(&screen_buffer, &back_buffer, &depth_buffer);
+    br_demo_tut2 *tut;
+    br_actor     *light, *observer;
+    br_camera    *camera_data;
 
-	/*************** Build the World Database **********************************/
-	/* 
-	 * Load root actor
-	 */
+    tut = BrResAllocate(demo, sizeof(br_demo_tut2), BR_MEMORY_APPLICATION);
 
-	world = BrActorAllocate(BR_ACTOR_NONE, NULL);
-	/* 
-	 * Add and enable the default light source
-	 */
-	light = BrActorAdd(world, BrActorAllocate(BR_ACTOR_LIGHT, NULL));
-	BrLightEnable(light);
-	/* 
-	 * Load and position camera
-	 */
-	observer = CreateSampleCamera(world);
-	observer->t.type = BR_TRANSFORM_MATRIX34;
-	BrMatrix34Translate(&observer->t.t.mat, BR_SCALAR(0.0), BR_SCALAR(0.0), BR_SCALAR(10.0));
-	camera_data = (br_camera *) observer->type_data;
-	camera_data->yon_z = BR_SCALAR(50);
-	/* 
-	 * Load and position Box model
-	 */
-	box = BrActorAdd(world, BrActorAllocate(BR_ACTOR_MODEL, NULL));
-	box->t.type = BR_TRANSFORM_MATRIX34;
-	BrMatrix34RotateY(&box->t.t.mat, BR_ANGLE_DEG(30));
-	BrMatrix34PostTranslate(&box->t.t.mat, BR_SCALAR(-2.5), BR_SCALAR(0.0), BR_SCALAR(0.0));
-	BrMatrix34PreScale(&box->t.t.mat, BR_SCALAR(2.0), BR_SCALAR(1.0), BR_SCALAR(1.0));
-	/*
-	 * Load and Position Sphere Model
-	 */
-	sphere = BrActorAdd(world, BrActorAllocate(BR_ACTOR_MODEL, NULL));
-	sphere->model = BrModelLoad("sph32.dat");
-	BrModelAdd(sphere->model);
-	sphere->t.type = BR_TRANSFORM_MATRIX34;
-	BrMatrix34Translate(&sphere->t.t.mat, BR_SCALAR(2.0), BR_SCALAR(0.0), BR_SCALAR(0.0));
-	/*
-	 * Load and Position Torus Model
-	 */
-	torus = BrActorAdd(world, BrActorAllocate(BR_ACTOR_MODEL, NULL));
-	torus->model = BrModelLoad("torus.dat");
-	BrModelAdd(torus->model);
-	torus->t.type = BR_TRANSFORM_MATRIX34;
-	BrMatrix34Translate(&torus->t.t.mat, BR_SCALAR(0.0), BR_SCALAR(0.0), BR_SCALAR(3.0));
+    /*
+     * Add and enable the default light source
+     */
+    light = BrActorAdd(demo->world, BrActorAllocate(BR_ACTOR_LIGHT, NULL));
+    BrLightEnable(light);
 
-	/********************** Animation Loop **********************************/
-	float dt;
-	while (UpdateSample(observer, &dt))
-	{
-		BrPixelmapFill(back_buffer, 0);
-		BrPixelmapFill(depth_buffer, 0xFFFFFFFF);
-		BrZbSceneRender(world, observer, back_buffer, depth_buffer);
-		BrPixelmapDoubleBuffer(screen_buffer, back_buffer);
-		BrMatrix34PostRotateX(&box->t.t.mat, BR_ANGLE_DEG(2.0));
-		BrMatrix34PreRotateZ(&torus->t.t.mat, BR_ANGLE_DEG(4.0));
-		BrMatrix34PreRotateY(&torus->t.t.mat, BR_ANGLE_DEG(-6.0));
-		BrMatrix34PreRotateX(&torus->t.t.mat, BR_ANGLE_DEG(2.0));
-		BrMatrix34PostRotateX(&torus->t.t.mat, BR_ANGLE_DEG(1.0));
-		BrMatrix34PostRotateY(&sphere->t.t.mat, BR_ANGLE_DEG(0.8));
-	}
-	/* Close down */
+    /*
+     * Move camera 5 units along +z axis so model becomes visible
+     */
+    observer         = BrActorAdd(demo->world, BrActorAllocate(BR_ACTOR_CAMERA, NULL));
+    observer->t.type = BR_TRANSFORM_MATRIX34;
+    BrMatrix34Translate(&observer->t.t.mat, BR_SCALAR(0.0), BR_SCALAR(0.0), BR_SCALAR(10.0));
+    demo->camera = observer;
 
-	BrZbEnd();
-	DOSGfxEnd();
-	BrEnd();
-	return 0;
+    camera_data              = observer->type_data;
+    camera_data->yon_z       = BR_SCALAR(50);
+    demo->order_table->min_z = camera_data->hither_z;
+    demo->order_table->max_z = camera_data->yon_z;
+
+    /*
+     * Load and position Box model
+     */
+    tut->box         = BrActorAdd(demo->world, BrActorAllocate(BR_ACTOR_MODEL, NULL));
+    tut->box->t.type = BR_TRANSFORM_MATRIX34;
+    BrMatrix34RotateY(&tut->box->t.t.mat, BR_ANGLE_DEG(30));
+    BrMatrix34PostTranslate(&tut->box->t.t.mat, BR_SCALAR(-2.5), BR_SCALAR(0.0), BR_SCALAR(0.0));
+    BrMatrix34PreScale(&tut->box->t.t.mat, BR_SCALAR(2.0), BR_SCALAR(1.0), BR_SCALAR(1.0));
+
+    /*
+     * Load and Position Sphere Model
+     */
+    tut->sphere        = BrActorAdd(demo->world, BrActorAllocate(BR_ACTOR_MODEL, NULL));
+    tut->sphere->model = BrModelLoad("sph32.dat");
+    BrModelAdd(tut->sphere->model);
+    tut->sphere->t.type = BR_TRANSFORM_MATRIX34;
+    BrMatrix34Translate(&tut->sphere->t.t.mat, BR_SCALAR(2.0), BR_SCALAR(0.0), BR_SCALAR(0.0));
+
+    /*
+     * Load and Position Torus Model
+     */
+    tut->torus        = BrActorAdd(demo->world, BrActorAllocate(BR_ACTOR_MODEL, NULL));
+    tut->torus->model = BrModelLoad("torus.dat");
+    BrModelAdd(tut->torus->model);
+    tut->torus->t.type = BR_TRANSFORM_MATRIX34;
+    BrMatrix34Translate(&tut->torus->t.t.mat, BR_SCALAR(0.0), BR_SCALAR(0.0), BR_SCALAR(3.0));
+
+    demo->user = tut;
+    return BRE_OK;
+}
+
+void Tutorial2Update(br_demo *demo, br_scalar dt)
+{
+    br_demo_tut2 *tut   = demo->user;
+    float         speed = dt * 25;
+
+    BrMatrix34PostRotateX(&tut->box->t.t.mat, BR_ANGLE_DEG(2.0f * speed));
+    BrMatrix34PreRotateZ(&tut->torus->t.t.mat, BR_ANGLE_DEG(4.0f * speed));
+    BrMatrix34PreRotateY(&tut->torus->t.t.mat, BR_ANGLE_DEG(-6.0f * speed));
+    BrMatrix34PreRotateX(&tut->torus->t.t.mat, BR_ANGLE_DEG(2.0f * speed));
+    BrMatrix34PostRotateX(&tut->torus->t.t.mat, BR_ANGLE_DEG(1.0f * speed));
+    BrMatrix34PostRotateY(&tut->sphere->t.t.mat, BR_ANGLE_DEG(0.8f * speed));
+}
+
+static br_demo_dispatch dispatch = {
+    .init          = Tutorial2Init,
+    .process_event = BrDemoDefaultProcessEvent,
+    .update        = Tutorial2Update,
+    .render        = BrDemoDefaultRender,
+    .on_resize     = BrDemoDefaultOnResize,
+    .destroy       = BrDemoDefaultDestroy,
+};
+
+int main(int argc, char **argv)
+{
+    return BrDemoRun("BRender Tutorial 2", 1280, 720, &dispatch);
 }

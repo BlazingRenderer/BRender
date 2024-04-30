@@ -4,85 +4,93 @@
  */
 
 #include <stddef.h>
-#include "brender.h"
-#include "dosio.h"
+#include <brdemo.h>
 
-int main()
+typedef struct br_demo_tut3 {
+    br_actor *planet;
+    br_actor *satellite;
+    br_actor *moon;
+} br_demo_tut3;
+
+br_error Tutorial3Init(br_demo *demo)
 {
-	br_pixelmap *screen_buffer, *back_buffer, *depth_buffer, *palette;
-	br_actor *world, *observer, *light, *planet, *moon, *satellite;
-	int i;
-	br_camera *camera_data;
+    br_demo_tut3 *tut;
+    br_actor     *light, *observer;
+    br_camera    *camera_data;
 
-	/************* Initialise BRender and Graphics Hardware *********************/
-	InitializeSampleZBuffer(&screen_buffer, &back_buffer, &depth_buffer);
+    tut = BrResAllocate(demo, sizeof(br_demo_tut3), BR_MEMORY_APPLICATION);
 
-	/*************** Build the World Database **********************************/
-	/*
-	 * Load Root Actor
-	 */
-	world = BrActorAllocate(BR_ACTOR_NONE, NULL);
-	/*
-	 * Load and Enable Default Light Source
-	 */
-	light = BrActorAdd(world, BrActorAllocate(BR_ACTOR_LIGHT, NULL));
-	BrLightEnable(light);
-	/*
-	 * Load and Position Camera
-	 */
-	observer = CreateSampleCamera(world);
-	observer->t.type = BR_TRANSFORM_MATRIX34;
-	BrMatrix34Translate(&observer->t.t.mat, BR_SCALAR(0.0), BR_SCALAR(0.0),
-	                    BR_SCALAR(6.0));
-	camera_data = (br_camera *) observer->type_data;
-	camera_data->yon_z = BR_SCALAR(50);
-	/*
-	 * Load Planet Model
-	 */
-	planet = BrActorAdd(world, BrActorAllocate(BR_ACTOR_MODEL, NULL));
-	planet->model = BrModelLoad("sph16.dat");
-	BrModelAdd(planet->model);
-	/*
-	 * Load and Position Moon Model
-	 */
-	moon = BrActorAdd(planet, BrActorAllocate(BR_ACTOR_MODEL, NULL));
-	moon->model = BrModelLoad("sph8.dat");
-	BrModelAdd(moon->model);
-	moon->t.type = BR_TRANSFORM_MATRIX34;
-	BrMatrix34Scale(&moon->t.t.mat, BR_SCALAR(0.5), BR_SCALAR(0.5),
-	                BR_SCALAR(0.5));
-	BrMatrix34PostTranslate(&moon->t.t.mat, BR_SCALAR(0.0), BR_SCALAR(0.0),
-	                        BR_SCALAR(2.0));
-	/*
-	 * Load and Position Satellite Model
-	 */
-	satellite = BrActorAdd(moon, BrActorAllocate(BR_ACTOR_MODEL, NULL));
-	satellite->model = BrModelLoad("sph8.dat");
-	BrModelAdd(satellite->model);
-	satellite->t.type = BR_TRANSFORM_MATRIX34;
-	BrMatrix34Scale(&satellite->t.t.mat, BR_SCALAR(0.25), BR_SCALAR(0.25),
-	                BR_SCALAR(0.25));
-	BrMatrix34PostTranslate(&satellite->t.t.mat, BR_SCALAR(1.5), BR_SCALAR(0.0),
-	                        BR_SCALAR(0.0));
+    /*
+     * Load and Enable Default Light Source
+     */
+    BrLightEnable(BrActorAdd(demo->world, BrActorAllocate(BR_ACTOR_LIGHT, NULL)));
 
-	/********************** Animation Loop **********************************/
-	float dt;
-	while (UpdateSample(observer, &dt))
-	{
-		BrPixelmapFill(back_buffer, 0);
-		BrPixelmapFill(depth_buffer, 0xFFFFFFFF);
-		BrZbSceneRender(world, observer, back_buffer, depth_buffer);
-		BrPixelmapDoubleBuffer(screen_buffer, back_buffer);
-		BrMatrix34PreRotateY(&planet->t.t.mat, BR_ANGLE_DEG(1.0));
-		BrMatrix34PreRotateY(&satellite->t.t.mat, BR_ANGLE_DEG(4.0));
-		BrMatrix34PreRotateZ(&moon->t.t.mat, BR_ANGLE_DEG(1.5));
-		BrMatrix34PostRotateZ(&satellite->t.t.mat, BR_ANGLE_DEG(-2.5));
-		BrMatrix34PostRotateY(&moon->t.t.mat, BR_ANGLE_DEG(-2.0));
-	}
-	/* Close down */
+    /*
+     * Load and Position Camera
+     */
+    observer         = BrActorAdd(demo->world, BrActorAllocate(BR_ACTOR_CAMERA, NULL));
+    observer->t.type = BR_TRANSFORM_MATRIX34;
+    BrMatrix34Translate(&observer->t.t.mat, BR_SCALAR(0.0), BR_SCALAR(0.0), BR_SCALAR(6.0));
+    demo->camera = observer;
 
-	BrZbEnd();
-	DOSGfxEnd();
-	BrEnd();
-	return 0;
+    camera_data              = observer->type_data;
+    camera_data->yon_z       = BR_SCALAR(50);
+    demo->order_table->min_z = camera_data->hither_z;
+    demo->order_table->max_z = camera_data->yon_z;
+
+    /*
+     * Load Planet Model
+     */
+    tut->planet        = BrActorAdd(demo->world, BrActorAllocate(BR_ACTOR_MODEL, NULL));
+    tut->planet->model = BrModelLoad("sph16.dat");
+    BrModelAdd(tut->planet->model);
+
+    /*
+     * Load and Position Moon Model
+     */
+    tut->moon        = BrActorAdd(tut->planet, BrActorAllocate(BR_ACTOR_MODEL, NULL));
+    tut->moon->model = BrModelLoad("sph8.dat");
+    BrModelAdd(tut->moon->model);
+    tut->moon->t.type = BR_TRANSFORM_MATRIX34;
+    BrMatrix34Scale(&tut->moon->t.t.mat, BR_SCALAR(0.5), BR_SCALAR(0.5), BR_SCALAR(0.5));
+    BrMatrix34PostTranslate(&tut->moon->t.t.mat, BR_SCALAR(0.0), BR_SCALAR(0.0), BR_SCALAR(2.0));
+
+    /*
+     * Load and Position Satellite Model
+     */
+    tut->satellite        = BrActorAdd(tut->moon, BrActorAllocate(BR_ACTOR_MODEL, NULL));
+    tut->satellite->model = BrModelLoad("sph8.dat");
+    BrModelAdd(tut->satellite->model);
+    tut->satellite->t.type = BR_TRANSFORM_MATRIX34;
+    BrMatrix34Scale(&tut->satellite->t.t.mat, BR_SCALAR(0.25), BR_SCALAR(0.25), BR_SCALAR(0.25));
+    BrMatrix34PostTranslate(&tut->satellite->t.t.mat, BR_SCALAR(1.5), BR_SCALAR(0.0), BR_SCALAR(0.0));
+
+    demo->user = tut;
+    return BRE_OK;
+}
+
+void Tutorial3Update(br_demo *demo, br_scalar dt)
+{
+    br_demo_tut3 *tut   = demo->user;
+    float         speed = dt * 25;
+
+    BrMatrix34PreRotateY(&tut->planet->t.t.mat, BR_ANGLE_DEG(1.0f * speed));
+    BrMatrix34PreRotateY(&tut->satellite->t.t.mat, BR_ANGLE_DEG(4.0f * speed));
+    BrMatrix34PreRotateZ(&tut->moon->t.t.mat, BR_ANGLE_DEG(1.5f * speed));
+    BrMatrix34PostRotateZ(&tut->satellite->t.t.mat, BR_ANGLE_DEG(-2.5f * speed));
+    BrMatrix34PostRotateY(&tut->moon->t.t.mat, BR_ANGLE_DEG(-2.0f * speed));
+}
+
+static br_demo_dispatch dispatch = {
+    .init          = Tutorial3Init,
+    .process_event = BrDemoDefaultProcessEvent,
+    .update        = Tutorial3Update,
+    .render        = BrDemoDefaultRender,
+    .on_resize     = BrDemoDefaultOnResize,
+    .destroy       = BrDemoDefaultDestroy,
+};
+
+int main(int argc, char **argv)
+{
+    return BrDemoRun("BRender Tutorial 3", 1280, 720, &dispatch);
 }

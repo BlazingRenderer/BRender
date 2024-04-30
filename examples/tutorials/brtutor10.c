@@ -2,75 +2,98 @@
  * Copyright (c) 1996 Argonaut Technologies Limited. All rights reserved.
  * Program to Display a Revolving Texture-Mapped Fork (15-bit mode)
  */
+#include <brdemo.h>
 
-#include <stddef.h>
-#include "brender.h"
-#include "dosio.h"
+typedef struct br_demo_tut10 {
+    br_actor *fork;
+} br_demo_tut10;
 
-int main()
+br_error Tutorial10Init(br_demo *demo)
 {
-	br_pixelmap *screen_buffer, *back_buffer, *depth_buffer;
-	br_actor *world, *observer, *fork;
-	br_pixelmap *tile_pm;
-	int i;
-	br_material *mats[10];
+    br_demo_tut10 *tut;
+    br_actor      *light, *observer;
+    br_model      *fork_model;
+    br_material   *fork_mat;
+    br_camera     *camera_data;
+    br_pixelmap   *tile_pm;
 
-	/************* Initialise BRender and Graphics Hardware *********************/
-	InitializeSampleZBuffer(&screen_buffer, &back_buffer, &depth_buffer);
+    /*
+     * Load and Register TILE0011 Texture
+     */
+    if((tile_pm = BrPixelmapLoad("refmap.pix")) == NULL) {
+        BrLogError("DEMO", "Unable to load refmap.pix");
+        return BRE_FAIL;
+    }
+    BrMapAdd(tile_pm);
 
-	/*************** Build the World Database **********************************/
+    /*
+     * Load and Apply `fork' Material
+     */
+    if((fork_mat = BrFmtScriptMaterialLoad("fork.mat")) == NULL) {
+        BrLogError("DEMO", "Unable to load fork.mat");
+        return BRE_FAIL;
+    }
+    BrMaterialAdd(fork_mat);
 
-	world = BrActorAllocate(BR_ACTOR_NONE, NULL);
-	BrLightEnable(BrActorAdd(world, BrActorAllocate(BR_ACTOR_LIGHT, NULL)));
-	observer = CreateSampleCamera(world);
-	observer->t.type = BR_TRANSFORM_MATRIX34;
-	BrMatrix34Translate(&observer->t.t.mat, BR_SCALAR(0.0), BR_SCALAR(0.0),
-	                    BR_SCALAR(5.0));
-	/*
-	 * Load and Register TILE0011 Texture
-	 */
-	tile_pm = BrPixelmapLoad("refmap.pix");
-	if (tile_pm == NULL)
-	{
-		BR_ERROR("Couldn't load refmap.pix");
-	}
-	BrMapAdd(tile_pm);
+    /*
+     * Load and Position Fork Actor
+     */
+    if((fork_model = BrModelLoad("fork.dat")) == NULL) {
+        BrLogError("DEMO", "Error loading fork.dat.");
+        return BRE_FAIL;
+    }
+    BrModelApplyMap(fork_model, BR_APPLYMAP_PLANE, NULL);
+    BrModelAdd(fork_model);
 
-	/*
-	 * Load and Apply fork Material
-	 */
+    tut = BrResAllocate(demo, sizeof(br_demo_tut10), BR_MEMORY_APPLICATION);
 
-	BrMaterialAdd(BrFmtScriptMaterialLoad("fork.mat"));
-	/*
-	 * Load and Position fork Actor
-	 */
+    /*
+     * Add and enable the default light source
+     */
+    light = BrActorAdd(demo->world, BrActorAllocate(BR_ACTOR_LIGHT, NULL));
+    BrLightEnable(light);
 
-	fork = BrActorAdd(world, BrActorAllocate(BR_ACTOR_MODEL, NULL));
-	fork->model = BrModelLoad("fork.dat");
-	fork->model->flags |= BR_MODF_UPDATEABLE;
-	BrModelAdd(fork->model);
-	BrModelApplyMap(fork->model, BR_APPLYMAP_PLANE, NULL);
-	fork->t.type = BR_TRANSFORM_MATRIX34;
-	/*
-	 * Assign fork material
-	 */
-	fork->material = BrMaterialFind("CHROME GIFMAP");
+    /*
+     * Load and Position Camera
+     */
+    observer         = BrActorAdd(demo->world, BrActorAllocate(BR_ACTOR_CAMERA, NULL));
+    observer->t.type = BR_TRANSFORM_MATRIX34;
+    BrMatrix34Translate(&observer->t.t.mat, BR_SCALAR(0.0), BR_SCALAR(0.0), BR_SCALAR(5.0));
+    demo->camera = observer;
 
-	/********************** Animation Loop **********************************/
+    camera_data              = observer->type_data;
+    demo->order_table->min_z = camera_data->hither_z;
+    demo->order_table->max_z = camera_data->yon_z;
 
-	float dt;
-	while (UpdateSample(observer, &dt))
-	{
-		BrPixelmapFill(back_buffer, 0);
-		BrPixelmapFill(depth_buffer, 0xFFFFFFFF);
-		BrZbSceneRender(world, observer, back_buffer, depth_buffer);
-		BrPixelmapDoubleBuffer(screen_buffer, back_buffer);
-		BrMatrix34PostRotateY(&fork->t.t.mat, BR_ANGLE_DEG(2.0));
-	}
-	/* Close down */
+    /*
+     * Load and Position Fork Actor
+     */
+    tut->fork           = BrActorAdd(demo->world, BrActorAllocate(BR_ACTOR_MODEL, NULL));
+    tut->fork->model    = fork_model;
+    tut->fork->material = BrMaterialFind("CHROME GIFMAP");
+    tut->fork->t.type   = BR_TRANSFORM_MATRIX34;
 
-	BrZbEnd();
-	DOSGfxEnd();
-	BrEnd();
-	return 0;
+    demo->user = tut;
+    return BRE_OK;
+}
+
+void Tutorial10Update(br_demo *demo, br_scalar dt)
+{
+    br_demo_tut10 *tut = demo->user;
+
+    BrMatrix34PostRotateY(&tut->fork->t.t.mat, BR_ANGLE_DEG(2.0 * dt * 25));
+}
+
+static br_demo_dispatch dispatch = {
+    .init          = Tutorial10Init,
+    .process_event = BrDemoDefaultProcessEvent,
+    .update        = Tutorial10Update,
+    .render        = BrDemoDefaultRender,
+    .on_resize     = BrDemoDefaultOnResize,
+    .destroy       = BrDemoDefaultDestroy,
+};
+
+int main(int argc, char **argv)
+{
+    return BrDemoRun("BRender Tutorial 10", 1280, 720, &dispatch);
 }

@@ -2,61 +2,82 @@
  * Copyright (c) 1996 Argonaut Technologies Limited. All rights reserved.
  * Program to Display a Revolving Yellow Duck (15-bit)
  */
+#include <brdemo.h>
 
-#include <stddef.h>
-#include "brender.h"
-#include "dosio.h"
+typedef struct br_demo_tut7 {
+    br_actor *duck;
+} br_demo_tut7;
 
-int main()
+br_error Tutorial7Init(br_demo *demo)
 {
-	br_pixelmap *screen_buffer, *back_buffer, *depth_buffer;
-	br_actor *world, *observer, *duck;
-	br_material *mats[10]; /*for storing pointers to material descriptions*/
-	int i;
+    br_demo_tut7 *tut;
+    br_actor     *light, *observer;
+    br_model     *duck_model;
+    br_camera    *camera_data;
+    br_material  *mats[2];
+    br_uint_32    nmats;
 
-	/************* Initialise BRender and Graphics Hardware *********************/
-	InitializeSampleZBuffer(&screen_buffer, &back_buffer, &depth_buffer);
+    if((nmats = BrFmtScriptMaterialLoadMany("duck.mat", mats, BR_ASIZE(mats))) != 2) {
+        BrLogError("DEMO", "Error loading duck.mat");
+        return BRE_FAIL;
+    }
+    BrMaterialAddMany(mats, nmats);
 
-	/*************** Build the World Database **********************************/
+    if((duck_model = BrModelLoad("duck.dat")) == NULL) {
+        BrLogError("DEMO", "Error loading duck.dat.");
+        return BRE_FAIL;
+    }
+    BrModelAdd(duck_model);
 
-	world = BrActorAllocate(BR_ACTOR_NONE, NULL);
-	BrLightEnable(BrActorAdd(world, BrActorAllocate(BR_ACTOR_LIGHT, NULL)));
-	observer = CreateSampleCamera(world);
-	observer->t.type = BR_TRANSFORM_MATRIX34;
-	BrMatrix34Translate(&observer->t.t.mat, BR_SCALAR(0.0), BR_SCALAR(0.0),
-	                    BR_SCALAR(5.0));
-	/*
-	 * Load and Apply Duck Materials
-	 */
+    tut = BrResAllocate(demo, sizeof(br_demo_tut7), BR_MEMORY_APPLICATION);
 
-	i = BrFmtScriptMaterialLoadMany("duck.mat", mats, BR_ASIZE(mats));
-	BrMaterialAddMany(mats, i);
+    /*
+     * Add and enable the default light source
+     */
+    light = BrActorAdd(demo->world, BrActorAllocate(BR_ACTOR_LIGHT, NULL));
+    BrLightEnable(light);
 
-	/*
-	 * Load and Position Duck Actor
-	 */
+    /*
+     * Load and Position Camera
+     */
+    observer         = BrActorAdd(demo->world, BrActorAllocate(BR_ACTOR_CAMERA, NULL));
+    observer->t.type = BR_TRANSFORM_MATRIX34;
+    BrMatrix34Translate(&observer->t.t.mat, BR_SCALAR(0.0), BR_SCALAR(0.0), BR_SCALAR(5.0));
+    demo->camera = observer;
 
-	duck = BrActorAdd(world, BrActorAllocate(BR_ACTOR_MODEL, NULL));
-	duck->model = BrModelLoad("duck.dat");
-	BrModelAdd(duck->model);
-	duck->t.type = BR_TRANSFORM_MATRIX34;
-	BrMatrix34RotateY(&duck->t.t.mat, BR_ANGLE_DEG(30));
+    camera_data              = observer->type_data;
+    demo->order_table->min_z = camera_data->hither_z;
+    demo->order_table->max_z = camera_data->yon_z;
 
-	/********************** Animation Loop **********************************/
+    /*
+     * Load and Position Duck Actor
+     */
+    tut->duck         = BrActorAdd(demo->world, BrActorAllocate(BR_ACTOR_MODEL, NULL));
+    tut->duck->model  = duck_model;
+    tut->duck->t.type = BR_TRANSFORM_MATRIX34;
+    BrMatrix34RotateY(&tut->duck->t.t.mat, BR_ANGLE_DEG(30));
 
-	float dt;
-	while (UpdateSample(observer, &dt))
-	{
-		BrPixelmapFill(back_buffer, 0);
-		BrPixelmapFill(depth_buffer, 0xFFFFFFFF);
-		BrZbSceneRender(world, observer, back_buffer, depth_buffer);
-		BrPixelmapDoubleBuffer(screen_buffer, back_buffer);
-		BrMatrix34PostRotateX(&duck->t.t.mat, BR_ANGLE_DEG(2.0));
-	}
-	/* Close down */
+    demo->user = tut;
+    return BRE_OK;
+}
 
-	BrZbEnd();
-	DOSGfxEnd();
-	BrEnd();
-	return 0;
+void Tutorial7Update(br_demo *demo, br_scalar dt)
+{
+    br_demo_tut7 *tut = demo->user;
+
+    BrMatrix34PostRotateX(&tut->duck->t.t.mat, BR_ANGLE_DEG(2.0 * dt * 25));
+}
+
+static br_demo_dispatch dispatch = {
+    .init          = Tutorial7Init,
+    .process_event = BrDemoDefaultProcessEvent,
+    .update        = Tutorial7Update,
+    .render        = BrDemoDefaultRender,
+    .on_resize     = BrDemoDefaultOnResize,
+    .destroy       = BrDemoDefaultDestroy,
+};
+
+int main(int argc, char **argv)
+{
+    return BrDemoRun("BRender Tutorial 7", 1280, 720, &dispatch);
 }

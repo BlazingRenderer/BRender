@@ -2,91 +2,107 @@
  * Copyright (c) 1996 Argonaut Technologies Limited. All rights reserved.
  * Program to display a Planet-Satellite animation
  */
+#include <brdemo.h>
 
-#include <stddef.h>
-#include "brender.h"
-#include "dosio.h"
+typedef struct br_demo_tut4 {
+    br_actor *planet;
+    br_actor *sat;
+} br_demo_tut4;
 
-int main()
+br_error Tutorial4Init(br_demo *demo)
 {
-	br_pixelmap *screen_buffer, *back_buffer, *depth_buffer, *palette;
-	br_actor *world, *observer, *cube, *planet, *sat, *wings1, *wings2;
-	int i;
-	br_camera *camera_data;
+    br_demo_tut4 *tut;
+    br_actor     *light, *observer, *wings1, *wings2;
+    br_camera    *camera_data;
 
-	/************* Initialise BRender and Graphics Hardware *********************/
-	InitializeSampleZBuffer(&screen_buffer, &back_buffer, &depth_buffer);
+    tut = BrResAllocate(demo, sizeof(br_demo_tut4), BR_MEMORY_APPLICATION);
 
-	/*************** Build the World Database **********************************/
-	world = BrActorAllocate(BR_ACTOR_NONE, NULL);
-	BrLightEnable(BrActorAdd(world, BrActorAllocate(BR_ACTOR_LIGHT, NULL)));
-	/*
-	 * Load and Position Camera
-	 */
-	observer = CreateSampleCamera(world);
-	observer->t.type = BR_TRANSFORM_MATRIX34;
-	BrMatrix34Translate(&observer->t.t.mat, BR_SCALAR(0.0), BR_SCALAR(0.0),
-	                    BR_SCALAR(8.0));
-	camera_data = (br_camera *) observer->type_data;
-	camera_data->yon_z = BR_SCALAR(350);
-	camera_data->hither_z = BR_SCALAR(0.5);
-	/*
-	 * Load and Position Planet Actor
-	 */
-	planet = BrActorAdd(world, BrActorAllocate(BR_ACTOR_MODEL, NULL));
-	planet->model = BrModelLoad("sph32.dat");
-	BrModelAdd(planet->model);
-	planet->t.type = BR_TRANSFORM_MATRIX34;
-	BrMatrix34Translate(&planet->t.t.mat, BR_SCALAR(14.0), BR_SCALAR(14.0),
-	                    BR_SCALAR(-40.0));
-	/*
-	 * Load and Position Satellite
-	 */
-	sat = BrActorAdd(planet, BrActorAllocate(BR_ACTOR_MODEL, NULL));
-	sat->model = BrModelLoad("sph16.dat");
-	BrModelAdd(sat->model);
-	sat->t.type = BR_TRANSFORM_MATRIX34;
-	BrMatrix34Scale(&sat->t.t.mat, BR_SCALAR(0.5), BR_SCALAR(0.5),
-	                BR_SCALAR(0.5));
-	BrMatrix34PostTranslate(&sat->t.t.mat, BR_SCALAR(2.0), BR_SCALAR(0.0),
-	                        BR_SCALAR(0.0));
-	/* Add `wings' to Satellite
-	 */
-	wings1 = BrActorAdd(sat, BrActorAllocate(BR_ACTOR_MODEL, NULL));
-	wings1->model = BrModelLoad("cylinder.dat");
-	BrModelAdd(wings1->model);
-	wings1->t.type = BR_TRANSFORM_MATRIX34;
-	BrMatrix34Scale(&wings1->t.t.mat, BR_SCALAR(0.25), BR_SCALAR(0.25),
-	                BR_SCALAR(2.0));
-	/* Add more `wings' to Satellite
-	 */
-	wings2 = BrActorAdd(sat, BrActorAllocate(BR_ACTOR_MODEL, NULL));
-	wings2->model = BrModelLoad("cylinder.dat");
-	BrModelAdd(wings2->model);
-	wings2->t.type = BR_TRANSFORM_MATRIX34;
-	BrMatrix34Scale(&wings2->t.t.mat, BR_SCALAR(0.25), BR_SCALAR(0.25),
-	                BR_SCALAR(2.0));
-	BrMatrix34PostRotateY(&wings2->t.t.mat, BR_ANGLE_DEG(90.0));
+    /*
+     * Add and enable the default light source
+     */
+    light = BrActorAdd(demo->world, BrActorAllocate(BR_ACTOR_LIGHT, NULL));
+    BrLightEnable(light);
 
-	/********************** Animation Loop **********************************/
-	float dt;
-	while (UpdateSample(observer, &dt))
-	{
-		BrPixelmapFill(back_buffer, 0);
-		BrPixelmapFill(depth_buffer, 0xFFFFFFFF);
-		BrZbSceneRender(world, observer, back_buffer, depth_buffer);
-		BrPixelmapDoubleBuffer(screen_buffer, back_buffer);
-		BrMatrix34PostTranslate(&planet->t.t.mat, BR_SCALAR(-0.033),
-		                        BR_SCALAR(-0.032), BR_SCALAR(0.1));
-		BrMatrix34PreRotateY(&planet->t.t.mat, BR_ANGLE_DEG(1.0));
-		BrMatrix34PreRotateX(&sat->t.t.mat, BR_ANGLE_DEG(15.0));
-		BrMatrix34PreRotateY(&sat->t.t.mat, BR_ANGLE_DEG(10.0));
-		BrMatrix34PostRotateZ(&sat->t.t.mat, BR_ANGLE_DEG(1.0));
-		BrMatrix34PostRotateY(&sat->t.t.mat, BR_ANGLE_DEG(3.0));
-	}
-	/* Close down */
-	BrZbEnd();
-	DOSGfxEnd();
-	BrEnd();
-	return 0;
+    /*
+     * Load and Position Camera
+     */
+    observer         = BrActorAdd(demo->world, BrActorAllocate(BR_ACTOR_CAMERA, NULL));
+    observer->t.type = BR_TRANSFORM_MATRIX34;
+    BrMatrix34Translate(&observer->t.t.mat, BR_SCALAR(0.0), BR_SCALAR(0.0), BR_SCALAR(8.0));
+    demo->camera = observer;
+
+    camera_data              = observer->type_data;
+    camera_data->yon_z       = BR_SCALAR(350);
+    camera_data->hither_z    = BR_SCALAR(0.5);
+    demo->order_table->min_z = camera_data->hither_z;
+    demo->order_table->max_z = camera_data->yon_z;
+
+    /*
+     * Load and Position Planet Actor
+     */
+    tut->planet        = BrActorAdd(demo->world, BrActorAllocate(BR_ACTOR_MODEL, NULL));
+    tut->planet->model = BrModelLoad("sph32.dat");
+    BrModelAdd(tut->planet->model);
+    tut->planet->t.type = BR_TRANSFORM_MATRIX34;
+    BrMatrix34Translate(&tut->planet->t.t.mat, BR_SCALAR(14.0), BR_SCALAR(14.0), BR_SCALAR(-40.0));
+
+    /*
+     * Load and Position Satellite
+     */
+    tut->sat        = BrActorAdd(tut->planet, BrActorAllocate(BR_ACTOR_MODEL, NULL));
+    tut->sat->model = BrModelLoad("sph16.dat");
+    BrModelAdd(tut->sat->model);
+    tut->sat->t.type = BR_TRANSFORM_MATRIX34;
+    BrMatrix34Scale(&tut->sat->t.t.mat, BR_SCALAR(0.5), BR_SCALAR(0.5), BR_SCALAR(0.5));
+    BrMatrix34PostTranslate(&tut->sat->t.t.mat, BR_SCALAR(2.0), BR_SCALAR(0.0), BR_SCALAR(0.0));
+
+    /*
+     * Add `wings' to Satellite
+     */
+    wings1        = BrActorAdd(tut->sat, BrActorAllocate(BR_ACTOR_MODEL, NULL));
+    wings1->model = BrModelLoad("cylinder.dat");
+    BrModelAdd(wings1->model);
+    wings1->t.type = BR_TRANSFORM_MATRIX34;
+    BrMatrix34Scale(&wings1->t.t.mat, BR_SCALAR(0.25), BR_SCALAR(0.25), BR_SCALAR(2.0));
+
+    /*
+     * Add more `wings' to Satellite
+     */
+    wings2        = BrActorAdd(tut->sat, BrActorAllocate(BR_ACTOR_MODEL, NULL));
+    wings2->model = BrModelLoad("cylinder.dat");
+    BrModelAdd(wings2->model);
+    wings2->t.type = BR_TRANSFORM_MATRIX34;
+    BrMatrix34Scale(&wings2->t.t.mat, BR_SCALAR(0.25), BR_SCALAR(0.25), BR_SCALAR(2.0));
+    BrMatrix34PostRotateY(&wings2->t.t.mat, BR_ANGLE_DEG(90.0));
+
+    demo->user = tut;
+    return BRE_OK;
+}
+
+void Tutorial4Update(br_demo *demo, br_scalar dt)
+{
+    br_demo_tut4 *tut   = demo->user;
+    float         speed = dt * 25;
+
+    BrMatrix34PostTranslate(&tut->planet->t.t.mat, BR_SCALAR(-0.033 * speed), BR_SCALAR(-0.032 * speed),
+                            BR_SCALAR(0.1 * speed));
+    BrMatrix34PreRotateY(&tut->planet->t.t.mat, BR_ANGLE_DEG(1.0f * speed));
+    BrMatrix34PreRotateX(&tut->sat->t.t.mat, BR_ANGLE_DEG(15.0f * speed));
+    BrMatrix34PreRotateY(&tut->sat->t.t.mat, BR_ANGLE_DEG(10.0f * speed));
+    BrMatrix34PostRotateZ(&tut->sat->t.t.mat, BR_ANGLE_DEG(1.0f * speed));
+    BrMatrix34PostRotateY(&tut->sat->t.t.mat, BR_ANGLE_DEG(3.0f * speed));
+}
+
+static br_demo_dispatch dispatch = {
+    .init          = Tutorial4Init,
+    .process_event = BrDemoDefaultProcessEvent,
+    .update        = Tutorial4Update,
+    .render        = BrDemoDefaultRender,
+    .on_resize     = BrDemoDefaultOnResize,
+    .destroy       = BrDemoDefaultDestroy,
+};
+
+int main(int argc, char **argv)
+{
+    return BrDemoRun("BRender Tutorial 4", 1280, 720, &dispatch);
 }
