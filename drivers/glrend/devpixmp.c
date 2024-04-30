@@ -466,15 +466,24 @@ br_error BR_CMETHOD(br_device_pixelmap_gl, rectangleStretchCopyTo)(br_device_pix
                                                                    br_device_pixelmap *_src, br_rectangle *sr)
 {
     /* Pixelmap->Device, addressable stretch copy. */
-    HVIDEO       hVideo = &self->screen->asFront.video;
-    br_pixelmap *src    = (br_pixelmap *)_src;
-    GLuint       tex;
-    br_matrix4   mvp;
+    HVIDEO            hVideo  = &self->screen->asFront.video;
+    br_pixelmap      *src     = (br_pixelmap *)_src;
+    br_buffer_stored *stored  = src->stored;
+    br_boolean        tex_tmp = BR_FALSE;
+    GLuint            tex;
+    br_matrix4        mvp;
 
     if(self->use_type != BRT_OFFSCREEN)
         return BRE_UNSUPPORTED;
 
-    if((tex = VIDEO_BrPixelmapToGLTexture(src)) == 0)
+    if(stored != NULL && ObjectDevice(stored) == self->device) {
+        tex = BufferStoredGLGetTexture(stored);
+    } else {
+        tex     = VIDEO_BrPixelmapToGLTexture(src);
+        tex_tmp = BR_TRUE;
+    }
+
+    if(tex == 0)
         return BRE_FAIL;
 
     /* Convert the rects to OpenGL-coordinates */
@@ -497,14 +506,17 @@ br_error BR_CMETHOD(br_device_pixelmap_gl, rectangleStretchCopyTo)(br_device_pix
 
     glUniformMatrix4fv(hVideo->defaultProgram.uMVP, 1, GL_FALSE, (GLfloat *)&mvp);
     glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, BufferStoredGLGetTexture((br_buffer_stored *)src->stored));
+    glBindTexture(GL_TEXTURE_2D, tex);
     glUniform1i(hVideo->defaultProgram.uSampler, 0);
     glUniform1f(hVideo->defaultProgram.uVerticalFlip, 1);
 
     DeviceGLDrawQuad(&self->asBack.quad);
 
     glBindVertexArray(0);
-    glDeleteTextures(1, &tex);
+
+    if(tex_tmp)
+        glDeleteTextures(1, &tex);
+
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
     return BRE_OK;
 }
