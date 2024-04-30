@@ -1,76 +1,59 @@
-/*
- * Copyright (c) 1995 Argonaut Technologies Limited. All rights reserved.
- *
- * $Id:  $
- * $Locker:  $
- *
- */
+#include <stddef.h>
+#include <brdemo.h>
 
-#include "brender.h"
-#include "dosio.h"
-
-/*
- * The screen, offscreen buffer, and the depth buffer
- */
-br_pixelmap *screen_buffer, *back_buffer, *depth_buffer;
-
-/*
- * The actors in the world
- */
-br_actor *observer, *world;
-
-int main(int argc, char **argv)
+static br_error MinZBInit(br_demo *demo)
 {
-    br_actor *a;
-    int       i;
+    br_actor  *a;
+    br_camera *camera_data;
 
-    /*
-     * Setup renderer and screen
-     */
-    InitializeSampleZBuffer(&screen_buffer, &back_buffer, &depth_buffer);
+    demo->camera = BrActorAdd(demo->world, BrActorAllocate(BR_ACTOR_CAMERA, NULL));
 
-    /*
-     * Build the world
-     */
-    world    = BrActorAllocate(BR_ACTOR_NONE, NULL);
-    observer = CreateSampleCamera(world);
-    BrLightEnable(BrActorAdd(world, BrActorAllocate(BR_ACTOR_LIGHT, NULL)));
+    camera_data              = demo->camera->type_data;
+    demo->order_table->min_z = camera_data->hither_z;
+    demo->order_table->max_z = camera_data->yon_z;
 
-    a                    = BrActorAdd(world, BrActorAllocate(BR_ACTOR_MODEL, NULL));
+    BrLightEnable(BrActorAdd(demo->world, BrActorAllocate(BR_ACTOR_LIGHT, NULL)));
+
+    a                    = BrActorAdd(demo->world, BrActorAllocate(BR_ACTOR_MODEL, NULL));
     a->t.type            = BR_TRANSFORM_EULER;
     a->t.t.euler.e.order = BR_EULER_ZXY_S;
-    BrVector3Set(&a->t.t.euler.t, BR_SCALAR(0.0), BR_SCALAR(0.0), BR_SCALAR(-5.0));
+    BrVector3Set(&a->t.t.euler.t, BR_SCALAR(0.0), BR_SCALAR(0.0), BR_SCALAR(-6.0));
+
+    demo->user = a;
+    return BRE_OK;
+}
+
+static void MinZBUpdate(br_demo *demo, br_scalar dt)
+{
+    br_actor *a = demo->user;
 
     /*
      * Tumble the actor around
      */
-    float dt;
-    i = 0;
-    while(UpdateSample(observer, &dt)) {
-        /*
-         * Clear the buffers
-         */
-        BrPixelmapFill(back_buffer, 0);
-        BrPixelmapFill(depth_buffer, 0xFFFFFFFF);
+    float aa = BrScalarToFloat(BrAngleToScalar(a->t.t.euler.e.a));
+    float bb = BrScalarToFloat(BrAngleToScalar(a->t.t.euler.e.a));
+    float cc = BrScalarToFloat(BrAngleToScalar(a->t.t.euler.e.a));
 
-        BrZbSceneRender(world, observer, back_buffer, depth_buffer);
-        BrPixelmapDoubleBuffer(screen_buffer, back_buffer);
+    aa = fmodf(aa + (dt * 1) / 25.0f, 1.0f);
+    bb = fmodf(bb + (dt * 2) / 25.0f, 1.0f);
+    cc = fmodf(cc + (dt * 3) / 25.0f, 1.0f);
 
-        a->t.t.euler.e.a = BR_ANGLE_DEG(i);
-        a->t.t.euler.e.b = BR_ANGLE_DEG(i * 2);
-        a->t.t.euler.e.c = BR_ANGLE_DEG(i * 3);
+    a->t.t.euler.e.a = BrScalarToAngle(aa);
+    a->t.t.euler.e.b = BrScalarToAngle(bb);
+    a->t.t.euler.e.c = BrScalarToAngle(cc);
+}
 
-        i++;
-        if(i >= 360)
-            i = 0;
-    }
 
-    /*
-     * Close down
-     */
-    BrZbEnd();
-    DOSGfxEnd();
-    BrEnd();
+const static br_demo_dispatch dispatch = {
+    .init          = MinZBInit,
+    .process_event = BrDemoDefaultProcessEvent,
+    .update        = MinZBUpdate,
+    .render        = BrDemoDefaultRender,
+    .on_resize     = BrDemoDefaultOnResize,
+    .destroy       = BrDemoDefaultDestroy,
+};
 
-    return 0;
+int main(int argc, char **argv)
+{
+    return BrDemoRun("BRender Minimal Z-Buffer Demo", 1280, 720, &dispatch);
 }
