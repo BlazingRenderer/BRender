@@ -1,17 +1,9 @@
-
-/*
- * Copyright (c) 1993 Argonaut Software Ltd. All rights reserved.
- */
-
 /* A simple real time physical simulation */
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
-
-#include "brender.h"
-#include "dosio.h"
-#include "fmt.h"
+#include <brdemo.h>
 
 #define S0 BR_SCALAR(0)
 #define S1 BR_SCALAR(1)
@@ -55,8 +47,6 @@ int Frozen = 0;
 #define PLANE_FORCE     BR_SCALAR(0.3)
 #define DAMPING         BR_SCALAR(0.8)
 #define DT              BR_SCALAR(1)
-
-br_pixelmap *palette;
 
 void InitialiseSheetModel(br_model *model)
 {
@@ -315,74 +305,57 @@ void PlaceSphere(br_actor *parent, br_model *model, br_vector3 *position, char *
     BrMatrix34PostTranslate(&sphere->t.t.mat, position->v[0], position->v[1], position->v[2]);
 }
 
-/*
- * Find Failed callbacks to automatically load textures & tables
- */
-br_pixelmap *BR_CALLBACK MapFindFailedLoad(const char *name)
-{
-    br_pixelmap *pm;
+typedef struct br_demo_sheet {
+    br_actor  *sheet;
+    br_boolean frozen;
+} br_demo_sheet;
 
-    if((pm = BrPixelmapLoad(name)) != NULL) {
-        pm->identifier = BrResStrDup(pm, name);
-        if(pm->type == BR_PMT_INDEX_8) {
-            pm->map = palette;
-            pm      = BrPixelmapDeCLUT(pm);
-        }
-        BrMapAdd(pm);
+static br_error SheetInit(br_demo *demo)
+{
+    br_demo_sheet *sheet;
+    br_actor      *pivot, *system, *box;
+    br_model      *sphere_model;
+    br_camera     *camera_data;
+    br_actor      *light1, *light2;
+    br_material   *mats[6];
+    br_uint_32     nmats;
+
+    if((demo->palette = BrPixelmapLoad("std.pal")) == NULL) {
+        BrLogError("DEMO", "Error loading std.pal");
+        return BRE_FAIL;
     }
+    BrMapAdd(demo->palette);
 
-    return pm;
-}
+    if((sphere_model = BrModelLoad("sph32.dat")) == NULL) {
+        BrLogError("DEMO", "Error loading sph32.dat.");
+        return BRE_FAIL;
+    }
+    BrModelAdd(sphere_model);
 
-int main(void)
-{
-    br_material *mats[10];
-    br_actor    *world, *sheet, *camera, *light1, *light2, *light3;
-    br_actor    *box, *system, *pivot;
-    br_pixelmap *depth_buffer, *shade, *design_1_pm, *design_2_pm;
-    br_pixelmap *colour_buffer, *screen_buffer, *ball8_pm, *earth_pm;
-    br_colour   *pal_entry;
-    br_scalar    time = 0, scale;
-    br_model    *sphere_model;
-    br_matrix34  inverse;
+    if((nmats = BrFmtScriptMaterialLoadMany("sheet.mat", mats, BR_ASIZE(mats))) != 6) {
+        BrLogError("DEMO", "Error loading sheet.mat");
+        return BRE_FAIL;
+    }
+    BrMaterialAddMany(mats, nmats);
 
-    int i;
+    sheet = BrResAllocate(demo, sizeof(br_demo_sheet), BR_MEMORY_APPLICATION);
 
-    BR_BANNER("Rubber Sheet", "1994-1995", "$Revision: 1.1 $");
-
-    /* Initialise BRender */
-    InitializeSampleZBuffer(&screen_buffer, &colour_buffer, &depth_buffer);
-
-    palette = BrPixelmapLoad("std.pal");
+    demo->world->t.type = BR_TRANSFORM_MATRIX34;
+    BrMatrix34PostTranslate(&demo->world->t.t.mat, 0, BR_SCALAR(0.5), 0);
 
     /*
-      Load the materials
-    */
-
-    BrTableFindHook(BrTableFindFailedLoad);
-    BrMapFindHook(MapFindFailedLoad);
-    BrModelFindHook(BrModelFindFailedLoad);
-    BrTableFindHook(BrTableFindFailedLoad);
-
-    i = BrFmtScriptMaterialLoadMany("sheet.mat", mats, BR_ASIZE(mats));
-    BrMaterialAddMany(mats, i);
-
-    world         = BrActorAllocate(BR_ACTOR_NONE, NULL);
-    world->t.type = BR_TRANSFORM_MATRIX34;
-    BrMatrix34PostTranslate(&world->t.t.mat, 0, BR_SCALAR(0.5), 0);
-
-    /* The Actors */
-
-    pivot  = BrActorAdd(world, BrActorAllocate(BR_ACTOR_NONE, NULL));
+     * The Actors
+     */
+    pivot  = BrActorAdd(demo->world, BrActorAllocate(BR_ACTOR_NONE, NULL));
     system = BrActorAdd(pivot, BrActorAllocate(BR_ACTOR_NONE, NULL));
 
-    sheet        = BrActorAdd(system, BrActorAllocate(BR_ACTOR_MODEL, NULL));
-    sheet->model = BrModelAllocate("sheet", SHEETX * SHEETY, 4 * (SHEETX - 1) * (SHEETY - 1));
-    InitialiseSheetModel(sheet->model);
-    sheet->model->flags = BR_MODF_KEEP_ORIGINAL | BR_MODF_GENERATE_TAGS;
-    BrModelAdd(sheet->model);
+    sheet->sheet        = BrActorAdd(system, BrActorAllocate(BR_ACTOR_MODEL, NULL));
+    sheet->sheet->model = BrModelAllocate("sheet", SHEETX * SHEETY, 4 * (SHEETX - 1) * (SHEETY - 1));
+    InitialiseSheetModel(sheet->sheet->model);
+    sheet->sheet->model->flags = BR_MODF_KEEP_ORIGINAL | BR_MODF_GENERATE_TAGS;
+    BrModelAdd(sheet->sheet->model);
 
-    BrModelUpdate(sheet->model, BR_MODU_ALL);
+    BrModelUpdate(sheet->sheet->model, BR_MODU_ALL);
 
     box               = BrActorAdd(system, BrActorAllocate(BR_ACTOR_MODEL, NULL));
     box->material     = BrMaterialFind("plain_white");
@@ -396,62 +369,66 @@ int main(void)
     PlaceSphere(system, sphere_model, &centre2, "plain_green");
     PlaceSphere(system, sphere_model, &centre3, "earth");
 
-    /* The Camera */
+    /*
+     * The Camera
+     */
+    demo->camera = BrActorAdd(demo->world, BrActorAllocate(BR_ACTOR_CAMERA, NULL));
 
-    camera                                          = CreateSampleCamera(world);
-    ((br_camera *)camera->type_data)->type          = BR_CAMERA_PERSPECTIVE;
-    ((br_camera *)camera->type_data)->field_of_view = BR_ANGLE_DEG(45.0);
-    ((br_camera *)camera->type_data)->hither_z      = BR_SCALAR(0.1);
-    ((br_camera *)camera->type_data)->yon_z         = BR_SCALAR(20.0);
-    BrMatrix34Translate(&camera->t.t.mat, BR_SCALAR(0.0), BR_SCALAR(0.0), BR_SCALAR(4.0));
+    camera_data                = demo->camera->type_data;
+    camera_data->type          = BR_CAMERA_PERSPECTIVE;
+    camera_data->field_of_view = BR_ANGLE_DEG(45.0);
+    camera_data->hither_z      = BR_SCALAR(0.1);
+    camera_data->yon_z         = BR_SCALAR(20.0);
+    BrMatrix34Translate(&demo->camera->t.t.mat, BR_SCALAR(0.0), BR_SCALAR(0.0), BR_SCALAR(4.0));
 
-    /* The lights */
+    demo->order_table->min_z = camera_data->hither_z;
+    demo->order_table->max_z = camera_data->yon_z;
 
-    light1                                = BrActorAdd(world, BrActorAllocate(BR_ACTOR_LIGHT, NULL));
+    /*
+     * The lights
+     */
+    light1                                = BrActorAdd(demo->world, BrActorAllocate(BR_ACTOR_LIGHT, NULL));
     ((br_light *)light1->type_data)->type = BR_LIGHT_DIRECT;
     BrMatrix34RotateZ(&light1->t.t.mat, BR_ANGLE_DEG(55));
     BrMatrix34PostRotateX(&light1->t.t.mat, BR_ANGLE_DEG(-45));
     BrLightEnable(light1);
 
-    light2                                = BrActorAdd(world, BrActorAllocate(BR_ACTOR_LIGHT, NULL));
+    light2                                = BrActorAdd(demo->world, BrActorAllocate(BR_ACTOR_LIGHT, NULL));
     ((br_light *)light2->type_data)->type = BR_LIGHT_DIRECT;
     BrMatrix34PostTranslate(&light2->t.t.mat, BR_SCALAR(0), BR_SCALAR(1), BR_SCALAR(1));
     BrMatrix34PostRotateX(&light2->t.t.mat, BR_ANGLE_DEG(45));
     BrLightEnable(light2);
 
-    /* Load and install palette */
-    BrMatrix34Identity(&inverse);
+    demo->user = sheet;
+    return BRE_OK;
+}
 
-    float dt;
-    while(UpdateSample(camera, &dt)) {
-        int         mouse_x, mouse_y, mouse_buttons;
-        br_matrix34 rotation;
-        br_vector3  tmp;
+void SheetUpdate(br_demo *demo, br_scalar dt)
+{
+    br_demo_sheet *sheet = demo->user;
 
-        /* Clear off screen buffer and its Z buffer */
-        BrPixelmapFill(colour_buffer, 0);
-        BrPixelmapFill(depth_buffer, 0xFFFFFFFF);
+    if(sheet->frozen)
+        return;
 
-        /* And now render the sheet */
+    for(int i = 0; i < CYCLES; i++)
+        UpdateDynamics(sheet->sheet->model, &gravity);
 
-        BrZbSceneRender(world, camera, colour_buffer, depth_buffer);
+    /* If the sheet has changed we need to tell BRender to */
+    /* update the normals, bounding box and radius */
 
-        /* Copy off screen buffer to display */
+    BrModelUpdate(sheet->sheet->model, BR_MODU_NORMALS | BR_MODU_BOUNDING_BOX | BR_MODU_RADIUS);
+}
 
-        BrPixelmapDoubleBuffer(screen_buffer, colour_buffer);
+const static br_demo_dispatch dispatch = {
+    .init          = SheetInit,
+    .process_event = BrDemoDefaultProcessEvent,
+    .update        = SheetUpdate,
+    .render        = BrDemoDefaultRender,
+    .on_resize     = BrDemoDefaultOnResize,
+    .destroy       = BrDemoDefaultDestroy,
+};
 
-        if(!Frozen) {
-            for(i = 0; i < CYCLES; i++)
-                UpdateDynamics(sheet->model, &gravity);
-
-            /* If the sheet has changed we need to tell BRender to */
-            /* update the normals, bounding box and radius */
-
-            BrModelUpdate(sheet->model, BR_MODU_NORMALS | BR_MODU_BOUNDING_BOX | BR_MODU_RADIUS);
-        }
-    }
-
-    BrZbEnd();
-    DOSGfxEnd();
-    BrEnd();
+int main(void)
+{
+    return BrDemoRun("BRender Rubber Sheet Demo", 1280, 720, &dispatch);
 }
