@@ -1,42 +1,11 @@
-
-/*
- * Copyright (c) 1993 Argonaut Software Ltd. All rights reserved.
- */
-
 /* Teapot in Space */
 /* Simulated reflections by rendering into environment maps */
 
 #include <stdio.h>
-#include <stdlib.h>
-
-#include "brender.h"
-#include "dosio.h"
+#include <brdemo.h>
 
 /* This demo simulates a giant reflecting teapot hanging above a */
 /* spinning earth */
-
-int RotateTeapot = 0;
-
-br_pixelmap *palette;
-
-/*
- * Find Failed callbacks to automatically load textures & tables
- */
-br_pixelmap *BR_CALLBACK MapFindFailedLoad(const char *name)
-{
-    br_pixelmap *pm;
-
-    if((pm = BrPixelmapLoad(name)) != NULL) {
-        pm->identifier = BrResStrDup(pm, name);
-        if(pm->type == BR_PMT_INDEX_8) {
-            pm->map = palette;
-            pm      = BrPixelmapDeCLUT(pm);
-        }
-        BrMapAdd(pm);
-    }
-
-    return pm;
-}
 
 static br_material *CreateMaterial(const char *identifier)
 {
@@ -61,107 +30,123 @@ static br_material *CreateMaterial(const char *identifier)
     return mat;
 }
 
-int main(void)
+typedef struct br_demo_reflection {
+    br_pixelmap *envmap1_pm;
+
+    br_actor *teapot;
+    br_actor *earth;
+    br_actor *moon;
+    br_actor *mirror_view;
+
+    br_pixelmap *mirror_pm;
+    br_pixelmap *mirror_depth;
+
+    br_float theta;
+} br_demo_reflection;
+
+br_error ReflectionInit(br_demo *demo)
 {
-    br_actor    *world, *teapot, *earth, *moon, *camera, *mirror_view, *light1, *env;
-    br_actor    *pair, *system, *light2;
-    br_pixelmap *depth_buffer, *mirror_depth, *shade, *earth_pm, *moon_pm;
-    br_pixelmap *colour_buffer, *mirror_pm, *envmap1_pm, *screen;
-    br_colour   *pal_entry;
-    br_matrix34  rotation;
-    br_material *moon_map, *earth_map, *mirror;
-    br_angle     theta = 0;
+    br_demo_reflection *ref;
+    br_pixelmap        *earth_pm, *moon_pm;
+    br_material        *earth_mat, *moon_mat, *mirror_mat;
+    br_model           *teapot_model, *earth_model;
+    br_actor           *pair, *system, *light1, *light2, *env;
+    br_camera          *camera_data, *mirror_camera_data;
 
-    int i;
+    ref        = BrResAllocate(demo, sizeof(br_demo_reflection), BR_MEMORY_APPLICATION);
+    demo->user = ref;
 
-    long          mouse_x, mouse_y;
-    unsigned long mouse_buttons;
+    /*
+     * Load the palette.
+     */
+    if((demo->palette = BrPixelmapLoad("std.pal")) == NULL) {
+        BrLogError("DEMO", "Error loading std.pal.");
+        return BRE_FAIL;
+    }
+    BrMapAdd(demo->palette);
 
-    BR_BANNER("Reflection Demo", "1994-1995", "$Revision: 1.2 $");
+    /*
+     * If the teapot simply reflected the earth with no other source
+     * for reflection then it would mostly look black so rather than simply/
+     * reflect the earth into the teapot we'll also have an environment map
+     * to provide a plain background that is also reflected.
+     */
+    if((ref->envmap1_pm = BrMapFind("testenv1.pix")) == NULL) {
+        BrLogError("DEMO", "Error loading testenv1.pix");
+        return BRE_FAIL;
+    }
+    BrMapAdd(ref->envmap1_pm);
 
-    /* Initialise BRender */
-    InitializeSampleZBuffer(&screen, &colour_buffer, &depth_buffer);
-    palette = BrPixelmapLoad("std.pal");
-
-    BrTableFindHook(BrTableFindFailedLoad);
-    BrMapFindHook(MapFindFailedLoad);
-    BrModelFindHook(BrModelFindFailedLoad);
-    BrTableFindHook(BrTableFindFailedLoad);
-
-    /* Load a shade table */
-
-    shade = BrPixelmapLoad("shade.tab");
-    if(shade == NULL)
-        BR_ERROR0("Could't load shade.tab");
-
-    /* Put shade table into registry */
-
-    BrTableAdd(shade);
-
-    /* Complete definition of mirror texture. Note that the colour_map */
-    /* is a newly allocated pixelmap into which we'll render later */
-
-    /* Firstly `mirror' is the structure defining the material from which */
-    /* the teapot is made...an environment map */
-    mirror = CreateMaterial("mirror");
-
-    /* The teapot model is subdivided into many small triangles. This */
-    /* means we can use BR_MATF_ENVIRONMENT_I even though it is */
-    /* less accurate than BR_MATF_ENVIRONMENT_L */
-    mirror->flags       = BR_MATF_GOURAUD | BR_MATF_LIGHT | BR_MATF_ENVIRONMENT_L;
-    mirror->index_shade = shade;
-    mirror->colour_map = mirror_pm = BrPixelmapMatchTypedSized(screen, BR_PMMATCH_OFFSCREEN, screen->type, 256, 256);
-    mirror_pm->origin_x            = (mirror_pm->width / 2);
-    mirror_pm->origin_y            = (mirror_pm->height / 2);
-    BrMapAdd(mirror_pm);
-    BrMaterialAdd(mirror);
-
-    mirror_depth = BrPixelmapMatch(mirror_pm, BR_PMMATCH_DEPTH_16);
-
-    /* The earth texture is now defined using a predefined earth texture */
-
-    /* Now the material from which the earth is made. */
-    earth_map     = CreateMaterial("earth");
-    earth_pm      = BrPixelmapLoad("earth.pix");
-    earth_pm->map = palette;
-    earth_pm      = BrPixelmapDeCLUT(earth_pm);
-    if(earth_pm == NULL)
-        BR_ERROR0("Couldn't load earth.pix");
+    /*
+     * Load the earth texture.
+     */
+    if((earth_pm = BrMapFind("earth.pix")) == NULL) {
+        BrLogError("DEMO", "Unable to load earth.pix");
+        return BRE_FAIL;
+    }
     BrMapAdd(earth_pm);
-    earth_map->index_shade = shade;
-    earth_map->colour_map  = earth_pm;
-    BrMaterialAdd(earth_map);
 
-    moon_map     = CreateMaterial("moon");
-    moon_pm      = BrPixelmapLoad("moon.pix");
-    moon_pm->map = palette;
-    moon_pm      = BrPixelmapDeCLUT(moon_pm);
-    if(moon_pm == NULL)
-        BR_ERROR0("Couldn't load moon.pix");
+    if((moon_pm = BrMapFind("moon.pix")) == NULL) {
+        BrLogError("DEMO", "Unable to load moon.pix");
+        return BRE_FAIL;
+    }
     BrMapAdd(moon_pm);
-    moon_map->index_shade = shade;
-    moon_map->colour_map  = moon_pm;
-    BrMaterialAdd(moon_map);
 
-    /* If the teapot simply reflected the earth with no other source */
-    /* for reflection then it would mostly look black so rather than simply */
-    /* reflect the earth into the teapot we'll also have an environment map */
-    /* to provide a plain background that is also reflected */
+    if((teapot_model = BrModelLoad("teapot.dat")) == NULL) {
+        BrLogError("DEMO", "Unable to load teapot.dat");
+        return BRE_FAIL;
+    }
+    BrModelAdd(teapot_model);
 
-    envmap1_pm      = BrPixelmapLoad("testenv1.pix");
-    envmap1_pm->map = palette;
-    envmap1_pm      = BrPixelmapDeCLUT(envmap1_pm);
-    if(envmap1_pm == NULL)
-        BR_ERROR0("Couldn't load testenv1.pix");
-    BrMapAdd(envmap1_pm);
+    if((earth_model = BrModelLoad("sph32.dat")) == NULL) {
+        BrLogError("DEMO", "Unable to load sph32.dat");
+        return BRE_FAIL;
+    }
+    BrModelAdd(earth_model);
 
-    /* In the beginning... */
+    /*
+     * Complete definition of mirror texture. Note that the colour_map
+     * is a newly allocated pixelmap into which we'll render later.
+     */
+    ref->mirror_pm = BrPixelmapMatchTypedSized(demo->colour_buffer, BR_PMMATCH_OFFSCREEN, demo->colour_buffer->type, 256, 256);
+    ref->mirror_pm->origin_x = (br_int_16)(ref->mirror_pm->width >> 1);
+    ref->mirror_pm->origin_y = (br_int_16)(ref->mirror_pm->height >> 1);
+    BrMapAdd(ref->mirror_pm);
 
-    world = BrActorAllocate(BR_ACTOR_NONE, NULL);
+    /*
+     * The teapot model is subdivided into many small triangles. This
+     * means we can use BR_MATF_ENVIRONMENT_I even though it is
+     * less accurate than BR_MATF_ENVIRONMENT_L.
+     * */
 
-    /* The earth-teapot system forms a single `pair' unit */
+    /*
+     * Firstly `mirror' is the structure defining the material from which
+     * the teapot is made...an environment map.
+     */
+    mirror_mat             = CreateMaterial("mirror");
+    mirror_mat->flags      = BR_MATF_GOURAUD | BR_MATF_LIGHT | BR_MATF_ENVIRONMENT_L;
+    mirror_mat->colour_map = ref->mirror_pm;
+    BrMaterialAdd(mirror_mat);
 
-    pair         = BrActorAdd(world, BrActorAllocate(BR_ACTOR_NONE, NULL));
+    ref->mirror_depth = BrPixelmapMatch(ref->mirror_pm, BR_PMMATCH_DEPTH_16);
+
+    /*
+     * Now the material from which the earth is made.
+     */
+    earth_mat             = CreateMaterial("earth");
+    earth_mat->colour_map = earth_pm;
+    BrMaterialAdd(earth_mat);
+
+    moon_mat             = CreateMaterial("moon");
+    moon_mat->colour_map = moon_pm;
+    BrMaterialAdd(moon_mat);
+
+    /*
+     * In the beginning...
+     * The earth-teapot system forms a single `pair' unit
+     */
+
+    pair         = BrActorAdd(demo->world, BrActorAllocate(BR_ACTOR_NONE, NULL));
     pair->t.type = BR_TRANSFORM_MATRIX34;
     BrMatrix34Identity(&pair->t.t.mat);
 
@@ -169,138 +154,176 @@ int main(void)
     system->t.type = BR_TRANSFORM_MATRIX34;
     BrMatrix34PostTranslate(&system->t.t.mat, BR_SCALAR(-0.7), BR_SCALAR(0), BR_SCALAR(0));
 
-    /* Load teapot and place into `pair' */
+    /*
+     * Load teapot and place into `pair'
+     */
 
-    teapot        = BrActorAdd(pair, BrActorAllocate(BR_ACTOR_MODEL, NULL));
-    teapot->model = BrModelLoad("teapot.dat");
-    if(teapot->model == NULL)
-        BR_ERROR0("Couldn't load teapot.dat");
-    BrModelAdd(teapot->model);
-    teapot->material = BrMaterialFind("mirror");
-    teapot->t.type   = BR_TRANSFORM_MATRIX34;
-    BrMatrix34Scale(&teapot->t.t.mat, BR_SCALAR(0.7), BR_SCALAR(0.7), BR_SCALAR(0.7));
-    BrMatrix34PostRotateX(&teapot->t.t.mat, BR_ANGLE_DEG(-70));
-    BrMatrix34PostRotateY(&teapot->t.t.mat, BR_ANGLE_DEG(-45));
-    BrMatrix34PostTranslate(&teapot->t.t.mat, BR_SCALAR(0.7), BR_SCALAR(0), BR_SCALAR(0));
+    ref->teapot        = BrActorAdd(pair, BrActorAllocate(BR_ACTOR_MODEL, NULL));
+    ref->teapot->model = teapot_model;
 
-    /* Load and place spheres into earth-moon system */
+    ref->teapot->material = BrMaterialFind("mirror");
+    ref->teapot->t.type   = BR_TRANSFORM_MATRIX34;
+    BrMatrix34Scale(&ref->teapot->t.t.mat, BR_SCALAR(0.7), BR_SCALAR(0.7), BR_SCALAR(0.7));
+    BrMatrix34PostRotateX(&ref->teapot->t.t.mat, BR_ANGLE_DEG(-70));
+    BrMatrix34PostRotateY(&ref->teapot->t.t.mat, BR_ANGLE_DEG(-45));
+    BrMatrix34PostTranslate(&ref->teapot->t.t.mat, BR_SCALAR(0.7), BR_SCALAR(0), BR_SCALAR(0));
 
-    earth        = BrActorAdd(system, BrActorAllocate(BR_ACTOR_MODEL, NULL));
-    earth->model = BrModelLoad("sph32.dat");
-    if(earth->model == NULL)
-        BR_ERROR0("Couldn't load sph32.dat");
-    BrModelAdd(earth->model);
-    earth->material = BrMaterialFind("earth");
-    earth->t.type   = BR_TRANSFORM_MATRIX34;
+    /*
+     * Load and place spheres into earth-moon system.
+     */
 
-    moon           = BrActorAdd(system, BrActorAllocate(BR_ACTOR_MODEL, NULL));
-    moon->model    = earth->model;
-    moon->material = BrMaterialFind("moon");
-    moon->t.type   = BR_TRANSFORM_MATRIX34;
+    ref->earth           = BrActorAdd(system, BrActorAllocate(BR_ACTOR_MODEL, NULL));
+    ref->earth->model    = earth_model;
+    ref->earth->material = BrMaterialFind("earth");
+    ref->earth->t.type   = BR_TRANSFORM_MATRIX34;
+
+    ref->moon           = BrActorAdd(system, BrActorAllocate(BR_ACTOR_MODEL, NULL));
+    ref->moon->model    = ref->earth->model;
+    ref->moon->material = BrMaterialFind("moon");
+    ref->moon->t.type   = BR_TRANSFORM_MATRIX34;
 
     /* Now place the main camera from which we will view the system */
 
-    camera                                          = CreateSampleCamera(world);
-    ((br_camera *)camera->type_data)->type          = BR_CAMERA_PERSPECTIVE;
-    ((br_camera *)camera->type_data)->field_of_view = BR_ANGLE_DEG(45.0);
-    ((br_camera *)camera->type_data)->hither_z      = BR_SCALAR(0.1);
-    ((br_camera *)camera->type_data)->yon_z         = BR_SCALAR(20.0);
-    camera->t.type                                  = BR_TRANSFORM_MATRIX34;
-    BrMatrix34Translate(&camera->t.t.mat, BR_SCALAR(0.0), BR_SCALAR(0.0), BR_SCALAR(2.0));
+    demo->camera         = BrActorAdd(demo->world, BrActorAllocate(BR_ACTOR_CAMERA, NULL));
+    demo->camera->t.type = BR_TRANSFORM_MATRIX34;
+
+    camera_data                = demo->camera->type_data;
+    camera_data->type          = BR_CAMERA_PERSPECTIVE;
+    camera_data->field_of_view = BR_ANGLE_DEG(45.0);
+    camera_data->hither_z      = BR_SCALAR(0.1);
+    camera_data->yon_z         = BR_SCALAR(20.0);
+
+    BrMatrix34Translate(&demo->camera->t.t.mat, BR_SCALAR(0.0), BR_SCALAR(0.0), BR_SCALAR(2.0));
+
+    demo->order_table->min_z = camera_data->hither_z;
+    demo->order_table->max_z = camera_data->yon_z;
 
     /* This is the camera that will be used to provide the reflection */
     /* of the earth into the teapot */
 
-    mirror_view                                          = BrActorAdd(pair, BrActorAllocate(BR_ACTOR_CAMERA, NULL));
-    ((br_camera *)mirror_view->type_data)->type          = BR_CAMERA_PERSPECTIVE;
-    ((br_camera *)mirror_view->type_data)->field_of_view = BR_ANGLE_DEG(90.0);
-    ((br_camera *)mirror_view->type_data)->hither_z      = BR_SCALAR(0.1);
-    ((br_camera *)mirror_view->type_data)->yon_z         = BR_SCALAR(20.0);
-    ((br_camera *)mirror_view->type_data)->aspect        = BR_SCALAR(1.46);
-    mirror_view->t.type                                  = BR_TRANSFORM_MATRIX34;
+    ref->mirror_view         = BrActorAdd(pair, BrActorAllocate(BR_ACTOR_CAMERA, NULL));
+    ref->mirror_view->t.type = BR_TRANSFORM_MATRIX34;
 
-    /* Rotate the camera to face the earth... */
+    mirror_camera_data                = ref->mirror_view->type_data;
+    mirror_camera_data->type          = BR_CAMERA_PERSPECTIVE;
+    mirror_camera_data->field_of_view = BR_ANGLE_DEG(90.0);
+    mirror_camera_data->hither_z      = BR_SCALAR(0.1);
+    mirror_camera_data->yon_z         = BR_SCALAR(20.0);
+    mirror_camera_data->aspect        = BR_SCALAR(1.46);
 
-    BrMatrix34RotateY(&mirror_view->t.t.mat, BR_ANGLE_DEG(90));
+    /*
+     * Rotate the camera to face the earth...
+     */
+    BrMatrix34RotateY(&ref->mirror_view->t.t.mat, BR_ANGLE_DEG(90));
 
-    /* ...and move it into the centre of the teapot */
+    /*
+     * ...and move it into the centre of the teapot.
+     */
 
-    BrMatrix34PostTranslate(&mirror_view->t.t.mat, BR_SCALAR(0.5), BR_SCALAR(0), BR_SCALAR(0));
+    BrMatrix34PostTranslate(&ref->mirror_view->t.t.mat, BR_SCALAR(0.5), BR_SCALAR(0), BR_SCALAR(0));
 
-    /* Let there be light...so we can see what we are doing */
-
-    light1                                         = BrActorAdd(world, BrActorAllocate(BR_ACTOR_LIGHT, NULL));
+    /*
+     * Let there be light...so we can see what we are doing.
+     */
+    light1                                         = BrActorAdd(demo->world, BrActorAllocate(BR_ACTOR_LIGHT, NULL));
     ((br_light *)light1->type_data)->type          = BR_LIGHT_DIRECT;
     ((br_light *)light1->type_data)->attenuation_c = BR_SCALAR(1.0);
     light1->t.type                                 = BR_TRANSFORM_MATRIX34;
     BrMatrix34RotateY(&light1->t.t.mat, BR_ANGLE_DEG(35));
     BrMatrix34RotateX(&light1->t.t.mat, BR_ANGLE_DEG(35));
 
-    light2                                         = BrActorAdd(world, BrActorAllocate(BR_ACTOR_LIGHT, NULL));
+    light2                                         = BrActorAdd(demo->world, BrActorAllocate(BR_ACTOR_LIGHT, NULL));
     ((br_light *)light2->type_data)->type          = BR_LIGHT_DIRECT;
     ((br_light *)light2->type_data)->attenuation_c = BR_SCALAR(1.0);
     light2->t.type                                 = BR_TRANSFORM_MATRIX34;
     BrMatrix34RotateY(&light2->t.t.mat, BR_ANGLE_DEG(-35));
     BrMatrix34RotateX(&light2->t.t.mat, BR_ANGLE_DEG(-90));
 
-    /* Mustn't forget to turn the light on */
-
+    /*
+     * Mustn't forget to turn the light on.
+     */
     BrLightEnable(light1);
     BrLightEnable(light2);
 
-    /* The environment map is attached to the earth-teapot pair so that */
-    /* when rotated the reflection rotates accordingly */
-
+    /*
+     * The environment map is attached to the earth-teapot pair so that
+     * when rotated the reflection rotates accordingly.
+     */
     env         = BrActorAdd(pair, BrActorAllocate(BR_ACTOR_NONE, NULL));
     env->t.type = BR_TRANSFORM_MATRIX34;
 
-    /* Rotate environment map so that the centre of it is in the same */
-    /* direction as the earth */
-
+    /*
+     * Rotate environment map so that the centre of it is in the same
+     * direction as the earth.
+     */
     BrMatrix34RotateY(&env->t.t.mat, BR_ANGLE_DEG(-90));
     BrEnvironmentSet(env);
 
-    float dt;
-    while(UpdateSample(camera, &dt)) {
-        /* Clear buffer and its Z buffer */
+    return BRE_OK;
+}
 
-        BrPixelmapFill(colour_buffer, 0x0);
-        BrPixelmapFill(depth_buffer, 0xffffffff);
+void ReflectionUpdate(br_demo *demo, float dt)
+{
+    br_demo_reflection *ref = demo->user;
 
-        /* Copy plain environment map into mirror pixelmap. We will render */
-        /* the earth over this. Also clear the Z buffer. */
+    /*
+     * Place rotated earth and moon.
+     */
+    ref->theta = fmodf(ref->theta + dt * 25.0f, 360.0f);
 
-        BrPixelmapCopy(mirror_pm, envmap1_pm);
-        BrPixelmapFill(mirror_depth, 0xffffffff);
+    BrMatrix34Scale(&ref->earth->t.t.mat, BR_SCALAR(0.35), BR_SCALAR(0.35), BR_SCALAR(0.35));
+    BrMatrix34PostRotateX(&ref->earth->t.t.mat, BR_ANGLE_DEG(90));
+    BrMatrix34PreRotateZ(&ref->earth->t.t.mat, BR_ANGLE_DEG(3 * ref->theta));
 
-        /* When rendering the earth into the reflection we don't want to */
-        /* see a view of the inside of the teapot. Turn it off for now */
+    BrMatrix34Scale(&ref->moon->t.t.mat, BR_SCALAR(0.1), BR_SCALAR(0.1), BR_SCALAR(0.1));
+    BrMatrix34PostTranslate(&ref->moon->t.t.mat, BR_SCALAR(-0.7), BR_SCALAR(0), BR_SCALAR(0));
+    BrMatrix34PostRotateY(&ref->moon->t.t.mat, BR_ANGLE_DEG(-2 * ref->theta));
+}
 
-        teapot->render_style = BR_RSTYLE_NONE;
+void ReflectionRender(br_demo *demo)
+{
+    br_demo_reflection *ref = demo->user;
 
-        /* Render reflection and turn back on teapot */
-        BrZbSceneRender(world, mirror_view, mirror_pm, mirror_depth);
-        teapot->render_style = BR_RSTYLE_DEFAULT;
+    BrRendererFrameBegin();
 
-        /* Place rotated earth and moon */
+    /*
+     * Copy plain environment map into mirror pixelmap. We will render
+     * the earth over this. Also clear the Z buffer.
+     */
+    BrPixelmapCopy(ref->mirror_pm, ref->envmap1_pm);
+    BrPixelmapFill(ref->mirror_depth, 0xffffffff);
 
-        theta += dt * 25;
+    /*
+     * When rendering the earth into the reflection we don't want to
+     * see a view of the inside of the teapot. Turn it off for now,
+     */
+    ref->teapot->render_style = BR_RSTYLE_NONE;
 
-        BrMatrix34Scale(&earth->t.t.mat, BR_SCALAR(0.35), BR_SCALAR(0.35), BR_SCALAR(0.35));
-        BrMatrix34PostRotateX(&earth->t.t.mat, BR_ANGLE_DEG(90));
-        BrMatrix34PreRotateZ(&earth->t.t.mat, BR_ANGLE_DEG(3 * theta));
+    /*
+     * Render reflection and turn back on teapot.
+     */
+    BrZbSceneRender(demo->world, ref->mirror_view, ref->mirror_pm, ref->mirror_depth);
+    ref->teapot->render_style = BR_RSTYLE_DEFAULT;
 
-        BrMatrix34Scale(&moon->t.t.mat, BR_SCALAR(0.1), BR_SCALAR(0.1), BR_SCALAR(0.1));
-        BrMatrix34PostTranslate(&moon->t.t.mat, BR_SCALAR(-0.7), BR_SCALAR(0), BR_SCALAR(0));
-        BrMatrix34PostRotateY(&moon->t.t.mat, BR_ANGLE_DEG(-2 * theta));
+    /*
+     * And now render the earth along with the shiny teapot.
+     */
+    BrPixelmapFill(demo->colour_buffer, demo->clear_colour);
+    BrPixelmapFill(demo->depth_buffer, 0xFFFFFFFF);
+    BrZbSceneRender(demo->world, demo->camera, demo->colour_buffer, demo->depth_buffer);
+    BrRendererFrameEnd();
+}
 
-        /* And now render the earth along with the shiny teapot */
+const static br_demo_dispatch dispatch = {
+    .init          = ReflectionInit,
+    .process_event = BrDemoDefaultProcessEvent,
+    .update        = ReflectionUpdate,
+    .render        = ReflectionRender,
+    .on_resize     = BrDemoDefaultOnResize,
+    .destroy       = BrDemoDefaultDestroy,
+};
 
-        BrZbSceneRender(world, camera, colour_buffer, depth_buffer);
-        BrPixelmapDoubleBuffer(screen, colour_buffer);
-    }
-
-    BrZbEnd();
-    DOSGfxEnd();
-    BrEnd();
+int main(void)
+{
+    return BrDemoRun("BRender Reflection Demo", 1280, 720, &dispatch);
 }
