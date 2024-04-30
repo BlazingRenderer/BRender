@@ -5,7 +5,6 @@ add_subdirectory(robot)
 add_subdirectory(cube)
 add_subdirectory(mkres)
 add_subdirectory(devpmtest)
-add_subdirectory(dosbase)
 add_subdirectory(tutorials)
 add_subdirectory(samples)
 
