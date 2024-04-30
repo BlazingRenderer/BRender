@@ -5,7 +5,7 @@ add_executable(robot
 )
 
 target_compile_definitions(robot PUBLIC -DSDL_MAIN_HANDLED)
-target_link_libraries(robot PUBLIC BRender::Full)
+target_link_libraries(robot PUBLIC BRender::Full brdemo)
 set_property(TARGET robot PROPERTY VS_DEBUGGER_WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/dat")
 set_property(TARGET robot PROPERTY FOLDER "BRender/Examples")
 
