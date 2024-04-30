@@ -1,3 +1,5 @@
+add_subdirectory(brdemo)
+
 add_subdirectory(brintro)
 add_subdirectory(robot)
 add_subdirectory(cube)
