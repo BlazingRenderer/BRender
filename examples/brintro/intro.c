@@ -211,8 +211,12 @@ void BrIntroDestroy(br_intro *state)
     if(state == NULL)
         return;
 
-    if(state->world != NULL)
+    if(state->world != NULL) {
+        if(state->world->prev != NULL)
+            BrActorRemove(state->world);
+
         BrActorFree(state->world);
+    }
 
     BrResFree(state);
 }
