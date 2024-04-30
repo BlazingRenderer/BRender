@@ -290,10 +290,10 @@ void StoredGLRenderGroup(br_geometry_stored *self, br_renderer *renderer, const 
     }
 #endif
 
-    model.projection    = cache->model.p;
-    model.model_view    = cache->model.mv;
-    model.mvp           = cache->model.mvp;
-    model.normal_matrix = cache->model.normal;
+    model.projection         = cache->model.p;
+    model.model_view         = cache->model.mv;
+    model.mvp                = cache->model.mvp;
+    model.normal_matrix      = cache->model.normal;
     model.environment_matrix = cache->model.environment;
     model.eye_m              = cache->model.eye_m;
 
