@@ -57,7 +57,7 @@ stdenv.mkDerivation rec {
 
     cp ${src}/examples/tutorials/dat/* $out/share/brender-samples/tutorials
 
-    for i in {1,2,3,4,5,5b,6,6b,7,7b,8,8b,9,10}; do
+    for i in {1,2,3,4,5,6,7,8,9,10}; do
       cp examples/tutorials/brtutor$i${binExtension} $out/bin
 
       wrapProgram $out/bin/brtutor$i${binExtension} \
