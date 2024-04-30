@@ -14,19 +14,19 @@
 
 // clang-format off
 static br_tv_template_entry template_entries[] = {
-    {BRT_MODEL_TO_VIEW_M34_X,        NULL, F(matrix.model_to_view),            Q | S | AX, BRTV_CONV_M34_FIXED_SCALAR, 0, TM_PART | TM_M2V | TM_CLEAR_M2V_HINT | TM_INVALID_PM | TM_INVALID_V2M | TM_INVALID_M2S},
-    {BRT_MODEL_TO_VIEW_M34_F,        NULL, F(matrix.model_to_view),            Q | S | AF, BRTV_CONV_M34_FLOAT_SCALAR, 0, TM_PART | TM_M2V | TM_CLEAR_M2V_HINT | TM_INVALID_PM | TM_INVALID_V2M | TM_INVALID_M2S},
-    {BRT_VIEW_TO_ENVIRONMENT_M34_X,  NULL, F(matrix.view_to_environment),      Q | S | AX, BRTV_CONV_M34_FIXED_SCALAR, 0, TM_PART | TM_INVALID_PS | TM_INVALID_PM},
-    {BRT_VIEW_TO_ENVIRONMENT_M34_F,  NULL, F(matrix.view_to_environment),      Q | S | AF, BRTV_CONV_M34_FLOAT_SCALAR, 0, TM_PART | TM_INVALID_PS | TM_INVALID_PM},
-    {BRT_VIEW_TO_SCREEN_M4_X,        NULL, F(matrix.view_to_screen),           Q | S | AX, BRTV_CONV_M4_FIXED_SCALAR,  0, TM_PART | TM_V2S | TM_CLEAR_V2S_HINT | TM_V2S_HINT | TM_INVALID_PS | TM_INVALID_PM | TM_INVALID_M2S},
-    {BRT_VIEW_TO_SCREEN_M4_F,        NULL, F(matrix.view_to_screen),           Q | S | AF, BRTV_CONV_M4_FLOAT_SCALAR,  0, TM_PART | TM_V2S | TM_CLEAR_V2S_HINT | TM_V2S_HINT | TM_INVALID_PS | TM_INVALID_PM | TM_INVALID_M2S},
-    {BRT_MODEL_TO_VIEW_HINT_T,       NULL, F(matrix.model_to_view_hint),       Q | S | A, BRTV_CONV_COPY,              0, TM_PART | TM_INVALID_PM | TM_INVALID_V2M},
-    {BRT_VIEW_TO_SCREEN_HINT_T,      NULL, F(matrix.view_to_screen_hint),      Q | S | A, BRTV_CONV_COPY,              0, TM_PART | TM_V2S_HINT | TM_INVALID_PS | TM_INVALID_PM | TM_INVALID_M2S},
-    {BRT_VIEW_TO_ENVIRONMENT_HINT_T, NULL, F(matrix.view_to_environment_hint), Q | S | A, BRTV_CONV_COPY,              0, TM_PART | TM_INVALID_PS | TM_INVALID_PM},
-    {BRT_HITHER_Z_X,                 NULL, F(matrix.hither_z),                 Q | S | A,  BRTV_CONV_FIXED_SCALAR,     0, TM_PART},
-    {BRT_HITHER_Z_F,                 NULL, F(matrix.hither_z),                 Q | S | A,  BRTV_CONV_FLOAT_SCALAR,     0, TM_PART},
-    {BRT_YON_Z_X,                    NULL, F(matrix.yon_z),                    Q | S | A,  BRTV_CONV_FIXED_SCALAR,     0, TM_PART},
-    {BRT_YON_Z_F,                    NULL, F(matrix.yon_z),                    Q | S | A,  BRTV_CONV_FLOAT_SCALAR,     0, TM_PART},
+    {BRT(MODEL_TO_VIEW_M34_X),        F(matrix.model_to_view),            Q | S | AX, BRTV_CONV_M34_FIXED_SCALAR, 0, TM_PART | TM_M2V | TM_CLEAR_M2V_HINT | TM_INVALID_PM | TM_INVALID_V2M | TM_INVALID_M2S},
+    {BRT(MODEL_TO_VIEW_M34_F),        F(matrix.model_to_view),            Q | S | AF, BRTV_CONV_M34_FLOAT_SCALAR, 0, TM_PART | TM_M2V | TM_CLEAR_M2V_HINT | TM_INVALID_PM | TM_INVALID_V2M | TM_INVALID_M2S},
+    {BRT(VIEW_TO_ENVIRONMENT_M34_X),  F(matrix.view_to_environment),      Q | S | AX, BRTV_CONV_M34_FIXED_SCALAR, 0, TM_PART | TM_INVALID_PS | TM_INVALID_PM},
+    {BRT(VIEW_TO_ENVIRONMENT_M34_F),  F(matrix.view_to_environment),      Q | S | AF, BRTV_CONV_M34_FLOAT_SCALAR, 0, TM_PART | TM_INVALID_PS | TM_INVALID_PM},
+    {BRT(VIEW_TO_SCREEN_M4_X),        F(matrix.view_to_screen),           Q | S | AX, BRTV_CONV_M4_FIXED_SCALAR,  0, TM_PART | TM_V2S | TM_CLEAR_V2S_HINT | TM_V2S_HINT | TM_INVALID_PS | TM_INVALID_PM | TM_INVALID_M2S},
+    {BRT(VIEW_TO_SCREEN_M4_F),        F(matrix.view_to_screen),           Q | S | AF, BRTV_CONV_M4_FLOAT_SCALAR,  0, TM_PART | TM_V2S | TM_CLEAR_V2S_HINT | TM_V2S_HINT | TM_INVALID_PS | TM_INVALID_PM | TM_INVALID_M2S},
+    {BRT(MODEL_TO_VIEW_HINT_T),       F(matrix.model_to_view_hint),       Q | S | A, BRTV_CONV_COPY,              0, TM_PART | TM_INVALID_PM | TM_INVALID_V2M},
+    {BRT(VIEW_TO_SCREEN_HINT_T),      F(matrix.view_to_screen_hint),      Q | S | A, BRTV_CONV_COPY,              0, TM_PART | TM_V2S_HINT | TM_INVALID_PS | TM_INVALID_PM | TM_INVALID_M2S},
+    {BRT(VIEW_TO_ENVIRONMENT_HINT_T), F(matrix.view_to_environment_hint), Q | S | A, BRTV_CONV_COPY,              0, TM_PART | TM_INVALID_PS | TM_INVALID_PM},
+    {BRT(HITHER_Z_X),                 F(matrix.hither_z),                 Q | S | A,  BRTV_CONV_FIXED_SCALAR,     0, TM_PART},
+    {BRT(HITHER_Z_F),                 F(matrix.hither_z),                 Q | S | A,  BRTV_CONV_FLOAT_SCALAR,     0, TM_PART},
+    {BRT(YON_Z_X),                    F(matrix.yon_z),                    Q | S | A,  BRTV_CONV_FIXED_SCALAR,     0, TM_PART},
+    {BRT(YON_Z_F),                    F(matrix.yon_z),                    Q | S | A,  BRTV_CONV_FLOAT_SCALAR,     0, TM_PART},
 };
 // clang-format on
 #undef F

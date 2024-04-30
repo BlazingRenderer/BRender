@@ -10,29 +10,29 @@
 #define F(f) offsetof(state_stack, f)
 
 static br_tv_template_entry template_entries[] = {
-    {BRT_COLOUR_RGB,       NULL, F(surface.colour),        Q | S | AX, BRTV_CONV_COPY,             0, TM_PART                },
+    {BRT(COLOUR_RGB),       F(surface.colour),        Q | S | AX, BRTV_CONV_COPY,             0, TM_PART                },
 
-    {BRT_OPACITY_X,        NULL, F(surface.opacity),       Q | S | AX, BRTV_CONV_FIXED_SCALAR,     0, TM_PART                },
-    {BRT_OPACITY_F,        NULL, F(surface.opacity),       Q | S | AF, BRTV_CONV_FLOAT_SCALAR,     0, TM_PART                },
-    {BRT_AMBIENT_X,        NULL, F(surface.ka),            Q | S | AX, BRTV_CONV_FIXED_SCALAR,     0, TM_PART                },
-    {BRT_AMBIENT_F,        NULL, F(surface.ka),            Q | S | AF, BRTV_CONV_FLOAT_SCALAR,     0, TM_PART                },
-    {BRT_DIFFUSE_X,        NULL, F(surface.kd),            Q | S | AX, BRTV_CONV_FIXED_SCALAR,     0, TM_PART                },
-    {BRT_DIFFUSE_F,        NULL, F(surface.kd),            Q | S | AF, BRTV_CONV_FLOAT_SCALAR,     0, TM_PART                },
-    {BRT_SPECULAR_X,       NULL, F(surface.ks),            Q | S | AX, BRTV_CONV_FIXED_SCALAR,     0, TM_PART                },
-    {BRT_SPECULAR_F,       NULL, F(surface.ks),            Q | S | AF, BRTV_CONV_FLOAT_SCALAR,     0, TM_PART                },
-    {BRT_SPECULAR_POWER_X, NULL, F(surface.power),         Q | S | AX, BRTV_CONV_FIXED_SCALAR,     0, TM_PART                },
-    {BRT_SPECULAR_POWER_F, NULL, F(surface.power),         Q | S | AF, BRTV_CONV_FLOAT_SCALAR,     0, TM_PART                },
+    {BRT(OPACITY_X),        F(surface.opacity),       Q | S | AX, BRTV_CONV_FIXED_SCALAR,     0, TM_PART                },
+    {BRT(OPACITY_F),        F(surface.opacity),       Q | S | AF, BRTV_CONV_FLOAT_SCALAR,     0, TM_PART                },
+    {BRT(AMBIENT_X),        F(surface.ka),            Q | S | AX, BRTV_CONV_FIXED_SCALAR,     0, TM_PART                },
+    {BRT(AMBIENT_F),        F(surface.ka),            Q | S | AF, BRTV_CONV_FLOAT_SCALAR,     0, TM_PART                },
+    {BRT(DIFFUSE_X),        F(surface.kd),            Q | S | AX, BRTV_CONV_FIXED_SCALAR,     0, TM_PART                },
+    {BRT(DIFFUSE_F),        F(surface.kd),            Q | S | AF, BRTV_CONV_FLOAT_SCALAR,     0, TM_PART                },
+    {BRT(SPECULAR_X),       F(surface.ks),            Q | S | AX, BRTV_CONV_FIXED_SCALAR,     0, TM_PART                },
+    {BRT(SPECULAR_F),       F(surface.ks),            Q | S | AF, BRTV_CONV_FLOAT_SCALAR,     0, TM_PART                },
+    {BRT(SPECULAR_POWER_X), F(surface.power),         Q | S | AX, BRTV_CONV_FIXED_SCALAR,     0, TM_PART                },
+    {BRT(SPECULAR_POWER_F), F(surface.power),         Q | S | AF, BRTV_CONV_FLOAT_SCALAR,     0, TM_PART                },
 
-    {BRT_LIGHTING_B,       NULL, F(surface.lighting),      Q | S | A,  BRTV_CONV_COPY,             0, TM_PART | TM_INVALID_CC},
-    {BRT_FORCE_FRONT_B,    NULL, F(surface.force_front),   Q | S | A,  BRTV_CONV_COPY,             0, TM_PART | TM_INVALID_CC},
-    {BRT_FORCE_BACK_B,     NULL, F(surface.force_back),    Q | S | A,  BRTV_CONV_COPY,             0, TM_PART | TM_INVALID_CC},
-    {BRT_DEPTH_BIAS_X,     NULL, F(surface.depth_bias),    Q | S | A,  BRTV_CONV_FIXED_SCALAR,     0, TM_PART | TM_INVALID_CC},
-    {BRT_DEPTH_BIAS_F,     NULL, F(surface.depth_bias),    Q | S | A,  BRTV_CONV_FLOAT_SCALAR,     0, TM_PART | TM_INVALID_CC},
+    {BRT(LIGHTING_B),       F(surface.lighting),      Q | S | A,  BRTV_CONV_COPY,             0, TM_PART | TM_INVALID_CC},
+    {BRT(FORCE_FRONT_B),    F(surface.force_front),   Q | S | A,  BRTV_CONV_COPY,             0, TM_PART | TM_INVALID_CC},
+    {BRT(FORCE_BACK_B),     F(surface.force_back),    Q | S | A,  BRTV_CONV_COPY,             0, TM_PART | TM_INVALID_CC},
+    {BRT(DEPTH_BIAS_X),     F(surface.depth_bias),    Q | S | A,  BRTV_CONV_FIXED_SCALAR,     0, TM_PART | TM_INVALID_CC},
+    {BRT(DEPTH_BIAS_F),     F(surface.depth_bias),    Q | S | A,  BRTV_CONV_FLOAT_SCALAR,     0, TM_PART | TM_INVALID_CC},
 
-    {BRT_COLOUR_SOURCE_T,  NULL, F(surface.colour_source), Q | S | A,  BRTV_CONV_COPY,             0, TM_PART | TM_INVALID_CC},
+    {BRT(COLOUR_SOURCE_T),  F(surface.colour_source), Q | S | A,  BRTV_CONV_COPY,             0, TM_PART | TM_INVALID_CC},
 
-    {BRT_MAP_MATRIX_M23_X, NULL, F(surface.map_transform), Q | S | AX, BRTV_CONV_M23_FIXED_SCALAR, 0, TM_PART | TM_INVALID_CC},
-    {BRT_MAP_MATRIX_M23_F, NULL, F(surface.map_transform), Q | S | AF, BRTV_CONV_M23_FLOAT_SCALAR, 0, TM_PART | TM_INVALID_CC},
+    {BRT(MAP_MATRIX_M23_X), F(surface.map_transform), Q | S | AX, BRTV_CONV_M23_FIXED_SCALAR, 0, TM_PART | TM_INVALID_CC},
+    {BRT(MAP_MATRIX_M23_F), F(surface.map_transform), Q | S | AF, BRTV_CONV_M23_FLOAT_SCALAR, 0, TM_PART | TM_INVALID_CC},
 };
 
 static const state_surface default_state = {

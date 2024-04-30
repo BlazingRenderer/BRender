@@ -10,35 +10,35 @@
 #define F(f) offsetof(state_stack, f)
 
 static br_tv_template_entry template_entries[] = {
-    {BRT_DEPTH_WRITE_B,           NULL, F(prim.flags),               Q | S | A, BRTV_CONV_BIT,        PRIMF_DEPTH_WRITE,  1},
-    {BRT_COLOUR_WRITE_B,          NULL, F(prim.flags),               Q | S | A, BRTV_CONV_BIT,        PRIMF_COLOUR_WRITE, 1},
-    {BRT_BLEND_B,                 NULL, F(prim.flags),               Q | S | A, BRTV_CONV_BIT,        PRIMF_BLEND,        1},
-    {BRT_MODULATE_B,              NULL, F(prim.flags),               Q | S | A, BRTV_CONV_BIT,        PRIMF_MODULATE,     1},
-    {BRT_COLOUR_KEY_B,            NULL, F(prim.flags),               Q | S | A, BRTV_CONV_BIT,        PRIMF_COLOUR_KEY,   1},
+    {BRT(DEPTH_WRITE_B),           F(prim.flags),               Q | S | A, BRTV_CONV_BIT,        PRIMF_DEPTH_WRITE,  1},
+    {BRT(COLOUR_WRITE_B),          F(prim.flags),               Q | S | A, BRTV_CONV_BIT,        PRIMF_COLOUR_WRITE, 1},
+    {BRT(BLEND_B),                 F(prim.flags),               Q | S | A, BRTV_CONV_BIT,        PRIMF_BLEND,        1},
+    {BRT(MODULATE_B),              F(prim.flags),               Q | S | A, BRTV_CONV_BIT,        PRIMF_MODULATE,     1},
+    {BRT(COLOUR_KEY_B),            F(prim.flags),               Q | S | A, BRTV_CONV_BIT,        PRIMF_COLOUR_KEY,   1},
 
-    {BRT_COLOUR_T,                NULL, F(prim.colour_type),         Q | S | A, BRTV_CONV_COPY,       0,                  1},
+    {BRT(COLOUR_T),                F(prim.colour_type),         Q | S | A, BRTV_CONV_COPY,       0,                  1},
 
-    {BRT_DEPTH_TEST_T,            NULL, F(prim.depth_test),          Q | S | A, BRTV_CONV_COPY,       0,                  1},
-    {BRT_BLEND_MODE_T,            NULL, F(prim.blend_mode),          Q | S | A, BRTV_CONV_COPY,       0,                  1},
+    {BRT(DEPTH_TEST_T),            F(prim.depth_test),          Q | S | A, BRTV_CONV_COPY,       0,                  1},
+    {BRT(BLEND_MODE_T),            F(prim.blend_mode),          Q | S | A, BRTV_CONV_COPY,       0,                  1},
 
-    {BRT_INDEX_BASE_I32,          NULL, F(prim.index_base),          Q | S | A, BRTV_CONV_COPY,       0,                  1},
-    {BRT_INDEX_RANGE_I32,         NULL, F(prim.index_range),         Q | S | A, BRTV_CONV_COPY,       0,                  1},
+    {BRT(INDEX_BASE_I32),          F(prim.index_base),          Q | S | A, BRTV_CONV_COPY,       0,                  1},
+    {BRT(INDEX_RANGE_I32),         F(prim.index_range),         Q | S | A, BRTV_CONV_COPY,       0,                  1},
 
-    {BRT_PERSPECTIVE_T,           NULL, F(prim.perspective_type),    Q | S | A, BRTV_CONV_COPY,       0,                  1},
-    {BRT_PERSPECTIVE_B,           NULL, F(prim.perspective_type),    S,         BRTV_CONV_BOOL_TOKEN, BRT_DEFAULT,        1},
+    {BRT(PERSPECTIVE_T),           F(prim.perspective_type),    Q | S | A, BRTV_CONV_COPY,       0,                  1},
+    {BRT(PERSPECTIVE_B),           F(prim.perspective_type),    S,         BRTV_CONV_BOOL_TOKEN, BRT_DEFAULT,        1},
 
-    {BRT_SUBDIVIDE_TOLERANCE_I32, NULL, F(prim.subdivide_tolerance), Q | S | A, BRTV_CONV_COPY,       0,                  1},
+    {BRT(SUBDIVIDE_TOLERANCE_I32), F(prim.subdivide_tolerance), Q | S | A, BRTV_CONV_COPY,       0,                  1},
 
-    {BRT_COLOUR_MAP_O,            NULL, F(prim.colour_map),          Q | S | A, BRTV_CONV_COPY,       0,                  0},
-    {BRT_TEXTURE_O,               NULL, F(prim.colour_map),          Q | S,     BRTV_CONV_COPY,       0,                  0},
-    {BRT_INDEX_SHADE_O,           NULL, F(prim.index_shade),         Q | S | A, BRTV_CONV_COPY,       0,                  0},
-    {BRT_INDEX_BLEND_O,           NULL, F(prim.index_blend),         Q | S | A, BRTV_CONV_COPY,       0,                  0},
-    {BRT_SCREEN_DOOR_O,           NULL, F(prim.screendoor),          Q | S | A, BRTV_CONV_COPY,       0,                  0},
-    {BRT_INDEX_LIGHT_O,           NULL, F(prim.lighting),            Q | S | A, BRTV_CONV_COPY,       0,                  0},
-    {BRT_BUMP_O,                  NULL, F(prim.bump),                Q | S | A, BRTV_CONV_COPY,       0,                  0},
-    {BRT_INDEX_FOG_O,             NULL, F(prim.index_fog),           Q | S | A, BRTV_CONV_COPY,       0,                  0},
-    {BRT_MAP_INTERPOLATION_T,     NULL, F(prim.filter),              Q | S | A, BRTV_CONV_COPY,       0,                  0},
-    {BRT_MIP_INTERPOLATION_T,     NULL, F(prim.mip_filter),          Q | S | A, BRTV_CONV_COPY,       0,                  0},
+    {BRT(COLOUR_MAP_O),            F(prim.colour_map),          Q | S | A, BRTV_CONV_COPY,       0,                  0},
+    {BRT(TEXTURE_O),               F(prim.colour_map),          Q | S,     BRTV_CONV_COPY,       0,                  0},
+    {BRT(INDEX_SHADE_O),           F(prim.index_shade),         Q | S | A, BRTV_CONV_COPY,       0,                  0},
+    {BRT(INDEX_BLEND_O),           F(prim.index_blend),         Q | S | A, BRTV_CONV_COPY,       0,                  0},
+    {BRT(SCREEN_DOOR_O),           F(prim.screendoor),          Q | S | A, BRTV_CONV_COPY,       0,                  0},
+    {BRT(INDEX_LIGHT_O),           F(prim.lighting),            Q | S | A, BRTV_CONV_COPY,       0,                  0},
+    {BRT(BUMP_O),                  F(prim.bump),                Q | S | A, BRTV_CONV_COPY,       0,                  0},
+    {BRT(INDEX_FOG_O),             F(prim.index_fog),           Q | S | A, BRTV_CONV_COPY,       0,                  0},
+    {BRT(MAP_INTERPOLATION_T),     F(prim.filter),              Q | S | A, BRTV_CONV_COPY,       0,                  0},
+    {BRT(MIP_INTERPOLATION_T),     F(prim.mip_filter),          Q | S | A, BRTV_CONV_COPY,       0,                  0},
 };
 
 static const state_primitive default_state = {

@@ -10,16 +10,16 @@
 #define F(f) offsetof(state_stack, f)
 
 static br_tv_template_entry template_entries[] = {
-    {BRT_TYPE_T,              NULL, F(hidden.type),        Q | S | A, BRTV_CONV_COPY, 0, TM_PART | TM_INVALID_PS | TM_INVALID_PM},
-    {BRT_DIVERT_T,            NULL, F(hidden.divert),      Q | S | A, BRTV_CONV_COPY, 0, TM_PART | TM_INVALID_PS | TM_INVALID_PM},
+    {BRT(TYPE_T),              F(hidden.type),        Q | S | A, BRTV_CONV_COPY, 0, TM_PART | TM_INVALID_PS | TM_INVALID_PM},
+    {BRT(DIVERT_T),            F(hidden.divert),      Q | S | A, BRTV_CONV_COPY, 0, TM_PART | TM_INVALID_PS | TM_INVALID_PM},
 
-    {BRT_V1ORDER_TABLE_P,     NULL, F(hidden.order_table), Q | S | A, BRTV_CONV_COPY, 0, TM_PART                                },
-    {BRT_V1PRIMITIVE_HEAP_P,  NULL, F(hidden.heap),        Q | S | A, BRTV_CONV_COPY, 0, TM_PART | TM_INVALID_PS | TM_INVALID_PM},
+    {BRT(V1ORDER_TABLE_P),     F(hidden.order_table), Q | S | A, BRTV_CONV_COPY, 0, TM_PART                                },
+    {BRT(V1PRIMITIVE_HEAP_P),  F(hidden.heap),        Q | S | A, BRTV_CONV_COPY, 0, TM_PART | TM_INVALID_PS | TM_INVALID_PM},
 
-    {BRT_V1INSERT_FUNCTION_P, NULL, F(hidden.insert_fn),   Q | S | A, BRTV_CONV_COPY, 0, TM_PART                                },
-    {BRT_V1INSERT_ARG1_P,     NULL, F(hidden.insert_arg1), Q | S | A, BRTV_CONV_COPY, 0, TM_PART                                },
-    {BRT_V1INSERT_ARG2_P,     NULL, F(hidden.insert_arg2), Q | S | A, BRTV_CONV_COPY, 0, TM_PART                                },
-    {BRT_V1INSERT_ARG3_P,     NULL, F(hidden.insert_arg3), Q | S | A, BRTV_CONV_COPY, 0, TM_PART                                },
+    {BRT(V1INSERT_FUNCTION_P), F(hidden.insert_fn),   Q | S | A, BRTV_CONV_COPY, 0, TM_PART                                },
+    {BRT(V1INSERT_ARG1_P),     F(hidden.insert_arg1), Q | S | A, BRTV_CONV_COPY, 0, TM_PART                                },
+    {BRT(V1INSERT_ARG2_P),     F(hidden.insert_arg2), Q | S | A, BRTV_CONV_COPY, 0, TM_PART                                },
+    {BRT(V1INSERT_ARG3_P),     F(hidden.insert_arg3), Q | S | A, BRTV_CONV_COPY, 0, TM_PART                                },
 };
 
 static const state_hidden default_state = {

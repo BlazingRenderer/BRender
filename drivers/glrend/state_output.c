@@ -10,8 +10,8 @@
 #define F(f) offsetof(state_stack, f)
 
 static br_tv_template_entry template_entries[] = {
-    {BRT_COLOUR_BUFFER_O, NULL, F(output.colour), Q | S | A, BRTV_CONV_COPY},
-    {BRT_DEPTH_BUFFER_O,  NULL, F(output.depth),  Q | S | A, BRTV_CONV_COPY},
+    {BRT(COLOUR_BUFFER_O), F(output.colour), Q | S | A, BRTV_CONV_COPY},
+    {BRT(DEPTH_BUFFER_O),  F(output.depth),  Q | S | A, BRTV_CONV_COPY},
 };
 
 static const state_output default_state = {
