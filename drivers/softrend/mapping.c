@@ -25,47 +25,55 @@ BR_RCS_ID("$Id: mapping.c 1.3 1998/07/20 14:45:20 jon Exp $");
 			self->state.cache.map_transform.m[2][1]);				\
 } while (0)
 
+static br_vector2 SurfaceMapEnvironment(const br_vector3 *eye, const br_vector3 *normal, const br_matrix34 *model_to_environment)
+{
+    br_vector3 r, wr;
+    br_scalar  d, cu, cv;
+
+    /*
+     * Generate reflected vector
+     *
+     * -    - - -  -
+     * R = 2N(N.E)-E
+     */
+    d = BR_CONST_MUL(BrVector3Dot(eye, normal), 2);
+    BrVector3Scale(&r, normal, d);
+    BrVector3Sub(&r, &r, eye);
+
+    /*
+     * If there is an environment frame, rotate vector into it
+     */
+    if(model_to_environment != NULL) {
+        BrMatrix34ApplyV(&wr, &r, model_to_environment);
+        BrVector3Normalise(&wr, &wr);
+    } else {
+        wr = r;
+    }
+
+    /*
+     * Convert vector to environment coordinates
+     */
+    cu = BrAngleToScalar(BR_ATAN2(wr.v[0], -wr.v[2]));
+    cv = -wr.v[1] / 2 + BR_SCALAR(0.5);
+
+    return (br_vector2)BR_VECTOR2(cu, cv);
+}
+
+
 /*
  * Generate U,V for environment assuming infinite eye
  */
 void SURFACE_CALL SurfaceMapEnvironmentInfinite(br_renderer *self,
 	br_vector3 *p, br_vector2 *map, br_vector3 *normal, br_colour colour, br_scalar *comp)
 {
-	br_vector3 eye;
-    br_vector3 r,wr;
-	br_scalar d,cu,cv;
+    br_vector2         r;
+    const br_matrix34 *model_to_environment = NULL;
 
-	/*
-	 * Generate reflected vector
-	 *
-	 * -    - - -  -
-	 * R = 2N(N.E)-E
-	 */
-    d = BR_CONST_MUL(BrVector3Dot(&scache.eye_m_normalised,normal),2);
-	BrVector3Scale(&r,normal,d);
-    BrVector3Sub(&r,&r,&scache.eye_m_normalised);
+    if(self->state.matrix.view_to_environment_hint != BRT_DONT_CARE)
+        model_to_environment = &scache.model_to_environment;
 
-	/*
-	 * If there is an environment frame, rotate vector into it
-	 */
-	if(self->state.matrix.view_to_environment_hint != BRT_DONT_CARE) {
-		BrMatrix34ApplyV(&wr, &r, &scache.model_to_environment);
-		BrVector3Normalise(&wr, &wr);
-	} else
-		wr = r;
-
-	/*
-	 * Convert vector to environment coordinates
-	 */
-	cu = BrAngleToScalar(BR_ATAN2(wr.v[0],-wr.v[2]));
-
-#if 0
-	cv = BrAngleToScalar(BR_ASIN(-wr.v[1]/2+BR_SCALAR(0.5)));
-#else
-	cv = -wr.v[1]/2+BR_SCALAR(0.5);
-#endif
-
-	APPLY_UV(comp[C_U],comp[C_V],cu,cv);
+    r = SurfaceMapEnvironment(&scache.eye_m_normalised, normal, model_to_environment);
+    APPLY_UV(comp[C_U], comp[C_V], r.v[0], r.v[1]);
 }
 
 /*
@@ -74,47 +82,22 @@ void SURFACE_CALL SurfaceMapEnvironmentInfinite(br_renderer *self,
 void SURFACE_CALL SurfaceMapEnvironmentLocal(br_renderer *self,
 	br_vector3 *p, br_vector2 *map, br_vector3 *normal, br_colour colour, br_scalar *comp)
 {
-	br_vector3 eye;
-	br_vector3 r,wr;
-	br_scalar d,cu,cv;
+    br_vector3 eye;
+    br_vector2 r;
 
-	/*
-	 * Generate eye vector - 
-	 */
-	BrVector3Sub(&eye,&scache.eye_m,p);
-	BrVector3Normalise(&eye, &eye);
-	
-	/*
-	 * Generate reflected vector
-	 *
-	 * -    - - -  -
-	 * R = 2N(N.E)-E
-	 */
-	d = BR_CONST_MUL(BrVector3Dot(&eye,normal),2);
-	BrVector3Scale(&r,normal,d);
-	BrVector3Sub(&r,&r,&eye);
+    const br_matrix34 *model_to_environment = NULL;
 
-	/*
-	 * If there is an environment frame, rotate vector into it
-	 */
-	if(self->state.matrix.view_to_environment_hint != BRT_DONT_CARE) {
-		BrMatrix34ApplyV(&wr, &r, &scache.model_to_environment);
-		BrVector3Normalise(&wr, &wr);
-	} else
-		wr = r;
+    /*
+     * Generate eye vector -
+     */
+    BrVector3Sub(&eye, &scache.eye_m, p);
+    BrVector3Normalise(&eye, &eye);
 
-	/*
-	 * Convert vector to environment coordinates
-	 */
-	cu = BrAngleToScalar(BR_ATAN2(wr.v[0],-wr.v[2]));
+    if(self->state.matrix.view_to_environment_hint != BRT_DONT_CARE)
+        model_to_environment = &scache.model_to_environment;
 
-#if 0
-	cv = BrAngleToScalar(BR_ASIN(-wr.v[1]/2+BR_SCALAR(0.5)));
-#else
-	cv = -wr.v[1]/2+BR_SCALAR(0.5);
-#endif
-
-	APPLY_UV(comp[C_U],comp[C_V],cu,cv);
+    r = SurfaceMapEnvironment(&eye, normal, model_to_environment);
+    APPLY_UV(comp[C_U], comp[C_V], r.v[0], r.v[1]);
 }
 
 /*
