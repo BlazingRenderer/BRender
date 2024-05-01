@@ -217,6 +217,9 @@ typedef struct {
         br_matrix4 mvp;
         br_matrix4 normal;
         br_matrix4 environment;
+
+        br_matrix4 view_to_model; /* Inverse of mv, needed for eye_model calc. */
+        br_vector4 eye_m;
     } model;
 } state_cache;
 

@@ -31,8 +31,9 @@ layout(std140) uniform br_model_state
     mat4 normal_matrix;
     mat4 environment;
     vec4 surface_colour;
-
     vec4 clear_colour;
+    vec4 eye_m; /* Eye position in model-space */
+
     float ka; /* Ambient mod */
     float ks; /* Specular mod (doesn't seem to be used by Croc) */
     float kd; /* Diffuse mod */

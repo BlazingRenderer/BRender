@@ -280,6 +280,7 @@ void StoredGLRenderGroup(br_geometry_stored *self, br_renderer *renderer, const 
     model.mvp           = cache->model.mvp;
     model.normal_matrix = cache->model.normal;
     model.environment_matrix = cache->model.environment;
+    model.eye_m              = cache->model.eye_m;
 
     glBindVertexArray(self->gl_vao);
 

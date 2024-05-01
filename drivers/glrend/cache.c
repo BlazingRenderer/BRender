@@ -1,5 +1,7 @@
 #include "drv.h"
 #include "brassert.h"
+#include "shortcut.h"
+#include "vecifns.h"
 
 /*
 ** Process each light, doing as much once-per-frame work as possible.
@@ -75,6 +77,11 @@ static void UpdateMatrices(state_cache *cache, state_matrix *matrix)
     BrMatrix4Copy34(&cache->model.mv, &matrix->model_to_view);
 
     /*
+     * Inverse of ModelView.
+     */
+    BrMatrix4Inverse(&cache->model.view_to_model, &cache->model.mv);
+
+    /*
      * MVP Matrix
      */
     BrMatrix4Mul(&cache->model.mvp, &cache->model.mv, &cache->model.p);
@@ -86,9 +93,71 @@ static void UpdateMatrices(state_cache *cache, state_matrix *matrix)
     BrMatrix4Transpose(&cache->model.normal);
 }
 
+/*
+ * Find centre of projection in model space
+ */
+static br_vector4 EyeInModel(const state_cache *cache, const state_matrix *matrix)
+{
+    br_matrix4 s2m;
+    br_vector4 eye_m;
+
+    /*
+     * Spot special, easy, cases
+     */
+    if(matrix->model_to_view_hint == BRT_LENGTH_PRESERVING) {
+        if(matrix->view_to_screen_hint == BRT_PERSPECTIVE) {
+            eye_m.v[0] = -BR_MAC3(matrix->model_to_view.m[3][0], matrix->model_to_view.m[0][0],
+                                  matrix->model_to_view.m[3][1], matrix->model_to_view.m[0][1],
+                                  matrix->model_to_view.m[3][Z], matrix->model_to_view.m[0][2]);
+            eye_m.v[1] = -BR_MAC3(matrix->model_to_view.m[3][0], matrix->model_to_view.m[1][0],
+                                  matrix->model_to_view.m[3][1], matrix->model_to_view.m[1][1],
+                                  matrix->model_to_view.m[3][Z], matrix->model_to_view.m[1][2]);
+            eye_m.v[2] = -BR_MAC3(matrix->model_to_view.m[3][0], matrix->model_to_view.m[2][0],
+                                  matrix->model_to_view.m[3][1], matrix->model_to_view.m[2][1],
+                                  matrix->model_to_view.m[3][Z], matrix->model_to_view.m[2][2]);
+
+            eye_m.v[3] = BR_SCALAR(1.0);
+
+            return eye_m;
+        }
+
+        if(matrix->view_to_screen_hint == BRT_PARALLEL) {
+            BrVector3CopyMat34Col((br_vector3 *)&eye_m, &matrix->model_to_view, 2);
+            eye_m.v[3] = BR_SCALAR(0.0);
+            return eye_m;
+        }
+
+    } else {
+        if(matrix->view_to_screen_hint == BRT_PERSPECTIVE) {
+            BrVector3CopyMat34Row((br_vector3 *)&eye_m, &cache->model.view_to_model, 3);
+            eye_m.v[3] = BR_SCALAR(1.0);
+            return eye_m;
+        }
+
+        if(matrix->view_to_screen_hint == BRT_PARALLEL) {
+            BrVector3CopyMat34Row((br_vector3 *)&eye_m, &cache->model.view_to_model, 2);
+            eye_m.v[3] = BR_SCALAR(0.0);
+            return eye_m;
+        }
+    }
+
+    /*
+     * If reached here, then we need to invert model_to_screen
+     */
+    BrMatrix4Inverse(&s2m, &cache->model.mvp);
+
+    eye_m.v[0] = s2m.m[Z][0];
+    eye_m.v[1] = s2m.m[Z][1];
+    eye_m.v[2] = s2m.m[Z][2];
+    eye_m.v[3] = s2m.m[Z][3];
+    return eye_m;
+}
+
 void StateGLUpdateModel(state_cache *cache, state_matrix *matrix)
 {
     UpdateMatrices(cache, matrix);
+
+    cache->model.eye_m = EyeInModel(cache, matrix);
 }
 
 void StateGLUpdateScene(state_cache *cache, state_stack *state)
@@ -127,6 +196,7 @@ void StateGLReset(state_cache *cache)
     BrMatrix4Identity(&cache->model.mvp);
     BrMatrix4Identity(&cache->model.normal);
     BrMatrix4Identity(&cache->model.environment);
+    BrVector4Set(&cache->model.eye_m, 0, 0, 0, 1);
 
     BrVector4Set(&cache->scene.eye_view, 0, 0, 0, 0);
 
