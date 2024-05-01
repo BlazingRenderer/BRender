@@ -293,7 +293,7 @@ void BR_PUBLIC_ENTRY      BrVector3Sub(br_vector3 *v1, const br_vector3 *v2, con
 void BR_PUBLIC_ENTRY      BrVector3Mul(br_vector3 *v1, const br_vector3 *v2, const br_vector3 *v3);
 void BR_PUBLIC_ENTRY      BrVector3Scale(br_vector3 *v1, const br_vector3 *v2, br_scalar s);
 void BR_PUBLIC_ENTRY      BrVector3InvScale(br_vector3 *v1, const br_vector3 *v2, br_scalar s);
-br_scalar BR_PUBLIC_ENTRY BrVector3Dot(br_vector3 *v1, const br_vector3 *v2);
+br_scalar BR_PUBLIC_ENTRY BrVector3Dot(const br_vector3 *v1, const br_vector3 *v2);
 void BR_PUBLIC_ENTRY      BrVector3Cross(br_vector3 *v1, const br_vector3 *v2, const br_vector3 *v3);
 br_scalar BR_PUBLIC_ENTRY BrVector3Length(br_vector3 *v1);
 br_scalar BR_PUBLIC_ENTRY BrVector3LengthSquared(br_vector3 *v1);

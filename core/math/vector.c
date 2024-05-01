@@ -365,7 +365,7 @@ void BR_PUBLIC_ENTRY BrVector3InvScale(br_vector3 *v1, const br_vector3 *v2, br_
 /*
  *  = v1.v2
  */
-br_scalar BR_PUBLIC_ENTRY BrVector3Dot(br_vector3 *v1, const br_vector3 *v2)
+br_scalar BR_PUBLIC_ENTRY BrVector3Dot(const br_vector3 *v1, const br_vector3 *v2)
 {
     UASSERT_MESSAGE("Destination Vector is NULL", v1 != NULL);
     UASSERT_MESSAGE("Source Vector is NULL", v2 != NULL);
