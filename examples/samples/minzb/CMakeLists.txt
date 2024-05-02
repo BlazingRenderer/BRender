@@ -3,6 +3,10 @@ project(minzb)
 add_executable(minzb
         minzb.c
 )
-target_compile_definitions(minzb PUBLIC -DSDL_MAIN_HANDLED)
-target_link_libraries(minzb BRender::Full brdemo)
+target_link_libraries(minzb PRIVATE brdemo)
 set_property(TARGET minzb PROPERTY FOLDER "BRender/Examples/Samples")
+
+if(TARGET SDL2::SDL2main)
+        target_link_libraries(minzb PRIVATE SDL2::SDL2main)
+endif()
+

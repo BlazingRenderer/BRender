@@ -2,11 +2,15 @@ function(add_example name)
 	add_executable(${name}
 			${name}.c
 			)
-	target_link_libraries(${name} brdemo)
+	target_link_libraries(${name} PRIVATE brdemo)
 	set_target_properties(${name} PROPERTIES
 			VS_DEBUGGER_WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/dat"
 			FOLDER "BRender/Examples/Tutorials"
 	)
+
+	if(TARGET SDL2::SDL2main)
+		target_link_libraries(${name} PRIVATE SDL2::SDL2main)
+	endif()
 endfunction()
 
 add_example(brtutor1)

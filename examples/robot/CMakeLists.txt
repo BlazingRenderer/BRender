@@ -4,10 +4,13 @@ add_executable(robot
         main.c
 )
 
-target_compile_definitions(robot PUBLIC -DSDL_MAIN_HANDLED)
-target_link_libraries(robot PUBLIC BRender::Full brdemo)
+target_link_libraries(robot PUBLIC brdemo)
 set_property(TARGET robot PROPERTY VS_DEBUGGER_WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/dat")
 set_property(TARGET robot PROPERTY FOLDER "BRender/Examples")
+
+if(TARGET SDL2::SDL2main)
+        target_link_libraries(robot PRIVATE SDL2::SDL2main)
+endif()
 
 set(ROBOT_FILES mask.pix robo.act robo.dat robo.msc robo.vue tile01_de.pix tile01.pix)
 
