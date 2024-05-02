@@ -57,6 +57,7 @@ layout(std140) uniform br_model_state
     float kd; /* Diffuse mod */
     float power;
     uint unlit; /* Is this surface unlit? */
+    int uv_source;
     bool disable_colour_key;
 };
 

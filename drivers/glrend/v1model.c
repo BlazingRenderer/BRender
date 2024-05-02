@@ -167,6 +167,21 @@ static void apply_stored_properties(HVIDEO hVideo, state_stack *state, uint32_t 
         model->kd    = state->surface.kd;
         model->power = state->surface.power;
 
+        switch(state->surface.mapping_source) {
+            case BRT_GEOMETRY_MAP:
+            default:
+                model->uv_source = 0;
+                break;
+
+            case BRT_ENVIRONMENT_LOCAL:
+                model->uv_source = 1;
+                break;
+
+            case BRT_ENVIRONMENT_INFINITE:
+                model->uv_source = 2;
+                break;
+        }
+
         *unlit = !state->surface.lighting;
     }
 
