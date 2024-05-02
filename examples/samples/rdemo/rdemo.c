@@ -21,7 +21,7 @@ static br_material *CreateMaterial(const char *identifier)
     mat->ks      = BR_UFRACTION(0.50);
     mat->power   = BR_SCALAR(20);
 
-    mat->flags         = BR_MATF_GOURAUD | BR_MATF_LIGHT;
+    mat->flags         = BR_MATF_GOURAUD | BR_MATF_LIGHT | BR_MATF_DISABLE_COLOUR_KEY;
     mat->map_transform = (br_matrix23){
         {BR_VECTOR2(1, 0), BR_VECTOR2(0, 1), BR_VECTOR2(0, 0)}
     };
@@ -123,8 +123,8 @@ br_error ReflectionInit(br_demo *demo)
      * Firstly `mirror' is the structure defining the material from which
      * the teapot is made...an environment map.
      */
-    mirror_mat             = CreateMaterial("mirror");
-    mirror_mat->flags      = BR_MATF_GOURAUD | BR_MATF_LIGHT | BR_MATF_ENVIRONMENT_L;
+    mirror_mat = CreateMaterial("mirror");
+    mirror_mat->flags |= BR_MATF_ENVIRONMENT_L;
     mirror_mat->colour_map = ref->mirror_pm;
     BrMaterialAdd(mirror_mat);
 
