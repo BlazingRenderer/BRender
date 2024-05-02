@@ -32,6 +32,10 @@ static br_material *CreateMaterial(const char *identifier)
 
 typedef struct br_demo_reflection {
     br_pixelmap *envmap1_pm;
+    br_pixelmap *earth_pm;
+    br_pixelmap *planet_pm;
+    br_pixelmap *moon_pm;
+    br_pixelmap *ast_pm;
 
     br_actor *teapot;
     br_actor *earth;
@@ -47,7 +51,6 @@ typedef struct br_demo_reflection {
 br_error ReflectionInit(br_demo *demo)
 {
     br_demo_reflection *ref;
-    br_pixelmap        *earth_pm, *moon_pm;
     br_material        *earth_mat, *moon_mat, *mirror_mat;
     br_model           *teapot_model, *earth_model;
     br_actor           *pair, *system, *light1, *light2, *env;
@@ -80,17 +83,29 @@ br_error ReflectionInit(br_demo *demo)
     /*
      * Load the earth texture.
      */
-    if((earth_pm = BrMapFind("earth.pix")) == NULL) {
+    if((ref->earth_pm = BrMapFind("earth.pix")) == NULL) {
         BrLogError("DEMO", "Unable to load earth.pix");
         return BRE_FAIL;
     }
-    BrMapAdd(earth_pm);
+    BrMapAdd(ref->earth_pm);
 
-    if((moon_pm = BrMapFind("moon.pix")) == NULL) {
+    if((ref->planet_pm = BrMapFind("planet.pix")) == NULL) {
+        BrLogError("DEMO", "Unable to load planet.pix");
+        return BRE_FAIL;
+    }
+    BrMapAdd(ref->planet_pm);
+
+    if((ref->moon_pm = BrMapFind("moon.pix")) == NULL) {
         BrLogError("DEMO", "Unable to load moon.pix");
         return BRE_FAIL;
     }
-    BrMapAdd(moon_pm);
+    BrMapAdd(ref->moon_pm);
+
+    if((ref->ast_pm = BrMapFind("ast.pix")) == NULL) {
+        BrLogError("DEMO", "Unable to load ast.pix");
+        return BRE_FAIL;
+    }
+    BrMapAdd(ref->ast_pm);
 
     if((teapot_model = BrModelLoad("teapot.dat")) == NULL) {
         BrLogError("DEMO", "Unable to load teapot.dat");
@@ -134,11 +149,11 @@ br_error ReflectionInit(br_demo *demo)
      * Now the material from which the earth is made.
      */
     earth_mat             = CreateMaterial("earth");
-    earth_mat->colour_map = earth_pm;
+    earth_mat->colour_map = ref->earth_pm;
     BrMaterialAdd(earth_mat);
 
     moon_mat             = CreateMaterial("moon");
-    moon_mat->colour_map = moon_pm;
+    moon_mat->colour_map = ref->moon_pm;
     BrMaterialAdd(moon_mat);
 
     /*
@@ -314,9 +329,39 @@ void ReflectionRender(br_demo *demo)
     BrRendererFrameEnd();
 }
 
+void ReflectionProcessEvent(br_demo *demo, const SDL_Event *evt)
+{
+    br_demo_reflection *ref = demo->user;
+
+    switch(evt->type) {
+        case SDL_KEYDOWN:
+            switch(evt->key.keysym.sym) {
+                case SDLK_m:
+                    if(ref->moon->material->colour_map == ref->moon_pm)
+                        ref->moon->material->colour_map = ref->ast_pm;
+                    else
+                        ref->moon->material->colour_map = ref->moon_pm;
+
+                    BrMaterialUpdate(ref->moon->material, BR_MATU_ALL);
+                    break;
+
+                case SDLK_e:
+                    if(ref->earth->material->colour_map == ref->earth_pm)
+                        ref->earth->material->colour_map = ref->planet_pm;
+                    else
+                        ref->earth->material->colour_map = ref->earth_pm;
+
+                    BrMaterialUpdate(ref->earth->material, BR_MATU_ALL);
+                    break;
+            }
+
+            break;
+    }
+}
+
 const static br_demo_dispatch dispatch = {
     .init          = ReflectionInit,
-    .process_event = BrDemoDefaultProcessEvent,
+    .process_event = ReflectionProcessEvent,
     .update        = ReflectionUpdate,
     .render        = ReflectionRender,
     .on_resize     = BrDemoDefaultOnResize,
