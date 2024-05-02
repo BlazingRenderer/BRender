@@ -1,7 +1,7 @@
 project(softcube)
 
 add_executable(softcube16 main.c)
-target_link_libraries(softcube16 BRender::Full BRender::DDI)
+target_link_libraries(softcube16 PRIVATE BRender::Full BRender::DDI)
 set_property(TARGET softcube16 PROPERTY VS_DEBUGGER_WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/../dat")
 set_property(TARGET softcube16 PROPERTY FOLDER "BRender/Examples")
 
@@ -10,7 +10,7 @@ if(TARGET SDL2::SDL2main)
 endif()
 
 add_executable(softcube24 main.c)
-target_link_libraries(softcube24 BRender::Full BRender::DDI)
+target_link_libraries(softcube24 PRIVATE BRender::Full BRender::DDI)
 set_property(TARGET softcube24 PROPERTY VS_DEBUGGER_WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/../dat")
 set_property(TARGET softcube24 PROPERTY FOLDER "BRender/Examples")
 
