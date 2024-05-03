@@ -182,6 +182,8 @@ static void apply_stored_properties(HVIDEO hVideo, state_stack *state, uint32_t 
                 break;
         }
 
+        BrMatrix4Copy23(&model->map_transform, &state->surface.map_transform);
+
         *unlit = !state->surface.lighting;
     }
 
