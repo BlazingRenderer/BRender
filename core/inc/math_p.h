@@ -255,6 +255,8 @@ void BR_PUBLIC_ENTRY BrMatrix4TApplyV(br_vector4 *A, const br_vector3 *B, const 
 void BR_PUBLIC_ENTRY BrMatrix4TApplyP(br_vector4 *A, const br_vector3 *B, const br_matrix4 *C);
 void BR_PUBLIC_ENTRY BrMatrix4TApply(br_vector4 *A, const br_vector4 *B, const br_matrix4 *C);
 
+void BR_PUBLIC_ENTRY BrMatrix4Copy23(br_matrix4 *A, const br_matrix23 *B);
+
 void BR_PUBLIC_ENTRY BrMatrix4Pre34(br_matrix4 *A, const br_matrix34 *B);
 void BR_PUBLIC_ENTRY BrMatrix4Mul34(br_matrix4 *A, const br_matrix34 *B, const br_matrix4 *C);
 void BR_PUBLIC_ENTRY BrMatrix4Copy34(br_matrix4 *A, const br_matrix34 *B);

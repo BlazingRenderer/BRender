@@ -383,6 +383,19 @@ void BR_PUBLIC_ENTRY BrMatrix4TApplyV(br_vector4 *A, const br_vector3 *B, const 
     A->v[3] = BR_MAC3(B->v[0], C(3, 0), B->v[1], C(3, 1), B->v[2], C(3, 2));
 }
 
+void BR_PUBLIC_ENTRY BrMatrix4Copy23(br_matrix4 *A, const br_matrix23 *B)
+{
+    UASSERT_MESSAGE("Destination matrix is NULL", A != NULL);
+    UASSERT_MESSAGE("Source matrix is NULL", B != NULL);
+
+    // clang-format off
+    A(0, 0) = B(0, 0); A(0, 1) = B(0, 1); A(0, 2) = S0; A(0, 3) = S0;
+    A(1, 0) = B(1, 0); A(1, 1) = B(1, 1); A(1, 2) = S0; A(1, 3) = S0;
+    A(2, 0) = B(2, 0); A(2, 1) = B(2, 1); A(2, 2) = S1; A(2, 3) = S0;
+    A(3, 0) = S0;      A(3, 1) = S0;      A(3, 2) = S0; A(3, 3) = S1;
+    // clang-format on
+}
+
 void BR_PUBLIC_ENTRY BrMatrix4Copy34(br_matrix4 *A, const br_matrix34 *B)
 {
     UASSERT_MESSAGE("Destination matrix is NULL", A != NULL);
