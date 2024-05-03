@@ -284,7 +284,7 @@ vec2 SurfaceMapEnvironment(in vec3 eye, in vec3 normal, in mat4 model_to_environ
     /*
      * Generate reflected vector
      */
-    r = reflect(-eye, normal);
+    r = reflect(eye, normal);
 
     /*
      * Rotate vector into the environment frame.
@@ -296,10 +296,10 @@ vec2 SurfaceMapEnvironment(in vec3 eye, in vec3 normal, in mat4 model_to_environ
     /*
      * Convert vector to environment coordinates
      */
-    cu = atan(wr2.x, -wr2.z) * 0.159154943091895; /* 1/(2*PI) */
-    cv = -wr2.y * 0.5 + 0.5;
+    cu = 0.5 + atan(wr2.x, -wr2.z) * 0.159154943091895; /* 1/(2*PI) */
+    cv = 0.5 + -wr2.y * 0.5;
 
-    return mod(vec2(cu, 1 - cv), 1);
+    return vec2(cu, cv);
 }
 
 vec2 SurfaceMap()
