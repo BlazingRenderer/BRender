@@ -16,3 +16,7 @@ set(SHEET_FILES 8ball.pix earth.pix rivrock1.pix shade.tab sheet.mat sph32.dat s
 foreach(file ${SHEET_FILES})
         configure_file(${CMAKE_CURRENT_SOURCE_DIR}/dat/${file} ${CMAKE_CURRENT_BINARY_DIR}/${file} COPYONLY)
 endforeach()
+
+if (NOT BRENDER_DISABLE_INSTALL)
+        install(TARGETS sheet DESTINATION ${CMAKE_INSTALL_BINDIR})
+endif ()

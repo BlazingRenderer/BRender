@@ -11,6 +11,10 @@ function(add_example name)
 	if(TARGET SDL2::SDL2main)
 		target_link_libraries(${name} PRIVATE SDL2::SDL2main)
 	endif()
+
+	if (NOT BRENDER_DISABLE_INSTALL)
+		install(TARGETS ${name} DESTINATION ${CMAKE_INSTALL_BINDIR})
+	endif ()
 endfunction()
 
 add_example(brtutor1)

@@ -11,3 +11,6 @@ if(TARGET SDL2::SDL2main)
         target_link_libraries(devpmtest PRIVATE SDL2::SDL2main)
 endif()
 
+if (NOT BRENDER_DISABLE_INSTALL)
+        install(TARGETS devpmtest DESTINATION ${CMAKE_INSTALL_BINDIR})
+endif ()

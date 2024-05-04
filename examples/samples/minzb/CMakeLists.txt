@@ -10,3 +10,6 @@ if(TARGET SDL2::SDL2main)
         target_link_libraries(minzb PRIVATE SDL2::SDL2main)
 endif()
 
+if (NOT BRENDER_DISABLE_INSTALL)
+        install(TARGETS minzb DESTINATION ${CMAKE_INSTALL_BINDIR})
+endif ()

@@ -17,3 +17,7 @@ set(ROBOT_FILES mask.pix robo.act robo.dat robo.msc robo.vue tile01_de.pix tile0
 foreach(file ${ROBOT_FILES})
         configure_file(${CMAKE_CURRENT_SOURCE_DIR}/dat/${file} ${CMAKE_CURRENT_BINARY_DIR}/${file} COPYONLY)
 endforeach()
+
+if (NOT BRENDER_DISABLE_INSTALL)
+        install(TARGETS robot DESTINATION ${CMAKE_INSTALL_BINDIR})
+endif ()

@@ -12,3 +12,7 @@ set_property(TARGET brintro PROPERTY FOLDER "BRender/Examples")
 if(TARGET SDL2::SDL2main)
     target_link_libraries(brintro PRIVATE SDL2::SDL2main)
 endif()
+
+if (NOT BRENDER_DISABLE_INSTALL)
+    install(TARGETS brintro DESTINATION ${CMAKE_INSTALL_BINDIR})
+endif ()

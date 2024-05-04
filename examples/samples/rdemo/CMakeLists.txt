@@ -16,3 +16,7 @@ set(RDEMO_FILES ast.pix planet.pix earth.pix moon.pix shade.tab sph32.dat std.pa
 foreach(file ${RDEMO_FILES})
         configure_file(${CMAKE_CURRENT_SOURCE_DIR}/dat/${file} ${CMAKE_CURRENT_BINARY_DIR}/${file} COPYONLY)
 endforeach()
+
+if (NOT BRENDER_DISABLE_INSTALL)
+        install(TARGETS rdemo DESTINATION ${CMAKE_INSTALL_BINDIR})
+endif ()
