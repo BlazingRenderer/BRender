@@ -91,6 +91,9 @@ typedef struct br_device_pixelmap {
             const char *gl_vendor;
             const char *gl_renderer;
 
+            GLint  gl_num_extensions;
+            char **gl_extensions;
+
             GLuint tex_white;
             GLuint tex_checkerboard;
 

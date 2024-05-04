@@ -49,6 +49,9 @@ static struct br_tv_template_entry devicePixelmapFrontTemplateEntries[] = {
     {BRT(OPENGL_VERSION_CSTR),  FF(gl_version),     BRTV_QUERY | BRTV_ALL, BRTV_CONV_COPY,    0                    },
     {BRT(OPENGL_VENDOR_CSTR),   FF(gl_vendor),      BRTV_QUERY | BRTV_ALL, BRTV_CONV_COPY,    0                    },
     {BRT(OPENGL_RENDERER_CSTR), FF(gl_renderer),    BRTV_QUERY | BRTV_ALL, BRTV_CONV_COPY,    0                    },
+
+    {DEV(OPENGL_NUM_EXTENSIONS_I32), FF(gl_num_extensions), BRTV_QUERY | BRTV_ALL, BRTV_CONV_COPY,    0                    },
+    {DEV(OPENGL_EXTENSIONS_PL),      FF(gl_extensions),     BRTV_QUERY | BRTV_ALL, BRTV_CONV_LIST,    0                    },
 };
 #undef FF
 #undef F
@@ -145,6 +148,19 @@ br_device_pixelmap *DevicePixelmapGLAllocateFront(br_device *dev, br_output_faci
     BrLogTrace("GLREND", "OpenGL Version  = %s", self->asFront.gl_version);
     BrLogTrace("GLREND", "OpenGL Vendor   = %s", self->asFront.gl_vendor);
     BrLogTrace("GLREND", "OpenGL Renderer = %s", self->asFront.gl_renderer);
+
+    /*
+     * Get a copy of the extension list.
+     * NULL-terminate so we can expose it as a BRT_POINTER_LIST.
+     */
+    glGetIntegerv(GL_NUM_EXTENSIONS, &self->asFront.gl_num_extensions);
+
+    self->asFront.gl_extensions = BrResAllocate(self, sizeof(char *) * (self->asFront.gl_num_extensions + 1), BR_MEMORY_DRIVER);
+    for(GLuint i = 0; i < self->asFront.gl_num_extensions; ++i) {
+        const GLubyte *ext             = glGetStringi(GL_EXTENSIONS, i);
+        self->asFront.gl_extensions[i] = BrResStrDup(self->asFront.gl_extensions, (const char *)ext);
+    }
+    self->asFront.gl_extensions[self->asFront.gl_num_extensions] = NULL;
 
     /*
      * Try to figure out the actual format we got.
