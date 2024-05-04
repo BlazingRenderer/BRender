@@ -41,8 +41,10 @@ stdenv.mkDerivation(finalAttrs: {
     (lib.cmakeBool "BRENDER_BUILD_EXAMPLES" withExamples)
   ];
 
-  postFixup = lib.optionalString withExamples ''
-    mkdir -p $out $data/share/brender-samples/{robot,brintro,dat,tutorials}
+  postFixup = ''
+    mkdir -p $out
+  '' + lib.optionalString withExamples ''
+    mkdir -p $data/share/brender-samples/{robot,brintro,dat,tutorials}
 
     cp ${finalAttrs.src}/examples/robot/dat/*   $data/share/brender-samples/robot
     cp ${finalAttrs.src}/examples/brintro/dat/* $data/share/brender-samples/brintro
