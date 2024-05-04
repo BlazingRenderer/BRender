@@ -7,15 +7,13 @@
     mkPackages = { system }: let
       pkgs = import nixpkgs { inherit system; };
     in rec {
-      brender-samples = pkgs.callPackage ./samples.nix {
-        version = self.lastModifiedDate;
-      };
-
-      brender-samples-clang = brender-samples.override { stdenv = pkgs.clangStdenv; };
-
       brender = pkgs.callPackage ./default.nix {
         version = self.lastModifiedDate;
       };
+
+      brender-samples = brender.override { withExamples = true; };
+
+      brender-samples-clang = brender-samples.override { stdenv = pkgs.clangStdenv; };
 
       default = brender;
     };
