@@ -105,6 +105,8 @@ static br_pixelmap *BrFmtSTBLoad(const char *name)
         return NULL;
     }
 
+    pixelmap->identifier = BrResStrDup(pixelmap, name);
+
     /* add pixels to pixelmap */
     BrResAdd(pixelmap, pixels);
 
