@@ -17,8 +17,8 @@ static struct br_buffer_stored_dispatch bufferStoredDispatch;
 #define F(f) offsetof(struct br_buffer_stored, f)
 
 static struct br_tv_template_entry bufferStoredTemplateEntries[] = {
-    {BRT(IDENTIFIER_CSTR),        F(identifier), BRTV_QUERY | BRTV_ALL, BRTV_CONV_COPY},
-    {DEV(BRT_OPENGL_TEXTURE_U32), F(gl_tex),     BRTV_QUERY | BRTV_ALL, BRTV_CONV_COPY}
+    {BRT(IDENTIFIER_CSTR),    F(identifier), BRTV_QUERY | BRTV_ALL, BRTV_CONV_COPY},
+    {DEV(OPENGL_TEXTURE_U32), F(gl_tex),     BRTV_QUERY | BRTV_ALL, BRTV_CONV_COPY}
 };
 
 #undef F
