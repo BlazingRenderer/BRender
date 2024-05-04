@@ -42,7 +42,7 @@ stdenv.mkDerivation(finalAttrs: {
   ];
 
   postFixup = lib.optionalString withExamples ''
-    mkdir -p $data/share/brender-samples/{robot,brintro,dat,tutorials}
+    mkdir -p $out $data/share/brender-samples/{robot,brintro,dat,tutorials}
 
     cp ${finalAttrs.src}/examples/robot/dat/*   $data/share/brender-samples/robot
     cp ${finalAttrs.src}/examples/brintro/dat/* $data/share/brender-samples/brintro
@@ -77,7 +77,8 @@ stdenv.mkDerivation(finalAttrs: {
       fi
     done
   '';
-  outputs = [ "bin" "out" ] ++ (lib.optionals withExamples [
+
+  outputs = [ "bin" "lib" "dev" "out" ] ++ (lib.optionals withExamples [
     "data"
   ]);
 })
