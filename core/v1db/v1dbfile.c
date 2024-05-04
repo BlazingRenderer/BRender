@@ -717,8 +717,13 @@ static int FopRead_FACE_MATERIAL(br_datafile *df, br_uint_32 id, br_uint_32 leng
 // clang-format on
 #define _STRUCT_NAME struct br_model
 static br_file_struct_member br_model_FM[] = {
-    _UINT_16(flags),      _VECTOR3(pivot),      _ANGLE(crease_angle), _SCALAR(radius),
-    _VECTOR3(bounds.min), _VECTOR3(bounds.max), _ASCIZ(identifier),
+    _UINT_16(flags),
+    _VECTOR3(pivot),
+    _ANGLE(crease_angle),
+    _SCALAR(radius),
+    _VECTOR3(bounds.min),
+    _VECTOR3(bounds.max),
+    _ASCIZ(identifier),
 };
 static _FILE_STRUCT(br_model);
 #undef _STRUCT_NAME
