@@ -409,8 +409,7 @@ static int FopRead_FACES(br_datafile *df, br_uint_32 id, br_uint_32 length, br_u
  */
 static int FopWrite_FACES(br_datafile *df, br_face *faces, int nfaces)
 {
-    df->prims->chunk_write(df, FID_FACES,
-                           df->prims->count_size(df) + nfaces * df->prims->struct_size(df, &br_face_F, NULL));
+    df->prims->chunk_write(df, FID_FACES, df->prims->count_size(df) + nfaces * df->prims->struct_size(df, &br_face_F, NULL));
     df->prims->count_write(df, nfaces);
 
     DfStructWriteArray(df, &br_face_F, faces, nfaces);
@@ -714,7 +713,7 @@ static int FopRead_FACE_MATERIAL(br_datafile *df, br_uint_32 id, br_uint_32 leng
 /**
  ** Model
  **/
-// clang-format on
+// clang-format off
 #define _STRUCT_NAME struct br_model
 static br_file_struct_member br_model_FM[] = {
     _UINT_16(flags),
@@ -727,7 +726,7 @@ static br_file_struct_member br_model_FM[] = {
 };
 static _FILE_STRUCT(br_model);
 #undef _STRUCT_NAME
-// clang-format off
+// clang-format on
 
 static int FopRead_MODEL(br_datafile *df, br_uint_32 id, br_uint_32 length, br_uint_32 count)
 {
