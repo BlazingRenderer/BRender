@@ -34,6 +34,14 @@ Input_Types InputFileTypes[] = {
     {"tga",      BrFmtTGALoad  },
     {"iff",      BrFmtIFFLoad  },
     {"lbm",      BrFmtIFFLoad  },
+    {"png",      BrFmtPNGLoad  },
+    {"jpg",      BrFmtJPGLoad  },
+    {"jpeg",     BrFmtJPGLoad  },
+    {"jpe",      BrFmtJPGLoad  },
+    {"jif",      BrFmtJPGLoad  },
+    {"jfif",     BrFmtJPGLoad  },
+    {"jfi",      BrFmtJPGLoad  },
+    {"pcx",      BrFmtPCXLoad  },
 
     {"tab",      T_LoadPixelmap},
 };
