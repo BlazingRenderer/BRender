@@ -202,9 +202,32 @@ static br_float *ConvertFixedToFloat(br_float **pextra, br_fixed_ls *src, br_int
  * Returns pointer to start of destination block, or NULL if there was not
  * enough space
  */
-static br_uint_32 *ConvertLongCopy(br_uint_32 **pextra, br_uint_32 *src, br_int_32 count, br_size_t *pextra_space)
+static br_uint_32 *ConvertLongCopy(br_uint_32 **pextra, br_uint_32 *src, br_size_t count, br_size_t *pextra_space)
 {
     br_uint_32 *ret;
+
+    if(pextra == NULL || *pextra == NULL || pextra_space == NULL)
+        return NULL;
+
+    ret = *pextra;
+
+    /*
+     * Check there is space for the data
+     */
+    if((count * sizeof(**pextra)) > *pextra_space)
+        return NULL;
+
+    *pextra_space -= count * sizeof(**pextra);
+
+    while(count--)
+        *(*pextra)++ = *src++;
+
+    return ret;
+}
+
+static br_uintptr_t *ConvertPtrCopy(br_uintptr_t **pextra, br_uintptr_t *src, br_size_t count, br_size_t *pextra_space)
+{
+    br_uintptr_t *ret;
 
     if(pextra == NULL || *pextra == NULL || pextra_space == NULL)
         return NULL;
@@ -270,8 +293,8 @@ static br_error ValueQuery(br_token_value *tv,                  /* Destination f
                            const br_tv_template_entry *tep)     /* Template entry to use for conversion		*/
 {
     void         *mem;
-    br_uint_32   *lp;
-    int           t;
+    br_uintptr_t *lp;
+    br_size_t     t;
     br_tv_custom *custp;
 
     /*
@@ -435,20 +458,20 @@ static br_error ValueQuery(br_token_value *tv,                  /* Destination f
             /*
              * Find number of entries in list
              */
-            lp = MEM(br_uint_32 *);
+            lp = MEM(br_uintptr_t *);
 
             t = 0;
             if(lp) {
                 while(*lp++)
                     t++;
 
-                if((tv->v.p = ConvertLongCopy((br_uint_32 **)pextra, MEM(br_uint_32 *), t + 1, pextra_size)) == NULL)
+                if((tv->v.p = ConvertPtrCopy((br_uintptr_t **)pextra, MEM(br_uintptr_t *), t + 1, pextra_size)) == NULL)
                     return BRE_OVERFLOW;
             } else {
                 /*
                  * Make a list with 0 entries
                  */
-                if((tv->v.p = ConvertLongCopy((br_uint_32 **)pextra, (br_uint_32 *)&lp, 1, pextra_size)) == NULL)
+                if((tv->v.p = ConvertPtrCopy((br_uintptr_t **)pextra, (br_uintptr_t *)&lp, 1, pextra_size)) == NULL)
                     return BRE_OVERFLOW;
             }
             break;
@@ -653,8 +676,8 @@ copy_words:
 static br_size_t ValueExtraSize(void *block, const br_tv_template_entry *tep)
 {
     void         *mem;
-    br_uint_32   *lp;
-    int           t;
+    br_uintptr_t *lp;
+    br_size_t     t;
     br_tv_custom *custp;
 
     /*
@@ -711,14 +734,14 @@ static br_size_t ValueExtraSize(void *block, const br_tv_template_entry *tep)
             /*
              * Find number of entries in list
              */
-            lp = MEM(br_uint_32 *);
+            lp = MEM(br_uintptr_t *);
 
             t = 1;
             if(lp) {
                 while(*lp++)
                     t++;
             }
-            return t * sizeof(br_uint_32);
+            return t * sizeof(br_uintptr_t);
 
         case BRTV_CONV_CUSTOM:
             custp = (br_tv_custom *)tep->conv_arg;
