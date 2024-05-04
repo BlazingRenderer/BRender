@@ -131,124 +131,6 @@ static void templateMakeMap(br_tv_template *template)
 }
 
 /*
- * Copy values onto the end of a buffer, whilst converting from float to fixed.
- *
- * The buffer pointer and remaining space are passed in by reference - and are
- * updated according to the size of the block
- *
- * Returns pointer to start of destination block, or NULL if there was not
- * enough space
- */
-static br_fixed_ls *ConvertFloatToFixed(br_fixed_ls **pextra, br_float *src, br_int_32 count, br_size_t *pextra_space)
-{
-    br_fixed_ls *ret;
-
-    if(pextra == NULL || *pextra == NULL || pextra_space == NULL)
-        return NULL;
-
-    ret = *pextra;
-    /*
-     * Check there is space for the data
-     */
-    if((count * sizeof(br_fixed_ls)) > *pextra_space)
-        return NULL;
-
-    *pextra_space -= count * sizeof(br_fixed_ls);
-
-    while(count--)
-        *(*pextra)++ = BrFloatToFixed(*src++);
-
-    return ret;
-}
-
-/*
- * Copy values onto the end of a buffer, whilst converting from fixed to float
- *
- * The buffer pointer and remaining space are passed in by reference - and are
- * updated according to the size of the block
- *
- * Returns pointer to start of destination block, or NULL if there was not
- * enough space
- */
-static br_float *ConvertFixedToFloat(br_float **pextra, br_fixed_ls *src, br_int_32 count, br_size_t *pextra_space)
-{
-    br_float *ret;
-
-    if(pextra == NULL || *pextra == NULL || pextra_space == NULL)
-        return NULL;
-
-    ret = *pextra;
-
-    /*
-     * Check there is space for the data
-     */
-    if((count * sizeof(**pextra)) > *pextra_space)
-        return NULL;
-
-    *pextra_space -= count * sizeof(**pextra);
-
-    while(count--)
-        *(*pextra)++ = (float)BrFixedToFloat(*src++);
-
-    return ret;
-}
-
-/*
- * Copy longword values onto the end of a buffer
- *
- * The buffer pointer and remaining space are passed in by reference - and are
- * updated according to the size of the block
- *
- * Returns pointer to start of destination block, or NULL if there was not
- * enough space
- */
-static br_uint_32 *ConvertLongCopy(br_uint_32 **pextra, br_uint_32 *src, br_size_t count, br_size_t *pextra_space)
-{
-    br_uint_32 *ret;
-
-    if(pextra == NULL || *pextra == NULL || pextra_space == NULL)
-        return NULL;
-
-    ret = *pextra;
-
-    /*
-     * Check there is space for the data
-     */
-    if((count * sizeof(**pextra)) > *pextra_space)
-        return NULL;
-
-    *pextra_space -= count * sizeof(**pextra);
-
-    while(count--)
-        *(*pextra)++ = *src++;
-
-    return ret;
-}
-
-static br_uintptr_t *ConvertPtrCopy(br_uintptr_t **pextra, br_uintptr_t *src, br_size_t count, br_size_t *pextra_space)
-{
-    br_uintptr_t *ret;
-
-    if(pextra == NULL || *pextra == NULL || pextra_space == NULL)
-        return NULL;
-
-    ret = *pextra;
-
-    /*
-     * Check there is space for the data
-     */
-    if((count * sizeof(**pextra)) > *pextra_space)
-        return NULL;
-
-    *pextra_space -= count * sizeof(**pextra);
-
-    while(count--)
-        *(*pextra)++ = *src++;
-
-    return ret;
-}
-
-/*
  * Copy a token value to the given address.
  * This is required for 64-bit, as not everything is 4 bytes.
  */
@@ -352,92 +234,92 @@ static br_error ValueQuery(br_token_value *tv,                  /* Destination f
              * XXX Assumes that vectors and matrix elements are contiguous
              */
         case BRTV_CONV_V2_FIXED_FLOAT:
-            if((tv->v.p = ConvertFloatToFixed((br_fixed_ls **)pextra, MEM_P(br_float), 2, pextra_size)) == NULL)
+            if((tv->v.p = BrTVConvertFloatToFixed((br_fixed_ls **)pextra, MEM_P(br_float), 2, pextra_size)) == NULL)
                 return BRE_OVERFLOW;
             break;
 
         case BRTV_CONV_V2_FLOAT_FIXED:
-            if((tv->v.p = ConvertFixedToFloat((br_float **)pextra, MEM_P(br_fixed_ls), 2, pextra_size)) == NULL)
+            if((tv->v.p = BrTVConvertFixedToFloat((br_float **)pextra, MEM_P(br_fixed_ls), 2, pextra_size)) == NULL)
                 return BRE_OVERFLOW;
             break;
 
         case BRTV_CONV_V3_FIXED_FLOAT:
-            if((tv->v.p = ConvertFloatToFixed((br_fixed_ls **)pextra, MEM_P(br_float), 3, pextra_size)) == NULL)
+            if((tv->v.p = BrTVConvertFloatToFixed((br_fixed_ls **)pextra, MEM_P(br_float), 3, pextra_size)) == NULL)
                 return BRE_OVERFLOW;
             break;
 
         case BRTV_CONV_V3_FLOAT_FIXED:
-            if((tv->v.p = ConvertFixedToFloat((br_float **)pextra, MEM_P(br_fixed_ls), 3, pextra_size)) == NULL)
+            if((tv->v.p = BrTVConvertFixedToFloat((br_float **)pextra, MEM_P(br_fixed_ls), 3, pextra_size)) == NULL)
                 return BRE_OVERFLOW;
             break;
 
         case BRTV_CONV_V4_FIXED_FLOAT:
-            if((tv->v.p = ConvertFloatToFixed((br_fixed_ls **)pextra, MEM_P(br_float), 4, pextra_size)) == NULL)
+            if((tv->v.p = BrTVConvertFloatToFixed((br_fixed_ls **)pextra, MEM_P(br_float), 4, pextra_size)) == NULL)
                 return BRE_OVERFLOW;
             break;
 
         case BRTV_CONV_V4_FLOAT_FIXED:
-            if((tv->v.p = ConvertFixedToFloat((br_float **)pextra, MEM_P(br_fixed_ls), 4, pextra_size)) == NULL)
+            if((tv->v.p = BrTVConvertFixedToFloat((br_float **)pextra, MEM_P(br_fixed_ls), 4, pextra_size)) == NULL)
                 return BRE_OVERFLOW;
             break;
 
         case BRTV_CONV_M23_FIXED_FLOAT:
-            if((tv->v.p = ConvertFloatToFixed((br_fixed_ls **)pextra, MEM_P(br_float), 6, pextra_size)) == NULL)
+            if((tv->v.p = BrTVConvertFloatToFixed((br_fixed_ls **)pextra, MEM_P(br_float), 6, pextra_size)) == NULL)
                 return BRE_OVERFLOW;
             break;
 
         case BRTV_CONV_M23_FLOAT_FIXED:
-            if((tv->v.p = ConvertFixedToFloat((br_float **)pextra, MEM_P(br_fixed_ls), 6, pextra_size)) == NULL)
+            if((tv->v.p = BrTVConvertFixedToFloat((br_float **)pextra, MEM_P(br_fixed_ls), 6, pextra_size)) == NULL)
                 return BRE_OVERFLOW;
             break;
 
         case BRTV_CONV_M4_FIXED_FLOAT:
-            if((tv->v.p = ConvertFloatToFixed((br_fixed_ls **)pextra, MEM_P(br_float), 16, pextra_size)) == NULL)
+            if((tv->v.p = BrTVConvertFloatToFixed((br_fixed_ls **)pextra, MEM_P(br_float), 16, pextra_size)) == NULL)
                 return BRE_OVERFLOW;
             break;
 
         case BRTV_CONV_M4_FLOAT_FIXED:
-            if((tv->v.p = ConvertFixedToFloat((br_float **)pextra, MEM_P(br_fixed_ls), 16, pextra_size)) == NULL)
+            if((tv->v.p = BrTVConvertFixedToFloat((br_float **)pextra, MEM_P(br_fixed_ls), 16, pextra_size)) == NULL)
                 return BRE_OVERFLOW;
             break;
 
         case BRTV_CONV_M34_FIXED_FLOAT:
-            if((tv->v.p = ConvertFloatToFixed((br_fixed_ls **)pextra, MEM_P(br_float), 12, pextra_size)) == NULL)
+            if((tv->v.p = BrTVConvertFloatToFixed((br_fixed_ls **)pextra, MEM_P(br_float), 12, pextra_size)) == NULL)
                 return BRE_OVERFLOW;
             break;
 
         case BRTV_CONV_M34_FLOAT_FIXED:
-            if((tv->v.p = ConvertFixedToFloat((br_float **)pextra, MEM_P(br_fixed_ls), 12, pextra_size)) == NULL)
+            if((tv->v.p = BrTVConvertFixedToFloat((br_float **)pextra, MEM_P(br_fixed_ls), 12, pextra_size)) == NULL)
                 return BRE_OVERFLOW;
             break;
 
         case BRTV_CONV_V2_COPY:
-            if((tv->v.p = ConvertLongCopy((br_uint_32 **)pextra, MEM_P(br_uint_32), 2, pextra_size)) == NULL)
+            if((tv->v.p = BrTVConvertLongCopy((br_uint_32 **)pextra, MEM_P(br_uint_32), 2, pextra_size)) == NULL)
                 return BRE_OVERFLOW;
             break;
 
         case BRTV_CONV_V3_COPY:
-            if((tv->v.p = ConvertLongCopy((br_uint_32 **)pextra, MEM_P(br_uint_32), 3, pextra_size)) == NULL)
+            if((tv->v.p = BrTVConvertLongCopy((br_uint_32 **)pextra, MEM_P(br_uint_32), 3, pextra_size)) == NULL)
                 return BRE_OVERFLOW;
             break;
 
         case BRTV_CONV_V4_COPY:
-            if((tv->v.p = ConvertLongCopy((br_uint_32 **)pextra, MEM_P(br_uint_32), 4, pextra_size)) == NULL)
+            if((tv->v.p = BrTVConvertLongCopy((br_uint_32 **)pextra, MEM_P(br_uint_32), 4, pextra_size)) == NULL)
                 return BRE_OVERFLOW;
             break;
 
         case BRTV_CONV_M23_COPY:
-            if((tv->v.p = ConvertLongCopy((br_uint_32 **)pextra, MEM_P(br_uint_32), 6, pextra_size)) == NULL)
+            if((tv->v.p = BrTVConvertLongCopy((br_uint_32 **)pextra, MEM_P(br_uint_32), 6, pextra_size)) == NULL)
                 return BRE_OVERFLOW;
             break;
 
         case BRTV_CONV_M4_COPY:
-            if((tv->v.p = ConvertLongCopy((br_uint_32 **)pextra, MEM_P(br_uint_32), 16, pextra_size)) == NULL)
+            if((tv->v.p = BrTVConvertLongCopy((br_uint_32 **)pextra, MEM_P(br_uint_32), 16, pextra_size)) == NULL)
                 return BRE_OVERFLOW;
             break;
 
         case BRTV_CONV_M34_COPY:
-            if((tv->v.p = ConvertLongCopy((br_uint_32 **)pextra, MEM_P(br_uint_32), 12, pextra_size)) == NULL)
+            if((tv->v.p = BrTVConvertLongCopy((br_uint_32 **)pextra, MEM_P(br_uint_32), 12, pextra_size)) == NULL)
                 return BRE_OVERFLOW;
             break;
 
@@ -449,7 +331,7 @@ static br_error ValueQuery(br_token_value *tv,                  /* Destination f
             t = BrStrLen(MEM(char *)) + 1;
             t = (t + (sizeof(br_uint_32) - 1)) / sizeof(br_uint_32);
 
-            if((tv->v.p = ConvertLongCopy((br_uint_32 **)pextra, MEM(br_uint_32 *), t, pextra_size)) == NULL)
+            if((tv->v.p = BrTVConvertLongCopy((br_uint_32 **)pextra, MEM(br_uint_32 *), t, pextra_size)) == NULL)
                 return BRE_OVERFLOW;
 
             break;
@@ -465,13 +347,13 @@ static br_error ValueQuery(br_token_value *tv,                  /* Destination f
                 while(*lp++)
                     t++;
 
-                if((tv->v.p = ConvertPtrCopy((br_uintptr_t **)pextra, MEM(br_uintptr_t *), t + 1, pextra_size)) == NULL)
+                if((tv->v.p = BrTVConvertPtrCopy((br_uintptr_t **)pextra, MEM(br_uintptr_t *), t + 1, pextra_size)) == NULL)
                     return BRE_OVERFLOW;
             } else {
                 /*
                  * Make a list with 0 entries
                  */
-                if((tv->v.p = ConvertPtrCopy((br_uintptr_t **)pextra, (br_uintptr_t *)&lp, 1, pextra_size)) == NULL)
+                if((tv->v.p = BrTVConvertPtrCopy((br_uintptr_t **)pextra, (br_uintptr_t *)&lp, 1, pextra_size)) == NULL)
                     return BRE_OVERFLOW;
             }
             break;
