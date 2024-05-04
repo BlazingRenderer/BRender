@@ -113,13 +113,13 @@ static br_pixelmap *BrFmtSTBLoad(const char *name)
 }
 
 /* load png */
-br_pixelmap *BR_PUBLIC_ENTRY BrFmtPNGLoad(const char *name)
+br_pixelmap *BR_PUBLIC_ENTRY BrFmtPNGLoad(const char *name, br_uint_32 flags)
 {
     return BrFmtSTBLoad(name);
 }
 
 /* load jpg */
-br_pixelmap *BR_PUBLIC_ENTRY BrFmtJPGLoad(const char *name)
+br_pixelmap *BR_PUBLIC_ENTRY BrFmtJPGLoad(const char *name, br_uint_32 flags)
 {
     return BrFmtSTBLoad(name);
 }

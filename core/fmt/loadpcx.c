@@ -17,7 +17,7 @@ size_t br_drpcx_read_cbfn(void *file, void *out, size_t size)
 /*
  * use drpcx to load PCX to pixelmap
  */
-br_pixelmap *BR_PUBLIC_ENTRY BrFmtPCXLoad(const char *name)
+br_pixelmap *BR_PUBLIC_ENTRY BrFmtPCXLoad(const char *name, br_uint_32 flags)
 {
     br_pixelmap *pm;
     drpcx_uint8 *pixels;

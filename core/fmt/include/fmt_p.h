@@ -70,12 +70,12 @@ void BR_PUBLIC_ENTRY    BrApplyVue(br_vue *vue, br_actor *actors);
 /*
  * .PNG files
  */
-br_pixelmap *BR_PUBLIC_ENTRY BrFmtPNGLoad(const char *name);
+br_pixelmap *BR_PUBLIC_ENTRY BrFmtPNGLoad(const char *name, br_uint_32 flags);
 
 /*
  * .JPG files
  */
-br_pixelmap *BR_PUBLIC_ENTRY BrFmtJPGLoad(const char *name);
+br_pixelmap *BR_PUBLIC_ENTRY BrFmtJPGLoad(const char *name, br_uint_32 flags);
 
 /*
  * Image files
@@ -85,7 +85,7 @@ br_uint_32 BR_PUBLIC_ENTRY BrFmtImageSave(const char *name, br_pixelmap *pm, br_
 /*
  * .PCX files
  */
-br_pixelmap *BR_PUBLIC_ENTRY BrFmtPCXLoad(const char *name);
+br_pixelmap *BR_PUBLIC_ENTRY BrFmtPCXLoad(const char *name, br_uint_32 flags);
 
 /*
  * .GLTF files
