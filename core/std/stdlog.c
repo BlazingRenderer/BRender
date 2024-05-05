@@ -1,9 +1,11 @@
 #include <stdio.h>
 #include <brender.h>
 
-static void BR_CALLBACK BrStdioLogProc(br_uint_8 level, const char *component, const char *fmt, va_list ap)
+static void BR_CALLBACK BrStdioLogProc(void *user, br_uint_8 level, const char *component, const char *fmt, va_list ap)
 {
     const char *sLevel;
+
+    (void)user;
 
     switch(level) {
         case BR_LOG_TRACE:
@@ -33,6 +35,7 @@ static void BR_CALLBACK BrStdioLogProc(br_uint_8 level, const char *component, c
 br_loghandler BrStdioLogHandler = {
     .identifier = "Stdio LogHandler",
     .handler    = BrStdioLogProc,
+    .user       = NULL,
 };
 
 /*

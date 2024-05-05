@@ -20,14 +20,15 @@ enum {
  * Instance of a log handler.
  */
 #if !defined(__H2INC__)
-typedef void BR_CALLBACK br_log_cbfn(br_uint_8 level, const char *component, const char *fmt, va_list ap);
+typedef void BR_CALLBACK br_log_cbfn(void *user, br_uint_8 level, const char *component, const char *fmt, va_list ap);
 #else
-typedef void BR_CALLBACK br_log_cbfn(br_uint_8 level, const char *component, const char *fmt);
+typedef void BR_CALLBACK br_log_cbfn(void *user, br_uint_8 level, const char *component, const char *fmt);
 #endif
 
 typedef struct br_loghandler {
     const char  *identifier;
     br_log_cbfn *handler;
+    void        *user;
 } br_loghandler;
 
 #endif /* _BRLOG_H_ */
