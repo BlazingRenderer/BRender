@@ -1485,7 +1485,7 @@ static br_file_enum_member angle_order_FM[] = {
 static _FILE_ENUM(angle_order);
 
 #define _STRUCT_NAME struct br_transform
-static br_file_struct_member br_transform_euler_FM[] = {
+static br_file_struct_member br_transform_euler_v1_FM[] = {
     _ENUM_8(t.euler.e.order, angle_order_F),
     _ANGLE(t.euler.e.a),
     _ANGLE(t.euler.e.b),
@@ -1494,7 +1494,7 @@ static br_file_struct_member br_transform_euler_FM[] = {
     _VECTOR3(t.euler.t),
 };
 
-static _FILE_STRUCT(br_transform_euler);
+static _FILE_STRUCTN(br_transform_euler_v1, "br_transform_euler");
 #undef _STRUCT_NAME
 
 #define _STRUCT_NAME struct br_transform
@@ -1527,7 +1527,7 @@ static struct transform_type {
     {.type = BR_TRANSFORM_MATRIX34,    .id = FID_TRANSFORM_MATRIX34,    .fs = &br_transform_matrix34_F   },
     {.type = BR_TRANSFORM_MATRIX34_LP, .id = FID_TRANSFORM_MATRIX34_LP, .fs = &br_transform_matrix34_F   },
     {.type = BR_TRANSFORM_QUAT,        .id = FID_TRANSFORM_QUAT,        .fs = &br_transform_quat_F       },
-    {.type = BR_TRANSFORM_EULER,       .id = FID_TRANSFORM_EULER,       .fs = &br_transform_euler_F      },
+    {.type = BR_TRANSFORM_EULER,       .id = FID_TRANSFORM_EULER_V1,    .fs = &br_transform_euler_v1_F   },
     {.type = BR_TRANSFORM_LOOK_UP,     .id = FID_TRANSFORM_LOOK_UP,     .fs = &br_transform_look_up_F    },
     {.type = BR_TRANSFORM_TRANSLATION, .id = FID_TRANSFORM_TRANSLATION, .fs = &br_transform_translation_F},
     {.type = BR_TRANSFORM_IDENTITY,    .id = FID_TRANSFORM_IDENTITY,    .fs = NULL                       },
@@ -2161,7 +2161,7 @@ static br_chunks_table_entry ActorLoadEntries[] = {
     {FID_TRANSFORM_MATRIX34,    0, FopRead_TRANSFORM       },
     {FID_TRANSFORM_MATRIX34_LP, 0, FopRead_TRANSFORM       },
     {FID_TRANSFORM_QUAT,        0, FopRead_TRANSFORM       },
-    {FID_TRANSFORM_EULER,       0, FopRead_TRANSFORM       },
+    {FID_TRANSFORM_EULER_V1,    0, FopRead_TRANSFORM       },
     {FID_TRANSFORM_LOOK_UP,     0, FopRead_TRANSFORM       },
     {FID_TRANSFORM_TRANSLATION, 0, FopRead_TRANSFORM       },
     {FID_TRANSFORM_IDENTITY,    0, FopRead_TRANSFORM       },
