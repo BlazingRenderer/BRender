@@ -571,7 +571,7 @@ static br_file_struct_member br_old_face_FM[] = {
 };
 static _FILE_STRUCT(br_old_face);
 #undef _STRUCT_NAME
-// clang-fornat on
+// clang-format on
 
 static int FopRead_OLD_FACES(br_datafile *df, br_uint_32 id, br_uint_32 length, br_uint_32 count)
 {
@@ -766,8 +766,9 @@ static int FopRead_MODEL_V4(br_datafile *df, br_uint_32 id, br_uint_32 length, b
     /*
      * Only allow DONT_WELD, QUICK_UPDATE, KEEP_ORIGINAL and GENERATE_TAGS
      */
-    mp->flags &= BR_MODF_DONT_WELD | BR_MODF_QUICK_UPDATE | BR_MODF_KEEP_ORIGINAL | BR_MODF_GENERATE_TAGS | BR_MODF_UPDATEABLE |
-                 BR_MODF_CREASE | BR_MODF_CUSTOM_NORMALS | BR_MODF_CUSTOM_EQUATIONS | BR_MODF_CUSTOM_BOUNDS;
+    mp->flags &= BR_MODF_DONT_WELD | BR_MODF_QUICK_UPDATE | BR_MODF_KEEP_ORIGINAL | BR_MODF_GENERATE_TAGS |
+                 BR_MODF_UPDATEABLE | BR_MODF_CREASE | BR_MODF_CUSTOM_NORMALS | BR_MODF_CUSTOM_EQUATIONS |
+                 BR_MODF_CUSTOM_BOUNDS;
 
     /*
      * Leave model on stack
@@ -792,8 +793,9 @@ static int FopRead_MODEL_V5(br_datafile *df, br_uint_32 id, br_uint_32 length, b
     /*
      * Only allow DONT_WELD, QUICK_UPDATE, KEEP_ORIGINAL and GENERATE_TAGS
      */
-    mp->flags &= BR_MODF_DONT_WELD | BR_MODF_QUICK_UPDATE | BR_MODF_KEEP_ORIGINAL | BR_MODF_GENERATE_TAGS | BR_MODF_UPDATEABLE |
-                 BR_MODF_CREASE | BR_MODF_CUSTOM_NORMALS | BR_MODF_CUSTOM_EQUATIONS | BR_MODF_CUSTOM_BOUNDS;
+    mp->flags &= BR_MODF_DONT_WELD | BR_MODF_QUICK_UPDATE | BR_MODF_KEEP_ORIGINAL | BR_MODF_GENERATE_TAGS |
+                 BR_MODF_UPDATEABLE | BR_MODF_CREASE | BR_MODF_CUSTOM_NORMALS | BR_MODF_CUSTOM_EQUATIONS |
+                 BR_MODF_CUSTOM_BOUNDS;
 
     /*
      * Leave model on stack
@@ -819,7 +821,6 @@ static int FopWrite_MODEL_V5(br_datafile *df, br_model *mp)
 
     return 0;
 }
-
 
 /**
  ** Old model
