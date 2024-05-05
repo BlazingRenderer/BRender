@@ -1847,7 +1847,7 @@ static _FILE_ENUM(camera_type);
 
 // clang-format off
 #define _STRUCT_NAME struct br_camera
-static br_file_struct_member br_camera_FM[] = {
+static br_file_struct_member br_camera_v1_FM[] = {
     _ENUM_8(type, camera_type_F),
     _ANGLE(field_of_view),
     _SCALAR(hither_z),
@@ -1855,19 +1855,19 @@ static br_file_struct_member br_camera_FM[] = {
     _SCALAR(aspect),
     _ASCIZ(identifier),
 };
-static _FILE_STRUCT(br_camera);
+static _FILE_STRUCTN(br_camera_v1, "br_camera");
 #undef _STRUCT_NAME
 // clang-format on
 
-static int FopWrite_CAMERA(br_datafile *df, br_camera *cp)
+static int FopWrite_CAMERA_V1(br_datafile *df, br_camera *cp)
 {
-    df->prims->chunk_write(df, FID_CAMERA, df->prims->struct_size(df, &br_camera_F, cp));
-    df->prims->struct_write(df, &br_camera_F, cp);
+    df->prims->chunk_write(df, FID_CAMERA_V1, df->prims->struct_size(df, &br_camera_v1_F, cp));
+    df->prims->struct_write(df, &br_camera_v1_F, cp);
 
     return 0;
 }
 
-static int FopRead_CAMERA(br_datafile *df, br_uint_32 id, br_uint_32 length, br_uint_32 count)
+static int FopRead_CAMERA_V1(br_datafile *df, br_uint_32 id, br_uint_32 length, br_uint_32 count)
 {
     br_camera *cp;
 
@@ -2169,7 +2169,7 @@ static br_chunks_table_entry ActorLoadEntries[] = {
     {FID_BOUNDS,                0, FopRead_BOUNDS          },
     {FID_LIGHT_V1,              0, FopRead_LIGHT_V1        },
     {FID_LIGHT_V2,              0, FopRead_LIGHT_V2        },
-    {FID_CAMERA,                0, FopRead_CAMERA          },
+    {FID_CAMERA_V1,             0, FopRead_CAMERA_V1       },
     {FID_PLANE,                 0, FopRead_PLANE           },
 };
 
@@ -2244,7 +2244,7 @@ static int WriteActor(br_actor *a, br_datafile *df)
                 break;
 
             case BR_ACTOR_CAMERA:
-                FopWrite_CAMERA(df, a->type_data);
+                FopWrite_CAMERA_V1(df, a->type_data);
                 FopWrite_ACTOR_CAMERA(df);
                 break;
 

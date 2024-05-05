@@ -97,7 +97,7 @@ enum {
 
     FID_BOUNDS,
     FID_LIGHT_V1,
-    FID_CAMERA,
+    FID_CAMERA_V1,
 
     FID_FACES,
     FID_OLD_MODEL_2,
