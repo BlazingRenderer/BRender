@@ -726,9 +726,58 @@ static br_file_struct_member br_model_v3_FM[] = {
 };
 static _FILE_STRUCTN(br_model_v3, "br_model");
 #undef _STRUCT_NAME
+
+#define _STRUCT_NAME struct br_model
+static br_file_struct_member br_model_v5_FM[] = {
+    _UINT_16(flags),
+    _VECTOR3(pivot),
+    _ANGLE_SCALAR(crease_angle),
+    _SCALAR(radius),
+    _VECTOR3(bounds.min),
+    _VECTOR3(bounds.max),
+    _ASCIZ(identifier),
+};
+static _FILE_STRUCTN(br_model_v5, "br_model");
+#undef _STRUCT_NAME
 // clang-format on
 
+static br_model *FopRead_MODEL_V3x(br_datafile *df)
+{
+    br_model *mp;
+
+    /*
+     * Allocate and read in model structure - into v3tmp first.
+     */
+    mp      = BrModelAllocate(NULL, 0, 0);
+    df->res = mp;
+    df->prims->struct_read(df, &br_model_v3_F, mp);
+    df->res = NULL;
+
+    mp->crease_angle = BrFixedLUFToScalar(*(br_fixed_luf *)&mp->crease_angle);
+    return mp;
+}
+
 static int FopRead_MODEL_V4(br_datafile *df, br_uint_32 id, br_uint_32 length, br_uint_32 count)
+{
+    br_model *mp;
+
+    mp = FopRead_MODEL_V3x(df);
+
+    /*
+     * Only allow DONT_WELD, QUICK_UPDATE, KEEP_ORIGINAL and GENERATE_TAGS
+     */
+    mp->flags &= BR_MODF_DONT_WELD | BR_MODF_QUICK_UPDATE | BR_MODF_KEEP_ORIGINAL | BR_MODF_GENERATE_TAGS | BR_MODF_UPDATEABLE |
+                 BR_MODF_CREASE | BR_MODF_CUSTOM_NORMALS | BR_MODF_CUSTOM_EQUATIONS | BR_MODF_CUSTOM_BOUNDS;
+
+    /*
+     * Leave model on stack
+     */
+    DfPush(DFST_MODEL, mp, 1);
+
+    return 0;
+}
+
+static int FopRead_MODEL_V5(br_datafile *df, br_uint_32 id, br_uint_32 length, br_uint_32 count)
 {
     br_model *mp;
 
@@ -737,7 +786,7 @@ static int FopRead_MODEL_V4(br_datafile *df, br_uint_32 id, br_uint_32 length, b
      */
     mp      = BrModelAllocate(NULL, 0, 0);
     df->res = mp;
-    df->prims->struct_read(df, &br_model_v3_F, mp);
+    df->prims->struct_read(df, &br_model_v5_F, mp);
     df->res = NULL;
 
     /*
@@ -754,7 +803,7 @@ static int FopRead_MODEL_V4(br_datafile *df, br_uint_32 id, br_uint_32 length, b
     return 0;
 }
 
-static int FopWrite_MODEL_V4(br_datafile *df, br_model *mp)
+static int FopWrite_MODEL_V5(br_datafile *df, br_model *mp)
 {
     br_model temp_model = *mp;
 
@@ -765,11 +814,12 @@ static int FopWrite_MODEL_V4(br_datafile *df, br_model *mp)
                         BR_MODF_UPDATEABLE | BR_MODF_CREASE | BR_MODF_CUSTOM_NORMALS | BR_MODF_CUSTOM_EQUATIONS |
                         BR_MODF_CUSTOM_BOUNDS;
 
-    df->prims->chunk_write(df, FID_MODEL_V4, df->prims->struct_size(df, &br_model_v3_F, &temp_model));
-    df->prims->struct_write(df, &br_model_v3_F, &temp_model);
+    df->prims->chunk_write(df, FID_MODEL_V5, df->prims->struct_size(df, &br_model_v5_F, &temp_model));
+    df->prims->struct_write(df, &br_model_v5_F, &temp_model);
 
     return 0;
 }
+
 
 /**
  ** Old model
@@ -858,14 +908,7 @@ static int FopRead_MODEL_V3(br_datafile *df, br_uint_32 id, br_uint_32 length, b
     br_model *mp;
     int       i;
 
-    /*
-     * Allocate and read in model structure
-     */
-    mp = BrModelAllocate(NULL, 0, 0);
-
-    df->res = mp;
-    df->prims->struct_read(df, &br_model_v3_F, mp);
-    df->res = NULL;
+    mp = FopRead_MODEL_V3x(df);
 
     /*
      * Hook up vertices and faces
@@ -1498,6 +1541,19 @@ static _FILE_STRUCTN(br_transform_euler_v1, "br_transform_euler");
 #undef _STRUCT_NAME
 
 #define _STRUCT_NAME struct br_transform
+static br_file_struct_member br_transform_euler_v2_FM[] = {
+    _ENUM_8(t.euler.e.order, angle_order_F),
+    _ANGLE_SCALAR(t.euler.e.a),
+    _ANGLE_SCALAR(t.euler.e.b),
+    _ANGLE_SCALAR(t.euler.e.c),
+
+    _VECTOR3(t.euler.t),
+};
+
+static _FILE_STRUCTN(br_transform_euler_v2, "br_transform_euler");
+#undef _STRUCT_NAME
+
+#define _STRUCT_NAME struct br_transform
 static br_file_struct_member br_transform_look_up_FM[] = {
     _VECTOR3(t.look_up.look),
     _VECTOR3(t.look_up.up),
@@ -1527,6 +1583,7 @@ static struct transform_type {
     {.type = BR_TRANSFORM_MATRIX34,    .id = FID_TRANSFORM_MATRIX34,    .fs = &br_transform_matrix34_F   },
     {.type = BR_TRANSFORM_MATRIX34_LP, .id = FID_TRANSFORM_MATRIX34_LP, .fs = &br_transform_matrix34_F   },
     {.type = BR_TRANSFORM_QUAT,        .id = FID_TRANSFORM_QUAT,        .fs = &br_transform_quat_F       },
+    {.type = BR_TRANSFORM_EULER,       .id = FID_TRANSFORM_EULER_V2,    .fs = &br_transform_euler_v2_F   },
     {.type = BR_TRANSFORM_EULER,       .id = FID_TRANSFORM_EULER_V1,    .fs = &br_transform_euler_v1_F   },
     {.type = BR_TRANSFORM_LOOK_UP,     .id = FID_TRANSFORM_LOOK_UP,     .fs = &br_transform_look_up_F    },
     {.type = BR_TRANSFORM_TRANSLATION, .id = FID_TRANSFORM_TRANSLATION, .fs = &br_transform_translation_F},
@@ -1587,6 +1644,12 @@ static int FopRead_TRANSFORM(br_datafile *df, br_uint_32 id, br_uint_32 length, 
      * Leave transform on stack
      */
     DfPush(DFST_TRANSFORM, tp, 1);
+
+    if(id == FID_TRANSFORM_EULER_V1) {
+        tp->t.euler.e.a = BrFixedLUFToScalar(*(br_fixed_luf *)&tp->t.euler.e.a);
+        tp->t.euler.e.b = BrFixedLUFToScalar(*(br_fixed_luf *)&tp->t.euler.e.b);
+        tp->t.euler.e.c = BrFixedLUFToScalar(*(br_fixed_luf *)&tp->t.euler.e.c);
+    }
 
     return 0;
 }
@@ -1726,6 +1789,33 @@ static br_file_struct_member br_light_v2_FM[] = {
 static _FILE_STRUCTN(br_light_v2, "br_light");
 #undef _STRUCT_NAME
 
+/*
+ * V3 lights are the same as V2, but with scalar angles.
+ */
+#define _STRUCT_NAME struct br_light
+static br_file_struct_member br_light_v3_FM[] = {
+    _ENUM_8(type, light_type_F),
+
+    _COLOUR(colour),
+
+    _SCALAR(attenuation_c),
+    _SCALAR(attenuation_l),
+    _SCALAR(attenuation_q),
+
+    _ANGLE_SCALAR(cone_inner),
+    _ANGLE_SCALAR(cone_outer),
+
+    _SCALAR(radius_inner),
+    _SCALAR(radius_outer),
+
+    _SCALAR(volume.falloff_distance),
+    _UINT_32(volume.nregions),
+
+    _ASCIZ(identifier),
+};
+static _FILE_STRUCTN(br_light_v3, "br_light");
+#undef _STRUCT_NAME
+
 #define _STRUCT_NAME struct br_convex_region
 static br_file_struct_member br_convex_region_FM[] = {
     _UINT_32(nplanes),
@@ -1752,11 +1842,11 @@ static _FILE_STRUCTN(br_light_v1, "br_light_old");
 #undef _STRUCT_NAME
 // clang-format on
 
-static int FopWrite_LIGHT_V2(br_datafile *df, br_light *lp)
+static int FopWrite_LIGHT_V3(br_datafile *df, br_light *lp)
 {
     br_uint_32 length, i, j;
 
-    length = df->prims->struct_size(df, &br_light_v2_F, lp);
+    length = df->prims->struct_size(df, &br_light_v3_F, lp);
 
     for(i = 0; i < lp->volume.nregions; i++) {
 
@@ -1766,8 +1856,8 @@ static int FopWrite_LIGHT_V2(br_datafile *df, br_light *lp)
             length += df->prims->struct_size(df, &br_plane_F, &lp->volume.regions[i].planes[j]);
     }
 
-    df->prims->chunk_write(df, FID_LIGHT_V2, length);
-    df->prims->struct_write(df, &br_light_v2_F, lp);
+    df->prims->chunk_write(df, FID_LIGHT_V3, length);
+    df->prims->struct_write(df, &br_light_v3_F, lp);
 
     for(i = 0; i < lp->volume.nregions; i++) {
 
@@ -1800,7 +1890,7 @@ static int FopRead_LIGHT_V1(br_datafile *df, br_uint_32 id, br_uint_32 length, b
     return 0;
 }
 
-static int FopRead_LIGHT_V2(br_datafile *df, br_uint_32 id, br_uint_32 length, br_uint_32 count)
+static br_light *FopRead_LIGHT_Vx(br_datafile *df, br_file_struct *fs)
 {
     br_light  *lp;
     br_uint_32 i, j;
@@ -1810,7 +1900,7 @@ static int FopRead_LIGHT_V2(br_datafile *df, br_uint_32 id, br_uint_32 length, b
      */
     lp      = BrResAllocate(v1db.res, sizeof(*lp), BR_MEMORY_LIGHT);
     df->res = lp;
-    df->prims->struct_read(df, &br_light_v2_F, lp);
+    df->prims->struct_read(df, fs, lp);
 
     lp->volume.regions = BrResAllocate(lp, lp->volume.nregions * sizeof(*lp->volume.regions), BR_MEMORY_LIGHT);
 
@@ -1831,6 +1921,24 @@ static int FopRead_LIGHT_V2(br_datafile *df, br_uint_32 id, br_uint_32 length, b
      * Leave light on stack
      */
     DfPush(DFST_LIGHT, lp, 1);
+
+    return lp;
+}
+
+static int FopRead_LIGHT_V2(br_datafile *df, br_uint_32 id, br_uint_32 length, br_uint_32 count)
+{
+    br_light *lp;
+
+    lp             = FopRead_LIGHT_Vx(df, &br_light_v2_F);
+    lp->cone_outer = BrFixedLUFToScalar(*(br_fixed_luf *)&lp->cone_outer);
+    lp->cone_inner = BrFixedLUFToScalar(*(br_fixed_luf *)&lp->cone_inner);
+
+    return 0;
+}
+
+static int FopRead_LIGHT_V3(br_datafile *df, br_uint_32 id, br_uint_32 length, br_uint_32 count)
+{
+    FopRead_LIGHT_Vx(df, &br_light_v3_F);
 
     return 0;
 }
@@ -1857,12 +1965,24 @@ static br_file_struct_member br_camera_v1_FM[] = {
 };
 static _FILE_STRUCTN(br_camera_v1, "br_camera");
 #undef _STRUCT_NAME
+
+#define _STRUCT_NAME struct br_camera
+static br_file_struct_member br_camera_v2_FM[] = {
+    _ENUM_8(type, camera_type_F),
+    _ANGLE_SCALAR(field_of_view),
+    _SCALAR(hither_z),
+    _SCALAR(yon_z),
+    _SCALAR(aspect),
+    _ASCIZ(identifier),
+};
+static _FILE_STRUCTN(br_camera_v2, "br_camera");
+#undef _STRUCT_NAME
 // clang-format on
 
-static int FopWrite_CAMERA_V1(br_datafile *df, br_camera *cp)
+static int FopWrite_CAMERA_V2(br_datafile *df, br_camera *cp)
 {
-    df->prims->chunk_write(df, FID_CAMERA_V1, df->prims->struct_size(df, &br_camera_v1_F, cp));
-    df->prims->struct_write(df, &br_camera_v1_F, cp);
+    df->prims->chunk_write(df, FID_CAMERA_V2, df->prims->struct_size(df, &br_camera_v2_F, cp));
+    df->prims->struct_write(df, &br_camera_v2_F, cp);
 
     return 0;
 }
@@ -1876,7 +1996,29 @@ static int FopRead_CAMERA_V1(br_datafile *df, br_uint_32 id, br_uint_32 length, 
      */
     cp      = BrResAllocate(v1db.res, sizeof(*cp), BR_MEMORY_CAMERA);
     df->res = cp;
-    df->prims->struct_read(df, &br_camera_F, cp);
+    df->prims->struct_read(df, &br_camera_v1_F, cp);
+    df->res = NULL;
+
+    cp->field_of_view = BrFixedToFloat(*(br_fixed_luf *)&cp->field_of_view);
+
+    /*
+     * Leave camera on stack
+     */
+    DfPush(DFST_CAMERA, cp, 1);
+
+    return 0;
+}
+
+static int FopRead_CAMERA_V2(br_datafile *df, br_uint_32 id, br_uint_32 length, br_uint_32 count)
+{
+    br_camera *cp;
+
+    /*
+     * Allocate and read in camera structure
+     */
+    cp      = BrResAllocate(v1db.res, sizeof(*cp), BR_MEMORY_CAMERA);
+    df->res = cp;
+    df->prims->struct_read(df, &br_camera_v2_F, cp);
     df->res = NULL;
 
     /*
@@ -1910,6 +2052,7 @@ static br_chunks_table_entry ModelLoadEntries[] = {
     {FID_MODEL_V2,           0, FopRead_MODEL_V2          },
 
     {FID_MODEL_V4,           0, FopRead_MODEL_V4          },
+    {FID_MODEL_V5,           0, FopRead_MODEL_V5          },
     {FID_MATERIAL_INDEX,     1, FopRead_MATERIAL_INDEX    },
     {FID_VERTICES,           1, FopRead_VERTICES          },
     {FID_VERTEX_UV,          1, FopRead_VERTEX_UV         },
@@ -2065,7 +2208,7 @@ static br_uint_32 BR_CALLBACK WriteModel(br_model *mp, br_datafile *df)
     /*
      * Write out chunks
      */
-    FopWrite_MODEL_V4(df, mp);
+    FopWrite_MODEL_V5(df, mp);
 
     if(mp->nvertices) {
 
@@ -2162,6 +2305,7 @@ static br_chunks_table_entry ActorLoadEntries[] = {
     {FID_TRANSFORM_MATRIX34_LP, 0, FopRead_TRANSFORM       },
     {FID_TRANSFORM_QUAT,        0, FopRead_TRANSFORM       },
     {FID_TRANSFORM_EULER_V1,    0, FopRead_TRANSFORM       },
+    {FID_TRANSFORM_EULER_V2,    0, FopRead_TRANSFORM       },
     {FID_TRANSFORM_LOOK_UP,     0, FopRead_TRANSFORM       },
     {FID_TRANSFORM_TRANSLATION, 0, FopRead_TRANSFORM       },
     {FID_TRANSFORM_IDENTITY,    0, FopRead_TRANSFORM       },
@@ -2169,7 +2313,9 @@ static br_chunks_table_entry ActorLoadEntries[] = {
     {FID_BOUNDS,                0, FopRead_BOUNDS          },
     {FID_LIGHT_V1,              0, FopRead_LIGHT_V1        },
     {FID_LIGHT_V2,              0, FopRead_LIGHT_V2        },
+    {FID_LIGHT_V3,              0, FopRead_LIGHT_V3        },
     {FID_CAMERA_V1,             0, FopRead_CAMERA_V1       },
+    {FID_CAMERA_V2,             0, FopRead_CAMERA_V2       },
     {FID_PLANE,                 0, FopRead_PLANE           },
 };
 
@@ -2239,12 +2385,12 @@ static int WriteActor(br_actor *a, br_datafile *df)
     if(a->type_data) {
         switch(a->type) {
             case BR_ACTOR_LIGHT:
-                FopWrite_LIGHT_V2(df, a->type_data);
+                FopWrite_LIGHT_V3(df, a->type_data);
                 FopWrite_ACTOR_LIGHT(df);
                 break;
 
             case BR_ACTOR_CAMERA:
-                FopWrite_CAMERA_V1(df, a->type_data);
+                FopWrite_CAMERA_V2(df, a->type_data);
                 FopWrite_ACTOR_CAMERA(df);
                 break;
 

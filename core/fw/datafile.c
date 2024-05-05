@@ -213,6 +213,7 @@ static char *member_type_names[] = {
     [FSM_FIXED]           = "fixed",
     [FSM_ANGLE_FIXED]     = "angle",
     [FSM_FLOAT]           = "float",
+    [FSM_ANGLE_SCALAR]    = "angle", /* FIXME: verify the order of these. */
     [FSM_DOUBLE]          = "double",
     [FSM_SCALAR]          = "scalar",
     [FSM_FRACTION]        = "fraction",
@@ -257,6 +258,7 @@ static br_uint_16 scalarTypeConvert(br_datafile *df, br_uint_16 t)
         case BRT_FLOAT:
             switch(t) {
                 case FSM_SCALAR:
+                case FSM_ANGLE_SCALAR:
                     return FSM_FLOAT;
                 case FSM_FRACTION:
                     return FSM_FLOAT_FRACTION;
@@ -282,6 +284,7 @@ static br_uint_16 scalarTypeConvert(br_datafile *df, br_uint_16 t)
         case BRT_FIXED:
             switch(t) {
                 case FSM_SCALAR:
+                case FSM_ANGLE_SCALAR:
                     return FSM_FIXED;
                 case FSM_FRACTION:
                     return FSM_FIXED_FRACTION;
@@ -307,6 +310,7 @@ static br_uint_16 scalarTypeConvert(br_datafile *df, br_uint_16 t)
         default:
             switch(t) {
                 case FSM_SCALAR:
+                case FSM_ANGLE_SCALAR:
                 case FSM_FRACTION:
                 case FSM_UFRACTION:
                 case FSM_VECTOR2:
@@ -968,9 +972,18 @@ static br_uint_32 StructWriteTextSub(br_datafile *df, br_file_struct *str, void 
 
             case FSM_FLOAT:
             case FSM_FLOAT_FRACTION:
-            case FSM_FLOAT_UFRACTION:
-                w = BrFilePrintf(df->h, "%g", *((float *)mp));
+            case FSM_FLOAT_UFRACTION: {
+                float val = *((float *)mp);
+
+                /*
+                 * If we're an angle, multiply by 360 to keep compatibility.
+                 */
+                if(sm->type == FSM_ANGLE_SCALAR)
+                    val *= 360.0f;
+
+                w = BrFilePrintf(df->h, "%g", val);
                 break;
+            }
 
             case FSM_DOUBLE:
                 w = BrFilePrintf(df->h, "%g", *((double *)mp));
@@ -1220,9 +1233,18 @@ static br_uint_32 StructReadTextSub(br_datafile *df, br_file_struct *str, void *
 
             case FSM_FLOAT:
             case FSM_FLOAT_FRACTION:
-            case FSM_FLOAT_UFRACTION:
-                *((float *)mp) = BrStrToF(data, NULL);
+            case FSM_FLOAT_UFRACTION: {
+                float val = BrStrToF(data, NULL);
+
+                /*
+                 * If we're an angle, divide by 360 to keep compatibility.
+                 */
+                if(sm->type == FSM_ANGLE_SCALAR)
+                    val /= 360.0f;
+
+                *((float *)mp) = val;
                 break;
+            }
 
             case FSM_DOUBLE:
                 *((double *)mp) = BrStrToD(data, NULL);
@@ -1465,12 +1487,14 @@ static char *ChunkNames[] = {
     [FID_TRANSFORM_MATRIX34_LP] = "TRANSFORM_MATRIX34_LP",
     [FID_TRANSFORM_QUAT]        = "TRANSFORM_QUAT",
     [FID_TRANSFORM_EULER_V1]    = "TRANSFORM_EULER",
+    [FID_TRANSFORM_EULER_V2]    = "TRANSFORM_EULER_V2",
     [FID_TRANSFORM_LOOK_UP]     = "TRANSFORM_LOOK_UP",
     [FID_TRANSFORM_TRANSLATION] = "TRANSFORM_TRANSLATION",
     [FID_TRANSFORM_IDENTITY]    = "TRANSFORM_IDENTITY",
     [FID_BOUNDS]                = "BOUNDS",
     [FID_LIGHT_V1]              = "LIGHT_OLD",
     [FID_CAMERA_V1]             = "CAMERA",
+    [FID_CAMERA_V2]             = "CAMERA_V2",
     [FID_FACES]                 = "FACES",
     [FID_MODEL_V2]              = "OLD_MODEL_2",
     [FID_ACTOR_CLIP_PLANE]      = "ACTOR_CLIP_PLANE",
@@ -1482,7 +1506,9 @@ static char *ChunkNames[] = {
     [FID_PIXELMAP]              = "PIXELMAP",
     [FID_MATERIAL]              = "MATERIAL",
     [FID_LIGHT_V2]              = "LIGHT",
+    [FID_LIGHT_V3]              = "LIGHT_V3",
     [FID_MODEL_V4]              = "MODEL",
+    [FID_MODEL_V5]              = "MODEL_V5",
     [FID_VERTEX_COLOUR]         = "VERTEX_COLOUR",
     [FID_VERTEX_NORMAL]         = "VERTEX_NORMAL",
     [FID_FACE_COLOUR]           = "FACE_COLOUR",

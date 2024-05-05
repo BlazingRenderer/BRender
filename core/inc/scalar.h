@@ -64,6 +64,9 @@ typedef br_float br_ufraction;
 #define BrUFractionToScalar(f) (f)
 #define BrScalarToUFraction(s) (s)
 
+#define BrFixedLUFToScalar(f)  BrFloatToScalar(BrFixedLUFToFloat(f))
+#define BrScalarToFixedLUF(s)  BrFloatToFixedLUF(BrScalarToFloat(s))
+
 /*
  * Various arithmetic operations
  */

@@ -2093,7 +2093,7 @@ br_value BR_RESIDENT_ENTRY BrTokenValueVaArg(br_token token, va_list *ap)
             return (br_value){.f = (float)va_arg(*ap, double)};
         /* NB: missing BRT_SCALAR */
         case BRT_ANGLE:
-            return (br_value){.a = (br_angle)va_arg(*ap, int)};
+            return (br_value){.a = (br_angle)va_arg(*ap, double)};
         case BRT_COLOUR_RGB:
             return (br_value){.rgb = va_arg(*ap, br_colour)};
         case BRT_OBJECT:

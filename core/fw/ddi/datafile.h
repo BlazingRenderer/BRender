@@ -120,6 +120,11 @@ enum {
     FID_VERTEX_NORMAL,
     FID_FACE_COLOUR,
     FID_FACE_EQUATION,
+
+    FID_MODEL_V5,
+    FID_LIGHT_V3,
+    FID_CAMERA_V2,
+    FID_TRANSFORM_EULER_V2,
 };
 
 /*
@@ -196,6 +201,7 @@ enum {
     FSM_FIXED,
     FSM_ANGLE_FIXED,
     FSM_FLOAT,
+    FSM_ANGLE_SCALAR,
     FSM_DOUBLE,
     FSM_SCALAR,
     FSM_FRACTION,
@@ -267,6 +273,7 @@ typedef struct br_file_struct {
 #define _UINT_32(m)    {FSM_UINT_32,  offsetof(_STRUCT_NAME,m),#m}
 #define _FIXED(m)      {FSM_FIXED,    offsetof(_STRUCT_NAME,m),#m}
 #define _ANGLE_FIXED(m) {FSM_ANGLE_FIXED, offsetof(_STRUCT_NAME,m),#m}
+#define _ANGLE_SCALAR(m) {FSM_ANGLE_SCALAR, offsetof(_STRUCT_NAME,m),#m}
 #define _FLOAT(m)      {FSM_FLOAT,    offsetof(_STRUCT_NAME,m),#m}
 #define _DOUBLE(m)     {FSM_DOUBLE,   offsetof(_STRUCT_NAME,m),#m}
 #define _SCALAR(m)     {FSM_SCALAR,   offsetof(_STRUCT_NAME,m),#m}

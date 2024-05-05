@@ -137,17 +137,17 @@ br_fixed_ls BR_ASM_CALL BrFixedFMac4(br_fixed_ls a, br_fixed_ls b, br_fixed_ls c
 /*
  * Misc. support  functions
  */
-br_fixed_ls BR_PUBLIC_ENTRY BrFixedSin(br_angle a);
+br_fixed_ls BR_PUBLIC_ENTRY BrFixedSin(br_fixed_luf a);
 
-br_fixed_ls BR_PUBLIC_ENTRY BrFixedCos(br_angle a);
+br_fixed_ls BR_PUBLIC_ENTRY BrFixedCos(br_fixed_luf a);
 
-br_angle BR_ASM_CALL BrFixedASin(br_fixed_ls s);
+br_fixed_luf BR_ASM_CALL BrFixedASin(br_fixed_ls s);
 
-br_angle BR_ASM_CALL BrFixedACos(br_fixed_ls c);
+br_fixed_luf BR_ASM_CALL BrFixedACos(br_fixed_ls c);
 
-br_angle BR_PUBLIC_ENTRY BrFixedATan2(br_fixed_ls x, br_fixed_ls y);
+br_fixed_luf BR_PUBLIC_ENTRY BrFixedATan2(br_fixed_ls x, br_fixed_ls y);
 
-br_angle BR_ASM_CALL BrFixedATan2Fast(br_fixed_ls x, br_fixed_ls y);
+br_fixed_luf BR_ASM_CALL BrFixedATan2Fast(br_fixed_ls x, br_fixed_ls y);
 
 br_fixed_ls BR_PUBLIC_ENTRY BrFixedSqrt(br_fixed_ls a);
 br_fixed_ls BR_PUBLIC_ENTRY BrFixedPow(br_fixed_ls a, br_fixed_ls b);

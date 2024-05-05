@@ -45,19 +45,19 @@ br_fixed_ls BR_PUBLIC_ENTRY BrFixedDiv(br_fixed_ls numerator, br_fixed_ls denomi
     return BrScalarToFixed(n / d);
 }
 
-br_fixed_ls BR_PUBLIC_ENTRY BrFixedSin(br_angle a)
+br_fixed_ls BR_PUBLIC_ENTRY BrFixedSin(br_fixed_luf a)
 {
-    return BrScalarToFixed(BR_SIN(a));
+    return BrScalarToFixed(BR_SIN(BrFixedLUFToScalar(a)));
 }
 
-br_fixed_ls BR_PUBLIC_ENTRY BrFixedCos(br_angle a)
+br_fixed_ls BR_PUBLIC_ENTRY BrFixedCos(br_fixed_luf a)
 {
-    return BrScalarToFixed(BR_COS(a));
+    return BrScalarToFixed(BR_COS(BrFixedLUFToScalar(a)));
 }
 
-br_angle BR_PUBLIC_ENTRY BrFixedATan2(br_fixed_ls x, br_fixed_ls y)
+br_fixed_luf BR_PUBLIC_ENTRY BrFixedATan2(br_fixed_ls x, br_fixed_ls y)
 {
-    return BR_ATAN2(BrFixedToScalar(x), BrFixedToScalar(y));
+    return BrScalarToFixedLUF(BR_ATAN2(BrFixedToScalar(x), BrFixedToScalar(y)));
 }
 
 br_fixed_ls BR_PUBLIC_ENTRY BrFixedSqrt(br_fixed_ls a)
