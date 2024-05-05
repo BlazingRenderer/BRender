@@ -1703,7 +1703,7 @@ static _FILE_ENUM(light_type);
 
 // clang-format off
 #define _STRUCT_NAME struct br_light
-static br_file_struct_member br_light_FM[] = {
+static br_file_struct_member br_light_v2_FM[] = {
     _ENUM_8(type, light_type_F),
 
     _COLOUR(colour),
@@ -1723,7 +1723,7 @@ static br_file_struct_member br_light_FM[] = {
 
     _ASCIZ(identifier),
 };
-static _FILE_STRUCT(br_light);
+static _FILE_STRUCTN(br_light_v2, "br_light");
 #undef _STRUCT_NAME
 
 #define _STRUCT_NAME struct br_convex_region
@@ -1734,7 +1734,7 @@ static _FILE_STRUCT(br_convex_region);
 #undef _STRUCT_NAME
 
 #define _STRUCT_NAME struct br_light
-static br_file_struct_member br_light_old_FM[] = {
+static br_file_struct_member br_light_v1_FM[] = {
     _ENUM_8(type, light_type_F),
 
     _COLOUR(colour),
@@ -1748,15 +1748,15 @@ static br_file_struct_member br_light_old_FM[] = {
 
     _ASCIZ(identifier),
 };
-static _FILE_STRUCT(br_light_old);
+static _FILE_STRUCTN(br_light_v1, "br_light_old");
 #undef _STRUCT_NAME
 // clang-format on
 
-static int FopWrite_LIGHT(br_datafile *df, br_light *lp)
+static int FopWrite_LIGHT_V2(br_datafile *df, br_light *lp)
 {
     br_uint_32 length, i, j;
 
-    length = df->prims->struct_size(df, &br_light_F, lp);
+    length = df->prims->struct_size(df, &br_light_v2_F, lp);
 
     for(i = 0; i < lp->volume.nregions; i++) {
 
@@ -1766,8 +1766,8 @@ static int FopWrite_LIGHT(br_datafile *df, br_light *lp)
             length += df->prims->struct_size(df, &br_plane_F, &lp->volume.regions[i].planes[j]);
     }
 
-    df->prims->chunk_write(df, FID_LIGHT, length);
-    df->prims->struct_write(df, &br_light_F, lp);
+    df->prims->chunk_write(df, FID_LIGHT_V2, length);
+    df->prims->struct_write(df, &br_light_v2_F, lp);
 
     for(i = 0; i < lp->volume.nregions; i++) {
 
@@ -1780,7 +1780,7 @@ static int FopWrite_LIGHT(br_datafile *df, br_light *lp)
     return 0;
 }
 
-static int FopRead_LIGHT_OLD(br_datafile *df, br_uint_32 id, br_uint_32 length, br_uint_32 count)
+static int FopRead_LIGHT_V1(br_datafile *df, br_uint_32 id, br_uint_32 length, br_uint_32 count)
 {
     br_light *lp;
 
@@ -1789,7 +1789,7 @@ static int FopRead_LIGHT_OLD(br_datafile *df, br_uint_32 id, br_uint_32 length, 
      */
     lp      = BrResAllocate(v1db.res, sizeof(*lp), BR_MEMORY_LIGHT);
     df->res = lp;
-    df->prims->struct_read(df, &br_light_old_F, lp);
+    df->prims->struct_read(df, &br_light_v1_F, lp);
     df->res = NULL;
 
     /*
@@ -1800,7 +1800,7 @@ static int FopRead_LIGHT_OLD(br_datafile *df, br_uint_32 id, br_uint_32 length, 
     return 0;
 }
 
-static int FopRead_LIGHT(br_datafile *df, br_uint_32 id, br_uint_32 length, br_uint_32 count)
+static int FopRead_LIGHT_V2(br_datafile *df, br_uint_32 id, br_uint_32 length, br_uint_32 count)
 {
     br_light  *lp;
     br_uint_32 i, j;
@@ -1810,7 +1810,7 @@ static int FopRead_LIGHT(br_datafile *df, br_uint_32 id, br_uint_32 length, br_u
      */
     lp      = BrResAllocate(v1db.res, sizeof(*lp), BR_MEMORY_LIGHT);
     df->res = lp;
-    df->prims->struct_read(df, &br_light_F, lp);
+    df->prims->struct_read(df, &br_light_v2_F, lp);
 
     lp->volume.regions = BrResAllocate(lp, lp->volume.nregions * sizeof(*lp->volume.regions), BR_MEMORY_LIGHT);
 
@@ -2167,8 +2167,8 @@ static br_chunks_table_entry ActorLoadEntries[] = {
     {FID_TRANSFORM_IDENTITY,    0, FopRead_TRANSFORM       },
 
     {FID_BOUNDS,                0, FopRead_BOUNDS          },
-    {FID_LIGHT_OLD,             0, FopRead_LIGHT_OLD       },
-    {FID_LIGHT,                 0, FopRead_LIGHT           },
+    {FID_LIGHT_V1,              0, FopRead_LIGHT_V1        },
+    {FID_LIGHT_V2,              0, FopRead_LIGHT_V2        },
     {FID_CAMERA,                0, FopRead_CAMERA          },
     {FID_PLANE,                 0, FopRead_PLANE           },
 };
@@ -2239,7 +2239,7 @@ static int WriteActor(br_actor *a, br_datafile *df)
     if(a->type_data) {
         switch(a->type) {
             case BR_ACTOR_LIGHT:
-                FopWrite_LIGHT(df, a->type_data);
+                FopWrite_LIGHT_V2(df, a->type_data);
                 FopWrite_ACTOR_LIGHT(df);
                 break;
 
