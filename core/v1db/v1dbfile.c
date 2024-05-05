@@ -715,7 +715,7 @@ static int FopRead_FACE_MATERIAL(br_datafile *df, br_uint_32 id, br_uint_32 leng
  **/
 // clang-format off
 #define _STRUCT_NAME struct br_model
-static br_file_struct_member br_model_FM[] = {
+static br_file_struct_member br_model_v3_FM[] = {
     _UINT_16(flags),
     _VECTOR3(pivot),
     _ANGLE_FIXED(crease_angle),
@@ -724,11 +724,11 @@ static br_file_struct_member br_model_FM[] = {
     _VECTOR3(bounds.max),
     _ASCIZ(identifier),
 };
-static _FILE_STRUCT(br_model);
+static _FILE_STRUCTN(br_model_v3, "br_model");
 #undef _STRUCT_NAME
 // clang-format on
 
-static int FopRead_MODEL(br_datafile *df, br_uint_32 id, br_uint_32 length, br_uint_32 count)
+static int FopRead_MODEL_V4(br_datafile *df, br_uint_32 id, br_uint_32 length, br_uint_32 count)
 {
     br_model *mp;
 
@@ -737,7 +737,7 @@ static int FopRead_MODEL(br_datafile *df, br_uint_32 id, br_uint_32 length, br_u
      */
     mp      = BrModelAllocate(NULL, 0, 0);
     df->res = mp;
-    df->prims->struct_read(df, &br_model_F, mp);
+    df->prims->struct_read(df, &br_model_v3_F, mp);
     df->res = NULL;
 
     /*
@@ -754,7 +754,7 @@ static int FopRead_MODEL(br_datafile *df, br_uint_32 id, br_uint_32 length, br_u
     return 0;
 }
 
-static int FopWrite_MODEL(br_datafile *df, br_model *mp)
+static int FopWrite_MODEL_V4(br_datafile *df, br_model *mp)
 {
     br_model temp_model = *mp;
 
@@ -765,8 +765,8 @@ static int FopWrite_MODEL(br_datafile *df, br_model *mp)
                         BR_MODF_UPDATEABLE | BR_MODF_CREASE | BR_MODF_CUSTOM_NORMALS | BR_MODF_CUSTOM_EQUATIONS |
                         BR_MODF_CUSTOM_BOUNDS;
 
-    df->prims->chunk_write(df, FID_MODEL, df->prims->struct_size(df, &br_model_F, &temp_model));
-    df->prims->struct_write(df, &br_model_F, &temp_model);
+    df->prims->chunk_write(df, FID_MODEL_V4, df->prims->struct_size(df, &br_model_v3_F, &temp_model));
+    df->prims->struct_write(df, &br_model_v3_F, &temp_model);
 
     return 0;
 }
@@ -776,15 +776,15 @@ static int FopWrite_MODEL(br_datafile *df, br_model *mp)
  **/
 // clang-format off
 #define _STRUCT_NAME struct br_model
-static br_file_struct_member br_old_model_2_FM[] = {
+static br_file_struct_member br_model_v2_FM[] = {
     _UINT_16(flags),
     _ASCIZ(identifier),
 };
-static _FILE_STRUCT(br_old_model_2);
+static _FILE_STRUCT(br_model_v2);
 #undef _STRUCT_NAME
 // clang-format on
 
-static int FopRead_OLD_MODEL_2(br_datafile *df, br_uint_32 id, br_uint_32 length, br_uint_32 count)
+static int FopRead_MODEL_V2(br_datafile *df, br_uint_32 id, br_uint_32 length, br_uint_32 count)
 {
     br_model *mp;
 
@@ -793,7 +793,7 @@ static int FopRead_OLD_MODEL_2(br_datafile *df, br_uint_32 id, br_uint_32 length
      */
     mp      = BrModelAllocate(NULL, 0, 0);
     df->res = mp;
-    df->prims->struct_read(df, &br_old_model_2_F, mp);
+    df->prims->struct_read(df, &br_model_v2_F, mp);
     df->res = NULL;
 
     /*
@@ -809,7 +809,7 @@ static int FopRead_OLD_MODEL_2(br_datafile *df, br_uint_32 id, br_uint_32 length
     return 0;
 }
 
-static int FopWrite_OLD_MODEL_2(br_datafile *df, br_model *mp)
+static int FopWrite_MODEL_V2(br_datafile *df, br_model *mp)
 {
     br_model temp_model = *mp;
 
@@ -818,22 +818,22 @@ static int FopWrite_OLD_MODEL_2(br_datafile *df, br_model *mp)
      */
     temp_model.flags &= BR_MODF_DONT_WELD | BR_MODF_QUICK_UPDATE | BR_MODF_KEEP_ORIGINAL | BR_MODF_GENERATE_TAGS;
 
-    df->prims->chunk_write(df, FID_OLD_MODEL_2, df->prims->struct_size(df, &br_old_model_2_F, &temp_model));
-    df->prims->struct_write(df, &br_old_model_2_F, &temp_model);
+    df->prims->chunk_write(df, FID_MODEL_V2, df->prims->struct_size(df, &br_model_v2_F, &temp_model));
+    df->prims->struct_write(df, &br_model_v2_F, &temp_model);
 
     return 0;
 }
 
 // clang-format off
 #define _STRUCT_NAME struct br_model
-static br_file_struct_member br_old_model_1_FM[] = {
+static br_file_struct_member br_model_v1_FM[] = {
     _ASCIZ(identifier),
 };
-static _FILE_STRUCT(br_old_model_1);
+static _FILE_STRUCT(br_model_v1);
 #undef _STRUCT_NAME
 // clang-format on
 
-static int FopRead_OLD_MODEL_1(br_datafile *df, br_uint_32 id, br_uint_32 length, br_uint_32 count)
+static int FopRead_MODEL_V1(br_datafile *df, br_uint_32 id, br_uint_32 length, br_uint_32 count)
 {
     br_model *mp;
 
@@ -842,7 +842,7 @@ static int FopRead_OLD_MODEL_1(br_datafile *df, br_uint_32 id, br_uint_32 length
      */
     mp      = BrModelAllocate(NULL, 0, 0);
     df->res = mp;
-    df->prims->struct_read(df, &br_old_model_1_F, mp);
+    df->prims->struct_read(df, &br_model_v1_F, mp);
     df->res = NULL;
 
     /*
@@ -853,7 +853,7 @@ static int FopRead_OLD_MODEL_1(br_datafile *df, br_uint_32 id, br_uint_32 length
     return 0;
 }
 
-static int FopRead_OLD_MODEL(br_datafile *df, br_uint_32 id, br_uint_32 length, br_uint_32 count)
+static int FopRead_MODEL_V3(br_datafile *df, br_uint_32 id, br_uint_32 length, br_uint_32 count)
 {
     br_model *mp;
     int       i;
@@ -864,7 +864,7 @@ static int FopRead_OLD_MODEL(br_datafile *df, br_uint_32 id, br_uint_32 length, 
     mp = BrModelAllocate(NULL, 0, 0);
 
     df->res = mp;
-    df->prims->struct_read(df, &br_model_F, mp);
+    df->prims->struct_read(df, &br_model_v3_F, mp);
     df->res = NULL;
 
     /*
@@ -1904,12 +1904,12 @@ static br_chunks_table_entry ModelLoadEntries[] = {
     {FID_OLD_VERTICES,       0, FopRead_OLD_VERTICES      },
     {FID_OLD_VERTICES_UV,    0, FopRead_OLD_VERTICES_UV   },
     {FID_OLD_FACES,          0, FopRead_OLD_FACES         },
-    {FID_OLD_MODEL,          0, FopRead_OLD_MODEL         },
+    {FID_MODEL_V3,           0, FopRead_MODEL_V3          },
     {FID_OLD_FACES_1,        1, FopRead_OLD_FACES_1       },
-    {FID_OLD_MODEL_1,        0, FopRead_OLD_MODEL_1       },
-    {FID_OLD_MODEL_2,        0, FopRead_OLD_MODEL_2       },
+    {FID_MODEL_V1,           0, FopRead_MODEL_V1          },
+    {FID_MODEL_V2,           0, FopRead_MODEL_V2          },
 
-    {FID_MODEL,              0, FopRead_MODEL             },
+    {FID_MODEL_V4,           0, FopRead_MODEL_V4          },
     {FID_MATERIAL_INDEX,     1, FopRead_MATERIAL_INDEX    },
     {FID_VERTICES,           1, FopRead_VERTICES          },
     {FID_VERTEX_UV,          1, FopRead_VERTEX_UV         },
@@ -2065,7 +2065,7 @@ static br_uint_32 BR_CALLBACK WriteModel(br_model *mp, br_datafile *df)
     /*
      * Write out chunks
      */
-    FopWrite_MODEL(df, mp);
+    FopWrite_MODEL_V4(df, mp);
 
     if(mp->nvertices) {
 
