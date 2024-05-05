@@ -718,7 +718,7 @@ static int FopRead_FACE_MATERIAL(br_datafile *df, br_uint_32 id, br_uint_32 leng
 static br_file_struct_member br_model_FM[] = {
     _UINT_16(flags),
     _VECTOR3(pivot),
-    _ANGLE(crease_angle),
+    _ANGLE_FIXED(crease_angle),
     _SCALAR(radius),
     _VECTOR3(bounds.min),
     _VECTOR3(bounds.max),
@@ -1487,9 +1487,9 @@ static _FILE_ENUM(angle_order);
 #define _STRUCT_NAME struct br_transform
 static br_file_struct_member br_transform_euler_v1_FM[] = {
     _ENUM_8(t.euler.e.order, angle_order_F),
-    _ANGLE(t.euler.e.a),
-    _ANGLE(t.euler.e.b),
-    _ANGLE(t.euler.e.c),
+    _ANGLE_FIXED(t.euler.e.a),
+    _ANGLE_FIXED(t.euler.e.b),
+    _ANGLE_FIXED(t.euler.e.c),
 
     _VECTOR3(t.euler.t),
 };
@@ -1712,8 +1712,8 @@ static br_file_struct_member br_light_v2_FM[] = {
     _SCALAR(attenuation_l),
     _SCALAR(attenuation_q),
 
-    _ANGLE(cone_inner),
-    _ANGLE(cone_outer),
+    _ANGLE_FIXED(cone_inner),
+    _ANGLE_FIXED(cone_outer),
 
     _SCALAR(radius_inner),
     _SCALAR(radius_outer),
@@ -1743,8 +1743,8 @@ static br_file_struct_member br_light_v1_FM[] = {
     _SCALAR(attenuation_l),
     _SCALAR(attenuation_q),
 
-    _ANGLE(cone_inner),
-    _ANGLE(cone_outer),
+    _ANGLE_FIXED(cone_inner),
+    _ANGLE_FIXED(cone_outer),
 
     _ASCIZ(identifier),
 };
@@ -1849,7 +1849,7 @@ static _FILE_ENUM(camera_type);
 #define _STRUCT_NAME struct br_camera
 static br_file_struct_member br_camera_v1_FM[] = {
     _ENUM_8(type, camera_type_F),
-    _ANGLE(field_of_view),
+    _ANGLE_FIXED(field_of_view),
     _SCALAR(hither_z),
     _SCALAR(yon_z),
     _SCALAR(aspect),

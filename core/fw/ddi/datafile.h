@@ -194,7 +194,7 @@ enum {
     FSM_INT_32,
     FSM_UINT_32,
     FSM_FIXED,
-    FSM_ANGLE,
+    FSM_ANGLE_FIXED,
     FSM_FLOAT,
     FSM_DOUBLE,
     FSM_SCALAR,
@@ -266,7 +266,7 @@ typedef struct br_file_struct {
 #define _INT_32(m)     {FSM_INT_32,   offsetof(_STRUCT_NAME,m),#m}
 #define _UINT_32(m)    {FSM_UINT_32,  offsetof(_STRUCT_NAME,m),#m}
 #define _FIXED(m)      {FSM_FIXED,    offsetof(_STRUCT_NAME,m),#m}
-#define _ANGLE(m)      {FSM_ANGLE,    offsetof(_STRUCT_NAME,m),#m}
+#define _ANGLE_FIXED(m) {FSM_ANGLE_FIXED, offsetof(_STRUCT_NAME,m),#m}
 #define _FLOAT(m)      {FSM_FLOAT,    offsetof(_STRUCT_NAME,m),#m}
 #define _DOUBLE(m)     {FSM_DOUBLE,   offsetof(_STRUCT_NAME,m),#m}
 #define _SCALAR(m)     {FSM_SCALAR,   offsetof(_STRUCT_NAME,m),#m}

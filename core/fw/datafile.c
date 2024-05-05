@@ -211,7 +211,7 @@ static char *member_type_names[] = {
     [FSM_INT_32]          = "int_32",
     [FSM_UINT_32]         = "uint_32",
     [FSM_FIXED]           = "fixed",
-    [FSM_ANGLE]           = "angle",
+    [FSM_ANGLE_FIXED]     = "angle",
     [FSM_FLOAT]           = "float",
     [FSM_DOUBLE]          = "double",
     [FSM_SCALAR]          = "scalar",
@@ -359,7 +359,7 @@ static br_uint_32 DfStructWriteBinary(br_datafile *df, br_file_struct *str, void
             case FSM_INT_16:
             case FSM_UINT_16:
             case FSM_ENUM_16:
-            case FSM_ANGLE:
+            case FSM_ANGLE_FIXED:
                 BrFilePutChar(mp[BR_HTON_16(0)], df->h);
                 BrFilePutChar(mp[BR_HTON_16(1)], df->h);
                 break;
@@ -556,7 +556,7 @@ static br_uint_32 DfStructReadBinary(br_datafile *df, br_file_struct *str, void 
                 mp[0] = BrFileGetChar(df->h);
                 break;
 
-            case FSM_ANGLE:
+            case FSM_ANGLE_FIXED:
             case FSM_UINT_16:
             case FSM_INT_16:
             case FSM_ENUM_16:
@@ -773,7 +773,7 @@ static br_uint_32 DfStructSizeBinary(br_datafile *df, br_file_struct *str, void 
                 bytes += 1;
                 break;
 
-            case FSM_ANGLE:
+            case FSM_ANGLE_FIXED:
             case FSM_INT_16:
             case FSM_UINT_16:
             case FSM_ENUM_16:
@@ -962,8 +962,8 @@ static br_uint_32 StructWriteTextSub(br_datafile *df, br_file_struct *str, void 
                 w = BrFilePrintf(df->h, "%g", BrFixedLUFToFloat(*((br_fixed_luf *)mp)));
                 break;
 
-            case FSM_ANGLE:
-                w = BrFilePrintf(df->h, "%g", BrScalarToFloat(BrAngleToDegree(*((br_angle *)mp))));
+            case FSM_ANGLE_FIXED:
+                w = BrFilePrintf(df->h, "%g", BrFixedLUFToFloat(*((br_fixed_luf *)mp)) * 360.0f);
                 break;
 
             case FSM_FLOAT:
@@ -1214,8 +1214,8 @@ static br_uint_32 StructReadTextSub(br_datafile *df, br_file_struct *str, void *
                 *((br_fixed_luf *)mp) = BrFloatToFixedLUF(BrStrToD(data, NULL));
                 break;
 
-            case FSM_ANGLE:
-                *((br_angle *)mp) = BrDegreeToAngle(BrFloatToScalar(BrStrToF(data, NULL)));
+            case FSM_ANGLE_FIXED:
+                *((br_fixed_luf *)mp) = BrFloatToFixedLUF(BrStrToF(data, NULL) / 360.0f);
                 break;
 
             case FSM_FLOAT:
