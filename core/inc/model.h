@@ -299,7 +299,6 @@ typedef struct br_model {
      * Application defined data - untouched by system
      */
     void *user;
-    int   crocFlags;
 
     /*
      * Crease angle (used if MODF_CREASE is set)
