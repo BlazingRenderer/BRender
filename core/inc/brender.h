@@ -13,7 +13,7 @@
 /*
  * Version number
  */
-#define BR_VERSION(major, minor, point) ((major)*65536 + (minor)*256 + (point))
+#define BR_VERSION(major, minor, point) ((((major) & 0xFF) << 16) + (((minor) & 0xFF) << 8) + (((point) & 0xFF) << 0))
 
 // #define __BRENDER__  BR_VERSION(1,3,0)
 #define __BRENDER__ 0x010300
