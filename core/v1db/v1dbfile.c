@@ -1517,28 +1517,34 @@ static _FILE_STRUCT(br_transform_translation);
 // clang-format on
 
 /*
- * Index (by transform type), of chunk ID and file struct to use
+ * Transform type, chunk ID and file struct to use
  */
 static struct transform_type {
+    br_uint_16             type;
     br_uint_32             id;
     struct br_file_struct *fs;
 } TransformTypes[] = {
-    {FID_TRANSFORM_MATRIX34,    &br_transform_matrix34_F   },
-    {FID_TRANSFORM_MATRIX34_LP, &br_transform_matrix34_F   },
-    {FID_TRANSFORM_QUAT,        &br_transform_quat_F       },
-    {FID_TRANSFORM_EULER,       &br_transform_euler_F      },
-    {FID_TRANSFORM_LOOK_UP,     &br_transform_look_up_F    },
-    {FID_TRANSFORM_TRANSLATION, &br_transform_translation_F},
-    {FID_TRANSFORM_IDENTITY,    NULL                       },
+    {.type = BR_TRANSFORM_MATRIX34,    .id = FID_TRANSFORM_MATRIX34,    .fs = &br_transform_matrix34_F   },
+    {.type = BR_TRANSFORM_MATRIX34_LP, .id = FID_TRANSFORM_MATRIX34_LP, .fs = &br_transform_matrix34_F   },
+    {.type = BR_TRANSFORM_QUAT,        .id = FID_TRANSFORM_QUAT,        .fs = &br_transform_quat_F       },
+    {.type = BR_TRANSFORM_EULER,       .id = FID_TRANSFORM_EULER,       .fs = &br_transform_euler_F      },
+    {.type = BR_TRANSFORM_LOOK_UP,     .id = FID_TRANSFORM_LOOK_UP,     .fs = &br_transform_look_up_F    },
+    {.type = BR_TRANSFORM_TRANSLATION, .id = FID_TRANSFORM_TRANSLATION, .fs = &br_transform_translation_F},
+    {.type = BR_TRANSFORM_IDENTITY,    .id = FID_TRANSFORM_IDENTITY,    .fs = NULL                       },
 };
 
 static int FopWrite_TRANSFORM(br_datafile *df, br_transform *t)
 {
-    struct transform_type *tt;
+    struct transform_type *tt = NULL;
 
-    ASSERT(t->type < BR_ASIZE(TransformTypes));
+    for(size_t i = 0; i < BR_ASIZE(TransformTypes); i++) {
+        if(TransformTypes[i].type == t->type) {
+            tt = TransformTypes + i;
+            break;
+        }
+    }
 
-    tt = TransformTypes + t->type;
+    ASSERT(tt != NULL);
 
     if(tt->fs) {
         df->prims->chunk_write(df, tt->id, df->prims->struct_size(df, tt->fs, t));
