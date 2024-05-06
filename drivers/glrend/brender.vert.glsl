@@ -13,10 +13,6 @@
 #define DEBUG_DISABLE_LIGHT_SPECULAR    0
 #define ENABLE_PSX_SIMULATION           0
 
-#define UV_SOURCE_MODEL                 0
-#define UV_SOURCE_ENV_L                 1
-#define UV_SOURCE_ENV_I                 2
-
 in vec3 aPosition;
 in vec2 aUV;
 in vec3 aNormal;
@@ -26,6 +22,10 @@ out vec4 position;
 out vec4 normal;
 out vec2 uv;
 out vec4 colour;
+
+out vec3 rawPosition;
+out vec3 rawNormal;
+
 bool directLightExists;
 
 struct br_light
@@ -276,69 +276,17 @@ vec4 PSXify_pos(in vec4 vertex, in vec2 resolution)
 }
 #endif
 
-
-vec2 SurfaceMapEnvironment(in vec3 eye, in vec3 normal, in mat4 model_to_environment) {
-    vec3 r;
-    vec4 wr;
-    float d, cu, cv;
-
-    /*
-     * Generate reflected vector
-     */
-    r = reflect(eye, normal);
-
-    /*
-     * Rotate vector into the environment frame.
-     * This should be the identity matrix if no environment is set.
-     */
-    wr = model_to_environment * vec4(r, 0.0);
-    vec3 wr2 = normalize(wr.xyz);
-
-    /*
-     * Convert vector to environment coordinates
-     */
-    cu = 0.5 + atan(wr2.x, -wr2.z) * 0.159154943091895; /* 1/(2*PI) */
-    cv = 0.5 + -wr2.y * 0.5;
-
-    return vec2(cu, cv);
-}
-
-vec2 SurfaceMap()
-{
-    vec2 uv;
-
-    if(uv_source == UV_SOURCE_ENV_L) {
-        /*
-         * Generate U,V for environment assuming local eye.
-         *
-         * softrend/mapping.c - SurfaceMapEnvironmentLocal()
-         */
-        vec3 eye = normalize(eye_m.xyz - aPosition);
-        uv = SurfaceMapEnvironment(eye, aNormal, environment);
-    } else if(uv_source == UV_SOURCE_ENV_I) {
-        /*
-         * Generate U,V for environment assuming infinite eye.
-         *
-         * softrend/mapping.c - SurfaceMapEnvironmentInfinite()
-         */
-        vec3 eye = normalize(eye_m.xyz);
-        uv = SurfaceMapEnvironment(eye, aNormal, environment);
-    } else {
-        uv = aUV;
-    }
-
-    /* Apply the map transformation. */
-    return (map_transform * vec4(uv, 1.0, 0.0)).xy;
-}
-
 void main()
 {
     vec4 pos = vec4(aPosition, 1.0);
 
     position = model_view * pos;
     normal = vec4(normalize(mat3(normal_matrix) * aNormal), 0);
-    uv = SurfaceMap();
+    uv = aUV;
     colour = aColour + fragmain();
+
+    rawPosition = aPosition;
+    rawNormal   = aNormal;
 
     if (!directLightExists && num_lights > 0u && unlit == 0u)
         colour += vec4(clear_colour.rgb, 0.0);
