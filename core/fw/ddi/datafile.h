@@ -308,13 +308,15 @@ typedef struct br_file_struct {
 #define _COLOUR_ALPHA(m)     {FSM_COLOUR_ALPHA,   offsetof(_STRUCT_NAME,m),#m}
 // clang-format on
 
-#define _FILE_STRUCT(name)      \
-    br_file_struct name##_F = { \
-        #name,                  \
-        BR_ASIZE(name##_FM),    \
-        name##_FM,              \
-        sizeof(_STRUCT_NAME),   \
+#define _FILE_STRUCTN(name, sname) \
+    br_file_struct name##_F = {    \
+        sname,                     \
+        BR_ASIZE(name##_FM),       \
+        name##_FM,                 \
+        sizeof(_STRUCT_NAME),      \
     }
+
+#define _FILE_STRUCT(name) _FILE_STRUCTN(name, #name)
 
 /*
  * Structures for describing an enum
