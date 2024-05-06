@@ -69,14 +69,14 @@ struct pixelmapNewTokens {
 
 #define F(f) offsetof(struct pixelmapNewTokens, f)
 static struct br_tv_template_entry pixelmapNewTemplateEntries[] = {
-    {BRT_WIDTH_I32,                  NULL, F(width),           BRTV_SET, BRTV_CONV_COPY},
-    {BRT_HEIGHT_I32,                 NULL, F(height),          BRTV_SET, BRTV_CONV_COPY},
-    {BRT_PIXEL_BITS_I32,             NULL, F(pixel_bits),      BRTV_SET, BRTV_CONV_COPY},
-    {BRT_PIXEL_TYPE_U8,              NULL, F(pixel_type),      BRTV_SET, BRTV_CONV_COPY},
-    {BRT_MSAA_SAMPLES_I32,           NULL, F(msaa_samples),    BRTV_SET, BRTV_CONV_COPY},
-    {BRT_OPENGL_EXT_PROCS_P,         NULL, F(ext_procs),       BRTV_SET, BRTV_CONV_COPY},
-    {BRT_OPENGL_VERTEX_SHADER_STR,   NULL, F(vertex_shader),   BRTV_SET, BRTV_CONV_COPY},
-    {BRT_OPENGL_FRAGMENT_SHADER_STR, NULL, F(fragment_shader), BRTV_SET, BRTV_CONV_COPY},
+    {BRT(WIDTH_I32),                  F(width),           BRTV_SET, BRTV_CONV_COPY},
+    {BRT(HEIGHT_I32),                 F(height),          BRTV_SET, BRTV_CONV_COPY},
+    {BRT(PIXEL_BITS_I32),             F(pixel_bits),      BRTV_SET, BRTV_CONV_COPY},
+    {BRT(PIXEL_TYPE_U8),              F(pixel_type),      BRTV_SET, BRTV_CONV_COPY},
+    {BRT(MSAA_SAMPLES_I32),           F(msaa_samples),    BRTV_SET, BRTV_CONV_COPY},
+    {BRT(OPENGL_EXT_PROCS_P),         F(ext_procs),       BRTV_SET, BRTV_CONV_COPY},
+    {BRT(OPENGL_VERTEX_SHADER_STR),   F(vertex_shader),   BRTV_SET, BRTV_CONV_COPY},
+    {BRT(OPENGL_FRAGMENT_SHADER_STR), F(fragment_shader), BRTV_SET, BRTV_CONV_COPY},
 };
 #undef F
 

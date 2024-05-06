@@ -119,8 +119,8 @@ struct newRendererTokens {
 #define F(f) offsetof(struct newRendererTokens, f)
 
 static struct br_tv_template_entry rendererNewTemplateEntries[] = {
-    {BRT_DESTINATION_O,     NULL, F(dest), BRTV_SET, BRTV_CONV_COPY},
-    {BRT_OUTPUT_FACILITY_O, NULL, F(dest), BRTV_SET, BRTV_CONV_COPY},
+    {BRT(DESTINATION_O),     F(dest), BRTV_SET, BRTV_CONV_COPY},
+    {BRT(OUTPUT_FACILITY_O), F(dest), BRTV_SET, BRTV_CONV_COPY},
 };
 
 #undef F
