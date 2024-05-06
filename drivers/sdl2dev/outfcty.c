@@ -47,17 +47,17 @@ static struct br_tv_template_entry outputFacilityTemplateEntries[] = {
 
 #define F(f) offsetof(struct pixelmap_new_tokens, f)
 static struct br_tv_template_entry pixelmapNewTemplateEntries[] = {
-    {BRT_WINDOW_NAME_CSTR, NULL, F(title),      BRTV_SET, BRTV_CONV_COPY, 0                       },
-    {BRT_WIDTH_I32,        NULL, F(width),      BRTV_SET, BRTV_CONV_COPY, 0                       },
-    {BRT_HEIGHT_I32,       NULL, F(height),     BRTV_SET, BRTV_CONV_COPY, 0                       },
-    {BRT_PIXEL_TYPE_U8,    NULL, F(pixel_type), BRTV_SET, BRTV_CONV_COPY, 0                       },
-    {BRT_WINDOW_HANDLE_H,  NULL, F(window),     BRTV_SET, BRTV_CONV_COPY, 0                       },
-    {BRT_SURFACE_HANDLE_H, NULL, F(surface),    BRTV_SET, BRTV_CONV_COPY, 0                       },
-    {BRT_USE_T,            NULL, F(use_type),   BRTV_SET, BRTV_CONV_COPY, 0                       },
-    {BRT_HIDPI_B,          NULL, F(flags),      BRTV_SET, BRTV_CONV_BIT,  SDL_WINDOW_ALLOW_HIGHDPI},
-    {BRT_RESIZABLE_B,      NULL, F(flags),      BRTV_SET, BRTV_CONV_BIT,  SDL_WINDOW_RESIZABLE    },
-    {BRT_OPENGL_B,         NULL, F(flags),      BRTV_SET, BRTV_CONV_BIT,  SDL_WINDOW_OPENGL       },
-    {BRT_SDL_EXT_PROCS_P,  NULL, F(ext_procs),  BRTV_SET, BRTV_CONV_COPY, 0                       },
+    {BRT(WINDOW_NAME_CSTR), F(title),      BRTV_SET, BRTV_CONV_COPY, 0                       },
+    {BRT(WIDTH_I32),        F(width),      BRTV_SET, BRTV_CONV_COPY, 0                       },
+    {BRT(HEIGHT_I32),       F(height),     BRTV_SET, BRTV_CONV_COPY, 0                       },
+    {BRT(PIXEL_TYPE_U8),    F(pixel_type), BRTV_SET, BRTV_CONV_COPY, 0                       },
+    {BRT(WINDOW_HANDLE_H),  F(window),     BRTV_SET, BRTV_CONV_COPY, 0                       },
+    {BRT(SURFACE_HANDLE_H), F(surface),    BRTV_SET, BRTV_CONV_COPY, 0                       },
+    {BRT(USE_T),            F(use_type),   BRTV_SET, BRTV_CONV_COPY, 0                       },
+    {BRT(HIDPI_B),          F(flags),      BRTV_SET, BRTV_CONV_BIT,  SDL_WINDOW_ALLOW_HIGHDPI},
+    {BRT(RESIZABLE_B),      F(flags),      BRTV_SET, BRTV_CONV_BIT,  SDL_WINDOW_RESIZABLE    },
+    {BRT(OPENGL_B),         F(flags),      BRTV_SET, BRTV_CONV_BIT,  SDL_WINDOW_OPENGL       },
+    {BRT(SDL_EXT_PROCS_P),  F(ext_procs),  BRTV_SET, BRTV_CONV_COPY, 0                       },
 };
 #undef F
 
