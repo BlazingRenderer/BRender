@@ -43,13 +43,13 @@ typedef br_uint_8  br_fixed_suf; /* Short unsigned fixed fraction 0.8  */
 #define BrIntToFixed(i)      ((i) << 16)
 #define BrFixedToInt(i)      ((i) >> 16)
 #define BrFloatToFixed(f)    ((br_fixed_ls)((f) * (float)BR_ONE_LS))
-#define BrFixedToFloat(s)    ((float)((s) * (1.0 / (float)BR_ONE_LS)))
+#define BrFixedToFloat(s)    ((float)((s) * (1.0f / (float)BR_ONE_LS)))
 
 #define BrFloatToFixedLS(f)  ((br_fixed_ls)((f) * (float)BR_ONE_LS))
-#define BrFixedLSToFloat(s)  ((float)((s) * (1.0 / (float)BR_ONE_LS)))
+#define BrFixedLSToFloat(s)  ((float)((s) * (1.0f / (float)BR_ONE_LS)))
 
-#define BrFixedLSFToFloat(s) ((float)((s) * (1.0 / (float)BR_ONE_LSF)))
-#define BrFixedLUFToFloat(s) ((float)((s) * (1.0 / (float)BR_ONE_LUF)))
+#define BrFixedLSFToFloat(s) ((float)((s) * (1.0f / (float)BR_ONE_LSF)))
+#define BrFixedLUFToFloat(s) ((float)((s) * (1.0f / (float)BR_ONE_LUF)))
 
 #define BrFloatToFixedLSF(f) ((br_fixed_lsf)((f) * (float)BR_ONE_LSF))
 #define BrFloatToFixedLUF(f) ((br_fixed_luf)((f) * (float)BR_ONE_LUF))
