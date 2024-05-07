@@ -13,21 +13,6 @@
 #define DEBUG_DISABLE_LIGHT_SPECULAR    0
 #define ENABLE_PSX_SIMULATION           0
 
-in vec3 aPosition;
-in vec2 aUV;
-in vec3 aNormal;
-in vec4 aColour;
-
-out vec4 position;
-out vec4 normal;
-out vec2 uv;
-out vec4 colour;
-
-out vec3 rawPosition;
-out vec3 rawNormal;
-
-bool directLightExists;
-
 struct br_light
 {
     vec4 position;    /* (X, Y, Z, 1) */
@@ -65,6 +50,21 @@ layout(std140) uniform br_model_state
     int uv_source;
     bool disable_colour_key;
 };
+
+in vec3 aPosition;
+in vec2 aUV;
+in vec3 aNormal;
+in vec4 aColour;
+
+out vec4 position;
+out vec4 normal;
+out vec2 uv;
+out vec4 colour;
+
+out vec3 rawPosition;
+out vec3 rawNormal;
+
+bool directLightExists;
 
 #define SPECULAR_DOT()                    \
     {                                     \
