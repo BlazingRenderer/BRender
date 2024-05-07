@@ -1,4 +1,4 @@
-# Blazing Renderer (BRender)
+# Blazing Renderer (BRender) 1.4.0
 
 This is an updated, modernized fork of [BRender](https://blazingrender.net/),
 based on the following source code releases:
