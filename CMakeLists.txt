@@ -1,5 +1,8 @@
 cmake_minimum_required(VERSION 3.23)
-project(BRender)
+project(BRender VERSION 1.4.0 LANGUAGES C CXX ASM
+    DESCRIPTION "Modernized fork of BRender"
+    HOMEPAGE_URL "https://github.com/BlazingRenderer/BRender"
+)
 
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
