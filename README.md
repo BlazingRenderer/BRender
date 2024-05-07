@@ -9,8 +9,8 @@ based on the following source code releases:
 There are OpenGL and SDL2 drivers, as well as an x86-specific software rendering
 backend used as the reference implementation.
 
-Sample applications (`robot` and `cube`) are included, as well as most of the
-original utilities released with the engine.
+Many sample applications are included, as well as most of the original utilities
+released with the engine.
 
 Enjoy!
 
@@ -19,7 +19,7 @@ Enjoy!
 Building is done through CMake.
 
 ```
-mkdir cmake-build & cd cmake-build
+mkdir cmake-build && cd cmake-build
 cmake ..
 make
 ```
@@ -28,7 +28,8 @@ make
 
 This is released under the MIT license.
 
-Copyright (c) 1998 Argonaut Software Limited 
+Copyright (c) 1992-1998 Argonaut Technologies Limited
+Copyright (c) 2019-2024 Zane van Ipren, erysdren
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
