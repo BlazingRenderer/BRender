@@ -765,7 +765,7 @@ br_error BR_RESIDENT_ENTRY BrTokenValueQueryAll(br_token_value *buffer, br_size_
     const br_tv_template_entry *tp;
     int                         n, e;
     br_token_value             *tv;
-    char                       *extra;
+    void                       *extra;
     br_size_t                   extra_size;
     br_error                    r;
 
@@ -792,7 +792,7 @@ br_error BR_RESIDENT_ENTRY BrTokenValueQueryAll(br_token_value *buffer, br_size_
      * Start using extra space after token/value pairs
      * (including the terminator)
      */
-    extra = (char *)(buffer + n);
+    extra = buffer + n;
 
     if(buffer_size < sizeof(*buffer) * n)
         return BRE_OVERFLOW;
