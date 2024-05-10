@@ -171,12 +171,24 @@ typedef struct br_smpte_state {
     br_pixelmap *pm;
 } br_smpte_state;
 
+static void smpte_fini(void *user)
+{
+    br_smpte_state *state = user;
+    BrPixelmapFree(state->pm);
+}
+
 static br_error smpte_init(void *user, br_pixelmap *screen, br_pixelmap *backbuffer, void *arg)
 {
     br_smpte_state *state = user;
 
     if((state->pm = BrPixelmapLoad(arg)) == NULL) {
         BrLogError("APP", "Error loading %s", arg);
+        return BRE_FAIL;
+    }
+
+    if(ObjectDevice(backbuffer) == NULL && state->pm->type != backbuffer->type) {
+        BrLogError("APP", "Disabling SMPTE type %d due to memory device format %d", state->pm->type, backbuffer->type);
+        smpte_fini(state);
         return BRE_FAIL;
     }
 
@@ -191,12 +203,6 @@ static void smpte_draw(br_pixelmap *dest, float dt, void *user)
     int             base_y = -pm->height / 2;
 
     BrPixelmapRectangleCopy(dest, base_x, base_y, pm, -pm->origin_x, -pm->origin_y, pm->width, pm->height);
-}
-
-static void smpte_fini(void *user)
-{
-    br_smpte_state *state = user;
-    BrPixelmapFree(state->pm);
 }
 
 typedef struct br_index8nopal_state {
@@ -504,6 +510,15 @@ static br_error submap_init(void *user, br_pixelmap *screen, br_pixelmap *backbu
 
     if((state->checkerboard_device = BrPixelmapMatchSized(backbuffer, BR_PMMATCH_OFFSCREEN, state->checkerboard_memory->width,
                                                           state->checkerboard_memory->height)) == NULL) {
+        submap_fini(user);
+        return BRE_FAIL;
+    }
+
+    /*
+     * Memory pixelmaps don't support copying different types.
+     */
+    if(ObjectDevice(state->checkerboard_device) == NULL) {
+        BrLogWarn("APP", "Disable Sub-pixelmap test due to memory device.");
         submap_fini(user);
         return BRE_FAIL;
     }
