@@ -371,7 +371,7 @@ static void Smoothing(br_model *model, br_scalar crease_limit, struct prep_verte
 #endif
             for(inner = start; inner < end; inner++) {
                 if((inner == outer) || (model->faces[(*outer)->f].smoothing & model->faces[(*inner)->f].smoothing)) {
-                    BrVector3Accumulate(&(*outer)->n, &model->faces[(*inner)->f].n);
+                    BrVector3AccumulateF(&(*outer)->n, &model->faces[(*inner)->f].n);
                 }
             }
     }
@@ -390,7 +390,7 @@ static void SmoothingCreased(br_model *model, br_scalar crease_limit, struct pre
         for(inner = start; inner < end; inner++) {
             if((inner == outer) || ((model->faces[(*outer)->f].smoothing & model->faces[(*inner)->f].smoothing) &&
                                     BrFVector3Dot(&model->faces[(*inner)->f].n, &o_n) > crease_limit)) {
-                BrVector3Accumulate(&(*outer)->n, &model->faces[(*inner)->f].n);
+                BrVector3AccumulateF(&(*outer)->n, &model->faces[(*inner)->f].n);
             }
         }
     }
