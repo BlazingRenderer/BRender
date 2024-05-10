@@ -360,9 +360,9 @@ br_scalar BR_PUBLIC_ENTRY BrZsDepthToScreenZ(br_scalar depth_z, const br_camera 
                     camera != NULL); // Not accessed, but should still be valid
 
     if(depth_z <= hither)
-        return BrFixedToScalar((br_fixed_ls)0x80000000);
+        return BR_SCALAR(NEAREST);
     else if(depth_z >= yon)
-        return BrFixedToScalar((br_fixed_ls)0x7fffffff);
+        return BR_SCALAR(FARTHEST);
 
     UASSERT_MESSAGE("BrZsDepthToScreenZ - Divide by zero error", yon != hither);
 
