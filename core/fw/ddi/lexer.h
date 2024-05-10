@@ -63,7 +63,17 @@ typedef enum br_lexer_token_id {
     /*
      * Keywords - start at 128
      */
-    T_KEYWORD = 128
+    T_KEYWORD   = 128,
+    T_KEYWORD_0 = T_KEYWORD,
+    T_KEYWORD_1,
+    T_KEYWORD_2,
+    T_KEYWORD_3,
+    T_KEYWORD_4,
+    T_KEYWORD_5,
+    T_KEYWORD_6,
+    T_KEYWORD_7,
+    T_KEYWORD_8,
+    T_KEYWORD_9,
 } br_lexer_token_id;
 
 /*
