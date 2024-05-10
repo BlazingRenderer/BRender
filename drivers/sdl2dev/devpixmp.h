@@ -12,6 +12,7 @@ typedef struct pixelmap_new_tokens {
     const char              *title;
     br_int_32                width;
     br_int_32                height;
+    br_int_32                pixel_bits;
     br_uint_8                pixel_type;
     SDL_Window              *window;
     SDL_Surface             *surface;

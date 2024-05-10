@@ -50,6 +50,7 @@ static struct br_tv_template_entry pixelmapNewTemplateEntries[] = {
     {BRT(WINDOW_NAME_CSTR), F(title),      BRTV_SET, BRTV_CONV_COPY, 0                       },
     {BRT(WIDTH_I32),        F(width),      BRTV_SET, BRTV_CONV_COPY, 0                       },
     {BRT(HEIGHT_I32),       F(height),     BRTV_SET, BRTV_CONV_COPY, 0                       },
+    {BRT(PIXEL_BITS_I32),   F(pixel_bits), BRTV_SET, BRTV_CONV_COPY, 0                       },
     {BRT(PIXEL_TYPE_U8),    F(pixel_type), BRTV_SET, BRTV_CONV_COPY, 0                       },
     {BRT(WINDOW_HANDLE_H),  F(window),     BRTV_SET, BRTV_CONV_COPY, 0                       },
     {BRT(SURFACE_HANDLE_H), F(surface),    BRTV_SET, BRTV_CONV_COPY, 0                       },
@@ -250,6 +251,29 @@ static br_error BR_CMETHOD_DECL(br_output_facility_sdl2, validSource)(br_output_
 
 #define DEFAULT_WINDOW_TITLE "BRender Application"
 
+static br_uint_8 FigureOutFormat(br_uint_8 type, br_int_32 bits)
+{
+    if(type != BR_PMT_MAX)
+        return type;
+
+    switch(bits) {
+        case 8:
+            return BR_PMT_INDEX_8;
+        case 15:
+            return BR_PMT_RGB_555;
+        case 16:
+            return BR_PMT_RGB_565;
+        case 24:
+            return BR_PMT_RGB_888;
+        case 32:
+            return BR_PMT_RGBX_888;
+        default:
+            break;
+    }
+
+    return BR_PMT_MAX;
+}
+
 /*
  * Instantiate an output pixelmap from the output type
  *
@@ -268,6 +292,7 @@ static br_error BR_CMETHOD_DECL(br_output_facility_sdl2, pixelmapNew)(br_output_
         .title      = NULL,
         .width      = -1,
         .height     = -1,
+        .pixel_bits = -1,
         .pixel_type = BR_PMT_MAX,
         .window     = NULL,
         .use_type   = BRT_NONE,
@@ -280,6 +305,8 @@ static br_error BR_CMETHOD_DECL(br_output_facility_sdl2, pixelmapNew)(br_output_
     }
 
     BrTokenValueSetMany(&pt, &count, NULL, tv, self->device->templates.pixelmapNewTemplate);
+
+    pt.pixel_type = FigureOutFormat(pt.pixel_type, pt.pixel_bits);
 
     /*
      * Four cases:
