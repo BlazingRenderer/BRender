@@ -58,6 +58,11 @@ char *BR_PUBLIC_ENTRY BrStrCpy(char *s1, const char *s2)
     return strcpy(s1, s2);
 }
 
+char *BR_PUBLIC_ENTRY BrStpCpy(char *s1, const char *s2)
+{
+    return strcpy(s1, s2) + strlen(s2);
+}
+
 br_size_t BR_PUBLIC_ENTRY BrStrLen(const char *s)
 {
     return strlen(s);

@@ -27,6 +27,7 @@ char *BR_PUBLIC_ENTRY     BrStrCat(char *s1, const char *s2);
 int BR_PUBLIC_ENTRY       BrStrCmp(const char *s1, const char *s2);
 int BR_PUBLIC_ENTRY       BrStrICmp(const char *s1, const char *s2);
 char *BR_PUBLIC_ENTRY     BrStrCpy(char *s1, const char *s2);
+char *BR_PUBLIC_ENTRY     BrStpCpy(char *s1, const char *s2);
 br_size_t BR_PUBLIC_ENTRY BrStrLen(const char *s);
 int BR_PUBLIC_ENTRY       BrStrNCmp(const char *s1, const char *s2, br_size_t n);
 int BR_PUBLIC_ENTRY       BrStrNICmp(const char *s1, const char *s2, br_size_t n);

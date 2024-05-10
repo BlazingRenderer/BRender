@@ -26,7 +26,7 @@ static char *build_buffer_uri(const cgltf_buffer *buffer, void *res)
     code_out = BrResAllocate(res, sizeof(prefix) + len + 1, BR_MEMORY_APPLICATION);
     memcpy(code_out, prefix, sizeof(prefix));
 
-    code_out_end = stpcpy(code_out, prefix);
+    code_out_end = BrStpCpy(code_out, prefix);
 
     cbase64_init_encodestate(&es);
     code_out_end += cbase64_encode_block(buffer->data, buffer->size, code_out_end, &es);
