@@ -36,7 +36,7 @@ char *BR_PUBLIC_ENTRY     BrStrNCpy(char *s1, const char *s2, br_size_t n);
 char *BR_PUBLIC_ENTRY BrStrChr(const char *s1, char c);
 char *BR_PUBLIC_ENTRY BrStrRChr(const char *s1, char c);
 
-void BR_PUBLIC_ENTRY BrAbort(void);
+BR_NORETURN void BR_PUBLIC_ENTRY BrAbort(void);
 
 char *BR_PUBLIC_ENTRY BrGetEnv(const char *name);
 
