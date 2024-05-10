@@ -13,7 +13,7 @@
 #include <stddef.h>
 
 #include "drv.h"
-#include "pm.h"
+#include "pm_ip.h"
 #include "shortcut.h"
 #include "brassert.h"
 
@@ -757,25 +757,13 @@ static void DevicePixelmapSDLExtPreSwap(br_device_pixelmap *self)
 
 static br_error BR_CMETHOD_DECL(br_device_pixelmap_sdl2, doubleBuffer)(br_device_pixelmap *self, br_device_pixelmap *src)
 {
-    SDL_Surface *src_surf;
-
-    UASSERT(self != NULL);
-    UASSERT(src != NULL);
+    br_error err;
 
     /*
-     * Don't allow double-buffering to sub-pixelmaps.
+     * Go via the generic double-buffer, which will punt us off the appropriate copy().
      */
-    if(!self->owned)
-        return BRE_UNSUPPORTED;
-
-    /*
-     * It doesn't make sense to double-buffer from a memory pixelmap.
-     */
-    if((src_surf = DevicePixelmapSDL2GetSurface((br_pixelmap *)src, BR_FALSE)) == NULL)
-        return BRE_UNSUPPORTED;
-
-    if(SDL_BlitSurface(src_surf, NULL, self->surface, NULL) < 0)
-        return BRE_FAIL;
+    if((err = BR_CMETHOD(br_device_pixelmap_gen, doubleBuffer)(self, src)) != BRE_OK)
+        return err;
 
     DevicePixelmapSDLExtPreSwap(self);
 
