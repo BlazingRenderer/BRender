@@ -17,7 +17,7 @@ BR_RCS_ID("$Id: angles.c 1.1 1997/12/10 16:41:20 jon Exp $")
 /*
  * Table of axes for each order
  */
-static struct order_info {
+const static struct order_info {
     br_uint_8 a0;
     br_uint_8 a1;
     br_uint_8 a2;
