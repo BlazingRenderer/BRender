@@ -1648,6 +1648,12 @@ static br_error parseTokenValue(br_lexer *l, br_token_value *tv, br_size_t size)
                         case BRT_UINTPTR:
                             tv->v.p = (void *)BrLexerInteger(l);
                             break;
+
+                        default:
+                            /*
+                             * BUG: You're missing a case from {pos,neg}_int_types.
+                             */
+                            BrAbort();
                     }
                     break;
                 }
