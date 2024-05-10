@@ -380,6 +380,8 @@ br_error BR_RESIDENT_ENTRY BrRendererFacilityFind(br_renderer_facility **prf, br
             image_name[sizeof(image_name) - 2] = 'x';
             scalar_is_valid                    = BR_TRUE;
             break;
+        default:
+            return BRE_FAIL;
     }
 
     /*
@@ -478,6 +480,10 @@ br_error BR_RESIDENT_ENTRY BrRendererFacilityListFind(br_renderer_facility **prf
             scalar_is_valid = BR_TRUE;
 
             break;
+
+        default:
+
+            return BRE_FAIL;
     }
 
     /*
@@ -644,6 +650,8 @@ br_error BR_RESIDENT_ENTRY BrPrimitiveLibraryFind(br_primitive_library **ppl, br
             image_name[sizeof(image_name) - 2] = 'x';
             scalar_is_valid                    = BR_TRUE;
             break;
+        default:
+            return BRE_FAIL;
     }
 
     /*
@@ -742,6 +750,10 @@ br_error BR_RESIDENT_ENTRY BrPrimitiveLibraryListFind(br_primitive_library **ppl
             scalar_is_valid = BR_TRUE;
 
             break;
+
+        default:
+
+            return BRE_FAIL;
     }
 
     /*
@@ -905,6 +917,8 @@ br_error BR_RESIDENT_ENTRY BrGeometryFormatFind(br_geometry **pgf, br_renderer *
             image_name[sizeof(image_name) - 2] = 'x';
             scalar_is_valid                    = BR_TRUE;
             break;
+        default:
+            return BRE_FAIL;
     }
 
     /*
