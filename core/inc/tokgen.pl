@@ -70,7 +70,7 @@ open(STDOUT,">pretok.h");
  */
 #if BR_TOKEN_ENUM
 
-typedef enum {
+typedef enum br_token {
 END
 
 foreach $t (sort(keys %token_val)) {
