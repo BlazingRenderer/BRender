@@ -22,15 +22,6 @@ typedef br_uint_32 br_token;
 #endif
 
 /*
- * 0 is reserved to indicate NULL tokens
- */
-#ifdef __cplusplus
-#define BR_NULL_TOKEN ((const br_token)0)
-#else
-#define BR_NULL_TOKEN 0
-#endif
-
-/*
  * Maximum length (including terminating '\0') of an string value
  */
 #define BR_MAX_IDENTIFIER 64
@@ -39,6 +30,11 @@ typedef br_uint_32 br_token;
  * Predefined token values
  */
 #include "pretok.h"
+
+/*
+ * 0 is reserved to indicate NULL tokens
+ */
+#define BR_NULL_TOKEN BRT_NULL
 
 /*
  * Make some macros for setting token types in terms of scalar

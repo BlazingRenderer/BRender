@@ -5,6 +5,9 @@
 $token_prefix = "BRT_";
 $current = 1;
 
+$token_val{"NULL"} = "none";
+$token_id{"NULL"} = 0;
+
 # Read all tokens into an array
 #
 open(TOK,"<$ARGV[0]");
@@ -101,15 +104,6 @@ close(STDOUT);
 # Predefined table
 #
 open(STDOUT,">pretok.c");
-
-# Special-case - the NULL token.
-#
-printf("\t[%-32s] = { .node = {0,}, .identifier = %-32s, .type = %-24s, .token = %-32s, .base_length = %8d},\n",
-		"BR_NULL_TOKEN",
-		"NULL",
-		"BR_NULL_TOKEN",
-		"BR_NULL_TOKEN",
-		0);
 
 foreach $t (sort(keys %token_val)) {
 	$len = length($t) - length($type_ext{$token_val{$t}});
