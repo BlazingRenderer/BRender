@@ -134,28 +134,27 @@ static void templateMakeMap(br_tv_template *template)
  * Copy a token value to the given address.
  * This is required for 64-bit, as not everything is 4 bytes.
  */
-static void BrTokenCopy(void *mem, const br_token_value *tv, br_boolean flip)
+static void MemCpyToken(br_token t, void *dst, const void *src)
 {
+    br_token  type;
     br_size_t s;
     /*
-    ** Get the token type. If we're BRT_NONE, we might be
-    ** something like BRT_COLOUR_RGB, which IS a token type, just use us.
-    **
-    ** Then get its size.
-    */
-    br_token ttype = BrTokenType(tv->t);
-    if(ttype == BRT_NONE)
-        s = BrTokenSize(tv->t);
+     * Get the token type. If we're BRT_NONE, we might be
+     * something like BRT_COLOUR_RGB, which IS a token type, just use us.
+     *
+     * Then get its size.
+     */
+
+    type = BrTokenType(t);
+    if(type == BRT_NONE)
+        s = BrTokenSize(t);
     else
-        s = BrTokenSize(ttype);
+        s = BrTokenSize(type);
 
     if(s == 0)
         return;
 
-    if(flip)
-        BrMemCpy(&tv->v, mem, s);
-    else
-        BrMemCpy(mem, &tv->v, s);
+    BrMemCpy(dst, src, s);
 }
 
 /*
@@ -194,7 +193,7 @@ static br_error ValueQuery(br_token_value *tv,                  /* Destination f
 
     switch(tep->conv) {
         case BRTV_CONV_COPY:
-            BrTokenCopy(mem, tv, BR_TRUE);
+            MemCpyToken(tv->t, &tv->v, mem);
             break;
 
         case BRTV_CONV_DIRECT:
@@ -403,7 +402,7 @@ static br_error ValueSet(void                       *block, /* Destination memeo
 
     switch(tep->conv) {
         case BRTV_CONV_COPY:
-            BrTokenCopy(mem, tv, BR_FALSE);
+            MemCpyToken(tv->t, mem, &tv->v);
             break;
 
         case BRTV_CONV_I32_I8:
@@ -673,7 +672,7 @@ br_error BR_RESIDENT_ENTRY BrTokenValueQuery(void *pvalue, void *extra, br_size_
 
     if(tep) {
         r = ValueQuery(&tv, &extra, &extra_size, block, tep);
-        BrTokenCopy(pvalue, &tv, BR_FALSE);
+        MemCpyToken(tv.t, pvalue, &tv.v);
         return r;
     } else
         return BRE_UNKNOWN;
