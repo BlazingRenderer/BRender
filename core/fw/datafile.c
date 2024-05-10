@@ -347,7 +347,7 @@ static br_uint_32 DfStructWriteBinary(br_datafile *df, br_file_struct *str, void
         /*
          * Get pointer to source memory
          */
-        mp = (char *)base + sm->offset;
+        mp = (unsigned char *)base + sm->offset;
 
         /*
          * Do type specific processing
@@ -547,7 +547,7 @@ static br_uint_32 DfStructReadBinary(br_datafile *df, br_file_struct *str, void 
         /*
          * Get pointer to destination memory
          */
-        mp = (char *)base + sm->offset;
+        mp = (unsigned char *)base + sm->offset;
 
         /*
          * Do type specific processing
@@ -831,7 +831,7 @@ static br_uint_32 DfStructSizeBinary(br_datafile *df, br_file_struct *str, void 
                 break;
 
             case FSM_ASCIZ:
-                mp = (char *)base + sm->offset;
+                mp = (unsigned char *)base + sm->offset;
 
                 if(*((char **)mp))
                     bytes += (br_uint_32)BrStrLen(*((char **)mp));
