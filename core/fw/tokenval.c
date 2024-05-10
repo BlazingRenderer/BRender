@@ -1477,12 +1477,12 @@ br_error BR_RESIDENT_ENTRY BrStringToTokenValue(br_token_value *buffer, br_size_
 
 static br_error parseTokenValue(br_lexer *l, br_token_value *tv, br_size_t size)
 {
-    br_size_t       len;
-    char            name[40];
-    br_token        type;
-    static br_token real_types[] = {BRT_FLOAT, BRT_FIXED};
-    br_error        r            = BRE_OK;
-    br_boolean      negative;
+    br_size_t             len;
+    char                  name[40];
+    br_token              type;
+    const static br_token real_types[] = {BRT_FLOAT, BRT_FIXED};
+    br_error              r            = BRE_OK;
+    br_boolean            negative;
 
     /*
      * Check that there is enough space for terminator
@@ -1560,8 +1560,6 @@ static br_error parseTokenValue(br_lexer *l, br_token_value *tv, br_size_t size)
                  * Look for float or fixed
                  */
                 case T_REAL: {
-                    static br_token real_types[] = {BRT_FLOAT, BRT_FIXED};
-
                     tv->t = BrTokenFindType(&type, name, real_types, BR_ASIZE(real_types));
 
                     if(tv->t == BR_NULL_TOKEN)
