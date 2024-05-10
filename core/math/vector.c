@@ -296,6 +296,19 @@ void BR_PUBLIC_ENTRY BrVector3Accumulate(br_vector3 *v1, const br_vector3 *v2)
 }
 
 /*
+ * v1+=v2
+ */
+void BR_PUBLIC_ENTRY BrVector3AccumulateF(br_vector3 *v1, const br_fvector3 *v2)
+{
+    UASSERT_MESSAGE("Destination Vector is NULL", v1 != NULL);
+    UASSERT_MESSAGE("Source Vector is NULL", v2 != NULL);
+
+    v1->v[0] += v2->v[0];
+    v1->v[1] += v2->v[1];
+    v1->v[2] += v2->v[2];
+}
+
+/*
  * v1+=v2*scalar
  */
 void BR_PUBLIC_ENTRY BrVector3AccumulateScale(br_vector3 *v1, const br_vector3 *v2, br_scalar s)
