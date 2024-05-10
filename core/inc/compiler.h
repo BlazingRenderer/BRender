@@ -139,6 +139,8 @@ typedef float br_float;
 #define BR_PRINTF_ATTRIBUTE(fmt, args)
 #define BR_SCANF_ATTRIBUTE(fmt, args)
 
+#define BR_NORETURN __declspec(noreturn)
+
 #define BR_STATIC_ASSERT(cond, msg)
 
 /*
@@ -194,6 +196,8 @@ typedef float br_float;
 
 #define BR_PRINTF_ATTRIBUTE(fmt, args) __attribute__((format(printf, fmt, args)))
 #define BR_SCANF_ATTRIBUTE(fmt, args)  __attribute__((format(scanf, fmt, args)))
+
+#define BR_NORETURN __attribute__((__noreturn__))
 
 #define BR_STATIC_ASSERT(cond, msg)    _Static_assert((cond), msg)
 
