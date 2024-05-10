@@ -6,3 +6,4 @@
 /result
 /result-*
 /build/
+**/imgui.ini
