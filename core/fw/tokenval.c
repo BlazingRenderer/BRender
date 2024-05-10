@@ -1574,6 +1574,8 @@ static br_error parseTokenValue(br_lexer *l, br_token_value *tv, br_size_t size)
                         case BRT_FIXED:
                             tv->v.x = BrFloatToFixed(negative ? -BrLexerReal(l) : BrLexerReal(l));
                             break;
+                        default:
+                            BrAbort();
                     }
                     break;
                 }
