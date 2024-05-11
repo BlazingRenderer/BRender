@@ -17,23 +17,126 @@
  * Various types of pixel
  */
 enum {
+    /**
+     * \brief 1-bit index into a colour map (2 colours).
+     *
+     * \note 32-bit encoding:
+     *       \code 0000000000000000000000000000000i \endcode
+     *
+     * \note First Four Bytes of Left Hand Pixel:
+     *       \code i....... ........ ........ ........ \endcode
+     *
+     * \remark The left hand byte is the byte at br_pixelmap::pixels.
+     */
     BR_PMT_INDEX_1,
+
+    /**
+     * \brief 2-bit index into a colour map (4 colours).
+     *
+     * \note 32-bit encoding:
+     *       \code 000000000000000000000000000000ii \endcode
+     *
+     * \note First Four Bytes of Left Hand Pixel:
+     *       \code ii...... ........ ........ ........ \endcode
+     *
+     * \remark The left hand byte is the byte at br_pixelmap::pixels.
+     */
     BR_PMT_INDEX_2,
+
+    /**
+     * \brief 4-bit index into a colour map (16 colours).
+     *
+     * \note 32-bit encoding:
+     *       \code 0000000000000000000000000000iiii \endcode
+     *
+     * \note First Four Bytes of Left Hand Pixel:
+     *       \code iiii.... ........ ........ ........ \endcode
+     *
+     * \remark The left hand byte is the byte at br_pixelmap::pixels.
+     */
     BR_PMT_INDEX_4,
 
-    /*
-     * Each pixel is an index into a colour map
+    /**
+     * \brief 8-bit index into a colour map (256 colours).
+     *
+     * \note 32-bit encoding:
+     *       \code 000000000000000000000000iiiiiiii \endcode
+     *
+     * \note First Four Bytes of Left Hand Pixel:
+     *       \code iiiiiiii ........ ........ ........ \endcode
+     *
+     * \remark The left hand byte is the byte at br_pixelmap::pixels.
      */
     BR_PMT_INDEX_8,
 
-    /*
-     * True colour RGB
+    /**
+     * \brief 16-bit 'true colour' RGB, 5-bits each colour.
+     *
+     * \note 32-bit encoding:
+     *       \code 00000000000000000rrrrrgggggbbbbb \endcode
+     *
+     * \note First Four Bytes of Left Hand Pixel:
+     *       \code gggbbbbb 0rrrrrgg ........ ........ \endcode
+     *
+     * \remark The left hand byte is the byte at br_pixelmap::pixels.
      */
-    BR_PMT_RGB_555,   /* 16 bits per pixel */
-    BR_PMT_RGB_565,   /* 16 bits per pixel */
-    BR_PMT_RGB_888,   /* 24 bits per pixel */
-    BR_PMT_RGBX_888,  /* 32 bits per pixel, actually XRGB */
-    BR_PMT_RGBA_8888, /* 32 bits per pixel, actually ARGB */
+    BR_PMT_RGB_555,
+
+    /**
+     * \brief 16-bit 'true colour' RGB, 5 bits red and blue, 6 bits green.
+     *
+     * \note 32-bit encoding:
+     *       \code 0000000000000000rrrrrggggggbbbbb \endcode
+     *
+     * \note First Four Bytes of Left Hand Pixel:
+     *       \code gggbbbbb rrrrrggg ........ ........ \endcode
+     *
+     * \remark The left hand byte is the byte at br_pixelmap::pixels.
+     */
+    BR_PMT_RGB_565,
+
+    /**
+     * \brief 24-bit 'true colour' RGB, 8 bits each colour.
+     *
+     * \note 32-bit encoding:
+     *       \code 00000000rrrrrrrrggggggggbbbbbbbb \endcode
+     *
+     * \note First Four Bytes of Left Hand Pixel:
+     *       \code bbbbbbbb gggggggg rrrrrrrr ........ \endcode
+     *
+     * \remark The left hand byte is the byte at br_pixelmap::pixels.
+     */
+    BR_PMT_RGB_888,
+
+    /**
+     * \brief 32-bit 'true colour' RGB, 8 bits each colour, 8 bits unused.
+     *
+     * \note Actually XRGB.
+     *
+     * \note 32-bit encoding:
+     *       \code 00000000rrrrrrrrggggggggbbbbbbbb \endcode
+     *
+     * \note First Four Bytes of Left Hand Pixel:
+     *       \code bbbbbbbb gggggggg rrrrrrrr xxxxxxxx \endcode
+     *
+     * \remark The left hand byte is the byte at br_pixelmap::pixels.
+     */
+    BR_PMT_RGBX_888,
+
+    /**
+     * \brief 32-bit 'true colour' RGB, 8 bits each colour with an 8-bit alpha channel.
+     *
+     * \note Actually ARGB.
+     *
+     * \note 32-bit encoding:
+     *       \code aaaaaaaarrrrrrrrggggggggbbbbbbbb \endcode
+     *
+     * \note First Four Bytes of Left Hand Pixel:
+     *       \code bbbbbbbb gggggggg rrrrrrrr aaaaaaaa \endcode
+     *
+     * \remark The left hand byte is the byte at br_pixelmap::pixels.
+     */
+    BR_PMT_RGBA_8888,
 
     /*
      * YUV
@@ -44,7 +147,27 @@ enum {
     /*
      * Depth
      */
+
+    /**
+     * \brief The pixelmap is used as a depth buffer with 16-bit precision.
+     *
+     * \note 32-bit encoding:
+     *       \code dddddddddddddddd0000000000000000 \endcode
+     *
+     * \note First Four Bytes of Left Hand Pixel:
+     *       \code Undefined \endcode
+     */
     BR_PMT_DEPTH_16,
+
+    /**
+     * @brief The pixelmap is used as a depth buffer with 32-bit precision.
+     *
+     * \note 32-bit encoding:
+     *       \code dddddddddddddddddddddddddddddddd \endcode
+     *
+     * \note First Four Bytes of Left Hand Pixel:
+     *       \code Undefined \endcode
+     */
     BR_PMT_DEPTH_32,
 
     /*
