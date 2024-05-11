@@ -745,6 +745,68 @@ static void pixelquery_draw(br_pixelmap *dest, float dt, void *user)
     draw_pixelbypixel(dest, state->tex32m, (state->tex32m->width + 126) + state->tex32m->width + 40, 64);
 }
 
+typedef struct xbpp_state {
+    br_uint_8    type;
+    br_pixelmap *src;
+    br_pixelmap *dst;
+} xbpp_state;
+
+static void xbpp_fini(void *user)
+{
+    xbpp_state *state = user;
+
+    if(state->src != NULL)
+        BrPixelmapFree(state->src);
+    state->src = NULL;
+}
+
+static br_error xbpp_init(void *user, br_pixelmap *screen, br_pixelmap *buffer, void *arg)
+{
+    xbpp_state *state = user;
+
+    if((state->src = BrPixelmapLoad(arg)) == NULL) {
+        BrLogError("ERROR", "Unable to load %s", arg);
+        return BRE_FAIL;
+    }
+
+    state->dst = BrPixelmapMatch(state->src, BR_PMMATCH_OFFSCREEN);
+    if(state->src->map != NULL)
+        state->dst->map = state->src->map;
+
+    state->type = state->src->type;
+
+    return BRE_OK;
+}
+
+static void xbpp_draw(br_pixelmap *dest, float dt, void *user)
+{
+    xbpp_state  *state = user;
+    br_pixelmap *src   = state->src;
+    br_pixelmap *dst   = state->dst;
+
+    /*
+     * Copy the first 10 rows, pixel-by-pixel, hitting _MemPixelSet/_MemPixelGet
+     */
+    for(br_int_32 y = 0; y < 10; ++y) {
+        for(br_int_32 x = 0; x < src->width; ++x) {
+            br_colour col = BrPixelmapPixelGet(state->src, -src->origin_x + x, -src->origin_y + y);
+
+            BrPixelmapPixelSet(dst, -dst->origin_x + x, -dst->origin_y + y, col);
+        }
+    }
+
+    /*
+     * Fill the next 10 rows with the top-left colour, hitting _MemFill_A.
+     */
+    for(br_int_32 i = 0; i < 10; ++i) {
+        BrPixelmapRectangleFill(dst, -dst->origin_x, -dst->origin_y + 10 + i, dst->width, 1,
+                                BrPixelmapPixelGet(state->src, -src->origin_x, -src->origin_y));
+    }
+
+    // BrPixelmapRectangleCopy(dest, -dest->origin_x, -dest->origin_y, state->dst, -src->origin_x, -src->origin_y, src->width, src->height);
+    BrPixelmapCopy(dest, state->dst);
+}
+
 typedef br_error(br_drawtest_init_cbfn)(void *user, br_pixelmap *screen, br_pixelmap *backbuffer, void *arg);
 typedef void(br_drawtest_draw_cbfn)(br_pixelmap *dest, float dt, void *user);
 typedef void(br_drawtest_swap_cbfn)(br_pixelmap *screen, br_pixelmap *backbuffer, void *user);
@@ -767,6 +829,12 @@ typedef struct br_drawtest {
     {                                                                                                          \
         .name = "SMPTE (" BR_STR(type) suffix ")", .init = smpte_init, .draw = smpte_draw, .fini = smpte_fini, \
         .arg = filename, .user_size = sizeof(br_smpte_state),                                                  \
+    }
+
+#define MAKE_XBPP_TEST(filename, type, suffix)                                                             \
+    {                                                                                                      \
+        .name = "XBPP (" BR_STR(type) suffix ")", .init = xbpp_init, .draw = xbpp_draw, .fini = xbpp_fini, \
+        .arg = filename, .user_size = sizeof(xbpp_state),                                                  \
     }
 
 // clang-format off
@@ -819,6 +887,11 @@ static br_drawtest tests[] = {
         .user_size = sizeof(pixelquery_state),
         .arg       = NULL,
     },
+    MAKE_XBPP_TEST("smpte_type03_index_8.pix",   BR_PMT_INDEX_8,   ""),
+    MAKE_XBPP_TEST("smpte_type04_rgb_555.pix",   BR_PMT_RGB_555,   ""),
+    MAKE_XBPP_TEST("smpte_type05_rgb_565.pix",   BR_PMT_RGB_565,   ""),
+    MAKE_XBPP_TEST("smpte_type06_rgb_888.pix",   BR_PMT_RGB_888,   ""),
+    MAKE_XBPP_TEST("smpte_type08_rgba_8888.pix", BR_PMT_RGBA_8888, ""),
 };
 // clang-format on
 
