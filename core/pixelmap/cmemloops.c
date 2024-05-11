@@ -31,28 +31,58 @@ br_uint_8 bit_to_mask_e[] = {
     0xFF  /* 0b11111111 */
 };
 
-static br_uint_32 *MemFill32(br_uint_32 *dest, br_uint_32 value, br_uint_32 num)
+static void MemFill0(void *dest, br_uint_32 value, br_size_t num)
 {
+}
+
+static void MemFill32(void *dest, br_uint_32 value, br_size_t num)
+{
+    br_uint_32 *d = dest;
     while(num--)
-        *(dest++) = value;
-
-    return dest;
+        *(d++) = value;
 }
 
-static br_uint_16 *MemFill16(br_uint_16 *dest, br_uint_16 value, br_uint_32 num)
+static void MemFill16(void *dest, br_uint_32 value, br_size_t num)
 {
+    br_uint_16 *d = dest;
     while(num--)
-        *(dest++) = value;
-
-    return dest;
+        *(d++) = value;
 }
 
-static br_uint_8 *MemFill8(br_uint_8 *dest, br_uint_8 value, br_uint_32 num)
+static void MemFill24(void *dest, br_uint_32 val, br_size_t num)
 {
-    memset(dest, value, num);
+    br_uint_8 *d = dest;
+    br_uint_8  r = BR_RED(val);
+    br_uint_8  g = BR_GRN(val);
+    br_uint_8  b = BR_BLU(val);
 
-    return dest + num;
+    if((r == g) && (r == b)) {
+        memset(d, r, num * 3);
+    } else {
+        for(br_uint_32 i = 0; i < num; ++i) {
+            *d++ = r;
+            *d++ = g;
+            *d++ = b;
+        }
+    }
 }
+
+static void MemFill8(void *dest, br_uint_32 value, br_size_t num)
+{
+    memset(dest, (int)(value & 0xFF), num);
+}
+
+typedef void(br_filler_cbfn)(void *dest, br_uint_32 value, br_size_t num);
+
+static br_filler_cbfn *const fillers[] = {
+    // clang-format off
+    [0] = MemFill0,
+    [1] = MemFill8,
+    [2] = MemFill16,
+    [3] = MemFill24,
+    [4] = MemFill32,
+    // clang-format on
+};
 
 static void bc_inner_loop(char *dest, br_uint_32 bpp, br_uint_32 colour, br_uint_8 c)
 {
@@ -67,23 +97,7 @@ static void bc_inner_loop(char *dest, br_uint_32 bpp, br_uint_32 colour, br_uint
         if((carry_check = oldC + oldC) <= 255)
             continue;
 
-        switch(bpp) {
-            case 1:
-                dest[(i * 1) + 0] = (br_uint_8)(colour & 0xFF); /* mov [edi+(x*1)],bl */
-                break;
-            case 2:
-                dest[(i * 2) + 0] = (br_uint_8)(colour & 0x00FF);        /* mov [edi+(x*2)+0],bl */
-                dest[(i * 2) + 1] = (br_uint_8)((colour & 0xFF00) >> 8); /* mov [edi+(x*2)+1],bh */
-                break;
-            case 3:
-                dest[(i * 3) + 0] = (br_uint_8)(colour & 0x0000FF);               /* mov [edi+(x*3)+0],bl */
-                dest[(i * 3) + 1] = (br_uint_8)((colour & 0x00FF00) >> 8);        /* mov [edi+(x*3)+1],bh */
-                dest[(i * 3) + 2] = (br_uint_8)(((colour >> 8) & 0x00FF00) >> 8); /* mov [edi+(x*3)+2],ah */
-                break;
-            case 4:
-                *((br_uint_32 *)(&dest[(i * 4) + 0])) = colour; /* mov [edi+(x*4)],ebx */
-                break;
-        }
+        fillers[bpp](dest + (i * bpp), colour, 1);
     }
 }
 
@@ -146,31 +160,8 @@ void _MemCopyBits_A(char *dest, br_int_32 d_stride, br_uint_8 *src, br_uint_32 s
 
 void _MemFill_A(char *dest, br_uint_32 pixels, br_uint_32 bpp, br_uint_32 colour)
 {
-    /* 32-bit */
-    if(bpp == 4) {
-        MemFill32((br_uint_32 *)dest, colour, pixels);
-    }
-    /* 16-bit */
-    else if(bpp == 2) {
-        MemFill16((br_uint_16 *)dest, (br_uint_16)colour, pixels);
-
-    }
-    /* 24-bit */
-    else if(bpp == 3) {
-        char *cols = (char *)&colour;
-
-        /* If 3 fill bytes are the same, just use 1bpp fill */
-        if((cols[0] == cols[1]) && (cols[0] == cols[2])) {
-            _MemFill_A(dest, pixels * 3, 1, colour);
-        } else
-            for(br_uint_32 i = 0; i < pixels; ++i) {
-                *dest++ = BR_BLU(colour);
-                *dest++ = BR_GRN(colour);
-                *dest++ = BR_RED(colour);
-            }
-    } else if(bpp == 1) {
-        MemFill8(dest, (br_uint_8)(colour & 0xFF), pixels);
-    }
+    ASSERT_MESSAGE("invalid pixel size", bpp < BR_ASIZE(fillers));
+    fillers[bpp](dest, colour, pixels);
 }
 
 void _MemRectCopy_A(char *dest, const char *src, br_uint_16 pwidth, br_uint_16 pheight, br_int_32 d_stride,
