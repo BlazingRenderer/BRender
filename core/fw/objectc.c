@@ -26,7 +26,7 @@ struct object_list_entry {
 /*
  * Exported function to allocate the basic anchor structure
  */
-void *BR_EXPORT BrObjectListAllocate(void *res)
+void *BR_RESIDENT_ENTRY BrObjectListAllocate(void *res)
 {
     struct object_list *hl;
 
@@ -376,7 +376,7 @@ const br_tv_match_info *BR_CMETHOD_DECL(br_object_container, tokensMatchInfoQuer
 /*
  * Utility function to free all the objects in a container
  */
-br_error BR_EXPORT BrObjectContainerFree(br_object_container *self, br_token type, char *pattern, br_token_value *tv)
+br_error BR_RESIDENT_ENTRY BrObjectContainerFree(br_object_container *self, br_token type, char *pattern, br_token_value *tv)
 {
     br_error    r;
     br_object **handles;
