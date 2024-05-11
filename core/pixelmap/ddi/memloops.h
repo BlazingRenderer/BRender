@@ -13,7 +13,7 @@ void       _MemFill_A(char *dest, br_uint_32 pixels, br_uint_32 bpp, br_uint_32 
 void       _MemRectCopy_A(char *dest, const char *src, br_uint_16 pwidth, br_uint_16 pheight, br_int_32 d_stride,
                           br_int_32 s_stride, br_uint_32 bpp);
 void       _MemCopy_A(char *dest, const char *src, br_uint_32 pixels, br_uint_32 bpp);
-void       _MemPixelSet(char *dest, br_uint_32 bytes, br_uint_32 colour);
-br_uint_32 _MemPixelGet(const char *dest, br_uint_32 bytes);
+void       _MemPixelSet(void *dest, br_uint_32 bytes, br_uint_32 colour);
+br_uint_32 _MemPixelGet(const void *dest, br_uint_32 bytes);
 
 #endif /* __MEMLOOPS_H__ */

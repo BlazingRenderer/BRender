@@ -182,7 +182,7 @@ void _MemCopy_A(char *dest, const char *src, br_uint_32 pixels, br_uint_32 bpp)
     BrMemCpy(dest, src, pixels * bpp);
 }
 
-void _MemPixelSet(char *dest, br_uint_32 bytes, br_uint_32 colour)
+void _MemPixelSet(void *dest, br_uint_32 bytes, br_uint_32 colour)
 {
     switch(bytes) {
         case 1:
@@ -192,31 +192,33 @@ void _MemPixelSet(char *dest, br_uint_32 bytes, br_uint_32 colour)
             *((br_uint_16 *)dest) = (br_uint_16)colour;
             break;
         case 3:
-            *dest       = (br_uint_8)colour;
-            *(dest + 1) = (br_uint_8)((colour & 0x00FF00) >> 8);
-            *(dest + 2) = (br_uint_8)((colour & 0xFF0000) >> 16);
+            *((br_uint_8 *)dest + 0) = (br_uint_8)((colour & 0x0000FF) >> 0);
+            *((br_uint_8 *)dest + 1) = (br_uint_8)((colour & 0x00FF00) >> 8);
+            *((br_uint_8 *)dest + 2) = (br_uint_8)((colour & 0xFF0000) >> 16);
             break;
         case 4:
             *((br_uint_32 *)dest) = colour;
             break;
         default:
-            ASSERT_MESSAGE("invalid pixel size", 0);
+            ASSERT_MESSAGE("invalid pixel size", bytes >= 1 && bytes <= 4);
     }
 }
 
-br_uint_32 _MemPixelGet(const char *dest, br_uint_32 bytes)
+br_uint_32 _MemPixelGet(const void *dest, br_uint_32 bytes)
 {
     switch(bytes) {
         case 1:
-            return (br_uint_8)*dest;
+            return *((br_uint_8 *)dest);
         case 2:
             return *((br_uint_16 *)dest);
-        case 3:
-            return (*(dest + 2) << 16) | (*(dest + 1) << 8) | (*dest);
+        case 3: {
+            const br_uint_8 *d = dest;
+            return d[0] | (d[1] << 8) | (d[2] << 16);
+        }
         case 4:
             return *((br_uint_32 *)dest);
         default:
-            ASSERT_MESSAGE("invalid pixel size", 0);
+            ASSERT_MESSAGE("invalid pixel size", bytes >= 1 && bytes <= 4);
             return 0;
     }
 }
