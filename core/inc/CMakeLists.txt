@@ -38,6 +38,7 @@ add_custom_target(inc-generated DEPENDS ${GENERATED_FILES})
 
 set(DDI_FILES
         )
+source_group("DDI" FILES ${DDI_FILES})
 
 set(INC_FILES
         actor.h

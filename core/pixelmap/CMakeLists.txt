@@ -15,6 +15,7 @@ set(DDI_FILES
         ddi/pm_ip.h
         ddi/memloops.h
         )
+source_group("DDI" FILES ${DDI_FILES})
 
 set(INC_FILES
         )

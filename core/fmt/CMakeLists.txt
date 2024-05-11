@@ -12,6 +12,7 @@ target_include_directories(brender-inc-ddi INTERFACE
 
 set(DDI_FILES
         )
+source_group("DDI" FILES ${DDI_FILES})
 
 set(INC_FILES
         include/fmt.h

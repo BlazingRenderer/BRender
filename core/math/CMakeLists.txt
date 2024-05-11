@@ -14,6 +14,7 @@ set(DDI_FILES
         ddi/math_ip.h
         ddi/vecifns.h
         )
+source_group("DDI" FILES ${DDI_FILES})
 
 set(INC_FILES
         include/brmath.h

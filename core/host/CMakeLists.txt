@@ -13,6 +13,7 @@ set(DDI_FILES
         ddi/host.h
         ddi/host_p.h
         )
+source_group("DDI" FILES ${DDI_FILES})
 
 set(INC_FILES
         )

@@ -61,6 +61,7 @@ set(DDI_FILES
 
         ${SOFTREND_DDI_DIR}/priminfo.h
         )
+source_group("DDI" FILES ${DDI_FILES})
 
 set(INC_FILES
         include/brlists.h
