@@ -568,34 +568,30 @@ void submap_draw(br_pixelmap *dest, float dt, void *user)
 
 typedef struct pixelquery_state {
     br_pixelmap *tex8;
+    br_pixelmap *tex8m;
     br_pixelmap *tex16;
+    br_pixelmap *tex16m;
     br_pixelmap *tex24;
+    br_pixelmap *tex24m;
     br_pixelmap *tex32;
+    br_pixelmap *tex32m;
 } pixelquery_state;
 
 static void pixelquery_fini(void *user)
 {
     pixelquery_state *state = user;
 
-    if(state->tex32 != NULL) {
-        BrPixelmapFree(state->tex32);
-    }
-    state->tex32 = NULL;
+    br_pixelmap **const pms[] = {
+        &state->tex32, &state->tex32m, &state->tex24, &state->tex24,
+        &state->tex16, &state->tex16m, &state->tex8,  &state->tex8m,
+    };
 
-    if(state->tex24 != NULL) {
-        BrPixelmapFree(state->tex24);
-    }
-    state->tex24 = NULL;
+    for(size_t i = 0; i < BR_ASIZE(pms); ++i) {
+        if(*pms[i] != NULL)
+            BrPixelmapFree(*pms[i]);
 
-    if(state->tex16 != NULL) {
-        BrPixelmapFree(state->tex16);
+        *pms[i] = NULL;
     }
-    state->tex16 = NULL;
-
-    if(state->tex8 != NULL) {
-        BrPixelmapFree(state->tex8);
-    }
-    state->tex8 = NULL;
 }
 
 static br_pixelmap *pm2dev(br_pixelmap *dst, br_pixelmap *pm)
@@ -612,7 +608,7 @@ static br_pixelmap *pm2dev(br_pixelmap *dst, br_pixelmap *pm)
     return new_pm;
 }
 
-static br_pixelmap *load2dev(br_pixelmap *dst, const char *name)
+static br_pixelmap *load2dev(br_pixelmap *dst, const char *name, br_pixelmap **mempm)
 {
     br_pixelmap *pm;
     br_pixelmap *devpm;
@@ -623,12 +619,17 @@ static br_pixelmap *load2dev(br_pixelmap *dst, const char *name)
     }
 
     devpm = pm2dev(dst, pm);
-    BrPixelmapFree(pm);
 
     if(devpm == NULL) {
+        BrPixelmapFree(pm);
         BrLogError("APP", "Unable to convert memory pixelmap to device pixelmap");
         return NULL;
     }
+
+    if(mempm != NULL)
+        *mempm = pm;
+    else
+        BrPixelmapFree(pm);
 
     return devpm;
 }
@@ -637,22 +638,22 @@ static br_error pixelquery_init(void *user, br_pixelmap *screen, br_pixelmap *ba
 {
     pixelquery_state *state = user;
 
-    if((state->tex8 = load2dev(backbuffer, "smpte_type03_index_8_small.pix")) == NULL) {
+    if((state->tex8 = load2dev(backbuffer, "smpte_type03_index_8_small.pix", &state->tex8m)) == NULL) {
         pixelquery_fini(state);
         return BRE_FAIL;
     }
 
-    if((state->tex16 = load2dev(backbuffer, "smpte_type05_rgb_565_small.pix")) == NULL) {
+    if((state->tex16 = load2dev(backbuffer, "smpte_type05_rgb_565_small.pix", &state->tex16m)) == NULL) {
         pixelquery_fini(state);
         return BRE_FAIL;
     }
 
-    if((state->tex24 = load2dev(backbuffer, "smpte_type06_rgb_888_small.pix")) == NULL) {
+    if((state->tex24 = load2dev(backbuffer, "smpte_type06_rgb_888_small.pix", &state->tex24m)) == NULL) {
         pixelquery_fini(state);
         return BRE_FAIL;
     }
 
-    if((state->tex32 = load2dev(backbuffer, "smpte_type07_rgbx_888_small.pix")) == NULL) {
+    if((state->tex32 = load2dev(backbuffer, "smpte_type07_rgbx_888_small.pix", &state->tex32m)) == NULL) {
         pixelquery_fini(state);
         return BRE_FAIL;
     }
@@ -663,6 +664,37 @@ static void draw_pixelbypixel(br_pixelmap *dest, br_pixelmap *pm, br_int_32 base
 {
     br_colour       col;
     br_device_clut *clut;
+    const char     *src_str = ObjectDevice(pm) ? "Device" : "Memory";
+    const char     *dst_str = ObjectDevice(dest) ? "Device" : "Memory";
+    int             src_bpp = 0;
+
+    br_vector2_i text_offset = {
+        .v = {-(pm->width >> 1) + 8, -(pm->height >> 1) - 16}
+    };
+
+    switch(pm->type) {
+        case BR_PMT_INDEX_8:
+            src_bpp = 8;
+            break;
+        case BR_PMT_RGB_565:
+            src_bpp = 16;
+            break;
+
+        case BR_PMT_RGB_888:
+            src_bpp = 24;
+            break;
+
+        case BR_PMT_ARGB_8888:
+        case BR_PMT_RGBA_8888:
+        case BR_PMT_RGBX_888:
+            src_bpp = 32;
+            break;
+        default:
+            break;
+    }
+
+    BrPixelmapTextF(dest, base_x + text_offset.v[0], base_y + text_offset.v[1], BR_COLOUR_RGBA(255, 255, 255, 255),
+                    BrFontProp7x9, "%s -> %s, %d-bit", src_str, dst_str, src_bpp);
 
     base_x -= pm->width / 2;
     base_y -= pm->height / 2;
@@ -678,6 +710,8 @@ static void draw_pixelbypixel(br_pixelmap *dest, br_pixelmap *pm, br_int_32 base
 
             if(clut != NULL)
                 DeviceClutEntryQuery(clut, &col, col);
+            else if(pm->map != NULL)
+                col = BrPixelmapPixelGet(pm->map, 0, col);
 
             if(pm->type == BR_PMT_RGB_565) {
                 r = BR_RED_565(col) << 3;
@@ -698,10 +732,17 @@ static void pixelquery_draw(br_pixelmap *dest, float dt, void *user)
 {
     pixelquery_state *state = user;
 
+    /* Test device::getPixel(), device::setPixel() */
     draw_pixelbypixel(dest, state->tex8, -84, -64);
     draw_pixelbypixel(dest, state->tex16, 84, -64);
     draw_pixelbypixel(dest, state->tex24, -84, 64);
     draw_pixelbypixel(dest, state->tex32, 84, 64);
+
+    /* Test memory::getPixel(), device::setPixel() */
+    draw_pixelbypixel(dest, state->tex8m, state->tex8m->width + 126, -64);
+    draw_pixelbypixel(dest, state->tex16m, (state->tex16m->width + 126) + state->tex16m->width + 40, -64);
+    draw_pixelbypixel(dest, state->tex24m, state->tex24m->width + 126, 64);
+    draw_pixelbypixel(dest, state->tex32m, (state->tex32m->width + 126) + state->tex32m->width + 40, 64);
 }
 
 typedef br_error(br_drawtest_init_cbfn)(void *user, br_pixelmap *screen, br_pixelmap *backbuffer, void *arg);
