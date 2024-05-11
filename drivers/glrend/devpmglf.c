@@ -183,8 +183,13 @@ br_device_pixelmap *DevicePixelmapGLAllocateFront(br_device *dev, br_output_faci
                   grn_bits, blu_bits, alpha_bits);
     }
 
-    if(VIDEO_Open(&self->asFront.video, pt.vertex_shader, pt.fragment_shader) == NULL)
-        goto cleanup_context;
+    if(VIDEO_Open(&self->asFront.video, pt.vertex_shader, pt.fragment_shader) == NULL) {
+        /*
+         * If this fails we can run our regular cleanup.
+         */
+        BrResFree(self);
+        return NULL;
+    }
 
     self->asFront.tex_white        = DeviceGLBuildWhiteTexture();
     self->asFront.tex_checkerboard = DeviceGLBuildCheckerboardTexture();
@@ -210,7 +215,9 @@ br_device_pixelmap *DevicePixelmapGLAllocateFront(br_device *dev, br_output_faci
 
 cleanup_context:
     DevicePixelmapGLExtDeleteContext(self, self->asFront.gl_context);
-    BrResFree(self);
+    DevicePixelmapGLExtFree(self);
+    BrResFreeNoCallback(self);
+
     return NULL;
 }
 
