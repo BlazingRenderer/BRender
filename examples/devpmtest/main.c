@@ -844,7 +844,6 @@ int main(int argc, char **argv)
     r = BrDevBeginVar(&screen, "SDL2",
                       BRT_WIDTH_I32,      (br_int_32)width,
                       BRT_HEIGHT_I32,     (br_int_32)height,
-                      BRT_PIXEL_BITS_I32, 24,
                       BRT_HIDPI_B,        BR_TRUE,
                       /* Set these if you dare... */
                       BRT_RESIZABLE_B,    BR_TRUE,
