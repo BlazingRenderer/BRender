@@ -189,25 +189,7 @@ void _MemRectCopy_A(char *dest, const char *src, br_uint_16 pwidth, br_uint_16 p
 /* From IDA */
 void _MemCopy_A(char *dest, const char *src, br_uint_32 pixels, br_uint_32 bpp)
 {
-    int          j;  // [sp+0h] [bp-24h]@4
-    int          i;  // [sp+10h] [bp-14h]@1
-    unsigned int v6; // [sp+14h] [bp-10h]@1
-    void        *v8; // [sp+1Ch] [bp-8h]@1
-    const char  *v9; // [sp+20h] [bp-4h]@1
-
-    v9      = src;
-    v8      = dest;
-    char v7 = bpp * pixels;
-    v6      = bpp * pixels;
-    for(i = (br_uint_8)dest & 3; i; --i) {
-        v7             = *v9;
-        *(uint8_t *)v8 = *v9++;
-        v8             = (char *)v8 + 1;
-        --v6;
-    }
-    memcpy(v8, v9, 4 * (v6 >> 2));
-    for(j = v6 & 3; j; --j)
-        *((uint8_t *)v8 + 4 * (v6 >> 2)) = v7;
+    BrMemCpy(dest, src, pixels * bpp);
 }
 
 void _MemPixelSet(char *dest, br_uint_32 bytes, br_uint_32 colour)
