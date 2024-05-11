@@ -5,13 +5,13 @@
 /*
  * stb helper functions
  */
-void *BR_RESIDENT_ENTRY FmtSTBMalloc(br_size_t size);
-void *BR_RESIDENT_ENTRY FmtSTBRealloc(void *ptr, br_size_t size);
-void BR_RESIDENT_ENTRY  FmtSTBFree(void *ptr);
-void BR_RESIDENT_ENTRY  FmtSTBFileWrite(void *context, void *data, int size);
-int BR_RESIDENT_ENTRY   FmtSTBFileRead(void *user, char *data, int size);
-void BR_RESIDENT_ENTRY  FmtSTBFileAdvance(void *user, int n);
-int BR_RESIDENT_ENTRY   FmtSTBFileEof(void *user);
+void *FmtSTBMalloc(br_size_t size);
+void *FmtSTBRealloc(void *ptr, br_size_t size);
+void  FmtSTBFree(void *ptr);
+void  FmtSTBFileWrite(void *context, void *data, int size);
+int   FmtSTBFileRead(void *user, char *data, int size);
+void  FmtSTBFileAdvance(void *user, int n);
+int   FmtSTBFileEof(void *user);
 
 /*
  * stb_image defines & header
