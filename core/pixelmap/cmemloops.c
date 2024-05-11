@@ -176,13 +176,12 @@ void _MemFill_A(char *dest, br_uint_32 pixels, br_uint_32 bpp, br_uint_32 colour
 void _MemRectCopy_A(char *dest, const char *src, br_uint_16 pwidth, br_uint_16 pheight, br_int_32 d_stride,
                     br_int_32 s_stride, br_uint_32 bpp)
 {
-    const br_uint_32 linediff = pwidth * bpp;
-    s_stride -= linediff;
-    d_stride -= linediff;
+    size_t row_bytes = pwidth * bpp;
 
-    for(; pheight-- > 0; src += s_stride, dest += d_stride) {
-        for(br_uint_32 w = 0; w < pwidth; ++w, src += bpp, dest += bpp)
-            _MemPixelSet(dest, bpp, _MemPixelGet(src, bpp));
+    for(size_t r = 0; r < pheight; ++r) {
+        BrMemCpy(dest, src, row_bytes);
+        dest += d_stride;
+        src += s_stride;
     }
 }
 
