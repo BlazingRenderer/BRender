@@ -924,6 +924,24 @@ int main(int argc, char **argv)
         /* Clear the screen black. */
         BrPixelmapFill(colour_buffer, BR_COLOUR_RGBA(0, 0, 0, 0xFF));
 
+        /* Run the test */
+        {
+            int base_x      = -colour_buffer->origin_x + colour_buffer->width / 2;
+            int base_y      = -colour_buffer->origin_y + 20;
+            int text_height = BrPixelmapTextHeight(colour_buffer, BrFontProp7x9);
+
+            int text_width = BrPixelmapTextWidth(colour_buffer, BrFontProp7x9, tests[test_index].name);
+
+            if(tests[test_index]._failed) {
+                BrPixelmapText(colour_buffer, base_x - text_width / 2, base_y + text_height, 0xFFFFFFFF, BrFontProp7x9,
+                               "INIT FAILED");
+            } else {
+                tests[test_index].draw(colour_buffer, dt, tests[test_index]._user);
+            }
+            BrPixelmapText(colour_buffer, base_x - text_width / 2, base_y, 0xFFFFFFFF, BrFontProp7x9, tests[test_index].name);
+        }
+
+
         /* Add in some text. */
         {
             br_int_32 base_x      = -colour_buffer->origin_x + 5;
@@ -946,24 +964,19 @@ int main(int argc, char **argv)
                 base_y += text_height * 2;
                 BrPixelmapText(colour_buffer, base_x, base_y, col, BrFontProp7x9, usage_lines[i]);
             }
-        }
 
-        {
-            int base_x      = -colour_buffer->origin_x + colour_buffer->width / 2;
-            int base_y      = -colour_buffer->origin_y + 20;
-            int text_height = BrPixelmapTextHeight(colour_buffer, BrFontProp7x9);
+            base_y += text_height * 3;
+            BrPixelmapText(colour_buffer, base_x, base_y, col, BrFontProp7x9, "Tests:");
+            for(int i = 0; i < BR_ASIZE(tests); ++i) {
+                br_colour colour = col;
 
-            int text_width = BrPixelmapTextWidth(colour_buffer, BrFontProp7x9, tests[test_index].name);
+                if(test_index == i)
+                    colour = BR_COLOUR_RGBA(0, 0, 255, 255);
 
-            BrPixelmapText(colour_buffer, base_x - text_width / 2, base_y, 0xFFFFFFFF, BrFontProp7x9, tests[test_index].name);
-            if(tests[test_index]._failed) {
-                BrPixelmapText(colour_buffer, base_x - text_width / 2, base_y + text_height, 0xFFFFFFFF, BrFontProp7x9,
-                               "INIT FAILED");
-            } else {
-                tests[test_index].draw(colour_buffer, dt, tests[test_index]._user);
+                base_y += text_height * 2;
+                BrPixelmapTextF(colour_buffer, base_x, base_y, colour, BrFontProp7x9, "%4d - %s", i, tests[i].name);
             }
         }
-
         BrPixelmapDoubleBuffer(screen, colour_buffer);
 
         if(!tests[test_index]._failed && tests[test_index].post != NULL)
