@@ -1030,6 +1030,13 @@ int main(int argc, char **argv)
                         case SDLK_F5:
                             want_screenshot = 1;
                             break;
+                        case SDLK_UP:
+                            if(test_index == 0)
+                                test_index = BR_ASIZE(tests) - 1;
+                            else
+                                test_index -= 1;
+                            break;
+                        case SDLK_DOWN:
                         case SDLK_SPACE:
                             test_index = (test_index + 1) % BR_ASIZE(tests);
                             break;
@@ -1071,9 +1078,10 @@ int main(int argc, char **argv)
 
             static const char *usage_lines[] = {
                 "Usage:",
-                "  Q      = Quit",
-                "  Space = Next Test",
-                "  F5     = Screenshot (to devpmtest.png)",
+                "  Q           = Quit",
+                "  Up, Space = Next Test",
+                "  Down      = Prev Test",
+                "  F5          = Screenshot (to devpmtest.png)",
             };
 
             BrPixelmapTextF(colour_buffer, base_x, base_y, col, BrFontProp7x9, "last frame delta (msec): %f", dt * 1000);
