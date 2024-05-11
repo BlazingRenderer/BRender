@@ -45,7 +45,11 @@ set(V1DB_FILES
         zsmacro.h
         )
 
-add_library(v1db OBJECT ${V1DB_FILES})
+add_library(v1db OBJECT
+        ${V1DB_FILES}
+        ${INC_FILES}
+        ${DDI_FILES}
+        )
 
 target_sources(v1db INTERFACE
         FILE_SET include

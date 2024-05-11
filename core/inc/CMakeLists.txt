@@ -85,6 +85,8 @@ set(INC_FILES
 add_library(inc OBJECT
         dummy.c
         ${INC_TOKEN_FILES}
+        ${INC_FILES}
+        ${DDI_FILES}
         )
 
 target_sources(inc INTERFACE

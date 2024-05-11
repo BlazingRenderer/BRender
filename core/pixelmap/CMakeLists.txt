@@ -45,7 +45,11 @@ set(PIXELMAP_FILES
         fntp7x9.c
         )
 
-add_library(pixelmap OBJECT ${PIXELMAP_FILES})
+add_library(pixelmap OBJECT
+        ${PIXELMAP_FILES}
+        ${INC_FILES}
+        ${DDI_FILES}
+        )
 
 target_sources(pixelmap INTERFACE
         FILE_SET include

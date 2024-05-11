@@ -25,7 +25,11 @@ set(HOST_FILES
         host_ip.h
         )
 
-add_library(host OBJECT ${HOST_FILES})
+add_library(host OBJECT
+        ${HOST_FILES}
+        ${INC_FILES}
+        ${DDI_FILES}
+        )
 
 target_sources(host INTERFACE
         FILE_SET include

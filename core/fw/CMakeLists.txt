@@ -111,7 +111,12 @@ set(FW_FILES
         fw_ip.h
         )
 
-add_library(fw OBJECT ${FW_FILES} ${FW_DEV_FILES})
+add_library(fw OBJECT
+        ${FW_FILES}
+        ${FW_DEV_FILES}
+        ${INC_FILES}
+        ${DDI_FILES}
+        )
 
 target_sources(fw INTERFACE
         FILE_SET include

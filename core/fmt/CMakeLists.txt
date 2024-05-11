@@ -53,6 +53,8 @@ set(FMT_FILES
 
 add_library(fmt OBJECT
         ${FMT_FILES}
+        ${INC_FILES}
+        ${DDI_FILES}
         )
 
 target_sources(fmt INTERFACE

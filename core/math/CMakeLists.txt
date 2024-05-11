@@ -33,7 +33,11 @@ set(MATH_FILES
         vector.c
         )
 
-add_library(math OBJECT ${MATH_FILES})
+add_library(math OBJECT
+        ${MATH_FILES}
+        ${INC_FILES}
+        ${DDI_FILES}
+        )
 
 target_sources(math INTERFACE
         FILE_SET include
