@@ -953,7 +953,7 @@ int main(int argc, char **argv)
                 "Usage:",
                 "  Q      = Quit",
                 "  Space = Next Test",
-                "  F5     = Screenshot (to devpmtest.pix)",
+                "  F5     = Screenshot (to devpmtest.png)",
             };
 
             BrPixelmapTextF(colour_buffer, base_x, base_y, col, BrFontProp7x9, "last frame delta (msec): %f", dt * 1000);
@@ -989,11 +989,11 @@ int main(int argc, char **argv)
          */
         if(want_screenshot) {
             br_pixelmap *pm;
-            BrLogInfo("APP", "Saving screenshot to devpmtest.pix");
+            BrLogInfo("APP", "Saving screenshot to devpmtest.png");
 
             pm = BrPixelmapAllocate(colour_buffer->type, colour_buffer->width, colour_buffer->height, NULL, BR_PMAF_NORMAL);
             BrPixelmapCopy(pm, colour_buffer);
-            BrPixelmapSave("devpmtest.pix", pm);
+            BrFmtImageSave("devpmtest.png", pm, BR_FMT_IMAGE_PNG);
             BrPixelmapFree(pm);
         }
     }
