@@ -973,11 +973,17 @@ int main(int argc, char **argv)
     width  = screen->width;
     height = screen->height;
 
+#if 0 /* Set 1 to use a memory pixelmap as the backbuffer. */
+    if((colour_buffer = BrPixelmapAllocate(screen->type, screen->width, screen->height, NULL, BR_PMAF_NORMAL)) == NULL) {
+        BrLogError("APP", "BrPixelmapMatchTypedSized() failed.");
+        goto screen_creation_failed;
+    }
+#else
     if((colour_buffer = BrPixelmapMatch(screen, BR_PMMATCH_OFFSCREEN)) == NULL) {
         BrLogError("APP", "BrPixelmapMatchTypedSized() failed.");
         goto screen_creation_failed;
     }
-
+#endif
     screen->origin_x = colour_buffer->origin_x = (br_int_16)(width / 2);
     screen->origin_y = colour_buffer->origin_y = (br_int_16)(height / 2);
 
