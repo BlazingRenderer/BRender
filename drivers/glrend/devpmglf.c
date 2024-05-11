@@ -149,6 +149,11 @@ br_device_pixelmap *DevicePixelmapGLAllocateFront(br_device *dev, br_output_faci
     BrLogTrace("GLREND", "OpenGL Vendor   = %s", self->asFront.gl_vendor);
     BrLogTrace("GLREND", "OpenGL Renderer = %s", self->asFront.gl_renderer);
 
+    if (GLVersion.major < 3 || (GLVersion.major == 3 && GLVersion.minor < 2)) {
+        BrLogError("ERROR", "Got OpenGL %d.%d context, expected 3.2", GLVersion.major, GLVersion.minor);
+        goto cleanup_context;
+    }
+
     /*
      * Get a copy of the extension list.
      * NULL-terminate so we can expose it as a BRT_POINTER_LIST.
