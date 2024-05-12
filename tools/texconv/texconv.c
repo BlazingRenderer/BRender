@@ -13,7 +13,6 @@
 #include "brender.h"
 #include "fmt.h"
 
-#include "quantize.h"
 #include "palquant.h"
 #include "texconv.h"
 #include "mip.h"

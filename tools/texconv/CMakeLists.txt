@@ -18,7 +18,6 @@ add_executable(texconv
         ./palquant.h
         ./pmaps.c
         ./pmaps.h
-        ./quantize.h
         ./savepix.c
         ./savepix.h
         ./savetga.c
