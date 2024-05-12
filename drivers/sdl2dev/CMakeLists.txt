@@ -47,6 +47,8 @@ add_library(sdl2dev
         glrend.c
 
         util.c
+
+        ${INC_FILES}
         )
 
 get_target_property(target_type sdl2dev TYPE)
