@@ -4,7 +4,7 @@ br_token BRT_OPENGL_TEXTURE_U32 = BR_NULL_TOKEN;
 
 br_device *BR_EXPORT BrDrv1GLBegin(const char *arguments)
 {
-    br_device *dev = DeviceGLAllocate("opengl", arguments);
+    br_device *dev = DeviceGLAllocate("glrend", arguments);
     if(!dev)
         return NULL;
 

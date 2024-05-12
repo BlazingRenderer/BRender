@@ -3,7 +3,7 @@
 #include <brsdl2dev.h>
 #include <brassert.h>
 
-#define OPENGL_DEVICE_NAME "opengl"
+#define OPENGL_DEVICE_NAME "glrend"
 
 typedef struct sdl_gl_state {
     SDL_Window *window;
