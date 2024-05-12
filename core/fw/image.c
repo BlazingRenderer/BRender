@@ -89,6 +89,7 @@ br_image *ImageLoad(const char *name)
     br_image *img;
     void     *host_image;
 
+    BrLogTrace("FW", "Attempting to load %s", name);
     if((host_image = HostImageLoad(name)) == NULL)
         return NULL;
 
