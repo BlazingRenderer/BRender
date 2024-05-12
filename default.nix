@@ -39,6 +39,7 @@ stdenv.mkDerivation(finalAttrs: {
   cmakeFlags = [
     (lib.cmakeBool "BRENDER_BUILD_TOOLS" withTools)
     (lib.cmakeBool "BRENDER_BUILD_EXAMPLES" withExamples)
+    (lib.cmakeBool "BUILD_SHARED_LIBS" (!stdenv.hostPlatform.isStatic))
   ];
 
   postFixup = ''
