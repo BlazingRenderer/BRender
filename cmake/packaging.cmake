@@ -8,8 +8,8 @@ include(GNUInstallDirs)
 install(TARGETS
         brender brender-ddi
         EXPORT Core
-        LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}/brender
-        ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}/brender
+        LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+        ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
         )
 
 install(TARGETS
