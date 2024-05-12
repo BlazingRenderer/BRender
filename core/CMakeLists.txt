@@ -40,6 +40,15 @@ add_library(brender)
 ##
 target_link_libraries(brender PRIVATE ${BRENDER_TARGETS})
 target_link_libraries(brender INTERFACE brender-inc)
+
+##
+# Link with math here because it's a royal pain to do elsewhere.
+##
+find_library(math_library m)
+if(UNIX AND math_library)
+    target_link_libraries(brender INTERFACE m)
+endif()
+
 set_target_properties(brender PROPERTIES
         C_VISIBILITY_PRESET hidden
         CXX_VISIBILITY_PRESET hidden
