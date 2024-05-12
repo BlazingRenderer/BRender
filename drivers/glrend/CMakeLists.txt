@@ -128,6 +128,7 @@ add_library(glrend
         ${RENDERER_FILES}
         ${VIDEO_FILES}
         ${GLSTATE_FILES}
+        ${INC_FILES}
 
         "${CMAKE_CURRENT_BINARY_DIR}/brender.vert.glsl.h"
         "${CMAKE_CURRENT_BINARY_DIR}/brender.frag.glsl.h"
