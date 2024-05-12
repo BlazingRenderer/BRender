@@ -8,7 +8,8 @@ include(GNUInstallDirs)
 install(TARGETS
         brender brender-ddi
         EXPORT Core
-        DESTINATION ${CMAKE_INSTALL_LIBDIR}/brender
+        LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}/brender
+        ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}/brender
         )
 
 install(TARGETS
@@ -19,46 +20,48 @@ install(TARGETS
         FILE_SET ddi DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/brender/ddi
         )
 
-if (BRENDER_BUILD_DRIVERS)
-    if (TARGET glrend)
-        install(TARGETS glrend-headers
-                EXPORT Core
-                FILE_SET include DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/brender/glrend
-                )
 
-        install(TARGETS glrend
-                EXPORT Core
-                DESTINATION ${CMAKE_INSTALL_LIBDIR}/brender
-                )
-    endif()
+if (TARGET glrend)
+    install(TARGETS glrend-headers
+            EXPORT Core
+            FILE_SET include DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/brender/glrend
+            )
 
-    if (TARGET sdl2dev)
-        install(TARGETS sdl2dev-headers
-                EXPORT Core
-                FILE_SET include DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/brender/sdl2dev
-                )
+    install(TARGETS glrend
+            EXPORT Core
+            LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}/brender
+            ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}/brender
+            )
+endif()
 
-        install(TARGETS sdl2dev
-                EXPORT Core
-                DESTINATION ${CMAKE_INSTALL_LIBDIR}/brender
-                )
-    endif()
+if (TARGET sdl2dev)
+    install(TARGETS sdl2dev-headers
+            EXPORT Core
+            FILE_SET include DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/brender/sdl2dev
+            )
 
-    if (TARGET softrend)
-        install(TARGETS softrend
-                EXPORT Core
-                DESTINATION ${CMAKE_INSTALL_LIBDIR}/brender
-                )
-    endif()
+    install(TARGETS sdl2dev
+            EXPORT Core
+            LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}/brender
+            ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}/brender
+            )
+endif()
 
-    if (TARGET pentprim)
-        install(TARGETS pentprim
-                EXPORT Core
-                DESTINATION ${CMAKE_INSTALL_LIBDIR}/brender
-                )
-    endif()
+if (TARGET softrend)
+    install(TARGETS softrend
+            EXPORT Core
+            LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}/brender
+            ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}/brender
+            )
+endif()
 
-endif ()
+if (TARGET pentprim)
+    install(TARGETS pentprim
+            EXPORT Core
+            LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}/brender
+            ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}/brender
+            )
+endif()
 
 
 install(EXPORT Core
