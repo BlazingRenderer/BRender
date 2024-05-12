@@ -26,6 +26,34 @@ br_boolean BR_RESIDENT_ENTRY BrImageRemove(br_image *img)
     return BR_TRUE;
 }
 
+#if defined(__WIN_32__)
+static const char *const DriverExtensions[] = {
+    ".bdd", /* BRender Device Driver        */
+    ".bed", /* BRender Device Driver (Eval) */
+    ".dll", /* BRender Device Driver        */
+};
+#else
+static const char *const DriverExtensions[] = {
+    ".sobdd", /* Linux/Unix BRender Device Driver */
+    ".so",    /* Linux/Unix BRender Device Driver */
+};
+#endif
+
+static char *StpCpyLower(char *restrict dst, const char *restrict src)
+{
+    char c;
+
+    while((c = *src++)) {
+        if(c >= 'A' && c <= 'Z')
+            c += 32;
+
+        *dst++ = c;
+    }
+
+    *dst = '\0';
+    return dst;
+}
+
 /*
  * Looks for an image in the currently loaded set
  */
@@ -38,8 +66,12 @@ br_image *BR_RESIDENT_ENTRY BrImageFind(const char *pattern)
      * Remove extension
      */
     if((c = BrStrRChr(pattern, '.'))) {
-        if(!BrStrICmp(c, ".dll") || !BrStrICmp(c, ".bdd") || !BrStrICmp(c, ".bed"))
-            *c = '\0';
+        for(size_t i = 0; i < BR_ASIZE(DriverExtensions); ++i) {
+            if(!BrStrICmp(c, DriverExtensions[i])) {
+                *c = '\0';
+                break;
+            }
+        }
     }
 
     /*
@@ -97,39 +129,21 @@ br_image *BR_RESIDENT_ENTRY BrImageReference(const char *name)
     }
 
     /*
-     * Try to load an image from the filesystem
+     * Try to load an image from the filesystem.
+     * If no extension, append known ones until we find it. Otherwise, load it directly.
      * The search order depends on the extension
-     *
-     * No Suffix:
-     *      ImageLoad(xxx.BDD)
-     *      ImageLoadHost(xxx)
-     *      ImageLoad(xxx.DLL)
-     *
-     * .BDD or .BED
-     *      ImageLoad(xxx)
-     *      ImageLoadHost(xxx)
-     *
-     * Any other suffix:
-     *      ImageLoadHost(xxx)
-     *      ImageLoad(xxx)
      */
 
     for(suffix = name; *suffix && *suffix != '.'; suffix++)
         ;
 
     if(*suffix == '\0') {
-        BrStrCpy(scratch, name);
-        BrStrCat(scratch, ".BDD");
-        img = ImageLoad(scratch);
-
-        if(!img) {
-            BrStrCpy(scratch, name);
-            BrStrCat(scratch, ".DLL");
-            img = ImageLoad(scratch);
+        for(size_t i = 0; i < BR_ASIZE(DriverExtensions); ++i) {
+            BrStrCat(StpCpyLower(scratch, name), DriverExtensions[i]);
+            if((img = ImageLoad(scratch)) != NULL) {
+                break;
+            }
         }
-
-    } else if(!BrStrICmp(suffix, ".bdd") || !BrStrICmp(suffix, ".bed")) {
-        img = ImageLoad(name);
     } else {
         img = ImageLoad(name);
     }
