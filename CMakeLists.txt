@@ -15,10 +15,6 @@ list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 
 find_package(Perl REQUIRED)
 
-if (BUILD_SHARED_LIBS)
-    message(FATAL_ERROR "BUILD_SHARED_LIBS is not supported at this time.")
-endif ()
-
 option(BRENDER_DISABLE_FINDSDL "Disable searching for SDL2" OFF)
 if (NOT BRENDER_DISABLE_FINDSDL)
     find_package(SDL2)
