@@ -16,11 +16,11 @@
 extern "C" {
 #endif
 
-float BR_PUBLIC_ENTRY BrFloatFloor(float f);
-float BR_PUBLIC_ENTRY BrFloatCeil(float f);
-float BR_PUBLIC_ENTRY BrFloatSqrt(float f);
-float BR_PUBLIC_ENTRY BrFloatPow(float a, float b);
-float BR_PUBLIC_ENTRY BrFloatAtan2(float x, float y);
+BR_API float BR_PUBLIC_ENTRY BrFloatFloor(float f);
+BR_API float BR_PUBLIC_ENTRY BrFloatCeil(float f);
+BR_API float BR_PUBLIC_ENTRY BrFloatSqrt(float f);
+BR_API float BR_PUBLIC_ENTRY BrFloatPow(float a, float b);
+BR_API float BR_PUBLIC_ENTRY BrFloatAtan2(float x, float y);
 
 #ifdef __cplusplus
 };

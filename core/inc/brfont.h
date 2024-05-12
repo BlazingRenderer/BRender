@@ -30,9 +30,9 @@ typedef struct br_font {
 #ifdef __cplusplus
 extern "C" {
 #endif
-extern struct br_font *BR_ASM_DATA BrFontFixed3x5;
-extern struct br_font *BR_ASM_DATA BrFontProp4x6;
-extern struct br_font *BR_ASM_DATA BrFontProp7x9;
+extern BR_API struct br_font *BR_ASM_DATA BrFontFixed3x5;
+extern BR_API struct br_font *BR_ASM_DATA BrFontProp4x6;
+extern BR_API struct br_font *BR_ASM_DATA BrFontProp7x9;
 #ifdef __cplusplus
 };
 #endif

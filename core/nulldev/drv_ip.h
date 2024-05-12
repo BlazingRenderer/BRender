@@ -14,8 +14,8 @@ extern "C" {
  * device.c
  */
 br_device              *DeviceNullAllocate(const char *identifier);
-br_geometry_primitives *GeometryPrimitivesNullAllocate(br_renderer_facility *type, const char *id);
-br_geometry_lighting   *GeometryLightingNullAllocate(br_renderer_facility *type, const char *id);
+BR_API br_geometry_primitives *GeometryPrimitivesNullAllocate(br_renderer_facility *type, const char *id);
+BR_API br_geometry_lighting   *GeometryLightingNullAllocate(br_renderer_facility *type, const char *id);
 
 #ifdef __cplusplus
 };

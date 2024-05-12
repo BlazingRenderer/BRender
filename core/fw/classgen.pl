@@ -208,7 +208,7 @@ foreach my $method (sort(keys(%method_return))) {
 	my $return_prefix = $method_return{$method} eq 'void' ? "" : "return ";
 
 	print <<END;
-$m_return $define_name(void *self$fn_args);
+BR_API $m_return $define_name(void *self$fn_args);
 END
 
 	print $fh_csource <<END;

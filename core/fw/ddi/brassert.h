@@ -19,7 +19,7 @@
 #if DEBUG
 #define ASSERT(e)            ((void)((e) || (_BrAssert(#e, __FILE__, __LINE__), 1)))
 #define ASSERT_MESSAGE(m, e) ((void)((e) || (_BrAssert(m " : " #e, __FILE__, __LINE__), 1)))
-void BR_RESIDENT_ENTRY _BrAssert(const char *condition, const char *file, unsigned line);
+BR_API void BR_RESIDENT_ENTRY _BrAssert(const char *condition, const char *file, unsigned line);
 #define VERIFY(f) ASSERT(f)
 
 #else
@@ -34,7 +34,7 @@ void BR_RESIDENT_ENTRY _BrAssert(const char *condition, const char *file, unsign
 #if PARANOID
 #define UASSERT(e)            ((void)((e) || (_BrUAssert(#e, __FILE__, __LINE__), 1)))
 #define UASSERT_MESSAGE(m, e) ((void)((e) || (_BrUAssert(m " : " #e, __FILE__, __LINE__), 1)))
-void BR_RESIDENT_ENTRY _BrUAssert(const char *condition, const char *file, unsigned line);
+BR_API void BR_RESIDENT_ENTRY _BrUAssert(const char *condition, const char *file, unsigned line);
 #define UVERIFY(f) ASSERT(f)
 
 #else

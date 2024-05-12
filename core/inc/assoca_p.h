@@ -15,10 +15,10 @@ extern "C" {
 
 #ifndef _NO_PROTOTYPES
 
-br_associative_array *BrAssociativeArrayAllocate();
-br_error              BrAssociativeArraySet(br_associative_array *array, br_token t, br_value v);
-br_error              BrAssociativeArrayRemove(br_associative_array *array, br_token t);
-br_error              BrAssociativeArrayQuery(br_associative_array *array, br_token t, br_value *value);
+BR_API br_associative_array *BrAssociativeArrayAllocate();
+BR_API br_error              BrAssociativeArraySet(br_associative_array *array, br_token t, br_value v);
+BR_API br_error              BrAssociativeArrayRemove(br_associative_array *array, br_token t);
+BR_API br_error              BrAssociativeArrayQuery(br_associative_array *array, br_token t, br_value *value);
 
 /*
  * Compatibility

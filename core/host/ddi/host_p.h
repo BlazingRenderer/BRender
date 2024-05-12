@@ -20,7 +20,7 @@ extern "C" {
 void BR_PUBLIC_ENTRY HostBegin(void);
 void BR_PUBLIC_ENTRY HostEnd(void);
 
-br_error BR_RESIDENT_ENTRY HostInfo(struct host_info *buffer, br_size_t buffersize);
+BR_API br_error BR_RESIDENT_ENTRY HostInfo(struct host_info *buffer, br_size_t buffersize);
 
 /*
  * Native loadable modules

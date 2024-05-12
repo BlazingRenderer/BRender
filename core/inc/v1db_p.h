@@ -40,12 +40,12 @@ typedef void BR_CALLBACK br_primitive_cbfn(br_primitive *primitive, br_actor *ac
 extern "C" {
 #endif
 
-br_error BR_PUBLIC_ENTRY BrV1dbBeginWrapper(void);
-br_error BR_PUBLIC_ENTRY BrV1dbEndWrapper(void);
+BR_API br_error BR_PUBLIC_ENTRY BrV1dbBeginWrapper(void);
+BR_API br_error BR_PUBLIC_ENTRY BrV1dbEndWrapper(void);
 
-br_error BR_PUBLIC_ENTRY BrV1dbRendererBegin(struct br_device_pixelmap *destination, struct br_renderer *renderer);
-struct br_renderer *BR_PUBLIC_ENTRY BrV1dbRendererQuery(void);
-br_error BR_PUBLIC_ENTRY            BrV1dbRendererEnd(void);
+BR_API br_error BR_PUBLIC_ENTRY BrV1dbRendererBegin(struct br_device_pixelmap *destination, struct br_renderer *renderer);
+BR_API struct br_renderer *BR_PUBLIC_ENTRY BrV1dbRendererQuery(void);
+BR_API br_error BR_PUBLIC_ENTRY            BrV1dbRendererEnd(void);
 
 /*
  * XXX - All the Add/Remove/Find/Count/Enum calls could ( when !(DEBUG | PARANOID))
@@ -54,158 +54,158 @@ br_error BR_PUBLIC_ENTRY            BrV1dbRendererEnd(void);
 /*
  * Material Handling
  */
-br_material *BR_PUBLIC_ENTRY           BrMaterialAdd(br_material *material);
-br_material *BR_PUBLIC_ENTRY           BrMaterialRemove(br_material *material);
-br_material *BR_PUBLIC_ENTRY           BrMaterialFind(const char *pattern);
-typedef br_material *BR_CALLBACK       br_material_find_cbfn(const char *name);
-br_material_find_cbfn *BR_PUBLIC_ENTRY BrMaterialFindHook(br_material_find_cbfn *hook);
-br_uint_32 BR_PUBLIC_ENTRY             BrMaterialAddMany(br_material **items, int n);
-br_uint_32 BR_PUBLIC_ENTRY             BrMaterialRemoveMany(br_material **items, int n);
-br_uint_32 BR_PUBLIC_ENTRY             BrMaterialFindMany(const char *pattern, br_material **items, int max);
-br_uint_32 BR_PUBLIC_ENTRY             BrMaterialCount(const char *pattern);
+BR_API br_material *BR_PUBLIC_ENTRY           BrMaterialAdd(br_material *material);
+BR_API br_material *BR_PUBLIC_ENTRY           BrMaterialRemove(br_material *material);
+BR_API br_material *BR_PUBLIC_ENTRY           BrMaterialFind(const char *pattern);
+typedef br_material *BR_CALLBACK              br_material_find_cbfn(const char *name);
+BR_API br_material_find_cbfn *BR_PUBLIC_ENTRY BrMaterialFindHook(br_material_find_cbfn *hook);
+BR_API br_uint_32 BR_PUBLIC_ENTRY             BrMaterialAddMany(br_material **items, int n);
+BR_API br_uint_32 BR_PUBLIC_ENTRY             BrMaterialRemoveMany(br_material **items, int n);
+BR_API br_uint_32 BR_PUBLIC_ENTRY             BrMaterialFindMany(const char *pattern, br_material **items, int max);
+BR_API br_uint_32 BR_PUBLIC_ENTRY             BrMaterialCount(const char *pattern);
 
-typedef br_uint_32 BR_CALLBACK br_material_enum_cbfn(br_material *item, void *arg);
-br_uint_32 BR_PUBLIC_ENTRY     BrMaterialEnum(const char *pattern, br_material_enum_cbfn *callback, void *arg);
+typedef br_uint_32 BR_CALLBACK    br_material_enum_cbfn(br_material *item, void *arg);
+BR_API br_uint_32 BR_PUBLIC_ENTRY BrMaterialEnum(const char *pattern, br_material_enum_cbfn *callback, void *arg);
 
-void BR_PUBLIC_ENTRY BrMaterialUpdate(br_material *material, br_uint_16 flags);
+BR_API void BR_PUBLIC_ENTRY BrMaterialUpdate(br_material *material, br_uint_16 flags);
 
-br_material *BR_PUBLIC_ENTRY BrMaterialAllocate(const char *name);
-void BR_PUBLIC_ENTRY         BrMaterialFree(br_material *m);
+BR_API br_material *BR_PUBLIC_ENTRY BrMaterialAllocate(const char *name);
+BR_API void BR_PUBLIC_ENTRY         BrMaterialFree(br_material *m);
 
 /*
  * Model Handling
  */
-br_model *BR_PUBLIC_ENTRY           BrModelAdd(br_model *model);
-br_model *BR_PUBLIC_ENTRY           BrModelRemove(br_model *model);
-br_model *BR_PUBLIC_ENTRY           BrModelFind(const char *pattern);
-typedef br_model *BR_CALLBACK       br_model_find_cbfn(const char *name);
-br_model_find_cbfn *BR_PUBLIC_ENTRY BrModelFindHook(br_model_find_cbfn *hook);
-br_uint_32 BR_PUBLIC_ENTRY          BrModelAddMany(br_model **items, int n);
-br_uint_32 BR_PUBLIC_ENTRY          BrModelRemoveMany(br_model **items, int n);
-br_uint_32 BR_PUBLIC_ENTRY          BrModelFindMany(const char *pattern, br_model **items, int max);
-br_uint_32 BR_PUBLIC_ENTRY          BrModelCount(const char *pattern);
+BR_API br_model *BR_PUBLIC_ENTRY           BrModelAdd(br_model *model);
+BR_API br_model *BR_PUBLIC_ENTRY           BrModelRemove(br_model *model);
+BR_API br_model *BR_PUBLIC_ENTRY           BrModelFind(const char *pattern);
+typedef br_model *BR_CALLBACK              br_model_find_cbfn(const char *name);
+BR_API br_model_find_cbfn *BR_PUBLIC_ENTRY BrModelFindHook(br_model_find_cbfn *hook);
+BR_API br_uint_32 BR_PUBLIC_ENTRY          BrModelAddMany(br_model **items, int n);
+BR_API br_uint_32 BR_PUBLIC_ENTRY          BrModelRemoveMany(br_model **items, int n);
+BR_API br_uint_32 BR_PUBLIC_ENTRY          BrModelFindMany(const char *pattern, br_model **items, int max);
+BR_API br_uint_32 BR_PUBLIC_ENTRY          BrModelCount(const char *pattern);
 
 typedef br_uint_32 BR_CALLBACK br_model_enum_cbfn(br_model *item, void *arg);
 
-br_uint_32 BR_PUBLIC_ENTRY BrModelEnum(const char *pattern, br_model_enum_cbfn *callback, void *arg);
+BR_API br_uint_32 BR_PUBLIC_ENTRY BrModelEnum(const char *pattern, br_model_enum_cbfn *callback, void *arg);
 
-void BR_PUBLIC_ENTRY BrModelUpdate(br_model *model, br_uint_16 flags);
+BR_API void BR_PUBLIC_ENTRY BrModelUpdate(br_model *model, br_uint_16 flags);
 
-void BR_PUBLIC_ENTRY         BrModelApplyMap(br_model *model, int map_type, br_matrix34 *xform);
-br_matrix34 *BR_PUBLIC_ENTRY BrModelFitMap(br_model *model, int axis_0, int axis_1, br_matrix34 *transform);
+BR_API void BR_PUBLIC_ENTRY         BrModelApplyMap(br_model *model, int map_type, br_matrix34 *xform);
+BR_API br_matrix34 *BR_PUBLIC_ENTRY BrModelFitMap(br_model *model, int axis_0, int axis_1, br_matrix34 *transform);
 
-br_model *BR_PUBLIC_ENTRY BrModelAllocate(const char *name, int nvertices, int nfaces);
-void BR_PUBLIC_ENTRY      BrModelFree(br_model *m);
+BR_API br_model *BR_PUBLIC_ENTRY BrModelAllocate(const char *name, int nvertices, int nfaces);
+BR_API void BR_PUBLIC_ENTRY      BrModelFree(br_model *m);
 
 /*
  * New primitive handling
  */
 
-br_primitive_list *BR_PUBLIC_ENTRY BrPrimitiveListAllocate(br_uint_32 prim_type, br_uint_16 num_prims);
-br_uint_32 BR_PUBLIC_ENTRY         BrModelAddPrimitiveList(br_model *model, br_primitive_list *primitive_list);
+BR_API br_primitive_list *BR_PUBLIC_ENTRY BrPrimitiveListAllocate(br_uint_32 prim_type, br_uint_16 num_prims);
+BR_API br_uint_32 BR_PUBLIC_ENTRY         BrModelAddPrimitiveList(br_model *model, br_primitive_list *primitive_list);
 
 /*
  * Texture handling
  */
-br_pixelmap *BR_PUBLIC_ENTRY      BrMapAdd(br_pixelmap *pixelmap);
-br_pixelmap *BR_PUBLIC_ENTRY      BrMapRemove(br_pixelmap *pixelmap);
-br_pixelmap *BR_PUBLIC_ENTRY      BrMapFind(const char *pattern);
-typedef br_pixelmap *BR_CALLBACK  br_map_find_cbfn(const char *name);
-br_map_find_cbfn *BR_PUBLIC_ENTRY BrMapFindHook(br_map_find_cbfn *hook);
-br_uint_32 BR_PUBLIC_ENTRY        BrMapAddMany(br_pixelmap **items, int n);
-br_uint_32 BR_PUBLIC_ENTRY        BrMapRemoveMany(br_pixelmap **items, int n);
-br_uint_32 BR_PUBLIC_ENTRY        BrMapFindMany(const char *pattern, br_pixelmap **items, int max);
-br_uint_32 BR_PUBLIC_ENTRY        BrMapCount(const char *pattern);
+BR_API br_pixelmap *BR_PUBLIC_ENTRY      BrMapAdd(br_pixelmap *pixelmap);
+BR_API br_pixelmap *BR_PUBLIC_ENTRY      BrMapRemove(br_pixelmap *pixelmap);
+BR_API br_pixelmap *BR_PUBLIC_ENTRY      BrMapFind(const char *pattern);
+typedef br_pixelmap *BR_CALLBACK         br_map_find_cbfn(const char *name);
+BR_API br_map_find_cbfn *BR_PUBLIC_ENTRY BrMapFindHook(br_map_find_cbfn *hook);
+BR_API br_uint_32 BR_PUBLIC_ENTRY        BrMapAddMany(br_pixelmap **items, int n);
+BR_API br_uint_32 BR_PUBLIC_ENTRY        BrMapRemoveMany(br_pixelmap **items, int n);
+BR_API br_uint_32 BR_PUBLIC_ENTRY        BrMapFindMany(const char *pattern, br_pixelmap **items, int max);
+BR_API br_uint_32 BR_PUBLIC_ENTRY        BrMapCount(const char *pattern);
 
-typedef br_uint_32 BR_CALLBACK br_map_enum_cbfn(br_pixelmap *item, void *arg);
-br_uint_32 BR_PUBLIC_ENTRY     BrMapEnum(const char *pattern, br_map_enum_cbfn *callback, void *arg);
+typedef br_uint_32 BR_CALLBACK    br_map_enum_cbfn(br_pixelmap *item, void *arg);
+BR_API br_uint_32 BR_PUBLIC_ENTRY BrMapEnum(const char *pattern, br_map_enum_cbfn *callback, void *arg);
 
-void BR_PUBLIC_ENTRY BrMapUpdate(br_pixelmap *item, br_uint_16 flags);
+BR_API void BR_PUBLIC_ENTRY BrMapUpdate(br_pixelmap *item, br_uint_16 flags);
 
 /*
  * Index lighting table handling
  */
-br_pixelmap *BR_PUBLIC_ENTRY        BrTableAdd(br_pixelmap *pixelmap);
-br_pixelmap *BR_PUBLIC_ENTRY        BrTableRemove(br_pixelmap *pixelmap);
-br_pixelmap *BR_PUBLIC_ENTRY        BrTableFind(const char *pattern);
-typedef br_pixelmap *BR_CALLBACK    br_table_find_cbfn(const char *name);
-br_table_find_cbfn *BR_PUBLIC_ENTRY BrTableFindHook(br_table_find_cbfn *hook);
-br_uint_32 BR_PUBLIC_ENTRY          BrTableAddMany(br_pixelmap **items, int n);
-br_uint_32 BR_PUBLIC_ENTRY          BrTableRemoveMany(br_pixelmap **items, int n);
-br_uint_32 BR_PUBLIC_ENTRY          BrTableFindMany(const char *pattern, br_pixelmap **items, int max);
-br_uint_32 BR_PUBLIC_ENTRY          BrTableCount(const char *pattern);
+BR_API br_pixelmap *BR_PUBLIC_ENTRY        BrTableAdd(br_pixelmap *pixelmap);
+BR_API br_pixelmap *BR_PUBLIC_ENTRY        BrTableRemove(br_pixelmap *pixelmap);
+BR_API br_pixelmap *BR_PUBLIC_ENTRY        BrTableFind(const char *pattern);
+typedef br_pixelmap *BR_CALLBACK           br_table_find_cbfn(const char *name);
+BR_API br_table_find_cbfn *BR_PUBLIC_ENTRY BrTableFindHook(br_table_find_cbfn *hook);
+BR_API br_uint_32 BR_PUBLIC_ENTRY          BrTableAddMany(br_pixelmap **items, int n);
+BR_API br_uint_32 BR_PUBLIC_ENTRY          BrTableRemoveMany(br_pixelmap **items, int n);
+BR_API br_uint_32 BR_PUBLIC_ENTRY          BrTableFindMany(const char *pattern, br_pixelmap **items, int max);
+BR_API br_uint_32 BR_PUBLIC_ENTRY          BrTableCount(const char *pattern);
 
 typedef br_uint_32 BR_CALLBACK br_table_enum_cbfn(br_pixelmap *item, void *arg);
 
-br_uint_32 BR_PUBLIC_ENTRY BrTableEnum(const char *pattern, br_table_enum_cbfn *callback, void *arg);
+BR_API br_uint_32 BR_PUBLIC_ENTRY BrTableEnum(const char *pattern, br_table_enum_cbfn *callback, void *arg);
 
-void BR_PUBLIC_ENTRY BrTableUpdate(br_pixelmap *item, br_uint_16 flags);
+BR_API void BR_PUBLIC_ENTRY BrTableUpdate(br_pixelmap *item, br_uint_16 flags);
 
 /*
  * Actor Handling
  */
-typedef br_uint_32 BR_CALLBACK br_actor_enum_cbfn(br_actor *mat, void *arg);
-br_uint_32 BR_PUBLIC_ENTRY     BrActorEnum(br_actor *parent, br_actor_enum_cbfn *callback, void *arg);
+typedef br_uint_32 BR_CALLBACK    br_actor_enum_cbfn(br_actor *mat, void *arg);
+BR_API br_uint_32 BR_PUBLIC_ENTRY BrActorEnum(br_actor *parent, br_actor_enum_cbfn *callback, void *arg);
 
-br_actor *BR_PUBLIC_ENTRY  BrActorAdd(br_actor *parent, br_actor *a);
-br_actor *BR_PUBLIC_ENTRY  BrActorAddNoRenumber(br_actor *parent, br_actor *a);
-br_actor *BR_PUBLIC_ENTRY  BrActorRemove(br_actor *a);
-br_actor *BR_PUBLIC_ENTRY  BrActorRemoveNoRenumber(br_actor *a);
-void BR_PUBLIC_ENTRY       BrActorRelink(br_actor *parent, br_actor *actor);
-br_uint_16 BR_PUBLIC_ENTRY BrActorToActorMatrix34(br_matrix34 *m, br_actor *a, br_actor *b);
-void BR_PUBLIC_ENTRY       BrActorToScreenMatrix4(br_matrix4 *m, br_actor *a, br_actor *camera);
+BR_API br_actor *BR_PUBLIC_ENTRY  BrActorAdd(br_actor *parent, br_actor *a);
+BR_API br_actor *BR_PUBLIC_ENTRY  BrActorAddNoRenumber(br_actor *parent, br_actor *a);
+BR_API br_actor *BR_PUBLIC_ENTRY  BrActorRemove(br_actor *a);
+BR_API br_actor *BR_PUBLIC_ENTRY  BrActorRemoveNoRenumber(br_actor *a);
+BR_API void BR_PUBLIC_ENTRY       BrActorRelink(br_actor *parent, br_actor *actor);
+BR_API br_uint_16 BR_PUBLIC_ENTRY BrActorToActorMatrix34(br_matrix34 *m, br_actor *a, br_actor *b);
+BR_API void BR_PUBLIC_ENTRY       BrActorToScreenMatrix4(br_matrix4 *m, br_actor *a, br_actor *camera);
 
-br_actor *BR_PUBLIC_ENTRY BrActorAllocate(br_uint_8 actor_type, void *type_data);
-void BR_PUBLIC_ENTRY      BrActorFree(br_actor *a);
+BR_API br_actor *BR_PUBLIC_ENTRY BrActorAllocate(br_uint_8 actor_type, void *type_data);
+BR_API void BR_PUBLIC_ENTRY      BrActorFree(br_actor *a);
 
-br_uint_32 BR_PUBLIC_ENTRY BrActorSearchMany(br_actor *root, char *pattern, br_actor **actors, int max);
-br_actor *BR_PUBLIC_ENTRY  BrActorSearch(br_actor *root, char *pattern);
+BR_API br_uint_32 BR_PUBLIC_ENTRY BrActorSearchMany(br_actor *root, char *pattern, br_actor **actors, int max);
+BR_API br_actor *BR_PUBLIC_ENTRY  BrActorSearch(br_actor *root, char *pattern);
 
-br_bounds *BR_PUBLIC_ENTRY BrActorToBounds(br_bounds *b, br_actor *ap);
+BR_API br_bounds *BR_PUBLIC_ENTRY BrActorToBounds(br_bounds *b, br_actor *ap);
 
 /*
  * File operations
  */
-br_model *BR_PUBLIC_ENTRY  BrModelLoad(const char *filename);
-br_uint_32 BR_PUBLIC_ENTRY BrModelSave(const char *filename, br_model *model);
-br_uint_32 BR_PUBLIC_ENTRY BrModelLoadMany(const char *filename, br_model **models, br_uint_16 num);
-br_uint_32 BR_PUBLIC_ENTRY BrModelSaveMany(const char *filename, br_model **models, br_uint_16 num);
-br_error BR_PUBLIC_ENTRY   BrModelFileCount(const char *filename, br_uint_16 *num);
+BR_API br_model *BR_PUBLIC_ENTRY  BrModelLoad(const char *filename);
+BR_API br_uint_32 BR_PUBLIC_ENTRY BrModelSave(const char *filename, br_model *model);
+BR_API br_uint_32 BR_PUBLIC_ENTRY BrModelLoadMany(const char *filename, br_model **models, br_uint_16 num);
+BR_API br_uint_32 BR_PUBLIC_ENTRY BrModelSaveMany(const char *filename, br_model **models, br_uint_16 num);
+BR_API br_error BR_PUBLIC_ENTRY   BrModelFileCount(const char *filename, br_uint_16 *num);
 
-br_material *BR_PUBLIC_ENTRY BrMaterialLoad(const char *filename);
-br_uint_32 BR_PUBLIC_ENTRY   BrMaterialSave(const char *filename, br_material *material);
-br_uint_32 BR_PUBLIC_ENTRY   BrMaterialLoadMany(const char *filename, br_material **materials, br_uint_16 num);
-br_uint_32 BR_PUBLIC_ENTRY   BrMaterialSaveMany(const char *filename, br_material **materials, br_uint_16 num);
-br_error BR_PUBLIC_ENTRY     BrMaterialFileCount(const char *filename, br_uint_16 *num);
+BR_API br_material *BR_PUBLIC_ENTRY BrMaterialLoad(const char *filename);
+BR_API br_uint_32 BR_PUBLIC_ENTRY   BrMaterialSave(const char *filename, br_material *material);
+BR_API br_uint_32 BR_PUBLIC_ENTRY   BrMaterialLoadMany(const char *filename, br_material **materials, br_uint_16 num);
+BR_API br_uint_32 BR_PUBLIC_ENTRY   BrMaterialSaveMany(const char *filename, br_material **materials, br_uint_16 num);
+BR_API br_error BR_PUBLIC_ENTRY     BrMaterialFileCount(const char *filename, br_uint_16 *num);
 
-br_actor *BR_PUBLIC_ENTRY  BrActorLoad(const char *filename);
-br_uint_32 BR_PUBLIC_ENTRY BrActorSave(const char *filename, br_actor *actor);
-br_uint_32 BR_PUBLIC_ENTRY BrActorLoadMany(const char *filename, br_actor **actors, br_uint_16 num);
-br_uint_32 BR_PUBLIC_ENTRY BrActorSaveMany(const char *filename, br_actor **actors, br_uint_16 num);
-br_error BR_PUBLIC_ENTRY   BrActorFileCount(const char *filename, br_uint_16 *num);
+BR_API br_actor *BR_PUBLIC_ENTRY  BrActorLoad(const char *filename);
+BR_API br_uint_32 BR_PUBLIC_ENTRY BrActorSave(const char *filename, br_actor *actor);
+BR_API br_uint_32 BR_PUBLIC_ENTRY BrActorLoadMany(const char *filename, br_actor **actors, br_uint_16 num);
+BR_API br_uint_32 BR_PUBLIC_ENTRY BrActorSaveMany(const char *filename, br_actor **actors, br_uint_16 num);
+BR_API br_error BR_PUBLIC_ENTRY   BrActorFileCount(const char *filename, br_uint_16 *num);
 
 /*
  * Lights
  */
-void BR_PUBLIC_ENTRY BrLightEnable(br_actor *l);
-void BR_PUBLIC_ENTRY BrLightDisable(br_actor *l);
+BR_API void BR_PUBLIC_ENTRY BrLightEnable(br_actor *l);
+BR_API void BR_PUBLIC_ENTRY BrLightDisable(br_actor *l);
 
 /*
  * Environment
  */
-br_actor *BR_PUBLIC_ENTRY BrEnvironmentSet(br_actor *a);
+BR_API br_actor *BR_PUBLIC_ENTRY BrEnvironmentSet(br_actor *a);
 
 /*
  * Clip planes
  */
-void BR_PUBLIC_ENTRY BrClipPlaneEnable(br_actor *cp);
-void BR_PUBLIC_ENTRY BrClipPlaneDisable(br_actor *cp);
+BR_API void BR_PUBLIC_ENTRY BrClipPlaneEnable(br_actor *cp);
+BR_API void BR_PUBLIC_ENTRY BrClipPlaneDisable(br_actor *cp);
 
 /*
  * Horizon planes
  */
-void BR_PUBLIC_ENTRY BrHorizonPlaneEnable(br_actor *h);
-void BR_PUBLIC_ENTRY BrHorizonPlaneDisable(br_actor *h);
+BR_API void BR_PUBLIC_ENTRY BrHorizonPlaneEnable(br_actor *h);
+BR_API void BR_PUBLIC_ENTRY BrHorizonPlaneDisable(br_actor *h);
 
 /*
  * Picking
@@ -213,61 +213,62 @@ void BR_PUBLIC_ENTRY BrHorizonPlaneDisable(br_actor *h);
 typedef int BR_CALLBACK br_pick2d_cbfn(br_actor *a, br_model *model, br_material *material, br_vector3 *ray_pos,
                                        br_vector3 *ray_dir, br_scalar t_near, br_scalar t_far, void *arg);
 
-int BR_PUBLIC_ENTRY BrScenePick2D(br_actor *world, br_actor *camera, br_pixelmap *viewport, int pick_x, int pick_y,
-                                  br_pick2d_cbfn *callback, void *arg);
+BR_API int BR_PUBLIC_ENTRY BrScenePick2D(br_actor *world, br_actor *camera, br_pixelmap *viewport, int pick_x,
+                                         int pick_y, br_pick2d_cbfn *callback, void *arg);
 
 typedef int BR_CALLBACK br_pick3d_cbfn(br_actor *a, br_model *model, br_material *material, br_matrix34 *transform,
                                        br_bounds *bounds, void *arg);
 
-int BR_PUBLIC_ENTRY BrScenePick3D(br_actor *world, br_actor *actor, br_bounds *bounds, br_pick3d_cbfn *callback, void *arg);
+BR_API int BR_PUBLIC_ENTRY BrScenePick3D(br_actor *world, br_actor *actor, br_bounds *bounds, br_pick3d_cbfn *callback,
+                                         void *arg);
 
 typedef int BR_CALLBACK br_modelpick2d_cbfn(br_model *model, br_material *material, br_vector3 *ray_pos,
                                             br_vector3 *ray_dir, br_scalar t, int face, int edge, int vertex,
                                             br_vector3 *p, br_vector2 *map, void *arg);
 
-int BR_PUBLIC_ENTRY BrModelPick2D(br_model *model, br_material *material, br_vector3 *ray_pos, br_vector3 *ray_dir,
-                                  br_scalar t_near, br_scalar t_far, br_modelpick2d_cbfn *callback, void *arg);
+BR_API int BR_PUBLIC_ENTRY BrModelPick2D(br_model *model, br_material *material, br_vector3 *ray_pos, br_vector3 *ray_dir,
+                                         br_scalar t_near, br_scalar t_far, br_modelpick2d_cbfn *callback, void *arg);
 
 /*
  * Custom calback support
  */
-br_uint_32 BR_PUBLIC_ENTRY BrOnScreenCheck(br_bounds3 *bounds);
+BR_API br_uint_32 BR_PUBLIC_ENTRY BrOnScreenCheck(br_bounds3 *bounds);
 
-br_uint_8 BR_PUBLIC_ENTRY  BrOriginToScreenXY(br_vector2 *screen);
-br_uint_32 BR_PUBLIC_ENTRY BrOriginToScreenXYZO(br_vector3 *screen);
+BR_API br_uint_8 BR_PUBLIC_ENTRY  BrOriginToScreenXY(br_vector2 *screen);
+BR_API br_uint_32 BR_PUBLIC_ENTRY BrOriginToScreenXYZO(br_vector3 *screen);
 
-br_uint_8 BR_PUBLIC_ENTRY  BrPointToScreenXY(br_vector2 *screen, br_vector3 *point);
-br_uint_32 BR_PUBLIC_ENTRY BrPointToScreenXYZO(br_vector3 *screen, br_vector3 *point);
+BR_API br_uint_8 BR_PUBLIC_ENTRY  BrPointToScreenXY(br_vector2 *screen, br_vector3 *point);
+BR_API br_uint_32 BR_PUBLIC_ENTRY BrPointToScreenXYZO(br_vector3 *screen, br_vector3 *point);
 
-void BR_PUBLIC_ENTRY BrPointToScreenXYMany(br_vector2 *screens, br_vector3 *points, br_uint_32 npoints);
-void BR_PUBLIC_ENTRY BrPointToScreenXYZOMany(br_vector3 *screens, br_uint_32 *outcodes, br_vector3 *points,
-                                             br_uint_32 npoints);
+BR_API void BR_PUBLIC_ENTRY BrPointToScreenXYMany(br_vector2 *screens, br_vector3 *points, br_uint_32 npoints);
+BR_API void BR_PUBLIC_ENTRY BrPointToScreenXYZOMany(br_vector3 *screens, br_uint_32 *outcodes, br_vector3 *points,
+                                                    br_uint_32 npoints);
 
-void BR_PUBLIC_ENTRY BrSceneModelLight(br_model *model, br_material *default_material, br_actor *root, br_actor *a);
+BR_API void BR_PUBLIC_ENTRY BrSceneModelLight(br_model *model, br_material *default_material, br_actor *root, br_actor *a);
 
-void BR_PUBLIC_ENTRY BrModelToScreenQuery(br_matrix4 *dest);
-void BR_PUBLIC_ENTRY BrModelToViewQuery(br_matrix34 *dest);
+BR_API void BR_PUBLIC_ENTRY BrModelToScreenQuery(br_matrix4 *dest);
+BR_API void BR_PUBLIC_ENTRY BrModelToViewQuery(br_matrix34 *dest);
 
-br_scalar BR_PUBLIC_ENTRY  BrZbDepthToScreenZ(br_uint_32 depth_z, const br_camera *camera);
-br_uint_32 BR_PUBLIC_ENTRY BrZbScreenZToDepth(br_scalar sz, const br_camera *camera);
+BR_API br_scalar BR_PUBLIC_ENTRY  BrZbDepthToScreenZ(br_uint_32 depth_z, const br_camera *camera);
+BR_API br_uint_32 BR_PUBLIC_ENTRY BrZbScreenZToDepth(br_scalar sz, const br_camera *camera);
 
-br_scalar BR_PUBLIC_ENTRY BrZsDepthToScreenZ(br_scalar depth_z, const br_camera *camera);
-br_scalar BR_PUBLIC_ENTRY BrZsScreenZToDepth(br_scalar sz, const br_camera *camera);
+BR_API br_scalar BR_PUBLIC_ENTRY BrZsDepthToScreenZ(br_scalar depth_z, const br_camera *camera);
+BR_API br_scalar BR_PUBLIC_ENTRY BrZsScreenZToDepth(br_scalar sz, const br_camera *camera);
 
-br_scalar BR_PUBLIC_ENTRY BrScreenZToCamera(const br_actor *camera, br_scalar sz);
-void BR_PUBLIC_ENTRY BrScreenXYZToCamera(br_vector3 *point, const br_actor *camera, const br_pixelmap *screen_buffer,
-                                         br_int_16 x, br_int_16 y, br_scalar sz);
+BR_API br_scalar BR_PUBLIC_ENTRY BrScreenZToCamera(const br_actor *camera, br_scalar sz);
+BR_API void BR_PUBLIC_ENTRY      BrScreenXYZToCamera(br_vector3 *point, const br_actor *camera,
+                                                     const br_pixelmap *screen_buffer, br_int_16 x, br_int_16 y, br_scalar sz);
 
-br_error BR_PUBLIC_ENTRY BrLightModelCull(br_actor *light);
+BR_API br_error BR_PUBLIC_ENTRY BrLightModelCull(br_actor *light);
 
 /*
  * Utility "FindFailed" callbacks that can be used to automaticaly load
  * models/materials/maps/tables from the filesystem
  */
-br_pixelmap *BR_CALLBACK BrMapFindFailedLoad(const char *name);
-br_pixelmap *BR_CALLBACK BrTableFindFailedLoad(const char *name);
-br_model *BR_CALLBACK    BrModelFindFailedLoad(const char *name);
-br_material *BR_CALLBACK BrMaterialFindFailedLoad(const char *name);
+BR_API br_pixelmap *BR_CALLBACK BrMapFindFailedLoad(const char *name);
+BR_API br_pixelmap *BR_CALLBACK BrTableFindFailedLoad(const char *name);
+BR_API br_model *BR_CALLBACK    BrModelFindFailedLoad(const char *name);
+BR_API br_material *BR_CALLBACK BrMaterialFindFailedLoad(const char *name);
 
 /*
  * Backwards comaptibility
@@ -280,82 +281,82 @@ br_material *BR_CALLBACK BrMaterialFindFailedLoad(const char *name);
 /*
  * Rendering - General
  */
-void BR_PUBLIC_ENTRY BrRendererBegin(br_pixelmap *destination, struct br_renderer_facility *renderer_facility,
-                                     struct br_primitive_library *primitive_library, void *primitive_heap,
-                                     br_uint_32 primitive_heap_size);
+BR_API void BR_PUBLIC_ENTRY BrRendererBegin(br_pixelmap *destination, struct br_renderer_facility *renderer_facility,
+                                            struct br_primitive_library *primitive_library, void *primitive_heap,
+                                            br_uint_32 primitive_heap_size);
 
-void BR_PUBLIC_ENTRY BrRendererEnd(void);
+BR_API void BR_PUBLIC_ENTRY BrRendererEnd(void);
 
-void BR_PUBLIC_ENTRY BrRendererFrameBegin(void);
-void BR_PUBLIC_ENTRY BrRendererFrameEnd(void);
+BR_API void BR_PUBLIC_ENTRY BrRendererFrameBegin(void);
+BR_API void BR_PUBLIC_ENTRY BrRendererFrameEnd(void);
 
-void BR_PUBLIC_ENTRY BrRendererFocusLossBegin(void);
-void BR_PUBLIC_ENTRY BrRendererFocusLossEnd(void);
+BR_API void BR_PUBLIC_ENTRY BrRendererFocusLossBegin(void);
+BR_API void BR_PUBLIC_ENTRY BrRendererFocusLossEnd(void);
 
 /*
  * Renderering - Z Buffer
  */
-void BR_PUBLIC_ENTRY BrZbBegin(br_uint_8 colour_type, br_uint_8 depth_type);
-void BR_PUBLIC_ENTRY BrZbEnd(void);
+BR_API void BR_PUBLIC_ENTRY BrZbBegin(br_uint_8 colour_type, br_uint_8 depth_type);
+BR_API void BR_PUBLIC_ENTRY BrZbEnd(void);
 
-void BR_PUBLIC_ENTRY BrZbSceneRenderBegin(br_actor *world, br_actor *camera, br_pixelmap *colour_buffer,
-                                          br_pixelmap *depth_buffer);
+BR_API void BR_PUBLIC_ENTRY BrZbSceneRenderBegin(br_actor *world, br_actor *camera, br_pixelmap *colour_buffer,
+                                                 br_pixelmap *depth_buffer);
 
-void BR_PUBLIC_ENTRY BrZbSceneRenderContinue(br_actor *world, br_actor *camera, br_pixelmap *colour_buffer,
-                                             br_pixelmap *depth_buffer);
+BR_API void BR_PUBLIC_ENTRY BrZbSceneRenderContinue(br_actor *world, br_actor *camera, br_pixelmap *colour_buffer,
+                                                    br_pixelmap *depth_buffer);
 
-void BR_PUBLIC_ENTRY BrZbSceneRenderAdd(br_actor *tree);
-void BR_PUBLIC_ENTRY BrZbSceneRenderEnd(void);
+BR_API void BR_PUBLIC_ENTRY BrZbSceneRenderAdd(br_actor *tree);
+BR_API void BR_PUBLIC_ENTRY BrZbSceneRenderEnd(void);
 
-void BR_PUBLIC_ENTRY BrZbSceneRender(br_actor *world, br_actor *camera, br_pixelmap *colour_buffer,
-                                     br_pixelmap *depth_buffer);
+BR_API void BR_PUBLIC_ENTRY BrZbSceneRender(br_actor *world, br_actor *camera, br_pixelmap *colour_buffer,
+                                            br_pixelmap *depth_buffer);
 
 /*
  * Used within custom model callbacks to render other models
  */
-void BR_PUBLIC_ENTRY BrZbModelRender(br_actor *actor, br_model *model, br_material *material, br_uint_8 style,
-                                     int on_screen, int use_custom);
+BR_API void BR_PUBLIC_ENTRY BrZbModelRender(br_actor *actor, br_model *model, br_material *material, br_uint_8 style,
+                                            int on_screen, int use_custom);
 
-br_renderbounds_cbfn *BR_PUBLIC_ENTRY BrZbRenderBoundsCallbackSet(br_renderbounds_cbfn *new_cbfn);
+BR_API br_renderbounds_cbfn *BR_PUBLIC_ENTRY BrZbRenderBoundsCallbackSet(br_renderbounds_cbfn *new_cbfn);
 
 /*
  * Renderering - Z Sort
  */
-void BR_PUBLIC_ENTRY BrZsBegin(br_uint_8 colour_type, void *primitive, br_uint_32 size);
-void BR_PUBLIC_ENTRY BrZsEnd(void);
+BR_API void BR_PUBLIC_ENTRY BrZsBegin(br_uint_8 colour_type, void *primitive, br_uint_32 size);
+BR_API void BR_PUBLIC_ENTRY BrZsEnd(void);
 
-void BR_PUBLIC_ENTRY BrZsSceneRenderBegin(br_actor *world, br_actor *camera, br_pixelmap *colour_buffer);
+BR_API void BR_PUBLIC_ENTRY BrZsSceneRenderBegin(br_actor *world, br_actor *camera, br_pixelmap *colour_buffer);
 
-void BR_PUBLIC_ENTRY BrZsSceneRenderContinue(br_actor *world, br_actor *camera, br_pixelmap *colour_buffer);
+BR_API void BR_PUBLIC_ENTRY BrZsSceneRenderContinue(br_actor *world, br_actor *camera, br_pixelmap *colour_buffer);
 
-void BR_PUBLIC_ENTRY BrZsSceneRenderAdd(br_actor *tree);
-void BR_PUBLIC_ENTRY BrZsSceneRenderEnd(void);
+BR_API void BR_PUBLIC_ENTRY BrZsSceneRenderAdd(br_actor *tree);
+BR_API void BR_PUBLIC_ENTRY BrZsSceneRenderEnd(void);
 
-void BR_PUBLIC_ENTRY BrZsSceneRender(br_actor *world, br_actor *camera, br_pixelmap *colour_buffer);
+BR_API void BR_PUBLIC_ENTRY BrZsSceneRender(br_actor *world, br_actor *camera, br_pixelmap *colour_buffer);
 
 /*
  * Used within custom model callbacks to render other models
  */
-void BR_PUBLIC_ENTRY BrZsModelRender(br_actor *actor, br_model *model, br_material *material,
-                                     br_order_table *order_table, br_uint_8 style, int on_screen, int use_custom);
+BR_API void BR_PUBLIC_ENTRY BrZsModelRender(br_actor *actor, br_model *model, br_material *material,
+                                            br_order_table *order_table, br_uint_8 style, int on_screen, int use_custom);
 
-br_renderbounds_cbfn *BR_PUBLIC_ENTRY BrZsRenderBoundsCallbackSet(br_renderbounds_cbfn *new_cbfn);
+BR_API br_renderbounds_cbfn *BR_PUBLIC_ENTRY BrZsRenderBoundsCallbackSet(br_renderbounds_cbfn *new_cbfn);
 
-br_primitive_cbfn *BR_PUBLIC_ENTRY BrZsPrimitiveCallbackSet(br_primitive_cbfn *new_cbfn);
+BR_API br_primitive_cbfn *BR_PUBLIC_ENTRY BrZsPrimitiveCallbackSet(br_primitive_cbfn *new_cbfn);
 
-struct br_order_table *BR_PUBLIC_ENTRY BrZsOrderTableAllocate(br_uint_16 size, br_uint_32 flags, br_uint_16 type);
-void BR_PUBLIC_ENTRY                   BrZsOrderTableFree(br_order_table *order_table);
-struct br_order_table *BR_PUBLIC_ENTRY BrZsActorOrderTableSet(struct br_actor *actor, struct br_order_table *order_table);
-struct br_order_table *BR_PUBLIC_ENTRY BrZsActorOrderTableGet(struct br_actor *actor);
-struct br_order_table *BR_PUBLIC_ENTRY BrZsOrderTableClear(struct br_order_table *order_table);
+BR_API struct br_order_table *BR_PUBLIC_ENTRY BrZsOrderTableAllocate(br_uint_16 size, br_uint_32 flags, br_uint_16 type);
+BR_API void BR_PUBLIC_ENTRY BrZsOrderTableFree(br_order_table *order_table);
+BR_API struct br_order_table *BR_PUBLIC_ENTRY BrZsActorOrderTableSet(struct br_actor *actor, struct br_order_table *order_table);
+BR_API struct br_order_table *BR_PUBLIC_ENTRY BrZsActorOrderTableGet(struct br_actor *actor);
+BR_API struct br_order_table *BR_PUBLIC_ENTRY BrZsOrderTableClear(struct br_order_table *order_table);
 
-void BR_PUBLIC_ENTRY BrZsOrderTablePrimitiveInsert(struct br_order_table *order_table, struct br_primitive *primitive,
-                                                   br_uint_16 bucket);
+BR_API void BR_PUBLIC_ENTRY BrZsOrderTablePrimitiveInsert(struct br_order_table *order_table,
+                                                          struct br_primitive *primitive, br_uint_16 bucket);
 
-br_uint_16 BR_PUBLIC_ENTRY BrZsPrimitiveBucketSelect(br_scalar *z, br_uint_16 type, br_scalar min_z, br_scalar max_z,
-                                                     br_uint_16 size, br_uint_16 sort_type);
-void BR_PUBLIC_ENTRY       BrZsOrderTablePrimaryEnable(struct br_order_table *order_table);
-void BR_PUBLIC_ENTRY       BrZsOrderTablePrimaryDisable(void);
+BR_API br_uint_16 BR_PUBLIC_ENTRY BrZsPrimitiveBucketSelect(br_scalar *z, br_uint_16 type, br_scalar min_z,
+                                                            br_scalar max_z, br_uint_16 size, br_uint_16 sort_type);
+BR_API void BR_PUBLIC_ENTRY       BrZsOrderTablePrimaryEnable(struct br_order_table *order_table);
+BR_API void BR_PUBLIC_ENTRY       BrZsOrderTablePrimaryDisable(void);
 
 /*
  * Backwards compatibility
@@ -369,7 +370,7 @@ void BR_PUBLIC_ENTRY       BrZsOrderTablePrimaryDisable(void);
  */
 
 typedef void BR_CALLBACK zs_order_table_traversal_cbfn(int primitive_type, ot_vertex *v0, ot_vertex *v1, ot_vertex *v2);
-void BR_PUBLIC_ENTRY     ZsOrderTableTraversal(zs_order_table_traversal_cbfn *cbfn);
+BR_API void BR_PUBLIC_ENTRY ZsOrderTableTraversal(zs_order_table_traversal_cbfn *cbfn);
 
 /*
  * Callback function invoked when a renderer facility is enumerated
@@ -408,8 +409,8 @@ typedef br_boolean BR_CALLBACK br_primlib_enum_cbfn(const char *identifier, br_p
 /*
  * Enumeration routines.
  */
-br_error BR_PUBLIC_ENTRY BrRendererFacilityEnum(br_pixelmap *destination, br_rendfcty_enum_cbfn *cbfn, void *args);
-br_error BR_PUBLIC_ENTRY BrPrimitiveLibraryEnum(br_pixelmap *destination, br_primlib_enum_cbfn *cbfn, void *args);
+BR_API br_error BR_PUBLIC_ENTRY BrRendererFacilityEnum(br_pixelmap *destination, br_rendfcty_enum_cbfn *cbfn, void *args);
+BR_API br_error BR_PUBLIC_ENTRY BrPrimitiveLibraryEnum(br_pixelmap *destination, br_primlib_enum_cbfn *cbfn, void *args);
 
 #ifdef __cplusplus
 };
