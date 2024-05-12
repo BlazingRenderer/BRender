@@ -46,6 +46,7 @@ set_target_properties(brender PROPERTIES
         VISIBILITY_INLINES_HIDDEN YES
         FOLDER "BRender"
         EXPORT_NAME "Core" # To get BRender::Core when exported.
+        VERSION ${PROJECT_VERSION}
         )
 
 # https://gitlab.kitware.com/cmake/cmake/-/issues/17356

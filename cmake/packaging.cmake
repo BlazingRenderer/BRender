@@ -79,7 +79,7 @@ configure_package_config_file(
 
 write_basic_package_version_file(
         "${CMAKE_CURRENT_BINARY_DIR}/BRenderConfigVersion.cmake"
-        VERSION "1.3.2"
+        VERSION "${PROJECT_VERSION}"
         COMPATIBILITY AnyNewerVersion
 )
 
