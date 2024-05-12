@@ -31,6 +31,18 @@ if (BRENDER_BUILD_SOFT AND (NOT WIN32 OR NOT MSVC OR (NOT CMAKE_GENERATOR_PLATFO
     message(FATAL_ERROR "Can only build the software renderer on 32-bit Windows using MSVC.")
 endif ()
 
+if (NOT BRENDER_DISABLE_INSTALL)
+    include(GNUInstallDirs)
+
+    # Set this so CMake doesn't strip the RUNPATH on install.
+    if (NOT APPLE)
+        list(APPEND CMAKE_INSTALL_RPATH
+                "${CMAKE_INSTALL_FULL_LIBDIR}"          # For BRender itself.
+                "${CMAKE_INSTALL_FULL_LIBDIR}/brender"  # For the drivers.
+        )
+    endif ()
+endif ()
+
 if (WIN32)
     set(BRENDER_DRIVER_SUFFIX ".bdd")
 else ()
