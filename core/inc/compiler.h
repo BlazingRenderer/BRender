@@ -93,6 +93,9 @@ typedef float br_float;
 /*
  * Function qualifiers
  */
+#define BR_DLL_EXPORT __declspec(dllexport)
+#define BR_DLL_IMPORT __declspec(dllimport)
+
 /*
  * Public entry point into library
  */
@@ -151,6 +154,14 @@ typedef float br_float;
 /*
  * Function qualifiers
  */
+#if defined(__MINGW32__)
+#define BR_DLL_EXPORT __attribute__((dllexport))
+#define BR_DLL_IMPORT __attribute__((dllimport))
+#else
+#define BR_DLL_EXPORT __attribute__((visibility("default")))
+#define BR_DLL_IMPORT
+#endif
+
 /*
  * Public entry point into library
  */
