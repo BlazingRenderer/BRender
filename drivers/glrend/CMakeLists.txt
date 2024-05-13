@@ -149,7 +149,15 @@ set_target_properties(glrend PROPERTIES
         C_STANDARD_REQUIRED TRUE
         EXPORT_NAME "Drivers::GLRend"
         FOLDER "BRender/Drivers"
+        OUTPUT_NAME "glrend"
         )
+
+if (target_type STREQUAL SHARED_LIBRARY)
+    set_target_properties(glrend PROPERTIES
+            PREFIX ""
+            SUFFIX ${BRENDER_DRIVER_SUFFIX}
+    )
+endif ()
 
 add_library(BRender::Drivers::GLRend::Headers ALIAS glrend-headers)
 add_library(BRender::Drivers::GLRend ALIAS glrend)

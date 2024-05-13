@@ -31,6 +31,12 @@ if (BRENDER_BUILD_SOFT AND (NOT WIN32 OR NOT MSVC OR (NOT CMAKE_GENERATOR_PLATFO
     message(FATAL_ERROR "Can only build the software renderer on 32-bit Windows using MSVC.")
 endif ()
 
+if (WIN32)
+    set(BRENDER_DRIVER_SUFFIX ".bdd")
+else ()
+    set(BRENDER_DRIVER_SUFFIX ".sobdd")
+endif ()
+
 add_subdirectory(core)
 
 if (BRENDER_BUILD_DRIVERS)

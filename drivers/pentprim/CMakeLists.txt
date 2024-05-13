@@ -205,4 +205,11 @@ set_target_properties(pentprim PROPERTIES
 		OUTPUT_NAME "softprmf"
 		)
 
+if (target_type STREQUAL SHARED_LIBRARY)
+    set_target_properties(pentprim PROPERTIES
+            PREFIX ""
+            SUFFIX ${BRENDER_DRIVER_SUFFIX}
+    )
+endif ()
+
 add_library(BRender::Drivers::SoftPrim ALIAS pentprim)

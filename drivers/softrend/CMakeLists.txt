@@ -77,6 +77,14 @@ target_link_libraries(softrend PRIVATE BRender::DDI)
 set_target_properties(softrend PROPERTIES
         EXPORT_NAME "Drivers::SoftRend"
         FOLDER "BRender/Drivers"
+        OUTPUT_NAME "softrndf"
         )
+
+if (target_type STREQUAL SHARED_LIBRARY)
+    set_target_properties(softrend PROPERTIES
+            PREFIX ""
+            SUFFIX ${BRENDER_DRIVER_SUFFIX}
+    )
+endif ()
 
 add_library(BRender::Drivers::SoftRend ALIAS softrend)

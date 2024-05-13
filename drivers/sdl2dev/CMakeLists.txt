@@ -64,7 +64,15 @@ target_link_libraries(sdl2dev PUBLIC SDL2::SDL2 sdl2dev-headers)
 set_target_properties(sdl2dev PROPERTIES
         EXPORT_NAME "Drivers::SDL2"
         FOLDER "BRender/Drivers"
+        OUTPUT_NAME "sdl2"
         )
+
+if (target_type STREQUAL SHARED_LIBRARY)
+    set_target_properties(sdl2dev PROPERTIES
+            PREFIX ""
+            SUFFIX ${BRENDER_DRIVER_SUFFIX}
+    )
+endif ()
 
 add_library(BRender::Drivers::SDL2Dev::Headers ALIAS sdl2dev-headers)
 add_library(BRender::Drivers::SDL2Dev ALIAS sdl2dev)
