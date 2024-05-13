@@ -19,10 +19,10 @@ target_include_directories(brender-inc-ddi INTERFACE
         )
 
 add_custom_command(
-        OUTPUT dev_objs.cgh
+        OUTPUT dev_objs.cgh dev_objs.c
         # This will work with MSVC and GCC
         COMMAND "${CMAKE_C_COMPILER}" -D__CLASSGEN__ -E "${CMAKE_CURRENT_SOURCE_DIR}/dev_objs.hpp" > dev_objs.tmp
-        COMMAND "${PERL_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/classgen.pl" dev_objs dev_objs.tmp dev_objs.cgh
+        COMMAND "${PERL_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/classgen.pl" dev_objs dev_objs.tmp dev_objs.cgh dev_objs.c
         MAIN_DEPENDENCY "${CMAKE_CURRENT_SOURCE_DIR}/dev_objs.hpp"
         DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/classgen.pl"
         BYPRODUCTS dev_objs.tmp
@@ -30,6 +30,7 @@ add_custom_command(
 
 set(GENERATED_FILES
         ${CMAKE_CURRENT_BINARY_DIR}/dev_objs.cgh
+        ${CMAKE_CURRENT_BINARY_DIR}/dev_objs.c
         )
 
 set(FW_DEV_FILES
@@ -109,6 +110,8 @@ set(FW_FILES
 
         fw.h
         fw_ip.h
+
+        ${CMAKE_CURRENT_BINARY_DIR}/dev_objs.c
         )
 
 add_library(fw OBJECT
