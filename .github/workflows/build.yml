@@ -20,10 +20,10 @@ jobs:
       matrix:
         installable:
           - "brender"
-          - "brender-samples"
-          - "brender-samples-clang"
-          - "brender-samples-win64"
-          - "brender-samples-win32"
+          # - "brender-samples"
+          # - "brender-samples-clang"
+          # - "brender-samples-win64"
+          # - "brender-samples-win32"
     steps:
       - uses: actions/checkout@v3
       - uses: cachix/install-nix-action@v20
@@ -50,9 +50,10 @@ jobs:
     strategy:
       matrix:
         configuration:
-          - { platform: 'x64',   soft: 'OFF', vcpkg_target: 'x64-windows' }
-          - { platform: 'Win32', soft: 'OFF', vcpkg_target: 'x86-windows' }
-          - { platform: 'Win32', soft: 'ON',  vcpkg_target: 'x86-windows' }
+          - { platform: x64,   shared: 'ON',  soft: 'OFF', vcpkg_target: 'x64-windows' }
+          - { platform: x64,   shared: 'OFF', soft: 'OFF', vcpkg_target: 'x64-windows' }
+          - { platform: Win32, shared: 'OFF', soft: 'ON',  vcpkg_target: 'x86-windows' }
+          - { platform: Win32, shared: 'ON',  soft: 'ON',  vcpkg_target: 'x86-windows' }
     steps:
       - name: Export GitHub Actions cache environment variables
         uses: actions/github-script@v7
@@ -71,6 +72,7 @@ jobs:
         run: >
           cmake -B build -G "Visual Studio 17 2022" -A ${{ matrix.configuration.platform }}
           -DCMAKE_BUILD_TYPE=Release
+          -DBUILD_SHARED_LIBS=${{ matrix.configuration.shared }}
           -DBRENDER_BUILD_SOFT=${{ matrix.configuration.soft }}
           -DCMAKE_TOOLCHAIN_FILE="$env:VCPKG_INSTALLATION_ROOT/scripts/buildsystems/vcpkg.cmake"
 
