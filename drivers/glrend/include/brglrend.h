@@ -5,11 +5,50 @@
 #error Please include brender.h first
 #endif
 
+
+
+/*
+ * Defined to 1 if built as a shared library.
+ */
+#if !defined(BR_GLREND_BUILD_SHARED)
+#define BR_GLREND_BUILD_SHARED 0
+#endif
+
+/*
+ * Defined to 1 if built as a static library.
+ */
+#if !defined(BR_GLREND_BUILD_STATIC)
+#define BR_GLREND_BUILD_STATIC 0
+#endif
+
+
+#if(!BR_GLREND_BUILD_SHARED && !BR_GLREND_BUILD_STATIC) || (BR_GLREND_BUILD_SHARED && BR_GLREND_BUILD_STATIC)
+#error Invalid linkage configuration
+#endif
+
+#if !defined(BR_GLREND_EXPORTS)
+#define BR_GLREND_EXPORTS 0
+#endif
+
+#if BR_GLREND_BUILD_SHARED
+#define BR_GLREND_API_EXPORT BR_DLL_EXPORT
+#define BR_GLREND_API_IMPORT BR_DLL_IMPORT
+#else
+#define BR_GLREND_API_EXPORT
+#define BR_GLREND_API_IMPORT
+#endif
+
+#if BR_GLREND_EXPORTS
+#define BR_GLREND_API BR_GLREND_API_EXPORT
+#else
+#define BR_GLREND_API BR_GLREND_API_IMPORT
+#endif
+
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-extern br_token BRT_OPENGL_TEXTURE_U32;
+extern BR_GLREND_API br_token BRT_OPENGL_TEXTURE_U32;
 
 #ifdef __cplusplus
 }

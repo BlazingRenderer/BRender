@@ -134,9 +134,15 @@ add_library(glrend
         "${CMAKE_CURRENT_BINARY_DIR}/brender.frag.glsl.h"
         )
 
+target_compile_definitions(glrend PRIVATE -DBR_GLREND_EXPORTS=1)
+
 get_target_property(target_type glrend TYPE)
 if (target_type STREQUAL SHARED_LIBRARY)
-    target_compile_definitions(glrend PRIVATE -DDEFINE_BR_ENTRY_POINT)
+    target_compile_definitions(glrend-headers INTERFACE -DBR_GLREND_BUILD_STATIC=0)
+    target_compile_definitions(glrend-headers INTERFACE -DBR_GLREND_BUILD_SHARED=1)
+else()
+    target_compile_definitions(glrend-headers INTERFACE -DBR_GLREND_BUILD_STATIC=1)
+    target_compile_definitions(glrend-headers INTERFACE -DBR_GLREND_BUILD_SHARED=0)
 endif ()
 
 target_include_directories(glrend PRIVATE ${CMAKE_CURRENT_BINARY_DIR})

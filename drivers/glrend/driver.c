@@ -12,8 +12,8 @@ br_device *BR_EXPORT BrDrv1GLBegin(const char *arguments)
     return dev;
 }
 
-#ifdef DEFINE_BR_ENTRY_POINT
-br_device *BR_EXPORT BrDrv1Begin(const char *arguments)
+#if BR_GLREND_BUILD_SHARED
+BR_GLREND_API br_device *BR_EXPORT BrDrv1Begin(const char *arguments)
 {
     return BrDrv1GLBegin(arguments);
 }
