@@ -28,6 +28,10 @@ extern "C" {
 #include "brddi.h"
 #endif
 
+#ifndef _CONFIG_H_
+#include "config.h"
+#endif
+
 #ifndef _TIMESTMP_H_
 #include "timestmp.h"
 #endif

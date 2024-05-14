@@ -2,6 +2,21 @@ project(softrend C ASM_MASM)
 
 include(h2inc)
 
+add_library(softrend)
+get_target_property(target_type softrend TYPE)
+
+if(target_type STREQUAL "STATIC_LIBRARY")
+	set(BR_SOFTREND_BUILD_STATIC 1)
+	set(BR_SOFTREND_BUILD_SHARED 0)
+else()
+	set(BR_SOFTREND_BUILD_STATIC 0)
+	set(BR_SOFTREND_BUILD_SHARED 1)
+endif()
+
+configure_file(config.h.in "${CMAKE_CURRENT_BINARY_DIR}/config.h" @ONLY)
+
+target_compile_definitions(softrend PRIVATE "-DBR_SOFTREND_EXPORTS=1")
+
 make_h2inc(softrend "${CMAKE_CURRENT_SOURCE_DIR}/drv.h" "${CMAKE_CURRENT_BINARY_DIR}/drv.inc")
 
 set(ASM_FILES
@@ -9,7 +24,7 @@ set(ASM_FILES
 )
 set_source_files_properties(${ASM_FILES} PROPERTIES COMPILE_OPTIONS "-safeseh")
 
-add_library(softrend
+target_sources(softrend PRIVATE
         alpha.c
         clip.c
         convert.c
@@ -59,20 +74,20 @@ add_library(softrend
         timestmp.h
         zsrmacro.h
 
+        config.h.in
+
+        "${CMAKE_CURRENT_BINARY_DIR}/config.h"
         "${CMAKE_CURRENT_BINARY_DIR}/drv.inc"
 
         ${ASM_FILES}
 )
 
-get_target_property(target_type softrend TYPE)
-if(target_type STREQUAL SHARED_LIBRARY)
-    target_compile_definitions(softrend PRIVATE -DDEFINE_BR_ENTRY_POINT)
-endif()
-
 target_include_directories(softrend PRIVATE ddi)
 target_compile_definitions(softrend PRIVATE -D__386__)
 
 target_link_libraries(softrend PRIVATE BRender::DDI)
+target_include_directories(softrend PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
+
 
 set_target_properties(softrend PROPERTIES
         EXPORT_NAME "Drivers::SoftRend"
