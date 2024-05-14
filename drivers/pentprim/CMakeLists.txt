@@ -2,9 +2,24 @@ project(pentprim C ASM_MASM)
 
 include(h2inc)
 
-make_h2inc(pentprim "${CMAKE_CURRENT_SOURCE_DIR}/drv.h" "${CMAKE_CURRENT_BINARY_DIR}/drv.inc")
+add_library(pentprim)
+get_target_property(target_type pentprim TYPE)
+
+if(target_type STREQUAL "STATIC_LIBRARY")
+	set(BR_PENTPRIM_BUILD_STATIC 1)
+	set(BR_PENTPRIM_BUILD_SHARED 0)
+else()
+	set(BR_PENTPRIM_BUILD_STATIC 0)
+	set(BR_PENTPRIM_BUILD_SHARED 1)
+endif()
 
 set(USE_MMX ON)
+
+configure_file(config.h.in "${CMAKE_CURRENT_BINARY_DIR}/config.h" @ONLY)
+
+target_compile_definitions(pentprim PRIVATE "-DBR_PENTPRIM_EXPORTS=1")
+
+make_h2inc(pentprim "${CMAKE_CURRENT_SOURCE_DIR}/drv.h" "${CMAKE_CURRENT_BINARY_DIR}/drv.inc")
 
 set(ASM_FILES
 	magicsym.asm
@@ -138,7 +153,7 @@ endif()
 
 set_source_files_properties(${ASM_FILES} PROPERTIES COMPILE_OPTIONS "-safeseh")
 
-add_library(pentprim
+target_sources(pentprim PRIVATE
         awtm.c
         awtmi.h
         awtmz.c
@@ -178,23 +193,17 @@ add_library(pentprim
         work.c
         work.h
 
+		config.h.in
+
+		"${CMAKE_CURRENT_BINARY_DIR}/config.h"
 		"${CMAKE_CURRENT_BINARY_DIR}/drv.inc"
 
 		${ASM_FILES}
 		${PRIM_FILES}
 )
 
-if(USE_MMX)
-	target_compile_definitions(pentprim PRIVATE "-DUSE_MMX=1")
-endif()
-
 target_compile_definitions(pentprim PRIVATE "-DPARTS=0xffff")
 set_source_files_properties(${ASM_FILES} PROPERTIES COMPILE_DEFINITIONS "PARTS=0ffffh")
-
-get_target_property(target_type pentprim TYPE)
-if(NOT target_type STREQUAL SHARED_LIBRARY)
-    target_compile_definitions(pentprim PRIVATE -DDEFINE_BR_ENTRY_POINT)
-endif()
 
 target_link_libraries(pentprim PRIVATE BRender::DDI)
 target_include_directories(pentprim PRIVATE ${CMAKE_CURRENT_BINARY_DIR})

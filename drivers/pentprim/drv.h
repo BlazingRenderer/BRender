@@ -19,6 +19,10 @@
 #include "brddi.h"
 #endif
 
+#ifndef _CONFIG_H_
+#include "config.h"
+#endif
+
 #ifndef _PRIMINFO_H_
 #include "priminfo.h"
 #endif
