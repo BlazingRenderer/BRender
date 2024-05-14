@@ -51,9 +51,15 @@ add_library(sdl2dev
         ${INC_FILES}
         )
 
+target_compile_definitions(sdl2dev PRIVATE -DBR_SDL2_EXPORTS=1)
+
 get_target_property(target_type sdl2dev TYPE)
 if (target_type STREQUAL SHARED_LIBRARY)
-    target_compile_definitions(sdl2dev PRIVATE -DDEFINE_BR_ENTRY_POINT)
+    target_compile_definitions(sdl2dev-headers INTERFACE -DBR_SDL2_BUILD_STATIC=0)
+    target_compile_definitions(sdl2dev-headers INTERFACE -DBR_SDL2_BUILD_SHARED=1)
+else()
+    target_compile_definitions(sdl2dev-headers INTERFACE -DBR_SDL2_BUILD_STATIC=1)
+    target_compile_definitions(sdl2dev-headers INTERFACE -DBR_SDL2_BUILD_SHARED=0)
 endif ()
 
 target_compile_definitions(sdl2dev PRIVATE -DNO_MEMORY_FALLBACK=1)

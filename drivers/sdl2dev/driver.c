@@ -40,8 +40,8 @@ br_device *BR_EXPORT BrDrv1SDL2Begin(const char *arguments)
     return device;
 }
 
-#ifdef DEFINE_BR_ENTRY_POINT
-br_device *BR_EXPORT BrDrv1Begin(const char *arguments)
+#if BR_SDL2_BUILD_SHARED
+BR_SDL2_API br_device *BR_EXPORT BrDrv1Begin(const char *arguments)
 {
     return BrDrv1SDL2Begin(arguments);
 }
