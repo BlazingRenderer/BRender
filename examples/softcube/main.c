@@ -7,11 +7,11 @@
 #include <SDL.h>
 #include <assert.h>
 
+BR_API struct br_device *BR_EXPORT BrDrv1SoftPrimBegin(const char *arguments);
+BR_API struct br_device *BR_EXPORT BrDrv1SoftRendBegin(const char *arguments);
+
 void BR_CALLBACK _BrBeginHook(void)
 {
-    struct br_device * BR_EXPORT BrDrv1SoftPrimBegin(const char *arguments);
-    struct br_device * BR_EXPORT BrDrv1SoftRendBegin(const char *arguments);
-
     BrDevAddStatic(NULL, BrDrv1SoftPrimBegin, NULL);
     BrDevAddStatic(NULL, BrDrv1SoftRendBegin, NULL);
     BrDevAddStatic(NULL, BrDrv1SDL2Begin, NULL);
