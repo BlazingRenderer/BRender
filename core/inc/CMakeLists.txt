@@ -6,12 +6,11 @@ target_include_directories(brender-inc INTERFACE
         $<INSTALL_INTERFACE:include>
         )
 
-target_compile_definitions(brender-inc INTERFACE
-        BASED_FIXED=0
-        BASED_FLOAT=1
-        PARANOID=1
-        )
+set(BASED_FIXED 0)
+set(BASED_FLOAT 1)
+set(PARANOID 1)
 
+configure_file(brconfig.h.in "${CMAKE_CURRENT_BINARY_DIR}/brconfig.h")
 
 # Generate pretok.h, pretok_c.h, and toktype.c
 add_custom_command(
@@ -25,6 +24,7 @@ set(GENERATED_FILES
         ${CMAKE_CURRENT_BINARY_DIR}/pretok.h
         ${CMAKE_CURRENT_BINARY_DIR}/pretok.c
         ${CMAKE_CURRENT_BINARY_DIR}/toktype.c
+        ${CMAKE_CURRENT_BINARY_DIR}/brconfig.h
         )
 
 set(INC_TOKEN_FILES
@@ -80,6 +80,9 @@ set(INC_FILES
         transfrm.h
         v1db_p.h
         ${CMAKE_CURRENT_BINARY_DIR}/pretok.h
+        ${CMAKE_CURRENT_BINARY_DIR}/brconfig.h
+
+        brconfig.h.in
         )
 
 add_library(inc OBJECT

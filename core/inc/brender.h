@@ -17,6 +17,10 @@
 
 #define __BRENDER__                     BR_VERSION(1, 4, 0)
 
+#ifndef _BRCONFIG_H_
+#include "brconfig.h"
+#endif
+
 #ifndef _COMPILER_H_
 #include "compiler.h"
 #endif
