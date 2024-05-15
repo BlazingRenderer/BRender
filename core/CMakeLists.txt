@@ -20,6 +20,7 @@ set(BRENDER_OBJECTS)
 
 foreach (target ${BRENDER_TARGETS})
     add_subdirectory(${target})
+    target_compile_definitions(${target} PRIVATE -DBR_EXPORTS=1)
     list(APPEND BRENDER_OBJECTS "$<TARGET_OBJECTS:${target}>")
 endforeach ()
 

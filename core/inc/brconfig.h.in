@@ -18,4 +18,23 @@
 
 #cmakedefine01 PARANOID
 
+/*
+ * True if BRender was built statically.
+ */
+#cmakedefine01 BR_BUILD_STATIC
+
+/*
+ * True if BRender was build dynamically/shared.
+ */
+#cmakedefine01 BR_BUILD_SHARED
+
+#if !defined(BR_EXPORTS)
+#define BR_EXPORTS 0
+#endif
+
+
+#if(!BR_BUILD_SHARED && !BR_BUILD_STATIC) || (BR_BUILD_SHARED && BR_BUILD_STATIC)
+#error Invalid linkage configuration
+#endif
+
 #endif /* _BRCONFIG_H_ */

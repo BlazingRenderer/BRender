@@ -9,6 +9,8 @@ target_include_directories(brender-inc INTERFACE
 set(BASED_FIXED 0)
 set(BASED_FLOAT 1)
 set(PARANOID 1)
+set(BR_BUILD_STATIC (NOT ${BUILD_SHARED_LIBS}))
+set(BR_BUILD_SHARED ${BUILD_SHARED_LIBS})
 
 configure_file(brconfig.h.in "${CMAKE_CURRENT_BINARY_DIR}/brconfig.h")
 

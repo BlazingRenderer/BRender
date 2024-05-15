@@ -218,6 +218,25 @@ typedef float br_float;
 
 #define BR_STR(s) #s
 
+/*
+ * Handle static/shared library stuff.
+ */
+#if BR_BUILD_SHARED
+#define BR_API_EXPORT BR_DLL_EXPORT
+#define BR_API_IMPORT BR_DLL_IMPORT
+#endif
+
+#if BR_BUILD_STATIC
+#define BR_API_EXPORT
+#define BR_API_IMPORT
+#endif
+
+#if BR_EXPORTS
+#define BR_API BR_API_EXPORT
+#else
+#define BR_API BR_API_IMPORT
+#endif
+
 #if defined(__H2INC__)
 /*
  * Avoid some tokens that masm chokes on
@@ -288,6 +307,11 @@ typedef float br_float;
 #define BR_ASM_CALL
 #define BR_ASM_CALLBACK
 
+#undef BR_DLL_EXPORT
+#define BR_DLL_EXPORT
+
+#undef BR_DLL_IMPORT
+#define BR_DLL_IMPORT
 #endif
 
 /*
