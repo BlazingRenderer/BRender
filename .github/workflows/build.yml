@@ -31,23 +31,36 @@ jobs:
           nix_path: nixpkgs=channel:nixos-unstable
       - run: nix build -L .#${{matrix.installable}}
 
-  build-msvc2022-win64:
+  build-msvc2022:
     runs-on: windows-2022
+    env:
+      VCPKG_BINARY_SOURCES: 'clear;x-gha,readwrite'
+    strategy:
+      matrix:
+        configuration:
+          - { platform: 'x64',   soft: 'OFF', vcpkg_target: 'x64-windows' }
+          - { platform: 'Win32', soft: 'OFF', vcpkg_target: 'x86-windows' }
+          - { platform: 'Win32', soft: 'ON',  vcpkg_target: 'x86-windows' }
     steps:
-      - uses: actions/checkout@v3
-      - run: vcpkg install sdl2:x64-windows
-      - run: >
-          cmake -B build -G "Visual Studio 17 2022" -A x64 -DCMAKE_BUILD_TYPE=MinSizeRel
-          -DCMAKE_TOOLCHAIN_FILE="$env:VCPKG_INSTALLATION_ROOT/scripts/buildsystems/vcpkg.cmake"
-      - run: cmake --build build
+      - name: Export GitHub Actions cache environment variables
+        uses: actions/github-script@v7
+        with:
+          script: |
+            core.exportVariable('ACTIONS_CACHE_URL', process.env.ACTIONS_CACHE_URL || '');
+            core.exportVariable('ACTIONS_RUNTIME_TOKEN', process.env.ACTIONS_RUNTIME_TOKEN || '');
 
-  build-msvc2022-win32-soft:
-    runs-on: windows-2022
-    steps:
-      - uses: actions/checkout@v3
-      - run: vcpkg install sdl2:x86-windows
-      - run: >
-          cmake -B build -G "Visual Studio 17 2022" -A Win32 -DCMAKE_BUILD_TYPE=MinSizeRel
-          -DBRENDER_BUILD_SOFT=ON
+      - name: Clone Repository
+        uses: actions/checkout@v4
+
+      - name: Install SDL2
+        run: vcpkg install sdl2:${{ matrix.configuration.vcpkg_target }}
+
+      - name: Configure
+        run: >
+          cmake -B build -G "Visual Studio 17 2022" -A ${{ matrix.configuration.platform }}
+          -DCMAKE_BUILD_TYPE=Release
+          -DBRENDER_BUILD_SOFT=${{ matrix.configuration.soft }}
           -DCMAKE_TOOLCHAIN_FILE="$env:VCPKG_INSTALLATION_ROOT/scripts/buildsystems/vcpkg.cmake"
-      - run: cmake --build build
+
+      - name: Build
+        run: cmake --build build
