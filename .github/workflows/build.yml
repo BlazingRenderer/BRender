@@ -34,6 +34,8 @@ jobs:
   build-ubuntu:
     runs-on: ubuntu-latest
     steps:
+      - name: Install Dependencies
+        run: sudo apt install -y --no-install-recommends libsdl2-dev ninja-build
       - name: Clone Repository
         uses: actions/checkout@v4
       - name: Configure
