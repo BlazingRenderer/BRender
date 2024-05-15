@@ -31,6 +31,16 @@ jobs:
           nix_path: nixpkgs=channel:nixos-unstable
       - run: nix build -L .#${{matrix.installable}}
 
+  build-ubuntu:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Clone Repository
+        uses: actions/checkout@v4
+      - name: Configure
+        run: cmake -B build -G "Ninja Multi-Config"
+      - name: Build
+        run: cmake --build build --config Release --parallel
+
   build-msvc2022:
     runs-on: windows-2022
     env:
