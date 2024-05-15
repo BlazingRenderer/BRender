@@ -93,5 +93,23 @@ install(FILES
         )
 
 # pkg-config
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/cmake/brender.pc.in ${CMAKE_CURRENT_BINARY_DIR}/brender.pc @ONLY)
+
+#get_target_property(COMPILE_DEFINITIONS brender-full INTERFACE_COMPILE_DEFINITIONS)
+
+# message(FATAL_ERROR "XXXX: ${COMPILE_DEFINITIONS}")
+
+file(GENERATE
+        OUTPUT "${CMAKE_CURRENT_BINARY_DIR}-$<CONFIG>.pc"
+        #INPUT "${CMAKE_CURRENT_SOURCE_DIR}/cmake/brender.pc.in"
+        CONTENT "\
+libdir=\"${CMAKE_INSTALL_FULL_LIBDIR}\"
+includedir=\"${CMAKE_INSTALL_FULL_INCLUDEDIR}/brender\"
+
+Name: ${PROJECT_NAME}
+URL: ${CMAKE_PROJECT_HOMEPAGE_URL}
+Version: $<TARGET_PROPERTY:brender,VERSION>
+Cflags: -I\"\${includedir}\" -I\"\${includedir}/glrend\" -I\"\${includedir}/sdl2dev\" -D$<JOIN:$<TARGET_PROPERTY:brender-full,INTERFACE_COMPILE_DEFINITIONS>, -D>
+")
+
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/cmake/brender.pc.in ${CMAKE_CURRENT_BINARY_DIR}/brender.pc)
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/brender.pc DESTINATION ${CMAKE_INSTALL_PREFIX}/lib/pkgconfig)

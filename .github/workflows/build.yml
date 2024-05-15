@@ -45,7 +45,7 @@ jobs:
           cmake -B build -G "Ninja Multi-Config"
           -DBUILD_SHARED_LIBS=${{ matrix.configuration.shared }}
           -DCMAKE_INSTALL_PREFIX=/opt/brender
-      - run: cmake --build build --config Release
+      - run: cmake --build build --config Release --parallel
       - run: sudo cmake --build build --config Release --target install
           
 

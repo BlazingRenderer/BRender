@@ -67,9 +67,15 @@ add_library(BRender::Full ALIAS brender-full)
 add_library(BRender::DDI ALIAS brender-ddi)
 
 
+#get_property(is_multi_config GLOBAL PROPERTY GENERATOR_IS_MULTI_CONFIG)
+
 option(BRENDER_BUILD_TOOLS "Build Tools" ON)
 option(BRENDER_BUILD_EXAMPLES "Build Examples" ON)
 option(BRENDER_DISABLE_INSTALL "Disable installation" OFF)
+
+#if(NOT BRENDER_DISABLE_INSTALL AND is_multi_config)
+#    message(FATAL_ERROR "Sorry, installation targets aren't support with multi-target generators.")
+#endif()
 
 if (BRENDER_BUILD_TOOLS)
     add_subdirectory(tools)

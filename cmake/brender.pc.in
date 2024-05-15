@@ -1,9 +1,10 @@
-libdir="@CMAKE_INSTALL_FULL_LIBDIR@"
-includedir="@CMAKE_INSTALL_FULL_INCLUDEDIR@/brender"
+//libdir=""
+//includedir="@CMAKE_INSTALL_FULL_INCLUDEDIR@/brender"
 
-Name: @PROJECT_NAME@
+Name:
 Description: @CMAKE_PROJECT_DESCRIPTION@
 URL: @CMAKE_PROJECT_HOMEPAGE_URL@
-Version: @PROJECT_VERSION@
+Version: $<TARGET_PROPERTY:brender,VERSION>
 Cflags: -I"${includedir}" -I"${includedir}/glrend" -I"${includedir}/sdl2dev"
-Libs: -L"${libdir}" -L"${libdir}/brender" -lglrend -lsdl2dev -lbrender
+Cflags: -D$<JOIN:$<TARGET_PROPERTY:brender-full,INTERFACE_COMPILE_DEFINITIONS>, -D>
+// Libs: -L"${libdir}" -L"${libdir}/brender" "${libdir}/brender/glrend.sobdd" "${libdir}/brender/sdl2.sobdd" -lbrender
