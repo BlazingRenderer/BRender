@@ -10,7 +10,6 @@
 
 #include "fw.h"
 
-BR_RCS_ID("$Id: printf.c 1.1 1997/12/10 16:41:09 jon Exp $")
 
 br_int_32 BR_RESIDENT_ENTRY BrSprintf(char *buf, const char *fmt, ...)
 {

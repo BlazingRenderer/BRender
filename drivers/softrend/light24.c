@@ -14,7 +14,6 @@
 #include "math_ip.h"
 #include "lightmac.h"
 
-BR_RCS_ID("$Id: light24.c 1.9 1998/08/13 13:56:38 jon Exp $");
 
 
 static br_scalar diffuse_r;

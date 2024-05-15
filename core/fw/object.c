@@ -9,7 +9,6 @@
 #include "fw.h"
 #include "brassert.h"
 
-BR_RCS_ID("$Id: object.c 1.1 1997/12/10 16:41:09 jon Exp $")
 
 /*
  * Token/Value support methods (via private templateQuery() method)

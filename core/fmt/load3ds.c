@@ -12,7 +12,6 @@
 #include "load3ds.h"
 #include "brassert.h"
 
-BR_RCS_ID("$Id: load3ds.c 1.3 1998/07/28 14:33:23 jon Exp $")
 
 /*
  * Default 3DS conversion options

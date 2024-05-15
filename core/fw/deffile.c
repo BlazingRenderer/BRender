@@ -8,7 +8,6 @@
  */
 #include "brender.h"
 
-BR_RCS_ID("$Id: deffile.c 1.1 1997/12/10 16:41:06 jon Exp $")
 
 static br_uint_32 BrNullAttributes(void)
 {

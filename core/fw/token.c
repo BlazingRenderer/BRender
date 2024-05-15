@@ -9,7 +9,6 @@
 #include "fw.h"
 #include "brassert.h"
 
-BR_RCS_ID("$Id: token.c 1.1 1997/12/10 16:41:11 jon Exp $")
 
 /*
  * Private structure used to reference a registered token

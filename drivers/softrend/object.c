@@ -13,7 +13,6 @@
 #include "shortcut.h"
 #include "brassert.h"
 
-BR_RCS_ID("$Id: object.c 1.1 1997/12/10 16:52:20 jon Exp $");
 
 /*
  * Methods for default object object

@@ -11,7 +11,6 @@
 #include "syscn_p.h"
 #include "brmath.h"
 
-BR_RCS_ID("$Id: fwsetup.c 1.2 1998/07/20 21:52:55 jon Exp $")
 
 static br_image Image_BRCORE1;
 

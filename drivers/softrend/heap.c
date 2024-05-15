@@ -16,7 +16,6 @@
 
 #include "zsrmacro.h"
 
-BR_RCS_ID("$Id: heap.c 1.1 1997/12/10 16:52:07 jon Exp $");
 
 static br_boolean heapCheck(br_primitive_heap *heap, br_size_t s)
 {

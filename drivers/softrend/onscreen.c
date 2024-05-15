@@ -8,7 +8,6 @@
 #include "drv.h"
 #include "shortcut.h"
 
-BR_RCS_ID("$Id: onscreen.c 1.1 1997/12/10 16:52:24 jon Exp $")
 
 /*
  * Check a bounding box against the view volume and return

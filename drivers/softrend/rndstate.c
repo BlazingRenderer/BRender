@@ -12,7 +12,6 @@
 #include "drv.h"
 #include "brassert.h"
 
-BR_RCS_ID("$Id: rndstate.c 1.2 1998/08/03 13:16:53 jon Exp $");
 
 
 /*

@@ -10,7 +10,6 @@
 #include "shortcut.h"
 #include "brassert.h"
 
-BR_RCS_ID("$Id: vector.c 1.1 1997/12/10 16:41:23 jon Exp $")
 
 /**
  ** 2D Vectors

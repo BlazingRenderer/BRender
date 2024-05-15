@@ -14,7 +14,6 @@
 #include "math_ip.h"
 #include "lightmac.h"
 
-BR_RCS_ID("$Id: light8.c 1.2 1998/03/06 20:38:26 jon Exp jon $");
 
 /*
  * Lighting function for unlit indexed 

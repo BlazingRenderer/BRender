@@ -10,7 +10,6 @@
 #include "host.h"
 #include "brassert.h"
 
-BR_RCS_ID("$Id: image.c 1.2 1998/06/23 13:46:15 jon Exp $")
 
 br_boolean BR_RESIDENT_ENTRY BrImageAdd(br_image *img)
 {

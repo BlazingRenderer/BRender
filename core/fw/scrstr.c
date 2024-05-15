@@ -8,7 +8,6 @@
  */
 #include "fw.h"
 
-BR_RCS_ID("$Id: scrstr.c 1.1 1997/12/10 16:41:10 jon Exp $")
 
 /*
  * Initialised to a value because IBM Cset++ LIB hides the symbol

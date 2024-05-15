@@ -16,7 +16,6 @@
 #include "vecifns.h"
 
 
-BR_RCS_ID("$Id: v1model.c 1.8 1998/07/21 11:35:57 jon Exp $");
 
 
 static void GEOMETRY_CALL V1Faces_ScratchAllocate(struct br_geometry *self, struct br_renderer *renderer)

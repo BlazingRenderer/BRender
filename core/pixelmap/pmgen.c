@@ -9,7 +9,6 @@
 #include "pm.h"
 #include "brassert.h"
 
-BR_RCS_ID("$Id: pmgen.c 1.2 1998/08/10 16:12:24 johng Exp $")
 
 br_error BR_CMETHOD_DECL(br_device_pixelmap_gen, match)(br_device_pixelmap *self, br_device_pixelmap **newpm,
                                                         br_token_value *tv)

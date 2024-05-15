@@ -12,7 +12,6 @@
 #include "brassert.h"
 #include "shortcut.h"
 
-BR_RCS_ID("$Id: angles.c 1.1 1997/12/10 16:41:20 jon Exp $")
 
 /*
  * Table of axes for each order

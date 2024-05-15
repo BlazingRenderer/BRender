@@ -11,7 +11,6 @@
 #include "brassert.h"
 #include "formats.h"
 
-BR_RCS_ID("$Id: modrend.c 1.2 1998/07/14 13:38:44 johng Exp $")
 
 /*
  * Render model faces

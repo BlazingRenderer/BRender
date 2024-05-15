@@ -24,7 +24,6 @@
 #include <windows.h>
 #endif
 
-BR_RCS_ID("$Id: stdfile.c 1.1 1997/12/10 16:41:28 jon Exp $")
 
 #if defined(_WIN32)
 static wchar_t *BrStdioToWinWchar(const char *utf8name, wchar_t *buf, br_size_t count)

@@ -12,7 +12,6 @@
 #include "drv.h"
 #include "brassert.h"
 
-BR_RCS_ID("$Id: state.c 1.6 1998/11/13 16:23:39 jon Exp $");
 
 /*
  * Shortcuts for template flags

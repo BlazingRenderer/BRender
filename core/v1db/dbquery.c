@@ -10,7 +10,6 @@
 #include "brddi.h"
 #include "brassert.h"
 
-BR_RCS_ID("$Id: dbquery.c 1.1 1997/12/10 16:41:29 jon Exp $")
 
 static br_boolean rendfctyEnum(br_object *rendfcty, br_rendfcty_enum_cbfn *cbfn, void *args)
 {

@@ -11,7 +11,6 @@
 #include "fw.h"
 #include "brassert.h"
 
-BR_RCS_ID("$Id: file.c 1.1 1997/12/10 16:41:07 jon Exp $")
 
 /*
  * Resource block used to represent an open file

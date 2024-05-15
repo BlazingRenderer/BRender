@@ -8,7 +8,6 @@
  */
 #include "brender.h"
 
-BR_RCS_ID("$Id: loadnff.c 1.1 1997/12/10 16:41:02 jon Exp $")
 
 /*
  * Current line buffer

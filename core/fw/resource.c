@@ -20,7 +20,6 @@
 #include "fw.h"
 #include "brassert.h"
 
-BR_RCS_ID("$Id: resource.c 1.1 1997/12/10 16:41:10 jon Exp $")
 
 /*
  * The granularity of resource sizes

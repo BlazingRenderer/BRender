@@ -10,7 +10,6 @@
 #include "shortcut.h"
 #include "brassert.h"
 
-BR_RCS_ID("$Id: custsupt.c 1.1 1997/12/10 16:41:29 jon Exp $")
 
 #define BR_FIXED_SIGN 0x80000000UL
 

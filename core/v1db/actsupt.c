@@ -12,7 +12,6 @@
 #include "datafile.h"
 #include "math_ip.h"
 
-BR_RCS_ID("$Id: actsupt.c 1.4 1998/11/17 16:01:01 nikh Exp $")
 
 /*
  * Invoke a callback for each one of an actors children

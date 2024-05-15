@@ -24,7 +24,6 @@
 #define MODU_VERTEX_COPY_FLAGS \
     (BR_MODU_VERTEX_POSITIONS | BR_MODU_VERTEX_COLOURS | BR_MODU_VERTEX_MAPPING | BR_MODU_VERTEX_NORMALS)
 
-BR_RCS_ID("$Id: prepmesh.c 1.10 1998/10/22 18:41:15 johng Exp $")
 
 /*
  * Temporary structure used whilst processing normals and groups

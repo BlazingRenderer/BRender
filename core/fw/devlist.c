@@ -10,7 +10,6 @@
 #include "fw.h"
 #include "brassert.h"
 
-BR_RCS_ID("$Id: devlist.c 1.1 1997/12/10 16:41:06 jon Exp $")
 
 extern br_framework_state BR_ASM_DATA fw;
 

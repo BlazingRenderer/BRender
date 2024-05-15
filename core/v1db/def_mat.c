@@ -12,7 +12,6 @@
 #include "datafile.h"
 #include <brassert.h>
 
-BR_RCS_ID("$Id: def_mat.c 1.2 1998/03/05 20:24:10 jon Exp $")
 
 /*
  * Global database state

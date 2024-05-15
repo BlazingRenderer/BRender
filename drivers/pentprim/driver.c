@@ -13,7 +13,6 @@
 #include "shortcut.h"
 #include "brassert.h"
 
-BR_RCS_ID("$Id: driver.c 1.1 1997/12/10 16:46:45 jon Exp $");
 
 /*
  * Driver-wide timestamp

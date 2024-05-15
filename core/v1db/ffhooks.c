@@ -8,7 +8,6 @@
  */
 #include "brender.h"
 
-BR_RCS_ID("$Id: ffhooks.c 1.1 1997/12/10 16:41:30 jon Exp $")
 
 /*
  * Find Failed callbacks to automatically load textures & tables

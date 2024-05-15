@@ -10,7 +10,6 @@
 #include "brassert.h"
 #include "shortcut.h"
 
-BR_RCS_ID("$Id: preptab.c 1.1 1997/12/10 16:41:33 jon Exp $")
 
 void BR_PUBLIC_ENTRY BrTableUpdate(br_pixelmap *table, br_uint_16 flags)
 {

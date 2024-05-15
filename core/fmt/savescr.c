@@ -9,7 +9,6 @@
 #include "brender.h"
 #include "fmt.h"
 
-BR_RCS_ID("$Id: savescr.c 1.2 1998/03/05 20:24:07 jon Exp $")
 
 /*
  * The default material used to load a script

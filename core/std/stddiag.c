@@ -11,7 +11,6 @@
 
 #include "brender.h"
 
-BR_RCS_ID("$Id: stddiag.c 1.1 1997/12/10 16:41:28 jon Exp $")
 
 static void BR_CALLBACK BrStdioWarning(const char *message)
 {

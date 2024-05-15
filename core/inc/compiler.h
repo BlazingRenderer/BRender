@@ -340,16 +340,6 @@ typedef float br_float;
         fprintf(stderr, "Copyright (C) " year " by Argonaut Technologies Limited\n"); \
     } while(0);
 
-#if !defined(ADD_RCS_ID)
-#define ADD_RCS_ID 0
-#endif
-
-#if ADD_RCS_ID
-#define BR_RCS_ID(str) static const char rscid[] = str;
-#else
-#define BR_RCS_ID(str)
-#endif
-
 /*
  * Useful macro for sizing an array
  */

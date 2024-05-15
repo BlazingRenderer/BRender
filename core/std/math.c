@@ -10,7 +10,6 @@
 
 #include "brender.h"
 
-BR_RCS_ID("$Id: math.c 1.2 1998/07/20 21:52:44 jon Exp $")
 
 float BR_PUBLIC_ENTRY BrFloatFloor(float f)
 {

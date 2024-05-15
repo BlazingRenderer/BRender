@@ -14,7 +14,6 @@
 #include "pmmem.h"
 #include "brassert.h"
 
-BR_RCS_ID("$Id: pmmem.c 1.5 1998/08/10 16:12:27 johng Exp $")
 
 /*
  * Useful info about each pixelmap type

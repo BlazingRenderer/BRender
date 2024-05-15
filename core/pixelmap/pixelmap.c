@@ -10,7 +10,6 @@
 #include "pm.h"
 #include "brassert.h"
 
-BR_RCS_ID("$Id: pixelmap.c 1.1 1997/12/10 16:41:25 jon Exp $")
 
 /*
  * Allocate a new, pixelmap of the given type and size

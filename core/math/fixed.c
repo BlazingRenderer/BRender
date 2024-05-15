@@ -10,7 +10,6 @@
 #include "brender.h"
 #include "brmath.h"
 
-BR_RCS_ID("$Id: fixed.c 2.2 1996/03/07 20:28:02 sam Exp $")
 
 br_fixed_ls BR_PUBLIC_ENTRY BrFixedMul(br_fixed_ls a, br_fixed_ls b)
 {

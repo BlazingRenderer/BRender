@@ -10,7 +10,6 @@
 #include "brmath.h"
 #include "brassert.h"
 
-BR_RCS_ID("$Id: plane.c 1.3 1998/08/03 16:48:18 jon Exp $")
 
 /*
  * Work out the plane equation of the plane defined by three points

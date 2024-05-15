@@ -9,7 +9,6 @@
 #include "pm.h"
 #include "brassert.h"
 
-BR_RCS_ID("$Id: genclip.c 1.1 1997/12/10 16:41:24 jon Exp $")
 
 /*
  * Clip a point to a pixelmap, producing coordinates relative to base of pixelmap

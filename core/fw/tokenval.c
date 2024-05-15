@@ -10,7 +10,6 @@
 #include "fw.h"
 #include "brassert.h"
 
-BR_RCS_ID("$Id: tokenval.c 1.3 1998/05/20 15:25:02 jon Exp $")
 
 /*
  * Allocate a new template structure

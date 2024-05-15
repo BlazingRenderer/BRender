@@ -8,7 +8,6 @@
  */
 #include "brddi.h"
 
-BR_RCS_ID("$Id: loadscr.c 1.2 1998/03/05 20:23:50 jon Exp $")
 
 /*
  * Default material fields

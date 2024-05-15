@@ -14,7 +14,6 @@
 #include "host.h"
 #include "brassert.h"
 
-BR_RCS_ID("$Id: devsetup.c 1.2 1997/12/11 13:33:10 jon Exp $")
 
 /*
  * XXX A very nasty hack to get around limitiations of v1.1.x

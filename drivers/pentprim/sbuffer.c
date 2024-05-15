@@ -13,7 +13,6 @@
 #include "shortcut.h"
 #include "brassert.h"
 
-BR_RCS_ID("$Id: sbuffer.c 1.2 1998/10/21 15:42:23 jon Exp $");
 
 /*
  * Default dispatch table for primitive state (defined at end of file)

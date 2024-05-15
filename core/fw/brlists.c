@@ -9,7 +9,6 @@
 
 #include "fw.h"
 
-BR_RCS_ID("$Id: brlists.c 1.2 1998/02/12 16:04:06 jon Exp $")
 
 /**
  ** Full features list handling

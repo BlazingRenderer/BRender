@@ -11,7 +11,6 @@
 #include "brassert.h"
 #include "brhton.h"
 
-BR_RCS_ID("$Id: bswap.c 1.1 1997/12/10 16:41:05 jon Exp $")
 
 #undef _SWAP
 #define _SWAP(a, b) \

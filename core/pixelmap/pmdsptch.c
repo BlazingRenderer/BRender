@@ -15,7 +15,6 @@
 
 #include "pmmem.h"
 
-BR_RCS_ID("$Id: pmdsptch.c 1.2 1998/08/10 16:12:21 johng Exp $")
 
 /*
  * Comatibility hack to catch any pixelmaps with NULL dispatch pointers and

@@ -35,7 +35,6 @@ Converted by SamL for use in avc
 
 #include "brender.h"
 
-BR_RCS_ID("$Id: quantize.c 1.1 1997/12/10 16:41:27 jon Exp $")
 
 #define MAXCOLOR 256
 

@@ -13,7 +13,6 @@
 #include "shortcut.h"
 #include "brassert.h"
 
-BR_RCS_ID("$Id: convert.c 1.2 1997/12/17 13:09:16 jon Exp $");
 
 #define FCONV	(float)
 #define XCONV	BrFloatToFixed

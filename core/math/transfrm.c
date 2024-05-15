@@ -10,7 +10,6 @@
 #include "brassert.h"
 #include "vecifns.h"
 
-BR_RCS_ID("$Id: transfrm.c 1.1 1997/12/10 16:41:22 jon Exp $")
 
 #define COMBINE_TRANSFORMS(a, b) (_CombineTransforms[(a)][(b)])
 #define IS_LP(a)                 ((a) != BR_TRANSFORM_MATRIX34)

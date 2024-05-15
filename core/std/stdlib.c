@@ -17,7 +17,6 @@
 
 #include "brender.h"
 
-BR_RCS_ID("$Id: stdlib.c 1.1 1997/12/10 16:41:28 jon Exp $")
 
 int BR_PUBLIC_ENTRY BrMemCmp(const void *s1, const void *s2, size_t n)
 {

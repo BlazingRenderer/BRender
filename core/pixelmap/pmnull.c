@@ -9,7 +9,6 @@
 #include "pm.h"
 #include "brassert.h"
 
-BR_RCS_ID("$Id: pmnull.c 1.1 1997/12/10 16:41:27 jon Exp $")
 
 br_error BR_CMETHOD_DECL(br_device_pixelmap_null, validSource)(br_device_pixelmap *self, br_boolean *bp, br_object *h)
 {

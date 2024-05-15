@@ -8,7 +8,6 @@
  */
 #include "brender.h"
 
-BR_RCS_ID("$Id: defdiag.c 1.1 1997/12/10 16:41:05 jon Exp $")
 
 static void BrNullWarning(const char *message)
 {

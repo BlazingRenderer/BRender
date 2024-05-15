@@ -32,7 +32,6 @@
 #define MarkStratAsNotDrawn(a)
 #endif
 
-BR_RCS_ID("$Id: render.c 1.9 1998/11/12 13:16:45 johng Exp $")
 
 static void actorRenderOnScreen(br_actor *ap, br_model *model, br_material *material, void *render_data,
                                 br_uint_8 style, br_uint_16 t);

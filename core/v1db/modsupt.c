@@ -11,7 +11,6 @@
 #include "shortcut.h"
 #include "brassert.h"
 
-BR_RCS_ID("$Id: modsupt.c 2.5 1997/04/09 15:47:03 TOMN Exp $")
 
 /*
  * Generate U and V values for a model's vertices.

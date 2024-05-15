@@ -13,7 +13,6 @@
 #include "brender.h"
 #include "fmt.h"
 
-BR_RCS_ID("$Id: loadtga.c 1.1 1997/12/10 16:41:02 jon Exp $")
 
 #define RED 2
 #define GRN 1

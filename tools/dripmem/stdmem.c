@@ -14,7 +14,6 @@
 #include "brender.h"
 #include "dripmem.h"
 
-BR_RCS_ID("$Id: stdmem.c 1.1 1998/11/17 15:32:14 jon Exp $")
 
 /*
  * Glue functions for malloc()/free()

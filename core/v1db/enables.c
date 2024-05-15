@@ -11,7 +11,6 @@
 #include "brassert.h"
 #include "math_ip.h"
 
-BR_RCS_ID("$Id: enables.c 1.7 1998/08/17 14:53:21 jon Exp $")
 
 static void actorEnable(br_v1db_enable *e, br_actor *a)
 {

@@ -15,7 +15,6 @@
 #include "shortcut.h"
 #include "brassert.h"
 
-BR_RCS_ID("$Id: matrix34.c 1.7 1998/08/13 11:56:03 jon Exp $")
 
 /*
  * A = B

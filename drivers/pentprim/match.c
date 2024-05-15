@@ -10,7 +10,6 @@
 #include "shortcut.h"
 #include "brassert.h"
 
-BR_RCS_ID("$Id: match.c 1.1 1997/12/10 16:47:17 jon Exp $");
 
 /*
  * Invalid value for unknown pixelmap types

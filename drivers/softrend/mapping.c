@@ -12,7 +12,6 @@
 
 #include "math_ip.h"
 
-BR_RCS_ID("$Id: mapping.c 1.3 1998/07/20 14:45:20 jon Exp $");
 
 #define APPLY_UV(du,dv,su,sv) do { \
 	du = BR_ADD(													\

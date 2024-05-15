@@ -15,7 +15,6 @@
 #include "shortcut.h"
 #include "brassert.h"
 
-BR_RCS_ID("$Id: plib.c 1.1 1997/12/10 16:47:37 jon Exp $");
 
 /*
  * Default dispatch table for primitive library (defined at end of file)

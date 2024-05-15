@@ -15,7 +15,6 @@
 
 #include "vecifns.h"
 
-BR_RCS_ID("$Id: faceops.c 1.4 1998/07/27 14:55:50 jon Exp $");
 
 /*
  * Clip a triangle

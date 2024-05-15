@@ -13,7 +13,6 @@
 #include "shortcut.h"
 #include "brassert.h"
 
-BR_RCS_ID("$Id: ffront.c 1.1 1997/12/10 16:51:52 jon Exp $");
 
 void BR_ASM_CALL RenderForceFront1(struct brp_block *block,
 	brp_vertex *v0)

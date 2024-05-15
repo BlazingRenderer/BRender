@@ -8,6 +8,5 @@
  */
 #include "brender.h"
 
-BR_RCS_ID("$Id: scalar.c 1.1 1997/12/10 16:41:22 jon Exp $")
 
 int _BR_Floating_Point_Scalar = 0;

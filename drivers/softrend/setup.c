@@ -14,7 +14,6 @@
 
 #include "vecifns.h"
 
-BR_RCS_ID("$Id: setup.c 1.9 1998/11/13 16:23:37 jon Exp $");
 
 #define COUNTERS 0
 

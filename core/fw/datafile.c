@@ -12,7 +12,6 @@
 #include "datafile.h"
 #include "shortcut.h"
 
-BR_RCS_ID("$Id: datafile.c 1.4 1998/07/21 17:32:46 jon Exp $")
 
 #define CHUNK_LOG 0
 

@@ -12,7 +12,6 @@
 #include "brassert.h"
 #include "math_ip.h"
 
-BR_RCS_ID("$Id: pick.c 1.1 1997/12/10 16:41:32 jon Exp $")
 
 static br_matrix34 pick_model_to_view;
 

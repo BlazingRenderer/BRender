@@ -10,7 +10,6 @@
 
 #include "brender.h"
 
-BR_RCS_ID("$Id: brqsort.c 1.1 1997/12/10 16:41:05 jon Exp $")
 
 #include <stdlib.h>
 

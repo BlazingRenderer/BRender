@@ -9,7 +9,6 @@
 #include "fw.h"
 #include "brassert.h"
 
-BR_RCS_ID("$Id: objectc.c 1.3 1998/07/15 18:32:32 johng Exp $")
 
 /*
  * Parts that lists are constructed from

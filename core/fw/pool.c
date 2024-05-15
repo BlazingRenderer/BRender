@@ -9,7 +9,6 @@
 #include "fw.h"
 #include "brassert.h"
 
-BR_RCS_ID("$Id: pool.c 1.1 1997/12/10 16:41:09 jon Exp $")
 
 #if BR_POOL_DEBUG
 #undef PoolAllocate

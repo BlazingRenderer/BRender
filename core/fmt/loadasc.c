@@ -10,7 +10,6 @@
 #include "brender.h"
 #include "fmt.h"
 
-BR_RCS_ID("$Id: loadasc.c 1.1 1997/12/10 16:41:01 jon Exp $")
 
 /*
  * Various keywords than can appear in 3D-Studio .ASC file

@@ -10,7 +10,6 @@
 #include "fw.h"
 #include "brassert.h"
 
-BR_RCS_ID("$Id: devquery.c 1.2 1997/12/11 13:34:07 jon Exp $")
 
 static br_boolean deviceEnum(br_device *dev, br_device_enum_cbfn *cbfn, void *args)
 {

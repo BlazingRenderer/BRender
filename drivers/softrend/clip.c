@@ -10,7 +10,6 @@
 #include "shortcut.h"
 #include "brassert.h"
 
-BR_RCS_ID("$Id: clip.c 1.2 1998/07/20 14:45:10 jon Exp $");
 
 /*
  * Core of 3D homogenous clipper - loosly based on Paul Heckbert's

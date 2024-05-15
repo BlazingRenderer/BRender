@@ -12,7 +12,6 @@
 #include "brassert.h"
 #include "datafile.h"
 
-BR_RCS_ID("$Id: regsupt.c 1.3 1998/01/15 12:58:24 jon Exp $")
 
 /**
  ** Specific versions of registry calls for each class

@@ -12,7 +12,6 @@
 
 #include "zsmacro.h"
 
-BR_RCS_ID("$Id: otable.c 1.1 1997/12/10 16:41:32 jon Exp $")
 
 /*
  * Smallest possible distance between Z bounds

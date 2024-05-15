@@ -9,7 +9,6 @@
 #include "shortcut.h"
 #include "brassert.h"
 
-BR_RCS_ID("$Id: work.c 1.1 1997/12/10 16:49:21 jon Exp $");
 
 /*
  * The static work area for all the renderers

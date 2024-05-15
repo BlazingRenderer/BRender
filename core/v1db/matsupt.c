@@ -11,7 +11,6 @@
 #include "brassert.h"
 #include "datafile.h"
 
-BR_RCS_ID("$Id: matsupt.c 1.2 1998/03/05 20:24:12 jon Exp $")
 
 /*
  * Allocate a material

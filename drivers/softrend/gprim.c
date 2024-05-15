@@ -13,7 +13,6 @@
 #include "shortcut.h"
 #include "brassert.h"
 
-BR_RCS_ID("$Id: gprim.c 1.1 1997/12/10 16:51:59 jon Exp $");
 
 /*
  * Default dispatch table for renderer type (defined at and of file)

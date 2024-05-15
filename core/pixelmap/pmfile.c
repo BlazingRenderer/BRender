@@ -18,7 +18,6 @@
 
 #include "pmmem.h"
 
-BR_RCS_ID("$Id: pmfile.c 1.1 1997/12/10 16:41:26 jon Exp $")
 
 /**
  ** Pixelmap

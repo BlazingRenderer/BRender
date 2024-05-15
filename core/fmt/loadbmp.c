@@ -11,7 +11,6 @@
 #include "brender.h"
 #include "fmt.h"
 
-BR_RCS_ID("$Id: loadbmp.c 1.1 1997/12/10 16:41:01 jon Exp $")
 
 int FileNumCol(void *tmp);
 

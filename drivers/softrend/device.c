@@ -13,7 +13,6 @@
 #include "shortcut.h"
 #include "brassert.h"
 
-BR_RCS_ID("$Id: device.c 1.2 1998/07/01 19:32:51 jon Exp $");
 
 /*
  * Default dispatch table for device (defined at end of file)

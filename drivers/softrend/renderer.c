@@ -13,7 +13,6 @@
 #include "shortcut.h"
 #include "brassert.h"
 
-BR_RCS_ID("$Id: renderer.c 1.5 1998/07/22 14:22:36 johng Exp $");
 
 /*
  * Default dispatch table for renderer (defined at end of file)

@@ -12,7 +12,6 @@
 #include "drv.h"
 #include "brassert.h"
 
-BR_RCS_ID("$Id: pstate.c 1.1 1997/12/10 16:47:56 jon Exp $");
 
 /*
  * Default dispatch table for primitive state (defined at end of file)

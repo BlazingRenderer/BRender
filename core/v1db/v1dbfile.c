@@ -13,7 +13,6 @@
 #include "brassert.h"
 #include "datafile.h"
 
-BR_RCS_ID("$Id: v1dbfile.c 1.9 1998/07/21 19:35:59 jon Exp $")
 
 /*
  * For digging around in points etc - makes things slightly easier to read

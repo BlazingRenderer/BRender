@@ -12,7 +12,6 @@
 #include "formats.h"
 #include "v1db.h"
 
-BR_RCS_ID("$Id: prelight.c 1.2 1998/07/16 17:56:14 johng Exp $")
 
 /*
  * Set the per-vertex i,r,g,b values for the model.
