@@ -2,8 +2,9 @@ libdir="@CMAKE_INSTALL_FULL_LIBDIR@"
 includedir="@CMAKE_INSTALL_FULL_INCLUDEDIR@/brender"
 
 Name: @PROJECT_NAME@
-Description: @CMAKE_PROJECT_DESCRIPTION@
+Description: @CMAKE_PROJECT_DESCRIPTION@ (w/ drivers)
 URL: @CMAKE_PROJECT_HOMEPAGE_URL@
 Version: @PROJECT_VERSION@
+Requires: brender = @PROJECT_VERSION@ brender-sdl2 = @PROJECT_VERSION@ brender-glrend = @PROJECT_VERSION@
 Cflags: -I"${includedir}"
 Libs: -L"${libdir}" -lbrender

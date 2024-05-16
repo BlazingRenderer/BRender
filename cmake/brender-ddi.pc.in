@@ -1,0 +1,8 @@
+includedir="@CMAKE_INSTALL_FULL_INCLUDEDIR@/brender/ddi"
+
+Name: BRender DDI
+Description: Interface for developing BRender device drivers
+URL: @CMAKE_PROJECT_HOMEPAGE_URL@
+Version: @PROJECT_VERSION@
+Requires: brender = @PROJECT_VERSION@
+Cflags: -I"${includedir}"

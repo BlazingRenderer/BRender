@@ -98,18 +98,30 @@ install(FILES
 
 # message(FATAL_ERROR "XXXX: ${COMPILE_DEFINITIONS}")
 
-file(GENERATE
-        OUTPUT "${CMAKE_CURRENT_BINARY_DIR}-$<CONFIG>.pc"
-        #INPUT "${CMAKE_CURRENT_SOURCE_DIR}/cmake/brender.pc.in"
-        CONTENT "\
-libdir=\"${CMAKE_INSTALL_FULL_LIBDIR}\"
-includedir=\"${CMAKE_INSTALL_FULL_INCLUDEDIR}/brender\"
+#file(GENERATE
+#        OUTPUT "${CMAKE_CURRENT_BINARY_DIR}-$<CONFIG>.pc"
+#        #INPUT "${CMAKE_CURRENT_SOURCE_DIR}/cmake/brender.pc.in"
+#        CONTENT "\
+#libdir=\"${CMAKE_INSTALL_FULL_LIBDIR}\"
+#includedir=\"${CMAKE_INSTALL_FULL_INCLUDEDIR}/brender\"
+#
+#Name: ${PROJECT_NAME}
+#URL: ${CMAKE_PROJECT_HOMEPAGE_URL}
+#Version: $<TARGET_PROPERTY:brender,VERSION>
+#Cflags: -I\"\${includedir}\" -I\"\${includedir}/glrend\" -I\"\${includedir}/sdl2dev\" -D$<JOIN:$<TARGET_PROPERTY:brender-full,INTERFACE_COMPILE_DEFINITIONS>, -D>
+#")
 
-Name: ${PROJECT_NAME}
-URL: ${CMAKE_PROJECT_HOMEPAGE_URL}
-Version: $<TARGET_PROPERTY:brender,VERSION>
-Cflags: -I\"\${includedir}\" -I\"\${includedir}/glrend\" -I\"\${includedir}/sdl2dev\" -D$<JOIN:$<TARGET_PROPERTY:brender-full,INTERFACE_COMPILE_DEFINITIONS>, -D>
-")
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/cmake/brender.pc.in ${CMAKE_CURRENT_BINARY_DIR}/brender.pc @ONLY)
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/cmake/brender-ddi.pc.in ${CMAKE_CURRENT_BINARY_DIR}/brender-ddi.pc @ONLY)
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/cmake/brender-sdl2.pc.in ${CMAKE_CURRENT_BINARY_DIR}/brender-sdl2.pc @ONLY)
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/cmake/brender-glrend.pc.in ${CMAKE_CURRENT_BINARY_DIR}/brender-glrend.pc @ONLY)
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/cmake/brender-full.pc.in ${CMAKE_CURRENT_BINARY_DIR}/brender-full.pc @ONLY)
 
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/cmake/brender.pc.in ${CMAKE_CURRENT_BINARY_DIR}/brender.pc)
-install(FILES ${CMAKE_CURRENT_BINARY_DIR}/brender.pc DESTINATION ${CMAKE_INSTALL_PREFIX}/lib/pkgconfig)
+install(
+        FILES ${CMAKE_CURRENT_BINARY_DIR}/brender.pc
+              ${CMAKE_CURRENT_BINARY_DIR}/brender-ddi.pc
+              ${CMAKE_CURRENT_BINARY_DIR}/brender-sdl2.pc
+              ${CMAKE_CURRENT_BINARY_DIR}/brender-glrend.pc
+              ${CMAKE_CURRENT_BINARY_DIR}/brender-full.pc
+        DESTINATION ${CMAKE_INSTALL_PREFIX}/lib/pkgconfig
+)
