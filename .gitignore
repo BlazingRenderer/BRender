@@ -7,3 +7,5 @@
 /result-*
 /build/
 **/imgui.ini
+**/.DS_Store
+
