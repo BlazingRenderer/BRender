@@ -56,7 +56,10 @@ br_fixed_ls BR_PUBLIC_ENTRY BrFixedCos(br_fixed_luf a)
 
 br_fixed_luf BR_PUBLIC_ENTRY BrFixedATan2(br_fixed_ls x, br_fixed_ls y)
 {
-    return BrScalarToFixedLUF(BR_ATAN2(BrFixedToScalar(x), BrFixedToScalar(y)));
+    float v = BrScalarToFloat(BR_ATAN2(BrFixedToScalar(x), BrFixedToScalar(y)));
+    if(v < 0.0f)
+        v += 1.0f;
+    return BrFloatToFixedLUF(v);
 }
 
 br_fixed_ls BR_PUBLIC_ENTRY BrFixedSqrt(br_fixed_ls a)
