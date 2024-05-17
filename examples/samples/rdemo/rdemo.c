@@ -359,13 +359,29 @@ void ReflectionProcessEvent(br_demo *demo, const SDL_Event *evt)
     }
 }
 
+void ReflectionDestroy(br_demo *demo)
+{
+    br_demo_reflection *ref = demo->user;
+    br_material        *mat;
+
+    if((mat = BrMaterialFind("mirror")) != NULL) {
+        mat->colour_map = NULL;
+    }
+
+    BrMapRemove(ref->mirror_depth);
+    BrPixelmapFree(ref->mirror_depth);
+
+    BrMapRemove(ref->mirror_pm);
+    BrPixelmapFree(ref->mirror_pm);
+}
+
 const static br_demo_dispatch dispatch = {
     .init          = ReflectionInit,
     .process_event = ReflectionProcessEvent,
     .update        = ReflectionUpdate,
     .render        = ReflectionRender,
     .on_resize     = BrDemoDefaultOnResize,
-    .destroy       = BrDemoDefaultDestroy,
+    .destroy       = ReflectionDestroy,
 };
 
 int main(int argc, char **argv)
