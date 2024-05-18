@@ -10,6 +10,13 @@
 #include "brender.h"
 #include "brmath.h"
 
+br_fixed_ls BR_PUBLIC_ENTRY BrFixedAbs(br_fixed_ls a)
+{
+    if(a < 0)
+        return -1;
+
+    return a;
+}
 
 br_fixed_ls BR_PUBLIC_ENTRY BrFixedMul(br_fixed_ls a, br_fixed_ls b)
 {
