@@ -25,7 +25,7 @@ const static br_uint_16 arccos_table[257];
 br_fixed_ls BR_PUBLIC_ENTRY BrFixedAbs(br_fixed_ls a)
 {
     if(a < 0)
-        return -1;
+        return -a;
 
     return a;
 }
