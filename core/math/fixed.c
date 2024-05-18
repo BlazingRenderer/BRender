@@ -62,9 +62,10 @@ br_fixed_ls BR_PUBLIC_ENTRY BrFixedSqr4(br_fixed_ls a, br_fixed_ls b, br_fixed_l
 
 br_fixed_ls BR_PUBLIC_ENTRY BrFixedDiv(br_fixed_ls numerator, br_fixed_ls denominator)
 {
-    br_scalar n = BrFixedToScalar(numerator);
-    br_scalar d = BrFixedToScalar(denominator);
-    return BrScalarToFixed(n / d);
+    if(denominator == 0)
+        return 0;
+
+    return (br_fixed_ls)(((br_uint_64)numerator << 16) / denominator);
 }
 
 br_fixed_ls BR_PUBLIC_ENTRY BrFixedSin(br_fixed_luf a)
