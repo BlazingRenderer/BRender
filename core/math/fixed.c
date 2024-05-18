@@ -24,6 +24,22 @@ br_fixed_ls BR_PUBLIC_ENTRY BrFixedMul(br_fixed_ls a, br_fixed_ls b)
     return (br_fixed_ls)(tmp >> 16);
 }
 
+br_fixed_ls BR_PUBLIC_ENTRY BrFixedMac2(br_fixed_ls a, br_fixed_ls b, br_fixed_ls c, br_fixed_ls d)
+{
+    return (br_fixed_ls)(((a * (br_int_64)b) + (c * (br_int_64)d)) >> 16);
+}
+
+br_fixed_ls BR_PUBLIC_ENTRY BrFixedMac3(br_fixed_ls a, br_fixed_ls b, br_fixed_ls c, br_fixed_ls d, br_fixed_ls e, br_fixed_ls f)
+{
+    return (br_fixed_ls)(((a * (br_int_64)b) + (c * (br_int_64)d) + (e * (br_int_64)f)) >> 16);
+}
+
+br_fixed_ls BR_PUBLIC_ENTRY BrFixedMac4(br_fixed_ls a, br_fixed_ls b, br_fixed_ls c, br_fixed_ls d, br_fixed_ls e,
+                                        br_fixed_ls f, br_fixed_ls g, br_fixed_ls h)
+{
+    return (br_fixed_ls)(((a * (br_int_64)b) + (c * (br_int_64)d) + (e * (br_int_64)f) + (g * (br_int_64)h)) >> 16);
+}
+
 br_fixed_ls BR_PUBLIC_ENTRY BrFixedSqr(br_fixed_ls a)
 {
     return BrFixedMul(a, a);
