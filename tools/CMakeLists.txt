@@ -2,3 +2,6 @@ foreach(target 3ds2br dquery dripmem mkblend mkfog mkranges mkshades paljoin tex
 	add_subdirectory(${target})
 	set_property(TARGET ${target} PROPERTY FOLDER "BRender/Tools")
 endforeach()
+
+# Debug tools - enable/disable them as required.
+# add_subdirectory(mathtest)
