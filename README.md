@@ -30,7 +30,7 @@ This is released under the MIT license.
 
 Copyright (c) 1992-1998 Argonaut Technologies Limited
 
-Copyright (c) 2014-2024 Zane van Ipren
+Copyright (c) 2014-2024 Zane van Iperen
 
 Copyright (c) 2022-2024 erysdren (it/she/they)
 
