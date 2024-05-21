@@ -145,7 +145,7 @@ br_fixed_luf BR_ASM_CALL BrFixedASin(br_fixed_ls s);
 
 br_fixed_luf BR_ASM_CALL BrFixedACos(br_fixed_ls c);
 
-br_fixed_luf BR_PUBLIC_ENTRY BrFixedATan2(br_fixed_ls x, br_fixed_ls y);
+br_fixed_luf BR_PUBLIC_ENTRY BrFixedATan2(br_fixed_ls y, br_fixed_ls x);
 
 br_fixed_luf BR_ASM_CALL BrFixedATan2Fast(br_fixed_ls x, br_fixed_ls y);
 

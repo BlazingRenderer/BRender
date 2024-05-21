@@ -21,6 +21,7 @@
 const static br_uint_16 sincos_table[321];
 const static br_uint_16 arcsin_table[257];
 const static br_uint_16 arccos_table[257];
+const static br_uint_16 arctan_table[257];
 
 br_fixed_ls BR_PUBLIC_ENTRY BrFixedAbs(br_fixed_ls a)
 {
@@ -119,12 +120,78 @@ br_fixed_luf BR_PUBLIC_ENTRY BrFixedACos(br_fixed_ls c)
     return interp(offset_input, arccos_table);
 }
 
-br_fixed_luf BR_PUBLIC_ENTRY BrFixedATan2(br_fixed_ls x, br_fixed_ls y)
+/*
+ * angle FixedATan2(_F y, _F x)
+ *
+ * Break in 8 octants, based on sign of X, sign of Y and relative magnitude
+ * of X to Y.
+ *
+ *    0  x>0  y>0  |x| > |y|    =       +atan(|y|/|x|)
+ *    1  x>0  y>0  |x| < |y|    = PI/2  -atan(|x|/|y|)
+ *    2  x<0  y>0  |x| < |y|    = PI/2  +atan(|x|/|y|)
+ *    3  x<0  y>0  |x| > |y|    = PI    -atan(|y|/|x|)
+ *    4  x<0  y<0  |x| > |y|    = PI    +atan(|y|/|x|)
+ *    5  x<0  y<0  |x| < |y|    = PI*3/2-atan(|x|/|y|)
+ *    6  x>0  y<0  |x| < |y|    = PI*3/2+atan(|x|/|y|)
+ *    7  x>0  y<0  |x| > |y|    = PI*2  -atan(|y|/|x|)
+ */
+
+#define X_GT_0_SHIFT   0
+#define Y_GT_0_SHIFT   1
+#define XA_GT_YA_SHIFT 2
+
+#define X_GT_0         (1 << X_GT_0_SHIFT)
+#define Y_GT_0         (1 << Y_GT_0_SHIFT)
+#define XA_GT_YA       (1 << XA_GT_YA_SHIFT)
+
+typedef struct octant_info {
+    br_fixed_luf offset;
+    int          mul;
+    br_uint_32   nidx;
+} octant_info;
+
+// clang-format off
+static const octant_info OctantInfo[] = {
+    /* Q0 */ [X_GT_0 | Y_GT_0 | XA_GT_YA] = {.offset = 0,             .mul =  1, .nidx = 1},
+    /* Q1 */ [X_GT_0 | Y_GT_0           ] = {.offset = BR_PI_2_LUF,   .mul = -1, .nidx = 0},
+    /* Q2 */ [         Y_GT_0           ] = {.offset = BR_PI_2_LUF,   .mul =  1, .nidx = 0},
+    /* Q3 */ [         Y_GT_0 | XA_GT_YA] = {.offset = BR_PI_LUF,     .mul = -1, .nidx = 1},
+    /* Q4 */ [                  XA_GT_YA] = {.offset = BR_PI_LUF,     .mul =  1, .nidx = 1},
+    /* Q5 */ [                         0] = {.offset = BR_3_PI_2_LUF, .mul = -1, .nidx = 0},
+    /* Q6 */ [X_GT_0                    ] = {.offset = BR_3_PI_2_LUF, .mul =  1, .nidx = 0},
+    /* Q7 */ [X_GT_0          | XA_GT_YA] = {.offset = 0, /* 2*pi */  .mul = -1, .nidx = 1},
+};
+// clang-format on
+
+br_fixed_luf BrFixedATan2(br_fixed_ls y, br_fixed_ls x)
 {
-    float v = BrScalarToFloat(BR_ATAN2(BrFixedToScalar(x), BrFixedToScalar(y)));
-    if(v < 0.0f)
-        v += 1.0f;
-    return BrFloatToFixedLUF(v);
+    const octant_info *octant;
+    br_fixed_ls        abs_y  = BrFixedAbs(y);
+    br_fixed_ls        abs_x  = BrFixedAbs(x);
+    br_fixed_ls        num[2] = {abs_x, abs_y};
+    br_fixed_ls        r;
+
+    /* Handle the boundaries between quadrants. */
+    if(abs_x == abs_y) {
+        if(x > 0 && y < 0)
+            return BR_7_PI_4_LUF;
+
+        if(x < 0 && y < 0)
+            return BR_5_PI_4_LUF;
+
+        if(x < 0 && y > 0)
+            return BR_3_PI_4_LUF;
+
+        if(x > 0 && y > 0)
+            return BR_PI_4_LUF;
+
+        /* (0, 0) */
+        return BR_ZERO_LUF;
+    }
+
+    octant = OctantInfo + (((x > 0) << X_GT_0_SHIFT) | ((y > 0) << Y_GT_0_SHIFT) | ((abs_x > abs_y) << XA_GT_YA_SHIFT));
+    r      = BrFixedDiv(num[octant->nidx], num[1 - octant->nidx]);
+    return octant->offset + (octant->mul * interp((br_int_16)r, arctan_table));
 }
 
 br_fixed_ls BR_PUBLIC_ENTRY BrFixedSqrt(br_fixed_ls a)
@@ -252,5 +319,41 @@ const static br_uint_16 arccos_table[] = {
     0x01497, 0x013EC, 0x0133B, 0x01285, 0x011C8, 0x01103, 0x01036, 0x00F5E,
     0x00E7B, 0x00D89, 0x00C86, 0x00B6C, 0x00A36, 0x008D6, 0x00736, 0x00518,
     0x00000,
+};
+
+const static br_uint_16 arctan_table[] = {
+    0x00000, 0x00028, 0x00051, 0x0007A, 0x000A2, 0x000CB, 0x000F4, 0x0011D,
+    0x00145, 0x0016E, 0x00197, 0x001BF, 0x001E8, 0x00211, 0x00239, 0x00262,
+    0x0028B, 0x002B3, 0x002DC, 0x00304, 0x0032D, 0x00355, 0x0037E, 0x003A6,
+    0x003CE, 0x003F7, 0x0041F, 0x00448, 0x00470, 0x00498, 0x004C0, 0x004E8,
+    0x00511, 0x00539, 0x00561, 0x00589, 0x005B1, 0x005D9, 0x00601, 0x00628,
+    0x00650, 0x00678, 0x006A0, 0x006C7, 0x006EF, 0x00716, 0x0073E, 0x00765,
+    0x0078D, 0x007B4, 0x007DB, 0x00803, 0x0082A, 0x00851, 0x00878, 0x0089F,
+    0x008C6, 0x008ED, 0x00913, 0x0093A, 0x00961, 0x00987, 0x009AE, 0x009D4,
+    0x009FB, 0x00A21, 0x00A47, 0x00A6D, 0x00A94, 0x00ABA, 0x00AE0, 0x00B05,
+    0x00B2B, 0x00B51, 0x00B77, 0x00B9C, 0x00BC2, 0x00BE7, 0x00C0C, 0x00C32,
+    0x00C57, 0x00C7C, 0x00CA1, 0x00CC6, 0x00CEB, 0x00D0F, 0x00D34, 0x00D58,
+    0x00D7D, 0x00DA1, 0x00DC6, 0x00DEA, 0x00E0E, 0x00E32, 0x00E56, 0x00E7A,
+    0x00E9E, 0x00EC1, 0x00EE5, 0x00F08, 0x00F2C, 0x00F4F, 0x00F72, 0x00F95,
+    0x00FB8, 0x00FDB, 0x00FFE, 0x01021, 0x01044, 0x01066, 0x01089, 0x010AB,
+    0x010CD, 0x010EF, 0x01111, 0x01133, 0x01155, 0x01177, 0x01199, 0x011BA,
+    0x011DC, 0x011FD, 0x0121E, 0x0123F, 0x01260, 0x01281, 0x012A2, 0x012C3,
+    0x012E4, 0x01304, 0x01325, 0x01345, 0x01365, 0x01385, 0x013A5, 0x013C5,
+    0x013E5, 0x01405, 0x01424, 0x01444, 0x01463, 0x01483, 0x014A2, 0x014C1,
+    0x014E0, 0x014FF, 0x0151E, 0x0153C, 0x0155B, 0x01579, 0x01598, 0x015B6,
+    0x015D4, 0x015F2, 0x01610, 0x0162E, 0x0164C, 0x0166A, 0x01687, 0x016A5,
+    0x016C2, 0x016DF, 0x016FC, 0x01719, 0x01736, 0x01753, 0x01770, 0x0178C,
+    0x017A9, 0x017C5, 0x017E2, 0x017FE, 0x0181A, 0x01836, 0x01852, 0x0186E,
+    0x0188A, 0x018A5, 0x018C1, 0x018DC, 0x018F7, 0x01913, 0x0192E, 0x01949,
+    0x01964, 0x0197F, 0x01999, 0x019B4, 0x019CE, 0x019E9, 0x01A03, 0x01A1D,
+    0x01A37, 0x01A51, 0x01A6B, 0x01A85, 0x01A9F, 0x01AB9, 0x01AD2, 0x01AEC,
+    0x01B05, 0x01B1E, 0x01B37, 0x01B50, 0x01B69, 0x01B82, 0x01B9B, 0x01BB4,
+    0x01BCC, 0x01BE5, 0x01BFD, 0x01C16, 0x01C2E, 0x01C46, 0x01C5E, 0x01C76,
+    0x01C8E, 0x01CA5, 0x01CBD, 0x01CD5, 0x01CEC, 0x01D04, 0x01D1B, 0x01D32,
+    0x01D49, 0x01D60, 0x01D77, 0x01D8E, 0x01DA5, 0x01DBB, 0x01DD2, 0x01DE9,
+    0x01DFF, 0x01E15, 0x01E2C, 0x01E42, 0x01E58, 0x01E6E, 0x01E84, 0x01E99,
+    0x01EAF, 0x01EC5, 0x01EDA, 0x01EF0, 0x01F05, 0x01F1B, 0x01F30, 0x01F45,
+    0x01F5A, 0x01F6F, 0x01F84, 0x01F99, 0x01FAD, 0x01FC2, 0x01FD7, 0x01FEB,
+    0x02000,
 };
 // clang-format on
