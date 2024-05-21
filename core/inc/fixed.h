@@ -28,6 +28,14 @@ typedef br_uint_16 br_fixed_su;  /* Short unsigned fixed          8.8  */
 typedef br_uint_8  br_fixed_suf; /* Short unsigned fixed fraction 0.8  */
 
 /*
+ * 0 in various fixed-point forms
+ */
+#define BR_ZERO_LS           0
+#define BR_ZERO_LSF          0
+#define BR_ZERO_LU           0
+#define BR_ZERO_LUF          0
+
+/*
  * 1 in various fixed point forms
  */
 #define BR_ONE_LS            65536 /* (1<<16) */
