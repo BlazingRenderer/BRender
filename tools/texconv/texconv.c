@@ -1302,8 +1302,10 @@ int main(int argc, char **argv)
 
             pm = InputFileTypes[it].function(input_name, alpha_channel);
 
-            if(pm != NULL)
-                BrMapAdd(pm);
+            if(pm == NULL)
+                break;
+
+            BrMapAdd(pm);
 
             /*
              * print details of a pixelmap (and palette)
