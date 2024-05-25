@@ -81,6 +81,11 @@ br_fixed_ls BR_PUBLIC_ENTRY BrFixedDiv(br_fixed_ls numerator, br_fixed_ls denomi
     return (br_fixed_ls)(((br_uint_64)numerator << 16) / denominator);
 }
 
+br_fixed_ls BR_PUBLIC_ENTRY BrFixedRcp(br_fixed_ls a)
+{
+    return BrFixedDiv(BR_ONE_LS, a);
+}
+
 /*
  * Given a 16-bit input, generate the output value of a function
  * using a 256-word lookup table with interpolation between entries.

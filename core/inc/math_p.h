@@ -114,7 +114,7 @@ br_fixed_ls BR_ASM_CALL BrFixedMac4Div(br_fixed_ls a, br_fixed_ls b, br_fixed_ls
                                        br_fixed_ls f, br_fixed_ls g, br_fixed_ls h, br_fixed_ls i);
 /* result = 1.0/a
  */
-br_fixed_ls BR_ASM_CALL BrFixedRcp(br_fixed_ls a);
+br_fixed_ls BR_PUBLIC_ENTRY BrFixedRcp(br_fixed_ls a);
 
 /*
  * Various combinations with fractions
