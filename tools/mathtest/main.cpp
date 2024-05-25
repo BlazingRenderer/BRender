@@ -50,6 +50,14 @@ const Graph graph_acos = {
     .eval_fixed = [](float x) -> float { return BrAngleToRadian(BrFixedLUFToFloat(BrFixedACos(BrFloatToFixed(x)))); },
 };
 
+const Graph graph_rcp = {
+    .from       = 0.5f,
+    .to         = 1000.0f,
+    .step       = 0.5f,
+    .eval_float = [](float x) -> float { return 1.0f / x; },
+    .eval_fixed = [](float x) -> float { return BrFixedToFloat(BrFixedRcp(BrFloatToFixed(x))); },
+};
+
 const Graph graph_atan2_x1 = {
     .from       = -10.0f,
     .to         = 10.0f,
