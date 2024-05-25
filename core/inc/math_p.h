@@ -69,15 +69,15 @@ br_fixed_ls BR_PUBLIC_ENTRY BrFixedLength4(br_fixed_ls a, br_fixed_ls b, br_fixe
 
 /* result = 1/sqrt(a*a + b*b) (low precision)
  */
-br_fixed_ls BR_ASM_CALL BrFixedRLength2(br_fixed_ls a, br_fixed_ls b);
+br_fixed_ls BR_PUBLIC_ENTRY BrFixedRLength2(br_fixed_ls a, br_fixed_ls b);
 
 /* result = 1/sqrt(a*a + b*b + c*c) (low precision)
  */
-br_fixed_ls BR_ASM_CALL BrFixedRLength3(br_fixed_ls a, br_fixed_ls b, br_fixed_ls c);
+br_fixed_ls BR_PUBLIC_ENTRY BrFixedRLength3(br_fixed_ls a, br_fixed_ls b, br_fixed_ls c);
 
 /* result = 1/sqrt(a*a + b*b + c*c + d*d) (low precision)
  */
-br_fixed_ls BR_ASM_CALL BrFixedRLength4(br_fixed_ls a, br_fixed_ls b, br_fixed_ls c, br_fixed_ls d);
+br_fixed_ls BR_PUBLIC_ENTRY BrFixedRLength4(br_fixed_ls a, br_fixed_ls b, br_fixed_ls c, br_fixed_ls d);
 
 /* result = a/b
  */
