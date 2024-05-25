@@ -73,6 +73,21 @@ br_fixed_ls BR_PUBLIC_ENTRY BrFixedSqr4(br_fixed_ls a, br_fixed_ls b, br_fixed_l
     return BrFixedSqr(a) + BrFixedSqr(b) + BrFixedSqr(c) + BrFixedSqr(d);
 }
 
+br_fixed_ls BR_PUBLIC_ENTRY BrFixedLength2(br_fixed_ls a, br_fixed_ls b)
+{
+    return BrFixedSqrt(BrFixedSqr2(a, b));
+}
+
+br_fixed_ls BR_PUBLIC_ENTRY BrFixedLength3(br_fixed_ls a, br_fixed_ls b, br_fixed_ls c)
+{
+    return BrFixedSqrt(BrFixedSqr3(a, b, c));
+}
+
+br_fixed_ls BR_PUBLIC_ENTRY BrFixedLength4(br_fixed_ls a, br_fixed_ls b, br_fixed_ls c, br_fixed_ls d)
+{
+    return BrFixedSqrt(BrFixedSqr4(a, b, c, d));
+}
+
 br_fixed_ls BR_PUBLIC_ENTRY BrFixedDiv(br_fixed_ls numerator, br_fixed_ls denominator)
 {
     if(denominator == 0)
