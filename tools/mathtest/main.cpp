@@ -58,21 +58,6 @@ const Graph graph_rcp = {
     .eval_fixed = [](float x) -> float { return BrFixedToFloat(BrFixedRcp(BrFloatToFixed(x))); },
 };
 
-const Graph graph_atan2_x1 = {
-    .from       = -10.0f,
-    .to         = 10.0f,
-    .step       = 0.001f,
-    .eval_float = [](float y) -> float { return atan2f(y, 1); },
-    .eval_fixed = [](float y) -> float {
-        float v = BrFixedLUFToFloat(BrFixedATan2(BrFloatToFixed(y), BrFloatToFixed(1)));
-
-        if(v >= 0.5f)
-            v -= 1.0f;
-
-        return BrAngleToRadian(v);
-    },
-};
-
 typedef struct Graph3D {
     float x_from, x_to, x_step;
     float y_from, y_to, y_step;
