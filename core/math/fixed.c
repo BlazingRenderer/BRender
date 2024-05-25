@@ -116,6 +116,23 @@ br_fixed_ls BR_PUBLIC_ENTRY BrFixedRcp(br_fixed_ls a)
     return BrFixedDiv(BR_ONE_LS, a);
 }
 
+br_fixed_ls BR_PUBLIC_ENTRY BrFixedFMac2(br_fixed_lsf a, br_fixed_ls b, br_fixed_lsf c, br_fixed_ls d)
+{
+    return BrFixedMac2(a << 1, b, c << 1, d);
+}
+
+br_fixed_ls BR_PUBLIC_ENTRY BrFixedFMac3(br_fixed_lsf a, br_fixed_ls b, br_fixed_lsf c, br_fixed_ls d, br_fixed_lsf e,
+                                         br_fixed_ls f)
+{
+    return BrFixedMac3(a << 1, b, c << 1, d, e << 1, f);
+}
+
+br_fixed_ls BR_PUBLIC_ENTRY BrFixedFMac4(br_fixed_lsf a, br_fixed_ls b, br_fixed_lsf c, br_fixed_ls d, br_fixed_lsf e,
+                                         br_fixed_ls f, br_fixed_lsf g, br_fixed_ls h)
+{
+    return BrFixedMac4(a << 1, b, c << 1, d, e << 1, f, g << 1, h);
+}
+
 /*
  * Given a 16-bit input, generate the output value of a function
  * using a 256-word lookup table with interpolation between entries.

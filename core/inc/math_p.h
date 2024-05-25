@@ -122,17 +122,17 @@ br_fixed_ls BR_PUBLIC_ENTRY BrFixedRcp(br_fixed_ls a);
 
 /* result = a*b + c*d - a & c are fractions
  */
-br_fixed_ls BR_ASM_CALL BrFixedFMac2(br_fixed_lsf a, br_fixed_ls b, br_fixed_lsf c, br_fixed_ls d);
+br_fixed_ls BR_PUBLIC_ENTRY BrFixedFMac2(br_fixed_lsf a, br_fixed_ls b, br_fixed_lsf c, br_fixed_ls d);
 
 /* result = a*b + c*d + e*f - a,c & e are fractions
  */
-br_fixed_ls BR_ASM_CALL BrFixedFMac3(br_fixed_lsf a, br_fixed_ls b, br_fixed_lsf c, br_fixed_ls d, br_fixed_lsf e,
-                                     br_fixed_ls f);
+br_fixed_ls BR_PUBLIC_ENTRY BrFixedFMac3(br_fixed_lsf a, br_fixed_ls b, br_fixed_lsf c, br_fixed_ls d, br_fixed_lsf e,
+                                         br_fixed_ls f);
 
 /* result = a*b + c*d + e*f + g*h (a,c,e,g are fractions)
  */
-br_fixed_ls BR_ASM_CALL BrFixedFMac4(br_fixed_ls a, br_fixed_ls b, br_fixed_ls c, br_fixed_ls d, br_fixed_ls e,
-                                     br_fixed_ls f, br_fixed_ls g, br_fixed_ls h);
+br_fixed_ls BR_PUBLIC_ENTRY BrFixedFMac4(br_fixed_lsf a, br_fixed_ls b, br_fixed_lsf c, br_fixed_ls d, br_fixed_lsf e,
+                                         br_fixed_ls f, br_fixed_lsf g, br_fixed_ls h);
 
 /*
  * Misc. support  functions
