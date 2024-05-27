@@ -108,7 +108,7 @@ br_fixed_ls BR_PUBLIC_ENTRY BrFixedDiv(br_fixed_ls numerator, br_fixed_ls denomi
     if(denominator == 0)
         return 0;
 
-    return (br_fixed_ls)(((br_uint_64)numerator << 16) / denominator);
+    return (br_fixed_ls)(((br_int_64)numerator << 16) / denominator);
 }
 
 br_fixed_ls BR_PUBLIC_ENTRY BrFixedRcp(br_fixed_ls a)
