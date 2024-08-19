@@ -11,3 +11,8 @@ add_subdirectory(samples)
 if(BRENDER_BUILD_SOFT)
     add_subdirectory(softcube)
 endif()
+
+find_package(glfw3 3)
+if(TARGET glfw)
+    add_subdirectory(glfw3-opengl)
+endif ()
