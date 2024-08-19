@@ -146,7 +146,7 @@ br_device_pixelmap *DevicePixelmapSDL2Allocate(br_device *dev, br_output_facilit
                                                SDL_Surface *surface, br_boolean owned)
 {
     br_device_pixelmap *self;
-    int                 bpp;
+    br_int_32           bpp;
     br_uint_8           type;
 
     UASSERT(dev != NULL);
@@ -802,7 +802,7 @@ br_error BR_CMETHOD_DECL(br_device_pixelmap_sdl2, match)(br_device_pixelmap *sel
     br_device_pixelmap *pm;
     SDL_Surface        *surface;
     Uint32              format;
-    int                 bpp;
+    br_int_32           bpp;
 
     struct match_off_tokens mt = {
         .use        = BRT_NONE,

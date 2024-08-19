@@ -21,7 +21,12 @@ endif ()
 
 option(BRENDER_DISABLE_FINDSDL "Disable searching for SDL2" OFF)
 if (NOT BRENDER_DISABLE_FINDSDL)
-    find_package(SDL2)
+    include(FindPkgConfig)
+    pkg_search_module(SDL2 REQUIRED sdl2)
+    add_library(SDL2::SDL2 INTERFACE IMPORTED)
+    set_target_properties(SDL2::SDL2 PROPERTIES
+                   INTERFACE_LINK_LIBRARIES "${SDL2_LIBRARIES}"
+                   INTERFACE_INCLUDE_DIRECTORIES "${SDL2_INCLUDE_DIRS}")
 endif ()
 
 option(BRENDER_BUILD_DRIVERS "Build Drivers" ON)

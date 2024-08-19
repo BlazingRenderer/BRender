@@ -119,7 +119,7 @@ static br_error maybe_allocate_surface(SDL_Surface **out_surf, br_boolean *chang
     br_error        result;
     Uint32          format;
     SDL_Surface    *surf;
-    int             bpp;
+    br_int_32       bpp;
     br_device_clut *clut;
 
     if(*out_surf != NULL) {

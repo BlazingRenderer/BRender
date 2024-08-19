@@ -286,7 +286,7 @@ static br_error BR_CMETHOD_DECL(br_output_facility_sdl2, pixelmapNew)(br_output_
     SDL_Window         *window  = NULL;
     SDL_Surface        *surface = NULL;
     Uint32              format  = SDL_PIXELFORMAT_UNKNOWN;
-    int                 bpp     = -1;
+    br_int_32           bpp     = -1;
 
     struct pixelmap_new_tokens pt = {
         .title      = NULL,

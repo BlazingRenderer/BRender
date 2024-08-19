@@ -941,7 +941,7 @@ static void cleanup_tests(void)
 int main(int argc, char **argv)
 {
     br_pixelmap *screen = NULL, *colour_buffer = NULL;
-    int          width = 1280, height = 720;
+    int          width = 480, height = 272;
     int          ret = -1;
     br_error     r;
     br_uint_64   ticks_last, ticks_now;
@@ -950,7 +950,7 @@ int main(int argc, char **argv)
 
     BrBegin();
 
-    BrLogSetLevel(BR_LOG_DEBUG);
+    BrLogSetLevel(BR_LOG_TRACE);
 
     void *anchor = BrResAllocate(NULL, 0, BR_MEMORY_ANCHOR);
 

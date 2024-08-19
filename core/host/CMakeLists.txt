@@ -46,4 +46,8 @@ target_sources(host INTERFACE
         )
 
 target_include_directories(host PRIVATE .)
-target_link_libraries(host PRIVATE brender-inc-ddi ${CMAKE_DL_LIBS})
+target_link_libraries(host PRIVATE brender-inc-ddi)
+
+if (NOT PSP)
+target_link_libraries(host PRIVATE ${CMAKE_DL_LIBS})
+endif ()
