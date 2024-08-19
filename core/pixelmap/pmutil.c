@@ -57,3 +57,79 @@ br_pixelmap *BR_PUBLIC_ENTRY BrPixelmapDeCLUT(br_pixelmap *src)
 
     return newpm;
 }
+
+br_error BrPixelmapResizeBuffers(br_pixelmap *screen, br_pixelmap **colour, br_pixelmap **depth)
+{
+    br_pixelmap *tmp;
+
+    if(screen == NULL || colour == NULL || depth == NULL)
+        return BRE_FAIL;
+
+    /*
+     * Try to resize the framebuffer directly. Fall back to recreation if we can't.
+     */
+    if(*colour != NULL && *depth != NULL) {
+        tmp = *colour;
+        if(tmp->width != screen->width || tmp->height != screen->height) {
+            if((tmp = BrPixelmapResize(tmp, screen->width, screen->height)) == NULL)
+                goto full_cleanup;
+
+            *colour       = tmp;
+            tmp->origin_x = screen->origin_x;
+            tmp->origin_y = screen->origin_y;
+        }
+
+        tmp = *depth;
+        if(tmp->width != screen->width || tmp->height != screen->height) {
+            if((tmp = BrPixelmapResize(*depth, screen->width, screen->height)) == NULL)
+                goto full_cleanup;
+
+            *depth        = tmp;
+            tmp->origin_x = screen->origin_x;
+            tmp->origin_y = screen->origin_y;
+        }
+        return BRE_OK;
+    }
+
+full_cleanup:
+
+    /*
+     * Clear the screen, just in case.
+     */
+    if(*colour != NULL) {
+        BrPixelmapFill(*colour, 0);
+        BrPixelmapDoubleBuffer(screen, *colour);
+    }
+
+    /*
+     * Delete everything.
+     */
+    if(*depth != NULL) {
+        BrPixelmapFree(*depth);
+        *depth = NULL;
+    }
+
+    if(*colour != NULL) {
+        BrPixelmapFree(*colour);
+        *colour = NULL;
+    }
+
+    if((tmp = BrPixelmapMatchTyped(screen, BR_PMMATCH_OFFSCREEN, screen->type)) == NULL)
+        return BRE_FAIL;
+
+    *colour       = tmp;
+    tmp->origin_x = screen->origin_x;
+    tmp->origin_y = screen->origin_y;
+
+    if((tmp = BrPixelmapMatch(*colour, BR_PMMATCH_DEPTH_16)) == NULL) {
+        BrPixelmapFree(*colour);
+        *colour = NULL;
+        return BRE_FAIL;
+    }
+
+    *depth        = tmp;
+    tmp->origin_x = screen->origin_x;
+    tmp->origin_y = screen->origin_y;
+
+    return BRE_OK;
+}
