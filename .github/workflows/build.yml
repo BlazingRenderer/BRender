@@ -35,7 +35,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Install Dependencies
-        run: sudo apt install -y --no-install-recommends libsdl2-dev ninja-build
+        run: sudo apt install -y --no-install-recommends libsdl2-dev libglfw3-dev ninja-build
       - name: Clone Repository
         uses: actions/checkout@v4
       - name: Configure
@@ -66,6 +66,9 @@ jobs:
 
       - name: Install SDL2
         run: vcpkg install sdl2:${{ matrix.configuration.vcpkg_target }}
+
+      - name: Install GLFW3
+        run: vcpkg install glfw3:${{ matrix.configuration.vcpkg_target }}
 
       - name: Configure
         run: >
