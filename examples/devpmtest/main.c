@@ -123,7 +123,7 @@ static void linepoint_draw(br_pixelmap *dest, float dt, void *user)
 {
     linepoint_state *state = user;
     br_colour        col;
-    const br_int_32  width  = 512;
+    const br_int_32  width  = 192;
     const int        nrows  = 64;
     const int        ncols  = 64;
     int              base_x = -width / 2;
@@ -950,7 +950,7 @@ int main(int argc, char **argv)
 
     BrBegin();
 
-    BrLogSetLevel(BR_LOG_TRACE);
+    BrLogSetLevel(BR_LOG_DEBUG);
 
     void *anchor = BrResAllocate(NULL, 0, BR_MEMORY_ANCHOR);
 
@@ -964,6 +964,11 @@ int main(int argc, char **argv)
                       BRT_OPENGL_B,       BR_FALSE,
                       BR_NULL_TOKEN);
     // clang-format on
+
+    if (SDL_Init(SDL_INIT_GAMECONTROLLER) != 0) {
+        BrLogError("APP", "SDL_INIT_GAMECONTROLLER failed.");
+        goto screen_creation_failed;
+    }
 
     if(r != BRE_OK) {
         BrLogError("APP", "BrDevBeginVar() failed.");
@@ -1003,7 +1008,7 @@ int main(int argc, char **argv)
             switch(evt.type) {
                 case SDL_QUIT:
                     goto done;
-                case SDL_WINDOWEVENT:
+                case SDL_WINDOWEVENT: {
                     if(BrPixelmapHandleWindowEvent(screen, &evt.window) != BRE_OK) {
                         BrLogError("APP", "Error handling window event");
                         goto done;
@@ -1025,6 +1030,25 @@ int main(int argc, char **argv)
                         }
                     }
                     break;
+                }
+                case SDL_CONTROLLERBUTTONDOWN: {
+					printf("ASGAJGKSN\n");
+                    if (evt.cbutton.state != SDL_PRESSED)
+                        break;
+                    switch(evt.cbutton.button) {
+                        case SDL_CONTROLLER_BUTTON_DPAD_UP:
+                            if(test_index == 0)
+                                test_index = BR_ASIZE(tests) - 1;
+                            else
+                                test_index -= 1;
+                            break;
+                        case SDL_CONTROLLER_BUTTON_DPAD_DOWN:
+                        case SDL_CONTROLLER_BUTTON_A:
+                            test_index = (test_index + 1) % BR_ASIZE(tests);
+                            break;
+                    }
+                    break;
+                }
                 case SDL_KEYDOWN: {
                     switch(evt.key.keysym.sym) {
                         case SDLK_F5:
@@ -1044,6 +1068,7 @@ int main(int argc, char **argv)
                             SDL_PushEvent(&(SDL_Event){.type = SDL_QUIT});
                             break;
                     }
+                    break;
                 }
             }
         }
