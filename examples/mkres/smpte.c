@@ -120,6 +120,24 @@ const static br_smpte_colours smpte_rgb_565 = {
     .plugeR    = BR_COLOUR_565(29, 29, 29),
 };
 
+const static br_smpte_colours smpte_bgr_565 = {
+    .grey40    = BR_COLOUR_565(104, 104, 104),
+    .white75   = BR_COLOUR_565(180, 180, 180),
+    .yellow75  = BR_COLOUR_565(16, 180, 180),
+    .cyan75    = BR_COLOUR_565(180, 180, 16),
+    .green75   = BR_COLOUR_565(16, 180, 16),
+    .magenta75 = BR_COLOUR_565(180, 16, 180),
+    .red75     = BR_COLOUR_565(16, 16, 180),
+    .blue75    = BR_COLOUR_565(180, 16, 16),
+    .black75   = BR_COLOUR_565(16, 16, 16),
+    .white100  = BR_COLOUR_565(235, 235, 235),
+    .plusQ     = BR_COLOUR_565(118, 16, 72),
+    .plusI     = BR_COLOUR_565(16, 52, 106),
+    .minusI    = BR_COLOUR_565(106, 70, 16),
+    .plugeL    = BR_COLOUR_565(9, 9, 9),
+    .plugeR    = BR_COLOUR_565(29, 29, 29),
+};
+
 const static br_smpte_colours smpte_rgba_8888 = {
     .grey40    = BR_COLOUR_RGBA(104, 104, 104, 255),
     .white75   = BR_COLOUR_RGBA(180, 180, 180, 255),
@@ -313,6 +331,7 @@ const static struct {
     {.type = BR_PMT_INDEX_8,   .colours = &smpte_index_8  },
     {.type = BR_PMT_RGB_555,   .colours = &smpte_rgb_555  },
     {.type = BR_PMT_RGB_565,   .colours = &smpte_rgb_565  },
+    {.type = BR_PMT_BGR_565,   .colours = &smpte_bgr_565  },
     {.type = BR_PMT_RGB_888,   .colours = &smpte_rgba_8888}, /* Ignores the alpha part. */
     {.type = BR_PMT_RGBA_8888, .colours = &smpte_rgba_8888},
     {.type = BR_PMT_RGBX_888,  .colours = &smpte_rgba_8888}, /* Ignores the alpha part. */

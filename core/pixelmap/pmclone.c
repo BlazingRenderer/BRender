@@ -109,6 +109,36 @@ void rgb_565_write(br_uint_8 *pixels, br_colour colour)
 }
 
 /*
+ * BR_PMT_BGR_565
+ */
+
+br_colour bgr_565_read(const br_uint_8 *pixels, const br_pixelmap *pm)
+{
+    br_uint_8 r, g, b;
+
+    r = BR_BLU_565(*((br_uint_16 *)pixels));
+    g = BR_GRN_565(*((br_uint_16 *)pixels));
+    b = BR_RED_565(*((br_uint_16 *)pixels));
+
+    r = (r << 3) | (r >> 2);
+    g = (g << 2) | (g >> 4);
+    b = (b << 3) | (b >> 2);
+
+    return BR_COLOUR_RGBA(r, g, b, 255);
+}
+
+void bgr_565_write(br_uint_8 *pixels, br_colour colour)
+{
+    br_uint_8 r, g, b;
+
+    r = BR_RED(colour);
+    g = BR_GRN(colour);
+    b = BR_BLU(colour);
+
+    *((br_uint_16 *)pixels) = BR_COLOUR_RGB_565(b, g, r);
+}
+
+/*
  * BR_PMT_RGB_888
  */
 
@@ -332,6 +362,7 @@ br_pixelmap_converter br_pixelmap_converters[] = {
     CONVERTER(NULL,               NULL,                BR_PMT_ARGB_1555,      "BR_PMT_ARGB_1555"),
     CONVERTER(argb_4444_read,     argb_4444_write,     BR_PMT_ARGB_4444,      "BR_PMT_ARGB_4444"),
     CONVERTER(rgba_8888_arr_read, rgba_8888_arr_write, BR_PMT_RGBA_8888_ARR,  "BR_PMT_RGBA_8888_ARR"),
+    CONVERTER(bgr_565_read,       bgr_565_write,       BR_PMT_BGR_565,        "BR_PMT_BGR_565"),
 };
 #undef CONVERTER
 // clang-format on

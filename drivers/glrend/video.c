@@ -172,6 +172,12 @@ br_error VIDEOI_BrPixelmapGetTypeDetails(br_uint_8 pmType, GLint *internalFormat
             *type           = GL_UNSIGNED_SHORT_5_6_5;
             *elemBytes      = 2;
             break;
+        case BR_PMT_BGR_565:
+            *internalFormat = GL_RGB;
+            *format         = GL_RGB; /* Using GL_BGR and GL_UNSIGNED_SHORT_5_6_5 just gives black. */
+            *type           = GL_UNSIGNED_SHORT_5_6_5_REV;
+            *elemBytes      = 2;
+            break;
         case BR_PMT_RGB_888:
             *internalFormat = GL_RGB;
 #if BR_ENDIAN_LITTLE

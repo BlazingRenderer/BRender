@@ -316,6 +316,35 @@ void T_Write_RGB_565(char *pixels, br_float fract, br_colour new_pixel)
     *((br_uint_16 *)pixels) = temp_colour;
 }
 
+br_colour T_Read_BGR_565(char *pixels, br_float fract)
+{
+    /* colour format B G R B G R B G R  - 2 bytes per pixel */
+
+    br_colour  colour;
+    br_uint_16 temp_colour;
+    br_uint_8  r, g, b;
+
+    temp_colour = *((br_uint_16 *)pixels);
+
+    b = (temp_colour >> 8) & 0xf8;
+    g = (temp_colour >> 3) & 0xf8;
+    r = (temp_colour << 3) & 0xf8;
+
+    colour = BR_COLOUR_ARGB(0, r, g, b);
+
+    return colour;
+}
+
+void T_Write_BGR_565(char *pixels, br_float fract, br_colour new_pixel)
+{
+    /* colour format B G R B G R B G R - 2 bytes per pixel */
+    br_uint_16 temp_colour;
+
+    temp_colour = ((BR_BLU(new_pixel) >> 3) << 11) | ((BR_GRN(new_pixel) >> 2) << 5) | ((BR_RED(new_pixel) >> 3));
+
+    *((br_uint_16 *)pixels) = temp_colour;
+}
+
 br_colour T_Read_BGR_555(char *pixels, br_float fract)
 {
     /* colour format B G R B G R B G R  - 2 bytes per pixel */

@@ -677,6 +677,7 @@ static void draw_pixelbypixel(br_pixelmap *dest, br_pixelmap *pm, br_int_32 base
             src_bpp = 8;
             break;
         case BR_PMT_RGB_565:
+        case BR_PMT_BGR_565:
             src_bpp = 16;
             break;
 
@@ -717,6 +718,10 @@ static void draw_pixelbypixel(br_pixelmap *dest, br_pixelmap *pm, br_int_32 base
                 r = BR_RED_565(col) << 3;
                 g = BR_GRN_565(col) << 2;
                 b = BR_BLU_565(col) << 3;
+            } else if(pm->type == BR_PMT_BGR_565) {
+                b = BR_RED_565(col) << 3;
+                g = BR_GRN_565(col) << 2;
+                r = BR_BLU_565(col) << 3;
             } else {
                 r = BR_RED(col);
                 g = BR_GRN(col);
@@ -849,6 +854,7 @@ static br_drawtest tests[] = {
     MAKE_SMPTE_TEST("smpte_type03_index_8.pix",   BR_PMT_INDEX_8,   ", embedded palette"),
     MAKE_SMPTE_TEST("smpte_type04_rgb_555.pix",   BR_PMT_RGB_555,   ""),
     MAKE_SMPTE_TEST("smpte_type05_rgb_565.pix",   BR_PMT_RGB_565,   ""),
+    MAKE_SMPTE_TEST("smpte_type34_bgr_565.pix",   BR_PMT_BGR_565,   ""),
     MAKE_SMPTE_TEST("smpte_type06_rgb_888.pix",   BR_PMT_RGB_888,   ""),
     MAKE_SMPTE_TEST("smpte_type07_rgbx_888.pix",  BR_PMT_RGBX_888,  ""),
     MAKE_SMPTE_TEST("smpte_type08_rgba_8888.pix", BR_PMT_RGBA_8888, ""),

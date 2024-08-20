@@ -60,6 +60,7 @@ t_pixelmap_type_info PixelmapTypes[] = {
 
     {T_Read_RGBA_4444, T_Write_RGBA_4444, T_Read_RGBA_4444,      0, BR_PMT_RGBA_4444,      "BR_PMT_RGBA_4444",      "RGBA 16 bit 4 bits per colour component"    },
     {NULL,             NULL,              NULL,                  0, BR_PMT_RGBA_8888_ARR,  "BR_PMT_RGBA_8888_ARR",  "Not supported"                              },
+    {T_Read_BGR_565,   T_Write_BGR_565,   T_Read_BGR_565,        0, BR_PMT_BGR_565,        "BR_PMT_BGR_565",        "BGR 16 bit 5,6,5 bit colour components"     },
 };
 // clang-format on
 

@@ -226,6 +226,19 @@ enum {
      */
     BR_PMT_RGBA_8888_ARR,
 
+    /**
+     * \brief 16-bit 'true colour' BGR, 5 bits red and blue, 6 bits green.
+     *
+     * \note 32-bit encoding:
+     *       \code 0000000000000000bbbbbggggggrrrrr \endcode
+     *
+     * \note First Four Bytes of Left Hand Pixel:
+     *       \code gggrrrrr bbbbbggg ........ ........ \endcode
+     *
+     * \remark The left hand byte is the byte at br_pixelmap::pixels.
+     */
+    BR_PMT_BGR_565,
+
     BR_PMT_MAX,
 
     BR_PMT_AINDEX_44 = BR_PMT_INDEXA_44,

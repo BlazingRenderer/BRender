@@ -17,6 +17,7 @@ br_colour T_Read_RGBX_888(char *pixels, br_float fract);
 br_colour T_Read_RGB_555(char *pixels, br_float fract);
 br_colour T_Read_RGB_565(char *pixels, br_float fract);
 br_colour T_Read_BGR_555(char *pixels, br_float fract);
+br_colour T_Read_BGR_565(char *pixels, br_float fract);
 br_colour T_Read_RGBA_4444(char *pixels, br_float fract);
 br_colour T_Read_ARGB_4444(char *pixels, br_float fract);
 
@@ -28,6 +29,7 @@ void T_Write_RGBX_888(char *pixels, br_float fract, br_colour new_pixel);
 void T_Write_RGB_555(char *pixels, br_float fract, br_colour new_pixel);
 void T_Write_RGB_565(char *pixels, br_float fract, br_colour new_pixel);
 void T_Write_BGR_555(char *pixels, br_float fract, br_colour new_pixel);
+void T_Write_BGR_565(char *pixels, br_float fract, br_colour new_pixel);
 void T_Write_ARGB_4444(char *pixels, br_float fract, br_colour new_pixel);
 void T_Write_RGBA_4444(char *pixels, br_float fract, br_colour new_pixel);
 

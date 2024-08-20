@@ -73,6 +73,7 @@ const static struct {
     {.format = SDL_PIXELFORMAT_RGB555,   .bpp = 15, .type = BR_PMT_RGB_555  },
     {.format = SDL_PIXELFORMAT_BGR555,   .bpp = 15, .type = BR_PMT_BGR_555  },
     {.format = SDL_PIXELFORMAT_RGB565,   .bpp = 16, .type = BR_PMT_RGB_565  },
+    {.format = SDL_PIXELFORMAT_BGR565,   .bpp = 16, .type = BR_PMT_BGR_565  },
 #if BR_ENDIAN_LITTLE
     {.format = SDL_PIXELFORMAT_BGR24,    .bpp = 24, .type = BR_PMT_RGB_888  },
 #else
