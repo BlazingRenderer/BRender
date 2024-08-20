@@ -163,7 +163,7 @@ int BrDemoRun(const char *title, br_uint_16 width, br_uint_16 height, const br_d
     SDL_SetWindowFullscreen(window, 0);
     is_fullscreen = BR_FALSE;
 
-    if(BrSDLUtilResizeBuffers(demo->_screen, &demo->colour_buffer, &demo->depth_buffer) != BRE_OK) {
+    if(BrPixelmapResizeBuffers(demo->_screen, &demo->colour_buffer, &demo->depth_buffer) != BRE_OK) {
         BrLogError("DEMO", "Error resizing window buffers.");
         goto cleanup;
     }
@@ -215,7 +215,7 @@ int BrDemoRun(const char *title, br_uint_16 width, br_uint_16 height, const br_d
                             demo->_screen->origin_x = (br_int_16)(demo->_screen->width >> 1);
                             demo->_screen->origin_y = (br_int_16)(demo->_screen->height >> 1);
 
-                            if(BrSDLUtilResizeBuffers(demo->_screen, &demo->colour_buffer, &demo->depth_buffer) != BRE_OK) {
+                            if(BrPixelmapResizeBuffers(demo->_screen, &demo->colour_buffer, &demo->depth_buffer) != BRE_OK) {
                                 BrLogError("DEMO", "Error resizing window buffers.");
                                 goto cleanup;
                             }
