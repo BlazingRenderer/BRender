@@ -203,8 +203,8 @@ br_error VIDEOI_BrPixelmapGetTypeDetails(br_uint_8 pmType, GLint *internalFormat
             break;
         case BR_PMT_BGR_555:
             *internalFormat = GL_RGB;
-            *format         = GL_BGR;
-            *type           = GL_UNSIGNED_SHORT_5_5_5_1;
+            *format         = GL_RGBA;
+            *type           = GL_UNSIGNED_SHORT_1_5_5_5_REV;
             *elemBytes      = 2;
             break;
         case BR_PMT_RGBA_4444:
