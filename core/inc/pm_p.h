@@ -187,6 +187,25 @@ br_pixelmap *BR_PUBLIC_ENTRY BrPixelmapDeCLUT(br_pixelmap *src);
  */
 br_error BrPixelmapResizeBuffers(br_pixelmap *screen, br_pixelmap **colour, br_pixelmap **depth);
 
+/**
+ * \brief Resize a colour and depth buffer to match their attached screen, falling back to recreation if
+ *        resizing fails.
+ *
+ * \param screen A pointer to the screen. Must not be NULL.
+ * \param colour A pointer to receive the new colour pixelmap. Must not be NULL.
+ *               If the pixelmap is recreated, it will be matched to the screen's current pixel format.
+ *               If \c *colour is NULL, recreation is forced.
+ *
+ * \param depth A pointer to receive the new depth pixelmap. Must not be NULL.
+ *              If the pixelmap is recreated, it will be a depth buffer containing at least 16-bit precision.
+ *              If \c *depth is NULL, recreation is forced.
+ * \param tv    A br_token_value list containing additional options. Supported tokens are:
+ *              - \c BRT_MSAA_SAMPLES_I32
+ *
+ * \return Returns BRE_OK on success, or a BRE_* error code on failure.
+ */
+br_error BrPixelmapResizeBuffersTV(br_pixelmap *screen, br_pixelmap **colour, br_pixelmap **depth, const br_token_value *tv);
+
 #endif /* _NO_PROTOTYPES */
 
 #ifdef __cplusplus
