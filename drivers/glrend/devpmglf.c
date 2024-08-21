@@ -338,22 +338,14 @@ br_error BR_CMETHOD_DECL(br_device_pixelmap_glf, doubleBuffer)(br_device_pixelma
      */
     DevicePixelmapGLExtPreSwap(self, src->asBack.glFbo);
 
-    /*
-     * Drain any GL errors.
-     */
-    while(glGetError() != GL_NO_ERROR)
-        ;
+    DeviceGLCheckErrors();
 
     /*
      * Finally, swap the buffers.
      */
     DevicePixelmapGLExtSwapBuffers(self);
 
-    /*
-     * Drain any GL errors (again).
-     */
-    while(glGetError() != GL_NO_ERROR)
-        ;
+    DeviceGLCheckErrors();
 
     return BRE_OK;
 }

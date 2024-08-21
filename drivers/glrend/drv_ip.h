@@ -42,6 +42,10 @@ void VIDEOI_BrRectToUVs(const br_pixelmap *pm, const br_rectangle *r, float *x0,
 
 br_matrix4 *VIDEOI_D3DtoGLProjection(br_matrix4 *m);
 
+br_boolean DeviceGLCheckErrors(void);
+
+const char *DeviceGLStrError(GLenum err);
+
 /*
  * device.c
  */

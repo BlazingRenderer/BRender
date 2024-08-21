@@ -103,43 +103,6 @@ static br_boolean is_compatible(br_buffer_stored *self, br_pixelmap *pm, GLenum 
     return BR_TRUE;
 }
 
-static const char *gl_strerror(GLenum err)
-{
-    static char errbuf[64];
-    const char *s;
-
-    switch(err) {
-        case 0:
-            s = "GL_NO_ERROR";
-            break;
-        case GL_INVALID_ENUM:
-            s = "GL_INVALID_ENUM";
-            break;
-        case GL_INVALID_VALUE:
-            s = "GL_INVALID_VALUE";
-            break;
-        case GL_INVALID_OPERATION:
-            s = "GL_INVALID_OPERATION";
-            break;
-        case GL_INVALID_FRAMEBUFFER_OPERATION:
-            s = "GL_INVALID_FRAMEBUFFER_OPERATION";
-            break;
-        case GL_OUT_OF_MEMORY:
-            s = "GL_OUT_OF_MEMORY";
-            break;
-        default:
-            s = NULL;
-    }
-
-    if(s != NULL)
-        BrSprintfN(errbuf, sizeof(errbuf) - 1, "error %d (%s)", err, s);
-    else
-        BrSprintfN(errbuf, sizeof(errbuf) - 1, "error %d", err);
-
-    errbuf[sizeof(errbuf) - 1] = '\0';
-    return errbuf;
-}
-
 static br_error updateMemory(br_buffer_stored *self, br_pixelmap *pm)
 {
     GLint      internal_format;
@@ -172,7 +135,7 @@ static br_error updateMemory(br_buffer_stored *self, br_pixelmap *pm)
     if(self->gl_tex == 0) {
         glGenTextures(1, &self->gl_tex);
         if((err = glGetError()) != 0) {
-            BrLogError("GLREND", "glGenTextures() failed with %s", gl_strerror(err));
+            BrLogError("GLREND", "glGenTextures() failed with %s", DeviceGLStrError(err));
             return BRE_FAIL;
         }
     }
@@ -181,7 +144,7 @@ static br_error updateMemory(br_buffer_stored *self, br_pixelmap *pm)
     glTexImage2D(GL_TEXTURE_2D, 0, internal_format, pm->width, pm->height, 0, format, type, pm->pixels);
 
     if((err = glGetError()) != 0) {
-        BrLogError("GLREND", "glTexImage2D() failed with %s", gl_strerror(err));
+        BrLogError("GLREND", "glTexImage2D() failed with %s", DeviceGLStrError(err));
         glBindTexture(GL_TEXTURE_2D, 0);
         return BRE_FAIL;
     }

@@ -58,8 +58,7 @@ br_boolean VIDEOI_CompileTextShader(HVIDEO hVideo)
         glBindFragDataLocation(hVideo->textProgram.program, 0, "mainColour");
     }
 
-    while(glGetError() != GL_NO_ERROR)
-        ;
+    DeviceGLCheckErrors();
 
     return hVideo->textProgram.program != 0;
 }

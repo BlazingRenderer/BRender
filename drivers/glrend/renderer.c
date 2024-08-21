@@ -68,8 +68,7 @@ static void BR_CMETHOD_DECL(br_renderer_gl, sceneBegin)(br_renderer *self)
     self->stats.vertices_rendered_count  = 0;
 
     /* First draw call, so do all the per-scene crap */
-    while(glGetError() != GL_NO_ERROR)
-        ;
+    DeviceGLCheckErrors();
 
     if(self->state.current->valid & BR_STATE_OUTPUT) {
         colour_target = self->state.current->output.colour;

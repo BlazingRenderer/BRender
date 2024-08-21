@@ -100,8 +100,8 @@ br_boolean VIDEOI_CompileBRenderShader(HVIDEO hVideo, const char *vertPath, cons
         VIDEOI_GetShaderVariables(hVideo);
     }
 
-    while(glGetError() != GL_NO_ERROR)
-        ;
+
+    DeviceGLCheckErrors();
 
     return hVideo->brenderProgram.program != 0;
 }

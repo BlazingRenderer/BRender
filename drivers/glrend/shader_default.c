@@ -58,8 +58,7 @@ br_boolean VIDEOI_CompileDefaultShader(HVIDEO hVideo)
         glBindFragDataLocation(hVideo->defaultProgram.program, 0, "mainColour");
     }
 
-    while(glGetError() != GL_NO_ERROR)
-        ;
+    DeviceGLCheckErrors();
 
     return hVideo->defaultProgram.program != 0;
 }
