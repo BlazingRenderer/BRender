@@ -227,12 +227,6 @@ br_error VIDEOI_BrPixelmapGetTypeDetails(br_uint_8 pmType, GLint *internalFormat
             *type           = GL_UNSIGNED_BYTE_3_3_2;
             *elemBytes      = 1;
             break;
-        case BR_PMT_DEPTH_8:
-            *internalFormat = GL_DEPTH_COMPONENT;
-            *format         = GL_DEPTH_COMPONENT;
-            *type           = GL_UNSIGNED_BYTE;
-            *elemBytes      = 1;
-            break;
         case BR_PMT_DEPTH_16:
             *internalFormat = GL_DEPTH_COMPONENT16;
             *format         = GL_DEPTH_COMPONENT;
