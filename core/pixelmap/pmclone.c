@@ -363,6 +363,8 @@ br_pixelmap_converter br_pixelmap_converters[] = {
     CONVERTER(argb_4444_read,     argb_4444_write,     BR_PMT_ARGB_4444,      "BR_PMT_ARGB_4444"),
     CONVERTER(rgba_8888_arr_read, rgba_8888_arr_write, BR_PMT_RGBA_8888_ARR,  "BR_PMT_RGBA_8888_ARR"),
     CONVERTER(bgr_565_read,       bgr_565_write,       BR_PMT_BGR_565,        "BR_PMT_BGR_565"),
+    CONVERTER(NULL,               NULL,                BR_PMT_DEPTH_24,       "BR_PMT_DEPTH_24"),
+    CONVERTER(NULL,               NULL,                BR_PMT_DEPTH_FP32,     "BR_PMT_DEPTH_FP32"),
 };
 #undef CONVERTER
 // clang-format on

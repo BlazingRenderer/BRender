@@ -234,10 +234,22 @@ br_error VIDEOI_BrPixelmapGetTypeDetails(br_uint_8 pmType, GLint *internalFormat
             *elemBytes      = 1;
             break;
         case BR_PMT_DEPTH_16:
-            *internalFormat = GL_DEPTH_COMPONENT;
+            *internalFormat = GL_DEPTH_COMPONENT16;
             *format         = GL_DEPTH_COMPONENT;
             *type           = GL_UNSIGNED_SHORT;
             *elemBytes      = 2;
+            break;
+        case BR_PMT_DEPTH_24:
+            *internalFormat = GL_DEPTH_COMPONENT24;
+            *format         = GL_DEPTH_COMPONENT;
+            *type           = GL_FLOAT;
+            *elemBytes      = 3;
+            break;
+        case BR_PMT_DEPTH_FP32:
+            *internalFormat = GL_DEPTH_COMPONENT32F;
+            *format         = GL_DEPTH_COMPONENT;
+            *type           = GL_FLOAT;
+            *elemBytes      = 4;
             break;
         default:
             BrLogTrace("GLREND", "Unsupported BRender texture format %d.", pmType);

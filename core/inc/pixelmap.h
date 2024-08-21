@@ -239,6 +239,28 @@ enum {
      */
     BR_PMT_BGR_565,
 
+    /**
+     * \brief The pixelmap is used as a depth buffer with 24-bit precision.
+     *
+     * \note 32-bit encoding:
+     *       \code dddddddddddddddddddddddd00000000 \endcode
+     *
+     * \note First Four Bytes of Left Hand Pixel:
+     *       \code Undefined \endcode
+     */
+    BR_PMT_DEPTH_24,
+
+    /**
+     * \brief The pixelmap is used as a depth buffer with 32-bit floating-point precision.
+     *
+     * \note 32-bit encoding:
+     *       \code dddddddddddddddddddddddddddddddd \endcode
+     *
+     * \note First Four Bytes of Left Hand Pixel:
+     *       \code Undefined \endcode
+     */
+    BR_PMT_DEPTH_FP32,
+
     BR_PMT_MAX,
 
     BR_PMT_AINDEX_44 = BR_PMT_INDEXA_44,

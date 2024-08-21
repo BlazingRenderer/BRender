@@ -274,13 +274,18 @@ br_error BR_CMETHOD_DECL(br_device_pixelmap_gl, match)(br_device_pixelmap *self,
             if(self->asBack.depthbuffer != NULL)
                 return BRE_FAIL;
 
-            /*
-             * Not supporting non-16bpp depth buffers.
-             */
-            if(mt.pixel_bits != 16)
-                return BRE_UNSUPPORTED;
+            switch(mt.pixel_bits) {
+                case 16:
+                    mt.type = BR_PMT_DEPTH_16;
+                    break;
+                case -1:
+                case 32:
+                    mt.type = BR_PMT_DEPTH_FP32;
+                    break;
+                default:
+                    return BRE_UNSUPPORTED;
+            }
 
-            mt.type = BR_PMT_DEPTH_16;
             break;
         default:
             return BRE_UNSUPPORTED;

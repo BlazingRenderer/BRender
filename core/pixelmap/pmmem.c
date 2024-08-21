@@ -62,6 +62,8 @@ struct pm_type_info pmTypeInfo[] = {
 
     [BR_PMT_RGBA_8888_ARR] = {.bits = 32, .file_size = 4, .align = 1,  .channels = BR_PMCHAN_RGB | BR_PMCHAN_ALPHA  },
     [BR_PMT_BGR_565]       = {.bits = 16, .file_size = 2, .align = 2,  .channels = BR_PMCHAN_RGB                    },
+    [BR_PMT_DEPTH_24]      = {.bits = 24, .file_size = 3, .align = 4,  .channels = BR_PMCHAN_DEPTH                  },
+    [BR_PMT_DEPTH_FP32]    = {.bits = 32, .file_size = 4, .align = 4,  .channels = BR_PMCHAN_DEPTH                  },
 };
 // clang-format on
 
