@@ -308,7 +308,7 @@ void VIDEOI_BrRectToGL(const br_pixelmap *pm, br_rectangle *r)
     PixelmapRectangleClip(&out, r, pm);
 
     /* Flip the rect upside down to use (0, 0) at bottom-left. */
-    *r = out;
+    *r   = out;
     r->y = pm->height - r->h - r->y;
 }
 
