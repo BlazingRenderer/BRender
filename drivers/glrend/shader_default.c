@@ -55,7 +55,7 @@ br_boolean VIDEOI_CompileDefaultShader(HVIDEO hVideo)
         hVideo->defaultProgram.uSampler      = glGetUniformLocation(hVideo->defaultProgram.program, "uSampler");
         hVideo->defaultProgram.uMVP          = glGetUniformLocation(hVideo->defaultProgram.program, "uMVP");
         hVideo->defaultProgram.uVerticalFlip = glGetUniformLocation(hVideo->defaultProgram.program, "uVerticalFlip");
-        glBindFragDataLocation(hVideo->textProgram.program, 0, "mainColour");
+        glBindFragDataLocation(hVideo->defaultProgram.program, 0, "mainColour");
     }
 
     while(glGetError() != GL_NO_ERROR)
