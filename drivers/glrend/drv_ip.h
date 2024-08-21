@@ -33,8 +33,8 @@ GLuint VIDEO_BrPixelmapToGLTexture(br_pixelmap *pm);
 
 br_error VIDEOI_BrPixelmapToExistingTexture(GLuint tex, br_pixelmap *pm);
 
-br_error VIDEOI_BrPixelmapGetTypeDetails(br_uint_8 pmType, GLint *internalFormat, GLenum *format, GLenum *type,
-                                         GLsizeiptr *elemBytes, br_boolean *blended);
+br_error VIDEOI_BrPixelmapGetTypeDetails(br_uint_8 pm_type, GLint *internal_format, GLenum *format, GLenum *type,
+                                         GLsizeiptr *bytes, br_boolean *blended);
 
 void VIDEOI_BrRectToGL(const br_pixelmap *pm, br_rectangle *r);
 

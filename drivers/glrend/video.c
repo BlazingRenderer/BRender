@@ -148,116 +148,73 @@ void VIDEO_Close(HVIDEO hVideo)
     glDeleteProgram(hVideo->textProgram.program);
 }
 
-br_error VIDEOI_BrPixelmapGetTypeDetails(br_uint_8 pmType, GLint *internalFormat, GLenum *format, GLenum *type,
-                                         GLsizeiptr *elemBytes, br_boolean *blended)
-{
-    br_boolean is_blended = BR_FALSE;
-    switch(pmType) {
-        case BR_PMT_RGBA_8888_ARR:
-            *internalFormat = GL_RGBA;
-            *format         = GL_RGBA;
-            *type           = GL_UNSIGNED_BYTE;
-            *elemBytes      = 4;
-            is_blended      = BR_TRUE;
-            break;
-        case BR_PMT_RGB_555:
-            *internalFormat = GL_RGB;
-            *format         = GL_BGRA;
-            *type           = GL_UNSIGNED_SHORT_1_5_5_5_REV;
-            *elemBytes      = 2;
-            break;
-        case BR_PMT_RGB_565:
-            *internalFormat = GL_RGB;
-            *format         = GL_RGB;
-            *type           = GL_UNSIGNED_SHORT_5_6_5;
-            *elemBytes      = 2;
-            break;
-        case BR_PMT_BGR_565:
-            *internalFormat = GL_RGB;
-            *format         = GL_RGB; /* Using GL_BGR and GL_UNSIGNED_SHORT_5_6_5 just gives black. */
-            *type           = GL_UNSIGNED_SHORT_5_6_5_REV;
-            *elemBytes      = 2;
-            break;
-        case BR_PMT_RGB_888:
-            *internalFormat = GL_RGB;
-#if BR_ENDIAN_LITTLE
-            *format = GL_BGR;
-#else
-            *format = GL_RGB;
-#endif
-            *type      = GL_UNSIGNED_BYTE;
-            *elemBytes = 3;
-            break;
-        case BR_PMT_RGBX_888:
-            *internalFormat = GL_RGB;
-            *format         = GL_BGRA;
-            *type           = GL_UNSIGNED_INT_8_8_8_8_REV;
-            *elemBytes      = 3;
-            break;
-        case BR_PMT_RGBA_8888:
-            *internalFormat = GL_RGBA;
-            *format         = GL_BGRA;
-            *type           = GL_UNSIGNED_INT_8_8_8_8_REV;
-            *elemBytes      = 4;
-            is_blended      = BR_TRUE;
-            break;
-        case BR_PMT_BGR_555:
-            *internalFormat = GL_RGB;
-            *format         = GL_RGBA;
-            *type           = GL_UNSIGNED_SHORT_1_5_5_5_REV;
-            *elemBytes      = 2;
-            break;
-        case BR_PMT_RGBA_4444:
-            *internalFormat = GL_RGBA;
-            *format         = GL_RGBA;
-            *type           = GL_UNSIGNED_SHORT_4_4_4_4;
-            *elemBytes      = 2;
-            is_blended      = BR_TRUE;
-            break;
-        case BR_PMT_ARGB_4444:
-            *internalFormat = GL_RGBA;
-            *format         = GL_BGRA;
-            *type           = GL_UNSIGNED_SHORT_4_4_4_4_REV;
-            *elemBytes      = 2;
-            is_blended      = BR_TRUE;
-            break;
-        case BR_PMT_RGB_332:
-            *internalFormat = GL_RGB;
-            *format         = GL_RGB;
-            *type           = GL_UNSIGNED_BYTE_3_3_2;
-            *elemBytes      = 1;
-            break;
-        case BR_PMT_DEPTH_16:
-            *internalFormat = GL_DEPTH_COMPONENT16;
-            *format         = GL_DEPTH_COMPONENT;
-            *type           = GL_UNSIGNED_SHORT;
-            *elemBytes      = 2;
-            break;
-        case BR_PMT_DEPTH_24:
-            *internalFormat = GL_DEPTH_COMPONENT24;
-            *format         = GL_DEPTH_COMPONENT;
-            *type           = GL_FLOAT;
-            *elemBytes      = 3;
-            break;
-        case BR_PMT_DEPTH_32:
-            *internalFormat = GL_DEPTH_COMPONENT32;
-            *format         = GL_DEPTH_COMPONENT;
-            *type           = GL_FLOAT;
-            *elemBytes      = 4;
-            break;
-        case BR_PMT_DEPTH_FP32:
-            *internalFormat = GL_DEPTH_COMPONENT32F;
-            *format         = GL_DEPTH_COMPONENT;
-            *type           = GL_FLOAT;
-            *elemBytes      = 4;
-            break;
-        default:
-            BrLogTrace("GLREND", "Unsupported BRender texture format %d.", pmType);
-            return BRE_FAIL;
+typedef struct br_pixelmap_gl_fmt {
+    br_uint_8  pm_type;
+    GLint      internal_format;
+    GLenum     format;
+    GLenum     type;
+    GLsizeiptr bytes;
+    br_boolean blended;
+} br_pixelmap_gl_fmt;
+
+// clang-format off
+#define BRPM_TO_GL(_pm_type, _internal_format, _format, _type, _bytes, _blended) \
+    [_pm_type] = {                                                               \
+        .pm_type         = _pm_type,                                             \
+        .internal_format = _internal_format,                                     \
+        .format          = _format,                                              \
+        .type            = _type,                                                \
+        .bytes           = _bytes,                                               \
+        .blended         = _blended                                              \
     }
 
+#if BR_ENDIAN_LITTLE
+#   define GL_RGBN GL_BGR
+#else
+#   define GL_RGBN GL_RGB
+#endif
+
+const static br_pixelmap_gl_fmt br2gl[BR_PMT_MAX] = {
+    BRPM_TO_GL(BR_PMT_RGB_332,       GL_RGB,  GL_RGB,  GL_UNSIGNED_BYTE_3_3_2,        1, BR_FALSE),
+    BRPM_TO_GL(BR_PMT_RGB_555,       GL_RGB,  GL_BGRA, GL_UNSIGNED_SHORT_1_5_5_5_REV, 2, BR_FALSE),
+    BRPM_TO_GL(BR_PMT_BGR_555,       GL_RGB,  GL_RGBA, GL_UNSIGNED_SHORT_1_5_5_5_REV, 2, BR_FALSE),
+    BRPM_TO_GL(BR_PMT_RGB_565,       GL_RGB,  GL_RGB,  GL_UNSIGNED_SHORT_5_6_5,       2, BR_FALSE),
+    /* Using GL_BGR and GL_UNSIGNED_SHORT_5_6_5 just gives black. */
+    BRPM_TO_GL(BR_PMT_BGR_565,       GL_RGB,  GL_RGB,  GL_UNSIGNED_SHORT_5_6_5_REV,   2, BR_FALSE),
+    BRPM_TO_GL(BR_PMT_RGBA_4444,     GL_RGBA, GL_RGBA, GL_UNSIGNED_SHORT_4_4_4_4,     2, BR_TRUE),
+    BRPM_TO_GL(BR_PMT_ARGB_4444,     GL_RGBA, GL_BGRA, GL_UNSIGNED_SHORT_4_4_4_4_REV, 2, BR_TRUE),
+    BRPM_TO_GL(BR_PMT_RGB_888,       GL_RGB,  GL_RGBN, GL_UNSIGNED_BYTE,              3, BR_FALSE),
+    BRPM_TO_GL(BR_PMT_RGBX_888,      GL_RGB,  GL_BGRA, GL_UNSIGNED_INT_8_8_8_8_REV,   3, BR_FALSE),
+    BRPM_TO_GL(BR_PMT_RGBA_8888,     GL_RGBA, GL_BGRA, GL_UNSIGNED_INT_8_8_8_8_REV,   4, BR_TRUE),
+    BRPM_TO_GL(BR_PMT_RGBA_8888_ARR, GL_RGBA, GL_RGBA, GL_UNSIGNED_BYTE,              4, BR_TRUE),
+
+    BRPM_TO_GL(BR_PMT_DEPTH_16,   GL_DEPTH_COMPONENT16,  GL_DEPTH_COMPONENT, 0,        2, BR_FALSE), /* mandatory */
+    BRPM_TO_GL(BR_PMT_DEPTH_24,   GL_DEPTH_COMPONENT24,  GL_DEPTH_COMPONENT, 0,        3, BR_FALSE), /* mandatory */
+    BRPM_TO_GL(BR_PMT_DEPTH_32,   GL_DEPTH_COMPONENT32,  GL_DEPTH_COMPONENT, 0,        4, BR_FALSE),
+    BRPM_TO_GL(BR_PMT_DEPTH_FP32, GL_DEPTH_COMPONENT32F, GL_DEPTH_COMPONENT, GL_FLOAT, 4, BR_FALSE), /* mandatory */
+
+};
+#undef GL_RGBN
+#undef BRPM_TO_GL
+// clang-format on
+
+br_error VIDEOI_BrPixelmapGetTypeDetails(br_uint_8 pm_type, GLint *internal_format, GLenum *format, GLenum *type,
+                                         GLsizeiptr *bytes, br_boolean *blended)
+{
+    const br_pixelmap_gl_fmt *fmt = br2gl + pm_type;
+
+    if(fmt->pm_type == 0) {
+        BrLogTrace("GLREND", "Unsupported BRender texture format %d.", pm_type);
+        return BRE_FAIL;
+    }
+
+    *internal_format = fmt->internal_format;
+    *format          = fmt->format;
+    *type            = fmt->type;
+    *bytes           = fmt->bytes;
+
     if(blended != NULL)
-        *blended = is_blended;
+        *blended = fmt->blended;
 
     return BRE_OK;
 }
