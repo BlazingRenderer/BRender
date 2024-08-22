@@ -183,7 +183,7 @@ class br_device_pixelmap : public br_object {
 		virtual br_error BR_METHOD line(br_point *start, br_point *end, br_uint_32 colour);
 
 		virtual br_error BR_METHOD copyBits(br_point *point,
-			br_uint_8 *src,br_uint_16 s_stride,
+			const br_uint_8 *src, br_uint_16 s_stride,
 			br_rectangle *bit_rect,
 			br_uint_32 colour);
 

@@ -1268,7 +1268,7 @@ br_error BR_CMETHOD_DECL(br_device_pixelmap_mem, line)(br_device_pixelmap *self,
     return BRE_OK;
 }
 
-br_error BR_CMETHOD_DECL(br_device_pixelmap_mem, copyBits)(br_device_pixelmap *self, br_point *point, br_uint_8 *src,
+br_error BR_CMETHOD_DECL(br_device_pixelmap_mem, copyBits)(br_device_pixelmap *self, br_point *point, const br_uint_8 *src,
                                                            br_uint_16 s_stride, br_rectangle *bit_rect,
                                                            br_uint_32 colour)
 {
