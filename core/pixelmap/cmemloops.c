@@ -101,7 +101,7 @@ static void bc_inner_loop(char *dest, br_uint_32 bpp, br_uint_32 colour, br_uint
     }
 }
 
-static void COPY_BITS_CORE_1(char *dest, br_uint_32 d_stride, br_uint_8 *src, br_uint_32 s_stride, br_uint_32 nrows,
+static void COPY_BITS_CORE_1(char *dest, br_uint_32 d_stride, const br_uint_8 *src, br_uint_32 s_stride, br_uint_32 nrows,
                              br_uint_32 bpp, br_uint_32 colour, br_uint_8 himask, br_uint_8 lomask)
 {
     br_uint_8 comb_mask = himask & lomask;
@@ -112,7 +112,7 @@ static void COPY_BITS_CORE_1(char *dest, br_uint_32 d_stride, br_uint_8 *src, br
     }
 }
 
-static void COPY_BITS_CORE_N(char *dest, br_int_32 d_stride, br_uint_8 *src, br_uint_32 s_stride, br_uint_32 nrows,
+static void COPY_BITS_CORE_N(char *dest, br_int_32 d_stride, const br_uint_8 *src, br_uint_32 s_stride, br_uint_32 nrows,
                              br_uint_32 bpp, br_uint_32 colour, br_uint_8 himask, br_uint_8 lomask)
 {
     char      c;
@@ -146,7 +146,7 @@ done_row:
     } while(nrows);
 }
 
-void _MemCopyBits_A(char *dest, br_int_32 d_stride, br_uint_8 *src, br_uint_32 s_stride, br_uint_32 start_bit,
+void _MemCopyBits_A(char *dest, br_int_32 d_stride, const br_uint_8 *src, br_uint_32 s_stride, br_uint_32 start_bit,
                     br_uint_32 end_bit, br_uint_32 nrows, br_uint_32 bpp, br_uint_32 colour)
 {
     br_uint_8 himask = bit_to_mask_e[end_bit & 7];

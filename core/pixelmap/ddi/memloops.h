@@ -7,7 +7,7 @@
  * cmemloops.c
  */
 
-void       _MemCopyBits_A(char *dest, br_int_32 d_stride, br_uint_8 *src, br_uint_32 s_stride, br_uint_32 start_bit,
+void       _MemCopyBits_A(char *dest, br_int_32 d_stride, const br_uint_8 *src, br_uint_32 s_stride, br_uint_32 start_bit,
                           br_uint_32 end_bit, br_uint_32 nrows, br_uint_32 bpp, br_uint_32 colour);
 void       _MemFill_A(char *dest, br_uint_32 pixels, br_uint_32 bpp, br_uint_32 colour);
 void       _MemRectCopy_A(char *dest, const char *src, br_uint_16 pwidth, br_uint_16 pheight, br_int_32 d_stride,
