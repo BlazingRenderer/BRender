@@ -540,7 +540,7 @@ br_error BR_CMETHOD_DECL(br_device_pixelmap_gen, text)(br_device_pixelmap *self,
             s_stride = (r.w + 7) / 8;
 
             if(x + r.w > 0)
-                DevicePixelmapCopyBits(self, &p, font->glyphs + font->encoding[*(unsigned char *)text],
+                DevicePixelmapCopyBits(self, &p, font->encoding[*(unsigned char *)text],
                                        (br_uint_16)s_stride, &r, colour);
 
             x += r.w + 1;
@@ -560,7 +560,7 @@ br_error BR_CMETHOD_DECL(br_device_pixelmap_gen, text)(br_device_pixelmap *self,
         for(; *(unsigned char *)text; text++) {
 
             if(x + r.w > 0)
-                DevicePixelmapCopyBits(self, &p, font->glyphs + font->encoding[*(unsigned char *)text],
+                DevicePixelmapCopyBits(self, &p, font->encoding[*(unsigned char *)text],
                                        (br_uint_16)s_stride, &r, colour);
 
             x += r.w + 1;

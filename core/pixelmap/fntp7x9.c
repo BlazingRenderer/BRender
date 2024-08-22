@@ -1,856 +1,1887 @@
-#include <stddef.h>
-#include "brender.h"
+/*
+ * Automatically generated from fntp7x9.asm, do not edit.
+ */
+#include <brender.h>
 
-#define width_space      0x03
-#define width_exclam     0x01
-#define width_dquote     0x03
-#define width_hash       0x05
-#define width_dollar     0x05
-#define width_percent    0x07
-#define width_ampersand  0x05
-#define width_quote      0x02
-#define width_lparen     0x03
-#define width_rparen     0x03
-#define width_asterisk   0x05
-#define width_plus       0x05
-#define width_comma      0x02
-#define width_minus      0x05
-#define width_period     0x02
-#define width_slash      0x07
-#define width_0          0x05
-#define width_1          0x05
-#define width_2          0x05
-#define width_3          0x05
-#define width_4          0x05
-#define width_5          0x05
-#define width_6          0x05
-#define width_7          0x05
-#define width_8          0x05
-#define width_9          0x05
-#define width_colon      0x02
-#define width_semicolon  0x02
-#define width_langle     0x04
-#define width_equal      0x05
-#define width_rangle     0x04
-#define width_query      0x05
-#define width_comat      0x06
-#define width_A          0x05
-#define width_B          0x05
-#define width_C          0x06
-#define width_D          0x06
-#define width_E          0x05
-#define width_F          0x05
-#define width_G          0x06
-#define width_H          0x06
-#define width_I          0x01
-#define width_J          0x05
-#define width_K          0x05
-#define width_L          0x05
-#define width_M          0x07
-#define width_N          0x07
-#define width_O          0x07
-#define width_P          0x05
-#define width_Q          0x07
-#define width_R          0x05
-#define width_S          0x05
-#define width_T          0x07
-#define width_U          0x05
-#define width_V          0x05
-#define width_W          0x09
-#define width_X          0x07
-#define width_Y          0x07
-#define width_Z          0x06
-#define width_lsquare    0x03
-#define width_bslash     0x07
-#define width_rsquare    0x03
-#define width_caret      0x05
-#define width_underbar   0x06
-#define width_bquote     0x02
-#define width_a          0x05
-#define width_b          0x05
-#define width_c          0x04
-#define width_d          0x05
-#define width_e          0x05
-#define width_f          0x04
-#define width_g          0x05
-#define width_h          0x05
-#define width_i          0x01
-#define width_j          0x02
-#define width_k          0x04
-#define width_l          0x01
-#define width_m          0x07
-#define width_n          0x05
-#define width_o          0x05
-#define width_p          0x05
-#define width_q          0x05
-#define width_r          0x04
-#define width_s          0x05
-#define width_t          0x04
-#define width_u          0x05
-#define width_v          0x05
-#define width_w          0x07
-#define width_x          0x05
-#define width_y          0x05
-#define width_z          0x05
-#define width_lbrace     0x04
-#define width_vbar       0x01
-#define width_rbrace     0x04
-#define width_tilde      0x07
-#define width_bullet     0x06
-#define width_cross      0x07
-#define width_tick       0x07
-#define width_uparrow    0x07
-#define width_downarrow  0x07
-#define width_rightarrow 0x07
-#define width_leftarrow  0x07
-#define width_solidbox   0x07
-#define width_cursor     0x03
-
-#pragma pack(push, 1)
-
-typedef struct {
-    br_uint_8 glyph_space[9];
-    br_uint_8 glyph_exclam[9];
-    br_uint_8 glyph_dquote[9];
-    br_uint_8 glyph_hash[9];
-    br_uint_8 glyph_dollar[9];
-    br_uint_8 glyph_percent[9];
-    br_uint_8 glyph_ampersand[9];
-    br_uint_8 glyph_quote[9];
-    br_uint_8 glyph_lparen[9];
-    br_uint_8 glyph_rparen[9];
-    br_uint_8 glyph_asterisk[9];
-    br_uint_8 glyph_plus[9];
-    br_uint_8 glyph_comma[9];
-    br_uint_8 glyph_minus[9];
-    br_uint_8 glyph_period[9];
-    br_uint_8 glyph_slash[9];
-    br_uint_8 glyph_0[9];
-    br_uint_8 glyph_1[9];
-    br_uint_8 glyph_2[9];
-    br_uint_8 glyph_3[9];
-    br_uint_8 glyph_4[9];
-    br_uint_8 glyph_5[9];
-    br_uint_8 glyph_6[9];
-    br_uint_8 glyph_7[9];
-    br_uint_8 glyph_8[9];
-    br_uint_8 glyph_9[9];
-    br_uint_8 glyph_colon[9];
-    br_uint_8 glyph_semicolon[9];
-    br_uint_8 glyph_langle[9];
-    br_uint_8 glyph_equal[9];
-    br_uint_8 glyph_rangle[9];
-    br_uint_8 glyph_query[9];
-    br_uint_8 glyph_comat[9];
-    br_uint_8 glyph_A[9];
-    br_uint_8 glyph_B[9];
-    br_uint_8 glyph_C[9];
-    br_uint_8 glyph_D[9];
-    br_uint_8 glyph_E[9];
-    br_uint_8 glyph_F[9];
-    br_uint_8 glyph_G[9];
-    br_uint_8 glyph_H[9];
-    br_uint_8 glyph_I[9];
-    br_uint_8 glyph_J[9];
-    br_uint_8 glyph_K[9];
-    br_uint_8 glyph_L[9];
-    br_uint_8 glyph_M[9];
-    br_uint_8 glyph_N[9];
-    br_uint_8 glyph_O[9];
-    br_uint_8 glyph_P[9];
-    br_uint_8 glyph_Q[9];
-    br_uint_8 glyph_R[9];
-    br_uint_8 glyph_S[9];
-    br_uint_8 glyph_T[9];
-    br_uint_8 glyph_U[9];
-    br_uint_8 glyph_V[9];
-    br_uint_8 glyph_W[9];
-    br_uint_8 glyph_X[9];
-    br_uint_8 glyph_Y[9];
-    br_uint_8 glyph_Z[9];
-    br_uint_8 glyph_lsquare[9];
-    br_uint_8 glyph_bslash[9];
-    br_uint_8 glyph_rsquare[9];
-    br_uint_8 glyph_caret[9];
-    br_uint_8 glyph_underbar[9];
-    br_uint_8 glyph_bquote[9];
-    br_uint_8 glyph_a[9];
-    br_uint_8 glyph_b[9];
-    br_uint_8 glyph_c[9];
-    br_uint_8 glyph_d[9];
-    br_uint_8 glyph_e[9];
-    br_uint_8 glyph_f[9];
-    br_uint_8 glyph_g[9];
-    br_uint_8 glyph_h[9];
-    br_uint_8 glyph_i[9];
-    br_uint_8 glyph_j[9];
-    br_uint_8 glyph_k[9];
-    br_uint_8 glyph_l[9];
-    br_uint_8 glyph_m[9];
-    br_uint_8 glyph_n[9];
-    br_uint_8 glyph_o[9];
-    br_uint_8 glyph_p[9];
-    br_uint_8 glyph_q[9];
-    br_uint_8 glyph_r[9];
-    br_uint_8 glyph_s[9];
-    br_uint_8 glyph_t[9];
-    br_uint_8 glyph_u[9];
-    br_uint_8 glyph_v[9];
-    br_uint_8 glyph_w[9];
-    br_uint_8 glyph_x[9];
-    br_uint_8 glyph_y[9];
-    br_uint_8 glyph_z[9];
-    br_uint_8 glyph_lbrace[9];
-    br_uint_8 glyph_vbar[9];
-    br_uint_8 glyph_rbrace[9];
-    br_uint_8 glyph_tilde[9];
-    br_uint_8 glyph_bullet[9];
-    br_uint_8 glyph_cross[9];
-    br_uint_8 glyph_tick[9];
-    br_uint_8 glyph_uparrow[9];
-    br_uint_8 glyph_downarrow[9];
-    br_uint_8 glyph_rightarrow[9];
-    br_uint_8 glyph_leftarrow[9];
-    br_uint_8 glyph_solidbox[9];
-    br_uint_8 glyph_cursor[9];
-} br_glyphs_t;
-
-static br_glyphs_t glyphs = {
-    {0,   0,   0,   0,   0,   0,   0,   0,   0  }, /* glyph_space */
-    {128, 128, 128, 128, 128, 0,   128, 0,   0  }, /* glyph_exclam */
-    {160, 160, 160, 0,   0,   0,   0,   0,   0  }, /* glyph_dquote */
-    {80,  80,  248, 80,  248, 80,  80,  0,   0  }, /* glyph_hash */
-    {32,  112, 128, 112, 8,   112, 32,  0,   0  }, /* glyph_dollar */
-    {66,  164, 72,  16,  36,  74,  132, 0,   0  }, /* glyph_percent */
-    {32,  80,  32,  96,  152, 144, 104, 0,   0  }, /* glyph_ampersand */
-    {64,  128, 0,   0,   0,   0,   0,   0,   0  }, /* glyph_quote */
-    {32,  64,  128, 128, 128, 64,  32,  0,   0  }, /* glyph_lparen */
-    {128, 64,  32,  32,  32,  64,  128, 0,   0  }, /* glyph_rparen */
-    {80,  32,  248, 32,  80,  0,   0,   0,   0  }, /* glyph_asterisk */
-    {0,   32,  32,  248, 32,  32,  0,   0,   0  }, /* glyph_plus */
-    {0,   0,   0,   0,   0,   0,   64,  128, 0  }, /* glyph_comma */
-    {0,   0,   0,   248, 0,   0,   0,   0,   0  }, /* glyph_minus */
-    {0,   0,   0,   0,   0,   0,   64,  0,   0  }, /* glyph_period */
-    {2,   4,   8,   16,  32,  64,  128, 0,   0  }, /* glyph_slash */
-    {112, 136, 136, 136, 136, 136, 112, 0,   0  }, /* glyph_0 */
-    {32,  96,  32,  32,  32,  32,  112, 0,   0  }, /* glyph_1 */
-    {112, 136, 8,   16,  32,  64,  248, 0,   0  }, /* glyph_2 */
-    {112, 136, 8,   48,  8,   136, 112, 0,   0  }, /* glyph_3 */
-    {16,  48,  80,  144, 248, 16,  16,  0,   0  }, /* glyph_4 */
-    {248, 128, 240, 8,   8,   136, 112, 0,   0  }, /* glyph_5 */
-    {48,  64,  128, 240, 136, 136, 112, 0,   0  }, /* glyph_6 */
-    {248, 8,   8,   16,  16,  32,  32,  0,   0  }, /* glyph_7 */
-    {112, 136, 136, 112, 136, 136, 112, 0,   0  }, /* glyph_8 */
-    {112, 136, 136, 120, 8,   16,  96,  0,   0  }, /* glyph_9 */
-    {0,   0,   0,   64,  0,   0,   64,  0,   0  }, /* glyph_colon */
-    {0,   0,   0,   64,  0,   0,   64,  128, 0  }, /* glyph_semicolon */
-    {16,  32,  64,  128, 64,  32,  16,  0,   0  }, /* glyph_langle */
-    {0,   0,   248, 0,   0,   248, 0,   0,   0  }, /* glyph_equal */
-    {128, 64,  32,  16,  32,  64,  128, 0,   0  }, /* glyph_rangle */
-    {112, 136, 8,   16,  32,  0,   32,  0,   0  }, /* glyph_query */
-    {120, 132, 164, 164, 184, 128, 120, 0,   0  }, /* glyph_comat */
-    {32,  80,  136, 136, 248, 136, 136, 0,   0  }, /* glyph_A */
-    {240, 136, 136, 240, 136, 136, 240, 0,   0  }, /* glyph_B */
-    {56,  68,  128, 128, 128, 68,  56,  0,   0  }, /* glyph_C */
-    {240, 136, 132, 132, 132, 136, 240, 0,   0  }, /* glyph_D */
-    {248, 128, 128, 224, 128, 128, 248, 0,   0  }, /* glyph_E */
-    {248, 128, 128, 224, 128, 128, 128, 0,   0  }, /* glyph_F */
-    {56,  68,  128, 128, 140, 68,  60,  0,   0  }, /* glyph_G */
-    {132, 132, 132, 252, 132, 132, 132, 0,   0  }, /* glyph_H */
-    {128, 128, 128, 128, 128, 128, 128, 0,   0  }, /* glyph_I */
-    {8,   8,   8,   8,   8,   136, 112, 0,   0  }, /* glyph_J */
-    {136, 144, 160, 192, 160, 144, 136, 0,   0  }, /* glyph_K */
-    {128, 128, 128, 128, 128, 128, 248, 0,   0  }, /* glyph_L */
-    {130, 198, 170, 146, 130, 130, 130, 0,   0  }, /* glyph_M */
-    {130, 194, 162, 146, 138, 134, 130, 0,   0  }, /* glyph_N */
-    {56,  68,  130, 130, 130, 68,  56,  0,   0  }, /* glyph_O */
-    {240, 136, 136, 240, 128, 128, 128, 0,   0  }, /* glyph_P */
-    {56,  68,  130, 130, 130, 68,  56,  14,  0  }, /* glyph_Q */
-    {240, 136, 136, 240, 160, 144, 136, 0,   0  }, /* glyph_R */
-    {112, 136, 128, 112, 8,   136, 112, 0,   0  }, /* glyph_S */
-    {254, 16,  16,  16,  16,  16,  16,  0,   0  }, /* glyph_T */
-    {136, 136, 136, 136, 136, 136, 112, 0,   0  }, /* glyph_U */
-    {136, 136, 136, 136, 136, 80,  32,  0,   0  }, /* glyph_V */
-    {136, 136, 136, 136, 136, 85,  34,  0,   0  }, /* glyph_W */
-    {130, 68,  40,  16,  40,  68,  130, 0,   0  }, /* glyph_X */
-    {130, 68,  40,  16,  16,  16,  16,  0,   0  }, /* glyph_Y */
-    {252, 4,   8,   16,  32,  64,  252, 0,   0  }, /* glyph_Z */
-    {224, 128, 128, 128, 128, 128, 224, 0,   0  }, /* glyph_lsquare */
-    {128, 64,  32,  16,  8,   4,   2,   0,   0  }, /* glyph_bslash */
-    {224, 32,  32,  32,  32,  32,  224, 0,   0  }, /* glyph_rsquare */
-    {32,  80,  136, 0,   0,   0,   0,   0,   0  }, /* glyph_caret */
-    {0,   0,   0,   0,   0,   0,   0,   0,   252}, /* glyph_underbar */
-    {128, 64,  0,   0,   0,   0,   0,   0,   0  }, /* glyph_bquote */
-    {0,   0,   112, 8,   120, 136, 120, 0,   0  }, /* glyph_a */
-    {128, 128, 240, 136, 136, 136, 112, 0,   0  }, /* glyph_b */
-    {0,   0,   112, 128, 128, 128, 112, 0,   0  }, /* glyph_c */
-    {8,   8,   120, 136, 136, 136, 120, 0,   0  }, /* glyph_d */
-    {0,   0,   112, 136, 248, 128, 112, 0,   0  }, /* glyph_e */
-    {48,  64,  224, 64,  64,  64,  64,  0,   0  }, /* glyph_f */
-    {0,   0,   112, 136, 136, 136, 120, 8,   112}, /* glyph_g */
-    {128, 128, 240, 136, 136, 136, 136, 0,   0  }, /* glyph_h */
-    {128, 0,   128, 128, 128, 128, 128, 0,   0  }, /* glyph_i */
-    {64,  0,   64,  64,  64,  64,  64,  64,  128}, /* glyph_j */
-    {128, 128, 144, 160, 192, 160, 144, 0,   0  }, /* glyph_k */
-    {128, 128, 128, 128, 128, 128, 128, 0,   0  }, /* glyph_l */
-    {0,   0,   236, 146, 146, 146, 146, 0,   0  }, /* glyph_m */
-    {0,   0,   176, 200, 136, 136, 136, 0,   0  }, /* glyph_n */
-    {0,   0,   112, 136, 136, 136, 112, 0,   0  }, /* glyph_o */
-    {0,   0,   240, 136, 136, 136, 240, 128, 128}, /* glyph_p */
-    {0,   0,   120, 136, 136, 136, 120, 8,   8  }, /* glyph_q */
-    {0,   0,   176, 192, 128, 128, 128, 0,   0  }, /* glyph_r */
-    {0,   0,   112, 128, 112, 8,   112, 0,   0  }, /* glyph_s */
-    {0,   64,  224, 64,  64,  64,  48,  0,   0  }, /* glyph_t */
-    {0,   0,   136, 136, 136, 152, 104, 0,   0  }, /* glyph_u */
-    {0,   0,   136, 136, 136, 80,  32,  0,   0  }, /* glyph_v */
-    {0,   0,   146, 146, 146, 146, 108, 0,   0  }, /* glyph_w */
-    {0,   0,   136, 80,  32,  80,  136, 0,   0  }, /* glyph_x */
-    {0,   0,   136, 136, 136, 136, 120, 8,   112}, /* glyph_y */
-    {0,   0,   248, 16,  32,  64,  248, 0,   0  }, /* glyph_z */
-    {48,  64,  64,  128, 64,  64,  48,  0,   0  }, /* glyph_lbrace */
-    {128, 128, 128, 0,   128, 128, 128, 0,   0  }, /* glyph_vbar */
-    {192, 32,  32,  16,  32,  32,  192, 0,   0  }, /* glyph_rbrace */
-    {118, 220, 0,   0,   0,   0,   0,   0,   0  }, /* glyph_tilde */
-    {0,   120, 252, 252, 252, 120, 0,   0,   0  }, /* glyph_bullet */
-    {0,   68,  40,  16,  40,  68,  0,   0,   0  }, /* glyph_cross */
-    {0,   2,   4,   136, 80,  32,  0,   0,   0  }, /* glyph_tick */
-    {16,  56,  124, 254, 56,  56,  56,  0,   0  }, /* glyph_uparrow */
-    {56,  56,  56,  254, 124, 56,  16,  0,   0  }, /* glyph_downarrow */
-    {16,  24,  252, 254, 252, 24,  16,  0,   0  }, /* glyph_rightarrow */
-    {16,  48,  126, 254, 126, 48,  16,  0,   0  }, /* glyph_leftarrow */
-    {254, 254, 254, 254, 254, 254, 254, 0,   0  }, /* glyph_solidbox */
-    {160, 64,  64,  64,  64,  64,  64,  64,  160}  /* glyph_cursor */
+enum {
+    width_space = 3,
+    width_exclam = 1,
+    width_dquote = 3,
+    width_hash = 5,
+    width_dollar = 5,
+    width_percent = 7,
+    width_ampersand = 5,
+    width_quote = 2,
+    width_lparen = 3,
+    width_rparen = 3,
+    width_asterisk = 5,
+    width_plus = 5,
+    width_comma = 2,
+    width_minus = 5,
+    width_period = 2,
+    width_slash = 7,
+    width_0 = 5,
+    width_1 = 5,
+    width_2 = 5,
+    width_3 = 5,
+    width_4 = 5,
+    width_5 = 5,
+    width_6 = 5,
+    width_7 = 5,
+    width_8 = 5,
+    width_9 = 5,
+    width_colon = 2,
+    width_semicolon = 2,
+    width_langle = 4,
+    width_equal = 5,
+    width_rangle = 4,
+    width_query = 5,
+    width_comat = 6,
+    width_A = 5,
+    width_B = 5,
+    width_C = 6,
+    width_D = 6,
+    width_E = 5,
+    width_F = 5,
+    width_G = 6,
+    width_H = 6,
+    width_I = 1,
+    width_J = 5,
+    width_K = 5,
+    width_L = 5,
+    width_M = 7,
+    width_N = 7,
+    width_O = 7,
+    width_P = 5,
+    width_Q = 7,
+    width_R = 5,
+    width_S = 5,
+    width_T = 7,
+    width_U = 5,
+    width_V = 5,
+    width_W = 9,
+    width_X = 7,
+    width_Y = 7,
+    width_Z = 6,
+    width_lsquare = 3,
+    width_bslash = 7,
+    width_rsquare = 3,
+    width_caret = 5,
+    width_underbar = 6,
+    width_bquote = 2,
+    width_a = 5,
+    width_b = 5,
+    width_c = 4,
+    width_d = 5,
+    width_e = 5,
+    width_f = 4,
+    width_g = 5,
+    width_h = 5,
+    width_i = 1,
+    width_j = 2,
+    width_k = 4,
+    width_l = 1,
+    width_m = 7,
+    width_n = 5,
+    width_o = 5,
+    width_p = 5,
+    width_q = 5,
+    width_r = 4,
+    width_s = 5,
+    width_t = 4,
+    width_u = 5,
+    width_v = 5,
+    width_w = 7,
+    width_x = 5,
+    width_y = 5,
+    width_z = 5,
+    width_lbrace = 4,
+    width_vbar = 1,
+    width_rbrace = 4,
+    width_tilde = 7,
+    width_bullet = 6,
+    width_cross = 7,
+    width_tick = 7,
+    width_uparrow = 7,
+    width_downarrow = 7,
+    width_rightarrow = 7,
+    width_leftarrow = 7,
+    width_solidbox = 7,
+    width_cursor = 3,
 };
 
-// clang-format off
-static br_uint_16 encoding[] = {
-    offsetof(br_glyphs_t, glyph_space),
-    offsetof(br_glyphs_t, glyph_space),
-    offsetof(br_glyphs_t, glyph_space),
-    offsetof(br_glyphs_t, glyph_space),
-    offsetof(br_glyphs_t, glyph_space),
-    offsetof(br_glyphs_t, glyph_space),
-    offsetof(br_glyphs_t, glyph_space),
-    offsetof(br_glyphs_t, glyph_bullet),
-    offsetof(br_glyphs_t, glyph_space),
-    offsetof(br_glyphs_t, glyph_space),
-    offsetof(br_glyphs_t, glyph_space),
-    offsetof(br_glyphs_t, glyph_space),
-    offsetof(br_glyphs_t, glyph_space),
-    offsetof(br_glyphs_t, glyph_space),
-    offsetof(br_glyphs_t, glyph_space),
-    offsetof(br_glyphs_t, glyph_space),
-    offsetof(br_glyphs_t, glyph_space),
-    offsetof(br_glyphs_t, glyph_space),
-    offsetof(br_glyphs_t, glyph_space),
-    offsetof(br_glyphs_t, glyph_space),
-    offsetof(br_glyphs_t, glyph_space),
-    offsetof(br_glyphs_t, glyph_space),
-    offsetof(br_glyphs_t, glyph_space),
-    offsetof(br_glyphs_t, glyph_space),
-    offsetof(br_glyphs_t, glyph_uparrow),
-    offsetof(br_glyphs_t, glyph_downarrow),
-    offsetof(br_glyphs_t, glyph_rightarrow),
-    offsetof(br_glyphs_t, glyph_leftarrow),
-    offsetof(br_glyphs_t, glyph_space),
-    offsetof(br_glyphs_t, glyph_space),
-    offsetof(br_glyphs_t, glyph_space),
-    offsetof(br_glyphs_t, glyph_space),
-    offsetof(br_glyphs_t, glyph_space),
-    offsetof(br_glyphs_t, glyph_exclam),
-    offsetof(br_glyphs_t, glyph_dquote),
-    offsetof(br_glyphs_t, glyph_hash),
-    offsetof(br_glyphs_t, glyph_dollar),
-    offsetof(br_glyphs_t, glyph_percent),
-    offsetof(br_glyphs_t, glyph_ampersand),
-    offsetof(br_glyphs_t, glyph_quote),
-    offsetof(br_glyphs_t, glyph_lparen),
-    offsetof(br_glyphs_t, glyph_rparen),
-    offsetof(br_glyphs_t, glyph_asterisk),
-    offsetof(br_glyphs_t, glyph_plus),
-    offsetof(br_glyphs_t, glyph_comma),
-    offsetof(br_glyphs_t, glyph_minus),
-    offsetof(br_glyphs_t, glyph_period),
-    offsetof(br_glyphs_t, glyph_slash),
-    offsetof(br_glyphs_t, glyph_0),
-    offsetof(br_glyphs_t, glyph_1),
-    offsetof(br_glyphs_t, glyph_2),
-    offsetof(br_glyphs_t, glyph_3),
-    offsetof(br_glyphs_t, glyph_4),
-    offsetof(br_glyphs_t, glyph_5),
-    offsetof(br_glyphs_t, glyph_6),
-    offsetof(br_glyphs_t, glyph_7),
-    offsetof(br_glyphs_t, glyph_8),
-    offsetof(br_glyphs_t, glyph_9),
-    offsetof(br_glyphs_t, glyph_colon),
-    offsetof(br_glyphs_t, glyph_semicolon),
-    offsetof(br_glyphs_t, glyph_langle),
-    offsetof(br_glyphs_t, glyph_equal),
-    offsetof(br_glyphs_t, glyph_rangle),
-    offsetof(br_glyphs_t, glyph_query),
-    offsetof(br_glyphs_t, glyph_comat),
-    offsetof(br_glyphs_t, glyph_A),
-    offsetof(br_glyphs_t, glyph_B),
-    offsetof(br_glyphs_t, glyph_C),
-    offsetof(br_glyphs_t, glyph_D),
-    offsetof(br_glyphs_t, glyph_E),
-    offsetof(br_glyphs_t, glyph_F),
-    offsetof(br_glyphs_t, glyph_G),
-    offsetof(br_glyphs_t, glyph_H),
-    offsetof(br_glyphs_t, glyph_I),
-    offsetof(br_glyphs_t, glyph_J),
-    offsetof(br_glyphs_t, glyph_K),
-    offsetof(br_glyphs_t, glyph_L),
-    offsetof(br_glyphs_t, glyph_M),
-    offsetof(br_glyphs_t, glyph_N),
-    offsetof(br_glyphs_t, glyph_O),
-    offsetof(br_glyphs_t, glyph_P),
-    offsetof(br_glyphs_t, glyph_Q),
-    offsetof(br_glyphs_t, glyph_R),
-    offsetof(br_glyphs_t, glyph_S),
-    offsetof(br_glyphs_t, glyph_T),
-    offsetof(br_glyphs_t, glyph_U),
-    offsetof(br_glyphs_t, glyph_V),
-    offsetof(br_glyphs_t, glyph_W),
-    offsetof(br_glyphs_t, glyph_X),
-    offsetof(br_glyphs_t, glyph_Y),
-    offsetof(br_glyphs_t, glyph_Z),
-    offsetof(br_glyphs_t, glyph_lsquare),
-    offsetof(br_glyphs_t, glyph_bslash),
-    offsetof(br_glyphs_t, glyph_rsquare),
-    offsetof(br_glyphs_t, glyph_caret),
-    offsetof(br_glyphs_t, glyph_underbar),
-    offsetof(br_glyphs_t, glyph_bquote),
-    offsetof(br_glyphs_t, glyph_a),
-    offsetof(br_glyphs_t, glyph_b),
-    offsetof(br_glyphs_t, glyph_c),
-    offsetof(br_glyphs_t, glyph_d),
-    offsetof(br_glyphs_t, glyph_e),
-    offsetof(br_glyphs_t, glyph_f),
-    offsetof(br_glyphs_t, glyph_g),
-    offsetof(br_glyphs_t, glyph_h),
-    offsetof(br_glyphs_t, glyph_i),
-    offsetof(br_glyphs_t, glyph_j),
-    offsetof(br_glyphs_t, glyph_k),
-    offsetof(br_glyphs_t, glyph_l),
-    offsetof(br_glyphs_t, glyph_m),
-    offsetof(br_glyphs_t, glyph_n),
-    offsetof(br_glyphs_t, glyph_o),
-    offsetof(br_glyphs_t, glyph_p),
-    offsetof(br_glyphs_t, glyph_q),
-    offsetof(br_glyphs_t, glyph_r),
-    offsetof(br_glyphs_t, glyph_s),
-    offsetof(br_glyphs_t, glyph_t),
-    offsetof(br_glyphs_t, glyph_u),
-    offsetof(br_glyphs_t, glyph_v),
-    offsetof(br_glyphs_t, glyph_w),
-    offsetof(br_glyphs_t, glyph_x),
-    offsetof(br_glyphs_t, glyph_y),
-    offsetof(br_glyphs_t, glyph_z),
-    offsetof(br_glyphs_t, glyph_lbrace),
-    offsetof(br_glyphs_t, glyph_vbar),
-    offsetof(br_glyphs_t, glyph_rbrace),
-    offsetof(br_glyphs_t, glyph_tilde),
-    offsetof(br_glyphs_t, glyph_space),
-    offsetof(br_glyphs_t, glyph_space),
-    offsetof(br_glyphs_t, glyph_space),
-    offsetof(br_glyphs_t, glyph_space),
-    offsetof(br_glyphs_t, glyph_space),
-    offsetof(br_glyphs_t, glyph_space),
-    offsetof(br_glyphs_t, glyph_space),
-    offsetof(br_glyphs_t, glyph_space),
-    offsetof(br_glyphs_t, glyph_space),
-    offsetof(br_glyphs_t, glyph_space),
-    offsetof(br_glyphs_t, glyph_space),
-    offsetof(br_glyphs_t, glyph_space),
-    offsetof(br_glyphs_t, glyph_space),
-    offsetof(br_glyphs_t, glyph_space),
-    offsetof(br_glyphs_t, glyph_space),
-    offsetof(br_glyphs_t, glyph_space),
-    offsetof(br_glyphs_t, glyph_space),
-    offsetof(br_glyphs_t, glyph_space),
-    offsetof(br_glyphs_t, glyph_space),
-    offsetof(br_glyphs_t, glyph_space),
-    offsetof(br_glyphs_t, glyph_space),
-    offsetof(br_glyphs_t, glyph_space),
-    offsetof(br_glyphs_t, glyph_space),
-    offsetof(br_glyphs_t, glyph_space),
-    offsetof(br_glyphs_t, glyph_space),
-    offsetof(br_glyphs_t, glyph_space),
-    offsetof(br_glyphs_t, glyph_space),
-    offsetof(br_glyphs_t, glyph_space),
-    offsetof(br_glyphs_t, glyph_space),
-    offsetof(br_glyphs_t, glyph_space),
-    offsetof(br_glyphs_t, glyph_space),
-    offsetof(br_glyphs_t, glyph_space),
-    offsetof(br_glyphs_t, glyph_space),
-    offsetof(br_glyphs_t, glyph_space),
-    offsetof(br_glyphs_t, glyph_space),
-    offsetof(br_glyphs_t, glyph_space),
-    offsetof(br_glyphs_t, glyph_space),
-    offsetof(br_glyphs_t, glyph_space),
-    offsetof(br_glyphs_t, glyph_space),
-    offsetof(br_glyphs_t, glyph_space),
-    offsetof(br_glyphs_t, glyph_space),
-    offsetof(br_glyphs_t, glyph_space),
-    offsetof(br_glyphs_t, glyph_space),
-    offsetof(br_glyphs_t, glyph_space),
-    offsetof(br_glyphs_t, glyph_space),
-    offsetof(br_glyphs_t, glyph_space),
-    offsetof(br_glyphs_t, glyph_space),
-    offsetof(br_glyphs_t, glyph_space),
-    offsetof(br_glyphs_t, glyph_space),
-    offsetof(br_glyphs_t, glyph_space),
-    offsetof(br_glyphs_t, glyph_space),
-    offsetof(br_glyphs_t, glyph_space),
-    offsetof(br_glyphs_t, glyph_cursor),
-    offsetof(br_glyphs_t, glyph_space),
-    offsetof(br_glyphs_t, glyph_space),
-    offsetof(br_glyphs_t, glyph_space),
-    offsetof(br_glyphs_t, glyph_space),
-    offsetof(br_glyphs_t, glyph_space),
-    offsetof(br_glyphs_t, glyph_space),
-    offsetof(br_glyphs_t, glyph_space),
-    offsetof(br_glyphs_t, glyph_space),
-    offsetof(br_glyphs_t, glyph_space),
-    offsetof(br_glyphs_t, glyph_space),
-    offsetof(br_glyphs_t, glyph_space),
-    offsetof(br_glyphs_t, glyph_space),
-    offsetof(br_glyphs_t, glyph_space),
-    offsetof(br_glyphs_t, glyph_space),
-    offsetof(br_glyphs_t, glyph_space),
-    offsetof(br_glyphs_t, glyph_space),
-    offsetof(br_glyphs_t, glyph_space),
-    offsetof(br_glyphs_t, glyph_space),
-    offsetof(br_glyphs_t, glyph_space),
-    offsetof(br_glyphs_t, glyph_space),
-    offsetof(br_glyphs_t, glyph_space),
-    offsetof(br_glyphs_t, glyph_space),
-    offsetof(br_glyphs_t, glyph_space),
-    offsetof(br_glyphs_t, glyph_space),
-    offsetof(br_glyphs_t, glyph_space),
-    offsetof(br_glyphs_t, glyph_space),
-    offsetof(br_glyphs_t, glyph_space),
-    offsetof(br_glyphs_t, glyph_space),
-    offsetof(br_glyphs_t, glyph_space),
-    offsetof(br_glyphs_t, glyph_space),
-    offsetof(br_glyphs_t, glyph_space),
-    offsetof(br_glyphs_t, glyph_space),
-    offsetof(br_glyphs_t, glyph_space),
-    offsetof(br_glyphs_t, glyph_space),
-    offsetof(br_glyphs_t, glyph_space),
-    offsetof(br_glyphs_t, glyph_space),
-    offsetof(br_glyphs_t, glyph_space),
-    offsetof(br_glyphs_t, glyph_space),
-    offsetof(br_glyphs_t, glyph_space),
-    offsetof(br_glyphs_t, glyph_solidbox),
-    offsetof(br_glyphs_t, glyph_space),
-    offsetof(br_glyphs_t, glyph_space),
-    offsetof(br_glyphs_t, glyph_space),
-    offsetof(br_glyphs_t, glyph_space),
-    offsetof(br_glyphs_t, glyph_space),
-    offsetof(br_glyphs_t, glyph_space),
-    offsetof(br_glyphs_t, glyph_space),
-    offsetof(br_glyphs_t, glyph_space),
-    offsetof(br_glyphs_t, glyph_space),
-    offsetof(br_glyphs_t, glyph_space),
-    offsetof(br_glyphs_t, glyph_space),
-    offsetof(br_glyphs_t, glyph_space),
-    offsetof(br_glyphs_t, glyph_space),
-    offsetof(br_glyphs_t, glyph_space),
-    offsetof(br_glyphs_t, glyph_space),
-    offsetof(br_glyphs_t, glyph_space),
-    offsetof(br_glyphs_t, glyph_space),
-    offsetof(br_glyphs_t, glyph_space),
-    offsetof(br_glyphs_t, glyph_space),
-    offsetof(br_glyphs_t, glyph_space),
-    offsetof(br_glyphs_t, glyph_space),
-    offsetof(br_glyphs_t, glyph_space),
-    offsetof(br_glyphs_t, glyph_space),
-    offsetof(br_glyphs_t, glyph_space),
-    offsetof(br_glyphs_t, glyph_space),
-    offsetof(br_glyphs_t, glyph_space),
-    offsetof(br_glyphs_t, glyph_space),
-    offsetof(br_glyphs_t, glyph_space),
-    offsetof(br_glyphs_t, glyph_space),
-    offsetof(br_glyphs_t, glyph_space),
-    offsetof(br_glyphs_t, glyph_space),
-    offsetof(br_glyphs_t, glyph_tick),
-    offsetof(br_glyphs_t, glyph_space),
-    offsetof(br_glyphs_t, glyph_space),
-    offsetof(br_glyphs_t, glyph_space),
-    offsetof(br_glyphs_t, glyph_space),
+const static br_int_8 widths[256] = {
+    [0] = width_space,
+    [1] = width_space,
+    [2] = width_space,
+    [3] = width_space,
+    [4] = width_space,
+    [5] = width_space,
+    [6] = width_space,
+    [7] = width_bullet,
+    [8] = width_space,
+    [9] = width_space,
+    [10] = width_space,
+    [11] = width_space,
+    [12] = width_space,
+    [13] = width_space,
+    [14] = width_space,
+    [15] = width_space,
+    [16] = width_space,
+    [17] = width_space,
+    [18] = width_space,
+    [19] = width_space,
+    [20] = width_space,
+    [21] = width_space,
+    [22] = width_space,
+    [23] = width_space,
+    [24] = width_uparrow,
+    [25] = width_downarrow,
+    [26] = width_rightarrow,
+    [27] = width_leftarrow,
+    [28] = width_space,
+    [29] = width_space,
+    [30] = width_space,
+    [31] = width_space,
+    [32] = width_space,
+    [33] = width_exclam,
+    [34] = width_dquote,
+    [35] = width_hash,
+    [36] = width_dollar,
+    [37] = width_percent,
+    [38] = width_ampersand,
+    [39] = width_quote,
+    [40] = width_lparen,
+    [41] = width_rparen,
+    [42] = width_asterisk,
+    [43] = width_plus,
+    [44] = width_comma,
+    [45] = width_minus,
+    [46] = width_period,
+    [47] = width_slash,
+    [48] = width_0,
+    [49] = width_1,
+    [50] = width_2,
+    [51] = width_3,
+    [52] = width_4,
+    [53] = width_5,
+    [54] = width_6,
+    [55] = width_7,
+    [56] = width_8,
+    [57] = width_9,
+    [58] = width_colon,
+    [59] = width_semicolon,
+    [60] = width_langle,
+    [61] = width_equal,
+    [62] = width_rangle,
+    [63] = width_query,
+    [64] = width_comat,
+    [65] = width_A,
+    [66] = width_B,
+    [67] = width_C,
+    [68] = width_D,
+    [69] = width_E,
+    [70] = width_F,
+    [71] = width_G,
+    [72] = width_H,
+    [73] = width_I,
+    [74] = width_J,
+    [75] = width_K,
+    [76] = width_L,
+    [77] = width_M,
+    [78] = width_N,
+    [79] = width_O,
+    [80] = width_P,
+    [81] = width_Q,
+    [82] = width_R,
+    [83] = width_S,
+    [84] = width_T,
+    [85] = width_U,
+    [86] = width_V,
+    [87] = width_W,
+    [88] = width_X,
+    [89] = width_Y,
+    [90] = width_Z,
+    [91] = width_lsquare,
+    [92] = width_bslash,
+    [93] = width_rsquare,
+    [94] = width_caret,
+    [95] = width_underbar,
+    [96] = width_bquote,
+    [97] = width_a,
+    [98] = width_b,
+    [99] = width_c,
+    [100] = width_d,
+    [101] = width_e,
+    [102] = width_f,
+    [103] = width_g,
+    [104] = width_h,
+    [105] = width_i,
+    [106] = width_j,
+    [107] = width_k,
+    [108] = width_l,
+    [109] = width_m,
+    [110] = width_n,
+    [111] = width_o,
+    [112] = width_p,
+    [113] = width_q,
+    [114] = width_r,
+    [115] = width_s,
+    [116] = width_t,
+    [117] = width_u,
+    [118] = width_v,
+    [119] = width_w,
+    [120] = width_x,
+    [121] = width_y,
+    [122] = width_z,
+    [123] = width_lbrace,
+    [124] = width_vbar,
+    [125] = width_rbrace,
+    [126] = width_tilde,
+    [127] = width_space,
+    [128] = width_space,
+    [129] = width_space,
+    [130] = width_space,
+    [131] = width_space,
+    [132] = width_space,
+    [133] = width_space,
+    [134] = width_space,
+    [135] = width_space,
+    [136] = width_space,
+    [137] = width_space,
+    [138] = width_space,
+    [139] = width_space,
+    [140] = width_space,
+    [141] = width_space,
+    [142] = width_space,
+    [143] = width_space,
+    [144] = width_space,
+    [145] = width_space,
+    [146] = width_space,
+    [147] = width_space,
+    [148] = width_space,
+    [149] = width_space,
+    [150] = width_space,
+    [151] = width_space,
+    [152] = width_space,
+    [153] = width_space,
+    [154] = width_space,
+    [155] = width_space,
+    [156] = width_space,
+    [157] = width_space,
+    [158] = width_space,
+    [159] = width_space,
+    [160] = width_space,
+    [161] = width_space,
+    [162] = width_space,
+    [163] = width_space,
+    [164] = width_space,
+    [165] = width_space,
+    [166] = width_space,
+    [167] = width_space,
+    [168] = width_space,
+    [169] = width_space,
+    [170] = width_space,
+    [171] = width_space,
+    [172] = width_space,
+    [173] = width_space,
+    [174] = width_space,
+    [175] = width_space,
+    [176] = width_space,
+    [177] = width_space,
+    [178] = width_space,
+    [179] = width_cursor,
+    [180] = width_space,
+    [181] = width_space,
+    [182] = width_space,
+    [183] = width_space,
+    [184] = width_space,
+    [185] = width_space,
+    [186] = width_space,
+    [187] = width_space,
+    [188] = width_space,
+    [189] = width_space,
+    [190] = width_space,
+    [191] = width_space,
+    [192] = width_space,
+    [193] = width_space,
+    [194] = width_space,
+    [195] = width_space,
+    [196] = width_space,
+    [197] = width_space,
+    [198] = width_space,
+    [199] = width_space,
+    [200] = width_space,
+    [201] = width_space,
+    [202] = width_space,
+    [203] = width_space,
+    [204] = width_space,
+    [205] = width_space,
+    [206] = width_space,
+    [207] = width_space,
+    [208] = width_space,
+    [209] = width_space,
+    [210] = width_space,
+    [211] = width_space,
+    [212] = width_space,
+    [213] = width_space,
+    [214] = width_space,
+    [215] = width_space,
+    [216] = width_space,
+    [217] = width_space,
+    [218] = width_space,
+    [219] = width_solidbox,
+    [220] = width_space,
+    [221] = width_space,
+    [222] = width_space,
+    [223] = width_space,
+    [224] = width_space,
+    [225] = width_space,
+    [226] = width_space,
+    [227] = width_space,
+    [228] = width_space,
+    [229] = width_space,
+    [230] = width_space,
+    [231] = width_space,
+    [232] = width_space,
+    [233] = width_space,
+    [234] = width_space,
+    [235] = width_space,
+    [236] = width_space,
+    [237] = width_space,
+    [238] = width_space,
+    [239] = width_space,
+    [240] = width_space,
+    [241] = width_space,
+    [242] = width_space,
+    [243] = width_space,
+    [244] = width_space,
+    [245] = width_space,
+    [246] = width_space,
+    [247] = width_space,
+    [248] = width_space,
+    [249] = width_space,
+    [250] = width_space,
+    [251] = width_tick,
+    [252] = width_space,
+    [253] = width_space,
+    [254] = width_space,
+    [255] = width_space,
 };
 
-static br_uint_8 widths[] = 
-{    width_space,
-    width_space,
-    width_space,
-    width_space,
-    width_space,
-    width_space,
-    width_space,
-    width_bullet,
-    width_space,
-    width_space,
-    width_space,
-    width_space,
-    width_space,
-    width_space,
-    width_space,
-    width_space,
-    width_space,
-    width_space,
-    width_space,
-    width_space,
-    width_space,
-    width_space,
-    width_space,
-    width_space,
-    width_uparrow,
-    width_downarrow,
-    width_rightarrow,
-    width_leftarrow,
-    width_space,
-    width_space,
-    width_space,
-    width_space,
-    width_space,
-    width_exclam,
-    width_dquote,
-    width_hash,
-    width_dollar,
-    width_percent,
-    width_ampersand,
-    width_quote,
-    width_lparen,
-    width_rparen,
-    width_asterisk,
-    width_plus,
-    width_comma,
-    width_minus,
-    width_period,
-    width_slash,
-    width_0,
-    width_1,
-    width_2,
-    width_3,
-    width_4,
-    width_5,
-    width_6,
-    width_7,
-    width_8,
-    width_9,
-    width_colon,
-    width_semicolon,
-    width_langle,
-    width_equal,
-    width_rangle,
-    width_query,
-    width_comat,
-    width_A,
-    width_B,
-    width_C,
-    width_D,
-    width_E,
-    width_F,
-    width_G,
-    width_H,
-    width_I,
-    width_J,
-    width_K,
-    width_L,
-    width_M,
-    width_N,
-    width_O,
-    width_P,
-    width_Q,
-    width_R,
-    width_S,
-    width_T,
-    width_U,
-    width_V,
-    width_W,
-    width_X,
-    width_Y,
-    width_Z,
-    width_lsquare,
-    width_bslash,
-    width_rsquare,
-    width_caret,
-    width_underbar,
-    width_bquote,
-    width_a,
-    width_b,
-    width_c,
-    width_d,
-    width_e,
-    width_f,
-    width_g,
-    width_h,
-    width_i,
-    width_j,
-    width_k,
-    width_l,
-    width_m,
-    width_n,
-    width_o,
-    width_p,
-    width_q,
-    width_r,
-    width_s,
-    width_t,
-    width_u,
-    width_v,
-    width_w,
-    width_x,
-    width_y,
-    width_z,
-    width_lbrace,
-    width_vbar,
-    width_rbrace,
-    width_tilde,
-    width_space,
-    width_space,
-    width_space,
-    width_space,
-    width_space,
-    width_space,
-    width_space,
-    width_space,
-    width_space,
-    width_space,
-    width_space,
-    width_space,
-    width_space,
-    width_space,
-    width_space,
-    width_space,
-    width_space,
-    width_space,
-    width_space,
-    width_space,
-    width_space,
-    width_space,
-    width_space,
-    width_space,
-    width_space,
-    width_space,
-    width_space,
-    width_space,
-    width_space,
-    width_space,
-    width_space,
-    width_space,
-    width_space,
-    width_space,
-    width_space,
-    width_space,
-    width_space,
-    width_space,
-    width_space,
-    width_space,
-    width_space,
-    width_space,
-    width_space,
-    width_space,
-    width_space,
-    width_space,
-    width_space,
-    width_space,
-    width_space,
-    width_space,
-    width_space,
-    width_space,
-    width_cursor,
-    width_space,
-    width_space,
-    width_space,
-    width_space,
-    width_space,
-    width_space,
-    width_space,
-    width_space,
-    width_space,
-    width_space,
-    width_space,
-    width_space,
-    width_space,
-    width_space,
-    width_space,
-    width_space,
-    width_space,
-    width_space,
-    width_space,
-    width_space,
-    width_space,
-    width_space,
-    width_space,
-    width_space,
-    width_space,
-    width_space,
-    width_space,
-    width_space,
-    width_space,
-    width_space,
-    width_space,
-    width_space,
-    width_space,
-    width_space,
-    width_space,
-    width_space,
-    width_space,
-    width_space,
-    width_space,
-    width_solidbox,
-    width_space,
-    width_space,
-    width_space,
-    width_space,
-    width_space,
-    width_space,
-    width_space,
-    width_space,
-    width_space,
-    width_space,
-    width_space,
-    width_space,
-    width_space,
-    width_space,
-    width_space,
-    width_space,
-    width_space,
-    width_space,
-    width_space,
-    width_space,
-    width_space,
-    width_space,
-    width_space,
-    width_space,
-    width_space,
-    width_space,
-    width_space,
-    width_space,
-    width_space,
-    width_space,
-    width_space,
-    width_tick,
-    width_space,
-    width_space,
-    width_space,
-    width_space
+const static br_uint_8 glyph_space[9] = {
+    0b00000000,
+    0b00000000,
+    0b00000000,
+    0b00000000,
+    0b00000000,
+    0b00000000,
+    0b00000000,
+    0b00000000,
+    0b00000000,
 };
-// clang-format on
+
+const static br_uint_8 glyph_exclam[9] = {
+    0b10000000,
+    0b10000000,
+    0b10000000,
+    0b10000000,
+    0b10000000,
+    0b00000000,
+    0b10000000,
+    0b00000000,
+    0b00000000,
+};
+
+const static br_uint_8 glyph_dquote[9] = {
+    0b10100000,
+    0b10100000,
+    0b10100000,
+    0b00000000,
+    0b00000000,
+    0b00000000,
+    0b00000000,
+    0b00000000,
+    0b00000000,
+};
+
+const static br_uint_8 glyph_hash[9] = {
+    0b01010000,
+    0b01010000,
+    0b11111000,
+    0b01010000,
+    0b11111000,
+    0b01010000,
+    0b01010000,
+    0b00000000,
+    0b00000000,
+};
+
+const static br_uint_8 glyph_dollar[9] = {
+    0b00100000,
+    0b01110000,
+    0b10000000,
+    0b01110000,
+    0b00001000,
+    0b01110000,
+    0b00100000,
+    0b00000000,
+    0b00000000,
+};
+
+const static br_uint_8 glyph_percent[9] = {
+    0b01000010,
+    0b10100100,
+    0b01001000,
+    0b00010000,
+    0b00100100,
+    0b01001010,
+    0b10000100,
+    0b00000000,
+    0b00000000,
+};
+
+const static br_uint_8 glyph_ampersand[9] = {
+    0b00100000,
+    0b01010000,
+    0b00100000,
+    0b01100000,
+    0b10011000,
+    0b10010000,
+    0b01101000,
+    0b00000000,
+    0b00000000,
+};
+
+const static br_uint_8 glyph_quote[9] = {
+    0b01000000,
+    0b10000000,
+    0b00000000,
+    0b00000000,
+    0b00000000,
+    0b00000000,
+    0b00000000,
+    0b00000000,
+    0b00000000,
+};
+
+const static br_uint_8 glyph_lparen[9] = {
+    0b00100000,
+    0b01000000,
+    0b10000000,
+    0b10000000,
+    0b10000000,
+    0b01000000,
+    0b00100000,
+    0b00000000,
+    0b00000000,
+};
+
+const static br_uint_8 glyph_rparen[9] = {
+    0b10000000,
+    0b01000000,
+    0b00100000,
+    0b00100000,
+    0b00100000,
+    0b01000000,
+    0b10000000,
+    0b00000000,
+    0b00000000,
+};
+
+const static br_uint_8 glyph_asterisk[9] = {
+    0b01010000,
+    0b00100000,
+    0b11111000,
+    0b00100000,
+    0b01010000,
+    0b00000000,
+    0b00000000,
+    0b00000000,
+    0b00000000,
+};
+
+const static br_uint_8 glyph_plus[9] = {
+    0b00000000,
+    0b00100000,
+    0b00100000,
+    0b11111000,
+    0b00100000,
+    0b00100000,
+    0b00000000,
+    0b00000000,
+    0b00000000,
+};
+
+const static br_uint_8 glyph_comma[9] = {
+    0b00000000,
+    0b00000000,
+    0b00000000,
+    0b00000000,
+    0b00000000,
+    0b00000000,
+    0b01000000,
+    0b10000000,
+    0b00000000,
+};
+
+const static br_uint_8 glyph_minus[9] = {
+    0b00000000,
+    0b00000000,
+    0b00000000,
+    0b11111000,
+    0b00000000,
+    0b00000000,
+    0b00000000,
+    0b00000000,
+    0b00000000,
+};
+
+const static br_uint_8 glyph_period[9] = {
+    0b00000000,
+    0b00000000,
+    0b00000000,
+    0b00000000,
+    0b00000000,
+    0b00000000,
+    0b01000000,
+    0b00000000,
+    0b00000000,
+};
+
+const static br_uint_8 glyph_slash[9] = {
+    0b00000010,
+    0b00000100,
+    0b00001000,
+    0b00010000,
+    0b00100000,
+    0b01000000,
+    0b10000000,
+    0b00000000,
+    0b00000000,
+};
+
+const static br_uint_8 glyph_0[9] = {
+    0b01110000,
+    0b10001000,
+    0b10001000,
+    0b10001000,
+    0b10001000,
+    0b10001000,
+    0b01110000,
+    0b00000000,
+    0b00000000,
+};
+
+const static br_uint_8 glyph_1[9] = {
+    0b00100000,
+    0b01100000,
+    0b00100000,
+    0b00100000,
+    0b00100000,
+    0b00100000,
+    0b01110000,
+    0b00000000,
+    0b00000000,
+};
+
+const static br_uint_8 glyph_2[9] = {
+    0b01110000,
+    0b10001000,
+    0b00001000,
+    0b00010000,
+    0b00100000,
+    0b01000000,
+    0b11111000,
+    0b00000000,
+    0b00000000,
+};
+
+const static br_uint_8 glyph_3[9] = {
+    0b01110000,
+    0b10001000,
+    0b00001000,
+    0b00110000,
+    0b00001000,
+    0b10001000,
+    0b01110000,
+    0b00000000,
+    0b00000000,
+};
+
+const static br_uint_8 glyph_4[9] = {
+    0b00010000,
+    0b00110000,
+    0b01010000,
+    0b10010000,
+    0b11111000,
+    0b00010000,
+    0b00010000,
+    0b00000000,
+    0b00000000,
+};
+
+const static br_uint_8 glyph_5[9] = {
+    0b11111000,
+    0b10000000,
+    0b11110000,
+    0b00001000,
+    0b00001000,
+    0b10001000,
+    0b01110000,
+    0b00000000,
+    0b00000000,
+};
+
+const static br_uint_8 glyph_6[9] = {
+    0b00110000,
+    0b01000000,
+    0b10000000,
+    0b11110000,
+    0b10001000,
+    0b10001000,
+    0b01110000,
+    0b00000000,
+    0b00000000,
+};
+
+const static br_uint_8 glyph_7[9] = {
+    0b11111000,
+    0b00001000,
+    0b00001000,
+    0b00010000,
+    0b00010000,
+    0b00100000,
+    0b00100000,
+    0b00000000,
+    0b00000000,
+};
+
+const static br_uint_8 glyph_8[9] = {
+    0b01110000,
+    0b10001000,
+    0b10001000,
+    0b01110000,
+    0b10001000,
+    0b10001000,
+    0b01110000,
+    0b00000000,
+    0b00000000,
+};
+
+const static br_uint_8 glyph_9[9] = {
+    0b01110000,
+    0b10001000,
+    0b10001000,
+    0b01111000,
+    0b00001000,
+    0b00010000,
+    0b01100000,
+    0b00000000,
+    0b00000000,
+};
+
+const static br_uint_8 glyph_colon[9] = {
+    0b00000000,
+    0b00000000,
+    0b00000000,
+    0b01000000,
+    0b00000000,
+    0b00000000,
+    0b01000000,
+    0b00000000,
+    0b00000000,
+};
+
+const static br_uint_8 glyph_semicolon[9] = {
+    0b00000000,
+    0b00000000,
+    0b00000000,
+    0b01000000,
+    0b00000000,
+    0b00000000,
+    0b01000000,
+    0b10000000,
+    0b00000000,
+};
+
+const static br_uint_8 glyph_langle[9] = {
+    0b00010000,
+    0b00100000,
+    0b01000000,
+    0b10000000,
+    0b01000000,
+    0b00100000,
+    0b00010000,
+    0b00000000,
+    0b00000000,
+};
+
+const static br_uint_8 glyph_equal[9] = {
+    0b00000000,
+    0b00000000,
+    0b11111000,
+    0b00000000,
+    0b00000000,
+    0b11111000,
+    0b00000000,
+    0b00000000,
+    0b00000000,
+};
+
+const static br_uint_8 glyph_rangle[9] = {
+    0b10000000,
+    0b01000000,
+    0b00100000,
+    0b00010000,
+    0b00100000,
+    0b01000000,
+    0b10000000,
+    0b00000000,
+    0b00000000,
+};
+
+const static br_uint_8 glyph_query[9] = {
+    0b01110000,
+    0b10001000,
+    0b00001000,
+    0b00010000,
+    0b00100000,
+    0b00000000,
+    0b00100000,
+    0b00000000,
+    0b00000000,
+};
+
+const static br_uint_8 glyph_comat[9] = {
+    0b01111000,
+    0b10000100,
+    0b10100100,
+    0b10100100,
+    0b10111000,
+    0b10000000,
+    0b01111000,
+    0b00000000,
+    0b00000000,
+};
+
+const static br_uint_8 glyph_A[9] = {
+    0b00100000,
+    0b01010000,
+    0b10001000,
+    0b10001000,
+    0b11111000,
+    0b10001000,
+    0b10001000,
+    0b00000000,
+    0b00000000,
+};
+
+const static br_uint_8 glyph_B[9] = {
+    0b11110000,
+    0b10001000,
+    0b10001000,
+    0b11110000,
+    0b10001000,
+    0b10001000,
+    0b11110000,
+    0b00000000,
+    0b00000000,
+};
+
+const static br_uint_8 glyph_C[9] = {
+    0b00111000,
+    0b01000100,
+    0b10000000,
+    0b10000000,
+    0b10000000,
+    0b01000100,
+    0b00111000,
+    0b00000000,
+    0b00000000,
+};
+
+const static br_uint_8 glyph_D[9] = {
+    0b11110000,
+    0b10001000,
+    0b10000100,
+    0b10000100,
+    0b10000100,
+    0b10001000,
+    0b11110000,
+    0b00000000,
+    0b00000000,
+};
+
+const static br_uint_8 glyph_E[9] = {
+    0b11111000,
+    0b10000000,
+    0b10000000,
+    0b11100000,
+    0b10000000,
+    0b10000000,
+    0b11111000,
+    0b00000000,
+    0b00000000,
+};
+
+const static br_uint_8 glyph_F[9] = {
+    0b11111000,
+    0b10000000,
+    0b10000000,
+    0b11100000,
+    0b10000000,
+    0b10000000,
+    0b10000000,
+    0b00000000,
+    0b00000000,
+};
+
+const static br_uint_8 glyph_G[9] = {
+    0b00111000,
+    0b01000100,
+    0b10000000,
+    0b10000000,
+    0b10001100,
+    0b01000100,
+    0b00111100,
+    0b00000000,
+    0b00000000,
+};
+
+const static br_uint_8 glyph_H[9] = {
+    0b10000100,
+    0b10000100,
+    0b10000100,
+    0b11111100,
+    0b10000100,
+    0b10000100,
+    0b10000100,
+    0b00000000,
+    0b00000000,
+};
+
+const static br_uint_8 glyph_I[9] = {
+    0b10000000,
+    0b10000000,
+    0b10000000,
+    0b10000000,
+    0b10000000,
+    0b10000000,
+    0b10000000,
+    0b00000000,
+    0b00000000,
+};
+
+const static br_uint_8 glyph_J[9] = {
+    0b00001000,
+    0b00001000,
+    0b00001000,
+    0b00001000,
+    0b00001000,
+    0b10001000,
+    0b01110000,
+    0b00000000,
+    0b00000000,
+};
+
+const static br_uint_8 glyph_K[9] = {
+    0b10001000,
+    0b10010000,
+    0b10100000,
+    0b11000000,
+    0b10100000,
+    0b10010000,
+    0b10001000,
+    0b00000000,
+    0b00000000,
+};
+
+const static br_uint_8 glyph_L[9] = {
+    0b10000000,
+    0b10000000,
+    0b10000000,
+    0b10000000,
+    0b10000000,
+    0b10000000,
+    0b11111000,
+    0b00000000,
+    0b00000000,
+};
+
+const static br_uint_8 glyph_M[9] = {
+    0b10000010,
+    0b11000110,
+    0b10101010,
+    0b10010010,
+    0b10000010,
+    0b10000010,
+    0b10000010,
+    0b00000000,
+    0b00000000,
+};
+
+const static br_uint_8 glyph_N[9] = {
+    0b10000010,
+    0b11000010,
+    0b10100010,
+    0b10010010,
+    0b10001010,
+    0b10000110,
+    0b10000010,
+    0b00000000,
+    0b00000000,
+};
+
+const static br_uint_8 glyph_O[9] = {
+    0b00111000,
+    0b01000100,
+    0b10000010,
+    0b10000010,
+    0b10000010,
+    0b01000100,
+    0b00111000,
+    0b00000000,
+    0b00000000,
+};
+
+const static br_uint_8 glyph_P[9] = {
+    0b11110000,
+    0b10001000,
+    0b10001000,
+    0b11110000,
+    0b10000000,
+    0b10000000,
+    0b10000000,
+    0b00000000,
+    0b00000000,
+};
+
+const static br_uint_8 glyph_Q[9] = {
+    0b00111000,
+    0b01000100,
+    0b10000010,
+    0b10000010,
+    0b10000010,
+    0b01000100,
+    0b00111000,
+    0b00001110,
+    0b00000000,
+};
+
+const static br_uint_8 glyph_R[9] = {
+    0b11110000,
+    0b10001000,
+    0b10001000,
+    0b11110000,
+    0b10100000,
+    0b10010000,
+    0b10001000,
+    0b00000000,
+    0b00000000,
+};
+
+const static br_uint_8 glyph_S[9] = {
+    0b01110000,
+    0b10001000,
+    0b10000000,
+    0b01110000,
+    0b00001000,
+    0b10001000,
+    0b01110000,
+    0b00000000,
+    0b00000000,
+};
+
+const static br_uint_8 glyph_T[9] = {
+    0b11111110,
+    0b00010000,
+    0b00010000,
+    0b00010000,
+    0b00010000,
+    0b00010000,
+    0b00010000,
+    0b00000000,
+    0b00000000,
+};
+
+const static br_uint_8 glyph_U[9] = {
+    0b10001000,
+    0b10001000,
+    0b10001000,
+    0b10001000,
+    0b10001000,
+    0b10001000,
+    0b01110000,
+    0b00000000,
+    0b00000000,
+};
+
+const static br_uint_8 glyph_V[9] = {
+    0b10001000,
+    0b10001000,
+    0b10001000,
+    0b10001000,
+    0b10001000,
+    0b01010000,
+    0b00100000,
+    0b00000000,
+    0b00000000,
+};
+
+const static br_uint_8 glyph_W[18] = {
+    0b10001000, 0b10000000,
+    0b10001000, 0b10000000,
+    0b10001000, 0b10000000,
+    0b10001000, 0b10000000,
+    0b10001000, 0b10000000,
+    0b01010101, 0b00000000,
+    0b00100010, 0b00000000,
+    0b00000000, 0b00000000,
+    0b00000000, 0b00000000,
+};
+
+const static br_uint_8 glyph_X[9] = {
+    0b10000010,
+    0b01000100,
+    0b00101000,
+    0b00010000,
+    0b00101000,
+    0b01000100,
+    0b10000010,
+    0b00000000,
+    0b00000000,
+};
+
+const static br_uint_8 glyph_Y[9] = {
+    0b10000010,
+    0b01000100,
+    0b00101000,
+    0b00010000,
+    0b00010000,
+    0b00010000,
+    0b00010000,
+    0b00000000,
+    0b00000000,
+};
+
+const static br_uint_8 glyph_Z[9] = {
+    0b11111100,
+    0b00000100,
+    0b00001000,
+    0b00010000,
+    0b00100000,
+    0b01000000,
+    0b11111100,
+    0b00000000,
+    0b00000000,
+};
+
+const static br_uint_8 glyph_lsquare[9] = {
+    0b11100000,
+    0b10000000,
+    0b10000000,
+    0b10000000,
+    0b10000000,
+    0b10000000,
+    0b11100000,
+    0b00000000,
+    0b00000000,
+};
+
+const static br_uint_8 glyph_bslash[9] = {
+    0b10000000,
+    0b01000000,
+    0b00100000,
+    0b00010000,
+    0b00001000,
+    0b00000100,
+    0b00000010,
+    0b00000000,
+    0b00000000,
+};
+
+const static br_uint_8 glyph_rsquare[9] = {
+    0b11100000,
+    0b00100000,
+    0b00100000,
+    0b00100000,
+    0b00100000,
+    0b00100000,
+    0b11100000,
+    0b00000000,
+    0b00000000,
+};
+
+const static br_uint_8 glyph_caret[9] = {
+    0b00100000,
+    0b01010000,
+    0b10001000,
+    0b00000000,
+    0b00000000,
+    0b00000000,
+    0b00000000,
+    0b00000000,
+    0b00000000,
+};
+
+const static br_uint_8 glyph_underbar[9] = {
+    0b00000000,
+    0b00000000,
+    0b00000000,
+    0b00000000,
+    0b00000000,
+    0b00000000,
+    0b00000000,
+    0b00000000,
+    0b11111100,
+};
+
+const static br_uint_8 glyph_bquote[9] = {
+    0b10000000,
+    0b01000000,
+    0b00000000,
+    0b00000000,
+    0b00000000,
+    0b00000000,
+    0b00000000,
+    0b00000000,
+    0b00000000,
+};
+
+const static br_uint_8 glyph_a[9] = {
+    0b00000000,
+    0b00000000,
+    0b01110000,
+    0b00001000,
+    0b01111000,
+    0b10001000,
+    0b01111000,
+    0b00000000,
+    0b00000000,
+};
+
+const static br_uint_8 glyph_b[9] = {
+    0b10000000,
+    0b10000000,
+    0b11110000,
+    0b10001000,
+    0b10001000,
+    0b10001000,
+    0b01110000,
+    0b00000000,
+    0b00000000,
+};
+
+const static br_uint_8 glyph_c[9] = {
+    0b00000000,
+    0b00000000,
+    0b01110000,
+    0b10000000,
+    0b10000000,
+    0b10000000,
+    0b01110000,
+    0b00000000,
+    0b00000000,
+};
+
+const static br_uint_8 glyph_d[9] = {
+    0b00001000,
+    0b00001000,
+    0b01111000,
+    0b10001000,
+    0b10001000,
+    0b10001000,
+    0b01111000,
+    0b00000000,
+    0b00000000,
+};
+
+const static br_uint_8 glyph_e[9] = {
+    0b00000000,
+    0b00000000,
+    0b01110000,
+    0b10001000,
+    0b11111000,
+    0b10000000,
+    0b01110000,
+    0b00000000,
+    0b00000000,
+};
+
+const static br_uint_8 glyph_f[9] = {
+    0b00110000,
+    0b01000000,
+    0b11100000,
+    0b01000000,
+    0b01000000,
+    0b01000000,
+    0b01000000,
+    0b00000000,
+    0b00000000,
+};
+
+const static br_uint_8 glyph_g[9] = {
+    0b00000000,
+    0b00000000,
+    0b01110000,
+    0b10001000,
+    0b10001000,
+    0b10001000,
+    0b01111000,
+    0b00001000,
+    0b01110000,
+};
+
+const static br_uint_8 glyph_h[9] = {
+    0b10000000,
+    0b10000000,
+    0b11110000,
+    0b10001000,
+    0b10001000,
+    0b10001000,
+    0b10001000,
+    0b00000000,
+    0b00000000,
+};
+
+const static br_uint_8 glyph_i[9] = {
+    0b10000000,
+    0b00000000,
+    0b10000000,
+    0b10000000,
+    0b10000000,
+    0b10000000,
+    0b10000000,
+    0b00000000,
+    0b00000000,
+};
+
+const static br_uint_8 glyph_j[9] = {
+    0b01000000,
+    0b00000000,
+    0b01000000,
+    0b01000000,
+    0b01000000,
+    0b01000000,
+    0b01000000,
+    0b01000000,
+    0b10000000,
+};
+
+const static br_uint_8 glyph_k[9] = {
+    0b10000000,
+    0b10000000,
+    0b10010000,
+    0b10100000,
+    0b11000000,
+    0b10100000,
+    0b10010000,
+    0b00000000,
+    0b00000000,
+};
+
+const static br_uint_8 glyph_l[9] = {
+    0b10000000,
+    0b10000000,
+    0b10000000,
+    0b10000000,
+    0b10000000,
+    0b10000000,
+    0b10000000,
+    0b00000000,
+    0b00000000,
+};
+
+const static br_uint_8 glyph_m[9] = {
+    0b00000000,
+    0b00000000,
+    0b11101100,
+    0b10010010,
+    0b10010010,
+    0b10010010,
+    0b10010010,
+    0b00000000,
+    0b00000000,
+};
+
+const static br_uint_8 glyph_n[9] = {
+    0b00000000,
+    0b00000000,
+    0b10110000,
+    0b11001000,
+    0b10001000,
+    0b10001000,
+    0b10001000,
+    0b00000000,
+    0b00000000,
+};
+
+const static br_uint_8 glyph_o[9] = {
+    0b00000000,
+    0b00000000,
+    0b01110000,
+    0b10001000,
+    0b10001000,
+    0b10001000,
+    0b01110000,
+    0b00000000,
+    0b00000000,
+};
+
+const static br_uint_8 glyph_p[9] = {
+    0b00000000,
+    0b00000000,
+    0b11110000,
+    0b10001000,
+    0b10001000,
+    0b10001000,
+    0b11110000,
+    0b10000000,
+    0b10000000,
+};
+
+const static br_uint_8 glyph_q[9] = {
+    0b00000000,
+    0b00000000,
+    0b01111000,
+    0b10001000,
+    0b10001000,
+    0b10001000,
+    0b01111000,
+    0b00001000,
+    0b00001000,
+};
+
+const static br_uint_8 glyph_r[9] = {
+    0b00000000,
+    0b00000000,
+    0b10110000,
+    0b11000000,
+    0b10000000,
+    0b10000000,
+    0b10000000,
+    0b00000000,
+    0b00000000,
+};
+
+const static br_uint_8 glyph_s[9] = {
+    0b00000000,
+    0b00000000,
+    0b01110000,
+    0b10000000,
+    0b01110000,
+    0b00001000,
+    0b01110000,
+    0b00000000,
+    0b00000000,
+};
+
+const static br_uint_8 glyph_t[9] = {
+    0b00000000,
+    0b01000000,
+    0b11100000,
+    0b01000000,
+    0b01000000,
+    0b01000000,
+    0b00110000,
+    0b00000000,
+    0b00000000,
+};
+
+const static br_uint_8 glyph_u[9] = {
+    0b00000000,
+    0b00000000,
+    0b10001000,
+    0b10001000,
+    0b10001000,
+    0b10011000,
+    0b01101000,
+    0b00000000,
+    0b00000000,
+};
+
+const static br_uint_8 glyph_v[9] = {
+    0b00000000,
+    0b00000000,
+    0b10001000,
+    0b10001000,
+    0b10001000,
+    0b01010000,
+    0b00100000,
+    0b00000000,
+    0b00000000,
+};
+
+const static br_uint_8 glyph_w[9] = {
+    0b00000000,
+    0b00000000,
+    0b10010010,
+    0b10010010,
+    0b10010010,
+    0b10010010,
+    0b01101100,
+    0b00000000,
+    0b00000000,
+};
+
+const static br_uint_8 glyph_x[9] = {
+    0b00000000,
+    0b00000000,
+    0b10001000,
+    0b01010000,
+    0b00100000,
+    0b01010000,
+    0b10001000,
+    0b00000000,
+    0b00000000,
+};
+
+const static br_uint_8 glyph_y[9] = {
+    0b00000000,
+    0b00000000,
+    0b10001000,
+    0b10001000,
+    0b10001000,
+    0b10001000,
+    0b01111000,
+    0b00001000,
+    0b01110000,
+};
+
+const static br_uint_8 glyph_z[9] = {
+    0b00000000,
+    0b00000000,
+    0b11111000,
+    0b00010000,
+    0b00100000,
+    0b01000000,
+    0b11111000,
+    0b00000000,
+    0b00000000,
+};
+
+const static br_uint_8 glyph_lbrace[9] = {
+    0b00110000,
+    0b01000000,
+    0b01000000,
+    0b10000000,
+    0b01000000,
+    0b01000000,
+    0b00110000,
+    0b00000000,
+    0b00000000,
+};
+
+const static br_uint_8 glyph_vbar[9] = {
+    0b10000000,
+    0b10000000,
+    0b10000000,
+    0b00000000,
+    0b10000000,
+    0b10000000,
+    0b10000000,
+    0b00000000,
+    0b00000000,
+};
+
+const static br_uint_8 glyph_rbrace[9] = {
+    0b11000000,
+    0b00100000,
+    0b00100000,
+    0b00010000,
+    0b00100000,
+    0b00100000,
+    0b11000000,
+    0b00000000,
+    0b00000000,
+};
+
+const static br_uint_8 glyph_tilde[9] = {
+    0b01110110,
+    0b11011100,
+    0b00000000,
+    0b00000000,
+    0b00000000,
+    0b00000000,
+    0b00000000,
+    0b00000000,
+    0b00000000,
+};
+
+const static br_uint_8 glyph_bullet[9] = {
+    0b00000000,
+    0b01111000,
+    0b11111100,
+    0b11111100,
+    0b11111100,
+    0b01111000,
+    0b00000000,
+    0b00000000,
+    0b00000000,
+};
+
+const static br_uint_8 glyph_cross[9] = {
+    0b00000000,
+    0b01000100,
+    0b00101000,
+    0b00010000,
+    0b00101000,
+    0b01000100,
+    0b00000000,
+    0b00000000,
+    0b00000000,
+};
+
+const static br_uint_8 glyph_tick[9] = {
+    0b00000000,
+    0b00000010,
+    0b00000100,
+    0b10001000,
+    0b01010000,
+    0b00100000,
+    0b00000000,
+    0b00000000,
+    0b00000000,
+};
+
+const static br_uint_8 glyph_uparrow[9] = {
+    0b00010000,
+    0b00111000,
+    0b01111100,
+    0b11111110,
+    0b00111000,
+    0b00111000,
+    0b00111000,
+    0b00000000,
+    0b00000000,
+};
+
+const static br_uint_8 glyph_downarrow[9] = {
+    0b00111000,
+    0b00111000,
+    0b00111000,
+    0b11111110,
+    0b01111100,
+    0b00111000,
+    0b00010000,
+    0b00000000,
+    0b00000000,
+};
+
+const static br_uint_8 glyph_rightarrow[9] = {
+    0b00010000,
+    0b00011000,
+    0b11111100,
+    0b11111110,
+    0b11111100,
+    0b00011000,
+    0b00010000,
+    0b00000000,
+    0b00000000,
+};
+
+const static br_uint_8 glyph_leftarrow[9] = {
+    0b00010000,
+    0b00110000,
+    0b01111110,
+    0b11111110,
+    0b01111110,
+    0b00110000,
+    0b00010000,
+    0b00000000,
+    0b00000000,
+};
+
+const static br_uint_8 glyph_solidbox[9] = {
+    0b11111110,
+    0b11111110,
+    0b11111110,
+    0b11111110,
+    0b11111110,
+    0b11111110,
+    0b11111110,
+    0b00000000,
+    0b00000000,
+};
+
+const static br_uint_8 glyph_cursor[9] = {
+    0b10100000,
+    0b01000000,
+    0b01000000,
+    0b01000000,
+    0b01000000,
+    0b01000000,
+    0b01000000,
+    0b01000000,
+    0b10100000,
+};
+
+const static br_uint_8 *encodings[256] = {
+    [0] = glyph_space,
+    [1] = glyph_space,
+    [2] = glyph_space,
+    [3] = glyph_space,
+    [4] = glyph_space,
+    [5] = glyph_space,
+    [6] = glyph_space,
+    [7] = glyph_bullet,
+    [8] = glyph_space,
+    [9] = glyph_space,
+    [10] = glyph_space,
+    [11] = glyph_space,
+    [12] = glyph_space,
+    [13] = glyph_space,
+    [14] = glyph_space,
+    [15] = glyph_space,
+    [16] = glyph_space,
+    [17] = glyph_space,
+    [18] = glyph_space,
+    [19] = glyph_space,
+    [20] = glyph_space,
+    [21] = glyph_space,
+    [22] = glyph_space,
+    [23] = glyph_space,
+    [24] = glyph_uparrow,
+    [25] = glyph_downarrow,
+    [26] = glyph_rightarrow,
+    [27] = glyph_leftarrow,
+    [28] = glyph_space,
+    [29] = glyph_space,
+    [30] = glyph_space,
+    [31] = glyph_space,
+    [32] = glyph_space,
+    [33] = glyph_exclam,
+    [34] = glyph_dquote,
+    [35] = glyph_hash,
+    [36] = glyph_dollar,
+    [37] = glyph_percent,
+    [38] = glyph_ampersand,
+    [39] = glyph_quote,
+    [40] = glyph_lparen,
+    [41] = glyph_rparen,
+    [42] = glyph_asterisk,
+    [43] = glyph_plus,
+    [44] = glyph_comma,
+    [45] = glyph_minus,
+    [46] = glyph_period,
+    [47] = glyph_slash,
+    [48] = glyph_0,
+    [49] = glyph_1,
+    [50] = glyph_2,
+    [51] = glyph_3,
+    [52] = glyph_4,
+    [53] = glyph_5,
+    [54] = glyph_6,
+    [55] = glyph_7,
+    [56] = glyph_8,
+    [57] = glyph_9,
+    [58] = glyph_colon,
+    [59] = glyph_semicolon,
+    [60] = glyph_langle,
+    [61] = glyph_equal,
+    [62] = glyph_rangle,
+    [63] = glyph_query,
+    [64] = glyph_comat,
+    [65] = glyph_A,
+    [66] = glyph_B,
+    [67] = glyph_C,
+    [68] = glyph_D,
+    [69] = glyph_E,
+    [70] = glyph_F,
+    [71] = glyph_G,
+    [72] = glyph_H,
+    [73] = glyph_I,
+    [74] = glyph_J,
+    [75] = glyph_K,
+    [76] = glyph_L,
+    [77] = glyph_M,
+    [78] = glyph_N,
+    [79] = glyph_O,
+    [80] = glyph_P,
+    [81] = glyph_Q,
+    [82] = glyph_R,
+    [83] = glyph_S,
+    [84] = glyph_T,
+    [85] = glyph_U,
+    [86] = glyph_V,
+    [87] = glyph_W,
+    [88] = glyph_X,
+    [89] = glyph_Y,
+    [90] = glyph_Z,
+    [91] = glyph_lsquare,
+    [92] = glyph_bslash,
+    [93] = glyph_rsquare,
+    [94] = glyph_caret,
+    [95] = glyph_underbar,
+    [96] = glyph_bquote,
+    [97] = glyph_a,
+    [98] = glyph_b,
+    [99] = glyph_c,
+    [100] = glyph_d,
+    [101] = glyph_e,
+    [102] = glyph_f,
+    [103] = glyph_g,
+    [104] = glyph_h,
+    [105] = glyph_i,
+    [106] = glyph_j,
+    [107] = glyph_k,
+    [108] = glyph_l,
+    [109] = glyph_m,
+    [110] = glyph_n,
+    [111] = glyph_o,
+    [112] = glyph_p,
+    [113] = glyph_q,
+    [114] = glyph_r,
+    [115] = glyph_s,
+    [116] = glyph_t,
+    [117] = glyph_u,
+    [118] = glyph_v,
+    [119] = glyph_w,
+    [120] = glyph_x,
+    [121] = glyph_y,
+    [122] = glyph_z,
+    [123] = glyph_lbrace,
+    [124] = glyph_vbar,
+    [125] = glyph_rbrace,
+    [126] = glyph_tilde,
+    [127] = glyph_space,
+    [128] = glyph_space,
+    [129] = glyph_space,
+    [130] = glyph_space,
+    [131] = glyph_space,
+    [132] = glyph_space,
+    [133] = glyph_space,
+    [134] = glyph_space,
+    [135] = glyph_space,
+    [136] = glyph_space,
+    [137] = glyph_space,
+    [138] = glyph_space,
+    [139] = glyph_space,
+    [140] = glyph_space,
+    [141] = glyph_space,
+    [142] = glyph_space,
+    [143] = glyph_space,
+    [144] = glyph_space,
+    [145] = glyph_space,
+    [146] = glyph_space,
+    [147] = glyph_space,
+    [148] = glyph_space,
+    [149] = glyph_space,
+    [150] = glyph_space,
+    [151] = glyph_space,
+    [152] = glyph_space,
+    [153] = glyph_space,
+    [154] = glyph_space,
+    [155] = glyph_space,
+    [156] = glyph_space,
+    [157] = glyph_space,
+    [158] = glyph_space,
+    [159] = glyph_space,
+    [160] = glyph_space,
+    [161] = glyph_space,
+    [162] = glyph_space,
+    [163] = glyph_space,
+    [164] = glyph_space,
+    [165] = glyph_space,
+    [166] = glyph_space,
+    [167] = glyph_space,
+    [168] = glyph_space,
+    [169] = glyph_space,
+    [170] = glyph_space,
+    [171] = glyph_space,
+    [172] = glyph_space,
+    [173] = glyph_space,
+    [174] = glyph_space,
+    [175] = glyph_space,
+    [176] = glyph_space,
+    [177] = glyph_space,
+    [178] = glyph_space,
+    [179] = glyph_cursor,
+    [180] = glyph_space,
+    [181] = glyph_space,
+    [182] = glyph_space,
+    [183] = glyph_space,
+    [184] = glyph_space,
+    [185] = glyph_space,
+    [186] = glyph_space,
+    [187] = glyph_space,
+    [188] = glyph_space,
+    [189] = glyph_space,
+    [190] = glyph_space,
+    [191] = glyph_space,
+    [192] = glyph_space,
+    [193] = glyph_space,
+    [194] = glyph_space,
+    [195] = glyph_space,
+    [196] = glyph_space,
+    [197] = glyph_space,
+    [198] = glyph_space,
+    [199] = glyph_space,
+    [200] = glyph_space,
+    [201] = glyph_space,
+    [202] = glyph_space,
+    [203] = glyph_space,
+    [204] = glyph_space,
+    [205] = glyph_space,
+    [206] = glyph_space,
+    [207] = glyph_space,
+    [208] = glyph_space,
+    [209] = glyph_space,
+    [210] = glyph_space,
+    [211] = glyph_space,
+    [212] = glyph_space,
+    [213] = glyph_space,
+    [214] = glyph_space,
+    [215] = glyph_space,
+    [216] = glyph_space,
+    [217] = glyph_space,
+    [218] = glyph_space,
+    [219] = glyph_solidbox,
+    [220] = glyph_space,
+    [221] = glyph_space,
+    [222] = glyph_space,
+    [223] = glyph_space,
+    [224] = glyph_space,
+    [225] = glyph_space,
+    [226] = glyph_space,
+    [227] = glyph_space,
+    [228] = glyph_space,
+    [229] = glyph_space,
+    [230] = glyph_space,
+    [231] = glyph_space,
+    [232] = glyph_space,
+    [233] = glyph_space,
+    [234] = glyph_space,
+    [235] = glyph_space,
+    [236] = glyph_space,
+    [237] = glyph_space,
+    [238] = glyph_space,
+    [239] = glyph_space,
+    [240] = glyph_space,
+    [241] = glyph_space,
+    [242] = glyph_space,
+    [243] = glyph_space,
+    [244] = glyph_space,
+    [245] = glyph_space,
+    [246] = glyph_space,
+    [247] = glyph_space,
+    [248] = glyph_space,
+    [249] = glyph_space,
+    [250] = glyph_space,
+    [251] = glyph_tick,
+    [252] = glyph_space,
+    [253] = glyph_space,
+    [254] = glyph_space,
+    [255] = glyph_space,
+};
 
 br_font _FontProp7x9 = {
-    .flags     = BR_FONTF_PROPORTIONAL,
-    .glyph_x   = 7,
-    .glyph_y   = 9,
-    .spacing_x = 8,
-    .spacing_y = 10,
-    .width     = widths,
-    .encoding  = encoding,
-    .glyphs    = (br_uint_8 *)&glyphs,
+	.flags     = BR_FONTF_PROPORTIONAL,
+	.glyph_x   = 7,
+	.glyph_y   = 9,
+	.spacing_x = 8,
+	.spacing_y = 10,
+	.width     = widths,
+	.encoding  = encodings,
 };
-
-#pragma pack(pop)

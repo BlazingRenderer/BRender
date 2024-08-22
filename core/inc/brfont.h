@@ -14,9 +14,8 @@ typedef struct br_font {
     br_uint_16  glyph_y;
     br_int_16   spacing_x;
     br_int_16   spacing_y;
-    br_int_8   *width;
-    br_uint_16 *encoding;
-    br_uint_8  *glyphs;
+    const br_int_8   *width;
+    const br_uint_8  **encoding;
 } br_font;
 
 /*
