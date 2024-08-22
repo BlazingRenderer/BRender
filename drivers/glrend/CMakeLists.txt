@@ -88,6 +88,7 @@ set(GLREND_FILES
 
         font.c
         font.h
+        stb_rect_pack.h
 
         template.h
 

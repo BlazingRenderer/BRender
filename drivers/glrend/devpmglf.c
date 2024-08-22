@@ -205,13 +205,13 @@ br_device_pixelmap *DevicePixelmapGLAllocateFront(br_device *dev, br_output_faci
      */
 
     BrLogTrace("GLREND", "Building fixed 3x5 font atlas.");
-    (void)FontGLBuildAtlas(&self->asFront.font_fixed3x5, BrFontFixed3x5, 128, 64);
+    (void)FontGLBuildAtlas(&self->asFront.font_fixed3x5, BrFontFixed3x5, 512, 64);
 
     BrLogTrace("GLREND", "Building proportional 4x6 font atlas.");
-    (void)FontGLBuildAtlas(&self->asFront.font_prop4x6, BrFontProp4x6, 128, 64);
+    (void)FontGLBuildAtlas(&self->asFront.font_prop4x6, BrFontProp4x6, 512, 64);
 
     BrLogTrace("GLREND", "Building proportional 7x9 font atlas.");
-    (void)FontGLBuildAtlas(&self->asFront.font_prop7x9, BrFontProp7x9, 256, 64);
+    (void)FontGLBuildAtlas(&self->asFront.font_prop7x9, BrFontProp7x9, 512, 64);
 
     self->asFront.num_refs = 0;
 
