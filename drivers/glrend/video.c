@@ -253,8 +253,10 @@ GLuint VIDEO_BrPixelmapToGLTexture(br_pixelmap *pm)
     GLuint tex;
     glGenTextures(1, &tex);
 
-    if(VIDEOI_BrPixelmapToExistingTexture(tex, pm) != BRE_OK)
+    if(VIDEOI_BrPixelmapToExistingTexture(tex, pm) != BRE_OK) {
+        glDeleteTextures(1, &tex);
         return 0;
+    }
 
     return tex;
 }
