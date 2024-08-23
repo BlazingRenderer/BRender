@@ -107,7 +107,7 @@ static void COPY_BITS_CORE_1(br_uint_8 *dst, br_uint_32 d_stride, const br_uint_
 
     for(; nrows; --nrows, dst += d_stride, src += s_stride) {
         /* We're 1 pixel wide, loop vertically (i.e. through each row) */
-        apply_mask(dst, bpp, colour, (br_uint_8)(*src & comb_mask));
+        apply_mask(dst, bpp, colour, *src & comb_mask);
     }
 }
 
