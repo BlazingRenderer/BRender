@@ -648,7 +648,6 @@ static br_error BR_CMETHOD_DECL(br_device_pixelmap_sdl2, pixelQuery)(br_device_p
 {
     br_error  err;
     SDL_Point ap;
-    uint8_t  *pixel;
     br_colour col;
 
     switch(self->surface->format->BytesPerPixel) {
@@ -667,27 +666,7 @@ static br_error BR_CMETHOD_DECL(br_device_pixelmap_sdl2, pixelQuery)(br_device_p
     if((err = DevicePixelmapDirectLock(self, BR_FALSE)) != BRE_OK)
         return err;
 
-    pixel = DevicePixelmapSDLMemAddress(self, ap.x, ap.y);
-
-    /*
-     * This is not nice to do in SDL.
-     */
-    switch(self->surface->format->BytesPerPixel) {
-        case 1:
-            col = *pixel;
-            break;
-        case 2:
-            col = *((uint16_t *)pixel);
-            break;
-        case 3:
-            col = (*(pixel + 2) << 16) | (*(pixel + 1) << 8) | (*pixel);
-            break;
-        case 4:
-            col = *((uint32_t *)pixel);
-            break;
-        default:
-            UASSERT(0);
-    }
+    col = _MemPixelGet(DevicePixelmapSDLMemAddress(self, ap.x, ap.y), self->surface->format->BytesPerPixel);
 
     if((err = DevicePixelmapDirectUnlock(self)) != BRE_OK)
         return err;
