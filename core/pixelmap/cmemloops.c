@@ -114,35 +114,24 @@ static void COPY_BITS_CORE_1(br_uint_8 *dst, br_uint_32 d_stride, const br_uint_
 static void COPY_BITS_CORE_N(br_uint_8 *dst, br_int_32 d_stride, const br_uint_8 *src, br_uint_32 s_stride,
                              br_uint_32 nrows, br_uint_32 bpp, br_uint_32 colour, br_uint_8 himask, br_uint_8 lomask)
 {
-    char      c;
-    br_int_32 bppt = (br_int_32)(bpp << 3);
-    do {
-        c = *(src)&lomask;
+    for(size_t r = 0; r < nrows; ++r) {
+        br_uint_8 *local_dst = dst;
 
-h_loop:
-        ++src;
-h_loop_last:
-        // Set destination pixels according to byte mask
-        apply_mask(dst, bpp, colour, c);
+        for(br_uint_32 n = 0; n < s_stride; ++n) {
+            br_uint_8 c = *src++;
 
-        c = *src;
-        dst += 8 * bpp;
-        --bppt;
+            if(n == 0)
+                c &= lomask;
+            else if(n == s_stride - 1)
+                c &= himask;
 
-        if(bppt > 0)
-            goto h_loop;
-        if(bppt < 0)
-            goto done_row;
+            apply_mask(local_dst, bpp, colour, c);
 
-        // If it is the last byte, mask and look one final time
-        c &= lomask;
-        goto h_loop_last;
+            local_dst += 8 * bpp;
+        }
 
-done_row:
         dst += d_stride;
-        src += s_stride;
-        --nrows;
-    } while(nrows);
+    }
 }
 
 void _MemCopyBits_A(void *dst, br_int_32 d_stride, const br_uint_8 *src, br_uint_32 s_stride, br_uint_32 start_bit,
