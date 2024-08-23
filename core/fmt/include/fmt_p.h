@@ -91,6 +91,7 @@ br_pixelmap *BR_PUBLIC_ENTRY BrFmtPCXLoad(const char *name, br_uint_32 flags);
  * .GLTF files
  */
 br_error BrFmtGLTFSave(const char *name, const br_model *model, void *res);
+br_fmt_results *BrFmtGLTFLoad(const char *name, br_uint_32 flags);
 
 #ifdef __cplusplus
 };
