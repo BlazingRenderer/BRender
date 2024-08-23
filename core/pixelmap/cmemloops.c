@@ -86,20 +86,17 @@ static br_filler_cbfn *const fillers[] = {
     // clang-format on
 };
 
-static void bc_inner_loop(char *dest, br_uint_32 bpp, br_uint_32 colour, br_uint_8 c)
+/**
+ * \brief For each bit \c i set in \c c, set the corresponding pixel to a given colour.
+ */
+static void apply_mask(br_uint_8 *dst, br_uint_32 bpp, br_colour colour, br_uint_8 c)
 {
-    br_int_16  carry_check;
-    br_uint_32 i;
-    br_uint_8  oldC;
+    br_filler_cbfn *const filler = fillers[bpp];
 
-    for(i = 0; i < 8; ++i) {
-        /* Carry check is working, don't touch it. */
-        oldC = c;
-        c += c;
-        if((carry_check = oldC + oldC) <= 255)
-            continue;
-
-        fillers[bpp](dest + (i * bpp), colour, 1);
+    for(int i = 0; i < 8; ++i, dst += bpp) {
+        /* If the bit is set, fill. */
+        if((c << i) & 0x80)
+            filler(dst, colour, 1);
     }
 }
 
@@ -110,7 +107,7 @@ static void COPY_BITS_CORE_1(char *dest, br_uint_32 d_stride, const br_uint_8 *s
 
     for(; nrows; --nrows, dest += d_stride, src += s_stride) {
         /* We're 1 pixel wide, loop vertically (i.e. through each row) */
-        bc_inner_loop(dest, bpp, colour, (br_uint_8)(*src & comb_mask));
+        apply_mask(dest, bpp, colour, (br_uint_8)(*src & comb_mask));
     }
 }
 
@@ -126,7 +123,7 @@ h_loop:
         ++src;
 h_loop_last:
         // Set destination pixels according to byte mask
-        bc_inner_loop(dest, bpp, colour, c);
+        apply_mask(dest, bpp, colour, c);
 
         c = *src;
         dest += 8 * bpp;
