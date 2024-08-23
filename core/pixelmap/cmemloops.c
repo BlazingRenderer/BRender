@@ -145,7 +145,7 @@ done_row:
     } while(nrows);
 }
 
-void _MemCopyBits_A(char *dst, br_int_32 d_stride, const br_uint_8 *src, br_uint_32 s_stride, br_uint_32 start_bit,
+void _MemCopyBits_A(void *dst, br_int_32 d_stride, const br_uint_8 *src, br_uint_32 s_stride, br_uint_32 start_bit,
                     br_uint_32 end_bit, br_uint_32 nrows, br_uint_32 bpp, br_uint_32 colour)
 {
     br_uint_8 himask = bit_to_mask_e[end_bit & 7];
@@ -157,26 +157,27 @@ void _MemCopyBits_A(char *dst, br_int_32 d_stride, const br_uint_8 *src, br_uint
         COPY_BITS_CORE_1(dst, d_stride, src, s_stride, nrows, bpp, colour, himask, lomask);
 }
 
-void _MemFill_A(char *dst, br_uint_32 pixels, br_uint_32 bpp, br_uint_32 colour)
+void _MemFill_A(void *dst, br_uint_32 pixels, br_uint_32 bpp, br_uint_32 colour)
 {
     ASSERT_MESSAGE("invalid pixel size", bpp < BR_ASIZE(fillers));
     fillers[bpp](dst, colour, pixels);
 }
 
-void _MemRectCopy_A(char *dst, const char *src, br_uint_16 pwidth, br_uint_16 pheight, br_int_32 d_stride,
+void _MemRectCopy_A(void *dst, const char *src, br_uint_16 pwidth, br_uint_16 pheight, br_int_32 d_stride,
                     br_int_32 s_stride, br_uint_32 bpp)
 {
-    size_t row_bytes = pwidth * bpp;
+    br_uint_8 *dest      = dst;
+    size_t     row_bytes = pwidth * bpp;
 
     for(size_t r = 0; r < pheight; ++r) {
-        BrMemCpy(dst, src, row_bytes);
-        dst += d_stride;
+        BrMemCpy(dest, src, row_bytes);
+        dest += d_stride;
         src += s_stride;
     }
 }
 
 /* From IDA */
-void _MemCopy_A(char *dst, const char *src, br_uint_32 pixels, br_uint_32 bpp)
+void _MemCopy_A(void *dst, const char *src, br_uint_32 pixels, br_uint_32 bpp)
 {
     BrMemCpy(dst, src, pixels * bpp);
 }
