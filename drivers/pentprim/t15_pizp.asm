@@ -393,7 +393,7 @@ name		endp
 ScanLinePIZ2TIP	ScanLinePIZ2TIP256_RGB_555,\
 		<>,\
 		<inc al>,<dec al>,<inc ah>,<dec ah>,\
-		<>,<>
+		<>,<>,0
 
 ScanLinePIZ2TIP ScanLinePIZ2TIPB256_RGB_555,\
 		<>,\

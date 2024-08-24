@@ -294,7 +294,7 @@ name		endp
 ScanLinePITIP	ScanLinePITIP256_RGB_555,\
 		<>,\
 		<inc al>,<dec al>,<inc ah>,<dec ah>,\
-		<>,<>
+		<>,<>,0
 
 ScanLinePITIP   ScanLinePITIPB256_RGB_555,\
 		<>,\
