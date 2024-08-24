@@ -61,8 +61,8 @@ typedef struct rend_block {
 
 	struct temp_face *temp_faces;
 	br_int_8 *vertex_counts;
-	union brp_vertex *temp_vertices;
-	union brp_vertex **vertex_heap_pointers;
+	brp_vertex *temp_vertices;
+	brp_vertex **vertex_heap_pointers;
 
 	br_int_8 *vertex_flags;
 	br_int_8 *edge_flags;

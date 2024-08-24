@@ -217,78 +217,78 @@ typedef float br_float;
 #endif
 
 #define BR_STR(s) #s
-
-#if defined(__H2INC__)
-/*
- * Avoid some tokens that masm chokes on
- */
-#define align  _align
-#define seg    _seg
-#define offset _offset
-#define type   _type
-#define size   _size
-#define page   _page
-#define mask   _mask
-#define state  _state
-#define ptr    _ptr
-#define a      _a
-#define b      _b
-#define c      _c
-#define width  _width
-#define end    _end
-#define out    _out
-#define str    _str
-#define ax     _ax
-#define bx     _bx
-#define cx     _cx
-#define dx     _dx
-#define si     _si
-#define di     _di
-#define bp     _bp
-#define ip     _ip
-#define sp     _sp
-#define eax    _eax
-#define ebx    _ebx
-#define ecx    _ecx
-#define edx    _edx
-#define esi    _esi
-#define edi    _edi
-#define ebp    _ebp
-#define eip    _eip
-#define esp    _esp
-#define al     _al
-#define bl     _bl
-#define cl     _cl
-#define dl     _dl
-#define ah     _ah
-#define bh     _bh
-#define ch     _ch
-#define dh     _dh
-
-#define es     _es
-#define cs     _cs
-#define ds     _ds
-#define ss     _ss
-#define fs     _fs
-#define gs     _gs
-
-#define low    _low
-#define high   _high
-
-/*
- * Supress compiler specific declarators
- */
-#undef BR_CALLBACK
-#undef BR_ASM_DATA
-#undef BR_ASM_CALL
-#undef BR_ASM_CALLBACK
-
-#define BR_CALLBACK
-#define BR_ASM_DATA
-#define BR_ASM_CALL
-#define BR_ASM_CALLBACK
-
-#endif
+//
+//#if defined(__H2INC__)
+///*
+// * Avoid some tokens that masm chokes on
+// */
+//#define align  _align
+//#define seg    _seg
+//#define offset _offset
+//#define type   _type
+//#define size   _size
+//#define page   _page
+//#define mask   _mask
+//#define state  _state
+//#define ptr    _ptr
+//#define a      _a
+//#define b      _b
+//#define c      _c
+//#define width  _width
+//#define end    _end
+//#define out    _out
+//#define str    _str
+//#define ax     _ax
+//#define bx     _bx
+//#define cx     _cx
+//#define dx     _dx
+//#define si     _si
+//#define di     _di
+//#define bp     _bp
+//#define ip     _ip
+//#define sp     _sp
+//#define eax    _eax
+//#define ebx    _ebx
+//#define ecx    _ecx
+//#define edx    _edx
+//#define esi    _esi
+//#define edi    _edi
+//#define ebp    _ebp
+//#define eip    _eip
+//#define esp    _esp
+//#define al     _al
+//#define bl     _bl
+//#define cl     _cl
+//#define dl     _dl
+//#define ah     _ah
+//#define bh     _bh
+//#define ch     _ch
+//#define dh     _dh
+//
+//#define es     _es
+//#define cs     _cs
+//#define ds     _ds
+//#define ss     _ss
+//#define fs     _fs
+//#define gs     _gs
+//
+//#define low    _low
+//#define high   _high
+//
+///*
+// * Supress compiler specific declarators
+// */
+//#undef BR_CALLBACK
+//#undef BR_ASM_DATA
+//#undef BR_ASM_CALL
+//#undef BR_ASM_CALLBACK
+//
+//#define BR_CALLBACK
+//#define BR_ASM_DATA
+//#define BR_ASM_CALL
+//#define BR_ASM_CALLBACK
+//
+//#endif
 
 /*
  * Declare methods in C

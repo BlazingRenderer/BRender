@@ -7,7 +7,7 @@ make_h2inc(softrend "${CMAKE_CURRENT_SOURCE_DIR}/drv.h" "${CMAKE_CURRENT_BINARY_
 set(ASM_FILES
         subdiv.asm
 )
-set_source_files_properties(${ASM_FILES} PROPERTIES COMPILE_OPTIONS "-safeseh")
+set_source_files_properties(${ASM_FILES} PROPERTIES COMPILE_OPTIONS "-D__H2INC__;-D_WIN32;-D_NO_PROTOTYPES;-safeseh;-Zne;-Zp4;-Zg;-Zm;-Cp")
 
 add_library(softrend
         alpha.c
@@ -69,7 +69,7 @@ if(target_type STREQUAL SHARED_LIBRARY)
     target_compile_definitions(softrend PRIVATE -DDEFINE_BR_ENTRY_POINT)
 endif()
 
-target_include_directories(softrend PRIVATE ddi)
+target_include_directories(softrend PRIVATE ddi ${CMAKE_CURRENT_BINARY_DIR})
 target_compile_definitions(softrend PRIVATE -D__386__)
 
 target_link_libraries(softrend PRIVATE BRender::DDI)
