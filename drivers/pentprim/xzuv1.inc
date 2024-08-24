@@ -203,8 +203,9 @@ endif
 
 	;; U
 	;;
-		        movd 		mm0,dword ptr PARAM.d_u_y1	; Load dy1
-				punpckldq	mm0,dword ptr PARAM.d_u_y0	;          and dy0
+        movd        mm0, dword ptr PARAM.d_u_y1   ; Load dy1 into mm0
+        movd        mm1, dword ptr PARAM.d_u_y0   ; Load dy0 into mm1
+        punpckldq   mm0, mm1                      ; Interleave dy1 and dy0
 
 				PACK_U
 
@@ -252,8 +253,9 @@ endif
 
 	;; V
 	;;
-		        movd 		mm0,dword ptr PARAM.d_v_y1	; Load dy1
-				punpckldq	mm0,dword ptr PARAM.d_v_y0	;          and dy0
+        movd        mm0, dword ptr PARAM.d_v_y1   ; Load dy1 into mm0
+        movd        mm1, dword ptr PARAM.d_v_y0   ; Load dy0 into mm1
+        punpckldq   mm0, mm1                      ; Interleave dy1 and dy0
 
 				PACK_V
 
