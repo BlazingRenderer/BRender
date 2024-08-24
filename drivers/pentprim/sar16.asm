@@ -6,11 +6,11 @@
 ;; Out of line call for gauranteed SAR
 ;;
 	.386p
-	.model flat
+	.model flat,c
 ifndef __WATCOMC__
 	.code
-_sar16	proc
-	mov	eax,4[esp]
+_sar16	proc a:dword
+	mov	eax,a
 	sar	eax,16
 	ret
 _sar16	endp
