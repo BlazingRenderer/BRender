@@ -69,7 +69,7 @@ if(target_type STREQUAL SHARED_LIBRARY)
     target_compile_definitions(softrend PRIVATE -DDEFINE_BR_ENTRY_POINT)
 endif()
 
-target_include_directories(softrend PRIVATE ddi)
+target_include_directories(softrend PRIVATE ddi ${CMAKE_CURRENT_BINARY_DIR})
 target_compile_definitions(softrend PRIVATE -D__386__)
 
 target_link_libraries(softrend PRIVATE BRender::DDI)
