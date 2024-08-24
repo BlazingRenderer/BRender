@@ -57,7 +57,7 @@ set(PRIM_FILES ${CMAKE_CURRENT_SOURCE_DIR}/infogen.pl)
 
 function(add_prim base)
 	set(input_file "${CMAKE_CURRENT_SOURCE_DIR}/${base}.ifg")
-	set(output_file "${base}.c")
+	set(output_file "${CMAKE_CURRENT_BINARY_DIR}/${base}.c")
 
 	add_custom_command(
 		OUTPUT ${output_file}
@@ -72,7 +72,7 @@ endfunction()
 
 function(add_prim_suffixed base with_suffixes)
 	set(input_file "${CMAKE_CURRENT_SOURCE_DIR}/${base}.ifg")
-	set(output_files "${base}f.c" "${base}x.c")
+	set(output_files "${CMAKE_CURRENT_BINARY_DIR}/${base}f.c" "${CMAKE_CURRENT_BINARY_DIR}/${base}x.c")
 
 	set(args_float "")
 	set(argx_fixed "")
@@ -86,8 +86,8 @@ function(add_prim_suffixed base with_suffixes)
 
 	add_custom_command(
 		OUTPUT ${output_files}
-		COMMAND ${PERL_EXECUTABLE} ${INFOGEN} ${args_float} < ${input_file} > "${base}f.c"
-		COMMAND ${PERL_EXECUTABLE} ${INFOGEN} ${args_fixed} < ${input_file} > "${base}x.c"
+		COMMAND ${PERL_EXECUTABLE} ${INFOGEN} ${args_float} < ${input_file} > "${CMAKE_CURRENT_BINARY_DIR}/${base}f.c"
+		COMMAND ${PERL_EXECUTABLE} ${INFOGEN} ${args_fixed} < ${input_file} > "${CMAKE_CURRENT_BINARY_DIR}/${base}x.c"
 		MAIN_DEPENDENCY ${input_file}
 		DEPENDS ${INFOGEN}
 	)
