@@ -136,7 +136,7 @@ endif()
 
 
 
-set_source_files_properties(${ASM_FILES} PROPERTIES COMPILE_OPTIONS "-safeseh")
+set_source_files_properties(${ASM_FILES} PROPERTIES COMPILE_OPTIONS "-q;-safeseh;-Zne;-6;-Zp4;-elf;-zcw")
 
 add_library(pentprim
         awtm.c

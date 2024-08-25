@@ -128,10 +128,11 @@ int main(int argc, char **argv)
     cube->material = BrMaterialLoad("checkerboard24.mat");
 #endif
 
-    cube->material->flags |= BR_MATF_PERSPECTIVE;           // Perspective-correct texture mapping. Doesn't actually work.
-    cube->material->flags |= BR_MATF_DITHER;                // Dithering.
-    cube->material->flags |= BR_MATF_SMOOTH;                // Makes lighting look _much_ better.
+    //cube->material->flags |= BR_MATF_PERSPECTIVE;           // Perspective-correct texture mapping. Doesn't actually work.
+    //cube->material->flags |= BR_MATF_DITHER;                // Dithering.
+    //cube->material->flags |= BR_MATF_SMOOTH;                // Makes lighting look _much_ better.
     //cube->material->flags |= BR_MATF_DISABLE_COLOUR_KEY;  // Not supported by software.
+    cube->material->flags |= BR_MATF_SUBDIVIDE;
     cube->material->opacity = 255;                          // < 255 selects screendoor renderer
 
     BrMapUpdate(cube->material->colour_map, BR_MAPU_ALL);
@@ -144,6 +145,8 @@ int main(int argc, char **argv)
 
     ticks_last = SDL_GetTicks64();
 
+    BrMatrix34Identity(&cube->t.t.mat);
+    BrMatrix34PostTranslate(&cube->t.t.mat, 4, 0, 0);
     for(SDL_Event evt;;) {
         float dt;
 
@@ -158,7 +161,7 @@ int main(int argc, char **argv)
             }
         }
 
-        BrMatrix34PostRotateY(&cube->t.t.mat, BR_ANGLE_DEG(BR_SCALAR(50) * BR_SCALAR(dt)));
+        BrMatrix34PostRotateY(&cube->t.t.mat, BR_ANGLE_DEG(BR_SCALAR(1) * BR_SCALAR(1)));
 
         BrRendererFrameBegin();
         BrPixelmapFill(colour_buffer, clear_colour);
