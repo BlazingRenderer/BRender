@@ -40,6 +40,8 @@ add_library(softrend
         state.c
         v1model.c
 
+        subdiv.c
+
         device.h
         drv.h
         drv_ip.h
