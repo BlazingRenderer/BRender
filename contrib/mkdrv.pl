@@ -50,6 +50,11 @@ sub run_h2inc {
         "-I${incpath}", "-Fa${procpath}", $infile
     );
 
+    if ($^O eq 'linux') {
+        # Hacky hacky
+        unshift(@params, 'wine');
+    }
+
     delete $ENV{'INCLUDE'};
 
     say STDERR "Executing H2INC: @{params}";
