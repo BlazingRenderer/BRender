@@ -114,6 +114,13 @@ set(FW_FILES
         ${CMAKE_CURRENT_BINARY_DIR}/dev_objs.c
         )
 
+if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+        set_source_files_properties(tokenval.cpp PROPERTIES
+                # Stupid "__gxx_personality_v0@@CXXABI_1.3"
+                COMPILE_OPTIONS "-fno-exceptions;-fno-rtti"
+        )
+endif()
+
 add_library(fw OBJECT
         ${FW_FILES}
         ${FW_DEV_FILES}
