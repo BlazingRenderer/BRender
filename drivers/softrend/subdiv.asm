@@ -399,35 +399,8 @@ fp_one_fixed    dword   65536.0
 
 dotProduct dword ?
 
-OUTCODE_TABLE macro name,gENameUCase,lNameUCase
-name&Table  dword OUTCODE_&gENameUCase or OUTCODE_N_&gENameUCase
-    dword OUTCODE_&gENameUCase or OUTCODE_N_&gENameUCase
-    dword 0
-
-    dword 0
-
-    dword OUTCODE_&gENameUCase or OUTCODE_N_&gENameUCase
-    dword OUTCODE_&gENameUCase or OUTCODE_N_&gENameUCase
-    dword OUTCODE_&gENameUCase or OUTCODE_N_&gENameUCase or OUTCODE_&lNameUCase or OUTCODE_N_&lNameUCase
-
-    dword 0
-
-    dword 0
-    dword OUTCODE_&lNameUCase or OUTCODE_N_&lNameUCase
-    dword 0
-
-    dword 0
-
-    dword OUTCODE_&gENameUCase or OUTCODE_N_&gENameUCase or OUTCODE_&lNameUCase or OUTCODE_N_&lNameUCase
-    dword OUTCODE_&lNameUCase or OUTCODE_N_&lNameUCase
-    dword OUTCODE_&gENameUCase or OUTCODE_N_&gENameUCase or OUTCODE_&lNameUCase or OUTCODE_N_&lNameUCase
-
-    dword 0
-endm
-
-OUTCODE_TABLE rightLeft,RIGHT,LEFT
-OUTCODE_TABLE topBottom,TOP,BOTTOM
-OUTCODE_TABLE hitherYon,HITHER,YON
-
+EXTERN rightLeftTable:ptr dword
+EXTERN topBottomTable:ptr dword
+EXTERN hitherYonTable:ptr dword
 
 end
