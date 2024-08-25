@@ -62,3 +62,46 @@ void averageVerticesOnScreen(const br_renderer *renderer, brp_vertex *restrict m
 OUTCODE_TABLE(rightLeft, RIGHT, LEFT);
 OUTCODE_TABLE(topBottom, TOP, BOTTOM);
 OUTCODE_TABLE(hitherYon, HITHER, YON);
+
+br_uint_32 OUTCODE_ORDINATE2(br_uint_32 lValue, br_uint_32 rValue, const br_uint_32 *table, br_uint_32 edx)
+{
+    br_uint_32 reg0, reg1;
+    br_uint_32 esi, edi;
+
+    reg0 = rValue;
+    esi  = 0x80000000u;
+
+    esi = esi & reg0;
+
+    reg1 = lValue;
+    edi  = 0x80000000u;
+    reg0 = reg0 & 0x7fffffffu;
+
+    esi = esi >> 1;
+    edi = edi & reg1;
+
+    esi = esi | edi;
+    edi = reg0;
+
+    reg1 = reg1 & 0x7fffffffu;
+
+    edi = edi - reg1;
+    reg1 = reg1 - reg0;
+
+    edi = edi >> 3;
+    reg1 = reg1 & 0x80000000u;
+
+    reg1 = reg1 >> 2;
+    esi = esi | edi;
+
+    esi = esi | reg1;
+
+    reg0 = (br_uint_32)table;
+
+    esi >>= 28;
+
+    reg0 = ((br_uint_32*)reg0)[esi];
+
+    edx = edx ^ reg0;
+    return edx;
+}

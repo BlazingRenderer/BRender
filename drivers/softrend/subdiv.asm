@@ -128,49 +128,68 @@ done:
 endm
 
 
+EXTERN rightLeftTable:ptr dword
+EXTERN topBottomTable:ptr dword
+EXTERN hitherYonTable:ptr dword
+
+OUTCODE_ORDINATE2 proto C, lValue:dword, rValue:dword, table: ptr dword, xxx:dword
 
 OUTCODE_ORDINATE macro lValue,rValue,tableName1,reg0,reg1
-;assumes edx contains outcode flags,esi target for discriptor edi,reg0,reg1
-;14 cycles - (at least 2.5 wasted cycles)
-    mov reg0,rValue
-    mov esi,080000000h
+    push eax
+    push ecx
+    push edx
 
-    and esi,reg0
-    mov reg1,lValue
+    lea ecx, tableName1
 
-    mov edi,080000000h
-    and reg0,07fffffffh
+    INVOKE OUTCODE_ORDINATE2, lValue, rValue, ecx, edx
+    mov edx, eax; move return value into edx
 
-    shr esi,1
-    and edi,reg1
+    add esp, 4 ; discard push'd edx
+    pop ecx
+    pop eax
 
-    or esi,edi
-    mov edi,reg0
-
-    and reg1,07fffffffh
-;stall
-
-    sub edi,reg1
-    sub reg1,reg0
-
-    shr edi,3
-    and reg1,080000000h
-
-    shr reg1,2
-    or esi,edi
-
-    or esi,reg1
-    lea reg0,tableName1
-
-    shr esi,28
-;stall
-
-;stall
-;stall
-    mov reg0,[reg0].comp[4*esi]
-;stall
-
-    xor edx,reg0
+; ;assumes edx contains outcode flags,esi target for discriptor edi,reg0,reg1
+; ;14 cycles - (at least 2.5 wasted cycles)
+;     mov reg0,rValue
+;     mov esi,080000000h
+;
+;     and esi,reg0
+;     mov reg1,lValue
+;
+;     mov edi,080000000h
+;     and reg0,07fffffffh
+;
+;     shr esi,1
+;     and edi,reg1
+;
+;     or esi,edi
+;     mov edi,reg0
+;
+;     and reg1,07fffffffh
+; ;stall
+;
+;     sub edi,reg1
+;     sub reg1,reg0
+;
+;     shr edi,3
+;     and reg1,080000000h
+;
+;     shr reg1,2
+;     or esi,edi
+;
+;     or esi,reg1
+;     lea reg0,tableName1
+;
+;     shr esi,28
+; ;stall
+;
+; ;stall
+; ;stall
+;
+;     mov reg0,[reg0+4*esi]
+; ;stall
+;
+;     xor edx,reg0
 endm
 
 
@@ -399,8 +418,5 @@ fp_one_fixed    dword   65536.0
 
 dotProduct dword ?
 
-EXTERN rightLeftTable:ptr dword
-EXTERN topBottomTable:ptr dword
-EXTERN hitherYonTable:ptr dword
 
 end
