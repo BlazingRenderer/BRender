@@ -7,7 +7,7 @@ make_h2inc(softrend "${CMAKE_CURRENT_SOURCE_DIR}/drv.h" "${CMAKE_CURRENT_BINARY_
 set(ASM_FILES
         subdiv.asm
 )
-set_source_files_properties(${ASM_FILES} PROPERTIES COMPILE_OPTIONS "-safeseh")
+set_source_files_properties(${ASM_FILES} PROPERTIES COMPILE_OPTIONS  "-q;-safeseh;-Zne;-6;-Zp4;-elf;-zcw")
 
 add_library(softrend
         alpha.c
