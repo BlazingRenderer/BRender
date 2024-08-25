@@ -46,7 +46,7 @@ target_link_libraries(brender INTERFACE brender-inc)
 ##
 find_library(math_library m)
 if(UNIX AND math_library)
-    target_link_libraries(brender INTERFACE m)
+    target_link_libraries(brender PUBLIC ${math_library})
 endif()
 
 set_target_properties(brender PROPERTIES
