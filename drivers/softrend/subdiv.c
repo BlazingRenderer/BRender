@@ -31,3 +31,34 @@ void averageVerticesOnScreen(const br_renderer *renderer, brp_vertex *restrict m
     PROJECT_VERTEX_WRITE_Q(m1, m1->comp[C_X], m1->comp[C_Y], m1->comp[C_Z], m1->comp[C_W]);
     PROJECT_VERTEX_WRITE_Q(m2, m2->comp[C_X], m2->comp[C_Y], m2->comp[C_Z], m2->comp[C_W]);
 }
+
+#define OUTCODE_TABLE(name, gENameUCase, lNameUCase)                                                     \
+    const br_uint_32 name##Table[16] = {                                                                 \
+        OUTCODE_##gENameUCase | OUTCODE_N_##gENameUCase,                                                 \
+        OUTCODE_##gENameUCase | OUTCODE_N_##gENameUCase,                                                 \
+        0,                                                                                               \
+                                                                                                         \
+        0,                                                                                               \
+                                                                                                         \
+        OUTCODE_##gENameUCase | OUTCODE_N_##gENameUCase,                                                 \
+        OUTCODE_##gENameUCase | OUTCODE_N_##gENameUCase,                                                 \
+        OUTCODE_##gENameUCase | OUTCODE_N_##gENameUCase | OUTCODE_##lNameUCase | OUTCODE_N_##lNameUCase, \
+                                                                                                         \
+        0,                                                                                               \
+                                                                                                         \
+        0,                                                                                               \
+        OUTCODE_##lNameUCase | OUTCODE_N_##lNameUCase,                                                   \
+        0,                                                                                               \
+                                                                                                         \
+        0,                                                                                               \
+                                                                                                         \
+        OUTCODE_##gENameUCase | OUTCODE_N_##gENameUCase | OUTCODE_##lNameUCase | OUTCODE_N_##lNameUCase, \
+        OUTCODE_##lNameUCase | OUTCODE_N_##lNameUCase,                                                   \
+        OUTCODE_##gENameUCase | OUTCODE_N_##gENameUCase | OUTCODE_##lNameUCase | OUTCODE_N_##lNameUCase, \
+                                                                                                         \
+        0,                                                                                               \
+    }
+
+OUTCODE_TABLE(rightLeft, RIGHT, LEFT);
+OUTCODE_TABLE(topBottom, TOP, BOTTOM);
+OUTCODE_TABLE(hitherYon, HITHER, YON);
