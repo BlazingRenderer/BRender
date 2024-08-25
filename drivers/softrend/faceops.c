@@ -346,7 +346,10 @@ void BR_ASM_CALL OpLineClip(struct brp_block *block, brp_vertex *v0, brp_vertex 
 /**
  ** Triangle subdivision
  **/
-void BR_ASM_CALL averageVerticesOnScreen(struct br_renderer *renderer, brp_vertex *dest1, brp_vertex *dest2, brp_vertex *dest3, brp_vertex *src1, brp_vertex *src2, brp_vertex *src3);
+void averageVerticesOnScreen(const br_renderer *renderer, brp_vertex *restrict m0, brp_vertex *restrict m1,
+                             brp_vertex *restrict m2, brp_vertex *restrict v0, brp_vertex *restrict v1,
+                             brp_vertex *restrict v2);
+
 void BR_ASM_CALL averageVertices(struct br_renderer *renderer, brp_vertex *dest1, brp_vertex *dest2, brp_vertex *dest3, brp_vertex *src1, brp_vertex *src2, brp_vertex *src3);
 
 /*
