@@ -71,9 +71,9 @@ br_uint_32 OUTCODE_ORDINATE2(br_uint_32 lValue, br_uint_32 rValue, const br_uint
     reg0 = rValue;
     esi  = 0x80000000u;
 
-    esi = esi & reg0;
-
+    esi  = esi & reg0;
     reg1 = lValue;
+
     edi  = 0x80000000u;
     reg0 = reg0 & 0x7fffffffu;
 
@@ -85,14 +85,14 @@ br_uint_32 OUTCODE_ORDINATE2(br_uint_32 lValue, br_uint_32 rValue, const br_uint
 
     reg1 = reg1 & 0x7fffffffu;
 
-    edi = edi - reg1;
+    edi  = edi - reg1;
     reg1 = reg1 - reg0;
 
-    edi = edi >> 3;
+    edi  = edi >> 3;
     reg1 = reg1 & 0x80000000u;
 
     reg1 = reg1 >> 2;
-    esi = esi | edi;
+    esi  = esi | edi;
 
     esi = esi | reg1;
 
@@ -100,8 +100,45 @@ br_uint_32 OUTCODE_ORDINATE2(br_uint_32 lValue, br_uint_32 rValue, const br_uint
 
     esi >>= 28;
 
-    reg0 = ((br_uint_32*)reg0)[esi];
+    reg0 = ((br_uint_32 *)reg0)[esi];
 
     edx = edx ^ reg0;
     return edx;
+}
+
+br_uint_32 OUTCODE_ORDINATE3(br_uint_32 leftValue, br_uint_32 rightValue, const br_uint_32 *outcodeTable, br_uint_32 currentOutcode)
+{
+    /*
+     * NB: lValue and rValue are actually floats, but it's easier to deal with them as br_uint_32s.
+     */
+
+    // Extract the sign bit from the left and right values.
+    br_uint_32 leftSignBit  = leftValue & 0x80000000u;
+    br_uint_32 rightSignBit = rightValue & 0x80000000u;
+
+    // Combine the right sign bit and left sign bit to start building the index.
+    br_uint_32 combinedSignBits = (rightSignBit >> 1) | leftSignBit;
+
+    // Get the absolute values of leftValue and rightValue as integers without the sign bit.
+    br_uint_32 absLeftValue  = leftValue & 0x7fffffffu;
+    br_uint_32 absRightValue = rightValue & 0x7fffffffu;
+
+    // Calculate the difference between the absolute values of rightValue and leftValue.
+    br_uint_32 diffRightLeft = (absRightValue - absLeftValue) >> 3;
+
+    // Calculate the difference between the absolute values of leftValue and rightValue,
+    // and extract the sign bit from this difference (shifting down to reduce to a smaller range).
+    br_uint_32 diffLeftRightSignBit = ((absLeftValue - absRightValue) & 0x80000000u) >> 2;
+
+    // Combine the differences into the index.
+    combinedSignBits |= diffRightLeft | diffLeftRightSignBit;
+
+    // Use the top 4 bits of combinedSignBits as an index to the outcode table (16 entries).
+    br_uint_32 index            = combinedSignBits >> 28;
+    br_uint_32 outcodeFromTable = outcodeTable[index];
+
+    // XOR the calculated outcode with the current outcode to update it.
+    currentOutcode ^= outcodeFromTable;
+
+    return currentOutcode;
 }

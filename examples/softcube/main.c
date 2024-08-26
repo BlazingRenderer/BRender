@@ -161,7 +161,7 @@ int main(int argc, char **argv)
             }
         }
 
-        BrMatrix34PostRotateY(&cube->t.t.mat, BR_ANGLE_DEG(BR_SCALAR(1) * BR_SCALAR(1)));
+        BrMatrix34PostRotateY(&cube->t.t.mat, BR_ANGLE_DEG(BR_SCALAR(50) * BR_SCALAR(dt)));
 
         BrRendererFrameBegin();
         BrPixelmapFill(colour_buffer, clear_colour);

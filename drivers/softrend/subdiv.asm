@@ -133,6 +133,7 @@ EXTERN topBottomTable:ptr dword
 EXTERN hitherYonTable:ptr dword
 
 OUTCODE_ORDINATE2 proto C, lValue:dword, rValue:dword, table: ptr dword, xxx:dword
+OUTCODE_ORDINATE3 proto C, lValue:dword, rValue:dword, table: ptr dword, xxx:dword
 
 OUTCODE_ORDINATE macro lValue,rValue,tableName1,reg0,reg1
     push eax
@@ -141,7 +142,7 @@ OUTCODE_ORDINATE macro lValue,rValue,tableName1,reg0,reg1
 
     lea ecx, tableName1
 
-    INVOKE OUTCODE_ORDINATE2, lValue, rValue, ecx, edx
+    INVOKE OUTCODE_ORDINATE3, lValue, rValue, ecx, edx
     mov edx, eax; move return value into edx
 
     add esp, 4 ; discard push'd edx
