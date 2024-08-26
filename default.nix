@@ -5,6 +5,7 @@
 , perl
 , SDL2
 , glfw
+, assimp
 , makeBinaryWrapper
 , darwin
 , clang-tools
@@ -32,6 +33,7 @@ stdenv.mkDerivation(finalAttrs: {
 
   buildInputs = [
     SDL2
+    assimp
   ] ++ lib.optionals stdenv.isDarwin [
     # Why doesn't SDL pull this in?
     darwin.apple_sdk.frameworks.OpenGL
