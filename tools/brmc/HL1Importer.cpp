@@ -2,6 +2,11 @@
 
 br_material *HL1Importer::ConvertMaterial(const aiMaterial *mat) noexcept
 {
+    return this->ConvertMaterial(mat, 0);
+}
+
+br_material *HL1Importer::ConvertMaterial(const aiMaterial *mat, size_t skin_index) noexcept
+{
     aiString     name;
     br_material *mp;
     br_pixelmap *pm;
@@ -10,12 +15,14 @@ br_material *HL1Importer::ConvertMaterial(const aiMaterial *mat) noexcept
     /*
      * Get the texture, first. We have a 1:1 mapping from texture:material.
      */
-    mat->Get(AI_MATKEY_TEXTURE(aiTextureType_DIFFUSE, 0), name);
+    mat->Get(AI_MATKEY_TEXTURE(aiTextureType_DIFFUSE, skin_index), name);
     if(name.length > 0)
         pm = this->FindTexture(name.C_Str());
 
     if((mp = BrMaterialAllocate(nullptr)) == nullptr)
         return nullptr;
+
+    mp->colour_map = pm;
 
     /*
      * Materials don't have names, use the texture's.
@@ -54,8 +61,8 @@ br_material *HL1Importer::ConvertMaterial(const aiMaterial *mat) noexcept
     /*
      * Alpha testing/colour-keying.
      */
-    int texture_flags = 0;
-    mat->Get(AI_MATKEY_TEXFLAGS_DIFFUSE(0), texture_flags);
+    int texture_flags = 0xFFFF;
+    mat->Get(AI_MATKEY_TEXFLAGS_DIFFUSE(skin_index), texture_flags);
 
     if(texture_flags & aiTextureFlags_UseAlpha) {
         aiColor3D key = {0.0f, 0.0f, 0.0f};
@@ -73,7 +80,7 @@ br_material *HL1Importer::ConvertMaterial(const aiMaterial *mat) noexcept
      * "My favourite colour is... $chrome"
      */
     int chrome = 0;
-    mat->Get("$mat.HL1.chrome", aiTextureType_DIFFUSE, 0, chrome);
+    mat->Get("$mat.HL1.chrome", aiTextureType_DIFFUSE, skin_index, chrome);
     if(chrome != 0)
         mp->flags |= BR_MATF_ENVIRONMENT_L;
 
@@ -81,7 +88,53 @@ br_material *HL1Importer::ConvertMaterial(const aiMaterial *mat) noexcept
     return mp;
 }
 
+#include <vector>
+
 void HL1Importer::Import(const aiScene *scene) noexcept
 {
     HL1Importer importer;
+    importer.mTextures.reserve(scene->mNumTextures);
+    importer.mSkins.reserve(scene->mNumMaterials);
+    importer.mModels.reserve(scene->mNumMeshes);
+
+    const aiNode *bodyparts = scene->mRootNode->FindNode("<MDL_bodyparts>");
+
+    for(size_t i = 0; i < bodyparts->mNumChildren; ++i) {
+        const aiNode *part = bodyparts->mChildren[i];
+
+        int base = -1;
+        part->mMetaData->Get("Base", base);
+
+        for(size_t j = 0; j < part->mNumChildren; ++j) {
+            const aiNode *model = part->mChildren[j];
+
+            int xx = 0;
+        }
+
+    }
+
+    /*
+     * HL1 models have all their textures embedded.
+     * Makes things easy.
+     */
+    for(size_t i = 0; i < scene->mNumTextures; ++i) {
+        importer.mTextures.push_back(importer.ConvertTexture(scene->mTextures[i]));
+    }
+
+    for(size_t i = 0; i < scene->mNumMaterials; ++i) {
+        const aiMaterial *mat  = scene->mMaterials[i];
+        Skin&             skin = importer.mSkins.emplace_back();
+
+        /*
+         * Handle multiple skins.
+         */
+        skin.count = scene->mMaterials[i]->GetTextureCount(aiTextureType_DIFFUSE);
+        for(size_t j = 0; j < skin.count; ++j) {
+            skin.materials[j] = importer.ConvertMaterial(mat, j);
+        }
+    }
+
+    for(size_t i = 0; i < scene->mNumMeshes; ++i) {
+        importer.mModels.push_back(importer.ConvertMesh(scene->mMeshes[i]));
+    }
 }
