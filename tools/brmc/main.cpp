@@ -2,6 +2,7 @@
 #include <vector>
 #include <brender.h>
 #include <assimp/Importer.hpp>
+#include <assimp/BaseImporter.h>
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
 
@@ -13,6 +14,15 @@ struct br_pixelmap_deleter {
     }
 };
 using br_pixelmap_ptr = std::unique_ptr<br_pixelmap, br_pixelmap_deleter>;
+
+struct br_material_deleter {
+    using pointer = br_material *;
+    void operator()(pointer p) const noexcept
+    {
+        BrMaterialFree(p);
+    }
+};
+using br_material_ptr = std::unique_ptr<br_material, br_material_deleter>;
 
 struct br_model_deleter {
     using pointer = br_model *;
@@ -90,6 +100,63 @@ static br_pixelmap *create_texture(const aiTexture *tex)
     return brpp;
 }
 
+const aiScene *current_scene = nullptr;
+
+static br_pixelmap *BR_CALLBACK assimp_texture_find_failed_load_hook(const char *name)
+{
+    br_pixelmap *pm = nullptr;
+
+    if(current_scene == nullptr)
+        return nullptr;
+
+    if(const aiTexture *tex = current_scene->GetEmbeddedTexture(name); tex != nullptr) {
+        pm = create_texture(tex);
+        goto found;
+    }
+
+    // TODO: attempt to load from disk
+
+found:
+    if(pm != nullptr)
+        BrMapAdd(pm);
+
+    return pm;
+}
+
+static br_material *create_material(const aiMaterial *mat)
+{
+    br_material *brmp;
+
+    brmp = BrMaterialAllocate(mat->GetName().C_Str());
+
+#if 0
+    aiTextureMapping mapping = aiTextureMapping_UV;
+    mat->Get(AI_MATKEY_MAPPING(aiTextureMapping_UV, 0), mapping);
+
+    int uv_index = -1;
+    mat->Get(AI_MATKEY_UVWSRC(0, 0), uv_index);
+#endif
+
+    aiTextureMapMode map_u = aiTextureMapMode_Wrap;
+    mat->Get(AI_MATKEY_MAPPINGMODE_U(0, 0), map_u);
+
+    aiTextureMapMode map_v = aiTextureMapMode_Wrap;
+    mat->Get(AI_MATKEY_MAPPINGMODE_V(0, 0), map_v);
+
+    aiString path;
+    mat->Get(AI_MATKEY_TEXTURE(aiTextureType_DIFFUSE, 0), path);
+    if(path.length > 0) {
+        brmp->colour_map = BrMapFind(path.C_Str());
+    }
+
+    unsigned int     uvindex  = 1000;
+    ai_real          blend    = 4.0f;
+    aiTextureOp      op       = aiTextureOp_Multiply;
+    aiTextureMapMode map_mode = aiTextureMapMode_Decal;
+
+    return brmp;
+}
+
 static br_model *create_mesh(const aiMesh *mesh)
 {
     br_model *brmp;
@@ -139,6 +206,15 @@ static br_model *create_mesh(const aiMesh *mesh)
     return brmp;
 }
 
+#include <unordered_map>
+#include <string_view>
+#include "XImporter.hpp"
+#include "HL1Importer.hpp"
+
+std::unordered_map<std::string_view, XImporter::ImporterProc> s = {
+    {"hl1", HL1Importer::Import},
+};
+
 int main(int argc, char **argv)
 {
     Assimp::Importer importer;
@@ -147,25 +223,27 @@ int main(int argc, char **argv)
 
     BrWriteModeSet(BR_FS_MODE_TEXT);
 
-//    // clang-format off
-//    BrModelEnum(nullptr, [](br_model *m, void *arg) -> br_uint_32 {
-//        BrModelRemove(m);
-//        BrModelFree(m);
-//        return 0;
-//    }, nullptr);
-//
-//    BrMaterialEnum(nullptr, [](br_material *mat, void *arg) -> br_uint_32 {
-//        BrMaterialRemove(mat);
-//        BrMaterialFree(mat);
-//        return 0;
-//    }, nullptr);
-//
-//    BrMapEnum(nullptr, [](br_pixelmap *mat, void *arg) -> br_uint_32 {
-//        BrMapRemove(mat);
-//        BrPixelmapFree(mat);
-//        return 0;
-//    }, nullptr);
-//    // clang-format on
+    //    // clang-format off
+    //    BrModelEnum(nullptr, [](br_model *m, void *arg) -> br_uint_32 {
+    //        BrModelRemove(m);
+    //        BrModelFree(m);
+    //        return 0;
+    //    }, nullptr);
+    //
+    //    BrMaterialEnum(nullptr, [](br_material *mat, void *arg) -> br_uint_32 {
+    //        BrMaterialRemove(mat);
+    //        BrMaterialFree(mat);
+    //        return 0;
+    //    }, nullptr);
+    //
+    //    BrMapEnum(nullptr, [](br_pixelmap *mat, void *arg) -> br_uint_32 {
+    //        BrMapRemove(mat);
+    //        BrPixelmapFree(mat);
+    //        return 0;
+    //    }, nullptr);
+    //    // clang-format on
+
+    //BrMapFindHook(assimp_texture_find_failed_load_hook);
 
     for(int i = 1; i < argc; ++i) {
         const aiScene *scene = importer.ReadFile(argv[i], aiProcessPreset_TargetRealtime_Quality | aiProcess_TransformUVCoords |
@@ -175,14 +253,32 @@ int main(int argc, char **argv)
             continue;
         }
 
+        HL1Importer::Import(scene);
+        continue;
+        for(size_t ii = 0; ii < importer.GetImporterCount(); ++ii) {
+            auto                  aii = importer.GetImporterInfo(ii);
+            Assimp::BaseImporter *bi  = importer.GetImporter(ii);
+            int                   xxx = 0;
+        }
+        current_scene = scene;
+
         std::vector<br_pixelmap_ptr> pixelmaps;
         pixelmaps.reserve(scene->mNumTextures);
+
+        std::vector<br_material_ptr> materials;
+        materials.reserve(scene->mNumMaterials);
 
         std::vector<br_model_ptr> models;
         models.reserve(scene->mNumMeshes);
 
-        for(size_t t = 0; t < scene->mNumTextures; ++t) {
-            pixelmaps.emplace_back(create_texture(scene->mTextures[t]));
+        //        for(size_t t = 0; t < scene->mNumTextures; ++t) {
+        //            br_pixelmap *pm = create_texture(scene->mTextures[t]);
+        //            BrMapAdd(pm);
+        //            pixelmaps.emplace_back(pm);
+        //        }
+
+        for(size_t m = 0; m < scene->mNumMaterials; ++m) {
+            materials.emplace_back(create_material(scene->mMaterials[m]));
         }
 
         br_actor *world = asdfasd(scene, scene->mRootNode, nullptr);
@@ -192,7 +288,7 @@ int main(int argc, char **argv)
         }
 
         BrPixelmapSaveMany("sci.pix", (br_pixelmap **)pixelmaps.data(), pixelmaps.size());
-        BrModelSaveMany("sci.mod", (br_model**)models.data(), models.size());
+        BrModelSaveMany("sci.mod", (br_model **)models.data(), models.size());
         BrActorSave("sci.txt", world);
         BrActorFree(world);
     }
