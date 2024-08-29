@@ -23,9 +23,15 @@ private:
         size_t                        count;
     };
 
+    struct Model {
+        br_model                  *model;
+        std::array<br_actor *, 32> actors;
+        size_t                     count;
+    };
+
     std::vector<br_pixelmap *> mTextures;
     std::vector<Skin>          mSkins;
-    std::vector<br_model *>    mModels;
+    std::vector<Model>         mModels;
 };
 
 #endif /* HL1IMPORTER_HPP */

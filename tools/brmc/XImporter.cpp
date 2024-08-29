@@ -124,6 +124,7 @@ br_model *XImporter::ConvertMesh(const aiMesh *mesh) noexcept
         fp->vertices[2] = static_cast<br_uint_16>(face->mIndices[2]);
     }
 
+    BrModelAdd(brmp);
     return brmp;
 }
 
