@@ -188,5 +188,9 @@ void HL1Importer::Import(const aiScene *scene) noexcept
         }
     }
 
+    int preview(br_actor *root);
+
+    preview(root);
+
     BrActorSave("sci.txt", root);
 }

@@ -87,6 +87,8 @@ br_model *XImporter::ConvertMesh(const aiMesh *mesh) noexcept
 
     brmp = BrModelAllocate(mesh->mName.C_Str(), static_cast<int>(mesh->mNumVertices), static_cast<int>(mesh->mNumFaces));
 
+    brmp->flags |= BR_MODF_UPDATEABLE;
+
     /*
      * Process vertices.
      */

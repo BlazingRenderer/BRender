@@ -215,6 +215,7 @@ std::unordered_map<std::string_view, XImporter::ImporterProc> s = {
     {"hl1", HL1Importer::Import},
 };
 
+
 int main(int argc, char **argv)
 {
     Assimp::Importer importer;
@@ -254,6 +255,7 @@ int main(int argc, char **argv)
         }
 
         HL1Importer::Import(scene);
+
         continue;
         for(size_t ii = 0; ii < importer.GetImporterCount(); ++ii) {
             auto                  aii = importer.GetImporterInfo(ii);
