@@ -34,7 +34,6 @@ static void create_scene(br_pixelmap *screen, br_actor **_world, br_actor **_cam
 
     BrMatrix34Translate(&camera->t.t.mat, BR_SCALAR(0), BR_SCALAR(0), BR_SCALAR(100));
 
-
     *_world  = world;
     *_camera = camera;
 
@@ -59,9 +58,13 @@ int preview(br_actor *root)
     int          ret = -1;
     br_error     r;
     br_actor    *world = NULL, *camera = NULL, *cube = NULL;
+    br_camera   *camdata;
     br_uint_64   ticks_last, ticks_now;
     br_boolean   is_fullscreen = BR_FALSE;
     SDL_Window  *window;
+
+    br_int_32 mx_rel, my_rel;
+    br_scalar mwheel_rel;
 
     /*
      * QoL for those poor X11 users.
@@ -105,8 +108,13 @@ int preview(br_actor *root)
     BrRendererBegin(colour_buffer, NULL, NULL, primitive_heap, sizeof(primitive_heap));
 
     create_scene(screen, &world, &camera, root);
+    camdata = static_cast<br_camera *>(camera->type_data);
 
     ticks_last = SDL_GetTicks64();
+
+    mx_rel     = 0;
+    my_rel     = 0;
+    mwheel_rel = -85.0f;
 
     for(SDL_Event evt;;) {
         float dt;
@@ -160,10 +168,35 @@ int preview(br_actor *root)
                         is_fullscreen = !is_fullscreen;
                         break;
                     }
+
+                    if(evt.key.keysym.sym == SDLK_SPACE) {
+                        mx_rel     = 0;
+                        my_rel     = 0;
+                        mwheel_rel = 85.0f;
+                    }
                     break;
                 }
+                case SDL_MOUSEMOTION:
+                    mx_rel += evt.motion.xrel;
+                    my_rel += evt.motion.yrel;
+                    break;
+                case SDL_MOUSEWHEEL:
+                    mwheel_rel += evt.wheel.preciseY;
+                    break;
             }
         }
+
+        br_scalar xdiff = BR_DIV(BR_SCALAR(mx_rel), BR_SCALAR(screen->width));
+        br_scalar ydiff = BR_DIV(BR_SCALAR(my_rel), BR_SCALAR(screen->height));
+        if(-mwheel_rel < 1.0f)
+            mwheel_rel = -1.0f;
+
+        fprintf(stderr, "%d, %d, %f\n", mx_rel, my_rel, mwheel_rel);
+        BrMatrix34Identity(&camera->t.t.mat);
+
+        BrMatrix34PostTranslate(&camera->t.t.mat, 0, 0, -mwheel_rel);
+        BrMatrix34PostRotateY(&camera->t.t.mat, BR_ANGLE_DEG(fmodf(-xdiff * 1000, 360)));
+        BrMatrix34PostRotateX(&camera->t.t.mat, BR_ANGLE_DEG(fmodf(-ydiff * 1000, 360)));
 
         BrRendererFrameBegin();
         BrPixelmapFill(colour_buffer, BR_COLOUR_RGB(66, 66, 66));

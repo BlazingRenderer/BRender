@@ -35,10 +35,15 @@ br_material *HL1Importer::ConvertMaterial(const aiMaterial *mat, size_t skin_ind
         mp->identifier = BrResStrDup(mp, identifier);
 
     /*
+     * Texutres are flipped, account for it.
+     */
+    BrMatrix23Scale(&mp->map_transform, BR_SCALAR(1.0f), BR_SCALAR(-1.0f));
+
+    /*
      * Now figure out the flags.
      */
     mp->mode  = BR_MATM_DEPTH_TEST_LE | BR_MATM_MAP_WIDTH_LIMIT_WRAP | BR_MATM_MAP_HEIGHT_LIMIT_WRAP;
-    mp->flags = BR_MATF_LIGHT;
+    mp->flags = BR_MATF_LIGHT | BR_MATF_MAP_INTERPOLATION | BR_MATF_MIP_INTERPOLATION;
 
     /*
      * Shading mode.
@@ -61,7 +66,7 @@ br_material *HL1Importer::ConvertMaterial(const aiMaterial *mat, size_t skin_ind
     /*
      * Alpha testing/colour-keying.
      */
-    int texture_flags = 0xFFFF;
+    int texture_flags = 0;
     mat->Get(AI_MATKEY_TEXFLAGS_DIFFUSE(skin_index), texture_flags);
 
     if(texture_flags & aiTextureFlags_UseAlpha) {
@@ -164,10 +169,10 @@ void HL1Importer::Import(const aiScene *scene) noexcept
                 mdl.model->identifier = BrResSprintf(mdl.model, "%s_%zu", model->mName.C_Str(), k);
 
                 if(mdl.count == 1) {
-//                    if(mdl.actors[0]->identifier != nullptr)
-//                        BrResFree(mdl.actors[0]->identifier);
+                    //                    if(mdl.actors[0]->identifier != nullptr)
+                    //                        BrResFree(mdl.actors[0]->identifier);
 
-                    //mdl.actors[0]->identifier
+                    // mdl.actors[0]->identifier
 
                     BrActorAdd(brap, mdl.actors[0]);
                     continue;
@@ -178,9 +183,9 @@ void HL1Importer::Import(const aiScene *scene) noexcept
                 group->t.type     = BR_TRANSFORM_IDENTITY;
 
                 for(size_t w = 0; w < mdl.count; ++w) {
-//                    if(mdl.actors[w]->identifier != nullptr)
-//                        BrResFree(mdl.actors[w]->identifier);
-//                    mdl.actors[w]->identifier = BrResSprintf();
+                    //                    if(mdl.actors[w]->identifier != nullptr)
+                    //                        BrResFree(mdl.actors[w]->identifier);
+                    //                    mdl.actors[w]->identifier = BrResSprintf();
 
                     BrActorAdd(group, mdl.actors[w]);
                 }
@@ -188,7 +193,7 @@ void HL1Importer::Import(const aiScene *scene) noexcept
         }
     }
 
-    int preview(br_actor *root);
+    int preview(br_actor * root);
 
     preview(root);
 
