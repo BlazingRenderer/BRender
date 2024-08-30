@@ -55,6 +55,7 @@ add_library(BRender::DDI ALIAS brender-ddi)
 
 option(BRENDER_BUILD_TOOLS "Build Tools" ON)
 option(BRENDER_BUILD_EXAMPLES "Build Examples" ON)
+option(BRENDER_BUILD_GLFW_EXAMPLE OFF "Build GLFW example (only if BRENDER_BUILD_EXAMPLES)")
 option(BRENDER_DISABLE_INSTALL "Disable installation" OFF)
 
 if (BRENDER_BUILD_TOOLS)

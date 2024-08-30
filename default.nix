@@ -42,6 +42,7 @@ stdenv.mkDerivation(finalAttrs: {
   cmakeFlags = [
     (lib.cmakeBool "BRENDER_BUILD_TOOLS" withTools)
     (lib.cmakeBool "BRENDER_BUILD_EXAMPLES" withExamples)
+    (lib.cmakeBool "BRENDER_BUILD_GLFW_EXAMPLE" withExamples)
   ];
 
   postFixup = ''
