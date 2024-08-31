@@ -26,10 +26,10 @@ typedef struct br_colour_range {
     br_uint_32 high;
 } br_colour_range;
 
-#define BR_COLOUR_RGB(r, g, b) ((((br_colour)(r)) << 16) | (((br_colour)(g)) << 8) | ((br_colour)(b)))
-
 #define BR_COLOUR_RGBA(r, g, b, a) \
     ((((br_colour)(a)) << 24) | (((br_colour)(r)) << 16) | (((br_colour)(g)) << 8) | ((br_colour)(b)))
+
+#define BR_COLOUR_RGB(r, g, b) BR_COLOUR_RGBA(r, g, b, 0xFF)
 
 #define BR_COLOUR_ARGB(a, r, g, b) \
     ((((br_colour)(a)) << 24) | (((br_colour)(r)) << 16) | (((br_colour)(g)) << 8) | ((br_colour)(b)))
