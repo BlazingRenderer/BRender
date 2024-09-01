@@ -26,10 +26,7 @@ static const GLchar g_TextFragmentShader[] = "#version 150\n"
                                              "\n"
                                              "void main()\n"
                                              "{\n"
-                                             "	vec4 texColour = texture(uSampler, uv);\n"
-                                             "	if(texColour.rgb == vec3(0.0, 0.0, 0.0))\n"
-                                             "		discard;\n"
-                                             "	mainColour = texColour * vec4(uColour.rgb, 1.0);\n"
+                                             "	mainColour = texture(uSampler, uv) * vec4(uColour.rgb, 1.0);\n"
                                              "}\n";
 
 br_boolean VIDEOI_CompileTextShader(HVIDEO hVideo)
