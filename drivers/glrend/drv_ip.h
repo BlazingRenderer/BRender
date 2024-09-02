@@ -145,7 +145,7 @@ void StoredGLRenderGroup(br_geometry_stored *self, br_renderer *renderer, const 
 /*
  * font.c
  */
-br_error FontGLBuildAtlas(br_font_gl *gl_font, br_font *font, br_int_32 width, br_int_32 height);
+br_error FontGLBuildArray(br_font_gl *gl_font, br_font *font);
 
 /*
  * quad.c
@@ -162,10 +162,7 @@ void DeviceGLFiniQuad(br_device_pixelmap_gl_quad *self);
  */
 void DeviceGLPatchQuad(br_device_pixelmap_gl_quad *self, const br_pixelmap *dst, const br_rectangle *dr,
                        const br_pixelmap *src, const br_rectangle *sr);
-void DeviceGLPatchQuadFont(br_device_pixelmap_gl_quad *self, const br_pixelmap *dst, const br_rectangle *dr,
-                           const br_font_gl *font, br_uint_8 glyph);
 void DeviceGLDrawQuad(br_device_pixelmap_gl_quad *self);
-void DeviceGLDrawQuadText(br_device_pixelmap_gl_quad *self);
 
 /*
  * util.c

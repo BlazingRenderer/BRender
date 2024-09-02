@@ -1,86 +1,80 @@
 #include "drv.h"
 #include "brassert.h"
 
-#define STB_RECT_PACK_IMPLEMENTATION
-#include "stb_rect_pack.h"
+#define GLYPH_COUNT 256
 
-/*
- * Amount of padding in pixels around each glyph. Keep POT.
- */
-#define GLYPH_PAD_PX 4
-#define GLYPH_COUNT  256
+#pragma pack(push, 16)
+typedef struct font_data {
+    /*
+     * NB: This is a vec4[GLYPH_COUNT/4] on the GLSL side because
+     * std140's array packing rules are shit.
+     */
+    alignas(16) br_float widths[GLYPH_COUNT];
+} font_data;
+#pragma pack(pop)
 
-typedef struct br_font_atlas_state_gl {
-    stbrp_rect rects[GLYPH_COUNT];
-    stbrp_node nodes[GLYPH_COUNT];
-} br_font_atlas_state_gl;
-
-br_error FontGLBuildAtlas(br_font_gl *gl_font, br_font *font, br_int_32 width, br_int_32 height)
+br_error FontGLBuildArray(br_font_gl *gl_font, br_font *font)
 {
-    br_pixelmap            *pm;
-    char                    c[2];
-    GLuint                  tex;
-    br_font_atlas_state_gl *state;
+    GLuint       tex;
+    GLint        internal_format;
+    GLenum       format, type;
+    br_pixelmap *pm;
+    br_int_32    max_width  = font->glyph_x;
+    br_int_32    max_height = font->glyph_y;
 
-    gl_font->font = font;
+    font_data fd = {};
 
-    state = BrScratchAllocate(sizeof(br_font_atlas_state_gl));
+    /*
+     * Find the max width, and calculate the UV coords.
+     */
+    for(size_t i = 0; i < GLYPH_COUNT; ++i) {
+        br_int_32 width = (font->flags & BR_FONTF_PROPORTIONAL) ? font->width[i] : font->glyph_x;
 
-    for(int i = 0; i < BR_ASIZE(state->rects); ++i) {
-        stbrp_rect *rect = state->rects + i;
-        rect->id         = i;
-        rect->w          = ((font->flags & BR_FONTF_PROPORTIONAL) ? font->width[i] : font->glyph_x) + GLYPH_PAD_PX;
-        rect->h          = font->glyph_y + GLYPH_PAD_PX;
+        fd.widths[i] = (float)width;
+
+        if(width > max_width)
+            max_width = width;
     }
 
-    stbrp_context ctx = {};
-    stbrp_init_target(&ctx, width, height, state->nodes, BR_ASIZE(state->nodes));
-
-    /* If this fails, that's programmer error. */
-    (void)stbrp_pack_rects(&ctx, state->rects, BR_ASIZE(state->rects));
-
-    if((pm = BrPixelmapAllocate(BR_PMT_RGBA_8888, width, height, NULL, BR_PMAF_NORMAL)) == NULL) {
-        BrScratchFree(state);
-        return 0;
+    for(size_t i = 0; i < GLYPH_COUNT; ++i) {
+        fd.widths[i] /= (float)max_width;
     }
 
-    pm->origin_x = pm->origin_y = 0;
-    BrPixelmapFill(pm, 0x00000000);
+    /*
+     * Upload the font data.
+     */
+    glGenBuffers(1, &gl_font->font_data);
+    glBindBuffer(GL_UNIFORM_BUFFER, gl_font->font_data);
+    glBufferData(GL_UNIFORM_BUFFER, sizeof(font_data), &fd, GL_STATIC_DRAW);
+    glBindBuffer(GL_UNIFORM_BUFFER, 0);
 
-    c[1] = '\0';
-    for(size_t i = 0; i < BR_ASIZE(state->rects); ++i) {
-        const stbrp_rect *rect = state->rects + i;
-
-        br_rectangle r = {
-            .w = rect->w - GLYPH_PAD_PX,
-            .h = rect->h - GLYPH_PAD_PX,
-            .x = rect->x + (GLYPH_PAD_PX >> 1),
-            .y = rect->y + (GLYPH_PAD_PX >> 1),
-        };
-
-        c[0] = (char)i;
-
-        BrPixelmapText(pm, r.x, r.y, 0xFFFFFFFF, font, c);
-
-        /*
-         * Calculate the UV coordinates.
-         * * Remember that the image will be upside down when converted to a
-         *     OpenGL texture. The UV for each glyph will match this.
-         * * The origin of the atlas is being set to top-left@(0,0), so
-         *     just swap y0/y1.
-         */
-        VIDEOI_BrRectToUVs(pm, &r, &gl_font->glyph[i].x0, &gl_font->glyph[i].y1, &gl_font->glyph[i].x1,
-                           &gl_font->glyph[i].y0);
-    }
-
-    tex = VIDEO_BrPixelmapToGLTexture(pm);
-    BrPixelmapFree(pm);
-
-    BrScratchFree(state);
-
-    gl_font->tex = tex;
-    if(tex == 0)
+    /*
+     * Allocate a temporary pixelmap to draw text into.
+     */
+    if((pm = BrPixelmapAllocate(BR_PMT_RGBA_8888, max_width, max_height, NULL, BR_PMAF_NORMAL)) == NULL)
         return BRE_FAIL;
 
+    VIDEOI_BrPixelmapGetTypeDetails(pm->type, &internal_format, &format, &type, NULL, NULL);
+
+    glGenTextures(1, &tex);
+    glBindTexture(GL_TEXTURE_2D_ARRAY, tex);
+    glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, internal_format, max_width, max_height, GLYPH_COUNT, 0, format, type, NULL);
+    glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
+    for(GLsizei i = 0; i < GLYPH_COUNT; ++i) {
+        char c[2] = {(char)i, '\0'};
+
+        BrPixelmapFill(pm, BR_COLOUR_RGBA(0, 0, 0, 0));
+        BrPixelmapText(pm, -pm->origin_x, -pm->origin_y, BR_COLOUR_RGBA(255, 255, 255, 255), font, c);
+
+        glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, 0, 0, i, max_width, max_height, 1, format, type, pm->pixels);
+    }
+
+    glBindTexture(GL_TEXTURE_2D_ARRAY, 0);
+    BrPixelmapFree(pm);
+
+    gl_font->tex  = tex;
+    gl_font->font = font;
     return BRE_OK;
 }

@@ -3,31 +3,8 @@
 /*
  * Lightweight vertex/fragment shader for rendering text.
  */
-static const GLchar g_TextVertexShader[] = "#version 150\n"
-                                           "in vec3 aPosition;\n"
-                                           "in vec2 aUV;\n"
-                                           "out vec2 uv;\n"
-                                           "\n"
-                                           "uniform mat4 uMVP;\n"
-                                           "\n"
-                                           "void main()\n"
-                                           "{\n"
-                                           "	gl_Position = uMVP * vec4(aPosition, 1.0);\n"
-                                           "	uv = aUV;\n"
-                                           "}\n";
-
-static const GLchar g_TextFragmentShader[] = "#version 150\n"
-                                             "\n"
-                                             "in vec2 uv;\n"
-                                             "uniform sampler2D uSampler;\n"
-                                             "uniform vec3 uColour;\n"
-                                             "\n"
-                                             "out vec4 mainColour;\n"
-                                             "\n"
-                                             "void main()\n"
-                                             "{\n"
-                                             "	mainColour = texture(uSampler, uv) * vec4(uColour.rgb, 1.0);\n"
-                                             "}\n";
+#include "text.vert.glsl.h"
+#include "text.frag.glsl.h"
 
 br_boolean VIDEOI_CompileTextShader(HVIDEO hVideo)
 {
@@ -46,13 +23,27 @@ br_boolean VIDEOI_CompileTextShader(HVIDEO hVideo)
     glDeleteShader(vert);
     glDeleteShader(frag);
 
+    glGenVertexArrays(1, &hVideo->textProgram.vao_glyphs);
+    glGenBuffers(1, &hVideo->textProgram.ubo_glyphs);
+
     if(hVideo->textProgram.program) {
-        hVideo->textProgram.aPosition = glGetAttribLocation(hVideo->textProgram.program, "aPosition");
-        hVideo->textProgram.aUV       = glGetAttribLocation(hVideo->textProgram.program, "aUV");
-        hVideo->textProgram.uSampler  = glGetUniformLocation(hVideo->textProgram.program, "uSampler");
-        hVideo->textProgram.uMVP      = glGetUniformLocation(hVideo->textProgram.program, "uMVP");
-        hVideo->textProgram.uColour   = glGetUniformLocation(hVideo->textProgram.program, "uColour");
-        glBindFragDataLocation(hVideo->textProgram.program, 0, "mainColour");
+        hVideo->textProgram.uSampler = glGetUniformLocation(hVideo->textProgram.program, "uSampler");
+
+        hVideo->textProgram.block_index_font_data   = glGetUniformBlockIndex(hVideo->textProgram.program, "FontData");
+        hVideo->textProgram.block_binding_font_data = 2;
+        glUniformBlockBinding(hVideo->textProgram.program, hVideo->textProgram.block_index_font_data,
+                              hVideo->textProgram.block_binding_font_data);
+
+        hVideo->textProgram.block_index_glyphs   = glGetUniformBlockIndex(hVideo->textProgram.program, "TextData");
+        hVideo->textProgram.block_binding_glyphs = 3;
+        glUniformBlockBinding(hVideo->textProgram.program, hVideo->textProgram.block_index_glyphs,
+                              hVideo->textProgram.block_binding_glyphs);
+
+        glBindBuffer(GL_UNIFORM_BUFFER, hVideo->textProgram.ubo_glyphs);
+        glBindBufferBase(GL_UNIFORM_BUFFER, hVideo->textProgram.block_binding_glyphs, hVideo->textProgram.ubo_glyphs);
+        glBindBuffer(GL_UNIFORM_BUFFER, 0);
+
+        glBindFragDataLocation(hVideo->textProgram.program, 0, "main_colour");
     }
 
     DeviceGLCheckErrors();

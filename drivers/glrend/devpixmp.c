@@ -595,11 +595,12 @@ br_error BR_CMETHOD_DECL(br_device_pixelmap_gl, rectangleCopyFrom)(br_device_pix
 br_error BR_CMETHOD(br_device_pixelmap_gl, text)(br_device_pixelmap *self, br_point *point, br_font *font,
                                                  const char *text, br_uint_32 colour)
 {
-    GLuint tex;
 
-    /* Quit if off top, bottom or right screen */
-    br_int_32 x = point->x + self->pm_origin_x;
-    br_int_32 y = point->y + self->pm_origin_y;
+    size_t      len = strlen(text);
+    br_point    pp;
+    br_font_gl *gl_font;
+    HVIDEO      hVideo = &self->screen->asFront.video;
+    br_text_gl *text_data;
 
     /*
      * Make sure we're an offscreen pixelmap.
@@ -607,11 +608,19 @@ br_error BR_CMETHOD(br_device_pixelmap_gl, text)(br_device_pixelmap *self, br_po
     if(self->use_type != BRT_OFFSCREEN)
         return BRE_UNSUPPORTED;
 
-    if(y <= -font->glyph_y || y >= self->pm_height || x >= self->pm_width)
+    /*
+     * Quit if off top, bottom or right screen
+     */
+    if(PixelmapPointClip(&pp, point, (br_pixelmap *)self) == BR_CLIP_REJECT)
         return BRE_OK;
 
-    /* Ensure we're a valid font. */
-    br_font_gl *gl_font;
+    if(pp.y <= -font->glyph_y || pp.y >= self->pm_height || pp.x >= self->pm_width)
+        return BRE_OK;
+
+    /*
+     * Ensure we're a valid font.
+     */
+
     if(font == BrFontFixed3x5)
         gl_font = &self->screen->asFront.font_fixed3x5;
     else if(font == BrFontProp4x6)
@@ -621,9 +630,9 @@ br_error BR_CMETHOD(br_device_pixelmap_gl, text)(br_device_pixelmap *self, br_po
     else
         return BRE_FAIL;
 
-    /* Set up the render state. The font UVs match the texture, so no need to flip here. */
-    HVIDEO hVideo = &self->screen->asFront.video;
-
+    /*
+     * All valid, set up the render state.
+     */
     glBindFramebuffer(GL_FRAMEBUFFER, self->asBack.glFbo);
     glViewport(0, 0, self->pm_width, self->pm_height);
 
@@ -634,25 +643,22 @@ br_error BR_CMETHOD(br_device_pixelmap_gl, text)(br_device_pixelmap *self, br_po
     glDisable(GL_CULL_FACE);
 
     glUseProgram(hVideo->textProgram.program);
+    glBindBufferBase(GL_UNIFORM_BUFFER, hVideo->textProgram.block_binding_font_data, gl_font->font_data);
 
-    br_vector3_f col = {
-        {BR_RED(colour) / 255.0f, BR_GRN(colour) / 255.0f, BR_BLU(colour) / 255.0f}
-    };
-
-    br_matrix4 mvp;
-    BrMatrix4Orthographic(&mvp, 0.0f, 1.0f, 0.0f, 1.0f, -1.0f, 1.0f);
-    VIDEOI_D3DtoGLProjection(&mvp);
-
-    glUniformMatrix4fv(hVideo->textProgram.uMVP, 1, GL_FALSE, (GLfloat *)&mvp);
     glActiveTexture(GL_TEXTURE0);
-
-    if(gl_font->tex != 0)
-        glBindTexture(GL_TEXTURE_2D, gl_font->tex);
-    else
-        glBindTexture(GL_TEXTURE_2D, self->screen->asFront.tex_checkerboard);
-
+    glBindTexture(GL_TEXTURE_2D_ARRAY, gl_font->tex);
     glUniform1i(hVideo->textProgram.uSampler, 0);
-    glUniform3fv(hVideo->textProgram.uColour, 1, col.v);
+
+    /*
+     * Create the per-model/text state.
+     */
+    text_data = BrScratchAllocate(sizeof(br_text_gl));
+    BrMatrix4Orthographic(&text_data->mvp, 0.0f, 1.0f, 0.0f, 1.0f, -1.0f, 1.0f);
+    VIDEOI_D3DtoGLProjection(&text_data->mvp);
+    text_data->colour = (br_vector3)BR_VECTOR3(BR_RED(colour) / 255.0f, BR_GRN(colour) / 255.0f, BR_BLU(colour) / 255.0f);
+
+    glBindVertexArray(self->screen->asFront.video.textProgram.vao_glyphs);
+    glBindBuffer(GL_UNIFORM_BUFFER, self->screen->asFront.video.textProgram.ubo_glyphs);
 
     br_rectangle r = {
         .x = point->x,
@@ -661,22 +667,54 @@ br_error BR_CMETHOD(br_device_pixelmap_gl, text)(br_device_pixelmap *self, br_po
         .w = 0,
     };
 
-    for(; *text && r.w <= self->pm_width; ++text) {
-        br_uint_8  glyph = (br_uint_8)*text;
-        br_uint_16 width = (font->flags & BR_FONTF_PROPORTIONAL) ? font->width[glyph] : font->glyph_x;
-        r.w              = width;
+    do {
+        size_t chunk = len;
+        if(chunk > BR_TEXT_GL_CHUNK_SIZE) {
+            chunk = BR_TEXT_GL_CHUNK_SIZE;
+        }
 
-        br_rectangle dr = r;
-        VIDEOI_BrRectToGL((br_pixelmap *)self, &dr);
+        for(size_t i = 0; i < chunk; ++i) {
+            br_uint_32   glyph = (br_uint_32)text[i];
+            br_uint_16   width = (font->flags & BR_FONTF_PROPORTIONAL) ? font->width[glyph] : font->glyph_x;
+            br_rectangle dr;
 
-        DeviceGLPatchQuadFont(&self->asBack.quad, (br_pixelmap *)self, &dr, gl_font, glyph);
-        DeviceGLDrawQuadText(&self->asBack.quad);
+            r.w = width;
 
-        r.x += width + 1;
-        r.w += width;
-    }
+            /*
+             * Bail early if the rest of the string is entirely offscreen.
+             */
+            dr = r;
+            if(PixelmapRectangleClip(&dr, &r, (br_pixelmap *)self) == BR_CLIP_REJECT) {
+                chunk = i;
+                len = chunk;
+                break;
+            }
+
+            // clang-format off
+            text_data->rects[i] = (br_vector4_f)BR_VECTOR4(
+                (float)dr.x / (float)self->pm_width,
+                (float)dr.y / (float)self->pm_height,
+                (float)dr.w / (float)self->pm_width,
+                (float)dr.h / (float)self->pm_height
+            );
+            text_data->chars[i] = (br_uint_32)glyph;
+            // clang-format on
+
+            r.x += width + 1;
+            r.w += width;
+        }
+
+        glBufferData(GL_UNIFORM_BUFFER, sizeof(br_text_gl), text_data, GL_STATIC_DRAW);
+        glDrawArraysInstanced(GL_TRIANGLES, 0, 6, (GLsizei)chunk);
+
+        len -= chunk;
+        text += chunk;
+    } while(len > 0);
+
+    BrScratchFree(text_data);
 
     glBindVertexArray(0);
+    glBindBuffer(GL_UNIFORM_BUFFER, 0);
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
     glDisable(GL_BLEND);
     return BRE_OK;

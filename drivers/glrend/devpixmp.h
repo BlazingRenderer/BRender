@@ -17,7 +17,6 @@ typedef struct {
 typedef struct br_device_pixelmap_gl_quad {
     br_device_pixelmap_gl_tri tris[4];
     GLuint                    defaultVao;
-    GLuint                    textVao;
     GLuint                    buffers[2];
 } br_device_pixelmap_gl_quad;
 

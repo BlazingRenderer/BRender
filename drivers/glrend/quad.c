@@ -76,22 +76,6 @@ void DeviceGLInitQuad(br_device_pixelmap_gl_quad *self, HVIDEO hVideo)
                               (GLvoid *)(sizeof(GLfloat) * 6));
     }
 
-    { /* Text Quad VAO */
-        glGenVertexArrays(1, &self->textVao);
-        glBindVertexArray(self->textVao);
-
-        glBindBuffer(GL_ARRAY_BUFFER, self->buffers[0]);
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, self->buffers[1]);
-
-        /* Positions */
-        glEnableVertexAttribArray(hVideo->textProgram.aPosition);
-        glVertexAttribPointer(hVideo->textProgram.aPosition, 3, GL_FLOAT, GL_FALSE, s_QuadStride, NULL);
-
-        /* UVs */
-        glEnableVertexAttribArray(hVideo->textProgram.aUV);
-        glVertexAttribPointer(hVideo->textProgram.aUV, 2, GL_FLOAT, GL_FALSE, s_QuadStride, (GLvoid *)(sizeof(GLfloat) * 6));
-    }
-
     glBindVertexArray(0);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -108,7 +92,6 @@ void DeviceGLFiniQuad(br_device_pixelmap_gl_quad *self)
 {
     glDeleteBuffers(2, self->buffers);
     glDeleteVertexArrays(1, &self->defaultVao);
-    glDeleteVertexArrays(1, &self->textVao);
 }
 
 static void actually_patch_quad(br_device_pixelmap_gl_quad *self, float dx0, float dy0, float dx1, float dy1, float sx0,
@@ -156,24 +139,8 @@ void DeviceGLPatchQuad(br_device_pixelmap_gl_quad *self, const br_pixelmap *dst,
     actually_patch_quad(self, dx0, dy0, dx1, dy1, sx0, sy0, sx1, sy1);
 }
 
-void DeviceGLPatchQuadFont(br_device_pixelmap_gl_quad *self, const br_pixelmap *dst, const br_rectangle *dr,
-                           const br_font_gl *font, br_uint_8 glyph)
-{
-    float dx0, dy0, dx1, dy1;
-    VIDEOI_BrRectToUVs(dst, dr, &dx0, &dy0, &dx1, &dy1);
-
-    actually_patch_quad(self, dx0, dy0, dx1, dy1, font->glyph[glyph].x0, font->glyph[glyph].y0, font->glyph[glyph].x1,
-                        font->glyph[glyph].y1);
-}
-
 void DeviceGLDrawQuad(br_device_pixelmap_gl_quad *self)
 {
     glBindVertexArray(self->defaultVao);
-    glDrawElements(GL_TRIANGLES, (GLsizei)BR_ASIZE(s_QuadIndices), GL_UNSIGNED_INT, NULL);
-}
-
-void DeviceGLDrawQuadText(br_device_pixelmap_gl_quad *self)
-{
-    glBindVertexArray(self->textVao);
     glDrawElements(GL_TRIANGLES, (GLsizei)BR_ASIZE(s_QuadIndices), GL_UNSIGNED_INT, NULL);
 }

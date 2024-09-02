@@ -16,6 +16,20 @@ add_custom_command(
         DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/embedshader.pl"
 )
 
+add_custom_command(
+        OUTPUT text.vert.glsl.h
+        COMMAND "${PERL_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/embedshader.pl" "g_TextVertexShader" "${CMAKE_CURRENT_SOURCE_DIR}/text.vert.glsl" text.vert.glsl.h
+        MAIN_DEPENDENCY "${CMAKE_CURRENT_SOURCE_DIR}/text.vert.glsl"
+        DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/embedshader.pl"
+)
+
+add_custom_command(
+        OUTPUT text.frag.glsl.h
+        COMMAND "${PERL_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/embedshader.pl" "g_TextFragmentShader" "${CMAKE_CURRENT_SOURCE_DIR}/text.frag.glsl" text.frag.glsl.h
+        MAIN_DEPENDENCY "${CMAKE_CURRENT_SOURCE_DIR}/text.frag.glsl"
+        DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/embedshader.pl"
+)
+
 set(GLSTATE_FILES
         cache.c
         state.c
@@ -88,7 +102,6 @@ set(GLREND_FILES
 
         font.c
         font.h
-        stb_rect_pack.h
 
         template.h
 
@@ -133,6 +146,9 @@ add_library(glrend
 
         "${CMAKE_CURRENT_BINARY_DIR}/brender.vert.glsl.h"
         "${CMAKE_CURRENT_BINARY_DIR}/brender.frag.glsl.h"
+
+        "${CMAKE_CURRENT_BINARY_DIR}/text.vert.glsl.h"
+        "${CMAKE_CURRENT_BINARY_DIR}/text.frag.glsl.h"
         )
 
 get_target_property(target_type glrend TYPE)
