@@ -208,10 +208,17 @@ br_error VIDEOI_BrPixelmapGetTypeDetails(br_uint_8 pm_type, GLint *internal_form
         return BRE_FAIL;
     }
 
-    *internal_format = fmt->internal_format;
-    *format          = fmt->format;
-    *type            = fmt->type;
-    *bytes           = fmt->bytes;
+    if(internal_format != NULL)
+        *internal_format = fmt->internal_format;
+
+    if(format != NULL)
+        *format = fmt->format;
+
+    if(type != NULL)
+        *type = fmt->type;
+
+    if(bytes != NULL)
+        *bytes = fmt->bytes;
 
     if(blended != NULL)
         *blended = fmt->blended;
