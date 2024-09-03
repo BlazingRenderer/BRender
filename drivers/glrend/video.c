@@ -149,14 +149,18 @@ void VIDEO_Close(HVIDEO hVideo)
 }
 
 // clang-format off
-#define BRPM_TO_GL(_pm_type, _internal_format, _format, _type, _bytes, _blended) \
+#define BRPM_TO_GL(_pm_type, _internal_format, _format, _type, _bytes, _blended, swr, swg, swb, swa) \
     [_pm_type] = {                                                               \
         .pm_type         = _pm_type,                                             \
         .internal_format = _internal_format,                                     \
         .format          = _format,                                              \
         .type            = _type,                                                \
         .bytes           = _bytes,                                               \
-        .blended         = _blended                                              \
+        .blended         = _blended,                                             \
+        .swizzle_r       = GL_##swr,                                             \
+        .swizzle_g       = GL_##swg,                                             \
+        .swizzle_b       = GL_##swb,                                             \
+        .swizzle_a       = GL_##swa,                                             \
     }
 
 #if BR_ENDIAN_LITTLE
@@ -166,23 +170,23 @@ void VIDEO_Close(HVIDEO hVideo)
 #endif
 
 const static br_pixelmap_gl_fmt br2gl[BR_PMT_MAX] = {
-    BRPM_TO_GL(BR_PMT_RGB_332,       GL_RGB,  GL_RGB,  GL_UNSIGNED_BYTE_3_3_2,        1, BR_FALSE),
-    BRPM_TO_GL(BR_PMT_RGB_555,       GL_RGB,  GL_BGRA, GL_UNSIGNED_SHORT_1_5_5_5_REV, 2, BR_FALSE),
-    BRPM_TO_GL(BR_PMT_BGR_555,       GL_RGB,  GL_RGBA, GL_UNSIGNED_SHORT_1_5_5_5_REV, 2, BR_FALSE),
-    BRPM_TO_GL(BR_PMT_RGB_565,       GL_RGB,  GL_RGB,  GL_UNSIGNED_SHORT_5_6_5,       2, BR_FALSE),
+    BRPM_TO_GL(BR_PMT_RGB_332,       GL_RGB,  GL_RGB,       GL_UNSIGNED_BYTE_3_3_2,        1, BR_FALSE, RED, GREEN, BLUE, ALPHA),
+    BRPM_TO_GL(BR_PMT_RGB_555,       GL_RGB,  GL_BGRA,      GL_UNSIGNED_SHORT_1_5_5_5_REV, 2, BR_FALSE, RED, GREEN, BLUE, ALPHA),
+    BRPM_TO_GL(BR_PMT_BGR_555,       GL_RGB,  GL_RGBA,      GL_UNSIGNED_SHORT_1_5_5_5_REV, 2, BR_FALSE, RED, GREEN, BLUE, ALPHA),
+    BRPM_TO_GL(BR_PMT_RGB_565,       GL_RGB,  GL_RGB,       GL_UNSIGNED_SHORT_5_6_5,       2, BR_FALSE, RED, GREEN, BLUE, ALPHA),
     /* Using GL_BGR and GL_UNSIGNED_SHORT_5_6_5 just gives black. */
-    BRPM_TO_GL(BR_PMT_BGR_565,       GL_RGB,  GL_RGB,  GL_UNSIGNED_SHORT_5_6_5_REV,   2, BR_FALSE),
-    BRPM_TO_GL(BR_PMT_RGBA_4444,     GL_RGBA, GL_RGBA, GL_UNSIGNED_SHORT_4_4_4_4,     2, BR_TRUE),
-    BRPM_TO_GL(BR_PMT_ARGB_4444,     GL_RGBA, GL_BGRA, GL_UNSIGNED_SHORT_4_4_4_4_REV, 2, BR_TRUE),
-    BRPM_TO_GL(BR_PMT_RGB_888,       GL_RGB,  GL_RGBN, GL_UNSIGNED_BYTE,              3, BR_FALSE),
-    BRPM_TO_GL(BR_PMT_RGBX_888,      GL_RGB,  GL_BGRA, GL_UNSIGNED_INT_8_8_8_8_REV,   3, BR_FALSE),
-    BRPM_TO_GL(BR_PMT_RGBA_8888,     GL_RGBA, GL_BGRA, GL_UNSIGNED_INT_8_8_8_8_REV,   4, BR_TRUE),
-    BRPM_TO_GL(BR_PMT_RGBA_8888_ARR, GL_RGBA, GL_RGBA, GL_UNSIGNED_BYTE,              4, BR_TRUE),
+    BRPM_TO_GL(BR_PMT_BGR_565,       GL_RGB,  GL_RGB,       GL_UNSIGNED_SHORT_5_6_5_REV,   2, BR_FALSE, RED, GREEN, BLUE, ALPHA),
+    BRPM_TO_GL(BR_PMT_RGBA_4444,     GL_RGBA, GL_RGBA,      GL_UNSIGNED_SHORT_4_4_4_4,     2, BR_TRUE,  RED, GREEN, BLUE, ALPHA),
+    BRPM_TO_GL(BR_PMT_ARGB_4444,     GL_RGBA, GL_BGRA,      GL_UNSIGNED_SHORT_4_4_4_4_REV, 2, BR_TRUE,  RED, GREEN, BLUE, ALPHA),
+    BRPM_TO_GL(BR_PMT_RGB_888,       GL_RGB,  GL_RGBN,      GL_UNSIGNED_BYTE,              3, BR_FALSE, RED, GREEN, BLUE, ALPHA),
+    BRPM_TO_GL(BR_PMT_RGBX_888,      GL_RGB,  GL_BGRA,      GL_UNSIGNED_INT_8_8_8_8_REV,   3, BR_FALSE, RED, GREEN, BLUE, ALPHA),
+    BRPM_TO_GL(BR_PMT_RGBA_8888,     GL_RGBA, GL_BGRA,      GL_UNSIGNED_INT_8_8_8_8_REV,   4, BR_TRUE,  RED, GREEN, BLUE, ALPHA),
+    BRPM_TO_GL(BR_PMT_RGBA_8888_ARR, GL_RGBA, GL_RGBA,      GL_UNSIGNED_BYTE,              4, BR_TRUE,  RED, GREEN, BLUE, ALPHA),
 
-    BRPM_TO_GL(BR_PMT_DEPTH_16,   GL_DEPTH_COMPONENT16,  GL_DEPTH_COMPONENT, 0,        2, BR_FALSE), /* mandatory */
-    BRPM_TO_GL(BR_PMT_DEPTH_24,   GL_DEPTH_COMPONENT24,  GL_DEPTH_COMPONENT, 0,        3, BR_FALSE), /* mandatory */
-    BRPM_TO_GL(BR_PMT_DEPTH_32,   GL_DEPTH_COMPONENT32,  GL_DEPTH_COMPONENT, 0,        4, BR_FALSE),
-    BRPM_TO_GL(BR_PMT_DEPTH_FP32, GL_DEPTH_COMPONENT32F, GL_DEPTH_COMPONENT, GL_FLOAT, 4, BR_FALSE), /* mandatory */
+    BRPM_TO_GL(BR_PMT_DEPTH_16,      GL_DEPTH_COMPONENT16,  GL_DEPTH_COMPONENT, 0,         2, BR_FALSE, RED, GREEN, BLUE, ALPHA), /* mandatory */
+    BRPM_TO_GL(BR_PMT_DEPTH_24,      GL_DEPTH_COMPONENT24,  GL_DEPTH_COMPONENT, 0,         3, BR_FALSE, RED, GREEN, BLUE, ALPHA), /* mandatory */
+    BRPM_TO_GL(BR_PMT_DEPTH_32,      GL_DEPTH_COMPONENT32,  GL_DEPTH_COMPONENT, 0,         4, BR_FALSE, RED, GREEN, BLUE, ALPHA),
+    BRPM_TO_GL(BR_PMT_DEPTH_FP32,    GL_DEPTH_COMPONENT32F, GL_DEPTH_COMPONENT, GL_FLOAT,  4, BR_FALSE, RED, GREEN, BLUE, ALPHA), /* mandatory */
 
 };
 #undef GL_RGBN
@@ -218,6 +222,12 @@ br_error VIDEOI_BrPixelmapToExistingTexture(GLuint tex, br_pixelmap *pm)
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_SWIZZLE_R, fmt->swizzle_r);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_SWIZZLE_G, fmt->swizzle_g);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_SWIZZLE_B, fmt->swizzle_b);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_SWIZZLE_A, fmt->swizzle_a);
+
     glBindTexture(GL_TEXTURE_2D, 0);
 
     return BRE_OK;

@@ -15,6 +15,10 @@ typedef struct br_pixelmap_gl_fmt {
     GLenum     type;
     GLsizeiptr bytes;
     br_boolean blended;
+    GLint      swizzle_r;
+    GLint      swizzle_g;
+    GLint      swizzle_b;
+    GLint      swizzle_a;
 } br_pixelmap_gl_fmt;
 
 typedef struct _VIDEO {
