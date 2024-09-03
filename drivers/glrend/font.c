@@ -53,7 +53,7 @@ br_error FontGLBuildArray(br_font_gl *gl_font, br_font *font)
     /*
      * Allocate a temporary pixelmap to draw text into.
      */
-    if((pm = BrPixelmapAllocate(BR_PMT_RGBA_8888, max_width, max_height, NULL, BR_PMAF_NORMAL)) == NULL)
+    if((pm = BrPixelmapAllocate(fmt->pm_type, max_width, max_height, NULL, BR_PMAF_NORMAL)) == NULL)
         return BRE_FAIL;
 
     glGenTextures(1, &tex);
