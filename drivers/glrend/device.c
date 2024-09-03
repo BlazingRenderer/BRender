@@ -39,7 +39,7 @@ static struct br_tv_template_entry deviceTemplateEntries[] = {
      * Other devices (e.g. SDL) may query these to create appropriate windows.
      */
     {BRT(OPENGL_VERSION_MAJOR_U8), 0,                BRTV_QUERY | BRTV_ALL,            BRTV_CONV_DIRECT, 3                      },
-    {BRT(OPENGL_VERSION_MINOR_U8), 0,                BRTV_QUERY | BRTV_ALL,            BRTV_CONV_DIRECT, 2                      },
+    {BRT(OPENGL_VERSION_MINOR_U8), 0,                BRTV_QUERY | BRTV_ALL,            BRTV_CONV_DIRECT, 3                      },
     {BRT(OPENGL_PROFILE_T),        0,                BRTV_QUERY | BRTV_ALL,            BRTV_CONV_DIRECT, BRT_OPENGL_PROFILE_CORE},
 };
 #undef F
