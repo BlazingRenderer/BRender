@@ -148,15 +148,6 @@ void VIDEO_Close(HVIDEO hVideo)
     glDeleteProgram(hVideo->textProgram.program);
 }
 
-typedef struct br_pixelmap_gl_fmt {
-    br_uint_8  pm_type;
-    GLint      internal_format;
-    GLenum     format;
-    GLenum     type;
-    GLsizeiptr bytes;
-    br_boolean blended;
-} br_pixelmap_gl_fmt;
-
 // clang-format off
 #define BRPM_TO_GL(_pm_type, _internal_format, _format, _type, _bytes, _blended) \
     [_pm_type] = {                                                               \
@@ -198,49 +189,29 @@ const static br_pixelmap_gl_fmt br2gl[BR_PMT_MAX] = {
 #undef BRPM_TO_GL
 // clang-format on
 
-br_error VIDEOI_BrPixelmapGetTypeDetails(br_uint_8 pm_type, GLint *internal_format, GLenum *format, GLenum *type,
-                                         GLsizeiptr *bytes, br_boolean *blended)
+const br_pixelmap_gl_fmt *DeviceGLGetFormatDetails(br_uint_8 type)
 {
-    const br_pixelmap_gl_fmt *fmt = br2gl + pm_type;
+    const br_pixelmap_gl_fmt *fmt;
+    if(type >= BR_PMT_MAX)
+        return NULL;
 
-    if(fmt->pm_type == 0) {
-        BrLogTrace("GLREND", "Unsupported BRender texture format %d.", pm_type);
-        return BRE_FAIL;
-    }
+    fmt = br2gl + type;
+    if(fmt->pm_type != type)
+        return NULL;
 
-    if(internal_format != NULL)
-        *internal_format = fmt->internal_format;
-
-    if(format != NULL)
-        *format = fmt->format;
-
-    if(type != NULL)
-        *type = fmt->type;
-
-    if(bytes != NULL)
-        *bytes = fmt->bytes;
-
-    if(blended != NULL)
-        *blended = fmt->blended;
-
-    return BRE_OK;
+    return fmt;
 }
 
 br_error VIDEOI_BrPixelmapToExistingTexture(GLuint tex, br_pixelmap *pm)
 {
-    GLint      internalFormat;
-    GLenum     format;
-    GLenum     type;
-    GLsizeiptr elemBytes;
-    br_error   r;
+    const br_pixelmap_gl_fmt *fmt;
 
-    r = VIDEOI_BrPixelmapGetTypeDetails(pm->type, &internalFormat, &format, &type, &elemBytes, NULL);
-    if(r != BRE_OK)
-        return r;
+    if((fmt = DeviceGLGetFormatDetails(pm->type)) == NULL)
+        return BRE_FAIL;
 
     glBindTexture(GL_TEXTURE_2D, tex);
 
-    glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, pm->width, pm->height, 0, format, type, pm->pixels);
+    glTexImage2D(GL_TEXTURE_2D, 0, fmt->internal_format, pm->width, pm->height, 0, fmt->format, fmt->type, pm->pixels);
 
     glGenerateMipmap(GL_TEXTURE_2D);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);

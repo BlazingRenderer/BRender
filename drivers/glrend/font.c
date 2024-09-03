@@ -15,14 +15,16 @@ typedef struct font_data {
 
 br_error FontGLBuildArray(br_font_gl *gl_font, br_font *font)
 {
-    GLuint       tex;
-    GLint        internal_format;
-    GLenum       format, type;
-    br_pixelmap *pm;
-    br_int_32    max_width  = font->glyph_x;
-    br_int_32    max_height = font->glyph_y;
+    GLuint                    tex;
+    const br_pixelmap_gl_fmt *fmt;
+    br_pixelmap              *pm;
+    br_int_32                 max_width  = font->glyph_x;
+    br_int_32                 max_height = font->glyph_y;
 
     font_data fd = {};
+
+    if((fmt = DeviceGLGetFormatDetails(BR_PMT_RGBA_8888)) == NULL)
+        return BRE_FAIL;
 
     /*
      * Find the max width, and calculate the UV coords.
@@ -54,11 +56,9 @@ br_error FontGLBuildArray(br_font_gl *gl_font, br_font *font)
     if((pm = BrPixelmapAllocate(BR_PMT_RGBA_8888, max_width, max_height, NULL, BR_PMAF_NORMAL)) == NULL)
         return BRE_FAIL;
 
-    VIDEOI_BrPixelmapGetTypeDetails(pm->type, &internal_format, &format, &type, NULL, NULL);
-
     glGenTextures(1, &tex);
     glBindTexture(GL_TEXTURE_2D_ARRAY, tex);
-    glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, internal_format, max_width, max_height, GLYPH_COUNT, 0, format, type, NULL);
+    glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, fmt->internal_format, max_width, max_height, GLYPH_COUNT, 0, fmt->format, fmt->type, NULL);
     glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
@@ -68,7 +68,7 @@ br_error FontGLBuildArray(br_font_gl *gl_font, br_font *font)
         BrPixelmapFill(pm, BR_COLOUR_RGBA(0, 0, 0, 0));
         BrPixelmapText(pm, -pm->origin_x, -pm->origin_y, BR_COLOUR_RGBA(255, 255, 255, 255), font, c);
 
-        glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, 0, 0, i, max_width, max_height, 1, format, type, pm->pixels);
+        glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, 0, 0, i, max_width, max_height, 1, fmt->format, fmt->type, pm->pixels);
     }
 
     glBindTexture(GL_TEXTURE_2D_ARRAY, 0);

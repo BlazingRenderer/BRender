@@ -8,6 +8,15 @@
 extern "C" {
 #endif
 
+typedef struct br_pixelmap_gl_fmt {
+    br_uint_8  pm_type;
+    GLint      internal_format;
+    GLenum     format;
+    GLenum     type;
+    GLsizeiptr bytes;
+    br_boolean blended;
+} br_pixelmap_gl_fmt;
+
 typedef struct _VIDEO {
     GLint   maxUniformBlockSize;
     GLint   maxUniformBufferBindings;

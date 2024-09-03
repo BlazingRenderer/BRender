@@ -105,10 +105,8 @@ static br_boolean is_compatible(br_buffer_stored *self, br_pixelmap *pm, GLenum 
 
 static br_error updateMemory(br_buffer_stored *self, br_pixelmap *pm)
 {
-    GLint      internal_format;
-    GLenum     format, type, err;
-    GLsizeiptr elem_bytes;
-    br_error   r;
+    GLenum                    err;
+    const br_pixelmap_gl_fmt *fmt;
 
     /*
      * The pixelmap is a plain BRender memory pixelmap. Make sure that the pixels can be accessed
@@ -116,14 +114,15 @@ static br_error updateMemory(br_buffer_stored *self, br_pixelmap *pm)
     if((pm->flags & BR_PMF_NO_ACCESS) || pm->pixels == NULL)
         return BRE_FAIL;
 
-    r = VIDEOI_BrPixelmapGetTypeDetails(pm->type, &internal_format, &format, &type, &elem_bytes, &self->blended);
-    if(r != BRE_OK)
-        return r;
+    if((fmt = DeviceGLGetFormatDetails(pm->type)) == NULL)
+        return BRE_FAIL;
+
+    self->blended = fmt->blended;
 
     /*
      * If we're compatible, update the existing texture.
      */
-    if(is_compatible(self, pm, internal_format) == BR_TRUE) {
+    if(is_compatible(self, pm, fmt->internal_format) == BR_TRUE) {
         ASSERT(self->gl_tex != 0);
 
         // TODO:
@@ -141,7 +140,7 @@ static br_error updateMemory(br_buffer_stored *self, br_pixelmap *pm)
     }
 
     glBindTexture(GL_TEXTURE_2D, self->gl_tex);
-    glTexImage2D(GL_TEXTURE_2D, 0, internal_format, pm->width, pm->height, 0, format, type, pm->pixels);
+    glTexImage2D(GL_TEXTURE_2D, 0, fmt->internal_format, pm->width, pm->height, 0, fmt->format, fmt->type, pm->pixels);
 
     if((err = glGetError()) != 0) {
         BrLogError("GLREND", "glTexImage2D() failed with %s", DeviceGLStrError(err));

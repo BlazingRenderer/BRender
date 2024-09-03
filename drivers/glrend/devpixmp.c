@@ -228,9 +228,6 @@ br_error BR_CMETHOD_DECL(br_device_pixelmap_gl, match)(br_device_pixelmap *self,
     br_error                   err;
     br_device_pixelmap        *pm;
     const char                *typestring;
-    GLint                      gl_internal_format;
-    GLenum                     gl_format, gl_type;
-    GLsizeiptr                 gl_elem_bytes;
     HVIDEO                     hVideo;
     struct pixelmapMatchTokens mt = {
         .width        = self->pm_width,
@@ -300,9 +297,8 @@ br_error BR_CMETHOD_DECL(br_device_pixelmap_gl, match)(br_device_pixelmap *self,
     if(mt.type == BR_PMT_MAX)
         mt.type = self->pm_type;
 
-    err = VIDEOI_BrPixelmapGetTypeDetails(mt.type, &gl_internal_format, &gl_format, &gl_type, &gl_elem_bytes, NULL);
-    if(err != BRE_OK)
-        return err;
+    if(DeviceGLGetFormatDetails(mt.type) == NULL)
+        return BRE_FAIL;
 
     if(mt.msaa_samples < 0)
         mt.msaa_samples = 0;
@@ -547,11 +543,9 @@ br_error BR_CMETHOD_DECL(br_device_pixelmap_gl, rectangleCopyTo)(br_device_pixel
 br_error BR_CMETHOD_DECL(br_device_pixelmap_gl, rectangleCopyFrom)(br_device_pixelmap *self, br_point *p,
                                                                    br_device_pixelmap *dest, br_rectangle *r)
 {
-    br_error   err;
-    GLint      internalFormat;
-    GLenum     format, type;
-    GLsizeiptr elemBytes;
-    void      *rowTemp;
+    br_error                  err;
+    void                     *rowTemp;
+    const br_pixelmap_gl_fmt *fmt;
 
     UASSERT(p->x == -self->pm_origin_x);
     UASSERT(p->y == -self->pm_origin_y);
@@ -567,13 +561,13 @@ br_error BR_CMETHOD_DECL(br_device_pixelmap_gl, rectangleCopyFrom)(br_device_pix
      */
     r->y = self->pm_height - r->h - r->y;
 
-    if((err = VIDEOI_BrPixelmapGetTypeDetails(dest->pm_type, &internalFormat, &format, &type, &elemBytes, NULL)) != BRE_OK)
-        return err;
+    if((fmt = DeviceGLGetFormatDetails(dest->pm_type)) == NULL)
+        return BRE_FAIL;
 
     if((err = DevicePixelmapGLBindFramebuffer(GL_READ_FRAMEBUFFER, self)) != BRE_OK)
         return err;
 
-    glReadPixels(r->x, r->y, r->w, r->h, format, type, dest->pm_pixels);
+    glReadPixels(r->x, r->y, r->w, r->h, fmt->format, fmt->type, dest->pm_pixels);
 
     /*
      * Flip it

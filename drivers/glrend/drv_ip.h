@@ -33,14 +33,13 @@ GLuint VIDEO_BrPixelmapToGLTexture(br_pixelmap *pm);
 
 br_error VIDEOI_BrPixelmapToExistingTexture(GLuint tex, br_pixelmap *pm);
 
-br_error VIDEOI_BrPixelmapGetTypeDetails(br_uint_8 pm_type, GLint *internal_format, GLenum *format, GLenum *type,
-                                         GLsizeiptr *bytes, br_boolean *blended);
-
 void VIDEOI_BrRectToGL(const br_pixelmap *pm, br_rectangle *r);
 
 void VIDEOI_BrRectToUVs(const br_pixelmap *pm, const br_rectangle *r, float *x0, float *y0, float *x1, float *y1);
 
 br_matrix4 *VIDEOI_D3DtoGLProjection(br_matrix4 *m);
+
+const br_pixelmap_gl_fmt *DeviceGLGetFormatDetails(br_uint_8 type);
 
 br_boolean DeviceGLCheckErrors(void);
 
