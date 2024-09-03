@@ -107,8 +107,8 @@ HVIDEO VIDEO_Open(HVIDEO hVideo, const char *vertShader, const char *fragShader)
     glGetIntegerv(GL_MAX_FRAGMENT_UNIFORM_BLOCKS, &hVideo->maxFragmentUniformBlocks);
     glGetIntegerv(GL_MAX_SAMPLES, &hVideo->maxSamples);
 
-    if(GLAD_GL_EXT_texture_filter_anisotropic)
-        glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, &hVideo->maxAnisotropy);
+    if(GLAD_GL_ARB_texture_filter_anisotropic)
+        glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY, &hVideo->maxAnisotropy);
 
     if(!VIDEOI_CompileDefaultShader(hVideo))
         return NULL;
