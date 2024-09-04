@@ -20,11 +20,18 @@ br_boolean VIDEOI_CompileTextShader(HVIDEO hVideo)
 
     hVideo->textProgram.program = VIDEOI_CreateAndCompileProgram(vert, frag);
 
+    DeviceGLObjectLabel(GL_SHADER, vert, BR_GLREND_DEBUG_INTERNAL_PREFIX "text:shader:vertex");
+    DeviceGLObjectLabel(GL_SHADER, frag, BR_GLREND_DEBUG_INTERNAL_PREFIX "text:shader:fragment");
+    DeviceGLObjectLabel(GL_PROGRAM, hVideo->textProgram.program, BR_GLREND_DEBUG_INTERNAL_PREFIX "text:program");
+
     glDeleteShader(vert);
     glDeleteShader(frag);
 
     glGenVertexArrays(1, &hVideo->textProgram.vao_glyphs);
+    DeviceGLObjectLabel(GL_VERTEX_ARRAY, hVideo->textProgram.vao_glyphs, BR_GLREND_DEBUG_INTERNAL_PREFIX "text:vao");
+
     glGenBuffers(1, &hVideo->textProgram.ubo_glyphs);
+    DeviceGLObjectLabel(GL_BUFFER, hVideo->textProgram.ubo_glyphs, BR_GLREND_DEBUG_INTERNAL_PREFIX "text:ubo");
 
     if(hVideo->textProgram.program) {
         hVideo->textProgram.uSampler = glGetUniformLocation(hVideo->textProgram.program, "uSampler");

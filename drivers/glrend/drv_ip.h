@@ -172,6 +172,9 @@ GLuint   DeviceGLBuildCheckerboardTexture(void);
 
 br_uint_8 DeviceGLTypeOrBits(br_uint_8 pixel_type, br_int_32 pixel_bits);
 
+void DeviceGLObjectLabel(GLenum identifier, GLuint name, const char *s);
+void DeviceGLObjectLabelF(GLenum identifier, GLuint name, const char *fmt, ...);
+
 /*
  * Wrappers for br_device_gl_procs.
  */

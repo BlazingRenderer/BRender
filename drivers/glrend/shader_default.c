@@ -45,6 +45,10 @@ br_boolean VIDEOI_CompileDefaultShader(HVIDEO hVideo)
 
     hVideo->defaultProgram.program = VIDEOI_CreateAndCompileProgram(vert, frag);
 
+    DeviceGLObjectLabel(GL_SHADER, vert, BR_GLREND_DEBUG_INTERNAL_PREFIX "default:shader:vertex");
+    DeviceGLObjectLabel(GL_SHADER, frag, BR_GLREND_DEBUG_INTERNAL_PREFIX "default:shader:fragment");
+    DeviceGLObjectLabel(GL_PROGRAM, hVideo->defaultProgram.program, BR_GLREND_DEBUG_INTERNAL_PREFIX "default:program");
+
     glDeleteShader(vert);
     glDeleteShader(frag);
 

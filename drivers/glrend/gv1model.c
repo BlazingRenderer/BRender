@@ -101,7 +101,7 @@ static br_error BR_CMETHOD_DECL(br_geometry_v1_model_gl,
                                            br_token_value *tv)
 {
     ASSERT(type == BRT_TRIANGLE);
-    if((*psg = GeometryStoredGLAllocate(self, "MODEL", renderer, (struct v11model *)model)) == NULL)
+    if((*psg = GeometryStoredGLAllocate(self, "model", renderer, (struct v11model *)model)) == NULL)
         return BRE_FAIL;
 
     return BRE_OK;

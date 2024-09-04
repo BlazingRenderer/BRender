@@ -6,6 +6,8 @@
 static void VIDEOI_GetShaderVariables(HVIDEO hVideo)
 {
     glGenBuffers(1, &hVideo->brenderProgram.uboScene);
+    DeviceGLObjectLabel(GL_BUFFER, hVideo->brenderProgram.uboScene, BR_GLREND_DEBUG_INTERNAL_PREFIX "brender:shader:ubo:scene");
+
     glBindBuffer(GL_UNIFORM_BUFFER, hVideo->brenderProgram.uboScene);
     glUniformBlockBinding(hVideo->brenderProgram.program, hVideo->brenderProgram.blockIndexScene,
                           hVideo->brenderProgram.blockBindingScene);
@@ -13,6 +15,8 @@ static void VIDEOI_GetShaderVariables(HVIDEO hVideo)
     glBufferData(GL_UNIFORM_BUFFER, sizeof(shader_data_scene), NULL, GL_DYNAMIC_DRAW);
 
     glGenBuffers(1, &hVideo->brenderProgram.uboModel);
+    DeviceGLObjectLabel(GL_BUFFER, hVideo->brenderProgram.uboModel, BR_GLREND_DEBUG_INTERNAL_PREFIX "brender:shader:ubo:model");
+
     glBindBuffer(GL_UNIFORM_BUFFER, hVideo->brenderProgram.uboModel);
     glUniformBlockBinding(hVideo->brenderProgram.program, hVideo->brenderProgram.blockIndexModel,
                           hVideo->brenderProgram.blockBindingModel);
@@ -78,6 +82,10 @@ br_boolean VIDEOI_CompileBRenderShader(HVIDEO hVideo, const char *vertPath, cons
         glDeleteShader(frag);
         return BR_FALSE;
     }
+
+    DeviceGLObjectLabel(GL_SHADER, vert, BR_GLREND_DEBUG_INTERNAL_PREFIX "brender:shader:vertex");
+    DeviceGLObjectLabel(GL_SHADER, frag, BR_GLREND_DEBUG_INTERNAL_PREFIX "brender:shader:fragment");
+    DeviceGLObjectLabel(GL_PROGRAM, hVideo->brenderProgram.program, BR_GLREND_DEBUG_INTERNAL_PREFIX "brender:shader:program");
 
     glDeleteShader(vert);
     glDeleteShader(frag);

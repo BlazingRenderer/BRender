@@ -46,9 +46,11 @@ void DeviceGLInitQuad(br_device_pixelmap_gl_quad *self, HVIDEO hVideo)
 
         glBindBuffer(GL_ARRAY_BUFFER, self->buffers[0]);
         glBufferData(GL_ARRAY_BUFFER, sizeof(self->tris), self->tris, GL_DYNAMIC_DRAW);
+        DeviceGLObjectLabel(GL_BUFFER, self->buffers[0], BR_GLREND_DEBUG_INTERNAL_PREFIX "quad:vbo:array");
 
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, self->buffers[1]);
         glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(s_QuadIndices), s_QuadIndices, GL_STATIC_DRAW);
+        DeviceGLObjectLabel(GL_BUFFER, self->buffers[1], BR_GLREND_DEBUG_INTERNAL_PREFIX "quad:vbo:element");
 
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
         glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -56,6 +58,8 @@ void DeviceGLInitQuad(br_device_pixelmap_gl_quad *self, HVIDEO hVideo)
 
     { /* Default Quad VAO */
         glGenVertexArrays(1, &self->defaultVao);
+        DeviceGLObjectLabel(GL_VERTEX_ARRAY, self->defaultVao, BR_GLREND_DEBUG_INTERNAL_PREFIX "quad:vao");
+
         glBindVertexArray(self->defaultVao);
 
         glBindBuffer(GL_ARRAY_BUFFER, self->buffers[0]);

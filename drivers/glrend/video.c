@@ -245,6 +245,7 @@ GLuint VIDEO_BrPixelmapToGLTexture(br_pixelmap *pm)
         return 0;
     }
 
+    DeviceGLObjectLabelF(GL_TEXTURE, tex, BR_GLREND_DEBUG_INTERNAL_PREFIX "temp:%s", pm->identifier ? pm->identifier : "(unnamed)");
     return tex;
 }
 

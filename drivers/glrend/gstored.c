@@ -142,7 +142,7 @@ br_geometry_stored *GeometryStoredGLAllocate(br_geometry_v1_model *gv1model, con
 
     self             = BrResAllocate(gv1model->renderer_facility->object_list, sizeof(*self), BR_MEMORY_OBJECT);
     self->dispatch   = &geometryStoredDispatch;
-    self->identifier = id;
+    self->identifier = BrResSprintf(self, BR_GLREND_DEBUG_USER_PREFIX "%s", id);
     self->device     = gv1model->device;
     self->gv1model   = gv1model;
 
@@ -166,6 +166,11 @@ br_geometry_stored *GeometryStoredGLAllocate(br_geometry_v1_model *gv1model, con
     self->gl_vbo      = build_vbo(model, total_vertices);
     self->gl_ibo      = build_ibo(model, total_faces, self->groups);
     self->gl_vao      = create_vao(&r->pixelmap->screen->asFront.video, self->gl_vbo_posn, self->gl_vbo, self->gl_ibo);
+
+    DeviceGLObjectLabelF(GL_BUFFER, self->gl_vbo_posn, "%s:vbo:posn", self->identifier);
+    DeviceGLObjectLabelF(GL_BUFFER, self->gl_vbo, "%s:vbo", self->identifier);
+    DeviceGLObjectLabelF(GL_BUFFER, self->gl_ibo, "%s:ibo", self->identifier);
+    DeviceGLObjectLabelF(GL_VERTEX_ARRAY, self->gl_vao, "%s:vao", self->identifier);
 
     glBindVertexArray(0);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);

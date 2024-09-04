@@ -50,6 +50,9 @@ br_error FontGLBuildArray(br_font_gl *gl_font, br_font *font)
     glBufferData(GL_UNIFORM_BUFFER, sizeof(font_data), &fd, GL_STATIC_DRAW);
     glBindBuffer(GL_UNIFORM_BUFFER, 0);
 
+    DeviceGLObjectLabelF(GL_BUFFER, gl_font->font_data, BR_GLREND_DEBUG_INTERNAL_PREFIX "Fnt%s%dx%d:Data",
+                         (font->flags & BR_FONTF_PROPORTIONAL) ? "P" : "F", font->glyph_x, font->glyph_y);
+
     /*
      * Allocate a temporary pixelmap to draw text into.
      */
@@ -61,6 +64,9 @@ br_error FontGLBuildArray(br_font_gl *gl_font, br_font *font)
     glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, fmt->internal_format, max_width, max_height, GLYPH_COUNT, 0, fmt->format, fmt->type, NULL);
     glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
+    DeviceGLObjectLabelF(GL_TEXTURE, tex, BR_GLREND_DEBUG_INTERNAL_PREFIX "Fnt%s%dx%d:Texture",
+                         (font->flags & BR_FONTF_PROPORTIONAL) ? "P" : "F", font->glyph_x, font->glyph_y);
 
     for(GLsizei i = 0; i < GLYPH_COUNT; ++i) {
         char c[2] = {(char)i, '\0'};

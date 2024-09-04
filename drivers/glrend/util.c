@@ -7,6 +7,9 @@ GLuint DeviceGLBuildWhiteTexture(void)
     GLuint tex;
 
     glGenTextures(1, &tex);
+
+    DeviceGLObjectLabel(GL_TEXTURE, tex, BR_GLREND_DEBUG_INTERNAL_PREFIX "white");
+
     glBindTexture(GL_TEXTURE_2D, tex);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
@@ -23,6 +26,9 @@ GLuint DeviceGLBuildCheckerboardTexture(void)
     GLuint tex;
 
     glGenTextures(1, &tex);
+
+    DeviceGLObjectLabel(GL_TEXTURE, tex, BR_GLREND_DEBUG_INTERNAL_PREFIX "checkerboard");
+
     glBindTexture(GL_TEXTURE_2D, tex);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
@@ -74,4 +80,30 @@ br_uint_8 DeviceGLTypeOrBits(br_uint_8 pixel_type, br_int_32 pixel_bits)
     }
 
     return BR_PMT_MAX;
+}
+
+void DeviceGLObjectLabel(GLenum identifier, GLuint name, const char *s)
+{
+    if(GLAD_GL_KHR_debug == 0)
+        return;
+
+    glObjectLabel(identifier, name, -1, s);
+}
+
+void DeviceGLObjectLabelF(GLenum identifier, GLuint name, const char *fmt, ...)
+{
+    va_list ap;
+    char   *s   = BrScratchString();
+    size_t  len = BrScratchStringSize();
+
+    if(GLAD_GL_KHR_debug == 0)
+        return;
+
+    va_start(ap, fmt);
+    BrVSprintfN(s, len, fmt, ap);
+    va_end(ap);
+
+    s[len - 1] = '\0';
+
+    DeviceGLObjectLabel(identifier, name, s);
 }

@@ -25,6 +25,9 @@ extern "C" {
 #define BR_RENDERER_STATE_STORED_PRIVATE
 #define BR_RENDERER_PRIVATE
 
+#define BR_GLREND_DEBUG_INTERNAL_PREFIX "glrend:internal:"
+#define BR_GLREND_DEBUG_USER_PREFIX     "glrend:user:"
+
 #include "brddi.h"
 #include "brglrend.h"
 #include "formats.h"

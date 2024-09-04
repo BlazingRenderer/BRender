@@ -36,31 +36,31 @@ struct br_buffer_stored *BufferStoredGLAllocate(br_renderer *renderer, br_token 
 
         case BRT_TEXTURE_O:
         case BRT_COLOUR_MAP_O:
-            ident = "Colour-Map";
+            ident = "colour_map";
             break;
 
         case BRT_INDEX_SHADE_O:
-            ident = "Shade-Table";
+            ident = "shade_table";
             break;
 
         case BRT_INDEX_BLEND_O:
-            ident = "Blend-Table";
+            ident = "blend_table";
             break;
 
         case BRT_SCREEN_DOOR_O:
-            ident = "Screendoor-Table";
+            ident = "screendoor_table";
             break;
 
         case BRT_INDEX_LIGHT_O:
-            ident = "Lighting-Table";
+            ident = "lighting_table";
             break;
 
         case BRT_BUMP_O:
-            ident = "Bump-Map";
+            ident = "bump_map";
             break;
 
         case BRT_UNKNOWN:
-            ident = "Unknown";
+            ident = "unknown";
             break;
 
         default:
@@ -72,7 +72,7 @@ struct br_buffer_stored *BufferStoredGLAllocate(br_renderer *renderer, br_token 
         return NULL;
 
     self->dispatch   = &bufferStoredDispatch;
-    self->identifier = ident;
+    self->identifier = BrResSprintf(self, BR_GLREND_DEBUG_USER_PREFIX "%s:%s", ident, pm->pm_identifier ? pm->pm_identifier : "(unnamed)");
     self->device     = ObjectDevice(renderer);
     self->renderer   = renderer;
     self->gl_tex     = 0;
@@ -141,6 +141,8 @@ static br_error updateMemory(br_buffer_stored *self, br_pixelmap *pm)
 
     glBindTexture(GL_TEXTURE_2D, self->gl_tex);
     glTexImage2D(GL_TEXTURE_2D, 0, fmt->internal_format, pm->width, pm->height, 0, fmt->format, fmt->type, pm->pixels);
+
+    DeviceGLObjectLabel(GL_TEXTURE, self->gl_tex, self->identifier);
 
     if((err = glGetError()) != 0) {
         BrLogError("GLREND", "glTexImage2D() failed with %s", DeviceGLStrError(err));

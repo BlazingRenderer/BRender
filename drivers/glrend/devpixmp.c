@@ -83,6 +83,8 @@ static br_error recreate_renderbuffers(br_device_pixelmap *self)
             glTexImage2D(binding_point, 0, GL_RGBA8, self->pm_width, self->pm_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
         }
 
+        DeviceGLObjectLabelF(GL_TEXTURE, self->asBack.glTex, "%s:colour", self->pm_identifier);
+
         glBindTexture(binding_point, 0);
 
         /* Attach */
@@ -106,6 +108,8 @@ static br_error recreate_renderbuffers(br_device_pixelmap *self)
             glTexImage2D(binding_point, 0, GL_DEPTH_COMPONENT, self->pm_width, self->pm_height, 0, GL_DEPTH_COMPONENT,
                          GL_UNSIGNED_BYTE, NULL);
         }
+
+        DeviceGLObjectLabelF(GL_TEXTURE, self->asDepth.glDepth, "%s:depth", self->pm_identifier);
 
         glBindTexture(binding_point, 0);
 
@@ -254,10 +258,10 @@ br_error BR_CMETHOD_DECL(br_device_pixelmap_gl, match)(br_device_pixelmap *self,
 
     switch(mt.use_type) {
         case BRT_OFFSCREEN:
-            typestring = "Backbuffer";
+            typestring = "backbuffer";
             break;
         case BRT_DEPTH:
-            typestring = "Depth";
+            typestring = "depth";
 
             /*
              * Depth buffers must be matched with the backbuffer.
@@ -307,7 +311,7 @@ br_error BR_CMETHOD_DECL(br_device_pixelmap_gl, match)(br_device_pixelmap *self,
 
     pm                  = BrResAllocate(self->device, sizeof(br_device_pixelmap), BR_MEMORY_OBJECT);
     pm->dispatch        = &devicePixelmapDispatch;
-    pm->pm_identifier   = BrResSprintf(pm, "OpenGL:%s:%dx%d", typestring, mt.width, mt.height);
+    pm->pm_identifier   = BrResSprintf(pm, BR_GLREND_DEBUG_USER_PREFIX "%s:%dx%d", typestring, mt.width, mt.height);
     pm->device          = self->device;
     pm->output_facility = self->output_facility;
     pm->use_type        = mt.use_type;
@@ -327,6 +331,7 @@ br_error BR_CMETHOD_DECL(br_device_pixelmap_gl, match)(br_device_pixelmap *self,
     if(mt.use_type == BRT_OFFSCREEN) {
         pm->asBack.depthbuffer = NULL;
         glGenFramebuffers(1, &pm->asBack.glFbo);
+        DeviceGLObjectLabelF(GL_FRAMEBUFFER, pm->asBack.glFbo, "%s:fbo", pm->pm_identifier);
         DeviceGLInitQuad(&pm->asBack.quad, hVideo);
     } else {
         UASSERT(mt.use_type == BRT_DEPTH);
