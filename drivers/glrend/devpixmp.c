@@ -93,7 +93,7 @@ static br_error recreate_renderbuffers(br_device_pixelmap *self)
         UASSERT(self->asDepth.backbuffer->asBack.glFbo != 0);
 
         /* Delete */
-        glGenTextures(1, &self->asDepth.glDepth);
+        glDeleteTextures(1, &self->asDepth.glDepth);
 
         /* Create */
         glGenTextures(1, &self->asDepth.glDepth);
