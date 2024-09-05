@@ -113,7 +113,7 @@ br_device_pixelmap *DevicePixelmapMemAllocate(br_uint_8 type, br_uint_16 w, br_u
     pm->pm_identifier    = NULL;
     pm->pm_type          = type;
     pm->pm_map           = NULL;
-    pm->pm_flags         = BR_PMF_LINEAR;
+    pm->pm_flags         = 0;
     pm->pm_copy_function = BR_PMCOPY_NORMAL;
     pm->pm_base_x        = 0;
     pm->pm_base_y        = 0;
@@ -131,6 +131,12 @@ br_device_pixelmap *DevicePixelmapMemAllocate(br_uint_8 type, br_uint_16 w, br_u
 
     if(((pm->pm_row_bytes * 8) % tip->bits) == 0)
         pm->pm_flags |= BR_PMF_ROW_WHOLEPIXELS;
+
+    /*
+     * Set linear flag if there's no alignment padding.
+     */
+    if((pm->pm_width * tip->bits) / 8 == pm->pm_row_bytes)
+        pm->pm_flags |= BR_PMF_LINEAR;
 
     /*
      * Allocate pixels
