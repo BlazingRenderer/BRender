@@ -485,7 +485,7 @@ br_error BR_CMETHOD(br_device_pixelmap_gl, rectangleStretchCopyTo)(br_device_pix
     if(stored != NULL && ObjectDevice(stored) == self->device) {
         tex = BufferStoredGLGetTexture(stored);
     } else {
-        tex     = VIDEO_BrPixelmapToGLTexture(src);
+        tex     = DeviceGLPixelmapToGLTexture(src);
         tex_tmp = BR_TRUE;
     }
 

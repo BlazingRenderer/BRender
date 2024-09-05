@@ -205,50 +205,6 @@ const br_pixelmap_gl_fmt *DeviceGLGetFormatDetails(br_uint_8 type)
     return fmt;
 }
 
-br_error VIDEOI_BrPixelmapToExistingTexture(GLuint tex, br_pixelmap *pm)
-{
-    const br_pixelmap_gl_fmt *fmt;
-
-    if((fmt = DeviceGLGetFormatDetails(pm->type)) == NULL)
-        return BRE_FAIL;
-
-    glBindTexture(GL_TEXTURE_2D, tex);
-
-    glTexImage2D(GL_TEXTURE_2D, 0, fmt->internal_format, pm->width, pm->height, 0, fmt->format, fmt->type, pm->pixels);
-
-    glGenerateMipmap(GL_TEXTURE_2D);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_SWIZZLE_R, fmt->swizzle_r);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_SWIZZLE_G, fmt->swizzle_g);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_SWIZZLE_B, fmt->swizzle_b);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_SWIZZLE_A, fmt->swizzle_a);
-
-    glBindTexture(GL_TEXTURE_2D, 0);
-
-    return BRE_OK;
-}
-
-GLuint VIDEO_BrPixelmapToGLTexture(br_pixelmap *pm)
-{
-    if(pm == NULL)
-        return 0;
-
-    GLuint tex;
-    glGenTextures(1, &tex);
-
-    if(VIDEOI_BrPixelmapToExistingTexture(tex, pm) != BRE_OK) {
-        glDeleteTextures(1, &tex);
-        return 0;
-    }
-
-    DeviceGLObjectLabelF(GL_TEXTURE, tex, BR_GLREND_DEBUG_INTERNAL_PREFIX "temp:%s", pm->identifier ? pm->identifier : "(unnamed)");
-    return tex;
-}
-
 void VIDEOI_BrRectToGL(const br_pixelmap *pm, br_rectangle *r)
 {
     br_rectangle out;

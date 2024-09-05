@@ -29,10 +29,6 @@ br_boolean VIDEOI_CompileTextShader(HVIDEO hVideo);
 
 br_boolean VIDEOI_CompileBRenderShader(HVIDEO hVideo, const char *vertPath, const char *fragPath);
 
-GLuint VIDEO_BrPixelmapToGLTexture(br_pixelmap *pm);
-
-br_error VIDEOI_BrPixelmapToExistingTexture(GLuint tex, br_pixelmap *pm);
-
 void VIDEOI_BrRectToGL(const br_pixelmap *pm, br_rectangle *r);
 
 void VIDEOI_BrRectToUVs(const br_pixelmap *pm, const br_rectangle *r, float *x0, float *y0, float *x1, float *y1);
@@ -169,6 +165,8 @@ void DeviceGLDrawQuad(br_device_pixelmap_gl_quad *self);
 br_error DevicePixelmapGLBindFramebuffer(GLenum target, br_device_pixelmap *pm);
 GLuint   DeviceGLBuildWhiteTexture(void);
 GLuint   DeviceGLBuildCheckerboardTexture(void);
+GLuint   DeviceGLPixelmapToGLTexture(br_pixelmap *pm);
+br_error DeviceGLPixelmapToExistingGLTexture(GLuint tex, br_pixelmap *pm);
 
 br_uint_8 DeviceGLTypeOrBits(br_uint_8 pixel_type, br_int_32 pixel_bits);
 
