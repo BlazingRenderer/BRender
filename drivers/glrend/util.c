@@ -92,6 +92,9 @@ br_error DeviceGLPixelmapToExistingGLTexture(GLuint tex, br_pixelmap *pm)
     GLenum                    err;
     const br_pixelmap_gl_fmt *fmt;
 
+    if(pm->flags & BR_PMF_NO_ACCESS || pm->pixels == NULL)
+        return BRE_FAIL;
+
     if((fmt = DeviceGLGetFormatDetails(pm->type)) == NULL)
         return BRE_FAIL;
 
