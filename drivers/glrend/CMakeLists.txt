@@ -17,6 +17,20 @@ add_custom_command(
 )
 
 add_custom_command(
+        OUTPUT default.vert.glsl.h
+        COMMAND "${PERL_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/embedshader.pl" "g_DefaultVertexShader" "${CMAKE_CURRENT_SOURCE_DIR}/default.vert.glsl" default.vert.glsl.h
+        MAIN_DEPENDENCY "${CMAKE_CURRENT_SOURCE_DIR}/default.vert.glsl"
+        DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/embedshader.pl"
+)
+
+add_custom_command(
+        OUTPUT default.frag.glsl.h
+        COMMAND "${PERL_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/embedshader.pl" "g_DefaultFragmentShader" "${CMAKE_CURRENT_SOURCE_DIR}/default.frag.glsl" default.frag.glsl.h
+        MAIN_DEPENDENCY "${CMAKE_CURRENT_SOURCE_DIR}/default.frag.glsl"
+        DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/embedshader.pl"
+)
+
+add_custom_command(
         OUTPUT text.vert.glsl.h
         COMMAND "${PERL_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/embedshader.pl" "g_TextVertexShader" "${CMAKE_CURRENT_SOURCE_DIR}/text.vert.glsl" text.vert.glsl.h
         MAIN_DEPENDENCY "${CMAKE_CURRENT_SOURCE_DIR}/text.vert.glsl"
@@ -145,6 +159,9 @@ add_library(glrend
 
         "${CMAKE_CURRENT_BINARY_DIR}/brender.vert.glsl.h"
         "${CMAKE_CURRENT_BINARY_DIR}/brender.frag.glsl.h"
+
+        "${CMAKE_CURRENT_BINARY_DIR}/default.vert.glsl.h"
+        "${CMAKE_CURRENT_BINARY_DIR}/default.frag.glsl.h"
 
         "${CMAKE_CURRENT_BINARY_DIR}/text.vert.glsl.h"
         "${CMAKE_CURRENT_BINARY_DIR}/text.frag.glsl.h"

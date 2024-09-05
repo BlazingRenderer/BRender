@@ -1,35 +1,7 @@
 #include "drv.h"
 
-static const GLchar g_DefaultVertexShader[] = "#version 150\n"
-                                              "in vec3 aPosition;\n"
-                                              "in vec3 aColour;\n"
-                                              "in vec2 aUV;\n"
-                                              "out vec3 colour;\n"
-                                              "out vec2 uv;\n"
-                                              "\n"
-                                              "uniform mat4 uMVP;\n"
-                                              "\n"
-                                              "void main()\n"
-                                              "{\n"
-                                              "	gl_Position = uMVP * vec4(aPosition, 1.0);\n"
-                                              "	colour = aColour;\n"
-                                              "	uv = aUV;\n"
-                                              "}\n";
-
-static const GLchar g_DefaultFragmentShader
-    [] = "#version 150\n"
-         "\n"
-         "in vec3 colour;\n"
-         "in vec2 uv;\n"
-         "uniform sampler2D uSampler;\n"
-         "uniform float uVerticalFlip;\n"
-         "\n"
-         "out vec4 mainColour;\n"
-         "\n"
-         "void main()\n"
-         "{\n"
-         "	mainColour = texture(uSampler, vec2(uv.x, abs(uVerticalFlip - uv.y))) * vec4(colour.rgb, 1.0);\n"
-         "}\n";
+#include "default.vert.glsl.h"
+#include "default.frag.glsl.h"
 
 br_boolean VIDEOI_CompileDefaultShader(HVIDEO hVideo)
 {
