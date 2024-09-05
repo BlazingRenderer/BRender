@@ -37,10 +37,6 @@ br_matrix4 *VIDEOI_D3DtoGLProjection(br_matrix4 *m);
 
 const br_pixelmap_gl_fmt *DeviceGLGetFormatDetails(br_uint_8 type);
 
-br_boolean DeviceGLCheckErrors(void);
-
-const char *DeviceGLStrError(GLenum err);
-
 /*
  * device.c
  */
@@ -172,6 +168,9 @@ br_uint_8 DeviceGLTypeOrBits(br_uint_8 pixel_type, br_int_32 pixel_bits);
 
 void DeviceGLObjectLabel(GLenum identifier, GLuint name, const char *s);
 void DeviceGLObjectLabelF(GLenum identifier, GLuint name, const char *fmt, ...);
+
+br_boolean  DeviceGLCheckErrors(void);
+const char *DeviceGLStrError(GLenum err);
 
 /*
  * Wrappers for br_device_gl_procs.
