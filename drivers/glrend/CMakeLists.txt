@@ -46,7 +46,6 @@ set(GLSTATE_FILES
 source_group("STATE" FILES ${GLSTATE_FILES})
 
 set(VIDEO_FILES
-        checkboard64.c
         shader_brender.c
         shader_default.c
         shader_text.c

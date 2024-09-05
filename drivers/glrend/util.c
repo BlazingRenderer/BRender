@@ -21,7 +21,12 @@ GLuint DeviceGLBuildWhiteTexture(void)
 
 GLuint DeviceGLBuildCheckerboardTexture(void)
 {
-    extern const uint8_t checkerboard_rgba[];
+    // clang-format off
+    const static br_uint_8 checkerboard_rgba[] = {
+        0x00, 0x00, 0x00, 0xFF,   0xFF, 0x00, 0xFF, 0xFF,
+        0xFF, 0x00, 0xFF, 0xFF,   0x00, 0x00, 0x00, 0xFF,
+    };
+    // clang-format on
 
     GLuint tex;
 
@@ -34,7 +39,7 @@ GLuint DeviceGLBuildCheckerboardTexture(void)
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 64, 64, 0, GL_RGBA, GL_UNSIGNED_BYTE, checkerboard_rgba);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 2, 2, 0, GL_RGBA, GL_UNSIGNED_BYTE, checkerboard_rgba);
 
     return tex;
 }
