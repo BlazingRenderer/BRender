@@ -103,8 +103,20 @@ void main()
     if(!disable_colour_key && texColour.rgb == vec3(0.0, 0.0, 0.0))
         discard;
 
-    vec4 surfaceColour = surface_colour * texColour;
-    vec3 fragColour = vec3(colour.rgb * texColour.rgb);
+#if ENABLE_PHONG
+    vec4 lightColour;
+
+    bool directLightExists = false;
+    lightColour = fragmainXX(position, normal, directLightExists);
+    if (!directLightExists && num_lights > 0u && unlit == 0u) {
+        lightColour += vec4(clear_colour.rgb, 0.0);
+    }
+#else
+    vec4 lightColour = vec4(0, 0, 0, 0);
+#endif
+
+    vec4 surfaceColour = (surface_colour * texColour);
+    vec3 fragColour = vec3((colour.rgb + lightColour.rgb) * texColour.rgb);
 
     /* Perform gamma correction */
 #if ENABLE_GAMMA_CORRECTION
