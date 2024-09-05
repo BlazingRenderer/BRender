@@ -106,6 +106,7 @@ static br_boolean is_compatible(br_buffer_stored *self, br_pixelmap *pm, GLenum 
 static br_error updateMemory(br_buffer_stored *self, br_pixelmap *pm)
 {
     GLenum                    err;
+    br_error                  berr;
     const br_pixelmap_gl_fmt *fmt;
 
     /*
@@ -139,32 +140,14 @@ static br_error updateMemory(br_buffer_stored *self, br_pixelmap *pm)
         }
     }
 
-    glBindTexture(GL_TEXTURE_2D, self->gl_tex);
-    glTexImage2D(GL_TEXTURE_2D, 0, fmt->internal_format, pm->width, pm->height, 0, fmt->format, fmt->type, pm->pixels);
+    if((berr = DeviceGLPixelmapToExistingGLTexture(self->gl_tex, pm)) != BRE_OK) {
+        return berr;
+    }
 
     DeviceGLObjectLabel(GL_TEXTURE, self->gl_tex, self->identifier);
 
-    if((err = glGetError()) != 0) {
-        BrLogError("GLREND", "glTexImage2D() failed with %s", DeviceGLStrError(err));
-        glBindTexture(GL_TEXTURE_2D, 0);
-        return BRE_FAIL;
-    }
-
-    glGenerateMipmap(GL_TEXTURE_2D);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_SWIZZLE_R, fmt->swizzle_r);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_SWIZZLE_G, fmt->swizzle_g);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_SWIZZLE_B, fmt->swizzle_b);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_SWIZZLE_A, fmt->swizzle_a);
-
     self->source       = pm;
     self->source_flags = pm->flags;
-
-    glBindTexture(GL_TEXTURE_2D, 0);
     return BRE_OK;
 }
 
