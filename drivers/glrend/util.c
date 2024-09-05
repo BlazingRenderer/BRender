@@ -100,7 +100,30 @@ br_error DeviceGLPixelmapToExistingGLTexture(GLuint tex, br_pixelmap *pm)
 
     glBindTexture(GL_TEXTURE_2D, tex);
 
-    glTexImage2D(GL_TEXTURE_2D, 0, fmt->internal_format, pm->width, pm->height, 0, fmt->format, fmt->type, pm->pixels);
+    /*
+     * If the texture isn't linear, or is inverted (i.e. pm->pixels points to the end),
+     * we need to go via an intermediate.
+     */
+    if((pm->flags & (BR_PMF_LINEAR | BR_PMF_ROW_WHOLEPIXELS)) != (BR_PMF_LINEAR | BR_PMF_ROW_WHOLEPIXELS) || pm->row_bytes < 0) {
+        br_pixelmap *tmp = BrPixelmapAllocate(pm->type, pm->width, pm->height, NULL, BR_PMAF_NORMAL);
+        for(br_int_32 row = 0; row < pm->height; ++row) {
+            BrPixelmapRectangleCopy(tmp,                                  /* dst    */
+                                    -tmp->origin_x, -tmp->origin_y + row, /* dx, dy */
+                                    pm,                                   /* src    */
+                                    -pm->origin_x, -pm->origin_y + row,   /* sx, sy */
+                                    pm->width, 1                          /* w, h   */
+            );
+            /*
+             * To flip, set sy to:
+             *   pm->height - (-pm->origin_y + row) - 1
+             */
+        }
+
+        glTexImage2D(GL_TEXTURE_2D, 0, fmt->internal_format, pm->width, pm->height, 0, fmt->format, fmt->type, tmp->pixels);
+        BrPixelmapFree(tmp);
+    } else {
+        glTexImage2D(GL_TEXTURE_2D, 0, fmt->internal_format, pm->width, pm->height, 0, fmt->format, fmt->type, pm->pixels);
+    }
 
     if((err = glGetError()) != 0) {
         BrLogError("GLREND", "glTexImage2D() failed with %s", DeviceGLStrError(err));
