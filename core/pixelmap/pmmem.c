@@ -129,7 +129,7 @@ br_device_pixelmap *DevicePixelmapMemAllocate(br_uint_8 type, br_uint_16 w, br_u
      */
     pm->pm_row_bytes = tip->bits * tip->align * ((w + tip->align - 1) / tip->align) / 8;
 
-    if((pm->pm_width * tip->bits) / 8 == pm->pm_row_bytes)
+    if(((pm->pm_row_bytes * 8) % tip->bits) == 0)
         pm->pm_flags |= BR_PMF_ROW_WHOLEPIXELS;
 
     /*
