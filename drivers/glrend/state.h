@@ -97,9 +97,24 @@ typedef struct state_light {
     br_scalar spot_outer;
     br_scalar spot_inner;
 
+    br_scalar radius_outer;
+    br_scalar radius_inner;
+
+    br_angle angle_outer;
+
     br_scalar attenuation_l;
     br_scalar attenuation_c;
     br_scalar attenuation_q;
+
+    br_token attenuation_type;
+    br_token attenuation_hint;
+
+    br_boolean radius_cull;
+    br_boolean angle_cull;
+
+    br_light_volume volume;
+
+    br_boolean culled;
 } state_light;
 
 typedef void insert_cbfn(br_primitive *primitive, void *arg1, void *arg2, void *arg3, br_order_table *order_table,
