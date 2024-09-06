@@ -140,15 +140,15 @@ enum {
     BR_MATF_DISABLE_COLOUR_KEY = 0x20000000,
 
     BR_MATF_SMOOTH_ALPHA = 0x40000000,
-};
 
-/*
- * Backwards compatibility
- */
-#define BR_MATF_GOURAUD    BR_MATF_SMOOTH
-#define BR_MATF_MAP_COLOUR 0
-#define BR_MATF_FORCE_Z_0  BR_MATF_FORCE_FRONT
-#define BR_MATF_BLEND      0
+    /*
+     * Backwards compatibility
+     */
+    BR_MATF_GOURAUD    = BR_MATF_SMOOTH,
+    BR_MATF_MAP_COLOUR = 0,
+    BR_MATF_FORCE_Z_0  = BR_MATF_FORCE_FRONT,
+    BR_MATF_BLEND      = 0,
+};
 
 /*
  * Bits for br_material->mode
