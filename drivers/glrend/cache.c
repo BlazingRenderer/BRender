@@ -3,20 +3,82 @@
 #include "shortcut.h"
 #include "vecifns.h"
 
-/*
-** Process each light, doing as much once-per-frame work as possible.
-** - For work that cannot be done here, see GLSTATE_ProcessActiveLights()
-*/
-static void ProcessSceneLights(state_cache *cache, const state_light *lights)
+/* softrend/setup.c, from ActiveLightsUpdate() */
+static void accumulate_ambient(shader_data_scene *scache, const state_light *lights)
 {
-    cache->scene.num_lights = 0;
-    for(uint32_t i = 0; i < MAX_STATE_LIGHTS; ++i) {
-        const state_light *light = lights + i;
+    br_boolean found_ambient = BR_FALSE;
 
-        if(light->type == BRT_NONE)
+    scache->ambient_red       = BR_SCALAR(0.0);
+    scache->ambient_green     = BR_SCALAR(0.0);
+    scache->ambient_blue      = BR_SCALAR(0.0);
+    scache->ambient_intensity = BR_SCALAR(0.0);
+
+    for(int i = 0; i < MAX_STATE_LIGHTS; ++i) {
+        const state_light *lp = lights + i;
+        br_scalar          intensity;
+
+        if(lp->type != BRT_AMBIENT || lp->attenuation_type == BRT_RADII)
             continue;
 
-        shader_data_light *alp = cache->scene.lights + cache->scene.num_lights;
+        found_ambient = BR_TRUE;
+
+        if(lp->culled)
+            continue;
+
+        intensity = BR_RCP(lp->attenuation_c);
+
+        scache->ambient_red += BR_MUL(BrFixedToScalar(BR_RED(lp->colour) << 8), intensity);
+        scache->ambient_green += BR_MUL(BrFixedToScalar(BR_GRN(lp->colour) << 8), intensity);
+        scache->ambient_blue += BR_MUL(BrFixedToScalar(BR_BLU(lp->colour) << 8), intensity);
+        scache->ambient_intensity += intensity;
+    }
+
+    if(found_ambient) {
+        if(scache->ambient_red > BR_SCALAR(1.0))
+            scache->ambient_red = BR_SCALAR(1.0);
+
+        if(scache->ambient_green > BR_SCALAR(1.0))
+            scache->ambient_green = BR_SCALAR(1.0);
+
+        if(scache->ambient_blue > BR_SCALAR(1.0))
+            scache->ambient_blue = BR_SCALAR(1.0);
+
+        scache->use_ambient_colour = scache->ambient_red != BR_SCALAR(1.0) || scache->ambient_green != BR_SCALAR(1.0) ||
+                                     scache->ambient_blue != BR_SCALAR(1.0);
+
+        if(scache->ambient_intensity > BR_SCALAR(1.0))
+            scache->ambient_intensity = BR_SCALAR(1.0);
+
+        scache->use_ambient_intensity = scache->ambient_intensity != BR_SCALAR(1.0);
+
+    } else {
+        scache->use_ambient_colour    = BR_FALSE;
+        scache->use_ambient_intensity = BR_FALSE;
+    }
+}
+
+/**
+ * \brief Process each light, doing as much once-per-frame work as possible.
+ *
+ * \remark BRender does support model/view-space lights. We only support view-space because
+ *  there's no benefit to model-space. Luckily, the position/direction is always transformed
+ *  in to view-space anyway, so we can just (ab)use that.
+ *
+ * \remark See BrSetupLighs() in `core/v1db/enables.c` for reference.
+ */
+static void ProcessSceneLights(state_cache *cache, const state_light *lights)
+{
+    accumulate_ambient(&cache->scene, lights);
+
+    cache->scene.num_lights = 0;
+    for(uint32_t i = 0; i < MAX_STATE_LIGHTS; ++i) {
+        const state_light *light     = lights + i;
+        shader_data_light *alp       = cache->scene.lights + cache->scene.num_lights;
+        br_token           type      = light->type & BR_LIGHT_TYPE;
+        float              intensity = 16384.0f;
+
+        if(type == BRT_NONE || light->culled)
+            continue;
 
         /* See enables.c:194, BrSetupLights(). All the lights are already converted into view space. */
         BrVector4Set(&alp->position, light->position.v[0], light->position.v[1], light->position.v[2],
@@ -24,11 +86,15 @@ static void ProcessSceneLights(state_cache *cache, const state_light *lights)
 
         BrVector4Set(&alp->direction, light->direction.v[0], light->direction.v[1], light->direction.v[2], 0.0f);
 
-        float intensity = 16384.0f; /* Effectively infinite */
-        if(light->attenuation_c != 0)
+        if(light->attenuation_c != BR_SCALAR(0))
             intensity = BR_RCP(light->attenuation_c);
 
         if(light->type == BRT_DIRECT) {
+            /*
+             * Work out a unit half vector:
+             *  eye = (0,0,1)
+             *  half = normalise(light_direection + eye)
+             */
             BrVector4Copy(&alp->half, &alp->direction);
             alp->half.v[2] += 1.0f;
             BrVector4Normalise(&alp->half, &alp->half);
@@ -41,11 +107,21 @@ static void ProcessSceneLights(state_cache *cache, const state_light *lights)
         BrVector4Set(&alp->colour, BR_RED(light->colour) / 255.0f, BR_GRN(light->colour) / 255.0f,
                      BR_BLU(light->colour) / 255.0f, light->type == BRT_AMBIENT ? 1.0f : 0.0f);
 
+        if(light->attenuation_type == BRT_RADII) {
+            if(light->radius_inner != light->radius_outer)
+                alp->falloff = BR_DIV(alp->iclq.v[0], light->radius_inner - light->radius_outer);
+
+            alp->cutoff = BR_SQR(light->radius_outer);
+        }
+
         if(light->type == BRT_SPOT) {
             BrVector2Set(&alp->spot_angles, BrAngleToRadian(light->spot_inner), BrAngleToRadian(light->spot_outer));
+            alp->spot_falloff = BR_RCP(light->spot_outer - light->spot_inner);
         } else {
             BrVector2Set(&alp->spot_angles, 0, 0);
+            alp->spot_falloff = 0.0f;
         }
+
         ++alp;
         ++cache->scene.num_lights;
     }

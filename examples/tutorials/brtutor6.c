@@ -26,11 +26,10 @@ br_error Tutorial6Init(br_demo *demo)
     /*
      * Load and Register `earth' Texture
      */
-    if((earth_pm = BrPixelmapLoad("earth15.pix")) == NULL) {
+    if((earth_pm = BrMapFind("earth15")) == NULL) {
         BrLogError("DEMO", "Unable to load earth15.pix");
         return BRE_FAIL;
     }
-    BrMapAdd(earth_pm);
 
     /*
      * Load and Apply `earth' Material
@@ -39,6 +38,7 @@ br_error Tutorial6Init(br_demo *demo)
         BrLogError("DEMO", "Unable to load earth.mat");
         return BRE_FAIL;
     }
+    planet_material->colour_map = earth_pm;
     BrMaterialAdd(planet_material);
 
     tut = BrResAllocate(demo, sizeof(br_demo_tut6), BR_MEMORY_APPLICATION);

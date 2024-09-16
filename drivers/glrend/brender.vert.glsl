@@ -1,6 +1,7 @@
 #version 150
 
-#include "brender.common.glsl"
+#define vFragPos (position.xyz)
+
 
 in vec3 aPosition;
 in vec2 aUV;
@@ -14,6 +15,9 @@ out vec4 colour;
 
 out vec3 rawPosition;
 out vec3 rawNormal;
+
+#include "brender.common.glsl"
+
 
 #if ENABLE_PSX_SIMULATION
 vec4 PSXify_pos(in vec4 vertex, in vec2 resolution)

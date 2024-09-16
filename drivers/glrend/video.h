@@ -98,16 +98,28 @@ typedef struct shader_data_light {
     alignas(16) br_vector4 iclq;
     /* (inner, outer), if (0.0, 0.0), then this is a point light. */
     alignas(16) br_vector2 spot_angles;
+    alignas(4) br_float _pad0, _pad1;
+
+    alignas(4) br_float falloff;
+    alignas(4) br_float cutoff;
+    alignas(4) br_float spot_falloff;
 
     /* Pad out the structure to maintain alignment. */
-    alignas(4) float _pad0, _pad1;
+    alignas(4) float _pad2;
 } shader_data_light;
 BR_STATIC_ASSERT(sizeof(shader_data_light) % 16 == 0, "shader_data_light is not aligned");
 
 typedef struct shader_data_scene {
     alignas(16) br_vector4 eye_view;
-    alignas(16) shader_data_light lights[BR_MAX_LIGHTS];
     alignas(4) uint32_t num_lights;
+    alignas(4) uint32_t use_ambient_colour;
+    alignas(4) float ambient_red;
+    alignas(4) float ambient_green;
+    alignas(4) float ambient_blue;
+    alignas(4) br_boolean use_ambient_intensity;
+    alignas(4) float ambient_intensity;
+    alignas(4) float _pad0;
+    alignas(16) shader_data_light lights[BR_MAX_LIGHTS];
 } shader_data_scene;
 BR_STATIC_ASSERT(sizeof(((shader_data_scene *)NULL)->lights) == sizeof(shader_data_light) * BR_MAX_LIGHTS,
                  "std::array<shader_data_light> fucked up");

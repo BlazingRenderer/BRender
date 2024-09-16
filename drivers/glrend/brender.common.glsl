@@ -11,14 +11,14 @@
 #define UV_SOURCE_ENV_I              2
 
 #define DEBUG_DISABLE_LIGHTS            0
-#define DEBUG_DISABLE_LIGHT_AMBIENT     0
+#define DEBUG_DISABLE_LIGHT_AMBIENT     1
 #define DEBUG_DISABLE_LIGHT_DIRECTIONAL 0
 #define DEBUG_DISABLE_LIGHT_POINT       0
 #define DEBUG_DISABLE_LIGHT_POINTATTEN  0
 #define DEBUG_DISABLE_LIGHT_SPOT        1
-#define DEBUG_DISABLE_LIGHT_SPECULAR    0
-#define ENABLE_GOURAUD                  1
-#define ENABLE_PHONG                    0
+#define DEBUG_DISABLE_LIGHT_SPECULAR    1
+#define ENABLE_GOURAUD                  0
+#define ENABLE_PHONG                    1
 #define ENABLE_PSX_SIMULATION           0
 
 struct br_light
@@ -29,13 +29,22 @@ struct br_light
     vec4 colour;      /* (R, G, B, 0), normalised */
     vec4 iclq;        /* (intensity, constant, linear, attenutation) */
     vec2 spot_angles; /* (inner, outer), if (0.0, 0.0), then this is a point light. */
+    float falloff;
+    float cutoff;
+    float spot_falloff;
 };
 
 layout(std140) uniform br_scene_state
 {
     vec4 eye_view; /* Eye position in view-space */
-    br_light lights[MAX_LIGHTS];
     uint num_lights;
+    uint use_ambient_colour;
+    float ambient_red;
+    float ambient_green;
+    float ambient_blue;
+    uint use_ambient_intensity;
+    float ambient_intensity;
+    br_light lights[MAX_LIGHTS];
 };
 
 layout(std140) uniform br_model_state
@@ -81,8 +90,18 @@ float shadingFilter(in float i)
     return i;
 }
 
+
+
+vec4 _SpecColour = vec4(1.0);
+float _Shininess = 64.0;
+
 float calculateAttenuation(in br_light alp, in float dist)
 {
+    float c = alp.iclq.y;
+    float l = alp.iclq.z;
+    float q = alp.iclq.w;
+
+    return 1.0 / (c + (l * dist) + (q * dist * dist));
     if (dist > alp.iclq.w)
         return 0.0;
 
@@ -96,14 +115,78 @@ float calculateAttenuation(in br_light alp, in float dist)
     return 1.0 - attn;
 }
 
+float calculateSpecularPhong(in vec3 lightDir, in vec3 normal)
+{
+    vec3 viewDir = normalize(-vFragPos);
+    vec3 reflectDir = reflect(-lightDir, normal);
+
+    return pow(max(dot(viewDir, reflectDir), 0.0), _Shininess);
+}
+
+float calculateSpecularBlinnPhong(in vec3 lightDir, in vec3 normal)
+{
+    vec3 viewDir = normalize(-vFragPos);
+    vec3 halfwayDir = normalize(lightDir + viewDir);
+
+    return pow(max(dot(normal, halfwayDir), 0.0), _Shininess * 4);
+}
+
+float calculateSpecular(in vec3 lightDir, in vec3 normal)
+{
+    return calculateSpecularBlinnPhong(lightDir, normal);
+}
+
 
 vec3 lightingColourAmbient(in vec4 p, in vec4 n, in br_light alp)
 {
     return ka * alp.iclq.x * alp.colour.xyz;
 }
 
+
+vec3 calculateASD(in br_light alp, in vec3 lightDir, in vec3 normal, in vec3 surfaceColour)
+{
+    vec3 lightColour = alp.colour.xyz;
+    float intensity = alp.iclq.x;
+
+    vec3 ambient = ka * lightColour * surfaceColour;
+
+    /* Do diffuse. */
+    float _dot = max(dot(normal, lightDir), 0.0);
+    vec3 diffuse = kd * _dot * lightColour * surfaceColour;
+
+    /* Only do specular if the light's actually hitting the surface. */
+    vec3 specular = vec3(0.0);
+    if(_dot > 0)
+        specular = ks * calculateSpecular(lightDir, normal) * lightColour * _SpecColour.xyz;
+
+    return (ambient + diffuse + specular) * intensity;
+}
+
+vec3 lightDirect(in br_light alp, in vec3 normal, in vec3 surfaceColour)
+{
+    vec3 lightDir = -alp.direction.xyz;
+    return calculateASD(alp, lightDir, normal, surfaceColour);
+}
+
+
+vec3 lightPoint(in br_light alp, in vec3 normal, in vec3 surfaceColour)
+{
+    vec3 lightDir = alp.position.xyz - vFragPos;
+    float dist = length(lightDir);
+    lightDir = normalize(lightDir);
+
+    vec3 colour = calculateASD(i, lightDir, normal, surfaceColour);
+    float atten = calculateAttenuation(alp.iclq.yzw, dist);
+
+    return colour * atten * alp.iclq.x;
+}
+
 vec3 lightingColourDirect(in vec4 p, in vec4 n, in br_light alp)
 {
+    return lightDirect(alp, n.xyz, vec3(1, 1, 1));
+    //vec3 lightDir = -alp.direction.xyz;
+
+
     /* Notes: '_dot' is 'intensity' */
     float _dot = max(dot(n, alp.direction), 0.0) * kd;
 
