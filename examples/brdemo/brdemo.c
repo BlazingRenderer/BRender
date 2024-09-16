@@ -5,11 +5,18 @@
 
 #include "brdemo.h"
 
+struct br_device * BR_EXPORT BrDrv1SoftPrimBegin(const char *arguments);
+struct br_device * BR_EXPORT BrDrv1SoftRendBegin(const char *arguments);
+
+
 /* begin hook */
 void _BrBeginHook(void) // NOLINT(*-reserved-identifier)
 {
     BrDevAddStatic(NULL, BrDrv1SDL2Begin, NULL);
     BrDevAddStatic(NULL, BrDrv1GLBegin, NULL);
+
+    BrDevAddStatic(NULL, BrDrv1SoftPrimBegin, NULL);
+    BrDevAddStatic(NULL, BrDrv1SoftRendBegin, NULL);
 }
 
 /* end hook */

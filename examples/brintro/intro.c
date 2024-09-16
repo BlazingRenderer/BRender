@@ -290,6 +290,11 @@ br_intro *BrIntroCreate(void)
     BrMatrix34Translate(&state->camera->t.t.mat, BR_SCALAR(0), BR_SCALAR(0), BR_SCALAR(2));
     BrMatrix34RotateY(&state->light->t.t.mat, BR_ANGLE_DEG(-45));
     BrMatrix34PostRotateZ(&state->light->t.t.mat, BR_ANGLE_DEG(45));
+
+    {
+        br_light  *lightdata = state->light->type_data;
+        lightdata->type = BR_LIGHT_DIRECT  | BR_LIGHT_VIEW;
+    }
     BrLightEnable(state->light);
 
     BrIntroReset(state);

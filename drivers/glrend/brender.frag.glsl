@@ -1,7 +1,6 @@
 #version 150
 
-#include "brender.common.glsl"
-#include "common.glsl"
+#define vFragPos (position.xyz)
 
 in vec4 position;
 in vec2 uv;
@@ -16,6 +15,10 @@ out vec4 mainColour;
 
 uniform sampler2D  main_texture;
 uniform usampler2D index_texture;
+
+
+#include "brender.common.glsl"
+#include "common.glsl"
 
 vec3 adjustBrightness(in vec3 colour, in float brightness)
 {
