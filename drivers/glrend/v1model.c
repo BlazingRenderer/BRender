@@ -246,6 +246,11 @@ static void apply_stored_properties(HVIDEO hVideo, state_stack *state, uint32_t 
             assert(0);
         }
 
+        if(model->is_indexed) {
+            minFilter = GL_NEAREST;
+            magFilter = GL_NEAREST;
+        }
+
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, (GLint)minFilter);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, (GLint)magFilter);
 
