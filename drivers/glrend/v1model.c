@@ -251,6 +251,7 @@ static void apply_stored_properties(HVIDEO hVideo, state_stack *state, uint32_t 
             magFilter = GL_NEAREST;
         }
 
+        glActiveTexture(GL_TEXTURE0);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, (GLint)minFilter);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, (GLint)magFilter);
 
