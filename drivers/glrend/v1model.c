@@ -226,14 +226,20 @@ static void apply_stored_properties(HVIDEO hVideo, state_stack *state, uint32_t 
 
         GLenum  minFilter, magFilter;
         GLfloat maxAnisotropy;
+
+        model->is_filtered = 0;
         if(state->prim.filter == BRT_LINEAR && state->prim.mip_filter == BRT_LINEAR) {
             minFilter     = GL_LINEAR_MIPMAP_LINEAR;
             magFilter     = GL_LINEAR;
             maxAnisotropy = hVideo->maxAnisotropy;
+
+            model->is_filtered = 1;
         } else if(state->prim.filter == BRT_LINEAR && state->prim.mip_filter == BRT_NONE) {
             minFilter     = GL_LINEAR;
             magFilter     = GL_LINEAR;
             maxAnisotropy = 1.0f;
+
+            model->is_filtered = 1;
         } else if(state->prim.filter == BRT_NONE && state->prim.mip_filter == BRT_LINEAR) {
             minFilter     = GL_NEAREST_MIPMAP_NEAREST;
             magFilter     = GL_NEAREST;

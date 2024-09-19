@@ -58,6 +58,7 @@ layout(std140) uniform br_model_state
     int uv_source;
     bool disable_colour_key;
     bool is_indexed; /* Is our texture indexed? */
+    bool is_filtered;
 };
 
 #define SPECULAR_DOT()                    \
