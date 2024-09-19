@@ -101,7 +101,7 @@ static br_error updateMemory(br_buffer_stored *self, br_pixelmap *pm)
     if((fmt = DeviceGLGetFormatDetails(pm->type)) == NULL)
         return BRE_FAIL;
 
-    self->blended = fmt->blended;
+    self->fmt = fmt;
 
     if(self->gl_tex == 0) {
         glGenTextures(1, &self->gl_tex);
@@ -139,6 +139,7 @@ static br_error BR_CMETHOD_DECL(br_buffer_stored_gl, update)(struct br_buffer_st
         self->gl_tex       = 0; /* Unused for us. */
         self->source       = (br_pixelmap *)pm;
         self->source_flags = pm->pm_flags;
+        self->fmt          = DeviceGLGetFormatDetails(pm->pm_type);
         return BRE_OK;
     } else {
         /*

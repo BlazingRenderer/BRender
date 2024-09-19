@@ -250,7 +250,7 @@ static void apply_stored_properties(HVIDEO hVideo, state_stack *state, uint32_t 
         //	}
         // }
 
-        blending_on = (state->prim.flags & PRIMF_BLEND) || (state->prim.colour_map != NULL && state->prim.colour_map->blended);
+        blending_on = (state->prim.flags & PRIMF_BLEND) || (state->prim.colour_map != NULL && state->prim.colour_map->fmt->blended);
         if(blending_on) {
             glEnable(GL_BLEND);
             apply_blend_mode(state);

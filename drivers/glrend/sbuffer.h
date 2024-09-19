@@ -42,11 +42,7 @@ typedef struct br_buffer_stored {
      */
     GLuint gl_tex;
 
-    GLenum gl_internal_format;
-    GLenum gl_format;
-    GLenum gl_type;
-
-    br_boolean blended;
+    const br_pixelmap_gl_fmt *fmt;
 
     /*
      * Object query templates.
