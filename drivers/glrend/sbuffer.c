@@ -86,23 +86,6 @@ struct br_buffer_stored *BufferStoredGLAllocate(br_renderer *renderer, br_token 
     return self;
 }
 
-static br_boolean is_compatible(br_buffer_stored *self, br_pixelmap *pm, GLenum internal_format)
-{
-    if(self->source == NULL)
-        return BR_FALSE;
-
-    if(self->gl_tex == 0 || self->gl_internal_format == 0 || self->gl_format == 0 || self->gl_type == 0)
-        return BR_FALSE;
-
-    if(self->source->width != pm->width || self->source->height != pm->height)
-        return BR_FALSE;
-
-    if(self->gl_internal_format != internal_format)
-        return BR_FALSE;
-
-    return BR_TRUE;
-}
-
 static br_error updateMemory(br_buffer_stored *self, br_pixelmap *pm)
 {
     GLenum                    err;
@@ -119,18 +102,6 @@ static br_error updateMemory(br_buffer_stored *self, br_pixelmap *pm)
         return BRE_FAIL;
 
     self->blended = fmt->blended;
-
-    /*
-     * If we're compatible, update the existing texture.
-     */
-    if(is_compatible(self, pm, fmt->internal_format) == BR_TRUE) {
-        ASSERT(self->gl_tex != 0);
-
-        // TODO:
-        BrDebugBreak();
-
-        return BRE_OK;
-    }
 
     if(self->gl_tex == 0) {
         glGenTextures(1, &self->gl_tex);
