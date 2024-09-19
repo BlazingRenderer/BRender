@@ -66,7 +66,7 @@ br_error ReflectionInit(br_demo *demo)
         BrLogError("DEMO", "Error loading std.pal.");
         return BRE_FAIL;
     }
-    BrMapAdd(demo->palette);
+    BrTableAdd(demo->palette);
 
     /*
      * If the teapot simply reflected the earth with no other source
