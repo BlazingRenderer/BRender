@@ -7,7 +7,7 @@ add_custom_command(
         WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
         COMMAND "${PERL_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/embedshader.pl" "g_DefaultVertexShader" "${CMAKE_CURRENT_SOURCE_DIR}/brender.vert.glsl" "${CMAKE_CURRENT_BINARY_DIR}/brender.vert.glsl.h"
         MAIN_DEPENDENCY "${CMAKE_CURRENT_SOURCE_DIR}/brender.vert.glsl"
-        DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/embedshader.pl" "${CMAKE_CURRENT_SOURCE_DIR}/brender.common.glsl"
+        DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/embedshader.pl" "${CMAKE_CURRENT_SOURCE_DIR}/brender.common.glsl" "${CMAKE_CURRENT_SOURCE_DIR}/common.glsl"
 )
 
 add_custom_command(
@@ -15,7 +15,7 @@ add_custom_command(
         WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
         COMMAND "${PERL_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/embedshader.pl" "g_DefaultFragmentShader" "${CMAKE_CURRENT_SOURCE_DIR}/brender.frag.glsl" "${CMAKE_CURRENT_BINARY_DIR}/brender.frag.glsl.h"
         MAIN_DEPENDENCY "${CMAKE_CURRENT_SOURCE_DIR}/brender.frag.glsl"
-        DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/embedshader.pl" "${CMAKE_CURRENT_SOURCE_DIR}/brender.common.glsl"
+        DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/embedshader.pl" "${CMAKE_CURRENT_SOURCE_DIR}/brender.common.glsl" "${CMAKE_CURRENT_SOURCE_DIR}/common.glsl"
 )
 
 add_custom_command(

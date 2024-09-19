@@ -1,6 +1,7 @@
 #version 150
 
 #include "brender.common.glsl"
+#include "common.glsl"
 
 in vec4 position;
 in vec2 uv;
@@ -95,18 +96,24 @@ vec2 SurfaceMap(in vec3 position, in vec3 normal, in vec2 uv)
     return (map_transform * vec4(uv, 1.0, 0.0)).xy;
 }
 
+vec4 getTexColour(in vec2 uv)
+{
+    if(!is_indexed) {
+        return texture(main_texture, uv);
+    }
+
+    if(is_filtered) {
+        return bilinearFilter(index_texture, main_texture, uv);
+    }
+
+    return texturei(index_texture, main_texture, uv);
+}
+
 void main()
 {
     vec2 mappedUV = SurfaceMap(rawPosition, rawNormal, uv);
 
-    vec4 texColour;
-
-    if(is_indexed) {
-        int index = int(texture(index_texture, uv).r);
-        texColour = texelFetch(main_texture, ivec2(0, index), 0);
-    } else {
-        texColour = texture(main_texture, mappedUV);
-    }
+    vec4 texColour = getTexColour(mappedUV);
 
     if(!disable_colour_key && texColour.rgb == vec3(0.0, 0.0, 0.0))
         discard;
