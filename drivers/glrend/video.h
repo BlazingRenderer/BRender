@@ -15,6 +15,7 @@ typedef struct br_pixelmap_gl_fmt {
     GLenum     type;
     GLsizeiptr bytes;
     br_boolean blended;
+    br_boolean indexed;
     GLint      swizzle_r;
     GLint      swizzle_g;
     GLint      swizzle_b;
@@ -35,8 +36,10 @@ typedef struct _VIDEO {
         GLint  aColour;       /* Colour, vec3 */
         GLint  aUV;           /* UV, vec2 */
         GLint  uSampler;      /* Sampler, sampler2D */
+        GLint  uIndexTex;     /* Sampler, usampler2D */
         GLint  uMVP;          /* Model-View-Projection Matrix, mat4 */
         GLint  uVerticalFlip; /* Boolean (actually a float). Should the image be vertically flipped. */
+        GLint  uIndexed;      /* Boolean (actually a float). Is the texture indexed? */
     } defaultProgram;
 
     struct {
@@ -64,6 +67,7 @@ typedef struct _VIDEO {
 
         struct {
             GLint main_texture; /* sampler2D */
+            GLint index_texture; /* usampler2D */
         } uniforms;
 
         GLuint uboScene;
@@ -75,6 +79,7 @@ typedef struct _VIDEO {
         GLuint blockBindingModel;
 
         GLint mainTextureBinding;
+        GLint indexTextureBinding;
     } brenderProgram;
 } VIDEO, *HVIDEO;
 
@@ -124,6 +129,7 @@ typedef struct shader_data_model {
     alignas(4) uint32_t unlit;
     alignas(4) uint32_t uv_source;
     alignas(4) uint32_t disable_colour_key;
+    alignas(4) uint32_t is_indexed;
 } shader_data_model;
 #pragma pack(pop)
 

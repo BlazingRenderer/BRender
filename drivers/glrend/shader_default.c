@@ -29,8 +29,10 @@ br_boolean VIDEOI_CompileDefaultShader(HVIDEO hVideo)
         hVideo->defaultProgram.aColour       = glGetAttribLocation(hVideo->defaultProgram.program, "aColour");
         hVideo->defaultProgram.aUV           = glGetAttribLocation(hVideo->defaultProgram.program, "aUV");
         hVideo->defaultProgram.uSampler      = glGetUniformLocation(hVideo->defaultProgram.program, "uSampler");
+        hVideo->defaultProgram.uIndexTex     = glGetUniformLocation(hVideo->defaultProgram.program, "uIndexTex");
         hVideo->defaultProgram.uMVP          = glGetUniformLocation(hVideo->defaultProgram.program, "uMVP");
         hVideo->defaultProgram.uVerticalFlip = glGetUniformLocation(hVideo->defaultProgram.program, "uVerticalFlip");
+        hVideo->defaultProgram.uIndexed      = glGetUniformLocation(hVideo->defaultProgram.program, "uIndexed");
         glBindFragDataLocation(hVideo->defaultProgram.program, 0, "mainColour");
     }
 

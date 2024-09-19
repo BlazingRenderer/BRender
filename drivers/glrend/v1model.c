@@ -150,8 +150,6 @@ static void apply_stored_properties(HVIDEO hVideo, state_stack *state, uint32_t 
 
     *unlit = BR_FALSE;
     if(states & MASK_STATE_SURFACE) {
-        glActiveTexture(GL_TEXTURE0);
-
         if(state->surface.colour_source == BRT_SURFACE) {
             br_uint_32 colour = state->surface.colour;
             float      r      = BR_RED(colour) / 255.0f;
@@ -196,14 +194,32 @@ static void apply_stored_properties(HVIDEO hVideo, state_stack *state, uint32_t 
             glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
 
         if(state->prim.colour_map) {
-            glBindTexture(GL_TEXTURE_2D, BufferStoredGLGetTexture(state->prim.colour_map));
-            glUniform1i(hVideo->brenderProgram.uniforms.main_texture, hVideo->brenderProgram.mainTextureBinding);
+            br_buffer_stored *stored = state->prim.colour_map;
+
+            model->is_indexed = stored->fmt->indexed;
+
+            if(model->is_indexed) {
+                glActiveTexture(GL_TEXTURE0);
+                glBindTexture(GL_TEXTURE_2D, BufferStoredGLGetCLUTTexture(stored, tex_default));
+                glUniform1i(hVideo->brenderProgram.uniforms.main_texture, hVideo->brenderProgram.mainTextureBinding);
+
+                glActiveTexture(GL_TEXTURE1);
+                glBindTexture(GL_TEXTURE_2D, BufferStoredGLGetTexture(stored));
+                glUniform1i(hVideo->brenderProgram.uniforms.index_texture, hVideo->brenderProgram.indexTextureBinding);
+            } else {
+                glActiveTexture(GL_TEXTURE0);
+                glBindTexture(GL_TEXTURE_2D, BufferStoredGLGetTexture(stored));
+                glUniform1i(hVideo->brenderProgram.uniforms.main_texture, hVideo->brenderProgram.mainTextureBinding);
+            }
 
             // if(state->prim.colour_map->source->flags & BR_PMF_KEYED_TRANSPARENCY)
             //{
             //	//BrDebugBreak();
             // }
         } else {
+            model->is_indexed = 0;
+
+            glActiveTexture(GL_TEXTURE0);
             glBindTexture(GL_TEXTURE_2D, tex_default);
             glUniform1i(hVideo->brenderProgram.uniforms.main_texture, hVideo->brenderProgram.mainTextureBinding);
         }

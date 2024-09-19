@@ -232,6 +232,7 @@ br_error BR_CMETHOD_DECL(br_device_pixelmap_gl, match)(br_device_pixelmap *self,
     br_error                   err;
     br_device_pixelmap        *pm;
     const char                *typestring;
+    const br_pixelmap_gl_fmt  *fmt;
     HVIDEO                     hVideo;
     struct pixelmapMatchTokens mt = {
         .width        = self->pm_width,
@@ -301,7 +302,13 @@ br_error BR_CMETHOD_DECL(br_device_pixelmap_gl, match)(br_device_pixelmap *self,
     if(mt.type == BR_PMT_MAX)
         mt.type = self->pm_type;
 
-    if(DeviceGLGetFormatDetails(mt.type) == NULL)
+    if((fmt = DeviceGLGetFormatDetails(mt.type)) == NULL)
+        return BRE_FAIL;
+
+    /*
+     * Refuse creation of indexed pixelmaps.
+     */
+    if(fmt->indexed)
         return BRE_FAIL;
 
     if(mt.msaa_samples < 0)
@@ -477,20 +484,38 @@ br_error BR_CMETHOD(br_device_pixelmap_gl, rectangleStretchCopyTo)(br_device_pix
     br_buffer_stored *stored  = src->stored;
     br_boolean        tex_tmp = BR_FALSE;
     GLuint            tex;
+    br_boolean        clut_tmp = BR_FALSE;
+    GLuint            clut = 0;
     br_matrix4        mvp;
+    const br_pixelmap_gl_fmt *fmt;
 
     if(self->use_type != BRT_OFFSCREEN)
         return BRE_UNSUPPORTED;
 
     if(stored != NULL && ObjectDevice(stored) == self->device) {
         tex = BufferStoredGLGetTexture(stored);
+        fmt = stored->fmt;
     } else {
         tex     = DeviceGLPixelmapToGLTexture(src);
         tex_tmp = BR_TRUE;
+        fmt = DeviceGLGetFormatDetails(src->type);
     }
 
-    if(tex == 0)
+    clut = self->screen->asFront.tex_white;
+    if(fmt->indexed && src->map != NULL) {
+        if(src->map->stored != NULL) {
+            clut = BufferStoredGLGetCLUTTexture(stored, self->screen->asFront.tex_white);
+        } else {
+            clut = DeviceGLPixelmapToGLTexture(src->map);
+            clut_tmp = BR_TRUE;
+        }
+    }
+
+    if(tex == 0) {
+        if(clut != 0 && clut_tmp)
+            glDeleteTextures(1, &clut);
         return BRE_FAIL;
+    }
 
     /* Convert the rects to OpenGL-coordinates */
     VIDEOI_BrRectToGL(src, sr);
@@ -511,10 +536,23 @@ br_error BR_CMETHOD(br_device_pixelmap_gl, rectangleStretchCopyTo)(br_device_pix
     VIDEOI_D3DtoGLProjection(&mvp);
 
     glUniformMatrix4fv(hVideo->defaultProgram.uMVP, 1, GL_FALSE, (GLfloat *)&mvp);
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, tex);
-    glUniform1i(hVideo->defaultProgram.uSampler, 0);
     glUniform1f(hVideo->defaultProgram.uVerticalFlip, 1);
+    glUniform1f(hVideo->defaultProgram.uIndexed, (float)fmt->indexed);
+
+    if(fmt->indexed) {
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, clut);
+        glUniform1i(hVideo->defaultProgram.uSampler, 0);
+
+        glActiveTexture(GL_TEXTURE1);
+        glBindTexture(GL_TEXTURE_2D, tex);
+        glUniform1i(hVideo->defaultProgram.uIndexTex, 1);
+    } else {
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, tex);
+
+        glUniform1i(hVideo->defaultProgram.uSampler, 0);
+    }
 
     DeviceGLDrawQuad(&self->asBack.quad);
 
@@ -522,6 +560,9 @@ br_error BR_CMETHOD(br_device_pixelmap_gl, rectangleStretchCopyTo)(br_device_pix
 
     if(tex_tmp)
         glDeleteTextures(1, &tex);
+
+    if(clut_tmp)
+        glDeleteTextures(1, &clut);
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
     return BRE_OK;

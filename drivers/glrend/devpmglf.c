@@ -85,6 +85,7 @@ br_device_pixelmap *DevicePixelmapGLAllocateFront(br_device *dev, br_output_faci
     br_device_pixelmap      *self;
     br_int_32                count;
     GLint                    red_bits = 0, grn_bits = 0, blu_bits = 0, alpha_bits = 0;
+    const br_pixelmap_gl_fmt *fmt;
     struct pixelmapNewTokens pt = {
         .width           = -1,
         .height          = -1,
@@ -107,6 +108,16 @@ br_device_pixelmap *DevicePixelmapGLAllocateFront(br_device *dev, br_output_faci
         return NULL;
 
     if((pt.pixel_type = DeviceGLTypeOrBits(pt.pixel_type, pt.pixel_bits)) == BR_PMT_MAX)
+        return NULL;
+
+    if((fmt = DeviceGLGetFormatDetails(pt.pixel_type)) == NULL)
+        return NULL;
+
+    /*
+     * Refuse creation of an indexed front screen.
+     * Have these ever existed?
+     */
+    if(fmt->indexed)
         return NULL;
 
     self                  = BrResAllocate(dev->res, sizeof(br_device_pixelmap), BR_MEMORY_OBJECT);

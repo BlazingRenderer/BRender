@@ -131,7 +131,9 @@ br_error DeviceGLPixelmapToExistingGLTexture(GLuint tex, br_pixelmap *pm)
         return BRE_FAIL;
     }
 
-    glGenerateMipmap(GL_TEXTURE_2D);
+    if(fmt->pm_type != BR_PMT_INDEX_8)
+        glGenerateMipmap(GL_TEXTURE_2D);
+
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);

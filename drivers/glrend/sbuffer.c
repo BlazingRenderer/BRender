@@ -214,6 +214,23 @@ GLuint BufferStoredGLGetTexture(br_buffer_stored *self)
     return self->gl_tex;
 }
 
+GLuint BufferStoredGLGetCLUTTexture(br_buffer_stored *self, GLuint fallback)
+{
+    if(self == NULL)
+        return fallback;
+
+    if(self->source == NULL)
+        return fallback;
+
+    if(self->source->map == NULL)
+        return fallback;
+
+    if(self->source->map->stored == NULL)
+        return fallback;
+
+    return BufferStoredGLGetTexture(self->source->map->stored);
+}
+
 /*
  * Default dispatch table for device
  */

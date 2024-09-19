@@ -12,7 +12,8 @@ in vec3 rawNormal;
 
 out vec4 mainColour;
 
-uniform sampler2D main_texture;
+uniform sampler2D  main_texture;
+uniform usampler2D index_texture;
 
 vec3 adjustBrightness(in vec3 colour, in float brightness)
 {
@@ -98,7 +99,14 @@ void main()
 {
     vec2 mappedUV = SurfaceMap(rawPosition, rawNormal, uv);
 
-    vec4 texColour = texture(main_texture, mappedUV);
+    vec4 texColour;
+
+    if(is_indexed) {
+        int index = int(texture(index_texture, uv).r);
+        texColour = texelFetch(main_texture, ivec2(0, index), 0);
+    } else {
+        texColour = texture(main_texture, mappedUV);
+    }
 
     if(!disable_colour_key && texColour.rgb == vec3(0.0, 0.0, 0.0))
         discard;
