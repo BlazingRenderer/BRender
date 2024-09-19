@@ -18,7 +18,8 @@ void main()
         int index = int(texture(uIndexTex, mappedUV).r);
         texColour = texelFetch(uSampler, ivec2(0, index), 0);
     } else {
-        texColour = texture(uSampler, mappedUV);
+        ivec2 size = textureSize(uSampler, 0);
+        texColour = texelFetch(uSampler, ivec2(mappedUV.x * size.x, mappedUV.y * size.y), 0);
     }
 
     mainColour = texColour * vec4(colour.rgb, 1.0);
