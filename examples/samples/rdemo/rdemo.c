@@ -21,7 +21,7 @@ static br_material *CreateMaterial(const char *identifier)
     mat->ks      = BR_UFRACTION(0.50);
     mat->power   = BR_SCALAR(20);
 
-    mat->flags         = BR_MATF_GOURAUD | BR_MATF_LIGHT | BR_MATF_DISABLE_COLOUR_KEY;
+    mat->flags         = BR_MATF_GOURAUD | BR_MATF_LIGHT | BR_MATF_DISABLE_COLOUR_KEY | BR_MATF_MAP_INTERPOLATION;
     mat->map_transform = (br_matrix23){
         {BR_VECTOR2(1, 0), BR_VECTOR2(0, 1), BR_VECTOR2(0, 0)}
     };
