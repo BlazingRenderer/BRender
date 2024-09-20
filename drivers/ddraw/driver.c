@@ -23,8 +23,6 @@
 #include "shortcut.h"
 #include "brassert.h"
 
-BR_RCS_ID("$Id: driver.c 1.1 1997/12/10 16:45:15 jon Exp $");
-
 /*
  * Main entry point for device - this may get redefined by the makefile
  */

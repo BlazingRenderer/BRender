@@ -16,8 +16,6 @@
 #include "shortcut.h"
 #include "brassert.h"
 
-BR_RCS_ID("$Id: devclut.c 1.1 1997/12/10 16:45:06 jon Exp $");
-
 /*
  * Default dispatch table for device_clut (defined at end of file)
  */
