@@ -1,6 +1,7 @@
 /*
  * BRender TexView - Quick'n'dirty tool to display a pixelmap.
  */
+#include <stdio.h>
 #include <SDL.h>
 #include <brender.h>
 #include <brsdl2dev.h>
