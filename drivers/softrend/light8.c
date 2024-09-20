@@ -211,7 +211,7 @@ static void lightingIndexPointAttn(br_renderer *self, br_vector3 *p, br_vector3 
 	br_vector3 dirn,dirn_norm;
 
 	BrVector3Sub(&dirn,&alp->position, p);
-	CALCULATE_DIRN_NORM();
+	CALCULATE_DIRN_NORM_DIST();
 	CALCULATE_ATTENUATION();
 	DIFFUSE_DOT();
 
@@ -276,7 +276,7 @@ static void lightingIndexSpotAttn(br_renderer *self, br_vector3 *p, br_vector3 *
 	br_vector3 dirn,dirn_norm;
 
 	BrVector3Sub(&dirn,&alp->position,p);
-	CALCULATE_DIRN_NORM();
+	CALCULATE_DIRN_NORM_DIST();
 	SPOT_DOT();
 	DIFFUSE_DOT();
 	CALCULATE_ATTENUATION();
