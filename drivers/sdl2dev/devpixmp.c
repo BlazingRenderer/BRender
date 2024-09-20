@@ -808,10 +808,14 @@ br_error BR_CMETHOD_DECL(br_device_pixelmap_sdl2, match)(br_device_pixelmap *sel
     }
 
     /*
-     * NB: pixel_bits is only used for depth formats, and as such is ignored until
-     * I figure out how to plumb one in using SDL_Surface (SDL has no depth pixel
-     * formats, nor single-channel ones).
+     * SDL has no depth or single-channel formats, so we can't handle depth
+     * textures - fall back to memory.
+     *
+     * NB: pixel_bits is only used for depth formats
      */
+    if(mt.use == BRT_DEPTH) {
+        return BR_CMETHOD(br_device_pixelmap_mem, match)(self, newpm, tv);
+    }
 
     if(BRenderToSDLPixelFormat(mt.type, &format, &bpp) != BRE_OK) {
         /*
