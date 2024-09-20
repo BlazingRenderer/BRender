@@ -14,3 +14,8 @@ if (BRENDER_BUILD_SOFT)
     add_subdirectory(pentprim)
     target_link_libraries(brender-full INTERFACE softrend pentprim)
 endif ()
+
+if (WIN32)
+    add_subdirectory(ddraw)
+    target_link_libraries(brender-full INTERFACE ddraw)
+endif ()
