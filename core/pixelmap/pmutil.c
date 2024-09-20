@@ -139,7 +139,7 @@ full_cleanup:
     ++tvidx;
 
     tva[tvidx].t    = BRT_PIXEL_TYPE_U8;
-    tva[tvidx].v.u8 = screen->type;
+    tva[tvidx].v.u8 = BR_PMT_INDEX_8;//screen->type;
     ++tvidx;
 
     if(msaa_samples > 0) {
@@ -167,7 +167,7 @@ full_cleanup:
     ++tvidx;
 
     tva[tvidx].t     = BRT_PIXEL_BITS_I32;
-    tva[tvidx].v.i32 = 32;
+    tva[tvidx].v.i32 = 16;
     ++tvidx;
 
     if(msaa_samples > 0) {
