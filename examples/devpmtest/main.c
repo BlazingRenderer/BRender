@@ -812,6 +812,86 @@ static void xbpp_draw(br_pixelmap *dest, float dt, void *user)
     BrPixelmapCopy(dest, state->dst);
 }
 
+typedef struct rwclut_state {
+    br_pixelmap *pm;
+    br_pixelmap *pal_std;
+    float        accum;
+    int          state;
+} rwclut_state;
+
+static void rwclut_fini(void *user)
+{
+    rwclut_state *state = user;
+
+    if(state->pm != NULL)
+        BrPixelmapFree(state->pm);
+
+    if(state->pal_std != NULL)
+        BrPixelmapFree(state->pal_std);
+}
+
+static br_error rwclut_init(void *user, br_pixelmap *screen, br_pixelmap *backbuffer, void *arg)
+{
+    rwclut_state *state = user;
+
+    if((state->pal_std = BrPixelmapLoad("std.pal")) == NULL) {
+        BrLogError("APP", "Error loading std.pal");
+        rwclut_fini(user);
+        return BRE_FAIL;
+    }
+
+    state->pm = BrPixelmapMatchTypedSized(backbuffer, BR_PMMATCH_OFFSCREEN, BR_PMT_INDEX_8, 256, 256);
+    if(state->pm == NULL) {
+        BrLogError("APP", "Unable to match BR_PMT_INDEX_8 pixelmap.");
+        rwclut_fini(user);
+        return BRE_FAIL;
+    }
+
+    BrPixelmapPaletteSet(state->pm, state->pal_std);
+
+    return BRE_OK;
+}
+
+static void rwclut_draw(br_pixelmap *dest, float dt, void *user)
+{
+    rwclut_state *state = user;
+
+    state->accum += dt;
+    while(state->accum >= 0.5f) {
+        state->accum -= 0.5f;
+
+        switch(state->state) {
+            case 0:
+                state->state = 1;
+                BrPixelmapResize(state->pm, 256, 64);
+                break;
+            case 1:
+                state->state = 2;
+                BrPixelmapResize(state->pm, 256, 128);
+                break;
+            case 2:
+                state->state = 3;
+                BrPixelmapResize(state->pm, 256, 192);
+                break;
+            case 3:
+                state->state = 0;
+                BrPixelmapResize(state->pm, 256, 256);
+                break;
+        }
+
+        for(br_int_32 i = 0; i < state->pm->width; ++i) {
+            BrPixelmapLine(state->pm, -state->pm->origin_x + i, -state->pm->origin_y, -state->pm->origin_x + i,
+                           state->pm->origin_y, i);
+        }
+    }
+
+    state->accum = fmodf(state->accum + dt, 2.0f);
+    BrPixelmapRectangleCopy(dest, -state->pm->width / 2, -state->pm->height / 2, state->pm, -state->pm->origin_x,
+                            -state->pm->origin_y, state->pm->width, state->pm->height);
+
+    BrPixelmapText(dest, -dest->origin_x + 16, dest->origin_y - 100, 0xFFFFFFFF, BrFontProp7x9, "Tests that a pixelmap keeps its palette on resize.");
+}
+
 typedef br_error(br_drawtest_init_cbfn)(void *user, br_pixelmap *screen, br_pixelmap *backbuffer, void *arg);
 typedef void(br_drawtest_draw_cbfn)(br_pixelmap *dest, float dt, void *user);
 typedef void(br_drawtest_swap_cbfn)(br_pixelmap *screen, br_pixelmap *backbuffer, void *user);
@@ -898,6 +978,13 @@ static br_drawtest tests[] = {
     MAKE_XBPP_TEST("smpte_type05_rgb_565.pix",   BR_PMT_RGB_565,   ""),
     MAKE_XBPP_TEST("smpte_type06_rgb_888.pix",   BR_PMT_RGB_888,   ""),
     MAKE_XBPP_TEST("smpte_type08_rgba_8888.pix", BR_PMT_RGBA_8888, ""),
+    {
+        .name      = "Resize w/ CLUT",
+        .init      = rwclut_init,
+        .draw      = rwclut_draw,
+        .fini      = rwclut_fini,
+        .user_size = sizeof(rwclut_state),
+    },
 };
 // clang-format on
 
