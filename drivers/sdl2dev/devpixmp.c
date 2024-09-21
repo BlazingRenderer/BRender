@@ -291,8 +291,20 @@ static br_error BR_CMETHOD_DECL(br_device_pixelmap_sdl2, resize)(br_device_pixel
             return BRE_FAIL;
         }
 
-        SDL_FreeSurface(self->surface);
+        /*
+         * If we're indexed and there's a CLUT attached, copy it over.
+         */
+        if(SDL_ISPIXELFORMAT_INDEXED(surface->format->format) && self->clut != NULL) {
+            if(DeviceSDL2SetPaletteFromCLUT(surface->format->palette, self->clut) != BRE_OK) {
+                SDL_FreeSurface(surface);
+                BrLogError("SDL2", "Unable to restore palette");
+                return BRE_FAIL;
+            }
 
+            self->clut->pal = surface->format->palette;
+        }
+
+        SDL_FreeSurface(self->surface);
         self->surface = surface;
     }
 
