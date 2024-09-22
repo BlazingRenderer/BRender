@@ -95,6 +95,7 @@ static br_pixelmap *BR_CALLBACK MapFindFailedLoadDeCLUT(const char *name)
         if(pm->type == BR_PMT_INDEX_8 && pm->map == NULL)
             pm->map = palette;
 
+#if 0
         if((pm2 = BrPixelmapDeCLUT(pm)) != NULL) {
             if(pm->map != palette)
                 BrResFree(pm->map);
@@ -102,11 +103,25 @@ static br_pixelmap *BR_CALLBACK MapFindFailedLoadDeCLUT(const char *name)
             BrResFree(pm);
             pm = pm2;
         }
+#endif
 
         if(pm->identifier != NULL)
             BrResFree(pm->identifier);
 
         pm->identifier = BrResStrDup(pm, name);
+
+        if(pm->map != NULL && pm->map != palette) {
+            /*
+             * If there's a non-default palette, give it a (hopefully) unique name
+             * so it can be added to the registry.
+             */
+            if(pm->map->identifier != NULL)
+                BrResFree(pm->map->identifier);
+
+            pm->map->identifier = BrResSprintf(pm->map, "%s(palette)", pm->identifier);
+            BrTableAdd(pm->map);
+        }
+
         BrMapAdd(pm);
     }
 

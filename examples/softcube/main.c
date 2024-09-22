@@ -73,10 +73,13 @@ int main(int argc, char **argv)
         goto create_fail;
     }
 
+    //br_pixelmap *std_pal;
+    //std_pal = BrPixelmapLoad("/home/zane/Documents/Coding/CrocDE-BRender/examples/tutorials/dat/std.pal");
+
     {
 #if defined(SOFTCUBE_16BIT)
         BrLogInfo("APP", "Running at 16-bpp");
-        colour_buffer = BrPixelmapMatchTyped(screen, BR_PMMATCH_OFFSCREEN, BR_PMT_RGB_565);;
+        colour_buffer = BrPixelmapMatchTyped(screen, BR_PMMATCH_OFFSCREEN, BR_PMT_INDEX_8);;
         clear_colour = BR_COLOUR_565(66, 66, 66);
 
 #else
@@ -138,6 +141,46 @@ int main(int argc, char **argv)
     BrMapUpdate(cube->material->colour_map, BR_MAPU_ALL);
     BrMaterialUpdate(cube->material, BR_MATU_ALL);
 
+
+
+    br_pixelmap *pal = BrPixelmapAllocate(BR_PMT_RGBX_888, 1, 256, NULL, BR_PMAF_NORMAL);
+    BrQuantBegin();
+    {
+        br_pixelmap *pm = cube->material->colour_map->map;
+        for(int y = -pm->origin_y; y < -pm->origin_y + pm->height; y++) {
+            for(int x = -pm->origin_x; x < -pm->origin_x + pm->width; x++) {
+                br_uint_32 col = BrPixelmapPixelGet(pm, x, y);
+
+                br_uint_8 rgb[3] = {
+                    BR_RED(col),
+                    BR_GRN(col),
+                    BR_BLU(col),
+                };
+                BrQuantAddColours(rgb, 1);
+            }
+        }
+        br_uint_8 rgb[3] = {
+            128,
+            128,
+            128,
+        };
+        BrQuantAddColours(rgb, 1);
+
+        br_uint_8 rgb2[3] = {
+            0,
+            0,
+            0,
+        };
+        BrQuantAddColours(rgb2, 1);
+    }
+    BrQuantMakePalette(0, 256, pal);
+    BrQuantPrepareMapping(0, 256, pal);
+    BrQuantEnd();
+
+    BrPixelmapPaletteSet(colour_buffer, pal);
+
+
+
     BrMatrix34RotateY(&cube->t.t.mat, BR_ANGLE_DEG(30));
 
     light = BrActorAdd(world, BrActorAllocate(BR_ACTOR_LIGHT, NULL));
@@ -146,7 +189,7 @@ int main(int argc, char **argv)
     ticks_last = SDL_GetTicks64();
 
     BrMatrix34Identity(&cube->t.t.mat);
-    BrMatrix34PostTranslate(&cube->t.t.mat, 4, 0, 0);
+    BrMatrix34PostTranslate(&cube->t.t.mat, 2, 0, 0);
     for(SDL_Event evt;;) {
         float dt;
 
@@ -164,7 +207,7 @@ int main(int argc, char **argv)
         BrMatrix34PostRotateY(&cube->t.t.mat, BR_ANGLE_DEG(BR_SCALAR(50) * BR_SCALAR(dt)));
 
         BrRendererFrameBegin();
-        BrPixelmapFill(colour_buffer, clear_colour);
+        BrPixelmapFill(colour_buffer, 10);
         BrPixelmapFill(depth_buffer, 0xFFFFFFFF);
         BrZbSceneRender(world, camera, colour_buffer, depth_buffer);
         BrRendererFrameEnd();
