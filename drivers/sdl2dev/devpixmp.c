@@ -758,8 +758,12 @@ static br_error BR_CMETHOD_DECL(br_device_pixelmap_sdl2, doubleBuffer)(br_device
 
     DevicePixelmapSDLExtPreSwap(self);
 
-    if(self->window != NULL)
-        SDL_UpdateWindowSurface(self->window);
+    if(self->window != NULL) {
+        if(SDL_UpdateWindowSurface(self->window) < 0) {
+            BrLogTrace("SDL2", "Unable to update window surface: %s", SDL_GetError());
+            return BRE_FAIL;
+        }
+    }
 
     return BRE_OK;
 }
