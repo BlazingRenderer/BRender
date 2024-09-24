@@ -251,12 +251,22 @@ br_error CacheUpdate(br_renderer *self)
 		           rend.renderer->state.cache.map_transform.m[2][1]);
 	}
 
-	/*
-	 * Surface component functions
-	 */
-	self->state.cache.nvertex_fns = GenerateSurfaceFunctions(self,
-		self->state.cache.vertex_fns, rend.block->vertex_components);
+#if FAST_LIGHTING
+	if (self->state.surface.lighting)
+		self->state.cache.nvertex_fns = GenerateSurfaceFunctions(self,
+			self->state.cache.vertex_fns, rend.block->vertex_components & ~(CM_R | CM_G | CM_B | CM_I));
+	else
+#endif
+		self->state.cache.nvertex_fns = GenerateSurfaceFunctions(self,
+			self->state.cache.vertex_fns, rend.block->vertex_components);
 
+
+#if 0//FAST_LIGHTING
+	if (self->state.surface.lighting)
+		self->state.cache.nconstant_fns = GenerateSurfaceFunctions(self,
+			self->state.cache.constant_fns, rend.block->constant_components & ~(CM_R | CM_G | CM_B | CM_I));
+	else
+#endif
 	self->state.cache.nconstant_fns = GenerateSurfaceFunctions(self,
 		self->state.cache.constant_fns, rend.block->constant_components);
 
@@ -895,7 +905,11 @@ br_int_32 GenerateSurfaceFunctions(br_renderer *self, surface_fn **fns, br_uint_
 	 */
 	if(mask & CM_I) {
 		if(self->state.surface.lighting) {
-			fns[f++] = SurfaceIndexLit;
+#if FAST_LIGHTING
+            fns[f++] = VertexIndexLit;
+#else
+            fns[f++] = SurfaceIndexLit;
+#endif
 		} else if(self->state.surface.colour_source == BRT_GEOMETRY) {
 			fns[f++] = SurfaceIndexUnlit;
 		} else {
@@ -918,8 +932,13 @@ br_int_32 GenerateSurfaceFunctions(br_renderer *self, surface_fn **fns, br_uint_
 		if(self->state.surface.lighting)
 			if (self->state.surface.prelighting)
 				fns[f++] = SurfaceColourLitPrelit;
-			else
-				fns[f++] = SurfaceColourLit;
+            else {
+#if FAST_LIGHTING
+                fns[f++] = VertexColourLit;
+#else
+                fns[f++] = SurfaceColourLit;
+#endif
+            }
 		else
 			fns[f++] = SurfaceColourUnlit;
 	} else if(mask & (CM_UR|CM_UG|CM_UB)) {

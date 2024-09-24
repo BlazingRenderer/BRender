@@ -114,6 +114,10 @@ struct v11group_f {
 };
 #endif
 
+enum{
+	V11MODF_LIT=1,
+};
+
 struct v11model {
     br_size_t  size;
     br_uint_32 flags;

@@ -14,7 +14,9 @@
 #include "math_ip.h"
 #include "lightmac.h"
 
-
+br_scalar globalAmbientRed;
+br_scalar globalAmbientGreen;
+br_scalar globalAmbientBlue;
 
 static br_scalar diffuse_r;
 static br_scalar diffuse_g;
@@ -24,6 +26,8 @@ static br_scalar specular_r;
 static br_scalar specular_g;
 static br_scalar specular_b;
 
+const float epsilonX2=2 * BR_SCALAR_EPSILON;
+const float unity=1;
 
 /*
  * Gross macros and declarations to allow inlining of common lighting routines
@@ -143,6 +147,191 @@ void SURFACE_CALL SurfaceColourUnlit(br_renderer *self, br_vector3 *p, br_vector
 
 br_boolean pointInLightVolumes(br_vector3 *p, br_light_volume *volume);
 br_scalar lightVolumeAttenuation(br_vector3 *p, br_light_volume *volume);
+
+
+void GEOMETRY_CALL GeometryColourLit(struct br_geometry *self, struct br_renderer *renderer)
+{
+	// initialise vertices to ambient values
+	int i,v;
+	struct active_light *alp;
+	brp_vertex *tvp;
+	br_scalar s,attn,dist,l,dot,r,g,b,materialRed,materialGreen,materialBlue;
+	br_scalar ambientRed,ambientGreen,ambientBlue;
+	br_vector3 dirn,dirn_norm;
+
+// potentialy speedup pre-compute the following
+	materialRed=BrFixedToScalar(BR_RED(scache.colour) << 8);
+	materialGreen=BrFixedToScalar(BR_GRN(scache.colour) << 8);
+	materialBlue=BrFixedToScalar(BR_BLU(scache.colour) << 8);
+	
+	for(v=0,tvp = rend.temp_vertices; v < rend.nvertices; v++, tvp++) {
+		
+		if(rend.vertex_counts[v] == 0)
+			continue;
+		
+		tvp->comp[C_R] = globalAmbientRed;
+		tvp->comp[C_G] = globalAmbientGreen;
+		tvp->comp[C_B] = globalAmbientBlue;
+	}
+	
+	
+	alp = scache.lights;
+	// accumulate active lights
+	for(i=0; i < scache.nlights_model; i++, alp++){
+		switch(alp->type){
+		case BRT_DIRECT:
+			for(v=0,tvp = rend.temp_vertices; v < rend.nvertices; v++, tvp++) {
+				
+				if(rend.vertex_counts[v] == 0)
+					continue;
+				
+				dot = BrVector3Dot(&rend.vertex_n[v],&alp->direction);
+				
+				if(FP_TO_UINT(dot)&FP_NEG)
+					continue;
+				
+				tvp->comp[C_R] += BR_MUL(dot, BR_RED(alp->s->colour) / 255.0f);
+				tvp->comp[C_G] += BR_MUL(dot, BR_GRN(alp->s->colour) / 255.0f);
+				tvp->comp[C_B] += BR_MUL(dot, BR_BLU(alp->s->colour) / 255.0f);
+			}
+			break;
+			
+		case BRT_POINT:
+			if(useLight[i]){
+				for(v=0,tvp = rend.temp_vertices; v < rend.nvertices; v++, tvp++) {
+
+					if(rend.vertex_counts[v] == 0)
+						continue;
+					
+					BrVector3Sub(&dirn,&alp->position,&rend.vertex_p[v]);
+					
+					//	CALCULATE_DIRN_NORM_GEOM();
+					dist = BrVector3Length(&dirn);					
+					if(FP_TO_UINT(dist) <= FP_TO_UINT(epsilonX2))
+						continue;
+					s = BR_RCP(dist);								
+					BrVector3Scale(&dirn_norm,&dirn,s);				
+					
+					//	CALCULATE_ATTENUATION_GEOM();
+					if(FP_TO_UINT(dist)>FP_TO_UINT(alp->s->attenuation_q)){											
+						continue;
+					}else{																	
+						if(FP_TO_UINT(dist)>FP_TO_UINT(alp->s->attenuation_c)){										
+							attn=BR_MUL((dist-alp->s->attenuation_c),alp->s->attenuation_l);
+						}else{																
+							attn=BR_SCALAR(0);												
+						}																	
+					}																		
+					attn=BR_SCALAR(1)-attn;
+				
+					//	DIFFUSE_DOT_GEOM();
+					dot = BrVector3Dot(&rend.vertex_n[v],&dirn_norm);
+					if(FP_TO_UINT(dot)&FP_NEG)
+						continue;									
+					
+					l = BR_MUL(dot, attn);
+					
+					tvp->comp[C_R] += BR_MUL(l, BR_RED(alp->s->colour) / 255.0f);;
+					tvp->comp[C_G] += BR_MUL(l, BR_GRN(alp->s->colour) / 255.0f);;
+					tvp->comp[C_B] += BR_MUL(l, BR_BLU(alp->s->colour) / 255.0f);;
+				}
+			}
+			break;
+		}
+		
+	}
+	// clamp and scale
+	for(v=0,tvp = rend.temp_vertices; v < rend.nvertices; v++, tvp++) {
+		
+		if(rend.vertex_counts[v] == 0)
+			continue;
+		CLAMP_MUL_SCALE_GEOM(C_R, materialRed);
+		CLAMP_MUL_SCALE_GEOM(C_G, materialGreen);
+		CLAMP_MUL_SCALE_GEOM(C_B, materialBlue);
+	}
+}
+
+
+void SURFACE_CALL VertexColourLit(br_renderer *self, br_vector3 *p, br_vector2 *map, br_vector3 *n, br_colour colour, br_scalar *comp)
+{
+	int i;
+	struct active_light *alp;
+	br_scalar s,attn,dist,l,dot,r,g,b,materialRed,materialGreen,materialBlue;
+	br_scalar ambientRed,ambientGreen,ambientBlue;
+	br_vector3 dirn,dirn_norm;
+
+	// potentialy speedup pre-compute the following
+	materialRed=BrFixedToScalar(BR_RED(scache.colour) << 8);
+	materialGreen=BrFixedToScalar(BR_GRN(scache.colour) << 8);
+	materialBlue=BrFixedToScalar(BR_BLU(scache.colour) << 8);
+	
+	comp[C_R] = globalAmbientRed;
+	comp[C_G] = globalAmbientGreen;
+	comp[C_B] = globalAmbientBlue;
+	
+	alp = scache.lights;
+	// accumulate active lights
+	for(i=0; i < scache.nlights_model; i++, alp++){
+		switch(alp->type){
+		case BRT_DIRECT:
+			
+			dot = BrVector3Dot(n,&alp->direction);
+			
+			if(FP_TO_UINT(dot)&FP_NEG)
+				continue;
+			
+			comp[C_R] += BR_MUL(dot, BR_RED(alp->s->colour) / 255.0f);
+			comp[C_G] += BR_MUL(dot, BR_GRN(alp->s->colour) / 255.0f);
+			comp[C_B] += BR_MUL(dot, BR_BLU(alp->s->colour) / 255.0f);
+
+			break;
+			
+		case BRT_POINT:
+			if(useLight[i]){
+					
+				BrVector3Sub(&dirn,&alp->position,p);
+				
+				//	CALCULATE_DIRN_NORM_GEOM();
+				dist = BrVector3Length(&dirn);					
+				if(FP_TO_UINT(dist) <= FP_TO_UINT(epsilonX2))
+					continue;
+				s = BR_RCP(dist);								
+				BrVector3Scale(&dirn_norm,&dirn,s);				
+				
+				//	CALCULATE_ATTENUATION_GEOM();
+				if(FP_TO_UINT(dist)>FP_TO_UINT(alp->s->attenuation_q)){											
+					continue;
+				}else{																	
+					if(FP_TO_UINT(dist)>FP_TO_UINT(alp->s->attenuation_c)){										
+						attn=BR_MUL((dist-alp->s->attenuation_c),alp->s->attenuation_l);
+					}else{																
+						attn=BR_SCALAR(0);												
+					}																	
+				}																		
+				attn=BR_SCALAR(1)-attn;
+			
+				//	DIFFUSE_DOT_GEOM();
+				dot = BrVector3Dot(n,&dirn_norm);
+				if(FP_TO_UINT(dot)&FP_NEG)
+					continue;									
+				
+				l = BR_MUL(dot, attn);
+				
+				comp[C_R] += BR_MUL(l, BR_RED(alp->s->colour) / 255.0f);
+				comp[C_G] += BR_MUL(l, BR_GRN(alp->s->colour) / 255.0f);
+				comp[C_B] += BR_MUL(l, BR_BLU(alp->s->colour) / 255.0f);
+
+			}
+			break;
+		}
+		
+	}
+	// clamp and scale
+	CLAMP_MUL_SCALE(C_R, materialRed);
+	CLAMP_MUL_SCALE(C_G, materialGreen);
+	CLAMP_MUL_SCALE(C_B, materialBlue);
+}
+
 
 /*
  * Accumulate lighting for multiple active lights by calling the

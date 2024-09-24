@@ -87,4 +87,9 @@ typedef struct br_light {
 
 } br_light;
 
+extern br_scalar globalAmbientRed;
+extern br_scalar globalAmbientGreen;
+extern br_scalar globalAmbientBlue;
+extern br_scalar globalAmbient;
+
 #endif

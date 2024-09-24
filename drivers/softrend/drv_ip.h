@@ -261,6 +261,10 @@ void SURFACE_CALL SurfaceIndexUnlit(br_renderer *self, br_vector3 *p, br_vector2
 void SURFACE_CALL SurfaceIndexLit(br_renderer *self, br_vector3 *p, br_vector2 *map, br_vector3 *n, br_colour gcolour, br_scalar *comp);
 void SURFACE_CALL SurfaceIndexLitSimple(br_renderer *self, br_vector3 *p, br_vector2 *map, br_vector3 *n, br_colour gcolour, br_scalar *comp);
 void ActiveLightAccumulateIndexSet(struct active_light *alp);
+void GEOMETRY_CALL GeometryIndexLit(struct br_geometry *self, struct br_renderer *renderer);
+void BR_ASM_CALL FaceIndexLit(struct brp_block *block, brp_vertex *v0, brp_vertex *v1, brp_vertex *v2,
+	struct v11face *fp, struct temp_face *tfp);
+void SURFACE_CALL VertexIndexLit(br_renderer *self, br_vector3 *p, br_vector2 *map, br_vector3 *n, br_colour colour, br_scalar *comp);
 
 void SURFACE_CALL SurfaceIndexLit1MD(br_renderer *self, br_vector3 *p, br_vector2 *map, br_vector3 *n, br_colour colour, br_scalar *comp);
 
@@ -273,6 +277,10 @@ void SURFACE_CALL SurfaceColourLit(br_renderer *self, br_vector3 *p, br_vector2 
 void SURFACE_CALL SurfaceColourLitPrelit(br_renderer *self, br_vector3 *p, br_vector2 *map, br_vector3 *n, br_colour gcolour, br_scalar *comp);
 void SURFACE_CALL SurfaceColourLitSimple(br_renderer *self, br_vector3 *p, br_vector2 *map, br_vector3 *n, br_colour gcolour, br_scalar *comp);
 void ActiveLightAccumulateColourSet(struct active_light *alp);
+void GEOMETRY_CALL GeometryColourLit(struct br_geometry *self, struct br_renderer *renderer);
+void BR_ASM_CALL FaceColourLit(struct brp_block *block, brp_vertex *v0, brp_vertex *v1, brp_vertex *v2,
+	struct v11face *fp, struct temp_face *tfp);
+void SURFACE_CALL VertexColourLit(br_renderer *self, br_vector3 *p, br_vector2 *map, br_vector3 *n, br_colour colour, br_scalar *comp);
 
 /*
  * mapping.c

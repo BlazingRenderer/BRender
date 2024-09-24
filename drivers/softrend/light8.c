@@ -14,6 +14,7 @@
 #include "math_ip.h"
 #include "lightmac.h"
 
+br_scalar globalAmbient;
 
 /*
  * Lighting function for unlit indexed 
@@ -32,6 +33,169 @@ void SURFACE_CALL SurfaceIndexUnlit(br_renderer *self, br_vector3 *p, br_vector2
 					   BR_CONST_DIV(BrIntToScalar(BR_ALPHA(colour)),256)) +
 					self->state.cache.comp_offsets[C_I];
 }
+
+
+void GEOMETRY_CALL GeometryIndexLit(struct br_geometry *self, struct br_renderer *renderer)
+{
+	// initialise vertices to ambient values
+	int i, v;
+	struct active_light *alp;
+	brp_vertex *tvp;
+	br_scalar s,attn,dist,l,dot,r,g,b,materialRed,materialGreen,materialBlue;
+	br_vector3 dirn,dirn_norm;
+	
+	for(v=0,tvp = rend.temp_vertices; v < rend.nvertices; v++, tvp++) {
+		
+		if(rend.vertex_counts[v] == 0)
+			continue;
+		
+		tvp->comp[C_I] = globalAmbient;
+	}
+	
+	
+	alp = scache.lights;
+	// accumulate active lights
+	for(i=0; i < scache.nlights_model; i++, alp++){
+		switch(alp->type){
+		case BRT_DIRECT:
+			for(v=0,tvp = rend.temp_vertices; v < rend.nvertices; v++, tvp++) {
+				
+				if(rend.vertex_counts[v] == 0)
+					continue;
+				
+				dot = BrVector3Dot(&rend.vertex_n[v],&alp->direction);
+				
+//				if(dot <= BR_SCALAR(0.0))
+				if(FP_TO_UINT(dot)&FP_NEG)
+					continue;
+				
+				//				l=BR_MUL(dot, renderer->state.surface.kd);
+				
+				tvp->comp[C_I] += dot;
+			}
+			break;
+			
+		case BRT_POINT:
+			if(useLight[i]){
+				for(v=0,tvp = rend.temp_vertices; v < rend.nvertices; v++, tvp++) {
+
+					if(rend.vertex_counts[v] == 0)
+						continue;
+					
+					BrVector3Sub(&dirn,&alp->position,&rend.vertex_p[v]);
+					
+					//	CALCULATE_DIRN_NORM_GEOM();
+					dist = BrVector3Length(&dirn);					
+//					if(dist <= 2 * BR_SCALAR_EPSILON)
+					if(FP_TO_UINT(dist) <= FP_TO_UINT(epsilonX2))
+						continue;
+					s = BR_RCP(dist);								
+					BrVector3Scale(&dirn_norm,&dirn,s);				
+					
+					//	CALCULATE_ATTENUATION_GEOM();
+					if(FP_TO_UINT(dist)>FP_TO_UINT(alp->s->attenuation_q)){											
+						continue;
+					}else{																	
+						if(FP_TO_UINT(dist)>FP_TO_UINT(alp->s->attenuation_c)){										
+							attn=BR_MUL((dist-alp->s->attenuation_c),alp->s->attenuation_l);
+						}else{																
+							attn=BR_SCALAR(0);												
+						}																	
+					}																		
+					attn=BR_SCALAR(1)-attn;
+				
+					//	DIFFUSE_DOT_GEOM();
+					dot = BrVector3Dot(&rend.vertex_n[v],&dirn_norm);
+//					if(dot <= BR_SCALAR(0.0))						
+					if(FP_TO_UINT(dot)&FP_NEG)
+						continue;									
+					
+					l = BR_MUL(dot, attn);
+					
+					tvp->comp[C_I] += l;
+				}
+			}
+			break;
+		}
+		
+	}
+	// clamp and scale
+	for(v=0,tvp = rend.temp_vertices; v < rend.nvertices; v++, tvp++) {
+		
+		if(rend.vertex_counts[v] == 0)
+			continue;
+		CLAMP_SCALE_GEOM(C_I);
+	}
+}
+
+void SURFACE_CALL VertexIndexLit(br_renderer *self, br_vector3 *p, br_vector2 *map, br_vector3 *n, br_colour colour, br_scalar *comp)
+{
+	int i;
+	struct active_light *alp;
+	br_scalar s,attn,dist,l,dot,r,g,b,materialRed,materialGreen,materialBlue;
+	br_vector3 dirn,dirn_norm;
+	
+	comp[C_I] = globalAmbient;
+	
+	alp = scache.lights;
+	// accumulate active lights
+	for(i=0; i < scache.nlights_model; i++, alp++){
+		switch(alp->type){
+		case BRT_DIRECT:
+				
+			dot = BrVector3Dot(n,&alp->direction);
+			
+//			if(dot <= BR_SCALAR(0.0))
+			if(FP_TO_UINT(dot)&FP_NEG)
+				continue;
+			
+//			l=BR_MUL(dot, renderer->state.surface.kd);
+			
+			comp[C_I] += dot;
+			break;
+		
+		case BRT_POINT:
+			if(useLight[i]){
+				BrVector3Sub(&dirn,&alp->position,p);
+				
+				//	CALCULATE_DIRN_NORM_GEOM();
+				dist = BrVector3Length(&dirn);					
+//				if(dist <= 2 * BR_SCALAR_EPSILON)
+				if(FP_TO_UINT(dist) <= FP_TO_UINT(epsilonX2))
+					continue;
+				s = BR_RCP(dist);								
+				BrVector3Scale(&dirn_norm,&dirn,s);				
+				
+				//	CALCULATE_ATTENUATION_GEOM();
+				if(FP_TO_UINT(dist)>FP_TO_UINT(alp->s->attenuation_q)){											
+					continue;
+				}else{																	
+					if(FP_TO_UINT(dist)>FP_TO_UINT(alp->s->attenuation_c)){										
+						attn=BR_MUL((dist-alp->s->attenuation_c),alp->s->attenuation_l);
+					}else{																
+						attn=BR_SCALAR(0);												
+					}																	
+				}																		
+				attn=BR_SCALAR(1)-attn;
+			
+				//	DIFFUSE_DOT_GEOM();
+				dot = BrVector3Dot(n,&dirn_norm);
+//				if(dot <= BR_SCALAR(0.0))						
+				if(FP_TO_UINT(dot)&FP_NEG)
+					continue;									
+				
+				l = BR_MUL(dot, attn);
+				
+				comp[C_I] += l;
+			}
+			break;
+		}
+		
+	}
+	// clamp and scale
+	CLAMP_SCALE(C_I);
+}
+
 
 /*
  * Accumulate lighting for multiple active lights by calling the

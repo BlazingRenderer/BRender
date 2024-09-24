@@ -558,6 +558,21 @@ static void GEOMETRY_CALL V1Faces_GeometryFnsUpdate(struct br_geometry *self, st
 	 */
 	VertexGeometryFns(renderer, V1Face_Outcode);
 
+#if FAST_LIGHTING
+	/*
+	 * coloured lighting after vertex counts have been minimized
+	 */
+
+	if(rend.block->vertex_components & (CM_R|CM_G|CM_B)) 
+		if(renderer->state.surface.lighting)
+			GeometryFunctionBothAdd(renderer, GeometryColourLit);
+
+	if(rend.block->vertex_components & CM_I) 
+		if(renderer->state.surface.lighting) 
+			GeometryFunctionBothAdd(renderer, GeometryIndexLit);
+
+#endif
+
 	/*
 	 * Rendering
 	 */
@@ -676,13 +691,26 @@ static void GEOMETRY_CALL V1Faces_GeometryFnsUpdate(struct br_geometry *self, st
         /*
          * Optional subdivision if the primitive requests it
          */
+#if 0 // removed subdivision for croc
         if(rend.block->flags & BR_PRIMF_SUBDIVIDE) {
     		PrimBlockAdd(renderer, (brp_render_fn *)OpTriangleSubdivide);
 	    	PrimBlockOnScreenAdd(renderer, (brp_render_fn *)OpTriangleSubdivideOnScreen);
 			SubdivideSetThreshold(rend.block->subdivide_tolerance);
         }
+#endif
 		break;
 	}
+
+#if 0//FAST_LIGHTING
+	if(rend.block->constant_components & (CM_R|CM_G|CM_B)) 
+		if(renderer->state.surface.lighting)
+			PrimBlockAddBoth(renderer, (brp_render_fn *)FaceColourLit);
+
+	if(rend.block->constant_components & CM_I) 
+		if(renderer->state.surface.lighting) 
+			PrimBlockAddBoth(renderer, (brp_render_fn *)FaceIndexLit);
+
+#endif
 
 	/*
 	 * Two-sided relighting of vertices
@@ -717,6 +745,9 @@ static void GEOMETRY_CALL V1Faces_GeometryFnsUpdate(struct br_geometry *self, st
 	renderer->state.cache.format = self;
 }
 
+#if FAST_LIGHTING
+int useLight[BR_MAX_LIGHTS];
+#endif
 
 static br_error V1Model_Render
 		(struct br_geometry *self, struct br_renderer *renderer, struct v11model *model,
@@ -727,6 +758,9 @@ static br_error V1Model_Render
 	struct br_renderer_state_stored *state;
 	br_error r;
 	br_boolean z_sort, z_sort_blended, divert;
+#if FAST_LIGHTING
+	struct active_light *alp;
+#endif
 
 	/*
 	 */
@@ -758,6 +792,22 @@ static br_error V1Model_Render
 		StaticCacheUpdate_PerModel(renderer);
 		scache.valid_per_model = BR_TRUE;
 	}
+
+#if FAST_LIGHTING
+#ifndef SQ
+#define SQ(a) ((a)*(a))
+#endif
+	if(model->flags&V11MODF_LIT){
+		alp = scache.lights;
+		for(g=0; g < scache.nlights_model; g++, alp++){
+			useLight[g]=BR_TRUE;
+			if(alp->type==BRT_POINT)
+				if((SQ(alp->position.v[0])+SQ(alp->position.v[1])+SQ(alp->position.v[2]))>(SQ(alp->s->attenuation_q+model->radius)))
+					useLight[g]=BR_FALSE;
+		}
+	}
+
+#endif
 
 	/*
 	 * Go through each group

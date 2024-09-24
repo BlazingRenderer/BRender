@@ -6,22 +6,52 @@
  *
  * Macros for building the lighting functions
  */
+#define FP_NEG (0x80000000)
+#define FP_TO_UINT(a) (*(unsigned int*)&(a))
+extern const float epsilonX2;
+extern const float unity;
 
 
- 
+#define CLAMP_SCALE_GEOM(c)	do {														\
+	if(FP_TO_UINT(tvp->comp[(c)]) >= FP_TO_UINT(unity))													\
+		tvp->comp[(c)] = renderer->state.cache.comp_offsets[(c)] +							\
+			renderer->state.cache.comp_scales[(c)]-BR_SCALAR_EPSILON;					\
+	else																			\
+		tvp->comp[(c)] = BR_MUL(renderer->state.cache.comp_scales[(c)], tvp->comp[(c)]) +			\
+			renderer->state.cache.comp_offsets[(c)];									\
+} while(0);
+
+#define CLAMP_MUL_SCALE_GEOM(c, m)	do {														\
+	if(FP_TO_UINT(tvp->comp[(c)]) >= FP_TO_UINT(unity))													\
+		tvp->comp[(c)] = renderer->state.cache.comp_offsets[(c)] +							\
+			BR_MUL(renderer->state.cache.comp_scales[(c)]-BR_SCALAR_EPSILON, m);					\
+	else																			\
+		tvp->comp[(c)] = BR_MUL(renderer->state.cache.comp_scales[(c)], BR_MUL(tvp->comp[(c)], m)) +			\
+			renderer->state.cache.comp_offsets[(c)];									\
+} while(0);
+
+
 /*
  * Clamp a component to (0,1], scale and offset
  */
 #define CLAMP_SCALE(c)	do {														\
-	if (BR_SCALAR_GE_1(comp[(c)]))													\
+	if(FP_TO_UINT(comp[(c)]) >= FP_TO_UINT(unity))													\
 		comp[(c)] = self->state.cache.comp_offsets[(c)] +							\
 			self->state.cache.comp_scales[(c)]-BR_SCALAR_EPSILON;					\
-	else if (BR_SCALAR_LE_0(comp[(c)]))												\
-		comp[(c)] = self->state.cache.comp_offsets[(c)];							\
 	else																			\
 		comp[(c)] = BR_MUL(self->state.cache.comp_scales[(c)], comp[(c)]) +			\
 			self->state.cache.comp_offsets[(c)];									\
 } while(0);
+
+#define CLAMP_MUL_SCALE(c, m)	do {														\
+	if(FP_TO_UINT(comp[(c)]) >= FP_TO_UINT(unity))													\
+		comp[(c)] = self->state.cache.comp_offsets[(c)] +							\
+			BR_MUL(self->state.cache.comp_scales[(c)]-BR_SCALAR_EPSILON, m);					\
+	else																			\
+		comp[(c)] = BR_MUL(self->state.cache.comp_scales[(c)], BR_MUL(comp[(c)], m)) +			\
+			self->state.cache.comp_offsets[(c)];									\
+} while(0);
+
 
 /*
  * Calculate a component from surface colour, diffuse and specular values and clamp

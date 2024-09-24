@@ -95,6 +95,10 @@ extern "C" {
 #define BRT(t)	BRT_##t,0
 #define DEV(t)	0,#t
 
+#if FAST_LIGHTING
+extern int useLight[BR_MAX_LIGHTS];
+#endif
+
 /*
  * Pull in private prototypes
  */
