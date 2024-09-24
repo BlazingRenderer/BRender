@@ -18,6 +18,7 @@ typedef struct pixelmap_new_tokens {
     SDL_Surface             *surface;
     br_token                 use_type;
     br_uint_32               flags;
+    br_boolean               fullscreen;
     br_device_sdl_ext_procs *ext_procs;
 } pixelmap_new_tokens;
 

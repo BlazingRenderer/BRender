@@ -138,6 +138,7 @@ static const br_token insignificantMatchTokens[] = {
     BRT_HIDPI_B,
     BRT_RESIZABLE_B,
     BRT_OPENGL_B,
+    BRT_WINDOW_FULLSCREEN_B,
     BRT_SDL_EXT_PROCS_P,
     BR_NULL_TOKEN,
 };
