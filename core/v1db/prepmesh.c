@@ -58,6 +58,8 @@ static struct pm_temp_edge **pm_edge_hash;
 static char *pm_edge_scratch;
 static int   num_edges = 0;
 
+static int isLit;
+
 static int addEdge(br_uint_16 first, br_uint_16 last)
 {
     struct pm_temp_edge *tep;
@@ -469,6 +471,8 @@ static void PrepareGroups(br_model *model)
     struct br_face **sorted_faces;
     char            *cp;
 
+    isLit = BR_FALSE;
+
     /*
      * Select sorting functions
      */
@@ -586,6 +590,15 @@ static void PrepareGroups(br_model *model)
     for(f = 1, ng = 1; f < model->nfaces; f++)
         if(sorted_faces[f]->material != sorted_faces[f - 1]->material)
             ng++;
+
+	for(f = 0; f < model->nfaces; f++) {
+        if(!sorted_faces[f]->material) { // assume the worst
+            isLit = BR_TRUE;
+        } else {
+            if((sorted_faces[f]->material->flags & BR_MATF_LIGHT) && ((sorted_faces[f]->material->flags & BR_MATF_PRELIT) == 0))
+                isLit = BR_TRUE;
+        }
+    }
 
     /*
      * Prepared data will have same number of faces as input
@@ -1184,6 +1197,12 @@ void BR_PUBLIC_ENTRY BrModelUpdate(br_model *model, br_uint_16 flags)
         BrPrepareEdges(model);
 
         v11m = model->prepared;
+
+        if(isLit) {
+            v11m->flags |= V11MODF_LIT;
+        } else {
+            v11m->flags &= ~V11MODF_LIT;
+        }
 
         v11m->bounds = model->bounds;
         v11m->radius = model->radius;
