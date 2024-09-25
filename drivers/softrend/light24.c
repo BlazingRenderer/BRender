@@ -148,7 +148,7 @@ void SURFACE_CALL SurfaceColourUnlit(br_renderer *self, br_vector3 *p, br_vector
 br_boolean pointInLightVolumes(br_vector3 *p, br_light_volume *volume);
 br_scalar lightVolumeAttenuation(br_vector3 *p, br_light_volume *volume);
 
-
+#if FAST_LIGHTING
 void GEOMETRY_CALL GeometryColourLit(struct br_geometry *self, struct br_renderer *renderer)
 {
 	// initialise vertices to ambient values
@@ -251,7 +251,6 @@ void GEOMETRY_CALL GeometryColourLit(struct br_geometry *self, struct br_rendere
 	}
 }
 
-
 void SURFACE_CALL VertexColourLit(br_renderer *self, br_vector3 *p, br_vector2 *map, br_vector3 *n, br_colour colour, br_scalar *comp)
 {
 	int i;
@@ -331,7 +330,7 @@ void SURFACE_CALL VertexColourLit(br_renderer *self, br_vector3 *p, br_vector2 *
 	CLAMP_MUL_SCALE(C_G, materialGreen);
 	CLAMP_MUL_SCALE(C_B, materialBlue);
 }
-
+#endif
 
 /*
  * Accumulate lighting for multiple active lights by calling the

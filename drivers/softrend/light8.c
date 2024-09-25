@@ -34,7 +34,7 @@ void SURFACE_CALL SurfaceIndexUnlit(br_renderer *self, br_vector3 *p, br_vector2
 					self->state.cache.comp_offsets[C_I];
 }
 
-
+#if FAST_LIGHTING
 void GEOMETRY_CALL GeometryIndexLit(struct br_geometry *self, struct br_renderer *renderer)
 {
 	// initialise vertices to ambient values
@@ -195,6 +195,7 @@ void SURFACE_CALL VertexIndexLit(br_renderer *self, br_vector3 *p, br_vector2 *m
 	// clamp and scale
 	CLAMP_SCALE(C_I);
 }
+#endif
 
 
 /*
