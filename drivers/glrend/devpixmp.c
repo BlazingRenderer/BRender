@@ -28,6 +28,13 @@ static br_error custom_query(br_value *pvalue, void **extra, br_size_t *pextra_s
             pvalue->u32 = 0;
 
         return BRE_OK;
+    } else if(tep->token == BRT_CLUT_O) {
+        if(self->use_type == BRT_OFFSCREEN)
+            pvalue->o = (br_object*)self->asBack.clut;
+        else
+            pvalue->o = NULL;
+
+        return BRE_OK;
     }
 
     return BRE_UNKNOWN;
@@ -49,6 +56,7 @@ static struct br_tv_template_entry devicePixelmapTemplateEntries[] = {
     {BRT(PIXEL_TYPE_U8),      F(pm_type),         BRTV_QUERY | BRTV_ALL, BRTV_CONV_I32_U8,  0                    },
     {BRT(OUTPUT_FACILITY_O),  F(output_facility), BRTV_QUERY | BRTV_ALL, BRTV_CONV_COPY,    0                    },
     {BRT(FACILITY_O),         F(output_facility), BRTV_QUERY,            BRTV_CONV_COPY,    0                    },
+    {BRT(CLUT_O),             0,                  BRTV_QUERY | BRTV_ALL, BRTV_CONV_CUSTOM,  (br_uintptr_t)&custom},
     {BRT(IDENTIFIER_CSTR),    F(pm_identifier),   BRTV_QUERY | BRTV_ALL, BRTV_CONV_COPY,    0                    },
     {BRT(MSAA_SAMPLES_I32),   F(msaa_samples),    BRTV_QUERY | BRTV_ALL, BRTV_CONV_COPY,    0                    },
     {DEV(OPENGL_TEXTURE_U32), 0,                  BRTV_QUERY | BRTV_ALL, BRTV_CONV_CUSTOM,  (br_uintptr_t)&custom},
@@ -337,6 +345,7 @@ br_error BR_CMETHOD_DECL(br_device_pixelmap_gl, match)(br_device_pixelmap *self,
 
     if(mt.use_type == BRT_OFFSCREEN) {
         pm->asBack.depthbuffer = NULL;
+        pm->asBack.clut        = DeviceClutGLAllocate(pm);
         glGenFramebuffers(1, &pm->asBack.glFbo);
         DeviceGLObjectLabelF(GL_FRAMEBUFFER, pm->asBack.glFbo, "%s:fbo", pm->pm_identifier);
         DeviceGLInitQuad(&pm->asBack.quad, hVideo);

@@ -17,6 +17,7 @@ extern "C" {
 #define BR_DEVICE_PRIVATE
 #define BR_OUTPUT_FACILITY_PRIVATE
 #define BR_DEVICE_PIXELMAP_PRIVATE
+#define BR_DEVICE_CLUT_PRIVATE
 #define BR_RENDERER_FACILITY_PRIVATE
 #define BR_BUFFER_STORED_PRIVATE
 #define BR_GEOMETRY_V1_MODEL_PRIVATE
@@ -27,6 +28,13 @@ extern "C" {
 
 #define BR_GLREND_DEBUG_INTERNAL_PREFIX "glrend:internal:"
 #define BR_GLREND_DEBUG_USER_PREFIX     "glrend:user:"
+
+
+/*
+ * Maximum number of possible entries on a CLUT.
+ * BRender supports no more than 256 (for BR_PMT_INDEX_8).
+ */
+#define BR_GLREND_MAX_CLUT_ENTRIES 256
 
 #include "brddi.h"
 #include "brglrend.h"
@@ -39,6 +47,7 @@ extern "C" {
 #include "template.h"
 #include "device.h"
 #include "outfcty.h"
+#include "devclut.h"
 #include "devpixmp.h"
 #include "rendfcty.h"
 #include "renderer.h"

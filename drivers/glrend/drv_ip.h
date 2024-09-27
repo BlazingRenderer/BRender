@@ -68,6 +68,11 @@ br_error BR_CMETHOD_DECL(br_device_pixelmap_gl, match) (br_device_pixelmap *self
 br_device_pixelmap *DevicePixelmapGLAllocateFront(br_device *dev, br_output_facility *outfcty, br_token_value *tv);
 
 /*
+ * devclut.c
+ */
+br_device_clut *DeviceClutGLAllocate(br_device_pixelmap *pm);
+
+/*
  * sbuffer.c
  */
 struct br_buffer_stored *BufferStoredGLAllocate(br_renderer *renderer, br_token use, struct br_device_pixelmap *pm,

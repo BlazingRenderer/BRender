@@ -119,6 +119,9 @@ set(GLREND_FILES
         devpixmp.h
         devpmglf.c
 
+        devclut.c
+        devclut.h
+
         font.c
         font.h
 
