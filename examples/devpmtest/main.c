@@ -910,16 +910,24 @@ typedef struct br_drawtest {
     br_boolean _failed;
 } br_drawtest;
 
-#define MAKE_SMPTE_TEST(filename, type, suffix)                                                                \
-    {                                                                                                          \
-        .name = "SMPTE (" BR_STR(type) suffix ")", .init = smpte_init, .draw = smpte_draw, .fini = smpte_fini, \
-        .arg = filename, .user_size = sizeof(br_smpte_state),                                                  \
+#define MAKE_SMPTE_TEST(filename, type, suffix)         \
+    {                                                   \
+        .name      = "SMPTE (" BR_STR(type) suffix ")", \
+        .init      = smpte_init,                        \
+        .draw      = smpte_draw,                        \
+        .fini      = smpte_fini,                        \
+        .arg       = filename,                          \
+        .user_size = sizeof(br_smpte_state),            \
     }
 
-#define MAKE_XBPP_TEST(filename, type, suffix)                                                             \
-    {                                                                                                      \
-        .name = "XBPP (" BR_STR(type) suffix ")", .init = xbpp_init, .draw = xbpp_draw, .fini = xbpp_fini, \
-        .arg = filename, .user_size = sizeof(xbpp_state),                                                  \
+#define MAKE_XBPP_TEST(filename, type, suffix)         \
+    {                                                  \
+        .name      = "XBPP (" BR_STR(type) suffix ")", \
+        .init      = xbpp_init,                        \
+        .draw      = xbpp_draw,                        \
+        .fini      = xbpp_fini,                        \
+        .arg       = filename,                         \
+        .user_size = sizeof(xbpp_state),               \
     }
 
 // clang-format off
