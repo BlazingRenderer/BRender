@@ -107,6 +107,7 @@ typedef struct br_device_pixelmap {
             GLuint                     glFbo;
             GLuint                     glTex;
             GLfloat                    clearColour[4];
+            br_device_clut            *clut;
 
             br_device_pixelmap_gl_quad quad;
         } asBack;
