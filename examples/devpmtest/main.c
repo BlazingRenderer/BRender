@@ -892,6 +892,112 @@ static void rwclut_draw(br_pixelmap *dest, float dt, void *user)
     BrPixelmapText(dest, -dest->origin_x + 16, dest->origin_y - 100, 0xFFFFFFFF, BrFontProp7x9, "Tests that a pixelmap keeps its palette on resize.");
 }
 
+typedef struct nitclut_state {
+    br_pixelmap *earth;
+    br_pixelmap *pal_std;
+    br_pixelmap *pal_grey;
+    br_pixelmap *target;
+    int          state;
+    float        accum;
+} nitclut_state;
+
+static void nitclut_fini(void *user)
+{
+    nitclut_state *state = user;
+
+    if(state->target != NULL)
+        BrPixelmapFree(state->target);
+
+    if(state->pal_std != NULL)
+        BrPixelmapFree(state->pal_std);
+
+    if(state->earth != NULL)
+        BrPixelmapFree(state->earth);
+}
+
+static br_error nitclut_init(void *user, br_pixelmap *screen, br_pixelmap *backbuffer, void *arg)
+{
+    nitclut_state *state = user;
+
+    if((state->earth = BrPixelmapLoad("earth8.pix")) == NULL) {
+        BrLogError("APP", "Error loading earth8.pix");
+        nitclut_fini(user);
+        return BRE_FAIL;
+    }
+
+    if(state->earth->map != NULL) {
+        BrPixelmapFree(state->earth->map);
+        state->earth->map = NULL;
+    }
+
+    if((state->pal_std = BrPixelmapLoad("std.pal")) == NULL) {
+        BrLogError("APP", "Error loading std.pal");
+        nitclut_fini(user);
+        return BRE_FAIL;
+    }
+
+    if((state->pal_grey = BrPixelmapAllocate(BR_PMT_RGBX_888, state->pal_std->width, state->pal_std->height, NULL,
+                                             BR_PMAF_NORMAL)) == NULL) {
+        BrLogError("APP", "Error allocating greyscale palette");
+        earth8_fini(user);
+        return BRE_FAIL;
+    }
+
+    for(br_int_32 j = 0; j < state->pal_grey->height; ++j) {
+        for(br_int_32 i = 0; i < state->pal_grey->width; ++i) {
+            br_colour col = BrPixelmapPixelGet(state->pal_std, i, j);
+            br_uint_8 val = (br_uint_8)(0.299f * BR_RED(col) + 0.587f * BR_GRN(col) + 0.114f * BR_BLU(col));
+            BrPixelmapPixelSet(state->pal_grey, i, j, BR_COLOUR_RGBA(val, val, val, 255));
+        }
+    }
+
+    state->target = BrPixelmapMatchTypedSized(backbuffer, BR_PMMATCH_OFFSCREEN, BR_PMT_RGBX_888, state->earth->width,
+                                              state->earth->height);
+    if(state->target == NULL) {
+        BrLogError("APP", "Unable to match BR_PMT_RGBX_888 pixelmap.");
+        nitclut_fini(user);
+        return BRE_FAIL;
+    }
+
+    state->target->origin_x = state->target->width >> 1;
+    state->target->origin_y = state->target->height >> 1;
+
+    state->accum = 1.0f;
+    return BRE_OK;
+}
+
+static void nitclut_draw(br_pixelmap *dest, float dt, void *user)
+{
+    nitclut_state *state = user;
+
+    state->accum += dt;
+    while(state->accum >= 1.0f) {
+        state->accum -= 1.0f;
+
+        switch(state->state) {
+            case 0:
+                state->state = 1;
+                BrPixelmapPaletteSet(state->target, state->pal_std);
+                break;
+            case 1:
+                state->state = 0;
+                BrPixelmapPaletteSet(state->target, state->pal_grey);
+                break;
+        }
+    }
+
+    BrPixelmapFill(state->target, 0);
+
+    state->accum = fmodf(state->accum + dt, 2.0f);
+    BrPixelmapCopy(state->target, state->earth);
+
+    BrPixelmapRectangleCopy(dest, -state->target->width / 2, -state->target->height / 2, state->target,
+                            -state->target->origin_x, -state->target->origin_y, state->target->width, state->target->height);
+
+    BrPixelmapText(dest, -dest->origin_x + 16, dest->origin_y - 100, 0xFFFFFFFF, BrFontProp7x9,
+                   "Tests that a non-indexed pixelmap has a CLUT for source indexed pixelmaps without a CLUT.");
+}
+
 typedef br_error(br_drawtest_init_cbfn)(void *user, br_pixelmap *screen, br_pixelmap *backbuffer, void *arg);
 typedef void(br_drawtest_draw_cbfn)(br_pixelmap *dest, float dt, void *user);
 typedef void(br_drawtest_swap_cbfn)(br_pixelmap *screen, br_pixelmap *backbuffer, void *user);
@@ -992,6 +1098,13 @@ static br_drawtest tests[] = {
         .draw      = rwclut_draw,
         .fini      = rwclut_fini,
         .user_size = sizeof(rwclut_state),
+    },
+    {
+        .name      = "Non-indexed target w/ CLUT",
+        .init      = nitclut_init,
+        .draw      = nitclut_draw,
+        .fini      = nitclut_fini,
+        .user_size = sizeof(nitclut_state),
     },
 };
 // clang-format on
