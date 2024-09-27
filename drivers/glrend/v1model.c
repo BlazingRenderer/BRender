@@ -200,7 +200,7 @@ static void apply_stored_properties(HVIDEO hVideo, state_stack *state, uint32_t 
 
             if(model->is_indexed) {
                 glActiveTexture(GL_TEXTURE0);
-                glBindTexture(GL_TEXTURE_2D, BufferStoredGLGetCLUTTexture(stored, tex_default));
+                glBindTexture(GL_TEXTURE_2D, BufferStoredGLGetCLUTTexture(stored, NULL, tex_default));
                 glUniform1i(hVideo->brenderProgram.uniforms.main_texture, hVideo->brenderProgram.mainTextureBinding);
 
                 glActiveTexture(GL_TEXTURE1);
