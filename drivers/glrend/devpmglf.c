@@ -194,6 +194,11 @@ br_device_pixelmap *DevicePixelmapGLAllocateFront(br_device *dev, br_output_faci
         self->pm_type = BR_PMT_RGBX_888;
     } else if(red_bits == 8 && grn_bits == 8 && blu_bits == 8 && alpha_bits == 8) {
         self->pm_type = BR_PMT_RGBA_8888;
+    } else if(red_bits == 4 && grn_bits == 4 && blu_bits == 4 && alpha_bits == 4) {
+        /*
+         * Mesa/llvmpipe (git-e362b0babc) on Windows gives us this.
+         */
+        self->pm_type = BR_PMT_RGBA_4444;
     } else {
         BrLogWarn("GLREND", "OpenGL gave us an unknown screen format (R%dG%dB%dA%d), soldiering on...", red_bits,
                   grn_bits, blu_bits, alpha_bits);
