@@ -510,10 +510,10 @@ br_error BR_CMETHOD(br_device_pixelmap_gl, rectangleStretchCopyTo)(br_device_pix
         fmt = DeviceGLGetFormatDetails(src->type);
     }
 
-    clut = self->screen->asFront.tex_white;
+    clut = self->asBack.clut->gl_tex ? self->asBack.clut->gl_tex : self->screen->asFront.tex_white;
     if(fmt->indexed && src->map != NULL) {
         if(src->map->stored != NULL) {
-            clut = BufferStoredGLGetCLUTTexture(stored, self->screen->asFront.tex_white);
+            clut = BufferStoredGLGetCLUTTexture(stored, self, clut);
         } else {
             clut = DeviceGLPixelmapToGLTexture(src->map);
             clut_tmp = BR_TRUE;

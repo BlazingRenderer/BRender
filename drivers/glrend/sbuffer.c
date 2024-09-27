@@ -214,21 +214,57 @@ GLuint BufferStoredGLGetTexture(br_buffer_stored *self)
     return self->gl_tex;
 }
 
-GLuint BufferStoredGLGetCLUTTexture(br_buffer_stored *self, GLuint fallback)
+GLuint BufferStoredGLGetCLUTTexture(br_buffer_stored *self, br_device_pixelmap *target, GLuint fallback)
 {
+    GLuint clut;
+
     if(self == NULL)
         return fallback;
 
+    /*
+     * If we have a CLUT, use it.
+     */
     if(self->source == NULL)
-        return fallback;
+        goto use_target;
 
     if(self->source->map == NULL)
-        return fallback;
+        goto use_target;
 
     if(self->source->map->stored == NULL)
+        goto use_target;
+
+    if((clut = BufferStoredGLGetTexture(self->source->map->stored)) != 0)
+        return clut;
+
+use_target:
+    /*
+     * If there's no target pixelmap, see if our renderer's current state has one.
+     */
+    if(target == NULL) {
+        const state_output *output;
+
+        if(!(self->renderer->state.current->valid & BR_STATE_OUTPUT))
+            return fallback;
+
+        target = self->renderer->state.current->output.colour;
+    }
+
+    /*
+     * Try to use the target's CLUT.
+     */
+    if(target == NULL)
         return fallback;
 
-    return BufferStoredGLGetTexture(self->source->map->stored);
+    if(target->use_type != BRT_OFFSCREEN)
+        return fallback;
+
+    if(target->asBack.clut == NULL)
+        return fallback;
+
+    if(target->asBack.clut->gl_tex == 0)
+        return fallback;
+
+    return target->asBack.clut->gl_tex;
 }
 
 /*
