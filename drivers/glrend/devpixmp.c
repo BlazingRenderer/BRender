@@ -423,8 +423,8 @@ br_error BR_CMETHOD_DECL(br_device_pixelmap_gl, rectangleCopy)(br_device_pixelma
     br_rectangle r = {
         .x = p->x,
         .y = p->y,
-        .w = self->pm_width,
-        .h = self->pm_height,
+        .w = src->pm_width,
+        .h = src->pm_height,
     };
 
     return BR_CMETHOD(br_device_pixelmap_gl, rectangleStretchCopy)(self, &r, src, sr);
