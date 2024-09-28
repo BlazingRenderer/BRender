@@ -101,6 +101,9 @@ br_error BrPixelmapResizeBuffersTV(br_pixelmap *screen, br_pixelmap **colour, br
         }
     }
 
+    if(target_width <= 0 || target_height <= 0)
+        return BRE_FAIL;
+
     if(target_depth_bits < 16)
         target_depth_bits = 16;
 
