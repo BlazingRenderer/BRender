@@ -19,6 +19,8 @@ if (BUILD_SHARED_LIBS)
     message(FATAL_ERROR "BUILD_SHARED_LIBS is not supported at this time.")
 endif ()
 
+set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
+
 option(BRENDER_DISABLE_FINDSDL "Disable searching for SDL2" OFF)
 if (NOT BRENDER_DISABLE_FINDSDL)
     find_package(SDL2)
