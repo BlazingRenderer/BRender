@@ -65,6 +65,7 @@ br_error BrPixelmapResizeBuffersTV(br_pixelmap *screen, br_pixelmap **colour, br
     br_int_32      target_width;
     br_int_32      target_height;
     br_uint_8      target_type;
+    br_int_32      target_depth_bits;
     size_t         tvidx, tvbase;
     br_token_value tva[] = {
         {.t = BR_NULL_TOKEN, .v = {}},
@@ -81,9 +82,10 @@ br_error BrPixelmapResizeBuffersTV(br_pixelmap *screen, br_pixelmap **colour, br
     /*
      * Default to the screen's width/height/type.
      */
-    target_width  = screen->width;
-    target_height = screen->height;
-    target_type   = screen->type;
+    target_width      = screen->width;
+    target_height     = screen->height;
+    target_type       = screen->type;
+    target_depth_bits = 32;
 
     for(const br_token_value *t = tv; t->t != BR_NULL_TOKEN; ++t) {
         if(t->t == BRT_MSAA_SAMPLES_I32) {
@@ -94,8 +96,13 @@ br_error BrPixelmapResizeBuffersTV(br_pixelmap *screen, br_pixelmap **colour, br
             target_height = t->v.i32;
         } else if(t->t == BRT_PIXEL_TYPE_U8) {
             target_type = t->v.u8;
+        } else if(t->t == BRT_PIXEL_BITS_I32) {
+            target_depth_bits = t->v.i32;
         }
     }
+
+    if(target_depth_bits < 16)
+        target_depth_bits = 16;
 
     /*
      * Try to resize the framebuffer directly. Fall back to recreation if we can't.
@@ -202,7 +209,7 @@ full_cleanup:
     ++tvidx;
 
     tva[tvidx].t     = BRT_PIXEL_BITS_I32;
-    tva[tvidx].v.i32 = 32;
+    tva[tvidx].v.i32 = target_depth_bits;
     ++tvidx;
 
     tva[tvidx].t = BR_NULL_TOKEN;
