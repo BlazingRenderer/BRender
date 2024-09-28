@@ -73,7 +73,8 @@ static br_error recreate_renderbuffers(br_device_pixelmap *self)
     UASSERT(self->use_type == BRT_OFFSCREEN || self->use_type == BRT_DEPTH);
 
     if(self->use_type == BRT_OFFSCREEN) {
-        const GLenum draw_buffers[1] = {GL_COLOR_ATTACHMENT0};
+        const GLenum              draw_buffers[1] = {GL_COLOR_ATTACHMENT0};
+        const br_pixelmap_gl_fmt *fmt             = DeviceGLGetFormatDetails(self->pm_type);
 
         UASSERT(self->asBack.glFbo != 0);
 
@@ -85,10 +86,12 @@ static br_error recreate_renderbuffers(br_device_pixelmap *self)
         glBindTexture(binding_point, self->asBack.glTex);
 
         if(self->msaa_samples) {
-            glTexImage2DMultisample(binding_point, self->msaa_samples, GL_RGBA8, self->pm_width, self->pm_height, GL_TRUE);
+            glTexImage2DMultisample(binding_point, self->msaa_samples, fmt->internal_format, self->pm_width,
+                                    self->pm_height, GL_TRUE);
         } else {
             glTexParameteri(binding_point, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-            glTexImage2D(binding_point, 0, GL_RGBA8, self->pm_width, self->pm_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+            glTexImage2D(binding_point, 0, fmt->internal_format, self->pm_width, self->pm_height, 0, fmt->format,
+                         fmt->type, NULL);
         }
 
         DeviceGLObjectLabelF(GL_TEXTURE, self->asBack.glTex, "%s:colour", self->pm_identifier);
