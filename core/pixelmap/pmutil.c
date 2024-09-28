@@ -62,8 +62,13 @@ br_error BrPixelmapResizeBuffersTV(br_pixelmap *screen, br_pixelmap **colour, br
 {
     br_pixelmap   *tmp;
     br_int_32      msaa_samples = -1;
-    size_t         tvidx        = 0;
-    br_token_value tva[]        = {
+    br_int_32      target_width;
+    br_int_32      target_height;
+    br_uint_8      target_type;
+    size_t         tvidx, tvbase;
+    br_token_value tva[] = {
+        {.t = BR_NULL_TOKEN, .v = {}},
+        {.t = BR_NULL_TOKEN, .v = {}},
         {.t = BR_NULL_TOKEN, .v = {}},
         {.t = BR_NULL_TOKEN, .v = {}},
         {.t = BR_NULL_TOKEN, .v = {}},
@@ -73,10 +78,22 @@ br_error BrPixelmapResizeBuffersTV(br_pixelmap *screen, br_pixelmap **colour, br
     if(screen == NULL || colour == NULL || depth == NULL)
         return BRE_FAIL;
 
+    /*
+     * Default to the screen's width/height/type.
+     */
+    target_width  = screen->width;
+    target_height = screen->height;
+    target_type   = screen->type;
+
     for(const br_token_value *t = tv; t->t != BR_NULL_TOKEN; ++t) {
         if(t->t == BRT_MSAA_SAMPLES_I32) {
             msaa_samples = t->v.i32;
-            break;
+        } else if(t->t == BRT_WIDTH_I32) {
+            target_width = t->v.i32;
+        } else if(t->t == BRT_HEIGHT_I32) {
+            target_height = t->v.i32;
+        } else if(t->t == BRT_PIXEL_TYPE_U8) {
+            target_type = t->v.u8;
         }
     }
 
@@ -85,24 +102,30 @@ br_error BrPixelmapResizeBuffersTV(br_pixelmap *screen, br_pixelmap **colour, br
      */
     if(*colour != NULL && *depth != NULL) {
         tmp = *colour;
-        if(tmp->width != screen->width || tmp->height != screen->height) {
-            if((tmp = BrPixelmapResize(tmp, screen->width, screen->height)) == NULL)
+
+        if(tmp->type != target_type)
+            goto full_cleanup;
+
+        if(tmp->width != target_width || tmp->height != target_height) {
+            if((tmp = BrPixelmapResize(tmp, target_width, target_height)) == NULL)
                 goto full_cleanup;
 
-            *colour       = tmp;
-            tmp->origin_x = screen->origin_x;
-            tmp->origin_y = screen->origin_y;
+            *colour = tmp;
         }
+
+        tmp->origin_x = (br_int_16)(tmp->width >> 1);
+        tmp->origin_y = (br_int_16)(tmp->height >> 1);
 
         tmp = *depth;
-        if(tmp->width != screen->width || tmp->height != screen->height) {
-            if((tmp = BrPixelmapResize(*depth, screen->width, screen->height)) == NULL)
+        if(tmp->width != target_width || tmp->height != target_height) {
+            if((tmp = BrPixelmapResize(*depth, target_width, target_height)) == NULL)
                 goto full_cleanup;
 
-            *depth        = tmp;
-            tmp->origin_x = screen->origin_x;
-            tmp->origin_y = screen->origin_y;
+            *depth = tmp;
         }
+
+        tmp->origin_x = (br_int_16)(tmp->width >> 1);
+        tmp->origin_y = (br_int_16)(tmp->height >> 1);
         return BRE_OK;
     }
 
@@ -130,23 +153,35 @@ full_cleanup:
     }
 
     /*
+     * Prepare common tokens.
+     */
+    tvbase            = 0;
+    tva[tvbase].t     = BRT_WIDTH_I32;
+    tva[tvbase].v.i32 = target_width;
+    ++tvbase;
+
+    tva[tvbase].t     = BRT_HEIGHT_I32;
+    tva[tvbase].v.i32 = target_height;
+    ++tvbase;
+
+    if(msaa_samples > 0) {
+        tva[tvbase].t     = BRT_MSAA_SAMPLES_I32;
+        tva[tvbase].v.i32 = msaa_samples;
+        ++tvbase;
+    }
+
+    /*
      * Recreate the colour buffer.
      */
-    tvidx = 0;
+    tvidx = tvbase;
 
     tva[tvidx].t   = BRT_USE_T;
     tva[tvidx].v.t = BRT_OFFSCREEN;
     ++tvidx;
 
     tva[tvidx].t    = BRT_PIXEL_TYPE_U8;
-    tva[tvidx].v.u8 = screen->type;
+    tva[tvidx].v.u8 = target_type;
     ++tvidx;
-
-    if(msaa_samples > 0) {
-        tva[tvidx].t     = BRT_MSAA_SAMPLES_I32;
-        tva[tvidx].v.i32 = msaa_samples;
-        ++tvidx;
-    }
 
     tva[tvidx].t = BR_NULL_TOKEN;
 
@@ -154,13 +189,13 @@ full_cleanup:
         return BRE_FAIL;
 
     *colour       = tmp;
-    tmp->origin_x = screen->origin_x;
-    tmp->origin_y = screen->origin_y;
+    tmp->origin_x = (br_int_16)(tmp->width >> 1);
+    tmp->origin_y = (br_int_16)(tmp->height >> 1);
 
     /*
      * Recreate the depth buffer.
      */
-    tvidx = 0;
+    tvidx = tvbase;
 
     tva[tvidx].t   = BRT_USE_T;
     tva[tvidx].v.t = BRT_DEPTH;
@@ -169,12 +204,6 @@ full_cleanup:
     tva[tvidx].t     = BRT_PIXEL_BITS_I32;
     tva[tvidx].v.i32 = 32;
     ++tvidx;
-
-    if(msaa_samples > 0) {
-        tva[tvidx].t     = BRT_MSAA_SAMPLES_I32;
-        tva[tvidx].v.i32 = msaa_samples;
-        ++tvidx;
-    }
 
     tva[tvidx].t = BR_NULL_TOKEN;
 
@@ -185,8 +214,8 @@ full_cleanup:
     }
 
     *depth        = tmp;
-    tmp->origin_x = screen->origin_x;
-    tmp->origin_y = screen->origin_y;
+    tmp->origin_x = (br_int_16)(tmp->width >> 1);
+    tmp->origin_y = (br_int_16)(tmp->height >> 1);
 
     return BRE_OK;
 }
