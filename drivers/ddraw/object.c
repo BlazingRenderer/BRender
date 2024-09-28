@@ -16,6 +16,8 @@
 #include "shortcut.h"
 #include "brassert.h"
 
+BR_RCS_ID("$Id: object.c 1.1 1997/12/10 16:45:22 jon Exp $");
+
 /*
  * Get the identifier associated with a object
  */

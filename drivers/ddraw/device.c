@@ -14,6 +14,8 @@
 #include "drv.h"
 #include "brassert.h"
 
+BR_RCS_ID("$Id: device.c 1.1 1997/12/10 16:45:08 jon Exp $");
+
 #define DEVICE_VERSION BR_VERSION(1, 0, 0)
 
 /*

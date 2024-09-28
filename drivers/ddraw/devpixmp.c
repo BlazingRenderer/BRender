@@ -16,6 +16,8 @@
 #include "shortcut.h"
 #include "brassert.h"
 
+BR_RCS_ID("$Id: devpixmp.c 1.2 1998/10/21 15:41:46 jon Exp $");
+
 /*
  * Default dispatch table for device pixelmap (defined at end of file)
  */
