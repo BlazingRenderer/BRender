@@ -201,6 +201,10 @@ br_error BrPixelmapResizeBuffers(br_pixelmap *screen, br_pixelmap **colour, br_p
  *              If \c *depth is NULL, recreation is forced.
  * \param tv    A br_token_value list containing additional options. Supported tokens are:
  *              - \c BRT_MSAA_SAMPLES_I32
+ *              - \c BRT_WIDTH_I32 (defaults to \c screen->width)
+ *              - \c BRT_HEIGHT_I32 (defaults to \c screen->height)
+ *              - \c BRT_PIXEL_TYPE_U8 (colour buffer, defaults to \c screen->type)
+ *              - \c BRT_PIXEL_BITS_I32 (depth buffer)
  *
  * \return Returns BRE_OK on success, or a BRE_* error code on failure.
  */
