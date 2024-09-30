@@ -264,6 +264,39 @@ static void apply_stored_properties(HVIDEO hVideo, state_stack *state, uint32_t 
         if(GLAD_GL_ARB_texture_filter_anisotropic)
             glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY, maxAnisotropy);
 
+        /*
+         * Apply wrapping.
+         */
+        switch(state->prim.map_width_limit)  {
+            case BRT_WRAP:
+            default:
+                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+                break;
+
+            case BRT_CLAMP:
+                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+                break;
+
+            case BRT_MIRROR:
+                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
+                break;
+        }
+
+        switch(state->prim.map_height_limit)  {
+            case BRT_WRAP:
+            default:
+                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+                break;
+
+            case BRT_CLAMP:
+                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+                break;
+
+            case BRT_MIRROR:
+                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
+                break;
+        }
+
         // if(state->prim.colour_map)
         //{
         //	if(state->prim.colour_map->source)
