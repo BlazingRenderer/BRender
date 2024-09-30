@@ -326,6 +326,11 @@ br_size_t BrPixelmapMipMemorySize(int dimension, br_uint_8 type);
 
 struct br_pixelmap_state *BR_RESIDENT_ENTRY PixelmapState(void);
 
+/*
+ * pmclone.c
+ */
+br_error BR_RESIDENT_ENTRY BrColourUnpack(br_colour pixel, br_uint_8 type, br_uint_8 *r, br_uint_8 *g, br_uint_8 *b, br_uint_8 *a);
+
 #ifdef __cplusplus
 };
 #endif

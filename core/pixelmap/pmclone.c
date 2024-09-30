@@ -369,6 +369,33 @@ br_pixelmap_converter br_pixelmap_converters[] = {
 #undef CONVERTER
 // clang-format on
 
+br_error BR_RESIDENT_ENTRY BrColourUnpack(br_colour pixel, br_uint_8 type, br_uint_8 *r, br_uint_8 *g, br_uint_8 *b,
+                                          br_uint_8 *a)
+{
+    br_uint_8 buf[sizeof(br_colour)];
+
+    const br_pixelmap_converter *cvt = br_pixelmap_converters + type;
+    if(type <= BR_PMT_INDEX_8 || cvt == NULL || cvt->read == NULL)
+        return BRE_FAIL;
+
+    _MemPixelSet(buf, pmTypeInfo[type].bits >> 3, pixel);
+    pixel = cvt->read(buf, NULL);
+
+    if(r != NULL)
+        *r = BR_RED(pixel);
+
+    if(g != NULL)
+        *g = BR_GRN(pixel);
+
+    if(b != NULL)
+        *b = BR_BLU(pixel);
+
+    if(a != NULL)
+        *a = BR_ALPHA(pixel);
+
+    return BRE_OK;
+}
+
 br_pixelmap *BR_PUBLIC_ENTRY BrPixelmapCloneTyped(br_pixelmap *src, br_uint_8 type)
 {
     br_pixelmap           *dst;
