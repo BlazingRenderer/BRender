@@ -20,6 +20,8 @@ static br_tv_template_entry template_entries[] = {
 
     {BRT(DEPTH_TEST_T),            F(prim.depth_test),          Q | S | A, BRTV_CONV_COPY,       0,                  1},
     {BRT(BLEND_MODE_T),            F(prim.blend_mode),          Q | S | A, BRTV_CONV_COPY,       0,                  1},
+    {BRT(MAP_WIDTH_LIMIT_T),       F(prim.map_width_limit),     Q | S | A, BRTV_CONV_COPY,       0,                  1},
+    {BRT(MAP_HEIGHT_LIMIT_T),      F(prim.map_height_limit),    Q | S | A, BRTV_CONV_COPY,       0,                  1},
 
     {BRT(INDEX_BASE_I32),          F(prim.index_base),          Q | S | A, BRTV_CONV_COPY,       0,                  1},
     {BRT(INDEX_RANGE_I32),         F(prim.index_range),         Q | S | A, BRTV_CONV_COPY,       0,                  1},
@@ -48,6 +50,8 @@ static const state_primitive default_state = {
     .colour_type         = BRT_DEFAULT,
     .depth_test          = BRT_LESS,
     .blend_mode          = BRT_NONE,
+    .map_width_limit     = BRT_WRAP,
+    .map_height_limit    = BRT_WRAP,
     .perspective_type    = BRT_NONE, // BRT_NONE, BRT_SUBDIVIDE
     .subdivide_tolerance = 0,
     .colour_map          = NULL,

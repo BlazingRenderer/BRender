@@ -177,6 +177,10 @@ typedef struct state_primitive {
 
     br_token blend_mode;
 
+    br_token map_width_limit;
+
+    br_token map_height_limit;
+
     /*
      * Type of perspective correct rendering
      */
