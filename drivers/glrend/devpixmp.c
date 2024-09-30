@@ -446,22 +446,23 @@ br_error BR_CMETHOD_DECL(br_device_pixelmap_gl, rectangleFill)(br_device_pixelma
 {
     GLuint     fbo;
     GLbitfield mask;
-    float      a = (float)((colour & 0xFF000000) >> 24) / 255.0f;
-    float      r = (float)((colour & 0x00FF0000) >> 16) / 255.0f;
-    float      g = (float)((colour & 0x0000FF00) >> 8) / 255.0f;
-    float      b = (float)((colour & 0x000000FF) >> 0) / 255.0f;
-    // TODO: handle the colour format correctly
 
     VIDEOI_BrRectToGL((br_pixelmap *)self, rect);
 
     if(self->use_type == BRT_OFFSCREEN) {
+        br_uint_8 r8 = 0, g8 = 0, b8 = 0, a8 = 255;
+        BrColourUnpack(colour, self->pm_type, &r8, &g8, &b8, &a8);
+
         fbo  = self->asBack.glFbo;
         mask = GL_COLOR_BUFFER_BIT;
-        glClearColor(r, g, b, a);
-        self->asBack.clearColour[0] = r;
-        self->asBack.clearColour[1] = g;
-        self->asBack.clearColour[2] = b;
-        self->asBack.clearColour[3] = a;
+
+        self->asBack.clearColour[0] = (float)r8 / 255.0f;
+        self->asBack.clearColour[1] = (float)g8 / 255.0f;
+        self->asBack.clearColour[2] = (float)b8 / 255.0f;
+        self->asBack.clearColour[3] = (float)a8 / 255.0f;
+
+        glClearColor(self->asBack.clearColour[0], self->asBack.clearColour[1], self->asBack.clearColour[2], self->asBack.clearColour[3]);
+
     } else if(self->use_type == BRT_DEPTH) {
         UASSERT(colour == 0xFFFFFFFF);
         fbo  = self->asBack.depthbuffer->asBack.glFbo;
