@@ -203,24 +203,21 @@ vec3 lightingColourSpotAtten(in vec4 p, in vec4 n, in br_light alp)
 
 
 
-vec4 fragmainXX(in vec4 position, in vec4 normal, out bool directLightExists)
+vec4 accumulateLights(in vec4 position, in vec4 normal)
 {
-//#if DEBUG_DISABLE_LIGHTS
-    //return surface_colour;
-//#endif
+#if DEBUG_DISABLE_LIGHTS
+    return vec4(1);
+#endif
 
     if (num_lights == 0u || unlit != 0u) {
-        return surface_colour;
+        return vec4(1);
     }
 
     vec4 normalDirection = normal;
 
-    vec3 _colour = surface_colour.xyz;
-
     /* This is shit, but this is the way the engine does it */
     vec3 lightColour = vec3(0.0);
-    vec3 directLightColour = vec3(0.0);
-    directLightExists = false;
+    bool directLightExists = false;
 
     for (uint i = 0u; i < num_lights; ++i) {
 #if !DEBUG_DISABLE_LIGHT_AMBIENT
@@ -232,7 +229,7 @@ vec4 fragmainXX(in vec4 position, in vec4 normal, out bool directLightExists)
         if (lights[i].position.w == 0) {
 #if !DEBUG_DISABLE_LIGHT_DIRECTIONAL
             directLightExists = true;
-            directLightColour += lightingColourDirect(position, normalDirection, lights[i]);
+            lightColour += lightingColourDirect(position, normalDirection, lights[i]);
 #endif
         } else {
             if (lights[i].spot_angles == vec2(0.0, 0.0)) {
@@ -256,9 +253,9 @@ vec4 fragmainXX(in vec4 position, in vec4 normal, out bool directLightExists)
         }
     }
 
-    lightColour += directLightColour;
-    lightColour *= _colour;
+    if (!directLightExists && num_lights > 0u && unlit == 0u) {
+        lightColour += clear_colour.rgb;
+    }
 
-    lightColour = clamp(lightColour, 0.0, 1.0);
-    return vec4(lightColour, surface_colour.a);
+    return vec4(clamp(lightColour, 0.0, 1.0), 1);
 }

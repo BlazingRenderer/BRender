@@ -7,6 +7,7 @@ in vec4 position;
 in vec2 uv;
 in vec4 normal;
 in vec4 colour;
+in vec4 vertexLight;
 
 in vec3 rawPosition;
 in vec3 rawNormal;
@@ -119,39 +120,33 @@ void main()
         discard;
 
 #if ENABLE_PHONG
-    vec4 lightColour;
-
-    bool directLightExists = false;
-    lightColour = fragmainXX(position, normal, directLightExists);
-    if (!directLightExists && num_lights > 0u && unlit == 0u) {
-        lightColour += vec4(clear_colour.rgb, 0.0);
-    }
+    vec4 fragmentLight = accumulateLights(position, normal);
 #else
-    vec4 lightColour = vec4(0, 0, 0, 0);
+    vec4 fragmentLight = vec4(1);
 #endif
 
-    vec4 surfaceColour = (surface_colour * texColour);
-    vec3 fragColour = vec3((colour.rgb + lightColour.rgb) * texColour.rgb);
+    vec4 surfaceColour = (surface_colour * texColour * vertexLight);
+    vec4 fragColour = surfaceColour * fragmentLight;
 
     /* Perform gamma correction */
 #if ENABLE_GAMMA_CORRECTION
-    fragColour = pow(fragColour, vec3(1.0 / 1.2));
-    // fragColour = adjustContrast(fragColour, 0.1);
-    // fragColour = adjustExposure(fragColour, 2.0);
+    fragColour.rgb = pow(fragColour.rgb, vec3(1.0 / 1.2));
+    // fragColour.rgb = adjustContrast(fragColour.rgb, 0.1);
+    // fragColour.rgb = adjustExposure(fragColour.rgb, 2.0);
 #endif
 
 #if ENABLE_SIMULATE_8BIT_COLOUR
-    fragColour = floor(fragColour.rgb * vec3(15.0)) / vec3(15.0);
+    fragColour.rgb = floor(fragColour.rgb * vec3(15.0)) / vec3(15.0);
 #endif
 #if ENABLE_SIMULATE_16BIT_COLOUR
     float r = floor(fragColour.r * 31.0) / 31.0;
     float g = floor(fragColour.g * 63.0) / 63.0;
     float b = floor(fragColour.b * 31.0) / 31.0;
-    fragColour = vec3(r, g, b);
+    fragColour.rgb = vec3(r, g, b);
 #endif
 
     /* The actual surface colour. */
-    mainColour = vec4(fragColour, surfaceColour.a);
+    mainColour = fragColour;
 
     return;
 }

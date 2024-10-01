@@ -11,6 +11,7 @@ out vec4 position;
 out vec4 normal;
 out vec2 uv;
 out vec4 colour;
+out vec4 vertexLight;
 
 out vec3 rawPosition;
 out vec3 rawNormal;
@@ -33,14 +34,12 @@ void main()
     position = model_view * pos;
     normal = vec4(normalize(mat3(normal_matrix) * aNormal), 0);
     uv = aUV;
+    colour = aColour;
 
 #if ENABLE_GOURAUD
-    bool directLightExists = false;
-    colour = aColour + fragmainXX(position, normal, directLightExists);
-    if (!directLightExists && num_lights > 0u && unlit == 0u)
-        colour += vec4(clear_colour.rgb, 0.0);
+    vertexLight = accumulateLights(position, normal);
 #else
-    colour = aColour;
+    vertexLight = vec4(1);
 #endif
 
     rawPosition = aPosition;
