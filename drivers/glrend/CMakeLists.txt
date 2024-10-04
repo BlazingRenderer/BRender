@@ -19,18 +19,18 @@ add_custom_command(
 )
 
 add_custom_command(
-        OUTPUT default.vert.glsl.h
+        OUTPUT rect.vert.glsl.h
         WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
-        COMMAND "${PERL_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/embedshader.pl" "g_DefaultVertexShader" "${CMAKE_CURRENT_SOURCE_DIR}/default.vert.glsl" "${CMAKE_CURRENT_BINARY_DIR}/default.vert.glsl.h"
-        MAIN_DEPENDENCY "${CMAKE_CURRENT_SOURCE_DIR}/default.vert.glsl"
+        COMMAND "${PERL_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/embedshader.pl" "g_RectVertexShader" "${CMAKE_CURRENT_SOURCE_DIR}/rect.vert.glsl" "${CMAKE_CURRENT_BINARY_DIR}/rect.vert.glsl.h"
+        MAIN_DEPENDENCY "${CMAKE_CURRENT_SOURCE_DIR}/rect.vert.glsl"
         DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/embedshader.pl"
 )
 
 add_custom_command(
-        OUTPUT default.frag.glsl.h
+        OUTPUT rect.frag.glsl.h
         WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
-        COMMAND "${PERL_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/embedshader.pl" "g_DefaultFragmentShader" "${CMAKE_CURRENT_SOURCE_DIR}/default.frag.glsl" "${CMAKE_CURRENT_BINARY_DIR}/default.frag.glsl.h"
-        MAIN_DEPENDENCY "${CMAKE_CURRENT_SOURCE_DIR}/default.frag.glsl"
+        COMMAND "${PERL_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/embedshader.pl" "g_RectFragmentShader" "${CMAKE_CURRENT_SOURCE_DIR}/rect.frag.glsl" "${CMAKE_CURRENT_BINARY_DIR}/rect.frag.glsl.h"
+        MAIN_DEPENDENCY "${CMAKE_CURRENT_SOURCE_DIR}/rect.frag.glsl"
         DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/embedshader.pl"
 )
 
@@ -67,7 +67,7 @@ source_group("STATE" FILES ${GLSTATE_FILES})
 
 set(VIDEO_FILES
         shader_brender.c
-        shader_default.c
+        shader_rect.c
         shader_text.c
         video.c
         video.h
@@ -127,7 +127,6 @@ set(GLREND_FILES
 
         template.h
 
-        quad.c
         util.c
 
         glad.c
@@ -169,8 +168,8 @@ add_library(glrend
         "${CMAKE_CURRENT_BINARY_DIR}/brender.vert.glsl.h"
         "${CMAKE_CURRENT_BINARY_DIR}/brender.frag.glsl.h"
 
-        "${CMAKE_CURRENT_BINARY_DIR}/default.vert.glsl.h"
-        "${CMAKE_CURRENT_BINARY_DIR}/default.frag.glsl.h"
+        "${CMAKE_CURRENT_BINARY_DIR}/rect.vert.glsl.h"
+        "${CMAKE_CURRENT_BINARY_DIR}/rect.frag.glsl.h"
 
         "${CMAKE_CURRENT_BINARY_DIR}/text.vert.glsl.h"
         "${CMAKE_CURRENT_BINARY_DIR}/text.frag.glsl.h"

@@ -23,7 +23,7 @@ GLuint VIDEOI_LoadAndCompileShader(GLenum type, const char *path, const char *de
 
 GLuint VIDEOI_CreateAndCompileProgram(GLuint vert, GLuint frag);
 
-br_boolean VIDEOI_CompileDefaultShader(HVIDEO hVideo);
+br_boolean VIDEOI_CompileRectShader(HVIDEO hVideo);
 
 br_boolean VIDEOI_CompileTextShader(HVIDEO hVideo);
 
@@ -143,23 +143,6 @@ void StoredGLRenderGroup(br_geometry_stored *self, br_renderer *renderer, const 
  * font.c
  */
 br_error FontGLBuildArray(br_font_gl *gl_font, br_font *font);
-
-/*
- * quad.c
- */
-
-void DeviceGLInitQuad(br_device_pixelmap_gl_quad *self, HVIDEO hVideo);
-void DeviceGLFiniQuad(br_device_pixelmap_gl_quad *self);
-
-/*
- * Patch the X/Y and U/V coordinates.
- * X/Y = rect of destination
- * U/V = rect of source
- * Rects are in OpenGL coordianges -- (0,0) at bottom-left
- */
-void DeviceGLPatchQuad(br_device_pixelmap_gl_quad *self, const br_pixelmap *dst, const br_rectangle *dr,
-                       const br_pixelmap *src, const br_rectangle *sr);
-void DeviceGLDrawQuad(br_device_pixelmap_gl_quad *self);
 
 /*
  * util.c

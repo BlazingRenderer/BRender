@@ -110,17 +110,17 @@ HVIDEO VIDEO_Open(HVIDEO hVideo, const char *vertShader, const char *fragShader)
     if(GLAD_GL_ARB_texture_filter_anisotropic)
         glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY, &hVideo->maxAnisotropy);
 
-    if(!VIDEOI_CompileDefaultShader(hVideo))
+    if(!VIDEOI_CompileRectShader(hVideo))
         return NULL;
 
     if(!VIDEOI_CompileTextShader(hVideo)) {
-        glDeleteProgram(hVideo->defaultProgram.program);
+        glDeleteProgram(hVideo->rectProgram.program);
         return NULL;
     }
 
     if(!VIDEOI_CompileBRenderShader(hVideo, vertShader, fragShader)) {
         glDeleteProgram(hVideo->textProgram.program);
-        glDeleteProgram(hVideo->defaultProgram.program);
+        glDeleteProgram(hVideo->rectProgram.program);
         return NULL;
     }
 
@@ -144,7 +144,10 @@ void VIDEO_Close(HVIDEO hVideo)
     if(hVideo->brenderProgram.blockIndexModel != GL_INVALID_INDEX)
         glDeleteBuffers(0, &hVideo->brenderProgram.uboModel);
 
-    glDeleteProgram(hVideo->defaultProgram.program);
+    glDeleteProgram(hVideo->rectProgram.program);
+    glDeleteBuffers(1, &hVideo->rectProgram.ubo);
+    glDeleteVertexArrays(1, &hVideo->rectProgram.vao);
+
     glDeleteProgram(hVideo->textProgram.program);
 }
 

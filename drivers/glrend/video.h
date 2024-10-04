@@ -32,15 +32,15 @@ typedef struct _VIDEO {
 
     struct {
         GLuint program;
-        GLint  aPosition;     /* Position, vec3 */
-        GLint  aColour;       /* Colour, vec3 */
-        GLint  aUV;           /* UV, vec2 */
         GLint  uSampler;      /* Sampler, sampler2D */
         GLint  uIndexTex;     /* Sampler, usampler2D */
-        GLint  uMVP;          /* Model-View-Projection Matrix, mat4 */
-        GLint  uVerticalFlip; /* Boolean (actually a float). Should the image be vertically flipped. */
-        GLint  uIndexed;      /* Boolean (actually a float). Is the texture indexed? */
-    } defaultProgram;
+
+        GLuint block_index_rect_data;
+        GLuint block_binding_rect_data;
+
+        GLuint vao;
+        GLuint ubo;
+    } rectProgram;
 
     struct {
         GLuint program;

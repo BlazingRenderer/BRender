@@ -8,18 +8,6 @@
 extern "C" {
 #endif
 
-typedef struct {
-    float x, y, z;
-    float r, g, b;
-    float u, v;
-} br_device_pixelmap_gl_tri;
-
-typedef struct br_device_pixelmap_gl_quad {
-    br_device_pixelmap_gl_tri tris[4];
-    GLuint                    defaultVao;
-    GLuint                    buffers[2];
-} br_device_pixelmap_gl_quad;
-
 #ifdef BR_DEVICE_PIXELMAP_PRIVATE
 
 /*
@@ -108,8 +96,6 @@ typedef struct br_device_pixelmap {
             GLuint                     glTex;
             GLfloat                    clearColour[4];
             br_device_clut            *clut;
-
-            br_device_pixelmap_gl_quad quad;
         } asBack;
         struct {
             struct br_device_pixelmap *backbuffer;

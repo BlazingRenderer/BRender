@@ -146,9 +146,6 @@ static void delete_gl_resources(br_device_pixelmap *self)
     } else if(self->use_type == BRT_OFFSCREEN) {
         glDeleteFramebuffers(1, &self->asBack.glFbo);
         glDeleteTextures(1, &self->asBack.glTex);
-
-        /* Cleanup the quad */
-        DeviceGLFiniQuad(&self->asBack.quad);
     }
 }
 
@@ -351,7 +348,6 @@ br_error BR_CMETHOD_DECL(br_device_pixelmap_gl, match)(br_device_pixelmap *self,
         pm->asBack.clut        = DeviceClutGLAllocate(pm);
         glGenFramebuffers(1, &pm->asBack.glFbo);
         DeviceGLObjectLabelF(GL_FRAMEBUFFER, pm->asBack.glFbo, "%s:fbo", pm->pm_identifier);
-        DeviceGLInitQuad(&pm->asBack.quad, hVideo);
     } else {
         UASSERT(mt.use_type == BRT_DEPTH);
         self->asBack.depthbuffer = pm;
@@ -492,6 +488,17 @@ br_error BR_CMETHOD(br_device_pixelmap_gl, rectangleStretchCopyTo)(br_device_pix
                                                                    br_device_pixelmap *_src, br_rectangle *sr)
 {
     /* Pixelmap->Device, addressable stretch copy. */
+
+#pragma pack(push, 16)
+    typedef struct br_rect_gl_data {
+        alignas(16) br_matrix4 mvp;
+        alignas(16) br_vector4 src_rect;
+        alignas(16) br_vector4 dst_rect;
+        alignas(4) float vertical_flip;
+        alignas(4) float indexed;
+    } br_rect_gl_data;
+#pragma pack(pop)
+
     HVIDEO            hVideo  = &self->screen->asFront.video;
     br_pixelmap      *src     = (br_pixelmap *)_src;
     br_buffer_stored *stored  = src->stored;
@@ -499,7 +506,6 @@ br_error BR_CMETHOD(br_device_pixelmap_gl, rectangleStretchCopyTo)(br_device_pix
     GLuint            tex;
     br_boolean        clut_tmp = BR_FALSE;
     GLuint            clut = 0;
-    br_matrix4        mvp;
     const br_pixelmap_gl_fmt *fmt;
 
     if(self->use_type != BRT_OFFSCREEN)
@@ -534,40 +540,54 @@ br_error BR_CMETHOD(br_device_pixelmap_gl, rectangleStretchCopyTo)(br_device_pix
     VIDEOI_BrRectToGL(src, sr);
     VIDEOI_BrRectToGL((br_pixelmap *)self, dr);
 
-    /* Patch the quad */
-    DeviceGLPatchQuad(&self->asBack.quad, (br_pixelmap *)self, dr, src, sr);
-
     glDisable(GL_DEPTH_TEST);
     glBindFramebuffer(GL_FRAMEBUFFER, self->asBack.glFbo);
 
     glViewport(0, 0, self->pm_width, self->pm_height);
 
     /* Render it */
-    glUseProgram(hVideo->defaultProgram.program);
-
-    BrMatrix4Orthographic(&mvp, 0.0f, 1.0f, 0.0f, 1.0f, -1.0f, 1.0f);
-    VIDEOI_D3DtoGLProjection(&mvp);
-
-    glUniformMatrix4fv(hVideo->defaultProgram.uMVP, 1, GL_FALSE, (GLfloat *)&mvp);
-    glUniform1f(hVideo->defaultProgram.uVerticalFlip, 1);
-    glUniform1f(hVideo->defaultProgram.uIndexed, (float)fmt->indexed);
+    glUseProgram(hVideo->rectProgram.program);
 
     if(fmt->indexed) {
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, clut);
-        glUniform1i(hVideo->defaultProgram.uSampler, 0);
+        glUniform1i(hVideo->rectProgram.uSampler, 0);
 
         glActiveTexture(GL_TEXTURE1);
         glBindTexture(GL_TEXTURE_2D, tex);
-        glUniform1i(hVideo->defaultProgram.uIndexTex, 1);
+        glUniform1i(hVideo->rectProgram.uIndexTex, 1);
     } else {
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, tex);
 
-        glUniform1i(hVideo->defaultProgram.uSampler, 0);
+        glUniform1i(hVideo->rectProgram.uSampler, 0);
     }
 
-    DeviceGLDrawQuad(&self->asBack.quad);
+    br_rect_gl_data rect_data = {
+        .mvp           = {},
+        .src_rect      = BR_VECTOR4(
+            (float)sr->x / (float)src->width,
+            (float)sr->y / (float)src->height,
+            (float)sr->w / (float)src->width,
+            (float)sr->h / (float)src->height
+        ),
+        .dst_rect      = BR_VECTOR4(
+            (float)dr->x / (float)self->pm_width,
+            (float)dr->y / (float)self->pm_height,
+            (float)dr->w / (float)self->pm_width,
+            (float)dr->h / (float)self->pm_height
+        ),
+        .vertical_flip = 1,
+        .indexed       = (float)fmt->indexed,
+    };
+
+    BrMatrix4Orthographic(&rect_data.mvp, 0.0f, 1.0f, 0.0f, 1.0f, -1.0f, 1.0f);
+    VIDEOI_D3DtoGLProjection(&rect_data.mvp);
+
+    glBindVertexArray(hVideo->rectProgram.vao);
+    glBindBuffer(GL_UNIFORM_BUFFER, hVideo->rectProgram.ubo);
+    glBufferData(GL_UNIFORM_BUFFER, sizeof(rect_data), &rect_data, GL_STATIC_DRAW);
+    glDrawArraysInstanced(GL_TRIANGLES, 0, 6, 2);
 
     glBindVertexArray(0);
 
