@@ -110,8 +110,7 @@ br_error BR_CMETHOD_DECL(br_geometry_v1_buckets_gl, render)(br_geometry_v1_bucke
                 ASSERT(ObjectIsType((br_object *)geom, BRT_GEOMETRY_STORED));
 
                 *renderer->state.current = *state;
-                BrPoolBlockFree(renderer->state_pool, p->v[1]);
-
+                RendererGLUnrefState(renderer, state);
                 StoredGLRenderGroup(geom, (br_renderer *)renderer, groupinfo);
             } else {
                 /*

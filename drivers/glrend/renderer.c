@@ -671,3 +671,19 @@ static const struct br_renderer_dispatch rendererDispatch = {
     ._sceneBegin            = BR_CMETHOD(br_renderer_gl, sceneBegin),
     ._sceneEnd              = BR_CMETHOD(br_renderer_gl, sceneEnd),
 };
+
+state_stack *RendererGLAllocState(br_renderer *self, const state_stack *tpl, br_uint_32 refs)
+{
+    state_stack *state = BrPoolBlockAllocate(self->state_pool);
+    *state             = *tpl;
+    state->num_refs    = refs;
+    return state;
+}
+
+void RendererGLUnrefState(br_renderer *self, state_stack *state)
+{
+    --state->num_refs;
+
+    if(state->num_refs == 0)
+        BrPoolBlockFree(self->state_pool, state);
+}

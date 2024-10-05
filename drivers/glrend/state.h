@@ -223,6 +223,11 @@ typedef struct state_stack {
     state_hidden    hidden;
 
     br_uint_32 valid;
+
+    /*
+     * Only for use when in the pool.
+     */
+    br_uint_32 num_refs;
 } state_stack;
 
 typedef struct {

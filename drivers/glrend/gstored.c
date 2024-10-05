@@ -467,8 +467,7 @@ static br_error V1Model_RenderStored(struct br_geometry_stored *self, br_rendere
 
         bucket = calculate_bucket(state->hidden.order_table, stored ? &stored->state : state, &distance_from_zero);
 
-        tmpstate = BrPoolBlockAllocate(renderer->state_pool);
-        *tmpstate = *state;
+        tmpstate = RendererGLAllocState(renderer, state, 1);
 
         prim         = heapPrimitiveAdd(state->hidden.heap, BRT_GEOMETRY_STORED);
         prim->stored = stored;

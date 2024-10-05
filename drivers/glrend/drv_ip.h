@@ -55,6 +55,9 @@ br_output_facility *OutputFacilityGLInit(br_device *dev, br_renderer_facility *r
  */
 br_renderer *RendererGLAllocate(br_device *device, br_renderer_facility *facility, br_device_pixelmap *dest);
 
+state_stack *RendererGLAllocState(br_renderer *self, const state_stack *tpl, br_uint_32 refs);
+void         RendererGLUnrefState(br_renderer *self, state_stack *state);
+
 /*
  * devpixmp.c
  */
