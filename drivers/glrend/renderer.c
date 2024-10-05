@@ -123,6 +123,8 @@ void BR_CMETHOD_DECL(br_renderer_gl, sceneEnd)(br_renderer *self)
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
     glUseProgram(0);
     self->has_begun = 0;
+
+    BrPoolEmpty(self->state_pool);
 }
 
 static void BR_CMETHOD_DECL(br_renderer_gl, free)(br_object *_self)
