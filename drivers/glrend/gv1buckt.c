@@ -87,20 +87,16 @@ static struct br_tv_template *BR_CMETHOD_DECL(br_geometry_v1_buckets_gl, templat
 br_error BR_CMETHOD_DECL(br_geometry_v1_buckets_gl, render)(br_geometry_v1_buckets *self, br_renderer *renderer,
                                                             br_primitive **buckets, br_int_32 nbuckets)
 {
-    br_primitive             *p;
-    br_renderer_state_stored *stored;
-
     if(nbuckets <= 0)
         return BRE_OK;
 
-    size_t count = 0;
     /*
      * Render bucket table from last to first
      */
     for(buckets += nbuckets - 1; nbuckets--; buckets--) {
-        for(p = *buckets; p; p = p->next) {
-            ++count;
-            stored = (br_renderer_state_stored *)p->stored;
+        for(br_primitive *p = *buckets; p; p = p->next) {
+            br_renderer_state_stored *stored = (br_renderer_state_stored *)p->stored;
+
             ASSERT(stored == NULL || ObjectIsType((br_object *)stored, BRT_RENDERER_STATE_STORED));
 
             /*
@@ -108,7 +104,7 @@ br_error BR_CMETHOD_DECL(br_geometry_v1_buckets_gl, render)(br_geometry_v1_bucke
              */
             if(p->type == BRT_GEOMETRY_STORED) {
                 br_geometry_stored *geom      = (br_geometry_stored *)p->v[0];
-                state_stack        *state     = (state_stack*)p->v[1];
+                state_stack        *state     = (state_stack *)p->v[1];
                 const gl_groupinfo *groupinfo = (gl_groupinfo *)p->v[2];
 
                 ASSERT(ObjectIsType((br_object *)geom, BRT_GEOMETRY_STORED));
