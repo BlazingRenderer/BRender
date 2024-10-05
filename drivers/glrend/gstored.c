@@ -431,16 +431,18 @@ static br_boolean want_defer(const state_hidden *hidden)
 
 static br_error V1Model_RenderStored(struct br_geometry_stored *self, br_renderer *renderer, br_boolean on_screen)
 {
-    state_stack *state;
-    br_primitive  *prim;
-    br_vector3     pos;
-    br_boolean     defer;
-    br_scalar      distance_from_zero;
+    state_stack  *state;
+    br_primitive *prim;
+    br_vector3    pos;
+    br_boolean    defer;
+    br_scalar     distance_from_zero;
 
     state = renderer->state.current;
 
-    BrVector3Set(&pos, state->matrix.model_to_view.m[3][0], state->matrix.model_to_view.m[3][1],
-                 state->matrix.model_to_view.m[3][2]);
+    pos.v[0] = state->matrix.model_to_view.m[3][0];
+    pos.v[1] = state->matrix.model_to_view.m[3][1];
+    pos.v[2] = state->matrix.model_to_view.m[3][2];
+
     distance_from_zero = BrVector3Length(&pos);
 
     defer = want_defer(&state->hidden);
@@ -449,6 +451,8 @@ static br_error V1Model_RenderStored(struct br_geometry_stored *self, br_rendere
         struct v11group          *group     = self->model->groups + i;
         gl_groupinfo             *groupinfo = self->groups + i;
         br_renderer_state_stored *stored    = (br_renderer_state_stored *)group->stored;
+        state_stack              *tmpstate;
+        br_uint_16                bucket;
 
         /*
          * TODO: I *think* the group's material may change in between here and build_ibo()
@@ -461,32 +465,28 @@ static br_error V1Model_RenderStored(struct br_geometry_stored *self, br_rendere
             continue;
         }
 
-        br_order_table *ot = state->hidden.order_table;
-        br_uint_16      bucket;
-        state_stack    *tmpstate;
+        bucket = calculate_bucket(state->hidden.order_table, stored ? &stored->state : state, &distance_from_zero);
 
         tmpstate = BrPoolBlockAllocate(renderer->state_pool);
+        *tmpstate = *state;
 
         prim         = heapPrimitiveAdd(state->hidden.heap, BRT_GEOMETRY_STORED);
         prim->stored = stored;
         prim->v[0]   = self;
         prim->v[1]   = tmpstate;
         prim->v[2]   = groupinfo;
-
-        *tmpstate = *state;
+        prim->depth  = distance_from_zero;
 
         /*
          * If the user set a function defer to them.
          */
         if(state->hidden.insert_fn != NULL) {
             state->hidden.insert_fn(prim, state->hidden.insert_arg1, state->hidden.insert_arg2,
-                                    state->hidden.insert_arg3, ot, &prim->depth);
+                                    state->hidden.insert_arg3, state->hidden.order_table, &prim->depth);
             continue;
         }
 
-        bucket      = calculate_bucket(ot, stored ? &stored->state : state, &distance_from_zero);
-        prim->depth = distance_from_zero;
-        BrZsOrderTablePrimitiveInsert(ot, prim, bucket);
+        BrZsOrderTablePrimitiveInsert(state->hidden.order_table, prim, bucket);
     }
     return BRE_OK;
 }
