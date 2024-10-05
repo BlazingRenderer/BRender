@@ -456,36 +456,37 @@ static br_error V1Model_RenderStored(struct br_geometry_stored *self, br_rendere
          */
         groupinfo->stored = stored;
 
-        if(defer) {
-            br_order_table *ot = state->hidden.order_table;
-            br_uint_16      bucket;
-            state_stack    *tmpstate;
-
-            tmpstate = BrPoolBlockAllocate(renderer->state_pool);
-
-            prim         = heapPrimitiveAdd(state->hidden.heap, BRT_GEOMETRY_STORED);
-            prim->stored = stored;
-            prim->v[0]   = self;
-            prim->v[1]   = tmpstate;
-            prim->v[2]   = groupinfo;
-
-            *tmpstate = *state;
-
-            /*
-             * If the user set a function defer to them.
-             */
-            if(state->hidden.insert_fn != NULL) {
-                state->hidden.insert_fn(prim, state->hidden.insert_arg1, state->hidden.insert_arg2,
-                                        state->hidden.insert_arg3, ot, &prim->depth);
-                continue;
-            }
-
-            bucket      = calculate_bucket(ot, stored ? &stored->state : state, &distance_from_zero);
-            prim->depth = distance_from_zero;
-            BrZsOrderTablePrimitiveInsert(ot, prim, bucket);
-        } else {
+        if(!defer) {
             StoredGLRenderGroup(self, renderer, groupinfo);
+            continue;
         }
+
+        br_order_table *ot = state->hidden.order_table;
+        br_uint_16      bucket;
+        state_stack    *tmpstate;
+
+        tmpstate = BrPoolBlockAllocate(renderer->state_pool);
+
+        prim         = heapPrimitiveAdd(state->hidden.heap, BRT_GEOMETRY_STORED);
+        prim->stored = stored;
+        prim->v[0]   = self;
+        prim->v[1]   = tmpstate;
+        prim->v[2]   = groupinfo;
+
+        *tmpstate = *state;
+
+        /*
+         * If the user set a function defer to them.
+         */
+        if(state->hidden.insert_fn != NULL) {
+            state->hidden.insert_fn(prim, state->hidden.insert_arg1, state->hidden.insert_arg2,
+                                    state->hidden.insert_arg3, ot, &prim->depth);
+            continue;
+        }
+
+        bucket      = calculate_bucket(ot, stored ? &stored->state : state, &distance_from_zero);
+        prim->depth = distance_from_zero;
+        BrZsOrderTablePrimitiveInsert(ot, prim, bucket);
     }
     return BRE_OK;
 }
