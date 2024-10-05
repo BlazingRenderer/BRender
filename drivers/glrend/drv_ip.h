@@ -159,6 +159,8 @@ void DeviceGLObjectLabelF(GLenum identifier, GLuint name, const char *fmt, ...);
 br_boolean  DeviceGLCheckErrors(void);
 const char *DeviceGLStrError(GLenum err);
 
+br_vector3 DeviceGLTriangleCentroid(const br_vector3 *v1, const br_vector3 *v2, const br_vector3 *v3);
+
 /*
  * Wrappers for br_device_gl_procs.
  */

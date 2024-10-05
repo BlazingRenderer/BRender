@@ -242,3 +242,12 @@ br_boolean DeviceGLCheckErrors(void)
 
     return has_error;
 }
+
+br_vector3 DeviceGLTriangleCentroid(const br_vector3 *v1, const br_vector3 *v2, const br_vector3 *v3)
+{
+    br_vector3 v;
+    v.v[0] = BR_DIV(v1->v[0] + v2->v[0] + v3->v[0], BR_SCALAR(3));
+    v.v[1] = BR_DIV(v1->v[1] + v2->v[1] + v3->v[1], BR_SCALAR(3));
+    v.v[2] = BR_DIV(v1->v[2] + v2->v[2] + v3->v[2], BR_SCALAR(3));
+    return v;
+}
