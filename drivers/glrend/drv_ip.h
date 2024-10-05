@@ -31,8 +31,6 @@ br_boolean VIDEOI_CompileBRenderShader(HVIDEO hVideo, const char *vertPath, cons
 
 void VIDEOI_BrRectToGL(const br_pixelmap *pm, br_rectangle *r);
 
-void VIDEOI_BrRectToUVs(const br_pixelmap *pm, const br_rectangle *r, float *x0, float *y0, float *x1, float *y1);
-
 br_matrix4 *VIDEOI_D3DtoGLProjection(br_matrix4 *m);
 
 const br_pixelmap_gl_fmt *DeviceGLGetFormatDetails(br_uint_8 type);

@@ -220,15 +220,6 @@ void VIDEOI_BrRectToGL(const br_pixelmap *pm, br_rectangle *r)
     r->y = pm->height - r->h - r->y;
 }
 
-void VIDEOI_BrRectToUVs(const br_pixelmap *pm, const br_rectangle *r, float *x0, float *y0, float *x1, float *y1)
-{
-    *x0 = (float)r->x / (float)pm->width;
-    *y0 = (float)r->y / (float)pm->height;
-
-    *x1 = (float)(r->x + r->w) / (float)pm->width;
-    *y1 = (float)(r->y + r->h) / (float)pm->height;
-}
-
 br_matrix4 *VIDEOI_D3DtoGLProjection(br_matrix4 *m)
 {
     // Change the signs
