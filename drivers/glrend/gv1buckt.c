@@ -91,6 +91,15 @@ br_error BR_CMETHOD_DECL(br_geometry_v1_buckets_gl, render)(br_geometry_v1_bucke
         return BRE_OK;
 
     /*
+     * Upload our transparent triangles, if any.
+     */
+    if(renderer->trans.next > 0) {
+        glBindBuffer(GL_ARRAY_BUFFER, renderer->trans.vbo);
+        glBufferData(GL_ARRAY_BUFFER, sizeof(renderer->trans.pool), renderer->trans.pool, GL_STATIC_DRAW);
+        glBindBuffer(GL_ARRAY_BUFFER, 0);
+    }
+
+    /*
      * Render bucket table from last to first
      */
     for(buckets += nbuckets - 1; nbuckets--; buckets--) {
@@ -112,6 +121,14 @@ br_error BR_CMETHOD_DECL(br_geometry_v1_buckets_gl, render)(br_geometry_v1_bucke
                 *renderer->state.current = *state;
                 RendererGLUnrefState(renderer, state);
                 StoredGLRenderGroup(geom, (br_renderer *)renderer, groupinfo);
+            } else if(p->type == BRT_TRIANGLE) {
+                br_uintptr_t        offset    = (br_uintptr_t)p->v[0];
+                state_stack        *state     = (state_stack *)p->v[1];
+                const gl_groupinfo *groupinfo = (gl_groupinfo *)p->v[2];
+
+                *renderer->state.current = *state;
+                StoredGLRenderTri(renderer, offset, groupinfo);
+                RendererGLUnrefState(renderer, state);
             } else {
                 /*
                  * We can't handle other things yet.

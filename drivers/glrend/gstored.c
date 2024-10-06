@@ -448,10 +448,10 @@ static br_error V1Model_RenderStored(struct br_geometry_stored *self, br_rendere
     defer = want_defer(&state->hidden);
 
     for(int i = 0; i < self->model->ngroups; ++i) {
-        struct v11group          *group     = self->model->groups + i;
-        gl_groupinfo             *groupinfo = self->groups + i;
-        br_renderer_state_stored *stored    = (br_renderer_state_stored *)group->stored;
-        state_stack              *tmpstate;
+        struct v11group          *group       = self->model->groups + i;
+        gl_groupinfo             *groupinfo   = self->groups + i;
+        br_renderer_state_stored *stored      = (br_renderer_state_stored *)group->stored;
+        int                       render_mode = get_render_mode(stored ? &stored->state : state);
         br_uint_16                bucket;
 
         /*
@@ -467,25 +467,70 @@ static br_error V1Model_RenderStored(struct br_geometry_stored *self, br_rendere
 
         bucket = calculate_bucket(state->hidden.order_table, stored ? &stored->state : state, &distance_from_zero);
 
-        tmpstate = RendererGLAllocState(renderer, state, 1);
+        if(render_mode == RM_TRANS) {
+            /*
+             * If transparent, send things triangle-by-triangle.
+             */
+            state_stack *tmpstate = RendererGLAllocState(renderer, state, group->nfaces);
+            for(int f = 0; f < group->nfaces; ++f) {
+                br_vector3 centroid, centroid_view;
+                br_int_32 base;
 
-        prim         = heapPrimitiveAdd(state->hidden.heap, BRT_GEOMETRY_STORED);
-        prim->stored = stored;
-        prim->v[0]   = self;
-        prim->v[1]   = tmpstate;
-        prim->v[2]   = groupinfo;
-        prim->depth  = distance_from_zero;
+                if((base = RendererGLNextImmTri(renderer, group, group->vertex_numbers[f])) < 0) {
+                    /*
+                     * Out of immediate primitives.
+                     */
+                    BrLogWarn("GLREND", "Out of transparent primitives.");
+                    RendererGLUnrefState(renderer, tmpstate);
+                    continue;
+                }
 
-        /*
-         * If the user set a function defer to them.
-         */
-        if(state->hidden.insert_fn != NULL) {
-            state->hidden.insert_fn(prim, state->hidden.insert_arg1, state->hidden.insert_arg2,
-                                    state->hidden.insert_arg3, state->hidden.order_table, &prim->depth);
-            continue;
+                prim         = heapPrimitiveAdd(state->hidden.heap, BRT_TRIANGLE);
+                prim->stored = stored;
+                prim->v[0]   = (void*)(br_uintptr_t)base;
+                prim->v[1]   = tmpstate;
+                prim->v[2]   = groupinfo;
+
+                centroid = DeviceGLTriangleCentroid(&renderer->trans.pool[base + 0].position,
+                                                    &renderer->trans.pool[base + 1].position,
+                                                    &renderer->trans.pool[base + 2].position);
+                BrMatrix34ApplyP(&centroid_view, &centroid, &state->matrix.model_to_view);
+
+                prim->depth = -BrVector3Length(&centroid_view);
+
+                /*
+                 * If the user set a function defer to them.
+                 */
+                if(state->hidden.insert_fn != NULL) {
+                    state->hidden.insert_fn(prim, state->hidden.insert_arg1, state->hidden.insert_arg2,
+                                            state->hidden.insert_arg3, state->hidden.order_table, &prim->depth);
+                    continue;
+                }
+
+                BrZsOrderTablePrimitiveInsert(state->hidden.order_table, prim, bucket);
+            }
+        } else {
+            /*
+             * Render everything else by group.
+             */
+            prim         = heapPrimitiveAdd(state->hidden.heap, BRT_GEOMETRY_STORED);
+            prim->stored = stored;
+            prim->v[0]   = self;
+            prim->v[1]   = RendererGLAllocState(renderer, state, 1);
+            prim->v[2]   = groupinfo;
+            prim->depth  = distance_from_zero;
+
+            /*
+             * If the user set a function defer to them.
+             */
+            if(state->hidden.insert_fn != NULL) {
+                state->hidden.insert_fn(prim, state->hidden.insert_arg1, state->hidden.insert_arg2,
+                                        state->hidden.insert_arg3, state->hidden.order_table, &prim->depth);
+                continue;
+            }
+
+            BrZsOrderTablePrimitiveInsert(state->hidden.order_table, prim, bucket);
         }
-
-        BrZsOrderTablePrimitiveInsert(state->hidden.order_table, prim, bucket);
     }
     return BRE_OK;
 }

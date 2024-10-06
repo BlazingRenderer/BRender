@@ -19,6 +19,48 @@ static struct br_tv_template_entry rendererTemplateEntries[] = {
 };
 #undef F
 
+static void RendererGLInitImm(br_renderer *self, HVIDEO hVideo)
+{
+    glGenVertexArrays(1, &self->trans.vao);
+    glBindVertexArray(self->trans.vao);
+
+    glGenBuffers(1, &self->trans.vbo);
+    glBindBuffer(GL_ARRAY_BUFFER, self->trans.vbo);
+
+    if(hVideo->brenderProgram.attributes.aUV >= 0) {
+        glEnableVertexAttribArray(hVideo->brenderProgram.attributes.aPosition);
+        glVertexAttribPointer(hVideo->brenderProgram.attributes.aPosition, 3, GL_FLOAT, GL_FALSE, sizeof(br_immvert_gl),
+                              (void *)offsetof(br_immvert_gl, position));
+    }
+
+    if(hVideo->brenderProgram.attributes.aUV >= 0) {
+        glEnableVertexAttribArray(hVideo->brenderProgram.attributes.aUV);
+        glVertexAttribPointer(hVideo->brenderProgram.attributes.aUV, 2, GL_FLOAT, GL_FALSE, sizeof(br_immvert_gl),
+                              (void *)offsetof(br_immvert_gl, map));
+    }
+
+    if(hVideo->brenderProgram.attributes.aNormal >= 0) {
+        glEnableVertexAttribArray(hVideo->brenderProgram.attributes.aNormal);
+        glVertexAttribPointer(hVideo->brenderProgram.attributes.aNormal, 3, GL_FLOAT, GL_FALSE, sizeof(br_immvert_gl),
+                              (void *)offsetof(br_immvert_gl, normal));
+    }
+
+    if(hVideo->brenderProgram.attributes.aColour >= 0) {
+        glEnableVertexAttribArray(hVideo->brenderProgram.attributes.aColour);
+        glVertexAttribPointer(hVideo->brenderProgram.attributes.aColour, 4, GL_UNSIGNED_BYTE, GL_TRUE,
+                              sizeof(br_immvert_gl), (void *)offsetof(br_immvert_gl, colour));
+    }
+
+    glBindVertexArray(0);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+}
+
+static void RendererGLFreeImm(br_renderer *self)
+{
+    glDeleteVertexArrays(1, &self->trans.vao);
+    glDeleteBuffers(1, &self->trans.vbo);
+}
+
 /*
  * Create a new renderer
  */
@@ -44,6 +86,8 @@ br_renderer *RendererGLAllocate(br_device *device, br_renderer_facility *facilit
     self->renderer_facility = facility;
     self->state_pool        = BrPoolAllocate(sizeof(state_stack), 1024, BR_MEMORY_OBJECT_DATA);
 
+    RendererGLInitImm(self, &dest->screen->asFront.video);
+
     ObjectContainerAddFront(facility, (br_object *)self);
 
     StateGLInit(&self->state, self->device);
@@ -66,6 +110,8 @@ static void BR_CMETHOD_DECL(br_renderer_gl, sceneBegin)(br_renderer *self)
     self->stats.triangles_drawn_count    = 0;
     self->stats.triangles_rendered_count = 0;
     self->stats.vertices_rendered_count  = 0;
+
+    self->trans.next = 0;
 
     /* First draw call, so do all the per-scene crap */
     DeviceGLCheckErrors();
@@ -125,11 +171,15 @@ void BR_CMETHOD_DECL(br_renderer_gl, sceneEnd)(br_renderer *self)
     self->has_begun = 0;
 
     BrPoolEmpty(self->state_pool);
+
+    self->trans.next = 0;
 }
 
 static void BR_CMETHOD_DECL(br_renderer_gl, free)(br_object *_self)
 {
     br_renderer *self = (br_renderer *)_self;
+
+    RendererGLFreeImm(self);
 
     BrPoolFree(self->state_pool);
 
@@ -686,4 +736,39 @@ void RendererGLUnrefState(br_renderer *self, state_stack *state)
 
     if(state->num_refs == 0)
         BrPoolBlockFree(self->state_pool, state);
+}
+
+br_int_32 RendererGLNextImmTri(br_renderer *self, struct v11group *group, br_vector3_u16 fp)
+{
+    br_size_t base = self->trans.next;
+
+    if(base + 3 >= BR_ASIZE(self->trans.pool))
+        return -1;
+
+    br_immvert_gl *v0 = self->trans.pool + self->trans.next++;
+    br_immvert_gl *v1 = self->trans.pool + self->trans.next++;
+    br_immvert_gl *v2 = self->trans.pool + self->trans.next++;
+
+    *v0 = (br_immvert_gl){
+        .position = group->position[fp.v[0]],
+        .normal   = group->normal[fp.v[0]],
+        .map      = group->map[fp.v[0]],
+        .colour   = group->vertex_colours[fp.v[0]],
+    };
+
+    *v1 = (br_immvert_gl){
+        .position = group->position[fp.v[1]],
+        .normal   = group->normal[fp.v[1]],
+        .map      = group->map[fp.v[1]],
+        .colour   = group->vertex_colours[fp.v[1]],
+    };
+
+    *v2 = (br_immvert_gl){
+        .position = group->position[fp.v[2]],
+        .normal   = group->normal[fp.v[2]],
+        .map      = group->map[fp.v[2]],
+        .colour   = group->vertex_colours[fp.v[2]],
+    };
+
+    return (br_int_32)base;
 }

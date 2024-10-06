@@ -8,6 +8,15 @@
 extern "C" {
 #endif
 
+#pragma pack(push, 4)
+typedef struct br_immvert_gl {
+    br_vector3 position;
+    br_vector3 normal;
+    br_vector2 map;
+    br_colour  colour;
+} br_immvert_gl;
+#pragma pack(pop)
+
 #ifdef BR_RENDERER_PRIVATE
 
 typedef struct br_renderer {
@@ -39,6 +48,13 @@ typedef struct br_renderer {
      * when deferring.
      */
     br_pool *state_pool;
+
+    struct {
+        br_immvert_gl pool[1024 * 3];
+        br_size_t     next;
+        GLuint        vao;
+        GLuint        vbo;
+    } trans;
 
     state_all state;
 

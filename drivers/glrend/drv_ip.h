@@ -58,6 +58,8 @@ br_renderer *RendererGLAllocate(br_device *device, br_renderer_facility *facilit
 state_stack *RendererGLAllocState(br_renderer *self, const state_stack *tpl, br_uint_32 refs);
 void         RendererGLUnrefState(br_renderer *self, state_stack *state);
 
+br_int_32 RendererGLNextImmTri(br_renderer *self, struct v11group *group, br_vector3_u16 fp);
+
 /*
  * devpixmp.c
  */
@@ -139,6 +141,7 @@ void StateGLCopy(state_stack *dst, state_stack *src, uint32_t mask);
  * renderer.c
  */
 void StoredGLRenderGroup(br_geometry_stored *self, br_renderer *renderer, const gl_groupinfo *groupinfo);
+void StoredGLRenderTri(br_renderer *renderer, br_uintptr_t offset, const gl_groupinfo *groupinfo);
 
 /*
  * font.c

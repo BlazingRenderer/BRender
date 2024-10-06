@@ -386,3 +386,70 @@ void StoredGLRenderGroup(br_geometry_stored *self, br_renderer *renderer, const 
     renderer->stats.triangles_drawn_count += groupinfo->group->nfaces;
     renderer->stats.vertices_rendered_count += groupinfo->group->nfaces * 3;
 }
+
+// TODO: combine this with StoredGLRenderGroup()
+void StoredGLRenderTri(br_renderer *renderer, br_uintptr_t offset, const gl_groupinfo *groupinfo)
+{
+    state_cache              *cache  = &renderer->state.cache;
+    br_device_pixelmap       *screen = renderer->pixelmap->screen;
+    HVIDEO                    hVideo = &screen->asFront.video;
+    br_renderer_state_stored *stored = groupinfo->stored;
+    br_boolean                unlit;
+    shader_data_model         model;
+
+    /* Update the per-model cache (matrices and lights) */
+    StateGLUpdateModel(cache, &renderer->state.current->matrix);
+
+#if DEBUG
+    { /* Check that sceneBegin() actually did it's shit. */
+
+        /* Program */
+        GLint p;
+        glGetIntegerv(GL_CURRENT_PROGRAM, &p);
+        ASSERT(p == hVideo->brenderProgram.program);
+
+        /* FBO */
+        glGetIntegerv(GL_DRAW_FRAMEBUFFER_BINDING, &p);
+        ASSERT(p == renderer->state.current->output.colour->asBack.glFbo);
+
+        /* Model UBO */
+        glGetIntegerv(GL_UNIFORM_BUFFER_BINDING, &p);
+        ASSERT(p == hVideo->brenderProgram.uboModel);
+    }
+#endif
+
+    model.projection         = cache->model.p;
+    model.model_view         = cache->model.mv;
+    model.mvp                = cache->model.mvp;
+    model.normal_matrix      = cache->model.normal;
+    model.environment_matrix = cache->model.environment;
+    model.eye_m              = cache->model.eye_m;
+
+    glBindVertexArray(renderer->trans.vao);
+    glBindBuffer(GL_ARRAY_BUFFER, renderer->trans.vbo);
+
+    /* NB: Flag is never set */
+    // int model_lit = self->model->flags & V11MODF_LIT;
+
+    unlit = BR_TRUE;
+    if(stored) {
+        apply_stored_properties(hVideo, &stored->state, MASK_STATE_PRIMITIVE | MASK_STATE_SURFACE | MASK_STATE_CULL,
+                                &unlit, &model, screen->asFront.tex_white);
+    } else {
+        /* If there's no stored state, apply all states from global. */
+        apply_stored_properties(hVideo, renderer->state.current, ~0u, &unlit, &model, screen->asFront.tex_white);
+    }
+
+    model.unlit = (br_uint_32)unlit;
+    BrVector4Set(&model.clear_colour, renderer->pixelmap->asBack.clearColour[0], renderer->pixelmap->asBack.clearColour[1],
+                 renderer->pixelmap->asBack.clearColour[2], renderer->pixelmap->asBack.clearColour[3]);
+
+    glBufferData(GL_UNIFORM_BUFFER, sizeof(model), &model, GL_STATIC_DRAW);
+    glDrawArrays(GL_TRIANGLES, offset, 3);
+
+    renderer->stats.triangles_rendered_count += 1;
+    renderer->stats.triangles_drawn_count += 1;
+    renderer->stats.vertices_rendered_count += 3;
+
+    glBindVertexArray(0);
+}
