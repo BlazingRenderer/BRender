@@ -461,7 +461,7 @@ static br_error V1Model_RenderStored(struct br_geometry_stored *self, br_rendere
         groupinfo->stored = stored;
 
         if(!defer) {
-            StoredGLRenderGroup(self, renderer, groupinfo);
+            RendererGLRenderGroup(renderer, self, groupinfo);
             continue;
         }
 

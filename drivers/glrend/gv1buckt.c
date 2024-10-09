@@ -120,15 +120,17 @@ br_error BR_CMETHOD_DECL(br_geometry_v1_buckets_gl, render)(br_geometry_v1_bucke
 
                 *renderer->state.current = *state;
                 RendererGLUnrefState(renderer, state);
-                StoredGLRenderGroup(geom, (br_renderer *)renderer, groupinfo);
+
+                RendererGLRenderGroup(renderer, geom, groupinfo);
             } else if(p->type == BRT_TRIANGLE) {
                 br_uintptr_t        offset    = (br_uintptr_t)p->v[0];
                 state_stack        *state     = (state_stack *)p->v[1];
                 const gl_groupinfo *groupinfo = (gl_groupinfo *)p->v[2];
 
                 *renderer->state.current = *state;
-                StoredGLRenderTri(renderer, offset, groupinfo);
                 RendererGLUnrefState(renderer, state);
+
+                RendererGLRenderTri(renderer, offset, groupinfo);
             } else {
                 /*
                  * We can't handle other things yet.

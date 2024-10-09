@@ -138,10 +138,10 @@ void StateGLUpdateModel(state_cache *cache, state_matrix *matrix);
 void StateGLCopy(state_stack *dst, const state_stack *src, uint32_t mask);
 
 /*
- * renderer.c
+ * v1model.c
  */
-void StoredGLRenderGroup(br_geometry_stored *self, br_renderer *renderer, const gl_groupinfo *groupinfo);
-void StoredGLRenderTri(br_renderer *renderer, br_uintptr_t offset, const gl_groupinfo *groupinfo);
+void RendererGLRenderGroup(br_renderer *self, br_geometry_stored *stored, const gl_groupinfo *groupinfo);
+void RendererGLRenderTri(br_renderer *self, br_uintptr_t offset, const gl_groupinfo *groupinfo);
 
 /*
  * font.c
