@@ -81,8 +81,8 @@ br_device_clut *DeviceClutGLAllocate(br_device_pixelmap *pm);
 struct br_buffer_stored *BufferStoredGLAllocate(br_renderer *renderer, br_token use, struct br_device_pixelmap *pm,
                                                 br_token_value *tv);
 
-GLenum BufferStoredGLGetTexture(br_buffer_stored *self);
-GLuint BufferStoredGLGetCLUTTexture(br_buffer_stored *self, br_device_pixelmap *target, GLuint fallback);
+GLenum BufferStoredGLGetTexture(const br_buffer_stored *self);
+GLuint BufferStoredGLGetCLUTTexture(const br_buffer_stored *self, br_device_pixelmap *target, GLuint fallback);
 
 /*
  * gv1buckt.c

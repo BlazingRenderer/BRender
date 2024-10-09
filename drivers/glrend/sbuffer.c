@@ -191,7 +191,7 @@ static struct br_tv_template *BR_CMETHOD_DECL(br_buffer_stored_gl, templateQuery
     return ((br_buffer_stored *)_self)->templates;
 }
 
-GLuint BufferStoredGLGetTexture(br_buffer_stored *self)
+GLuint BufferStoredGLGetTexture(const br_buffer_stored *self)
 {
     if(self->source == NULL)
         return self->gl_tex;
@@ -214,7 +214,7 @@ GLuint BufferStoredGLGetTexture(br_buffer_stored *self)
     return self->gl_tex;
 }
 
-GLuint BufferStoredGLGetCLUTTexture(br_buffer_stored *self, br_device_pixelmap *target, GLuint fallback)
+GLuint BufferStoredGLGetCLUTTexture(const br_buffer_stored *self, br_device_pixelmap *target, GLuint fallback)
 {
     GLuint clut;
 
