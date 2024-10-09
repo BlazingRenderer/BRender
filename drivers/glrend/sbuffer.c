@@ -135,7 +135,7 @@ static br_error BR_CMETHOD_DECL(br_buffer_stored_gl, update)(struct br_buffer_st
     if(pm_device == NULL) {
         return updateMemory(self, (br_pixelmap *)pm);
     } else if(pm_device == self->device) {
-        ASSERT(self->source == NULL || self->source == pm);
+        ASSERT(self->source == NULL || self->source == (br_pixelmap *)pm);
         self->gl_tex       = 0; /* Unused for us. */
         self->source       = (br_pixelmap *)pm;
         self->source_flags = pm->pm_flags;
