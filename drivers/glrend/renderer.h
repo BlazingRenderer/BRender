@@ -24,6 +24,21 @@ typedef struct br_sampler_info_gl {
     GLint wrap_t;
 } br_sampler_info_gl;
 
+typedef struct br_state_info_gl {
+    br_sampler_info_gl sampler;
+
+    GLuint colour_map;
+    GLuint colour_palette;
+
+    struct {
+        br_uint_8 is_blended : 1;
+        br_uint_8 is_filtered : 1;
+        br_uint_8 is_indexed : 1;
+        br_uint_8 disable_colour_key : 1;
+        br_uint_8 write_colour : 1;
+    };
+} br_primitive_state_info_gl;
+
 typedef struct br_sampler_gl {
     br_sampler_info_gl key;
     GLuint             sampler;

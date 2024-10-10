@@ -5,6 +5,116 @@
 #include "drv.h"
 #include "brassert.h"
 
+void DeviceGLExtractPrimitiveState(const state_stack *state, br_primitive_state_info_gl *info, GLuint tex_white)
+{
+    const state_primitive *prim = &state->prim;
+
+    // clang-format off
+    *info = (br_primitive_state_info_gl){
+        .sampler = {
+            .filter_min     = GL_NEAREST,
+            .filter_mag     = GL_NEAREST,
+            .wrap_s         = GL_REPEAT,
+            .wrap_t         = GL_REPEAT,
+        },
+        .is_blended         = BR_FALSE,
+        .is_filtered        = BR_FALSE,
+        .is_indexed         = BR_FALSE,
+        .disable_colour_key = BR_FALSE,
+        .write_colour       = BR_TRUE,
+    };
+    // clang-format on
+
+    if(!(state->valid & MASK_STATE_PRIMITIVE))
+        return;
+
+    info->is_blended         = (prim->flags & PRIMF_BLEND) != 0;
+    info->disable_colour_key = (prim->flags & PRIMF_COLOUR_KEY) == 0;
+    info->write_colour       = (prim->flags & PRIMF_COLOUR_WRITE) != 0;
+    info->is_indexed         = prim->colour_map ? (prim->colour_map->fmt->indexed != 0) : 0;
+
+    if(prim->colour_map != NULL) {
+        const br_buffer_stored *stored = prim->colour_map;
+
+        info->is_indexed = stored->fmt->indexed;
+        info->colour_map = BufferStoredGLGetTexture(stored);
+
+        if(info->is_indexed) {
+            info->colour_palette = BufferStoredGLGetCLUTTexture(stored, NULL, tex_white);
+        } else {
+            info->colour_palette = 0;
+        }
+
+        info->is_blended = info->is_blended || stored->fmt->blended != 0;
+    } else {
+        info->is_indexed     = BR_FALSE;
+        info->colour_map     = tex_white;
+        info->colour_palette = 0;
+    }
+
+    if(prim->filter == BRT_LINEAR && prim->mip_filter == BRT_LINEAR) {
+        info->sampler.filter_min = GL_LINEAR_MIPMAP_LINEAR;
+        info->sampler.filter_mag = GL_LINEAR;
+
+        info->is_filtered = 1;
+    } else if(prim->filter == BRT_LINEAR && prim->mip_filter == BRT_NONE) {
+        info->sampler.filter_min = GL_LINEAR;
+        info->sampler.filter_mag = GL_LINEAR;
+
+        info->is_filtered = 1;
+    } else if(prim->filter == BRT_NONE && prim->mip_filter == BRT_LINEAR) {
+        info->sampler.filter_min = GL_NEAREST_MIPMAP_NEAREST;
+        info->sampler.filter_mag = GL_NEAREST;
+
+        info->is_filtered = 0;
+    } else if(prim->filter == BRT_NONE && prim->mip_filter == BRT_NONE) {
+        info->sampler.filter_min = GL_NEAREST;
+        info->sampler.filter_mag = GL_NEAREST;
+
+        info->is_filtered = 0;
+    } else {
+        assert(0);
+    }
+
+    if(info->is_indexed) {
+        info->sampler.filter_min = GL_NEAREST;
+        info->sampler.filter_mag = GL_NEAREST;
+    }
+
+    /*
+     * Apply wrapping.
+     */
+    switch(prim->map_width_limit) {
+        case BRT_WRAP:
+        default:
+            info->sampler.wrap_s = GL_REPEAT;
+            break;
+
+        case BRT_CLAMP:
+            info->sampler.wrap_s = GL_CLAMP_TO_EDGE;
+            break;
+
+        case BRT_MIRROR:
+            info->sampler.wrap_s = GL_MIRRORED_REPEAT;
+            break;
+    }
+
+    switch(prim->map_height_limit) {
+        case BRT_WRAP:
+        default:
+            info->sampler.wrap_t = GL_REPEAT;
+            break;
+
+        case BRT_CLAMP:
+            info->sampler.wrap_t = GL_CLAMP_TO_EDGE;
+            break;
+
+        case BRT_MIRROR:
+            info->sampler.wrap_t = GL_MIRRORED_REPEAT;
+            break;
+    }
+}
+
 static void apply_blend_mode(state_stack *self)
 {
     /* C_result = (C_source * F_Source) + (C_dest * F_dest) */
@@ -109,11 +219,9 @@ static void apply_depth_properties(state_stack *state, uint32_t states)
     }
 }
 
-static void apply_stored_properties(HVIDEO hVideo, state_stack *state, uint32_t states, br_boolean *unlit,
+static void apply_stored_properties(HVIDEO hVideo, br_renderer *renderer, state_stack *state, uint32_t states, br_boolean *unlit,
                                     shader_data_model *model, GLuint tex_default)
 {
-    br_boolean blending_on;
-
     /* Only use the states we want (if valid). */
     states = state->valid & states;
 
@@ -185,134 +293,37 @@ static void apply_stored_properties(HVIDEO hVideo, state_stack *state, uint32_t 
         *unlit = !state->surface.lighting;
     }
 
-    if(states & MASK_STATE_PRIMITIVE) {
-        model->disable_colour_key = !(state->prim.flags & PRIMF_COLOUR_KEY);
+    {
+        br_primitive_state_info_gl info;
+        DeviceGLExtractPrimitiveState(state, &info, tex_default);
 
-        if(state->prim.flags & PRIMF_COLOUR_WRITE)
+        model->disable_colour_key = info.disable_colour_key;
+        model->is_indexed         = info.is_indexed;
+        model->is_filtered        = info.is_filtered;
+
+        if(info.write_colour) {
             glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
-        else
-            glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
-
-        if(state->prim.colour_map) {
-            br_buffer_stored *stored = state->prim.colour_map;
-
-            model->is_indexed = stored->fmt->indexed;
-
-            if(model->is_indexed) {
-                glActiveTexture(GL_TEXTURE0);
-                glBindTexture(GL_TEXTURE_2D, BufferStoredGLGetCLUTTexture(stored, NULL, tex_default));
-                glUniform1i(hVideo->brenderProgram.uniforms.main_texture, hVideo->brenderProgram.mainTextureBinding);
-
-                glActiveTexture(GL_TEXTURE1);
-                glBindTexture(GL_TEXTURE_2D, BufferStoredGLGetTexture(stored));
-                glUniform1i(hVideo->brenderProgram.uniforms.index_texture, hVideo->brenderProgram.indexTextureBinding);
-            } else {
-                glActiveTexture(GL_TEXTURE0);
-                glBindTexture(GL_TEXTURE_2D, BufferStoredGLGetTexture(stored));
-                glUniform1i(hVideo->brenderProgram.uniforms.main_texture, hVideo->brenderProgram.mainTextureBinding);
-            }
-
-            // if(state->prim.colour_map->source->flags & BR_PMF_KEYED_TRANSPARENCY)
-            //{
-            //	//BrDebugBreak();
-            // }
         } else {
-            model->is_indexed = 0;
+            glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
+        }
+
+        glBindSampler(0, RendererGLGetSampler(renderer, &info.sampler));
+
+        if(info.is_indexed) {
+            glActiveTexture(GL_TEXTURE1);
+            glBindTexture(GL_TEXTURE_2D, info.colour_map);
+            glUniform1i(hVideo->brenderProgram.uniforms.main_texture, hVideo->brenderProgram.mainTextureBinding);
 
             glActiveTexture(GL_TEXTURE0);
-            glBindTexture(GL_TEXTURE_2D, tex_default);
+            glBindTexture(GL_TEXTURE_2D, info.colour_palette);
+            glUniform1i(hVideo->brenderProgram.uniforms.index_texture, hVideo->brenderProgram.indexTextureBinding);
+        } else {
+            glActiveTexture(GL_TEXTURE0);
+            glBindTexture(GL_TEXTURE_2D, info.colour_map);
             glUniform1i(hVideo->brenderProgram.uniforms.main_texture, hVideo->brenderProgram.mainTextureBinding);
         }
 
-        GLenum  minFilter, magFilter;
-        GLfloat maxAnisotropy;
-
-        model->is_filtered = 0;
-        if(state->prim.filter == BRT_LINEAR && state->prim.mip_filter == BRT_LINEAR) {
-            minFilter     = GL_LINEAR_MIPMAP_LINEAR;
-            magFilter     = GL_LINEAR;
-            maxAnisotropy = hVideo->maxAnisotropy;
-
-            model->is_filtered = 1;
-        } else if(state->prim.filter == BRT_LINEAR && state->prim.mip_filter == BRT_NONE) {
-            minFilter     = GL_LINEAR;
-            magFilter     = GL_LINEAR;
-            maxAnisotropy = 1.0f;
-
-            model->is_filtered = 1;
-        } else if(state->prim.filter == BRT_NONE && state->prim.mip_filter == BRT_LINEAR) {
-            minFilter     = GL_NEAREST_MIPMAP_NEAREST;
-            magFilter     = GL_NEAREST;
-            maxAnisotropy = hVideo->maxAnisotropy;
-        } else if(state->prim.filter == BRT_NONE && state->prim.mip_filter == BRT_NONE) {
-            minFilter     = GL_NEAREST;
-            magFilter     = GL_NEAREST;
-            maxAnisotropy = 1.0f;
-        } else {
-            assert(0);
-        }
-
-        if(model->is_indexed) {
-            minFilter = GL_NEAREST;
-            magFilter = GL_NEAREST;
-        }
-
-        glActiveTexture(GL_TEXTURE0);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, (GLint)minFilter);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, (GLint)magFilter);
-
-        if(GLAD_GL_ARB_texture_filter_anisotropic)
-            glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY, maxAnisotropy);
-
-        /*
-         * Apply wrapping.
-         */
-        switch(state->prim.map_width_limit)  {
-            case BRT_WRAP:
-            default:
-                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-                break;
-
-            case BRT_CLAMP:
-                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-                break;
-
-            case BRT_MIRROR:
-                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
-                break;
-        }
-
-        switch(state->prim.map_height_limit)  {
-            case BRT_WRAP:
-            default:
-                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-                break;
-
-            case BRT_CLAMP:
-                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-                break;
-
-            case BRT_MIRROR:
-                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
-                break;
-        }
-
-        // if(state->prim.colour_map)
-        //{
-        //	if(state->prim.colour_map->source)
-        //	{
-        //		if(state->prim.colour_map->source->identifier)
-        //		{
-        //			if(!stricmp("sprkwt02", state->prim.colour_map->source->identifier))
-        //			{
-        //				int x = 0;
-        //			}
-        //		}
-        //	}
-        // }
-
-        blending_on = (state->prim.flags & PRIMF_BLEND) || (state->prim.colour_map != NULL && state->prim.colour_map->fmt->blended);
-        if(blending_on) {
+        if(info.is_blended) {
             glEnable(GL_BLEND);
             apply_blend_mode(state);
         } else {
@@ -365,11 +376,11 @@ static void apply_state(br_renderer *renderer, const gl_groupinfo *groupinfo)
 
     unlit = BR_TRUE;
     if(stored) {
-        apply_stored_properties(hVideo, &stored->state, MASK_STATE_PRIMITIVE | MASK_STATE_SURFACE | MASK_STATE_CULL,
+        apply_stored_properties(hVideo, renderer, &stored->state, MASK_STATE_PRIMITIVE | MASK_STATE_SURFACE | MASK_STATE_CULL,
                                 &unlit, &model, screen->asFront.tex_white);
     } else {
         /* If there's no stored state, apply all states from global. */
-        apply_stored_properties(hVideo, renderer->state.current, ~0u, &unlit, &model, screen->asFront.tex_white);
+        apply_stored_properties(hVideo, renderer, renderer->state.current, ~0u, &unlit, &model, screen->asFront.tex_white);
     }
 
     model.unlit = (br_uint_32)unlit;

@@ -142,6 +142,8 @@ void StateGLCopy(state_stack *dst, const state_stack *src, uint32_t mask);
 /*
  * v1model.c
  */
+void DeviceGLExtractPrimitiveState(const state_stack *state, br_primitive_state_info_gl *info, GLuint tex_white);
+
 void RendererGLRenderGroup(br_renderer *self, br_geometry_stored *stored, const gl_groupinfo *groupinfo);
 void RendererGLRenderTri(br_renderer *self, br_uintptr_t offset, const gl_groupinfo *groupinfo);
 
