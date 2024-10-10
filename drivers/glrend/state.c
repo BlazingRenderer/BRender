@@ -17,7 +17,7 @@ void StateGLInit(state_all *state, void *res)
     StateGLCopy(state->current, &state->default_, ~0u);
 }
 
-void StateGLCopy(state_stack *dst, state_stack *src, uint32_t mask)
+void StateGLCopy(state_stack *dst, const state_stack *src, uint32_t mask)
 {
     /* Restrict the copy mask to the valid parts. */
     mask &= src->valid;

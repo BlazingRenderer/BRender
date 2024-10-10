@@ -135,7 +135,7 @@ void       StateGLDefault(state_all *state, uint32_t mask);
 
 void StateGLUpdateScene(state_cache *cache, state_stack *state);
 void StateGLUpdateModel(state_cache *cache, state_matrix *matrix);
-void StateGLCopy(state_stack *dst, state_stack *src, uint32_t mask);
+void StateGLCopy(state_stack *dst, const state_stack *src, uint32_t mask);
 
 /*
  * renderer.c
