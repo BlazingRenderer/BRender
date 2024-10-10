@@ -29,6 +29,10 @@ extern "C" {
 #define BR_GLREND_DEBUG_INTERNAL_PREFIX "glrend:internal:"
 #define BR_GLREND_DEBUG_USER_PREFIX     "glrend:user:"
 
+/*
+ * The maximum number of samplers. Probably overkill.
+ */
+#define BR_GLREND_MAX_SAMPLERS 256
 
 /*
  * Maximum number of possible entries on a CLUT.

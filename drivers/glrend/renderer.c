@@ -88,6 +88,10 @@ br_renderer *RendererGLAllocate(br_device *device, br_renderer_facility *facilit
 
     RendererGLInitImm(self, &dest->screen->asFront.video);
 
+    BrMemSet(self->sampler_pool, 0, sizeof(self->sampler_pool));
+    self->sampler_pool_size = BR_GLREND_MAX_SAMPLERS;
+    self->sampler_count     = 0;
+
     ObjectContainerAddFront(facility, (br_object *)self);
 
     StateGLInit(&self->state, self->device);
@@ -180,6 +184,11 @@ static void BR_CMETHOD_DECL(br_renderer_gl, free)(br_object *_self)
     br_renderer *self = (br_renderer *)_self;
 
     RendererGLFreeImm(self);
+
+    for(br_size_t i = 0; i < self->sampler_pool_size; ++i) {
+        if(self->sampler_pool[i].sampler != 0)
+            glDeleteSamplers(1, &self->sampler_pool[i].sampler);
+    }
 
     BrPoolFree(self->state_pool);
 
@@ -771,4 +780,42 @@ br_int_32 RendererGLNextImmTri(br_renderer *self, struct v11group *group, br_vec
     };
 
     return (br_int_32)base;
+}
+
+static int sampler_comp(const void *a, const void *b)
+{
+    const br_sampler_info_gl *key     = a;
+    const br_sampler_gl      *sampler = b;
+
+    return BrMemCmp(key, &sampler->key, sizeof(br_sampler_info_gl));
+}
+
+GLuint RendererGLGetSampler(br_renderer *self, const br_sampler_info_gl *info)
+{
+    br_sampler_gl *smp;
+
+    smp = BrBSearch(info, self->sampler_pool, self->sampler_count, sizeof(br_sampler_gl), sampler_comp);
+    if(smp != NULL)
+        return smp->sampler;
+
+    if(self->sampler_count == self->sampler_pool_size)
+        return 0;
+
+    smp      = self->sampler_pool + self->sampler_count++;
+    smp->key = *info;
+
+    glGenSamplers(1, &smp->sampler);
+
+    glSamplerParameteri(smp->sampler, GL_TEXTURE_WRAP_S, info->wrap_s);
+    glSamplerParameteri(smp->sampler, GL_TEXTURE_WRAP_T, info->wrap_t);
+    glSamplerParameteri(smp->sampler, GL_TEXTURE_MIN_FILTER, info->filter_min);
+    glSamplerParameteri(smp->sampler, GL_TEXTURE_MAG_FILTER, info->filter_mag);
+
+    if(GLAD_GL_ARB_texture_filter_anisotropic && info->filter_min != GL_NEAREST && info->filter_mag != GL_NEAREST) {
+        glSamplerParameterf(smp->sampler, GL_TEXTURE_MAX_ANISOTROPY, self->pixelmap->screen->asFront.video.maxAnisotropy);
+    }
+
+    BrQsort(self->sampler_pool, self->sampler_count, sizeof(br_sampler_gl), sampler_comp);
+
+    return smp->sampler;
 }

@@ -17,6 +17,18 @@ typedef struct br_immvert_gl {
 } br_immvert_gl;
 #pragma pack(pop)
 
+typedef struct br_sampler_info_gl {
+    GLint filter_min;
+    GLint filter_mag;
+    GLint wrap_s;
+    GLint wrap_t;
+} br_sampler_info_gl;
+
+typedef struct br_sampler_gl {
+    br_sampler_info_gl key;
+    GLuint             sampler;
+} br_sampler_gl;
+
 #ifdef BR_RENDERER_PRIVATE
 
 typedef struct br_renderer {
@@ -57,6 +69,10 @@ typedef struct br_renderer {
     } trans;
 
     state_all state;
+
+    br_sampler_gl sampler_pool[BR_GLREND_MAX_SAMPLERS];
+    br_size_t     sampler_pool_size;
+    br_size_t     sampler_count;
 
     int has_begun;
 

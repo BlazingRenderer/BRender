@@ -60,6 +60,8 @@ void         RendererGLUnrefState(br_renderer *self, state_stack *state);
 
 br_int_32 RendererGLNextImmTri(br_renderer *self, struct v11group *group, br_vector3_u16 fp);
 
+GLuint RendererGLGetSampler(br_renderer *self, const br_sampler_info_gl *info);
+
 /*
  * devpixmp.c
  */
