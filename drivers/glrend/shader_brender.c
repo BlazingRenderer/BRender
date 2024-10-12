@@ -71,46 +71,31 @@ br_boolean VIDEOI_CompileBRenderShader(HVIDEO hVideo, const char *vertPath, cons
 
     vert = VIDEOI_LoadAndCompileShader(GL_VERTEX_SHADER, vertPath, g_DefaultVertexShader, sizeof(g_DefaultVertexShader));
     if(!vert)
-        return BR_FALSE;
+        goto vert_failed;
 
     frag = VIDEOI_LoadAndCompileShader(GL_FRAGMENT_SHADER, fragPath, g_DefaultFragmentShader, sizeof(g_DefaultFragmentShader));
-    if(!frag) {
-        glDeleteShader(vert);
-        return BR_FALSE;
-    }
+    if(!frag)
+        goto frag_failed;
 
-    if(!(hVideo->brenderProgram.program = VIDEOI_CreateAndCompileProgram(vert, frag))) {
-        glDeleteShader(vert);
-        glDeleteShader(frag);
-        return BR_FALSE;
-    }
+    if(!(hVideo->brenderProgram.program = VIDEOI_CreateAndCompileProgram(vert, frag)))
+        goto prog_failed;
 
     DeviceGLObjectLabel(GL_SHADER, vert, BR_GLREND_DEBUG_INTERNAL_PREFIX "brender:shader:vertex");
     DeviceGLObjectLabel(GL_SHADER, frag, BR_GLREND_DEBUG_INTERNAL_PREFIX "brender:shader:fragment");
     DeviceGLObjectLabel(GL_PROGRAM, hVideo->brenderProgram.program, BR_GLREND_DEBUG_INTERNAL_PREFIX "brender:shader:program");
 
-    glDeleteShader(vert);
+    hVideo->brenderProgram.blockIndexScene = glGetUniformBlockIndex(hVideo->brenderProgram.program, "br_scene_state");
+    hVideo->brenderProgram.blockIndexModel = glGetUniformBlockIndex(hVideo->brenderProgram.program, "br_model_state");
+
+    VIDEOI_GetShaderVariables(hVideo);
+
+prog_failed:
     glDeleteShader(frag);
 
-    if(hVideo->brenderProgram.program) {
-        hVideo->brenderProgram.blockIndexScene = glGetUniformBlockIndex(hVideo->brenderProgram.program,
-                                                                        "br_scene_state");
-        if(hVideo->brenderProgram.blockIndexScene == GL_INVALID_INDEX) {
-            BrLogError("VIDEO", "Unable to retrieve block index for uniform block 'br_scene_state'.");
-            return BR_FALSE;
-        }
+frag_failed:
+    glDeleteShader(vert);
 
-        hVideo->brenderProgram.blockIndexModel = glGetUniformBlockIndex(hVideo->brenderProgram.program,
-                                                                        "br_model_state");
-        if(hVideo->brenderProgram.blockIndexModel == GL_INVALID_INDEX) {
-            BrLogError("VIDEO", "Unable to retrieve block index for uniform block 'br_model_state'.");
-            return BR_FALSE;
-        }
-
-        VIDEOI_GetShaderVariables(hVideo);
-    }
-
-
+vert_failed:
     DeviceGLCheckErrors();
 
     return hVideo->brenderProgram.program != 0;

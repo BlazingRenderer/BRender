@@ -101,6 +101,8 @@ HVIDEO VIDEO_Open(HVIDEO hVideo, const char *vertShader, const char *fragShader)
         return NULL;
     }
 
+    BrMemSet(hVideo, 0, sizeof(VIDEO));
+
     glGetIntegerv(GL_MAX_UNIFORM_BLOCK_SIZE, &hVideo->maxUniformBlockSize);
     glGetIntegerv(GL_MAX_UNIFORM_BUFFER_BINDINGS, &hVideo->maxUniformBufferBindings);
     glGetIntegerv(GL_MAX_VERTEX_UNIFORM_BLOCKS, &hVideo->maxVertexUniformBlocks);

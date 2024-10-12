@@ -5,30 +5,20 @@
 
 br_boolean VIDEOI_CompileRectShader(HVIDEO hVideo)
 {
-    GLuint vert = VIDEOI_CreateAndCompileShader(GL_VERTEX_SHADER, g_RectVertexShader, sizeof(g_RectVertexShader));
-    if(!vert)
-        return BR_FALSE;
+    GLuint vert, frag;
 
-    GLuint frag = VIDEOI_CreateAndCompileShader(GL_FRAGMENT_SHADER, g_RectFragmentShader, sizeof(g_RectFragmentShader));
-    if(!frag) {
-        glDeleteShader(vert);
-        return BR_FALSE;
-    }
+    if((vert = VIDEOI_CreateAndCompileShader(GL_VERTEX_SHADER, g_RectVertexShader, sizeof(g_RectVertexShader))) == 0)
+        goto vert_failed;
 
-    if((hVideo->rectProgram.program = VIDEOI_CreateAndCompileProgram(vert, frag)) == 0) {
-        DeviceGLCheckErrors();
+    if((frag = VIDEOI_CreateAndCompileShader(GL_FRAGMENT_SHADER, g_RectFragmentShader, sizeof(g_RectFragmentShader))) == 0)
+        goto frag_failed;
 
-        glDeleteShader(vert);
-        glDeleteShader(frag);
-        return BR_FALSE;
-    }
+    if((hVideo->rectProgram.program = VIDEOI_CreateAndCompileProgram(vert, frag)) == 0)
+        goto prog_failed;
 
     DeviceGLObjectLabel(GL_SHADER, vert, BR_GLREND_DEBUG_INTERNAL_PREFIX "rect:shader:vertex");
     DeviceGLObjectLabel(GL_SHADER, frag, BR_GLREND_DEBUG_INTERNAL_PREFIX "rect:shader:fragment");
     DeviceGLObjectLabel(GL_PROGRAM, hVideo->rectProgram.program, BR_GLREND_DEBUG_INTERNAL_PREFIX "rect:program");
-
-    glDeleteShader(vert);
-    glDeleteShader(frag);
 
     glGenVertexArrays(1, &hVideo->rectProgram.vao);
     DeviceGLObjectLabel(GL_VERTEX_ARRAY, hVideo->rectProgram.vao, BR_GLREND_DEBUG_INTERNAL_PREFIX "rect:vao");
@@ -50,7 +40,14 @@ br_boolean VIDEOI_CompileRectShader(HVIDEO hVideo)
 
     glBindFragDataLocation(hVideo->rectProgram.program, 0, "main_colour");
 
+prog_failed:
+    glDeleteShader(frag);
+
+frag_failed:
+    glDeleteShader(vert);
+
+vert_failed:
     DeviceGLCheckErrors();
 
-    return BR_TRUE;
+    return hVideo->rectProgram.program != 0;
 }
