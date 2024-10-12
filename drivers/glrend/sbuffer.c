@@ -105,10 +105,6 @@ static br_error updateMemory(br_buffer_stored *self, br_pixelmap *pm)
 
     if(self->gl_tex == 0) {
         glGenTextures(1, &self->gl_tex);
-        if((err = glGetError()) != 0) {
-            BrLogError("GLREND", "glGenTextures() failed with %s", DeviceGLStrError(err));
-            return BRE_FAIL;
-        }
     }
 
     if((berr = DeviceGLPixelmapToExistingGLTexture(self->gl_tex, pm)) != BRE_OK) {
