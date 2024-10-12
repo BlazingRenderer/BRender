@@ -21,10 +21,10 @@ br_boolean VIDEOI_CompileRectShader(HVIDEO hVideo)
     DeviceGLObjectLabel(GL_PROGRAM, hVideo->rectProgram.program, BR_GLREND_DEBUG_INTERNAL_PREFIX "rect:program");
 
     glGenVertexArrays(1, &hVideo->rectProgram.vao);
-    DeviceGLObjectLabel(GL_VERTEX_ARRAY, hVideo->rectProgram.vao, BR_GLREND_DEBUG_INTERNAL_PREFIX "rect:vao");
+    glBindVertexArray(hVideo->rectProgram.vao);
+    glBindVertexArray(0);
 
-    glGenBuffers(1, &hVideo->rectProgram.ubo);
-    DeviceGLObjectLabel(GL_BUFFER, hVideo->rectProgram.ubo, BR_GLREND_DEBUG_INTERNAL_PREFIX "rect:ubo");
+    DeviceGLObjectLabel(GL_VERTEX_ARRAY, hVideo->rectProgram.vao, BR_GLREND_DEBUG_INTERNAL_PREFIX "rect:vao");
 
     hVideo->rectProgram.uSampler  = glGetUniformLocation(hVideo->rectProgram.program, "uSampler");
     hVideo->rectProgram.uIndexTex = glGetUniformLocation(hVideo->rectProgram.program, "uIndexTex");
@@ -34,9 +34,12 @@ br_boolean VIDEOI_CompileRectShader(HVIDEO hVideo)
     glUniformBlockBinding(hVideo->rectProgram.program, hVideo->rectProgram.block_index_rect_data,
                           hVideo->rectProgram.block_binding_rect_data);
 
+    glGenBuffers(1, &hVideo->rectProgram.ubo);
     glBindBuffer(GL_UNIFORM_BUFFER, hVideo->rectProgram.ubo);
     glBindBufferBase(GL_UNIFORM_BUFFER, hVideo->rectProgram.block_binding_rect_data, hVideo->rectProgram.ubo);
     glBindBuffer(GL_UNIFORM_BUFFER, 0);
+
+    DeviceGLObjectLabel(GL_BUFFER, hVideo->rectProgram.ubo, BR_GLREND_DEBUG_INTERNAL_PREFIX "rect:ubo");
 
     glBindFragDataLocation(hVideo->rectProgram.program, 0, "main_colour");
 

@@ -24,10 +24,10 @@ br_boolean VIDEOI_CompileTextShader(HVIDEO hVideo)
     DeviceGLObjectLabel(GL_PROGRAM, hVideo->textProgram.program, BR_GLREND_DEBUG_INTERNAL_PREFIX "text:program");
 
     glGenVertexArrays(1, &hVideo->textProgram.vao_glyphs);
-    DeviceGLObjectLabel(GL_VERTEX_ARRAY, hVideo->textProgram.vao_glyphs, BR_GLREND_DEBUG_INTERNAL_PREFIX "text:vao");
+    glBindVertexArray(hVideo->textProgram.vao_glyphs);
+    glBindVertexArray(0);
 
-    glGenBuffers(1, &hVideo->textProgram.ubo_glyphs);
-    DeviceGLObjectLabel(GL_BUFFER, hVideo->textProgram.ubo_glyphs, BR_GLREND_DEBUG_INTERNAL_PREFIX "text:ubo");
+    DeviceGLObjectLabel(GL_VERTEX_ARRAY, hVideo->textProgram.vao_glyphs, BR_GLREND_DEBUG_INTERNAL_PREFIX "text:vao");
 
     hVideo->textProgram.uSampler = glGetUniformLocation(hVideo->textProgram.program, "uSampler");
 
@@ -41,9 +41,12 @@ br_boolean VIDEOI_CompileTextShader(HVIDEO hVideo)
     glUniformBlockBinding(hVideo->textProgram.program, hVideo->textProgram.block_index_glyphs,
                           hVideo->textProgram.block_binding_glyphs);
 
+    glGenBuffers(1, &hVideo->textProgram.ubo_glyphs);
     glBindBuffer(GL_UNIFORM_BUFFER, hVideo->textProgram.ubo_glyphs);
     glBindBufferBase(GL_UNIFORM_BUFFER, hVideo->textProgram.block_binding_glyphs, hVideo->textProgram.ubo_glyphs);
     glBindBuffer(GL_UNIFORM_BUFFER, 0);
+
+    DeviceGLObjectLabel(GL_BUFFER, hVideo->textProgram.ubo_glyphs, BR_GLREND_DEBUG_INTERNAL_PREFIX "text:ubo");
 
     glBindFragDataLocation(hVideo->textProgram.program, 0, "main_colour");
 
