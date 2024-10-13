@@ -793,6 +793,7 @@ static int sampler_comp(const void *a, const void *b)
 GLuint RendererGLGetSampler(br_renderer *self, const br_sampler_info_gl *info)
 {
     br_sampler_gl *smp;
+    const br_quirks_gl *quirks = &self->pixelmap->screen->asFront.quirks;
 
     smp = BrBSearch(info, self->sampler_pool, self->sampler_count, sizeof(br_sampler_gl), sampler_comp);
     if(smp != NULL)
@@ -811,8 +812,10 @@ GLuint RendererGLGetSampler(br_renderer *self, const br_sampler_info_gl *info)
     glSamplerParameteri(smp->sampler, GL_TEXTURE_MIN_FILTER, info->filter_min);
     glSamplerParameteri(smp->sampler, GL_TEXTURE_MAG_FILTER, info->filter_mag);
 
-    if(GLAD_GL_ARB_texture_filter_anisotropic && info->filter_min != GL_NEAREST && info->filter_mag != GL_NEAREST) {
-        glSamplerParameterf(smp->sampler, GL_TEXTURE_MAX_ANISOTROPY, self->pixelmap->screen->asFront.video.maxAnisotropy);
+    if(!quirks->disable_anisotropic_filtering) {
+        if(GLAD_GL_ARB_texture_filter_anisotropic && info->filter_min != GL_NEAREST && info->filter_mag != GL_NEAREST) {
+            glSamplerParameterf(smp->sampler, GL_TEXTURE_MAX_ANISOTROPY, self->pixelmap->screen->asFront.video.maxAnisotropy);
+        }
     }
 
     BrQsort(self->sampler_pool, self->sampler_count, sizeof(br_sampler_gl), sampler_comp);

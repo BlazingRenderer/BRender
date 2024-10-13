@@ -8,6 +8,14 @@
 extern "C" {
 #endif
 
+typedef union br_quirks_gl {
+    struct {
+        br_uint_32 disable_anisotropic_filtering : 1;
+        br_uint_32 reserved : 31;
+    };
+    br_uint_32 value;
+} br_quirks_gl;
+
 #ifdef BR_DEVICE_PIXELMAP_PRIVATE
 
 /*
@@ -80,6 +88,8 @@ typedef struct br_device_pixelmap {
 
             GLint  gl_num_extensions;
             char **gl_extensions;
+
+            br_quirks_gl quirks;
 
             GLuint tex_white;
             GLuint tex_checkerboard;

@@ -4,6 +4,7 @@
 
 #include "drv.h"
 #include <brassert.h>
+#include <string.h>
 
 /*
  * Default dispatch table for device (defined at end of file)
@@ -79,6 +80,22 @@ static struct br_tv_template_entry pixelmapNewTemplateEntries[] = {
     {BRT(OPENGL_FRAGMENT_SHADER_STR), F(fragment_shader), BRTV_SET, BRTV_CONV_COPY},
 };
 #undef F
+
+static void setup_qiurks(br_device_pixelmap *self)
+{
+    const char *gl_renderer = self->asFront.gl_renderer;
+    const char *gl_vendor   = self->asFront.gl_vendor;
+
+    self->asFront.quirks.value = 0;
+
+    /*
+     * Disable anisotropic filtering on llvmpipe. It is _slow_.
+     */
+    if(BrStrCmp(gl_vendor, "Mesa") == 0 && strstr(gl_renderer, "llvmpipe (") == gl_renderer) {
+        BrLogInfo("GLREND", "Quirk - using llvmpipe, disabling anisotropic filtering.");
+        self->asFront.quirks.disable_anisotropic_filtering = 1;
+    }
+}
 
 br_device_pixelmap *DevicePixelmapGLAllocateFront(br_device *dev, br_output_facility *outfcty, br_token_value *tv)
 {
@@ -211,6 +228,11 @@ br_device_pixelmap *DevicePixelmapGLAllocateFront(br_device *dev, br_output_faci
         BrResFree(self);
         return NULL;
     }
+
+    /*
+     * Everything's init'd, quirkify.
+     */
+    setup_qiurks(self);
 
     self->asFront.tex_white        = DeviceGLBuildWhiteTexture();
     self->asFront.tex_checkerboard = DeviceGLBuildCheckerboardTexture();
