@@ -95,7 +95,7 @@ int main(int argc, char **argv)
     screen->origin_x = (br_int_16)(screen->width / 2);
     screen->origin_y = (br_int_16)(screen->height / 2);
 
-    if(BrSDLUtilResizeBuffers(screen, &colour_buffer, &depth_buffer) != BRE_OK)
+    if(BrPixelmapResizeBuffers(screen, &colour_buffer, &depth_buffer) != BRE_OK)
         goto buffer_create_failed;
 
     window = BrSDLUtilGetWindow(screen);
@@ -137,7 +137,7 @@ int main(int argc, char **argv)
                             screen->origin_x = (br_int_16)(screen->width / 2);
                             screen->origin_y = (br_int_16)(screen->height / 2);
 
-                            if(BrSDLUtilResizeBuffers(screen, &colour_buffer, &depth_buffer) != BRE_OK) {
+                            if(BrPixelmapResizeBuffers(screen, &colour_buffer, &depth_buffer) != BRE_OK) {
                                 BrLogError("APP", "Error resizing window buffers");
                                 goto buffer_create_failed;
                             }
