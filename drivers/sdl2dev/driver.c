@@ -35,15 +35,3 @@ br_device *BR_EXPORT BrDrv1Begin(const char *arguments)
     return BrDrv1SDL2Begin(arguments);
 }
 #endif
-
-br_device *BR_EXPORT BrDrv1MCGABegin(const char *arguments)
-{
-    /* TODO: implement */
-    return NULL;
-}
-
-br_device *BR_EXPORT BrDrv1VESABegin(const char *arguments)
-{
-    /* TODO: implement */
-    return NULL;
-}
