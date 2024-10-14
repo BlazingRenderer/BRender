@@ -16,17 +16,6 @@ br_device *BR_EXPORT BrDrv1SDL2Begin(const char *arguments)
     if((device = DeviceSDL2Allocate("SDL2")) == NULL)
         return NULL;
 
-//    /*
-//     * Create an output facility for each "screen mode".
-//     */
-//    if(OutputFacilitySDL2EnumerateModes(device) <= 0) {
-//        /*
-//         * If nothing is available, then don't admit to being a device
-//         */
-//        ObjectFree(device);
-//        return NULL;
-//    }
-
     brt_sdl_surface_h = BrTokenCreate("SDL_SURFACE_H", BR_NULL_TOKEN);
 
     if(OutputFacilitySDL2CreateGeneric(device) == NULL) {

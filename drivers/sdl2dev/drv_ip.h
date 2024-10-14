@@ -27,7 +27,6 @@ br_device *DeviceSDL2Allocate(const char *identifier);
 /*
  * outfcty.c
  */
-int                 OutputFacilitySDL2EnumerateModes(br_device *dev);
 br_error            SDLToBRenderPixelFormat(Uint32 format, br_int_32 *bpp, br_uint_8 *type);
 br_error            BRenderToSDLPixelFormat(br_uint_8 type, Uint32 *format, br_int_32 *bpp);
 br_output_facility *OutputFacilitySDL2CreateGeneric(br_device *dev);

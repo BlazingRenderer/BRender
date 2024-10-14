@@ -121,58 +121,6 @@ br_error BRenderToSDLPixelFormat(br_uint_8 type, Uint32 *format, br_int_32 *bpp)
     return BRE_FAIL;
 }
 
-br_output_facility *OutputFacilitySDL2CreateFromMode(br_device *dev, SDL_DisplayMode *mode, int monitor)
-{
-    br_output_facility *self;
-    br_int_32           bpp;
-    br_uint_8           type;
-
-    if(SDLToBRenderPixelFormat(mode->format, &bpp, &type) != BRE_OK)
-        return NULL;
-
-    if((self = BrResAllocate(dev->res, sizeof(br_output_facility), BR_MEMORY_OBJECT)) == NULL)
-        return NULL;
-
-    self->dispatch    = &outputFacilityDispatch;
-    self->identifier  = BrResSprintf(self, "%d:%dx%dx%d", monitor, mode->w, mode->h, bpp);
-    self->device      = dev;
-    self->object_list = BrObjectListAllocate(self);
-    ObjectContainerAddFront(dev, (br_object *)self);
-
-    self->width       = mode->w;
-    self->height      = mode->h;
-    self->colour_bits = bpp;
-    self->colour_type = type;
-    self->monitor     = monitor;
-
-    BrLogTrace("SDL2", "Created output facility: %s", self->identifier);
-    return self;
-}
-
-int OutputFacilitySDL2EnumerateModes(br_device *dev)
-{
-    int ndisplays = SDL_GetNumVideoDisplays();
-    int nadded    = 0;
-
-    for(int d = 0; d < ndisplays; ++d) {
-        int nmodes = SDL_GetNumDisplayModes(d);
-
-        for(int m = 0; m < nmodes; ++m) {
-            SDL_DisplayMode mode;
-
-            if(SDL_GetDisplayMode(d, m, &mode) < 0) {
-                BrLogWarn("SDL2", "Unable to get display mode (display=%d,mode=%d)", d, m);
-                continue;
-            }
-
-            if(OutputFacilitySDL2CreateFromMode(dev, &mode, d) != NULL)
-                ++nadded;
-        }
-    }
-
-    return nadded;
-}
-
 br_output_facility *OutputFacilitySDL2CreateGeneric(br_device *dev)
 {
     br_output_facility *self;
