@@ -1,13 +1,5 @@
 #include "drv.h"
 
-/*
- * Resize/recreate the back/colour and depth buffers to match the screen.
- */
-br_error BrSDLUtilResizeBuffers(br_pixelmap *screen, br_pixelmap **colour_buffer, br_pixelmap **depth_buffer)
-{
-    return BrPixelmapResizeBuffers(screen, colour_buffer, depth_buffer);
-}
-
 br_boolean BrSDLUtilIsAltEnter(const SDL_KeyboardEvent *evt)
 {
     if(evt->repeat)
