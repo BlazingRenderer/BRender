@@ -167,6 +167,98 @@ static void linepoint_draw(br_pixelmap *dest, float dt, void *user)
     // draw_linepoint_test(dest, -dest->origin_x + 20, -200, dt, &state->h, &state->s, &state->l);
 }
 
+typedef struct linepoint8_state {
+    br_pixelmap *pm;
+
+    float accum;
+    int   index;
+} linepoint8_state;
+
+static br_error linepoint8_init(void *user, br_pixelmap *screen, br_pixelmap *backbuffer, void *arg)
+{
+    linepoint8_state *state = user;
+    br_pixelmap      *pal;
+
+    state->accum = 1.0f;
+    state->index = -1;
+
+    if((state->pm = BrPixelmapMatchTypedSized(screen, BR_PMMATCH_NO_RENDER, BR_PMT_INDEX_8, 512, 512)) == NULL) {
+        return BRE_FAIL;
+    }
+
+    state->pm->origin_x = state->pm->origin_y = 0;
+
+    pal = BrPixelmapAllocate(BR_PMT_RGBX_888, 1, 256, NULL, BR_PMAF_NORMAL);
+
+    for(int i = 0; i < 256; ++i) {
+        BrPixelmapPixelSet(pal, 0, i, hsl2rgb((float)i * (1.0f / 256.0f), 1.0f, 0.5f));
+    }
+
+    BrPixelmapPaletteSet(state->pm, pal);
+    BrPixelmapFree(pal);
+
+    return BRE_OK;
+}
+
+static void linepoint8_draw(br_pixelmap *dest, float dt, void *user)
+{
+    linepoint8_state *state  = user;
+    const br_int_32   width  = 512;
+    const int         nrows  = 64;
+    const int         ncols  = 64;
+    int               base_x = 0;
+    int               base_y = 0;
+
+    const float step = (1 / 60.0f);
+
+    state->accum += dt;
+    while(state->accum >= step) {
+        state->index = (state->index + 1) % 256;
+        state->accum -= step;
+    }
+
+    BrPixelmapRectangleFill(state->pm, base_x, base_y, width, width, state->index);
+
+    /*
+     * Draw a grid over the rainbow rect using the opposite hue.
+     */
+
+    for(int i = 0; i < nrows + 1; ++i) {
+        int x1 = base_x;
+        int x2 = x1 + width;
+        int y1 = base_y + (i * 8);
+        int y2 = base_y + (i * 8);
+        BrPixelmapLine(state->pm, x1, y1, x2, y2, 256 - state->index);
+    }
+
+    for(int i = 0; i < ncols + 1; ++i) {
+        int x1 = base_x + (i * 8);
+        int x2 = base_x + (i * 8);
+        int y1 = base_y;
+        int y2 = y1 + width;
+        BrPixelmapLine(state->pm, x1, y1, x2, y2, 256 - state->index);
+    }
+
+    /*
+     * Put a single dot inside each box.
+     */
+    for(int i = 0; i < nrows; ++i) {
+        for(int j = 0; j < ncols; ++j) {
+            BrPixelmapPixelSet(state->pm, base_x + (i * 8) + 4, base_y + (j * 8) + 4, 256 - state->index);
+        }
+    }
+
+    BrPixelmapRectangleCopy(dest, -state->pm->width / 2, -state->pm->height / 2, state->pm, 0, 0, state->pm->width,
+                            state->pm->height);
+}
+
+static void linepoint8_fini(void *user)
+{
+    linepoint8_state *state = user;
+
+    BrPixelmapFree(state->pm);
+}
+
 typedef struct br_smpte_state {
     br_pixelmap *pm;
 } br_smpte_state;
@@ -1043,6 +1135,14 @@ static br_drawtest tests[] = {
         .init      = linepoint_init,
         .draw      = linepoint_draw,
         .user_size = sizeof(linepoint_state),
+        .arg       = NULL
+    },
+    {
+        .name      = "Line & Point Test (indexed)",
+        .init      = linepoint8_init,
+        .draw      = linepoint8_draw,
+        .fini      = linepoint8_fini,
+        .user_size = sizeof(linepoint8_state),
         .arg       = NULL
     },
     MAKE_SMPTE_TEST("smpte_type03_index_8.pix",   BR_PMT_INDEX_8,   ", embedded palette"),
