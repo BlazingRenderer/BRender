@@ -8,7 +8,7 @@
 extern "C" {
 #endif
 
-#include <SDL.h>
+#include <SDL3/SDL.h>
 
 // #define BR_OBJECT_PRIVATE
 #define BR_DEVICE_PRIVATE
@@ -30,7 +30,7 @@ extern "C" {
 #define MAX_CLUT_ENTRIES 256
 
 #include "brddi.h"
-#include "brsdl2dev.h"
+#include "brsdl3dev.h"
 #include "template.h"
 #include "device.h"
 #include "outfcty.h"
@@ -44,7 +44,7 @@ extern "C" {
 #define BRT(t) BRT_##t, 0
 #define DEV(t) 0, #t
 
-typedef int(SDLCALL br_sdl_blit_cbfn)(SDL_Surface *src, const SDL_Rect *srcrect, SDL_Surface *dst, SDL_Rect *dstrect);
+typedef bool (br_sdl_blit_cbfn)(SDL_Surface *src, const SDL_Rect *srcrect, SDL_Surface *dst, const SDL_Rect *dstrect);
 
 /*
  * Pull in private prototypes
