@@ -2,7 +2,7 @@
 #include "pm.h"
 #include <brassert.h>
 
-br_clip_result DevicePixelmapSDL2PointClip(SDL_Point *out, const br_point *in, const br_pixelmap *pm)
+br_clip_result DevicePixelmapSDL3PointClip(SDL_Point *out, const br_point *in, const br_pixelmap *pm)
 {
     br_clip_result r;
     br_point       tmp;
@@ -18,7 +18,7 @@ br_clip_result DevicePixelmapSDL2PointClip(SDL_Point *out, const br_point *in, c
     return r;
 }
 
-br_clip_result DevicePixelmapSDL2LineClip(SDL_Point *s_out, SDL_Point *e_out, const br_point *s_in,
+br_clip_result DevicePixelmapSDL3LineClip(SDL_Point *s_out, SDL_Point *e_out, const br_point *s_in,
                                           const br_point *e_in, const br_pixelmap *pm)
 {
     br_clip_result r;
@@ -39,7 +39,7 @@ br_clip_result DevicePixelmapSDL2LineClip(SDL_Point *s_out, SDL_Point *e_out, co
     return r;
 }
 
-br_clip_result DevicePixelmapSDL2RectangleClip(SDL_Rect *out, const br_rectangle *in, const br_pixelmap *pm)
+br_clip_result DevicePixelmapSDL3RectangleClip(SDL_Rect *out, const br_rectangle *in, const br_pixelmap *pm)
 {
     br_clip_result r;
     br_rectangle   tmp;
@@ -57,7 +57,7 @@ br_clip_result DevicePixelmapSDL2RectangleClip(SDL_Rect *out, const br_rectangle
     return r;
 }
 
-br_clip_result DevicePixelmapSDL2RectangleClipTwo(SDL_Rect *r_out, SDL_Point *p_out, const br_rectangle *r_in,
+br_clip_result DevicePixelmapSDL3RectangleClipTwo(SDL_Rect *r_out, SDL_Point *p_out, const br_rectangle *r_in,
                                                   const br_point *p_in, const br_pixelmap *pm_dst, const br_pixelmap *pm_src)
 {
     br_clip_result r;
@@ -82,7 +82,12 @@ br_clip_result DevicePixelmapSDL2RectangleClipTwo(SDL_Rect *r_out, SDL_Point *p_
     return r;
 }
 
-SDL_Surface *DevicePixelmapSDL2GetSurface(br_pixelmap *pm, br_boolean ignore_locked)
+bool DevicePixelmapSDL3BlitScaled(SDL_Surface *src, const SDL_Rect *srcrect, SDL_Surface *dst, const SDL_Rect *dstrect)
+{
+    return SDL_BlitSurfaceScaled(src, srcrect, dst, dstrect, SDL_SCALEMODE_NEAREST);
+}
+
+SDL_Surface *DevicePixelmapSDL3GetSurface(br_pixelmap *pm, br_boolean ignore_locked)
 {
     br_device_pixelmap *self = (br_device_pixelmap *)pm;
     SDL_Surface        *surf = NULL;
@@ -90,22 +95,37 @@ SDL_Surface *DevicePixelmapSDL2GetSurface(br_pixelmap *pm, br_boolean ignore_loc
     /*
      * If we're one of ours, get it directly, otherwise query the token.
      */
-    if(DevicePixelmapSDL2IsOurs(pm))
+    if(DevicePixelmapSDL3IsOurs(pm))
         surf = self->surface;
     else if(ObjectQuery(pm, &surf, brt_sdl_surface_h) != BRE_OK)
         return NULL;
 
-    if(surf->locked && ignore_locked != BR_TRUE)
+    if((surf->flags & SDL_SURFACE_LOCKED) && ignore_locked != BR_TRUE)
         return NULL;
 
     return surf;
 }
 
-br_device_clut *DevicePixelmapSDL2GetCLUT(br_pixelmap *pm)
+SDL_Surface *DevicePixelmapSDL3CreateSurface(int width, int height, SDL_PixelFormat format)
+{
+    SDL_Surface *surf;
+
+    if((surf = SDL_CreateSurface(width, height, format)) == NULL)
+        return NULL;
+
+    if(SDL_ISPIXELFORMAT_INDEXED(format) && SDL_CreateSurfacePalette(surf) == NULL) {
+        SDL_DestroySurface(surf);
+        return NULL;
+    }
+
+    return surf;
+}
+
+br_device_clut *DevicePixelmapSDL3GetCLUT(br_pixelmap *pm)
 {
     br_device_clut *clut = NULL;
 
-    if(DevicePixelmapSDL2IsOurs(pm))
+    if(DevicePixelmapSDL3IsOurs(pm))
         return ((br_device_pixelmap *)pm)->clut;
 
     if(ObjectQuery(pm, &clut, BRT_CLUT_O) != BRE_OK)
@@ -141,12 +161,12 @@ static br_error maybe_allocate_surface(SDL_Surface **out_surf, br_boolean *chang
      *  In this case, just fail the blit.
      */
     if(SDL_ISPIXELFORMAT_INDEXED(format)) {
-        clut = DevicePixelmapSDL2GetCLUT(pm);
+        clut = DevicePixelmapSDL3GetCLUT(pm);
         if(pm->map == NULL && clut == NULL && dst_clut == NULL)
             return BRE_UNSUPPORTED;
     }
 
-    if((surf = SDL_CreateRGBSurfaceWithFormatFrom(pm->pixels, pm->width, pm->height, bpp, pm->row_bytes, format)) == NULL)
+    if((surf = SDL_CreateSurfaceFrom(pm->width, pm->height, format, pm->pixels, pm->row_bytes)) == NULL)
         return BRE_FAIL;
 
     /*
@@ -155,8 +175,16 @@ static br_error maybe_allocate_surface(SDL_Surface **out_surf, br_boolean *chang
     if(SDL_ISPIXELFORMAT_INDEXED(format)) {
         UASSERT(!(pm->map == NULL && clut == NULL && dst_clut == NULL));
 
-        if((result = DeviceClutSDL2CopyToSurface(surf, pm, dst_clut)) != BRE_OK) {
-            SDL_FreeSurface(surf);
+        /*
+         * The new surface won't have a CLUT. Add one.
+         */
+        if(SDL_CreateSurfacePalette(surf) == NULL) {
+            SDL_DestroySurface(surf);
+            return result;
+        }
+
+        if((result = DeviceClutSDL3CopyToSurface(surf, pm, dst_clut)) != BRE_OK) {
+            SDL_DestroySurface(surf);
             return result;
         }
     }
@@ -166,7 +194,7 @@ static br_error maybe_allocate_surface(SDL_Surface **out_surf, br_boolean *chang
     return BRE_OK;
 }
 
-br_error DeviceSDL2SetPalette(SDL_Palette *pal, br_int_32 index, br_int_32 count, const br_colour *entries, br_boolean has_alpha)
+br_error DeviceSDL3SetPalette(SDL_Palette *pal, br_int_32 index, br_int_32 count, const br_colour *entries, br_boolean has_alpha)
 {
     SDL_Color cols[MAX_CLUT_ENTRIES];
 
@@ -188,13 +216,13 @@ br_error DeviceSDL2SetPalette(SDL_Palette *pal, br_int_32 index, br_int_32 count
         };
     }
 
-    if(SDL_SetPaletteColors(pal, cols, index, count) < 0)
+    if(!SDL_SetPaletteColors(pal, cols, index, count))
         return BRE_FAIL;
 
     return BRE_OK;
 }
 
-br_error DeviceSDL2SetPaletteFromCLUT(SDL_Palette *pal, br_device_clut *clut)
+br_error DeviceSDL3SetPaletteFromCLUT(SDL_Palette *pal, br_device_clut *clut)
 {
     br_error  r;
     br_colour colours[MAX_CLUT_ENTRIES];
@@ -205,14 +233,14 @@ br_error DeviceSDL2SetPaletteFromCLUT(SDL_Palette *pal, br_device_clut *clut)
     /*
      * If the CLUT is one of ours, do it directly.
      */
-    if(DeviceClutSDL2IsOurs(clut)) {
+    if(DeviceClutSDL3IsOurs(clut)) {
         if(pal == clut->pal)
             return BRE_OK;
 
         if(pal->ncolors != clut->pal->ncolors)
             return BRE_UNSUPPORTED;
 
-        if(SDL_SetPaletteColors(pal, clut->pal->colors, 0, clut->pal->ncolors) < 0)
+        if(!SDL_SetPaletteColors(pal, clut->pal->colors, 0, clut->pal->ncolors))
             return BRE_FAIL;
 
         return BRE_OK;
@@ -224,10 +252,10 @@ br_error DeviceSDL2SetPaletteFromCLUT(SDL_Palette *pal, br_device_clut *clut)
     if((r = DeviceClutEntryQueryMany(clut, colours, 0, pal->ncolors)) != BRE_OK)
         return r;
 
-    return DeviceSDL2SetPalette(pal, 0, pal->ncolors, colours, BR_FALSE);
+    return DeviceSDL3SetPalette(pal, 0, pal->ncolors, colours, BR_FALSE);
 }
 
-br_error DeviceSDL2SetPaletteFromMap(SDL_Palette *pal, const br_pixelmap *map)
+br_error DeviceSDL3SetPaletteFromMap(SDL_Palette *pal, const br_pixelmap *map)
 {
     br_boolean has_alpha;
 
@@ -249,38 +277,40 @@ br_error DeviceSDL2SetPaletteFromMap(SDL_Palette *pal, const br_pixelmap *map)
             return BRE_FAIL;
     }
 
-    return DeviceSDL2SetPalette(pal, 0, map->height, map->pixels, has_alpha);
+    return DeviceSDL3SetPalette(pal, 0, map->height, map->pixels, has_alpha);
 }
 
-br_error DeviceClutSDL2CopyToSurface(SDL_Surface *surf, br_pixelmap *pm, br_device_clut *fallback)
+br_error DeviceClutSDL3CopyToSurface(SDL_Surface *surf, br_pixelmap *pm, br_device_clut *fallback)
 {
     br_device_clut *cluts[2];
+    SDL_Palette    *pal;
+    UASSERT(SDL_ISPIXELFORMAT_INDEXED(surf->format));
 
-    UASSERT(SDL_ISPIXELFORMAT_INDEXED(surf->format->format));
+    pal = SDL_GetSurfacePalette(surf);
 
     /*
      * If a map is explicitly set, use it.
      */
     if(pm->map != NULL)
-        return DeviceSDL2SetPaletteFromMap(surf->format->palette, pm->map);
+        return DeviceSDL3SetPaletteFromMap(pal, pm->map);
 
     /*
      * Otherwise, fall back to the pixelmap's CLUT (if any), and our fallback CLUT.
      */
-    cluts[0] = DevicePixelmapSDL2GetCLUT(pm);
+    cluts[0] = DevicePixelmapSDL3GetCLUT(pm);
     cluts[1] = fallback;
 
     for(size_t i = 0; i < BR_ASIZE(cluts); ++i) {
         if(cluts[i] == NULL)
             continue;
 
-        return DeviceSDL2SetPaletteFromCLUT(surf->format->palette, cluts[i]);
+        return DeviceSDL3SetPaletteFromCLUT(pal, cluts[i]);
     }
 
     return BRE_FAIL;
 }
 
-static int xblit(SDL_Surface *src, const SDL_Rect *sr, SDL_Surface *dst, SDL_Rect *dr, br_sdl_blit_cbfn blit)
+static bool xblit(SDL_Surface *src, const SDL_Rect *sr, SDL_Surface *dst, SDL_Rect *dr, br_sdl_blit_cbfn blit)
 {
     /*
      * Handle two special cases that SDL doesn't support.
@@ -290,23 +320,23 @@ static int xblit(SDL_Surface *src, const SDL_Rect *sr, SDL_Surface *dst, SDL_Rec
      * Go via an intermediate surface (possibly again). This is slow, and indexed pixelmaps
      * should be de-indexed at load-time. See BrPixelmapDeCLUT().
      */
-    if(SDL_ISPIXELFORMAT_INDEXED(src->format->format) &&
-       (dst->format->format == SDL_PIXELFORMAT_XRGB8888 || blit == SDL_BlitScaled)) {
+    if(SDL_ISPIXELFORMAT_INDEXED(src->format) &&
+       (dst->format == SDL_PIXELFORMAT_XRGB8888 || blit == DevicePixelmapSDL3BlitScaled)) {
         int          r;
         SDL_Surface *newsrc;
 
-        if((newsrc = SDL_ConvertSurfaceFormat(src, SDL_PIXELFORMAT_XRGB8888, 0)) == NULL)
-            return -1;
+        if((newsrc = SDL_ConvertSurface(src, SDL_PIXELFORMAT_XRGB8888)) == NULL)
+            return false;
 
         r = blit(newsrc, sr, dst, dr);
-        SDL_FreeSurface(newsrc);
+        SDL_DestroySurface(newsrc);
         return r;
     }
 
     return blit(src, sr, dst, dr);
 }
 
-br_error DevicePixelmapSDL2BlitSurface(br_pixelmap *src, SDL_Rect *sr, br_pixelmap *dst, SDL_Rect *dr, br_sdl_blit_cbfn blit)
+br_error DevicePixelmapSDL3BlitSurface(br_pixelmap *src, SDL_Rect *sr, br_pixelmap *dst, SDL_Rect *dr, br_sdl_blit_cbfn blit)
 {
     br_error     result;
     SDL_Surface *src_surf, *dst_surf;
@@ -314,17 +344,17 @@ br_error DevicePixelmapSDL2BlitSurface(br_pixelmap *src, SDL_Rect *sr, br_pixelm
 
     // TODO: handle colour keyed copy
 
-    dst_surf = DevicePixelmapSDL2GetSurface(dst, BR_FALSE);
-    src_surf = DevicePixelmapSDL2GetSurface(src, BR_FALSE);
+    dst_surf = DevicePixelmapSDL3GetSurface(dst, BR_FALSE);
+    src_surf = DevicePixelmapSDL3GetSurface(src, BR_FALSE);
 
     /*
      * If both surfaces expose an SDL surface - we can blit directly.
      */
     if(dst_surf != NULL && src_surf != NULL) {
-        if(xblit(src_surf, sr, dst_surf, dr, blit) == 0)
+        if(xblit(src_surf, sr, dst_surf, dr, blit))
             return BRE_OK;
 
-        BrLogTrace("SDL2", "Blit from %s->%s failed: %s", src->identifier, dst->identifier, SDL_GetError());
+        BrLogTrace("SDL3", "Blit from %s->%s failed: %s", src->identifier, dst->identifier, SDL_GetError());
     }
 
     /*
@@ -334,24 +364,24 @@ br_error DevicePixelmapSDL2BlitSurface(br_pixelmap *src, SDL_Rect *sr, br_pixelm
      */
     result = BRE_FAIL;
 
-    if((result = maybe_allocate_surface(&src_surf, &free_src, src, DevicePixelmapSDL2GetCLUT(dst))) != BRE_OK)
+    if((result = maybe_allocate_surface(&src_surf, &free_src, src, DevicePixelmapSDL3GetCLUT(dst))) != BRE_OK)
         goto cleanup;
 
     if((result = maybe_allocate_surface(&dst_surf, &free_dst, dst, NULL)) != BRE_OK)
         goto cleanup;
 
-    if(xblit(src_surf, sr, dst_surf, dr, blit) == 0)
+    if(xblit(src_surf, sr, dst_surf, dr, blit))
         result = BRE_OK;
     else
-        BrLogTrace("SDL2", "Blit from %s->%s failed: %s", src->identifier, dst->identifier, SDL_GetError());
+        BrLogTrace("SDL3", "Blit from %s->%s failed: %s", src->identifier, dst->identifier, SDL_GetError());
 
 cleanup:
 
     if(free_dst != BR_FALSE)
-        SDL_FreeSurface(dst_surf);
+        SDL_DestroySurface(dst_surf);
 
     if(free_src != BR_FALSE)
-        SDL_FreeSurface(src_surf);
+        SDL_DestroySurface(src_surf);
 
     return result;
 }

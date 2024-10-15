@@ -44,7 +44,7 @@ typedef struct br_device {
 /*
  * Some useful inline ops.
  */
-#define DeviceSDL2Resource(d) (((br_device *)d)->res)
+#define DeviceSDL3Resource(d) (((br_device *)d)->res)
 
 #endif /* BR_DEVICE_PRIVATE */
 #endif /* _DEVICE_H_ */

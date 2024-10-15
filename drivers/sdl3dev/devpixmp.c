@@ -27,7 +27,7 @@ static const struct br_device_pixelmap_dispatch devicePixelmapDispatch;
  */
 #define F(f) offsetof(struct br_device_pixelmap, f)
 
-br_boolean DevicePixelmapSDL2IsOurs(const br_pixelmap *pm)
+br_boolean DevicePixelmapSDL3IsOurs(const br_pixelmap *pm)
 {
     return ((br_device_pixelmap *)pm)->dispatch == &devicePixelmapDispatch;
 }
@@ -39,7 +39,7 @@ static br_error custom_query(br_value *pvalue, void **extra, br_size_t *pextra_s
 
     switch(tep->token) {
         case BRT_INDEXED_B:
-            pvalue->b = self->surface->format->palette != NULL;
+            pvalue->b = SDL_ISPIXELFORMAT_INDEXED(self->surface->format);
             break;
         /*
         case BRT_PIXEL_CHANNELS_I32:
@@ -54,10 +54,10 @@ static br_error custom_query(br_value *pvalue, void **extra, br_size_t *pextra_s
             break;
          */
         case BRT_PIXEL_BITS_I32:
-            pvalue->i32 = self->surface->format->BitsPerPixel;
+            pvalue->i32 = SDL_BITSPERPIXEL(self->surface->format);
             break;
         case BRT_WORD_BYTES_I32:
-            pvalue->i32 = self->surface->format->BytesPerPixel;
+            pvalue->i32 = SDL_BYTESPERPIXEL(self->surface->format);
             break;
         case BRT_MEMORY_MAPPED_B:
             pvalue->b = self->pm_pixels != NULL;
@@ -127,14 +127,14 @@ static br_error resync(br_device_pixelmap *self)
     self->pm_flags |= BR_PMF_LINEAR;
 
     self->pm_row_bytes = (br_int_16)self->surface->pitch;
-    if(((self->pm_row_bytes * 8) % self->surface->format->BitsPerPixel) == 0)
+    if(((self->pm_row_bytes * 8) % SDL_BITSPERPIXEL(self->surface->format)) == 0)
         self->pm_flags |= BR_PMF_ROW_WHOLEPIXELS;
 
     if(self->renderer != NULL)
         SDL_DestroyRenderer(self->renderer);
 
     if((renderer = SDL_CreateSoftwareRenderer(self->surface)) == NULL) {
-        BrLogError("SDL2", "Unable to create software renderer: %s", SDL_GetError());
+        BrLogError("SDL3", "Unable to create software renderer: %s", SDL_GetError());
         return BRE_FAIL;
     }
 
@@ -142,7 +142,7 @@ static br_error resync(br_device_pixelmap *self)
     return BRE_OK;
 }
 
-br_device_pixelmap *DevicePixelmapSDL2Allocate(br_device *dev, br_output_facility *outfcty, SDL_Window *window,
+br_device_pixelmap *DevicePixelmapSDL3Allocate(br_device *dev, br_output_facility *outfcty, SDL_Window *window,
                                                SDL_Surface *surface, br_boolean owned)
 {
     br_device_pixelmap *self;
@@ -152,7 +152,7 @@ br_device_pixelmap *DevicePixelmapSDL2Allocate(br_device *dev, br_output_facilit
     UASSERT(dev != NULL);
     UASSERT(outfcty == NULL || ObjectDevice(outfcty) == dev);
 
-    if(SDLToBRenderPixelFormat(surface->format->format, &bpp, &type) != BRE_OK)
+    if(SDLToBRenderPixelFormat(surface->format, &bpp, &type) != BRE_OK)
         return NULL;
 
     self = BrResAllocate(dev->res, sizeof(br_device_pixelmap), BR_MEMORY_OBJECT);
@@ -160,7 +160,7 @@ br_device_pixelmap *DevicePixelmapSDL2Allocate(br_device *dev, br_output_facilit
         return NULL;
 
     self->dispatch = &devicePixelmapDispatch;
-    self->pm_identifier = BrResSprintf(self, "SDL2:%s:%dx%d", window != NULL ? "Window" : "Surface", surface->w, surface->h);
+    self->pm_identifier = BrResSprintf(self, "SDL3:%s:%dx%d", window != NULL ? "Window" : "Surface", surface->w, surface->h);
     self->device          = dev;
     self->output_facility = outfcty;
 
@@ -186,7 +186,7 @@ br_device_pixelmap *DevicePixelmapSDL2Allocate(br_device *dev, br_output_facilit
     }
 
     if(self->pm_type == BR_PMT_INDEX_8) {
-        if((self->clut = DeviceClutSDL2Allocate(self, "CLUT")) == NULL) {
+        if((self->clut = DeviceClutSDL3Allocate(self, "CLUT")) == NULL) {
             BrResFreeNoCallback(self);
             return NULL;
         }
@@ -195,7 +195,7 @@ br_device_pixelmap *DevicePixelmapSDL2Allocate(br_device *dev, br_output_facilit
     return self;
 }
 
-static void BR_CMETHOD_DECL(br_device_pixelmap_sdl2, free)(br_object *_self)
+static void BR_CMETHOD_DECL(br_device_pixelmap_sdl3, free)(br_object *_self)
 {
     br_device_pixelmap *self = (br_device_pixelmap *)_self;
 
@@ -209,42 +209,42 @@ static void BR_CMETHOD_DECL(br_device_pixelmap_sdl2, free)(br_object *_self)
         if(self->window != NULL) {
             SDL_DestroyWindow(self->window);
         } else {
-            SDL_FreeSurface(self->surface);
+            SDL_DestroySurface(self->surface);
         }
     }
 
     BrResFreeNoCallback(self);
 }
 
-static const char *BR_CMETHOD_DECL(br_device_pixelmap_sdl2, identifier)(br_object *self)
+static const char *BR_CMETHOD_DECL(br_device_pixelmap_sdl3, identifier)(br_object *self)
 {
     return ((br_device_pixelmap *)self)->pm_identifier;
 }
 
-static br_device *BR_CMETHOD_DECL(br_device_pixelmap_sdl2, device)(br_object *self)
+static br_device *BR_CMETHOD_DECL(br_device_pixelmap_sdl3, device)(br_object *self)
 {
     return ((br_device_pixelmap *)self)->device;
 }
 
-static br_token BR_CMETHOD_DECL(br_device_pixelmap_sdl2, type)(br_object *self)
+static br_token BR_CMETHOD_DECL(br_device_pixelmap_sdl3, type)(br_object *self)
 {
     (void)self;
     return BRT_DEVICE_PIXELMAP;
 }
 
-static br_boolean BR_CMETHOD_DECL(br_device_pixelmap_sdl2, isType)(br_object *self, br_token t)
+static br_boolean BR_CMETHOD_DECL(br_device_pixelmap_sdl3, isType)(br_object *self, br_token t)
 {
     (void)self;
     return (t == BRT_DEVICE_PIXELMAP) || (t == BRT_OBJECT);
 }
 
-static br_size_t BR_CMETHOD_DECL(br_device_pixelmap_sdl2, space)(br_object *self)
+static br_size_t BR_CMETHOD_DECL(br_device_pixelmap_sdl3, space)(br_object *self)
 {
     (void)self;
     return sizeof(br_device_pixelmap);
 }
 
-static struct br_tv_template *BR_CMETHOD_DECL(br_device_pixelmap_sdl2, queryTemplate)(br_object *_self)
+static struct br_tv_template *BR_CMETHOD_DECL(br_device_pixelmap_sdl3, queryTemplate)(br_object *_self)
 {
     br_device_pixelmap *self = (br_device_pixelmap *)_self;
 
@@ -255,7 +255,7 @@ static struct br_tv_template *BR_CMETHOD_DECL(br_device_pixelmap_sdl2, queryTemp
     return self->device->templates.devicePixelmapTemplate;
 }
 
-static br_error BR_CMETHOD_DECL(br_device_pixelmap_sdl2, resize)(br_device_pixelmap *self, br_int_32 width, br_int_32 height)
+static br_error BR_CMETHOD_DECL(br_device_pixelmap_sdl3, resize)(br_device_pixelmap *self, br_int_32 width, br_int_32 height)
 {
     SDL_Surface *surface;
 
@@ -278,40 +278,40 @@ static br_error BR_CMETHOD_DECL(br_device_pixelmap_sdl2, resize)(br_device_pixel
         SDL_SetWindowSize(self->window, width, height);
 
         if((self->surface = SDL_GetWindowSurface(self->window)) == NULL) {
-            BrLogError("SDL2", "Unable to get window surface: %s", SDL_GetError());
+            BrLogError("SDL3", "Unable to get window surface: %s", SDL_GetError());
             return BRE_FAIL;
         }
     } else {
         ASSERT(self->surface != NULL);
 
-        surface = SDL_CreateRGBSurfaceWithFormat(0, width, height, self->surface->format->BitsPerPixel,
-                                                 self->surface->format->format);
+        surface = DevicePixelmapSDL3CreateSurface(width, height, self->surface->format);
         if(surface == NULL) {
-            BrLogError("SDL2", "Error creating surface: %s", SDL_GetError());
+            BrLogError("SDL3", "Error creating surface: %s", SDL_GetError());
             return BRE_FAIL;
         }
 
         /*
          * If we're indexed and there's a CLUT attached, copy it over.
          */
-        if(SDL_ISPIXELFORMAT_INDEXED(surface->format->format) && self->clut != NULL) {
-            if(DeviceSDL2SetPaletteFromCLUT(surface->format->palette, self->clut) != BRE_OK) {
-                SDL_FreeSurface(surface);
-                BrLogError("SDL2", "Unable to restore palette");
+        if(SDL_ISPIXELFORMAT_INDEXED(surface->format) && self->clut != NULL) {
+            SDL_Palette *palette = SDL_GetSurfacePalette(surface);
+            if(DeviceSDL3SetPaletteFromCLUT(palette, self->clut) != BRE_OK) {
+                SDL_DestroySurface(surface);
+                BrLogError("SDL3", "Unable to restore palette");
                 return BRE_FAIL;
             }
 
-            self->clut->pal = surface->format->palette;
+            self->clut->pal = palette;
         }
 
-        SDL_FreeSurface(self->surface);
+        SDL_DestroySurface(self->surface);
         self->surface = surface;
     }
 
     return resync(self);
 }
 
-br_error BR_CMETHOD_DECL(br_device_pixelmap_sdl2, validSource)(br_device_pixelmap *self, br_boolean *bp, br_object *h)
+br_error BR_CMETHOD_DECL(br_device_pixelmap_sdl3, validSource)(br_device_pixelmap *self, br_boolean *bp, br_object *h)
 {
     /*
      * Nothing uses this, not sure what the expected behaviour is.
@@ -323,7 +323,7 @@ br_error BR_CMETHOD_DECL(br_device_pixelmap_sdl2, validSource)(br_device_pixelma
     return BRE_OK;
 }
 
-static br_error BR_CMETHOD_DECL(br_device_pixelmap_sdl2, allocateSub)(br_device_pixelmap  *self,
+static br_error BR_CMETHOD_DECL(br_device_pixelmap_sdl3, allocateSub)(br_device_pixelmap  *self,
                                                                       br_device_pixelmap **newpm, br_rectangle *rect)
 {
     br_rectangle        out;
@@ -376,7 +376,7 @@ static br_error BR_CMETHOD_DECL(br_device_pixelmap_sdl2, allocateSub)(br_device_
 /*
  * Device->device same-size, non-stretch copy.
  */
-static br_error BR_CMETHOD_DECL(br_device_pixelmap_sdl2, copy)(br_device_pixelmap *self, br_device_pixelmap *src)
+static br_error BR_CMETHOD_DECL(br_device_pixelmap_sdl3, copy)(br_device_pixelmap *self, br_device_pixelmap *src)
 {
     SDL_Rect     drect;
     br_rectangle r = {
@@ -386,13 +386,13 @@ static br_error BR_CMETHOD_DECL(br_device_pixelmap_sdl2, copy)(br_device_pixelma
         .h = src->pm_height,
     };
 
-    if(DevicePixelmapSDL2RectangleClip(&drect, &r, (const br_pixelmap *)self) == BR_CLIP_REJECT)
+    if(DevicePixelmapSDL3RectangleClip(&drect, &r, (const br_pixelmap *)self) == BR_CLIP_REJECT)
         return BRE_OK;
 
     drect.x += self->pm_base_x;
     drect.y += self->pm_base_y;
 
-    if(SDL_BlitSurface(src->surface, NULL, self->surface, &drect) < 0)
+    if(!SDL_BlitSurface(src->surface, NULL, self->surface, &drect))
         return BRE_FAIL;
 
     return BRE_OK;
@@ -401,13 +401,13 @@ static br_error BR_CMETHOD_DECL(br_device_pixelmap_sdl2, copy)(br_device_pixelma
 /*
  * Memory->device non-stretch copy
  */
-static br_error BR_CMETHOD_DECL(br_device_pixelmap_sdl2, rectangleCopyTo)(br_device_pixelmap *self, br_point *p,
+static br_error BR_CMETHOD_DECL(br_device_pixelmap_sdl3, rectangleCopyTo)(br_device_pixelmap *self, br_point *p,
                                                                           br_device_pixelmap *src, br_rectangle *r)
 {
     SDL_Rect  srect, drect;
     SDL_Point dpoint;
 
-    if(DevicePixelmapSDL2RectangleClipTwo(&srect, &dpoint, r, p, (br_pixelmap *)self, (br_pixelmap *)src) == BR_CLIP_REJECT)
+    if(DevicePixelmapSDL3RectangleClipTwo(&srect, &dpoint, r, p, (br_pixelmap *)self, (br_pixelmap *)src) == BR_CLIP_REJECT)
         return BRE_OK;
 
     drect = (SDL_Rect){
@@ -417,7 +417,7 @@ static br_error BR_CMETHOD_DECL(br_device_pixelmap_sdl2, rectangleCopyTo)(br_dev
         .h = srect.h,
     };
 
-    if(DevicePixelmapSDL2BlitSurface((br_pixelmap *)src, &srect, (br_pixelmap *)self, &drect, SDL_BlitSurface) == BRE_OK)
+    if(DevicePixelmapSDL3BlitSurface((br_pixelmap *)src, &srect, (br_pixelmap *)self, &drect, SDL_BlitSurface) == BRE_OK)
         return BRE_OK;
 
 #if NO_MEMORY_FALLBACK
@@ -441,14 +441,14 @@ static br_error BR_CMETHOD_DECL(br_device_pixelmap_sdl2, rectangleCopyTo)(br_dev
  * Device->memory copy, device non-addressable.
  * Otherwise this would be going via br_device_pixelmap_mem::rectangleCopyTo().
  */
-static br_error BR_CMETHOD_DECL(br_device_pixelmap_sdl2, rectangleCopyFrom)(br_device_pixelmap *self, br_point *p,
+static br_error BR_CMETHOD_DECL(br_device_pixelmap_sdl3, rectangleCopyFrom)(br_device_pixelmap *self, br_point *p,
                                                                             br_device_pixelmap *dest, br_rectangle *r)
 {
 
     SDL_Rect  srect, drect;
     SDL_Point dpoint;
 
-    if(DevicePixelmapSDL2RectangleClipTwo(&srect, &dpoint, r, p, (br_pixelmap *)dest, (br_pixelmap *)self) == BR_CLIP_REJECT)
+    if(DevicePixelmapSDL3RectangleClipTwo(&srect, &dpoint, r, p, (br_pixelmap *)dest, (br_pixelmap *)self) == BR_CLIP_REJECT)
         return BRE_OK;
 
     drect = (SDL_Rect){
@@ -458,7 +458,7 @@ static br_error BR_CMETHOD_DECL(br_device_pixelmap_sdl2, rectangleCopyFrom)(br_d
         .h = srect.h,
     };
 
-    if(DevicePixelmapSDL2BlitSurface((br_pixelmap *)self, &srect, (br_pixelmap *)dest, &drect, SDL_BlitSurface) == BRE_OK)
+    if(DevicePixelmapSDL3BlitSurface((br_pixelmap *)self, &srect, (br_pixelmap *)dest, &drect, SDL_BlitSurface) == BRE_OK)
         return BRE_OK;
 
 #if NO_MEMORY_FALLBACK
@@ -481,21 +481,21 @@ static br_error BR_CMETHOD_DECL(br_device_pixelmap_sdl2, rectangleCopyFrom)(br_d
 /*
  * Memory -> device stretch copy
  */
-static br_error BR_CMETHOD_DECL(br_device_pixelmap_sdl2, rectangleStretchCopyTo)(br_device_pixelmap *self, br_rectangle *d,
+static br_error BR_CMETHOD_DECL(br_device_pixelmap_sdl3, rectangleStretchCopyTo)(br_device_pixelmap *self, br_rectangle *d,
                                                                                  br_device_pixelmap *src, br_rectangle *s)
 {
     SDL_Rect srect, drect;
 
-    if(DevicePixelmapSDL2RectangleClip(&srect, s, (const br_pixelmap *)src) == BR_CLIP_REJECT)
+    if(DevicePixelmapSDL3RectangleClip(&srect, s, (const br_pixelmap *)src) == BR_CLIP_REJECT)
         return BRE_OK;
 
-    if(DevicePixelmapSDL2RectangleClip(&drect, d, (const br_pixelmap *)self) == BR_CLIP_REJECT)
+    if(DevicePixelmapSDL3RectangleClip(&drect, d, (const br_pixelmap *)self) == BR_CLIP_REJECT)
         return BRE_OK;
 
     drect.x += self->pm_base_x;
     drect.y += self->pm_base_y;
 
-    if(DevicePixelmapSDL2BlitSurface((br_pixelmap *)src, &srect, (br_pixelmap *)self, &drect, SDL_BlitScaled) == BRE_OK)
+    if(DevicePixelmapSDL3BlitSurface((br_pixelmap *)src, &srect, (br_pixelmap *)self, &drect, DevicePixelmapSDL3BlitScaled) == BRE_OK)
         return BRE_OK;
 
 #if NO_MEMORY_FALLBACK
@@ -519,21 +519,21 @@ static br_error BR_CMETHOD_DECL(br_device_pixelmap_sdl2, rectangleStretchCopyTo)
  * Device->memory stretch copy, device non-addressable.
  * Otherwise this would be going via br_device_pixelmap_mem::rectangleStretchCopyTo().
  */
-static br_error BR_CMETHOD_DECL(br_device_pixelmap_sdl2, rectangleStretchCopyFrom)(br_device_pixelmap *self, br_rectangle *s,
+static br_error BR_CMETHOD_DECL(br_device_pixelmap_sdl3, rectangleStretchCopyFrom)(br_device_pixelmap *self, br_rectangle *s,
                                                                                    br_device_pixelmap *dest, br_rectangle *d)
 {
     SDL_Rect srect, drect;
 
-    if(DevicePixelmapSDL2RectangleClip(&srect, s, (const br_pixelmap *)self) == BR_CLIP_REJECT)
+    if(DevicePixelmapSDL3RectangleClip(&srect, s, (const br_pixelmap *)self) == BR_CLIP_REJECT)
         return BRE_OK;
 
-    if(DevicePixelmapSDL2RectangleClip(&drect, d, (const br_pixelmap *)dest) == BR_CLIP_REJECT)
+    if(DevicePixelmapSDL3RectangleClip(&drect, d, (const br_pixelmap *)dest) == BR_CLIP_REJECT)
         return BRE_OK;
 
     drect.x += self->pm_base_x;
     drect.y += self->pm_base_y;
 
-    if(DevicePixelmapSDL2BlitSurface((br_pixelmap *)self, &srect, (br_pixelmap *)dest, &drect, SDL_BlitScaled) == BRE_OK)
+    if(DevicePixelmapSDL3BlitSurface((br_pixelmap *)self, &srect, (br_pixelmap *)dest, &drect, DevicePixelmapSDL3BlitScaled) == BRE_OK)
         return BRE_OK;
 
 #if NO_MEMORY_FALLBACK
@@ -553,24 +553,30 @@ static br_error BR_CMETHOD_DECL(br_device_pixelmap_sdl2, rectangleStretchCopyFro
 #endif
 }
 
-static br_error BR_CMETHOD_DECL(br_device_pixelmap_sdl2, pixelSet)(br_device_pixelmap *self, br_point *p, br_uint_32 colour)
+static br_error BR_CMETHOD_DECL(br_device_pixelmap_sdl3, pixelSet)(br_device_pixelmap *self, br_point *p, br_uint_32 colour)
 {
     SDL_Point point;
     SDL_Color col;
+    const SDL_PixelFormatDetails *pfd;
 
-    if(DevicePixelmapSDL2PointClip(&point, p, (const br_pixelmap *)self) == BR_CLIP_REJECT)
+    if(DevicePixelmapSDL3PointClip(&point, p, (const br_pixelmap *)self) == BR_CLIP_REJECT)
         return BRE_OK;
 
     point.x += self->pm_base_x;
     point.y += self->pm_base_y;
 
-    SDL_GetRGBA(colour, self->surface->format, &col.r, &col.g, &col.b, &col.a);
+    pfd = SDL_GetPixelFormatDetails(self->surface->format);
 
-    if(SDL_SetRenderDrawColor(self->renderer, col.r, col.g, col.b, col.a) < 0)
+    // TODO: test with indexed
+    SDL_GetRGBA(colour, pfd, SDL_GetSurfacePalette(self->surface), &col.r, &col.g, &col.b, &col.a);
+
+    if(!SDL_SetRenderDrawColor(self->renderer, col.r, col.g, col.b, col.a))
         goto memory_fallback;
 
-    if(SDL_RenderDrawPoint(self->renderer, point.x, point.y) < 0)
+    if(!SDL_RenderPoint(self->renderer, (float)point.x, (float)point.y))
         goto memory_fallback;
+
+    SDL_FlushRenderer(self->renderer);
 
     return BRE_OK;
 
@@ -594,13 +600,16 @@ memory_fallback:;
 #endif
 }
 
-static br_error BR_CMETHOD_DECL(br_device_pixelmap_sdl2, line)(br_device_pixelmap *self, br_point *s, br_point *e,
+static br_error BR_CMETHOD_DECL(br_device_pixelmap_sdl3, line)(br_device_pixelmap *self, br_point *s, br_point *e,
                                                                br_uint_32 colour)
 {
     SDL_Point spoint, epoint;
     SDL_Color col;
 
-    if(DevicePixelmapSDL2LineClip(&spoint, &epoint, s, e, (const br_pixelmap *)self) == BR_CLIP_REJECT)
+    SDL_Palette                  *pal = SDL_GetSurfacePalette(self->surface);
+    const SDL_PixelFormatDetails *pfd = SDL_GetPixelFormatDetails(self->surface->format);
+
+    if(DevicePixelmapSDL3LineClip(&spoint, &epoint, s, e, (const br_pixelmap *)self) == BR_CLIP_REJECT)
         return BRE_OK;
 
     spoint.x += self->pm_base_x;
@@ -609,13 +618,15 @@ static br_error BR_CMETHOD_DECL(br_device_pixelmap_sdl2, line)(br_device_pixelma
     epoint.x += self->pm_base_x;
     epoint.y += self->pm_base_y;
 
-    SDL_GetRGBA(colour, self->surface->format, &col.r, &col.g, &col.b, &col.a);
+    SDL_GetRGBA(colour, pfd, pal, &col.r, &col.g, &col.b, &col.a);
 
-    if(SDL_SetRenderDrawColor(self->renderer, col.r, col.g, col.b, col.a) < 0)
+    if(!SDL_SetRenderDrawColor(self->renderer, col.r, col.g, col.b, col.a))
         goto memory_fallback;
 
-    if(SDL_RenderDrawLine(self->renderer, spoint.x, spoint.y, epoint.x, epoint.y) < 0)
+    if(!SDL_RenderLine(self->renderer, (float)spoint.x, (float)spoint.y, (float)epoint.x, (float)epoint.y))
         goto memory_fallback;
+
+    SDL_FlushRenderer(self->renderer);
 
     return BRE_OK;
 
@@ -639,18 +650,18 @@ memory_fallback:;
 #endif
 }
 
-static br_error BR_CMETHOD_DECL(br_device_pixelmap_sdl2, rectangleFill)(br_device_pixelmap *self, br_rectangle *r,
+static br_error BR_CMETHOD_DECL(br_device_pixelmap_sdl3, rectangleFill)(br_device_pixelmap *self, br_rectangle *r,
                                                                         br_uint_32 colour)
 {
     SDL_Rect rect;
 
-    if(DevicePixelmapSDL2RectangleClip(&rect, r, (const br_pixelmap *)self) == BR_CLIP_REJECT)
+    if(DevicePixelmapSDL3RectangleClip(&rect, r, (const br_pixelmap *)self) == BR_CLIP_REJECT)
         return BRE_OK;
 
     rect.x += self->pm_base_x;
     rect.y += self->pm_base_y;
 
-    if(SDL_FillRect(self->surface, &rect, colour) < 0)
+    if(!SDL_FillSurfaceRect(self->surface, &rect, colour))
         return BRE_FAIL;
 
     return BRE_OK;
@@ -659,16 +670,16 @@ static br_error BR_CMETHOD_DECL(br_device_pixelmap_sdl2, rectangleFill)(br_devic
 void *DevicePixelmapSDLMemAddress(br_device_pixelmap *self, br_int_32 x, br_int_32 y)
 {
     return (void *)((br_uintptr_t)self->pm_pixels + ((self->pm_base_y + y) * self->surface->pitch) +
-                    ((self->pm_base_x + x) * self->surface->format->BytesPerPixel));
+                    ((self->pm_base_x + x) * SDL_BYTESPERPIXEL(self->surface->format)));
 }
 
-static br_error BR_CMETHOD_DECL(br_device_pixelmap_sdl2, pixelQuery)(br_device_pixelmap *self, br_uint_32 *pcolour, br_point *p)
+static br_error BR_CMETHOD_DECL(br_device_pixelmap_sdl3, pixelQuery)(br_device_pixelmap *self, br_uint_32 *pcolour, br_point *p)
 {
     br_error  err;
     SDL_Point ap;
     br_colour col;
 
-    switch(self->surface->format->BytesPerPixel) {
+    switch(SDL_BYTESPERPIXEL(self->surface->format)) {
         case 1:
         case 2:
         case 3:
@@ -678,13 +689,13 @@ static br_error BR_CMETHOD_DECL(br_device_pixelmap_sdl2, pixelQuery)(br_device_p
             return BRE_FAIL;
     }
 
-    if(DevicePixelmapSDL2PointClip(&ap, p, (br_pixelmap *)self) == BR_CLIP_REJECT)
+    if(DevicePixelmapSDL3PointClip(&ap, p, (br_pixelmap *)self) == BR_CLIP_REJECT)
         return BRE_FAIL;
 
     if((err = DevicePixelmapDirectLock(self, BR_FALSE)) != BRE_OK)
         return err;
 
-    col = _MemPixelGet(DevicePixelmapSDLMemAddress(self, ap.x, ap.y), self->surface->format->BytesPerPixel);
+    col = _MemPixelGet(DevicePixelmapSDLMemAddress(self, ap.x, ap.y), SDL_BYTESPERPIXEL(self->surface->format));
 
     if((err = DevicePixelmapDirectUnlock(self)) != BRE_OK)
         return err;
@@ -693,14 +704,14 @@ static br_error BR_CMETHOD_DECL(br_device_pixelmap_sdl2, pixelQuery)(br_device_p
     return BRE_OK;
 }
 
-br_error BR_CMETHOD_DECL(br_device_pixelmap_sdl2, pixelAddressQuery)(br_device_pixelmap *self, void **pptr,
+br_error BR_CMETHOD_DECL(br_device_pixelmap_sdl3, pixelAddressQuery)(br_device_pixelmap *self, void **pptr,
                                                                      br_uint_32 *pqual, br_point *p)
 {
     SDL_Point ap;
 
     (void)pqual;
 
-    if(DevicePixelmapSDL2PointClip(&ap, p, (br_pixelmap *)self) == BR_CLIP_REJECT)
+    if(DevicePixelmapSDL3PointClip(&ap, p, (br_pixelmap *)self) == BR_CLIP_REJECT)
         return BRE_FAIL;
 
     if(pptr != NULL)
@@ -709,17 +720,17 @@ br_error BR_CMETHOD_DECL(br_device_pixelmap_sdl2, pixelAddressQuery)(br_device_p
     return BRE_OK;
 }
 
-static br_error BR_CMETHOD_DECL(br_device_pixelmap_sdl2, directLock)(br_device_pixelmap *self, br_boolean block)
+static br_error BR_CMETHOD_DECL(br_device_pixelmap_sdl3, directLock)(br_device_pixelmap *self, br_boolean block)
 {
     (void)block; /* We're single-threaded CPU surface. We can't block. */
 
     if(SDL_MUSTLOCK(self->surface) == 0)
         return BRE_OK;
 
-    if(self->surface->locked)
+    if(self->surface->flags & SDL_SURFACE_LOCKED)
         return BRE_OK;
 
-    if(SDL_LockSurface(self->surface) < 0)
+    if(!SDL_LockSurface(self->surface))
         return BRE_FAIL;
 
     self->pm_pixels    = self->surface->pixels;
@@ -729,7 +740,7 @@ static br_error BR_CMETHOD_DECL(br_device_pixelmap_sdl2, directLock)(br_device_p
     return BRE_OK;
 }
 
-static br_error BR_CMETHOD_DECL(br_device_pixelmap_sdl2, directUnlock)(br_device_pixelmap *self)
+static br_error BR_CMETHOD_DECL(br_device_pixelmap_sdl3, directUnlock)(br_device_pixelmap *self)
 {
     if(SDL_MUSTLOCK(self->surface) == 0)
         return BRE_OK;
@@ -752,7 +763,7 @@ static void DevicePixelmapSDLExtPreSwap(br_device_pixelmap *self)
         self->ext_procs.preswap((br_pixelmap *)self, self->ext_procs.user);
 }
 
-static br_error BR_CMETHOD_DECL(br_device_pixelmap_sdl2, doubleBuffer)(br_device_pixelmap *self, br_device_pixelmap *src)
+static br_error BR_CMETHOD_DECL(br_device_pixelmap_sdl3, doubleBuffer)(br_device_pixelmap *self, br_device_pixelmap *src)
 {
     br_error err;
 
@@ -765,8 +776,8 @@ static br_error BR_CMETHOD_DECL(br_device_pixelmap_sdl2, doubleBuffer)(br_device
     DevicePixelmapSDLExtPreSwap(self);
 
     if(self->window != NULL) {
-        if(SDL_UpdateWindowSurface(self->window) < 0) {
-            BrLogTrace("SDL2", "Unable to update window surface: %s", SDL_GetError());
+        if(!SDL_UpdateWindowSurface(self->window)) {
+            BrLogTrace("SDL3", "Unable to update window surface: %s", SDL_GetError());
             return BRE_FAIL;
         }
     }
@@ -796,7 +807,7 @@ static struct br_tv_template_entry matchOffTemplateEntries[] = {
 };
 #undef F
 
-br_error BR_CMETHOD_DECL(br_device_pixelmap_sdl2, match)(br_device_pixelmap *self, br_device_pixelmap **newpm,
+br_error BR_CMETHOD_DECL(br_device_pixelmap_sdl3, match)(br_device_pixelmap *self, br_device_pixelmap **newpm,
                                                          br_token_value *tv)
 {
     br_int_32           count;
@@ -826,7 +837,7 @@ br_error BR_CMETHOD_DECL(br_device_pixelmap_sdl2, match)(br_device_pixelmap *sel
 
     if(mt.use == BRT_CLONE) {
         mt.type       = self->pm_type;
-        mt.pixel_bits = self->surface->format->BitsPerPixel;
+        mt.pixel_bits = SDL_BITSPERPIXEL(self->surface->format);
     }
 
     /*
@@ -846,13 +857,13 @@ br_error BR_CMETHOD_DECL(br_device_pixelmap_sdl2, match)(br_device_pixelmap *sel
         return BR_CMETHOD(br_device_pixelmap_mem, match)(self, newpm, tv);
     }
 
-    surface = SDL_CreateRGBSurfaceWithFormat(0, mt.width, mt.height, bpp, format);
+    surface = DevicePixelmapSDL3CreateSurface(mt.width, mt.height, format);
     if(surface == NULL) {
-        BrLogError("SDL2", "Error creating surface: %s", SDL_GetError());
+        BrLogError("SDL3", "Error creating surface: %s", SDL_GetError());
         return BRE_FAIL;
     }
 
-    if((pm = DevicePixelmapSDL2Allocate(self->device, NULL, NULL, surface, BR_TRUE)) == NULL)
+    if((pm = DevicePixelmapSDL3Allocate(self->device, NULL, NULL, surface, BR_TRUE)) == NULL)
         return BRE_FAIL;
 
     /*
@@ -865,7 +876,7 @@ br_error BR_CMETHOD_DECL(br_device_pixelmap_sdl2, match)(br_device_pixelmap *sel
      * If both pixelmaps have a CLUT, copy it over.
      */
     if(self->clut != NULL && pm->clut != NULL) {
-        DeviceSDL2SetPaletteFromCLUT(pm->clut->pal, self->clut);
+        DeviceSDL3SetPaletteFromCLUT(pm->clut->pal, self->clut);
     }
 
     *newpm = pm;
@@ -876,7 +887,7 @@ br_error BR_CMETHOD_DECL(br_device_pixelmap_sdl2, match)(br_device_pixelmap *sel
 /*
  * Resync after an external change, such as a screen resize.
  */
-static br_error BR_CMETHOD_DECL(br_device_pixelmap_sdl2, handleWindowEvent)(br_device_pixelmap *self, void *arg)
+static br_error BR_CMETHOD_DECL(br_device_pixelmap_sdl3, handleWindowEvent)(br_device_pixelmap *self, void *arg)
 {
     const SDL_WindowEvent *evt = arg;
 
@@ -886,12 +897,12 @@ static br_error BR_CMETHOD_DECL(br_device_pixelmap_sdl2, handleWindowEvent)(br_d
     /*
      * We can only handle window size changes for now.
      */
-    if(evt->type != SDL_WINDOWEVENT && evt->event != SDL_WINDOWEVENT_SIZE_CHANGED)
+    if(evt->type != SDL_EVENT_WINDOW_PIXEL_SIZE_CHANGED)
         return BRE_OK;
 
     /* NB: this will invalidate all subsurfaces. */
     if((self->surface = SDL_GetWindowSurface(self->window)) == NULL) {
-        BrLogError("SDL2", "Unable to get window surface: %s", SDL_GetError());
+        BrLogError("SDL3", "Unable to get window surface: %s", SDL_GetError());
         return BRE_FAIL;
     }
 
@@ -906,14 +917,14 @@ static const struct br_device_pixelmap_dispatch devicePixelmapDispatch = {
     .__reserved1 = NULL,
     .__reserved2 = NULL,
     .__reserved3 = NULL,
-    ._free       = BR_CMETHOD_REF(br_device_pixelmap_sdl2, free),
-    ._identifier = BR_CMETHOD_REF(br_device_pixelmap_sdl2, identifier),
-    ._type       = BR_CMETHOD_REF(br_device_pixelmap_sdl2, type),
-    ._isType     = BR_CMETHOD_REF(br_device_pixelmap_sdl2, isType),
-    ._device     = BR_CMETHOD_REF(br_device_pixelmap_sdl2, device),
-    ._space      = BR_CMETHOD_REF(br_device_pixelmap_sdl2, space),
+    ._free       = BR_CMETHOD_REF(br_device_pixelmap_sdl3, free),
+    ._identifier = BR_CMETHOD_REF(br_device_pixelmap_sdl3, identifier),
+    ._type       = BR_CMETHOD_REF(br_device_pixelmap_sdl3, type),
+    ._isType     = BR_CMETHOD_REF(br_device_pixelmap_sdl3, isType),
+    ._device     = BR_CMETHOD_REF(br_device_pixelmap_sdl3, device),
+    ._space      = BR_CMETHOD_REF(br_device_pixelmap_sdl3, space),
 
-    ._templateQuery = BR_CMETHOD_REF(br_device_pixelmap_sdl2, queryTemplate),
+    ._templateQuery = BR_CMETHOD_REF(br_device_pixelmap_sdl3, queryTemplate),
     ._query         = BR_CMETHOD_REF(br_object, query),
     ._queryBuffer   = BR_CMETHOD_REF(br_object, queryBuffer),
     ._queryMany     = BR_CMETHOD_REF(br_object, queryMany),
@@ -921,16 +932,16 @@ static const struct br_device_pixelmap_dispatch devicePixelmapDispatch = {
     ._queryAll      = BR_CMETHOD_REF(br_object, queryAll),
     ._queryAllSize  = BR_CMETHOD_REF(br_object, queryAllSize),
 
-    ._validSource = BR_CMETHOD_REF(br_device_pixelmap_sdl2, validSource),
-    ._resize      = BR_CMETHOD_REF(br_device_pixelmap_sdl2, resize),
-    ._match       = BR_CMETHOD_REF(br_device_pixelmap_sdl2, match),
-    ._allocateSub = BR_CMETHOD_REF(br_device_pixelmap_sdl2, allocateSub),
+    ._validSource = BR_CMETHOD_REF(br_device_pixelmap_sdl3, validSource),
+    ._resize      = BR_CMETHOD_REF(br_device_pixelmap_sdl3, resize),
+    ._match       = BR_CMETHOD_REF(br_device_pixelmap_sdl3, match),
+    ._allocateSub = BR_CMETHOD_REF(br_device_pixelmap_sdl3, allocateSub),
 
-    ._copy         = BR_CMETHOD_REF(br_device_pixelmap_sdl2, copy),
+    ._copy         = BR_CMETHOD_REF(br_device_pixelmap_sdl3, copy),
     ._copyTo       = BR_CMETHOD_REF(br_device_pixelmap_gen, copyTo),
     ._copyFrom     = BR_CMETHOD_REF(br_device_pixelmap_gen, copyFrom),
     ._fill         = BR_CMETHOD_REF(br_device_pixelmap_gen, fill),
-    ._doubleBuffer = BR_CMETHOD_REF(br_device_pixelmap_sdl2, doubleBuffer),
+    ._doubleBuffer = BR_CMETHOD_REF(br_device_pixelmap_sdl3, doubleBuffer),
 
     ._copyDirty         = BR_CMETHOD_REF(br_device_pixelmap_gen, copyDirty),
     ._copyToDirty       = BR_CMETHOD_REF(br_device_pixelmap_gen, copyToDirty),
@@ -940,15 +951,15 @@ static const struct br_device_pixelmap_dispatch devicePixelmapDispatch = {
 
     ._rectangle                = BR_CMETHOD_REF(br_device_pixelmap_gen, rectangle),
     ._rectangle2               = BR_CMETHOD_REF(br_device_pixelmap_gen, rectangle2),
-    ._rectangleCopy            = BR_CMETHOD_REF(br_device_pixelmap_sdl2, rectangleCopyTo),
-    ._rectangleCopyTo          = BR_CMETHOD_REF(br_device_pixelmap_sdl2, rectangleCopyTo),
-    ._rectangleCopyFrom        = BR_CMETHOD_REF(br_device_pixelmap_sdl2, rectangleCopyFrom),
-    ._rectangleStretchCopy     = BR_CMETHOD_REF(br_device_pixelmap_sdl2, rectangleStretchCopyTo),
-    ._rectangleStretchCopyTo   = BR_CMETHOD_REF(br_device_pixelmap_sdl2, rectangleStretchCopyTo),
-    ._rectangleStretchCopyFrom = BR_CMETHOD_REF(br_device_pixelmap_sdl2, rectangleStretchCopyFrom),
-    ._rectangleFill            = BR_CMETHOD_REF(br_device_pixelmap_sdl2, rectangleFill),
-    ._pixelSet                 = BR_CMETHOD_REF(br_device_pixelmap_sdl2, pixelSet),
-    ._line                     = BR_CMETHOD_REF(br_device_pixelmap_sdl2, line),
+    ._rectangleCopy            = BR_CMETHOD_REF(br_device_pixelmap_sdl3, rectangleCopyTo),
+    ._rectangleCopyTo          = BR_CMETHOD_REF(br_device_pixelmap_sdl3, rectangleCopyTo),
+    ._rectangleCopyFrom        = BR_CMETHOD_REF(br_device_pixelmap_sdl3, rectangleCopyFrom),
+    ._rectangleStretchCopy     = BR_CMETHOD_REF(br_device_pixelmap_sdl3, rectangleStretchCopyTo),
+    ._rectangleStretchCopyTo   = BR_CMETHOD_REF(br_device_pixelmap_sdl3, rectangleStretchCopyTo),
+    ._rectangleStretchCopyFrom = BR_CMETHOD_REF(br_device_pixelmap_sdl3, rectangleStretchCopyFrom),
+    ._rectangleFill            = BR_CMETHOD_REF(br_device_pixelmap_sdl3, rectangleFill),
+    ._pixelSet                 = BR_CMETHOD_REF(br_device_pixelmap_sdl3, pixelSet),
+    ._line                     = BR_CMETHOD_REF(br_device_pixelmap_sdl3, line),
     ._copyBits                 = BR_CMETHOD_REF(br_device_pixelmap_gen, copyBits),
 
     ._text       = BR_CMETHOD_REF(br_device_pixelmap_gen, text),
@@ -959,19 +970,19 @@ static const struct br_device_pixelmap_dispatch devicePixelmapDispatch = {
     ._rowQuery = BR_CMETHOD_REF(br_device_pixelmap_fail, rowQuery),
     ._rowSet   = BR_CMETHOD_REF(br_device_pixelmap_fail, rowSet),
 
-    ._pixelQuery        = BR_CMETHOD_REF(br_device_pixelmap_sdl2, pixelQuery),
-    ._pixelAddressQuery = BR_CMETHOD_REF(br_device_pixelmap_sdl2, pixelAddressQuery),
+    ._pixelQuery        = BR_CMETHOD_REF(br_device_pixelmap_sdl3, pixelQuery),
+    ._pixelAddressQuery = BR_CMETHOD_REF(br_device_pixelmap_sdl3, pixelAddressQuery),
 
     ._pixelAddressSet = BR_CMETHOD_REF(br_device_pixelmap_fail, pixelAddressSet),
     ._originSet       = BR_CMETHOD_REF(br_device_pixelmap_gen, originSet),
 
     ._flush        = BR_CMETHOD_REF(br_device_pixelmap_gen, flush),
     ._synchronise  = BR_CMETHOD_REF(br_device_pixelmap_gen, synchronise),
-    ._directLock   = BR_CMETHOD_REF(br_device_pixelmap_sdl2, directLock),
-    ._directUnlock = BR_CMETHOD_REF(br_device_pixelmap_sdl2, directUnlock),
+    ._directLock   = BR_CMETHOD_REF(br_device_pixelmap_sdl3, directLock),
+    ._directUnlock = BR_CMETHOD_REF(br_device_pixelmap_sdl3, directUnlock),
 
     ._getControls = BR_CMETHOD_REF(br_device_pixelmap_gen, getControls),
     ._setControls = BR_CMETHOD_REF(br_device_pixelmap_gen, setControls),
 
-    ._handleWindowEvent = BR_CMETHOD_REF(br_device_pixelmap_sdl2, handleWindowEvent),
+    ._handleWindowEvent = BR_CMETHOD_REF(br_device_pixelmap_sdl3, handleWindowEvent),
 };

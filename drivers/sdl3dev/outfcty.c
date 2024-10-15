@@ -2,7 +2,6 @@
  * Output type methods
  */
 #include <stddef.h>
-#include <SDL.h>
 
 #include "drv.h"
 #include "shortcut.h"
@@ -56,7 +55,7 @@ static struct br_tv_template_entry pixelmapNewTemplateEntries[] = {
     {BRT(WINDOW_HANDLE_H),  F(window),     BRTV_SET, BRTV_CONV_COPY, 0                       },
     {BRT(SURFACE_HANDLE_H), F(surface),    BRTV_SET, BRTV_CONV_COPY, 0                       },
     {BRT(USE_T),            F(use_type),   BRTV_SET, BRTV_CONV_COPY, 0                       },
-    {BRT(HIDPI_B),          F(flags),      BRTV_SET, BRTV_CONV_BIT,  SDL_WINDOW_ALLOW_HIGHDPI},
+    {BRT(HIDPI_B),          F(flags),      BRTV_SET, BRTV_CONV_BIT,  SDL_WINDOW_HIGH_PIXEL_DENSITY},
     {BRT(RESIZABLE_B),      F(flags),      BRTV_SET, BRTV_CONV_BIT,  SDL_WINDOW_RESIZABLE    },
     {BRT(OPENGL_B),         F(flags),      BRTV_SET, BRTV_CONV_BIT,  SDL_WINDOW_OPENGL       },
     {BRT(WINDOW_FULLSCREEN_B), F(flags),   BRTV_SET, BRTV_CONV_BIT,  SDL_WINDOW_FULLSCREEN   },
@@ -72,8 +71,8 @@ const static struct {
   // {.format = SDL_PIXELFORMAT_INDEX4MSB, .bpp = 4,  .type = BR_PMT_INDEX_4  }, /* Untested */
     {.format = SDL_PIXELFORMAT_INDEX8,   .bpp = 8,  .type = BR_PMT_INDEX_8  },
     {.format = SDL_PIXELFORMAT_RGB332,   .bpp = 8,  .type = BR_PMT_RGB_332  },
-    {.format = SDL_PIXELFORMAT_RGB555,   .bpp = 15, .type = BR_PMT_RGB_555  },
-    {.format = SDL_PIXELFORMAT_BGR555,   .bpp = 15, .type = BR_PMT_BGR_555  },
+    {.format = SDL_PIXELFORMAT_XRGB1555, .bpp = 15, .type = BR_PMT_RGB_555  },
+    {.format = SDL_PIXELFORMAT_XBGR1555, .bpp = 15, .type = BR_PMT_BGR_555  },
     {.format = SDL_PIXELFORMAT_RGB565,   .bpp = 16, .type = BR_PMT_RGB_565  },
     {.format = SDL_PIXELFORMAT_BGR565,   .bpp = 16, .type = BR_PMT_BGR_565  },
 #if BR_ENDIAN_LITTLE
@@ -101,7 +100,7 @@ br_error SDLToBRenderPixelFormat(Uint32 format, br_int_32 *bpp, br_uint_8 *type)
         return BRE_OK;
     }
 
-    BrLogTrace("SDL2", "Skipping unsupported pixel format %s", SDL_GetPixelFormatName(format));
+    BrLogTrace("SDL3", "Skipping unsupported pixel format %s", SDL_GetPixelFormatName(format));
     return BRE_FAIL;
 }
 
@@ -122,7 +121,7 @@ br_error BRenderToSDLPixelFormat(br_uint_8 type, Uint32 *format, br_int_32 *bpp)
     return BRE_FAIL;
 }
 
-br_output_facility *OutputFacilitySDL2CreateGeneric(br_device *dev)
+br_output_facility *OutputFacilitySDL3CreateGeneric(br_device *dev)
 {
     br_output_facility *self;
 
@@ -130,7 +129,7 @@ br_output_facility *OutputFacilitySDL2CreateGeneric(br_device *dev)
         return NULL;
 
     self->dispatch    = &outputFacilityDispatch;
-    self->identifier  = BrResStrDup(self, "SDL2");
+    self->identifier  = BrResStrDup(self, "SDL3");
     self->device      = dev;
     self->object_list = BrObjectListAllocate(self);
     ObjectContainerAddFront(dev, (br_object *)self);
@@ -141,14 +140,14 @@ br_output_facility *OutputFacilitySDL2CreateGeneric(br_device *dev)
     self->colour_type = BR_PMT_MAX;
     self->monitor     = -1;
 
-    BrLogTrace("SDL2", "Created output facility: %s", self->identifier);
+    BrLogTrace("SDL3", "Created output facility: %s", self->identifier);
     return self;
 }
 
 /*
  * Common object methods
  */
-static void BR_CMETHOD_DECL(br_output_facility_sdl2, free)(br_object *self)
+static void BR_CMETHOD_DECL(br_output_facility_sdl3, free)(br_object *self)
 {
     ObjectContainerRemove(ObjectDevice(self), (br_object *)self);
 
@@ -160,32 +159,32 @@ static void BR_CMETHOD_DECL(br_output_facility_sdl2, free)(br_object *self)
     BrResFreeNoCallback(self);
 }
 
-static const char *BR_CMETHOD_DECL(br_output_facility_sdl2, identifier)(br_object *self)
+static const char *BR_CMETHOD_DECL(br_output_facility_sdl3, identifier)(br_object *self)
 {
     return ((br_output_facility *)self)->identifier;
 }
 
-static br_token BR_CMETHOD_DECL(br_output_facility_sdl2, type)(br_object *self)
+static br_token BR_CMETHOD_DECL(br_output_facility_sdl3, type)(br_object *self)
 {
     return BRT_OUTPUT_FACILITY;
 }
 
-static br_boolean BR_CMETHOD_DECL(br_output_facility_sdl2, isType)(br_object *self, br_token t)
+static br_boolean BR_CMETHOD_DECL(br_output_facility_sdl3, isType)(br_object *self, br_token t)
 {
     return (t == BRT_OUTPUT_FACILITY) || (t == BRT_OBJECT_CONTAINER) || (t == BRT_OBJECT);
 }
 
-static br_device *BR_CMETHOD_DECL(br_output_facility_sdl2, device)(br_object *self)
+static br_device *BR_CMETHOD_DECL(br_output_facility_sdl3, device)(br_object *self)
 {
     return ((br_output_facility *)self)->device;
 }
 
-static br_size_t BR_CMETHOD_DECL(br_output_facility_sdl2, space)(br_object *self)
+static br_size_t BR_CMETHOD_DECL(br_output_facility_sdl3, space)(br_object *self)
 {
     return sizeof(br_output_facility);
 }
 
-static struct br_tv_template *BR_CMETHOD_DECL(br_output_facility_sdl2, queryTemplate)(br_object *_self)
+static struct br_tv_template *BR_CMETHOD_DECL(br_output_facility_sdl3, queryTemplate)(br_object *_self)
 {
     br_output_facility *self = (br_output_facility *)_self;
 
@@ -196,7 +195,7 @@ static struct br_tv_template *BR_CMETHOD_DECL(br_output_facility_sdl2, queryTemp
     return self->device->templates.outputFacilityTemplate;
 }
 
-static br_error BR_CMETHOD_DECL(br_output_facility_sdl2, validSource)(br_output_facility *self, br_boolean *bp, br_object *h)
+static br_error BR_CMETHOD_DECL(br_output_facility_sdl3, validSource)(br_output_facility *self, br_boolean *bp, br_object *h)
 {
     return BRE_OK;
 }
@@ -230,7 +229,7 @@ static br_uint_8 FigureOutFormat(br_uint_8 type, br_int_32 bits)
  * Instantiate an output pixelmap from the output type
  *
  */
-static br_error BR_CMETHOD_DECL(br_output_facility_sdl2, pixelmapNew)(br_output_facility  *self,
+static br_error BR_CMETHOD_DECL(br_output_facility_sdl3, pixelmapNew)(br_output_facility  *self,
                                                                       br_device_pixelmap **ppmap, br_token_value *tv)
 {
     br_device_pixelmap *pm;
@@ -274,7 +273,7 @@ static br_error BR_CMETHOD_DECL(br_output_facility_sdl2, pixelmapNew)(br_output_
     br_boolean is_new     = (is_window && pt.window == NULL) || (pt.surface == NULL && pt.use_type == BRT_OFFSCREEN);
 
     if(is_window && is_surface) {
-        BrLogError("SDL2", "Invalid parameter combination, refusing to create pixelmap");
+        BrLogError("SDL3", "Invalid parameter combination, refusing to create pixelmap");
         return BRE_FAIL;
     }
 
@@ -298,13 +297,13 @@ static br_error BR_CMETHOD_DECL(br_output_facility_sdl2, pixelmapNew)(br_output_
      * If wanting OpenGL, forward things on.
      */
     if(pt.flags & SDL_WINDOW_OPENGL)
-        return DevicePixelmapSDL2CreateGL(&pt, ppmap);
+        return DevicePixelmapSDL3CreateGL(&pt, ppmap);
 
     if(is_window) {
         if(is_new) {
-            window = SDL_CreateWindow(pt.title, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, pt.width, pt.height, pt.flags);
+            window = SDL_CreateWindow(pt.title, pt.width, pt.height, pt.flags);
             if(window == NULL) {
-                BrLogError("SDL2", "Error creating window: %s", SDL_GetError());
+                BrLogError("SDL3", "Error creating window: %s", SDL_GetError());
                 return BRE_FAIL;
             }
         } else {
@@ -325,7 +324,7 @@ static br_error BR_CMETHOD_DECL(br_output_facility_sdl2, pixelmapNew)(br_output_
 
         /* Get the window surface. */
         if((surface = SDL_GetWindowSurface(window)) == NULL) {
-            BrLogError("SDL2", "Unable to get window surface: %s", SDL_GetError());
+            BrLogError("SDL3", "Unable to get window surface: %s", SDL_GetError());
             return BRE_FAIL;
         }
 
@@ -341,9 +340,9 @@ static br_error BR_CMETHOD_DECL(br_output_facility_sdl2, pixelmapNew)(br_output_
             if(pt.pixel_type == BR_PMT_MAX)
                 return BRE_FAIL;
 
-            surface = SDL_CreateRGBSurfaceWithFormat(0, pt.width, pt.height, bpp, format);
+            surface = DevicePixelmapSDL3CreateSurface(pt.width, pt.height, format);
             if(surface == NULL) {
-                BrLogError("SDL2", "Error creating surface: %s", SDL_GetError());
+                BrLogError("SDL3", "Error creating surface: %s", SDL_GetError());
                 return BRE_FAIL;
             }
         } else {
@@ -351,7 +350,7 @@ static br_error BR_CMETHOD_DECL(br_output_facility_sdl2, pixelmapNew)(br_output_
         }
     }
 
-    if((pm = DevicePixelmapSDL2Allocate(self->device, self, window, surface, is_new)) == NULL) {
+    if((pm = DevicePixelmapSDL3Allocate(self->device, self, window, surface, is_new)) == NULL) {
         /* NB: This will window/surface cleanup. */
         return BRE_FAIL;
     }
@@ -369,7 +368,7 @@ static br_error BR_CMETHOD_DECL(br_output_facility_sdl2, pixelmapNew)(br_output_
     return BRE_OK;
 }
 
-static br_error BR_CMETHOD_DECL(br_output_facility_sdl2, clutNew)(br_output_facility     *self,
+static br_error BR_CMETHOD_DECL(br_output_facility_sdl3, clutNew)(br_output_facility     *self,
                                                                   struct br_device_clut **pclut, br_token_value *tv)
 {
     (void)self;
@@ -381,7 +380,7 @@ static br_error BR_CMETHOD_DECL(br_output_facility_sdl2, clutNew)(br_output_faci
 /*
  * No querying ability yet
  */
-static br_error BR_CMETHOD_DECL(br_output_facility_sdl2, queryCapability)(br_output_facility *self, br_token_value *buffer_in,
+static br_error BR_CMETHOD_DECL(br_output_facility_sdl3, queryCapability)(br_output_facility *self, br_token_value *buffer_in,
                                                                           br_token_value *buffer_out, br_size_t size_buffer_out)
 {
     (void)self;
@@ -391,7 +390,7 @@ static br_error BR_CMETHOD_DECL(br_output_facility_sdl2, queryCapability)(br_out
     return BRE_FAIL;
 }
 
-static void *BR_CMETHOD_DECL(br_output_facility_sdl2, listQuery)(br_object_container *self)
+static void *BR_CMETHOD_DECL(br_output_facility_sdl3, listQuery)(br_object_container *self)
 {
     return ((br_output_facility *)self)->object_list;
 }
@@ -404,14 +403,14 @@ static const struct br_output_facility_dispatch outputFacilityDispatch = {
     .__reserved1 = NULL,
     .__reserved2 = NULL,
     .__reserved3 = NULL,
-    ._free       = BR_CMETHOD_REF(br_output_facility_sdl2, free),
-    ._identifier = BR_CMETHOD_REF(br_output_facility_sdl2, identifier),
-    ._type       = BR_CMETHOD_REF(br_output_facility_sdl2, type),
-    ._isType     = BR_CMETHOD_REF(br_output_facility_sdl2, isType),
-    ._device     = BR_CMETHOD_REF(br_output_facility_sdl2, device),
-    ._space      = BR_CMETHOD_REF(br_output_facility_sdl2, space),
+    ._free       = BR_CMETHOD_REF(br_output_facility_sdl3, free),
+    ._identifier = BR_CMETHOD_REF(br_output_facility_sdl3, identifier),
+    ._type       = BR_CMETHOD_REF(br_output_facility_sdl3, type),
+    ._isType     = BR_CMETHOD_REF(br_output_facility_sdl3, isType),
+    ._device     = BR_CMETHOD_REF(br_output_facility_sdl3, device),
+    ._space      = BR_CMETHOD_REF(br_output_facility_sdl3, space),
 
-    ._templateQuery = BR_CMETHOD_REF(br_output_facility_sdl2, queryTemplate),
+    ._templateQuery = BR_CMETHOD_REF(br_output_facility_sdl3, queryTemplate),
     ._query         = BR_CMETHOD_REF(br_object, query),
     ._queryBuffer   = BR_CMETHOD_REF(br_object, queryBuffer),
     ._queryMany     = BR_CMETHOD_REF(br_object, queryMany),
@@ -419,7 +418,7 @@ static const struct br_output_facility_dispatch outputFacilityDispatch = {
     ._queryAll      = BR_CMETHOD_REF(br_object, queryAll),
     ._queryAllSize  = BR_CMETHOD_REF(br_object, queryAllSize),
 
-    ._listQuery        = BR_CMETHOD_REF(br_output_facility_sdl2, listQuery),
+    ._listQuery        = BR_CMETHOD_REF(br_output_facility_sdl3, listQuery),
     ._tokensMatchBegin = BR_CMETHOD_REF(br_object_container, tokensMatchBegin),
     ._tokensMatch      = BR_CMETHOD_REF(br_object_container, tokensMatch),
     ._tokensMatchEnd   = BR_CMETHOD_REF(br_object_container, tokensMatchEnd),
@@ -430,8 +429,8 @@ static const struct br_output_facility_dispatch outputFacilityDispatch = {
     ._findMany         = BR_CMETHOD_REF(br_object_container, findMany),
     ._count            = BR_CMETHOD_REF(br_object_container, count),
 
-    ._validSource     = BR_CMETHOD_REF(br_output_facility_sdl2, validSource),
-    ._pixelmapNew     = BR_CMETHOD_REF(br_output_facility_sdl2, pixelmapNew),
-    ._clutNew         = BR_CMETHOD_REF(br_output_facility_sdl2, clutNew),
-    ._queryCapability = BR_CMETHOD_REF(br_output_facility_sdl2, queryCapability),
+    ._validSource     = BR_CMETHOD_REF(br_output_facility_sdl3, validSource),
+    ._pixelmapNew     = BR_CMETHOD_REF(br_output_facility_sdl3, pixelmapNew),
+    ._clutNew         = BR_CMETHOD_REF(br_output_facility_sdl3, clutNew),
+    ._queryCapability = BR_CMETHOD_REF(br_output_facility_sdl3, queryCapability),
 };

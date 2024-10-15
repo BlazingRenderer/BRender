@@ -1,6 +1,7 @@
 #include "drv.h"
+#include <SDL3/SDL_opengl.h>
 #include <brglrend.h>
-#include <brsdl2dev.h>
+#include <brsdl3dev.h>
 #include <brassert.h>
 
 #define OPENGL_DEVICE_NAME "glrend"
@@ -20,7 +21,7 @@ static void *sdl_gl_create_context(br_pixelmap *dev, void *user)
     (void)dev;
 
     if((ctx = SDL_GL_CreateContext(state->window)) == NULL) {
-        BrLogError("SDL2", "OpenGL context creation failed: %s", SDL_GetError());
+        BrLogError("SDL3", "OpenGL context creation failed: %s", SDL_GetError());
         return NULL;
     }
 
@@ -31,7 +32,7 @@ static void sdl_gl_delete_context(br_pixelmap *dev, void *ctx, void *user)
 {
     (void)dev;
     (void)user;
-    SDL_GL_DeleteContext(ctx);
+    SDL_GL_DestroyContext(ctx);
 }
 
 static br_error sdl_gl_make_current(br_pixelmap *dev, void *ctx, void *user)
@@ -41,7 +42,7 @@ static br_error sdl_gl_make_current(br_pixelmap *dev, void *ctx, void *user)
     (void)dev;
 
     if(SDL_GL_MakeCurrent(state->window, (SDL_GLContext)ctx) < 0) {
-        BrLogError("SDL2", "OpenGL MakeCurrent failed: %s", SDL_GetError());
+        BrLogError("SDL3", "OpenGL MakeCurrent failed: %s", SDL_GetError());
         return BRE_FAIL;
     }
 
@@ -99,10 +100,10 @@ static br_error sdl_gl_handle_window_event(br_pixelmap *pm, void *arg, void *use
     /*
      * We can only handle window size changes for now.
      */
-    if(evt->type != SDL_WINDOWEVENT && evt->event != SDL_WINDOWEVENT_SIZE_CHANGED)
+    if(evt->type != SDL_EVENT_WINDOW_PIXEL_SIZE_CHANGED)
         return BRE_UNSUPPORTED;
 
-    SDL_GL_GetDrawableSize(state->window, &wpix, &hpix);
+    SDL_GetWindowSizeInPixels(state->window, &wpix, &hpix);
 
     /*
      * glrend's resize() method is guaranteed to only update the internal state, so this is fine.
@@ -135,12 +136,12 @@ static br_error configure_device(br_device *dev)
     };
 
     if(ObjectQueryMany(dev, gltv, NULL, 0, &count) != BRE_OK) {
-        BrLogError("SDL2", "Unable to query OpenGL driver for supported version.");
+        BrLogError("SDL3", "Unable to query OpenGL driver for supported version.");
         return BRE_FAIL;
     }
 
     if(count != BR_ASIZE(gltv) - 1) {
-        BrLogError("SDL2", "OpenGL driver returned short value count.");
+        BrLogError("SDL3", "OpenGL driver returned short value count.");
         return BRE_FAIL;
     }
 
@@ -193,15 +194,14 @@ static br_error create_gl_pixelmap(SDL_Window *window, br_device *gldev, br_devi
         {.t = BR_NULL_TOKEN,          .v = 0                   },
     };
 
-    SDL_GL_GetDrawableSize(window, &width, &height);
-    /* FIXME: Switch to this once SDL on Ubuntu LTS is new-enough. */
-    //SDL_GetWindowSizeInPixels(window, &width, &height);
+    SDL_GetWindowSizeInPixels(window, &width, &height);
+
     tv[0].v.i32 = (br_int_32)width;
     tv[1].v.i32 = (br_int_32)height;
 
     format = SDL_GetWindowPixelFormat(window);
     if((err = SDLToBRenderPixelFormat(format, NULL, &tv[2].v.u8)) != BRE_OK) {
-        BrLogError("SDL2", "Unable to find suitable pixel format for %s", SDL_GetPixelFormatName(format));
+        BrLogError("SDL3", "Unable to find suitable pixel format for %s", SDL_GetPixelFormatName(format));
         return err;
     }
 
@@ -210,7 +210,7 @@ static br_error create_gl_pixelmap(SDL_Window *window, br_device *gldev, br_devi
      */
     outfctygl = NULL;
     if((err = ObjectContainerFind(gldev, &outfctygl, BRT_OUTPUT_FACILITY, NULL, tv)) != BRE_OK) {
-        BrLogError("SDL2", "Unable to find suitable output facility.");
+        BrLogError("SDL3", "Unable to find suitable output facility.");
         return err;
     }
 
@@ -233,7 +233,7 @@ static br_error create_gl_pixelmap(SDL_Window *window, br_device *gldev, br_devi
      * Create the screen pixelmap.
      */
     if((err = OutputFacilityPixelmapNew(outfctygl, (void *)&pm, tv)) != BRE_OK) {
-        BrLogError("SDL2", "Unable to create new screen pixelmap.");
+        BrLogError("SDL3", "Unable to create new screen pixelmap.");
         BrResFree(state);
         return err;
     }
@@ -247,7 +247,7 @@ static br_error create_gl_pixelmap(SDL_Window *window, br_device *gldev, br_devi
     return BRE_OK;
 }
 
-br_error DevicePixelmapSDL2CreateGL(const pixelmap_new_tokens *pt, br_device_pixelmap **ppmap)
+br_error DevicePixelmapSDL3CreateGL(const pixelmap_new_tokens *pt, br_device_pixelmap **ppmap)
 {
     br_device  *gldev;
     SDL_Window *window;
@@ -265,7 +265,7 @@ br_error DevicePixelmapSDL2CreateGL(const pixelmap_new_tokens *pt, br_device_pix
      * Find or load the device.
      */
     if(BrDevCheckAdd(&gldev, OPENGL_DEVICE_NAME, NULL) != BRE_OK || gldev == NULL) {
-        BrLogError("SDL2", "OpenGL window requested, but driver can't be loaded.");
+        BrLogError("SDL3", "OpenGL window requested, but driver can't be loaded.");
         return BRE_FAIL;
     }
 
@@ -275,9 +275,9 @@ br_error DevicePixelmapSDL2CreateGL(const pixelmap_new_tokens *pt, br_device_pix
     if((err = configure_device(gldev)) != BRE_OK)
         return err;
 
-    window = SDL_CreateWindow(pt->title, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, pt->width, pt->height, pt->flags);
+    window = SDL_CreateWindow(pt->title, pt->width, pt->height, pt->flags);
     if(window == NULL) {
-        BrLogError("SDL2", "Error creating window: %s", SDL_GetError());
+        BrLogError("SDL3", "Error creating window: %s", SDL_GetError());
         return BRE_FAIL;
     }
 
@@ -289,7 +289,7 @@ br_error DevicePixelmapSDL2CreateGL(const pixelmap_new_tokens *pt, br_device_pix
     return BRE_OK;
 }
 
-SDL_Window *DevicePixelmapSDL2GetWindowGL(br_pixelmap *pm)
+SDL_Window *DevicePixelmapSDL3GetWindowGL(br_pixelmap *pm)
 {
     const br_device_gl_ext_procs *procs;
     br_device                    *gldev;
