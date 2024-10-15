@@ -2,13 +2,13 @@
  * BRender TexView - Quick'n'dirty tool to display a pixelmap.
  */
 #include <stdio.h>
-#include <SDL.h>
+#include <SDL3/SDL.h>
 #include <brender.h>
-#include <brsdl2dev.h>
+#include <brsdl3dev.h>
 
 void _BrBeginHook(void)
 {
-    BrDevAddStatic(NULL, BrDrv1SDL2Begin, NULL);
+    BrDevAddStatic(NULL, BrDrv1SDL3Begin, NULL);
 }
 
 void _BrEndHook(void)
@@ -111,9 +111,9 @@ int main(int argc, char **argv)
     for(SDL_Event evt;;) {
         while(SDL_PollEvent(&evt) > 0) {
             switch(evt.type) {
-                case SDL_QUIT:
+                case SDL_EVENT_QUIT:
                     goto done;
-                case SDL_WINDOWEVENT:
+                case SDL_EVENT_WINDOW_PIXEL_SIZE_CHANGED:
                     if(BrPixelmapHandleWindowEvent(screen, &evt.window) != BRE_OK) {
                         BrLogError("APP", "Error handling window event");
                         goto done;
