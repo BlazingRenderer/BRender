@@ -7,7 +7,14 @@
     mkPackages = { system }: let
       pkgs = import nixpkgs { inherit system; };
     in rec {
+
+      SDL3 = pkgs.callPackage ./sdl3 {
+        inherit (pkgs.darwin.apple_sdk.frameworks) AudioUnit Cocoa CoreAudio CoreServices ForceFeedback OpenGL;
+      };
+
       brender = pkgs.callPackage ./default.nix {
+        inherit SDL3;
+
         version = self.lastModifiedDate;
       };
 
