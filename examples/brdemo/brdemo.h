@@ -5,7 +5,7 @@
 extern "C" {
 #endif
 
-#include <SDL.h>
+#include <SDL3/SDL.h>
 #include <brender.h>
 
 struct br_demo;
