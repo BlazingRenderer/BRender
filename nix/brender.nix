@@ -5,7 +5,7 @@
 , perl
 , uasm
 , wineserverHook
-, SDL2
+, sdl3
 , glfw
 , libGL
 , glslang
@@ -41,7 +41,7 @@ stdenv.mkDerivation(finalAttrs: {
   ];
 
   buildInputs = [
-    SDL2
+    sdl3
   ] ++ lib.optionals stdenv.isLinux [
     libGL
   ] ++ lib.optionals stdenv.isDarwin [
