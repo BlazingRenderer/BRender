@@ -26,7 +26,7 @@
     in crossPackages.callPackage ./default.nix {
       version = self.lastModifiedDate;
 
-      SDL2 = crossPackages.SDL2.override {
+      sdl3 = crossPackages.sdl3.override {
         withStatic = crossPackages.hostPlatform.isWindows;
       };
     };

@@ -3,7 +3,7 @@
 , version
 , cmake
 , perl
-, SDL2
+, sdl3
 , glfw
 , makeBinaryWrapper
 , darwin
@@ -31,7 +31,7 @@ stdenv.mkDerivation(finalAttrs: {
   ];
 
   buildInputs = [
-    SDL2
+    sdl3
   ] ++ lib.optionals stdenv.isDarwin [
     # Why doesn't SDL pull this in?
     darwin.apple_sdk.frameworks.OpenGL
