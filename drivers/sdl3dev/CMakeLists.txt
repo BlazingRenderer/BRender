@@ -1,8 +1,8 @@
 project(sdl3dev)
 
 set(INC_FILES
-        include/brsdl2dev.h
-        include/brsdl2dev_p.h
+        include/brsdl3dev.h
+        include/brsdl3dev_p.h
         )
 
 add_library(sdl3dev-headers INTERFACE)

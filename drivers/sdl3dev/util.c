@@ -1,26 +1,26 @@
 #include "drv.h"
 
-br_boolean BrSDLUtilIsAltEnter(const SDL_KeyboardEvent *evt)
+br_boolean BrSDL3UtilIsAltEnter(const SDL_KeyboardEvent *evt)
 {
     if(evt->repeat)
         return BR_FALSE;
 
-    if(evt->state != SDL_PRESSED)
+    if(!evt->down)
         return BR_FALSE;
 
-    if(!(evt->keysym.mod & KMOD_ALT))
+    if(!(evt->mod & SDL_KMOD_ALT))
         return BR_FALSE;
 
-    return evt->keysym.scancode == SDL_SCANCODE_RETURN;
+    return evt->scancode == SDL_SCANCODE_RETURN;
 }
 
-SDL_Window *BrSDLUtilGetWindow(br_pixelmap *pm)
+SDL_Window *BrSDL3UtilGetWindow(br_pixelmap *pm)
 {
     if(pm == NULL)
         return NULL;
 
-    if(DevicePixelmapSDL2IsOurs(pm))
+    if(DevicePixelmapSDL3IsOurs(pm))
         return ((br_device_pixelmap *)pm)->window;
 
-    return DevicePixelmapSDL2GetWindowGL(pm);
+    return DevicePixelmapSDL3GetWindowGL(pm);
 }
