@@ -19,10 +19,47 @@ if (BUILD_SHARED_LIBS)
     message(FATAL_ERROR "BUILD_SHARED_LIBS is not supported at this time.")
 endif ()
 
-option(BRENDER_DISABLE_FINDSDL "Disable searching for SDL2" OFF)
-if (NOT BRENDER_DISABLE_FINDSDL)
+option(BRENDER_USE_SDL2 "Use SDL2" OFF)
+option(BRENDER_USE_SDL3 "Use SDL3" OFF)
+option(BRENDER_DISABLE_FINDSDL "Disable searching for SDL" OFF)
+
+function(find_sdl)
+    if (BRENDER_DISABLE_FINDSDL)
+        # I certainly hope you know what you're doing.
+        return()
+    endif ()
+
+    if (BRENDER_USE_SDL2 AND BRENDER_USE_SDL3)
+        message(FATAL_ERROR "BRENDER_USE_SDL2 and BRENDER_USE_SDL3 are mutually exclusive.")
+    endif ()
+
+
+    if (BRENDER_USE_SDL3)
+        message(STATUS "SDL Preference: SDL3")
+        find_package(SDL3 CONFIG REQUIRED COMPONENTS SDL3)
+        return()
+    endif ()
+
+    if (BRENDER_USE_SDL2)
+        message(STATUS "SDL Preference: SDL2")
+        find_package(SDL2 REQUIRED)
+        return()
+    endif ()
+
+    find_package(SDL3 CONFIG COMPONENTS SDL3)
+    if(TARGET SDL3::SDL3)
+        return()
+    endif()
+
     find_package(SDL2)
-endif ()
+    if(TARGET SDL2::SDL2)
+        return()
+    endif()
+
+    message(FATAL_ERROR "Unable to find either SDL2 or SDL3, please install one of them.")
+endfunction()
+
+find_sdl()
 
 option(BRENDER_BUILD_DRIVERS "Build Drivers" ON)
 option(BRENDER_BUILD_SOFT "Build Software Renderer" OFF)
