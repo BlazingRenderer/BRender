@@ -7,10 +7,10 @@
  *
  * If you want to make it more complex - don't.
  */
-#include <SDL.h>
+#include <SDL3/SDL.h>
 #include <brender.h>
 #include <brglrend.h>
-#include <brsdl2dev.h>
+#include <brsdl3dev.h>
 
 /*
  * Primitive heap - used by z-buffered renderer to defer drawing of blended primitives
@@ -53,7 +53,7 @@ static void create_scene(br_pixelmap *screen, br_actor **_world, br_actor **_cam
 
 void _BrBeginHook(void)
 {
-    BrDevAddStatic(NULL, BrDrv1SDL2Begin, NULL);
+    BrDevAddStatic(NULL, BrDrv1SDL3Begin, NULL);
     BrDevAddStatic(NULL, BrDrv1GLBegin, NULL);
 }
 
@@ -79,7 +79,7 @@ int main(int argc, char **argv)
     BrBegin();
 
     // clang-format off
-    r = BrDevBeginVar(&screen, "SDL2",
+    r = BrDevBeginVar(&screen, "SDL3",
                       BRT_WIDTH_I32,        1280,
                       BRT_HEIGHT_I32,       720,
                       BRT_PIXEL_TYPE_U8,    BR_PMT_RGB_888,
@@ -98,7 +98,7 @@ int main(int argc, char **argv)
     if(BrPixelmapResizeBuffers(screen, &colour_buffer, &depth_buffer) != BRE_OK)
         goto buffer_create_failed;
 
-    window = BrSDLUtilGetWindow(screen);
+    window = BrSDL3UtilGetWindow(screen);
     SDL_SetWindowFullscreen(window, 0);
     is_fullscreen = BR_FALSE;
 
@@ -106,20 +106,20 @@ int main(int argc, char **argv)
 
     create_scene(screen, &world, &camera, &cube);
 
-    ticks_last = SDL_GetTicks64();
+    ticks_last = SDL_GetTicksNS();
 
     for(SDL_Event evt;;) {
         float dt;
 
-        ticks_now  = SDL_GetTicks64();
-        dt         = (float)(ticks_now - ticks_last) / 1000.0f;
+        ticks_now  = SDL_GetTicksNS();
+        dt         = (float)(ticks_now - ticks_last) / 1e9f;
         ticks_last = ticks_now;
 
         while(SDL_PollEvent(&evt) > 0) {
             switch(evt.type) {
-                case SDL_QUIT:
+                case SDL_EVENT_QUIT:
                     goto done;
-                case SDL_WINDOWEVENT:
+                case SDL_EVENT_WINDOW_PIXEL_SIZE_CHANGED:
                     /*
                      * Window event, pass it to the driver.
                      */
@@ -128,34 +128,30 @@ int main(int argc, char **argv)
                         goto buffer_create_failed;
                     }
 
-                    switch(evt.window.event) {
-                        case SDL_WINDOWEVENT_SIZE_CHANGED:
-                            /*
-                             * The main screen should have been resized above.
-                             * Update its origin and resize the framebuffer.
-                             */
-                            screen->origin_x = (br_int_16)(screen->width / 2);
-                            screen->origin_y = (br_int_16)(screen->height / 2);
+                    /*
+                     * The main screen should have been resized above.
+                     * Update its origin and resize the framebuffer.
+                     */
+                    screen->origin_x = (br_int_16)(screen->width / 2);
+                    screen->origin_y = (br_int_16)(screen->height / 2);
 
-                            if(BrPixelmapResizeBuffers(screen, &colour_buffer, &depth_buffer) != BRE_OK) {
-                                BrLogError("APP", "Error resizing window buffers");
-                                goto buffer_create_failed;
-                            }
-
-                            /*
-                             * Update the camera's aspect ratio to match the camera.
-                             */
-                            ((br_camera *)camera->type_data)->aspect = BR_DIV(BR_SCALAR(screen->width),
-                                                                              BR_SCALAR(screen->height));
-                            break;
+                    if(BrPixelmapResizeBuffers(screen, &colour_buffer, &depth_buffer) != BRE_OK) {
+                        BrLogError("APP", "Error resizing window buffers");
+                        goto buffer_create_failed;
                     }
+
+                    /*
+                     * Update the camera's aspect ratio to match the camera.
+                     */
+                    ((br_camera *)camera->type_data)->aspect = BR_DIV(BR_SCALAR(screen->width),
+                                                                      BR_SCALAR(screen->height));
                     break;
-                case SDL_KEYDOWN: {
-                    if(BrSDLUtilIsAltEnter(&evt.key)) {
+                case SDL_EVENT_KEY_DOWN: {
+                    if(BrSDL3UtilIsAltEnter(&evt.key)) {
                         if(is_fullscreen) {
                             SDL_SetWindowFullscreen(window, 0);
                         } else {
-                            SDL_SetWindowFullscreen(window, SDL_WINDOW_FULLSCREEN_DESKTOP);
+                            SDL_SetWindowFullscreen(window, 1);
                         }
                         is_fullscreen = !is_fullscreen;
                         break;

@@ -1,11 +1,11 @@
 /*
  * BRender Device Pixelmap Testing Tool
  */
-#include <SDL.h>
+#include <SDL3/SDL.h>
 #include <brender.h>
 #include <brddi.h> /* To poke the device's CLUT. */
 #include <brglrend.h>
-#include <brsdl2dev.h>
+#include <brsdl3dev.h>
 
 /*
  * HSL -> RGB conversion code modified from https://gist.github.com/ciembor/1494530
@@ -1211,7 +1211,7 @@ static br_drawtest tests[] = {
 
 void BR_CALLBACK _BrBeginHook(void)
 {
-    BrDevAddStatic(NULL, BrDrv1SDL2Begin, NULL);
+    BrDevAddStatic(NULL, BrDrv1SDL3Begin, NULL);
     BrDevAddStatic(NULL, BrDrv1GLBegin, NULL);
 }
 
@@ -1269,7 +1269,7 @@ int main(int argc, char **argv)
     void *anchor = BrResAllocate(NULL, 0, BR_MEMORY_ANCHOR);
 
     // clang-format off
-    r = BrDevBeginVar(&screen, "SDL2",
+    r = BrDevBeginVar(&screen, "SDL3",
                       BRT_WIDTH_I32,      (br_int_32)width,
                       BRT_HEIGHT_I32,     (br_int_32)height,
                       BRT_HIDPI_B,        BR_TRUE,
@@ -1301,46 +1301,41 @@ int main(int argc, char **argv)
     screen->origin_x = colour_buffer->origin_x = (br_int_16)(width / 2);
     screen->origin_y = colour_buffer->origin_y = (br_int_16)(height / 2);
 
-    ticks_last = SDL_GetTicks64();
+    ticks_last = SDL_GetTicksNS();
 
     init_tests(anchor, screen, colour_buffer);
 
     for(SDL_Event evt;;) {
         float dt;
 
-        ticks_now  = SDL_GetTicks64();
-        dt         = (float)(ticks_now - ticks_last) / 1000.0f;
+        ticks_now  = SDL_GetTicksNS();
+        dt         = (float)(ticks_now - ticks_last) / 1e9f;
         ticks_last = ticks_now;
 
         want_screenshot = 0;
         while(SDL_PollEvent(&evt) > 0) {
             switch(evt.type) {
-                case SDL_QUIT:
+                case SDL_EVENT_QUIT:
                     goto done;
-                case SDL_WINDOWEVENT:
+                case SDL_EVENT_WINDOW_PIXEL_SIZE_CHANGED:
                     if(BrPixelmapHandleWindowEvent(screen, &evt.window) != BRE_OK) {
                         BrLogError("APP", "Error handling window event");
                         goto done;
                     }
 
-                    switch(evt.window.event) {
-                        case SDL_WINDOWEVENT_SIZE_CHANGED: {
-                            br_pixelmap *ncol;
-                            screen->origin_x = (br_int_16)(screen->width / 2);
-                            screen->origin_y = (br_int_16)(screen->height / 2);
+                    br_pixelmap *ncol;
+                    screen->origin_x = (br_int_16)(screen->width / 2);
+                    screen->origin_y = (br_int_16)(screen->height / 2);
 
-                            ncol          = BrPixelmapResize(colour_buffer, screen->width, screen->height);
-                            colour_buffer = ncol;
+                    ncol          = BrPixelmapResize(colour_buffer, screen->width, screen->height);
+                    colour_buffer = ncol;
 
-                            cleanup_tests();
-                            init_tests(anchor, screen, colour_buffer);
+                    cleanup_tests();
+                    init_tests(anchor, screen, colour_buffer);
 
-                            break;
-                        }
-                    }
                     break;
-                case SDL_KEYDOWN: {
-                    switch(evt.key.keysym.sym) {
+                case SDL_EVENT_KEY_DOWN: {
+                    switch(evt.key.key) {
                         case SDLK_F5:
                             want_screenshot = 1;
                             break;
@@ -1355,7 +1350,7 @@ int main(int argc, char **argv)
                             test_index = (test_index + 1) % BR_ASIZE(tests);
                             break;
                         case 'q':
-                            SDL_PushEvent(&(SDL_Event){.type = SDL_QUIT});
+                            SDL_PushEvent(&(SDL_Event){.type = SDL_EVENT_QUIT});
                             break;
                     }
                 }
