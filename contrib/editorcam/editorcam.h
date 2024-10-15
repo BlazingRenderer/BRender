@@ -49,8 +49,8 @@ typedef struct br_editor_camera {
     br_uint_16 viewport_width;
     br_uint_16 viewport_height;
 
-    br_int_32 mx_rel;
-    br_int_32 my_rel;
+    br_scalar mx_rel;
+    br_scalar my_rel;
     br_scalar mwheel_rel;
 
 } br_editor_camera;

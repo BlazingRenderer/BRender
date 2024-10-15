@@ -52,12 +52,12 @@ typedef struct KeyMap {
 } KeyMap;
 
 const static KeyMap keymap[] = {
-    {.key = SDLK_w,      .flag = BR_ECAMF_MOVE_FORWARD},
-    {.key = SDLK_s,      .flag = BR_ECAMF_MOVE_BACK   },
-    {.key = SDLK_a,      .flag = BR_ECAMF_MOVE_LEFT   },
-    {.key = SDLK_d,      .flag = BR_ECAMF_MOVE_RIGHT  },
-    {.key = SDLK_q,      .flag = BR_ECAMF_MOVE_DOWN   },
-    {.key = SDLK_e,      .flag = BR_ECAMF_MOVE_UP     },
+    {.key = SDLK_W,      .flag = BR_ECAMF_MOVE_FORWARD},
+    {.key = SDLK_S,      .flag = BR_ECAMF_MOVE_BACK   },
+    {.key = SDLK_A,      .flag = BR_ECAMF_MOVE_LEFT   },
+    {.key = SDLK_D,      .flag = BR_ECAMF_MOVE_RIGHT  },
+    {.key = SDLK_Q,      .flag = BR_ECAMF_MOVE_DOWN   },
+    {.key = SDLK_E,      .flag = BR_ECAMF_MOVE_UP     },
     {.key = SDLK_LSHIFT, .flag = BR_ECAMF_FASTER      },
 };
 
@@ -76,16 +76,16 @@ static void EditorCamProcessEvent(br_demo *demo, const SDL_Event *evt)
     br_editor_camera *cam = demo->user;
 
     switch(evt->type) {
-        case SDL_KEYDOWN:
-        case SDL_KEYUP:
-            switch(evt->key.keysym.sym) {
+        case SDL_EVENT_KEY_DOWN:
+        case SDL_EVENT_KEY_UP:
+            switch(evt->key.key) {
                 case SDLK_SPACE:
                     BrEditorCamReset(cam);
                     BrMatrix34Translate(&cam->actor->t.t.mat, 0, 0, 5);
                     break;
 
                 case SDLK_ESCAPE:
-                    SDL_PushEvent(&(SDL_Event){.type = SDL_QUIT});
+                    SDL_PushEvent(&(SDL_Event){.type = SDL_EVENT_QUIT});
                     break;
 
                 default:
@@ -93,11 +93,11 @@ static void EditorCamProcessEvent(br_demo *demo, const SDL_Event *evt)
             }
 
             for(size_t i = 0; i < BR_ASIZE(keymap); ++i) {
-                if(evt->key.keysym.sym == keymap[i].key) {
-                    if(evt->type == SDL_KEYDOWN)
+                if(evt->key.key == keymap[i].key) {
+                    if(evt->type == SDL_EVENT_KEY_DOWN)
                         cam->flags |= keymap[i].flag;
 
-                    if(evt->type == SDL_KEYUP)
+                    if(evt->type == SDL_EVENT_KEY_UP)
                         cam->flags &= ~keymap[i].flag;
 
                     break;
@@ -105,26 +105,26 @@ static void EditorCamProcessEvent(br_demo *demo, const SDL_Event *evt)
             }
             break;
 
-        case SDL_MOUSEBUTTONDOWN:
-        case SDL_MOUSEBUTTONUP:
+        case SDL_EVENT_MOUSE_BUTTON_DOWN:
+        case SDL_EVENT_MOUSE_BUTTON_UP:
             for(size_t i = 0; i < BR_ASIZE(buttonmap); ++i) {
                 if(evt->button.button == buttonmap[i].button) {
-                    if(evt->button.state == SDL_PRESSED)
+                    if(evt->type == SDL_EVENT_MOUSE_BUTTON_DOWN)
                         cam->flags |= buttonmap[i].flag;
 
-                    if(evt->button.state == SDL_RELEASED)
+                    if(evt->type == SDL_EVENT_MOUSE_BUTTON_UP)
                         cam->flags &= ~buttonmap[i].flag;
                 }
             }
             break;
 
-        case SDL_MOUSEMOTION:
+        case SDL_EVENT_MOUSE_MOTION:
             cam->mx_rel += evt->motion.xrel;
             cam->my_rel += evt->motion.yrel;
             break;
 
-        case SDL_MOUSEWHEEL:
-            cam->mwheel_rel += BR_SCALAR(evt->wheel.preciseY / 4.0f);
+        case SDL_EVENT_MOUSE_WHEEL:
+            cam->mwheel_rel += BR_SCALAR(evt->wheel.y / 4.0f);
             break;
 
         default:

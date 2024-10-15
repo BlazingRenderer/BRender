@@ -391,21 +391,21 @@ static void ForestProcessEvent(br_demo *demo, const SDL_Event *evt)
     br_demo_forest *state = demo->user;
 
     switch(evt->type) {
-        case SDL_KEYDOWN: {
-            switch(evt->key.keysym.sym) {
-                case 'q':
-                    SDL_PushEvent(&(SDL_Event){.type = SDL_QUIT});
+        case SDL_EVENT_KEY_DOWN: {
+            switch(evt->key.key) {
+                case SDLK_Q:
+                    SDL_PushEvent(&(SDL_Event){.type = SDL_EVENT_QUIT});
                     break;
 
-                case 'a':
+                case SDLK_A:
                     state->animate ^= 1;
                     break;
 
-                case 'c':
+                case SDLK_C:
                     state->auto_change ^= 1;
                     break;
 
-                case 't':
+                case SDLK_T:
                     state->use_small ^= 1;
                     ForestSwitchTextures(demo, state->use_small);
                     break;
@@ -445,15 +445,15 @@ static void ForestProcessEvent(br_demo *demo, const SDL_Event *evt)
             break;
         }
 
-        case SDL_MOUSEMOTION:
+        case SDL_EVENT_MOUSE_MOTION:
             if(evt->motion.state & (SDL_BUTTON_LMASK | SDL_BUTTON_RMASK)) {
-                state->xpos = BR_ADD(state->xpos, BR_DIV(BR_SCALAR(evt->motion.xrel), BR_SCALAR(16)));
+                state->xpos = BR_ADD(state->xpos, BR_DIV(evt->motion.xrel, BR_SCALAR(16)));
 
                 if(evt->motion.state & SDL_BUTTON_LMASK)
-                    state->ypos = BR_ADD(state->ypos, BR_DIV(BR_SCALAR(evt->motion.yrel), BR_SCALAR(16)));
+                    state->ypos = BR_ADD(state->ypos, BR_DIV(evt->motion.yrel, BR_SCALAR(16)));
 
                 if(evt->motion.state & SDL_BUTTON_RMASK)
-                    state->zpos = BR_ADD(state->zpos, BR_DIV(BR_SCALAR(evt->motion.yrel), BR_SCALAR(16)));
+                    state->zpos = BR_ADD(state->zpos, BR_DIV(evt->motion.yrel, BR_SCALAR(16)));
             }
             break;
 

@@ -3,7 +3,7 @@ foreach(target 3ds2br dquery dripmem mkblend mkfog mkranges mkshades paljoin tex
 	set_property(TARGET ${target} PROPERTY FOLDER "BRender/Tools")
 endforeach()
 
-if(TARGET SDL2::SDL2)
+if(TARGET SDL3::SDL3)
 	add_subdirectory(texview)
 	set_property(TARGET texview PROPERTY FOLDER "BRender/Tools")
 endif()

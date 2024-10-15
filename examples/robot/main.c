@@ -153,19 +153,21 @@ static void RobotProcessEvent(br_demo *demo, const SDL_Event *evt)
     br_demo_robot *robot = demo->user;
 
     switch(evt->type) {
-        case SDL_KEYDOWN: {
-            switch(evt->key.keysym.sym) {
+        case SDL_EVENT_KEY_DOWN: {
+            switch(evt->key.key) {
                 case SDLK_SPACE:
                     BrMatrix34Identity(&robot->camera_pivot->t.t.mat);
                     break;
                 case 'q':
-                    SDL_PushEvent(&(SDL_Event){.type = SDL_QUIT});
+                    SDL_PushEvent(&(SDL_Event){.type = SDL_EVENT_QUIT});
+                    break;
+                default:
                     break;
             }
             break;
         }
 
-        case SDL_MOUSEMOTION: {
+        case SDL_EVENT_MOUSE_MOTION: {
             if(evt->motion.state & SDL_BUTTON_LMASK) {
                 br_angle ax, ay;
                 /* NB: dt is already accounted for in xrel/yrel. */

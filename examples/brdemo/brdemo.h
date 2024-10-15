@@ -5,7 +5,7 @@
 extern "C" {
 #endif
 
-#include <SDL.h>
+#include <SDL3/SDL.h>
 #include <brender.h>
 
 struct br_demo;
@@ -99,7 +99,7 @@ typedef struct br_demo {
 
 /**
  * Demo entry point. This function automatically creates a valid BRender state
- * and renderer with the SDL2+GLRend drivers. The intended usage is to return
+ * and renderer with the SDL3+GLRend drivers. The intended usage is to return
  * BrDemoRun() from main() with the appropriate arguments.
  *
  * @param title Window title

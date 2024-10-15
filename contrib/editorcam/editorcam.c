@@ -25,8 +25,8 @@ const static br_editor_camera default_camera = {
 
     .viewport_width    = 1000,
     .viewport_height   = 1000,
-    .mx_rel            = 0,
-    .my_rel            = 0,
+    .mx_rel            = BR_SCALAR(0),
+    .my_rel            = BR_SCALAR(0),
     .mwheel_rel        = 0,
 };
 // clang-format on
@@ -90,8 +90,8 @@ static br_vector3 accumulate_keys(br_uint_32 flags)
 
 void BrEditorCamUpdate(br_editor_camera *cam, float dt)
 {
-    br_scalar xdiff      = BR_DIV(BR_SCALAR(cam->mx_rel), cam->viewport_width) * dt;
-    br_scalar ydiff      = BR_DIV(BR_SCALAR(cam->my_rel), cam->viewport_height) * dt;
+    br_scalar xdiff      = BR_MUL(BR_DIV(cam->mx_rel, cam->viewport_width), BR_SCALAR(dt));
+    br_scalar ydiff      = BR_MUL(BR_DIV(cam->my_rel, cam->viewport_height), BR_SCALAR(dt));
     br_scalar wheel_diff = cam->mwheel_rel * dt;
 
     br_matrix34 camera_to_world;
@@ -138,8 +138,8 @@ void BrEditorCamUpdate(br_editor_camera *cam, float dt)
         BrMatrix34PreTranslate(&cam->actor->t.t.mat, world_forward.v[0], world_forward.v[1], world_forward.v[2]);
     }
 
-    cam->mx_rel     = 0;
-    cam->my_rel     = 0;
+    cam->mx_rel     = BR_SCALAR(0);
+    cam->my_rel     = BR_SCALAR(0);
     cam->mwheel_rel = 0;
 }
 

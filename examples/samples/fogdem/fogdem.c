@@ -234,28 +234,28 @@ static void FogProcessEvent(br_demo *demo, const SDL_Event *evt)
     br_demo_fog *state = demo->user;
 
     struct {
-        SDL_KeyCode keytest;
+        SDL_Keycode keytest;
         br_boolean *flag;
         void (*togglefn)(br_demo *demo);
     } keytable[] = {
-        {SDLK_h, &state->helpon, helptoggle},
-        {SDLK_f, &state->fogon, fogtoggle},
-        {SDLK_m, &state->mainon, maintoggle},
-        {SDLK_s, &state->spoton, spottoggle},
-        {SDLK_g, &state->groundon, groundtoggle},
-        {SDLK_p, &state->fadeon, fadetoggle},
+        {SDLK_H, &state->helpon, helptoggle},
+        {SDLK_F, &state->fogon, fogtoggle},
+        {SDLK_M, &state->mainon, maintoggle},
+        {SDLK_S, &state->spoton, spottoggle},
+        {SDLK_G, &state->groundon, groundtoggle},
+        {SDLK_P, &state->fadeon, fadetoggle},
         {0, NULL}
     };
 
     switch(evt->type) {
-        case SDL_KEYDOWN: {
-            if(evt->key.keysym.sym == 'q') {
-                SDL_PushEvent(&(SDL_Event){.type = SDL_QUIT});
+        case SDL_EVENT_KEY_DOWN: {
+            if(evt->key.key == SDLK_Q) {
+                SDL_PushEvent(&(SDL_Event){.type = SDL_EVENT_QUIT});
                 break;
             }
 
             for(int i = 0; i < BR_ASIZE(keytable); ++i) {
-                if(keytable[i].keytest == evt->key.keysym.sym) {
+                if(keytable[i].keytest == evt->key.key) {
                     *keytable[i].flag = !*keytable[i].flag;
                     keytable[i].togglefn(demo);
                 }
@@ -263,33 +263,33 @@ static void FogProcessEvent(br_demo *demo, const SDL_Event *evt)
             break;
         }
 
-        case SDL_MOUSEMOTION: {
+        case SDL_EVENT_MOUSE_MOTION: {
             br_scalar   tx, ty, tz;
             br_actor   *target = state->mainobj;
             br_matrix34 mat_target, mat_roll;
 
-            Sint32 mouse_x = evt->motion.xrel;
-            Sint32 mouse_y = evt->motion.yrel;
+            br_scalar mouse_x = BR_SCALAR(evt->motion.xrel);
+            br_scalar mouse_y = BR_SCALAR(evt->motion.yrel);
 
             if((evt->motion.state & SDL_BUTTON_LMASK) && (evt->motion.state & SDL_BUTTON_RMASK)) {
                 // Drag object around in x/y plane
 
-                tx = BR_MUL(BR_SCALAR(mouse_x), MSCALE);
-                tz = BR_MUL(BR_SCALAR(mouse_y), MSCALE);
+                tx = BR_MUL(mouse_x, MSCALE);
+                tz = BR_MUL(mouse_y, MSCALE);
 
                 BrMatrix34PostTranslate(&target->t.t.mat, tx, BR_SCALAR(0.0), tz);
 
             } else if(evt->motion.state & SDL_BUTTON_LMASK) {
                 // Move object along z axis
 
-                tx = BR_MUL(BR_SCALAR(mouse_x), MSCALE);
-                ty = -BR_MUL(BR_SCALAR(mouse_y), MSCALE);
+                tx = BR_MUL(mouse_x, MSCALE);
+                ty = -BR_MUL(mouse_y, MSCALE);
 
                 BrMatrix34PostTranslate(&target->t.t.mat, tx, ty, BR_SCALAR(0.0));
             } else if(evt->motion.state & SDL_BUTTON_RMASK) {
                 // Rotate object via rolling ball interface
 
-                BrMatrix34RollingBall(&mat_roll, mouse_x, -mouse_y, ROLLING_BALL_SENSITIVITY);
+                BrMatrix34RollingBall(&mat_roll, (int)mouse_x, (int)-mouse_y, ROLLING_BALL_SENSITIVITY);
 
                 // Only modify the top 3x3
 

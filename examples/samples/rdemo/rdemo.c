@@ -347,9 +347,9 @@ void ReflectionProcessEvent(br_demo *demo, const SDL_Event *evt)
     br_demo_reflection *ref = demo->user;
 
     switch(evt->type) {
-        case SDL_KEYDOWN:
-            switch(evt->key.keysym.sym) {
-                case SDLK_m:
+        case SDL_EVENT_KEY_DOWN:
+            switch(evt->key.key) {
+                case SDLK_M:
                     if(ref->moon->material->colour_map == ref->moon_pm)
                         ref->moon->material->colour_map = ref->ast_pm;
                     else
@@ -358,7 +358,7 @@ void ReflectionProcessEvent(br_demo *demo, const SDL_Event *evt)
                     BrMaterialUpdate(ref->moon->material, BR_MATU_ALL);
                     break;
 
-                case SDLK_e:
+                case SDLK_E:
                     if(ref->earth->material->colour_map == ref->earth_pm)
                         ref->earth->material->colour_map = ref->planet_pm;
                     else

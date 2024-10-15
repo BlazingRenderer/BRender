@@ -2,9 +2,9 @@
 #include <brender.h>
 #include <brddi.h>
 #include <priminfo.h>
-#include <brsdl2dev.h>
+#include <brsdl3dev.h>
 #include <stdio.h>
-#include <SDL.h>
+#include <SDL3/SDL.h>
 #include <assert.h>
 
 void BR_CALLBACK _BrBeginHook(void)
@@ -14,7 +14,7 @@ void BR_CALLBACK _BrBeginHook(void)
 
     BrDevAddStatic(NULL, BrDrv1SoftPrimBegin, NULL);
     BrDevAddStatic(NULL, BrDrv1SoftRendBegin, NULL);
-    BrDevAddStatic(NULL, BrDrv1SDL2Begin, NULL);
+    BrDevAddStatic(NULL, BrDrv1SDL3Begin, NULL);
 }
 
 void BR_CALLBACK _BrEndHook(void)
@@ -62,7 +62,7 @@ int main(int argc, char **argv)
 
     BrLogSetLevel(BR_LOG_DEBUG);
 
-    err = BrDevBeginVar(&screen, "SDL2",
+    err = BrDevBeginVar(&screen, "SDL3",
         BRT_WIDTH_I32, 1280,
         BRT_HEIGHT_I32, 720,
         BR_NULL_TOKEN
@@ -142,18 +142,18 @@ int main(int argc, char **argv)
     light = BrActorAdd(world, BrActorAllocate(BR_ACTOR_LIGHT, NULL));
     BrLightEnable(light);
 
-    ticks_last = SDL_GetTicks64();
+    ticks_last = SDL_GetTicksNS();
 
     for(SDL_Event evt;;) {
         float dt;
 
-        ticks_now = SDL_GetTicks64();
+        ticks_now = SDL_GetTicksNS();
         dt = (float)(ticks_now - ticks_last) / 1000.0f;
         ticks_last = ticks_now;
 
         while(SDL_PollEvent(&evt) > 0) {
             switch(evt.type) {
-            case SDL_QUIT:
+            case SDL_EVENT_QUIT:
                 goto done;
             }
         }
