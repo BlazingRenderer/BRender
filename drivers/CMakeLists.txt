@@ -7,6 +7,14 @@ else ()
     message("SDL2 not found, not building sdl2dev")
 endif ()
 
+ if (TARGET SDL3::SDL3)
+     add_subdirectory(sdl3dev)
+     # FIXME: uncomment when finished
+     # target_link_libraries(brender-full INTERFACE sdl3dev)
+ else ()
+     message("SDL3 not found, not building sdl3dev")
+ endif ()
+
 target_link_libraries(brender-full INTERFACE glrend)
 
 add_subdirectory(softrend)
