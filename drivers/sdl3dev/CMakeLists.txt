@@ -56,8 +56,6 @@ if (target_type STREQUAL SHARED_LIBRARY)
     target_compile_definitions(sdl3dev PRIVATE -DDEFINE_BR_ENTRY_POINT)
 endif ()
 
-target_compile_definitions(sdl3dev PRIVATE -DNO_MEMORY_FALLBACK=1)
-
 target_link_libraries(sdl3dev PRIVATE SDL3::SDL3 BRender::DDI glrend-headers)
 target_link_libraries(sdl3dev PUBLIC SDL3::SDL3 sdl3dev-headers)
 
