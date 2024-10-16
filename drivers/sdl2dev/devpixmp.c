@@ -553,7 +553,7 @@ static br_error BR_CMETHOD_DECL(br_device_pixelmap_sdl2, pixelSet)(br_device_pix
     SDL_Color col;
 
     if(DevicePixelmapSDL2PointClip(&point, p, (const br_pixelmap *)self) == BR_CLIP_REJECT)
-        goto memory_fallback;
+        return BRE_OK;
 
     point.x += self->pm_base_x;
     point.y += self->pm_base_y;
