@@ -87,6 +87,8 @@ br_error DeviceClutSDL3CopyToSurface(SDL_Surface *surf, br_pixelmap *pm, br_devi
  */
 br_error DevicePixelmapSDL3BlitSurface(br_pixelmap *src, SDL_Rect *sr, br_pixelmap *dst, SDL_Rect *dr, br_sdl_blit_cbfn blit);
 
+SDL_Color DevicePixelmapSDL3GetSurfaceColour(SDL_Surface *surf, br_colour colour);
+
 /*
  * glrend.c
  */

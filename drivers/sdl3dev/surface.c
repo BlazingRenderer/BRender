@@ -385,3 +385,12 @@ cleanup:
 
     return result;
 }
+
+SDL_Color DevicePixelmapSDL3GetSurfaceColour(SDL_Surface *surf, br_colour colour)
+{
+    const SDL_PixelFormatDetails *pfd = SDL_GetPixelFormatDetails(surf->format);
+    SDL_Color                     col;
+
+    SDL_GetRGBA(colour, pfd, SDL_GetSurfacePalette(surf), &col.r, &col.g, &col.b, &col.a);
+    return col;
+}
