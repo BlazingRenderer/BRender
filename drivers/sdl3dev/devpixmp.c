@@ -501,7 +501,6 @@ static br_error BR_CMETHOD_DECL(br_device_pixelmap_sdl3, pixelSet)(br_device_pix
 {
     SDL_Point point;
     SDL_Color col;
-    const SDL_PixelFormatDetails *pfd;
 
     if(DevicePixelmapSDL3PointClip(&point, p, (const br_pixelmap *)self) == BR_CLIP_REJECT)
         return BRE_OK;
@@ -509,10 +508,7 @@ static br_error BR_CMETHOD_DECL(br_device_pixelmap_sdl3, pixelSet)(br_device_pix
     point.x += self->pm_base_x;
     point.y += self->pm_base_y;
 
-    pfd = SDL_GetPixelFormatDetails(self->surface->format);
-
-    // TODO: test with indexed
-    SDL_GetRGBA(colour, pfd, SDL_GetSurfacePalette(self->surface), &col.r, &col.g, &col.b, &col.a);
+    col = DevicePixelmapSDL3GetSurfaceColour(self->surface, colour);
 
     if(!SDL_SetRenderDrawColor(self->renderer, col.r, col.g, col.b, col.a))
         return BRE_FAIL;
@@ -531,9 +527,6 @@ static br_error BR_CMETHOD_DECL(br_device_pixelmap_sdl3, line)(br_device_pixelma
     SDL_Point spoint, epoint;
     SDL_Color col;
 
-    SDL_Palette                  *pal = SDL_GetSurfacePalette(self->surface);
-    const SDL_PixelFormatDetails *pfd = SDL_GetPixelFormatDetails(self->surface->format);
-
     if(DevicePixelmapSDL3LineClip(&spoint, &epoint, s, e, (const br_pixelmap *)self) == BR_CLIP_REJECT)
         return BRE_OK;
 
@@ -543,7 +536,7 @@ static br_error BR_CMETHOD_DECL(br_device_pixelmap_sdl3, line)(br_device_pixelma
     epoint.x += self->pm_base_x;
     epoint.y += self->pm_base_y;
 
-    SDL_GetRGBA(colour, pfd, pal, &col.r, &col.g, &col.b, &col.a);
+    col = DevicePixelmapSDL3GetSurfaceColour(self->surface, colour);
 
     if(!SDL_SetRenderDrawColor(self->renderer, col.r, col.g, col.b, col.a))
         return BRE_FAIL;
