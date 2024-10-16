@@ -420,21 +420,7 @@ static br_error BR_CMETHOD_DECL(br_device_pixelmap_sdl3, rectangleCopyTo)(br_dev
     if(DevicePixelmapSDL3BlitSurface((br_pixelmap *)src, &srect, (br_pixelmap *)self, &drect, SDL_BlitSurface) == BRE_OK)
         return BRE_OK;
 
-#if NO_MEMORY_FALLBACK
     return BRE_FAIL;
-#else
-    br_error err, result;
-
-    if((err = DevicePixelmapDirectLock(self, BR_FALSE)) != BRE_OK)
-        return err;
-
-    result = BR_CMETHOD(br_device_pixelmap_mem, rectangleCopyTo)(self, p, src, r);
-
-    if((err = DevicePixelmapDirectUnlock(self)) != BRE_OK)
-        return err;
-
-    return result;
-#endif
 }
 
 /*
@@ -461,21 +447,7 @@ static br_error BR_CMETHOD_DECL(br_device_pixelmap_sdl3, rectangleCopyFrom)(br_d
     if(DevicePixelmapSDL3BlitSurface((br_pixelmap *)self, &srect, (br_pixelmap *)dest, &drect, SDL_BlitSurface) == BRE_OK)
         return BRE_OK;
 
-#if NO_MEMORY_FALLBACK
     return BRE_FAIL;
-#else
-    br_error err, result;
-
-    if((err = DevicePixelmapDirectLock(self, BR_FALSE)) != BRE_OK)
-        return err;
-
-    result = BR_CMETHOD(br_device_pixelmap_mem, rectangleCopyFrom)(self, p, dest, r);
-
-    if((err = DevicePixelmapDirectUnlock(self)) != BRE_OK)
-        return err;
-
-    return result;
-#endif
 }
 
 /*
@@ -498,21 +470,7 @@ static br_error BR_CMETHOD_DECL(br_device_pixelmap_sdl3, rectangleStretchCopyTo)
     if(DevicePixelmapSDL3BlitSurface((br_pixelmap *)src, &srect, (br_pixelmap *)self, &drect, DevicePixelmapSDL3BlitScaled) == BRE_OK)
         return BRE_OK;
 
-#if NO_MEMORY_FALLBACK
     return BRE_FAIL;
-#else
-    br_error err, result;
-
-    if((err = DevicePixelmapDirectLock(src, BR_FALSE)) != BRE_OK)
-        return err;
-
-    result = BR_CMETHOD(br_device_pixelmap_mem, rectangleStretchCopyTo)(self, d, (br_device_pixelmap *)src, s);
-
-    if((err = DevicePixelmapDirectUnlock(src)) != BRE_OK)
-        return err;
-
-    return result;
-#endif
 }
 
 /*
@@ -536,21 +494,7 @@ static br_error BR_CMETHOD_DECL(br_device_pixelmap_sdl3, rectangleStretchCopyFro
     if(DevicePixelmapSDL3BlitSurface((br_pixelmap *)self, &srect, (br_pixelmap *)dest, &drect, DevicePixelmapSDL3BlitScaled) == BRE_OK)
         return BRE_OK;
 
-#if NO_MEMORY_FALLBACK
     return BRE_FAIL;
-#else
-    br_error err, result;
-
-    if((err = DevicePixelmapDirectLock(self, BR_FALSE)) != BRE_OK)
-        return err;
-
-    result = BR_CMETHOD(br_device_pixelmap_mem, rectangleStretchCopyFrom)(self, s, dest, d);
-
-    if((err = DevicePixelmapDirectUnlock(self)) != BRE_OK)
-        return err;
-
-    return result;
-#endif
 }
 
 static br_error BR_CMETHOD_DECL(br_device_pixelmap_sdl3, pixelSet)(br_device_pixelmap *self, br_point *p, br_uint_32 colour)
@@ -571,33 +515,14 @@ static br_error BR_CMETHOD_DECL(br_device_pixelmap_sdl3, pixelSet)(br_device_pix
     SDL_GetRGBA(colour, pfd, SDL_GetSurfacePalette(self->surface), &col.r, &col.g, &col.b, &col.a);
 
     if(!SDL_SetRenderDrawColor(self->renderer, col.r, col.g, col.b, col.a))
-        goto memory_fallback;
+        return BRE_FAIL;
 
     if(!SDL_RenderPoint(self->renderer, (float)point.x, (float)point.y))
-        goto memory_fallback;
+        return BRE_FAIL;
 
     SDL_FlushRenderer(self->renderer);
 
     return BRE_OK;
-
-memory_fallback:;
-#if NO_MEMORY_FALLBACK
-    return BRE_FAIL;
-#else
-    {
-        br_error err, result;
-
-        if((err = DevicePixelmapDirectLock(self, BR_FALSE)) != BRE_OK)
-            return err;
-
-        result = BR_CMETHOD(br_device_pixelmap_mem, pixelSet)(self, p, colour);
-
-        if((err = DevicePixelmapDirectUnlock(self)) != BRE_OK)
-            return err;
-
-        return result;
-    }
-#endif
 }
 
 static br_error BR_CMETHOD_DECL(br_device_pixelmap_sdl3, line)(br_device_pixelmap *self, br_point *s, br_point *e,
@@ -621,33 +546,14 @@ static br_error BR_CMETHOD_DECL(br_device_pixelmap_sdl3, line)(br_device_pixelma
     SDL_GetRGBA(colour, pfd, pal, &col.r, &col.g, &col.b, &col.a);
 
     if(!SDL_SetRenderDrawColor(self->renderer, col.r, col.g, col.b, col.a))
-        goto memory_fallback;
+        return BRE_FAIL;
 
     if(!SDL_RenderLine(self->renderer, (float)spoint.x, (float)spoint.y, (float)epoint.x, (float)epoint.y))
-        goto memory_fallback;
+        return BRE_FAIL;
 
     SDL_FlushRenderer(self->renderer);
 
     return BRE_OK;
-
-memory_fallback:;
-#if NO_MEMORY_FALLBACK
-    return BRE_FAIL;
-#else
-    {
-        br_error err, result;
-
-        if((err = DevicePixelmapDirectLock(self, BR_FALSE)) != BRE_OK)
-            return err;
-
-        result = BR_CMETHOD(br_device_pixelmap_mem, line)(self, s, e, colour);
-
-        if((err = DevicePixelmapDirectUnlock(self)) != BRE_OK)
-            return err;
-
-        return result;
-    }
-#endif
 }
 
 static br_error BR_CMETHOD_DECL(br_device_pixelmap_sdl3, rectangleFill)(br_device_pixelmap *self, br_rectangle *r,

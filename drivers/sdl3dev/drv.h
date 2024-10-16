@@ -17,13 +17,6 @@ extern "C" {
 #define BR_DEVICE_CLUT_PRIVATE
 
 /*
- * Define to 1 to disable falling back the br_device_pixelmap_mem methods.
- */
-#ifndef NO_MEMORY_FALLBACK
-#define NO_MEMORY_FALLBACK 0
-#endif
-
-/*
  * Maximum number of possible entries on a CLUT.
  * BRender supports no more than 256 (for BR_PMT_INDEX_8).
  */
