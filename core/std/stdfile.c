@@ -42,7 +42,7 @@ static wchar_t *BrStdioToWinWchar(const char *utf8name, wchar_t *buf, br_size_t 
 }
 #endif
 
-static FILE *BrStdioFopenUtf8(const char *utf8Name, const char *mode)
+FILE *BR_RESIDENT_ENTRY BrStdioFopenUtf8(const char *utf8Name, const char *mode)
 {
 #if defined(_WIN32)
     static wchar_t buf[4096];
