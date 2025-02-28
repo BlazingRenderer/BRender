@@ -101,7 +101,7 @@ void BR_PUBLIC_ENTRY BrAbort(void)
     abort();
 }
 
-char *BR_PUBLIC_ENTRY BrGetEnv(const char *name)
+const char *BR_PUBLIC_ENTRY BrGetEnv(const char *name)
 {
     return getenv(name);
 }

@@ -209,7 +209,8 @@ br_error BR_PUBLIC_ENTRY BrReadEnvironmentEntry(br_associative_array *a, const c
 {
     br_lexer *l;
     br_error  r;
-    char      entry[256], tv[256], *value;
+    char      entry[256], tv[256];
+    const char *value;
 
     /*
      * Read the environment variable and use the parser for INI files
@@ -249,8 +250,7 @@ br_error BR_PUBLIC_ENTRY BrReadEnvironmentEntry(br_associative_array *a, const c
      * separately
      */
     if(BrTokenType(((br_token_value *)tv)->t) == BRT_STRING && ((br_token_value *)tv)->v.str == NULL)
-
-        ((br_token_value *)tv)->v.str = BrGetEnv(name);
+        ((br_token_value *)tv)->v.str = (char*)BrGetEnv(name);
 
     r = BrAssociativeArraySet(a, ((br_token_value *)tv)->t, ((br_token_value *)tv)->v);
 
