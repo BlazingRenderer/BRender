@@ -14,11 +14,6 @@
 #include "brender.h"
 #include "brassert.h"
 
-#if defined(_MSC_VER)
-#include <malloc.h>
-#define alloca _alloca
-#endif
-
 #if defined(_WIN32)
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
@@ -26,40 +21,54 @@
 
 
 #if defined(_WIN32)
-static wchar_t *BrStdioToWinWchar(const char *utf8name, wchar_t *buf, br_size_t count)
+static wchar_t *BrStdioToWinWchar(void *vres, const char *s)
 {
-    if(utf8name == NULL)
+    int      x;
+    size_t   _len;
+    wchar_t *ws;
+
+    _len = BrStrLen(s);
+    if(_len >= INT_MAX - 1)
         return NULL;
 
-    br_size_t inlen = BrStrLen(utf8name);
+    _len += 1;
 
-    int x = MultiByteToWideChar(CP_UTF8, 0, utf8name, (int)inlen, buf, (int)count);
-    if(x == 0)
+    /* Get the required size. */
+    if((x = MultiByteToWideChar(CP_UTF8, 0, s, (int)_len, NULL, 0)) == 0)
         return NULL;
 
-    buf[x] = L'\0';
-    return buf;
+    if((ws = BrResAllocate(vres, x * sizeof(wchar_t), BR_MEMORY_APPLICATION)) == NULL)
+        return NULL;
+
+    /* Now convert. */
+    if((x = MultiByteToWideChar(CP_UTF8, 0, s, (int)_len, ws, x)) == 0) {
+        BrMemFree(ws);
+        return NULL;
+    }
+
+    return ws;
 }
 #endif
 
-static FILE *BrStdioFopenUtf8(const char *utf8Name, const char *mode)
+static FILE *BrStdioFopenUtf8(const char *name, const char *mode)
 {
 #if defined(_WIN32)
-    static wchar_t buf[4096];
+    wchar_t *lname, *lmode;
+    FILE    *fp;
 
-    wchar_t *name = BrStdioToWinWchar(utf8Name, buf, BR_ASIZE(buf));
-    if(name == NULL)
+    if((lname = BrStdioToWinWchar(NULL, name)) == NULL)
         return NULL;
 
-    br_size_t modelen = BrStrLen(mode);
-
-    wchar_t *lmode = alloca((modelen + 1) * sizeof(wchar_t));
-    if(BrStdioToWinWchar(mode, lmode, modelen) == NULL)
+    if((lmode = BrStdioToWinWchar(lname, mode)) == NULL) {
+        BrResFree(lname);
         return NULL;
+    }
 
-    return _wfopen(name, lmode);
+    fp = _wfopen(lname, lmode);
+    BrResFree(lname);
+    return fp;
 #else
-    return fopen(utf8Name, mode);
+    return fopen(name, mode);
 #endif
 }
 
