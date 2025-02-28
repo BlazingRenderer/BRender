@@ -53,9 +53,10 @@ jobs:
     strategy:
       matrix:
         configuration:
-          - { platform: 'x64',   soft: 'OFF', vcpkg_target: 'x64-windows' }
-          - { platform: 'Win32', soft: 'OFF', vcpkg_target: 'x86-windows' }
-          - { platform: 'Win32', soft: 'ON',  vcpkg_target: 'x86-windows' }
+          - { platform: 'x64',   soft: 'OFF', vcpkg_target: 'x64-windows', sdl: 'sdl3' }
+          - { platform: 'x64',   soft: 'OFF', vcpkg_target: 'x64-windows', sdl: 'sdl2' }
+          - { platform: 'Win32', soft: 'OFF', vcpkg_target: 'x86-windows', sdl: 'sdl3' }
+          - { platform: 'Win32', soft: 'ON',  vcpkg_target: 'x86-windows', sdl: 'sdl3' }
     steps:
       - name: Export GitHub Actions cache environment variables
         uses: actions/github-script@v7
@@ -73,8 +74,8 @@ jobs:
       - name: Install spirv-cross
         run: vcpkg install spirv-cross:${{ matrix.configuration.vcpkg_target }}
 
-      - name: Install SDL2
-        run: vcpkg install sdl2:${{ matrix.configuration.vcpkg_target }}
+      - name: Install SDL
+        run: vcpkg install ${{ matrix.configuration.sdl }}:${{ matrix.configuration.vcpkg_target }}
 
       - name: Install GLFW3
         run: vcpkg install glfw3:${{ matrix.configuration.vcpkg_target }}
