@@ -61,6 +61,8 @@ endif()
 target_include_directories(softrend PRIVATE ddi ${CMAKE_CURRENT_BINARY_DIR})
 target_compile_definitions(softrend PRIVATE -D__386__)
 
+target_compile_options(softrend PRIVATE -Wno-incompatible-pointer-types)
+
 target_link_libraries(softrend PRIVATE BRender::DDI)
 
 set_target_properties(softrend PROPERTIES
