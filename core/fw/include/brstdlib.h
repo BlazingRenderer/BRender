@@ -38,7 +38,7 @@ char *BR_PUBLIC_ENTRY BrStrRChr(const char *s1, char c);
 
 BR_NORETURN void BR_PUBLIC_ENTRY BrAbort(void);
 
-char *BR_PUBLIC_ENTRY BrGetEnv(const char *name);
+const char *BR_PUBLIC_ENTRY BrGetEnv(const char *name);
 
 float BR_PUBLIC_ENTRY         BrStrToF(const char *nptr, char **endptr);
 double BR_PUBLIC_ENTRY        BrStrToD(const char *nptr, char **endptr);
