@@ -25,10 +25,6 @@
       };
     in crossPackages.callPackage ./default.nix {
       version = self.lastModifiedDate;
-
-      sdl3 = crossPackages.sdl3.override {
-        withStatic = crossPackages.hostPlatform.isWindows;
-      };
     };
 
     mkShells = packages: builtins.mapAttrs (k: v: v.overrideAttrs(old: {

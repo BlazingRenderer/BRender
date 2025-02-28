@@ -8,10 +8,6 @@ function(add_example name)
 			FOLDER "BRender/Examples/Tutorials"
 	)
 
-	if(TARGET SDL2::SDL2main)
-		target_link_libraries(${name} PRIVATE SDL2::SDL2main)
-	endif()
-
 	if (NOT BRENDER_DISABLE_INSTALL)
 		install(TARGETS ${name} DESTINATION ${CMAKE_INSTALL_BINDIR})
 	endif ()
