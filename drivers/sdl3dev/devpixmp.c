@@ -552,7 +552,9 @@ static br_error BR_CMETHOD_DECL(br_device_pixelmap_sdl3, line)(br_device_pixelma
 static br_error BR_CMETHOD_DECL(br_device_pixelmap_sdl3, rectangleFill)(br_device_pixelmap *self, br_rectangle *r,
                                                                         br_uint_32 colour)
 {
-    SDL_Rect rect;
+    SDL_Rect  rect;
+    SDL_FRect frect;
+    SDL_Color col;
 
     if(DevicePixelmapSDL3RectangleClip(&rect, r, (const br_pixelmap *)self) == BR_CLIP_REJECT)
         return BRE_OK;
@@ -560,8 +562,21 @@ static br_error BR_CMETHOD_DECL(br_device_pixelmap_sdl3, rectangleFill)(br_devic
     rect.x += self->pm_base_x;
     rect.y += self->pm_base_y;
 
-    if(!SDL_FillSurfaceRect(self->surface, &rect, colour))
+    col = DevicePixelmapSDL3GetSurfaceColour(self->surface, colour);
+
+    frect = (SDL_FRect){
+        .x = (float)rect.x,
+        .y = (float)rect.y,
+        .w = (float)rect.w,
+        .h = (float)rect.h,
+    };
+    if(!SDL_SetRenderDrawColor(self->renderer, col.r, col.g, col.b, col.a))
         return BRE_FAIL;
+
+    if(!SDL_RenderFillRect(self->renderer, &frect))
+        return BRE_FAIL;
+
+    SDL_FlushRenderer(self->renderer);
 
     return BRE_OK;
 }
