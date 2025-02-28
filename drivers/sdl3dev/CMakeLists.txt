@@ -49,6 +49,8 @@ add_library(sdl3dev
         util.c
 
         ${INC_FILES}
+
+        sdlfile.c
         )
 
 get_target_property(target_type sdl3dev TYPE)

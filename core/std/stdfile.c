@@ -6,6 +6,8 @@
  *
  * Default file handler that uses <stdio.h>
  */
+#include <SDL3/SDL.h>
+
 #include <stddef.h>
 #include <string.h>
 #include <stdio.h>

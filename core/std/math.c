@@ -6,32 +6,32 @@
  *
  * Glue to math functions
  */
-#include <math.h>
+#include <SDL3/SDL.h>
 
 #include "brender.h"
 
 
 float BR_PUBLIC_ENTRY BrFloatFloor(float f)
 {
-    return floorf(f);
+    return SDL_floorf(f);
 }
 
 float BR_PUBLIC_ENTRY BrFloatCeil(float f)
 {
-    return ceilf(f);
+    return SDL_ceilf(f);
 }
 
 float BR_PUBLIC_ENTRY BrFloatSqrt(float f)
 {
-    return sqrtf(f);
+    return SDL_sqrtf(f);
 }
 
 float BR_PUBLIC_ENTRY BrFloatPow(float a, float b)
 {
-    return powf(a, b);
+    return SDL_powf(a, b);
 }
 
 float BR_PUBLIC_ENTRY BrFloatAtan2(float x, float y)
 {
-    return atan2f(x, y);
+    return SDL_atan2f(x, y);
 }

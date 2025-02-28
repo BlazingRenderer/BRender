@@ -6,51 +6,25 @@
  *
  * Using images from host environment
  */
+#include <SDL3/SDL.h>
 #include "brender.h"
 
 #include "host.h"
 
-#ifdef __WIN_32__
-
-#include <windows.h>
-
 void *BR_RESIDENT_ENTRY HostImageLoad(const char *name)
 {
-    return (void *)LoadLibraryA(name);
+    return SDL_LoadObject(name);
 }
 
 void BR_RESIDENT_ENTRY HostImageUnload(void *image)
 {
-    FreeLibrary((HMODULE)image);
-}
-
-void *BR_RESIDENT_ENTRY HostImageLookupName(void *img, const char *name, br_uint_32 hint)
-{
-    return (void *)GetProcAddress((HMODULE)img, name);
-}
-
-void *BR_RESIDENT_ENTRY HostImageLookupOrdinal(void *img, br_uint_32 ordinal)
-{
-    return NULL;
-}
-#elif defined(__unix__)
-
-#include <dlfcn.h>
-
-void *BR_RESIDENT_ENTRY HostImageLoad(const char *name)
-{
-    return dlopen(name, RTLD_NOW);
-}
-
-void BR_RESIDENT_ENTRY HostImageUnload(void *image)
-{
-    dlclose(image);
+    SDL_UnloadObject(image);
 }
 
 void *BR_RESIDENT_ENTRY HostImageLookupName(void *img, const char *name, br_uint_32 hint)
 {
     (void)hint;
-    return dlsym(img, name);
+    return (void *)SDL_LoadFunction(img, name);
 }
 
 void *BR_RESIDENT_ENTRY HostImageLookupOrdinal(void *img, br_uint_32 ordinal)
@@ -59,23 +33,3 @@ void *BR_RESIDENT_ENTRY HostImageLookupOrdinal(void *img, br_uint_32 ordinal)
     (void)ordinal;
     return NULL;
 }
-#else
-void *BR_RESIDENT_ENTRY HostImageLoad(const char *name)
-{
-    return NULL;
-}
-
-void BR_RESIDENT_ENTRY HostImageUnload(void *image)
-{
-}
-
-void *BR_RESIDENT_ENTRY HostImageLookupName(void *img, const char *name, br_uint_32 hint)
-{
-    return NULL;
-}
-
-void *BR_RESIDENT_ENTRY HostImageLookupOrdinal(void *img, br_uint_32 ordinal)
-{
-    return NULL;
-}
-#endif
