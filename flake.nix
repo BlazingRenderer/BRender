@@ -25,6 +25,8 @@
       };
     in crossPackages.callPackage ./default.nix {
       version = self.lastModifiedDate;
+
+      withExamples = true;
     };
 
     mkShells = packages: builtins.mapAttrs (k: v: v.overrideAttrs(old: {
