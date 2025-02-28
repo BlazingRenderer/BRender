@@ -8,6 +8,8 @@
  *   and are then converted to global coordinates by adding pm_base_{x,y}.
  * - As pm_base_{x,y} is 0 on regular pixelmaps, this logic doesn't need to be special-cased.
  * - Double buffering to a sub-pixelmap is explicitly NOT supported.
+ * - We explicitly call SDL_FlushRenderer() after every modification. This is a software-pixelmap,
+ *   so changes need to be visible immediately.
  */
 
 #include <stddef.h>
