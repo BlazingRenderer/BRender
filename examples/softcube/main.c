@@ -189,7 +189,7 @@ int main(int argc, char **argv)
     ticks_last = SDL_GetTicks64();
 
     BrMatrix34Identity(&cube->t.t.mat);
-    BrMatrix34PostTranslate(&cube->t.t.mat, 2, 0, 0);
+    BrMatrix34PostTranslate(&cube->t.t.mat, 3, 0, 0);
     for(SDL_Event evt;;) {
         float dt;
 
