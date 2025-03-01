@@ -512,7 +512,7 @@ void BR_PUBLIC_ENTRY BrVector4Set(br_vector4 *v1, br_scalar s1, br_scalar s2, br
 /*
  *  = v1.v2
  */
-br_scalar BR_PUBLIC_ENTRY BrVector4Dot(br_vector4 *v1, const br_vector4 *v2)
+br_scalar BR_PUBLIC_ENTRY BrVector4Dot(const br_vector4 *v1, const br_vector4 *v2)
 {
     UASSERT_MESSAGE("Destination Vector is NULL", v1 != NULL);
     UASSERT_MESSAGE("Source Vector is NULL", v2 != NULL);
