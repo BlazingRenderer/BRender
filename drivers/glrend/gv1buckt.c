@@ -104,7 +104,7 @@ br_error BR_CMETHOD_DECL(br_geometry_v1_buckets_gl, render)(br_geometry_v1_bucke
      */
     for(buckets += nbuckets - 1; nbuckets--; buckets--) {
         for(br_primitive *p = *buckets; p; p = p->next) {
-            br_renderer_state_stored *stored = (br_renderer_state_stored *)p->stored;
+            br_renderer_state_stored *stored = p->stored;
 
             ASSERT(stored == NULL || ObjectIsType((br_object *)stored, BRT_RENDERER_STATE_STORED));
 
@@ -112,9 +112,9 @@ br_error BR_CMETHOD_DECL(br_geometry_v1_buckets_gl, render)(br_geometry_v1_bucke
              * See gstored.c
              */
             if(p->type == BRT_GEOMETRY_STORED) {
-                br_geometry_stored *geom      = (br_geometry_stored *)p->v[0];
-                state_stack        *state     = (state_stack *)p->v[1];
-                const gl_groupinfo *groupinfo = (gl_groupinfo *)p->v[2];
+                br_geometry_stored *geom      = p->v[0];
+                state_stack        *state     = p->v[1];
+                const gl_groupinfo *groupinfo = p->v[2];
 
                 ASSERT(ObjectIsType((br_object *)geom, BRT_GEOMETRY_STORED));
 
@@ -124,8 +124,8 @@ br_error BR_CMETHOD_DECL(br_geometry_v1_buckets_gl, render)(br_geometry_v1_bucke
                 RendererGLRenderGroup(renderer, geom, groupinfo);
             } else if(p->type == BRT_TRIANGLE) {
                 br_uintptr_t        offset    = (br_uintptr_t)p->v[0];
-                state_stack        *state     = (state_stack *)p->v[1];
-                const gl_groupinfo *groupinfo = (gl_groupinfo *)p->v[2];
+                state_stack        *state     = p->v[1];
+                const gl_groupinfo *groupinfo = p->v[2];
 
                 *renderer->state.current = *state;
                 RendererGLUnrefState(renderer, state);
