@@ -1,0 +1,66 @@
+#
+# Materials for CGDC/ECTS/E3 demo (sample10)
+#
+
+material = [
+    identifier = "SPACE_SHIP";
+    flags = [light, smooth];
+    colour = [200,200,200];    
+    ambient = 0.2;
+    diffuse = 0.8;
+    power = 51.489998;
+    index_base=74;
+    index_range=2;
+    colour_map = "spship.pix";
+    index_shade = "shade_table";
+    map_transform = [[1,0],[0,-1],[0,0]];
+];
+
+material = [
+    identifier = "floor_0";
+    ambient = 0.8;
+    colour = [200,200,200];    
+    flags = [always_visible];
+    colour_map = "floor_0.pix";
+    index_base=74;
+    index_range=2;
+    index_shade = "shade_table";
+];
+
+material = [
+   identifier = "column";
+   flags = [smooth];
+   colour = [200,200,200];    
+   ambient = 0.1;
+   colour_map = "column.pix";
+   index_base=74;
+   index_range=2;
+   index_shade = "shade_table";
+];
+
+
+material = [
+   identifier = "plant";
+   ambient = 0.3;
+   colour = [200,200,200];    
+   flags = [always_visible];
+   colour_map = "plant.pix";
+   index_shade = "shade_table";
+   index_base=66;
+   index_range=3;
+];
+
+material = [
+   identifier = "cloud";
+   colour = [200,200,200];    
+   ambient = 0.3;
+   flags = [prelit, smooth];
+   colour_map = "cloud.pix";
+   index_shade = "shade_table";
+   index_base=46;
+   index_range=2;
+];
+
+
+
+
