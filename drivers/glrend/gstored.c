@@ -450,7 +450,7 @@ static br_error V1Model_RenderStored(br_geometry_stored *self, br_renderer *rend
     for(int i = 0; i < self->model->ngroups; ++i) {
         struct v11group          *group       = self->model->groups + i;
         gl_groupinfo             *groupinfo   = self->groups + i;
-        br_renderer_state_stored *stored      = (br_renderer_state_stored *)group->stored;
+        br_renderer_state_stored *stored      = group->stored;
         int                       render_mode = get_render_mode(stored ? &stored->state : state);
         br_uint_16                bucket;
 
