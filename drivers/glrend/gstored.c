@@ -435,6 +435,7 @@ static br_error V1Model_RenderStored(br_geometry_stored *self, br_renderer *rend
     br_vector3    pos;
     br_boolean    defer;
     br_scalar     distance_from_zero;
+    br_boolean    z_sorting;
 
     pos.v[0] = renderer->state.current->matrix.model_to_view.m[3][0];
     pos.v[1] = renderer->state.current->matrix.model_to_view.m[3][1];
@@ -443,6 +444,8 @@ static br_error V1Model_RenderStored(br_geometry_stored *self, br_renderer *rend
     distance_from_zero = BrVector3Length(&pos);
 
     defer = want_defer(&renderer->state.current->hidden);
+
+    z_sorting = (renderer->state.current->valid & MASK_STATE_OUTPUT) && renderer->state.current->output.depth == NULL;
 
     for(int i = 0; i < self->model->ngroups; ++i) {
         struct v11group          *group       = self->model->groups + i;
@@ -469,9 +472,9 @@ static br_error V1Model_RenderStored(br_geometry_stored *self, br_renderer *rend
 
         bucket = calculate_bucket(state.hidden.order_table, &state, &distance_from_zero);
 
-        if(render_mode == RM_TRANS) {
+        if(z_sorting || render_mode == RM_TRANS) {
             /*
-             * If transparent, send things triangle-by-triangle.
+             * If transparent or z-sorting, send things triangle-by-triangle.
              */
             state_stack *tmpstate = RendererGLAllocState(renderer, &state, group->nfaces);
             for(int f = 0; f < group->nfaces; ++f) {
