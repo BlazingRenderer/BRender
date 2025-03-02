@@ -181,12 +181,14 @@ static void apply_depth_properties(state_stack *state, uint32_t states)
     }
 
     if(states & MASK_STATE_PRIMITIVE) {
-        if(state->prim.flags & PRIMF_DEPTH_WRITE)
-            glDepthMask(GL_TRUE);
-        else
-            glDepthMask(GL_FALSE);
-
+        GLboolean depthMask;
         GLenum depthFunc;
+
+        if(state->prim.flags & PRIMF_DEPTH_WRITE)
+            depthMask = GL_TRUE;
+        else
+            depthMask = GL_FALSE;
+
         switch(state->prim.depth_test) {
             case BRT_LESS:
                 depthFunc = GL_LESS;
@@ -215,7 +217,11 @@ static void apply_depth_properties(state_stack *state, uint32_t states)
             default:
                 depthFunc = GL_LESS;
         }
-        glDepthFunc(depthFunc);
+
+        if(depth_valid) {
+            glDepthFunc(depthFunc);
+            glDepthMask(depthMask);
+        }
     }
 }
 
