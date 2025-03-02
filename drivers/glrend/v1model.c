@@ -330,16 +330,13 @@ static void apply_stored_properties(HVIDEO hVideo, br_renderer *renderer, state_
             glDisable(GL_BLEND);
         }
     }
-
-    apply_depth_properties(state, states);
 }
 
-static void apply_state(br_renderer *renderer, const gl_groupinfo *groupinfo)
+static void apply_state(br_renderer *renderer)
 {
     state_cache              *cache  = &renderer->state.cache;
     br_device_pixelmap       *screen = renderer->pixelmap->screen;
     HVIDEO                    hVideo = &screen->asFront.video;
-    br_renderer_state_stored *stored = groupinfo->stored;
     br_boolean                unlit;
     shader_data_model         model;
 
@@ -375,13 +372,8 @@ static void apply_state(br_renderer *renderer, const gl_groupinfo *groupinfo)
     // int model_lit = self->model->flags & V11MODF_LIT;
 
     unlit = BR_TRUE;
-    if(stored) {
-        apply_stored_properties(hVideo, renderer, &stored->state, MASK_STATE_PRIMITIVE | MASK_STATE_SURFACE | MASK_STATE_CULL,
-                                &unlit, &model, screen->asFront.tex_white);
-    } else {
-        /* If there's no stored state, apply all states from global. */
-        apply_stored_properties(hVideo, renderer, renderer->state.current, ~0u, &unlit, &model, screen->asFront.tex_white);
-    }
+    apply_stored_properties(hVideo, renderer, renderer->state.current, MASK_STATE_STORED, &unlit, &model, screen->asFront.tex_white);
+    apply_depth_properties(renderer->state.current, MASK_STATE_STORED | MASK_STATE_OUTPUT);
 
     model.unlit = (br_uint_32)unlit;
     BrVector4Set(&model.clear_colour, renderer->pixelmap->asBack.clearColour[0], renderer->pixelmap->asBack.clearColour[1],
@@ -393,7 +385,7 @@ static void apply_state(br_renderer *renderer, const gl_groupinfo *groupinfo)
 
 void RendererGLRenderGroup(br_renderer *self, br_geometry_stored *stored, const gl_groupinfo *groupinfo)
 {
-    apply_state(self, groupinfo);
+    apply_state(self);
 
     glBindVertexArray(stored->gl_vao);
     glDrawElements(GL_TRIANGLES, groupinfo->count, GL_UNSIGNED_SHORT, groupinfo->offset);
@@ -406,7 +398,7 @@ void RendererGLRenderGroup(br_renderer *self, br_geometry_stored *stored, const 
 
 void RendererGLRenderTri(br_renderer *self, br_uintptr_t offset, const gl_groupinfo *groupinfo)
 {
-    apply_state(self, groupinfo);
+    apply_state(self);
 
     glBindVertexArray(self->trans.vao);
     glBindBuffer(GL_ARRAY_BUFFER, self->trans.vbo);

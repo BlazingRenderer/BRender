@@ -431,47 +431,49 @@ static br_boolean want_defer(const state_hidden *hidden)
 
 static br_error V1Model_RenderStored(br_geometry_stored *self, br_renderer *renderer, br_boolean on_screen)
 {
-    state_stack  *state;
     br_primitive *prim;
     br_vector3    pos;
     br_boolean    defer;
     br_scalar     distance_from_zero;
 
-    state = renderer->state.current;
-
-    pos.v[0] = state->matrix.model_to_view.m[3][0];
-    pos.v[1] = state->matrix.model_to_view.m[3][1];
-    pos.v[2] = state->matrix.model_to_view.m[3][2];
+    pos.v[0] = renderer->state.current->matrix.model_to_view.m[3][0];
+    pos.v[1] = renderer->state.current->matrix.model_to_view.m[3][1];
+    pos.v[2] = renderer->state.current->matrix.model_to_view.m[3][2];
 
     distance_from_zero = BrVector3Length(&pos);
 
-    defer = want_defer(&state->hidden);
+    defer = want_defer(&renderer->state.current->hidden);
 
     for(int i = 0; i < self->model->ngroups; ++i) {
         struct v11group          *group       = self->model->groups + i;
         gl_groupinfo             *groupinfo   = self->groups + i;
         br_renderer_state_stored *stored      = group->stored;
-        int                       render_mode = get_render_mode(stored ? &stored->state : state);
+        int                       render_mode;
         br_uint_16                bucket;
+        state_stack               state;
 
         /*
-         * TODO: I *think* the group's material may change in between here and build_ibo()
-         *  so always set this here.
+         * If there's a stored state (i.e. a material), apply it to our current state.
          */
-        groupinfo->stored = stored;
+        state = *renderer->state.current;
+        if(stored != NULL) {
+            StateGLCopy(&state, &stored->state, MASK_STATE_STORED);
+        }
+
+        render_mode = get_render_mode(&state);
 
         if(!defer) {
             RendererGLRenderGroup(renderer, self, groupinfo);
             continue;
         }
 
-        bucket = calculate_bucket(state->hidden.order_table, stored ? &stored->state : state, &distance_from_zero);
+        bucket = calculate_bucket(state.hidden.order_table, &state, &distance_from_zero);
 
         if(render_mode == RM_TRANS) {
             /*
              * If transparent, send things triangle-by-triangle.
              */
-            state_stack *tmpstate = RendererGLAllocState(renderer, state, group->nfaces);
+            state_stack *tmpstate = RendererGLAllocState(renderer, &state, group->nfaces);
             for(int f = 0; f < group->nfaces; ++f) {
                 br_vector3 centroid, centroid_view;
                 br_int_32 base;
@@ -485,7 +487,7 @@ static br_error V1Model_RenderStored(br_geometry_stored *self, br_renderer *rend
                     continue;
                 }
 
-                prim         = heapPrimitiveAdd(state->hidden.heap, BRT_TRIANGLE);
+                prim         = heapPrimitiveAdd(state.hidden.heap, BRT_TRIANGLE);
                 prim->stored = stored;
                 prim->v[0]   = (void*)(br_uintptr_t)base;
                 prim->v[1]   = tmpstate;
@@ -494,42 +496,42 @@ static br_error V1Model_RenderStored(br_geometry_stored *self, br_renderer *rend
                 centroid = DeviceGLTriangleCentroid(&renderer->trans.pool[base + 0].position,
                                                     &renderer->trans.pool[base + 1].position,
                                                     &renderer->trans.pool[base + 2].position);
-                BrMatrix34ApplyP(&centroid_view, &centroid, &state->matrix.model_to_view);
+                BrMatrix34ApplyP(&centroid_view, &centroid, &state.matrix.model_to_view);
 
                 prim->depth = -BrVector3Length(&centroid_view);
 
                 /*
                  * If the user set a function defer to them.
                  */
-                if(state->hidden.insert_fn != NULL) {
-                    state->hidden.insert_fn(prim, state->hidden.insert_arg1, state->hidden.insert_arg2,
-                                            state->hidden.insert_arg3, state->hidden.order_table, &prim->depth);
+                if(state.hidden.insert_fn != NULL) {
+                    state.hidden.insert_fn(prim, state.hidden.insert_arg1, state.hidden.insert_arg2,
+                                           state.hidden.insert_arg3, state.hidden.order_table, &prim->depth);
                     continue;
                 }
 
-                BrZsOrderTablePrimitiveInsert(state->hidden.order_table, prim, bucket);
+                BrZsOrderTablePrimitiveInsert(state.hidden.order_table, prim, bucket);
             }
         } else {
             /*
              * Render everything else by group.
              */
-            prim         = heapPrimitiveAdd(state->hidden.heap, BRT_GEOMETRY_STORED);
+            prim         = heapPrimitiveAdd(state.hidden.heap, BRT_GEOMETRY_STORED);
             prim->stored = stored;
             prim->v[0]   = self;
-            prim->v[1]   = RendererGLAllocState(renderer, state, 1);
+            prim->v[1]   = RendererGLAllocState(renderer, &state, 1);
             prim->v[2]   = groupinfo;
             prim->depth  = distance_from_zero;
 
             /*
              * If the user set a function defer to them.
              */
-            if(state->hidden.insert_fn != NULL) {
-                state->hidden.insert_fn(prim, state->hidden.insert_arg1, state->hidden.insert_arg2,
-                                        state->hidden.insert_arg3, state->hidden.order_table, &prim->depth);
+            if(state.hidden.insert_fn != NULL) {
+                state.hidden.insert_fn(prim, state.hidden.insert_arg1, state.hidden.insert_arg2,
+                                       state.hidden.insert_arg3, state.hidden.order_table, &prim->depth);
                 continue;
             }
 
-            BrZsOrderTablePrimitiveInsert(state->hidden.order_table, prim, bucket);
+            BrZsOrderTablePrimitiveInsert(state.hidden.order_table, prim, bucket);
         }
     }
     return BRE_OK;

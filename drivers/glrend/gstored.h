@@ -40,11 +40,6 @@ typedef struct gl_groupinfo {
      * The group itself
      */
     struct v11group *group;
-
-    /*
-     * Stored renderer state for the group
-     */
-    br_renderer_state_stored *stored;
 } gl_groupinfo;
 
 #ifdef BR_GEOMETRY_STORED_PRIVATE
