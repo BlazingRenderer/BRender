@@ -423,6 +423,9 @@ void BR_PUBLIC_ENTRY BrRendererEnd(void)
  */
 void BR_PUBLIC_ENTRY BrZbBegin(br_uint_8 colour_type, br_uint_8 depth_type)
 {
+    if(v1db.zb_active || v1db.zs_active)
+        BR_ERROR0("Renderer already started\n");
+
     if(!v1db.zs_active && !v1db.zb_active)
         if(BrV1dbRendererBegin((br_device_pixelmap *)BrDevLastBeginQuery(), NULL) != BRE_OK)
             BR_ERROR0("Failed to load renderer\n");
@@ -433,6 +436,9 @@ void BR_PUBLIC_ENTRY BrZbBegin(br_uint_8 colour_type, br_uint_8 depth_type)
 void BR_PUBLIC_ENTRY BrZsBegin(br_uint_8 colour_type, void *primitive, br_uint_32 size)
 {
     UASSERT_MESSAGE("BrZsBegin NULL pointer to an allocated block of memory", primitive != NULL);
+
+    if(v1db.zb_active || v1db.zs_active)
+        BR_ERROR0("Renderer already started\n");
 
     if(!v1db.zs_active && !v1db.zb_active)
         if(BrV1dbRendererBegin((br_device_pixelmap *)BrDevLastBeginQuery(), NULL) != BRE_OK)
@@ -449,6 +455,9 @@ void BR_PUBLIC_ENTRY BrZsBegin(br_uint_8 colour_type, void *primitive, br_uint_3
 
 void BR_PUBLIC_ENTRY BrZbEnd(void)
 {
+    if(v1db.zb_active && v1db.zs_active)
+        BR_ERROR0("Invalid BrZbEnd() call, please use BrRendererEnd() instead");
+
     v1db.zb_active = BR_FALSE;
 
     /*
@@ -460,6 +469,9 @@ void BR_PUBLIC_ENTRY BrZbEnd(void)
 
 void BR_PUBLIC_ENTRY BrZsEnd(void)
 {
+    if(v1db.zb_active && v1db.zs_active)
+        BR_ERROR0("Invalid BrZsEnd() call, please use BrRendererEnd() instead");
+
     v1db.zs_active = BR_FALSE;
 
     if(!v1db.zb_active && v1db.renderer)
