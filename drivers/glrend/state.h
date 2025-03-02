@@ -20,6 +20,12 @@ enum {
     MASK_STATE_CULL      = BR_STATE_CULL,
     MASK_STATE_OUTPUT    = BR_STATE_OUTPUT,
     MASK_STATE_PRIMITIVE = BR_STATE_PRIMITIVE,
+
+    /*
+     * Parts of state that are stored.
+     * This is also PARTS_MASK in prepmatl.c
+     */
+    MASK_STATE_STORED = (MASK_STATE_CULL | MASK_STATE_SURFACE | MASK_STATE_PRIMITIVE),
 };
 
 /*
