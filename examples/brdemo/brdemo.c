@@ -245,6 +245,14 @@ int BrDemoRun(const char *title, br_uint_16 width, br_uint_16 height, const br_d
         demo->dispatch->update(demo, BR_SCALAR(dt));
         demo->dispatch->render(demo);
 
+        {
+            br_int_32 base_x = -demo->colour_buffer->origin_x + 5;
+            br_int_32 base_y = -demo->colour_buffer->origin_y + 5;
+            br_colour col    = BR_COLOUR_RGBA(255, 255, 255, 255);
+
+            BrPixelmapTextF(demo->colour_buffer, base_x, base_y, col, BrFontProp7x9, "last frame delta (msec): %f", dt * 1000);
+        }
+
         BrPixelmapDoubleBuffer(demo->_screen, demo->colour_buffer);
     }
 
