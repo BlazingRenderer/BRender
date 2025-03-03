@@ -1,0 +1,35 @@
+## Materials script file for test harness
+##
+## $Id: TEST.MAT 1.2 1996/12/03 17:38:03 NEELA Exp $
+## $Locker: $
+
+# Some test textures
+#
+
+material = [
+	identifier = "tiles";
+	flags = [perspective];
+	colour = [0,0,255];
+	ambient = 0.20; diffuse = 0.50; specular = 0.60;
+	power=20;
+	index_base = 64; index_range = 31;
+
+	colour_map = "tile.pix";
+	index_shade = "shade_table";
+	
+	map_transform = [[10,0],[0,10],[0,0]];
+];
+
+material = [
+	identifier = "test_mat";
+        flags = [light,smooth,perspective];
+	colour = [0,0,255];
+	ambient = 0.20; diffuse = 0.50; specular = 0.60;
+	power=20;
+
+	index_base = 64; index_range = 31;
+
+	colour_map = "testtex.pix";
+	index_shade = "shade_table";
+];
+
