@@ -28,6 +28,7 @@ material = [
 	flags = [light,smooth];
 	index_base = 160;
 	index_range = 31;
+	colour = [148, 37, 37];
 ];
 
 # A plain green texture for one of the balls
@@ -42,6 +43,7 @@ material = [
 	flags = [light,smooth];
 	index_base = 96;
 	index_range = 31;
+	colour = [37, 148, 37];
 ];
 
 # Solid white for the box
