@@ -146,7 +146,7 @@ int BrDemoRun(const char *title, br_uint_16 width, br_uint_16 height, const br_d
     BrBegin();
 
     BrModelFindHook(BrModelFindFailedLoad);
-    BrMapFindHook(MapFindFailedLoadDeCLUT);
+    //BrMapFindHook(MapFindFailedLoadDeCLUT);
     BrMaterialFindHook(BrMaterialFindFailedLoad);
     BrTableFindHook(BrTableFindFailedLoad);
 
@@ -163,11 +163,11 @@ int BrDemoRun(const char *title, br_uint_16 width, br_uint_16 height, const br_d
     err = BrDevBeginVar(&demo->_screen, "SDL2",
                         BRT_WIDTH_I32,        width,
                         BRT_HEIGHT_I32,       height,
-                        BRT_PIXEL_TYPE_U8,    BR_PMT_RGB_888,
+                        //BRT_PIXEL_TYPE_U8,    BR_PMT_RGB_888,
                         BRT_WINDOW_NAME_CSTR, title,
-                        BRT_HIDPI_B,          BR_TRUE,
-                        BRT_RESIZABLE_B,      BR_TRUE,
-                        BRT_OPENGL_B,         BR_TRUE,
+                        BRT_HIDPI_B,          BR_FALSE,
+                        BRT_RESIZABLE_B,      BR_FALSE,
+                        BRT_OPENGL_B,         BR_FALSE,
                         BR_NULL_TOKEN);
     // clang-format on
     if(err != BRE_OK) {
@@ -270,7 +270,7 @@ int BrDemoRun(const char *title, br_uint_16 width, br_uint_16 height, const br_d
         {
             br_int_32 base_x = -demo->colour_buffer->origin_x + 5;
             br_int_32 base_y = -demo->colour_buffer->origin_y + 5;
-            br_colour col    = BR_COLOUR_RGBA(255, 255, 255, 255);
+            br_colour col    = 96;//BR_COLOUR_RGBA(255, 255, 255, 255);
 
             BrPixelmapTextF(demo->colour_buffer, base_x, base_y, col, BrFontProp7x9, "last frame delta (msec): %f", dt * 1000);
         }

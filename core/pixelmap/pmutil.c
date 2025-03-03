@@ -186,6 +186,10 @@ full_cleanup:
 
 br_error BrPixelmapResizeBuffers(br_pixelmap *screen, br_pixelmap **colour, br_pixelmap **depth)
 {
-    br_token_value tv = {.t = BR_NULL_TOKEN, .v = {}};
-    return BrPixelmapResizeBuffersTV(screen, colour, depth, &tv);
+    br_token_value tv[] = {
+        {.t = BRT_PIXEL_TYPE_U8, .v = {.u8 = BR_PMT_INDEX_8}},
+        {.t = BRT_PIXEL_BITS_I32, .v = {.i32 = BR_PMMATCH_DEPTH_16}},
+        {.t = BR_NULL_TOKEN,     .v = {}                    },
+    };
+    return BrPixelmapResizeBuffersTV(screen, colour, depth, tv);
 }
