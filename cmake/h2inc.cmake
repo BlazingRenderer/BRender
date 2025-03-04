@@ -1,5 +1,5 @@
 function(make_h2inc TARGET SRC DST)
-    set(mkdrv "${CMAKE_SOURCE_DIR}/contrib/mkdrv.pl")
+    set(mkdrv "${CMAKE_CURRENT_FUNCTION_LIST_DIR}/../contrib/mkdrv.pl")
     set(target_includes "$<TARGET_PROPERTY:${TARGET},INCLUDE_DIRECTORIES>")
 
     add_custom_command(
