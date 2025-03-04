@@ -8,7 +8,7 @@
 
 material = [
 	identifier = "tiles";
-	flags = [perspective];
+	flags = [perspective,light];
 	colour = [0,0,255];
 	ambient = 0.20; diffuse = 0.50; specular = 0.60;
 	power=20;
@@ -16,7 +16,7 @@ material = [
 
 	colour_map = "tile.pix";
 	index_shade = "shade_table";
-	
+
 	map_transform = [[10,0],[0,10],[0,0]];
 ];
 
@@ -32,4 +32,3 @@ material = [
 	colour_map = "testtex.pix";
 	index_shade = "shade_table";
 ];
-
