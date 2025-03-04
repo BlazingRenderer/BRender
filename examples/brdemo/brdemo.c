@@ -166,7 +166,7 @@ int BrDemoRun(const char *title, br_uint_16 width, br_uint_16 height, const br_d
                         //BRT_PIXEL_TYPE_U8,    BR_PMT_RGB_888,
                         BRT_WINDOW_NAME_CSTR, title,
                         BRT_HIDPI_B,          BR_FALSE,
-                        BRT_RESIZABLE_B,      BR_FALSE,
+                        BRT_RESIZABLE_B,      BR_TRUE,
                         BRT_OPENGL_B,         BR_FALSE,
                         BR_NULL_TOKEN);
     // clang-format on
