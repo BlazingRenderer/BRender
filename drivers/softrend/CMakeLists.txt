@@ -1,13 +1,4 @@
-project(softrend C ASM_MASM)
-
-include(h2inc)
-
-make_h2inc(softrend "${CMAKE_CURRENT_SOURCE_DIR}/drv.h" "${CMAKE_CURRENT_BINARY_DIR}/drv.inc")
-
-set(ASM_FILES
-
-)
-set_source_files_properties(${ASM_FILES} PROPERTIES COMPILE_OPTIONS  "-q;-safeseh;-Zne;-6;-Zp4;-elf;-zcw")
+project(softrend C)
 
 add_library(softrend
         alpha.c
@@ -60,10 +51,6 @@ add_library(softrend
         template.h
         timestmp.h
         zsrmacro.h
-
-        "${CMAKE_CURRENT_BINARY_DIR}/drv.inc"
-
-        ${ASM_FILES}
 )
 
 get_target_property(target_type softrend TYPE)
