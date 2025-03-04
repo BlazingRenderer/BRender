@@ -9,8 +9,9 @@ endif ()
 
 target_link_libraries(brender-full INTERFACE glrend)
 
+add_subdirectory(softrend)
+
 if (BRENDER_BUILD_SOFT)
-    add_subdirectory(softrend)
     add_subdirectory(pentprim)
     target_link_libraries(brender-full INTERFACE softrend pentprim)
 endif ()
