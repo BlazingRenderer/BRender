@@ -144,7 +144,7 @@ void StaticCacheUpdate_PerModel(br_renderer *self)
 	}
 
 	eyeInModel(self);
-	BrVector3Normalise(&scache.eye_m_normalised, &scache.eye_m);
+	BrVector3Normalise(&scache.eye_m_normalised, (br_vector3*)&scache.eye_m);
 
 	if(self->state.matrix.view_to_environment_hint != BRT_DONT_CARE) {
 		BrMatrix34Mul(&scache.model_to_environment,

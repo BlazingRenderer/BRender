@@ -149,7 +149,7 @@ static void GEOMETRY_CALL V1Face_CullOneSidedPerspective(struct br_geometry *sel
 		/*
 		 * if Plane_Eqn . Eye <= 0, face is away from eye
 		 */
-		if(BrVector3Dot((br_vector3 *)fp_eqn,&scache.eye_m) < fp_eqn->v[3]) {
+		if(BrVector3Dot((br_vector3 *)fp_eqn,(br_vector3*)&scache.eye_m) < fp_eqn->v[3]) {
 			tfp->flag = 0;
 			continue;
 		}
@@ -180,7 +180,7 @@ static void GEOMETRY_CALL V1Face_CullOneSidedParallel(struct br_geometry *self, 
 		/*
 		 * if Plane_Eqn . Eye <= 0, face is away from eye
 		 */
-		if(BrVector3Dot((br_vector3 *)fp_eqn,&scache.eye_m) < S0) {
+		if(BrVector3Dot((br_vector3 *)fp_eqn,(br_vector3*)&scache.eye_m) < S0) {
 			tfp->flag = 0;
 			continue;
 		}
@@ -212,7 +212,7 @@ static void GEOMETRY_CALL V1Face_CullTwoSidedPerspective(struct br_geometry *sel
 		/*
 		 * if Plane_Eqn . Eye <= 0, face is away from eye
 		 */
-		if(BrVector3Dot((br_vector3 *)fp_eqn,&scache.eye_m) < fp_eqn->v[3]) {
+		if(BrVector3Dot((br_vector3 *)fp_eqn,(br_vector3*)&scache.eye_m) < fp_eqn->v[3]) {
 			tfp->flag |= TFF_REVERSED;
 			df = TVDIR_BACK;
 		}
@@ -246,7 +246,7 @@ static void GEOMETRY_CALL V1Face_CullTwoSidedParallel(struct br_geometry *self, 
 		/*
 		 * if Plane_Eqn . Eye <= 0, face is away from eye
 		 */
-		if(BrVector3Dot((br_vector3 *)fp_eqn,&scache.eye_m) < S0) {
+		if(BrVector3Dot((br_vector3 *)fp_eqn,(br_vector3*)&scache.eye_m) < S0) {
 			tfp->flag |= TFF_REVERSED;
 			df = TVDIR_BACK;
 		}
@@ -890,7 +890,7 @@ br_error BR_CMETHOD_DECL(br_geometry_v1_model_soft, render)
 {
 	br_error r;
 
-	r = V1Model_Render(self, renderer, model, default_state, type, BR_FALSE);
+	r = V1Model_Render((br_geometry*)self, renderer, (struct v11model*)model, default_state, type, BR_FALSE);
 
 	return r;
 }
@@ -902,7 +902,7 @@ br_error BR_CMETHOD_DECL(br_geometry_v1_model_soft, renderOnScreen)
 {
 	br_error r;
 
-	r = V1Model_Render(self, renderer, model, default_state, type, BR_TRUE);
+	r = V1Model_Render((br_geometry*)self, renderer, (struct v11model*)model, default_state, type, BR_TRUE);
 
 	return r;
 }

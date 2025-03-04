@@ -93,7 +93,7 @@ static const br_tv_template_entry partSurfaceTemplateEntries[] = {
 /**************************************************************************
  ** Light
  **/
-static br_error BR_CALLBACK customLightingVolumeSet(void *block, br_value *pvalue, const struct br_tv_template_entry *tep);
+static br_error BR_CALLBACK customLightingVolumeSet(void *block, const br_value *pvalue, const struct br_tv_template_entry *tep);
 
 static const struct br_tv_custom customLightingVolumeConv = {
     .query      = NULL,
@@ -554,7 +554,7 @@ void TouchModelToView(br_renderer *self)
 }
 
 
-static br_error BR_CALLBACK customLightingVolumeSet(void *block, br_value *pvalue, const struct br_tv_template_entry *tep)
+static br_error BR_CALLBACK customLightingVolumeSet(void *block, const br_value *pvalue, const struct br_tv_template_entry *tep)
 {
 	br_light_volume *volume, *new_volume;
 	br_uint_32 i;

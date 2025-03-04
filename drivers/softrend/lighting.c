@@ -143,19 +143,19 @@ br_error BR_CMETHOD_DECL(br_geometry_lighting_soft, render)
 
         for(j = 0; j < nvertices; j++){
                 for(i = 0; i < renderer->state.cache.nvertex_fns; i++)
-                        renderer->state.cache.vertex_fns[i](renderer, points,
-                                &map, normals, *colour_in, comp);
+                        renderer->state.cache.vertex_fns[i](renderer, (br_vector3*)points,
+                                &map, (br_vector3*)normals, *colour_in, comp);
                 for(i = 0; i < renderer->state.cache.nconstant_fns; i++)
-                    renderer->state.cache.constant_fns[i](renderer, points,
-                        &map, normals, *colour_in, comp);
+                    renderer->state.cache.constant_fns[i](renderer, (br_vector3*)points,
+                        &map, (br_vector3*)normals, *colour_in, comp);
 
                 *((char *)colour_out) = BrScalarToInt(comp[C_I]);
                 *(((char *)colour_out)+1) = BrScalarToInt(comp[C_R]);
                 *(((char *)colour_out)+2) = BrScalarToInt(comp[C_G]);
                 *(((char *)colour_out)+3) = BrScalarToInt(comp[C_B]);
 
-                points = (br_vector3 *)((char *)points + pstride);
-                normals = (br_vector3 *)((char *)normals + nstride);
+                points = (br_vector3_f *)((br_uintptr_t)points + pstride);
+                normals = (br_vector3_f *)((br_uintptr_t)normals + nstride);
                 colour_in = (br_colour *)((char *)colour_in + cinstride);
                 if(redirect){
                         colour_out = (br_colour *)(((char *)colour_out) + coutstride*((*(redirect+1))-(*redirect)));

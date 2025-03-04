@@ -89,7 +89,7 @@ void SURFACE_CALL SurfaceMapEnvironmentLocal(br_renderer *self,
     /*
      * Generate eye vector -
      */
-    BrVector3Sub(&eye, &scache.eye_m, p);
+    BrVector3Sub(&eye, (br_vector3*)&scache.eye_m, p);
     BrVector3Normalise(&eye, &eye);
 
     if(self->state.matrix.view_to_environment_hint != BRT_DONT_CARE)
