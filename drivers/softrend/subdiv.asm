@@ -1,5 +1,6 @@
-.586p
+.686p
 .model flat,c
+.xmm
 
 include drv.inc
 
@@ -176,28 +177,12 @@ endm
 
 
 DOT_PRODUCT_4 macro reg0,reg1,dest
-assume reg0:ptr dword
-assume reg1:ptr dword
-;18 cycles
-                            ;   0           1           2           3           4           5           6           7
-    fld [reg0]              ;   u0
-    fmul [reg1]             ;   u0*v0
-    fld [reg0+4]            ;   u1          u0*v0
-    fmul [reg1+4]           ;   u1*v1       u0*v0
-    fld [reg0+8]            ;   u2          u1*v1       u0*v0
-    fmul [reg1+8]           ;   u2*v2       u1*v1       u0*v0
-    fld [reg0+12]           ;   u3          u2*v2       u1*v1       u0*v0
-    fmul [reg1+12]          ;   u3*v3       u2*v2       u1*v1       u0*v0
-    fxch st(3)              ;   u0*v0       u2*v2       u1*v1       u3*v3
-    faddp st(2),st          ;   u2*v2       p0+p1       u3*v3
-;stall
-    faddp st(2),st          ;   p0+p1       p2+p3
-;stall
-;stall
-    faddp st(1),st          ;   prod
-;stall
-;stall
-    fstp dest               ;
+    movups xmm0, [reg0]  ; Load v0 into xmm0
+    movups xmm1, [reg1]  ; Load v1 into xmm1
+    mulps  xmm0, xmm1    ; Multiply element-wise
+    haddps xmm0, xmm0    ; Horizontal add
+    haddps xmm0, xmm0    ; Horizontal add again to get final sum
+    movss  dest, xmm0    ; Store result
 endm
 
 
@@ -247,6 +232,7 @@ averageVertices proc renderer:ptr br_renderer, m0:ptr brp_vertex, m1:ptr brp_ver
     OUTCODE_ORDINATE [eax].comp[4*C_Y],[eax].comp[4*C_W],topBottomTable,ebx,ecx
     OUTCODE_ORDINATE [eax].comp[4*C_Z],[eax].comp[4*C_W],hitherYonTable,ebx,ecx
     mov [eax].flags,edx
+
     push ebp
 
     mov ecx,m2
@@ -257,22 +243,22 @@ averageVertices proc renderer:ptr br_renderer, m0:ptr brp_vertex, m1:ptr brp_ver
 
 ; perform clip plane outcoding if neccessary.
     mov edx,scache.user_clip_active
-    mov edi,MAX_STATE_CLIP_PLANES-1
+    mov edi,MAX_STATE_CLIP_PLANES
 
     test edx,edx
     jz clipDone
 assume ebp:ptr br_renderer
+    lea ebp,[ebp]._state.clip+(MAX_STATE_CLIP_PLANES - 1)*sizeof(state_clip)
 clipPlane:
-    lea ebp,[ebp]._state.clip+MAX_STATE_CLIP_PLANES*sizeof(state_clip)
 assume ebp:ptr state_clip
-    cmp esi,BRT_PLANE
+    cmp [ebp]._type, BRT_PLANE
     jne clipNext
-    lea edx,[ebp].plane
+    lea edx,[ebp].plane.v
     lea esi,[eax].comp[4*C_X]
     DOT_PRODUCT_4 esi,edx,dotProduct
     mov edx,dotProduct
     mov esi,[eax].flags
-    test edx,080000000h
+    test edx,080000000h ; If the DP is negative (sign bit set), XOR the outcodes
     jz clip1
     mov edx,OUTCODE_USER or OUTCODE_N_USER
     push ecx
@@ -282,12 +268,13 @@ assume ebp:ptr state_clip
     xor esi,edx
     mov [eax].flags,esi
 clip1:
+    lea edx,[ebp].plane.v
     lea esi,[ebx].comp[4*C_X]
     DOT_PRODUCT_4 esi,edx,dotProduct
     mov edx,dotProduct
     mov esi,[ebx].flags
     test edx,080000000h
-    jz clip1
+    jz clip2
     mov edx,OUTCODE_USER or OUTCODE_N_USER
     push ecx
     mov ecx,edi
@@ -296,12 +283,13 @@ clip1:
     xor esi,edx
     mov [ebx].flags,esi
 clip2:
+    lea edx,[ebp].plane.v
     lea esi,[ecx].comp[4*C_X]
     DOT_PRODUCT_4 esi,edx,dotProduct
     mov edx,dotProduct
     mov esi,[ecx].flags
     test edx,080000000h
-    jz clip1
+    jz clipNext
     mov edx,OUTCODE_USER or OUTCODE_N_USER
     push ecx
     mov ecx,edi
@@ -312,7 +300,7 @@ clip2:
 clipNext:
     sub ebp,sizeof(state_clip)
     dec edi
-    jge clipPlane
+    jnz clipPlane
 clipDone:
 ;project if neccesary
     mov edx,[eax].flags
@@ -389,9 +377,6 @@ sort_table_2    dword   2*4
                 dword   0*4
                 dword   0*4
                 dword   0*4
-
-temp            dword   0
-temp2           dword   0
 
 fp_one          dword   1.0
 fp_half         dword   0.5
