@@ -8,14 +8,50 @@ typedef struct br_demo_tut6 {
     br_actor *planet;
 } br_demo_tut6;
 
-static br_error Tutorial6Init(br_demo *demo)
+static br_error Tutorial6LoadSWRes(br_demo *demo)
 {
-    br_demo_tut6 *tut;
-    br_actor     *light, *observer;
-    br_camera    *camera_data;
-    br_material  *planet_material;
-    br_model     *planet_model;
-    br_pixelmap  *earth_pm;
+    br_pixelmap *std_pal;
+    br_pixelmap *shade_tab;
+    br_pixelmap *earth_pm;
+
+    if((std_pal = BrPixelmapLoad("std.pal")) == NULL) {
+        BrLogError("DEMO", "Unable to load std.pal");
+        return BRE_FAIL;
+    }
+
+    if((shade_tab = BrPixelmapLoad("shade.tab")) == NULL) {
+        BrLogError("DEMO", "Unable to load shade.tab");
+        return BRE_FAIL;
+    }
+    BrTableAdd(shade_tab);
+
+    /*
+     * Load and Register `earth' Texture
+     */
+    if((earth_pm = BrPixelmapLoad("earth8.pix")) == NULL) {
+        BrLogError("DEMO", "Unable to load earth8.pix");
+        return BRE_FAIL;
+    }
+
+    /*
+     * Per-pixelmap palette needed for non-indexed renderers.
+     */
+    earth_pm->map = std_pal;
+    BrMapAdd(earth_pm);
+
+    /*
+     * Indexed targets need a palette.
+     */
+    if(demo->colour_buffer->type == BR_PMT_INDEX_8) {
+        BrPixelmapPaletteSet(demo->colour_buffer, std_pal);
+    }
+
+    return BRE_OK;
+}
+
+static br_error Tutorial6LoadHWRes(br_demo *demo)
+{
+    br_pixelmap *earth_pm;
 
     /*
      * Load and Register `earth' Texture
@@ -24,7 +60,22 @@ static br_error Tutorial6Init(br_demo *demo)
         BrLogError("DEMO", "Unable to load earth15.pix");
         return BRE_FAIL;
     }
+
     BrMapAdd(earth_pm);
+    return BRE_OK;
+}
+
+static br_error Tutorial6Init(br_demo *demo)
+{
+    br_demo_tut6 *tut;
+    br_actor     *light, *observer;
+    br_camera    *camera_data;
+    br_material  *planet_material;
+    br_model     *planet_model;
+    br_error      err;
+
+    if((err = demo->hw_accel ? Tutorial6LoadHWRes(demo) : Tutorial6LoadSWRes(demo)) != BRE_OK)
+        return err;
 
     /*
      * Load and Apply `earth' Material
