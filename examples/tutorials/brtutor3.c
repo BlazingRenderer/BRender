@@ -15,7 +15,7 @@ typedef struct br_demo_tut3 {
 static br_error Tutorial3Init(br_demo *demo)
 {
     br_demo_tut3 *tut;
-    br_actor     *light, *observer;
+    br_actor     *observer;
     br_camera    *camera_data;
 
     tut = BrResAllocate(demo, sizeof(br_demo_tut3), BR_MEMORY_APPLICATION);
