@@ -23,8 +23,8 @@ static br_error Tutorial8Init(br_demo *demo)
     }
     BrMapAdd(gold_pm);
 
-    if((gold_mat = BrFmtScriptMaterialLoad("gold15.mat")) == NULL) {
-        BrLogError("DEMO", "Unable to load gold15.mat");
+    if((gold_mat = BrFmtScriptMaterialLoad("gold.mat")) == NULL) {
+        BrLogError("DEMO", "Unable to load gold.mat");
         return BRE_FAIL;
     }
     BrMaterialAdd(gold_mat);
@@ -61,7 +61,7 @@ static br_error Tutorial8Init(br_demo *demo)
      */
     tut->duck           = BrActorAdd(demo->world, BrActorAllocate(BR_ACTOR_MODEL, NULL));
     tut->duck->model    = duck_model;
-    tut->duck->material = BrMaterialFind("gold15");
+    tut->duck->material = BrMaterialFind("gold");
     tut->duck->t.type   = BR_TRANSFORM_MATRIX34;
     BrMatrix34RotateX(&tut->duck->t.t.mat, BR_ANGLE_DEG(30));
 

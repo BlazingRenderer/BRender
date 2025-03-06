@@ -30,8 +30,8 @@ add_example(brtutor10)
 
 set(TUTORIAL_FILES cube.mat cylinder.dat duck.3ds duck.dat duck.mat
 		e.png e.tga earth.mat earth15.pix earth8.pix
-		fork.3ds fork.asc fork.dat fork.mat gold.gif gold15.mat gold15.pix
-		gold8.mat gold8.pix mkranges.txt refmap.gif refmap.pix refmap.png
+		fork.3ds fork.asc fork.dat fork.mat gold.gif gold.mat gold15.pix
+		gold8.pix mkranges.txt refmap.gif refmap.pix refmap.png
 		refmap.tga shade.tab sph16.dat sph32.dat sph4096.dat sph8.dat std.pal
 		strippal.txt tile.pix tile0011.tga torus.dat
 		)
