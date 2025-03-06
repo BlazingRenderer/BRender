@@ -156,6 +156,8 @@ int BrDemoRun(const char *title, br_uint_16 width, br_uint_16 height, const br_d
     demo->_screen->origin_x = (br_int_16)(demo->_screen->width >> 1);
     demo->_screen->origin_y = (br_int_16)(demo->_screen->height >> 1);
 
+    demo->hw_accel = BR_TRUE;
+
     /*
      * Windowed mode initially.
      */

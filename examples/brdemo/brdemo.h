@@ -78,6 +78,11 @@ typedef struct br_demo {
     br_pixelmap *colour_buffer;
     br_pixelmap *depth_buffer;
 
+    /*
+     * Are we using a hardware-accelerated renderer?
+     */
+    br_boolean hw_accel;
+
     void *user;
 
     /*
