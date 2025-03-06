@@ -17,12 +17,6 @@ static br_error Tutorial6Init(br_demo *demo)
     br_model     *planet_model;
     br_pixelmap  *earth_pm;
 
-    if((planet_model = BrModelLoad("sph32.dat")) == NULL) {
-        BrLogError("DEMO", "Unable to load sph32.dat");
-        return BRE_FAIL;
-    }
-    BrModelAdd(planet_model);
-
     /*
      * Load and Register `earth' Texture
      */
@@ -40,6 +34,12 @@ static br_error Tutorial6Init(br_demo *demo)
         return BRE_FAIL;
     }
     BrMaterialAdd(planet_material);
+
+    if((planet_model = BrModelLoad("sph32.dat")) == NULL) {
+        BrLogError("DEMO", "Unable to load sph32.dat");
+        return BRE_FAIL;
+    }
+    BrModelAdd(planet_model);
 
     tut = BrResAllocate(demo, sizeof(br_demo_tut6), BR_MEMORY_APPLICATION);
 
