@@ -8,6 +8,68 @@ typedef struct br_demo_tut8 {
     br_actor *duck;
 } br_demo_tut8;
 
+static br_error Tutorial8LoadSWRes(br_demo *demo)
+{
+    br_pixelmap *std_pal;
+    br_pixelmap *shade_tab;
+    br_pixelmap *gold_pm;
+
+    if((std_pal = BrPixelmapLoad("std.pal")) == NULL) {
+        BrLogError("DEMO", "Unable to load std.pal");
+        return BRE_FAIL;
+    }
+
+    if((shade_tab = BrPixelmapLoad("shade.tab")) == NULL) {
+        BrLogError("DEMO", "Unable to load shade.tab");
+        return BRE_FAIL;
+    }
+    BrTableAdd(shade_tab);
+
+    /*
+     * Load and Register `gold' Texture.
+     *
+     * NB: The source texture is 320x200. In order for the 15/16bpp software renderer to use it (8bpp is fine), it
+     * needs to be POT.
+     *  convert examples/tutorials/dat/gold.gif  -resize 256x256\! gold256.png
+     *  texconv gold256.png -n gold -Q examples/tutorials/dat/std.pal -O image -o examples/tutorials/dat/gold8.pix
+     */
+    if((gold_pm = BrPixelmapLoad("gold8.pix")) == NULL) {
+        BrLogError("DEMO", "Unable to load gold8.pix");
+        return BRE_FAIL;
+    }
+
+    /*
+     * Per-pixelmap palette needed for non-indexed renderers.
+     */
+    gold_pm->map = std_pal;
+    BrMapAdd(gold_pm);
+
+    /*
+     * Indexed targets need a palette.
+     */
+    if(demo->colour_buffer->type == BR_PMT_INDEX_8) {
+        BrPixelmapPaletteSet(demo->colour_buffer, std_pal);
+    }
+
+    return BRE_OK;
+}
+
+static br_error Tutorial8LoadHWRes(br_demo *demo)
+{
+    br_pixelmap *gold_pm;
+
+    /*
+     * Load and Register `gold' Texture
+     */
+    if((gold_pm = BrPixelmapLoad("gold15.pix")) == NULL) {
+        BrLogError("DEMO", "Unable to load gold15.pix");
+        return BRE_FAIL;
+    }
+
+    BrMapAdd(gold_pm);
+    return BRE_OK;
+}
+
 static br_error Tutorial8Init(br_demo *demo)
 {
     br_demo_tut8 *tut;
@@ -15,13 +77,10 @@ static br_error Tutorial8Init(br_demo *demo)
     br_model     *duck_model;
     br_material  *gold_mat;
     br_camera    *camera_data;
-    br_pixelmap  *gold_pm;
+    br_error      err;
 
-    if((gold_pm = BrPixelmapLoad("gold15.pix")) == NULL) {
-        BrLogError("DEMO", "Unable to load gold15.pix");
-        return BRE_FAIL;
-    }
-    BrMapAdd(gold_pm);
+    if((err = demo->hw_accel ? Tutorial8LoadHWRes(demo) : Tutorial8LoadSWRes(demo)) != BRE_OK)
+        return err;
 
     if((gold_mat = BrFmtScriptMaterialLoad("gold.mat")) == NULL) {
         BrLogError("DEMO", "Unable to load gold.mat");
