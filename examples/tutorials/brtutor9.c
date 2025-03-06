@@ -8,7 +8,7 @@ typedef struct br_demo_tut9 {
     br_actor *fork;
 } br_demo_tut9;
 
-br_error Tutorial9Init(br_demo *demo)
+static br_error Tutorial9Init(br_demo *demo)
 {
     br_demo_tut9 *tut;
     br_actor     *light, *observer;
@@ -78,7 +78,7 @@ br_error Tutorial9Init(br_demo *demo)
     return BRE_OK;
 }
 
-void Tutorial9Update(br_demo *demo, br_scalar dt)
+static void Tutorial9Update(br_demo *demo, br_scalar dt)
 {
     br_demo_tut9 *tut = demo->user;
 

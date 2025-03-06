@@ -12,7 +12,7 @@ typedef struct br_demo_tut3 {
     br_actor *moon;
 } br_demo_tut3;
 
-br_error Tutorial3Init(br_demo *demo)
+static br_error Tutorial3Init(br_demo *demo)
 {
     br_demo_tut3 *tut;
     br_actor     *light, *observer;
@@ -69,7 +69,7 @@ br_error Tutorial3Init(br_demo *demo)
     return BRE_OK;
 }
 
-void Tutorial3Update(br_demo *demo, br_scalar dt)
+static void Tutorial3Update(br_demo *demo, br_scalar dt)
 {
     br_demo_tut3 *tut   = demo->user;
     float         speed = dt * 25;
