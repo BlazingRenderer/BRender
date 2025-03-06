@@ -21,6 +21,20 @@ static br_error Tutorial3Init(br_demo *demo)
     tut = BrResAllocate(demo, sizeof(br_demo_tut3), BR_MEMORY_APPLICATION);
 
     /*
+     * If indexed, load and set the palette.
+     */
+    if(demo->colour_buffer->type == BR_PMT_INDEX_8) {
+        br_pixelmap *std_pal;
+
+        if((std_pal = BrPixelmapLoad("std.pal")) == NULL) {
+            BrLogError("DEMO", "Unable to load std.pal");
+            return BRE_FAIL;
+        }
+
+        BrPixelmapPaletteSet(demo->colour_buffer, std_pal);
+    }
+
+    /*
      * Load and Enable Default Light Source
      */
     BrLightEnable(BrActorAdd(demo->world, BrActorAllocate(BR_ACTOR_LIGHT, NULL)));
