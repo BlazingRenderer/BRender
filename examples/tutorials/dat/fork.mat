@@ -3,7 +3,7 @@
 
 material = [
     identifier = "CHROME GIFMAP";
-    flags = [light];
+    flags = [light,smooth,environment];
     ambient = 0.2;
     diffuse = 0.500000;
     specular = 0.6;
