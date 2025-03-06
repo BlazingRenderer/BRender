@@ -11,7 +11,7 @@ typedef struct br_demo_tut5 {
 static br_error Tutorial5Init(br_demo *demo)
 {
     br_demo_tut5 *tut;
-    br_actor     *light, *observer, *wings1, *wings2;
+    br_actor     *light, *observer;
     br_camera    *camera_data;
     br_material  *cube_material;
 
