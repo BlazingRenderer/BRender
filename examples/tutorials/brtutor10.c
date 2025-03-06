@@ -8,6 +8,66 @@ typedef struct br_demo_tut10 {
     br_actor *fork;
 } br_demo_tut10;
 
+static br_error Tutorial10LoadSWRes(br_demo *demo)
+{
+    br_pixelmap *std_pal;
+    br_pixelmap *shade_tab;
+    br_pixelmap *chrome_pm;
+
+    if((std_pal = BrPixelmapLoad("std.pal")) == NULL) {
+        BrLogError("DEMO", "Unable to load std.pal");
+        return BRE_FAIL;
+    }
+
+    if((shade_tab = BrPixelmapLoad("shade.tab")) == NULL) {
+        BrLogError("DEMO", "Unable to load shade.tab");
+        return BRE_FAIL;
+    }
+    BrTableAdd(shade_tab);
+
+    /*
+     * Load and Register `chrome' Texture.
+     *
+     *  convert examples/tutorials/dat/tile0011.tga  -resize 128x128\! tile128.png
+     *  texconv tile128.png -n REFMAP -Q examples/tutorials/dat/std.pal -O image -o examples/tutorials/dat/tile8.pix
+     */
+    if((chrome_pm = BrPixelmapLoad("tile8.pix")) == NULL) {
+        BrLogError("DEMO", "Unable to load tile8.pix");
+        return BRE_FAIL;
+    }
+
+    /*
+     * Per-pixelmap palette needed for non-indexed renderers.
+     */
+    chrome_pm->map = std_pal;
+    BrMapAdd(chrome_pm);
+
+    /*
+     * Indexed targets need a palette.
+     */
+    if(demo->colour_buffer->type == BR_PMT_INDEX_8) {
+        BrPixelmapPaletteSet(demo->colour_buffer, std_pal);
+    }
+
+    return BRE_OK;
+}
+
+static br_error Tutorial10LoadHWRes(br_demo *demo)
+{
+    br_pixelmap *chrome_pm;
+
+    /*
+     * Load and Register TILE0011 Texture
+     */
+    if((chrome_pm = BrPixelmapLoad("tile.pix")) == NULL) {
+        BrLogError("DEMO", "Unable to load tile.pix");
+        return BRE_FAIL;
+    }
+
+    BrMapAdd(chrome_pm);
+    return BRE_OK;
+}
+
 static br_error Tutorial10Init(br_demo *demo)
 {
     br_demo_tut10 *tut;
@@ -15,16 +75,10 @@ static br_error Tutorial10Init(br_demo *demo)
     br_model      *fork_model;
     br_material   *fork_mat;
     br_camera     *camera_data;
-    br_pixelmap   *tile_pm;
+    br_error       err;
 
-    /*
-     * Load and Register TILE0011 Texture
-     */
-    if((tile_pm = BrPixelmapLoad("refmap.pix")) == NULL) {
-        BrLogError("DEMO", "Unable to load refmap.pix");
-        return BRE_FAIL;
-    }
-    BrMapAdd(tile_pm);
+    if((err = demo->hw_accel ? Tutorial10LoadHWRes(demo) : Tutorial10LoadSWRes(demo)) != BRE_OK)
+        return err;
 
     /*
      * Load and Apply `fork' Material
