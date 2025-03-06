@@ -1,13 +1,14 @@
-# This material script file describes the appearance of the 
-# material "BLUE MATERIAL"
+# This material script file describes the appearance of the
+# material "BLUE MATERIAL", a plain blue texture
 
 material = [
-
-        name = "BLUE MATERIAL"; 
-        colour = [0,0,255];
-        ambient = 0.05;
-        diffuse = 0.55;
-        specular = 0.4;
-        power = 20;
-        flags = [light,smooth];
-        ];
+    identifier  = "BLUE MATERIAL";
+    colour      = [0,0,255];
+	  ambient     = 0.05;
+	  diffuse     = 0.55;
+	  specular    = 0.40;
+	  power       = 10;
+	  flags       = [light,smooth];
+	  index_base  = 64;
+	  index_range = 30;
+];
