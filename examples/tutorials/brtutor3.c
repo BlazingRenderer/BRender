@@ -106,5 +106,5 @@ static br_demo_dispatch dispatch = {
 
 int main(int argc, char **argv)
 {
-    return BrDemoRun("BRender Tutorial 3", 1280, 720, &dispatch);
+    return BrDemoRunArgv("BRender Tutorial 3", &dispatch, argc, argv);
 }
