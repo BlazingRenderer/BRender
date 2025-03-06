@@ -8,14 +8,55 @@ typedef struct br_demo_tut9 {
     br_actor *fork;
 } br_demo_tut9;
 
-static br_error Tutorial9Init(br_demo *demo)
+static br_error Tutorial9LoadSWRes(br_demo *demo)
 {
-    br_demo_tut9 *tut;
-    br_actor     *light, *observer;
-    br_model     *fork_model;
-    br_material  *fork_mat;
-    br_camera    *camera_data;
-    br_pixelmap  *chrome_pm;
+    br_pixelmap *std_pal;
+    br_pixelmap *shade_tab;
+    br_pixelmap *chrome_pm;
+
+    if((std_pal = BrPixelmapLoad("std.pal")) == NULL) {
+        BrLogError("DEMO", "Unable to load std.pal");
+        return BRE_FAIL;
+    }
+
+    if((shade_tab = BrPixelmapLoad("shade.tab")) == NULL) {
+        BrLogError("DEMO", "Unable to load shade.tab");
+        return BRE_FAIL;
+    }
+    BrTableAdd(shade_tab);
+
+    /*
+     * Load and Register `chrome' Texture.
+     *
+     * NB: The source texture is 320x200. In order for the 15/16bpp software renderer to use it (8bpp is fine), it
+     * needs to be POT.
+     *  convert examples/tutorials/dat/refmap.gif  -resize 256x256\! refmap256.png
+     *  texconv refmap256.png -n refmap -Q examples/tutorials/dat/std.pal -O image -o examples/tutorials/dat/refmap8.pix
+     */
+    if((chrome_pm = BrPixelmapLoad("refmap8.pix")) == NULL) {
+        BrLogError("DEMO", "Unable to load refmap8.pix");
+        return BRE_FAIL;
+    }
+
+    /*
+     * Per-pixelmap palette needed for non-indexed renderers.
+     */
+    chrome_pm->map = std_pal;
+    BrMapAdd(chrome_pm);
+
+    /*
+     * Indexed targets need a palette.
+     */
+    if(demo->colour_buffer->type == BR_PMT_INDEX_8) {
+        BrPixelmapPaletteSet(demo->colour_buffer, std_pal);
+    }
+
+    return BRE_OK;
+}
+
+static br_error Tutorial9LoadHWRes(br_demo *demo)
+{
+    br_pixelmap *chrome_pm;
 
     /*
      * Load and Register `chrome' Texture
@@ -24,7 +65,22 @@ static br_error Tutorial9Init(br_demo *demo)
         BrLogError("DEMO", "Unable to load refmap.pix");
         return BRE_FAIL;
     }
+
     BrMapAdd(chrome_pm);
+    return BRE_OK;
+}
+
+static br_error Tutorial9Init(br_demo *demo)
+{
+    br_demo_tut9 *tut;
+    br_actor     *light, *observer;
+    br_model     *fork_model;
+    br_material  *fork_mat;
+    br_camera    *camera_data;
+    br_error      err;
+
+    if((err = demo->hw_accel ? Tutorial9LoadHWRes(demo) : Tutorial9LoadSWRes(demo)) != BRE_OK)
+        return err;
 
     /*
      * Load and Apply `fork' Material
