@@ -3,7 +3,6 @@
 
 material = [
     name          = "gold";
-    colour        = [0,255,0];
     ambient       = 0.05;
     diffuse       = 0.55;
     specular      = 0.4;
