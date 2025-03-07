@@ -221,14 +221,3 @@ void VIDEOI_BrRectToGL(const br_pixelmap *pm, br_rectangle *r)
     *r   = out;
     r->y = pm->height - r->h - r->y;
 }
-
-br_matrix4 *VIDEOI_D3DtoGLProjection(br_matrix4 *m)
-{
-    // Change the signs
-    // https://cv4mar.blogspot.com.au/2009/03/transformation-matrices-between-opengl.html
-    m->m[0][2] = -m->m[0][2];
-    m->m[1][2] = -m->m[1][2];
-    m->m[2][2] = -m->m[2][2];
-    m->m[3][2] = -m->m[3][2];
-    return m;
-}
