@@ -148,6 +148,8 @@ static void BR_CMETHOD_DECL(br_renderer_gl, sceneBegin)(br_renderer *self)
     StateGLReset(&self->state.cache);
     StateGLUpdateScene(&self->state.cache, self->state.current);
 
+    glDepthRange(1.0f, 0.0f);
+
     glUseProgram(hVideo->brenderProgram.program);
     glBindFramebuffer(GL_FRAMEBUFFER, self->state.cache.fbo);
     glBindBufferBase(GL_UNIFORM_BUFFER, hVideo->brenderProgram.blockBindingScene, hVideo->brenderProgram.uboScene);

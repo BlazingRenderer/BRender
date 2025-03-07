@@ -582,7 +582,6 @@ br_error BR_CMETHOD(br_device_pixelmap_gl, rectangleStretchCopyTo)(br_device_pix
     };
 
     BrMatrix4Orthographic(&rect_data.mvp, 0.0f, 1.0f, 0.0f, 1.0f, -1.0f, 1.0f);
-    VIDEOI_D3DtoGLProjection(&rect_data.mvp);
 
     glBindVertexArray(hVideo->rectProgram.vao);
     glBindBuffer(GL_UNIFORM_BUFFER, hVideo->rectProgram.ubo);
@@ -727,7 +726,6 @@ br_error BR_CMETHOD(br_device_pixelmap_gl, text)(br_device_pixelmap *self, br_po
      */
     text_data = BrScratchAllocate(sizeof(br_text_gl));
     BrMatrix4Orthographic(&text_data->mvp, 0.0f, 1.0f, 0.0f, 1.0f, -1.0f, 1.0f);
-    VIDEOI_D3DtoGLProjection(&text_data->mvp);
     text_data->colour = (br_vector3)BR_VECTOR3(BR_RED(colour) / 255.0f, BR_GRN(colour) / 255.0f, BR_BLU(colour) / 255.0f);
 
     glBindVertexArray(self->screen->asFront.video.textProgram.vao_glyphs);
