@@ -1,4 +1,5 @@
 #define MAX_LIGHTS                   48 /* Must match up with BRender */
+#define MAX_CLIP_PLANES              6  /* Must match up with BRender */
 #define SPECULARPOW_CUTOFF           0.6172
 #define BR_SCALAR_EPSILON            1.192092896e-7f
 
@@ -35,7 +36,9 @@ layout(std140) uniform br_scene_state
 {
     vec4 eye_view; /* Eye position in view-space */
     br_light lights[MAX_LIGHTS];
+    vec4 clip_planes[MAX_CLIP_PLANES];
     uint num_lights;
+    uint num_clip_planes;
 };
 
 layout(std140) uniform br_model_state

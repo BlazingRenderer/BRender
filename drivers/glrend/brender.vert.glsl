@@ -16,6 +16,11 @@ out vec4 vertexLight;
 out vec3 rawPosition;
 out vec3 rawNormal;
 
+out gl_PerVertex {
+    vec4 gl_Position;
+    float gl_ClipDistance[MAX_CLIP_PLANES];
+};
+
 #if ENABLE_PSX_SIMULATION
 vec4 PSXify_pos(in vec4 vertex, in vec2 resolution)
 {
@@ -52,4 +57,8 @@ void main()
 #endif
 
     gl_Position = pos;
+
+    for(uint i = 0u; i < num_clip_planes; ++i) {
+        gl_ClipDistance[i] = dot(position, clip_planes[i]);
+    }
 }

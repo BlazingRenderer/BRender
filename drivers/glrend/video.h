@@ -107,7 +107,9 @@ BR_STATIC_ASSERT(sizeof(shader_data_light) % 16 == 0, "shader_data_light is not 
 typedef struct shader_data_scene {
     alignas(16) br_vector4 eye_view;
     alignas(16) shader_data_light lights[BR_MAX_LIGHTS];
+    alignas(16) br_vector4 clip_planes[BR_MAX_CLIP_PLANES];
     alignas(4) uint32_t num_lights;
+    alignas(4) uint32_t num_clip_planes;
 } shader_data_scene;
 BR_STATIC_ASSERT(sizeof(((shader_data_scene *)NULL)->lights) == sizeof(shader_data_light) * BR_MAX_LIGHTS,
                  "std::array<shader_data_light> fucked up");

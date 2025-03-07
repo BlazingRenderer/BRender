@@ -168,6 +168,23 @@ void StateGLUpdateScene(state_cache *cache, state_stack *state)
     BrVector4Set(&cache->scene.eye_view, 0.0f, 0.0f, 1.0f, 0.0f);
 
     ProcessSceneLights(cache, state->light);
+
+    cache->scene.num_clip_planes = 0;
+    if(state->valid & MASK_STATE_CLIP) {
+        for(int i = 0; i < BR_ASIZE(cache->scene.clip_planes); ++i) {
+            const state_clip *cp = state->clip + i;
+            if(cp->type != BRT_PLANE)
+                continue;
+
+            /*
+             * BrSetupClipPlanes() does "Push plane through to screen space".
+             * We need to undo that particular transformation.
+             */
+            BrMatrix4TApply(cache->scene.clip_planes + i, &cp->plane, &state->matrix.view_to_screen);
+
+            ++cache->scene.num_clip_planes;
+        }
+    }
 }
 
 static void ResetCacheLight(shader_data_light *alp)
@@ -205,4 +222,10 @@ void StateGLReset(state_cache *cache)
     }
 
     cache->scene.num_lights = 0;
+
+    for(int i = 0; i < BR_ASIZE(cache->scene.clip_planes); ++i) {
+        BrVector4Set(cache->scene.clip_planes + i, BR_SCALAR(0.0), BR_SCALAR(0.0), BR_SCALAR(0.0), BR_SCALAR(0.0));
+    }
+
+    cache->scene.num_clip_planes = 0;
 }

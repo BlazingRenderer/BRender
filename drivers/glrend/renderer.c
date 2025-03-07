@@ -140,6 +140,11 @@ static void BR_CMETHOD_DECL(br_renderer_gl, sceneBegin)(br_renderer *self)
         BR_ERROR("Can't render without a destination");
     }
 
+    /*
+     * Cache some data before we blat our cache.
+     */
+    br_uint_32 last_num_clip_planes = self->state.cache.scene.num_clip_planes;
+
     StateGLReset(&self->state.cache);
     StateGLUpdateScene(&self->state.cache, self->state.current);
 
@@ -155,6 +160,21 @@ static void BR_CMETHOD_DECL(br_renderer_gl, sceneBegin)(br_renderer *self)
 
     if(self->pixelmap->msaa_samples)
         glEnable(GL_MULTISAMPLE);
+
+    /*
+     * Now enable our clip planes.
+     */
+    br_uint_32 current_num_clip_planes = self->state.cache.scene.num_clip_planes;
+
+    if(last_num_clip_planes > current_num_clip_planes) {
+        for(br_uint_32 i = current_num_clip_planes; i < last_num_clip_planes; ++i) {
+            glDisable(GL_CLIP_DISTANCE0 + i);
+        }
+    }
+
+    for(br_uint_32 i = last_num_clip_planes; i < current_num_clip_planes; ++i) {
+        glEnable(GL_CLIP_DISTANCE0 + i);
+    }
 
     self->has_begun = 1;
 }
