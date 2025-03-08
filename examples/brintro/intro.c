@@ -57,24 +57,13 @@ static int load_pixelmaps(void)
         return -1;
 
     for(size_t i = 0; i < INTRO_NUM_PIX; ++i) {
-        br_pixelmap *newpm;
         if(pixtable[i] == palette)
             continue;
 
         if(pixtable[i]->type == BR_PMT_INDEX_8 && pixtable[i]->map == NULL)
             pixtable[i]->map = palette;
-
-        if((newpm = BrPixelmapDeCLUT(pixtable[i])) != NULL) {
-            BrMapAdd(newpm);
-
-            BrMapRemove(pixtable[i]);
-            BrPixelmapFree(pixtable[i]);
-            pixtable[i] = newpm;
-        }
     }
 
-    BrMapRemove(palette);
-    BrPixelmapFree(palette);
     return 0;
 }
 
