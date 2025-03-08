@@ -22,6 +22,7 @@ jobs:
           - "brender"
           - "brender-samples"
           - "brender-samples-clang"
+          - "brender-samples-linux32"
           - "brender-samples-win64"
           - "brender-samples-win32"
     steps:
