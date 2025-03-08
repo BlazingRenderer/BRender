@@ -326,6 +326,20 @@ static br_error SheetInit(br_demo *demo)
     }
     BrMapAdd(demo->palette);
 
+    /*
+     * If indexed, load and set the palette.
+     */
+    if(demo->colour_buffer->type == BR_PMT_INDEX_8) {
+        br_pixelmap *std_pal;
+
+        if((std_pal = BrPixelmapLoad("std.pal")) == NULL) {
+            BrLogError("DEMO", "Unable to load std.pal");
+            return BRE_FAIL;
+        }
+
+        BrPixelmapPaletteSet(demo->colour_buffer, std_pal);
+    }
+
     if((sphere_model = BrModelLoad("sph32.dat")) == NULL) {
         BrLogError("DEMO", "Error loading sph32.dat.");
         return BRE_FAIL;
