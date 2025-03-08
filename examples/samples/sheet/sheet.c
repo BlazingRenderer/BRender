@@ -5,8 +5,10 @@
 #include <math.h>
 #include <brdemo.h>
 
-#define S0 BR_SCALAR(0)
-#define S1 BR_SCALAR(1)
+#define SPF (1.0f / 60.0f)
+
+#define S0  BR_SCALAR(0)
+#define S1  BR_SCALAR(1)
 
 /* Specify number of vertices in sheet */
 
@@ -308,6 +310,7 @@ void PlaceSphere(br_actor *parent, br_model *model, br_vector3 *position, char *
 typedef struct br_demo_sheet {
     br_actor  *sheet;
     br_boolean frozen;
+    float      accum;
 } br_demo_sheet;
 
 static br_error SheetInit(br_demo *demo)
@@ -352,7 +355,8 @@ static br_error SheetInit(br_demo *demo)
     }
     BrMaterialAddMany(mats, nmats);
 
-    sheet = BrResAllocate(demo, sizeof(br_demo_sheet), BR_MEMORY_APPLICATION);
+    sheet        = BrResAllocate(demo, sizeof(br_demo_sheet), BR_MEMORY_APPLICATION);
+    sheet->accum = SPF;
 
     demo->world->t.type = BR_TRANSFORM_MATRIX34;
     BrMatrix34PostTranslate(&demo->world->t.t.mat, 0, BR_SCALAR(0.5), 0);
@@ -421,16 +425,24 @@ void SheetUpdate(br_demo *demo, br_scalar dt)
 {
     br_demo_sheet *sheet = demo->user;
 
-    if(sheet->frozen)
+    if(sheet->frozen) {
+        sheet->accum = SPF;
         return;
+    }
 
-    for(int i = 0; i < CYCLES; i++)
-        UpdateDynamics(sheet->sheet->model, &gravity);
+    sheet->accum += dt;
 
-    /* If the sheet has changed we need to tell BRender to */
-    /* update the normals, bounding box and radius */
+    while(sheet->accum >= SPF) {
+        for(int i = 0; i < CYCLES; i++)
+            UpdateDynamics(sheet->sheet->model, &gravity);
 
-    BrModelUpdate(sheet->sheet->model, BR_MODU_NORMALS | BR_MODU_BOUNDING_BOX | BR_MODU_RADIUS);
+        /* If the sheet has changed we need to tell BRender to */
+        /* update the normals, bounding box and radius */
+
+        BrModelUpdate(sheet->sheet->model, BR_MODU_NORMALS | BR_MODU_BOUNDING_BOX | BR_MODU_RADIUS);
+
+        sheet->accum -= SPF;
+    }
 }
 
 const static br_demo_dispatch dispatch = {
