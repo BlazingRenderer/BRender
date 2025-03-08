@@ -10,6 +10,10 @@ static br_error IntroInit(br_demo *demo)
         return BRE_FAIL;
     }
 
+    if(demo->colour_buffer->type == BR_PMT_INDEX_8) {
+        BrPixelmapPaletteSet(demo->colour_buffer, BrMapFind("intro_palette"));
+    }
+
     BrIntroSetAspect(intro, BR_DIV(BR_SCALAR(demo->colour_buffer->width), BR_SCALAR(demo->colour_buffer->height)));
 
     demo->user   = intro;
