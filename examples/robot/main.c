@@ -35,6 +35,26 @@ static br_error RobotInit(br_demo *demo)
     br_uint_32     nmodels;
     br_camera     *camera_data;
 
+    /*
+     * If indexed, load and set the palette.
+     */
+    if(demo->colour_buffer->type == BR_PMT_INDEX_8) {
+        br_pixelmap *std_pal, *shade_table;
+
+        if((std_pal = BrPixelmapLoad("os2pal.pal")) == NULL) {
+            BrLogError("DEMO", "Unable to load std.pal");
+            return BRE_FAIL;
+        }
+
+        BrPixelmapPaletteSet(demo->colour_buffer, std_pal);
+
+        if((shade_table = BrPixelmapLoad("os2shade.tab")) == NULL) {
+            BrLogError("DEMO", "Unable to load os2shade.tab");
+            return BRE_FAIL;
+        }
+        BrTableAdd(shade_table);
+    }
+
     if((nmaterials = BrFmtScriptMaterialLoadMany("robo.msc", materials, BR_ASIZE(materials))) == 0) {
         BrLogError("DEMO", "Unable to load robo.msc");
         return BRE_FAIL;

@@ -12,7 +12,7 @@ if(TARGET SDL2::SDL2main)
         target_link_libraries(robot PRIVATE SDL2::SDL2main)
 endif()
 
-set(ROBOT_FILES mask.pix robo.act robo.dat robo.msc robo.vue tile01_de.pix tile01.pix)
+set(ROBOT_FILES mask.pix robo.act robo.dat robo.msc robo.vue tile01_de.pix tile01.pix os2shade.tab os2pal.pal)
 
 foreach(file ${ROBOT_FILES})
         configure_file(${CMAKE_CURRENT_SOURCE_DIR}/dat/${file} ${CMAKE_CURRENT_BINARY_DIR}/${file} COPYONLY)
