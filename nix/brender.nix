@@ -3,6 +3,8 @@
 , version
 , cmake
 , perl
+, uasm
+, wineserverHook
 , SDL2
 , glfw
 , makeBinaryWrapper
@@ -18,12 +20,15 @@ stdenv.mkDerivation(finalAttrs: {
 
   pname = "brender";
 
-  src = ./.;
+  src = ../.;
 
   nativeBuildInputs = [
     cmake
     perl
     makeBinaryWrapper
+  ] ++ lib.optionals stdenv.isx86_32 [
+    uasm
+    wineserverHook
   ];
 
   passthru.devTools = [
@@ -43,6 +48,9 @@ stdenv.mkDerivation(finalAttrs: {
     (lib.cmakeBool "BRENDER_BUILD_TOOLS" withTools)
     (lib.cmakeBool "BRENDER_BUILD_EXAMPLES" withExamples)
     (lib.cmakeBool "BRENDER_BUILD_GLFW_EXAMPLE" withExamples)
+    (lib.cmakeBool "BRENDER_BUILD_SOFT" stdenv.isx86_32)
+  ] ++ lib.optionals stdenv.isx86_32 [
+    "-DCMAKE_ASM_MASM_COMPILER=uasm"
   ];
 
   postFixup = ''
