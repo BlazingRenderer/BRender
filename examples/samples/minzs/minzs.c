@@ -7,6 +7,20 @@ static br_error MinZSInit(br_demo *demo)
     br_camera *camera_data;
 
     /*
+     * If indexed, load and set the palette.
+     */
+    if(demo->colour_buffer->type == BR_PMT_INDEX_8) {
+        br_pixelmap *std_pal;
+
+        if((std_pal = BrPixelmapLoad("std.pal")) == NULL) {
+            BrLogError("DEMO", "Unable to load std.pal");
+            return BRE_FAIL;
+        }
+
+        BrPixelmapPaletteSet(demo->colour_buffer, std_pal);
+    }
+
+    /*
      * The demo framework creates a depth buffer, but we don't want it.
      */
     BrPixelmapFree(demo->depth_buffer);
