@@ -178,6 +178,10 @@ static br_error ForestInit(br_demo *demo)
     BrTableAdd(demo->palette);
     BrPixelmapPaletteSet(demo->colour_buffer, demo->palette);
 
+    if(demo->colour_buffer->type == BR_PMT_INDEX_8) {
+        demo->text_colour = 118;
+    }
+
     Add_Textures(Small_Bitmaps, &state->tex_sml);
     Add_Textures(Big_Bitmaps, &state->tex_big);
 
@@ -348,7 +352,7 @@ static void ForestRender(br_demo *demo)
     {
         br_int_32 base_x      = -demo->colour_buffer->origin_x + 5;
         br_int_32 base_y      = -demo->colour_buffer->origin_y + 5;
-        br_colour col         = BR_COLOUR_RGBA(255, 255, 255, 255);
+        br_colour col         = demo->text_colour;
         br_int_32 text_height = BrPixelmapTextHeight(demo->colour_buffer, BrFontProp7x9);
 
 
