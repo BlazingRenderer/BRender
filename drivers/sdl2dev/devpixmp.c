@@ -855,6 +855,13 @@ br_error BR_CMETHOD_DECL(br_device_pixelmap_sdl2, match)(br_device_pixelmap *sel
     pm->pm_origin_x = self->pm_origin_x;
     pm->pm_origin_y = self->pm_origin_y;
 
+    /*
+     * If both pixelmaps have a CLUT, copy it over.
+     */
+    if(self->clut != NULL && pm->clut != NULL) {
+        DeviceSDL2SetPaletteFromCLUT(pm->clut->pal, self->clut);
+    }
+
     *newpm = pm;
 
     return BRE_OK;
