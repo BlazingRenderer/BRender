@@ -46,7 +46,7 @@ material = [
 material = [
 	identifier = "ROBO TILE";
 	flags = [light, smooth];
-	colour =[255,50,50];
+	# colour =[255,50,50];
 	ambient = 0.10; diffuse = 0.75; specular = 0.0;
 	power = 53;
 	index_base = 170; index_range = 31;
@@ -56,7 +56,7 @@ material = [
 material = [
 	identifier = "ROBO MASK";
 	flags = [light, smooth];
-	colour =[255,50,50];
+	# colour =[255,50,50];
 	ambient = 0.10; diffuse = 0.75; specular = 0.0;
 	power = 53;
 	index_base = 170; index_range = 31;
