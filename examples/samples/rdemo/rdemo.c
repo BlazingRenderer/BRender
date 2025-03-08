@@ -68,6 +68,10 @@ br_error ReflectionInit(br_demo *demo)
     }
     BrTableAdd(demo->palette);
 
+    if(demo->colour_buffer->type == BR_PMT_INDEX_8) {
+        BrPixelmapPaletteSet(demo->colour_buffer, demo->palette);
+    }
+
     /*
      * If the teapot simply reflected the earth with no other source
      * for reflection then it would mostly look black so rather than simply/
