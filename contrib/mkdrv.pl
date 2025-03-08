@@ -52,7 +52,7 @@ sub run_h2inc {
 
     if ($^O eq 'linux') {
         # Hacky hacky
-        unshift(@params, 'wine');
+        unshift(@params, $ENV{WINE_EXECUTABLE} || 'wine');
     }
 
     delete $ENV{'INCLUDE'};

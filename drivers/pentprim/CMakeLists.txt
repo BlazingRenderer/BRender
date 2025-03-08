@@ -135,8 +135,25 @@ if(USE_MMX)
 endif()
 
 
+set(masm_flags )
 
-set_source_files_properties(${ASM_FILES} PROPERTIES COMPILE_OPTIONS "-safeseh")
+# -- The ASM_MASM compiler identification is unknown
+# -- Found assembler: /run/current-system/sw/bin/uasm
+if(CMAKE_ASM_MASM_COMPILER MATCHES ".*/uasm$")
+	list(APPEND masm_flags "-q" "-Zne" "-6" "-Zp4")
+
+	if(MINGW)
+		list(APPEND masm_flags "-coff")
+	else()
+		list(APPEND masm_flags "-elf" "-zcw")
+	endif()
+endif()
+
+list(APPEND masm_flags "-safeseh")
+
+message(STATUS "Assember Flags: ${masm_flags}")
+
+set_source_files_properties(${ASM_FILES} PROPERTIES COMPILE_OPTIONS "${masm_flags}")
 
 add_library(pentprim
         awtm.c

@@ -27,8 +27,26 @@ endif ()
 option(BRENDER_BUILD_DRIVERS "Build Drivers" ON)
 option(BRENDER_BUILD_SOFT "Build Software Renderer" OFF)
 
-if (BRENDER_BUILD_SOFT AND (NOT WIN32 OR NOT MSVC OR (NOT CMAKE_GENERATOR_PLATFORM STREQUAL "Win32")))
-    message(FATAL_ERROR "Can only build the software renderer on 32-bit Windows using MSVC.")
+message(STATUS "Building software renderer: ${BRENDER_BUILD_SOFT}")
+
+# CMake does _not_ handle this well.
+if (BRENDER_BUILD_SOFT)
+    if (NOT (CMAKE_SYSTEM_PROCESSOR MATCHES "i686.*|i386.*|x86.*|amd64.*|AMD64.*|x86_64.*" AND "${CMAKE_SIZEOF_VOID_P}" EQUAL "4"))
+        message(FATAL_ERROR "Can only build the software renderer on 32-bit x86.")
+    endif ()
+
+    if (NOT (CMAKE_HOST_SYSTEM_NAME MATCHES "Windows"))
+        find_program(
+                WINE_EXECUTABLE
+                NAMES wine
+                DOC "WINE executable location (for H2INC.EXE)"
+                REQUIRED
+        )
+
+        if (WINE_EXECUTABLE)
+            message(STATUS "Found WINE: ${WINE_EXECUTABLE}")
+        endif ()
+    endif ()
 endif ()
 
 add_subdirectory(core)
