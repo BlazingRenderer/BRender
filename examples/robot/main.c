@@ -197,5 +197,5 @@ const static br_demo_dispatch dispatch = {
 
 int main(int argc, char **argv)
 {
-    return BrDemoRun("BRender Robot Demo", 1280, 720, &dispatch);
+    return BrDemoRunArgv("BRender Robot Demo", &dispatch, argc, argv);
 }
