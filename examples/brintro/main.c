@@ -45,5 +45,5 @@ const static br_demo_dispatch dispatch = {
 
 int main(int argc, char **argv)
 {
-    return BrDemoRun("BRender Intro Sequence", 1024, 768, &dispatch);
+    return BrDemoRunArgv("BRender Intro Sequence", &dispatch, argc, argv);
 }
