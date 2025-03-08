@@ -6,6 +6,20 @@ static br_error MinZBInit(br_demo *demo)
     br_actor  *a;
     br_camera *camera_data;
 
+    /*
+     * If indexed, load and set the palette.
+     */
+    if(demo->colour_buffer->type == BR_PMT_INDEX_8) {
+        br_pixelmap *std_pal;
+
+        if((std_pal = BrPixelmapLoad("std.pal")) == NULL) {
+            BrLogError("DEMO", "Unable to load std.pal");
+            return BRE_FAIL;
+        }
+
+        BrPixelmapPaletteSet(demo->colour_buffer, std_pal);
+    }
+
     demo->camera = BrActorAdd(demo->world, BrActorAllocate(BR_ACTOR_CAMERA, NULL));
 
     camera_data              = demo->camera->type_data;
