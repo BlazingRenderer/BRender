@@ -360,7 +360,6 @@ static void ForestRender(br_demo *demo)
         br_colour col         = demo->text_colour;
         br_int_32 text_height = BrPixelmapTextHeight(demo->colour_buffer, BrFontProp7x9);
 
-
         static const char *usage_lines[] = {
             "Usage:",
             "  'A':            Freezes a frame of the animation",
@@ -370,7 +369,6 @@ static void ForestRender(br_demo *demo)
             "  'T':            Toggle big/small textures",
             "  '1'/'0':        Move forwards/backwards",
         };
-
 
         base_y += text_height * 2;
 
