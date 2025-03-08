@@ -22,6 +22,8 @@
 #include <brdemo.h>
 #include <string.h>
 
+#define SPF (1.0f / 60.0f)
+
 typedef struct br_demo_forest_textures {
     br_pixelmap *spcship;
     br_pixelmap *floor;
@@ -87,6 +89,8 @@ typedef struct br_demo_forest {
     br_scalar  xpos, ypos, zpos;
 
     br_uint_32 current_camera_mode;
+
+    float accum;
 } br_demo_forest;
 
 // Prototypes for CameraUpdate#, CameraReset#
@@ -169,6 +173,7 @@ static br_error ForestInit(br_demo *demo)
     *state = (br_demo_forest){
         .animate = 1,
         .start   = 0,
+        .accum   = SPF,
     };
 
     if((demo->palette = BrPixelmapLoad("forest.pal")) == NULL) {
@@ -489,22 +494,27 @@ static void ForestUpdate(br_demo *demo, br_scalar dt)
 
     br_transform xform;
 
-    state->counter++;
-    if(state->counter >= 180)
-        state->counter -= 180;
+    state->accum += dt;
+    while(state->accum >= SPF) {
+        state->counter++;
+        if(state->counter >= 180)
+            state->counter -= 180;
 
-    state->counter1 += 2;
-    if(state->counter1 >= 360)
-        state->counter1 -= 360;
+        state->counter1 += 2;
+        if(state->counter1 >= 360)
+            state->counter1 -= 360;
 
-    state->counter2++;
-    if(state->counter2 >= 60)
-        state->counter2 -= 60;
+        state->counter2++;
+        if(state->counter2 >= 60)
+            state->counter2 -= 60;
 
-    if((state->counter2 % 2) == 0)
-        state->counter3 += 1;
-    if(state->counter3 == 64)
-        state->counter3 = 0;
+        if((state->counter2 % 2) == 0)
+            state->counter3 += 1;
+        if(state->counter3 == 64)
+            state->counter3 = 0;
+
+        state->accum -= SPF;
+    }
 
     if(state->animate == 1) {
         BrMatrix34Copy(&state->object->t.t.mat, state->loop + state->counter);
