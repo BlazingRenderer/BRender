@@ -597,5 +597,5 @@ const static br_demo_dispatch dispatch = {
 
 int main(int argc, char **argv)
 {
-    return BrDemoRun("Forest Demo", 1280, 720, &dispatch);
+    return BrDemoRunArgv("Forest Demo", &dispatch, argc, argv);
 }

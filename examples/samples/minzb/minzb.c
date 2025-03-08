@@ -55,5 +55,5 @@ const static br_demo_dispatch dispatch = {
 
 int main(int argc, char **argv)
 {
-    return BrDemoRun("BRender Minimal Z-Buffer Demo", 1280, 720, &dispatch);
+    return BrDemoRunArgv("BRender Minimal Z-Buffer Demo", &dispatch, argc, argv);
 }
