@@ -122,7 +122,7 @@ static br_error RobotInit(br_demo *demo)
     demo->order_table->min_z = camera_data->hither_z;
     demo->order_table->max_z = camera_data->yon_z;
 
-    demo->clear_colour = BR_COLOUR_RGB(66, 66, 66);
+    demo->clear_colour = 0;
 
     /*
      * Robotate the model to face the camera.
