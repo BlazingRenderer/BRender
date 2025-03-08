@@ -1,15 +1,25 @@
+#include <stdio.h>
 #include <SDL.h>
 #include <brender.h>
 #include <brglrend.h>
 #include <brsdl2dev.h>
+#include "parg.h"
 
 #include "brdemo.h"
+
+struct br_device *BR_EXPORT BrDrv1SoftPrimBegin(const char *arguments);
+struct br_device *BR_EXPORT BrDrv1SoftRendBegin(const char *arguments);
 
 /* begin hook */
 void _BrBeginHook(void) // NOLINT(*-reserved-identifier)
 {
     BrDevAddStatic(NULL, BrDrv1SDL2Begin, NULL);
     BrDevAddStatic(NULL, BrDrv1GLBegin, NULL);
+
+#if HAVE_SOFTPRIM
+    BrDevAddStatic(NULL, BrDrv1SoftPrimBegin, NULL);
+#endif
+    BrDevAddStatic(NULL, BrDrv1SoftRendBegin, NULL);
 }
 
 /* end hook */
@@ -88,6 +98,7 @@ static br_pixelmap *BR_CALLBACK MapFindFailedLoadDeCLUT(const char *name)
         if(pm->type == BR_PMT_INDEX_8 && pm->map == NULL)
             pm->map = palette;
 
+#if 0
         if((pm2 = BrPixelmapDeCLUT(pm)) != NULL) {
             if(pm->map != palette)
                 BrResFree(pm->map);
@@ -95,20 +106,123 @@ static br_pixelmap *BR_CALLBACK MapFindFailedLoadDeCLUT(const char *name)
             BrResFree(pm);
             pm = pm2;
         }
+#endif
 
         if(pm->identifier != NULL)
             BrResFree(pm->identifier);
 
         pm->identifier = BrResStrDup(pm, name);
+
+        if(pm->map != NULL && pm->map != palette) {
+            /*
+             * If there's a non-default palette, give it a (hopefully) unique name
+             * so it can be added to the registry.
+             */
+            if(pm->map->identifier != NULL)
+                BrResFree(pm->map->identifier);
+
+            pm->map->identifier = BrResSprintf(pm->map, "%s(palette)", pm->identifier);
+            BrTableAdd(pm->map);
+        }
+
         BrMapAdd(pm);
     }
 
     return pm;
 }
 
-int BrDemoRun(const char *title, br_uint_16 width, br_uint_16 height, const br_demo_dispatch *dispatch)
+typedef struct br_demo_run_args {
+    const char *title;
+    br_int_32   width;
+    br_int_32   height;
+    int         verbose;
+    int         force_software;
+    br_uint_8   software_pm_type;
+    br_int_32   backbuffer_width;
+    br_int_32   backbuffer_height;
+} br_demo_run_args;
+
+static br_error resize_buffers(br_demo *demo, const br_demo_run_args *args)
 {
-    br_error    err;
+    br_int_32 width  = args->backbuffer_width;
+    br_int_32 height = args->backbuffer_height;
+
+    if(width <= 0)
+        width = demo->_screen->width;
+
+    if(height <= 0)
+        height = demo->_screen->height;
+
+    if(!demo->hw_accel) {
+        const br_token_value tv[] = {
+            {.t = BRT_WIDTH_I32,      .v = {.i32 = width}                },
+            {.t = BRT_HEIGHT_I32,     .v = {.i32 = height}               },
+            {.t = BRT_PIXEL_TYPE_U8,  .v = {.u8 = args->software_pm_type}},
+            {.t = BRT_PIXEL_BITS_I32, .v = {.i32 = 16}                   },
+            {.t = BR_NULL_TOKEN,      .v = {}                            },
+        };
+        return BrPixelmapResizeBuffersTV(demo->_screen, &demo->colour_buffer, &demo->depth_buffer, tv);
+    }
+
+    const br_token_value tv[] = {
+        {.t = BRT_WIDTH_I32,  .v = {.i32 = width} },
+        {.t = BRT_HEIGHT_I32, .v = {.i32 = height}},
+        {.t = BR_NULL_TOKEN,  .v = {}             },
+    };
+    return BrPixelmapResizeBuffersTV(demo->_screen, &demo->colour_buffer, &demo->depth_buffer, tv);
+}
+
+static br_error create_window(br_demo *demo, const br_demo_run_args *args)
+{
+    br_error err;
+
+    if(args->force_software)
+        goto try_software;
+
+#if 0
+    char *devs = BrResSprintf(demo, "SDL2,WIDTH=%d,HEIGHT=%d,WINDOW_NAME=\"%s\",HIDPI=1,RESIZABLE=1,OPENGL=%d",
+                              args->width, args->height, args->title, !args->force_software);
+    err = BrDevBeginVar(&demo->_screen, devs, BR_NULL_TOKEN);
+#endif
+
+    // clang-format off
+    err = BrDevBeginVar(&demo->_screen,       "SDL2",
+                        BRT_WIDTH_I32,        args->width,
+                        BRT_HEIGHT_I32,       args->height,
+                        BRT_WINDOW_NAME_CSTR, args->title,
+                        BRT_HIDPI_B,          BR_TRUE,
+                        BRT_RESIZABLE_B,      BR_TRUE,
+                        BRT_OPENGL_B,         args->force_software ? BR_FALSE : BR_TRUE,
+                        BR_NULL_TOKEN);
+    // clang-format on
+    if(err == BRE_OK) {
+        demo->hw_accel = BR_TRUE;
+        return err;
+    }
+
+    BrLogWarn("DEMO", "Unable to create window, falling back to software.");
+
+try_software:
+    // clang-format off
+    err = BrDevBeginVar(&demo->_screen,       "SDL2",
+                        BRT_WIDTH_I32,        args->width,
+                        BRT_HEIGHT_I32,       args->height,
+                        BRT_WINDOW_NAME_CSTR, args->title,
+                        BRT_HIDPI_B,          BR_FALSE,
+                        BRT_RESIZABLE_B,      BR_TRUE,
+                        BRT_OPENGL_B,         BR_FALSE,
+                        BR_NULL_TOKEN);
+    // clang-format on
+    if(err != BRE_OK) {
+        BrLogError("DEMO", "Unable to create window.");
+    }
+
+    demo->hw_accel = BR_FALSE;
+    return err;
+}
+
+static int BrDemoRunArg(const br_demo_dispatch *dispatch, const br_demo_run_args *args)
+{
     int         ret           = 1;
     br_demo    *demo          = NULL;
     SDL_Window *window        = NULL;
@@ -137,26 +251,11 @@ int BrDemoRun(const char *title, br_uint_16 width, br_uint_16 height, const br_d
     /*
      * Create the window.
      */
-    // clang-format off
-    err = BrDevBeginVar(&demo->_screen, "SDL2",
-                        BRT_WIDTH_I32,        width,
-                        BRT_HEIGHT_I32,       height,
-                        BRT_PIXEL_TYPE_U8,    BR_PMT_RGB_888,
-                        BRT_WINDOW_NAME_CSTR, title,
-                        BRT_HIDPI_B,          BR_TRUE,
-                        BRT_RESIZABLE_B,      BR_TRUE,
-                        BRT_OPENGL_B,         BR_TRUE,
-                        BR_NULL_TOKEN);
-    // clang-format on
-    if(err != BRE_OK) {
-        BrLogError("DEMO", "Unable to create window.");
+    if(create_window(demo, args) != BRE_OK)
         goto cleanup;
-    }
 
     demo->_screen->origin_x = (br_int_16)(demo->_screen->width >> 1);
     demo->_screen->origin_y = (br_int_16)(demo->_screen->height >> 1);
-
-    demo->hw_accel = BR_TRUE;
 
     /*
      * Windowed mode initially.
@@ -165,9 +264,31 @@ int BrDemoRun(const char *title, br_uint_16 width, br_uint_16 height, const br_d
     SDL_SetWindowFullscreen(window, 0);
     is_fullscreen = BR_FALSE;
 
-    if(BrPixelmapResizeBuffers(demo->_screen, &demo->colour_buffer, &demo->depth_buffer) != BRE_OK) {
+    if(resize_buffers(demo, args) != BRE_OK) {
         BrLogError("DEMO", "Error resizing window buffers.");
         goto cleanup;
+    }
+
+    /*
+     * Set appropriate colour defaults.
+     */
+    switch(demo->colour_buffer->type) {
+        case BR_PMT_INDEX_8:
+            demo->clear_colour = 0;
+            demo->text_colour  = 255;
+            break;
+        case BR_PMT_RGB_555:
+            demo->clear_colour = BR_COLOUR_RGB_555(0, 0, 0);
+            demo->text_colour  = BR_COLOUR_RGB_555(255, 255, 255);
+            break;
+        case BR_PMT_RGB_565:
+            demo->clear_colour = BR_COLOUR_RGB_565(0, 0, 0);
+            demo->text_colour  = BR_COLOUR_RGB_565(255, 255, 255);
+            break;
+        default:
+            demo->clear_colour = BR_COLOUR_RGBA(0, 0, 0, 255);
+            demo->text_colour  = BR_COLOUR_RGBA(255, 255, 255, 255);
+            break;
     }
 
     BrRendererBegin(demo->colour_buffer, NULL, NULL, demo->_primitive_heap, sizeof(demo->_primitive_heap));
@@ -217,7 +338,7 @@ int BrDemoRun(const char *title, br_uint_16 width, br_uint_16 height, const br_d
                             demo->_screen->origin_x = (br_int_16)(demo->_screen->width >> 1);
                             demo->_screen->origin_y = (br_int_16)(demo->_screen->height >> 1);
 
-                            if(BrPixelmapResizeBuffers(demo->_screen, &demo->colour_buffer, &demo->depth_buffer) != BRE_OK) {
+                            if(resize_buffers(demo, args) != BRE_OK) {
                                 BrLogError("DEMO", "Error resizing window buffers.");
                                 goto cleanup;
                             }
@@ -250,9 +371,9 @@ int BrDemoRun(const char *title, br_uint_16 width, br_uint_16 height, const br_d
         {
             br_int_32 base_x = -demo->colour_buffer->origin_x + 5;
             br_int_32 base_y = -demo->colour_buffer->origin_y + 5;
-            br_colour col    = BR_COLOUR_RGBA(255, 255, 255, 255);
 
-            BrPixelmapTextF(demo->colour_buffer, base_x, base_y, col, BrFontProp7x9, "last frame delta (msec): %f", dt * 1000);
+            BrPixelmapTextF(demo->colour_buffer, base_x, base_y, demo->text_colour, BrFontProp7x9,
+                            "last frame delta (msec): %f", dt * 1000);
         }
 
         BrPixelmapDoubleBuffer(demo->_screen, demo->colour_buffer);
@@ -280,4 +401,158 @@ cleanup:
     BrResFree(demo);
     BrEnd();
     return ret;
+}
+
+#define ARGDEF_WIDTH             'w'
+#define ARGDEF_HEIGHT            'h'
+#define ARGDEF_VERBOSE           'v'
+#define ARGDEF_HELP              301
+#define ARGDEF_FORCE_SOFTWARE    302
+#define ARGDEF_SOFTWARE_BPP      303
+#define ARGDEF_BACKBUFFER_WIDTH  304
+#define ARGDEF_BACKBUFFER_HEIGHT 305
+
+const static struct parg_option argdefs[] = {
+    {.name = "width",             .has_arg = PARG_REQARG, .flag = NULL, .val = ARGDEF_WIDTH            },
+    {.name = "height",            .has_arg = PARG_REQARG, .flag = NULL, .val = ARGDEF_HEIGHT           },
+    {.name = "verbose",           .has_arg = PARG_NOARG,  .flag = NULL, .val = ARGDEF_VERBOSE          },
+    {.name = "help",              .has_arg = PARG_NOARG,  .flag = NULL, .val = ARGDEF_HELP             },
+    {.name = "force-software",    .has_arg = PARG_NOARG,  .flag = NULL, .val = ARGDEF_FORCE_SOFTWARE   },
+    {.name = "software-bpp",      .has_arg = PARG_REQARG, .flag = NULL, .val = ARGDEF_SOFTWARE_BPP     },
+    {.name = "backbuffer-width",  .has_arg = PARG_REQARG, .flag = NULL, .val = ARGDEF_BACKBUFFER_WIDTH },
+    {.name = "backbuffer-height", .has_arg = PARG_REQARG, .flag = NULL, .val = ARGDEF_BACKBUFFER_HEIGHT},
+    {.name = NULL,                .has_arg = 0,           .flag = NULL, .val = 0                       },
+};
+
+static int parse_args(int argc, char *const argv[], br_demo_run_args *args)
+{
+    struct parg_state ps;
+    parg_init(&ps);
+    int software_bpp = 8;
+
+    for(int c; (c = parg_getopt_long(&ps, argc, argv, "w:h:v", argdefs, NULL)) != -1;) {
+        switch(c) {
+
+            case ARGDEF_WIDTH:
+                args->width = atoi(ps.optarg);
+                break;
+
+            case ARGDEF_HEIGHT:
+                args->height = atoi(ps.optarg);
+                break;
+
+            case ARGDEF_VERBOSE:
+                ++args->verbose;
+                break;
+
+            case ARGDEF_FORCE_SOFTWARE:
+                ++args->force_software;
+                break;
+
+            case ARGDEF_SOFTWARE_BPP:
+                software_bpp = atoi(ps.optarg);
+                break;
+
+            case ARGDEF_BACKBUFFER_WIDTH:
+                args->backbuffer_width = atoi(ps.optarg);
+                break;
+
+            case ARGDEF_BACKBUFFER_HEIGHT:
+                args->backbuffer_height = atoi(ps.optarg);
+                break;
+
+            case ARGDEF_HELP:
+            case '?':
+            case ':':
+            default:
+                return 2;
+        }
+    }
+
+    if(args->width < 0)
+        return 2;
+
+    if(args->height < 0)
+        return 2;
+
+    switch(software_bpp) {
+        case 16:
+            args->software_pm_type = BR_PMT_RGB_565;
+            break;
+        case 15:
+            args->software_pm_type = BR_PMT_RGB_555;
+            break;
+        default:
+        case 8:
+            args->software_pm_type = BR_PMT_INDEX_8;
+            break;
+    }
+
+    if(args->backbuffer_width < 0)
+        args->backbuffer_width = 0;
+
+    if(args->backbuffer_height < 0)
+        args->backbuffer_height = 0;
+
+    if(args->title == NULL || args->title[0] == '\0')
+        args->title = "BRender Application";
+
+    return 0;
+}
+
+// clang-format off
+static const char *usage_options =
+    "  -w, --width          Set the initial window width (default: 1280).\n"
+    "  -h, --height         Set the initial window height (default: 720).\n"
+    "  -v, --verbose        Increase verbosity level. May be given multiple times.\n"
+    "  --force-software     Force use of the software renderer. Only valid on x86.\n"
+    "  --software-bpp       Software renderer bit depth. Valid options: 8 (default), 15, 16.\n"
+    "  --backbuffer-width   Width of the backbuffer, defaults to the same as the screen.\n"
+    "  --backbuffer-height  Height of the backbuffer, defaults to the same as the screen.\n"
+    "  --help               Display this message.\n"
+    "\n"
+;
+// clang-format on
+
+int BrDemoRunArgv(const char *title, const br_demo_dispatch *dispatch, int argc, char * const *argv)
+{
+    int               r;
+    struct parg_state ps;
+    parg_init(&ps);
+
+    br_demo_run_args args = {
+        .title             = title,
+        .width             = 1280,
+        .height            = 720,
+        .verbose           = BR_LOG_INFO,
+        .force_software    = 0,
+        .software_pm_type  = BR_PMT_INDEX_8,
+        .backbuffer_width  = 0,
+        .backbuffer_height = 0,
+    };
+
+    if((r = parse_args(argc, argv, &args)) != 0) {
+        fprintf(stderr, "Usage: %s \nOptions:\n%s", argv[0], usage_options);
+        return r;
+    }
+
+    BrLogSetLevel(args.verbose);
+
+    return BrDemoRunArg(dispatch, &args);
+}
+
+int BrDemoRun(const char *title, br_uint_16 width, br_uint_16 height, const br_demo_dispatch *dispatch)
+{
+    br_demo_run_args args = {
+        .title             = title,
+        .width             = width,
+        .height            = height,
+        .verbose           = 0,
+        .force_software    = 0,
+        .software_pm_type  = BR_PMT_INDEX_8,
+        .backbuffer_width  = 0,
+        .backbuffer_height = 0,
+    };
+
+    return BrDemoRunArg(dispatch, &args);
 }

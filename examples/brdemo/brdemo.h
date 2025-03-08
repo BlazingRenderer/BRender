@@ -75,6 +75,11 @@ typedef struct br_demo {
      */
     br_colour clear_colour;
 
+    /*
+     * Colour in which to render text.
+     */
+    br_colour text_colour;
+
     br_pixelmap *colour_buffer;
     br_pixelmap *depth_buffer;
 
@@ -105,6 +110,8 @@ typedef struct br_demo {
  */
 
 int BrDemoRun(const char *title, br_uint_16 width, br_uint_16 height, const br_demo_dispatch *dispatch);
+
+int BrDemoRunArgv(const char *title, const br_demo_dispatch *dispatch, int argc, char * const *argv);
 
 #ifdef __cplusplus
 }
