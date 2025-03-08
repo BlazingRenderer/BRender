@@ -164,6 +164,7 @@ static br_error ForestInit(br_demo *demo)
     br_demo_forest *state;
     br_camera      *camera_data;
     br_model       *model_floor, *model_column, *model_ship;
+    br_pixelmap    *shade_table;
     br_material    *pMaterial[32];
     br_uint_16      Num_Materials;
 
@@ -254,28 +255,34 @@ static br_error ForestInit(br_demo *demo)
 
     // BrZsActorOrderTableSet(root, BrZsOrderTableAllocate(1024, BR_ORDER_TABLE_NEW_BOUNDS | BR_ORDER_TABLE_SORT_NEAR, BR_SORT_MAX));
 
-    // pm = NULL;
-    //
-    // switch(screen_buffer->type) {
-    //     case BR_PMT_INDEX_8:
-    //         pm = BrPixelmapLoad("forest8.tab");
-    //         break;
-    //
-    //     case BR_PMT_RGB_555:
-    //         pm = BrPixelmapLoad("forest15.tab");
-    //         break;
-    //
-    //     case BR_PMT_RGB_565:
-    //         pm = BrPixelmapLoad("forest16.tab");
-    //         break;
-    // }
-    //
-    // if(!pm) {
-    //     BR_ERROR0("Couldn't load shade table");
-    //     return BRE_FAIL;
-    // }
-    //
-    // BrTableAdd(pm);
+    switch(demo->colour_buffer->type) {
+        case BR_PMT_INDEX_8:
+            if((shade_table = BrPixelmapLoad("forest8.tab")) == NULL) {
+                BrLogError("DEMO", "Error loading forest8.tab.");
+                return BRE_FAIL;
+            }
+            BrTableAdd(shade_table);
+            break;
+
+        case BR_PMT_RGB_555:
+            if((shade_table = BrPixelmapLoad("forest15.tab")) == NULL) {
+                BrLogError("DEMO", "Error loading forest16.tab.");
+                return BRE_FAIL;
+            }
+            BrTableAdd(shade_table);
+            break;
+
+        case BR_PMT_RGB_565:
+            if((shade_table = BrPixelmapLoad("forest16.tab")) == NULL) {
+                BrLogError("DEMO", "Error loading forest16.tab.");
+                return BRE_FAIL;
+            }
+            BrTableAdd(shade_table);
+            break;
+
+        default:
+            break;
+    }
 
     state->current_camera_mode = 0;
     state->frames              = CameraModes[state->current_camera_mode].frames;
