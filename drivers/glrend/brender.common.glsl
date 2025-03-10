@@ -204,16 +204,16 @@ vec3 lightingColourSpotAtten(in vec4 p, in vec4 n, in br_light alp)
     return vec3(0);
 }
 
-
-
-vec4 accumulateLights(in vec4 position, in vec4 normal)
+void accumulateLights(in vec4 position, in vec4 normal, inout vec3 ambient, inout vec3 diffuse, inout vec3 specular)
 {
 #if DEBUG_DISABLE_LIGHTS
-    return vec4(1);
+    diffuse += vec3(1);
+    return;
 #endif
 
     if (num_lights == 0u || unlit != 0u) {
-        return vec4(1);
+        diffuse += vec3(1);
+        return;
     }
 
     vec4 normalDirection = normal;
@@ -260,5 +260,6 @@ vec4 accumulateLights(in vec4 position, in vec4 normal)
         lightColour += clear_colour.rgb;
     }
 
-    return vec4(clamp(lightColour, 0.0, 1.0), 1);
+    // FIXME: set properly
+    diffuse = clamp(lightColour, 0, 1);
 }

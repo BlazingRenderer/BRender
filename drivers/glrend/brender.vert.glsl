@@ -11,7 +11,10 @@ out vec4 position;
 out vec4 normal;
 out vec2 uv;
 out vec4 colour;
-out vec4 vertexLight;
+
+out vec3 vertexLightA;
+out vec3 vertexLightD;
+out vec3 vertexLightS;
 
 out vec3 rawPosition;
 out vec3 rawNormal;
@@ -41,10 +44,12 @@ void main()
     uv = aUV;
     colour = aColour;
 
+    vertexLightA = vec3(0);
+    vertexLightD = vec3(0);
+    vertexLightS = vec3(0);
+
 #if ENABLE_GOURAUD
-    vertexLight = accumulateLights(position, normal);
-#else
-    vertexLight = vec4(1);
+    accumulateLights(position, normal, vertexLightA, vertexLightD, vertexLightS);
 #endif
 
     rawPosition = aPosition;
