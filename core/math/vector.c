@@ -579,8 +579,8 @@ br_boolean BR_PUBLIC_ENTRY BrVector4Normalise0(br_vector4 *v1, const br_vector4 
 
         v1->v[0] = BR_MUL(v2->v[0], scale);
         v1->v[1] = BR_MUL(v2->v[1], scale);
-        v1->v[1] = BR_MUL(v2->v[2], scale);
-        v1->v[1] = BR_MUL(v2->v[3], scale);
+        v1->v[2] = BR_MUL(v2->v[2], scale);
+        v1->v[3] = BR_MUL(v2->v[3], scale);
 
         return BR_TRUE;
     } else {
