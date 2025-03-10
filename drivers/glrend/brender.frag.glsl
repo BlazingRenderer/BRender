@@ -7,7 +7,9 @@ in vec4 position;
 in vec2 uv;
 in vec4 normal;
 in vec4 colour;
-in vec4 vertexLight;
+in vec3 vertexLightA;
+in vec3 vertexLightD;
+in vec3 vertexLightS;
 
 in vec3 rawPosition;
 in vec3 rawNormal;
@@ -119,14 +121,16 @@ void main()
     if(!disable_colour_key && texColour.rgb == vec3(0.0, 0.0, 0.0))
         discard;
 
+    vec3 fragmentLightA = vertexLightA;
+    vec3 fragmentLightD = vertexLightD;
+    vec3 fragmentLightS = vertexLightS;
 #if ENABLE_PHONG
-    vec4 fragmentLight = accumulateLights(position, normal);
-#else
-    vec4 fragmentLight = vec4(1);
+    accumulateLights(position, normal, fragmentLightA, fragmentLightD, fragmentLightS);
 #endif
 
-    vec4 surfaceColour = (surface_colour * texColour * vertexLight);
-    vec4 fragColour = surfaceColour * fragmentLight;
+    vec4 fragColour = ((vec4(fragmentLightA + fragmentLightD, 1.0)) * (surface_colour * texColour)) + vec4(fragmentLightS, 0.0);
+
+    fragColour = clamp(fragColour, 0, 1);
 
     /* Perform gamma correction */
 #if ENABLE_GAMMA_CORRECTION
