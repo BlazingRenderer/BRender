@@ -535,6 +535,20 @@ void BR_PUBLIC_ENTRY BrVector4Copy(br_vector4 *v1, const br_vector4 *v2)
 }
 
 /*
+ * v1 = (v2.x, v2.y, v2.z, w)
+ */
+void BR_PUBLIC_ENTRY BrVector4Copy3(br_vector4 *v1, const br_vector3 *v2, br_scalar w)
+{
+    UASSERT_MESSAGE("Destination Vector is NULL", v1 != NULL);
+    UASSERT_MESSAGE("Source Vector is NULL", v2 != NULL);
+
+    v1->v[0] = v2->v[0];
+    v1->v[1] = v2->v[1];
+    v1->v[2] = v2->v[2];
+    v1->v[3] = w;
+}
+
+/*
  * v1=-v2
  */
 void BR_PUBLIC_ENTRY BrVector4Negate(br_vector4 *v1, const br_vector4 *v2)
