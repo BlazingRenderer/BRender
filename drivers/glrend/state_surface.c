@@ -24,12 +24,14 @@ static br_tv_template_entry template_entries[] = {
     {BRT(SPECULAR_POWER_F), F(surface.power),          Q | S | AF, BRTV_CONV_FLOAT_SCALAR,     0, TM_PART                },
 
     {BRT(LIGHTING_B),       F(surface.lighting),       Q | S | A,  BRTV_CONV_COPY,             0, TM_PART | TM_INVALID_CC},
+    {BRT(PRELIGHTING_B),    F(surface.prelighting),    Q | S | A,  BRTV_CONV_COPY,             0, TM_PART | TM_INVALID_CC},
     {BRT(FORCE_FRONT_B),    F(surface.force_front),    Q | S | A,  BRTV_CONV_COPY,             0, TM_PART | TM_INVALID_CC},
     {BRT(FORCE_BACK_B),     F(surface.force_back),     Q | S | A,  BRTV_CONV_COPY,             0, TM_PART | TM_INVALID_CC},
     {BRT(DEPTH_BIAS_X),     F(surface.depth_bias),     Q | S | A,  BRTV_CONV_FIXED_SCALAR,     0, TM_PART | TM_INVALID_CC},
     {BRT(DEPTH_BIAS_F),     F(surface.depth_bias),     Q | S | A,  BRTV_CONV_FLOAT_SCALAR,     0, TM_PART | TM_INVALID_CC},
 
     {BRT(COLOUR_SOURCE_T),  F(surface.colour_source),  Q | S | A,  BRTV_CONV_COPY,             0, TM_PART | TM_INVALID_CC},
+    {BRT(OPACITY_SOURCE_T), F(surface.opacity_source), Q | S | A,  BRTV_CONV_COPY,             0, TM_PART | TM_INVALID_CC},
     {BRT(MAPPING_SOURCE_T), F(surface.mapping_source), Q | S | A,  BRTV_CONV_COPY,             0, TM_PART | TM_INVALID_CC},
 
     {BRT(MAP_MATRIX_M23_X), F(surface.map_transform),  Q | S | AX, BRTV_CONV_M23_FIXED_SCALAR, 0, TM_PART | TM_INVALID_CC},
@@ -45,10 +47,13 @@ static const state_surface default_state = {
     .power   = BR_SCALAR(20.0),
 
     .lighting       = BR_FALSE,
+    .prelighting    = BR_FALSE,
     .force_front    = BR_FALSE,
     .force_back     = BR_FALSE,
+    .depth_bias     = BR_SCALAR(0.0),
     .colour_source  = BRT_SURFACE,
-    .mapping_source = BRT_GEOMETRY, /* BRT_ENVIRONMENT_LOCAL, BRT_ENVIRONMENT_INFINITE, BRT_QUAD */
+    .opacity_source = BRT_SURFACE,      /* BRT_GEOMETRY */
+    .mapping_source = BRT_GEOMETRY_MAP, /* BRT_ENVIRONMENT_LOCAL, BRT_ENVIRONMENT_INFINITE, BRT_QUAD, BRT_GEOMETRY_{X,Y,Z} */
 
     .map_transform = {{
         BR_VECTOR2(1, 0),
