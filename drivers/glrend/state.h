@@ -81,11 +81,13 @@ typedef struct state_surface {
     br_scalar power;
 
     br_boolean lighting;
+    br_boolean prelighting;
     br_boolean force_front;
     br_boolean force_back;
     br_scalar  depth_bias;
 
     br_token colour_source;
+    br_token opacity_source;
     br_token mapping_source;
 
     br_matrix23 map_transform;
