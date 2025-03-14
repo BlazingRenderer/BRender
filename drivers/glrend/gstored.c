@@ -50,6 +50,7 @@ static GLuint create_vao(HVIDEO hVideo, GLuint vbo_posn, GLuint vbo, GLuint ibo)
     }
 
     if(hVideo->brenderProgram.attributes.aColour >= 0) {
+        glEnableVertexAttribArray(hVideo->brenderProgram.attributes.aColour);
         glVertexAttribPointer(hVideo->brenderProgram.attributes.aColour, 4, GL_UNSIGNED_BYTE, GL_TRUE,
                               sizeof(gl_vertex_f), (void *)offsetof(gl_vertex_f, c));
     }
