@@ -42,9 +42,9 @@ static void ProcessSceneLights(state_cache *cache, const state_light *lights)
                      BR_BLU(light->colour) / 255.0f, light->type == BRT_AMBIENT ? 1.0f : 0.0f);
 
         if(light->type == BRT_SPOT) {
-            BrVector2Set(&alp->spot_angles, BrAngleToRadian(light->spot_inner), BrAngleToRadian(light->spot_outer));
+            BrVector2Set(&alp->spot_cosines, light->spot_inner, light->spot_outer);
         } else {
-            BrVector2Set(&alp->spot_angles, 0, 0);
+            BrVector2Set(&alp->spot_cosines, 0, 0);
         }
         ++alp;
         ++cache->scene.num_lights;
@@ -202,7 +202,7 @@ static void ResetCacheLight(shader_data_light *alp)
     BrVector4Set(&alp->half, 0, 0, 0, 0);
     BrVector4Set(&alp->colour, 0, 0, 0, 0);
     BrVector4Set(&alp->iclq, 0, 0, 0, 0);
-    BrVector2Set(&alp->spot_angles, 0, 0);
+    BrVector2Set(&alp->spot_cosines, 0, 0);
 }
 
 void StateGLReset(state_cache *cache)

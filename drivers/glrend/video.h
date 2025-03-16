@@ -97,7 +97,7 @@ typedef struct shader_data_light {
     /* (intensity, constant, linear, attenutation) */
     alignas(16) br_vector4 iclq;
     /* (inner, outer), if (0.0, 0.0), then this is a point light. */
-    alignas(16) br_vector2 spot_angles;
+    alignas(16) br_vector2 spot_cosines;
 
     /* Pad out the structure to maintain alignment. */
     alignas(4) float _pad0, _pad1;
