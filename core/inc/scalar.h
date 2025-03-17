@@ -116,6 +116,8 @@ typedef br_float br_ufraction;
 #define BR_FLOOR(a)                           ((br_scalar)floorf(a))
 #define BR_CEIL(a)                            ((br_scalar)ceilf(a))
 
+#define BR_FMOD(x, y)                         ((br_scalar)fmodf(x, y))
+
 /*
  * Make sure PI is defined
  */
