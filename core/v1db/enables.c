@@ -405,21 +405,35 @@ void BrSetupLights(br_actor *world, br_matrix34 *world_to_view, br_int_32 w2vt)
             tvp++;
 
             if((light->type & BR_LIGHT_TYPE) == BR_LIGHT_SPOT) {
+                br_scalar cone_outer = BR_FMOD(light->cone_outer, BR_SCALAR(1));
+                br_scalar cone_inner = BR_FMOD(light->cone_inner, BR_SCALAR(1));
+
+                if(cone_outer < BR_SCALAR(0.0))
+                    cone_outer += BR_SCALAR(1.0);
+
+                if(cone_inner < BR_SCALAR(0.0))
+                    cone_inner += BR_SCALAR(1.0);
+
+                if(cone_outer > BR_SCALAR(0.5))
+                    cone_outer = BR_SCALAR(0.5);
+
+                if(cone_inner > cone_outer)
+                    cone_inner = cone_outer;
 
                 tvp->t   = BRT_AS_SCALAR(SPOT_OUTER);
-                tvp->v.s = BR_COS(light->cone_outer);
+                tvp->v.s = BR_COS(cone_outer);
                 tvp++;
 
                 tvp->t   = BRT_AS_SCALAR(SPOT_INNER);
-                tvp->v.s = BR_COS(light->cone_inner);
+                tvp->v.s = BR_COS(cone_inner);
                 tvp++;
 
                 tvp->t   = BRT_ANGLE_OUTER_A;
-                tvp->v.a = light->cone_outer;
+                tvp->v.a = cone_outer;
                 tvp++;
 
                 tvp->t   = BRT_ANGLE_INNER_A;
-                tvp->v.a = light->cone_inner;
+                tvp->v.a = cone_inner;
                 tvp++;
 
                 tvp->t   = BRT_ANGLE_CULL_B;
