@@ -68,7 +68,17 @@ typedef struct br_light {
     br_scalar attenuation_q;
 
     /*
-     * Cone angles for spot light
+     * Cone angles for spotlights.
+     *
+     * Will be clamped as follows:
+     *  cone_inner ≤ cone_outer ≤ 0.5 (180°, π rad)
+     *
+     *        Full Brightness Zone
+     *      /----------------------\     (cone_inner)
+     *     /      Smooth Fade       \
+     *    /--------------------------\   (cone_outer)
+     *   /        No Light (0%)       \
+     *  /______________________________\
      */
     br_angle cone_outer;
     br_angle cone_inner;
