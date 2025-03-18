@@ -850,6 +850,30 @@ static br_error V1Model_Render
 			renderer->state.timestamp_cache = Timestamp();
 		}
 
+#if 0
+		{
+			void *fp = BrFileOpenWrite("softlights.txt", 0);
+			for(int i = 0; i < scache.nlights_model + scache.nlights_view; ++i) {
+				const struct active_light *alp = scache.lights + i;
+
+				BrFilePrintf(fp, "LIGHT %2d:\n", i + 1);
+				BrFilePrintf(fp, "  culled            = %s\n", alp->culled ? "TRUE" : "FALSE");
+				BrFilePrintf(fp, "  type              = %s\n", BrTokenIdentifier(alp->type));
+				BrFilePrintf(fp, "  position          = (%f, %f, %f)\n", alp->position.v[0], alp->position.v[2], alp->position.v[2]);
+				BrFilePrintf(fp, "  direction         = (%f, %f, %f)\n", alp->direction.v[0], alp->direction.v[2], alp->direction.v[2]);
+				BrFilePrintf(fp, "  half              = (%f, %f, %f)\n", alp->half.v[0], alp->half.v[2], alp->half.v[2]);
+				BrFilePrintf(fp, "  intensity         = %f\n", alp->intensity);
+				BrFilePrintf(fp, "  falloff           = %f\n", alp->falloff);
+				BrFilePrintf(fp, "  cutoff            = %f\n", alp->cutoff);
+				BrFilePrintf(fp, "  spot_falloff      = %f\n", alp->spot_falloff);
+				BrFilePrintf(fp, "  red               = %f\n", alp->red);
+				BrFilePrintf(fp, "  green             = %f\n", alp->green);
+				BrFilePrintf(fp, "  blue              = %f\n", alp->blue);
+				BrFilePrintf(fp, "  s->lighting_space = %s\n", BrTokenIdentifier(alp->s->lighting_space));
+			}
+			BrFileClose(fp);
+		}
+#endif
 		/*
 		 * Invoke the current set of renderer functions on the group
 		 */
