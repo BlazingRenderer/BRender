@@ -68,6 +68,7 @@ static struct br_tv_template_entry devicePixelmapTemplateEntries[] = {
  */
 static br_error recreate_renderbuffers(br_device_pixelmap *self)
 {
+    GLuint fbo = 0;
     GLenum binding_point = self->msaa_samples > 1 ? GL_TEXTURE_2D_MULTISAMPLE : GL_TEXTURE_2D;
 
     UASSERT(self->use_type == BRT_OFFSCREEN || self->use_type == BRT_DEPTH);
@@ -76,7 +77,8 @@ static br_error recreate_renderbuffers(br_device_pixelmap *self)
         const GLenum              draw_buffers[1] = {GL_COLOR_ATTACHMENT0};
         const br_pixelmap_gl_fmt *fmt             = DeviceGLGetFormatDetails(self->pm_type);
 
-        UASSERT(self->asBack.glFbo != 0);
+        fbo = self->asBack.glFbo;
+        UASSERT(fbo != 0);
 
         /* Delete */
         glDeleteTextures(1, &self->asBack.glTex);
@@ -99,11 +101,12 @@ static br_error recreate_renderbuffers(br_device_pixelmap *self)
         glBindTexture(binding_point, 0);
 
         /* Attach */
-        glBindFramebuffer(GL_FRAMEBUFFER, self->asBack.glFbo);
+        glBindFramebuffer(GL_FRAMEBUFFER, fbo);
         glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, binding_point, self->asBack.glTex, 0);
         glDrawBuffers(1, draw_buffers);
     } else if(self->use_type == BRT_DEPTH) {
-        UASSERT(self->asDepth.backbuffer->asBack.glFbo != 0);
+        fbo = self->asDepth.backbuffer->asBack.glFbo;
+        UASSERT(fbo != 0);
 
         /* Delete */
         glDeleteTextures(1, &self->asDepth.glDepth);
@@ -125,9 +128,11 @@ static br_error recreate_renderbuffers(br_device_pixelmap *self)
         glBindTexture(binding_point, 0);
 
         /* Attach */
-        glBindFramebuffer(GL_FRAMEBUFFER, self->asDepth.backbuffer->asBack.glFbo);
+        glBindFramebuffer(GL_FRAMEBUFFER, fbo);
         glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, binding_point, self->asDepth.glDepth, 0);
     }
+
+    DeviceGLObjectLabelF(GL_FRAMEBUFFER, fbo, "%s:fbo", self->pm_identifier);
 
     if(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -347,7 +352,6 @@ br_error BR_CMETHOD_DECL(br_device_pixelmap_gl, match)(br_device_pixelmap *self,
         pm->asBack.depthbuffer = NULL;
         pm->asBack.clut        = DeviceClutGLAllocate(pm);
         glGenFramebuffers(1, &pm->asBack.glFbo);
-        DeviceGLObjectLabelF(GL_FRAMEBUFFER, pm->asBack.glFbo, "%s:fbo", pm->pm_identifier);
     } else {
         UASSERT(mt.use_type == BRT_DEPTH);
         self->asBack.depthbuffer = pm;
