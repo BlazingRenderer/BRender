@@ -179,7 +179,7 @@ void DeviceGLObjectLabel(GLenum identifier, GLuint name, const char *s)
     glObjectLabel(identifier, name, -1, s);
 
     if(DeviceGLCheckErrors()) {
-        BrLogDebug("GLREND", "glObjectLabel(%s) failed.");
+        BrLogDebug("GLREND", "glObjectLabel(%u, %u, %s) failed.", identifier, name, s);
     }
 }
 
