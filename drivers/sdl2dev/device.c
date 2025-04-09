@@ -43,7 +43,7 @@ br_device *DeviceSDL2Allocate(const char *identifier)
 {
     br_device *self;
 
-    if(SDL_InitSubSystem(SDL_INIT_VIDEO | SDL_INIT_JOYSTICK) < 0) {
+    if(SDL_InitSubSystem(SDL_INIT_VIDEO) < 0) {
         BrLogError("SDL2", "Initialisation failure: %s", SDL_GetError());
         return NULL;
     }
