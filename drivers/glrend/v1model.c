@@ -55,6 +55,9 @@ void DeviceGLExtractPrimitiveState(const state_stack *state, br_primitive_state_
         info->colour_palette = 0;
     }
 
+    /* Don't depth write with transparent primitives. */
+    info->write_depth = !info->is_blended && info->write_depth;
+
     if(prim->filter == BRT_LINEAR && prim->mip_filter == BRT_LINEAR) {
         info->sampler.filter_min = GL_LINEAR_MIPMAP_LINEAR;
         info->sampler.filter_mag = GL_LINEAR;
