@@ -313,6 +313,11 @@ static void apply_stored_properties(HVIDEO hVideo, br_renderer *renderer, state_
         glDepthMask(info.write_depth ? GL_TRUE : GL_FALSE);
     }
 
+    if (states & MASK_STATE_OUTPUT) {
+        if (state->output.depth == NULL)
+            depth_test = BR_FALSE;
+    }
+
     if(depth_test == BR_TRUE)
         glEnable(GL_DEPTH_TEST);
     else
@@ -359,7 +364,7 @@ static void apply_state(br_renderer *renderer)
     // int model_lit = self->model->flags & V11MODF_LIT;
 
     unlit = BR_TRUE;
-    apply_stored_properties(hVideo, renderer, renderer->state.current, MASK_STATE_STORED, &unlit, &model, screen->asFront.tex_white);
+    apply_stored_properties(hVideo, renderer, renderer->state.current, MASK_STATE_STORED | MASK_STATE_OUTPUT, &unlit, &model, screen->asFront.tex_white);
 
     model.unlit = (br_uint_32)unlit;
     BrVector4Set(&model.clear_colour, renderer->pixelmap->asBack.clearColour[0], renderer->pixelmap->asBack.clearColour[1],
