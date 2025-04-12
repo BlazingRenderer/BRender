@@ -22,6 +22,8 @@ void DeviceGLExtractPrimitiveState(const state_stack *state, br_primitive_state_
         .is_indexed         = BR_FALSE,
         .disable_colour_key = BR_FALSE,
         .write_colour       = BR_TRUE,
+        .write_depth        = BR_TRUE,
+        .depth_func         = GL_LESS,
     };
     // clang-format on
 
@@ -31,6 +33,7 @@ void DeviceGLExtractPrimitiveState(const state_stack *state, br_primitive_state_
     info->is_blended         = (prim->flags & PRIMF_BLEND) != 0;
     info->disable_colour_key = (prim->flags & PRIMF_COLOUR_KEY) == 0;
     info->write_colour       = (prim->flags & PRIMF_COLOUR_WRITE) != 0;
+    info->write_depth        = (prim->flags & PRIMF_DEPTH_WRITE) != 0;
     info->is_indexed         = prim->colour_map ? (prim->colour_map->fmt->indexed != 0) : 0;
 
     if(prim->colour_map != NULL) {
@@ -113,6 +116,41 @@ void DeviceGLExtractPrimitiveState(const state_stack *state, br_primitive_state_
             info->sampler.wrap_t = GL_MIRRORED_REPEAT;
             break;
     }
+
+    switch(prim->depth_test) {
+        case BRT_LESS:
+        default:
+            info->depth_func = GL_LESS;
+            break;
+
+        case BRT_GREATER:
+            info->depth_func = GL_GREATER;
+            break;
+
+        case BRT_LESS_OR_EQUAL:
+            info->depth_func = GL_LEQUAL;
+            break;
+
+        case BRT_GREATER_OR_EQUAL:
+            info->depth_func = GL_GEQUAL;
+            break;
+
+        case BRT_EQUAL:
+            info->depth_func = GL_EQUAL;
+            break;
+
+        case BRT_NOT_EQUAL:
+            info->depth_func = GL_NOTEQUAL;
+            break;
+
+        case BRT_NEVER:
+            info->depth_func = GL_NEVER;
+            break;
+
+        case BRT_ALWAYS:
+            info->depth_func = GL_ALWAYS;
+            break;
+    }
 }
 
 static void apply_blend_mode(state_stack *self)
@@ -154,80 +192,11 @@ static void apply_blend_mode(state_stack *self)
     }
 }
 
-static void apply_depth_properties(state_stack *state, uint32_t states)
-{
-    br_boolean depth_valid = BR_TRUE; /* Defaulting to BR_TRUE to keep existing behaviour. */
-    GLenum     depth_test  = GL_NONE;
-
-    /* Only use the states we want (if valid). */
-    states = state->valid & states;
-
-    if(states & MASK_STATE_OUTPUT) {
-        depth_valid = state->output.depth != NULL;
-    }
-
-    if(states & MASK_STATE_SURFACE) {
-        if(state->surface.force_front || state->surface.force_back)
-            depth_test = GL_FALSE;
-        else
-            depth_test = GL_TRUE;
-    }
-
-    if(depth_valid == BR_TRUE) {
-        if(depth_test == GL_TRUE)
-            glEnable(GL_DEPTH_TEST);
-        else if(depth_test == GL_FALSE)
-            glDisable(GL_DEPTH_TEST);
-    }
-
-    if(states & MASK_STATE_PRIMITIVE) {
-        GLboolean depthMask;
-        GLenum depthFunc;
-
-        if(state->prim.flags & PRIMF_DEPTH_WRITE)
-            depthMask = GL_TRUE;
-        else
-            depthMask = GL_FALSE;
-
-        switch(state->prim.depth_test) {
-            case BRT_LESS:
-                depthFunc = GL_LESS;
-                break;
-            case BRT_GREATER:
-                depthFunc = GL_GREATER;
-                break;
-            case BRT_LESS_OR_EQUAL:
-                depthFunc = GL_LEQUAL;
-                break;
-            case BRT_GREATER_OR_EQUAL:
-                depthFunc = GL_GEQUAL;
-                break;
-            case BRT_EQUAL:
-                depthFunc = GL_EQUAL;
-                break;
-            case BRT_NOT_EQUAL:
-                depthFunc = GL_NOTEQUAL;
-                break;
-            case BRT_NEVER:
-                depthFunc = GL_NEVER;
-                break;
-            case BRT_ALWAYS:
-                depthFunc = GL_ALWAYS;
-                break;
-            default:
-                depthFunc = GL_LESS;
-        }
-
-        if(depth_valid) {
-            glDepthFunc(depthFunc);
-            glDepthMask(depthMask);
-        }
-    }
-}
-
 static void apply_stored_properties(HVIDEO hVideo, br_renderer *renderer, state_stack *state, uint32_t states, br_boolean *unlit,
                                     shader_data_model *model, GLuint tex_default)
 {
+    br_boolean depth_test = BR_FALSE;
+
     /* Only use the states we want (if valid). */
     states = state->valid & states;
 
@@ -296,7 +265,8 @@ static void apply_stored_properties(HVIDEO hVideo, br_renderer *renderer, state_
 
         BrMatrix4Copy23(&model->map_transform, &state->surface.map_transform);
 
-        *unlit = !state->surface.lighting;
+        depth_test = !state->surface.force_front && !state->surface.force_back;
+        *unlit     = !state->surface.lighting;
     }
 
     {
@@ -335,7 +305,15 @@ static void apply_stored_properties(HVIDEO hVideo, br_renderer *renderer, state_
         } else {
             glDisable(GL_BLEND);
         }
+
+        glDepthFunc(info.depth_func);
+        glDepthMask(info.write_depth ? GL_TRUE : GL_FALSE);
     }
+
+    if(depth_test == BR_TRUE)
+        glEnable(GL_DEPTH_TEST);
+    else
+        glDisable(GL_DEPTH_TEST);
 }
 
 static void apply_state(br_renderer *renderer)
@@ -379,7 +357,6 @@ static void apply_state(br_renderer *renderer)
 
     unlit = BR_TRUE;
     apply_stored_properties(hVideo, renderer, renderer->state.current, MASK_STATE_STORED, &unlit, &model, screen->asFront.tex_white);
-    apply_depth_properties(renderer->state.current, MASK_STATE_STORED | MASK_STATE_OUTPUT);
 
     model.unlit = (br_uint_32)unlit;
     BrVector4Set(&model.clear_colour, renderer->pixelmap->asBack.clearColour[0], renderer->pixelmap->asBack.clearColour[1],

@@ -36,7 +36,9 @@ typedef struct br_state_info_gl {
         br_uint_8 is_indexed : 1;
         br_uint_8 disable_colour_key : 1;
         br_uint_8 write_colour : 1;
+        br_uint_8 write_depth : 1;
     };
+    GLenum depth_func;
 } br_primitive_state_info_gl;
 
 typedef struct br_sampler_gl {
