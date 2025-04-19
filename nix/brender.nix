@@ -38,6 +38,7 @@ stdenv.mkDerivation(finalAttrs: {
 
   buildInputs = [
     SDL2
+  ] ++ lib.optionals stdenv.isLinux [
     libGL
   ] ++ lib.optionals stdenv.isDarwin [
     # Why doesn't SDL pull this in?
