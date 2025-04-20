@@ -1,0 +1,37 @@
+## Materials script file for fogdem
+##
+## $Id: fogdem.mat 1.1 1996/12/11 15:23:39 ALISTAIR Exp $
+## $Locker: $
+
+material = [
+    identifier = "environment";
+	ambient = 0.05;
+    diffuse = 0.65;
+    specular = 0.30;
+	power = 20;
+    flags = [light, smooth, environment, fog_local, map_interpolation];
+    fog_min = 2;
+    fog_max = 6;
+    fog_colour = [128,128,128];
+    colour_map = "testenv.pix";
+    index_shade = "fogshade.tab";
+    index_fog = "fogtable.tab";
+];
+
+material = [
+	identifier = "earth";
+	ambient = 0.05;
+	diffuse = 0.44;
+	specular = 0.50;
+	power = 20;
+    flags = [light, smooth, fog_local, map_interpolation];
+    fog_min = 2;
+    fog_max = 6;
+    fog_colour = [128,128,128];
+	colour_map = "earth.pix";
+    index_shade = "fogshade.tab";
+    index_fog = "fogtable.tab";
+	map_transform = [[-1,0],[0,1],[0,0]];
+];
+
+            
