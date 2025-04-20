@@ -85,7 +85,7 @@ stdenv.mkDerivation(finalAttrs: {
         --set BRENDER_PATH $data/share/brender-samples/tutorials
     done
 
-    for i in minzb minzs sheet rdemo forest; do
+    for i in minzb minzs sheet rdemo forest fogdem; do
       if  [[ -e ${finalAttrs.src}/examples/samples/$i/dat ]]; then
         mkdir -p $data/share/brender-samples/samples/$i
         cp ${finalAttrs.src}/examples/samples/$i/dat/* $data/share/brender-samples/samples/$i
