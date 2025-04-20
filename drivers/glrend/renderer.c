@@ -303,10 +303,10 @@ static br_error BR_CMETHOD_DECL(br_renderer_gl, bufferStoredNew)(br_renderer *se
 static br_error BR_CMETHOD_DECL(br_renderer_gl, bufferStoredAvail)(br_renderer *self, br_int_32 *space, br_token use,
                                                                    br_token_value *tv)
 {
-    /*
-     * Should return free VRAM
-     */
-    BrLogTrace("GLREND", "%s", __FUNCTION__);
+    (void)self;
+    (void)space;
+    (void)use;
+    (void)tv;
     return BRE_FAIL;
 }
 
