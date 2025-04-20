@@ -4,3 +4,4 @@ add_subdirectory(sheet)
 add_subdirectory(rdemo)
 
 add_subdirectory(forest)
+add_subdirectory(fogdem)
