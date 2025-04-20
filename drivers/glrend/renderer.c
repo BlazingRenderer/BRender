@@ -628,6 +628,12 @@ static br_error BR_CMETHOD_DECL(br_renderer_gl, viewDistance)(br_renderer *self,
 
 static br_error BR_CMETHOD_DECL(br_renderer_gl, flush)(br_renderer *self, br_boolean wait)
 {
+    (void)self;
+    glFlush();
+
+    if(wait)
+        glFinish();
+
     return BRE_OK;
 }
 
