@@ -87,10 +87,13 @@ enum {
     T_ENVIRONMENT_L,
     T_PERSPECTIVE,
     T_DECAL,
+    T_I_FROM_U,
+    T_I_FROM_V,
+    T_U_FROM_I,
+    T_V_FROM_I,
     T_ALWAYS_VISIBLE,
     T_TWO_SIDED,
     T_FORCE_FRONT,
-    T_FORCE_BACK,
     T_DITHER,
     T_EXTRA_SURFACE,
     T_EXTRA_PRIMITIVE,
@@ -100,7 +103,11 @@ enum {
     T_FOG_LOCAL,
     T_SUBDIVIDE,
     T_QUAD_MAPPING,
+    T_FORCE_BACK,
     T_INHIBIT_DEPTH_WRITE,
+    T_PREALPHA,
+    T_DISABLE_COLOUR_KEY,
+    T_SMOOTH_ALPHA,
 
     /*
      * Depth test modes
@@ -165,6 +172,10 @@ static const br_lexer_keyword keywords[] = {
     {"environment_l",       T_ENVIRONMENT_L      },
     {"perspective",         T_PERSPECTIVE        },
     {"decal",               T_DECAL              },
+    {"i_from_u",            T_I_FROM_U           },
+    {"i_from_v",            T_I_FROM_V           },
+    {"u_from_i",            T_U_FROM_I           },
+    {"v_from_i",            T_V_FROM_I           },
     {"always_visible",      T_ALWAYS_VISIBLE     },
     {"two_sided",           T_TWO_SIDED          },
     {"force_z_0",           T_FORCE_FRONT        },
@@ -185,6 +196,9 @@ static const br_lexer_keyword keywords[] = {
     {"subdivide",           T_SUBDIVIDE          },
     {"quad_mapping",        T_QUAD_MAPPING       },
     {"inhibit_depth_write", T_INHIBIT_DEPTH_WRITE},
+    {"prealpha",            T_PREALPHA           },
+    {"disable_colour_key",  T_DISABLE_COLOUR_KEY },
+    {"smooth_alpha",        T_SMOOTH_ALPHA       },
     {"gt",                  T_GT                 },
     {"ge",                  T_GE                 },
     {"eq",                  T_EQ                 },
@@ -245,10 +259,13 @@ static br_uint_32 ParseMatFlags(br_lexer *l)
         case T_ENVIRONMENT_LOCAL:       f |= BR_MATF_ENVIRONMENT_L;             break;
         case T_PERSPECTIVE:             f |= BR_MATF_PERSPECTIVE;               break;
         case T_DECAL:                   f |= BR_MATF_DECAL;                     break;
+        case T_I_FROM_U:                f |= BR_MATF_I_FROM_U;                  break;
+        case T_I_FROM_V:                f |= BR_MATF_I_FROM_V;                  break;
+        case T_V_FROM_I:                f |= BR_MATF_V_FROM_I;                  break;
+        case T_U_FROM_I:                f |= BR_MATF_U_FROM_I;                  break;
         case T_ALWAYS_VISIBLE:          f |= BR_MATF_ALWAYS_VISIBLE;            break;
         case T_TWO_SIDED:               f |= BR_MATF_TWO_SIDED;                 break;
         case T_FORCE_FRONT:             f |= BR_MATF_FORCE_FRONT;               break;
-        case T_FORCE_BACK:              f |= BR_MATF_FORCE_BACK;                break;
         case T_DITHER:                  f |= BR_MATF_DITHER;                    break;
         case T_MAP_ANTIALIASING:        f |= BR_MATF_MAP_ANTIALIASING;          break;
         case T_MAP_INTERPOLATION:       f |= BR_MATF_MAP_INTERPOLATION;         break;
@@ -256,7 +273,11 @@ static br_uint_32 ParseMatFlags(br_lexer *l)
         case T_FOG_LOCAL:               f |= BR_MATF_FOG_LOCAL;                 break;
         case T_SUBDIVIDE:               f |= BR_MATF_SUBDIVIDE;                 break;
         case T_QUAD_MAPPING:            f |= BR_MATF_QUAD_MAPPING;              break;
+        case T_FORCE_BACK:              f |= BR_MATF_FORCE_BACK;                break;
         case T_INHIBIT_DEPTH_WRITE:     f |= BR_MATF_INHIBIT_DEPTH_WRITE;       break;
+        case T_PREALPHA:                f |= BR_MATF_PREALPHA;                  break;
+        case T_DISABLE_COLOUR_KEY:      f |= BR_MATF_DISABLE_COLOUR_KEY;        break;
+        case T_SMOOTH_ALPHA:            f |= BR_MATF_SMOOTH_ALPHA;              break;
         default:
             BrLexerError(l, "Unknown material flag");
         }
