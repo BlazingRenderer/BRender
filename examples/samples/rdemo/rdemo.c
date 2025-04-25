@@ -27,6 +27,7 @@ static br_material *CreateMaterial(const char *identifier)
     };
     mat->index_base  = 0;
     mat->index_range = 63;
+    mat->index_shade = BrTableFind("shade_table");
     return mat;
 }
 
@@ -69,7 +70,15 @@ br_error ReflectionInit(br_demo *demo)
     BrTableAdd(demo->palette);
 
     if(demo->colour_buffer->type == BR_PMT_INDEX_8) {
+        br_pixelmap *shade_table;
+
         BrPixelmapPaletteSet(demo->colour_buffer, demo->palette);
+
+        if((shade_table = BrPixelmapLoad("shade.tab")) == NULL) {
+            BrLogError("DEMO", "Unable to load shade.tab");
+            return BRE_FAIL;
+        }
+        BrTableAdd(shade_table);
     }
 
     /*
