@@ -233,6 +233,36 @@ static void lightingIndexPointAttn(br_renderer *self, br_vector3 *p, br_vector3 
 	comp[C_I] += BR_MUL(l,attn);
 }
 
+static void lightingIndexPointRadii(br_renderer *self, br_vector3 *p, br_vector3 *n, struct active_light *alp, br_scalar *comp)
+{
+    br_scalar  attn, dot, l, dist;
+    br_vector3 dirn, dirn_norm;
+
+    CALCULATE_LIGHT_DIRN();
+    CALCULATE_DIRN_NORM_DIST_CUTOFF(alp->cutoff);
+
+    DIFFUSE_DOT();
+
+    CALCULATE_ATTENUATION_RADII();
+
+    l = BR_MUL(dot, self->state.surface.kd);
+
+    if(self->state.surface.ks != BR_SCALAR(0.0)) {
+        /*
+         * Specular
+         */
+        SPECULAR_DOT();
+
+        /*
+         * Phong lighting approximation from Gems IV pg. 385
+         */
+        if(dot > SPECULARPOW_CUTOFF)
+            l += SPECULAR_POWER(self->state.surface.ks);
+    }
+
+    comp[C_I] += BR_MUL(l, attn);
+}
+
 /*
  * Lighting for spot light source
  * Index
@@ -300,17 +330,57 @@ static void lightingIndexSpotAttn(br_renderer *self, br_vector3 *p, br_vector3 *
 	comp[C_I] += BR_MUL(l, attn);
 }
 
+static void lightingIndexSpotRadii(br_renderer *self, br_vector3 *p, br_vector3 *n, struct active_light *alp, br_scalar *comp)
+{
+    br_scalar  dot, dot_spot, dist, attn, l;
+    br_vector3 dirn, dirn_norm;
+
+    CALCULATE_LIGHT_DIRN();
+    CALCULATE_DIRN_NORM_DIST_CUTOFF(alp->cutoff);
+
+    SPOT_DOT();
+
+    DIFFUSE_DOT();
+
+    CALCULATE_ATTENUATION_RADII();
+    MULTIPLY_SPOT_ATTENUATION(attn);
+
+    l = BR_MUL(dot, self->state.surface.kd);
+
+    if(self->state.surface.ks != BR_SCALAR(0.0)) {
+        /*
+         * Specular
+         */
+        SPECULAR_DOT();
+
+        /*
+         * Phong lighting approximation from Gems IV pg. 385
+         */
+        if(dot > SPECULARPOW_CUTOFF)
+            l += SPECULAR_POWER(self->state.surface.ks);
+    }
+
+    comp[C_I] += BR_MUL(l, attn);
+}
+
 /*
  * Select a per-light component accumulation function
  */
 void ActiveLightAccumulateIndexSet(struct active_light *alp)
 {
+	const int is_linear_falloff = !!(alp->s->type & BR_LIGHT_LINEAR_FALLOFF);
+
 	switch(alp->type) {
 	case BRT_DIRECT:
 			alp->accumulate_index = lightingIndexDirect;
 		break;
 
 	case BRT_POINT:
+		if(is_linear_falloff) {
+			alp->accumulate_index = lightingIndexPointRadii;
+			break;
+		}
+
 		if(alp->s->attenuation_l == BR_SCALAR(0.0) &&
 		   alp->s->attenuation_q == BR_SCALAR(0.0))
 			alp->accumulate_index = lightingIndexPoint;
@@ -319,6 +389,11 @@ void ActiveLightAccumulateIndexSet(struct active_light *alp)
 		break;
 
 	case BRT_SPOT:
+		if(is_linear_falloff) {
+			alp->accumulate_index = lightingIndexSpotRadii;
+			break;
+		}
+
 		if(alp->s->attenuation_l == BR_SCALAR(0.0) &&
 		   alp->s->attenuation_q == BR_SCALAR(0.0))
 			alp->accumulate_index = lightingIndexSpot;
