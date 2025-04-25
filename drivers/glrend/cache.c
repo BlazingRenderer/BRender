@@ -13,10 +13,24 @@ static void ProcessSceneLights(state_cache *cache, const state_light *lights)
     for(uint32_t i = 0; i < MAX_STATE_LIGHTS; ++i) {
         const state_light *light = lights + i;
 
-        if(light->type == BRT_NONE)
-            continue;
-
         shader_data_light *alp = cache->scene.lights + cache->scene.num_lights;
+
+        switch(light->type) {
+            case BRT_AMBIENT:
+                alp->light_type = 0;
+                break;
+            case BRT_DIRECT:
+                alp->light_type = 1;
+                break;
+            case BRT_POINT:
+                alp->light_type = 2;
+                break;
+            case BRT_SPOT:
+                alp->light_type = 3;
+                break;
+            default:
+                continue;
+        }
 
         /* See enables.c:194, BrSetupLights(). All the lights are already converted into view space. */
         BrVector4Set(&alp->position, light->position.v[0], light->position.v[1], light->position.v[2],
@@ -36,16 +50,35 @@ static void ProcessSceneLights(state_cache *cache, const state_light *lights)
             BrVector4Scale(&alp->direction, &alp->direction, intensity);
         }
 
-        BrVector4Set(&alp->iclq, intensity, light->attenuation_c, light->attenuation_l, light->attenuation_q);
+        alp->intensity     = intensity;
+        alp->attenuation_c = light->attenuation_c;
+        alp->attenuation_l = light->attenuation_l;
+        alp->attenuation_q = light->attenuation_q;
 
         BrVector4Set(&alp->colour, BR_RED(light->colour) / 255.0f, BR_GRN(light->colour) / 255.0f,
                      BR_BLU(light->colour) / 255.0f, light->type == BRT_AMBIENT ? 1.0f : 0.0f);
 
         if(light->type == BRT_SPOT) {
-            BrVector2Set(&alp->spot_cosines, light->spot_inner, light->spot_outer);
+            alp->spot_inner_cos = light->spot_inner;
+            alp->spot_outer_cos = light->spot_outer;
         } else {
-            BrVector2Set(&alp->spot_cosines, 0, 0);
+            alp->spot_inner_cos = 0.0f;
+            alp->spot_outer_cos = 0.0f;
         }
+
+        switch(light->attenuation_type) {
+            case BRT_QUADRATIC:
+            default:
+                alp->attenuation_type = 0;
+                break;
+
+            case BRT_RADII:
+                alp->attenuation_type = 1;
+                alp->radius_inner = light->radius_inner;
+                alp->radius_outer = light->radius_outer;
+                break;
+        }
+
         ++alp;
         ++cache->scene.num_lights;
     }
@@ -201,8 +234,12 @@ static void ResetCacheLight(shader_data_light *alp)
     BrVector4Set(&alp->direction, 0, 0, 0, 0);
     BrVector4Set(&alp->half, 0, 0, 0, 0);
     BrVector4Set(&alp->colour, 0, 0, 0, 0);
-    BrVector4Set(&alp->iclq, 0, 0, 0, 0);
-    BrVector2Set(&alp->spot_cosines, 0, 0);
+    alp->intensity      = 0.0f;
+    alp->attenuation_c  = 0.0f;
+    alp->attenuation_l  = 0.0f;
+    alp->attenuation_q  = 0.0f;
+    alp->spot_inner_cos = 0.0f;
+    alp->spot_outer_cos = 0.0f;
 }
 
 void StateGLReset(state_cache *cache)

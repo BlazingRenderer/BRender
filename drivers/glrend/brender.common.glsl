@@ -11,25 +11,41 @@
 #define UV_SOURCE_ENV_L              1
 #define UV_SOURCE_ENV_I              2
 
+#define BRT_AMBIENT                  0u
+#define BRT_DIRECT                   1u
+#define BRT_POINT                    2u
+#define BRT_SPOT                     3u
+
+#define BRT_QUADRATIC                0u /* Quadratic attenuation, i.e. standard 1/clq ... */
+#define BRT_RADII                    1u /* Radial attenuation, i.e. linear falloff. */
+
 #define DEBUG_DISABLE_LIGHTS            0
 #define DEBUG_DISABLE_LIGHT_AMBIENT     0
 #define DEBUG_DISABLE_LIGHT_DIRECTIONAL 0
 #define DEBUG_DISABLE_LIGHT_POINT       0
-#define DEBUG_DISABLE_LIGHT_POINTATTEN  0
-#define DEBUG_DISABLE_LIGHT_SPOT        1
-#define DEBUG_DISABLE_LIGHT_SPECULAR    0
+#define DEBUG_DISABLE_LIGHT_SPOT        0
+
 #define ENABLE_GOURAUD                  1
 #define ENABLE_PHONG                    0
-#define ENABLE_PSX_SIMULATION           0
+
+#define USE_LEGACY_ATTENUATION          0
 
 struct br_light
 {
-    vec4 position;    /* (X, Y, Z, 1) */
-    vec4 direction;   /* (X, Y, Z, 0), normalised */
-    vec4 half_;       /* (X, Y, Z, 0), normalised */
-    vec4 colour;      /* (R, G, B, 0), normalised */
-    vec4 iclq;        /* (intensity, constant, linear, attenutation) */
-    vec2 spot_angles; /* (inner, outer), if (0.0, 0.0), then this is a point light. */
+    vec4 position;          /* (X, Y, Z, 1)                        */
+    vec4 direction;         /* (X, Y, Z, 0), normalised            */
+    vec4 half_;             /* (X, Y, Z, 0), normalised            */
+    vec4 colour;            /* (R, G, B, 0), normalised            */
+    float intensity;        /* Intensity (1/attenuation_c)         */
+    float attenuation_c;    /* Constant attenuation factor.        */
+    float attenuation_l;    /* Linear attenuation factor.          */
+    float attenuation_q;    /* Quadratic attenuation factor.       */
+    float spot_inner_cos;   /* cos(inner angle), spot lights only. */
+    float spot_outer_cos;   /* cos(outer angle), spot lights only. */
+    uint type;
+    uint attenuation_type;  /* Attenuation type, BRT_QUADRATIC or BRT_RADII. */
+    float radius_inner;
+    float radius_outer;
 };
 
 layout(std140) uniform br_scene_state
@@ -64,144 +80,111 @@ layout(std140) uniform br_model_state
     bool is_filtered;
 };
 
-#define SPECULAR_DOT()                    \
-    {                                     \
-        float rd = dot(dirn_norm, n) * 2; \
-        vec4 r = n - rd;                  \
-        r = r - dirn_norm;                \
-                                          \
-        _dot = dot(eye_view, r);          \
-    }
-
-#define SPECULAR_POWER(l) (_dot * (l)) / (power - (power * _dot) + _dot)
-
-float shadingFilter(in float i)
-{
-    /* Software shading emulation */
-    #if ENABLE_PSX_SIMULATION
-    i = floor(i * 255.0) / 255.0;
-    #endif
-    return i;
-}
-
 float calculateAttenuation(in br_light alp, in float dist)
 {
-    if (dist > alp.iclq.w)
+#if USE_LEGACY_ATTENUATION
+    if (dist > alp.attenuation_q)
         return 0.0;
 
     float attn;
 
-    if (dist > alp.iclq.y)
-        attn = (dist - alp.iclq.y) * alp.iclq.z;
+    if (dist > alp.attenuation_c)
+        attn = (dist - alp.attenuation_c) * alp.attenuation_l;
     else
         attn = 0.0;
 
     return 1.0 - attn;
+#else
+    return 1.0 / (alp.attenuation_c + (alp.attenuation_l * dist) + (alp.attenuation_q * dist * dist));
+#endif
+}
+
+float calculateAttenuationRadii(in br_light alp, in float dist, in float intensity)
+{
+    if(dist <= alp.radius_inner)
+        return intensity;
+    else if(dist >= alp.radius_outer)
+        return 0.0;
+
+    float t = (dist - alp.radius_inner) / (alp.radius_outer - alp.radius_inner);
+    return intensity * (1.0 - t);
 }
 
 
-vec3 lightingColourAmbient(in vec4 p, in vec4 n, in br_light alp)
+void lightingColourAmbient(in vec4 p, in vec4 n, in br_light alp, inout vec3 outA, inout vec3 outD, inout vec3 outS)
 {
-    return ka * alp.iclq.x * alp.colour.xyz;
+    outA += ka * alp.intensity * alp.colour.xyz;
 }
 
-vec3 lightingColourDirect(in vec4 p, in vec4 n, in br_light alp)
+void lightingColourDirect(in vec4 p, in vec4 n, in br_light alp, inout vec3 outA, inout vec3 outD, inout vec3 outS)
 {
-    /* Notes: '_dot' is 'intensity' */
-    float _dot = max(dot(n, alp.direction), 0.0) * kd;
+    float diffDot = max(dot(n, alp.direction), 0.0);
+    outD += diffDot * alp.intensity * kd * alp.colour.xyz;
 
-    /* Shading filters like 'toon' */
-    _dot = shadingFilter(_dot);
+    float specDot = max(dot(n, alp.half_), 0.0);
+    outS += ks * alp.intensity * alp.colour.rgb * pow(specDot, power);
+}
+
+void lightingColourPoint(in vec4 p, in vec4 n, in br_light alp, inout vec3 outA, inout vec3 outD, inout vec3 outS)
+{
+    vec4 dirn = alp.position - p;
+    vec4 dirn_norm = normalize(dirn);
+
+    float dist = length(dirn);
+    float atten = 0.0f;
+
+    if(alp.attenuation_type == BRT_RADII) {
+        if(dist >= alp.radius_outer)
+            return;
+
+        // atten = calculateAttenuationRadii(alp, dist, calculateAttenuation(alp, dist));
+        atten = calculateAttenuationRadii(alp, dist, alp.intensity);
+    } else {
+        atten = calculateAttenuation(alp, dist);
+    }
+
+    if(atten <= 0)
+        return;
+
+    float diffDot = max(dot(n, dirn_norm), 0.0);
+    outD += diffDot * kd * alp.colour.xyz * atten;
+
+    float specDot = max(dot(n, normalize(eye_view + dirn_norm)), 0.0);
+    outS += ks * alp.colour.xyz * pow(specDot, power) * atten;
+}
+
+void lightingColourSpot(in vec4 p, in vec4 n, in br_light alp, inout vec3 outA, inout vec3 outD, inout vec3 outS)
+{
+    /*
+     * FIXME: We're calculating this twice (in lightingColourPoint).
+     */
+    vec4 dirn_norm = normalize(alp.position - p);
 
     /*
-     * -- Kludge to emulate the broken D3D lighting from v1.0 and v1.1
-     * vec3 outColour = vec3((alp.colour.x + alp.colour.y + alp.colour.z) / 3.0) * _dot;
+     * NB: To test this, stick a spot light on a camera and see if you see it.
      */
-    vec3 outColour = alp.colour.xyz * _dot;
+    float spotDot = dot(dirn_norm.xyz, alp.direction.xyz);
+    if(spotDot <= alp.spot_outer_cos)
+        return;
 
-    #if !DEBUG_DISABLE_LIGHT_SPECULAR
-    if (ks <= 0.0) {
-        _dot = dot(n, alp.half_);
+    float cutoff = 1.0;
+    float innerOuterDiff = alp.spot_inner_cos - alp.spot_outer_cos;
 
-        if (_dot > SPECULARPOW_CUTOFF)
-        outColour += SPECULAR_POWER(ks * alp.iclq.x);
+    if(innerOuterDiff != 0.0) {
+        cutoff = clamp((spotDot - alp.spot_outer_cos) / innerOuterDiff, 0.0, 1.0);
     }
-    #endif
-    return outColour;
-}
 
-vec3 lightingColourPoint(in vec4 p, in vec4 n, in br_light alp)
-{
-    float _dot;
-    vec4 dirn, dirn_norm;
-
-    /* Work out vector between point and light source */
-    dirn = alp.position - p;
-    dirn_norm = normalize(dirn);
-
-    float dist = length(dirn);
-
-    _dot = max(dot(n, dirn_norm), 0.0) * kd;
-
-    /* Shading filters like 'toon' */
-    _dot = shadingFilter(_dot);
-
-    vec3 outColour = _dot * (alp.iclq.x * alp.colour.xyz);
-
-    #if !DEBUG_DISABLE_LIGHT_SPECULAR
-    if (ks != 0.0) {
-        /* Specular */
-        SPECULAR_DOT();
-
-        /* Phong lighting approximation from Gems IV pg. 385 */
-        if (_dot > SPECULARPOW_CUTOFF)
-        outColour += SPECULAR_POWER(ks);
-    }
-    #endif
-    return (outColour);
-}
-
-vec3 lightingColourPointAtten(in vec4 p, in vec4 n, in br_light alp)
-{
-    float _dot;
-    vec4 dirn, dirn_norm;
-
-    /* Work out vector between point and light source */
-    dirn = alp.position - p;
-    dirn_norm = normalize(dirn);
-    _dot = ((max(dot(n, dirn_norm), 0.0) * kd));
-
-    /* Shading filters like 'toon' */
-    _dot = shadingFilter(_dot);
-
-    float dist = length(dirn);
-    float atten = calculateAttenuation(alp, dist);
-
-    vec3 outColour = _dot * alp.colour.xyz;
-
-    #if !DEBUG_DISABLE_LIGHT_SPECULAR
-    if (ks != 0.0) {
-        /* Specular */
-        SPECULAR_DOT();
-
-        /* Phong lighting approximation from Gems IV pg. 385 */
-        if (_dot > SPECULARPOW_CUTOFF)
-        outColour += SPECULAR_POWER(ks);
-    }
-    #endif
-    return outColour * atten;
-}
-
-vec3 lightingColourSpot(in vec4 p, in vec4 n, in br_light alp)
-{
-    /* Croc doesn't use spot lights */
-    return vec3(0);
-}
-
-vec3 lightingColourSpotAtten(in vec4 p, in vec4 n, in br_light alp)
-{
-    /* Croc doesn't use spot lights */
-    return vec3(0);
+    /*
+     * A spot light is just a point light with a cutoff.
+     */
+    vec3 outAA = vec3(0);
+    vec3 outDD = vec3(0);
+    vec3 outSS = vec3(0);
+    lightingColourPoint(p, n, alp, outAA, outDD, outSS);
+    outA += outAA * cutoff;
+    outD += outDD * cutoff;
+    outS += outSS * cutoff;
+    return;
 }
 
 void accumulateLights(in vec4 position, in vec4 normal, inout vec3 ambient, inout vec3 diffuse, inout vec3 specular)
@@ -219,47 +202,38 @@ void accumulateLights(in vec4 position, in vec4 normal, inout vec3 ambient, inou
     vec4 normalDirection = normal;
 
     /* This is shit, but this is the way the engine does it */
-    vec3 lightColour = vec3(0.0);
     bool directLightExists = false;
 
     for (uint i = 0u; i < num_lights; ++i) {
+        switch(lights[i].type) {
 #if !DEBUG_DISABLE_LIGHT_AMBIENT
-        if(lights[i].colour.w != 0.0) {
-            lightColour += lightingColourAmbient(position, normalDirection, lights[i]);
-            continue;
-        }
+            case BRT_AMBIENT:
+                lightingColourAmbient(position, normalDirection, lights[i], ambient, diffuse, specular);
+                break;
 #endif
-        if (lights[i].position.w == 0) {
+
 #if !DEBUG_DISABLE_LIGHT_DIRECTIONAL
-            directLightExists = true;
-            lightColour += lightingColourDirect(position, normalDirection, lights[i]);
+            case BRT_DIRECT:
+                directLightExists = true;
+                lightingColourDirect(position, normalDirection, lights[i], ambient, diffuse, specular);
+                break;
 #endif
-        } else {
-            if (lights[i].spot_angles == vec2(0.0, 0.0)) {
-                if (lights[i].iclq.zw == vec2(0)) {
+
 #if !DEBUG_DISABLE_LIGHT_POINT
-                    lightColour += lightingColourPoint(position, normalDirection, lights[i]);
+            case BRT_POINT:
+                lightingColourPoint(position, normalDirection, lights[i], ambient, diffuse, specular);
+                break;
 #endif
-                } else {
-#if !DEBUG_DISABLE_LIGHT_POINTATTEN
-                    lightColour += lightingColourPointAtten(position, normalDirection, lights[i]);
-#endif
-                }
-            } else {
+
 #if !DEBUG_DISABLE_LIGHT_SPOT
-                if (lights[i].iclq.zw == vec2(0))
-                    lightColour += lightingColourSpot(position, normalDirection, lights[i]);
-                else
-                    lightColour += lightingColourSpotAtten(position, normalDirection, lights[i]);
+            case BRT_SPOT:
+                lightingColourSpot(position, normalDirection, lights[i], ambient, diffuse, specular);
+                break;
 #endif
-            }
         }
     }
 
     if (!directLightExists && num_lights > 0u && unlit == 0u) {
-        lightColour += clear_colour.rgb;
+        diffuse += clear_colour.rgb;
     }
-
-    // FIXME: set properly
-    diffuse = clamp(lightColour, 0, 1);
 }

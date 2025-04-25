@@ -94,13 +94,18 @@ typedef struct shader_data_light {
     alignas(16) br_vector4 half;
     /* (R, G, B, 0) */
     alignas(16) br_vector4 colour;
-    /* (intensity, constant, linear, attenutation) */
-    alignas(16) br_vector4 iclq;
-    /* (inner, outer), if (0.0, 0.0), then this is a point light. */
-    alignas(16) br_vector2 spot_cosines;
-
-    /* Pad out the structure to maintain alignment. */
-    alignas(4) float _pad0, _pad1;
+    alignas(4) float intensity;
+    alignas(4) float attenuation_c;
+    alignas(4) float attenuation_l;
+    alignas(4) float attenuation_q;
+    alignas(4) float spot_inner_cos;
+    alignas(4) float spot_outer_cos;
+    alignas(4) uint32_t light_type;
+    alignas(4) uint32_t attenuation_type;
+    alignas(4) float radius_inner;
+    alignas(4) float radius_outer;
+    alignas(4) float _pad0;
+    alignas(4) float _pad1;
 } shader_data_light;
 BR_STATIC_ASSERT(sizeof(shader_data_light) % 16 == 0, "shader_data_light is not aligned");
 
