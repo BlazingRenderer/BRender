@@ -7,8 +7,6 @@
  * Traversal of hierachy for rendering
  */
 
-// NB CHANGED FOR CROC SPECIFICALLY (uses actor->user)
-
 #include <stdio.h>
 
 #include "v1db.h"
@@ -19,7 +17,7 @@
 
 #include "math_ip.h"
 
-#if defined(CROC_BUILD)
+#if BRENDER_BUILD_FOR_CROC
 #include <csource/strat.h>
 #define MarkStratAsDrawn(a) \
     if((a) > (void *)1024)  \

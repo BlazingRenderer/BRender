@@ -360,12 +360,12 @@ static void Smoothing(br_model *model, br_scalar crease_limit, struct prep_verte
 
     for(outer = start; outer < end; outer++) {
 
-#if 0 // Kludging flat shading for Croc
+#if BRENDER_BUILD_FOR_CROC // Kludging flat shading for Croc
         /*
          * Kludge normals on all flat shaded faces
          */
         if(model->faces[(*outer)->f].material != NULL && !(model->faces[(*outer)->f].material->flags & BR_MATF_SMOOTH)) {
-            BrVector3Copy(&(*outer)->n, &model->faces[(*outer)->f].n);
+            BrVector3CopyF(&(*outer)->n, &model->faces[(*outer)->f].n);
         } else
 #endif
             for(inner = start; inner < end; inner++) {
@@ -1126,7 +1126,7 @@ void BR_PUBLIC_ENTRY BrModelUpdate(br_model *model, br_uint_16 flags)
 
         if(flags & BR_MODU_VERTEX_POSITIONS) {
 
-#if 0 // Disabled for Croc - it doesn't work right anyhow!
+#if !BRENDER_BUILD_FOR_CROC // Disabled for Croc - it doesn't work right anyhow!
 			if(!(model->flags & BR_MODF_CUSTOM_NORMALS))
 				RegenerateVertexNormals(v11m);
 #endif

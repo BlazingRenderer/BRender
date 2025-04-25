@@ -391,14 +391,6 @@ enum {
 #define BR_MODU_MATERIALS      BR_MODU_FACE_MATERIALS
 
 /*
- * flags for crocFlags
- */
-
-enum {
-    BR_MODCROCF_SPRITE = 1,
-};
-
-/*
  * Values for BrModelApplyMap()
  */
 enum br_apply_map_types {

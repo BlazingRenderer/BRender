@@ -49,6 +49,10 @@ if (BRENDER_BUILD_SOFT)
     endif ()
 endif ()
 
+
+option(BRENDER_BUILD_FOR_CROC "Build for Croc" OFF)
+message(STATUS "Building for Croc: ${BRENDER_BUILD_FOR_CROC}")
+
 add_subdirectory(core)
 
 if (BRENDER_BUILD_DRIVERS)
