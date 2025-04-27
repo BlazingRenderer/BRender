@@ -466,7 +466,7 @@ br_error BR_CMETHOD_DECL(br_device_pixelmap_gl, rectangleFill)(br_device_pixelma
 
     } else if(self->use_type == BRT_DEPTH) {
         UASSERT(colour == 0xFFFFFFFF);
-        fbo  = self->asBack.depthbuffer->asBack.glFbo;
+        fbo  = self->asDepth.backbuffer->asBack.glFbo;
         mask = GL_DEPTH_BUFFER_BIT;
         glDepthMask(GL_TRUE);
         glClearDepth(1.0f);
