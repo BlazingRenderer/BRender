@@ -7,6 +7,7 @@ add_subdirectory(mkres)
 add_subdirectory(devpmtest)
 add_subdirectory(tutorials)
 add_subdirectory(samples)
+add_subdirectory(brcube)
 
 if(BRENDER_BUILD_SOFT)
     add_subdirectory(softcube)
