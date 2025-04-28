@@ -211,6 +211,13 @@ typedef struct state_primitive {
 
     /* Mipmap filtering. BRT_NONE or BRT_LINEAR */
     br_token mip_filter;
+
+    /* Fog type. BRT_NONE or BRT_LINEAR */
+    br_token  fog_type;
+    br_scalar fog_min;
+    br_scalar fog_max;
+    br_colour fog_colour;
+    br_uint_8 fog_scale;
 } state_primitive;
 
 typedef struct state_output {

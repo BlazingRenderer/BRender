@@ -24,6 +24,11 @@ void DeviceGLExtractPrimitiveState(const state_stack *state, br_primitive_state_
         .write_colour       = BR_TRUE,
         .write_depth        = BR_TRUE,
         .depth_func         = GL_LESS,
+        .fog                = BR_FALSE,
+        .fog_colour         = BR_VECTOR4(BR_SCALAR(1), BR_SCALAR(1), BR_SCALAR(1), BR_SCALAR(1)),
+        .fog_min            = 0,
+        .fog_max            = 0,
+        .fog_scale          = 1.0f,
     };
     // clang-format on
 
@@ -35,6 +40,7 @@ void DeviceGLExtractPrimitiveState(const state_stack *state, br_primitive_state_
     info->write_colour       = (prim->flags & PRIMF_COLOUR_WRITE) != 0;
     info->write_depth        = (prim->flags & PRIMF_DEPTH_WRITE) != 0;
     info->is_indexed         = prim->colour_map ? (prim->colour_map->fmt->indexed != 0) : 0;
+    info->fog                = prim->fog_type != BRT_NONE;
 
     if(prim->colour_map != NULL) {
         const br_buffer_stored *stored = prim->colour_map;
@@ -153,6 +159,17 @@ void DeviceGLExtractPrimitiveState(const state_stack *state, br_primitive_state_
         case BRT_ALWAYS:
             info->depth_func = GL_ALWAYS;
             break;
+    }
+
+    if(prim->fog_type != BRT_NONE) {
+        info->fog_colour.v[0] = BR_RED(prim->fog_colour) / 255.0f;
+        info->fog_colour.v[1] = BR_GRN(prim->fog_colour) / 255.0f;
+        info->fog_colour.v[2] = BR_BLU(prim->fog_colour) / 255.0f;
+        info->fog_colour.v[3] = 1.0f;
+
+        info->fog_min   = prim->fog_min;
+        info->fog_max   = prim->fog_max;
+        info->fog_scale = (float)prim->fog_scale / 255.0f;
     }
 }
 
@@ -311,6 +328,11 @@ static void apply_stored_properties(HVIDEO hVideo, br_renderer *renderer, state_
 
         glDepthFunc(info.depth_func);
         glDepthMask(info.write_depth ? GL_TRUE : GL_FALSE);
+
+        model->enable_fog = info.fog;
+        model->fog_colour = info.fog_colour;
+        model->fog_scale  = info.fog_scale;
+        BrVector2Set(&model->fog_range, info.fog_min, info.fog_max);
     }
 
     if (states & MASK_STATE_OUTPUT) {

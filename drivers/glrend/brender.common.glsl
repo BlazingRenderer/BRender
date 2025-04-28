@@ -67,6 +67,8 @@ layout(std140) uniform br_model_state
     mat4 map_transform;
     vec4 surface_colour;
     vec4 eye_m; /* Eye position in model-space */
+    vec4 fog_colour;
+    vec2 fog_range; /* (min, max) */
 
     float ka; /* Ambient mod */
     float ks; /* Specular mod (doesn't seem to be used by Croc) */
@@ -77,6 +79,8 @@ layout(std140) uniform br_model_state
     bool disable_colour_key;
     bool is_indexed; /* Is our texture indexed? */
     bool is_filtered;
+    bool enable_fog;
+    float fog_scale;
 };
 
 float calculateAttenuation(in br_light alp, in float dist)

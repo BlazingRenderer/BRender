@@ -14,6 +14,8 @@ in vec3 vertexLightS;
 in vec3 rawPosition;
 in vec3 rawNormal;
 
+in float viewDistance;
+
 out vec4 mainColour;
 
 uniform sampler2D  main_texture;
@@ -46,6 +48,17 @@ vec3 adjustSaturation(in vec3 colour, in float saturation)
     return mix(grayscale, colour, 1.0 + saturation);
 }
 
+vec4 applyFog(in vec4 inColour, in float dist)
+{
+    float fog_min = fog_range.x; /* NB: To match softrend, set this to 0. */
+    float fog_max = fog_range.y;
+
+    if(fog_min == fog_max)
+        fog_max += 0.001f;
+
+    float fog_factor = clamp((fog_max - dist) / (fog_max - fog_min), 0.0, 1.0);
+    return mix(fog_colour, inColour, fog_factor);
+}
 
 vec2 SurfaceMapEnvironment(in vec3 eye, in vec3 normal, in mat4 model_to_environment) {
     vec3 r;
@@ -149,7 +162,10 @@ void main()
     fragColour.rgb = vec3(r, g, b);
 #endif
 
-    /* The actual surface colour. */
+    if(enable_fog) {
+        fragColour = applyFog(fragColour, viewDistance);
+    }
+
     mainColour = fragColour;
 
     return;

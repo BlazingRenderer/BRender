@@ -41,6 +41,14 @@ static br_tv_template_entry template_entries[] = {
     {BRT(INDEX_FOG_O),             F(prim.index_fog),           Q | S | A, BRTV_CONV_COPY,       0,                  0},
     {BRT(MAP_INTERPOLATION_T),     F(prim.filter),              Q | S | A, BRTV_CONV_COPY,       0,                  0},
     {BRT(MIP_INTERPOLATION_T),     F(prim.mip_filter),          Q | S | A, BRTV_CONV_COPY,       0,                  0},
+
+    {BRT(FOG_T),                   F(prim.fog_type),            Q | S | A, BRTV_CONV_COPY,          0,               0},
+    {BRT(FOG_MIN_X),               F(prim.fog_min),             Q | S | A, BRTV_CONV_FIXED_SCALAR,  0,               0},
+    {BRT(FOG_MIN_F),               F(prim.fog_min),             Q | S | A, BRTV_CONV_FLOAT_SCALAR,  0,               0},
+    {BRT(FOG_MAX_X),               F(prim.fog_max),             Q | S | A, BRTV_CONV_FIXED_SCALAR,  0,               0},
+    {BRT(FOG_MAX_F),               F(prim.fog_max),             Q | S | A, BRTV_CONV_FLOAT_SCALAR,  0,               0},
+    {BRT(FOG_RGB),                 F(prim.fog_colour),          Q | S | A, BRTV_CONV_COPY,          0,               0},
+    {BRT(FOG_SCALE_U8),            F(prim.fog_scale),           Q | S | A, BRTV_CONV_COPY,          0,               0},
 };
 
 static const state_primitive default_state = {
@@ -63,6 +71,11 @@ static const state_primitive default_state = {
     .bump                = NULL,
     .filter              = BRT_NONE,
     .mip_filter          = BRT_NONE,
+    .fog_type            = BRT_NONE,
+    .fog_min             = BR_SCALAR(256),
+    .fog_max             = BR_SCALAR(512),
+    .fog_colour          = BR_COLOUR_RGBA(255, 255, 255, 0),
+    .fog_scale           = 255,
 };
 
 void StateGLInitPrimitive(state_all *state)

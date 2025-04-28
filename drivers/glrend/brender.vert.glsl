@@ -19,6 +19,8 @@ out vec3 vertexLightS;
 out vec3 rawPosition;
 out vec3 rawNormal;
 
+out float viewDistance;
+
 out gl_PerVertex {
     vec4 gl_Position;
     float gl_ClipDistance[MAX_CLIP_PLANES];
@@ -43,6 +45,8 @@ void main()
     normal = vec4(normalize(mat3(normal_matrix) * aNormal), 0);
     uv = aUV;
     colour = aColour;
+
+    viewDistance = -position.z;
 
     vertexLightA = vec3(0);
     vertexLightD = vec3(0);

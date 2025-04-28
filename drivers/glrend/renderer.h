@@ -37,8 +37,14 @@ typedef struct br_state_info_gl {
         br_uint_8 disable_colour_key : 1;
         br_uint_8 write_colour : 1;
         br_uint_8 write_depth : 1;
+        br_uint_8 fog : 1;
     };
     GLenum depth_func;
+
+    br_vector4 fog_colour;
+    br_scalar  fog_min;
+    br_scalar  fog_max;
+    br_scalar  fog_scale;
 } br_primitive_state_info_gl;
 
 typedef struct br_sampler_gl {
