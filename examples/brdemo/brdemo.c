@@ -482,6 +482,9 @@ static int parse_args(int argc, char *const argv[], br_demo_run_args *args)
         case 15:
             args->software_pm_type = BR_PMT_RGB_555;
             break;
+        case 24:
+            args->software_pm_type = BR_PMT_RGB_888;
+            break;
         default:
         case 8:
             args->software_pm_type = BR_PMT_INDEX_8;
