@@ -66,7 +66,6 @@ layout(std140) uniform br_model_state
     mat4 environment;
     mat4 map_transform;
     vec4 surface_colour;
-    vec4 clear_colour;
     vec4 eye_m; /* Eye position in model-space */
 
     float ka; /* Ambient mod */

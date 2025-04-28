@@ -456,21 +456,14 @@ br_error BR_CMETHOD_DECL(br_device_pixelmap_gl, rectangleFill)(br_device_pixelma
         fbo  = self->asBack.glFbo;
         mask = GL_COLOR_BUFFER_BIT;
 
-        self->asBack.clearColour[0] = (float)r8 / 255.0f;
-        self->asBack.clearColour[1] = (float)g8 / 255.0f;
-        self->asBack.clearColour[2] = (float)b8 / 255.0f;
-        self->asBack.clearColour[3] = (float)a8 / 255.0f;
-
         glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
-        glClearColor(self->asBack.clearColour[0], self->asBack.clearColour[1], self->asBack.clearColour[2], self->asBack.clearColour[3]);
-
+        glClearColor((float)r8 / 255.0f,  (float)g8 / 255.0f, (float)b8 / 255.0f, (float)a8 / 255.0f);
     } else if(self->use_type == BRT_DEPTH) {
         UASSERT(colour == 0xFFFFFFFF);
         fbo  = self->asDepth.backbuffer->asBack.glFbo;
         mask = GL_DEPTH_BUFFER_BIT;
         glDepthMask(GL_TRUE);
         glClearDepth(1.0f);
-        self->asDepth.clearValue = 1.0f;
     } else {
         return BRE_UNSUPPORTED;
     }

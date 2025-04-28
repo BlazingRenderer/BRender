@@ -367,8 +367,6 @@ static void apply_state(br_renderer *renderer)
     apply_stored_properties(hVideo, renderer, renderer->state.current, MASK_STATE_STORED | MASK_STATE_OUTPUT, &unlit, &model, screen->asFront.tex_white);
 
     model.unlit = (br_uint_32)unlit;
-    BrVector4Set(&model.clear_colour, renderer->pixelmap->asBack.clearColour[0], renderer->pixelmap->asBack.clearColour[1],
-                 renderer->pixelmap->asBack.clearColour[2], renderer->pixelmap->asBack.clearColour[3]);
 
     glBufferData(GL_UNIFORM_BUFFER, sizeof(model), &model, GL_STATIC_DRAW);
 

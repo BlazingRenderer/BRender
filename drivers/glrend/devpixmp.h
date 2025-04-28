@@ -104,13 +104,11 @@ typedef struct br_device_pixelmap {
             struct br_device_pixelmap *depthbuffer;
             GLuint                     glFbo;
             GLuint                     glTex;
-            GLfloat                    clearColour[4];
             br_device_clut            *clut;
         } asBack;
         struct {
             struct br_device_pixelmap *backbuffer;
             GLuint                     glDepth;
-            GLfloat                    clearValue;
         } asDepth;
     };
 } br_device_pixelmap;
