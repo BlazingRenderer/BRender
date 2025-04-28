@@ -472,9 +472,15 @@ static void FogRender(br_demo *demo)
             BrPixelmapFill(demo->colour_buffer, 239);
             break;
         case BR_PMT_RGB_555:
+            BrPixelmapFill(demo->colour_buffer, BR_COLOUR_RGB_555(0x80, 0x80, 0x80));
+            break;
         case BR_PMT_RGB_565:
+            BrPixelmapFill(demo->colour_buffer, BR_COLOUR_RGB_565(0x80, 0x80, 0x80));
+            break;
         case BR_PMT_RGB_888:
-            BrPixelmapFill(demo->colour_buffer, 0x808080);
+        case BR_PMT_RGBX_888:
+        case BR_PMT_RGBA_8888:
+            BrPixelmapFill(demo->colour_buffer, BR_COLOUR_RGBA(0x80, 0x80, 0x80, 0xFF));
             break;
         default:
             BrPixelmapFill(demo->colour_buffer, 0);
