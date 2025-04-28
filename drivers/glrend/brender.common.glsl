@@ -110,10 +110,23 @@ float calculateAttenuationRadii(in br_light alp, in float dist, in float intensi
     return intensity * (1.0 - t);
 }
 
-
-void lightingColourAmbient(in vec4 p, in vec4 n, in br_light alp, inout vec3 outA, inout vec3 outD, inout vec3 outS)
+/*
+ * Radial ambient lights, who ever thought such things could be?
+ * See softrend/light24.c, lightingColourAmbientRadii()
+ */
+void lightingColourAmbientRadii(in vec4 p, in vec4 n, in br_light alp, inout vec3 outA, inout vec3 outD, inout vec3 outS)
 {
-    outA += ka * alp.intensity * alp.colour.xyz;
+    float atten = 1.0f;
+
+    vec4 dirn = alp.position - p;
+    float dist = length(dirn);
+
+    if(dist >= alp.radius_outer)
+        return;
+
+    atten = calculateAttenuationRadii(alp, dist, alp.intensity);
+
+    outA += ka * alp.intensity * alp.colour.xyz * atten;
 }
 
 void lightingColourDirect(in vec4 p, in vec4 n, in br_light alp, inout vec3 outA, inout vec3 outD, inout vec3 outS)
@@ -187,6 +200,14 @@ void lightingColourSpot(in vec4 p, in vec4 n, in br_light alp, inout vec3 outA, 
     return;
 }
 
+/*
+ * Lighting accumulation function. Does A/D/S separately.
+ *
+ * NB: For regular (i.e. non-radial/non-linear-falloff) ambient lights, if there's no global contribution
+ *     then we need to apply the ambient constant (ka) flat to the diffuse colour.
+ *     - See softrend/light24.c, SurfaceColourLit(), use_ambient_colour
+ *     - See softrend/setup.c, ActiveLightsUpdate(), use_ambient_colour
+ */
 void accumulateLights(in vec4 position, in vec4 normal, inout vec3 ambient, inout vec3 diffuse, inout vec3 specular)
 {
 #if DEBUG_DISABLE_LIGHTS
@@ -194,27 +215,31 @@ void accumulateLights(in vec4 position, in vec4 normal, inout vec3 ambient, inou
     return;
 #endif
 
-    if (num_lights == 0u || unlit != 0u) {
+    if(unlit != 0u) {
         diffuse += vec3(1);
         return;
     }
 
+    vec3 ambientAccum = vec3(0);
     vec4 normalDirection = normal;
-
-    /* This is shit, but this is the way the engine does it */
-    bool directLightExists = false;
+    bool hasAmbient = false;
 
     for (uint i = 0u; i < num_lights; ++i) {
         switch(lights[i].type) {
 #if !DEBUG_DISABLE_LIGHT_AMBIENT
             case BRT_AMBIENT:
-                lightingColourAmbient(position, normalDirection, lights[i], ambient, diffuse, specular);
+                if(lights[i].attenuation_type == BRT_RADII) {
+                    lightingColourAmbientRadii(position, normalDirection, lights[i], ambient, diffuse, specular);
+                } else {
+                    /* See note above. */
+                    ambientAccum += lights[i].colour.xyz * lights[i].intensity;
+                    hasAmbient = true;
+                }
                 break;
 #endif
 
 #if !DEBUG_DISABLE_LIGHT_DIRECTIONAL
             case BRT_DIRECT:
-                directLightExists = true;
                 lightingColourDirect(position, normalDirection, lights[i], ambient, diffuse, specular);
                 break;
 #endif
@@ -233,7 +258,13 @@ void accumulateLights(in vec4 position, in vec4 normal, inout vec3 ambient, inou
         }
     }
 
-    if (!directLightExists && num_lights > 0u && unlit == 0u) {
-        diffuse += clear_colour.rgb;
+    /*
+     * If no non-radial ambient contributions, apply ka flat.
+     */
+    ambientAccum = clamp(ambientAccum, 0.0f, 1.0f);
+    if(hasAmbient && ambientAccum != vec3(1)) {
+        diffuse += ka * ambientAccum;
+    } else {
+        diffuse += ka;
     }
 }
