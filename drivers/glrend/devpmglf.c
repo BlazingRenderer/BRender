@@ -251,7 +251,7 @@ br_device_pixelmap *DevicePixelmapGLAllocateFront(br_device *dev, br_output_faci
     BrLogTrace("GLREND", "Building proportional 7x9 font array.");
     (void)FontGLBuildArray(&self->asFront.font_prop7x9, BrFontProp7x9);
 
-    self->asFront.num_refs = 0;
+    self->num_refs = 0;
 
     ObjectContainerAddFront(self->output_facility, (br_object *)self);
     return self;
@@ -270,7 +270,7 @@ static void BR_CMETHOD_DECL(br_device_pixelmap_glf, free)(br_object *_self)
 
     BrLogTrace("GLREND", "Freeing %s", self->pm_identifier);
 
-    UASSERT(self->asFront.num_refs == 0);
+    UASSERT(self->num_refs == 0);
 
     glDeleteTextures(1, &self->asFront.font_prop7x9.tex);
     glDeleteTextures(1, &self->asFront.font_prop4x6.tex);
