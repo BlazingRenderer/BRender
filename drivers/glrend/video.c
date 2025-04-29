@@ -211,13 +211,3 @@ const br_pixelmap_gl_fmt *DeviceGLGetFormatDetails(br_uint_8 type)
 
     return fmt;
 }
-
-void VIDEOI_BrRectToGL(const br_pixelmap *pm, br_rectangle *r)
-{
-    br_rectangle out;
-    PixelmapRectangleClip(&out, r, pm);
-
-    /* Flip the rect upside down to use (0, 0) at bottom-left. */
-    *r   = out;
-    r->y = pm->height - r->h - r->y;
-}

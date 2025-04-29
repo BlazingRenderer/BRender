@@ -259,3 +259,19 @@ br_vector3 DeviceGLTriangleCentroid(const br_vector3 *v1, const br_vector3 *v2, 
     v.v[2] = BR_DIV(v1->v[2] + v2->v[2] + v3->v[2], BR_SCALAR(3));
     return v;
 }
+
+br_clip_result DevicePixelmapGLRectangleClip(br_rectangle *restrict out, const br_rectangle *restrict r, const br_pixelmap *pm)
+{
+    br_clip_result rr;
+    br_rectangle   tmp;
+
+    if((rr = PixelmapRectangleClip(&tmp, r, pm)) == BR_CLIP_REJECT)
+        return rr;
+
+    /*
+     * Flip the rect upside down to use (0, 0) at bottom-left.
+     */
+    tmp.y = pm->height - tmp.h - tmp.y;
+    *out  = tmp;
+    return rr;
+}

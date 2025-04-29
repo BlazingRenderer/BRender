@@ -29,8 +29,6 @@ br_boolean VIDEOI_CompileTextShader(HVIDEO hVideo);
 
 br_boolean VIDEOI_CompileBRenderShader(HVIDEO hVideo, const char *vertPath, const char *fragPath);
 
-void VIDEOI_BrRectToGL(const br_pixelmap *pm, br_rectangle *r);
-
 const br_pixelmap_gl_fmt *DeviceGLGetFormatDetails(br_uint_8 type);
 
 /*
@@ -168,6 +166,8 @@ br_boolean  DeviceGLCheckErrors(void);
 const char *DeviceGLStrError(GLenum err);
 
 br_vector3 DeviceGLTriangleCentroid(const br_vector3 *v1, const br_vector3 *v2, const br_vector3 *v3);
+
+br_clip_result DevicePixelmapGLRectangleClip(br_rectangle *restrict out, const br_rectangle *restrict r, const br_pixelmap *pm);
 
 /*
  * Wrappers for br_device_gl_procs.

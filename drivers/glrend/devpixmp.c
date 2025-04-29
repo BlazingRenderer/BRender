@@ -384,12 +384,19 @@ br_error BR_CMETHOD_DECL(br_device_pixelmap_gl, rectangleStretchCopy)(br_device_
      */
     GLbitfield bits;
     GLuint     srcFbo, dstFbo;
+    br_rectangle srect, drect;
 
     /*
      * Refusing copy/blit to screen.
      */
     if(self->use_type == BRT_NONE)
         return BRE_FAIL;
+
+    if(DevicePixelmapGLRectangleClip(&srect, s, (const br_pixelmap *)src) == BR_CLIP_REJECT)
+        return BRE_OK;
+
+    if(DevicePixelmapGLRectangleClip(&drect, d, (const br_pixelmap *)self) == BR_CLIP_REJECT)
+        return BRE_OK;
 
     if(self->use_type == BRT_OFFSCREEN) {
         if(src->use_type != BRT_OFFSCREEN)
@@ -414,13 +421,10 @@ br_error BR_CMETHOD_DECL(br_device_pixelmap_gl, rectangleStretchCopy)(br_device_
     if(self == src)
         return BRE_OK;
 
-    VIDEOI_BrRectToGL((br_pixelmap *)self, d);
-    VIDEOI_BrRectToGL((br_pixelmap *)src, s);
-
     glBindFramebuffer(GL_READ_FRAMEBUFFER, srcFbo);
     glBindFramebuffer(GL_DRAW_FRAMEBUFFER, dstFbo);
 
-    glBlitFramebuffer(s->x, s->y, s->x + s->w, s->y + s->h, d->x, d->y, d->x + d->w, d->y + d->h, bits, GL_NEAREST);
+    glBlitFramebuffer(srect.x, srect.y, srect.x + srect.w, srect.y + srect.h, drect.x, drect.y, drect.x + drect.w, drect.y + drect.h, bits, GL_NEAREST);
 
     glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
     glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
@@ -444,10 +448,15 @@ br_error BR_CMETHOD_DECL(br_device_pixelmap_gl, rectangleCopy)(br_device_pixelma
 
 br_error BR_CMETHOD_DECL(br_device_pixelmap_gl, rectangleFill)(br_device_pixelmap *self, br_rectangle *rect, br_uint_32 colour)
 {
-    GLuint     fbo;
-    GLbitfield mask;
+    GLuint       fbo;
+    GLbitfield   mask;
+    br_rectangle drect;
 
-    VIDEOI_BrRectToGL((br_pixelmap *)self, rect);
+    /*
+     * Clip rectangle to pixelmap
+     */
+    if(DevicePixelmapGLRectangleClip(&drect, rect, (br_pixelmap *)self) == BR_CLIP_REJECT)
+        return BRE_OK;
 
     if(self->use_type == BRT_OFFSCREEN) {
         br_uint_8 r8 = 0, g8 = 0, b8 = 0, a8 = 255;
@@ -472,7 +481,7 @@ br_error BR_CMETHOD_DECL(br_device_pixelmap_gl, rectangleFill)(br_device_pixelma
     glViewport(0, 0, self->pm_width, self->pm_height);
 
     glEnable(GL_SCISSOR_TEST);
-    glScissor(rect->x, rect->y, rect->w, rect->h);
+    glScissor(drect.x, drect.y, drect.w, drect.h);
 
     glClear(mask);
 
@@ -483,8 +492,8 @@ br_error BR_CMETHOD_DECL(br_device_pixelmap_gl, rectangleFill)(br_device_pixelma
     return BRE_OK;
 }
 
-br_error BR_CMETHOD(br_device_pixelmap_gl, rectangleStretchCopyTo)(br_device_pixelmap *self, br_rectangle *dr,
-                                                                   br_device_pixelmap *_src, br_rectangle *sr)
+br_error BR_CMETHOD(br_device_pixelmap_gl, rectangleStretchCopyTo)(br_device_pixelmap *self, br_rectangle *d,
+                                                                   br_device_pixelmap *_src, br_rectangle *s)
 {
     /* Pixelmap->Device, addressable stretch copy. */
 
@@ -501,6 +510,7 @@ br_error BR_CMETHOD(br_device_pixelmap_gl, rectangleStretchCopyTo)(br_device_pix
     HVIDEO            hVideo  = &self->screen->asFront.video;
     br_pixelmap      *src     = (br_pixelmap *)_src;
     br_buffer_stored *stored  = src->stored;
+    br_rectangle      srect, drect;
     br_boolean        tex_tmp = BR_FALSE;
     GLuint            tex;
     br_boolean        clut_tmp = BR_FALSE;
@@ -509,6 +519,12 @@ br_error BR_CMETHOD(br_device_pixelmap_gl, rectangleStretchCopyTo)(br_device_pix
 
     if(self->use_type != BRT_OFFSCREEN)
         return BRE_UNSUPPORTED;
+
+    if(DevicePixelmapGLRectangleClip(&srect, s, src) == BR_CLIP_REJECT)
+        return BRE_OK;
+
+    if(DevicePixelmapGLRectangleClip(&drect, d, (const br_pixelmap *)self) == BR_CLIP_REJECT)
+        return BRE_OK;
 
     if(stored != NULL && ObjectDevice(stored) == self->device) {
         tex = BufferStoredGLGetTexture(stored);
@@ -534,10 +550,6 @@ br_error BR_CMETHOD(br_device_pixelmap_gl, rectangleStretchCopyTo)(br_device_pix
             glDeleteTextures(1, &clut);
         return BRE_FAIL;
     }
-
-    /* Convert the rects to OpenGL-coordinates */
-    VIDEOI_BrRectToGL(src, sr);
-    VIDEOI_BrRectToGL((br_pixelmap *)self, dr);
 
     glDisable(GL_DEPTH_TEST);
     glBindFramebuffer(GL_FRAMEBUFFER, self->asBack.glFbo);
@@ -565,16 +577,16 @@ br_error BR_CMETHOD(br_device_pixelmap_gl, rectangleStretchCopyTo)(br_device_pix
     br_rect_gl_data rect_data = {
         .mvp           = {},
         .src_rect      = BR_VECTOR4(
-            (float)sr->x / (float)src->width,
-            (float)sr->y / (float)src->height,
-            (float)sr->w / (float)src->width,
-            (float)sr->h / (float)src->height
+            (float)srect.x / (float)src->width,
+            (float)srect.y / (float)src->height,
+            (float)srect.w / (float)src->width,
+            (float)srect.h / (float)src->height
         ),
         .dst_rect      = BR_VECTOR4(
-            (float)dr->x / (float)self->pm_width,
-            (float)dr->y / (float)self->pm_height,
-            (float)dr->w / (float)self->pm_width,
-            (float)dr->h / (float)self->pm_height
+            (float)drect.x / (float)self->pm_width,
+            (float)drect.y / (float)self->pm_height,
+            (float)drect.w / (float)self->pm_width,
+            (float)drect.h / (float)self->pm_height
         ),
         .vertical_flip = 1,
         .indexed       = (float)fmt->indexed,
