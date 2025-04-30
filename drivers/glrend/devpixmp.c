@@ -731,6 +731,7 @@ br_error BR_CMETHOD(br_device_pixelmap_gl, text)(br_device_pixelmap *self, br_po
 
     glDisable(GL_DEPTH_TEST);
     glDisable(GL_CULL_FACE);
+    glDepthMask(GL_FALSE);
 
     glUseProgram(hVideo->textProgram.program);
     glBindBufferBase(GL_UNIFORM_BUFFER, hVideo->textProgram.block_binding_font_data, gl_font->font_data);
