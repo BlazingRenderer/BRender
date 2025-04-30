@@ -27,6 +27,8 @@ br_boolean VIDEOI_CompileRectShader(HVIDEO hVideo);
 
 br_boolean VIDEOI_CompileTextShader(HVIDEO hVideo);
 
+br_boolean VIDEOI_CompileLineShader(HVIDEO hVideo);
+
 br_boolean VIDEOI_CompileBRenderShader(HVIDEO hVideo, const char *vertPath, const char *fragPath);
 
 const br_pixelmap_gl_fmt *DeviceGLGetFormatDetails(br_uint_8 type);
