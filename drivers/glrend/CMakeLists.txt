@@ -50,6 +50,22 @@ add_custom_command(
         DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/embedshader.pl"
 )
 
+add_custom_command(
+        OUTPUT line.vert.glsl.h
+        WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
+        COMMAND "${PERL_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/embedshader.pl" "g_LineVertexShader" "${CMAKE_CURRENT_SOURCE_DIR}/line.vert.glsl" "${CMAKE_CURRENT_BINARY_DIR}/line.vert.glsl.h"
+        MAIN_DEPENDENCY "${CMAKE_CURRENT_SOURCE_DIR}/line.vert.glsl"
+        DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/embedshader.pl"
+)
+
+add_custom_command(
+        OUTPUT line.frag.glsl.h
+        WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
+        COMMAND "${PERL_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/embedshader.pl" "g_LineFragmentShader" "${CMAKE_CURRENT_SOURCE_DIR}/line.frag.glsl" "${CMAKE_CURRENT_BINARY_DIR}/line.frag.glsl.h"
+        MAIN_DEPENDENCY "${CMAKE_CURRENT_SOURCE_DIR}/line.frag.glsl"
+        DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/embedshader.pl"
+)
+
 set(GLSTATE_FILES
         cache.c
         state.c
@@ -69,6 +85,7 @@ set(VIDEO_FILES
         shader_brender.c
         shader_rect.c
         shader_text.c
+        shader_line.c
         video.c
         video.h
         )
@@ -173,6 +190,9 @@ add_library(glrend
 
         "${CMAKE_CURRENT_BINARY_DIR}/text.vert.glsl.h"
         "${CMAKE_CURRENT_BINARY_DIR}/text.frag.glsl.h"
+
+        "${CMAKE_CURRENT_BINARY_DIR}/line.vert.glsl.h"
+        "${CMAKE_CURRENT_BINARY_DIR}/line.frag.glsl.h"
         )
 
 get_target_property(target_type glrend TYPE)

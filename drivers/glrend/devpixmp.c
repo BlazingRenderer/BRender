@@ -815,6 +815,60 @@ br_error BR_CMETHOD(br_device_pixelmap_gl, text)(br_device_pixelmap *self, br_po
     return BRE_OK;
 }
 
+br_error BR_CMETHOD_DECL(br_device_pixelmap_gl, line)(br_device_pixelmap *self, br_point *s, br_point *e, br_uint_32 colour)
+{
+#pragma pack(push, 16)
+    typedef struct br_line_gl {
+        alignas(16) br_matrix4 mvp;
+        alignas(8) br_vector2 start;
+        alignas(8) br_vector2 end;
+        alignas(16) br_vector4 colour;
+    } br_line_gl;
+#pragma pack(pop)
+
+    br_point   spoint, epoint;
+    br_uint_8  r8 = 0, g8 = 0, b8 = 0, a8 = 255;
+    br_line_gl line_data;
+    HVIDEO     hVideo = &self->screen->asFront.video;
+
+    if(PixelmapLineClip(&spoint, &epoint, s, e, (br_pixelmap *)self) == BR_CLIP_REJECT)
+        return BRE_OK;
+
+    BrColourUnpack(colour, self->pm_type, &r8, &g8, &b8, &a8);
+
+    BrMatrix4Orthographic(&line_data.mvp, 0.0f, 1.0f, 0.0f, 1.0f, -1.0f, 1.0f);
+    line_data.start  = (br_vector2)BR_VECTOR2((float)spoint.x / (float)self->pm_width,
+                                              1.0f - ((float)spoint.y / (float)self->pm_height));
+    line_data.end    = (br_vector2)BR_VECTOR2((float)epoint.x / (float)self->pm_width,
+                                              1.0f - ((float)epoint.y / (float)self->pm_height));
+    line_data.colour = (br_vector4)BR_VECTOR4(r8 / 255.0f, g8 / 255.0f, b8 / 255.0f, a8 / 255.0f);
+
+    glBindFramebuffer(GL_FRAMEBUFFER, self->asBack.glFbo);
+    glViewport(0, 0, self->pm_width, self->pm_height);
+
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+    glDisable(GL_DEPTH_TEST);
+    glDisable(GL_CULL_FACE);
+    glDepthMask(GL_FALSE);
+
+    glUseProgram(hVideo->lineProgram.program);
+
+    glBindVertexArray(self->screen->asFront.video.lineProgram.vao);
+    glBindBuffer(GL_UNIFORM_BUFFER, self->screen->asFront.video.lineProgram.ubo);
+    glBufferData(GL_UNIFORM_BUFFER, sizeof(br_line_gl), &line_data, GL_STATIC_DRAW);
+
+    glDrawArrays(GL_LINES, 0, 2);
+
+    glBindVertexArray(0);
+    glBindBuffer(GL_UNIFORM_BUFFER, 0);
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    glDisable(GL_BLEND);
+
+    return BRE_OK;
+}
+
 void DevicePixelmapGLIncRef(br_device_pixelmap *self)
 {
     UASSERT(self->num_refs >= 0);
@@ -877,7 +931,7 @@ static const struct br_device_pixelmap_dispatch devicePixelmapDispatch = {
     ._rectangleStretchCopyFrom = BR_CMETHOD_REF(br_device_pixelmap_fail, rectangleStretchCopyFrom),
     ._rectangleFill            = BR_CMETHOD_REF(br_device_pixelmap_gl, rectangleFill),
     ._pixelSet                 = BR_CMETHOD_REF(br_device_pixelmap_fail, pixelSet),
-    ._line                     = BR_CMETHOD_REF(br_device_pixelmap_fail, line),
+    ._line                     = BR_CMETHOD_REF(br_device_pixelmap_gl, line),
     ._copyBits                 = BR_CMETHOD_REF(br_device_pixelmap_fail, copyBits),
 
     ._text       = BR_CMETHOD_REF(br_device_pixelmap_gl, text),

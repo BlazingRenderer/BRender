@@ -120,9 +120,16 @@ HVIDEO VIDEO_Open(HVIDEO hVideo, const char *vertShader, const char *fragShader)
         return NULL;
     }
 
+    if(!VIDEOI_CompileLineShader(hVideo)) {
+        glDeleteProgram(hVideo->textProgram.program);
+        glDeleteProgram(hVideo->rectProgram.program);
+        return NULL;
+    }
+
     if(!VIDEOI_CompileBRenderShader(hVideo, vertShader, fragShader)) {
         glDeleteProgram(hVideo->textProgram.program);
         glDeleteProgram(hVideo->rectProgram.program);
+        glDeleteProgram(hVideo->lineProgram.program);
         return NULL;
     }
 
@@ -149,6 +156,10 @@ void VIDEO_Close(HVIDEO hVideo)
     glDeleteProgram(hVideo->rectProgram.program);
     glDeleteBuffers(1, &hVideo->rectProgram.ubo);
     glDeleteVertexArrays(1, &hVideo->rectProgram.vao);
+
+    glDeleteBuffers(1, &hVideo->lineProgram.ubo);
+    glDeleteVertexArrays(1, &hVideo->lineProgram.vao);
+    glDeleteProgram(hVideo->lineProgram.program);
 
     glDeleteProgram(hVideo->textProgram.program);
 }

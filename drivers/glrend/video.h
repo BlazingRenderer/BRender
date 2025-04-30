@@ -57,6 +57,15 @@ typedef struct _VIDEO {
 
     struct {
         GLuint program;
+        GLuint block_index_line_data;
+        GLuint block_binding_line_data;
+
+        GLuint vao;
+        GLuint ubo;
+    } lineProgram;
+
+    struct {
+        GLuint program;
 
         struct {
             GLint aPosition; /* Vectex Position, vec3 */
