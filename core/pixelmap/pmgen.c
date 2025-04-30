@@ -48,20 +48,20 @@ br_error BR_CMETHOD_DECL(br_device_pixelmap_gen, copyTo)(br_device_pixelmap *sel
     return DevicePixelmapRectangleCopyTo(self, &p, src, &r);
 }
 
-br_error BR_CMETHOD_DECL(br_device_pixelmap_gen, copyFrom)(br_device_pixelmap *self, br_device_pixelmap *src)
+br_error BR_CMETHOD_DECL(br_device_pixelmap_gen, copyFrom)(br_device_pixelmap *self, br_device_pixelmap *dst)
 {
     br_rectangle r;
     br_point     p;
 
-    p.x = -self->pm_origin_x;
-    p.y = -self->pm_origin_y;
+    p.x = -dst->pm_origin_x;
+    p.y = -dst->pm_origin_y;
 
-    r.x = -src->pm_origin_x;
-    r.y = -src->pm_origin_y;
-    r.w = src->pm_width;
-    r.h = src->pm_height;
+    r.x = -self->pm_origin_x;
+    r.y = -self->pm_origin_y;
+    r.w = self->pm_width;
+    r.h = self->pm_height;
 
-    return DevicePixelmapRectangleCopyFrom(self, &p, src, &r);
+    return DevicePixelmapRectangleCopyFrom(self, &p, dst, &r);
 }
 
 br_error BR_CMETHOD_DECL(br_device_pixelmap_gen, fill)(br_device_pixelmap *self, br_uint_32 colour)
