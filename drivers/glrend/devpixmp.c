@@ -626,18 +626,24 @@ br_error BR_CMETHOD_DECL(br_device_pixelmap_gl, rectangleCopyTo)(br_device_pixel
     return BR_CMETHOD(br_device_pixelmap_gl, rectangleStretchCopyTo)(self, &r, src, sr);
 }
 
+#define DevicePixelmapMemAddress(pm, x, y, bpp)                                                     \
+    ((char *)(((br_device_pixelmap *)(pm))->pm_pixels) +                                            \
+     (((br_device_pixelmap *)(pm))->pm_base_y + (y)) * ((br_device_pixelmap *)(pm))->pm_row_bytes + \
+     (((br_device_pixelmap *)(pm))->pm_base_x + (x)) * (bpp))
+
 /*
  * Device->Pixelmap, addressable same-size copy.
  */
 br_error BR_CMETHOD_DECL(br_device_pixelmap_gl, rectangleCopyFrom)(br_device_pixelmap *self, br_point *p,
                                                                    br_device_pixelmap *dest, br_rectangle *r)
 {
-    br_error                  err;
-    void                     *rowTemp;
+    br_error err;
+    void                     *row_temp;
     const br_pixelmap_gl_fmt *fmt;
-
-    UASSERT(p->x == -self->pm_origin_x);
-    UASSERT(p->y == -self->pm_origin_y);
+    br_rectangle              srect;
+    br_point                  dpoint;
+    br_uint_16                bytes_per_pixel;
+    void                     *dst_pixels;
 
     /*
      * Need contig pixels and whole rows.
@@ -645,10 +651,8 @@ br_error BR_CMETHOD_DECL(br_device_pixelmap_gl, rectangleCopyFrom)(br_device_pix
     if(!(dest->pm_flags & (BR_PMF_LINEAR | BR_PMF_ROW_WHOLEPIXELS)))
         return BRE_FAIL;
 
-    /*
-     * Flip to bottom-up. It's already been clipped.
-     */
-    r->y = self->pm_height - r->h - r->y;
+    if(PixelmapRectangleClipTwo(&srect, &dpoint, r, p, (br_pixelmap *)dest, (br_pixelmap *)self) == BR_CLIP_REJECT)
+        return BRE_OK;
 
     if((fmt = DeviceGLGetFormatDetails(dest->pm_type)) == NULL)
         return BRE_FAIL;
@@ -656,22 +660,25 @@ br_error BR_CMETHOD_DECL(br_device_pixelmap_gl, rectangleCopyFrom)(br_device_pix
     if((err = DevicePixelmapGLBindFramebuffer(GL_READ_FRAMEBUFFER, self)) != BRE_OK)
         return err;
 
-    glReadPixels(r->x, r->y, r->w, r->h, fmt->format, fmt->type, dest->pm_pixels);
+    bytes_per_pixel = BrPixelmapPixelSize((br_pixelmap *)dest) >> 3;
+    dst_pixels      = DevicePixelmapMemAddress(dest, dpoint.x, dpoint.y, bytes_per_pixel);
 
-    /*
-     * Flip it
-     */
-    rowTemp = BrScratchAllocate(dest->pm_row_bytes);
-    for(br_uint_16 j = 0; j < dest->pm_height / 2; ++j) {
-        void *top = (void *)((br_uintptr_t)dest->pm_pixels + (j * dest->pm_row_bytes));
-        void *bot = (void *)((br_uintptr_t)dest->pm_pixels + ((dest->pm_height - j - 1) * dest->pm_row_bytes));
-        memcpy(rowTemp, top, dest->pm_row_bytes);
-        memcpy(top, bot, dest->pm_row_bytes);
-        memcpy(bot, rowTemp, dest->pm_row_bytes);
+    glPixelStorei(GL_PACK_ROW_LENGTH, srect.w);
+    glReadPixels(srect.x, self->pm_height - srect.y - srect.h, srect.w, srect.h, fmt->format, fmt->type, dst_pixels);
+
+    size_t bytes_per_subrow = srect.w * bytes_per_pixel;
+    row_temp                = BrScratchAllocate(bytes_per_subrow);
+    for(br_uint_16 j = 0; j < srect.h / 2; ++j) {
+        void *top = DevicePixelmapMemAddress(dest, dpoint.x, dpoint.y + j, bytes_per_pixel);
+        void *bot = DevicePixelmapMemAddress(dest, dpoint.x, dpoint.y + srect.h - j - 1, bytes_per_pixel);
+
+        memcpy(row_temp, top, bytes_per_subrow);
+        memcpy(top, bot, bytes_per_subrow);
+        memcpy(bot, row_temp, bytes_per_subrow);
     }
 
     /* TODO: If on little-endian systems, swap the byte order. */
-    BrScratchFree(rowTemp);
+    BrScratchFree(row_temp);
     return BRE_OK;
 }
 
