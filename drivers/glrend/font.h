@@ -15,7 +15,7 @@ typedef struct br_font_gl {
 #pragma pack(push, 16)
 typedef struct br_text_gl {
     alignas(16) br_matrix4 mvp;
-    alignas(16) br_vector3 colour;
+    alignas(16) br_vector4 colour;
     alignas(16) br_vector4_f rects[BR_TEXT_GL_CHUNK_SIZE];
     alignas(16) br_uint_32 chars[BR_TEXT_GL_CHUNK_SIZE];
 } br_text_gl;

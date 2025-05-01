@@ -691,6 +691,7 @@ br_error BR_CMETHOD(br_device_pixelmap_gl, text)(br_device_pixelmap *self, br_po
     br_font_gl *gl_font;
     HVIDEO      hVideo = &self->screen->asFront.video;
     br_text_gl *text_data;
+    br_uint_8  r8 = 0, g8 = 0, b8 = 0, a8 = 255;
 
     /*
      * Make sure we're an offscreen pixelmap.
@@ -745,7 +746,9 @@ br_error BR_CMETHOD(br_device_pixelmap_gl, text)(br_device_pixelmap *self, br_po
      */
     text_data = BrScratchAllocate(sizeof(br_text_gl));
     BrMatrix4Orthographic(&text_data->mvp, 0.0f, 1.0f, 0.0f, 1.0f, -1.0f, 1.0f);
-    text_data->colour = (br_vector3)BR_VECTOR3(BR_RED(colour) / 255.0f, BR_GRN(colour) / 255.0f, BR_BLU(colour) / 255.0f);
+
+    BrColourUnpack(colour, self->pm_type, &r8, &g8, &b8, &a8);
+    text_data->colour = (br_vector4)BR_VECTOR4(r8 / 255.0f, g8 / 255.0f, b8 / 255.0f, a8 / 255.0f);
 
     glBindVertexArray(self->screen->asFront.video.textProgram.vao_glyphs);
     glBindBuffer(GL_UNIFORM_BUFFER, self->screen->asFront.video.textProgram.ubo_glyphs);
