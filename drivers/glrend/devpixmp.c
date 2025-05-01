@@ -774,7 +774,7 @@ br_error BR_CMETHOD(br_device_pixelmap_gl, text)(br_device_pixelmap *self, br_po
              * Bail early if the rest of the string is entirely offscreen.
              */
             dr = r;
-            if(PixelmapRectangleClip(&dr, &r, (br_pixelmap *)self) == BR_CLIP_REJECT) {
+            if(DevicePixelmapGLRectangleClip(&dr, &r, (br_pixelmap *)self) == BR_CLIP_REJECT) {
                 chunk = i;
                 len = chunk;
                 break;

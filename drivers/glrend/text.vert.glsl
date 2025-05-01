@@ -24,10 +24,10 @@ const int INDICES[6] = int[6](0, 1, 2, 2, 1, 3);
 
 void main()
 {
-    float x     =     text_data.rects[gl_InstanceID].x;
-    float y     = 1 - text_data.rects[gl_InstanceID].y;
-    float w     =     text_data.rects[gl_InstanceID].z;
-    float h     = 0 - text_data.rects[gl_InstanceID].w;
+    float x     = text_data.rects[gl_InstanceID].x;
+    float y     = text_data.rects[gl_InstanceID].y;
+    float w     = text_data.rects[gl_InstanceID].z;
+    float h     = text_data.rects[gl_InstanceID].w;
     uint ch     = text_data.chars[gl_InstanceID / 4][gl_InstanceID % 4];
     float width = font_data.widths[ch / 4u][ch % 4u];
 
@@ -39,10 +39,10 @@ void main()
     );
 
     vec2 uvs[4] = vec2[4](
-        vec2(0,     1 - 0),
-        vec2(0,     1 - 1),
-        vec2(width, 1 - 0),
-        vec2(width, 1 - 1)
+        vec2(0,     0),
+        vec2(0,     1),
+        vec2(width, 0),
+        vec2(width, 1)
     );
 
     gl_Position = text_data.mvp * vec4(verts[INDICES[gl_VertexID]], 0, 1);
