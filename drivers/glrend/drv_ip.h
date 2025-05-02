@@ -63,6 +63,11 @@ GLuint RendererGLGetSampler(br_renderer *self, const br_sampler_info_gl *info);
  */
 br_error BR_CMETHOD_DECL(br_device_pixelmap_gl, match) (br_device_pixelmap *self, br_device_pixelmap **newpm,
                                                         br_token_value *tv);
+
+void DevicePixelmapGLIncRef(br_device_pixelmap *self);
+
+void DevicePixelmapGLDecRef(br_device_pixelmap *self);
+
 /*
  * devpmgl.c
  */

@@ -166,7 +166,7 @@ void BR_CMETHOD_DECL(br_device_pixelmap_gl, free)(br_object *_self)
 
     ObjectContainerRemove(self->output_facility, (br_object *)self);
 
-    --self->screen->num_refs;
+    DevicePixelmapGLDecRef(self->screen);
 
     BrResFreeNoCallback(self);
 }
@@ -339,7 +339,7 @@ br_error BR_CMETHOD_DECL(br_device_pixelmap_gl, match)(br_device_pixelmap *self,
     pm->use_type        = mt.use_type;
     pm->msaa_samples    = mt.msaa_samples;
     pm->screen          = self->screen;
-    ++self->screen->num_refs;
+    DevicePixelmapGLIncRef(self->screen);
 
     pm->pm_type     = mt.type;
     pm->pm_width    = mt.width;
@@ -361,7 +361,7 @@ br_error BR_CMETHOD_DECL(br_device_pixelmap_gl, match)(br_device_pixelmap *self,
     }
 
     if(recreate_renderbuffers(pm) != BRE_OK) {
-        --self->screen->num_refs;
+        DevicePixelmapGLDecRef(self->screen);
         delete_gl_resources(pm);
         BrResFreeNoCallback(pm);
         return BRE_FAIL;
@@ -813,6 +813,18 @@ br_error BR_CMETHOD(br_device_pixelmap_gl, text)(br_device_pixelmap *self, br_po
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
     glDisable(GL_BLEND);
     return BRE_OK;
+}
+
+void DevicePixelmapGLIncRef(br_device_pixelmap *self)
+{
+    UASSERT(self->num_refs >= 0);
+    ++self->num_refs;
+}
+
+void DevicePixelmapGLDecRef(br_device_pixelmap *self)
+{
+    UASSERT(self->num_refs > 0);
+    --self->num_refs;
 }
 
 /*
