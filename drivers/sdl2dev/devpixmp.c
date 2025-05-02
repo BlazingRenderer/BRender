@@ -330,6 +330,12 @@ static br_error BR_CMETHOD_DECL(br_device_pixelmap_sdl2, allocateSub)(br_device_
     br_device_pixelmap *pm;
 
     /*
+     * Don't allow nested sub pixelmaps, it's too annoying to deal with.
+     */
+    if(self->owned != BR_TRUE)
+        return BRE_FAIL;
+
+    /*
      * Create sub-window (clipped against original)
      */
     if(PixelmapRectangleClip(&out, rect, (br_pixelmap *)self) == BR_CLIP_REJECT)
