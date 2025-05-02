@@ -37,13 +37,6 @@ AttributeMacros:
   - BR_ASM_CALLBACK
   - BR_PRINTF_ATTRIBUTE
   - BR_SCANF_ATTRIBUTE
-  - BR_CMETHOD_DECL
-  - BR_CMETHOD_VA_DECL
-  - BR_CMETHOD_PTR_DECL
-  - BR_CMETHOD_VA_PTR_DECL
-  - BR_CMETHOD
-  - BR_CMETHOD_REF
-  - BR_CMETHOD_CALL
 BinPackArguments: true
 BinPackParameters: true
 BraceWrapping:
