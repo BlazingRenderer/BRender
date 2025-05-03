@@ -653,6 +653,9 @@ void submap_draw(br_pixelmap *dest, float dt, void *user)
     BrPixelmapFill(state->middle_square, 0xFFFFFFFF);
     linepoint_draw(state->middle_square, dt, &state->linepoint);
 
+    BrPixelmapText(state->middle_square, -state->middle_square->origin_x + 10, -state->middle_square->origin_y + 10,
+                   0xFF000000, BrFontProp7x9, "Black Text on a White Sub-pixelmap");
+
     BrPixelmapCopy(state->left_square, state->checkerboard_memory);
     BrPixelmapCopy(state->left_square2, state->checkerboard_device);
     // BrPixelmapFill(state->left_square2, 0xFFFFFFFF);
@@ -1260,7 +1263,7 @@ int main(int argc, char **argv)
     br_error     r;
     br_uint_64   ticks_last, ticks_now;
     int          want_screenshot;
-    int          test_index = 0;/* BR_ASIZE(tests) - 1; */
+    int          test_index = 13;/* BR_ASIZE(tests) - 1; */
 
     BrBegin();
 
@@ -1275,7 +1278,7 @@ int main(int argc, char **argv)
                       BRT_HIDPI_B,        BR_TRUE,
                       /* Set these if you dare... */
                       BRT_RESIZABLE_B,    BR_TRUE,
-                      BRT_OPENGL_B,       BR_FALSE,
+                      BRT_OPENGL_B,       BR_TRUE,
                       BR_NULL_TOKEN);
     // clang-format on
 
@@ -1363,7 +1366,7 @@ int main(int argc, char **argv)
         }
 
         /* Clear the screen black. */
-        BrPixelmapFill(colour_buffer, BR_COLOUR_RGBA(0, 0, 0, 0xFF));
+        BrPixelmapFill(colour_buffer, BR_COLOUR_RGBA(255, 0, 0, 0xFF));
 
         /* Run the test */
         {
