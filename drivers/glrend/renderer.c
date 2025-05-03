@@ -155,7 +155,7 @@ static void BR_CMETHOD_DECL(br_renderer_gl, sceneBegin)(br_renderer *self)
     glBindBufferBase(GL_UNIFORM_BUFFER, hVideo->brenderProgram.blockBindingScene, hVideo->brenderProgram.uboScene);
     glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(self->state.cache.scene), &self->state.cache.scene);
 
-    glViewport(0, 0, colour_target->pm_width, colour_target->pm_height);
+    glViewport(colour_target->pm_base_x, colour_target->pm_base_y, colour_target->pm_width, colour_target->pm_height);
 
     /* Bind the model UBO here, it's faster than doing it for each model group */
     glBindBufferBase(GL_UNIFORM_BUFFER, hVideo->brenderProgram.blockBindingModel, hVideo->brenderProgram.uboModel);

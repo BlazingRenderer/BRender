@@ -135,6 +135,7 @@ set(GLREND_FILES
         devpixmp.c
         devpixmp.h
         devpmglf.c
+        devpmsub.c
 
         devclut.c
         devclut.h

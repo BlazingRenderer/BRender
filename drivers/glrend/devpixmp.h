@@ -114,6 +114,9 @@ typedef struct br_device_pixelmap {
             struct br_device_pixelmap *backbuffer;
             GLuint                     glDepth;
         } asDepth;
+        struct {
+            struct br_device_pixelmap *parent;
+        } asSub;
     };
 } br_device_pixelmap;
 
