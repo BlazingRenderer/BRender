@@ -25,5 +25,6 @@ out vec4 main_colour;
 
 void main()
 {
+    // NB: We explicitly ignore the alpha here because everything that uses text assumes so.
     main_colour = texture(uSampler, vec3(uv, character)) * vec4(text_data.colour.rgb, 1.0);
 }
