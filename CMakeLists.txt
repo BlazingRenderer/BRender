@@ -59,6 +59,11 @@ if (BRENDER_BUILD_DRIVERS)
     add_subdirectory(drivers)
 endif ()
 
+option(BRENDER_BUILD_CONTRIB "Build Contrib" OFF)
+if(BRENDER_BUILD_CONTRIB)
+    add_subdirectory(contrib)
+endif()
+
 ##
 # Core BRender, no drivers, no DDI.
 ##
