@@ -881,6 +881,24 @@ void DevicePixelmapGLDecRef(br_device_pixelmap *self)
     --self->num_refs;
 }
 
+br_rectangle DevicePixelmapGLGetViewport(const br_device_pixelmap *pm)
+{
+    br_rectangle rect = {
+        .x = pm->pm_base_x,
+        .y = 0,
+        .w = pm->pm_width,
+        .h = pm->pm_height,
+    };
+
+    /* FIXME: Figure out a better way to detect a sub-pixelmap. */
+    if(pm->dispatch != &devicePixelmapDispatch) {
+        const br_device_pixelmap *parent = pm->asSub.parent;
+        rect.y                           = parent->pm_height - (pm->pm_height + pm->pm_base_y);
+    }
+
+    return rect;
+}
+
 /*
  * Default dispatch table for device pixelmap
  */
@@ -907,7 +925,7 @@ static const struct br_device_pixelmap_dispatch devicePixelmapDispatch = {
     ._validSource = BR_CMETHOD_REF(br_device_pixelmap_null, validSource),
     ._resize      = BR_CMETHOD_REF(br_device_pixelmap_gl, resize),
     ._match       = BR_CMETHOD_REF(br_device_pixelmap_gl, match),
-    ._allocateSub = BR_CMETHOD_REF(br_device_pixelmap_fail, allocateSub),
+    ._allocateSub = BR_CMETHOD_REF(br_device_pixelmap_gl, allocateSub),
 
     ._copy         = BR_CMETHOD_REF(br_device_pixelmap_gen, copy),
     ._copyTo       = BR_CMETHOD_REF(br_device_pixelmap_gen, copyTo),

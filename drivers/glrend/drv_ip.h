@@ -66,6 +66,17 @@ GLuint RendererGLGetSampler(br_renderer *self, const br_sampler_info_gl *info);
 br_error BR_CMETHOD_DECL(br_device_pixelmap_gl, match) (br_device_pixelmap *self, br_device_pixelmap **newpm,
                                                         br_token_value *tv);
 
+/*
+ * Gets the pixelmap viewport rect (for glViewport), converting to bottom-left coordinates.
+ */
+br_rectangle DevicePixelmapGLGetViewport(const br_device_pixelmap *pm);
+
+/*
+ * devpmsub.c
+ */
+br_error BR_CMETHOD_DECL(br_device_pixelmap_gl, allocateSub)(br_device_pixelmap *self, br_device_pixelmap **newpm,
+                                                             br_rectangle *rect);
+
 void DevicePixelmapGLIncRef(br_device_pixelmap *self);
 
 void DevicePixelmapGLDecRef(br_device_pixelmap *self);
