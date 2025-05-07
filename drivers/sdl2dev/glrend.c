@@ -200,8 +200,10 @@ static br_error create_gl_pixelmap(SDL_Window *window, br_device *gldev, br_devi
     tv[1].v.i32 = (br_int_32)height;
 
     format = SDL_GetWindowPixelFormat(window);
-    if((err = SDLToBRenderPixelFormat(format, NULL, &tv[2].v.u8)) != BRE_OK)
+    if((err = SDLToBRenderPixelFormat(format, NULL, &tv[2].v.u8)) != BRE_OK) {
+        BrLogError("SDL2", "Unable to find suitable pixel format for %s", SDL_GetPixelFormatName(format));
         return err;
+    }
 
     /*
      * Find an output facility with our given requirements.
