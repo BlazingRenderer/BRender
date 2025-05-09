@@ -67,7 +67,10 @@ void main()
 
     gl_Position = pos;
 
-    for(uint i = 0u; i < num_clip_planes; ++i) {
+    /*
+     * Switched from "num_clip_planes" to "MAX_CLIP_PLANES" so it will be unrolled.
+     */
+    for(int i = 0; i < MAX_CLIP_PLANES; ++i) {
         gl_ClipDistance[i] = dot(position, clip_planes[i]);
     }
 }
