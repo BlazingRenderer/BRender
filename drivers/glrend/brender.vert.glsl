@@ -8,7 +8,7 @@ in vec3 aNormal;
 in vec4 aColour;
 
 out vec4 position;
-out vec4 normal;
+out vec3 normal;
 out vec2 uv;
 out vec4 colour;
 
@@ -42,7 +42,7 @@ void main()
     vec4 pos = vec4(aPosition, 1.0);
 
     position = model_view * pos;
-    normal = vec4(normalize(mat3(normal_matrix) * aNormal), 0);
+    normal = normalize(mat3(normal_matrix) * aNormal);
     uv = aUV;
     colour = aColour;
 
@@ -53,7 +53,7 @@ void main()
     vertexLightS = vec3(0);
 
 #if ENABLE_GOURAUD
-    accumulateLights(position, normal, vertexLightA, vertexLightD, vertexLightS);
+    accumulateLights(position, vec4(normal, 0), vertexLightA, vertexLightD, vertexLightS);
 #endif
 
     rawPosition = aPosition;

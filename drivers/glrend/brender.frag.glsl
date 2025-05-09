@@ -5,7 +5,7 @@
 
 in vec4 position;
 in vec2 uv;
-in vec4 normal;
+in vec3 normal;
 in vec4 colour;
 in vec3 vertexLightA;
 in vec3 vertexLightD;
@@ -138,7 +138,7 @@ void main()
     vec3 fragmentLightD = vertexLightD;
     vec3 fragmentLightS = vertexLightS;
 #if ENABLE_PHONG
-    accumulateLights(position, normal, fragmentLightA, fragmentLightD, fragmentLightS);
+    accumulateLights(position, vec4(normal, 0), fragmentLightA, fragmentLightD, fragmentLightS);
 #endif
 
     vec4 fragColour = ((vec4(fragmentLightA + fragmentLightD, 1.0)) * (surface_colour * texColour)) + vec4(fragmentLightS, 0.0);
