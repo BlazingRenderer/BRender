@@ -106,7 +106,7 @@ set(FW_FILES
         sys_conf.c
         token.c
         tokenval.c
-        tokenval.cpp
+        tokenval_convert.cpp
 
         fw.h
         fw_ip.h
