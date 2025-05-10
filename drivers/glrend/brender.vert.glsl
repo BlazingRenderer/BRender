@@ -12,9 +12,12 @@ out vec3 normal;
 out vec2 uv;
 out vec4 colour;
 
-out vec3 vertexLightA;
-out vec3 vertexLightD;
-out vec3 vertexLightS;
+/*
+ * [0] = Ambient
+ * [1] = Diffuse
+ * [2] = Specular
+ */
+out mat3 vertexLighting;
 
 out vec3 rawPosition;
 out vec3 rawNormal;
@@ -37,12 +40,10 @@ void main()
 
     viewDistance = -position.z;
 
-    vertexLightA = vec3(0);
-    vertexLightD = vec3(0);
-    vertexLightS = vec3(0);
+    vertexLighting = mat3(0);
 
 #if ENABLE_GOURAUD
-    accumulateLights(position, vec4(normal, 0), vertexLightA, vertexLightD, vertexLightS);
+    accumulateLights(position, vec4(normal, 0), vertexLighting[0], vertexLighting[1], vertexLighting[2]);
 #endif
 
     rawPosition = aPosition;

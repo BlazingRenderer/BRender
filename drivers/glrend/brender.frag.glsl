@@ -7,9 +7,13 @@ in vec4 position;
 in vec2 uv;
 in vec3 normal;
 in vec4 colour;
-in vec3 vertexLightA;
-in vec3 vertexLightD;
-in vec3 vertexLightS;
+
+/*
+ * [0] = Ambient
+ * [1] = Diffuse
+ * [2] = Specular
+ */
+in mat3 vertexLighting;
 
 in vec3 rawPosition;
 in vec3 rawNormal;
@@ -107,14 +111,14 @@ void main()
     if(!disable_colour_key && texColour.rgb == vec3(0.0, 0.0, 0.0))
         discard;
 
-    vec3 fragmentLightA = vertexLightA;
-    vec3 fragmentLightD = vertexLightD;
-    vec3 fragmentLightS = vertexLightS;
+    vec3 lightA = vertexLighting[0];
+    vec3 lightD = vertexLighting[1];
+    vec3 lightS = vertexLighting[2];
 #if ENABLE_PHONG
-    accumulateLights(position, vec4(normal, 0), fragmentLightA, fragmentLightD, fragmentLightS);
+    accumulateLights(position, vec4(normal, 0), lightA, lightD, lightS);
 #endif
 
-    vec4 fragColour = ((vec4(fragmentLightA + fragmentLightD, 1.0)) * (surface_colour * texColour)) + vec4(fragmentLightS, 0.0);
+    vec4 fragColour = ((vec4(lightA + lightD, 1.0)) * (surface_colour * texColour)) + vec4(lightS, 0.0);
 
     fragColour = clamp(fragColour, 0, 1);
 
