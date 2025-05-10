@@ -3,10 +3,6 @@
 #define SPECULARPOW_CUTOFF           0.6172
 #define BR_SCALAR_EPSILON            1.192092896e-7f
 
-#define ENABLE_GAMMA_CORRECTION      0
-#define ENABLE_SIMULATE_8BIT_COLOUR  0
-#define ENABLE_SIMULATE_16BIT_COLOUR 0
-
 #define UV_SOURCE_MODEL              0
 #define UV_SOURCE_ENV_L              1
 #define UV_SOURCE_ENV_I              2
@@ -27,8 +23,6 @@
 
 #define ENABLE_GOURAUD                  1
 #define ENABLE_PHONG                    0
-
-#define USE_LEGACY_ATTENUATION          0
 
 struct br_light
 {
@@ -85,21 +79,7 @@ layout(std140) uniform br_model_state
 
 float calculateAttenuation(in br_light alp, in float dist)
 {
-#if USE_LEGACY_ATTENUATION
-    if (dist > alp.attenuation_q)
-        return 0.0;
-
-    float attn;
-
-    if (dist > alp.attenuation_c)
-        attn = (dist - alp.attenuation_c) * alp.attenuation_l;
-    else
-        attn = 0.0;
-
-    return 1.0 - attn;
-#else
     return 1.0 / (alp.attenuation_c + (alp.attenuation_l * dist) + (alp.attenuation_q * dist * dist));
-#endif
 }
 
 float calculateAttenuationRadii(in br_light alp, in float dist, in float intensity)

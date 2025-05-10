@@ -21,33 +21,6 @@ out vec4 mainColour;
 uniform sampler2D  main_texture;
 uniform usampler2D index_texture;
 
-vec3 adjustBrightness(in vec3 colour, in float brightness)
-{
-    return colour + brightness;
-}
-
-/* use values between -1 and 1 */
-vec3 adjustContrast(in vec3 colour, in float contrast)
-{
-    return 0.5 + (1.0 + contrast) * (colour - 0.5);
-}
-
-/* use values between -1 and 1 */
-vec3 adjustExposure(in vec3 colour, in float exposure)
-{
-    // return (1.0 + exposure) * colour;
-    return vec3(1.0) - exp(-colour * exposure);
-}
-
-vec3 adjustSaturation(in vec3 colour, in float saturation)
-{
-    /* https://www.w3.org/TR/WCAG21/#dfn-relative-luminance */
-    const vec3 luminosityFactor = vec3(0.2126, 0.7152, 0.0722);
-    vec3 grayscale = vec3(dot(colour, luminosityFactor));
-
-    return mix(grayscale, colour, 1.0 + saturation);
-}
-
 vec4 applyFog(in vec4 inColour, in float dist)
 {
     float fog_min = fog_range.x; /* NB: To match softrend, set this to 0. */
@@ -144,23 +117,6 @@ void main()
     vec4 fragColour = ((vec4(fragmentLightA + fragmentLightD, 1.0)) * (surface_colour * texColour)) + vec4(fragmentLightS, 0.0);
 
     fragColour = clamp(fragColour, 0, 1);
-
-    /* Perform gamma correction */
-#if ENABLE_GAMMA_CORRECTION
-    fragColour.rgb = pow(fragColour.rgb, vec3(1.0 / 1.2));
-    // fragColour.rgb = adjustContrast(fragColour.rgb, 0.1);
-    // fragColour.rgb = adjustExposure(fragColour.rgb, 2.0);
-#endif
-
-#if ENABLE_SIMULATE_8BIT_COLOUR
-    fragColour.rgb = floor(fragColour.rgb * vec3(15.0)) / vec3(15.0);
-#endif
-#if ENABLE_SIMULATE_16BIT_COLOUR
-    float r = floor(fragColour.r * 31.0) / 31.0;
-    float g = floor(fragColour.g * 63.0) / 63.0;
-    float b = floor(fragColour.b * 31.0) / 31.0;
-    fragColour.rgb = vec3(r, g, b);
-#endif
 
     if(enable_fog) {
         fragColour = applyFog(fragColour, viewDistance);

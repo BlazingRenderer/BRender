@@ -26,17 +26,6 @@ out gl_PerVertex {
     float gl_ClipDistance[MAX_CLIP_PLANES];
 };
 
-#if ENABLE_PSX_SIMULATION
-vec4 PSXify_pos(in vec4 vertex, in vec2 resolution)
-{
-    vec4 snappedPos = vertex;
-    snappedPos.xyz = vertex.xyz / vertex.w;
-    snappedPos.xy = floor(resolution.xy * snappedPos.xy) / resolution;
-    snappedPos.xyz *= vertex.w;
-    return snappedPos;
-}
-#endif
-
 void main()
 {
     vec4 pos = vec4(aPosition, 1.0);
@@ -59,11 +48,7 @@ void main()
     rawPosition = aPosition;
     rawNormal   = aNormal;
 
-#if ENABLE_PSX_SIMULATION
-    pos = PSXify_pos(mvp * pos, vec2(200.0, 150.0));
-#else
     pos = mvp * pos;
-#endif
 
     gl_Position = pos;
 
