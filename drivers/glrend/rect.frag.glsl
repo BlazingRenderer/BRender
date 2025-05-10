@@ -1,6 +1,6 @@
-#version 150
+#version 430 core
 
-layout(std140) uniform RectData {
+layout(std140, binding=0) uniform RectData {
     mat4  mvp;
     vec4  src_rect;
     vec4  dst_rect;
@@ -8,12 +8,12 @@ layout(std140) uniform RectData {
     float indexed;
 } rect_data;
 
-in vec2 uv;
+layout(location=0) in vec2 uv;
 
 uniform sampler2D uSampler;
 uniform usampler2D uIndexTex;
 
-out vec4 main_colour;
+layout(location=0) out vec4 main_colour;
 
 void main()
 {

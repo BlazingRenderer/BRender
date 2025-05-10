@@ -42,7 +42,7 @@ struct br_light
     float radius_outer;
 };
 
-layout(std140) uniform br_scene_state
+layout(std140, binding=0) uniform br_scene_state
 {
     vec4 eye_view; /* Eye position in view-space */
     br_light lights[MAX_LIGHTS];
@@ -51,7 +51,7 @@ layout(std140) uniform br_scene_state
     uint num_clip_planes;
 };
 
-layout(std140) uniform br_model_state
+layout(std140, binding=1) uniform br_model_state
 {
     mat4 model_view;
     mat4 projection;

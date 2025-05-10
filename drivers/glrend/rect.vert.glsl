@@ -1,6 +1,6 @@
-#version 150
+#version 430 core
 
-layout(std140) uniform RectData {
+layout(std140, binding=0) uniform RectData {
     mat4  mvp;
     vec4  src_rect;
     vec4  dst_rect;
@@ -8,7 +8,7 @@ layout(std140) uniform RectData {
     float indexed;
 } rect_data;
 
-out vec2 uv;
+layout(location=0) out vec2 uv;
 
 const int INDICES[6] = int[6](0, 1, 2, 2, 1, 3);
 

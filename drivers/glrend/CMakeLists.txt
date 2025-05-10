@@ -2,68 +2,103 @@ project(glrend)
 
 find_package(OpenGL REQUIRED COMPONENTS OpenGL)
 
-add_custom_command(
-        OUTPUT brender.vert.glsl.h
-        WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
-        COMMAND "${PERL_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/embedshader.pl" "g_DefaultVertexShader" "${CMAKE_CURRENT_SOURCE_DIR}/brender.vert.glsl" "${CMAKE_CURRENT_BINARY_DIR}/brender.vert.glsl.h"
-        MAIN_DEPENDENCY "${CMAKE_CURRENT_SOURCE_DIR}/brender.vert.glsl"
-        DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/embedshader.pl" "${CMAKE_CURRENT_SOURCE_DIR}/brender.common.glsl" "${CMAKE_CURRENT_SOURCE_DIR}/common.glsl"
+# NB: Don't use this, it's fragile as fuck.
+# find_package(glslang CONFIG REQUIRED)
+# set(GLSLANG_EXECUTABLE "$<TARGET_FILE:glslang::glslang-standalone>")
+
+find_program(GLSLANG_EXECUTABLE glslang REQUIRED)
+message(STATUS "Found glslang: ${GLSLANG_EXECUTABLE}")
+
+find_program(SPIRV_CROSS_EXECUTABLE spirv-cross REQUIRED)
+message(STATUS "Found spirv-cross: ${SPIRV_CROSS_EXECUTABLE}")
+
+function(compile_shader)
+    set(shaderpp    "${CMAKE_CURRENT_SOURCE_DIR}/shaderpp.pl")
+    set(embedshader "${CMAKE_CURRENT_SOURCE_DIR}/embedshader.pl")
+
+    cmake_parse_arguments(PARSE_ARGV 0 arg "" "SOURCE;DESTINATION;VARNAME;STAGE" "DEPENDS")
+
+    cmake_path(GET arg_SOURCE FILENAME source_filename)
+
+    set(processed_file "${CMAKE_CURRENT_BINARY_DIR}/${source_filename}.processed.glsl")
+    set(spv_file       "${CMAKE_CURRENT_BINARY_DIR}/${source_filename}.spv")
+    set(optimised_file "${CMAKE_CURRENT_BINARY_DIR}/${source_filename}.optimised.glsl")
+
+    add_custom_command(
+            OUTPUT              ${arg_DESTINATION}
+            WORKING_DIRECTORY   ${CMAKE_CURRENT_SOURCE_DIR}
+            MAIN_DEPENDENCY     ${arg_SOURCE}
+            BYPRODUCTS          "${processed_file}"
+                                "${spv_file}"
+                                "${optimised_file}"
+            DEPENDS             "${shaderpp}"
+                                "${embedshader}"
+
+            COMMAND "${PERL_EXECUTABLE}" "${shaderpp}" "${arg_SOURCE}" "${processed_file}"
+            COMMAND "${GLSLANG_EXECUTABLE}" -G100 -S "${arg_STAGE}" -o "${spv_file}" "${processed_file}"
+            COMMAND "${SPIRV_CROSS_EXECUTABLE}" "${spv_file}" --version 330 --no-420pack-extension --no-es --output "${optimised_file}"
+            COMMAND "${PERL_EXECUTABLE}" "${embedshader}" "${arg_VARNAME}" "${optimised_file}" "${arg_DESTINATION}"
+    )
+endfunction()
+
+compile_shader(
+        SOURCE      "${CMAKE_CURRENT_SOURCE_DIR}/brender.vert.glsl"
+        DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/brender.vert.glsl.h"
+        STAGE       "vert"
+        VARNAME     "g_DefaultVertexShader"
+        DEPENDS     "${CMAKE_CURRENT_SOURCE_DIR}/brender.common.glsl"
+                    "${CMAKE_CURRENT_SOURCE_DIR}/common.glsl"
 )
 
-add_custom_command(
-        OUTPUT brender.frag.glsl.h
-        WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
-        COMMAND "${PERL_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/embedshader.pl" "g_DefaultFragmentShader" "${CMAKE_CURRENT_SOURCE_DIR}/brender.frag.glsl" "${CMAKE_CURRENT_BINARY_DIR}/brender.frag.glsl.h"
-        MAIN_DEPENDENCY "${CMAKE_CURRENT_SOURCE_DIR}/brender.frag.glsl"
-        DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/embedshader.pl" "${CMAKE_CURRENT_SOURCE_DIR}/brender.common.glsl" "${CMAKE_CURRENT_SOURCE_DIR}/common.glsl"
+compile_shader(
+        SOURCE      "${CMAKE_CURRENT_SOURCE_DIR}/brender.frag.glsl"
+        DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/brender.frag.glsl.h"
+        STAGE       "frag"
+        VARNAME     "g_DefaultFragmentShader"
+        DEPENDS     "${CMAKE_CURRENT_SOURCE_DIR}/brender.common.glsl"
+        "${CMAKE_CURRENT_SOURCE_DIR}/common.glsl"
 )
 
-add_custom_command(
-        OUTPUT rect.vert.glsl.h
-        WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
-        COMMAND "${PERL_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/embedshader.pl" "g_RectVertexShader" "${CMAKE_CURRENT_SOURCE_DIR}/rect.vert.glsl" "${CMAKE_CURRENT_BINARY_DIR}/rect.vert.glsl.h"
-        MAIN_DEPENDENCY "${CMAKE_CURRENT_SOURCE_DIR}/rect.vert.glsl"
-        DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/embedshader.pl"
+compile_shader(
+        SOURCE      "${CMAKE_CURRENT_SOURCE_DIR}/rect.vert.glsl"
+        DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/rect.vert.glsl.h"
+        STAGE       "vert"
+        VARNAME     "g_RectVertexShader"
 )
 
-add_custom_command(
-        OUTPUT rect.frag.glsl.h
-        WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
-        COMMAND "${PERL_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/embedshader.pl" "g_RectFragmentShader" "${CMAKE_CURRENT_SOURCE_DIR}/rect.frag.glsl" "${CMAKE_CURRENT_BINARY_DIR}/rect.frag.glsl.h"
-        MAIN_DEPENDENCY "${CMAKE_CURRENT_SOURCE_DIR}/rect.frag.glsl"
-        DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/embedshader.pl"
+compile_shader(
+        SOURCE      "${CMAKE_CURRENT_SOURCE_DIR}/rect.frag.glsl"
+        DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/rect.frag.glsl.h"
+        STAGE       "frag"
+        VARNAME     "g_RectFragmentShader"
 )
 
-add_custom_command(
-        OUTPUT text.vert.glsl.h
-        WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
-        COMMAND "${PERL_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/embedshader.pl" "g_TextVertexShader" "${CMAKE_CURRENT_SOURCE_DIR}/text.vert.glsl" "${CMAKE_CURRENT_BINARY_DIR}/text.vert.glsl.h"
-        MAIN_DEPENDENCY "${CMAKE_CURRENT_SOURCE_DIR}/text.vert.glsl"
-        DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/embedshader.pl"
+compile_shader(
+        SOURCE      "${CMAKE_CURRENT_SOURCE_DIR}/text.vert.glsl"
+        DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/text.vert.glsl.h"
+        STAGE       "vert"
+        VARNAME     "g_TextVertexShader"
 )
 
-add_custom_command(
-        OUTPUT text.frag.glsl.h
-        WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
-        COMMAND "${PERL_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/embedshader.pl" "g_TextFragmentShader" "${CMAKE_CURRENT_SOURCE_DIR}/text.frag.glsl" "${CMAKE_CURRENT_BINARY_DIR}/text.frag.glsl.h"
-        MAIN_DEPENDENCY "${CMAKE_CURRENT_SOURCE_DIR}/text.frag.glsl"
-        DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/embedshader.pl"
+compile_shader(
+        SOURCE      "${CMAKE_CURRENT_SOURCE_DIR}/text.frag.glsl"
+        DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/text.frag.glsl.h"
+        STAGE       "frag"
+        VARNAME     "g_TextFragmentShader"
 )
 
-add_custom_command(
-        OUTPUT line.vert.glsl.h
-        WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
-        COMMAND "${PERL_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/embedshader.pl" "g_LineVertexShader" "${CMAKE_CURRENT_SOURCE_DIR}/line.vert.glsl" "${CMAKE_CURRENT_BINARY_DIR}/line.vert.glsl.h"
-        MAIN_DEPENDENCY "${CMAKE_CURRENT_SOURCE_DIR}/line.vert.glsl"
-        DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/embedshader.pl"
+compile_shader(
+        SOURCE      "${CMAKE_CURRENT_SOURCE_DIR}/line.vert.glsl"
+        DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/line.vert.glsl.h"
+        STAGE       "vert"
+        VARNAME     "g_LineVertexShader"
 )
 
-add_custom_command(
-        OUTPUT line.frag.glsl.h
-        WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
-        COMMAND "${PERL_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/embedshader.pl" "g_LineFragmentShader" "${CMAKE_CURRENT_SOURCE_DIR}/line.frag.glsl" "${CMAKE_CURRENT_BINARY_DIR}/line.frag.glsl.h"
-        MAIN_DEPENDENCY "${CMAKE_CURRENT_SOURCE_DIR}/line.frag.glsl"
-        DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/embedshader.pl"
+compile_shader(
+        SOURCE      "${CMAKE_CURRENT_SOURCE_DIR}/line.frag.glsl"
+        DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/line.frag.glsl.h"
+        STAGE       "frag"
+        VARNAME     "g_LineFragmentShader"
 )
 
 set(GLSTATE_FILES

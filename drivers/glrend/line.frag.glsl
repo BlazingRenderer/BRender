@@ -1,13 +1,13 @@
-#version 150
+#version 430 core
 
-layout(std140) uniform LineData {
+layout(std140, binding=0) uniform LineData {
     mat4 mvp;
     vec2 start;
     vec2 end;
     vec4 colour;
 } line_data;
 
-out vec4 main_colour;
+layout(location=0) out vec4 main_colour;
 
 void main()
 {

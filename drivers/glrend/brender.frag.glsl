@@ -1,26 +1,22 @@
-#version 330 core
+#version 430 core
 
 #include "brender.common.glsl"
 #include "common.glsl"
 
-in vec4 position;
-in vec2 uv;
-in vec3 normal;
-in vec4 colour;
+layout(location=0) in vec4 position;
+layout(location=1) in vec3 normal;
+layout(location=2) in vec2 uv;
+layout(location=3) in vec4 colour;
 
-/*
- * [0] = Ambient
- * [1] = Diffuse
- * [2] = Specular
- */
-in mat3 vertexLighting;
 
-in vec3 rawPosition;
-in vec3 rawNormal;
+layout(location=4) in mat3 vertexLighting;
 
-in float viewDistance;
+layout(location=7) in vec3 rawPosition;
+layout(location=8) in vec3 rawNormal;
 
-out vec4 mainColour;
+layout(location=9) in float viewDistance;
+
+layout(location=0) out vec4 mainColour;
 
 uniform sampler2D  main_texture;
 uniform usampler2D index_texture;
@@ -28,10 +24,7 @@ uniform usampler2D index_texture;
 vec4 applyFog(in vec4 inColour, in float dist)
 {
     float fog_min = fog_range.x; /* NB: To match softrend, set this to 0. */
-    float fog_max = fog_range.y;
-
-    if(fog_min == fog_max)
-        fog_max += 0.001f;
+    float fog_max = max(fog_range.y + 0.001f, fog_range.y);
 
     float fog_factor = clamp((fog_max - dist) / (fog_max - fog_min), 0.0, 1.0);
     return mix(fog_colour, inColour, fog_factor);
