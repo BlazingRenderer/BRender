@@ -24,10 +24,7 @@ out vec3 rawNormal;
 
 out float viewDistance;
 
-out gl_PerVertex {
-    vec4 gl_Position;
-    float gl_ClipDistance[MAX_CLIP_PLANES];
-};
+out float gl_ClipDistance[MAX_CLIP_PLANES];
 
 void main()
 {
