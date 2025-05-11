@@ -83,7 +83,6 @@ typedef struct _VIDEO {
         GLuint blockIndexScene;
         GLuint blockBindingScene;
 
-        GLuint uboModel;
         GLuint blockIndexModel;
         GLuint blockBindingModel;
 

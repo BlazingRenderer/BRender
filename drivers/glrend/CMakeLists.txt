@@ -219,6 +219,8 @@ add_library(glrend
         ${GLSTATE_FILES}
         ${INC_FILES}
 
+        buffer_ring.c
+
         "${CMAKE_CURRENT_BINARY_DIR}/brender.vert.glsl.h"
         "${CMAKE_CURRENT_BINARY_DIR}/brender.frag.glsl.h"
 

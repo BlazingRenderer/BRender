@@ -150,9 +150,6 @@ void VIDEO_Close(HVIDEO hVideo)
     if(hVideo->brenderProgram.blockIndexScene != GL_INVALID_INDEX)
         glDeleteBuffers(1, &hVideo->brenderProgram.uboScene);
 
-    if(hVideo->brenderProgram.blockIndexModel != GL_INVALID_INDEX)
-        glDeleteBuffers(0, &hVideo->brenderProgram.uboModel);
-
     glDeleteProgram(hVideo->rectProgram.program);
     glDeleteBuffers(1, &hVideo->rectProgram.ubo);
     glDeleteVertexArrays(1, &hVideo->rectProgram.vao);

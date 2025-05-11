@@ -343,7 +343,7 @@ static void apply_stored_properties(HVIDEO hVideo, br_renderer *renderer, state_
         glDisable(GL_DEPTH_TEST);
 }
 
-static void apply_state(br_renderer *renderer)
+static br_boolean apply_state(br_renderer *renderer)
 {
     state_cache              *cache  = &renderer->state.cache;
     br_device_pixelmap       *screen = renderer->pixelmap->screen;
@@ -369,13 +369,15 @@ static void apply_state(br_renderer *renderer)
 
     model.unlit = (br_uint_32)unlit;
 
-    glBufferData(GL_UNIFORM_BUFFER, sizeof(model), &model, GL_STATIC_DRAW);
-
+    return BufferRingGLPush(&renderer->model_ring, &model, sizeof(model));
 }
 
 void RendererGLRenderGroup(br_renderer *self, br_geometry_stored *stored, const gl_groupinfo *groupinfo)
 {
-    apply_state(self);
+    if(!apply_state(self)) {
+        BrLogWarn("GLREND", "Out of model space.");
+        return;
+    }
 
     glBindVertexArray(stored->gl_vao);
     glDrawElements(GL_TRIANGLES, groupinfo->count, GL_UNSIGNED_SHORT, groupinfo->offset);
@@ -388,7 +390,10 @@ void RendererGLRenderGroup(br_renderer *self, br_geometry_stored *stored, const 
 
 void RendererGLRenderTri(br_renderer *self, br_uintptr_t offset, const gl_groupinfo *groupinfo)
 {
-    apply_state(self);
+    if(!apply_state(self)) {
+        BrLogWarn("GLREND", "Out of model space.");
+        return;
+    }
 
     glBindVertexArray(self->trans.vao);
     glBindBuffer(GL_ARRAY_BUFFER, self->trans.vbo);

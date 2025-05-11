@@ -52,6 +52,16 @@ typedef struct br_sampler_gl {
     GLuint             sampler;
 } br_sampler_gl;
 
+typedef struct br_buffer_ring_gl {
+    GLuint   buffers[BR_GLREND_MODEL_RB_FRAMES];
+    GLsync   fences[BR_GLREND_MODEL_RB_FRAMES];
+    size_t   frame_index;
+    GLintptr offset;
+    size_t   buffer_size;
+    GLintptr aligned_elem_size;
+    GLuint   buffer_index;
+} br_buffer_ring_gl;
+
 #ifdef BR_RENDERER_PRIVATE
 
 typedef struct br_renderer {
@@ -96,6 +106,9 @@ typedef struct br_renderer {
     br_sampler_gl sampler_pool[BR_GLREND_MAX_SAMPLERS];
     br_size_t     sampler_pool_size;
     br_size_t     sampler_count;
+
+    GLint             uniform_buffer_offset_alignment;
+    br_buffer_ring_gl model_ring;
 
     int has_begun;
 

@@ -14,14 +14,7 @@ static void VIDEOI_GetShaderVariables(HVIDEO hVideo)
 
     DeviceGLObjectLabel(GL_BUFFER, hVideo->brenderProgram.uboScene, BR_GLREND_DEBUG_INTERNAL_PREFIX "brender:shader:ubo:scene");
 
-    glGenBuffers(1, &hVideo->brenderProgram.uboModel);
-    glBindBuffer(GL_UNIFORM_BUFFER, hVideo->brenderProgram.uboModel);
-    glUniformBlockBinding(hVideo->brenderProgram.program, hVideo->brenderProgram.blockIndexModel,
-                          hVideo->brenderProgram.blockBindingModel);
-    glBindBufferBase(GL_UNIFORM_BUFFER, hVideo->brenderProgram.blockBindingModel, hVideo->brenderProgram.uboModel);
-    glBufferData(GL_UNIFORM_BUFFER, sizeof(shader_data_model), NULL, GL_DYNAMIC_DRAW);
-
-    DeviceGLObjectLabel(GL_BUFFER, hVideo->brenderProgram.uboModel, BR_GLREND_DEBUG_INTERNAL_PREFIX "brender:shader:ubo:model");
+    glUniformBlockBinding(hVideo->brenderProgram.program, hVideo->brenderProgram.blockIndexModel, hVideo->brenderProgram.blockBindingModel);
 
     hVideo->brenderProgram.attributes.aPosition  = glGetAttribLocation(hVideo->brenderProgram.program, "aPosition");
     hVideo->brenderProgram.attributes.aUV        = glGetAttribLocation(hVideo->brenderProgram.program, "aUV");

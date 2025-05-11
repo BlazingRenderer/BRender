@@ -40,6 +40,16 @@ extern "C" {
  */
 #define BR_GLREND_MAX_CLUT_ENTRIES 256
 
+/*
+ * No. frames in the model-state ring buffer.
+ */
+#define BR_GLREND_MODEL_RB_FRAMES 3
+
+/*
+ * Max. no draws in-flight. This determines the size of the model-state buffer.
+ */
+#define BR_GLREND_MAX_DRAWS_IN_FLIGHT 4096
+
 #include "brddi.h"
 #include "brglrend.h"
 #include "formats.h"

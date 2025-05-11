@@ -2,6 +2,7 @@
  * Renderer methods
  */
 #include "drv.h"
+#include "brassert.h"
 
 /*
  * Default dispatch table for renderer (defined at end of file)
@@ -101,6 +102,13 @@ br_renderer *RendererGLAllocate(br_device *device, br_renderer_facility *facilit
      */
     RendererStateDefault(self, (br_uint_32)BR_STATE_ALL);
 
+    GLint alignment = 256;
+    glGetIntegerv(GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT, &alignment);
+
+    self->uniform_buffer_offset_alignment = alignment;
+    BufferRingGLInit(&self->model_ring, "model", alignment, BR_GLREND_MAX_DRAWS_IN_FLIGHT,
+                     dest->screen->asFront.video.brenderProgram.blockBindingModel, sizeof(shader_data_model));
+
     self->has_begun = 0;
     return (br_renderer *)self;
 }
@@ -161,9 +169,6 @@ static void BR_CMETHOD_DECL(br_renderer_gl, sceneBegin)(br_renderer *self)
     br_rectangle viewport = DevicePixelmapGLGetViewport(colour_target);
     glViewport(viewport.x, viewport.y, viewport.w, viewport.h);
 
-    /* Bind the model UBO here, it's faster than doing it for each model group */
-    glBindBufferBase(GL_UNIFORM_BUFFER, hVideo->brenderProgram.blockBindingModel, hVideo->brenderProgram.uboModel);
-
     if(self->pixelmap->msaa_samples)
         glEnable(GL_MULTISAMPLE);
 
@@ -182,11 +187,15 @@ static void BR_CMETHOD_DECL(br_renderer_gl, sceneBegin)(br_renderer *self)
         glEnable(GL_CLIP_DISTANCE0 + i);
     }
 
+    BufferRingGLBegin(&self->model_ring);
+
     self->has_begun = 1;
 }
 
 void BR_CMETHOD_DECL(br_renderer_gl, sceneEnd)(br_renderer *self)
 {
+    BufferRingGLEnd(&self->model_ring);
+
     glDisable(GL_CULL_FACE);
     glDisable(GL_DEPTH_TEST);
     glDisable(GL_BLEND);
@@ -221,6 +230,8 @@ static void BR_CMETHOD_DECL(br_renderer_gl, free)(br_object *_self)
     ObjectContainerRemove(self->renderer_facility, (br_object *)self);
 
     BrObjectContainerFree((br_object_container *)self, BR_NULL_TOKEN, NULL, NULL);
+
+    BufferRingGLFini(&self->model_ring);
 
     BrResFreeNoCallback(self);
 }
