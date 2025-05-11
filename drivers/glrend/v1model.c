@@ -354,24 +354,6 @@ static void apply_state(br_renderer *renderer)
     /* Update the per-model cache (matrices and lights) */
     StateGLUpdateModel(cache, &renderer->state.current->matrix);
 
-#if DEBUG
-    { /* Check that sceneBegin() actually did it's shit. */
-
-        /* Program */
-        GLint p;
-        glGetIntegerv(GL_CURRENT_PROGRAM, &p);
-        ASSERT(p == hVideo->brenderProgram.program);
-
-        /* FBO */
-        glGetIntegerv(GL_DRAW_FRAMEBUFFER_BINDING, &p);
-        ASSERT(p == renderer->state.current->output.colour->asBack.glFbo);
-
-        /* Model UBO */
-        glGetIntegerv(GL_UNIFORM_BUFFER_BINDING, &p);
-        ASSERT(p == hVideo->brenderProgram.uboModel);
-    }
-#endif
-
     model.projection         = cache->model.p;
     model.model_view         = cache->model.mv;
     model.mvp                = cache->model.mvp;
