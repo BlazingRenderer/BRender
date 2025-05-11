@@ -33,6 +33,7 @@ function(compile_shader)
                                 "${optimised_file}"
             DEPENDS             "${shaderpp}"
                                 "${embedshader}"
+                                ${arg_DEPENDS}
 
             COMMAND "${PERL_EXECUTABLE}" "${shaderpp}" "${arg_SOURCE}" "${processed_file}"
             COMMAND "${GLSLANG_EXECUTABLE}" -G100 -S "${arg_STAGE}" -o "${spv_file}" "${processed_file}"
