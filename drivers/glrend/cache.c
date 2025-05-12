@@ -3,30 +3,53 @@
 #include "shortcut.h"
 #include "vecifns.h"
 
+static int sort_lights(const void *a, const void *b)
+{
+    const shader_data_light *l1 = a;
+    const shader_data_light *l2 = b;
+
+    if(l1->light_type < l2->light_type)
+        return -1;
+
+    if(l1->light_type > l2->light_type)
+        return 1;
+
+    return 0;
+}
+
 /*
 ** Process each light, doing as much once-per-frame work as possible.
 ** - For work that cannot be done here, see GLSTATE_ProcessActiveLights()
 */
 static void ProcessSceneLights(state_cache *cache, const state_light *lights)
 {
-    cache->scene.num_lights = 0;
+    shader_data_scene *scene      = &cache->scene;
+    size_t             num_lights = 0;
+
+    br_vector4_i counts = {
+        .v = {0, 0, 0, 0},
+    };
+
     for(uint32_t i = 0; i < MAX_STATE_LIGHTS; ++i) {
         const state_light *light = lights + i;
-
-        shader_data_light *alp = cache->scene.lights + cache->scene.num_lights;
+        shader_data_light *alp   = cache->scene.lights + num_lights;
 
         switch(light->type) {
             case BRT_AMBIENT:
                 alp->light_type = 0;
+                ++counts.v[0];
                 break;
             case BRT_DIRECT:
                 alp->light_type = 1;
+                ++counts.v[1];
                 break;
             case BRT_POINT:
                 alp->light_type = 2;
+                ++counts.v[2];
                 break;
             case BRT_SPOT:
                 alp->light_type = 3;
+                ++counts.v[3];
                 break;
             default:
                 continue;
@@ -74,14 +97,28 @@ static void ProcessSceneLights(state_cache *cache, const state_light *lights)
 
             case BRT_RADII:
                 alp->attenuation_type = 1;
-                alp->radius_inner = light->radius_inner;
-                alp->radius_outer = light->radius_outer;
+                alp->radius_inner     = light->radius_inner;
+                alp->radius_outer     = light->radius_outer;
                 break;
         }
 
         ++alp;
-        ++cache->scene.num_lights;
+        ++num_lights;
     }
+
+    BrQsort(scene->lights, num_lights, sizeof(shader_data_light), sort_lights);
+
+    scene->light_start.v[0] = 0;
+    scene->light_end.v[0]   = counts.v[0];
+
+    scene->light_start.v[1] = scene->light_end.v[0];
+    scene->light_end.v[1]   = scene->light_start.v[1] + counts.v[1];
+
+    scene->light_start.v[2] = scene->light_end.v[1];
+    scene->light_end.v[2]   = scene->light_start.v[2] + counts.v[2];
+
+    scene->light_start.v[3] = scene->light_end.v[2];
+    scene->light_end.v[3]   = scene->light_start.v[3] + counts.v[3];
 }
 
 /*
@@ -257,7 +294,8 @@ void StateGLReset(state_cache *cache)
         ResetCacheLight(cache->scene.lights + i);
     }
 
-    cache->scene.num_lights = 0;
+    BrMemSet(&cache->scene.light_start, 0, sizeof(cache->scene.light_start));
+    BrMemSet(&cache->scene.light_end, 0, sizeof(cache->scene.light_end));
 
     for(int i = 0; i < BR_ASIZE(cache->scene.clip_planes); ++i) {
         BrVector4Set(cache->scene.clip_planes + i, BR_SCALAR(0.0), BR_SCALAR(0.0), BR_SCALAR(0.0), BR_SCALAR(0.0));

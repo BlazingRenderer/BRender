@@ -47,7 +47,8 @@ layout(std140, binding=0) uniform br_scene_state
     vec4 eye_view; /* Eye position in view-space */
     br_light lights[MAX_LIGHTS];
     vec4 clip_planes[MAX_CLIP_PLANES];
-    uint num_lights;
+    uvec4 light_start;
+    uvec4 light_end;
     uint num_clip_planes;
 };
 
@@ -207,39 +208,35 @@ void accumulateLights(in vec4 position, in vec4 normal, inout vec3 ambient, inou
     vec4 normalDirection = normal;
     bool hasAmbient = false;
 
-    for (uint i = 0u; i < num_lights; ++i) {
-        switch(lights[i].type) {
 #if !DEBUG_DISABLE_LIGHT_AMBIENT
-            case BRT_AMBIENT:
-                if(lights[i].attenuation_type == BRT_RADII) {
-                    lightingColourAmbientRadii(position, normalDirection, lights[i], ambient, diffuse, specular);
-                } else {
-                    /* See note above. */
-                    ambientAccum += lights[i].colour.xyz * lights[i].intensity;
-                    hasAmbient = true;
-                }
-                break;
+    for(uint i = light_start.x; i < light_end.x; ++i) {
+        if(lights[i].attenuation_type == BRT_RADII) {
+            lightingColourAmbientRadii(position, normalDirection, lights[i], ambient, diffuse, specular);
+        } else {
+            /* See note above. */
+            ambientAccum += lights[i].colour.xyz * lights[i].intensity;
+            hasAmbient = true;
+        }
+    }
 #endif
 
 #if !DEBUG_DISABLE_LIGHT_DIRECTIONAL
-            case BRT_DIRECT:
-                lightingColourDirect(position, normalDirection, lights[i], ambient, diffuse, specular);
-                break;
+    for(uint i = light_start.y; i < light_end.y; ++i) {
+        lightingColourDirect(position, normalDirection, lights[i], ambient, diffuse, specular);
+    }
 #endif
 
 #if !DEBUG_DISABLE_LIGHT_POINT
-            case BRT_POINT:
-                lightingColourPoint(position, normalDirection, lights[i], ambient, diffuse, specular);
-                break;
+    for(uint i = light_start.z; i < light_end.z; ++i) {
+        lightingColourPoint(position, normalDirection, lights[i], ambient, diffuse, specular);
+    }
 #endif
 
 #if !DEBUG_DISABLE_LIGHT_SPOT
-            case BRT_SPOT:
-                lightingColourSpot(position, normalDirection, lights[i], ambient, diffuse, specular);
-                break;
-#endif
-        }
+    for(uint i = light_start.w; i < light_end.w; ++i) {
+        lightingColourSpot(position, normalDirection, lights[i], ambient, diffuse, specular);
     }
+#endif
 
     /*
      * If no non-radial ambient contributions, apply ka flat.
