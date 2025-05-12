@@ -23,16 +23,36 @@ static int sort_lights(const void *a, const void *b)
 */
 static void ProcessSceneLights(state_cache *cache, const state_light *lights)
 {
-    shader_data_scene *scene      = &cache->scene;
-    size_t             num_lights = 0;
+    shader_data_scene *scene              = &cache->scene;
+    size_t             num_lights         = 0;
+    br_boolean         use_ambient_colour = BR_FALSE;
 
     br_vector4_i counts = {
         .v = {0, 0, 0, 0},
     };
 
+    BrVector4ColourSet(&scene->ambient_colour, BR_COLOUR_RGBA(0, 0, 0, 0xFF));
+
     for(uint32_t i = 0; i < MAX_STATE_LIGHTS; ++i) {
         const state_light *light = lights + i;
         shader_data_light *alp   = cache->scene.lights + num_lights;
+
+        float intensity = 16384.0f; /* Effectively infinite */
+        if(light->attenuation_c != 0)
+            intensity = BR_RCP(light->attenuation_c);
+
+        br_vector4 colour;
+        BrVector4ColourSet(&colour, light->colour);
+
+        /*
+         * Regular (i.e. non-radial) ambient lights can be accumulated early,
+         * moving work out of the shader.
+         */
+        if(light->type == BRT_AMBIENT && light->attenuation_type != BRT_RADII) {
+            BrVector4AccumulateScale(&scene->ambient_colour, &colour, intensity);
+            use_ambient_colour = BR_TRUE;
+            continue;
+        }
 
         switch(light->type) {
             case BRT_AMBIENT:
@@ -61,10 +81,6 @@ static void ProcessSceneLights(state_cache *cache, const state_light *lights)
 
         BrVector4Set(&alp->direction, light->direction.v[0], light->direction.v[1], light->direction.v[2], 0.0f);
 
-        float intensity = 16384.0f; /* Effectively infinite */
-        if(light->attenuation_c != 0)
-            intensity = BR_RCP(light->attenuation_c);
-
         if(light->type == BRT_DIRECT) {
             BrVector4Copy(&alp->half, &alp->direction);
             alp->half.v[2] += 1.0f;
@@ -77,9 +93,7 @@ static void ProcessSceneLights(state_cache *cache, const state_light *lights)
         alp->attenuation_c = light->attenuation_c;
         alp->attenuation_l = light->attenuation_l;
         alp->attenuation_q = light->attenuation_q;
-
-        BrVector4Set(&alp->colour, BR_RED(light->colour) / 255.0f, BR_GRN(light->colour) / 255.0f,
-                     BR_BLU(light->colour) / 255.0f, light->type == BRT_AMBIENT ? 1.0f : 0.0f);
+        alp->colour        = colour;
 
         if(light->type == BRT_SPOT) {
             alp->spot_inner_cos = light->spot_inner;
@@ -119,6 +133,17 @@ static void ProcessSceneLights(state_cache *cache, const state_light *lights)
 
     scene->light_start.v[3] = scene->light_end.v[2];
     scene->light_end.v[3]   = scene->light_start.v[3] + counts.v[3];
+
+    if(use_ambient_colour) {
+        BrVector4Clamp(&scene->ambient_colour, &scene->ambient_colour, BR_SCALAR(0), BR_SCALAR(1));
+
+        if(scene->ambient_colour.v[0] == BR_SCALAR(1) && scene->ambient_colour.v[0] == BR_SCALAR(1) && scene->ambient_colour.v[0] == BR_SCALAR(1))
+            use_ambient_colour = BR_FALSE;
+    }
+
+    /* No, sorry, I'm not dealing with lighting alpha. */
+    scene->ambient_colour.v[3] = 1.0f;
+    scene->use_ambient_colour  = use_ambient_colour;
 }
 
 /*
@@ -294,6 +319,7 @@ void StateGLReset(state_cache *cache)
         ResetCacheLight(cache->scene.lights + i);
     }
 
+    BrVector4ColourSet(&cache->scene.ambient_colour, BR_COLOUR_RGBA(0, 0, 0, 0xFF));
     BrMemSet(&cache->scene.light_start, 0, sizeof(cache->scene.light_start));
     BrMemSet(&cache->scene.light_end, 0, sizeof(cache->scene.light_end));
 
@@ -301,5 +327,6 @@ void StateGLReset(state_cache *cache)
         BrVector4Set(cache->scene.clip_planes + i, BR_SCALAR(0.0), BR_SCALAR(0.0), BR_SCALAR(0.0), BR_SCALAR(0.0));
     }
 
-    cache->scene.num_clip_planes = 0;
+    cache->scene.num_clip_planes    = 0;
+    cache->scene.use_ambient_colour = BR_FALSE;
 }

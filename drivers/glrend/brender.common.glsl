@@ -47,9 +47,11 @@ layout(std140, binding=0) uniform br_scene_state
     vec4 eye_view; /* Eye position in view-space */
     br_light lights[MAX_LIGHTS];
     vec4 clip_planes[MAX_CLIP_PLANES];
+    vec4 ambient_colour;
     uvec4 light_start;
     uvec4 light_end;
     uint num_clip_planes;
+    bool use_ambient_colour;
 };
 
 layout(std140, binding=1) uniform br_model_state
@@ -204,19 +206,21 @@ void accumulateLights(in vec4 position, in vec4 normal, inout vec3 ambient, inou
         return;
     }
 
-    vec3 ambientAccum = vec3(0);
     vec4 normalDirection = normal;
-    bool hasAmbient = false;
 
 #if !DEBUG_DISABLE_LIGHT_AMBIENT
+    /*
+     * If no non-radial ambient contributions, apply ka flat.
+     * See above note.
+     */
+    if(use_ambient_colour) {
+        diffuse += ka * ambient_colour.xyz;
+    } else {
+        diffuse += ka;
+    }
+
     for(uint i = light_start.x; i < light_end.x; ++i) {
-        if(lights[i].attenuation_type == BRT_RADII) {
-            lightingColourAmbientRadii(position, normalDirection, lights[i], ambient, diffuse, specular);
-        } else {
-            /* See note above. */
-            ambientAccum += lights[i].colour.xyz * lights[i].intensity;
-            hasAmbient = true;
-        }
+        lightingColourAmbientRadii(position, normalDirection, lights[i], ambient, diffuse, specular);
     }
 #endif
 
@@ -237,14 +241,4 @@ void accumulateLights(in vec4 position, in vec4 normal, inout vec3 ambient, inou
         lightingColourSpot(position, normalDirection, lights[i], ambient, diffuse, specular);
     }
 #endif
-
-    /*
-     * If no non-radial ambient contributions, apply ka flat.
-     */
-    ambientAccum = clamp(ambientAccum, 0.0f, 1.0f);
-    if(hasAmbient && ambientAccum != vec3(1)) {
-        diffuse += ka * ambientAccum;
-    } else {
-        diffuse += ka;
-    }
 }
