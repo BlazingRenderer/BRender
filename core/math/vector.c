@@ -10,6 +10,8 @@
 #include "shortcut.h"
 #include "brassert.h"
 
+/* TODO: make public */
+#define BR_CLAMP(v, a, b) (((v) < (a)) ? (a) : (((v) > (b)) ? (b) : (v)))
 
 /**
  ** 2D Vectors
@@ -207,6 +209,18 @@ void BR_PUBLIC_ENTRY BrVector2Normalise(br_vector2 *v1, const br_vector2 *v2)
         v1->v[0] = BR_SCALAR(1.0);
 }
 
+/*
+ * v1 = clamp(v2, min, max)
+ */
+void BR_PUBLIC_ENTRY BrVector2Clamp(br_vector2 *v1, const br_vector2 *v2, br_scalar min, br_scalar max)
+{
+    UASSERT_MESSAGE("Destination Vector is NULL", v1 != NULL);
+    UASSERT_MESSAGE("Source Vector is NULL", v2 != NULL);
+
+    v1->v[0] = BR_CLAMP(v2->v[0], min, max);
+    v1->v[1] = BR_CLAMP(v2->v[1], min, max);
+}
+
 /**
  ** 3D VECTORS
  **/
@@ -252,6 +266,18 @@ void BR_PUBLIC_ENTRY BrVector3SetFloat(br_vector3 *v1, float f1, float f2, float
     v1->v[0] = BrFloatToScalar(f1);
     v1->v[1] = BrFloatToScalar(f2);
     v1->v[2] = BrFloatToScalar(f3);
+}
+
+/*
+ * v1=(colour.r / 255, colour.g / 255, colour.b / 255)
+ */
+void BR_PUBLIC_ENTRY BrVector3ColourSet(br_vector3 *v1, br_colour colour)
+{
+    UASSERT_MESSAGE("Destination Vector is NULL", v1 != NULL);
+
+    v1->v[0] = BR_DIV(BR_RED(colour), 255.0f);
+    v1->v[1] = BR_DIV(BR_GRN(colour), 255.0f);
+    v1->v[2] = BR_DIV(BR_BLU(colour), 255.0f);
 }
 
 /*
@@ -492,6 +518,19 @@ void BR_PUBLIC_ENTRY BrVector3NormaliseLP(br_vector3 *v1, const br_vector3 *v2)
     }
 }
 
+/*
+ * v1 = clamp(v2, min, max)
+ */
+void BR_PUBLIC_ENTRY BrVector3Clamp(br_vector3 *v1, const br_vector3 *v2, br_scalar min, br_scalar max)
+{
+    UASSERT_MESSAGE("Destination Vector is NULL", v1 != NULL);
+    UASSERT_MESSAGE("Source Vector is NULL", v2 != NULL);
+
+    v1->v[0] = BR_CLAMP(v2->v[0], min, max);
+    v1->v[1] = BR_CLAMP(v2->v[1], min, max);
+    v1->v[2] = BR_CLAMP(v2->v[2], min, max);
+}
+
 /**
  ** 4D Vectors
  **/
@@ -507,6 +546,19 @@ void BR_PUBLIC_ENTRY BrVector4Set(br_vector4 *v1, br_scalar s1, br_scalar s2, br
     v1->v[1] = s2;
     v1->v[2] = s3;
     v1->v[3] = s4;
+}
+
+/*
+ * v1=(colour.r / 255, colour.g / 255, colour.b / 255, colour.a / 255)
+ */
+void BR_PUBLIC_ENTRY BrVector4ColourSet(br_vector4 *v1, br_colour colour)
+{
+    UASSERT_MESSAGE("Destination Vector is NULL", v1 != NULL);
+
+    v1->v[0] = BR_DIV(BR_RED(colour), 255.0f);
+    v1->v[1] = BR_DIV(BR_GRN(colour), 255.0f);
+    v1->v[2] = BR_DIV(BR_BLU(colour), 255.0f);
+    v1->v[3] = BR_DIV(BR_ALPHA(colour), 255.0f);
 }
 
 /*
@@ -614,6 +666,48 @@ void BR_PUBLIC_ENTRY BrVector4Normalise(br_vector4 *v1, const br_vector4 *v2)
 {
     if(!BrVector4Normalise0(v1, v2))
         v1->v[0] = BR_SCALAR(1.0);
+}
+
+/*
+ * v1+=v2
+ */
+void BR_PUBLIC_ENTRY BrVector4Accumulate(br_vector4 *v1, const br_vector4 *v2)
+{
+    UASSERT_MESSAGE("Destination Vector is NULL", v1 != NULL);
+    UASSERT_MESSAGE("Source Vector is NULL", v2 != NULL);
+
+    v1->v[0] += v2->v[0];
+    v1->v[1] += v2->v[1];
+    v1->v[2] += v2->v[2];
+    v1->v[3] += v2->v[3];
+}
+
+/*
+ * v1+=v2*scalar
+ */
+void BR_PUBLIC_ENTRY BrVector4AccumulateScale(br_vector4 *v1, const br_vector4 *v2, br_scalar s)
+{
+    UASSERT_MESSAGE("Destination Vector is NULL", v1 != NULL);
+    UASSERT_MESSAGE("Source Vector is NULL", v2 != NULL);
+
+    v1->v[0] += BR_MUL(v2->v[0], s);
+    v1->v[1] += BR_MUL(v2->v[1], s);
+    v1->v[2] += BR_MUL(v2->v[2], s);
+    v1->v[3] += BR_MUL(v2->v[3], s);
+}
+
+/*
+ * v1 = clamp(v2, min, max)
+ */
+void BR_PUBLIC_ENTRY BrVector4Clamp(br_vector4 *v1, const br_vector4 *v2, br_scalar min, br_scalar max)
+{
+    UASSERT_MESSAGE("Destination Vector is NULL", v1 != NULL);
+    UASSERT_MESSAGE("Source Vector is NULL", v2 != NULL);
+
+    v1->v[0] = BR_CLAMP(v2->v[0], min, max);
+    v1->v[1] = BR_CLAMP(v2->v[1], min, max);
+    v1->v[2] = BR_CLAMP(v2->v[2], min, max);
+    v1->v[3] = BR_CLAMP(v2->v[3], min, max);
 }
 
 /**
