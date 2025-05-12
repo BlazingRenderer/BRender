@@ -304,6 +304,32 @@ void rgba_8888_arr_write(br_uint_8 *pixels, br_colour colour)
     pixels[3] = BR_ALPHA(colour);
 }
 
+static br_colour r8b8g8a8_read(const br_uint_8 *pixels, const br_pixelmap *pm)
+{
+    br_uint_8 r, g, b, a;
+
+    br_uint_32 pixel = *(br_uint_32 *)pixels;
+
+    r = (pixel & 0xFF000000) >> 24;
+    g = (pixel & 0x00FF0000) >> 16;
+    b = (pixel & 0x0000FF00) >> 8;
+    a = (pixel & 0x000000FF) >> 0;
+
+    return BR_COLOUR_ARGB(a, r, g, b);
+}
+
+static void r8g8b8a8_write(br_uint_8 *pixels, br_colour colour)
+{
+    br_uint_8 r, g, b, a;
+
+    r = BR_RED(colour);
+    g = BR_GRN(colour);
+    b = BR_BLU(colour);
+    a = BR_ALPHA(colour);
+
+    *(br_uint_32 *)pixels = (r << 24) | (g << 16) | (b << 8) | (a << 0);
+}
+
 /*
  * converters
  */
@@ -351,6 +377,7 @@ br_pixelmap_converter br_pixelmap_converters[] = {
     CONVERTER(bgr_565_read,       bgr_565_write,       BR_PMT_BGR_565,        "BR_PMT_BGR_565"),
     CONVERTER(NULL,               NULL,                BR_PMT_DEPTH_24,       "BR_PMT_DEPTH_24"),
     CONVERTER(NULL,               NULL,                BR_PMT_DEPTH_FP32,     "BR_PMT_DEPTH_FP32"),
+    CONVERTER(r8b8g8a8_read,      r8g8b8a8_write,      BR_PMT_R8G8B8A8,       "BR_PMT_R8G8B8A8"),
 };
 #undef CONVERTER
 // clang-format on

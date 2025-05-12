@@ -261,6 +261,21 @@ enum {
      */
     BR_PMT_DEPTH_FP32,
 
+    /**
+     * \brief 32-bit 'true colour' RGBA, 8 bits each colour with an 8-bit alpha channel.
+     *
+     * \note This is what BR_PMT_RGBA_8888 should've been.
+     *
+     * \note 32-bit encoding:
+     *       \code rrrrrrrrggggggggbbbbbbbbaaaaaaaa \endcode
+     *
+     * \note First Four Bytes of Left Hand Pixel:
+     *       \code aaaaaaaa bbbbbbbb gggggggg rrrrrrrr \endcode
+     *
+     * \remark The left hand byte is the byte at br_pixelmap::pixels.
+     */
+    BR_PMT_R8G8B8A8,
+
     BR_PMT_MAX,
 
     BR_PMT_AINDEX_44 = BR_PMT_INDEXA_44,

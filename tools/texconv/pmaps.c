@@ -63,6 +63,7 @@ t_pixelmap_type_info PixelmapTypes[] = {
     {T_Read_BGR_565,   T_Write_BGR_565,   T_Read_BGR_565,        0, BR_PMT_BGR_565,        "BR_PMT_BGR_565",        "BGR 16 bit 5,6,5 bit colour components"     },
     {NULL,             NULL,              NULL,                  0, BR_PMT_DEPTH_24,       "BR_PMT_DEPTH_24",       "Not supported"                              },
     {NULL,             NULL,              NULL,                  0, BR_PMT_DEPTH_FP32,     "BR_PMT_DEPTH_FP32",     "Not supported"                              },
+    {T_Read_R8G8B8A8,  T_Write_R8G8B8A8,  T_Read_R8G8B8A8,       0, BR_PMT_R8G8B8A8,       "BR_PMT_R8G8B8A8",       "R8G8B8A8, host-order"                       },
 };
 // clang-format on
 

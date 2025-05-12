@@ -1154,6 +1154,7 @@ static br_drawtest tests[] = {
     MAKE_SMPTE_TEST("smpte_type08_rgba_8888.pix", BR_PMT_RGBA_8888, ""),
     MAKE_SMPTE_TEST("smpte_type17_bgr_555.pix",   BR_PMT_BGR_555,   ""),
     MAKE_SMPTE_TEST("smpte_type32_argb_4444.pix", BR_PMT_ARGB_4444, ""),
+    MAKE_SMPTE_TEST("smpte_type37_r8g8b8a8.pix",  BR_PMT_R8G8B8A8,  ""),
     {
         .name      = "Earth 8-bit",
         .init      = earth8_init,

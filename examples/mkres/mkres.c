@@ -95,6 +95,7 @@ int main(int argc, char **argv)
             {.type = BR_PMT_RGBX_888,  .name = "rgbx_888",       .width = 672},
             {.type = BR_PMT_BGR_555,   .name = "bgr_555",        .width = 672},
             {.type = BR_PMT_ARGB_4444, .name = "argb_4444",      .width = 672},
+            {.type = BR_PMT_R8G8B8A8,  .name = "r8g8b8a8",       .width = 672},
 
             {.type = BR_PMT_INDEX_8,   .name = "index_8_small",  .width = 128},
             {.type = BR_PMT_RGB_565,   .name = "rgb_565_small",  .width = 128},

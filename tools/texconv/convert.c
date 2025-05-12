@@ -437,6 +437,35 @@ void T_Write_ARGB_4444(char *pixels, br_float fract, br_colour new_pixel)
 }
 
 /*
+ * FIXME: Merge these with the ones in pmclone.c
+ */
+br_colour T_Read_R8G8B8A8(char *pixels, br_float fract)
+{
+    br_uint_8  r, g, b, a;
+    br_uint_32 new_pixel = *(br_uint_32 *)pixels;
+
+    r = (new_pixel & 0xFF000000) >> 24;
+    g = (new_pixel & 0x00FF0000) >> 16;
+    b = (new_pixel & 0x0000FF00) >> 8;
+    a = (new_pixel & 0x000000FF) >> 0;
+
+    return BR_COLOUR_ARGB(a, r, g, b);
+}
+
+void T_Write_R8G8B8A8(char *pixels, br_float fract, br_colour new_pixel)
+{
+    br_uint_8 r, g, b, a;
+
+    r = BR_RED(new_pixel);
+    g = BR_GRN(new_pixel);
+    b = BR_BLU(new_pixel);
+    a = BR_ALPHA(new_pixel);
+
+    *(br_uint_32 *)pixels = (r << 24) | (g << 16) | (b << 8) | (a << 0);
+}
+
+
+/*
  * convert all pixelmaps to new type
  */
 br_uint_32 T_ConvertPixelmaps(t_pixelmap_cbfn_info *cbfn_command)

@@ -61,6 +61,7 @@ static br_file_enum_member pixelmap_type_FM[] = {
     _ENUM_MEMBER(BR_PMT_BGR_565),
     _ENUM_MEMBER(BR_PMT_DEPTH_24),
     _ENUM_MEMBER(BR_PMT_DEPTH_FP32),
+    _ENUM_MEMBER(BR_PMT_R8G8B8A8),
 };
 // clang-format on
 

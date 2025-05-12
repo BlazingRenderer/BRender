@@ -192,6 +192,24 @@ const static br_smpte_colours smpte_argb_4444 = {
     .plugeR    = BR_COLOUR_ARGB_4444(29, 29, 29, 255),
 };
 
+const static br_smpte_colours smpte_r8g8b8a8 = {
+    .grey40    = BR_COLOUR_R8G8B8A8(104, 104, 104, 255),
+    .white75   = BR_COLOUR_R8G8B8A8(180, 180, 180, 255),
+    .yellow75  = BR_COLOUR_R8G8B8A8(180, 180, 16, 255),
+    .cyan75    = BR_COLOUR_R8G8B8A8(16, 180, 180, 255),
+    .green75   = BR_COLOUR_R8G8B8A8(16, 180, 16, 255),
+    .magenta75 = BR_COLOUR_R8G8B8A8(180, 16, 180, 255),
+    .red75     = BR_COLOUR_R8G8B8A8(180, 16, 16, 255),
+    .blue75    = BR_COLOUR_R8G8B8A8(16, 16, 180, 255),
+    .black75   = BR_COLOUR_R8G8B8A8(16, 16, 16, 255),
+    .white100  = BR_COLOUR_R8G8B8A8(235, 235, 235, 255),
+    .plusQ     = BR_COLOUR_R8G8B8A8(72, 16, 118, 255),
+    .plusI     = BR_COLOUR_R8G8B8A8(106, 52, 16, 255),
+    .minusI    = BR_COLOUR_R8G8B8A8(16, 70, 106, 255),
+    .plugeL    = BR_COLOUR_R8G8B8A8(9, 9, 9, 255),
+    .plugeR    = BR_COLOUR_R8G8B8A8(29, 29, 29, 255),
+};
+
 #define SMPTE_NUM_BARS       7
 #define SMPTE_NUM_SQUARES    4
 #define SMPTE_NUM_PLUGE_BARS 3
@@ -337,6 +355,7 @@ const static struct {
     {.type = BR_PMT_RGBX_888,  .colours = &smpte_rgba_8888}, /* Ignores the alpha part. */
     {.type = BR_PMT_BGR_555,   .colours = &smpte_bgr_555  },
     {.type = BR_PMT_ARGB_4444, .colours = &smpte_argb_4444},
+    {.type = BR_PMT_R8G8B8A8,  .colours = &smpte_r8g8b8a8},
 };
 
 br_pixelmap *mkres_make_smtpe_bars(br_uint_8 type, br_int_16 width)

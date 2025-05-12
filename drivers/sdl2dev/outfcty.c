@@ -84,6 +84,7 @@ const static struct {
     {.format = SDL_PIXELFORMAT_XRGB8888, .bpp = 24, .type = BR_PMT_RGBX_888 },
     {.format = SDL_PIXELFORMAT_ARGB8888, .bpp = 32, .type = BR_PMT_RGBA_8888},
     {.format = SDL_PIXELFORMAT_ARGB4444, .bpp = 16, .type = BR_PMT_ARGB_4444},
+    {.format = SDL_PIXELFORMAT_RGBA8888, .bpp = 32, .type = BR_PMT_R8G8B8A8 },
 };
 
 br_error SDLToBRenderPixelFormat(Uint32 format, br_int_32 *bpp, br_uint_8 *type)

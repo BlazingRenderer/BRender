@@ -20,6 +20,7 @@ br_colour T_Read_BGR_555(char *pixels, br_float fract);
 br_colour T_Read_BGR_565(char *pixels, br_float fract);
 br_colour T_Read_RGBA_4444(char *pixels, br_float fract);
 br_colour T_Read_ARGB_4444(char *pixels, br_float fract);
+br_colour T_Read_R8G8B8A8(char *pixels, br_float fract);
 
 void T_Write_Alpha_8(char *pixels, br_float fract, br_colour new_pixel);
 void T_Write_Index_8(char *pixels, br_float fract, br_colour new_pixel);
@@ -32,6 +33,7 @@ void T_Write_BGR_555(char *pixels, br_float fract, br_colour new_pixel);
 void T_Write_BGR_565(char *pixels, br_float fract, br_colour new_pixel);
 void T_Write_ARGB_4444(char *pixels, br_float fract, br_colour new_pixel);
 void T_Write_RGBA_4444(char *pixels, br_float fract, br_colour new_pixel);
+void T_Write_R8G8B8A8(char *pixels, br_float colour, br_colour new_pixel);
 
 br_colour T_Read_Flip_IndexA_88(char *pixels, br_float fract);
 br_colour T_Read_Flip_Index_4(char *pixels, br_float fract);
