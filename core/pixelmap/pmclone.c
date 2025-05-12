@@ -248,20 +248,6 @@ void rgba_4444_write(br_uint_8 *pixels, br_colour colour)
 }
 
 /*
- * BR_PMT_ARGB_8888
- */
-
-br_colour argb_8888_read(const br_uint_8 *pixels, const br_pixelmap *pm)
-{
-    return *((br_colour *)pixels);
-}
-
-void argb_8888_write(br_uint_8 *pixels, br_colour colour)
-{
-    *((br_colour *)pixels) = colour;
-}
-
-/*
  * BR_PMT_ARGB_4444
  */
 
@@ -351,7 +337,7 @@ br_pixelmap_converter br_pixelmap_converters[] = {
     CONVERTER(NULL,               NULL,                BR_PMT_RBG_1aba,       "BR_PMT_RBG_1aba"),
     CONVERTER(NULL,               NULL,                BR_PMT_RGB_332,        "BR_PMT_RGB_332"),
     CONVERTER(NULL,               NULL,                BR_PMT_DEPTH_8,        "BR_PMT_DEPTH_8"),
-    CONVERTER(argb_8888_read,     argb_8888_write,     BR_PMT_ARGB_8888,      "BR_PMT_ARGB_8888"),
+    CONVERTER(NULL,               NULL,                BR_PMT_ARGB_8888,      "BR_PMT_ARGB_8888"),
     CONVERTER(NULL,               NULL,                BR_PMT_ALPHA_4,        "BR_PMT_ALPHA_4"),
     CONVERTER(NULL,               NULL,                BR_PMT_INDEXA_44,      "BR_PMT_INDEXA_44"),
     CONVERTER(NULL,               NULL,                BR_PMT_DEPTH_15,       "BR_PMT_DEPTH_15"),
