@@ -59,7 +59,7 @@ static struct br_tv_template_entry pixelmapNewTemplateEntries[] = {
     {BRT(HIDPI_B),          F(flags),      BRTV_SET, BRTV_CONV_BIT,  SDL_WINDOW_ALLOW_HIGHDPI},
     {BRT(RESIZABLE_B),      F(flags),      BRTV_SET, BRTV_CONV_BIT,  SDL_WINDOW_RESIZABLE    },
     {BRT(OPENGL_B),         F(flags),      BRTV_SET, BRTV_CONV_BIT,  SDL_WINDOW_OPENGL       },
-    {BRT(WINDOW_FULLSCREEN_B), F(flags),   BRTV_SET, BRTV_CONV_COPY, SDL_WINDOW_FULLSCREEN   },
+    {BRT(WINDOW_FULLSCREEN_B), F(flags),   BRTV_SET, BRTV_CONV_BIT,  SDL_WINDOW_FULLSCREEN   },
     {BRT(SDL_EXT_PROCS_P),  F(ext_procs),  BRTV_SET, BRTV_CONV_COPY, 0                       },
 };
 #undef F
