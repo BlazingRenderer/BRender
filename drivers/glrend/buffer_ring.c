@@ -4,7 +4,7 @@
 void BufferRingGLInit(br_buffer_ring_gl *self, const char *tag, size_t offset_alignment, size_t num_draws,
                       GLuint buffer_index, size_t elem_size)
 {
-    size_t aligned_size = ((sizeof(shader_data_model) + offset_alignment - 1) / offset_alignment) * offset_alignment;
+    size_t aligned_size = ((elem_size + offset_alignment - 1) / offset_alignment) * offset_alignment;
     size_t buffer_size  = aligned_size * num_draws;
 
     assert(aligned_size <= elem_size);
