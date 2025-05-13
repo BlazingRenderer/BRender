@@ -113,6 +113,10 @@ static void ProcessSceneLights(state_cache *cache, const state_light *lights)
                 alp->attenuation_type = 1;
                 alp->radius_inner     = light->radius_inner;
                 alp->radius_outer     = light->radius_outer;
+
+                if (alp->radius_inner == alp->radius_outer)
+                    alp->radius_outer += 1e6f;
+
                 break;
         }
 

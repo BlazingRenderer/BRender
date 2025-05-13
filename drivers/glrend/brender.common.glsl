@@ -87,12 +87,10 @@ float calculateAttenuation(in br_light alp, in float dist)
 
 float calculateAttenuationRadii(in br_light alp, in float dist, in float intensity)
 {
-    if(dist <= alp.radius_inner)
-        return intensity;
-    else if(dist >= alp.radius_outer)
-        return 0.0;
-
-    float t = (dist - alp.radius_inner) / (alp.radius_outer - alp.radius_inner);
+    /*
+     * NB: radius_outer != radius_inner is enforced CPU-side.
+     */
+    float t = clamp((dist - alp.radius_inner) / (alp.radius_outer - alp.radius_inner), 0.0, 1.0);
     return intensity * (1.0 - t);
 }
 
