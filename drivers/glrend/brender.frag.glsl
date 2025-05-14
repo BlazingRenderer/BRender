@@ -115,11 +115,11 @@ void main()
 
     vec4 fragColour = ((vec4(lightA + lightD, 1.0)) * (surface_colour * texColour)) + vec4(lightS, 0.0);
 
-    fragColour = clamp(fragColour, 0, 1);
-
     if(enable_fog) {
         fragColour = applyFog(fragColour, viewDistance);
     }
+
+    fragColour = clamp(fragColour, 0, 1);
 
     mainColour = fragColour;
 
