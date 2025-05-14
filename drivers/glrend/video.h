@@ -92,34 +92,39 @@ typedef struct _VIDEO {
 } VIDEO, *HVIDEO;
 
 #pragma pack(push, 16)
-/* std140-compatible light structure */
-typedef struct shader_data_light {
-    /* (X, Y, Z, T), if T == 0, direct, otherwise point/spot */
-    alignas(16) br_vector4 position;
-    /* (X, Y, Z, 0), normalised */
-    alignas(16) br_vector4 direction;
-    /* (X, Y, Z, 0), normalised */
-    alignas(16) br_vector4 half;
-    /* (R, G, B, 0) */
-    alignas(16) br_vector4 colour;
-    alignas(4) float intensity;
-    alignas(4) float attenuation_c;
-    alignas(4) float attenuation_l;
-    alignas(4) float attenuation_q;
-    alignas(4) float spot_inner_cos;
-    alignas(4) float spot_outer_cos;
-    alignas(4) uint32_t light_type;
+typedef struct shader_data_light_info {
+    alignas(4) uint32_t type;
     alignas(4) uint32_t attenuation_type;
-    alignas(4) float radius_inner;
-    alignas(4) float radius_outer;
-    alignas(4) float _pad0;
-    alignas(4) float _pad1;
-} shader_data_light;
-BR_STATIC_ASSERT(sizeof(shader_data_light) % 16 == 0, "shader_data_light is not aligned");
+    alignas(4) uint32_t _pad0;
+    alignas(4) uint32_t _pad1;
+} shader_data_light_info;
+BR_STATIC_ASSERT(sizeof(shader_data_light_info) == sizeof(br_vector4), "sizeof(shader_data_light_info) != sizeof(br_vector4)");
+
+typedef struct shader_data_light_atten {
+    alignas(4) br_float intensity;
+    alignas(4) br_float attenuation_c;
+    alignas(4) br_float attenuation_l;
+    alignas(4) br_float attenuation_q;
+} shader_data_light_atten;
+BR_STATIC_ASSERT(sizeof(shader_data_light_atten) == sizeof(br_vector4), "sizeof(shader_data_light_atten) != sizeof(br_vector4)");
+
+typedef struct shader_data_light_radii {
+    alignas(4) br_float spot_cos_inner;
+    alignas(4) br_float spot_cos_outer;
+    alignas(4) br_float radius_inner;
+    alignas(4) br_float radius_outer;
+} shader_data_light_radii;
+BR_STATIC_ASSERT(sizeof(shader_data_light_radii) == sizeof(br_vector4), "sizeof(shader_data_light_radii) != sizeof(br_vector4)");
 
 typedef struct shader_data_scene {
     alignas(16) br_vector4 eye_view;
-    alignas(16) shader_data_light lights[BR_MAX_LIGHTS];
+    alignas(16) shader_data_light_info light_info[BR_MAX_LIGHTS];   /* (type, atten_type, 0, 0) */
+    alignas(16) br_vector4 light_positions[BR_MAX_LIGHTS];          /* (X, Y, Z, 0) */
+    alignas(16) br_vector4 light_directions[BR_MAX_LIGHTS];         /* (X, Y, Z, 0), normalised */
+    alignas(16) br_vector4 light_halfs[BR_MAX_LIGHTS];              /* (X, Y, Z, 0), normalised */
+    alignas(16) br_vector4 light_colours[BR_MAX_LIGHTS];            /* (R, G, B, 0)   */
+    alignas(16) shader_data_light_atten light_atten[BR_MAX_LIGHTS]; /* (1/C, C, L, Q) */
+    alignas(16) shader_data_light_radii light_radii[BR_MAX_LIGHTS]; /* (cos(inner), cos(outer), radius_inner, radius_outer) */
     alignas(16) br_vector4 clip_planes[BR_MAX_CLIP_PLANES];
     alignas(16) br_vector4 ambient_colour;
     alignas(16) br_vector4_i light_start;
@@ -127,8 +132,6 @@ typedef struct shader_data_scene {
     alignas(4) uint32_t num_clip_planes;
     alignas(4) uint32_t use_ambient_colour;
 } shader_data_scene;
-BR_STATIC_ASSERT(sizeof(((shader_data_scene *)NULL)->lights) == sizeof(shader_data_light) * BR_MAX_LIGHTS,
-                 "std::array<shader_data_light> fucked up");
 
 typedef struct shader_data_model {
     alignas(16) br_matrix4 model_view;

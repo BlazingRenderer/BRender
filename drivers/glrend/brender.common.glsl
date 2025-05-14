@@ -24,28 +24,16 @@
 #define ENABLE_GOURAUD                  1
 #define ENABLE_PHONG                    0
 
-struct br_light
-{
-    vec4 position;          /* (X, Y, Z, 1)                        */
-    vec4 direction;         /* (X, Y, Z, 0), normalised            */
-    vec4 half_;             /* (X, Y, Z, 0), normalised            */
-    vec4 colour;            /* (R, G, B, 0), normalised            */
-    float intensity;        /* Intensity (1/attenuation_c)         */
-    float attenuation_c;    /* Constant attenuation factor.        */
-    float attenuation_l;    /* Linear attenuation factor.          */
-    float attenuation_q;    /* Quadratic attenuation factor.       */
-    float spot_inner_cos;   /* cos(inner angle), spot lights only. */
-    float spot_outer_cos;   /* cos(outer angle), spot lights only. */
-    uint type;
-    uint attenuation_type;  /* Attenuation type, BRT_QUADRATIC or BRT_RADII. */
-    float radius_inner;
-    float radius_outer;
-};
-
 layout(std140, binding=0) uniform br_scene_state
 {
     vec4 eye_view; /* Eye position in view-space */
-    br_light lights[MAX_LIGHTS];
+    uvec4 light_info[MAX_LIGHTS];
+    vec4 light_positions[MAX_LIGHTS];
+    vec4 light_directions[MAX_LIGHTS];
+    vec4 light_halfs[MAX_LIGHTS];
+    vec4 light_colours[MAX_LIGHTS];
+    vec4 light_atten[MAX_LIGHTS];
+    vec4 light_radii[MAX_LIGHTS];
     vec4 clip_planes[MAX_CLIP_PLANES];
     vec4 ambient_colour;
     uvec4 light_start;
@@ -80,17 +68,24 @@ layout(std140, binding=1) uniform br_model_state
     float fog_scale;
 };
 
-float calculateAttenuation(in br_light alp, in float dist)
+float calculateAttenuation(in uint i, in float dist)
 {
-    return 1.0 / (alp.attenuation_c + (alp.attenuation_l * dist) + (alp.attenuation_q * dist * dist));
+    const float attenuation_c = light_atten[i][1];
+    const float attenuation_l = light_atten[i][2];
+    const float attenuation_q = light_atten[i][3];
+
+    return 1.0 / (attenuation_c + (attenuation_l * dist) + (attenuation_q * dist * dist));
 }
 
-float calculateAttenuationRadii(in br_light alp, in float dist, in float intensity)
+float calculateAttenuationRadii(in uint i, in float dist, in float intensity)
 {
+    const float radius_inner = light_radii[i][2];
+    const float radius_outer = light_radii[i][3];
+
     /*
      * NB: radius_outer != radius_inner is enforced CPU-side.
      */
-    float t = clamp((dist - alp.radius_inner) / (alp.radius_outer - alp.radius_inner), 0.0, 1.0);
+    float t = clamp((dist - radius_inner) / (radius_outer - radius_inner), 0.0, 1.0);
     return intensity * (1.0 - t);
 }
 
@@ -98,77 +93,91 @@ float calculateAttenuationRadii(in br_light alp, in float dist, in float intensi
  * Radial ambient lights, who ever thought such things could be?
  * See softrend/light24.c, lightingColourAmbientRadii()
  */
-void lightingColourAmbientRadii(in vec4 p, in vec4 n, in br_light alp, inout vec3 outA, inout vec3 outD, inout vec3 outS)
+void lightingColourAmbientRadii(in vec4 p, in vec4 n, in uint i, inout vec3 outA, inout vec3 outD, inout vec3 outS)
 {
+    const float intensity    = light_atten[i][0];
+    const float radius_outer = light_radii[i][3];
+
     float atten = 1.0f;
 
-    vec4 dirn = alp.position - p;
+    vec4 dirn = light_positions[i] - p;
     float dist = length(dirn);
 
-    if(dist >= alp.radius_outer)
+    if(dist >= radius_outer)
         return;
 
-    atten = calculateAttenuationRadii(alp, dist, alp.intensity);
+    atten = calculateAttenuationRadii(i, dist, intensity);
 
-    outA += ka * alp.intensity * alp.colour.xyz * atten;
+    // FIXME: should the intensity be multiplied here?
+    outA += ka * intensity * light_colours[i].xyz * atten;
 }
 
-void lightingColourDirect(in vec4 p, in vec4 n, in br_light alp, inout vec3 outA, inout vec3 outD, inout vec3 outS)
+void lightingColourDirect(in vec4 p, in vec4 n, in uint i, inout vec3 outA, inout vec3 outD, inout vec3 outS)
 {
-    float diffDot = max(dot(n, alp.direction), 0.0);
-    outD += diffDot * alp.intensity * kd * alp.colour.xyz;
+    const float intensity = light_atten[i][0];
+    const vec3  colour    = light_colours[i].rgb;
 
-    float specDot = max(dot(n, alp.half_), 0.0);
-    outS += ks * alp.intensity * alp.colour.rgb * pow(specDot, power);
+    float diffDot = max(dot(n, light_directions[i]), 0.0);
+    outD += diffDot * intensity * kd * colour;
+
+    float specDot = max(dot(n, light_halfs[i]), 0.0);
+    outS += ks * intensity * colour * pow(specDot, power);
 }
 
-void lightingColourPoint(in vec4 p, in vec4 n, in br_light alp, inout vec3 outA, inout vec3 outD, inout vec3 outS)
+void lightingColourPoint(in vec4 p, in vec4 n, in uint i, inout vec3 outA, inout vec3 outD, inout vec3 outS)
 {
-    vec4 dirn = alp.position - p;
+    const uint  attenuation_type = light_info[i][1];
+    const float intensity        = light_atten[i][0];
+    const vec3  colour           = light_colours[i].rgb;
+    const float radius_outer     = light_radii[i][3];
+
+    vec4 dirn = light_positions[i] - p;
     vec4 dirn_norm = normalize(dirn);
 
     float dist = length(dirn);
     float atten = 0.0f;
 
-    if(alp.attenuation_type == BRT_RADII) {
-        if(dist >= alp.radius_outer)
+    if(attenuation_type == BRT_RADII) {
+        if(dist >= radius_outer)
             return;
 
-        // atten = calculateAttenuationRadii(alp, dist, calculateAttenuation(alp, dist));
-        atten = calculateAttenuationRadii(alp, dist, alp.intensity);
+        atten = calculateAttenuationRadii(i, dist, intensity);
     } else {
-        atten = calculateAttenuation(alp, dist);
+        atten = calculateAttenuation(i, dist);
     }
 
     if(atten <= 0)
         return;
 
     float diffDot = max(dot(n, dirn_norm), 0.0);
-    outD += diffDot * kd * alp.colour.xyz * atten;
+    outD += diffDot * kd * colour * atten;
 
     float specDot = max(dot(n, normalize(eye_view + dirn_norm)), 0.0);
-    outS += ks * alp.colour.xyz * pow(specDot, power) * atten;
+    outS += ks * colour * pow(specDot, power) * atten;
 }
 
-void lightingColourSpot(in vec4 p, in vec4 n, in br_light alp, inout vec3 outA, inout vec3 outD, inout vec3 outS)
+void lightingColourSpot(in vec4 p, in vec4 n, in uint i, inout vec3 outA, inout vec3 outD, inout vec3 outS)
 {
+    const float spot_inner_cos = light_radii[i][0];
+    const float spot_outer_cos = light_radii[i][1];
+
     /*
      * FIXME: We're calculating this twice (in lightingColourPoint).
      */
-    vec4 dirn_norm = normalize(alp.position - p);
+    vec4 dirn_norm = normalize(light_positions[i] - p);
 
     /*
      * NB: To test this, stick a spot light on a camera and see if you see it.
      */
-    float spotDot = dot(dirn_norm.xyz, alp.direction.xyz);
-    if(spotDot <= alp.spot_outer_cos)
+    float spotDot = dot(dirn_norm.xyz, light_directions[i].xyz);
+    if(spotDot <= spot_outer_cos)
         return;
 
     float cutoff = 1.0;
-    float innerOuterDiff = alp.spot_inner_cos - alp.spot_outer_cos;
+    float innerOuterDiff = spot_inner_cos - spot_outer_cos;
 
     if(innerOuterDiff != 0.0) {
-        cutoff = clamp((spotDot - alp.spot_outer_cos) / innerOuterDiff, 0.0, 1.0);
+        cutoff = clamp((spotDot - spot_outer_cos) / innerOuterDiff, 0.0, 1.0);
     }
 
     /*
@@ -177,7 +186,7 @@ void lightingColourSpot(in vec4 p, in vec4 n, in br_light alp, inout vec3 outA, 
     vec3 outAA = vec3(0);
     vec3 outDD = vec3(0);
     vec3 outSS = vec3(0);
-    lightingColourPoint(p, n, alp, outAA, outDD, outSS);
+    lightingColourPoint(p, n, i, outAA, outDD, outSS);
     outA += outAA * cutoff;
     outD += outDD * cutoff;
     outS += outSS * cutoff;
@@ -218,25 +227,25 @@ void accumulateLights(in vec4 position, in vec4 normal, inout vec3 ambient, inou
     }
 
     for(uint i = light_start.x; i < light_end.x; ++i) {
-        lightingColourAmbientRadii(position, normalDirection, lights[i], ambient, diffuse, specular);
+        lightingColourAmbientRadii(position, normalDirection, i, ambient, diffuse, specular);
     }
 #endif
 
 #if !DEBUG_DISABLE_LIGHT_DIRECTIONAL
     for(uint i = light_start.y; i < light_end.y; ++i) {
-        lightingColourDirect(position, normalDirection, lights[i], ambient, diffuse, specular);
+        lightingColourDirect(position, normalDirection, i, ambient, diffuse, specular);
     }
 #endif
 
 #if !DEBUG_DISABLE_LIGHT_POINT
     for(uint i = light_start.z; i < light_end.z; ++i) {
-        lightingColourPoint(position, normalDirection, lights[i], ambient, diffuse, specular);
+        lightingColourPoint(position, normalDirection, i, ambient, diffuse, specular);
     }
 #endif
 
 #if !DEBUG_DISABLE_LIGHT_SPOT
     for(uint i = light_start.w; i < light_end.w; ++i) {
-        lightingColourSpot(position, normalDirection, lights[i], ambient, diffuse, specular);
+        lightingColourSpot(position, normalDirection, i, ambient, diffuse, specular);
     }
 #endif
 }
