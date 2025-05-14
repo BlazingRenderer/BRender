@@ -40,7 +40,7 @@ void main()
     vertexLighting = mat3(0);
 
 #if ENABLE_GOURAUD
-    accumulateLights(position, vec4(normal, 0), vertexLighting[0], vertexLighting[1], vertexLighting[2]);
+    accumulateLights(position.xyz, normal, vertexLighting[0], vertexLighting[1], vertexLighting[2]);
 #endif
 
     rawPosition = aPosition;

@@ -106,7 +106,7 @@ void main()
     vec3 lightD = vertexLighting[1];
     vec3 lightS = vertexLighting[2];
 #if ENABLE_PHONG
-    accumulateLights(position, vec4(normal, 0), lightA, lightD, lightS);
+    accumulateLights(position.xyz, normal, lightA, lightD, lightS);
 #endif
 
     vec4 fragColour = ((vec4(lightA + lightD, 1.0)) * (surface_colour * texColour)) + vec4(lightS, 0.0);
