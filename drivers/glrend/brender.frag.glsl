@@ -56,7 +56,13 @@ vec2 SurfaceMapEnvironment(in vec3 eye, in vec3 normal, in mat4 model_to_environ
 
 vec2 SurfaceMap(in vec3 position, in vec3 normal, in vec2 uv)
 {
-    if(uv_source == UV_SOURCE_ENV_L) {
+    if(uv_source == UV_SOURCE_MODEL) {
+        /*
+         * NB: We need this no-op branch explicitly first because
+         * NX Homebrew (Mesa 20.1.0-rc3 + nouveau) is much faster
+         * with it here.
+         */
+    } else if(uv_source == UV_SOURCE_ENV_L) {
         /*
          * Generate U,V for environment assuming local eye.
          *
@@ -72,8 +78,6 @@ vec2 SurfaceMap(in vec3 position, in vec3 normal, in vec2 uv)
          */
         vec3 eye = normalize(eye_m.xyz);
         uv = SurfaceMapEnvironment(eye, normal, environment);
-    } else {
-        /* nop */
     }
 
     /* Apply the map transformation. */
