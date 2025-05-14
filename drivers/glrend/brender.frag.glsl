@@ -32,7 +32,6 @@ vec4 applyFog(in vec4 inColour, in float dist)
 
 vec2 SurfaceMapEnvironment(in vec3 eye, in vec3 normal, in mat4 model_to_environment) {
     vec3 r;
-    vec4 wr;
     float d, cu, cv;
 
     /*
@@ -44,8 +43,7 @@ vec2 SurfaceMapEnvironment(in vec3 eye, in vec3 normal, in mat4 model_to_environ
      * Rotate vector into the environment frame.
      * This should be the identity matrix if no environment is set.
      */
-    wr = model_to_environment * vec4(r, 0.0);
-    vec3 wr2 = normalize(wr.xyz);
+    vec3 wr2 = normalize(mat3(model_to_environment) * r);
 
     /*
      * Convert vector to environment coordinates
