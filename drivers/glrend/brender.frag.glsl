@@ -79,7 +79,7 @@ vec2 SurfaceMap(in vec3 position, in vec3 normal, in vec2 uv)
     }
 
     /* Apply the map transformation. */
-    return (map_transform * vec4(uv, 1.0, 0.0)).xy;
+    return (mat3(map_transform) * vec3(uv, 1.0)).xy;
 }
 
 vec4 getTexColour(in vec2 uv)
