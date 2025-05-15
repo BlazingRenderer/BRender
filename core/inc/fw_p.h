@@ -328,12 +328,12 @@ br_uint_8 BR_RESIDENT_ENTRY BrLogSetLevel(br_uint_8 level);
 br_uint_8 BR_RESIDENT_ENTRY BrLogGetLevel(void);
 
 void BR_RESIDENT_ENTRY BrLogV(br_uint_8 level, const char *component, const char *fmt, va_list ap);
-void BR_RESIDENT_ENTRY BrLog(br_uint_8 level, const char *component, const char *fmt, ...);
-void BR_RESIDENT_ENTRY BrLogTrace(const char *component, const char *fmt, ...);
-void BR_RESIDENT_ENTRY BrLogDebug(const char *component, const char *fmt, ...);
-void BR_RESIDENT_ENTRY BrLogInfo(const char *component, const char *fmt, ...);
-void BR_RESIDENT_ENTRY BrLogWarn(const char *component, const char *fmt, ...);
-void BR_RESIDENT_ENTRY BrLogError(const char *component, const char *fmt, ...);
+void BR_RESIDENT_ENTRY BrLog(br_uint_8 level, const char *component, const char *fmt, ...) BR_PRINTF_ATTRIBUTE(3, 4);
+void BR_RESIDENT_ENTRY BrLogTrace(const char *component, const char *fmt, ...) BR_PRINTF_ATTRIBUTE(2, 3);
+void BR_RESIDENT_ENTRY BrLogDebug(const char *component, const char *fmt, ...) BR_PRINTF_ATTRIBUTE(2, 3);
+void BR_RESIDENT_ENTRY BrLogInfo(const char *component, const char *fmt, ...) BR_PRINTF_ATTRIBUTE(2, 3);
+void BR_RESIDENT_ENTRY BrLogWarn(const char *component, const char *fmt, ...) BR_PRINTF_ATTRIBUTE(2, 3);
+void BR_RESIDENT_ENTRY BrLogError(const char *component, const char *fmt, ...) BR_PRINTF_ATTRIBUTE(2, 3);
 
 #endif /* _NO_PROTOTYPES */
 
