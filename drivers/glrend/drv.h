@@ -50,6 +50,11 @@ extern "C" {
  */
 #define BR_GLREND_MAX_DRAWS_IN_FLIGHT 4096
 
+/*
+ * Set to nonzero to glEnable(GL_DEBUG_OUTPUT)
+ */
+#define BR_GLREND_DEBUG 0
+
 #include "brddi.h"
 #include "brglrend.h"
 #include "formats.h"
