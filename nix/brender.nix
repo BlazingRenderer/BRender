@@ -8,8 +8,6 @@
 , SDL2
 , glfw
 , libGL
-, glslang
-, spirv-cross
 , makeBinaryWrapper
 , darwin
 , clang-tools
@@ -29,8 +27,6 @@ stdenv.mkDerivation(finalAttrs: {
     cmake
     perl
     makeBinaryWrapper
-    glslang
-    spirv-cross
   ] ++ lib.optionals stdenv.isx86_32 [
     uasm
     wineserverHook

@@ -1,22 +1,21 @@
-#version 430 core
+#version 330 core
 
 #include "brender.common.glsl"
 #include "common.glsl"
 
-layout(location=0) in vec4 position;
-layout(location=1) in vec3 normal;
-layout(location=2) in vec2 uv;
-layout(location=3) in vec4 colour;
+in vec4 position;
+in vec2 uv;
+in vec3 normal;
+in vec4 colour;
 
+in mat3 vertexLighting;
 
-layout(location=4) in mat3 vertexLighting;
+in vec3 rawPosition;
+in vec3 rawNormal;
 
-layout(location=7) in vec3 rawPosition;
-layout(location=8) in vec3 rawNormal;
+in float viewDistance;
 
-layout(location=9) in float viewDistance;
-
-layout(location=0) out vec4 mainColour;
+out vec4 mainColour;
 
 uniform sampler2D  main_texture;
 uniform usampler2D index_texture;
