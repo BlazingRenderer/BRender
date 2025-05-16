@@ -825,6 +825,12 @@ static br_error BR_CMETHOD_DECL(br_device_pixelmap_sdl3, handleWindowEvent)(br_d
     return resync(self);
 }
 
+static br_error BR_CMETHOD_DECL(br_device_pixelmap_sdl3, flush)(struct br_device_pixelmap *self)
+{
+    SDL_FlushRenderer(self->renderer);
+    return BRE_OK;
+}
+
 /*
  * Default dispatch table for device pixelmap
  */
@@ -892,7 +898,7 @@ static const struct br_device_pixelmap_dispatch devicePixelmapDispatch = {
     ._pixelAddressSet = BR_CMETHOD_REF(br_device_pixelmap_fail, pixelAddressSet),
     ._originSet       = BR_CMETHOD_REF(br_device_pixelmap_gen, originSet),
 
-    ._flush        = BR_CMETHOD_REF(br_device_pixelmap_gen, flush),
+    ._flush        = BR_CMETHOD_REF(br_device_pixelmap_sdl3, flush),
     ._synchronise  = BR_CMETHOD_REF(br_device_pixelmap_gen, synchronise),
     ._directLock   = BR_CMETHOD_REF(br_device_pixelmap_sdl3, directLock),
     ._directUnlock = BR_CMETHOD_REF(br_device_pixelmap_sdl3, directUnlock),
