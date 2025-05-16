@@ -294,8 +294,6 @@ static void apply_stored_properties(HVIDEO hVideo, br_renderer *renderer, state_
         DeviceGLExtractPrimitiveState(state, &info, tex_default);
 
         model->disable_colour_key = info.disable_colour_key;
-        model->is_indexed         = info.is_indexed;
-        model->is_filtered        = info.is_filtered;
 
         if(info.write_colour) {
             glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
@@ -306,6 +304,8 @@ static void apply_stored_properties(HVIDEO hVideo, br_renderer *renderer, state_
         glBindSampler(0, RendererGLGetSampler(renderer, &info.sampler));
 
         if(info.is_indexed) {
+            model->texture_mode = info.is_filtered ? 2 : 1;
+
             glActiveTexture(GL_TEXTURE1);
             glBindTexture(GL_TEXTURE_2D, info.colour_map);
 
@@ -314,6 +314,8 @@ static void apply_stored_properties(HVIDEO hVideo, br_renderer *renderer, state_
         } else {
             glActiveTexture(GL_TEXTURE0);
             glBindTexture(GL_TEXTURE_2D, info.colour_map);
+
+            model->texture_mode = 0;
         }
 
         if(info.is_blended) {

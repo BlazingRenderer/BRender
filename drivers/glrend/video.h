@@ -151,8 +151,7 @@ typedef struct shader_data_model {
     alignas(4) uint32_t unlit;
     alignas(4) uint32_t uv_source;
     alignas(4) uint32_t disable_colour_key;
-    alignas(4) uint32_t is_indexed;
-    alignas(4) uint32_t is_filtered;
+    alignas(4) uint32_t texture_mode;
     alignas(4) uint32_t enable_fog;
     alignas(4) br_scalar fog_scale;
 } shader_data_model;

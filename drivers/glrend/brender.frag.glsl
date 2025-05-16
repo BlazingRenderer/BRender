@@ -86,15 +86,16 @@ vec2 SurfaceMap(in vec3 position, in vec3 normal, in vec2 uv)
 
 vec4 getTexColour(in vec2 uv)
 {
-    if(!is_indexed) {
-        return texture(main_texture, uv);
+    switch(texture_mode) {
+        case TEXTURE_MODE_NORMAL:
+            return texture(main_texture, uv);
+        case TEXTURE_MODE_INDEX:
+            return texturei(index_texture, main_texture, uv);
+        case TEXTURE_MODE_INDEX_FILTER:
+            return bilinearFilter(index_texture, main_texture, uv);
+        default:
+            return vec4(1, 0, 1, 1);
     }
-
-    if(is_filtered) {
-        return bilinearFilter(index_texture, main_texture, uv);
-    }
-
-    return texturei(index_texture, main_texture, uv);
 }
 
 void main()

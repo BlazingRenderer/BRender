@@ -7,6 +7,10 @@
 #define UV_SOURCE_ENV_L              1
 #define UV_SOURCE_ENV_I              2
 
+#define TEXTURE_MODE_NORMAL          0u
+#define TEXTURE_MODE_INDEX           1u
+#define TEXTURE_MODE_INDEX_FILTER    2u
+
 #define BRT_AMBIENT                  0u
 #define BRT_DIRECT                   1u
 #define BRT_POINT                    2u
@@ -62,8 +66,7 @@ layout(std140, binding=1) uniform br_model_state
     uint unlit; /* Is this surface unlit? */
     int uv_source;
     bool disable_colour_key;
-    bool is_indexed; /* Is our texture indexed? */
-    bool is_filtered;
+    uint texture_mode;
     bool enable_fog;
     float fog_scale;
 };
