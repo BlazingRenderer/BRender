@@ -434,11 +434,11 @@ static int parse_args(int argc, char *const argv[], br_demo_run_args *args)
         switch(c) {
 
             case ARGDEF_WIDTH:
-                args->width = atoi(ps.optarg);
+                args->width = BrAToI(ps.optarg);
                 break;
 
             case ARGDEF_HEIGHT:
-                args->height = atoi(ps.optarg);
+                args->height = BrAToI(ps.optarg);
                 break;
 
             case ARGDEF_VERBOSE:
@@ -450,15 +450,15 @@ static int parse_args(int argc, char *const argv[], br_demo_run_args *args)
                 break;
 
             case ARGDEF_SOFTWARE_BPP:
-                software_bpp = atoi(ps.optarg);
+                software_bpp = BrAToI(ps.optarg);
                 break;
 
             case ARGDEF_BACKBUFFER_WIDTH:
-                args->backbuffer_width = atoi(ps.optarg);
+                args->backbuffer_width = BrAToI(ps.optarg);
                 break;
 
             case ARGDEF_BACKBUFFER_HEIGHT:
-                args->backbuffer_height = atoi(ps.optarg);
+                args->backbuffer_height = BrAToI(ps.optarg);
                 break;
 
             case ARGDEF_HELP:
