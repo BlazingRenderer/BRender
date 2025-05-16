@@ -122,8 +122,12 @@ void lightingColourDirect(in vec3 p, in vec3 n, in uint i, inout vec3 outA, inou
     float diffDot = max(dot(n, direction), 0.0);
     outD += diffDot * intensity * kd * colour;
 
-    float specDot = max(dot(n, light_halfs[i].xyz), 0.0);
-    outS += ks * intensity * colour * pow(specDot, power);
+    if(ks > 0.0) {
+        float specDot = max(dot(n, light_halfs[i].xyz), 0.0);
+        if(specDot > 0.0) {
+            outS += ks * intensity * colour * pow(specDot, power);
+        }
+    }
 }
 
 void lightingColourPoint(in vec3 p, in vec3 n, in uint i, inout vec3 outA, inout vec3 outD, inout vec3 outS)
@@ -155,8 +159,12 @@ void lightingColourPoint(in vec3 p, in vec3 n, in uint i, inout vec3 outA, inout
     float diffDot = max(dot(n, dirn_norm), 0.0);
     outD += diffDot * kd * colour * atten;
 
-    float specDot = max(dot(n, normalize(eye_view.xyz + dirn_norm)), 0.0);
-    outS += ks * colour * pow(specDot, power) * atten;
+    if(ks > 0.0) {
+        float specDot = max(dot(n, normalize(eye_view.xyz + dirn_norm)), 0.0);
+        if(specDot > 0.0) {
+            outS += ks * colour * pow(specDot, power) * atten;
+        }
+    }
 }
 
 void lightingColourSpot(in vec3 p, in vec3 n, in uint i, inout vec3 outA, inout vec3 outD, inout vec3 outS)
