@@ -192,7 +192,7 @@ static br_error create_window(br_demo *demo, const br_demo_run_args *args)
                         BRT_WINDOW_NAME_CSTR, args->title,
                         BRT_HIDPI_B,          BR_TRUE,
                         BRT_RESIZABLE_B,      BR_TRUE,
-                        BRT_OPENGL_B,         args->force_software ? BR_FALSE : BR_TRUE,
+                        BRT_OPENGL_B,         BR_TRUE,
                         BR_NULL_TOKEN);
     // clang-format on
     if(err == BRE_OK) {
