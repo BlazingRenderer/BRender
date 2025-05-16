@@ -10,6 +10,11 @@ extern "C" {
 
 typedef struct gl_vertex_f {
     /*
+     * Position
+     */
+    br_vector3_f p;
+
+    /*
      * Mapping coordinates
      */
     br_vector2_f map;
@@ -69,7 +74,6 @@ typedef struct br_geometry_stored {
     struct v11model *model;
 
     GLuint gl_vao;
-    GLuint gl_vbo_posn;
     GLuint gl_vbo;
     GLuint gl_ibo;
 

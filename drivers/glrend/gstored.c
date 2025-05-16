@@ -24,18 +24,19 @@ static struct br_tv_template_entry templateEntries[] = {
 };
 #undef F
 
-static GLuint create_vao(HVIDEO hVideo, GLuint vbo_posn, GLuint vbo, GLuint ibo)
+static GLuint create_vao(HVIDEO hVideo, GLuint vbo, GLuint ibo)
 {
     GLuint vao;
     glGenVertexArrays(1, &vao);
     glBindVertexArray(vao);
 
-    /* Separate buffer for positions. Makes it easier on tiling (i.e. mobile) GPUs. */
-    glBindBuffer(GL_ARRAY_BUFFER, vbo_posn);
-    glEnableVertexAttribArray(hVideo->brenderProgram.attributes.aPosition);
-    glVertexAttribPointer(hVideo->brenderProgram.attributes.aPosition, 3, GL_FLOAT, GL_FALSE, 0, NULL);
-
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
+
+    if(hVideo->brenderProgram.attributes.aPosition >= 0) {
+        glEnableVertexAttribArray(hVideo->brenderProgram.attributes.aPosition);
+        glVertexAttribPointer(hVideo->brenderProgram.attributes.aPosition, 3, GL_FLOAT, GL_FALSE, sizeof(gl_vertex_f),
+                              (void *)offsetof(gl_vertex_f, p));
+    }
 
     if(hVideo->brenderProgram.attributes.aUV >= 0) {
         glEnableVertexAttribArray(hVideo->brenderProgram.attributes.aUV);
@@ -60,25 +61,6 @@ static GLuint create_vao(HVIDEO hVideo, GLuint vbo_posn, GLuint vbo, GLuint ibo)
     return vao;
 }
 
-static GLuint build_vbo_posn(const struct v11model *model, size_t total_vertices)
-{
-    br_vector3_f *vtx  = BrScratchAllocate(total_vertices * sizeof(br_vector3_f));
-    br_vector3_f *next = vtx;
-    GLuint        buf;
-
-    for(br_uint_16 i = 0; i < model->ngroups; ++i) {
-        const struct v11group *gp = model->groups + i;
-        memcpy(next, gp->position, gp->nvertices * sizeof(br_vector3_f));
-        next += gp->nvertices;
-    }
-
-    glGenBuffers(1, &buf);
-    glBindBuffer(GL_ARRAY_BUFFER, buf);
-    glBufferData(GL_ARRAY_BUFFER, (GLsizeiptr)(total_vertices * sizeof(br_vector3_f)), vtx, GL_STATIC_DRAW);
-    BrScratchFree(vtx);
-    return buf;
-}
-
 static GLuint build_vbo(const struct v11model *model, size_t total_vertices)
 {
     /* Collate and upload the vertex data. */
@@ -89,6 +71,7 @@ static GLuint build_vbo(const struct v11model *model, size_t total_vertices)
     for(br_uint_16 i = 0; i < model->ngroups; ++i) {
         const struct v11group *gp = model->groups + i;
         for(br_uint_16 v = 0; v < gp->nvertices; ++v, ++nextVtx) {
+            nextVtx->p   = *(br_vector3_f *)(gp->position + v);
             nextVtx->map = *(br_vector2_f *)(gp->map + v);
             nextVtx->n   = *(br_vector3_f *)(gp->normal + v);
             nextVtx->c   = gp->vertex_colours[v];
@@ -163,12 +146,10 @@ br_geometry_stored *GeometryStoredGLAllocate(br_geometry_v1_model *gv1model, con
 
     glBindVertexArray(0);
 
-    self->gl_vbo_posn = build_vbo_posn(model, total_vertices);
     self->gl_vbo      = build_vbo(model, total_vertices);
     self->gl_ibo      = build_ibo(model, total_faces, self->groups);
-    self->gl_vao      = create_vao(&r->pixelmap->screen->asFront.video, self->gl_vbo_posn, self->gl_vbo, self->gl_ibo);
+    self->gl_vao      = create_vao(&r->pixelmap->screen->asFront.video, self->gl_vbo, self->gl_ibo);
 
-    DeviceGLObjectLabelF(GL_BUFFER, self->gl_vbo_posn, "%s:vbo:posn", self->identifier);
     DeviceGLObjectLabelF(GL_BUFFER, self->gl_vbo, "%s:vbo", self->identifier);
     DeviceGLObjectLabelF(GL_BUFFER, self->gl_ibo, "%s:ibo", self->identifier);
     DeviceGLObjectLabelF(GL_VERTEX_ARRAY, self->gl_vao, "%s:vao", self->identifier);
@@ -186,7 +167,6 @@ static void BR_CMETHOD(br_geometry_stored_gl, free)(br_object *_self)
     ObjectContainerRemove(self->gv1model->renderer_facility, (br_object *)self);
 
     glDeleteVertexArrays(1, &self->gl_vao);
-    glDeleteBuffers(1, &self->gl_vbo_posn);
     glDeleteBuffers(1, &self->gl_vbo);
     glDeleteBuffers(1, &self->gl_ibo);
     BrResFreeNoCallback(self);
