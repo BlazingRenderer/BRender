@@ -107,7 +107,8 @@ br_renderer *RendererGLAllocate(br_device *device, br_renderer_facility *facilit
 
     self->uniform_buffer_offset_alignment = alignment;
     BufferRingGLInit(&self->model_ring, "model", alignment, BR_GLREND_MAX_DRAWS_IN_FLIGHT,
-                     dest->screen->asFront.video.brenderProgram.blockBindingModel, sizeof(shader_data_model));
+                     dest->screen->asFront.video.brenderProgram.blockBindingModel, sizeof(shader_data_model),
+                     GL_UNIFORM_BUFFER);
 
     self->has_begun = 0;
     return (br_renderer *)self;

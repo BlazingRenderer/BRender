@@ -60,6 +60,7 @@ typedef struct br_buffer_ring_gl {
     size_t   buffer_size;
     GLintptr aligned_elem_size;
     GLuint   buffer_index;
+    GLenum   binding_point;
 } br_buffer_ring_gl;
 
 #ifdef BR_RENDERER_PRIVATE
