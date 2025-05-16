@@ -1,23 +1,28 @@
-#version 330 core
+#version 430 core
 
 #include "brender.common.glsl"
 
-in vec3 aPosition;
-in vec2 aUV;
-in vec3 aNormal;
-in vec4 aColour;
+layout(location=0) in vec3 aPosition;
+layout(location=1) in vec2 aUV;
+layout(location=2) in vec3 aNormal;
+layout(location=3) in vec4 aColour;
 
-out vec4 position;
-out vec3 normal;
-out vec2 uv;
-out vec4 colour;
+layout(location=0) out vec4 position;
+layout(location=1) out vec3 normal;
+layout(location=2) out vec2 uv;
+layout(location=3) out vec4 colour;
 
-out mat3 vertexLighting;
+/*
+ * [0] = Ambient
+ * [1] = Diffuse
+ * [2] = Specular
+ */
+layout(location=4) out mat3 vertexLighting;
 
-out vec3 rawPosition;
-out vec3 rawNormal;
+layout(location=7) out vec3 rawPosition;
+layout(location=8) out vec3 rawNormal;
 
-out float viewDistance;
+layout(location=9) out float viewDistance;
 
 out float gl_ClipDistance[MAX_CLIP_PLANES];
 

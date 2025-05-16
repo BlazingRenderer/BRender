@@ -24,7 +24,7 @@
 #define ENABLE_GOURAUD                  1
 #define ENABLE_PHONG                    0
 
-layout(std140) uniform br_scene_state
+layout(std140, binding=0) uniform br_scene_state
 {
     vec4 eye_view; /* Eye position in view-space */
     uvec4 light_info[MAX_LIGHTS];
@@ -42,7 +42,7 @@ layout(std140) uniform br_scene_state
     bool use_ambient_colour;
 };
 
-layout(std140) uniform br_model_state
+layout(std140, binding=1) uniform br_model_state
 {
     mat4 model_view;
     mat4 projection;

@@ -2,21 +2,43 @@ project(glrend)
 
 find_package(OpenGL REQUIRED COMPONENTS OpenGL)
 
+# NB: Don't use this, it's fragile as fuck.
+# find_package(glslang CONFIG REQUIRED)
+# set(GLSLANG_EXECUTABLE "$<TARGET_FILE:glslang::glslang-standalone>")
+
+find_program(GLSLANG_EXECUTABLE glslang REQUIRED)
+message(STATUS "Found glslang: ${GLSLANG_EXECUTABLE}")
+
+find_program(SPIRV_CROSS_EXECUTABLE spirv-cross REQUIRED)
+message(STATUS "Found spirv-cross: ${SPIRV_CROSS_EXECUTABLE}")
+
 function(compile_shader)
+    set(shaderpp    "${CMAKE_CURRENT_SOURCE_DIR}/shaderpp.pl")
     set(embedshader "${CMAKE_CURRENT_SOURCE_DIR}/embedshader.pl")
 
     cmake_parse_arguments(PARSE_ARGV 0 arg "" "SOURCE;DESTINATION;VARNAME;STAGE" "DEPENDS")
 
     cmake_path(GET arg_SOURCE FILENAME source_filename)
 
+    set(processed_file "${CMAKE_CURRENT_BINARY_DIR}/${source_filename}.processed.glsl")
+    set(spv_file       "${CMAKE_CURRENT_BINARY_DIR}/${source_filename}.spv")
+    set(optimised_file "${CMAKE_CURRENT_BINARY_DIR}/${source_filename}.optimised.glsl")
+
     add_custom_command(
             OUTPUT              ${arg_DESTINATION}
             WORKING_DIRECTORY   ${CMAKE_CURRENT_SOURCE_DIR}
             MAIN_DEPENDENCY     ${arg_SOURCE}
-            DEPENDS             "${embedshader}"
+            BYPRODUCTS          "${processed_file}"
+                                "${spv_file}"
+                                "${optimised_file}"
+            DEPENDS             "${shaderpp}"
+                                "${embedshader}"
                                 ${arg_DEPENDS}
 
-            COMMAND "${PERL_EXECUTABLE}" "${embedshader}" "${arg_VARNAME}" "${arg_SOURCE}" "${arg_DESTINATION}"
+            COMMAND "${PERL_EXECUTABLE}" "${shaderpp}" "${arg_SOURCE}" "${processed_file}"
+            COMMAND "${GLSLANG_EXECUTABLE}" -G100 -S "${arg_STAGE}" -o "${spv_file}" "${processed_file}"
+            COMMAND "${SPIRV_CROSS_EXECUTABLE}" "${spv_file}" --version 330 --no-420pack-extension --no-es --output "${optimised_file}"
+            COMMAND "${PERL_EXECUTABLE}" "${embedshader}" "${arg_VARNAME}" "${optimised_file}" "${arg_DESTINATION}"
     )
 endfunction()
 
