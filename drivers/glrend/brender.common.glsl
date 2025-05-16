@@ -139,9 +139,9 @@ void lightingColourPoint(in vec3 p, in vec3 n, in uint i, inout vec3 outA, inout
     const vec3  position         = light_positions[i].xyz;
 
     vec3 dirn = position - p;
-    vec3 dirn_norm = normalize(dirn);
-
     float dist = length(dirn);
+    vec3 dirn_norm = dirn / dist;
+
     float atten = 0.0f;
 
     if(attenuation_type == BRT_RADII) {
