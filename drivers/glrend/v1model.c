@@ -388,6 +388,7 @@ void RendererGLRenderGroup(br_renderer *self, br_geometry_stored *stored, const 
     self->stats.triangles_rendered_count += groupinfo->group->nfaces;
     self->stats.triangles_drawn_count += groupinfo->group->nfaces;
     self->stats.vertices_rendered_count += groupinfo->group->nfaces * 3;
+    self->stats.opaque_draw_count += 1;
 }
 
 void RendererGLRenderTri(br_renderer *self, br_uintptr_t offset, const gl_groupinfo *groupinfo)
@@ -405,4 +406,5 @@ void RendererGLRenderTri(br_renderer *self, br_uintptr_t offset, const gl_groupi
     self->stats.triangles_rendered_count += 1;
     self->stats.triangles_drawn_count += 1;
     self->stats.vertices_rendered_count += 3;
+    self->stats.transparent_draw_count += 1;
 }

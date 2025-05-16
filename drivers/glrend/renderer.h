@@ -118,6 +118,8 @@ typedef struct br_renderer {
         br_uint_32 triangles_drawn_count;
         br_uint_32 triangles_rendered_count;
         br_uint_32 vertices_rendered_count;
+        br_uint_32 opaque_draw_count;
+        br_uint_32 transparent_draw_count;
     } stats;
 } br_renderer;
 

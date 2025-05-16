@@ -10,6 +10,8 @@ extern "C" {
 #endif
 
 extern br_token BRT_OPENGL_TEXTURE_U32;
+extern br_token BRT_OPENGL_OPAQUE_DRAW_COUNT_U32;
+extern br_token BRT_OPENGL_TRANSPARENT_DRAW_COUNT_U32;
 
 #ifdef __cplusplus
 }

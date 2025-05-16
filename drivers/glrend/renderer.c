@@ -17,6 +17,8 @@ static struct br_tv_template_entry rendererTemplateEntries[] = {
     {BRT(TRIANGLES_DRAWN_COUNT_U32),    F(stats.triangles_drawn_count),    BRTV_QUERY | BRTV_ALL, BRTV_CONV_COPY},
     {BRT(TRIANGLES_RENDERED_COUNT_U32), F(stats.triangles_rendered_count), BRTV_QUERY | BRTV_ALL, BRTV_CONV_COPY},
     {BRT(VERTICES_RENDERED_COUNT_U32),  F(stats.vertices_rendered_count),  BRTV_QUERY | BRTV_ALL, BRTV_CONV_COPY},
+    {DEV(OPENGL_OPAQUE_DRAW_COUNT_U32),      F(stats.opaque_draw_count),        BRTV_QUERY | BRTV_ALL, BRTV_CONV_COPY},
+    {DEV(OPENGL_TRANSPARENT_DRAW_COUNT_U32), F(stats.transparent_draw_count),   BRTV_QUERY | BRTV_ALL, BRTV_CONV_COPY},
 };
 #undef F
 
@@ -123,6 +125,8 @@ static void BR_CMETHOD_DECL(br_renderer_gl, sceneBegin)(br_renderer *self)
     self->stats.triangles_drawn_count    = 0;
     self->stats.triangles_rendered_count = 0;
     self->stats.vertices_rendered_count  = 0;
+    self->stats.opaque_draw_count        = 0;
+    self->stats.transparent_draw_count   = 0;
 
     self->trans.next = 0;
 
