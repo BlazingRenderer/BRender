@@ -40,9 +40,11 @@ jobs:
       - name: Clone Repository
         uses: actions/checkout@v4
       - name: Configure
-        run: cmake -B build -G "Ninja Multi-Config"
+        run: cmake -B build -G "Ninja Multi-Config" -DBRENDER_BUILD_GLFW_EXAMPLE=ON
       - name: Build
         run: cmake --build build --config Release --parallel
+      - name: Install
+        run: sudo cmake --install build --config Release --strip
 
   build-msvc2022:
     runs-on: windows-2022
