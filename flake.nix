@@ -41,6 +41,8 @@
 
         version = self.lastModifiedDate;
         withExamples = true;
+
+        SDL2 =  pkgs.pkgsCross.mingw32.SDL2_classic;
       };
 
       brender-samples-win64 = pkgs.pkgsCross.mingwW64.callPackage ./nix/brender.nix {
@@ -48,6 +50,8 @@
 
         version = self.lastModifiedDate;
         withExamples = true;
+
+        SDL2 =  pkgs.pkgsCross.mingwW64.SDL2_classic;
       };
 
       brender-samples-linux32 = pkgs.pkgsi686Linux.callPackage ./nix/brender.nix {
