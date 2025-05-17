@@ -7,7 +7,7 @@ void BufferRingGLInit(br_buffer_ring_gl *self, const char *tag, size_t offset_al
     size_t aligned_size = ((elem_size + offset_alignment - 1) / offset_alignment) * offset_alignment;
     size_t buffer_size  = aligned_size * num_draws;
 
-    assert(aligned_size <= elem_size);
+    assert(aligned_size >= elem_size);
 
     glGenBuffers(BR_ASIZE(self->buffers), self->buffers);
     for(int i = 0; i < BR_ASIZE(self->buffers); ++i) {
