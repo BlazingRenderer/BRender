@@ -6,7 +6,7 @@ based on the following source code releases:
 - [BRender-1997](https://github.com/foone/BRender-1997)
 - [BRender-v1.3.2](https://github.com/foone/BRender-v1.3.2)
 
-There are OpenGL and SDL2 drivers, as well as an x86-specific software rendering
+There are OpenGL and SDL2/SDL3 drivers, as well as an x86-specific software rendering
 backend used as the reference implementation.
 
 Many sample applications are included, as well as most of the original utilities
