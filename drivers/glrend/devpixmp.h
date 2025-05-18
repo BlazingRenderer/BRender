@@ -11,7 +11,8 @@ extern "C" {
 typedef union br_quirks_gl {
     struct {
         br_uint_32 disable_anisotropic_filtering : 1;
-        br_uint_32 reserved : 31;
+        br_uint_32 orphan_model_buffers : 1;
+        br_uint_32 reserved : 30;
     };
     br_uint_32 value;
 } br_quirks_gl;

@@ -85,6 +85,7 @@ static void setup_qiurks(br_device_pixelmap *self)
 {
     const char *gl_renderer = self->asFront.gl_renderer;
     const char *gl_vendor   = self->asFront.gl_vendor;
+    const char *gl_version  = self->asFront.gl_version;
 
     self->asFront.quirks.value = 0;
 
@@ -94,6 +95,11 @@ static void setup_qiurks(br_device_pixelmap *self)
     if(BrStrCmp(gl_vendor, "Mesa") == 0 && strstr(gl_renderer, "llvmpipe (") == gl_renderer) {
         BrLogInfo("GLREND", "Quirk - using llvmpipe, disabling anisotropic filtering.");
         self->asFront.quirks.disable_anisotropic_filtering = 1;
+    }
+
+    if(strstr(gl_renderer, "Apple M") == gl_renderer && strstr(gl_version, " Metal ") != NULL) {
+        BrLogInfo("GLREND", "Quirk - using Apple Silicon, forcing model uniform buffer orphaning.");
+        self->asFront.quirks.orphan_model_buffers = 1;
     }
 }
 

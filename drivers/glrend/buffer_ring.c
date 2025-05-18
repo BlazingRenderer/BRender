@@ -1,13 +1,24 @@
 #include "drv.h"
 #include "brassert.h"
 
+
 void BufferRingGLInit(br_buffer_ring_gl *self, const char *tag, size_t offset_alignment, size_t num_draws,
-                      GLuint buffer_index, size_t elem_size, GLenum binding_point)
+                      GLuint buffer_index, size_t elem_size, GLenum binding_point, uint32_t flags)
 {
-    size_t aligned_size = ((elem_size + offset_alignment - 1) / offset_alignment) * offset_alignment;
-    size_t buffer_size  = aligned_size * num_draws;
+    size_t aligned_size;
+    size_t buffer_size;
+
+    assert((flags & ~BUFFER_RING_GL_FLAG_MASK) == 0);
+
+    if(flags & BUFFER_RING_GL_FLAG_ORPHAN)
+        num_draws = 1;
+
+    aligned_size = ((elem_size + offset_alignment - 1) / offset_alignment) * offset_alignment;
+    buffer_size  = aligned_size * num_draws;
 
     assert(aligned_size >= elem_size);
+
+    self->flags = flags;
 
     glGenBuffers(BR_ASIZE(self->buffers), self->buffers);
     for(int i = 0; i < BR_ASIZE(self->buffers); ++i) {
@@ -55,7 +66,11 @@ void BufferRingGLBegin(br_buffer_ring_gl *self)
         self->fences[self->frame_index] = NULL;
     }
 
-    glBindBuffer(self->binding_point, self->buffers[self->frame_index]);
+    if(self->flags & BUFFER_RING_GL_FLAG_ORPHAN) {
+        glBindBufferBase(self->binding_point, self->buffer_index, self->buffers[self->frame_index]);
+    } else {
+        glBindBuffer(self->binding_point, self->buffers[self->frame_index]);
+    }
 }
 
 void BufferRingGLEnd(br_buffer_ring_gl *self)
@@ -75,12 +90,17 @@ br_boolean BufferRingGLPush(br_buffer_ring_gl *self, const void *data, GLsizeipt
     }
 #endif
 
-    if(self->offset >= self->buffer_size)
-        return BR_FALSE;
+    if(self->flags & BUFFER_RING_GL_FLAG_ORPHAN) {
+        glBufferData(self->binding_point, size, data, GL_STATIC_DRAW);
+    } else {
+        if(self->offset >= self->buffer_size)
+            return BR_FALSE;
 
-    glBufferSubData(self->binding_point, self->offset, size, data);
-    glBindBufferRange(self->binding_point, self->buffer_index, ubo, self->offset, size);
+        glBufferSubData(self->binding_point, self->offset, size, data);
+        glBindBufferRange(self->binding_point, self->buffer_index, ubo, self->offset, size);
 
-    self->offset += self->aligned_elem_size;
+        self->offset += self->aligned_elem_size;
+    }
+
     return BR_TRUE;
 }
