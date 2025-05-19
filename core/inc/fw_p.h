@@ -144,7 +144,7 @@ void * BR_RESIDENT_ENTRY BrMemAllocateAlign(br_size_t size, br_uint_8 type, br_i
 #endif
 
 char *BR_RESIDENT_ENTRY BrMemStrDup(const char *str);
-void *BR_RESIDENT_ENTRY BrMemCalloc(int nelems, br_size_t size, br_uint_8 type);
+void *BR_RESIDENT_ENTRY BrMemCalloc(br_size_t nelems, br_size_t size, br_uint_8 type);
 
 /*
  * Resource allocation

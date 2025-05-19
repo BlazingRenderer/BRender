@@ -87,7 +87,7 @@ br_int_32 BR_RESIDENT_ENTRY BrMemAlign(br_uint_8 type)
 /*
  * calloc() equivalent
  */
-void *BR_RESIDENT_ENTRY BrMemCalloc(int nelems, br_size_t size, br_uint_8 type)
+void *BR_RESIDENT_ENTRY BrMemCalloc(br_size_t nelems, br_size_t size, br_uint_8 type)
 {
     void *b;
 
