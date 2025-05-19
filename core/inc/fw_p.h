@@ -329,6 +329,96 @@ br_hash BR_RESIDENT_ENTRY BrHash(const void *data, size_t size);
 br_hash BR_RESIDENT_ENTRY BrHashString(const char *s);
 
 /*
+ * Hash Map.
+ */
+
+/**
+ * @brief Manually hash a key.
+ *
+ * @param   hm The hash map instance. May not be NULL.
+ * @param   key A pointer to the key.
+ * @return  The hash of the provided key. This will never be #BR_INVALID_HASH.
+ */
+br_hash BR_RESIDENT_ENTRY BrHashMapHash(const br_hashmap *hm, const void *key);
+
+/**
+ * @brief Compare two keys for equality.
+ *
+ * @param   hm The hash map instance. May not be NULL.
+ * @param   a A pointer to the first key.
+ * @param   b A pointer to the second key.
+ * @return  If the keys are equal, returns BR_TRUE, or BR_FALSE if they're not.
+ */
+br_boolean BR_RESIDENT_ENTRY BrHashMapCompare(const br_hashmap *hm, const void *a, const void *b);
+
+br_hashmap *BR_RESIDENT_ENTRY BrHashMapAllocate(void *vparent, br_hashmap_hash_cbfn *hash, br_hashmap_compare_cbfn *compare);
+int BR_RESIDENT_ENTRY BrHashMapClear(br_hashmap *hm);
+
+void BR_RESIDENT_ENTRY BrHashMapSetResizePolicy(br_hashmap *hm, br_hashmap_resize_policy policy);
+
+/**
+ * @brief Configure the minimum and maximum load factors of the hash map.
+ *
+ * @param   hm      The hash map instance.
+ * @param   min_num The numerator of the minimum load factor.
+ * @param   min_den The denominator of the minimum load factor.
+ * @param   max_num The numerator of the maximum load factor.
+ * @param   max_den The denominator of the maximum load factor.
+ * @return  On success, returns 0. If the function fails, it returns a negative error value.
+ *          The function can fail under the following conditions:
+ *          - `hm` is NULL.
+ *          - One or both of the numerators or denominators are 0.
+ *          - One of both of the numerators are greater than or equal to its
+ *            respective denominator.
+ *          - The minimum load factor is greater than the maximum load factor.
+ */
+int BR_RESIDENT_ENTRY BrHashMapSetLoadFactor(br_hashmap *hm, uint16_t min_num, uint16_t min_den, uint16_t max_num,
+                                             uint16_t max_den);
+
+/**
+ * @brief Reset a hash map to its default state, releasing all memory.
+ *
+ * It may be used as if `BrHashMapAllocate()` has just been called.
+ *
+ * @param hm The hash map instance. Must not be NULL.
+ */
+void BR_RESIDENT_ENTRY BrHashMapReset(br_hashmap *hm);
+
+/**
+ * @brief Free a hash map and all contents.
+ *
+ * @param hm The hash map instance. Must not be NULL.
+ *
+ * @remark If attached to a parent resource, this call may be omitted.
+ */
+void BR_RESIDENT_ENTRY BrHashMapFree(br_hashmap *hm);
+
+/**
+ * @brief Resize a hash map so it can hold `nelem` elements.
+ *
+ * @param   hm The hash map instance. Must not be NULL.
+ * @param   nelem The number of elements this map must be able to hold.
+ *          This cannot be less than the current number of elements in the map.
+ * @return
+ *
+ * @remark  This is *not* affected by the current resize policy.
+ */
+int BR_RESIDENT_ENTRY       BrHashMapResize(br_hashmap *hm, br_size_t nelem);
+int BR_RESIDENT_ENTRY       BrHashMapInsert(br_hashmap *hm, const void *key, void *value);
+void *BR_RESIDENT_ENTRY     BrHashMapFindByHash(const br_hashmap *hm, br_hash hash);
+void *BR_RESIDENT_ENTRY     BrHashMapFind(const br_hashmap *hm, const void *key);
+void *BR_RESIDENT_ENTRY     BrHashMapRemove(br_hashmap *hm, const void *key);
+br_size_t BR_RESIDENT_ENTRY BrHashMapSize(const br_hashmap *hm);
+
+int BR_RESIDENT_ENTRY BrHashMapEnumerate(const br_hashmap *hm, br_hashmap_enum_cbfn proc, void *user);
+
+br_hash BR_RESIDENT_ENTRY    BrHashMapDefaultHash(const void *k);
+br_boolean BR_RESIDENT_ENTRY BrHashMapDefaultCompare(const void *a, const void *b);
+
+br_hash BR_RESIDENT_ENTRY    BrHashMapStringHash(const void *s);
+br_boolean BR_RESIDENT_ENTRY BrHashMapStringCompare(const void *a, const void *b);
+
+/*
  * Logging routines.
  */
 br_uint_8 BR_RESIDENT_ENTRY BrLogSetLevel(br_uint_8 level);

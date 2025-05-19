@@ -139,6 +139,10 @@
 #include "brhash.h"
 #endif
 
+#ifndef _BRHASHMAP_H_
+#include "brhashmap.h"
+#endif
+
 /*
  * Function prototypes
  */

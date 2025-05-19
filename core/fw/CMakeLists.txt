@@ -68,6 +68,7 @@ set(INC_FILES
         include/brlists.h
         include/brstdlib.h
         include/brhash.h
+        include/brhashmap.h
         )
 
 set(FW_FILES
@@ -111,6 +112,8 @@ set(FW_FILES
 
         brhash.c
         xxhash.h
+
+        brhashmap.c
 
         fw.h
         fw_ip.h
