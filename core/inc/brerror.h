@@ -67,6 +67,9 @@ typedef br_uint_32 br_error;
 #define BRE_ALLREADY_ACTIVE BR_ERROR_MAKE(BR_ECLASS_MISC, 7)
 #define BRE_UNSUPPORTED     BR_ERROR_MAKE(BR_ECLASS_MISC, 8)
 #define BRE_INVALID         BR_ERROR_MAKE(BR_ECLASS_MISC, 9)
+#define BRE_RANGE           BR_ERROR_MAKE(BR_ECLASS_MISC, 10)
+#define BRE_NO_SPACE        BR_ERROR_MAKE(BR_ECLASS_MISC, 11)
+#define BRE_PERMISSION      BR_ERROR_MAKE(BR_ECLASS_MISC, 12)
 
 // clang-format off
 #define BRE_DEV_FAIL                 BR_ERROR_MAKE(BR_ECLASS_DEVICE, 1) // All general device errors
