@@ -10,26 +10,7 @@
 
 void *BR_RESIDENT_ENTRY FmtSTBRealloc(void *ptr, br_size_t size)
 {
-    void *new;
-
-    /* allocate new ptr */
-    if(ptr == NULL) {
-        return BrResAllocate(NULL, size, BR_MEMORY_PIXELS);
-    }
-
-    /* free ptr */
-    if(size == 0) {
-        BrResFree(ptr);
-        return NULL;
-    }
-
-    /* actually realloc */
-    new = BrResAllocate(NULL, size, BR_MEMORY_PIXELS);
-    BrMemCpy(new, ptr, BrResSize(ptr));
-    BrResFree(ptr);
-
-    /* return ptr */
-    return new;
+    return BrMemReallocate(ptr, size, BR_MEMORY_PIXELS);
 }
 
 /*
@@ -38,7 +19,7 @@ void *BR_RESIDENT_ENTRY FmtSTBRealloc(void *ptr, br_size_t size)
 
 void *BR_RESIDENT_ENTRY FmtSTBMalloc(br_size_t size)
 {
-    return BrResAllocate(NULL, size, BR_MEMORY_PIXELS);
+    return BrMemAllocate(size, BR_MEMORY_PIXELS);
 }
 
 /*
@@ -48,7 +29,7 @@ void *BR_RESIDENT_ENTRY FmtSTBMalloc(br_size_t size)
 void BR_RESIDENT_ENTRY FmtSTBFree(void *ptr)
 {
     if(ptr != NULL)
-        BrResFree(ptr);
+        BrMemFree(ptr);
 }
 
 /*
