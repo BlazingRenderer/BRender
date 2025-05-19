@@ -95,6 +95,9 @@ void *BR_RESIDENT_ENTRY BrMemCalloc(br_size_t nelems, br_size_t size, br_uint_8 
 
     ASSERT(fw.mem->allocate != NULL);
 
+    if(size > 0 && nelems > SIZE_MAX / size)
+        return NULL;
+
     b = fw.mem->allocate(size * nelems, type);
     BrMemSet(b, 0, size * nelems);
 
