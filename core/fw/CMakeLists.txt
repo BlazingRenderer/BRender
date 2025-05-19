@@ -67,6 +67,7 @@ source_group("DDI" FILES ${DDI_FILES})
 set(INC_FILES
         include/brlists.h
         include/brstdlib.h
+        include/brhash.h
         )
 
 set(FW_FILES
@@ -107,6 +108,9 @@ set(FW_FILES
         token.c
         tokenval.c
         tokenval_convert.cpp
+
+        brhash.c
+        xxhash.h
 
         fw.h
         fw_ip.h

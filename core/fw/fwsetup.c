@@ -288,6 +288,8 @@ static const br_image_function_info functions[] = {
     REGMETHOD(BrFloatPow),
     REGMETHOD(BrFloatSqrt),
     REGMETHOD(BrGetEnv),
+    REGMETHOD(BrHash),
+    REGMETHOD(BrHashString),
     REGMETHOD(BrImageAdd),
     REGMETHOD(BrImageDereference),
     REGMETHOD(BrImageLookupName),

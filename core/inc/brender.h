@@ -135,6 +135,10 @@
 #include "brlists.h"
 #endif
 
+#ifndef _BRHASH_H_
+#include "brhash.h"
+#endif
+
 /*
  * Function prototypes
  */

@@ -323,6 +323,12 @@ void BR_RESIDENT_ENTRY            BrSimpleInsert(br_simple_list *list, br_simple
 br_simple_node *BR_RESIDENT_ENTRY BrSimpleRemove(br_simple_node *node);
 
 /*
+ * Hash
+ */
+br_hash BR_RESIDENT_ENTRY BrHash(const void *data, size_t size);
+br_hash BR_RESIDENT_ENTRY BrHashString(const char *s);
+
+/*
  * Logging routines.
  */
 br_uint_8 BR_RESIDENT_ENTRY BrLogSetLevel(br_uint_8 level);
