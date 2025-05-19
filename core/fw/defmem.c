@@ -9,10 +9,14 @@
 
 #include "brender.h"
 
-
 static void *BrNullAllocate(br_size_t size, br_uint_8 type)
 {
     return 0;
+}
+
+static void *BrNullReallocate(void *ptr, br_size_t size, br_uint_8 type)
+{
+    return NULL;
 }
 
 static void BrNullFree(void *mem)
@@ -30,6 +34,7 @@ static br_size_t BrNullInquire(br_uint_8 type)
 br_allocator BrNullAllocator = {
     "Null",
     BrNullAllocate,
+    BrNullReallocate,
     BrNullFree,
     BrNullInquire,
 };

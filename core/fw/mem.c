@@ -34,6 +34,23 @@ void *BR_RESIDENT_ENTRY BrMemAllocate(br_size_t size, br_uint_8 type)
     return b;
 }
 
+void *BR_RESIDENT_ENTRY BrMemReallocate(void *block, br_size_t size, br_uint_8 type)
+{
+    void *b;
+
+    UASSERT(fw.resource_class_index[type] != NULL);
+
+    ASSERT(fw.mem->reallocate != NULL);
+
+    b = fw.mem->reallocate(block, size, type);
+
+#if MEM_LOG
+    BrLogPrintf("BrMemReallocate(%d,%s) = %p\n", size, fw.resource_class_index[type]->identifier, b);
+#endif
+
+    return b;
+}
+
 void BR_RESIDENT_ENTRY BrMemFree(void *block)
 {
     UASSERT(block != NULL);

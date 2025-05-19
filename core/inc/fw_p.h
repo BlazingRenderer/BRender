@@ -135,6 +135,7 @@ int BR_PUBLIC_ENTRY BrWriteModeSet(int text);
  * Generic memory allocation
  */
 void *BR_RESIDENT_ENTRY     BrMemAllocate(br_size_t size, br_uint_8 type);
+void *BR_RESIDENT_ENTRY     BrMemReallocate(void *block, br_size_t size, br_uint_8 type);
 void BR_RESIDENT_ENTRY      BrMemFree(void *block);
 br_size_t BR_RESIDENT_ENTRY BrMemInquire(br_uint_8 type);
 br_int_32 BR_RESIDENT_ENTRY BrMemAlign(br_uint_8 type);

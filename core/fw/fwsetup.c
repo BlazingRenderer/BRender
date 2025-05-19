@@ -313,6 +313,7 @@ static const br_image_function_info functions[] = {
     REGMETHOD(BrLexerTokenError),
     REGMETHOD(BrLogPrintf),
     REGMETHOD(BrMemAllocate),
+    REGMETHOD(BrMemReallocate),
     REGMETHOD(BrMemCalloc),
     REGMETHOD(BrMemCmp),
     REGMETHOD(BrMemCpy),

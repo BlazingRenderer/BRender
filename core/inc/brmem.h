@@ -14,6 +14,7 @@
  * Instance of a memory allocator
  */
 typedef void *BR_CALLBACK      brmem_allocate_cbfn(br_size_t size, br_uint_8 type);
+typedef void *BR_CALLBACK      brmem_reallocate_cbfn(void *ptr, br_size_t size, br_uint_8 type);
 typedef void BR_CALLBACK       brmem_free_cbfn(void *block);
 typedef br_size_t BR_CALLBACK  brmem_inquire_cbfn(br_uint_8 type);
 typedef br_uint_32 BR_CALLBACK brmem_align_cbfn(br_uint_8 type);
@@ -26,6 +27,11 @@ typedef struct br_allocator {
      * or handle the error itself
      */
     brmem_allocate_cbfn *allocate;
+
+    /*
+     * (re)allocate a chunk of memory - same semantics as realloc(3).
+     */
+    brmem_reallocate_cbfn *reallocate;
 
     /*
      * Release previously allocated block

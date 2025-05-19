@@ -25,6 +25,18 @@ static void *BR_CALLBACK BrStdlibAllocate(br_size_t size, br_uint_8 type)
     return m;
 }
 
+static void *BR_CALLBACK BrStdlibReallocate(void *ptr, br_size_t size, br_uint_8 type)
+{
+    void *m;
+
+    m = realloc(ptr, size);
+
+    if(m == NULL)
+        BR_ERROR2("BrStdlibReallocate: failed with size=%d, type=%d", size, type);
+
+    return m;
+}
+
 static void BR_CALLBACK BrStdlibFree(void *mem)
 {
     free(mem);
@@ -48,6 +60,7 @@ static br_uint_32 BR_CALLBACK BrStdlibAlign(br_uint_8 type)
 br_allocator BrStdlibAllocator = {
     .identifier = "malloc",
     .allocate   = BrStdlibAllocate,
+    .reallocate = BrStdlibReallocate,
     .free       = BrStdlibFree,
     .inquire    = BrStdlibInquire,
     .align      = BrStdlibAlign,
