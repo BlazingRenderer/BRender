@@ -374,6 +374,15 @@ static int cgltf_int_from_primitive_type(cgltf_primitive_type ctype)
 	}
 }
 
+static int cgltf_int_from_buffer_view_type(cgltf_buffer_view_type ctype)
+{
+	switch (ctype) {
+		case cgltf_buffer_view_type_vertices: return 34962; /* ARRAY_BUFFER */
+		case cgltf_buffer_view_type_indices: return 34963; /* ELEMENT_ARRAY_BUFFER */
+		default: return 0;
+	}
+}
+
 static const char* cgltf_str_from_alpha_mode(cgltf_alpha_mode alpha_mode)
 {
 	switch (alpha_mode)
@@ -579,6 +588,8 @@ static void cgltf_write_buffer_view(cgltf_write_context* context, const cgltf_bu
 	cgltf_write_sizeprop(context, "byteOffset", view->offset, 0);
 	cgltf_write_sizeprop(context, "byteStride", view->stride, 0);
 	// NOTE: We skip writing "target" because the spec says its usage can be inferred.
+	// EDIT: No we don't because the validator complains loudly.
+	cgltf_write_intprop(context, "target", cgltf_int_from_buffer_view_type(view->type), 0);
 	cgltf_write_extras(context, &view->extras);
 	cgltf_write_line(context, "}");
 }
