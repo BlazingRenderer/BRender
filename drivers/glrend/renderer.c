@@ -64,6 +64,16 @@ static void RendererGLFreeImm(br_renderer *self)
     glDeleteBuffers(1, &self->trans.vbo);
 }
 
+static br_hash SamplerInfoGLHash(const void *p)
+{
+    return BrHash(p, sizeof(br_sampler_info_gl));
+}
+
+static br_boolean SamplerInfoGLCompare(const void *a, const void *b)
+{
+    return BrMemCmp(a, b, sizeof(br_sampler_info_gl)) == 0;
+}
+
 /*
  * Create a new renderer
  */
@@ -91,9 +101,7 @@ br_renderer *RendererGLAllocate(br_device *device, br_renderer_facility *facilit
 
     RendererGLInitImm(self, &dest->screen->asFront.video);
 
-    BrMemSet(self->sampler_pool, 0, sizeof(self->sampler_pool));
-    self->sampler_pool_size = BR_GLREND_MAX_SAMPLERS;
-    self->sampler_count     = 0;
+    self->sampler_pool = BrHashMapAllocate(self, SamplerInfoGLHash, SamplerInfoGLCompare);
 
     ObjectContainerAddFront(facility, (br_object *)self);
 
@@ -219,16 +227,20 @@ void BR_CMETHOD_DECL(br_renderer_gl, sceneEnd)(br_renderer *self)
     self->trans.next = 0;
 }
 
+static int RendererGLDeleteSampler(const void *key, void *value, br_hash hash, void *user)
+{
+    GLuint sampler = (GLuint)(br_uintptr_t)value;
+    glDeleteSamplers(1, &sampler);
+    return 0;
+}
+
 static void BR_CMETHOD_DECL(br_renderer_gl, free)(br_object *_self)
 {
     br_renderer *self = (br_renderer *)_self;
 
     RendererGLFreeImm(self);
 
-    for(br_size_t i = 0; i < self->sampler_pool_size; ++i) {
-        if(self->sampler_pool[i].sampler != 0)
-            glDeleteSamplers(1, &self->sampler_pool[i].sampler);
-    }
+    BrHashMapEnumerate(self->sampler_pool, RendererGLDeleteSampler, NULL);
 
     BrPoolFree(self->state_pool);
 
@@ -830,43 +842,35 @@ br_int_32 RendererGLNextImmTri(br_renderer *self, struct v11group *group, br_vec
     return (br_int_32)base;
 }
 
-static int sampler_comp(const void *a, const void *b)
-{
-    const br_sampler_info_gl *key     = a;
-    const br_sampler_gl      *sampler = b;
-
-    return BrMemCmp(key, &sampler->key, sizeof(br_sampler_info_gl));
-}
-
 GLuint RendererGLGetSampler(br_renderer *self, const br_sampler_info_gl *info)
 {
-    br_sampler_gl *smp;
     const br_quirks_gl *quirks = &self->pixelmap->screen->asFront.quirks;
+    void               *raw_sampler;
+    br_sampler_info_gl  *key;
+    GLuint sampler;
 
-    smp = BrBSearch(info, self->sampler_pool, self->sampler_count, sizeof(br_sampler_gl), sampler_comp);
-    if(smp != NULL)
-        return smp->sampler;
+    raw_sampler = BrHashMapFindByHash(self->sampler_pool, SamplerInfoGLHash(info));
+    if(raw_sampler != NULL)
+        return (GLuint)(br_uintptr_t)raw_sampler;
 
-    if(self->sampler_count == self->sampler_pool_size)
-        return 0;
+    glGenSamplers(1, &sampler);
 
-    smp      = self->sampler_pool + self->sampler_count++;
-    smp->key = *info;
-
-    glGenSamplers(1, &smp->sampler);
-
-    glSamplerParameteri(smp->sampler, GL_TEXTURE_WRAP_S, info->wrap_s);
-    glSamplerParameteri(smp->sampler, GL_TEXTURE_WRAP_T, info->wrap_t);
-    glSamplerParameteri(smp->sampler, GL_TEXTURE_MIN_FILTER, info->filter_min);
-    glSamplerParameteri(smp->sampler, GL_TEXTURE_MAG_FILTER, info->filter_mag);
+    glSamplerParameteri(sampler, GL_TEXTURE_WRAP_S, info->wrap_s);
+    glSamplerParameteri(sampler, GL_TEXTURE_WRAP_T, info->wrap_t);
+    glSamplerParameteri(sampler, GL_TEXTURE_MIN_FILTER, info->filter_min);
+    glSamplerParameteri(sampler, GL_TEXTURE_MAG_FILTER, info->filter_mag);
 
     if(!quirks->disable_anisotropic_filtering) {
         if(GLAD_GL_ARB_texture_filter_anisotropic && info->filter_min != GL_NEAREST && info->filter_mag != GL_NEAREST) {
-            glSamplerParameterf(smp->sampler, GL_TEXTURE_MAX_ANISOTROPY, self->pixelmap->screen->asFront.video.maxAnisotropy);
+            glSamplerParameterf(sampler, GL_TEXTURE_MAX_ANISOTROPY, self->pixelmap->screen->asFront.video.maxAnisotropy);
         }
     }
 
-    BrQsort(self->sampler_pool, self->sampler_count, sizeof(br_sampler_gl), sampler_comp);
 
-    return smp->sampler;
+    key = BrResAllocate(self->sampler_pool, sizeof(br_sampler_info_gl), BR_MEMORY_DRIVER);
+    *key = *info;
+
+    BrHashMapInsert(self->sampler_pool, key, (void*)(br_uintptr_t)sampler);
+
+    return sampler;
 }

@@ -47,11 +47,6 @@ typedef struct br_state_info_gl {
     br_scalar  fog_scale;
 } br_primitive_state_info_gl;
 
-typedef struct br_sampler_gl {
-    br_sampler_info_gl key;
-    GLuint             sampler;
-} br_sampler_gl;
-
 enum {
     BUFFER_RING_GL_FLAG_ORPHAN = (1 << 0), /**< Orphan the buffer each draw instead of appending to. */
     BUFFER_RING_GL_FLAG_MASK   = BUFFER_RING_GL_FLAG_ORPHAN,
@@ -110,9 +105,7 @@ typedef struct br_renderer {
 
     state_all state;
 
-    br_sampler_gl sampler_pool[BR_GLREND_MAX_SAMPLERS];
-    br_size_t     sampler_pool_size;
-    br_size_t     sampler_count;
+    br_hashmap *sampler_pool;
 
     GLint             uniform_buffer_offset_alignment;
     br_buffer_ring_gl model_ring;
