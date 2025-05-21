@@ -1073,6 +1073,11 @@ static int fill_mesh(const void *key, void *value, br_hash hash, void *user)
     return 0;
 }
 
+static float srgb_to_linear(float f)
+{
+    return (f <= 0.04045f) ? f / 12.92f : powf((f + 0.055f) / 1.055f, 2.4f);
+}
+
 static int fill_material(const void *key, void *value, br_hash hash, void *user)
 {
     const br_material  *mat      = key;
@@ -1102,9 +1107,9 @@ static int fill_material(const void *key, void *value, br_hash hash, void *user)
         material->pbr_metallic_roughness.base_color_texture.texture = texture;
     }
 
-    material->pbr_metallic_roughness.base_color_factor[0] = BR_RED(mat->colour) / 255.0f;
-    material->pbr_metallic_roughness.base_color_factor[1] = BR_GRN(mat->colour) / 255.0f;
-    material->pbr_metallic_roughness.base_color_factor[2] = BR_BLU(mat->colour) / 255.0f;
+    material->pbr_metallic_roughness.base_color_factor[0] = srgb_to_linear(BR_RED(mat->colour) / 255.0f);
+    material->pbr_metallic_roughness.base_color_factor[1] = srgb_to_linear(BR_GRN(mat->colour) / 255.0f);
+    material->pbr_metallic_roughness.base_color_factor[2] = srgb_to_linear(BR_BLU(mat->colour) / 255.0f);
     material->pbr_metallic_roughness.base_color_factor[3] = (float)mat->opacity / 255.0f;
 
     material->pbr_metallic_roughness.roughness_factor = 1.0f;
