@@ -107,16 +107,6 @@ br_error BR_CMETHOD_DECL(br_renderer_soft,boundsTestF)
 br_error BR_CMETHOD_DECL(br_renderer_soft,boundsTestX)
 	(struct br_renderer *self, br_token *r, br_bounds3_x *bounds);
 
-br_error BR_CMETHOD_DECL(br_renderer_soft, coverageTestF)
-	(struct br_renderer *self, br_float *r, br_bounds3_f *bounds);
-br_error BR_CMETHOD_DECL(br_renderer_soft, coverageTestX)
-	(struct br_renderer *self, br_fixed_ls *r, br_bounds3_x *bounds);
-
-br_error BR_CMETHOD_DECL(br_renderer_soft,viewDistanceF)
-	(struct br_renderer *self, br_float *r);
-br_error BR_CMETHOD_DECL(br_renderer_soft,viewDistanceX)
-	(struct br_renderer *self, br_fixed_ls *r);
-
 br_error BR_CMETHOD_DECL(br_renderer_soft,statePush)
 		(struct br_renderer *self, br_uint_32 mask);
 br_error BR_CMETHOD_DECL(br_renderer_soft,statePop)

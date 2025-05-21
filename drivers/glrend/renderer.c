@@ -646,18 +646,6 @@ static br_error BR_CMETHOD_DECL(br_renderer_gl, boundsTest)(br_renderer *self, b
     return BRE_OK;
 }
 
-static br_error BR_CMETHOD_DECL(br_renderer_gl, coverageTest)(br_renderer *self, br_float *r, br_bounds3_f *bounds)
-{
-    BrLogTrace("GLREND", "%s", __FUNCTION__);
-    return BRE_FAIL;
-}
-
-static br_error BR_CMETHOD_DECL(br_renderer_gl, viewDistance)(br_renderer *self, br_float *r)
-{
-    BrLogTrace("GLREND", "%s", __FUNCTION__);
-    return BRE_FAIL;
-}
-
 static br_error BR_CMETHOD_DECL(br_renderer_gl, flush)(br_renderer *self, br_boolean wait)
 {
     (void)self;
@@ -764,8 +752,6 @@ static const struct br_renderer_dispatch rendererDispatch = {
     ._stateMask             = BR_CMETHOD(br_renderer_gl, stateMask),
     ._stateDefault          = BR_CMETHOD(br_renderer_gl, stateDefault),
     ._boundsTest            = BR_CMETHOD(br_renderer_gl, boundsTest),
-    ._coverageTest          = BR_CMETHOD(br_renderer_gl, coverageTest),
-    ._viewDistance          = BR_CMETHOD(br_renderer_gl, viewDistance),
     ._commandModeSet        = BR_CMETHOD(br_renderer_gl, commandModeSet),
     ._commandModeQuery      = BR_CMETHOD(br_renderer_gl, commandModeQuery),
     ._commandModeDefault    = BR_CMETHOD(br_renderer_gl, commandModeDefault),

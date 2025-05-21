@@ -564,33 +564,6 @@ br_error BR_CMETHOD_DECL(br_renderer_soft,boundsTestF)
 	return BRE_OK;
 }
 
-
-br_error BR_CMETHOD_DECL(br_renderer_soft, coverageTestF)
-	(struct br_renderer *self, br_float *r, br_bounds3_f *bounds)
-{
-	return BRE_FAIL;
-}
-
-br_error BR_CMETHOD_DECL(br_renderer_soft, coverageTestX)
-	(struct br_renderer *self, br_fixed_ls *r, br_bounds3_x *bounds)
-{
-	return BRE_FAIL;
-}
-
-
-br_error BR_CMETHOD_DECL(br_renderer_soft,viewDistanceF)
-	(struct br_renderer *self, br_float *r)
-{
-	return BRE_FAIL;
-}
-
-br_error BR_CMETHOD_DECL(br_renderer_soft,viewDistanceX)
-	(struct br_renderer *self, br_fixed_ls *r)
-{
-	return BRE_FAIL;
-}
-
-
 br_error BR_CMETHOD_DECL(br_renderer_soft,stateSave)
 		(struct br_renderer *self, struct br_renderer_state_stored *save, br_uint_32 mask)
 {

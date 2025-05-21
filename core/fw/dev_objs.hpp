@@ -326,10 +326,6 @@ class br_renderer : public br_object_container {
 
 		virtual br_error BR_METHOD CG_F(boundsTest)(br_token *r, br_bounds3_f *bounds);
 
-		virtual br_error BR_METHOD CG_F(coverageTest)(br_float *r, br_bounds3_f *bounds);
-
-		virtual br_error BR_METHOD CG_F(viewDistance)(br_float *r);
-
 	// Control current command mode
 
 		virtual br_error BR_METHOD commandModeSet(br_token mode);
