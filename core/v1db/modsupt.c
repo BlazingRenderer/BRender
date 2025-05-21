@@ -224,8 +224,16 @@ br_model *BR_PUBLIC_ENTRY BrModelAllocate(const char *name, int nvertices, int n
     if(name)
         m->identifier = BrResStrDup(m, name);
 
-    if(nvertices)
+    if(nvertices) {
         m->vertices = BrResAllocate(m, nvertices * sizeof(*m->vertices), BR_MEMORY_VERTICES);
+
+        for(br_size_t i = 0; i < nvertices; ++i) {
+            m->vertices[i].red   = 255;
+            m->vertices[i].grn   = 255;
+            m->vertices[i].blu   = 255;
+            m->vertices[i].index = 0;
+        }
+    }
 
     if(nfaces)
         m->faces = BrResAllocate(m, nfaces * sizeof(*m->faces), BR_MEMORY_FACES);
