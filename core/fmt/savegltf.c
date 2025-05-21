@@ -1078,6 +1078,15 @@ static int fill_material(const void *key, void *value, br_hash hash, void *user)
 
     material->has_ior = true;
     material->ior.ior = 1.0f;
+
+    /*
+     * GLTF really has some limitations.
+     */
+    if(mat->mode & BR_MATM_BLEND_MODE_MASK) {
+        material->alpha_mode = cgltf_alpha_mode_blend;
+    } else {
+        material->alpha_mode = cgltf_alpha_mode_opaque;
+    }
     return 0;
 }
 
