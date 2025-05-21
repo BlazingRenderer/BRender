@@ -674,13 +674,6 @@ static br_error BR_CMETHOD_DECL(br_renderer_gl, synchronise)(br_renderer *self, 
     return BRE_UNSUPPORTED;
 }
 
-static br_error BR_CMETHOD_DECL(br_renderer_gl, testRender)(br_renderer *self, br_token type, union brp_vertex *v0,
-                                                            union brp_vertex *v1, union brp_vertex *v2)
-{
-    BrLogTrace("GLREND", "%s", __FUNCTION__);
-    return BRE_OK;
-}
-
 static br_error BR_CMETHOD_DECL(br_renderer_gl, partQueryCapability)(br_renderer *self, br_token part, br_int_32 index,
                                                                      br_token_value *buffer, br_size_t buffer_size)
 {
@@ -780,7 +773,6 @@ static const struct br_renderer_dispatch rendererDispatch = {
     ._commandModePop        = BR_CMETHOD(br_renderer_gl, commandModePop),
     ._flush                 = BR_CMETHOD(br_renderer_gl, flush),
     ._synchronise           = BR_CMETHOD(br_renderer_gl, synchronise),
-    ._testRender            = BR_CMETHOD(br_renderer_gl, testRender),
     ._partQueryCapability   = BR_CMETHOD(br_renderer_gl, partQueryCapability),
     ._stateQueryPerformance = BR_CMETHOD(br_renderer_gl, stateQueryPerformance),
     ._frameBegin            = BR_CMETHOD(br_renderer_gl, frameBegin),

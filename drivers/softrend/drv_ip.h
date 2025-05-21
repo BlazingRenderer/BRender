@@ -132,13 +132,6 @@ br_error BR_CMETHOD_DECL(br_renderer_soft,stateDefault)
 br_error BR_CMETHOD_DECL(br_renderer_soft,stateMask)
 		(struct br_renderer *self, br_uint_32 *mask, br_token *parts, int n_parts);
 
-br_error BR_CMETHOD_DECL(br_renderer_soft, testRender)(
-		struct br_renderer *self,
-		br_token type,
-		union brp_vertex *v0,
-		union brp_vertex *v1,
-		union brp_vertex *v2);
-
 /*
  * sstate.c
  */

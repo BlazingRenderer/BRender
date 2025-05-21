@@ -358,15 +358,6 @@ class br_renderer : public br_object_container {
 		virtual br_error screenToView
 #endif
 
-#if 1
-	// Test hook
-	//
-		virtual br_error BR_METHOD testRender(br_token type,
-			union brp_vertex *v0,
-			union brp_vertex *v1,
-			union brp_vertex *v2);
-#endif
-
 	// Query state performance
 		virtual br_error BR_METHOD partQueryCapability(br_token part, br_int_32 index, br_token_value *buffer,
 			br_size_t buffer_size);
