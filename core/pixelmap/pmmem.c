@@ -95,7 +95,7 @@ static struct br_tv_template_entry devicePixelmapTemplateEntries[] = {
     // {BRT_WORD_BYTES_I32,     NULL, F(pm_indexed),    BRTV_QUERY | BRTV_ALL, BRTV_CONV_CUSTOM },
     // {BRT_MEMORY_MAPPED,      NULL, F(pm_indexed),    BRTV_QUERY | BRTV_ALL, BRTV_CONV_CUSTOM },
 };
-//clang-format on
+// clang-format on
 #undef F
 
 br_device_pixelmap *DevicePixelmapMemAllocate(br_uint_8 type, br_uint_16 w, br_uint_16 h, void *pixels, int flags)
