@@ -1,6 +1,8 @@
 #include <string.h>
 #include <brender.h>
 #include <brddi.h>
+#include <brassert.h>
+
 #include "formats.h"
 
 #include "cbase64.h"
@@ -46,6 +48,26 @@ typedef struct br_gltf_save_state {
     br_size_t next_buffer;
     br_size_t next_image;
 } br_gltf_save_state;
+
+#define DEFINE_GETTER(type, nextvar, name, datavar)            \
+    type *get_next_##name(br_gltf_save_state *state)           \
+    {                                                          \
+        ASSERT(state != NULL);                                 \
+        ASSERT(state->nextvar < state->data->datavar##_count); \
+                                                               \
+        return state->data->datavar + state->nextvar++;        \
+    }
+
+DEFINE_GETTER(cgltf_node, next_node, node, nodes)
+DEFINE_GETTER(cgltf_camera, next_camera, camera, cameras)
+DEFINE_GETTER(cgltf_light, next_light, light, lights)
+DEFINE_GETTER(cgltf_brender_light, next_brender_light, brender_light, brender_lights)
+DEFINE_GETTER(cgltf_mesh, next_mesh, mesh, meshes)
+DEFINE_GETTER(cgltf_material, next_material, material, materials)
+DEFINE_GETTER(cgltf_texture, next_texture, texture, textures)
+DEFINE_GETTER(cgltf_sampler, next_sampler, sampler, samplers)
+DEFINE_GETTER(cgltf_buffer, next_buffer, buffer, buffers)
+DEFINE_GETTER(cgltf_image, next_image, image, images)
 
 static char *build_buffer_uri(const cgltf_buffer *buffer, void *res)
 {
@@ -156,7 +178,7 @@ static int fixup_actor_map(const void *key, void *value, br_hash hash, void *use
     (void)hash;
 
     /* Technically modifying the map during iteration, but we're just updating the value so it's fine. */
-    BrHashMapInsert(state->actor_map, actor, state->data->nodes + state->next_node++);
+    BrHashMapInsert(state->actor_map, actor, get_next_node(state));
     return 0;
 }
 
@@ -559,7 +581,7 @@ static int fixup_model_map(const void *key, void *value, br_hash hash, void *use
     (void)hash;
 
     /* Technically modifying the map during iteration, but we're just updating the value so it's fine. */
-    BrHashMapInsert(state->model_map, model, state->data->meshes + state->next_mesh++);
+    BrHashMapInsert(state->model_map, model, get_next_mesh(state));
     return 0;
 }
 
@@ -572,7 +594,7 @@ static int fixup_material_map(const void *key, void *value, br_hash hash, void *
     (void)hash;
 
     /* Technically modifying the map during iteration, but we're just updating the value so it's fine. */
-    BrHashMapInsert(state->material_map, mat, state->data->materials + state->next_material++);
+    BrHashMapInsert(state->material_map, mat, get_next_material(state));
     return 0;
 }
 
@@ -584,7 +606,7 @@ static int fixup_sampler_map(const void *key, void *value, br_hash hash, void *u
     (void)hash;
 
     /* Technically modifying the map during iteration, but we're just updating the value so it's fine. */
-    BrHashMapInsert(state->sampler_map, key, state->data->samplers + state->next_sampler++);
+    BrHashMapInsert(state->sampler_map, key, get_next_sampler(state));
     return 0;
 }
 
@@ -612,7 +634,7 @@ static int fixup_pixelmap_map(const void *key, void *value, br_hash hash, void *
     (void)hash;
 
     /* Technically modifying the map during iteration, but we're just updating the value so it's fine. */
-    BrHashMapInsert(state->pixelmap_map, pm, state->data->images + state->next_image++);
+    BrHashMapInsert(state->pixelmap_map, pm, get_next_image(state));
     return 0;
 }
 
@@ -696,12 +718,12 @@ static int build_node_links(const void *key, void *value, br_hash hash, void *us
 
     switch(actor->type) {
         case BR_ACTOR_CAMERA:
-            node->camera = state->data->cameras + state->next_camera++;
+            node->camera = get_next_camera(state);
             break;
 
         case BR_ACTOR_LIGHT:
-            node->light         = state->data->lights + state->next_light++;
-            node->brender_light = state->data->brender_lights + state->next_brender_light++;
+            node->light         = get_next_light(state);
+            node->brender_light = get_next_brender_light(state);
             break;
 
         case BR_ACTOR_MODEL:
@@ -1097,7 +1119,7 @@ static int fill_material(const void *key, void *value, br_hash hash, void *user)
     // material->pbr_metallic_roughness.base_color_texture.has_transform = true;
 
     if(mat->colour_map != NULL) {
-        cgltf_texture           *texture     = state->data->textures + state->next_texture++;
+        cgltf_texture           *texture     = get_next_texture(state);
         br_gltf_save_sampler_key sampler_key = material_to_sampler_key(mat);
 
         texture->name    = mat->identifier;
