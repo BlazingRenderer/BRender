@@ -1077,7 +1077,7 @@ static int fill_material(const void *key, void *value, br_hash hash, void *user)
         material->pbr_metallic_roughness.metallic_factor = 1.0f;
 
     material->has_ior = true;
-    material->ior.ior = 1.5f;
+    material->ior.ior = 1.0f;
     return 0;
 }
 
