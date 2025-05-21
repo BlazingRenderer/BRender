@@ -766,6 +766,9 @@ static int fill_actor_name(const void *key, void *value, br_hash hash, void *use
 
 static void fill_transform_actual(const br_actor *root, cgltf_node *node)
 {
+    br_matrix4 identity;
+    BrMatrix4Identity(&identity);
+
     switch(root->t.type) {
         case BR_TRANSFORM_LOOK_UP:
         case BR_TRANSFORM_MATRIX34:
@@ -775,11 +778,16 @@ static void fill_transform_actual(const br_actor *root, cgltf_node *node)
             BrTransformToMatrix34(&mat34, &root->t);
             BrMatrix4Copy34(&mat44, &root->t.t.mat);
 
-            node->has_matrix = true;
+            /*
+             * Only set the matrix if it's non-identity. The validator complains otherwise.
+             */
+            if(BrMemCmp(&mat44, &identity, sizeof(br_matrix4)) != 0) {
+                node->has_matrix = true;
 
-            for(int j = 0; j < 4; ++j) {
-                for(int i = 0; i < 4; ++i) {
-                    node->matrix[(j * 4) + i] = BrScalarToFloat(mat44.m[j][i]);
+                for(int j = 0; j < 4; ++j) {
+                    for(int i = 0; i < 4; ++i) {
+                        node->matrix[(j * 4) + i] = BrScalarToFloat(mat44.m[j][i]);
+                    }
                 }
             }
             break;
