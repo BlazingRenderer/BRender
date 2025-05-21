@@ -252,6 +252,15 @@ typedef enum cgltf_light_type {
 	cgltf_light_type_max_enum
 } cgltf_light_type;
 
+typedef enum cgltf_brender_light_type {
+	cgltf_brender_light_type_invalid,
+	cgltf_brender_light_type_point,
+	cgltf_brender_light_type_direct,
+	cgltf_brender_light_type_spot,
+	cgltf_brender_light_type_ambient,
+	cgltf_brender_light_type_max,
+} cgltf_brender_light_type;
+
 typedef enum cgltf_data_free_method {
 	cgltf_data_free_method_none,
 	cgltf_data_free_method_file_release,
@@ -573,6 +582,33 @@ typedef struct cgltf_mesh_gpu_instancing {
 	cgltf_size attributes_count;
 } cgltf_mesh_gpu_instancing;
 
+typedef struct cgltf_brender_material {
+	char       *identifier;
+	cgltf_float colour[3];
+	cgltf_float opacity;
+	cgltf_float ka;
+	cgltf_float kd;
+	cgltf_float ks;
+	cgltf_float power;
+	cgltf_int flags;
+	cgltf_float map_transform[6];
+	cgltf_int mode;
+	cgltf_int index_base;
+	cgltf_int index_range;
+	cgltf_image *colour_map;
+	cgltf_image *screendoor;
+	cgltf_image *index_shade;
+	cgltf_image *index_blend;
+	cgltf_image *index_fog;
+	// TODO: extra_surf
+	// TODO: extra_prim
+	cgltf_float fog_min;
+	cgltf_float fog_max;
+	cgltf_float fog_colour[3];
+	cgltf_int   subdivide_tolerance;
+	cgltf_float depth_bias;
+} cgltf_brender_material;
+
 typedef struct cgltf_primitive {
 	cgltf_primitive_type type;
 	cgltf_accessor* indices;
@@ -586,6 +622,7 @@ typedef struct cgltf_primitive {
 	cgltf_draco_mesh_compression draco_mesh_compression;
 	cgltf_material_mapping* mappings;
 	cgltf_size mappings_count;
+	cgltf_brender_material *brender_material;
 	cgltf_size extensions_count;
 	cgltf_extension* extensions;
 } cgltf_primitive;
@@ -657,6 +694,23 @@ typedef struct cgltf_light {
 	cgltf_extras extras;
 } cgltf_light;
 
+typedef struct cgltf_brender_light {
+	char                    *identifier;
+	cgltf_brender_light_type type;
+	cgltf_bool               view_space;
+	cgltf_bool               linear_falloff;
+	cgltf_float              colour[3];
+	cgltf_float              attenuation_c;
+	cgltf_float              attenuation_l;
+	cgltf_float              attenuation_q;
+	cgltf_float              cone_outer;
+	cgltf_float              cone_inner;
+	cgltf_float              radius_outer;
+	cgltf_float              radius_inner;
+
+	/* TODO: volumes, if I ever see any. */
+} cgltf_brender_light;
+
 struct cgltf_node {
 	char* name;
 	cgltf_node* parent;
@@ -679,6 +733,8 @@ struct cgltf_node {
 	cgltf_extras extras;
 	cgltf_bool has_mesh_gpu_instancing;
 	cgltf_mesh_gpu_instancing mesh_gpu_instancing;
+	cgltf_brender_light* brender_light;
+	cgltf_brender_material* brender_material;
 	cgltf_size extensions_count;
 	cgltf_extension* extensions;
 };
@@ -801,6 +857,12 @@ typedef struct cgltf_data
 
 	char** extensions_required;
 	cgltf_size extensions_required_count;
+
+	cgltf_brender_light *brender_lights;
+	cgltf_size brender_lights_count;
+
+	cgltf_brender_material *brender_materials;
+	cgltf_size brender_materials_count;
 
 	const char* json;
 	cgltf_size json_size;
