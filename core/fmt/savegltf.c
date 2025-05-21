@@ -41,6 +41,7 @@ typedef struct br_gltf_save_state {
     br_size_t next_brender_light;
     br_size_t next_mesh;
     br_size_t next_material;
+    br_size_t next_texture;
     br_size_t next_sampler;
     br_size_t next_buffer;
     br_size_t next_image;
@@ -206,6 +207,25 @@ static int gather_models_and_materials(const void *key, void *value, br_hash has
             break;
         }
     }
+
+    return 0;
+}
+
+static int count_textures(const void *key, void *value, br_hash hash, void *user)
+{
+    const br_material  *mat   = key;
+    br_gltf_save_state *state = user;
+
+    (void)value;
+    (void)hash;
+
+    /*
+     * If materials don't have a colour map, don't create a texture for them.
+     * Using an empty one is undefined behaviour (e.g. Blender samples (0, 0, 0, 0), meaning
+     * the material colour multiplication is completely ignored.
+     */
+    if(mat->colour_map != NULL)
+        ++state->data->textures_count;
 
     return 0;
 }
@@ -1050,7 +1070,6 @@ static int fill_material(const void *key, void *value, br_hash hash, void *user)
     const br_material  *mat      = key;
     cgltf_material     *material = value;
     br_gltf_save_state *state    = user;
-    size_t              index    = material - state->data->materials;
 
     (void)hash;
 
@@ -1063,7 +1082,17 @@ static int fill_material(const void *key, void *value, br_hash hash, void *user)
 
     /* TODO: Figure out how to decompose map_transform. */
     // material->pbr_metallic_roughness.base_color_texture.has_transform = true;
-    material->pbr_metallic_roughness.base_color_texture.texture = state->data->textures + index;
+
+    if(mat->colour_map != NULL) {
+        cgltf_texture           *texture     = state->data->textures + state->next_texture++;
+        br_gltf_save_sampler_key sampler_key = material_to_sampler_key(mat);
+
+        texture->name    = mat->identifier;
+        texture->sampler = BrHashMapFind(state->sampler_map, &sampler_key);
+        texture->image   = BrHashMapFind(state->pixelmap_map, mat->colour_map);
+
+        material->pbr_metallic_roughness.base_color_texture.texture = texture;
+    }
 
     material->pbr_metallic_roughness.base_color_factor[0] = BR_RED(mat->colour) / 255.0f;
     material->pbr_metallic_roughness.base_color_factor[1] = BR_GRN(mat->colour) / 255.0f;
@@ -1087,22 +1116,6 @@ static int fill_material(const void *key, void *value, br_hash hash, void *user)
     } else {
         material->alpha_mode = cgltf_alpha_mode_opaque;
     }
-    return 0;
-}
-
-static int fill_texture(const void *key, void *value, br_hash hash, void *user)
-{
-    const br_material       *mat         = key;
-    br_gltf_save_state      *state       = user;
-    size_t                   index       = (cgltf_material *)value - state->data->materials;
-    cgltf_texture           *texture     = state->data->textures + index;
-    br_gltf_save_sampler_key sampler_key = material_to_sampler_key(mat);
-
-    (void)hash;
-
-    texture->name    = mat->identifier;
-    texture->sampler = BrHashMapFind(state->sampler_map, &sampler_key);
-    texture->image   = BrHashMapFind(state->pixelmap_map, mat->colour_map);
     return 0;
 }
 
@@ -1289,6 +1302,13 @@ br_error BR_PUBLIC_ENTRY BrFmtGLTFActorSaveMany(const char *name, br_actor **act
     BrHashMapEnumerate(state->actor_map, gather_models_and_materials, state);
 
     /*
+     * Using our materials list, count the no. textures.
+     *
+     * Post: state->date->textures_count is set.
+     */
+    BrHashMapEnumerate(state->material_map, count_textures, state);
+
+    /*
      * Using our materials list, gather our samplers.
      *
      * Post: state->sampler_map is populated with (<sampler_key>, (void*)1).
@@ -1327,7 +1347,6 @@ br_error BR_PUBLIC_ENTRY BrFmtGLTFActorSaveMany(const char *name, br_actor **act
     data->meshes_count            = BrHashMapSize(state->model_map);
     data->materials_count         = BrHashMapSize(state->material_map);
     data->brender_materials_count = BrHashMapSize(state->material_map);
-    data->textures_count          = BrHashMapSize(state->material_map); /* NB: GLTF textures are _not_ BRender textures. */
     data->samplers_count          = BrHashMapSize(state->sampler_map);
 
     data->cameras           = BrResAllocate(data, data->cameras_count * sizeof(cgltf_camera), BR_MEMORY_SCRATCH);
@@ -1414,16 +1433,10 @@ br_error BR_PUBLIC_ENTRY BrFmtGLTFActorSaveMany(const char *name, br_actor **act
     BrHashMapEnumerate(state->sampler_map, fill_sampler, state);
 
     /*
-     * Fill the textures (not pixelmaps). They map the image<->sampler.
-     *
-     * Post: state->data->textures is filled.
-     */
-    BrHashMapEnumerate(state->material_map, fill_texture, state);
-
-    /*
      * Fill the materials as best we can.
      *
      * Post: state->data->materials is filled.
+     *       state->data->textures for each material are filled.
      */
     BrHashMapEnumerate(state->material_map, fill_material, state);
 
