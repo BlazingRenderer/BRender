@@ -1412,7 +1412,9 @@ br_error BR_PUBLIC_ENTRY BrFmtGLTFActorSaveMany(const char *name, br_actor **act
     BrHashMapEnumerate(state->material_map, fill_texture, state);
 
     /*
-     * [WIP] Fill the materials
+     * Fill the materials as best we can.
+     *
+     * Post: state->data->materials is filled.
      */
     BrHashMapEnumerate(state->material_map, fill_material, state);
 
