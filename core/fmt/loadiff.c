@@ -10,27 +10,25 @@
 #include "brender.h"
 #include "fmt.h"
 
-
 static int  readline(char *mblock, int bytes, void *fh);
 static void planes2bytes(br_pixelmap *pm, char *block, int line);
 
-#define RED           2
-#define GRN           1
-#define BLU           0
-#define PAD           3
+#define RED             2
+#define GRN             1
+#define BLU             0
+#define PAD             3
 
-#define PACKET_SIZE   4 /* block size	*/
+#define PACKET_SIZE     4 /* block size	*/
 
-#define MAX_PALETTE   768 /* 256 colours	*/
+#define MAX_PALETTE     768 /* 256 colours	*/
 
-#define RUN_LENGTH    0x80 /* rle bit field */
+#define RUN_LENGTH      0x80 /* rle bit field */
 
-#define BITMAP_HEADER "BMHD"
-#define COLOUR_MAP    "CMAP"
-#define IMAGE_DATA    "BODY"
+#define BITMAP_HEADER   "BMHD"
+#define COLOUR_MAP      "CMAP"
+#define IMAGE_DATA      "BODY"
 
-#define swapl(n) \
-    (((n & 0xff000000) >> 24) + ((n & 0x00ff0000) >> 8) + ((n & 0x0000ff00) << 8) + ((n & 0x000000ff) << 24))
+#define swapl(n)        (((n & 0xff000000) >> 24) + ((n & 0x00ff0000) >> 8) + ((n & 0x0000ff00) << 8) + ((n & 0x000000ff) << 24))
 
 #define swapi(n)        (((n & 0xff00) >> 8) | ((n & 0x00ff) << 8))
 
@@ -92,8 +90,7 @@ br_pixelmap *BR_PUBLIC_ENTRY BrFmtIFFLoad(const char *name, br_uint_32 flags)
     if(BrFileRead(&IFFheader, 1, sizeof(IFFheader), fh) != sizeof(IFFheader))
         BR_ERROR1("Unable to read header information from '%s'", name);
 
-    if(!BrMemCmp(IFFheader.type, "FORM", 4) || !BrMemCmp(IFFheader.type, "LIST", 4) ||
-       !BrMemCmp(IFFheader.type, "CAT ", 4)) {
+    if(!BrMemCmp(IFFheader.type, "FORM", 4) || !BrMemCmp(IFFheader.type, "LIST", 4) || !BrMemCmp(IFFheader.type, "CAT ", 4)) {
         do {
             if(BrFileRead(block, 1, PACKET_SIZE, fh) != PACKET_SIZE)
                 BR_ERROR1("Unable to read block descriptor from '%s'", name);
@@ -160,8 +157,7 @@ br_pixelmap *BR_PUBLIC_ENTRY BrFmtIFFLoad(const char *name, br_uint_32 flags)
                         if(BrFileRead(mblock, 1, bytes_per_line, fh) != bytes_per_line)
                             BR_ERROR1("Unable to read image data from '%s'", name);
                     }
-                    if(!BrMemCmp(IFFheader.subtype, "ILBM", 4) ||
-                       (!BrMemCmp(IFFheader.subtype, "PBM ", 4) && BMHD.nPlanes < 8))
+                    if(!BrMemCmp(IFFheader.subtype, "ILBM", 4) || (!BrMemCmp(IFFheader.subtype, "PBM ", 4) && BMHD.nPlanes < 8))
                         /* bitmap split into image planes */
 
                         planes2bytes(pm, mblock, i);

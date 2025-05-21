@@ -15,7 +15,6 @@
 #include "shortcut.h"
 #include "brassert.h"
 
-
 /*
  * A = B
  */
@@ -151,8 +150,8 @@ br_scalar BR_PUBLIC_ENTRY BrMatrix4Inverse(br_matrix4 *A, const br_matrix4 *B)
 
 #define DETERMINANT2(a, b, c, d) BR_MAC2((a), (d), -(b), (c))
 
-static br_scalar Determinant3(br_scalar a1, br_scalar a2, br_scalar a3, br_scalar b1, br_scalar b2, br_scalar b3,
-                              br_scalar c1, br_scalar c2, br_scalar c3)
+static br_scalar Determinant3(br_scalar a1, br_scalar a2, br_scalar a3, br_scalar b1, br_scalar b2, br_scalar b3, br_scalar c1,
+                              br_scalar c2, br_scalar c3)
 {
     // clang-format off
     return BR_MAC3( a1,DETERMINANT2(b2, b3, c2, c3),
@@ -246,8 +245,7 @@ void BR_PUBLIC_ENTRY BrMatrix4Adjoint(br_matrix4 *A, const br_matrix4 *B)
  * Generate a perspective tranform
  *
  */
-void BR_PUBLIC_ENTRY BrMatrix4Perspective(br_matrix4 *mat, br_angle field_of_view, br_scalar aspect, br_scalar hither,
-                                          br_scalar yon)
+void BR_PUBLIC_ENTRY BrMatrix4Perspective(br_matrix4 *mat, br_angle field_of_view, br_scalar aspect, br_scalar hither, br_scalar yon)
 {
     br_scalar scale = BR_DIV(BR_COS((br_angle)(field_of_view / 2)), BR_SIN((br_angle)(field_of_view / 2)));
 
@@ -266,8 +264,8 @@ void BR_PUBLIC_ENTRY BrMatrix4Perspective(br_matrix4 *mat, br_angle field_of_vie
     // clang-format on
 }
 
-void BR_PUBLIC_ENTRY BrMatrix4Orthographic(br_matrix4 *mat, br_scalar left, br_scalar right, br_scalar bottom,
-                                           br_scalar top, br_scalar hither, br_scalar yon)
+void BR_PUBLIC_ENTRY BrMatrix4Orthographic(br_matrix4 *mat, br_scalar left, br_scalar right, br_scalar bottom, br_scalar top,
+                                           br_scalar hither, br_scalar yon)
 {
     UASSERT_MESSAGE("Subject matrix is NULL", mat != NULL);
 

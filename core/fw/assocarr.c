@@ -55,8 +55,8 @@ br_error BrAssociativeArraySet(br_associative_array *array, br_token t, br_value
          */
         if(array->num_elements >= array->max_elements) {
 
-            tv = (br_token_value *)BrResAllocate(
-                array, (array->max_elements + MAX_ELEMENTS_INCREMENT) * sizeof(br_token_value), BR_MEMORY_APPLICATION);
+            tv = (br_token_value *)BrResAllocate(array, (array->max_elements + MAX_ELEMENTS_INCREMENT) * sizeof(br_token_value),
+                                                 BR_MEMORY_APPLICATION);
             if(tv == NULL)
                 return BRE_FAIL;
 

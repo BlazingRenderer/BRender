@@ -11,7 +11,6 @@
 #include "brassert.h"
 #include "shortcut.h"
 
-
 /*
  * Mask of renderer state parts that materials are mapped to
  */
@@ -46,8 +45,7 @@ void BR_PUBLIC_ENTRY BrMaterialUpdate(br_material *mat, br_uint_16 flags)
      */
 
     if(flags & BR_MATU_MAP_TRANSFORM)
-        RendererPartSet(v1db.renderer, BRT_SURFACE, 0, BRT_AS_MATRIX23_SCALAR(MAP_MATRIX),
-                        (br_value){.m23 = &mat->map_transform});
+        RendererPartSet(v1db.renderer, BRT_SURFACE, 0, BRT_AS_MATRIX23_SCALAR(MAP_MATRIX), (br_value){.m23 = &mat->map_transform});
 
     if(flags & BR_MATU_RENDERING) {
         tvp = tva;

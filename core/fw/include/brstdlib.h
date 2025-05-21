@@ -40,11 +40,11 @@ BR_NORETURN void BR_PUBLIC_ENTRY BrAbort(void);
 
 const char *BR_PUBLIC_ENTRY BrGetEnv(const char *name);
 
-float BR_PUBLIC_ENTRY         BrStrToF(const char *nptr, char **endptr);
-double BR_PUBLIC_ENTRY        BrStrToD(const char *nptr, char **endptr);
-long int BR_PUBLIC_ENTRY      BrStrToL(const char *nptr, char **endptr, int base);
-long long int BR_PUBLIC_ENTRY BrStrToLL(const char *nptr, char **endptr, int base);
-unsigned long BR_PUBLIC_ENTRY BrStrToUL(const char *nptr, char **endptr, int base);
+float BR_PUBLIC_ENTRY              BrStrToF(const char *nptr, char **endptr);
+double BR_PUBLIC_ENTRY             BrStrToD(const char *nptr, char **endptr);
+long int BR_PUBLIC_ENTRY           BrStrToL(const char *nptr, char **endptr, int base);
+long long int BR_PUBLIC_ENTRY      BrStrToLL(const char *nptr, char **endptr, int base);
+unsigned long BR_PUBLIC_ENTRY      BrStrToUL(const char *nptr, char **endptr, int base);
 unsigned long long BR_PUBLIC_ENTRY BrStrToULL(const char *nptr, char **endptr, int base);
 
 int BR_PUBLIC_ENTRY       BrAToI(const char *nptr);

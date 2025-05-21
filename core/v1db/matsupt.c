@@ -11,7 +11,6 @@
 #include "brassert.h"
 #include "datafile.h"
 
-
 /*
  * Allocate a material
  */

@@ -12,7 +12,6 @@
 #include "formats.h"
 #include "v1db.h"
 
-
 /*
  * Set the per-vertex i,r,g,b values for the model.
  *

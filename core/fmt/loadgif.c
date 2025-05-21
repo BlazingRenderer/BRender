@@ -14,7 +14,6 @@
 #include "brender.h"
 #include "fmt.h"
 
-
 #define RED            2
 #define GRN            1
 #define BLU            0
@@ -230,8 +229,7 @@ static void *UnpackImage(br_pixelmap *pm, short bits, void *fh)
 
     for(;;) {
         if(bitsleft == 8) {
-            if(++p >= q && (((blocksize = BrFileGetChar(fh)) < 1) ||
-                            (q = (p = b) + BrFileRead(b, 1, blocksize, fh)) < (b + blocksize))) {
+            if(++p >= q && (((blocksize = BrFileGetChar(fh)) < 1) || (q = (p = b) + BrFileRead(b, 1, blocksize, fh)) < (b + blocksize))) {
                 BrMemFree(linebuffer);
                 return UNEXPECTED_EOF;
             }
@@ -242,8 +240,7 @@ static void *UnpackImage(br_pixelmap *pm, short bits, void *fh)
             *p >>= codesize;
             bitsleft = currentcode;
         } else {
-            if(++p >= q && (((blocksize = BrFileGetChar(fh)) < 1) ||
-                            (q = (p = b) + BrFileRead(b, 1, blocksize, fh)) < (b + blocksize))) {
+            if(++p >= q && (((blocksize = BrFileGetChar(fh)) < 1) || (q = (p = b) + BrFileRead(b, 1, blocksize, fh)) < (b + blocksize))) {
                 BrMemFree(linebuffer);
                 return UNEXPECTED_EOF;
             }
@@ -251,8 +248,7 @@ static void *UnpackImage(br_pixelmap *pm, short bits, void *fh)
             if(currentcode <= 16)
                 *p >>= (bitsleft = currentcode - 8);
             else {
-                if(++p >= q && (((blocksize = BrFileGetChar(fh)) < 1) ||
-                                (q = (p = b) + BrFileRead(b, 1, blocksize, fh)) < (b + blocksize))) {
+                if(++p >= q && (((blocksize = BrFileGetChar(fh)) < 1) || (q = (p = b) + BrFileRead(b, 1, blocksize, fh)) < (b + blocksize))) {
                     BrMemFree(linebuffer);
                     return UNEXPECTED_EOF;
                 }

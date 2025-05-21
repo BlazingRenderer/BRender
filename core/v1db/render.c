@@ -30,12 +30,10 @@
 #define MarkStratAsNotDrawn(a)
 #endif
 
+static void actorRenderOnScreen(br_actor *ap, br_model *model, br_material *material, void *render_data, br_uint_8 style, br_uint_16 t);
 
-static void actorRenderOnScreen(br_actor *ap, br_model *model, br_material *material, void *render_data,
-                                br_uint_8 style, br_uint_16 t);
-
-void BR_PUBLIC_ENTRY BrDbModelRender(br_actor *actor, br_model *model, br_material *material, void *render_data,
-                                     br_uint_8 style, int on_screen, int use_custom)
+void BR_PUBLIC_ENTRY BrDbModelRender(br_actor *actor, br_model *model, br_material *material, void *render_data, br_uint_8 style,
+                                     int on_screen, int use_custom)
 {
     br_int_32      count;
     br_token_value tv[] = {
@@ -75,8 +73,7 @@ void BR_PUBLIC_ENTRY BrDbModelRender(br_actor *actor, br_model *model, br_materi
     if(material == NULL || material->stored == NULL)
         RendererStateDefault(v1db.renderer, (br_uint_32)(BR_STATE_PRIMITIVE | BR_STATE_SURFACE | BR_STATE_CULL));
     else
-        RendererStateRestore(v1db.renderer, material->stored,
-                             (br_uint_32)(BR_STATE_PRIMITIVE | BR_STATE_SURFACE | BR_STATE_CULL));
+        RendererStateRestore(v1db.renderer, material->stored, (br_uint_32)(BR_STATE_PRIMITIVE | BR_STATE_SURFACE | BR_STATE_CULL));
 
     /*
      * Optional preparation for Z-Sort
@@ -259,8 +256,7 @@ static br_uint_16 prependMatrix(br_matrix34 *mat, br_uint_16 mat_t, br_uint_16 t
 /*
  * Rendering traversal for the given actor
  */
-static void actorRender(br_actor *ap, br_model *model, br_material *material, void *render_data, br_uint_8 style,
-                        br_uint_16 t)
+static void actorRender(br_actor *ap, br_model *model, br_material *material, void *render_data, br_uint_8 style, br_uint_16 t)
 {
     /*
      * Saved state
@@ -424,8 +420,7 @@ static void actorRender(br_actor *ap, br_model *model, br_material *material, vo
  * Rendering traversal for an actor that is completely on screen, along
  * with any children
  */
-static void actorRenderOnScreen(br_actor *ap, br_model *model, br_material *material, void *render_data,
-                                br_uint_8 style, br_uint_16 t)
+static void actorRenderOnScreen(br_actor *ap, br_model *model, br_material *material, void *render_data, br_uint_8 style, br_uint_16 t)
 {
     /*
      * Saved state
@@ -541,8 +536,7 @@ static void sceneRenderAdd(br_actor *tree)
         /*
          * Simple case for when added tree is unconnected
          */
-        actorRender(tree, v1db.default_model, v1db.default_material, v1db.default_render_data, BR_RSTYLE_DEFAULT,
-                    (br_uint_16)v1db.ttype);
+        actorRender(tree, v1db.default_model, v1db.default_material, v1db.default_render_data, BR_RSTYLE_DEFAULT, (br_uint_16)v1db.ttype);
         return;
     }
 
@@ -662,10 +656,8 @@ void BR_PUBLIC_ENTRY BrDbSceneRenderBegin(br_actor *world, br_actor *camera)
     RendererPartSet(v1db.renderer, BRT_MATRIX, 0, BRT_AS_MATRIX4_SCALAR(VIEW_TO_SCREEN), (br_value){.m4 = &vtos});
     RendererPartSet(v1db.renderer, BRT_MATRIX, 0, BRT_VIEW_TO_SCREEN_HINT_T, (br_value){.t = vtos_type});
 
-    RendererPartSet(v1db.renderer, BRT_MATRIX, 0, BRT_AS_SCALAR(HITHER_Z),
-                    (br_value){.s = ((br_camera *)camera->type_data)->hither_z});
-    RendererPartSet(v1db.renderer, BRT_MATRIX, 0, BRT_AS_SCALAR(YON_Z),
-                    (br_value){.s = ((br_camera *)camera->type_data)->yon_z});
+    RendererPartSet(v1db.renderer, BRT_MATRIX, 0, BRT_AS_SCALAR(HITHER_Z), (br_value){.s = ((br_camera *)camera->type_data)->hither_z});
+    RendererPartSet(v1db.renderer, BRT_MATRIX, 0, BRT_AS_SCALAR(YON_Z), (br_value){.s = ((br_camera *)camera->type_data)->yon_z});
 
     /*
      * Collect transforms from camera to root
@@ -698,8 +690,7 @@ void BR_PUBLIC_ENTRY BrDbSceneRenderBegin(br_actor *world, br_actor *camera)
     /*
      * Make world->view as initial model->view
      */
-    RendererPartSet(v1db.renderer, BRT_MATRIX, 0, BRT_AS_MATRIX34_SCALAR(MODEL_TO_VIEW),
-                    (br_value){.m34 = &v1db.camera_path[i].m});
+    RendererPartSet(v1db.renderer, BRT_MATRIX, 0, BRT_AS_MATRIX34_SCALAR(MODEL_TO_VIEW), (br_value){.m34 = &v1db.camera_path[i].m});
 
     v1db.ttype = v1db.camera_path[i].transform_type;
 
@@ -711,8 +702,7 @@ void BR_PUBLIC_ENTRY BrDbSceneRenderBegin(br_actor *world, br_actor *camera)
     /*
      * Setup active lights, clip planes, horizon and environment
      */
-    RendererPartQueryBuffer(v1db.renderer, BRT_MATRIX, 0, &dummy, (br_uint_32 *)&tfm, sizeof(tfm),
-                            BRT_AS_MATRIX34_SCALAR(MODEL_TO_VIEW));
+    RendererPartQueryBuffer(v1db.renderer, BRT_MATRIX, 0, &dummy, (br_uint_32 *)&tfm, sizeof(tfm), BRT_AS_MATRIX34_SCALAR(MODEL_TO_VIEW));
 
     BrSetupLights(world, &tfm, v1db.ttype);
     BrSetupClipPlanes(world, &tfm, v1db.ttype, &vtos);
@@ -764,8 +754,7 @@ static void SetViewport(br_pixelmap *buffer)
     v1db.vp_height = -BR_SCALAR(buffer->height / 2);
 };
 
-void BR_PUBLIC_ENTRY BrZbSceneRenderBegin(br_actor *world, br_actor *camera, br_pixelmap *colour_buffer,
-                                          br_pixelmap *depth_buffer)
+void BR_PUBLIC_ENTRY BrZbSceneRenderBegin(br_actor *world, br_actor *camera, br_pixelmap *colour_buffer, br_pixelmap *depth_buffer)
 {
     br_camera *camera_data;
 
@@ -804,8 +793,7 @@ void BR_PUBLIC_ENTRY BrZbSceneRenderBegin(br_actor *world, br_actor *camera, br_
 
         v1db.order_table_list = NULL;
 
-        RendererPartSet(v1db.renderer, BRT_HIDDEN_SURFACE, 0, BRT_V1ORDER_TABLE_P,
-                        (br_value){.p = v1db.default_order_table});
+        RendererPartSet(v1db.renderer, BRT_HIDDEN_SURFACE, 0, BRT_V1ORDER_TABLE_P, (br_value){.p = v1db.default_order_table});
         RendererPartSet(v1db.renderer, BRT_HIDDEN_SURFACE, 0, BRT_V1PRIMITIVE_HEAP_P, (br_value){.p = &v1db.heap});
         RendererPartSet(v1db.renderer, BRT_HIDDEN_SURFACE, 0, BRT_TYPE_T, (br_value){.t = BRT_BUCKET_SORT});
         RendererPartSet(v1db.renderer, BRT_HIDDEN_SURFACE, 0, BRT_DIVERT_T, (br_value){.t = BRT_BLENDED});
@@ -823,8 +811,7 @@ void BR_PUBLIC_ENTRY BrZbSceneRenderBegin(br_actor *world, br_actor *camera, br_
     BrDbSceneRenderBegin(world, camera);
 }
 
-void BR_PUBLIC_ENTRY BrZbSceneRenderContinue(br_actor *world, br_actor *camera, br_pixelmap *colour_buffer,
-                                             br_pixelmap *depth_buffer)
+void BR_PUBLIC_ENTRY BrZbSceneRenderContinue(br_actor *world, br_actor *camera, br_pixelmap *colour_buffer, br_pixelmap *depth_buffer)
 {
     br_camera *camera_data;
 
@@ -1038,8 +1025,7 @@ br_primitive_cbfn *BR_PUBLIC_ENTRY BrZsPrimitiveCallbackSet(br_primitive_cbfn *n
     return old_cbfn;
 }
 
-void BR_PUBLIC_ENTRY BrZbModelRender(br_actor *actor, br_model *model, br_material *material, br_uint_8 style,
-                                     int on_screen, int use_custom)
+void BR_PUBLIC_ENTRY BrZbModelRender(br_actor *actor, br_model *model, br_material *material, br_uint_8 style, int on_screen, int use_custom)
 {
 
     UASSERT_MESSAGE("Invalid BrZbModelRender model actor pointer", actor != NULL);
@@ -1049,8 +1035,8 @@ void BR_PUBLIC_ENTRY BrZbModelRender(br_actor *actor, br_model *model, br_materi
     BrDbModelRender(actor, model, material, NULL, style, on_screen, use_custom);
 }
 
-void BR_PUBLIC_ENTRY BrZsModelRender(br_actor *actor, br_model *model, br_material *material,
-                                     br_order_table *order_table, br_uint_8 style, int on_screen, int use_custom)
+void BR_PUBLIC_ENTRY BrZsModelRender(br_actor *actor, br_model *model, br_material *material, br_order_table *order_table, br_uint_8 style,
+                                     int on_screen, int use_custom)
 {
     UASSERT_MESSAGE("Invalid BrZsModelRender model actor pointer", actor != NULL);
     UASSERT_MESSAGE("Invalid BrZsModelRender model pointer", model != NULL);

@@ -136,7 +136,7 @@ br_error ReflectionInit(br_demo *demo)
      * Complete definition of mirror texture. Note that the colour_map
      * is a newly allocated pixelmap into which we'll render later.
      */
-    ref->mirror_pm = BrPixelmapMatchTypedSized(demo->colour_buffer, BR_PMMATCH_OFFSCREEN, demo->colour_buffer->type, 256, 256);
+    ref->mirror_pm           = BrPixelmapMatchTypedSized(demo->colour_buffer, BR_PMMATCH_OFFSCREEN, demo->colour_buffer->type, 256, 256);
     ref->mirror_pm->origin_x = (br_int_16)(ref->mirror_pm->width >> 1);
     ref->mirror_pm->origin_y = (br_int_16)(ref->mirror_pm->height >> 1);
     BrMapAdd(ref->mirror_pm);

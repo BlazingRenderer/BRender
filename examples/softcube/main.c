@@ -9,8 +9,8 @@
 
 void BR_CALLBACK _BrBeginHook(void)
 {
-    struct br_device * BR_EXPORT BrDrv1SoftPrimBegin(const char *arguments);
-    struct br_device * BR_EXPORT BrDrv1SoftRendBegin(const char *arguments);
+    struct br_device *BR_EXPORT BrDrv1SoftPrimBegin(const char *arguments);
+    struct br_device *BR_EXPORT BrDrv1SoftRendBegin(const char *arguments);
 
     BrDevAddStatic(NULL, BrDrv1SoftPrimBegin, NULL);
     BrDevAddStatic(NULL, BrDrv1SoftRendBegin, NULL);
@@ -23,18 +23,17 @@ void BR_CALLBACK _BrEndHook(void)
 
 static char primitive_heap[1500 * 1024];
 
-
 static void draw_info(br_pixelmap *screen, br_material *mat)
 {
     br_token   pstate_token = BR_NULL_TOKEN;
-    br_object *primstate = NULL;
-    br_uint_16 font_height = 0;
+    br_object *primstate    = NULL;
+    br_uint_16 font_height  = 0;
     brp_block *block;
 
     if((pstate_token = BrTokenFind("PRIMITIVE_STATE_O")) == BR_NULL_TOKEN)
         return;
 
-    //ObjectQuery(BrV1dbRendererQuery(), &primstate, pstate_token);
+    // ObjectQuery(BrV1dbRendererQuery(), &primstate, pstate_token);
     ObjectQuery(mat->stored, &primstate, pstate_token);
     if(primstate == NULL)
         return;
@@ -45,28 +44,30 @@ static void draw_info(br_pixelmap *screen, br_material *mat)
 
     font_height = BrPixelmapTextHeight(screen, BrFontProp7x9);
 
-    BrPixelmapTextF(screen, -(screen->width / 2) + font_height, -(screen->height / 2) + font_height, 0xFFFFFFFF,
-        BrFontProp7x9, "Rasteriser: %s", block->identifier);
+    BrPixelmapTextF(screen, -(screen->width / 2) + font_height, -(screen->height / 2) + font_height, 0xFFFFFFFF, BrFontProp7x9,
+                    "Rasteriser: %s", block->identifier);
 }
 
 int main(int argc, char **argv)
 {
     br_pixelmap *screen = NULL, *colour_buffer = NULL, *depth_buffer = NULL;
-    br_actor *world, *camera, *cube, *light;
-    int ret = 1;
-    br_uint_64 ticks_last, ticks_now;
-    br_colour clear_colour;
-    br_error err;
+    br_actor    *world, *camera, *cube, *light;
+    int          ret = 1;
+    br_uint_64   ticks_last, ticks_now;
+    br_colour    clear_colour;
+    br_error     err;
 
     BrBegin();
 
     BrLogSetLevel(BR_LOG_DEBUG);
 
+    // clang-format off
     err = BrDevBeginVar(&screen, "SDL3",
         BRT_WIDTH_I32, 1280,
         BRT_HEIGHT_I32, 720,
         BR_NULL_TOKEN
     );
+    // clang-format on
 
     if(err != BRE_OK) {
         BrLogError("APP", "BrDevBeginVar() failed");
@@ -76,12 +77,14 @@ int main(int argc, char **argv)
     {
 #if defined(SOFTCUBE_16BIT)
         BrLogInfo("APP", "Running at 16-bpp");
-        colour_buffer = BrPixelmapMatchTyped(screen, BR_PMMATCH_OFFSCREEN, BR_PMT_RGB_565);;
+        colour_buffer = BrPixelmapMatchTyped(screen, BR_PMMATCH_OFFSCREEN, BR_PMT_RGB_565);
+        ;
         clear_colour = BR_COLOUR_565(66, 66, 66);
 
 #else
         BrLogInfo("APP", "Running at 24-bpp");
-        colour_buffer = BrPixelmapMatchTyped(screen, BR_PMMATCH_OFFSCREEN, BR_PMT_RGB_888);;
+        colour_buffer = BrPixelmapMatchTyped(screen, BR_PMMATCH_OFFSCREEN, BR_PMT_RGB_888);
+        ;
         clear_colour = BR_COLOUR_RGB(66, 66, 66);
 #endif
     }
@@ -106,11 +109,11 @@ int main(int argc, char **argv)
     {
         br_camera *camera_data;
 
-        camera = BrActorAdd(world, BrActorAllocate(BR_ACTOR_CAMERA, NULL));
+        camera         = BrActorAdd(world, BrActorAllocate(BR_ACTOR_CAMERA, NULL));
         camera->t.type = BR_TRANSFORM_MATRIX34;
         BrMatrix34Translate(&camera->t.t.mat, BR_SCALAR(0.0), BR_SCALAR(0.0), BR_SCALAR(5.0));
 
-        camera_data = (br_camera *)camera->type_data;
+        camera_data         = (br_camera *)camera->type_data;
         camera_data->aspect = BR_DIV(BR_SCALAR(colour_buffer->width), BR_SCALAR(colour_buffer->height));
     }
 
@@ -118,9 +121,9 @@ int main(int argc, char **argv)
     BrMapFindHook(BrMapFindFailedLoad);
     BrMaterialFindHook(BrMaterialFindFailedLoad);
 
-    cube = BrActorAdd(world, BrActorAllocate(BR_ACTOR_MODEL, NULL));
+    cube         = BrActorAdd(world, BrActorAllocate(BR_ACTOR_MODEL, NULL));
     cube->t.type = BR_TRANSFORM_MATRIX34;
-    cube->model = BrModelFind("cube.dat");
+    cube->model  = BrModelFind("cube.dat");
 
 #if defined(SOFTCUBE_16BIT)
     cube->material = BrMaterialLoad("checkerboard8.mat");
@@ -128,11 +131,11 @@ int main(int argc, char **argv)
     cube->material = BrMaterialLoad("checkerboard24.mat");
 #endif
 
-    cube->material->flags |= BR_MATF_PERSPECTIVE;           // Perspective-correct texture mapping. Doesn't actually work.
-    cube->material->flags |= BR_MATF_DITHER;                // Dithering.
-    cube->material->flags |= BR_MATF_SMOOTH;                // Makes lighting look _much_ better.
-    //cube->material->flags |= BR_MATF_DISABLE_COLOUR_KEY;  // Not supported by software.
-    cube->material->opacity = 255;                          // < 255 selects screendoor renderer
+    cube->material->flags |= BR_MATF_PERSPECTIVE; // Perspective-correct texture mapping. Doesn't actually work.
+    cube->material->flags |= BR_MATF_DITHER;      // Dithering.
+    cube->material->flags |= BR_MATF_SMOOTH;      // Makes lighting look _much_ better.
+    // cube->material->flags |= BR_MATF_DISABLE_COLOUR_KEY;  // Not supported by software.
+    cube->material->opacity = 255; // < 255 selects screendoor renderer
 
     BrMapUpdate(cube->material->colour_map, BR_MAPU_ALL);
     BrMaterialUpdate(cube->material, BR_MATU_ALL);
@@ -147,14 +150,14 @@ int main(int argc, char **argv)
     for(SDL_Event evt;;) {
         float dt;
 
-        ticks_now = SDL_GetTicksNS();
-        dt = (float)(ticks_now - ticks_last) / 1000.0f;
+        ticks_now  = SDL_GetTicksNS();
+        dt         = (float)(ticks_now - ticks_last) / 1000.0f;
         ticks_last = ticks_now;
 
         while(SDL_PollEvent(&evt) > 0) {
             switch(evt.type) {
-            case SDL_EVENT_QUIT:
-                goto done;
+                case SDL_EVENT_QUIT:
+                    goto done;
             }
         }
 
@@ -188,4 +191,3 @@ create_fail:
 
     return ret;
 }
-

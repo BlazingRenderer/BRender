@@ -10,7 +10,6 @@
 
 #include "fw.h"
 
-
 br_int_32 BR_RESIDENT_ENTRY BrSprintf(char *buf, const char *fmt, ...)
 {
     int     n;

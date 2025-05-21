@@ -13,7 +13,6 @@
 #include "fw.h"
 #include "brassert.h"
 
-
 /*
  * Initialise a registry
  */

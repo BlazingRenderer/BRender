@@ -35,7 +35,6 @@ Converted by SamL for use in avc
 
 #include "brender.h"
 
-
 #define MAXCOLOR 256
 
 #define RED      2
@@ -168,16 +167,16 @@ static long Bottom(struct box *cube, unsigned char dir, long mmt[33][33][33])
 {
     switch(dir) {
         case RED:
-            return (-mmt[cube->r0][cube->g1][cube->b1] + mmt[cube->r0][cube->g1][cube->b0] +
-                    mmt[cube->r0][cube->g0][cube->b1] - mmt[cube->r0][cube->g0][cube->b0]);
+            return (-mmt[cube->r0][cube->g1][cube->b1] + mmt[cube->r0][cube->g1][cube->b0] + mmt[cube->r0][cube->g0][cube->b1] -
+                    mmt[cube->r0][cube->g0][cube->b0]);
             break;
         case GREEN:
-            return (-mmt[cube->r1][cube->g0][cube->b1] + mmt[cube->r1][cube->g0][cube->b0] +
-                    mmt[cube->r0][cube->g0][cube->b1] - mmt[cube->r0][cube->g0][cube->b0]);
+            return (-mmt[cube->r1][cube->g0][cube->b1] + mmt[cube->r1][cube->g0][cube->b0] + mmt[cube->r0][cube->g0][cube->b1] -
+                    mmt[cube->r0][cube->g0][cube->b0]);
             break;
         case BLUE:
-            return (-mmt[cube->r1][cube->g1][cube->b0] + mmt[cube->r1][cube->g0][cube->b0] +
-                    mmt[cube->r0][cube->g1][cube->b0] - mmt[cube->r0][cube->g0][cube->b0]);
+            return (-mmt[cube->r1][cube->g1][cube->b0] + mmt[cube->r1][cube->g0][cube->b0] + mmt[cube->r0][cube->g1][cube->b0] -
+                    mmt[cube->r0][cube->g0][cube->b0]);
             break;
     }
     return 0;
@@ -191,16 +190,13 @@ static long Top(struct box *cube, unsigned char dir, int pos, long mmt[33][33][3
 {
     switch(dir) {
         case RED:
-            return (mmt[pos][cube->g1][cube->b1] - mmt[pos][cube->g1][cube->b0] - mmt[pos][cube->g0][cube->b1] +
-                    mmt[pos][cube->g0][cube->b0]);
+            return (mmt[pos][cube->g1][cube->b1] - mmt[pos][cube->g1][cube->b0] - mmt[pos][cube->g0][cube->b1] + mmt[pos][cube->g0][cube->b0]);
             break;
         case GREEN:
-            return (mmt[cube->r1][pos][cube->b1] - mmt[cube->r1][pos][cube->b0] - mmt[cube->r0][pos][cube->b1] +
-                    mmt[cube->r0][pos][cube->b0]);
+            return (mmt[cube->r1][pos][cube->b1] - mmt[cube->r1][pos][cube->b0] - mmt[cube->r0][pos][cube->b1] + mmt[cube->r0][pos][cube->b0]);
             break;
         case BLUE:
-            return (mmt[cube->r1][cube->g1][pos] - mmt[cube->r1][cube->g0][pos] - mmt[cube->r0][cube->g1][pos] +
-                    mmt[cube->r0][cube->g0][pos]);
+            return (mmt[cube->r1][cube->g1][pos] - mmt[cube->r1][cube->g0][pos] - mmt[cube->r0][cube->g1][pos] + mmt[cube->r0][cube->g0][pos]);
             break;
     }
     return 0;
@@ -232,8 +228,7 @@ static float Var(struct box *cube)
  * so we drop the minus sign and MAXIMIZE the sum of the two terms.
  */
 
-static float Maximize(struct box *cube, unsigned char dir, int first, int last, int *cut, long whole_r, long whole_g,
-                      long whole_b, long whole_w)
+static float Maximize(struct box *cube, unsigned char dir, int first, int last, int *cut, long whole_r, long whole_g, long whole_b, long whole_w)
 {
     long  half_r, half_g, half_b, half_w;
     long  base_r, base_g, base_b, base_w;
@@ -479,8 +474,7 @@ void BR_PUBLIC_ENTRY BrQuantMakePalette(int base, int num_entries, br_pixelmap *
         weight = Vol(&cube[k], wt);
 
         if(weight)
-            palette_entry[k + base] = ((Vol(&cube[k], mr) / weight) << 16) + ((Vol(&cube[k], mg) / weight) << 8) +
-                                      (Vol(&cube[k], mb) / weight);
+            palette_entry[k + base] = ((Vol(&cube[k], mr) / weight) << 16) + ((Vol(&cube[k], mg) / weight) << 8) + (Vol(&cube[k], mb) / weight);
     }
 }
 

@@ -12,7 +12,6 @@
 #include "brender.h"
 #include "brmath.h"
 
-
 #define CLAMP(a, min, max) (a < min ? min : (a > max ? max : a))
 
 #define BLACK              0x00
@@ -76,8 +75,7 @@ static float Mitchell_filter(float t)
         t = (((12.0F - 9.0F * B - 6.0F * C) * (t * tt)) + ((-18.0F + 12.0F * B + 6.0F * C) * tt) + (6.0F - 2 * B));
         return (t / 6.0F);
     } else if(t < 2.0F) {
-        t = (((-1.0F * B - 6.0F * C) * (t * tt)) + ((6.0F * B + 30.0F * C) * tt) + ((-12.0F * B - 48.0F * C) * t) +
-             (8.0F * B + 24 * C));
+        t = (((-1.0F * B - 6.0F * C) * (t * tt)) + ((6.0F * B + 30.0F * C) * tt) + ((-12.0F * B - 48.0F * C) * t) + (8.0F * B + 24 * C));
         return (t / 6.0F);
     }
     return (0.0F);

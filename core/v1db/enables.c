@@ -11,7 +11,6 @@
 #include "brassert.h"
 #include "math_ip.h"
 
-
 static void actorEnable(br_v1db_enable *e, br_actor *a)
 {
     int i;
@@ -220,8 +219,8 @@ br_actor *BR_PUBLIC_ENTRY BrEnvironmentSet(br_actor *a)
 /*
  * Build transforms between the view and a given actor
  */
-static br_boolean setupView(br_matrix34 *view_to_this, br_matrix34 *this_to_view, br_matrix34 *world_to_view,
-                            br_int_32 w2vt, br_actor *world, br_actor *a)
+static br_boolean setupView(br_matrix34 *view_to_this, br_matrix34 *this_to_view, br_matrix34 *world_to_view, br_int_32 w2vt,
+                            br_actor *world, br_actor *a)
 {
     br_matrix34 this_to_world;
     br_int_32   root_t, t;
@@ -391,8 +390,7 @@ void BrSetupLights(br_actor *world, br_matrix34 *world_to_view, br_int_32 w2vt)
          * Set direction and cone angles and enable angle culling, if
          * appropriate
          */
-        if((light->type & BR_LIGHT_TYPE) == BR_LIGHT_DIRECT || (light->type & BR_LIGHT_TYPE) == BR_LIGHT_SPOT ||
-           light->volume.regions != NULL) {
+        if((light->type & BR_LIGHT_TYPE) == BR_LIGHT_DIRECT || (light->type & BR_LIGHT_TYPE) == BR_LIGHT_SPOT || light->volume.regions != NULL) {
 
             /*
              * Transform direction (0,0,1,0) into view space -
@@ -481,11 +479,9 @@ void BrSetupLights(br_actor *world, br_matrix34 *world_to_view, br_int_32 w2vt)
 
             if(temp_regions != NULL)
 
-                for(region = light->volume.regions, new_region = temp_regions, i = 0; i < light->volume.nregions;
-                    i++, region++, new_region++) {
+                for(region = light->volume.regions, new_region = temp_regions, i = 0; i < light->volume.nregions; i++, region++, new_region++) {
 
-                    temp_planes = BrResAllocate(temp_regions, sizeof(*temp_planes) * region->nplanes,
-                                                BR_MEMORY_OBJECT_DATA);
+                    temp_planes = BrResAllocate(temp_regions, sizeof(*temp_planes) * region->nplanes, BR_MEMORY_OBJECT_DATA);
 
                     if(temp_planes == NULL) {
 
@@ -495,8 +491,7 @@ void BrSetupLights(br_actor *world, br_matrix34 *world_to_view, br_int_32 w2vt)
                         break;
                     }
 
-                    for(plane = region->planes, new_plane = temp_planes, j = 0; j < region->nplanes;
-                        j++, plane++, new_plane++)
+                    for(plane = region->planes, new_plane = temp_planes, j = 0; j < region->nplanes; j++, plane++, new_plane++)
                         BrMatrix34ApplyPlaneEquation(new_plane, plane, &this_to_view);
 
                     new_region->planes  = temp_planes;
@@ -636,8 +631,7 @@ void BrSetupEnvironment(br_actor *world, br_matrix34 *world_to_view, br_int_32 w
      * Send to renderer
      */
     if(h != BRT_DONT_CARE)
-        RendererPartSet(v1db.renderer, BRT_MATRIX, 0, BRT_AS_MATRIX34_SCALAR(VIEW_TO_ENVIRONMENT),
-                        (br_value){.m34 = &view_to_this});
+        RendererPartSet(v1db.renderer, BRT_MATRIX, 0, BRT_AS_MATRIX34_SCALAR(VIEW_TO_ENVIRONMENT), (br_value){.m34 = &view_to_this});
     RendererPartSet(v1db.renderer, BRT_MATRIX, 0, BRT_VIEW_TO_ENVIRONMENT_HINT_T, (br_value){.t = h});
 }
 

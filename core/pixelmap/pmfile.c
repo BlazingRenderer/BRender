@@ -18,7 +18,6 @@
 
 #include "pmmem.h"
 
-
 /**
  ** Pixelmap
  **/
@@ -68,6 +67,8 @@ static br_file_enum_member pixelmap_type_FM[] = {
 static _FILE_ENUM(pixelmap_type);
 
 #define _STRUCT_NAME struct br_pixelmap
+
+// clang-format off
 static br_file_struct_member br_old_pixelmap_FM[] = {
     _ENUM_8(type, pixelmap_type_F),
     _UINT_16(row_bytes),
@@ -88,6 +89,7 @@ static br_file_struct_member br_pixelmap_FM[] = {
     _UINT_16(mip_offset),
     _ASCIZ(identifier),
 };
+// clang-format on
 
 static _FILE_STRUCT(br_pixelmap);
 static _FILE_STRUCT(br_old_pixelmap);
@@ -181,8 +183,7 @@ static int FopWrite_PIXELS(br_datafile *df, br_pixelmap *pixelmap)
 
     } else {
 
-        df->prims->chunk_write(
-            df, FID_PIXELS, df->prims->block_size(df, pixels, block_count, pixelmap->row_bytes, pixelmap->height, size));
+        df->prims->chunk_write(df, FID_PIXELS, df->prims->block_size(df, pixels, block_count, pixelmap->row_bytes, pixelmap->height, size));
 
         df->prims->block_write(df, pixels, block_count, pixelmap->row_bytes, pixelmap->height, size);
     }

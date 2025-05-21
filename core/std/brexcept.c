@@ -10,7 +10,6 @@
 
 #include "brddi.h"
 
-
 /*
  * Current head of exception handler chain
  */

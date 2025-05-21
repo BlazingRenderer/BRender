@@ -41,8 +41,7 @@ br_boolean BR_RESIDENT_ENTRY HostIniSectionExists(const char *ini_file, const ch
     return (Size != 0);
 }
 
-br_error BR_RESIDENT_ENTRY HostIniQuery(const char *ini_file, const char *section_name, const char *entry, char *Buffer,
-                                        int max, br_uint_16 *size)
+br_error BR_RESIDENT_ENTRY HostIniQuery(const char *ini_file, const char *section_name, const char *entry, char *Buffer, int max, br_uint_16 *size)
 
 {
     *size = (int)GetPrivateProfileStringA(section_name, entry, "", Buffer, max, ini_file);
@@ -50,8 +49,7 @@ br_error BR_RESIDENT_ENTRY HostIniQuery(const char *ini_file, const char *sectio
     return BRE_OK;
 }
 
-br_error BR_RESIDENT_ENTRY HostRegistryQuery(const void *hKey, const char *Path, const char *entry, char *Buffer,
-                                             br_uint_16 max, br_uint_16 *size)
+br_error BR_RESIDENT_ENTRY HostRegistryQuery(const void *hKey, const char *Path, const char *entry, char *Buffer, br_uint_16 max, br_uint_16 *size)
 {
     HKEY  key, key2;
     DWORD type;
@@ -132,8 +130,7 @@ br_error BR_RESIDENT_ENTRY HostRegistryReadKey(const void *key, const char *subk
     if(RegOpenKeyExA(key ? (HKEY)key : HKEY_LOCAL_MACHINE, subkey, 0, KEY_READ, &hkey) != ERROR_SUCCESS)
         return BRE_FAIL;
 
-    if(RegQueryInfoKeyA(hkey, NULL, NULL, NULL, NULL, NULL, NULL, &num_values, &max_name_len, &max_value_len, NULL,
-                        NULL) != ERROR_SUCCESS) {
+    if(RegQueryInfoKeyA(hkey, NULL, NULL, NULL, NULL, NULL, NULL, &num_values, &max_name_len, &max_value_len, NULL, NULL) != ERROR_SUCCESS) {
         RegCloseKey(hkey);
         return BRE_FAIL;
     }
@@ -183,8 +180,7 @@ br_error BR_RESIDENT_ENTRY HostRegistryReadKey(const void *key, const char *subk
 
             case REG_DWORD_BIG_ENDIAN:
 
-                dword = *(BYTE *)value << 24 | *(BYTE *)(value + 1) << 16 | *(BYTE *)(value + 2) << 8 |
-                        *(BYTE *)(value + 3);
+                dword = *(BYTE *)value << 24 | *(BYTE *)(value + 1) << 16 | *(BYTE *)(value + 2) << 8 | *(BYTE *)(value + 3);
                 BrSprintf(value, "%d", dword);
                 value_len = BrStrLen(value);
 
@@ -247,8 +243,8 @@ br_error BR_RESIDENT_ENTRY HostRegistryWriteKey(const void *key, const char *sub
     br_error r = BRE_OK;
 
     if(subkey != NULL) {
-        if(RegCreateKeyExA(key ? (HKEY)key : HKEY_LOCAL_MACHINE, subkey, 0, "", REG_OPTION_NON_VOLATILE, KEY_WRITE,
-                           NULL, &hkey, &disposition) != ERROR_SUCCESS)
+        if(RegCreateKeyExA(key ? (HKEY)key : HKEY_LOCAL_MACHINE, subkey, 0, "", REG_OPTION_NON_VOLATILE, KEY_WRITE, NULL, &hkey,
+                           &disposition) != ERROR_SUCCESS)
             return BRE_FAIL;
     } else {
         if(RegOpenKeyExA(key ? (HKEY)key : HKEY_LOCAL_MACHINE, NULL, 0, KEY_WRITE, &hkey) != ERROR_SUCCESS)
@@ -290,8 +286,7 @@ br_boolean BR_RESIDENT_ENTRY HostIniSectionExists(const char *ini_file, const ch
     return BR_FALSE;
 }
 
-br_error BR_RESIDENT_ENTRY HostIniQuery(const char *ini_file, const char *section_name, const char *entry, char *Buffer,
-                                        int max, br_uint_16 *size)
+br_error BR_RESIDENT_ENTRY HostIniQuery(const char *ini_file, const char *section_name, const char *entry, char *Buffer, int max, br_uint_16 *size)
 {
     *size   = 0;
     *Buffer = '\0';
@@ -299,8 +294,7 @@ br_error BR_RESIDENT_ENTRY HostIniQuery(const char *ini_file, const char *sectio
     return BRE_FAIL;
 }
 
-br_error BR_RESIDENT_ENTRY HostRegistryQuery(const void *hKey, const char *Path, const char *entry, char *Buffer,
-                                             br_uint_16 max, br_uint_16 *size)
+br_error BR_RESIDENT_ENTRY HostRegistryQuery(const void *hKey, const char *Path, const char *entry, char *Buffer, br_uint_16 max, br_uint_16 *size)
 {
     *size   = 0;
     *Buffer = '\0';

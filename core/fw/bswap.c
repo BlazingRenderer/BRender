@@ -11,7 +11,6 @@
 #include "brassert.h"
 #include "brhton.h"
 
-
 #undef _SWAP
 #define _SWAP(a, b) \
     {               \

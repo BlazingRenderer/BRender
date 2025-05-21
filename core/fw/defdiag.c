@@ -8,7 +8,6 @@
  */
 #include "brender.h"
 
-
 static void BrNullWarning(const char *message)
 {
 }

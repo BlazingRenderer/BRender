@@ -297,7 +297,7 @@ static void lexerAdvance(struct br_lexer *l)
             for(n = 1; n < l->string_buffer_size - 1; n++) {
 
                 switch(l->source->next) {
-                    // clang-format off
+                        // clang-format off
                     case '0': case '1': case '2': case '3': case '4': case '5':
                     case '6': case '7': case '8': case '9': case 'x': case 'X':
                     case 'A': case 'B': case 'C': case 'D': case 'E': case 'F':

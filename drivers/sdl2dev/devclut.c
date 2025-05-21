@@ -108,14 +108,12 @@ static br_error BR_CMETHOD_DECL(br_device_clut_sdl2, entryQuery)(br_device_clut 
     return DeviceClutEntryQueryMany(self, entry, index, 1);
 }
 
-static br_error BR_CMETHOD_DECL(br_device_clut_sdl2, entrySetMany)(br_device_clut *self, br_int_32 index,
-                                                                   br_int_32 count, br_colour *entries)
+static br_error BR_CMETHOD_DECL(br_device_clut_sdl2, entrySetMany)(br_device_clut *self, br_int_32 index, br_int_32 count, br_colour *entries)
 {
     return DeviceSDL2SetPalette(self->pal, index, count, entries, BR_FALSE);
 }
 
-static br_error BR_CMETHOD_DECL(br_device_clut_sdl2, entryQueryMany)(br_device_clut *self, br_colour *entries,
-                                                                     br_int_32 index, br_int_32 count)
+static br_error BR_CMETHOD_DECL(br_device_clut_sdl2, entryQueryMany)(br_device_clut *self, br_colour *entries, br_int_32 index, br_int_32 count)
 {
     if(index < 0 || index >= self->pal->ncolors)
         return BRE_OVERFLOW;

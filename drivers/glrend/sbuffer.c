@@ -26,8 +26,7 @@ static struct br_tv_template_entry bufferStoredTemplateEntries[] = {
 /*
  * Set up a static device object
  */
-struct br_buffer_stored *BufferStoredGLAllocate(br_renderer *renderer, br_token use, struct br_device_pixelmap *pm,
-                                                br_token_value *tv)
+struct br_buffer_stored *BufferStoredGLAllocate(br_renderer *renderer, br_token use, struct br_device_pixelmap *pm, br_token_value *tv)
 {
     struct br_buffer_stored *self;
     char                    *ident;
@@ -76,8 +75,7 @@ struct br_buffer_stored *BufferStoredGLAllocate(br_renderer *renderer, br_token 
     self->device     = ObjectDevice(renderer);
     self->renderer   = renderer;
     self->gl_tex     = 0;
-    self->templates  = BrTVTemplateAllocate(self, (br_tv_template_entry *)bufferStoredTemplateEntries,
-                                            BR_ASIZE(bufferStoredTemplateEntries));
+    self->templates = BrTVTemplateAllocate(self, (br_tv_template_entry *)bufferStoredTemplateEntries, BR_ASIZE(bufferStoredTemplateEntries));
 
     BufferStoredUpdate(self, pm, tv);
 
@@ -118,8 +116,7 @@ static br_error updateMemory(br_buffer_stored *self, br_pixelmap *pm)
     return BRE_OK;
 }
 
-static br_error BR_CMETHOD_DECL(br_buffer_stored_gl, update)(struct br_buffer_stored   *self,
-                                                             struct br_device_pixelmap *pm, br_token_value *tv)
+static br_error BR_CMETHOD_DECL(br_buffer_stored_gl, update)(struct br_buffer_stored *self, struct br_device_pixelmap *pm, br_token_value *tv)
 {
     br_device *pm_device;
     (void)tv;

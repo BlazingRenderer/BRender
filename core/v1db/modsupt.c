@@ -11,7 +11,6 @@
 #include "shortcut.h"
 #include "brassert.h"
 
-
 /*
  * Generate U and V values for a model's vertices.
  *

@@ -41,7 +41,7 @@ br_device_clut *DeviceClutGLAllocate(br_device_pixelmap *pm)
     return self;
 }
 
-static void BR_CMETHOD_DECL(br_device_clut_gl, free) (br_object *_self)
+static void BR_CMETHOD_DECL(br_device_clut_gl, free)(br_object *_self)
 {
     br_device_clut *self = (br_device_clut *)_self;
 
@@ -57,32 +57,32 @@ static void BR_CMETHOD_DECL(br_device_clut_gl, free) (br_object *_self)
     BrResFreeNoCallback(self);
 }
 
-static const char *BR_CMETHOD_DECL(br_device_clut_gl, identifier) (br_object *self)
+static const char *BR_CMETHOD_DECL(br_device_clut_gl, identifier)(br_object *self)
 {
     return ((br_device_clut *)self)->identifier;
 }
 
-static br_device *BR_CMETHOD_DECL(br_device_clut_gl, device) (br_object *self)
+static br_device *BR_CMETHOD_DECL(br_device_clut_gl, device)(br_object *self)
 {
     return ((br_device_clut *)self)->device;
 }
 
-static br_token BR_CMETHOD_DECL(br_device_clut_gl, type) (br_object *self)
+static br_token BR_CMETHOD_DECL(br_device_clut_gl, type)(br_object *self)
 {
     return BRT_DEVICE_CLUT;
 }
 
-static br_boolean BR_CMETHOD_DECL(br_device_clut_gl, isType) (br_object *self, br_token t)
+static br_boolean BR_CMETHOD_DECL(br_device_clut_gl, isType)(br_object *self, br_token t)
 {
     return (t == BRT_DEVICE_CLUT) || (t == BRT_OBJECT);
 }
 
-static br_size_t BR_CMETHOD_DECL(br_device_clut_gl, space) (br_object *self)
+static br_size_t BR_CMETHOD_DECL(br_device_clut_gl, space)(br_object *self)
 {
     return sizeof(br_device_clut);
 }
 
-static struct br_tv_template *BR_CMETHOD_DECL(br_device_clut_gl, queryTemplate) (br_object *_self)
+static struct br_tv_template *BR_CMETHOD_DECL(br_device_clut_gl, queryTemplate)(br_object *_self)
 {
     br_device_clut *self = (br_device_clut *)_self;
 
@@ -93,18 +93,17 @@ static struct br_tv_template *BR_CMETHOD_DECL(br_device_clut_gl, queryTemplate) 
     return self->device->templates.deviceClutTemplate;
 }
 
-static br_error BR_CMETHOD_DECL(br_device_clut_gl, entrySet) (br_device_clut *self, br_int_32 index, br_colour entry)
+static br_error BR_CMETHOD_DECL(br_device_clut_gl, entrySet)(br_device_clut *self, br_int_32 index, br_colour entry)
 {
     return DeviceClutEntrySetMany(self, index, 1, &entry);
 }
 
-static br_error BR_CMETHOD_DECL(br_device_clut_gl, entryQuery) (br_device_clut *self, br_colour *entry, br_int_32 index)
+static br_error BR_CMETHOD_DECL(br_device_clut_gl, entryQuery)(br_device_clut *self, br_colour *entry, br_int_32 index)
 {
     return DeviceClutEntryQueryMany(self, entry, index, 1);
 }
 
-static br_error BR_CMETHOD_DECL(br_device_clut_gl, entrySetMany) (br_device_clut *self, br_int_32 index,
-                                                                  br_int_32 count, br_colour *entries)
+static br_error BR_CMETHOD_DECL(br_device_clut_gl, entrySetMany)(br_device_clut *self, br_int_32 index, br_int_32 count, br_colour *entries)
 {
     if(count > BR_GLREND_MAX_CLUT_ENTRIES)
         return BRE_OVERFLOW;
@@ -131,8 +130,7 @@ static br_error BR_CMETHOD_DECL(br_device_clut_gl, entrySetMany) (br_device_clut
     return BRE_OK;
 }
 
-static br_error BR_CMETHOD_DECL(br_device_clut_gl, entryQueryMany) (br_device_clut *self, br_colour *entries,
-                                                                    br_int_32 index, br_int_32 count)
+static br_error BR_CMETHOD_DECL(br_device_clut_gl, entryQueryMany)(br_device_clut *self, br_colour *entries, br_int_32 index, br_int_32 count)
 {
     if(index < 0 || index >= self->pm->height)
         return BRE_OVERFLOW;

@@ -10,7 +10,6 @@
 
 #include "brender.h"
 
-
 #include <stdlib.h>
 
 void BR_RESIDENT_ENTRY BrQsort(void *basep, unsigned int nelems, unsigned int size, br_qsort_cbfn *comp)

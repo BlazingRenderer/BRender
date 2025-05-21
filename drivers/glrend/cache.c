@@ -85,8 +85,7 @@ static int casfd(shader_data_scene *scene, const state_light *in, size_t i, br_v
     counts->v[info->type]++;
 
     /* See enables.c:194, BrSetupLights(). All the lights are already converted into view space. */
-    BrVector4Set(scene->light_positions + i, in->position.v[0], in->position.v[1], in->position.v[2],
-                 in->type == BRT_DIRECT ? 0.0f : 1.0f);
+    BrVector4Set(scene->light_positions + i, in->position.v[0], in->position.v[1], in->position.v[2], in->type == BRT_DIRECT ? 0.0f : 1.0f);
     BrVector4Set(scene->light_directions + i, in->direction.v[0], in->direction.v[1], in->direction.v[2], 0.0f);
 
     if(in->type == BRT_DIRECT) {
@@ -178,8 +177,7 @@ static void ProcessSceneLights(state_cache *cache, state_light *lights)
     if(use_ambient_colour) {
         BrVector4Clamp(&scene->ambient_colour, &scene->ambient_colour, BR_SCALAR(0), BR_SCALAR(1));
 
-        if(scene->ambient_colour.v[0] == BR_SCALAR(1) && scene->ambient_colour.v[0] == BR_SCALAR(1) &&
-           scene->ambient_colour.v[0] == BR_SCALAR(1))
+        if(scene->ambient_colour.v[0] == BR_SCALAR(1) && scene->ambient_colour.v[0] == BR_SCALAR(1) && scene->ambient_colour.v[0] == BR_SCALAR(1))
             use_ambient_colour = BR_FALSE;
     }
 
@@ -242,6 +240,7 @@ static br_vector4 EyeInModel(const state_cache *cache, const state_matrix *matri
      */
     if(matrix->model_to_view_hint == BRT_LENGTH_PRESERVING) {
         if(matrix->view_to_screen_hint == BRT_PERSPECTIVE) {
+            // clang-format off
             eye_m.v[0] = -BR_MAC3(matrix->model_to_view.m[3][0], matrix->model_to_view.m[0][0],
                                   matrix->model_to_view.m[3][1], matrix->model_to_view.m[0][1],
                                   matrix->model_to_view.m[3][Z], matrix->model_to_view.m[0][2]);
@@ -253,6 +252,7 @@ static br_vector4 EyeInModel(const state_cache *cache, const state_matrix *matri
                                   matrix->model_to_view.m[3][Z], matrix->model_to_view.m[2][2]);
 
             eye_m.v[3] = BR_SCALAR(1.0);
+            // clang-format on
 
             return eye_m;
         }

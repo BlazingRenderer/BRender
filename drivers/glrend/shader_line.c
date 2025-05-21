@@ -5,7 +5,7 @@
 
 br_boolean VIDEOI_CompileLineShader(HVIDEO hVideo)
 {
-  GLuint vert, frag;
+    GLuint vert, frag;
 
     if((vert = VIDEOI_CreateAndCompileShader(GL_VERTEX_SHADER, g_LineVertexShader, sizeof(g_LineVertexShader))) == 0)
         goto vert_failed;
@@ -28,8 +28,7 @@ br_boolean VIDEOI_CompileLineShader(HVIDEO hVideo)
 
     hVideo->lineProgram.block_index_line_data   = glGetUniformBlockIndex(hVideo->lineProgram.program, "LineData");
     hVideo->lineProgram.block_binding_line_data = 0;
-    glUniformBlockBinding(hVideo->lineProgram.program, hVideo->lineProgram.block_index_line_data,
-                          hVideo->lineProgram.block_binding_line_data);
+    glUniformBlockBinding(hVideo->lineProgram.program, hVideo->lineProgram.block_index_line_data, hVideo->lineProgram.block_binding_line_data);
 
     glGenBuffers(1, &hVideo->lineProgram.ubo);
     glBindBuffer(GL_UNIFORM_BUFFER, hVideo->lineProgram.ubo);

@@ -9,7 +9,6 @@
 #include "pm.h"
 #include "brassert.h"
 
-
 br_error BR_CMETHOD_DECL(br_device_pixelmap_null, validSource)(br_device_pixelmap *self, br_boolean *bp, br_object *h)
 {
     return BRE_OK;
@@ -43,32 +42,30 @@ br_error BR_CMETHOD_DECL(br_device_pixelmap_null, doubleBuffer)(br_device_pixelm
     return BRE_OK;
 }
 
-br_error BR_CMETHOD_DECL(br_device_pixelmap_null, copyDirty)(br_device_pixelmap *self, br_device_pixelmap *src,
-                                                             br_rectangle *dirty, br_int_32 num_rects)
+br_error BR_CMETHOD_DECL(br_device_pixelmap_null, copyDirty)(br_device_pixelmap *self, br_device_pixelmap *src, br_rectangle *dirty, br_int_32 num_rects)
 {
     return BRE_OK;
 }
 
-br_error BR_CMETHOD_DECL(br_device_pixelmap_null, copyToDirty)(br_device_pixelmap *self, br_device_pixelmap *src,
-                                                               br_rectangle *dirty, br_int_32 num_rects)
+br_error BR_CMETHOD_DECL(br_device_pixelmap_null, copyToDirty)(br_device_pixelmap *self, br_device_pixelmap *src, br_rectangle *dirty,
+                                                               br_int_32 num_rects)
 {
     return BRE_OK;
 }
 
-br_error BR_CMETHOD_DECL(br_device_pixelmap_null, copyFromDirty)(br_device_pixelmap *self, br_device_pixelmap *src,
-                                                                 br_rectangle *dirty, br_int_32 num_rects)
+br_error BR_CMETHOD_DECL(br_device_pixelmap_null, copyFromDirty)(br_device_pixelmap *self, br_device_pixelmap *src, br_rectangle *dirty,
+                                                                 br_int_32 num_rects)
 {
     return BRE_OK;
 }
 
-br_error BR_CMETHOD_DECL(br_device_pixelmap_null, fillDirty)(br_device_pixelmap *self, br_uint_32 colour,
-                                                             br_rectangle *dirty, br_int_32 num_rects)
+br_error BR_CMETHOD_DECL(br_device_pixelmap_null, fillDirty)(br_device_pixelmap *self, br_uint_32 colour, br_rectangle *dirty, br_int_32 num_rects)
 {
     return BRE_OK;
 }
 
-br_error BR_CMETHOD_DECL(br_device_pixelmap_null, doubleBufferDirty)(br_device_pixelmap *self, br_device_pixelmap *src,
-                                                                     br_rectangle *dirty, br_int_32 num_rects)
+br_error BR_CMETHOD_DECL(br_device_pixelmap_null, doubleBufferDirty)(br_device_pixelmap *self, br_device_pixelmap *src, br_rectangle *dirty,
+                                                                     br_int_32 num_rects)
 {
     return BRE_OK;
 }
@@ -76,14 +73,13 @@ br_error BR_CMETHOD_DECL(br_device_pixelmap_null, doubleBufferDirty)(br_device_p
 /*
  * Direct 2D rendering operations
  */
-br_error BR_CMETHOD_DECL(br_device_pixelmap_null, rectangleCopyTo)(br_device_pixelmap *self, br_point *p,
-                                                                   br_device_pixelmap *src, br_rectangle *r)
+br_error BR_CMETHOD_DECL(br_device_pixelmap_null, rectangleCopyTo)(br_device_pixelmap *self, br_point *p, br_device_pixelmap *src, br_rectangle *r)
 {
     return BRE_OK;
 }
 
-br_error BR_CMETHOD_DECL(br_device_pixelmap_null, rectangleCopyFrom)(br_device_pixelmap *self, br_point *p,
-                                                                     br_device_pixelmap *mem, br_rectangle *r)
+br_error BR_CMETHOD_DECL(br_device_pixelmap_null, rectangleCopyFrom)(br_device_pixelmap *self, br_point *p, br_device_pixelmap *mem,
+                                                                     br_rectangle *r)
 {
     return BRE_OK;
 }
@@ -100,8 +96,7 @@ br_error BR_CMETHOD_DECL(br_device_pixelmap_null, rectangleStretchCopyFrom)(br_d
     return BRE_OK;
 }
 
-br_error BR_CMETHOD_DECL(br_device_pixelmap_null, rectangleFill)(br_device_pixelmap *self, br_rectangle *rect,
-                                                                 br_uint_32 colour)
+br_error BR_CMETHOD_DECL(br_device_pixelmap_null, rectangleFill)(br_device_pixelmap *self, br_rectangle *rect, br_uint_32 colour)
 {
     return BRE_OK;
 }
@@ -125,8 +120,7 @@ br_error BR_CMETHOD_DECL(br_device_pixelmap_null, pixelQuery)(br_device_pixelmap
     return BRE_OK;
 }
 
-br_error BR_CMETHOD_DECL(br_device_pixelmap_null, pixelAddressQuery)(br_device_pixelmap *self, void **pptr,
-                                                                     br_uint_32 *pqual, br_point *p)
+br_error BR_CMETHOD_DECL(br_device_pixelmap_null, pixelAddressQuery)(br_device_pixelmap *self, void **pptr, br_uint_32 *pqual, br_point *p)
 {
     return BRE_OK;
 }

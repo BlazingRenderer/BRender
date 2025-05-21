@@ -15,7 +15,6 @@
 
 #include "fw.h"
 
-
 static char _diag_scratch[128];
 
 void BR_RESIDENT_ENTRY BrFailure(const char *s, ...)

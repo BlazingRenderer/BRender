@@ -10,7 +10,6 @@
 #include "host.h"
 #include <brassert.h>
 
-
 static br_boolean active = BR_FALSE;
 
 br_error BR_PUBLIC_ENTRY BrBegin(void)

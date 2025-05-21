@@ -2,9 +2,9 @@
 
 static br_vertex quad_vertices[4] = {
     {.p = BR_VECTOR3(-0.5f, -0.5f, 0.0f), .n = BR_VECTOR3(0.0f, 0.0f, -1.0f), .map = BR_VECTOR2(0.0f, 0.0f), .red = 255, .grn = 255, .blu = 255},
-    {.p = BR_VECTOR3( 0.5f, -0.5f, 0.0f), .n = BR_VECTOR3(0.0f, 0.0f, -1.0f), .map = BR_VECTOR2(1.0f, 0.0f), .red = 255, .grn = 255, .blu = 255},
-    {.p = BR_VECTOR3(-0.5f,  0.5f, 0.0f), .n = BR_VECTOR3(0.0f, 0.0f, -1.0f), .map = BR_VECTOR2(0.0f, 1.0f), .red = 255, .grn = 255, .blu = 255},
-    {.p = BR_VECTOR3( 0.5f,  0.5f, 0.0f), .n = BR_VECTOR3(0.0f, 0.0f, -1.0f), .map = BR_VECTOR2(1.0f, 1.0f), .red = 255, .grn = 255, .blu = 255},
+    {.p = BR_VECTOR3(0.5f,  -0.5f, 0.0f), .n = BR_VECTOR3(0.0f, 0.0f, -1.0f), .map = BR_VECTOR2(1.0f, 0.0f), .red = 255, .grn = 255, .blu = 255},
+    {.p = BR_VECTOR3(-0.5f, 0.5f,  0.0f), .n = BR_VECTOR3(0.0f, 0.0f, -1.0f), .map = BR_VECTOR2(0.0f, 1.0f), .red = 255, .grn = 255, .blu = 255},
+    {.p = BR_VECTOR3(0.5f,  0.5f,  0.0f), .n = BR_VECTOR3(0.0f, 0.0f, -1.0f), .map = BR_VECTOR2(1.0f, 1.0f), .red = 255, .grn = 255, .blu = 255},
 };
 
 static br_face quad_faces[2] = {

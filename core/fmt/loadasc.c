@@ -10,7 +10,6 @@
 #include "brender.h"
 #include "fmt.h"
 
-
 /*
  * Various keywords than can appear in 3D-Studio .ASC file
  */

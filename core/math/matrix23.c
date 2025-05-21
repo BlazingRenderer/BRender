@@ -15,7 +15,6 @@
 #include "shortcut.h"
 #include "brassert.h"
 
-
 /*
  * A = B
  */

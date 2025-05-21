@@ -10,7 +10,6 @@
 #include "fw.h"
 #include "brassert.h"
 
-
 extern br_framework_state BR_ASM_DATA fw;
 
 /* Add drivers specified in the BRENDER_DRIVERS configuration entry
@@ -288,8 +287,7 @@ br_error BR_RESIDENT_ENTRY BrDevFind(struct br_device **pdev, const char *patter
 /*
  * Fill in an array of pointers to loaded devices mathcing pattern
  */
-br_error BR_RESIDENT_ENTRY BrDevFindMany(struct br_device **devices, br_int_32 *ndevices, br_int_32 max_devices,
-                                         const char *pattern)
+br_error BR_RESIDENT_ENTRY BrDevFindMany(struct br_device **devices, br_int_32 *ndevices, br_int_32 max_devices, const char *pattern)
 {
     int i, c;
 
@@ -346,9 +344,8 @@ br_error BR_RESIDENT_ENTRY BrDevContainedFind(struct br_object **ph, br_token ty
     return BRE_FAIL;
 }
 
-br_error BR_RESIDENT_ENTRY BrDevContainedFindMany(struct br_object **objects, br_int_32 max_objects,
-                                                  br_int_32 *pnum_objects, br_token type, const char *pattern,
-                                                  br_token_value *tv)
+br_error BR_RESIDENT_ENTRY BrDevContainedFindMany(struct br_object **objects, br_int_32 max_objects, br_int_32 *pnum_objects, br_token type,
+                                                  const char *pattern, br_token_value *tv)
 {
     int       i;
     br_int_32 n, total = 0;

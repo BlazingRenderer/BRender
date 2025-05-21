@@ -98,8 +98,7 @@ static void Tutorial4Update(br_demo *demo, br_scalar dt)
     br_demo_tut4 *tut   = demo->user;
     float         speed = dt * 25;
 
-    BrMatrix34PostTranslate(&tut->planet->t.t.mat, BR_SCALAR(-0.033 * speed), BR_SCALAR(-0.032 * speed),
-                            BR_SCALAR(0.1 * speed));
+    BrMatrix34PostTranslate(&tut->planet->t.t.mat, BR_SCALAR(-0.033 * speed), BR_SCALAR(-0.032 * speed), BR_SCALAR(0.1 * speed));
     BrMatrix34PreRotateY(&tut->planet->t.t.mat, BR_ANGLE_DEG(1.0f * speed));
     BrMatrix34PreRotateX(&tut->sat->t.t.mat, BR_ANGLE_DEG(15.0f * speed));
     BrMatrix34PreRotateY(&tut->sat->t.t.mat, BR_ANGLE_DEG(10.0f * speed));

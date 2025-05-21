@@ -38,17 +38,13 @@ br_token BrTokenFindType(br_token *ptype, const char *base, const br_token *type
 /*
  * tokenval.cpp
  */
-br_fixed_ls *BR_RESIDENT_ENTRY BrTVConvertFloatToFixed(br_fixed_ls **pextra, const br_float *src, br_size_t count,
-                                                       br_size_t *pextra_space);
+br_fixed_ls *BR_RESIDENT_ENTRY BrTVConvertFloatToFixed(br_fixed_ls **pextra, const br_float *src, br_size_t count, br_size_t *pextra_space);
 
-br_float *BR_RESIDENT_ENTRY BrTVConvertFixedToFloat(br_float **pextra, const br_fixed_ls *src, br_size_t count,
-                                                    br_size_t *pextra_space);
+br_float *BR_RESIDENT_ENTRY BrTVConvertFixedToFloat(br_float **pextra, const br_fixed_ls *src, br_size_t count, br_size_t *pextra_space);
 
-br_uint_32 *BR_RESIDENT_ENTRY BrTVConvertLongCopy(br_uint_32 **pextra, const br_uint_32 *src, br_size_t count,
-                                                  br_size_t *pextra_space);
+br_uint_32 *BR_RESIDENT_ENTRY BrTVConvertLongCopy(br_uint_32 **pextra, const br_uint_32 *src, br_size_t count, br_size_t *pextra_space);
 
-br_uintptr_t *BR_RESIDENT_ENTRY BrTVConvertPtrCopy(br_uintptr_t **pextra, const br_uintptr_t *src, br_size_t count,
-                                                   br_size_t *pextra_space);
+br_uintptr_t *BR_RESIDENT_ENTRY BrTVConvertPtrCopy(br_uintptr_t **pextra, const br_uintptr_t *src, br_size_t count, br_size_t *pextra_space);
 
 /*
  * object.c

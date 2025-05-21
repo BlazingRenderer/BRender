@@ -12,7 +12,6 @@
 
 #include "zsmacro.h"
 
-
 /*
  * Smallest possible distance between Z bounds
  */
@@ -166,8 +165,8 @@ void BR_PUBLIC_ENTRY BrZsOrderTablePrimitiveInsert(br_order_table *order_table, 
 /*
  * Select a bucket, given vertices, bounds, size and sort type
  */
-br_uint_16 BR_PUBLIC_ENTRY BrZsPrimitiveBucketSelect(br_scalar *z, br_uint_16 type, br_scalar min_z, br_scalar max_z,
-                                                     br_uint_16 size, br_uint_16 sort_type)
+br_uint_16 BR_PUBLIC_ENTRY BrZsPrimitiveBucketSelect(br_scalar *z, br_uint_16 type, br_scalar min_z, br_scalar max_z, br_uint_16 size,
+                                                     br_uint_16 sort_type)
 {
     br_uint_16 bucket;
     br_scalar  zprim, range, scale;
@@ -304,8 +303,7 @@ void SetOrderTableBounds(br_bounds *bounds, br_order_table *order_table)
     /*
      * Set new bounds if necessary
      */
-    if((order_table->flags & BR_ORDER_TABLE_NEW_BOUNDS) ||
-       ((order_table->flags & BR_ORDER_TABLE_INIT_BOUNDS) && (order_table->visits == 1))) {
+    if((order_table->flags & BR_ORDER_TABLE_NEW_BOUNDS) || ((order_table->flags & BR_ORDER_TABLE_INIT_BOUNDS) && (order_table->visits == 1))) {
 
         /*
          * Calculate Z bounds in screen space by accumulating

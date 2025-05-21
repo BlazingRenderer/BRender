@@ -10,7 +10,6 @@
 #include "fw.h"
 #include "brassert.h"
 
-
 static br_boolean deviceEnum(br_device *dev, br_device_enum_cbfn *cbfn, void *args)
 {
     br_size_t       s;

@@ -181,8 +181,7 @@ static void EditorCamRender(br_demo *demo)
         base_y += text_height * 2;
         base_y += text_height * 2;
 
-        BrPixelmapTextF(demo->colour_buffer, base_x, base_y, demo->text_colour, BrFontProp7x9, "Current Speed: %f",
-                        cam->current_speed);
+        BrPixelmapTextF(demo->colour_buffer, base_x, base_y, demo->text_colour, BrFontProp7x9, "Current Speed: %f", cam->current_speed);
     }
 
     BrRendererFrameEnd();

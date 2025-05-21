@@ -32,11 +32,7 @@ static br_size_t BrNullInquire(br_uint_8 type)
  * Allocator structure
  */
 br_allocator BrNullAllocator = {
-    "Null",
-    BrNullAllocate,
-    BrNullReallocate,
-    BrNullFree,
-    BrNullInquire,
+    "Null", BrNullAllocate, BrNullReallocate, BrNullFree, BrNullInquire,
 };
 
 // Nope, we're using std now

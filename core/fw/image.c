@@ -10,7 +10,6 @@
 #include "host.h"
 #include "brassert.h"
 
-
 br_boolean BR_RESIDENT_ENTRY BrImageAdd(br_image *img)
 {
     BR_ADDHEAD(&fw.images, img);

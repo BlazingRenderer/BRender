@@ -8,5 +8,4 @@
  */
 #include "brender.h"
 
-
 int _BR_Floating_Point_Scalar = 0;

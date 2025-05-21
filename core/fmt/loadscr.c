@@ -8,7 +8,6 @@
  */
 #include "brddi.h"
 
-
 /*
  * Default material fields
  */
@@ -30,8 +29,7 @@ const br_material _DefaultScriptMaterial = {
         BR_VECTOR2(0, 0),
     }},
 
-    .mode = BR_MATM_DEPTH_TEST_LE | BR_MATM_BLEND_MODE_STANDARD | BR_MATM_MAP_WIDTH_LIMIT_WRAP |
-            BR_MATM_MAP_HEIGHT_LIMIT_WRAP,
+    .mode        = BR_MATM_DEPTH_TEST_LE | BR_MATM_BLEND_MODE_STANDARD | BR_MATM_MAP_WIDTH_LIMIT_WRAP | BR_MATM_MAP_HEIGHT_LIMIT_WRAP,
     .index_base  = 0,
     .index_range = 63,
 };

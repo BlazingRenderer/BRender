@@ -34,8 +34,7 @@ typedef struct br_pool {
 #if !POOL_DEBUG
 br_pool_block *__bp; /* Hmm, this global is not optimizer friendly */
 
-#define BrPoolAllocate(pool) \
-    (void *)(((pool)->free ? 0 : BrPoolAddChunk(pool)), (__bp = (pool)->free), ((pool)->free = __bp->next, __bp))
+#define BrPoolAllocate(pool) (void *)(((pool)->free ? 0 : BrPoolAddChunk(pool)), (__bp = (pool)->free), ((pool)->free = __bp->next, __bp))
 
 #define BrPoolFree(pool, bp) ((bp)->next = (pool)->free, (pool)->free = (bp))
 #endif

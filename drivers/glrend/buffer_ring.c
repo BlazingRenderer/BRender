@@ -1,9 +1,8 @@
 #include "drv.h"
 #include "brassert.h"
 
-
-void BufferRingGLInit(br_buffer_ring_gl *self, const char *tag, size_t offset_alignment, size_t num_draws,
-                      GLuint buffer_index, size_t elem_size, GLenum binding_point, uint32_t flags)
+void BufferRingGLInit(br_buffer_ring_gl *self, const char *tag, size_t offset_alignment, size_t num_draws, GLuint buffer_index,
+                      size_t elem_size, GLenum binding_point, uint32_t flags)
 {
     size_t aligned_size;
     size_t buffer_size;

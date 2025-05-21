@@ -63,8 +63,7 @@ GLuint RendererGLGetSampler(br_renderer *self, const br_sampler_info_gl *info);
 /*
  * devpixmp.c
  */
-br_error BR_CMETHOD_DECL(br_device_pixelmap_gl, match) (br_device_pixelmap *self, br_device_pixelmap **newpm,
-                                                        br_token_value *tv);
+br_error BR_CMETHOD_DECL(br_device_pixelmap_gl, match)(br_device_pixelmap *self, br_device_pixelmap **newpm, br_token_value *tv);
 
 /*
  * Gets the pixelmap viewport rect (for glViewport), converting to bottom-left coordinates.
@@ -74,8 +73,7 @@ br_rectangle DevicePixelmapGLGetViewport(const br_device_pixelmap *pm);
 /*
  * devpmsub.c
  */
-br_error BR_CMETHOD_DECL(br_device_pixelmap_gl, allocateSub)(br_device_pixelmap *self, br_device_pixelmap **newpm,
-                                                             br_rectangle *rect);
+br_error BR_CMETHOD_DECL(br_device_pixelmap_gl, allocateSub)(br_device_pixelmap *self, br_device_pixelmap **newpm, br_rectangle *rect);
 
 void DevicePixelmapGLIncRef(br_device_pixelmap *self);
 
@@ -94,8 +92,7 @@ br_device_clut *DeviceClutGLAllocate(br_device_pixelmap *pm);
 /*
  * sbuffer.c
  */
-struct br_buffer_stored *BufferStoredGLAllocate(br_renderer *renderer, br_token use, struct br_device_pixelmap *pm,
-                                                br_token_value *tv);
+struct br_buffer_stored *BufferStoredGLAllocate(br_renderer *renderer, br_token use, struct br_device_pixelmap *pm, br_token_value *tv);
 
 GLenum BufferStoredGLGetTexture(const br_buffer_stored *self);
 GLuint BufferStoredGLGetCLUTTexture(const br_buffer_stored *self, br_device_pixelmap *target, GLuint fallback);
@@ -113,8 +110,7 @@ br_geometry_v1_model *GeometryV1ModelGLAllocate(br_renderer_facility *type, cons
 /*
  * gstored.c
  */
-br_geometry_stored *GeometryStoredGLAllocate(br_geometry_v1_model *gv1model, const char *id, br_renderer *r,
-                                             struct v11model *model);
+br_geometry_stored *GeometryStoredGLAllocate(br_geometry_v1_model *gv1model, const char *id, br_renderer *r, struct v11model *model);
 
 /*
  * onscreen.c
@@ -124,8 +120,7 @@ br_token GLOnScreenCheck(const br_matrix4 *model_to_screen, const br_bounds3_f *
 /*
  * sstate.c
  */
-br_renderer_state_stored *RendererStateStoredGLAllocate(br_renderer *renderer, state_stack *base_state, br_uint_32 m,
-                                                        br_token_value *tv);
+br_renderer_state_stored *RendererStateStoredGLAllocate(br_renderer *renderer, state_stack *base_state, br_uint_32 m, br_token_value *tv);
 
 /*
  * state.c and friends
@@ -156,8 +151,8 @@ void StateGLCopy(state_stack *dst, const state_stack *src, uint32_t mask);
 /*
  * buffer_ring.c
  */
-void       BufferRingGLInit(br_buffer_ring_gl *self, const char *tag, size_t offset_alignment, size_t num_draws,
-                            GLuint buffer_index, size_t elem_size, GLenum binding_point, uint32_t flags);
+void       BufferRingGLInit(br_buffer_ring_gl *self, const char *tag, size_t offset_alignment, size_t num_draws, GLuint buffer_index,
+                            size_t elem_size, GLenum binding_point, uint32_t flags);
 void       BufferRingGLBegin(br_buffer_ring_gl *self);
 br_boolean BufferRingGLPush(br_buffer_ring_gl *self, const void *data, GLsizeiptr size);
 void       BufferRingGLEnd(br_buffer_ring_gl *self);

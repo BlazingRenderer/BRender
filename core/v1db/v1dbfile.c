@@ -13,7 +13,6 @@
 #include "brassert.h"
 #include "datafile.h"
 
-
 /*
  * For digging around in points etc - makes things slightly easier to read
  */
@@ -46,8 +45,7 @@ static _FILE_STRUCT(br_vertex);
  */
 static int FopWrite_VERTICES(br_datafile *df, br_vertex *vertices, int nvertices)
 {
-    df->prims->chunk_write(df, FID_VERTICES,
-                           df->prims->count_size(df) + nvertices * df->prims->struct_size(df, &br_vertex_F, NULL));
+    df->prims->chunk_write(df, FID_VERTICES, df->prims->count_size(df) + nvertices * df->prims->struct_size(df, &br_vertex_F, NULL));
     df->prims->count_write(df, nvertices);
     DfStructWriteArray(df, &br_vertex_F, vertices, nvertices);
 
@@ -106,8 +104,7 @@ static _FILE_STRUCT(br_vertex_uv);
  */
 static int FopWrite_VERTEX_UV(br_datafile *df, br_vertex *vertices, int nvertices)
 {
-    df->prims->chunk_write(df, FID_VERTEX_UV,
-                           df->prims->count_size(df) + nvertices * df->prims->struct_size(df, &br_vertex_uv_F, NULL));
+    df->prims->chunk_write(df, FID_VERTEX_UV, df->prims->count_size(df) + nvertices * df->prims->struct_size(df, &br_vertex_uv_F, NULL));
     df->prims->count_write(df, nvertices);
 
     DfStructWriteArray(df, &br_vertex_uv_F, vertices, nvertices);
@@ -152,8 +149,7 @@ static _FILE_STRUCT(br_vertex_colour);
  */
 static int FopWrite_VERTEX_COLOUR(br_datafile *df, br_vertex *vertices, int nvertices)
 {
-    df->prims->chunk_write(df, FID_VERTEX_COLOUR,
-                           df->prims->count_size(df) + nvertices * df->prims->struct_size(df, &br_vertex_colour_F, NULL));
+    df->prims->chunk_write(df, FID_VERTEX_COLOUR, df->prims->count_size(df) + nvertices * df->prims->struct_size(df, &br_vertex_colour_F, NULL));
     df->prims->count_write(df, nvertices);
 
     DfStructWriteArray(df, &br_vertex_colour_F, vertices, nvertices);
@@ -195,8 +191,7 @@ static _FILE_STRUCT(br_vertex_normal);
  */
 static int FopWrite_VERTEX_NORMAL(br_datafile *df, br_vertex *vertices, int nvertices)
 {
-    df->prims->chunk_write(df, FID_VERTEX_NORMAL,
-                           df->prims->count_size(df) + nvertices * df->prims->struct_size(df, &br_vertex_normal_F, NULL));
+    df->prims->chunk_write(df, FID_VERTEX_NORMAL, df->prims->count_size(df) + nvertices * df->prims->struct_size(df, &br_vertex_normal_F, NULL));
     df->prims->count_write(df, nvertices);
 
     DfStructWriteArray(df, &br_vertex_normal_F, vertices, nvertices);
@@ -436,8 +431,7 @@ static _FILE_STRUCT(br_face_colour);
  */
 static int FopWrite_FACE_COLOUR(br_datafile *df, br_face *faces, int nfaces)
 {
-    df->prims->chunk_write(df, FID_FACE_COLOUR,
-                           df->prims->count_size(df) + nfaces * df->prims->struct_size(df, &br_face_colour_F, NULL));
+    df->prims->chunk_write(df, FID_FACE_COLOUR, df->prims->count_size(df) + nfaces * df->prims->struct_size(df, &br_face_colour_F, NULL));
     df->prims->count_write(df, nfaces);
 
     DfStructWriteArray(df, &br_face_colour_F, faces, nfaces);
@@ -480,8 +474,7 @@ static _FILE_STRUCT(br_face_equation);
  */
 static int FopWrite_FACE_EQUATION(br_datafile *df, br_face *faces, int nfaces)
 {
-    df->prims->chunk_write(df, FID_FACE_EQUATION,
-                           df->prims->count_size(df) + nfaces * df->prims->struct_size(df, &br_face_equation_F, NULL));
+    df->prims->chunk_write(df, FID_FACE_EQUATION, df->prims->count_size(df) + nfaces * df->prims->struct_size(df, &br_face_equation_F, NULL));
     df->prims->count_write(df, nfaces);
 
     DfStructWriteArray(df, &br_face_equation_F, faces, nfaces);
@@ -765,9 +758,8 @@ static int FopRead_MODEL_V4(br_datafile *df, br_uint_32 id, br_uint_32 length, b
     /*
      * Only allow DONT_WELD, QUICK_UPDATE, KEEP_ORIGINAL and GENERATE_TAGS
      */
-    mp->flags &= BR_MODF_DONT_WELD | BR_MODF_QUICK_UPDATE | BR_MODF_KEEP_ORIGINAL | BR_MODF_GENERATE_TAGS |
-                 BR_MODF_UPDATEABLE | BR_MODF_CREASE | BR_MODF_CUSTOM_NORMALS | BR_MODF_CUSTOM_EQUATIONS |
-                 BR_MODF_CUSTOM_BOUNDS;
+    mp->flags &= BR_MODF_DONT_WELD | BR_MODF_QUICK_UPDATE | BR_MODF_KEEP_ORIGINAL | BR_MODF_GENERATE_TAGS | BR_MODF_UPDATEABLE |
+                 BR_MODF_CREASE | BR_MODF_CUSTOM_NORMALS | BR_MODF_CUSTOM_EQUATIONS | BR_MODF_CUSTOM_BOUNDS;
 
     /*
      * Leave model on stack
@@ -792,9 +784,8 @@ static int FopRead_MODEL_V5(br_datafile *df, br_uint_32 id, br_uint_32 length, b
     /*
      * Only allow DONT_WELD, QUICK_UPDATE, KEEP_ORIGINAL and GENERATE_TAGS
      */
-    mp->flags &= BR_MODF_DONT_WELD | BR_MODF_QUICK_UPDATE | BR_MODF_KEEP_ORIGINAL | BR_MODF_GENERATE_TAGS |
-                 BR_MODF_UPDATEABLE | BR_MODF_CREASE | BR_MODF_CUSTOM_NORMALS | BR_MODF_CUSTOM_EQUATIONS |
-                 BR_MODF_CUSTOM_BOUNDS;
+    mp->flags &= BR_MODF_DONT_WELD | BR_MODF_QUICK_UPDATE | BR_MODF_KEEP_ORIGINAL | BR_MODF_GENERATE_TAGS | BR_MODF_UPDATEABLE |
+                 BR_MODF_CREASE | BR_MODF_CUSTOM_NORMALS | BR_MODF_CUSTOM_EQUATIONS | BR_MODF_CUSTOM_BOUNDS;
 
     /*
      * Leave model on stack
@@ -811,9 +802,8 @@ static int FopWrite_MODEL_V5(br_datafile *df, br_model *mp)
     /*
      * Only allow DONT_WELD, QUICK_UPDATE, KEEP_ORIGINAL and GENERATE_TAGS
      */
-    temp_model.flags &= BR_MODF_DONT_WELD | BR_MODF_QUICK_UPDATE | BR_MODF_KEEP_ORIGINAL | BR_MODF_GENERATE_TAGS |
-                        BR_MODF_UPDATEABLE | BR_MODF_CREASE | BR_MODF_CUSTOM_NORMALS | BR_MODF_CUSTOM_EQUATIONS |
-                        BR_MODF_CUSTOM_BOUNDS;
+    temp_model.flags &= BR_MODF_DONT_WELD | BR_MODF_QUICK_UPDATE | BR_MODF_KEEP_ORIGINAL | BR_MODF_GENERATE_TAGS | BR_MODF_UPDATEABLE |
+                        BR_MODF_CREASE | BR_MODF_CUSTOM_NORMALS | BR_MODF_CUSTOM_EQUATIONS | BR_MODF_CUSTOM_BOUNDS;
 
     df->prims->chunk_write(df, FID_MODEL_V5, df->prims->struct_size(df, &br_model_v5_F, &temp_model));
     df->prims->struct_write(df, &br_model_v5_F, &temp_model);
@@ -1908,8 +1898,7 @@ static br_light *FopRead_LIGHT_Vx(br_datafile *df, br_file_struct *fs)
 
         df->prims->struct_read(df, &br_convex_region_F, &lp->volume.regions[i]);
 
-        lp->volume.regions[i].planes = BrResAllocate(
-            lp, lp->volume.regions[i].nplanes * sizeof(*lp->volume.regions[i].planes), BR_MEMORY_LIGHT);
+        lp->volume.regions[i].planes = BrResAllocate(lp, lp->volume.regions[i].nplanes * sizeof(*lp->volume.regions[i].planes), BR_MEMORY_LIGHT);
 
         for(j = 0; j < lp->volume.regions[i].nplanes; j++)
             df->prims->struct_read(df, &br_plane_F, &lp->volume.regions[i].planes[j]);

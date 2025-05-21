@@ -25,14 +25,14 @@
  * Callback function invoked when an actor is
  * rendered
  */
-typedef void BR_CALLBACK br_renderbounds_cbfn(br_actor *actor, br_model *model, br_material *material, void *render_data,
-                                              br_uint_8 style, br_matrix4 *model_to_screen, br_int_32 bounds[4]);
+typedef void BR_CALLBACK br_renderbounds_cbfn(br_actor *actor, br_model *model, br_material *material, void *render_data, br_uint_8 style,
+                                              br_matrix4 *model_to_screen, br_int_32 bounds[4]);
 
 /*
  * Callback function invoked when a z-sort primitive is generated
  */
-typedef void BR_CALLBACK br_primitive_cbfn(br_primitive *primitive, br_actor *actor, br_model *model,
-                                           br_material *material, br_order_table *order_table, br_scalar *z);
+typedef void BR_CALLBACK br_primitive_cbfn(br_primitive *primitive, br_actor *actor, br_model *model, br_material *material,
+                                           br_order_table *order_table, br_scalar *z);
 
 #ifndef _NO_PROTOTYPES
 
@@ -43,7 +43,7 @@ extern "C" {
 br_error BR_PUBLIC_ENTRY BrV1dbBeginWrapper(void);
 br_error BR_PUBLIC_ENTRY BrV1dbEndWrapper(void);
 
-br_error BR_PUBLIC_ENTRY BrV1dbRendererBegin(struct br_device_pixelmap *destination, struct br_renderer *renderer);
+br_error BR_PUBLIC_ENTRY            BrV1dbRendererBegin(struct br_device_pixelmap *destination, struct br_renderer *renderer);
 struct br_renderer *BR_PUBLIC_ENTRY BrV1dbRendererQuery(void);
 br_error BR_PUBLIC_ENTRY            BrV1dbRendererEnd(void);
 
@@ -210,23 +210,21 @@ void BR_PUBLIC_ENTRY BrHorizonPlaneDisable(br_actor *h);
 /*
  * Picking
  */
-typedef int BR_CALLBACK br_pick2d_cbfn(br_actor *a, br_model *model, br_material *material, br_vector3 *ray_pos,
-                                       br_vector3 *ray_dir, br_scalar t_near, br_scalar t_far, void *arg);
+typedef int BR_CALLBACK br_pick2d_cbfn(br_actor *a, br_model *model, br_material *material, br_vector3 *ray_pos, br_vector3 *ray_dir,
+                                       br_scalar t_near, br_scalar t_far, void *arg);
 
 int BR_PUBLIC_ENTRY BrScenePick2D(br_actor *world, br_actor *camera, br_pixelmap *viewport, int pick_x, int pick_y,
                                   br_pick2d_cbfn *callback, void *arg);
 
-typedef int BR_CALLBACK br_pick3d_cbfn(br_actor *a, br_model *model, br_material *material, br_matrix34 *transform,
-                                       br_bounds *bounds, void *arg);
+typedef int BR_CALLBACK br_pick3d_cbfn(br_actor *a, br_model *model, br_material *material, br_matrix34 *transform, br_bounds *bounds, void *arg);
 
 int BR_PUBLIC_ENTRY BrScenePick3D(br_actor *world, br_actor *actor, br_bounds *bounds, br_pick3d_cbfn *callback, void *arg);
 
-typedef int BR_CALLBACK br_modelpick2d_cbfn(br_model *model, br_material *material, br_vector3 *ray_pos,
-                                            br_vector3 *ray_dir, br_scalar t, int face, int edge, int vertex,
-                                            br_vector3 *p, br_vector2 *map, void *arg);
+typedef int BR_CALLBACK br_modelpick2d_cbfn(br_model *model, br_material *material, br_vector3 *ray_pos, br_vector3 *ray_dir, br_scalar t,
+                                            int face, int edge, int vertex, br_vector3 *p, br_vector2 *map, void *arg);
 
-int BR_PUBLIC_ENTRY BrModelPick2D(br_model *model, br_material *material, br_vector3 *ray_pos, br_vector3 *ray_dir,
-                                  br_scalar t_near, br_scalar t_far, br_modelpick2d_cbfn *callback, void *arg);
+int BR_PUBLIC_ENTRY BrModelPick2D(br_model *model, br_material *material, br_vector3 *ray_pos, br_vector3 *ray_dir, br_scalar t_near,
+                                  br_scalar t_far, br_modelpick2d_cbfn *callback, void *arg);
 
 /*
  * Custom calback support
@@ -240,8 +238,7 @@ br_uint_8 BR_PUBLIC_ENTRY  BrPointToScreenXY(br_vector2 *screen, br_vector3 *poi
 br_uint_32 BR_PUBLIC_ENTRY BrPointToScreenXYZO(br_vector3 *screen, br_vector3 *point);
 
 void BR_PUBLIC_ENTRY BrPointToScreenXYMany(br_vector2 *screens, br_vector3 *points, br_uint_32 npoints);
-void BR_PUBLIC_ENTRY BrPointToScreenXYZOMany(br_vector3 *screens, br_uint_32 *outcodes, br_vector3 *points,
-                                             br_uint_32 npoints);
+void BR_PUBLIC_ENTRY BrPointToScreenXYZOMany(br_vector3 *screens, br_uint_32 *outcodes, br_vector3 *points, br_uint_32 npoints);
 
 void BR_PUBLIC_ENTRY BrSceneModelLight(br_model *model, br_material *default_material, br_actor *root, br_actor *a);
 
@@ -255,8 +252,8 @@ br_scalar BR_PUBLIC_ENTRY BrZsDepthToScreenZ(br_scalar depth_z, const br_camera 
 br_scalar BR_PUBLIC_ENTRY BrZsScreenZToDepth(br_scalar sz, const br_camera *camera);
 
 br_scalar BR_PUBLIC_ENTRY BrScreenZToCamera(const br_actor *camera, br_scalar sz);
-void BR_PUBLIC_ENTRY BrScreenXYZToCamera(br_vector3 *point, const br_actor *camera, const br_pixelmap *screen_buffer,
-                                         br_int_16 x, br_int_16 y, br_scalar sz);
+void BR_PUBLIC_ENTRY      BrScreenXYZToCamera(br_vector3 *point, const br_actor *camera, const br_pixelmap *screen_buffer, br_int_16 x,
+                                              br_int_16 y, br_scalar sz);
 
 br_error BR_PUBLIC_ENTRY BrLightModelCull(br_actor *light);
 
@@ -281,8 +278,7 @@ br_material *BR_CALLBACK BrMaterialFindFailedLoad(const char *name);
  * Rendering - General
  */
 void BR_PUBLIC_ENTRY BrRendererBegin(br_pixelmap *destination, struct br_renderer_facility *renderer_facility,
-                                     struct br_primitive_library *primitive_library, void *primitive_heap,
-                                     br_uint_32 primitive_heap_size);
+                                     struct br_primitive_library *primitive_library, void *primitive_heap, br_uint_32 primitive_heap_size);
 
 void BR_PUBLIC_ENTRY BrRendererEnd(void);
 
@@ -298,23 +294,19 @@ void BR_PUBLIC_ENTRY BrRendererFocusLossEnd(void);
 void BR_PUBLIC_ENTRY BrZbBegin(br_uint_8 colour_type, br_uint_8 depth_type);
 void BR_PUBLIC_ENTRY BrZbEnd(void);
 
-void BR_PUBLIC_ENTRY BrZbSceneRenderBegin(br_actor *world, br_actor *camera, br_pixelmap *colour_buffer,
-                                          br_pixelmap *depth_buffer);
+void BR_PUBLIC_ENTRY BrZbSceneRenderBegin(br_actor *world, br_actor *camera, br_pixelmap *colour_buffer, br_pixelmap *depth_buffer);
 
-void BR_PUBLIC_ENTRY BrZbSceneRenderContinue(br_actor *world, br_actor *camera, br_pixelmap *colour_buffer,
-                                             br_pixelmap *depth_buffer);
+void BR_PUBLIC_ENTRY BrZbSceneRenderContinue(br_actor *world, br_actor *camera, br_pixelmap *colour_buffer, br_pixelmap *depth_buffer);
 
 void BR_PUBLIC_ENTRY BrZbSceneRenderAdd(br_actor *tree);
 void BR_PUBLIC_ENTRY BrZbSceneRenderEnd(void);
 
-void BR_PUBLIC_ENTRY BrZbSceneRender(br_actor *world, br_actor *camera, br_pixelmap *colour_buffer,
-                                     br_pixelmap *depth_buffer);
+void BR_PUBLIC_ENTRY BrZbSceneRender(br_actor *world, br_actor *camera, br_pixelmap *colour_buffer, br_pixelmap *depth_buffer);
 
 /*
  * Used within custom model callbacks to render other models
  */
-void BR_PUBLIC_ENTRY BrZbModelRender(br_actor *actor, br_model *model, br_material *material, br_uint_8 style,
-                                     int on_screen, int use_custom);
+void BR_PUBLIC_ENTRY BrZbModelRender(br_actor *actor, br_model *model, br_material *material, br_uint_8 style, int on_screen, int use_custom);
 
 br_renderbounds_cbfn *BR_PUBLIC_ENTRY BrZbRenderBoundsCallbackSet(br_renderbounds_cbfn *new_cbfn);
 
@@ -336,8 +328,8 @@ void BR_PUBLIC_ENTRY BrZsSceneRender(br_actor *world, br_actor *camera, br_pixel
 /*
  * Used within custom model callbacks to render other models
  */
-void BR_PUBLIC_ENTRY BrZsModelRender(br_actor *actor, br_model *model, br_material *material,
-                                     br_order_table *order_table, br_uint_8 style, int on_screen, int use_custom);
+void BR_PUBLIC_ENTRY BrZsModelRender(br_actor *actor, br_model *model, br_material *material, br_order_table *order_table, br_uint_8 style,
+                                     int on_screen, int use_custom);
 
 br_renderbounds_cbfn *BR_PUBLIC_ENTRY BrZsRenderBoundsCallbackSet(br_renderbounds_cbfn *new_cbfn);
 
@@ -349,11 +341,10 @@ struct br_order_table *BR_PUBLIC_ENTRY BrZsActorOrderTableSet(struct br_actor *a
 struct br_order_table *BR_PUBLIC_ENTRY BrZsActorOrderTableGet(struct br_actor *actor);
 struct br_order_table *BR_PUBLIC_ENTRY BrZsOrderTableClear(struct br_order_table *order_table);
 
-void BR_PUBLIC_ENTRY BrZsOrderTablePrimitiveInsert(struct br_order_table *order_table, struct br_primitive *primitive,
-                                                   br_uint_16 bucket);
+void BR_PUBLIC_ENTRY BrZsOrderTablePrimitiveInsert(struct br_order_table *order_table, struct br_primitive *primitive, br_uint_16 bucket);
 
-br_uint_16 BR_PUBLIC_ENTRY BrZsPrimitiveBucketSelect(br_scalar *z, br_uint_16 type, br_scalar min_z, br_scalar max_z,
-                                                     br_uint_16 size, br_uint_16 sort_type);
+br_uint_16 BR_PUBLIC_ENTRY BrZsPrimitiveBucketSelect(br_scalar *z, br_uint_16 type, br_scalar min_z, br_scalar max_z, br_uint_16 size,
+                                                     br_uint_16 sort_type);
 void BR_PUBLIC_ENTRY       BrZsOrderTablePrimaryEnable(struct br_order_table *order_table);
 void BR_PUBLIC_ENTRY       BrZsOrderTablePrimaryDisable(void);
 

@@ -14,7 +14,6 @@
 #include "host.h"
 #include "brassert.h"
 
-
 /*
  * XXX A very nasty hack to get around limitiations of v1.1.x
  *
@@ -200,8 +199,7 @@ br_error BR_PUBLIC_ENTRY BrDevBeginTV(br_pixelmap **ppm, const char *setup_strin
                      * Parse devices string into device name, arguments
                      * string and next entry
                      */
-                    for(device_args = device_name; *device_args != '\0' && *device_args != ',' && *device_args != ';';
-                        device_args++)
+                    for(device_args = device_name; *device_args != '\0' && *device_args != ',' && *device_args != ';'; device_args++)
                         ;
 
                     if(*device_args == ',') {
@@ -355,8 +353,7 @@ void BR_PUBLIC_ENTRY BrDevPaletteSetEntryOld(int i, br_colour colour)
 /*
  * Find a renderer from a destination pixelmap according to standard rules
  */
-br_error BR_RESIDENT_ENTRY BrRendererFacilityFind(br_renderer_facility **prf, br_device_pixelmap *destination,
-                                                  br_token scalar_type)
+br_error BR_RESIDENT_ENTRY BrRendererFacilityFind(br_renderer_facility **prf, br_device_pixelmap *destination, br_token scalar_type)
 {
     br_renderer_facility *renderer_facility = NULL;
     br_error              r;
@@ -452,8 +449,8 @@ br_error BR_RESIDENT_ENTRY BrRendererFacilityListFind(br_renderer_facility **prf
     char                   object_pattern[] = "*-Renderer-00000";
     br_boolean             scalar_is_valid  = BR_FALSE;
     br_token_value         is_alternative[] = {
-                {.t = BRT_ALTERNATIVE_TO_DEFAULT_B, .v.b = BR_TRUE},
-                {.t = BR_NULL_TOKEN,                .v.p = NULL   }
+        {.t = BRT_ALTERNATIVE_TO_DEFAULT_B, .v.b = BR_TRUE},
+        {.t = BR_NULL_TOKEN,                .v.p = NULL   }
     };
     const char *identifier;
     br_size_t   identifier_len;
@@ -545,8 +542,8 @@ br_error BR_RESIDENT_ENTRY BrRendererFacilityListFind(br_renderer_facility **prf
         /*
          * Search for all scalar-specific alternatives
          */
-        r = BrDevContainedFindMany((br_object **)&prf[*num_rf], max_rf - *num_rf, &renderer_facility_count,
-                                   BRT_RENDERER_FACILITY, object_pattern, is_alternative);
+        r = BrDevContainedFindMany((br_object **)&prf[*num_rf], max_rf - *num_rf, &renderer_facility_count, BRT_RENDERER_FACILITY,
+                                   object_pattern, is_alternative);
 
         if(r != BRE_OK && r != BRE_OVERFLOW)
             return r;
@@ -566,8 +563,8 @@ br_error BR_RESIDENT_ENTRY BrRendererFacilityListFind(br_renderer_facility **prf
         if(renderer_facility == NULL)
             return BRE_NO_MEMORY;
 
-        r = BrDevContainedFindMany((br_object **)renderer_facility, renderer_facility_size, &renderer_facility_count,
-                                   BRT_RENDERER_FACILITY, "*-Renderer", is_alternative);
+        r = BrDevContainedFindMany((br_object **)renderer_facility, renderer_facility_size, &renderer_facility_count, BRT_RENDERER_FACILITY,
+                                   "*-Renderer", is_alternative);
 
         if(r != BRE_OK && r != BRE_OVERFLOW) {
             BrResFree(renderer_facility);
@@ -607,8 +604,8 @@ br_error BR_RESIDENT_ENTRY BrRendererFacilityListFind(br_renderer_facility **prf
         /*
          * Search for all non-scalar-specific alternatives
          */
-        r = BrDevContainedFindMany((br_object **)&prf[*num_rf], max_rf - *num_rf, &renderer_facility_count,
-                                   BRT_RENDERER_FACILITY, "*-Renderer", is_alternative);
+        r = BrDevContainedFindMany((br_object **)&prf[*num_rf], max_rf - *num_rf, &renderer_facility_count, BRT_RENDERER_FACILITY,
+                                   "*-Renderer", is_alternative);
 
         if(r != BRE_OK && r != BRE_OVERFLOW)
             return r;
@@ -625,8 +622,7 @@ br_error BR_RESIDENT_ENTRY BrRendererFacilityListFind(br_renderer_facility **prf
 /*
  * Find a primtive library from a destination pixelmap according to standard rules
  */
-br_error BR_RESIDENT_ENTRY BrPrimitiveLibraryFind(br_primitive_library **ppl, br_device_pixelmap *destination,
-                                                  br_token scalar_type)
+br_error BR_RESIDENT_ENTRY BrPrimitiveLibraryFind(br_primitive_library **ppl, br_device_pixelmap *destination, br_token scalar_type)
 {
     br_primitive_library *primitive_library = NULL;
     br_error              r;
@@ -722,8 +718,8 @@ br_error BR_RESIDENT_ENTRY BrPrimitiveLibraryListFind(br_primitive_library **ppl
     char                   object_pattern[] = "*-Primitives-00000";
     br_boolean             scalar_is_valid  = BR_FALSE;
     br_token_value         is_alternative[] = {
-                {.t = BRT_ALTERNATIVE_TO_DEFAULT_B, .v.b = BR_TRUE},
-                {.t = BR_NULL_TOKEN,                .v.p = NULL   }
+        {.t = BRT_ALTERNATIVE_TO_DEFAULT_B, .v.b = BR_TRUE},
+        {.t = BR_NULL_TOKEN,                .v.p = NULL   }
     };
     const char *identifier;
     br_size_t   identifier_len;
@@ -815,8 +811,8 @@ br_error BR_RESIDENT_ENTRY BrPrimitiveLibraryListFind(br_primitive_library **ppl
         /*
          * Search for all scalar-specific alternatives
          */
-        r = BrDevContainedFindMany((br_object **)&ppl[*num_pl], max_pl - *num_pl, &primitive_library_count,
-                                   BRT_PRIMITIVE_LIBRARY, object_pattern, is_alternative);
+        r = BrDevContainedFindMany((br_object **)&ppl[*num_pl], max_pl - *num_pl, &primitive_library_count, BRT_PRIMITIVE_LIBRARY,
+                                   object_pattern, is_alternative);
 
         if(r != BRE_OK && r != BRE_OVERFLOW)
             return r;
@@ -836,8 +832,8 @@ br_error BR_RESIDENT_ENTRY BrPrimitiveLibraryListFind(br_primitive_library **ppl
         if(primitive_library == NULL)
             return BRE_NO_MEMORY;
 
-        r = BrDevContainedFindMany((br_object **)primitive_library, primitive_library_size, &primitive_library_count,
-                                   BRT_PRIMITIVE_LIBRARY, "*-Primitives", is_alternative);
+        r = BrDevContainedFindMany((br_object **)primitive_library, primitive_library_size, &primitive_library_count, BRT_PRIMITIVE_LIBRARY,
+                                   "*-Primitives", is_alternative);
 
         if(r != BRE_OK && r != BRE_OVERFLOW) {
             BrResFree(primitive_library);
@@ -877,8 +873,8 @@ br_error BR_RESIDENT_ENTRY BrPrimitiveLibraryListFind(br_primitive_library **ppl
         /*
          * Search for all non-scalar-specific alternatives
          */
-        r = BrDevContainedFindMany((br_object **)&ppl[*num_pl], max_pl - *num_pl, &primitive_library_count,
-                                   BRT_PRIMITIVE_LIBRARY, "*-Primitives", is_alternative);
+        r = BrDevContainedFindMany((br_object **)&ppl[*num_pl], max_pl - *num_pl, &primitive_library_count, BRT_PRIMITIVE_LIBRARY,
+                                   "*-Primitives", is_alternative);
 
         if(r != BRE_OK && r != BRE_OVERFLOW)
             return r;
@@ -892,9 +888,8 @@ br_error BR_RESIDENT_ENTRY BrPrimitiveLibraryListFind(br_primitive_library **ppl
     return BRE_OK;
 }
 
-br_error BR_RESIDENT_ENTRY BrGeometryFormatFind(br_geometry **pgf, br_renderer *renderer,
-                                                br_renderer_facility *renderer_facility, br_token scalar_type,
-                                                br_token format_type)
+br_error BR_RESIDENT_ENTRY BrGeometryFormatFind(br_geometry **pgf, br_renderer *renderer, br_renderer_facility *renderer_facility,
+                                                br_token scalar_type, br_token format_type)
 {
     br_error     r;
     br_geometry *gf;

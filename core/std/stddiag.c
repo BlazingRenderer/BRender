@@ -11,7 +11,6 @@
 
 #include "brender.h"
 
-
 static void BR_CALLBACK BrStdioWarning(const char *message)
 {
     fflush(stdout);

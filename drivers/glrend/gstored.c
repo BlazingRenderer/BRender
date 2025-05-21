@@ -52,8 +52,8 @@ static GLuint create_vao(HVIDEO hVideo, GLuint vbo, GLuint ibo)
 
     if(hVideo->brenderProgram.attributes.aColour >= 0) {
         glEnableVertexAttribArray(hVideo->brenderProgram.attributes.aColour);
-        glVertexAttribPointer(hVideo->brenderProgram.attributes.aColour, 4, GL_UNSIGNED_BYTE, GL_TRUE,
-                              sizeof(gl_vertex_f), (void *)offsetof(gl_vertex_f, c));
+        glVertexAttribPointer(hVideo->brenderProgram.attributes.aColour, 4, GL_UNSIGNED_BYTE, GL_TRUE, sizeof(gl_vertex_f),
+                              (void *)offsetof(gl_vertex_f, c));
     }
 
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
@@ -146,9 +146,9 @@ br_geometry_stored *GeometryStoredGLAllocate(br_geometry_v1_model *gv1model, con
 
     glBindVertexArray(0);
 
-    self->gl_vbo      = build_vbo(model, total_vertices);
-    self->gl_ibo      = build_ibo(model, total_faces, self->groups);
-    self->gl_vao      = create_vao(&r->pixelmap->screen->asFront.video, self->gl_vbo, self->gl_ibo);
+    self->gl_vbo = build_vbo(model, total_vertices);
+    self->gl_ibo = build_ibo(model, total_faces, self->groups);
+    self->gl_vao = create_vao(&r->pixelmap->screen->asFront.video, self->gl_vbo, self->gl_ibo);
 
     DeviceGLObjectLabelF(GL_BUFFER, self->gl_vbo, "%s:vbo", self->identifier);
     DeviceGLObjectLabelF(GL_BUFFER, self->gl_ibo, "%s:ibo", self->identifier);
@@ -202,8 +202,7 @@ static struct br_tv_template *BR_CMETHOD(br_geometry_stored_gl, templateQuery)(b
     br_geometry_stored *self = (br_geometry_stored *)_self;
 
     if(self->device->templates.geometryStoredTemplate == NULL) {
-        self->device->templates.geometryStoredTemplate = BrTVTemplateAllocate(self->device, templateEntries,
-                                                                              BR_ASIZE(templateEntries));
+        self->device->templates.geometryStoredTemplate = BrTVTemplateAllocate(self->device, templateEntries, BR_ASIZE(templateEntries));
     }
 
     return self->device->templates.geometryStoredTemplate;
@@ -429,9 +428,9 @@ static br_error V1Model_RenderStored(br_geometry_stored *self, br_renderer *rend
     z_sorting = (renderer->state.current->valid & MASK_STATE_OUTPUT) && renderer->state.current->output.depth == NULL;
 
     for(int i = 0; i < self->model->ngroups; ++i) {
-        struct v11group          *group       = self->model->groups + i;
-        gl_groupinfo             *groupinfo   = self->groups + i;
-        br_renderer_state_stored *stored      = group->stored;
+        struct v11group          *group     = self->model->groups + i;
+        gl_groupinfo             *groupinfo = self->groups + i;
+        br_renderer_state_stored *stored    = group->stored;
         int                       render_mode;
         br_uint_16                bucket;
         state_stack               state;
@@ -460,7 +459,7 @@ static br_error V1Model_RenderStored(br_geometry_stored *self, br_renderer *rend
             state_stack *tmpstate = RendererGLAllocState(renderer, &state, group->nfaces);
             for(int f = 0; f < group->nfaces; ++f) {
                 br_vector3 centroid, centroid_view;
-                br_int_32 base;
+                br_int_32  base;
 
                 if((base = RendererGLNextImmTri(renderer, group, group->vertex_numbers[f])) < 0) {
                     /*
@@ -473,12 +472,11 @@ static br_error V1Model_RenderStored(br_geometry_stored *self, br_renderer *rend
 
                 prim         = heapPrimitiveAdd(state.hidden.heap, BRT_TRIANGLE);
                 prim->stored = stored;
-                prim->v[0]   = (void*)(br_uintptr_t)base;
+                prim->v[0]   = (void *)(br_uintptr_t)base;
                 prim->v[1]   = tmpstate;
                 prim->v[2]   = groupinfo;
 
-                centroid = DeviceGLTriangleCentroid(&renderer->trans.pool[base + 0].position,
-                                                    &renderer->trans.pool[base + 1].position,
+                centroid = DeviceGLTriangleCentroid(&renderer->trans.pool[base + 0].position, &renderer->trans.pool[base + 1].position,
                                                     &renderer->trans.pool[base + 2].position);
                 BrMatrix34ApplyP(&centroid_view, &centroid, &state.matrix.model_to_view);
 
@@ -488,8 +486,8 @@ static br_error V1Model_RenderStored(br_geometry_stored *self, br_renderer *rend
                  * If the user set a function defer to them.
                  */
                 if(state.hidden.insert_fn != NULL) {
-                    state.hidden.insert_fn(prim, state.hidden.insert_arg1, state.hidden.insert_arg2,
-                                           state.hidden.insert_arg3, state.hidden.order_table, &prim->depth);
+                    state.hidden.insert_fn(prim, state.hidden.insert_arg1, state.hidden.insert_arg2, state.hidden.insert_arg3,
+                                           state.hidden.order_table, &prim->depth);
                     continue;
                 }
 
@@ -510,8 +508,8 @@ static br_error V1Model_RenderStored(br_geometry_stored *self, br_renderer *rend
              * If the user set a function defer to them.
              */
             if(state.hidden.insert_fn != NULL) {
-                state.hidden.insert_fn(prim, state.hidden.insert_arg1, state.hidden.insert_arg2,
-                                       state.hidden.insert_arg3, state.hidden.order_table, &prim->depth);
+                state.hidden.insert_fn(prim, state.hidden.insert_arg1, state.hidden.insert_arg2, state.hidden.insert_arg3,
+                                       state.hidden.order_table, &prim->depth);
                 continue;
             }
 

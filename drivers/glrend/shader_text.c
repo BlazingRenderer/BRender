@@ -33,13 +33,11 @@ br_boolean VIDEOI_CompileTextShader(HVIDEO hVideo)
 
     hVideo->textProgram.block_index_font_data   = glGetUniformBlockIndex(hVideo->textProgram.program, "FontData");
     hVideo->textProgram.block_binding_font_data = 2;
-    glUniformBlockBinding(hVideo->textProgram.program, hVideo->textProgram.block_index_font_data,
-                          hVideo->textProgram.block_binding_font_data);
+    glUniformBlockBinding(hVideo->textProgram.program, hVideo->textProgram.block_index_font_data, hVideo->textProgram.block_binding_font_data);
 
     hVideo->textProgram.block_index_glyphs   = glGetUniformBlockIndex(hVideo->textProgram.program, "TextData");
     hVideo->textProgram.block_binding_glyphs = 3;
-    glUniformBlockBinding(hVideo->textProgram.program, hVideo->textProgram.block_index_glyphs,
-                          hVideo->textProgram.block_binding_glyphs);
+    glUniformBlockBinding(hVideo->textProgram.program, hVideo->textProgram.block_index_glyphs, hVideo->textProgram.block_binding_glyphs);
 
     glGenBuffers(1, &hVideo->textProgram.ubo_glyphs);
     glBindBuffer(GL_UNIFORM_BUFFER, hVideo->textProgram.ubo_glyphs);

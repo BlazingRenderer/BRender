@@ -10,7 +10,6 @@
 #include "brassert.h"
 #include "shortcut.h"
 
-
 void BR_PUBLIC_ENTRY BrMapUpdate(br_pixelmap *map, br_uint_16 flags)
 {
     UASSERT_MESSAGE("Invalid BrMapUpdate pointer", map != NULL);

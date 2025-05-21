@@ -12,7 +12,6 @@
 #include "load3ds.h"
 #include "brassert.h"
 
-
 /*
  * Default 3DS conversion options
  */
@@ -367,9 +366,8 @@ static br_colour ConvertColor(Color_t *color)
  */
 static br_ufraction GreyscaleOfColor(Color_t *color)
 {
-    return BrScalarToUFraction(
-        BrFloatToScalar((float)((color->red * RED_GREYSCALE_FACTOR) + (color->green * GREEN_GREYSCALE_FACTOR) +
-                                (color->blue * BLUE_GREYSCALE_FACTOR))));
+    return BrScalarToUFraction(BrFloatToScalar(
+        (float)((color->red * RED_GREYSCALE_FACTOR) + (color->green * GREEN_GREYSCALE_FACTOR) + (color->blue * BLUE_GREYSCALE_FACTOR))));
 }
 
 /*
@@ -761,10 +759,9 @@ static MaterialList_t *ConvertMaterial(MatEntry_t *mat_entry, PixmapList_t **pix
 #if REPORT_MESSAGES
     if(options->report != NULL) {
         ReportMessage(options->report, "Material: '%s'\n", material->identifier);
-        ReportMessage(options->report, "  colour:   %3d %3d %3d\n", BR_RED(material->colour), BR_GRN(material->colour),
-                      BR_BLU(material->colour));
-        ReportMessage(options->report, "  ka kd ks: %f %f %f\n", BrScalarToFloat(material->ka),
-                      BrScalarToFloat(material->kd), BrScalarToFloat(material->ks));
+        ReportMessage(options->report, "  colour:   %3d %3d %3d\n", BR_RED(material->colour), BR_GRN(material->colour), BR_BLU(material->colour));
+        ReportMessage(options->report, "  ka kd ks: %f %f %f\n", BrScalarToFloat(material->ka), BrScalarToFloat(material->kd),
+                      BrScalarToFloat(material->ks));
         ReportMessage(options->report, "  index_base:     %3d\n", material->index_base);
         ReportMessage(options->report, "  index_range:    %3d\n", material->index_range);
         if(mat_entry->pixmap_ref.mat_mapname != NULL) {
@@ -1138,8 +1135,7 @@ static State_t ReadSmoothGroup(void *stream, Stack_t *top, br_uint_16 n_faces, b
 
     br_uint_16 set[32] = {0,  1,  2,  3,  4,  5,  6,  7,  8,  9,  10, 11, 12, 13, 14, 15,
                           16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31};
-    br_uint_16 map[32] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                          0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+    br_uint_16 map[32] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 
     UASSERT((stream != NULL) && (top != NULL) && (n_faces > 0) && (options != NULL));
 
@@ -1188,8 +1184,7 @@ static State_t ReadSmoothGroup(void *stream, Stack_t *top, br_uint_16 n_faces, b
 
 #if REPORT_MESSAGES
         if(options->report != NULL) {
-            ReportMessage(options->report, "  %d smoothing group%s (arbitrary remapping)\n", n_used,
-                          (n_used != 1) ? "s" : "");
+            ReportMessage(options->report, "  %d smoothing group%s (arbitrary remapping)\n", n_used, (n_used != 1) ? "s" : "");
         }
 #endif
 
@@ -1202,8 +1197,7 @@ static State_t ReadSmoothGroup(void *stream, Stack_t *top, br_uint_16 n_faces, b
 
 #if REPORT_MESSAGES
         if(options->report != NULL) {
-            ReportMessage(options->report, "  %d smoothing group%s (sensible remapping)\n", n_used,
-                          (n_used != 1) ? "s" : "");
+            ReportMessage(options->report, "  %d smoothing group%s (sensible remapping)\n", n_used, (n_used != 1) ? "s" : "");
         }
 #endif
 
@@ -1415,9 +1409,8 @@ static void DeallocateNamedObjList(NamedObj_t *objects)
  * Take a face map of materials and a vertex re-mapping array,
  * allocate a new 'br_model', and fill it up
  */
-static br_model *MakeModelFromMaps(NTriObj_t *n_tri_obj, Bool_t (*material_type)(MaterialList_t *), char *name,
-                                   char *suffix, Int_t n_vertices, Int_t n_faces, br_uint_16 *vertex_map,
-                                   MaterialList_t **face_map)
+static br_model *MakeModelFromMaps(NTriObj_t *n_tri_obj, Bool_t (*material_type)(MaterialList_t *), char *name, char *suffix,
+                                   Int_t n_vertices, Int_t n_faces, br_uint_16 *vertex_map, MaterialList_t **face_map)
 {
     char      *full_name;
     br_model  *result;
@@ -1544,7 +1537,7 @@ static br_model *MakeModelFromMaps(NTriObj_t *n_tri_obj, Bool_t (*material_type)
 #if REGISTRY_ADD
     result = BrModelAdd(model);
 #else
-    result                  = model;
+    result = model;
 #endif
 
     if(result == NULL) {
@@ -1786,16 +1779,12 @@ static State_t ConvertNTriObj(NTriObj_t *n_tri_obj, NamedObj_t *named_obj, br_3d
     }
 
     if(n_fill_faces && n_wire_faces) {
-        model->fill_model = MakeModelFromMaps(n_tri_obj, &FillMat, name, "-fill", n_fill_vertices, n_fill_faces,
-                                              fill_vertex_map, face_map);
-        model->wire_model = MakeModelFromMaps(n_tri_obj, &WireMat, name, "-wire", n_wire_vertices, n_wire_faces,
-                                              wire_vertex_map, face_map);
+        model->fill_model = MakeModelFromMaps(n_tri_obj, &FillMat, name, "-fill", n_fill_vertices, n_fill_faces, fill_vertex_map, face_map);
+        model->wire_model = MakeModelFromMaps(n_tri_obj, &WireMat, name, "-wire", n_wire_vertices, n_wire_faces, wire_vertex_map, face_map);
     } else if(n_fill_faces) {
-        model->fill_model = MakeModelFromMaps(n_tri_obj, &FillMat, name, "", n_fill_vertices, n_fill_faces,
-                                              fill_vertex_map, face_map);
+        model->fill_model = MakeModelFromMaps(n_tri_obj, &FillMat, name, "", n_fill_vertices, n_fill_faces, fill_vertex_map, face_map);
     } else if(n_wire_faces) {
-        model->wire_model = MakeModelFromMaps(n_tri_obj, &WireMat, name, "", n_wire_vertices, n_wire_faces,
-                                              wire_vertex_map, face_map);
+        model->wire_model = MakeModelFromMaps(n_tri_obj, &WireMat, name, "", n_wire_vertices, n_wire_faces, wire_vertex_map, face_map);
     }
 
     BrMemFree(wire_vertex_map);
@@ -2389,8 +2378,8 @@ static State_t ReadDlSpotlight(void *stream, Stack_t *top, br_3ds_options *optio
     dl_spotlight = &(top->data.dl_spotlight);
 
     if(!ReadPoint(stream, top, &(dl_spotlight->target), options) || !ReadFloat(stream, &(dl_spotlight->cone_inner)) ||
-       !ReadFloat(stream, &(dl_spotlight->cone_outer)) || dl_spotlight->cone_inner < 1.0 ||
-       dl_spotlight->cone_inner > 160.0 || dl_spotlight->cone_outer < 1.0 || dl_spotlight->cone_outer > 160.0) {
+       !ReadFloat(stream, &(dl_spotlight->cone_outer)) || dl_spotlight->cone_inner < 1.0 || dl_spotlight->cone_inner > 160.0 ||
+       dl_spotlight->cone_outer < 1.0 || dl_spotlight->cone_outer > 160.0) {
         return PARSE_ERROR;
     }
 
@@ -2404,8 +2393,7 @@ static State_t ReadDlSpotlight(void *stream, Stack_t *top, br_3ds_options *optio
     if(options->report != NULL) {
         ReportMessage(options->report, "  spotlight target: (%f %f %f)\n", BrScalarToFloat(dl_spotlight->target.v[0]),
                       BrScalarToFloat(dl_spotlight->target.v[1]), BrScalarToFloat(dl_spotlight->target.v[2]));
-        ReportMessage(options->report, "  cone angles: %f degrees -> %f degrees\n", dl_spotlight->cone_inner,
-                      dl_spotlight->cone_outer);
+        ReportMessage(options->report, "  cone angles: %f degrees -> %f degrees\n", dl_spotlight->cone_inner, dl_spotlight->cone_outer);
     }
 #endif
 
@@ -2492,8 +2480,8 @@ static State_t ReadNodeHdr(void *stream, Stack_t *top, Int_t index, NamedObj_t *
 
     UASSERT((stream != NULL) && (top != NULL) && (index >= 0));
 
-    if(!ReadString(stream, top, 12, buffer) || !ReadUInt16(stream, &skip) || !ReadUInt16(stream, &skip) ||
-       !ReadInt16(stream, &parent) || parent < -1 || parent >= index) {
+    if(!ReadString(stream, top, 12, buffer) || !ReadUInt16(stream, &skip) || !ReadUInt16(stream, &skip) || !ReadInt16(stream, &parent) ||
+       parent < -1 || parent >= index) {
         return PARSE_ERROR;
     }
 
@@ -2955,8 +2943,8 @@ static br_actor *MakeEnclosingActor(Int_t depth, char *instance_name, NamedObj_t
  * and if they can be recursed on, add them as children
  * to the 'actor' parameter
  */
-static Bool_t CollectDescendents(Int_t depth, br_actor *actor, Int_t parent, NodeTag_t *node_tags,
-                                 br_matrix34 *world_to_parent, br_3ds_options *options)
+static Bool_t CollectDescendents(Int_t depth, br_actor *actor, Int_t parent, NodeTag_t *node_tags, br_matrix34 *world_to_parent,
+                                 br_3ds_options *options)
 {
     br_actor   *child;
     br_matrix34 world_to_child;
@@ -2974,8 +2962,7 @@ static Bool_t CollectDescendents(Int_t depth, br_actor *actor, Int_t parent, Nod
             /*
              * Allocate it's actor
              */
-            child = MakeEnclosingActor(depth + 1, node_tag->instance_name, node_tag->node_hdr.named_obj,
-                                       world_to_parent, &world_to_child,
+            child = MakeEnclosingActor(depth + 1, node_tag->instance_name, node_tag->node_hdr.named_obj, world_to_parent, &world_to_child,
                                        (options->flags & BR_3DS_APPLY_PIVOT) ? &node_tag->pivot : NULL, options);
             if(child == NULL) {
                 return FALSE;
@@ -3148,28 +3135,24 @@ br_fmt_results *BR_PUBLIC_ENTRY BrFmt3DSLoad(const char *name, br_fmt_options *f
                     break;
 
                 case COLOR_F:
-                    if(((parent->id_tag != AMBIENT_LIGHT) && (parent->id_tag != MAT_AMBIENT) &&
-                        (parent->id_tag != MAT_DIFFUSE) && (parent->id_tag != MAT_SPECULAR) &&
-                        (parent->id_tag != N_DIRECT_LIGHT)) ||
-                       (parent->flags & GOT_COLOR_F) != 0 || (parent->flags & GOT_COLOR_24) != 0 ||
-                       !ReadColorF(stream, top)) {
+                    if(((parent->id_tag != AMBIENT_LIGHT) && (parent->id_tag != MAT_AMBIENT) && (parent->id_tag != MAT_DIFFUSE) &&
+                        (parent->id_tag != MAT_SPECULAR) && (parent->id_tag != N_DIRECT_LIGHT)) ||
+                       (parent->flags & GOT_COLOR_F) != 0 || (parent->flags & GOT_COLOR_24) != 0 || !ReadColorF(stream, top)) {
                         state = PARSE_ERROR;
                     }
                     break;
 
                 case COLOR_24:
-                    if(((parent->id_tag != AMBIENT_LIGHT) && (parent->id_tag != MAT_AMBIENT) &&
-                        (parent->id_tag != MAT_DIFFUSE) && (parent->id_tag != MAT_SPECULAR) &&
-                        (parent->id_tag != N_DIRECT_LIGHT)) ||
-                       (parent->flags & GOT_COLOR_F) != 0 || (parent->flags & GOT_COLOR_24) != 0 ||
-                       !ReadColor24(stream, top)) {
+                    if(((parent->id_tag != AMBIENT_LIGHT) && (parent->id_tag != MAT_AMBIENT) && (parent->id_tag != MAT_DIFFUSE) &&
+                        (parent->id_tag != MAT_SPECULAR) && (parent->id_tag != N_DIRECT_LIGHT)) ||
+                       (parent->flags & GOT_COLOR_F) != 0 || (parent->flags & GOT_COLOR_24) != 0 || !ReadColor24(stream, top)) {
                         state = PARSE_ERROR;
                     }
                     break;
 
                 case INT_PERCENTAGE:
-                    if(((parent->id_tag == MAT_SHININESS) || (parent->id_tag == MAT_TRANSPARENCY) ||
-                        (parent->id_tag == MAT_TEXMAP) || (parent->id_tag == MAT_REFLMAP)) &&
+                    if(((parent->id_tag == MAT_SHININESS) || (parent->id_tag == MAT_TRANSPARENCY) || (parent->id_tag == MAT_TEXMAP) ||
+                        (parent->id_tag == MAT_REFLMAP)) &&
                        (parent->flags & GOT_INT_PERCENTAGE) == 0 && (parent->flags & GOT_FLOAT_PERCENTAGE) == 0) {
                         br_int_16 percent;
 
@@ -3191,8 +3174,8 @@ br_fmt_results *BR_PUBLIC_ENTRY BrFmt3DSLoad(const char *name, br_fmt_options *f
                     break;
 
                 case FLOAT_PERCENTAGE:
-                    if(((parent->id_tag == MAT_SHININESS) || (parent->id_tag == MAT_TRANSPARENCY) ||
-                        (parent->id_tag == MAT_TEXMAP) || (parent->id_tag == MAT_REFLMAP)) &&
+                    if(((parent->id_tag == MAT_SHININESS) || (parent->id_tag == MAT_TRANSPARENCY) || (parent->id_tag == MAT_TEXMAP) ||
+                        (parent->id_tag == MAT_REFLMAP)) &&
                        (parent->flags & GOT_INT_PERCENTAGE) == 0 && (parent->flags & GOT_FLOAT_PERCENTAGE) == 0 &&
                        ReadFloat(stream, &(top->data.percent)) && top->data.percent >= 0.0 && top->data.percent <= 1.0) {
                         /*
@@ -3208,8 +3191,7 @@ br_fmt_results *BR_PUBLIC_ENTRY BrFmt3DSLoad(const char *name, br_fmt_options *f
 
                 case MAT_MAPNAME:
                     top->data.string = NULL;
-                    if((parent->id_tag == MAT_TEXMAP || parent->id_tag == MAT_REFLMAP) &&
-                       (parent->flags & GOT_MAT_MAPNAME) == 0) {
+                    if((parent->id_tag == MAT_TEXMAP || parent->id_tag == MAT_REFLMAP) && (parent->flags & GOT_MAT_MAPNAME) == 0) {
                         char buffer[14];
 
                         if(ReadString(stream, top, 14, buffer)) {
@@ -3237,8 +3219,7 @@ br_fmt_results *BR_PUBLIC_ENTRY BrFmt3DSLoad(const char *name, br_fmt_options *f
                                 if(version == 3) {
                                     ReportMessage(options->report, "File version %d.0\n", version);
                                 } else {
-                                    ReportMessage(options->report,
-                                                  "File version %d.0 (only able to read version 3.0 chunks)\n", version);
+                                    ReportMessage(options->report, "File version %d.0 (only able to read version 3.0 chunks)\n", version);
                                 }
                             }
 #endif
@@ -3263,9 +3244,7 @@ br_fmt_results *BR_PUBLIC_ENTRY BrFmt3DSLoad(const char *name, br_fmt_options *f
                                 if((version == 1) || (version == 2)) {
                                     ReportMessage(options->report, "Mesh version %d.0\n", version);
                                 } else {
-                                    ReportMessage(options->report,
-                                                  "Mesh version %d.0 (only able to read version 1.0 and 2.0 chunks)\n",
-                                                  version);
+                                    ReportMessage(options->report, "Mesh version %d.0 (only able to read version 1.0 and 2.0 chunks)\n", version);
                                 }
                             }
 #endif
@@ -3553,8 +3532,7 @@ br_fmt_results *BR_PUBLIC_ENTRY BrFmt3DSLoad(const char *name, br_fmt_options *f
                     break;
 
                 case MAT_SXP_TEXT_DATA:
-                    if(parent->id_tag != MAT_ENTRY || (parent->flags & GOT_MAT_SXP_TEXT_DATA) != 0 ||
-                       !SkipRest(stream, top)) {
+                    if(parent->id_tag != MAT_ENTRY || (parent->flags & GOT_MAT_SXP_TEXT_DATA) != 0 || !SkipRest(stream, top)) {
                         state = PARSE_ERROR;
                     }
                     break;
@@ -3566,8 +3544,7 @@ br_fmt_results *BR_PUBLIC_ENTRY BrFmt3DSLoad(const char *name, br_fmt_options *f
                     break;
 
                 case MAT_SXP_OPAC_DATA:
-                    if(parent->id_tag != MAT_ENTRY || (parent->flags & GOT_MAT_SXP_OPAC_DATA) != 0 ||
-                       !SkipRest(stream, top)) {
+                    if(parent->id_tag != MAT_ENTRY || (parent->flags & GOT_MAT_SXP_OPAC_DATA) != 0 || !SkipRest(stream, top)) {
                         state = PARSE_ERROR;
                     }
                     break;
@@ -3592,8 +3569,7 @@ br_fmt_results *BR_PUBLIC_ENTRY BrFmt3DSLoad(const char *name, br_fmt_options *f
                     break;
 
                 case MAT_SXP_BUMP_DATA:
-                    if(parent->id_tag != MAT_ENTRY || (parent->flags & GOT_MAT_SXP_BUMP_DATA) != 0 ||
-                       !SkipRest(stream, top)) {
+                    if(parent->id_tag != MAT_ENTRY || (parent->flags & GOT_MAT_SXP_BUMP_DATA) != 0 || !SkipRest(stream, top)) {
                         state = PARSE_ERROR;
                     }
                     break;
@@ -3642,8 +3618,7 @@ br_fmt_results *BR_PUBLIC_ENTRY BrFmt3DSLoad(const char *name, br_fmt_options *f
                     break;
 
                 case POINT_FLAG_ARRAY:
-                    if(parent->id_tag != N_TRI_OBJECT || (parent->flags & GOT_POINT_FLAG_ARRAY) != 0 ||
-                       !SkipRest(stream, top)) {
+                    if(parent->id_tag != N_TRI_OBJECT || (parent->flags & GOT_POINT_FLAG_ARRAY) != 0 || !SkipRest(stream, top)) {
                         state = PARSE_ERROR;
                     }
                     break;
@@ -3693,8 +3668,7 @@ br_fmt_results *BR_PUBLIC_ENTRY BrFmt3DSLoad(const char *name, br_fmt_options *f
                     break;
 
                 case MESH_TEXTURE_INFO:
-                    if(parent->id_tag != N_TRI_OBJECT || (parent->flags & GOT_MESH_TEXTURE_INFO) != 0 ||
-                       !SkipRest(stream, top)) {
+                    if(parent->id_tag != N_TRI_OBJECT || (parent->flags & GOT_MESH_TEXTURE_INFO) != 0 || !SkipRest(stream, top)) {
                         state = PARSE_ERROR;
                     }
                     break;
@@ -3771,15 +3745,13 @@ br_fmt_results *BR_PUBLIC_ENTRY BrFmt3DSLoad(const char *name, br_fmt_options *f
                     break;
 
                 case OBJ_VIS_LOFTER:
-                    if(parent->id_tag != NAMED_OBJECT || (parent->flags & GOT_OBJ_VIS_LOFTER) != 0 ||
-                       !SkipRest(stream, top)) {
+                    if(parent->id_tag != NAMED_OBJECT || (parent->flags & GOT_OBJ_VIS_LOFTER) != 0 || !SkipRest(stream, top)) {
                         state = PARSE_ERROR;
                     }
                     break;
 
                 case OBJ_DOESNT_CAST:
-                    if(parent->id_tag != NAMED_OBJECT || (parent->flags & GOT_OBJ_DOESNT_CAST) != 0 ||
-                       !SkipRest(stream, top)) {
+                    if(parent->id_tag != NAMED_OBJECT || (parent->flags & GOT_OBJ_DOESNT_CAST) != 0 || !SkipRest(stream, top)) {
                         state = PARSE_ERROR;
                     }
                     break;
@@ -3797,8 +3769,7 @@ br_fmt_results *BR_PUBLIC_ENTRY BrFmt3DSLoad(const char *name, br_fmt_options *f
                     break;
 
                 case OBJ_PROCEDURAL:
-                    if(parent->id_tag != NAMED_OBJECT || (parent->flags & GOT_OBJ_PROCEDURAL) != 0 ||
-                       !SkipRest(stream, top)) {
+                    if(parent->id_tag != NAMED_OBJECT || (parent->flags & GOT_OBJ_PROCEDURAL) != 0 || !SkipRest(stream, top)) {
                         state = PARSE_ERROR;
                     }
                     break;
@@ -3922,8 +3893,8 @@ br_fmt_results *BR_PUBLIC_ENTRY BrFmt3DSLoad(const char *name, br_fmt_options *f
 
                 case NODE_HDR:
                     InitialiseNodeHdr(&(top->data.node_hdr));
-                    if((parent->id_tag == OBJECT_NODE_TAG || parent->id_tag == CAMERA_NODE_TAG ||
-                        parent->id_tag == LIGHT_NODE_TAG || parent->id_tag == SPOTLIGHT_NODE_TAG) &&
+                    if((parent->id_tag == OBJECT_NODE_TAG || parent->id_tag == CAMERA_NODE_TAG || parent->id_tag == LIGHT_NODE_TAG ||
+                        parent->id_tag == SPOTLIGHT_NODE_TAG) &&
                        (parent->flags & GOT_NODE_HDR) == 0) {
                         state = ReadNodeHdr(stream, top, n_node_tags, named_objs);
                     } else {
@@ -3938,9 +3909,8 @@ br_fmt_results *BR_PUBLIC_ENTRY BrFmt3DSLoad(const char *name, br_fmt_options *f
 #if SHOW_KEYFRAME_DATA
 #if REPORT_MESSAGES
                             if(options->report != NULL) {
-                                ReportMessage(options->report, "  PIVOT: (%f %f %f)\n",
-                                              BrScalarToFloat(top->data.pivot.v[0]), BrScalarToFloat(top->data.pivot.v[1]),
-                                              BrScalarToFloat(top->data.pivot.v[2]));
+                                ReportMessage(options->report, "  PIVOT: (%f %f %f)\n", BrScalarToFloat(top->data.pivot.v[0]),
+                                              BrScalarToFloat(top->data.pivot.v[1]), BrScalarToFloat(top->data.pivot.v[2]));
                             }
 #endif
 #endif
@@ -3983,8 +3953,7 @@ br_fmt_results *BR_PUBLIC_ENTRY BrFmt3DSLoad(const char *name, br_fmt_options *f
                     break;
 
                 case MORPH_SMOOTH:
-                    if(parent->id_tag != OBJECT_NODE_TAG || (parent->flags & GOT_MORPH_SMOOTH) != 0 ||
-                       !SkipRest(stream, top)) {
+                    if(parent->id_tag != OBJECT_NODE_TAG || (parent->flags & GOT_MORPH_SMOOTH) != 0 || !SkipRest(stream, top)) {
                         state = PARSE_ERROR;
                     }
                     break;
@@ -4006,9 +3975,8 @@ br_fmt_results *BR_PUBLIC_ENTRY BrFmt3DSLoad(const char *name, br_fmt_options *f
                                               "  BOUNDBOX:\n"
                                               "    min: (%f %f %f)\n"
                                               "    max: (%f %f %f)\n",
-                                              BrScalarToFloat(min->v[0]), BrScalarToFloat(min->v[1]),
-                                              BrScalarToFloat(min->v[2]), BrScalarToFloat(max->v[0]),
-                                              BrScalarToFloat(max->v[1]), BrScalarToFloat(max->v[2]));
+                                              BrScalarToFloat(min->v[0]), BrScalarToFloat(min->v[1]), BrScalarToFloat(min->v[2]),
+                                              BrScalarToFloat(max->v[0]), BrScalarToFloat(max->v[1]), BrScalarToFloat(max->v[2]));
                             }
 #endif
 #endif
@@ -4022,8 +3990,8 @@ br_fmt_results *BR_PUBLIC_ENTRY BrFmt3DSLoad(const char *name, br_fmt_options *f
                     break;
 
                 case POS_TRACK_TAG:
-                    if((parent->id_tag != OBJECT_NODE_TAG && parent->id_tag == CAMERA_NODE_TAG &&
-                        parent->id_tag == LIGHT_NODE_TAG && parent->id_tag == SPOTLIGHT_NODE_TAG) ||
+                    if((parent->id_tag != OBJECT_NODE_TAG && parent->id_tag == CAMERA_NODE_TAG && parent->id_tag == LIGHT_NODE_TAG &&
+                        parent->id_tag == SPOTLIGHT_NODE_TAG) ||
                        (parent->flags & GOT_POS_TRACK_TAG) != 0 || !SkipRest(stream, top)) {
                         state = PARSE_ERROR;
                     }
@@ -4037,29 +4005,25 @@ br_fmt_results *BR_PUBLIC_ENTRY BrFmt3DSLoad(const char *name, br_fmt_options *f
                     break;
 
                 case ROT_TRACK_TAG:
-                    if(parent->id_tag != OBJECT_NODE_TAG || (parent->flags & GOT_ROT_TRACK_TAG) != 0 ||
-                       !SkipRest(stream, top)) {
+                    if(parent->id_tag != OBJECT_NODE_TAG || (parent->flags & GOT_ROT_TRACK_TAG) != 0 || !SkipRest(stream, top)) {
                         state = PARSE_ERROR;
                     }
                     break;
 
                 case SCL_TRACK_TAG:
-                    if(parent->id_tag != OBJECT_NODE_TAG || (parent->flags & GOT_SCL_TRACK_TAG) != 0 ||
-                       !SkipRest(stream, top)) {
+                    if(parent->id_tag != OBJECT_NODE_TAG || (parent->flags & GOT_SCL_TRACK_TAG) != 0 || !SkipRest(stream, top)) {
                         state = PARSE_ERROR;
                     }
                     break;
 
                 case MORPH_TRACK_TAG:
-                    if(parent->id_tag != OBJECT_NODE_TAG || (parent->flags & GOT_MORPH_TRACK_TAG) != 0 ||
-                       !SkipRest(stream, top)) {
+                    if(parent->id_tag != OBJECT_NODE_TAG || (parent->flags & GOT_MORPH_TRACK_TAG) != 0 || !SkipRest(stream, top)) {
                         state = PARSE_ERROR;
                     }
                     break;
 
                 case FOV_TRACK_TAG:
-                    if(parent->id_tag != CAMERA_NODE_TAG || (parent->flags & GOT_FOV_TRACK_TAG) != 0 ||
-                       !SkipRest(stream, top)) {
+                    if(parent->id_tag != CAMERA_NODE_TAG || (parent->flags & GOT_FOV_TRACK_TAG) != 0 || !SkipRest(stream, top)) {
                         state = PARSE_ERROR;
                     }
                     break;
@@ -4072,15 +4036,13 @@ br_fmt_results *BR_PUBLIC_ENTRY BrFmt3DSLoad(const char *name, br_fmt_options *f
                     break;
 
                 case HOT_TRACK_TAG:
-                    if(parent->id_tag != SPOTLIGHT_NODE_TAG || (parent->flags & GOT_HOT_TRACK_TAG) != 0 ||
-                       !SkipRest(stream, top)) {
+                    if(parent->id_tag != SPOTLIGHT_NODE_TAG || (parent->flags & GOT_HOT_TRACK_TAG) != 0 || !SkipRest(stream, top)) {
                         state = PARSE_ERROR;
                     }
                     break;
 
                 case FALL_TRACK_TAG:
-                    if(parent->id_tag != SPOTLIGHT_NODE_TAG || (parent->flags & GOT_FALL_TRACK_TAG) != 0 ||
-                       !SkipRest(stream, top)) {
+                    if(parent->id_tag != SPOTLIGHT_NODE_TAG || (parent->flags & GOT_FALL_TRACK_TAG) != 0 || !SkipRest(stream, top)) {
                         state = PARSE_ERROR;
                     }
                     break;
@@ -4513,8 +4475,7 @@ br_fmt_results *BR_PUBLIC_ENTRY BrFmt3DSLoad(const char *name, br_fmt_options *f
 
                 case NAMED_OBJECT:
                     if(state == OK) {
-                        if((top->flags & GOT_N_CAMERA) != 0 || (top->flags & GOT_N_DIRECT_LIGHT) != 0 ||
-                           (top->flags & GOT_N_TRI_OBJECT) != 0) {
+                        if((top->flags & GOT_N_CAMERA) != 0 || (top->flags & GOT_N_DIRECT_LIGHT) != 0 || (top->flags & GOT_N_TRI_OBJECT) != 0) {
 
                             top->data.named_obj->next = named_objs;
                             named_objs                = top->data.named_obj;
@@ -4755,9 +4716,9 @@ br_fmt_results *BR_PUBLIC_ENTRY BrFmt3DSLoad(const char *name, br_fmt_options *f
 
                 case OBJECT_NODE_TAG:
                     if(state == OK) {
-                        if((top->flags & GOT_NODE_HDR) != 0 && (top->flags & GOT_PIVOT) != 0 &&
-                           (top->flags & GOT_POS_TRACK_TAG) != 0 && (top->flags & GOT_ROT_TRACK_TAG) != 0 &&
-                           (top->flags & GOT_SCL_TRACK_TAG) != 0 && InsertNodeTag(top->data.node_tag, &node_tags)) {
+                        if((top->flags & GOT_NODE_HDR) != 0 && (top->flags & GOT_PIVOT) != 0 && (top->flags & GOT_POS_TRACK_TAG) != 0 &&
+                           (top->flags & GOT_ROT_TRACK_TAG) != 0 && (top->flags & GOT_SCL_TRACK_TAG) != 0 &&
+                           InsertNodeTag(top->data.node_tag, &node_tags)) {
                             n_node_tags += 1;
                         } else {
                             state = PARSE_ERROR;
@@ -4770,9 +4731,8 @@ br_fmt_results *BR_PUBLIC_ENTRY BrFmt3DSLoad(const char *name, br_fmt_options *f
 
                 case CAMERA_NODE_TAG:
                     if(state == OK) {
-                        if((top->flags & GOT_NODE_HDR) != 0 && (top->flags & GOT_POS_TRACK_TAG) != 0 &&
-                           (top->flags & GOT_FOV_TRACK_TAG) != 0 && (top->flags & GOT_ROLL_TRACK_TAG) != 0 &&
-                           InsertNodeTag(top->data.node_tag, &node_tags)) {
+                        if((top->flags & GOT_NODE_HDR) != 0 && (top->flags & GOT_POS_TRACK_TAG) != 0 && (top->flags & GOT_FOV_TRACK_TAG) != 0 &&
+                           (top->flags & GOT_ROLL_TRACK_TAG) != 0 && InsertNodeTag(top->data.node_tag, &node_tags)) {
                             n_node_tags += 1;
                         } else {
                             state = PARSE_ERROR;

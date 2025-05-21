@@ -11,7 +11,6 @@
 #include "brender.h"
 #include "fmt.h"
 
-
 int FileNumCol(void *tmp);
 
 #define RED           2

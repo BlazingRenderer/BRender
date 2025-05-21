@@ -11,7 +11,6 @@
 #include "syscn_p.h"
 #include "brmath.h"
 
-
 static br_image Image_BRCORE1;
 
 /*
@@ -43,9 +42,9 @@ extern br_file_primitives          _BrFilePrimsNull;
  * System resource classes
  */
 static br_resource_class resourceClasses[] = {
-  /*
-  * These two classes have to be initialised by hand
-  */
+    /*
+     * These two classes have to be initialised by hand
+     */
     {0, "REGISTRY",          BR_MEMORY_REGISTRY,          NULL,          0 },
     {0, "ANCHOR",            BR_MEMORY_ANCHOR,            NULL,          0 },
 

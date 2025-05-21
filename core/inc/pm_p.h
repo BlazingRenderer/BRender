@@ -36,13 +36,12 @@ br_pixelmap *BR_PUBLIC_ENTRY BrPixelmapResize(br_pixelmap *pm, br_int_32 width, 
 
 br_pixelmap *BR_PUBLIC_ENTRY BrPixelmapMatch(br_pixelmap *src, br_uint_8 match_type);
 
-br_pixelmap *BR_PUBLIC_ENTRY BrPixelmapMatchSized(br_pixelmap *src, br_uint_8 match_type, br_int_32 width,
-                                                  br_int_32 height);
+br_pixelmap *BR_PUBLIC_ENTRY BrPixelmapMatchSized(br_pixelmap *src, br_uint_8 match_type, br_int_32 width, br_int_32 height);
 
 br_pixelmap *BR_PUBLIC_ENTRY BrPixelmapMatchTyped(br_pixelmap *src, br_uint_8 match_type, br_uint_8 pixelmap_type);
 
-br_pixelmap *BR_PUBLIC_ENTRY BrPixelmapMatchTypedSized(br_pixelmap *src, br_uint_8 match_type, br_uint_8 pixelmap_type,
-                                                       br_int_32 width, br_int_32 height);
+br_pixelmap *BR_PUBLIC_ENTRY BrPixelmapMatchTypedSized(br_pixelmap *src, br_uint_8 match_type, br_uint_8 pixelmap_type, br_int_32 width,
+                                                       br_int_32 height);
 
 br_pixelmap *BR_PUBLIC_ENTRY BrPixelmapMatchTV(br_pixelmap *src, br_token_value *tv);
 
@@ -57,24 +56,18 @@ br_pixelmap *BR_PUBLIC_ENTRY BrPixelmapDirectUnlock(br_pixelmap *src);
  */
 void BR_PUBLIC_ENTRY BrPixelmapFill(br_pixelmap *dst, br_uint_32 colour);
 
-void BR_PUBLIC_ENTRY BrPixelmapRectangle(br_pixelmap *dst, br_int_32 x, br_int_32 y, br_int_32 w, br_int_32 h,
-                                         br_uint_32 colour);
-void BR_PUBLIC_ENTRY BrPixelmapRectangle2(br_pixelmap *dst, br_int_32 x, br_int_32 y, br_int_32 w, br_int_32 h,
-                                          br_uint_32 colour1, br_uint_32 colour2);
-void BR_PUBLIC_ENTRY BrPixelmapRectangleCopy(br_pixelmap *dst, br_int_32 dx, br_int_32 dy, br_pixelmap *src,
-                                             br_int_32 sx, br_int_32 sy, br_int_32 w, br_int_32 h);
-void BR_PUBLIC_ENTRY BrPixelmapRectangleStretchCopy(br_pixelmap *dst, br_int_32 dx, br_int_32 dy, br_int_32 dw,
-                                                    br_int_32 dh, br_pixelmap *src, br_int_32 sx, br_int_32 sy,
-                                                    br_int_32 sw, br_int_32 sh);
-void BR_PUBLIC_ENTRY BrPixelmapRectangleFill(br_pixelmap *dst, br_int_32 x, br_int_32 y, br_int_32 w, br_int_32 h,
-                                             br_uint_32 colour);
+void BR_PUBLIC_ENTRY BrPixelmapRectangle(br_pixelmap *dst, br_int_32 x, br_int_32 y, br_int_32 w, br_int_32 h, br_uint_32 colour);
+void BR_PUBLIC_ENTRY BrPixelmapRectangle2(br_pixelmap *dst, br_int_32 x, br_int_32 y, br_int_32 w, br_int_32 h, br_uint_32 colour1,
+                                          br_uint_32 colour2);
+void BR_PUBLIC_ENTRY BrPixelmapRectangleCopy(br_pixelmap *dst, br_int_32 dx, br_int_32 dy, br_pixelmap *src, br_int_32 sx, br_int_32 sy,
+                                             br_int_32 w, br_int_32 h);
+void BR_PUBLIC_ENTRY BrPixelmapRectangleStretchCopy(br_pixelmap *dst, br_int_32 dx, br_int_32 dy, br_int_32 dw, br_int_32 dh,
+                                                    br_pixelmap *src, br_int_32 sx, br_int_32 sy, br_int_32 sw, br_int_32 sh);
+void BR_PUBLIC_ENTRY BrPixelmapRectangleFill(br_pixelmap *dst, br_int_32 x, br_int_32 y, br_int_32 w, br_int_32 h, br_uint_32 colour);
 
-void BR_PUBLIC_ENTRY BrPixelmapDirtyRectangleCopy(br_pixelmap *dst, br_pixelmap *src, br_int_32 x, br_int_32 y,
-                                                  br_int_32 w, br_int_32 h);
-void BR_PUBLIC_ENTRY BrPixelmapDirtyRectangleClear(br_pixelmap *dst, br_int_32 x, br_int_32 y, br_int_32 w, br_int_32 h,
-                                                   br_uint_32 colour);
-void BR_PUBLIC_ENTRY BrPixelmapDirtyRectangleDoubleBuffer(br_pixelmap *dst, br_pixelmap *src, br_int_32 x, br_int_32 y,
-                                                          br_int_32 w, br_int_32 h);
+void BR_PUBLIC_ENTRY BrPixelmapDirtyRectangleCopy(br_pixelmap *dst, br_pixelmap *src, br_int_32 x, br_int_32 y, br_int_32 w, br_int_32 h);
+void BR_PUBLIC_ENTRY BrPixelmapDirtyRectangleClear(br_pixelmap *dst, br_int_32 x, br_int_32 y, br_int_32 w, br_int_32 h, br_uint_32 colour);
+void BR_PUBLIC_ENTRY BrPixelmapDirtyRectangleDoubleBuffer(br_pixelmap *dst, br_pixelmap *src, br_int_32 x, br_int_32 y, br_int_32 w, br_int_32 h);
 
 /*
  * Backwards compatibility
@@ -84,15 +77,12 @@ void BR_PUBLIC_ENTRY BrPixelmapDirtyRectangleDoubleBuffer(br_pixelmap *dst, br_p
 void BR_PUBLIC_ENTRY       BrPixelmapPixelSet(br_pixelmap *dst, br_int_32 x, br_int_32 y, br_uint_32 colour);
 br_uint_32 BR_PUBLIC_ENTRY BrPixelmapPixelGet(br_pixelmap *dst, br_int_32 x, br_int_32 y);
 void BR_PUBLIC_ENTRY       BrPixelmapCopy(br_pixelmap *dst, br_pixelmap *src);
-void BR_PUBLIC_ENTRY       BrPixelmapLine(br_pixelmap *dst, br_int_32 x1, br_int_32 y1, br_int_32 x2, br_int_32 y2,
-                                          br_uint_32 colour);
-void BR_PUBLIC_ENTRY       BrPixelmapText(br_pixelmap *dst, br_int_32 x, br_int_32 y, br_uint_32 colour, br_font *font,
-                                          const char *text);
-void BR_PUBLIC_ENTRY       BrPixelmapTextF(br_pixelmap *dst, br_int_32 x, br_int_32 y, br_uint_32 colour, br_font *font,
-                                           const char *fmt, ...);
+void BR_PUBLIC_ENTRY       BrPixelmapLine(br_pixelmap *dst, br_int_32 x1, br_int_32 y1, br_int_32 x2, br_int_32 y2, br_uint_32 colour);
+void BR_PUBLIC_ENTRY       BrPixelmapText(br_pixelmap *dst, br_int_32 x, br_int_32 y, br_uint_32 colour, br_font *font, const char *text);
+void BR_PUBLIC_ENTRY BrPixelmapTextF(br_pixelmap *dst, br_int_32 x, br_int_32 y, br_uint_32 colour, br_font *font, const char *fmt, ...);
 
-void BR_PUBLIC_ENTRY BrPixelmapCopyBits(br_pixelmap *dst, br_int_32 x, br_int_32 y, br_uint_8 *src, br_int_32 s_stride,
-                                        br_int_32 start_bit, br_int_32 end_bit, br_int_32 nrows, br_uint_32 colour);
+void BR_PUBLIC_ENTRY BrPixelmapCopyBits(br_pixelmap *dst, br_int_32 x, br_int_32 y, br_uint_8 *src, br_int_32 s_stride, br_int_32 start_bit,
+                                        br_int_32 end_bit, br_int_32 nrows, br_uint_32 colour);
 
 br_uint_16 BR_PUBLIC_ENTRY BrPixelmapTextWidth(br_pixelmap *dst, br_font *font, const char *text);
 br_uint_16 BR_PUBLIC_ENTRY BrPixelmapTextHeight(br_pixelmap *dst, br_font *font);
@@ -101,8 +91,7 @@ void BR_PUBLIC_ENTRY BrPixelmapDoubleBuffer(br_pixelmap *dst, br_pixelmap *src);
 
 void BR_PUBLIC_ENTRY BrPixelmapPaletteSet(br_pixelmap *pm, br_pixelmap *pal);
 void BR_PUBLIC_ENTRY BrPixelmapPaletteEntrySet(br_pixelmap *pm, br_int_32 i, br_colour colour);
-void BR_PUBLIC_ENTRY BrPixelmapPaletteEntrySetMany(br_pixelmap *pm, br_int_32 index, br_int_32 ncolours,
-                                                   br_colour *colours);
+void BR_PUBLIC_ENTRY BrPixelmapPaletteEntrySetMany(br_pixelmap *pm, br_int_32 index, br_int_32 ncolours, br_colour *colours);
 
 /*
  * Backwards compatibility
@@ -156,8 +145,8 @@ void BR_PUBLIC_ENTRY BrQuantMapColours(int base, br_uint_8 *colours, br_uint_8 *
  * Produce a pixelmap containing mip levels from a pixelmap.
  */
 
-br_pixelmap *BR_PUBLIC_ENTRY BrPixelmapMakeMipMap(br_pixelmap *source, br_uint_32 destinationType, br_pixelmap *palette,
-                                                  br_uint_32 base, br_uint_32 range, br_uint_32 quantizationMethod);
+br_pixelmap *BR_PUBLIC_ENTRY BrPixelmapMakeMipMap(br_pixelmap *source, br_uint_32 destinationType, br_pixelmap *palette, br_uint_32 base,
+                                                  br_uint_32 range, br_uint_32 quantizationMethod);
 
 br_error BR_PUBLIC_ENTRY BrPixelmapGetControls(br_pixelmap *pm, br_display_controls *controls);
 br_error BR_PUBLIC_ENTRY BrPixelmapSetControls(br_pixelmap *pm, br_display_controls *controls);

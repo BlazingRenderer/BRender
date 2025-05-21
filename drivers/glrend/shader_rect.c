@@ -31,8 +31,7 @@ br_boolean VIDEOI_CompileRectShader(HVIDEO hVideo)
 
     hVideo->rectProgram.block_index_rect_data   = glGetUniformBlockIndex(hVideo->rectProgram.program, "RectData");
     hVideo->rectProgram.block_binding_rect_data = 4;
-    glUniformBlockBinding(hVideo->rectProgram.program, hVideo->rectProgram.block_index_rect_data,
-                          hVideo->rectProgram.block_binding_rect_data);
+    glUniformBlockBinding(hVideo->rectProgram.program, hVideo->rectProgram.block_index_rect_data, hVideo->rectProgram.block_binding_rect_data);
 
     glGenBuffers(1, &hVideo->rectProgram.ubo);
     glBindBuffer(GL_UNIFORM_BUFFER, hVideo->rectProgram.ubo);

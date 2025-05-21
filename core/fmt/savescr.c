@@ -9,7 +9,6 @@
 #include "brender.h"
 #include "fmt.h"
 
-
 /*
  * The default material used to load a script
  */

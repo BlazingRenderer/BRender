@@ -10,7 +10,6 @@
 #include "brmath.h"
 #include "brassert.h"
 
-
 /*
  * Work out the plane equation of the plane defined by three points
  *

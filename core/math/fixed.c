@@ -47,8 +47,8 @@ br_fixed_ls BR_PUBLIC_ENTRY BrFixedMac3(br_fixed_ls a, br_fixed_ls b, br_fixed_l
     return (br_fixed_ls)(((a * (br_int_64)b) + (c * (br_int_64)d) + (e * (br_int_64)f)) >> 16);
 }
 
-br_fixed_ls BR_PUBLIC_ENTRY BrFixedMac4(br_fixed_ls a, br_fixed_ls b, br_fixed_ls c, br_fixed_ls d, br_fixed_ls e,
-                                        br_fixed_ls f, br_fixed_ls g, br_fixed_ls h)
+br_fixed_ls BR_PUBLIC_ENTRY BrFixedMac4(br_fixed_ls a, br_fixed_ls b, br_fixed_ls c, br_fixed_ls d, br_fixed_ls e, br_fixed_ls f,
+                                        br_fixed_ls g, br_fixed_ls h)
 {
     return (br_fixed_ls)(((a * (br_int_64)b) + (c * (br_int_64)d) + (e * (br_int_64)f) + (g * (br_int_64)h)) >> 16);
 }
@@ -121,14 +121,13 @@ br_fixed_ls BR_PUBLIC_ENTRY BrFixedFMac2(br_fixed_lsf a, br_fixed_ls b, br_fixed
     return BrFixedMac2(a << 1, b, c << 1, d);
 }
 
-br_fixed_ls BR_PUBLIC_ENTRY BrFixedFMac3(br_fixed_lsf a, br_fixed_ls b, br_fixed_lsf c, br_fixed_ls d, br_fixed_lsf e,
-                                         br_fixed_ls f)
+br_fixed_ls BR_PUBLIC_ENTRY BrFixedFMac3(br_fixed_lsf a, br_fixed_ls b, br_fixed_lsf c, br_fixed_ls d, br_fixed_lsf e, br_fixed_ls f)
 {
     return BrFixedMac3(a << 1, b, c << 1, d, e << 1, f);
 }
 
-br_fixed_ls BR_PUBLIC_ENTRY BrFixedFMac4(br_fixed_lsf a, br_fixed_ls b, br_fixed_lsf c, br_fixed_ls d, br_fixed_lsf e,
-                                         br_fixed_ls f, br_fixed_lsf g, br_fixed_ls h)
+br_fixed_ls BR_PUBLIC_ENTRY BrFixedFMac4(br_fixed_lsf a, br_fixed_ls b, br_fixed_lsf c, br_fixed_ls d, br_fixed_lsf e, br_fixed_ls f,
+                                         br_fixed_lsf g, br_fixed_ls h)
 {
     return BrFixedMac4(a << 1, b, c << 1, d, e << 1, f, g << 1, h);
 }

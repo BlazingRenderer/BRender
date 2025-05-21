@@ -369,8 +369,7 @@ static int BrDemoRunArg(const br_demo_dispatch *dispatch, const br_demo_run_args
             br_int_32 base_x = -demo->colour_buffer->origin_x + 5;
             br_int_32 base_y = -demo->colour_buffer->origin_y + 5;
 
-            BrPixelmapTextF(demo->colour_buffer, base_x, base_y, demo->text_colour, BrFontProp7x9,
-                            "last frame delta (msec): %f", dt * 1000);
+            BrPixelmapTextF(demo->colour_buffer, base_x, base_y, demo->text_colour, BrFontProp7x9, "last frame delta (msec): %f", dt * 1000);
         }
 
         BrPixelmapDoubleBuffer(demo->_screen, demo->colour_buffer);
@@ -514,7 +513,7 @@ static const char *usage_options =
 ;
 // clang-format on
 
-int BrDemoRunArgv(const char *title, const br_demo_dispatch *dispatch, int argc, char * const *argv)
+int BrDemoRunArgv(const char *title, const br_demo_dispatch *dispatch, int argc, char *const *argv)
 {
     int               r;
     struct parg_state ps;

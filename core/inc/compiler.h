@@ -275,7 +275,7 @@ typedef float br_float;
 #define low    _low
 #define high   _high
 
-#define name _name
+#define name   _name
 
 /*
  * Supress compiler specific declarators

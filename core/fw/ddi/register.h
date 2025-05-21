@@ -21,7 +21,7 @@ typedef struct br_registry_entry {
     struct {
         br_uintptr_t reserved;
         char        *identifier;
-    } * item;
+    } *item;
 } br_registry_entry;
 
 typedef void *BR_CALLBACK      br_find_failed_cbfn(const char *pattern);

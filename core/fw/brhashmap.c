@@ -166,12 +166,10 @@ void BR_RESIDENT_ENTRY BrHashMapReset(br_hashmap *hm)
 /*
  * Circularly loop over each of the buckets, starting at index `start`.
  */
-#define LOOP_BUCKETS(hm, idxname, start)                                                \
-    for(size_t _i = 0, (idxname) = (start) % (hm)->num_buckets; _i < (hm)->num_buckets; \
-        ++_i, (idxname)          = ((idxname) + 1) % (hm)->num_buckets)
+#define LOOP_BUCKETS(hm, idxname, start) \
+    for(size_t _i = 0, (idxname) = (start) % (hm)->num_buckets; _i < (hm)->num_buckets; ++_i, (idxname) = ((idxname) + 1) % (hm)->num_buckets)
 
-static br_hashmap_bucket *add_or_replace_bucket(br_hashmap *hm, br_hashmap_bucket *buckets, size_t n,
-                                                const br_hashmap_bucket *bkt, int *added)
+static br_hashmap_bucket *add_or_replace_bucket(br_hashmap *hm, br_hashmap_bucket *buckets, size_t n, const br_hashmap_bucket *bkt, int *added)
 {
     if(n == 0)
         return NULL;

@@ -14,8 +14,7 @@
  */
 static const struct br_device_pixelmap_dispatch devicePixelmapDispatch;
 
-static br_error custom_query(br_value *pvalue, void **extra, br_size_t *pextra_size, void *block,
-                             const struct br_tv_template_entry *tep)
+static br_error custom_query(br_value *pvalue, void **extra, br_size_t *pextra_size, void *block, const struct br_tv_template_entry *tep)
 {
     const br_device_pixelmap *self = block;
 
@@ -30,7 +29,7 @@ static br_error custom_query(br_value *pvalue, void **extra, br_size_t *pextra_s
         return BRE_OK;
     } else if(tep->token == BRT_CLUT_O) {
         if(self->use_type == BRT_OFFSCREEN)
-            pvalue->o = (br_object*)self->asBack.clut;
+            pvalue->o = (br_object *)self->asBack.clut;
         else
             pvalue->o = NULL;
 
@@ -68,7 +67,7 @@ static struct br_tv_template_entry devicePixelmapTemplateEntries[] = {
  */
 static br_error recreate_renderbuffers(br_device_pixelmap *self)
 {
-    GLuint fbo = 0;
+    GLuint fbo           = 0;
     GLenum binding_point = self->msaa_samples > 1 ? GL_TEXTURE_2D_MULTISAMPLE : GL_TEXTURE_2D;
 
     UASSERT(self->use_type == BRT_OFFSCREEN || self->use_type == BRT_DEPTH);
@@ -88,12 +87,10 @@ static br_error recreate_renderbuffers(br_device_pixelmap *self)
         glBindTexture(binding_point, self->asBack.glTex);
 
         if(self->msaa_samples) {
-            glTexImage2DMultisample(binding_point, self->msaa_samples, fmt->internal_format, self->pm_width,
-                                    self->pm_height, GL_TRUE);
+            glTexImage2DMultisample(binding_point, self->msaa_samples, fmt->internal_format, self->pm_width, self->pm_height, GL_TRUE);
         } else {
             glTexParameteri(binding_point, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-            glTexImage2D(binding_point, 0, fmt->internal_format, self->pm_width, self->pm_height, 0, fmt->format,
-                         fmt->type, NULL);
+            glTexImage2D(binding_point, 0, fmt->internal_format, self->pm_width, self->pm_height, 0, fmt->format, fmt->type, NULL);
         }
 
         DeviceGLObjectLabelF(GL_TEXTURE, self->asBack.glTex, "%s:colour", self->pm_identifier);
@@ -116,11 +113,9 @@ static br_error recreate_renderbuffers(br_device_pixelmap *self)
         glBindTexture(binding_point, self->asDepth.glDepth);
 
         if(self->msaa_samples) {
-            glTexImage2DMultisample(binding_point, self->msaa_samples, GL_DEPTH_COMPONENT, self->pm_width,
-                                    self->pm_height, GL_TRUE);
+            glTexImage2DMultisample(binding_point, self->msaa_samples, GL_DEPTH_COMPONENT, self->pm_width, self->pm_height, GL_TRUE);
         } else {
-            glTexImage2D(binding_point, 0, GL_DEPTH_COMPONENT, self->pm_width, self->pm_height, 0, GL_DEPTH_COMPONENT,
-                         GL_UNSIGNED_BYTE, NULL);
+            glTexImage2D(binding_point, 0, GL_DEPTH_COMPONENT, self->pm_width, self->pm_height, 0, GL_DEPTH_COMPONENT, GL_UNSIGNED_BYTE, NULL);
         }
 
         DeviceGLObjectLabelF(GL_TEXTURE, self->asDepth.glDepth, "%s:depth", self->pm_identifier);
@@ -378,14 +373,14 @@ br_error BR_CMETHOD_DECL(br_device_pixelmap_gl, match)(br_device_pixelmap *self,
     return BRE_OK;
 }
 
-br_error BR_CMETHOD_DECL(br_device_pixelmap_gl, rectangleStretchCopy)(br_device_pixelmap *self, br_rectangle *d,
-                                                                      br_device_pixelmap *src, br_rectangle *s)
+br_error BR_CMETHOD_DECL(br_device_pixelmap_gl, rectangleStretchCopy)(br_device_pixelmap *self, br_rectangle *d, br_device_pixelmap *src,
+                                                                      br_rectangle *s)
 {
     /*
      * Device->Device non-addressable stretch copy.
      */
-    GLbitfield bits;
-    GLuint     srcFbo, dstFbo;
+    GLbitfield   bits;
+    GLuint       srcFbo, dstFbo;
     br_rectangle srect, drect;
 
     /*
@@ -426,7 +421,8 @@ br_error BR_CMETHOD_DECL(br_device_pixelmap_gl, rectangleStretchCopy)(br_device_
     glBindFramebuffer(GL_READ_FRAMEBUFFER, srcFbo);
     glBindFramebuffer(GL_DRAW_FRAMEBUFFER, dstFbo);
 
-    glBlitFramebuffer(srect.x, srect.y, srect.x + srect.w, srect.y + srect.h, drect.x, drect.y, drect.x + drect.w, drect.y + drect.h, bits, GL_NEAREST);
+    glBlitFramebuffer(srect.x, srect.y, srect.x + srect.w, srect.y + srect.h, drect.x, drect.y, drect.x + drect.w, drect.y + drect.h, bits,
+                      GL_NEAREST);
 
     glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
     glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
@@ -434,8 +430,7 @@ br_error BR_CMETHOD_DECL(br_device_pixelmap_gl, rectangleStretchCopy)(br_device_
     return BRE_OK;
 }
 
-br_error BR_CMETHOD_DECL(br_device_pixelmap_gl, rectangleCopy)(br_device_pixelmap *self, br_point *p,
-                                                               br_device_pixelmap *src, br_rectangle *sr)
+br_error BR_CMETHOD_DECL(br_device_pixelmap_gl, rectangleCopy)(br_device_pixelmap *self, br_point *p, br_device_pixelmap *src, br_rectangle *sr)
 {
     /* Device->Device non-addressable same-size copy. */
     br_rectangle r = {
@@ -468,7 +463,7 @@ br_error BR_CMETHOD_DECL(br_device_pixelmap_gl, rectangleFill)(br_device_pixelma
         mask = GL_COLOR_BUFFER_BIT;
 
         glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
-        glClearColor((float)r8 / 255.0f,  (float)g8 / 255.0f, (float)b8 / 255.0f, (float)a8 / 255.0f);
+        glClearColor((float)r8 / 255.0f, (float)g8 / 255.0f, (float)b8 / 255.0f, (float)a8 / 255.0f);
     } else if(self->use_type == BRT_DEPTH) {
         UASSERT(colour == 0xFFFFFFFF);
         fbo  = self->asDepth.backbuffer->asBack.glFbo;
@@ -494,8 +489,8 @@ br_error BR_CMETHOD_DECL(br_device_pixelmap_gl, rectangleFill)(br_device_pixelma
     return BRE_OK;
 }
 
-br_error BR_CMETHOD(br_device_pixelmap_gl, rectangleStretchCopyTo)(br_device_pixelmap *self, br_rectangle *d,
-                                                                   br_device_pixelmap *_src, br_rectangle *s)
+br_error BR_CMETHOD(br_device_pixelmap_gl, rectangleStretchCopyTo)(br_device_pixelmap *self, br_rectangle *d, br_device_pixelmap *_src,
+                                                                   br_rectangle *s)
 {
     /* Pixelmap->Device, addressable stretch copy. */
 
@@ -509,14 +504,14 @@ br_error BR_CMETHOD(br_device_pixelmap_gl, rectangleStretchCopyTo)(br_device_pix
     } br_rect_gl_data;
 #pragma pack(pop)
 
-    HVIDEO            hVideo  = &self->screen->asFront.video;
-    br_pixelmap      *src     = (br_pixelmap *)_src;
-    br_buffer_stored *stored  = src->stored;
-    br_rectangle      srect, drect;
-    br_boolean        tex_tmp = BR_FALSE;
-    GLuint            tex;
-    br_boolean        clut_tmp = BR_FALSE;
-    GLuint            clut = 0;
+    HVIDEO                    hVideo = &self->screen->asFront.video;
+    br_pixelmap              *src    = (br_pixelmap *)_src;
+    br_buffer_stored         *stored = src->stored;
+    br_rectangle              srect, drect;
+    br_boolean                tex_tmp = BR_FALSE;
+    GLuint                    tex;
+    br_boolean                clut_tmp = BR_FALSE;
+    GLuint                    clut     = 0;
     const br_pixelmap_gl_fmt *fmt;
 
     if(self->use_type != BRT_OFFSCREEN)
@@ -534,7 +529,7 @@ br_error BR_CMETHOD(br_device_pixelmap_gl, rectangleStretchCopyTo)(br_device_pix
     } else {
         tex     = DeviceGLPixelmapToGLTexture(src);
         tex_tmp = BR_TRUE;
-        fmt = DeviceGLGetFormatDetails(src->type);
+        fmt     = DeviceGLGetFormatDetails(src->type);
     }
 
     clut = self->asBack.clut->gl_tex ? self->asBack.clut->gl_tex : self->screen->asFront.tex_white;
@@ -542,7 +537,7 @@ br_error BR_CMETHOD(br_device_pixelmap_gl, rectangleStretchCopyTo)(br_device_pix
         if(src->map->stored != NULL) {
             clut = BufferStoredGLGetCLUTTexture(stored, self, clut);
         } else {
-            clut = DeviceGLPixelmapToGLTexture(src->map);
+            clut     = DeviceGLPixelmapToGLTexture(src->map);
             clut_tmp = BR_TRUE;
         }
     }
@@ -577,19 +572,11 @@ br_error BR_CMETHOD(br_device_pixelmap_gl, rectangleStretchCopyTo)(br_device_pix
     }
 
     br_rect_gl_data rect_data = {
-        .mvp           = {},
-        .src_rect      = BR_VECTOR4(
-            (float)srect.x / (float)src->width,
-            (float)srect.y / (float)src->height,
-            (float)srect.w / (float)src->width,
-            (float)srect.h / (float)src->height
-        ),
-        .dst_rect      = BR_VECTOR4(
-            (float)drect.x / (float)self->pm_width,
-            (float)drect.y / (float)self->pm_height,
-            (float)drect.w / (float)self->pm_width,
-            (float)drect.h / (float)self->pm_height
-        ),
+        .mvp      = {},
+        .src_rect = BR_VECTOR4((float)srect.x / (float)src->width, (float)srect.y / (float)src->height, (float)srect.w / (float)src->width,
+                               (float)srect.h / (float)src->height),
+        .dst_rect = BR_VECTOR4((float)drect.x / (float)self->pm_width, (float)drect.y / (float)self->pm_height,
+                               (float)drect.w / (float)self->pm_width, (float)drect.h / (float)self->pm_height),
         .vertical_flip = 1,
         .indexed       = (float)fmt->indexed,
     };
@@ -613,8 +600,7 @@ br_error BR_CMETHOD(br_device_pixelmap_gl, rectangleStretchCopyTo)(br_device_pix
     return BRE_OK;
 }
 
-br_error BR_CMETHOD_DECL(br_device_pixelmap_gl, rectangleCopyTo)(br_device_pixelmap *self, br_point *p,
-                                                                 br_device_pixelmap *src, br_rectangle *sr)
+br_error BR_CMETHOD_DECL(br_device_pixelmap_gl, rectangleCopyTo)(br_device_pixelmap *self, br_point *p, br_device_pixelmap *src, br_rectangle *sr)
 {
     /* Pixelmap->Device, addressable same-size copy. */
 
@@ -628,18 +614,16 @@ br_error BR_CMETHOD_DECL(br_device_pixelmap_gl, rectangleCopyTo)(br_device_pixel
     return BR_CMETHOD(br_device_pixelmap_gl, rectangleStretchCopyTo)(self, &r, src, sr);
 }
 
-#define DevicePixelmapMemAddress(pm, x, y, bpp)                                                     \
-    ((char *)(((br_device_pixelmap *)(pm))->pm_pixels) +                                            \
-     (((br_device_pixelmap *)(pm))->pm_base_y + (y)) * ((br_device_pixelmap *)(pm))->pm_row_bytes + \
+#define DevicePixelmapMemAddress(pm, x, y, bpp)                                                                                                         \
+    ((char *)(((br_device_pixelmap *)(pm))->pm_pixels) + (((br_device_pixelmap *)(pm))->pm_base_y + (y)) * ((br_device_pixelmap *)(pm))->pm_row_bytes + \
      (((br_device_pixelmap *)(pm))->pm_base_x + (x)) * (bpp))
 
 /*
  * Device->Pixelmap, addressable same-size copy.
  */
-br_error BR_CMETHOD_DECL(br_device_pixelmap_gl, rectangleCopyFrom)(br_device_pixelmap *self, br_point *p,
-                                                                   br_device_pixelmap *dest, br_rectangle *r)
+br_error BR_CMETHOD_DECL(br_device_pixelmap_gl, rectangleCopyFrom)(br_device_pixelmap *self, br_point *p, br_device_pixelmap *dest, br_rectangle *r)
 {
-    br_error err;
+    br_error                  err;
     void                     *row_temp;
     const br_pixelmap_gl_fmt *fmt;
     br_rectangle              srect;
@@ -684,8 +668,7 @@ br_error BR_CMETHOD_DECL(br_device_pixelmap_gl, rectangleCopyFrom)(br_device_pix
     return BRE_OK;
 }
 
-br_error BR_CMETHOD(br_device_pixelmap_gl, text)(br_device_pixelmap *self, br_point *point, br_font *font,
-                                                 const char *text, br_uint_32 colour)
+br_error BR_CMETHOD(br_device_pixelmap_gl, text)(br_device_pixelmap *self, br_point *point, br_font *font, const char *text, br_uint_32 colour)
 {
 
     size_t      len = strlen(text);
@@ -693,7 +676,7 @@ br_error BR_CMETHOD(br_device_pixelmap_gl, text)(br_device_pixelmap *self, br_po
     br_font_gl *gl_font;
     HVIDEO      hVideo = &self->screen->asFront.video;
     br_text_gl *text_data;
-    br_uint_8  r8 = 0, g8 = 0, b8 = 0, a8 = 255;
+    br_uint_8   r8 = 0, g8 = 0, b8 = 0, a8 = 255;
 
     /*
      * Make sure we're an offscreen pixelmap.
@@ -781,7 +764,7 @@ br_error BR_CMETHOD(br_device_pixelmap_gl, text)(br_device_pixelmap *self, br_po
             dr = r;
             if(DevicePixelmapGLRectangleClip(&dr, &r, (br_pixelmap *)self) == BR_CLIP_REJECT) {
                 chunk = i;
-                len = chunk;
+                len   = chunk;
                 break;
             }
 
@@ -837,10 +820,8 @@ br_error BR_CMETHOD_DECL(br_device_pixelmap_gl, line)(br_device_pixelmap *self, 
     BrColourUnpack(colour, self->pm_type, &r8, &g8, &b8, &a8);
 
     BrMatrix4Orthographic(&line_data.mvp, 0.0f, 1.0f, 0.0f, 1.0f, -1.0f, 1.0f);
-    line_data.start  = (br_vector2)BR_VECTOR2((float)spoint.x / (float)self->pm_width,
-                                              1.0f - ((float)spoint.y / (float)self->pm_height));
-    line_data.end    = (br_vector2)BR_VECTOR2((float)epoint.x / (float)self->pm_width,
-                                              1.0f - ((float)epoint.y / (float)self->pm_height));
+    line_data.start  = (br_vector2)BR_VECTOR2((float)spoint.x / (float)self->pm_width, 1.0f - ((float)spoint.y / (float)self->pm_height));
+    line_data.end    = (br_vector2)BR_VECTOR2((float)epoint.x / (float)self->pm_width, 1.0f - ((float)epoint.y / (float)self->pm_height));
     line_data.colour = (br_vector4)BR_VECTOR4(r8 / 255.0f, g8 / 255.0f, b8 / 255.0f, a8 / 255.0f);
 
     glBindFramebuffer(GL_FRAMEBUFFER, self->asBack.glFbo);

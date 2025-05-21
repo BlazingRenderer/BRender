@@ -111,7 +111,7 @@ typedef struct br_demo {
 
 int BrDemoRun(const char *title, br_uint_16 width, br_uint_16 height, const br_demo_dispatch *dispatch);
 
-int BrDemoRunArgv(const char *title, const br_demo_dispatch *dispatch, int argc, char * const *argv);
+int BrDemoRunArgv(const char *title, const br_demo_dispatch *dispatch, int argc, char *const *argv);
 
 #ifdef __cplusplus
 }

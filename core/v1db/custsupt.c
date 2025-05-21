@@ -10,7 +10,6 @@
 #include "shortcut.h"
 #include "brassert.h"
 
-
 #define BR_FIXED_SIGN 0x80000000UL
 
 /*
@@ -54,10 +53,8 @@ void BR_PUBLIC_ENTRY BrModelToScreenQuery(br_matrix4 *dest)
                     "model_to_screen transform",
                     dest != NULL);
 
-    RendererPartQueryBuffer(v1db.renderer, BRT_MATRIX, 0, &dummy, (void *)&v2s, sizeof(v2s),
-                            BRT_AS_MATRIX4_SCALAR(VIEW_TO_SCREEN));
-    RendererPartQueryBuffer(v1db.renderer, BRT_MATRIX, 0, &dummy, (void *)&m2v, sizeof(m2v),
-                            BRT_AS_MATRIX34_SCALAR(MODEL_TO_VIEW));
+    RendererPartQueryBuffer(v1db.renderer, BRT_MATRIX, 0, &dummy, (void *)&v2s, sizeof(v2s), BRT_AS_MATRIX4_SCALAR(VIEW_TO_SCREEN));
+    RendererPartQueryBuffer(v1db.renderer, BRT_MATRIX, 0, &dummy, (void *)&m2v, sizeof(m2v), BRT_AS_MATRIX34_SCALAR(MODEL_TO_VIEW));
 
     BrMatrix4Mul34(dest, &m2v, &v2s);
 }
@@ -75,8 +72,7 @@ void BR_PUBLIC_ENTRY BrModelToViewQuery(br_matrix34 *dest)
                     "transform",
                     dest != NULL);
 
-    RendererPartQueryBuffer(v1db.renderer, BRT_MATRIX, 0, &dummy, (void *)dest, sizeof(*dest),
-                            BRT_AS_MATRIX34_SCALAR(MODEL_TO_VIEW));
+    RendererPartQueryBuffer(v1db.renderer, BRT_MATRIX, 0, &dummy, (void *)dest, sizeof(*dest), BRT_AS_MATRIX34_SCALAR(MODEL_TO_VIEW));
 }
 
 /*
@@ -147,8 +143,7 @@ br_uint_8 BR_PUBLIC_ENTRY BrPointToScreenXY(br_vector2 *screen, br_vector3 *poin
     UASSERT_MESSAGE("BrPointToScreenXY NULL pointer to the destination vector to receive the coords.in projected "
                     "screen space",
                     screen != NULL);
-    UASSERT_MESSAGE("BrPointToScreenXY NULL pointer to the source vector containing the coords of the point to project",
-                    point != NULL);
+    UASSERT_MESSAGE("BrPointToScreenXY NULL pointer to the source vector containing the coords of the point to project", point != NULL);
 
     if(!v1db.model_to_screen_valid) {
         BrModelToScreenQuery(&v1db.model_to_screen);
@@ -236,8 +231,7 @@ void BR_PUBLIC_ENTRY BrPointToScreenXYMany(br_vector2 *screens, br_vector3 *poin
  *
  * Outcode each point, and if it is not on screen, don't project it
  */
-void BR_PUBLIC_ENTRY BrPointToScreenXYZOMany(br_vector3 *screens, br_uint_32 *outcodes, br_vector3 *points,
-                                             br_uint_32 npoints)
+void BR_PUBLIC_ENTRY BrPointToScreenXYZOMany(br_vector3 *screens, br_uint_32 *outcodes, br_vector3 *points, br_uint_32 npoints)
 {
     br_vector4 sp;
     br_uint_32 i;
@@ -365,8 +359,7 @@ br_scalar BR_PUBLIC_ENTRY BrZsDepthToScreenZ(br_scalar depth_z, const br_camera 
 
     UASSERT_MESSAGE("BrZsDepthToScreenZ - Divide by zero error", yon != hither);
 
-    return BR_CONST_MUL(
-        BR_MULDIV(BR_SUB(BR_SUB(BR_CONST_MUL(depth_z, 2), yon), hither), BR_SCALAR(16384), BR_SUB(yon, hither)), 2);
+    return BR_CONST_MUL(BR_MULDIV(BR_SUB(BR_SUB(BR_CONST_MUL(depth_z, 2), yon), hither), BR_SCALAR(16384), BR_SUB(yon, hither)), 2);
 }
 
 /*
@@ -384,8 +377,7 @@ br_scalar BR_PUBLIC_ENTRY BrZsScreenZToDepth(br_scalar sz, const br_camera *came
                     camera != NULL); // Not accessed, but should still be valid
 
     /*	depth=BR_CONST_DIV(BR_MULDIV(sz,yon+hither,BR_SCALAR(-32768.f))-yon+hither,2); Not so good */
-    depth = BR_CONST_DIV(
-        BR_ADD(BR_MULDIV(BR_CONST_DIV(sz, 2), BR_SUB(yon, hither), BR_SCALAR(16384)), BR_ADD(yon, hither)), 2);
+    depth = BR_CONST_DIV(BR_ADD(BR_MULDIV(BR_CONST_DIV(sz, 2), BR_SUB(yon, hither), BR_SCALAR(16384)), BR_ADD(yon, hither)), 2);
 
     if(sz <= TOONEAR)
         return hither;
@@ -427,21 +419,18 @@ br_scalar BR_PUBLIC_ENTRY BrScreenZToCamera(const br_actor *camera, br_scalar sz
         case BR_CAMERA_PERSPECTIVE:
 
             UASSERT_MESSAGE("BrScreenZToCamera - Divide by zero error",
-                            BR_SUB(BR_MULDIV(BR_CONST_DIV(sz, 2), BR_SUB(yon, hither), BR_SCALAR(16384)),
-                                   BR_ADD(hither, yon)) != 0);
+                            BR_SUB(BR_MULDIV(BR_CONST_DIV(sz, 2), BR_SUB(yon, hither), BR_SCALAR(16384)), BR_ADD(hither, yon)) != 0);
 
-            return BR_CONST_MUL(BR_MULDIV(hither, yon,
-                                          BR_SUB(BR_MULDIV(BR_CONST_DIV(sz, 2), BR_SUB(yon, hither), BR_SCALAR(16384)),
-                                                 BR_ADD(hither, yon))),
-                                2);
+            return BR_CONST_MUL(
+                BR_MULDIV(hither, yon, BR_SUB(BR_MULDIV(BR_CONST_DIV(sz, 2), BR_SUB(yon, hither), BR_SCALAR(16384)), BR_ADD(hither, yon))), 2);
         default:
             UASSERT(0);
             return BR_SCALAR(0);
     }
 }
 
-void BR_PUBLIC_ENTRY BrScreenXYZToCamera(br_vector3 *point, const br_actor *camera, const br_pixelmap *screen_buffer,
-                                         br_int_16 x, br_int_16 y, br_scalar sz)
+void BR_PUBLIC_ENTRY BrScreenXYZToCamera(br_vector3 *point, const br_actor *camera, const br_pixelmap *screen_buffer, br_int_16 x,
+                                         br_int_16 y, br_scalar sz)
 {
     br_scalar        hx, hy;
     br_scalar        vz;
@@ -449,8 +438,7 @@ void BR_PUBLIC_ENTRY BrScreenXYZToCamera(br_vector3 *point, const br_actor *came
     br_angle         fov;
     br_scalar        scale;
 
-    UASSERT_MESSAGE("BrScreenXYZToCamera NULL pointer to vector to hold the converted point in camera space",
-                    point != NULL);
+    UASSERT_MESSAGE("BrScreenXYZToCamera NULL pointer to vector to hold the converted point in camera space", point != NULL);
     UASSERT_MESSAGE("BrScreenXYZToCamera NULL pointer to camera actor", camera != NULL);
     UASSERT_MESSAGE("BrScreenXYZToCamera - invalid camera data", camera->type_data != NULL);
     UASSERT_MESSAGE("BrScreenXYZToCamera NULL pointer to the screen buffer", screen_buffer != NULL);

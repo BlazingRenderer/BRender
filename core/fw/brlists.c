@@ -9,7 +9,6 @@
 
 #include "fw.h"
 
-
 /**
  ** Full features list handling
  **/

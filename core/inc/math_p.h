@@ -37,8 +37,7 @@ br_fixed_ls BrFixedMac3(br_fixed_ls a, br_fixed_ls b, br_fixed_ls c, br_fixed_ls
 
 /* result = a*b + c*d + e*f + g*h
  */
-br_fixed_ls BrFixedMac4(br_fixed_ls a, br_fixed_ls b, br_fixed_ls c, br_fixed_ls d, br_fixed_ls e, br_fixed_ls f,
-                        br_fixed_ls g, br_fixed_ls h);
+br_fixed_ls BrFixedMac4(br_fixed_ls a, br_fixed_ls b, br_fixed_ls c, br_fixed_ls d, br_fixed_ls e, br_fixed_ls f, br_fixed_ls g, br_fixed_ls h);
 
 /* result = a*a
  */
@@ -105,13 +104,12 @@ br_fixed_ls BR_ASM_CALL BrFixedMac2Div(br_fixed_ls a, br_fixed_ls b, br_fixed_ls
 
 /* result = (a*b + c*d + e*f)/g
  */
-br_fixed_ls BR_ASM_CALL BrFixedMac3Div(br_fixed_ls a, br_fixed_ls b, br_fixed_ls c, br_fixed_ls d, br_fixed_ls e,
-                                       br_fixed_ls f, br_fixed_ls g);
+br_fixed_ls BR_ASM_CALL BrFixedMac3Div(br_fixed_ls a, br_fixed_ls b, br_fixed_ls c, br_fixed_ls d, br_fixed_ls e, br_fixed_ls f, br_fixed_ls g);
 
 /* result = (a*b + c*d + e*f + g*h)/i
  */
-br_fixed_ls BR_ASM_CALL BrFixedMac4Div(br_fixed_ls a, br_fixed_ls b, br_fixed_ls c, br_fixed_ls d, br_fixed_ls e,
-                                       br_fixed_ls f, br_fixed_ls g, br_fixed_ls h, br_fixed_ls i);
+br_fixed_ls BR_ASM_CALL BrFixedMac4Div(br_fixed_ls a, br_fixed_ls b, br_fixed_ls c, br_fixed_ls d, br_fixed_ls e, br_fixed_ls f,
+                                       br_fixed_ls g, br_fixed_ls h, br_fixed_ls i);
 /* result = 1.0/a
  */
 br_fixed_ls BR_PUBLIC_ENTRY BrFixedRcp(br_fixed_ls a);
@@ -126,13 +124,12 @@ br_fixed_ls BR_PUBLIC_ENTRY BrFixedFMac2(br_fixed_lsf a, br_fixed_ls b, br_fixed
 
 /* result = a*b + c*d + e*f - a,c & e are fractions
  */
-br_fixed_ls BR_PUBLIC_ENTRY BrFixedFMac3(br_fixed_lsf a, br_fixed_ls b, br_fixed_lsf c, br_fixed_ls d, br_fixed_lsf e,
-                                         br_fixed_ls f);
+br_fixed_ls BR_PUBLIC_ENTRY BrFixedFMac3(br_fixed_lsf a, br_fixed_ls b, br_fixed_lsf c, br_fixed_ls d, br_fixed_lsf e, br_fixed_ls f);
 
 /* result = a*b + c*d + e*f + g*h (a,c,e,g are fractions)
  */
-br_fixed_ls BR_PUBLIC_ENTRY BrFixedFMac4(br_fixed_lsf a, br_fixed_ls b, br_fixed_lsf c, br_fixed_ls d, br_fixed_lsf e,
-                                         br_fixed_ls f, br_fixed_lsf g, br_fixed_ls h);
+br_fixed_ls BR_PUBLIC_ENTRY BrFixedFMac4(br_fixed_lsf a, br_fixed_ls b, br_fixed_lsf c, br_fixed_ls d, br_fixed_lsf e, br_fixed_ls f,
+                                         br_fixed_lsf g, br_fixed_ls h);
 
 /*
  * Misc. support  functions
@@ -241,11 +238,10 @@ br_scalar BR_PUBLIC_ENTRY BrMatrix4Inverse(br_matrix4 *A, const br_matrix4 *B);
 void BR_PUBLIC_ENTRY      BrMatrix4Adjoint(br_matrix4 *A, const br_matrix4 *B);
 br_scalar BR_PUBLIC_ENTRY BrMatrix4Determinant(const br_matrix4 *mat);
 
-void BR_PUBLIC_ENTRY BrMatrix4Perspective(br_matrix4 *mat, br_angle field_of_view, br_scalar aspect, br_scalar hither,
-                                          br_scalar yon);
+void BR_PUBLIC_ENTRY BrMatrix4Perspective(br_matrix4 *mat, br_angle field_of_view, br_scalar aspect, br_scalar hither, br_scalar yon);
 
-void BR_PUBLIC_ENTRY BrMatrix4Orthographic(br_matrix4 *mat, br_scalar left, br_scalar right, br_scalar bottom,
-                                           br_scalar top, br_scalar hither, br_scalar yon);
+void BR_PUBLIC_ENTRY BrMatrix4Orthographic(br_matrix4 *mat, br_scalar left, br_scalar right, br_scalar bottom, br_scalar top,
+                                           br_scalar hither, br_scalar yon);
 
 void BR_PUBLIC_ENTRY BrMatrix4ApplyV(br_vector4 *A, const br_vector3 *B, const br_matrix4 *C);
 void BR_PUBLIC_ENTRY BrMatrix4ApplyP(br_vector4 *A, const br_vector3 *B, const br_matrix4 *C);
@@ -309,8 +305,7 @@ void BR_PUBLIC_ENTRY       BrVector3NormaliseLP(br_vector3 *v1, const br_vector3
 void BR_PUBLIC_ENTRY       BrVector3ColourSet(br_vector3 *v1, br_colour colour);
 void BR_PUBLIC_ENTRY       BrVector3Clamp(br_vector3 *v1, const br_vector3 *v2, br_scalar min, br_scalar max);
 
-br_int_32 BR_PUBLIC_ENTRY BrPlaneEquation(br_vector4 *eqn, const br_vector3 *v0, const br_vector3 *v1,
-                                          const br_vector3 *v2);
+br_int_32 BR_PUBLIC_ENTRY BrPlaneEquation(br_vector4 *eqn, const br_vector3 *v0, const br_vector3 *v1, const br_vector3 *v2);
 
 /*
  * 2D vectors

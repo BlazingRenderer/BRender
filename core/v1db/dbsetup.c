@@ -206,8 +206,8 @@ br_error BR_PUBLIC_ENTRY BrV1dbRendererBegin(br_device_pixelmap *destination, br
     br_renderer_facility *renderer_facility = NULL;
     br_error              r;
     br_token_value        tv[] = {
-               {0, 0},
-               {0},
+        {0, 0},
+        {0},
     };
 
     /*
@@ -253,20 +253,17 @@ br_error BR_PUBLIC_ENTRY BrV1dbRendererBegin(br_device_pixelmap *destination, br
     /*
      * Look up geometry format objects
      */
-    r = BrGeometryFormatFind((br_geometry **)&v1db.format_model, renderer, renderer_facility, BR_SCALAR_TOKEN,
-                             BRT_GEOMETRY_V1_MODEL);
+    r = BrGeometryFormatFind((br_geometry **)&v1db.format_model, renderer, renderer_facility, BR_SCALAR_TOKEN, BRT_GEOMETRY_V1_MODEL);
 
     if(r != BRE_OK)
         return r;
 
-    r = BrGeometryFormatFind((br_geometry **)&v1db.format_buckets, renderer, renderer_facility, BR_SCALAR_TOKEN,
-                             BRT_GEOMETRY_V1_BUCKETS);
+    r = BrGeometryFormatFind((br_geometry **)&v1db.format_buckets, renderer, renderer_facility, BR_SCALAR_TOKEN, BRT_GEOMETRY_V1_BUCKETS);
 
     if(r != BRE_OK)
         v1db.format_buckets = NULL;
 
-    r = BrGeometryFormatFind((br_geometry **)&v1db.format_lighting, renderer, renderer_facility, BR_SCALAR_TOKEN,
-                             BRT_GEOMETRY_LIGHTING);
+    r = BrGeometryFormatFind((br_geometry **)&v1db.format_lighting, renderer, renderer_facility, BR_SCALAR_TOKEN, BRT_GEOMETRY_LIGHTING);
 
     if(r != BRE_OK)
         return r;
@@ -348,8 +345,7 @@ br_error BR_PUBLIC_ENTRY BrV1dbRendererEnd(void)
  * General purpose renderer handling
  */
 void BR_PUBLIC_ENTRY BrRendererBegin(br_pixelmap *destination, struct br_renderer_facility *renderer_facility,
-                                     struct br_primitive_library *primitive_library, void *primitive_heap,
-                                     br_uint_32 primitive_heap_size)
+                                     struct br_primitive_library *primitive_library, void *primitive_heap, br_uint_32 primitive_heap_size)
 {
     br_renderer   *renderer = NULL;
     br_token_value tv[3];

@@ -15,7 +15,6 @@
 
 #include "pmmem.h"
 
-
 /*
  * Comatibility hack to catch any pixelmaps with NULL dispatch pointers and
  * redirect them to the memory dispatch table
@@ -264,8 +263,7 @@ br_pixelmap *BR_PUBLIC_ENTRY BrPixelmapMatchTyped(br_pixelmap *src, br_uint_8 ma
         case BR_PMMATCH_DEPTH:
             tv[0].v.t = BRT_DEPTH;
 
-            UASSERT_MESSAGE("Pixelmap type incompatible with match type",
-                            (pixelmap_type == BR_PMT_DEPTH_16) || (pixelmap_type == BR_PMT_DEPTH_32));
+            UASSERT_MESSAGE("Pixelmap type incompatible with match type", (pixelmap_type == BR_PMT_DEPTH_16) || (pixelmap_type == BR_PMT_DEPTH_32));
 
             break;
     }
@@ -282,8 +280,8 @@ br_pixelmap *BR_PUBLIC_ENTRY BrPixelmapMatchTyped(br_pixelmap *src, br_uint_8 ma
     return new;
 }
 
-br_pixelmap *BR_PUBLIC_ENTRY BrPixelmapMatchTypedSized(br_pixelmap *src, br_uint_8 match_type, br_uint_8 pixelmap_type,
-                                                       br_int_32 width, br_int_32 height)
+br_pixelmap *BR_PUBLIC_ENTRY BrPixelmapMatchTypedSized(br_pixelmap *src, br_uint_8 match_type, br_uint_8 pixelmap_type, br_int_32 width,
+                                                       br_int_32 height)
 {
     br_pixelmap *new;
 
@@ -330,8 +328,7 @@ br_pixelmap *BR_PUBLIC_ENTRY BrPixelmapMatchTypedSized(br_pixelmap *src, br_uint
         case BR_PMMATCH_DEPTH:
             tv[0].v.t = BRT_DEPTH;
 
-            UASSERT_MESSAGE("Pixelmap type incompatible with match type",
-                            (pixelmap_type == BR_PMT_DEPTH_16) || (pixelmap_type == BR_PMT_DEPTH_32));
+            UASSERT_MESSAGE("Pixelmap type incompatible with match type", (pixelmap_type == BR_PMT_DEPTH_16) || (pixelmap_type == BR_PMT_DEPTH_32));
 
             break;
     }
@@ -393,6 +390,24 @@ br_pixelmap *BR_PUBLIC_ENTRY BrPixelmapClone(br_pixelmap *src)
     return new;
 }
 
+br_pixelmap *BR_PUBLIC_ENTRY BrPixelmapCloneTyped(br_pixelmap *src, br_uint_8 type)
+{
+    br_pixelmap *new;
+
+    br_token_value tv[] = {
+        {.t = BRT_USE_T,         .v = {.t = BRT_CLONE}},
+        {.t = BRT_PIXEL_TYPE_U8, .v = {.u8 = type}    },
+        {.t = BR_NULL_TOKEN,     .v = 0               },
+    };
+
+    CheckDispatch(src);
+
+    if((new = BrPixelmapMatchTV(src, tv)) == NULL)
+        return NULL;
+
+    return new;
+}
+
 void BR_PUBLIC_ENTRY BrPixelmapFill(br_pixelmap *dst, br_uint_32 colour)
 {
     CheckDispatch(dst);
@@ -414,8 +429,8 @@ void BR_PUBLIC_ENTRY BrPixelmapRectangle(br_pixelmap *dst, br_int_32 x, br_int_3
     DevicePixelmapRectangle(dst, &r, colour);
 }
 
-void BR_PUBLIC_ENTRY BrPixelmapRectangle2(br_pixelmap *dst, br_int_32 x, br_int_32 y, br_int_32 w, br_int_32 h,
-                                          br_uint_32 colour_tl, br_uint_32 colour_br)
+void BR_PUBLIC_ENTRY BrPixelmapRectangle2(br_pixelmap *dst, br_int_32 x, br_int_32 y, br_int_32 w, br_int_32 h, br_uint_32 colour_tl,
+                                          br_uint_32 colour_br)
 {
     br_rectangle r;
 
@@ -531,8 +546,8 @@ br_error DispatchRectangleStretchCopy(br_device_pixelmap *self, br_rectangle *r,
         return GeneralRectangleStretchCopy((br_device_pixelmap *)self, r, (br_device_pixelmap *)src, s);
 }
 
-void BR_PUBLIC_ENTRY BrPixelmapRectangleCopy(br_pixelmap *dst, br_int_32 dx, br_int_32 dy, br_pixelmap *src,
-                                             br_int_32 sx, br_int_32 sy, br_int_32 w, br_int_32 h)
+void BR_PUBLIC_ENTRY BrPixelmapRectangleCopy(br_pixelmap *dst, br_int_32 dx, br_int_32 dy, br_pixelmap *src, br_int_32 sx, br_int_32 sy,
+                                             br_int_32 w, br_int_32 h)
 {
     br_rectangle r;
     br_point     p;
@@ -567,8 +582,7 @@ void BR_PUBLIC_ENTRY BrPixelmapRectangleStretchCopy(br_pixelmap *dst, br_int_32 
     DispatchRectangleStretchCopy((br_device_pixelmap *)dst, &d, (br_device_pixelmap *)src, &s);
 }
 
-void BR_PUBLIC_ENTRY BrPixelmapRectangleFill(br_pixelmap *dst, br_int_32 x, br_int_32 y, br_int_32 w, br_int_32 h,
-                                             br_uint_32 colour)
+void BR_PUBLIC_ENTRY BrPixelmapRectangleFill(br_pixelmap *dst, br_int_32 x, br_int_32 y, br_int_32 w, br_int_32 h, br_uint_32 colour)
 {
     br_rectangle r;
 
@@ -582,8 +596,7 @@ void BR_PUBLIC_ENTRY BrPixelmapRectangleFill(br_pixelmap *dst, br_int_32 x, br_i
     DevicePixelmapRectangleFill(dst, &r, colour);
 }
 
-void BR_PUBLIC_ENTRY BrPixelmapDirtyRectangleCopy(br_pixelmap *dst, br_pixelmap *src, br_int_32 x, br_int_32 y,
-                                                  br_int_32 w, br_int_32 h)
+void BR_PUBLIC_ENTRY BrPixelmapDirtyRectangleCopy(br_pixelmap *dst, br_pixelmap *src, br_int_32 x, br_int_32 y, br_int_32 w, br_int_32 h)
 {
     br_rectangle r;
     br_point     p;
@@ -630,8 +643,7 @@ void BR_PUBLIC_ENTRY BrPixelmapDirtyRectangleCopy(br_pixelmap *dst, br_pixelmap 
         GeneralRectangleCopy((br_device_pixelmap *)dst, &p, (br_device_pixelmap *)src, &r);
 }
 
-void BR_PUBLIC_ENTRY BrPixelmapDirtyRectangleClear(br_pixelmap *dst, br_int_32 x, br_int_32 y, br_int_32 w, br_int_32 h,
-                                                   br_uint_32 colour)
+void BR_PUBLIC_ENTRY BrPixelmapDirtyRectangleClear(br_pixelmap *dst, br_int_32 x, br_int_32 y, br_int_32 w, br_int_32 h, br_uint_32 colour)
 {
     br_rectangle r;
 
@@ -645,8 +657,7 @@ void BR_PUBLIC_ENTRY BrPixelmapDirtyRectangleClear(br_pixelmap *dst, br_int_32 x
     DevicePixelmapFillDirty((br_device_pixelmap *)dst, colour, &r, 1);
 }
 
-void BR_PUBLIC_ENTRY BrPixelmapDirtyRectangleDoubleBuffer(br_pixelmap *dst, br_pixelmap *src, br_int_32 x, br_int_32 y,
-                                                          br_int_32 w, br_int_32 h)
+void BR_PUBLIC_ENTRY BrPixelmapDirtyRectangleDoubleBuffer(br_pixelmap *dst, br_pixelmap *src, br_int_32 x, br_int_32 y, br_int_32 w, br_int_32 h)
 {
     br_rectangle r;
 
@@ -750,8 +761,7 @@ void BR_PUBLIC_ENTRY BrPixelmapText(br_pixelmap *dst, br_int_32 x, br_int_32 y, 
     DevicePixelmapText(dst, &p, font, text, colour);
 }
 
-void BR_PUBLIC_ENTRY BrPixelmapTextF(br_pixelmap *dst, br_int_32 x, br_int_32 y, br_uint_32 colour, br_font *font,
-                                     const char *fmt, ...)
+void BR_PUBLIC_ENTRY BrPixelmapTextF(br_pixelmap *dst, br_int_32 x, br_int_32 y, br_uint_32 colour, br_font *font, const char *fmt, ...)
 {
     char    *ss = BrScratchString();
     br_point p;
@@ -806,8 +816,8 @@ br_uint_16 BR_PUBLIC_ENTRY BrPixelmapTextHeight(br_pixelmap *dst, br_font *font)
     return font->glyph_y;
 }
 
-void BR_PUBLIC_ENTRY BrPixelmapCopyBits(br_pixelmap *dst, br_int_32 x, br_int_32 y, br_uint_8 *src, br_int_32 s_stride,
-                                        br_int_32 start_bit, br_int_32 end_bit, br_int_32 nrows, br_uint_32 colour)
+void BR_PUBLIC_ENTRY BrPixelmapCopyBits(br_pixelmap *dst, br_int_32 x, br_int_32 y, br_uint_8 *src, br_int_32 s_stride, br_int_32 start_bit,
+                                        br_int_32 end_bit, br_int_32 nrows, br_uint_32 colour)
 {
     br_point     p;
     br_rectangle r;

@@ -382,8 +382,7 @@ br_pixelmap_converter br_pixelmap_converters[] = {
 #undef CONVERTER
 // clang-format on
 
-br_error BR_RESIDENT_ENTRY BrColourUnpack(br_colour pixel, br_uint_8 type, br_uint_8 *r, br_uint_8 *g, br_uint_8 *b,
-                                          br_uint_8 *a)
+br_error BR_RESIDENT_ENTRY BrColourUnpack(br_colour pixel, br_uint_8 type, br_uint_8 *r, br_uint_8 *g, br_uint_8 *b, br_uint_8 *a)
 {
     br_uint_8 buf[sizeof(br_colour)];
 
@@ -409,7 +408,7 @@ br_error BR_RESIDENT_ENTRY BrColourUnpack(br_colour pixel, br_uint_8 type, br_ui
     return BRE_OK;
 }
 
-br_pixelmap *BR_PUBLIC_ENTRY BrPixelmapCloneTyped(br_pixelmap *src, br_uint_8 type)
+static br_pixelmap *BR_PUBLIC_ENTRY BrPixelmapCloneTypedXX(br_pixelmap *src, br_uint_8 type)
 {
     br_pixelmap           *dst;
     br_pixelmap_converter *src_converter;

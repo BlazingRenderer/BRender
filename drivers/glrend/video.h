@@ -32,8 +32,8 @@ typedef struct _VIDEO {
 
     struct {
         GLuint program;
-        GLint  uSampler;      /* Sampler, sampler2D */
-        GLint  uIndexTex;     /* Sampler, usampler2D */
+        GLint  uSampler;  /* Sampler, sampler2D */
+        GLint  uIndexTex; /* Sampler, usampler2D */
 
         GLuint block_index_rect_data;
         GLuint block_binding_rect_data;
@@ -44,7 +44,7 @@ typedef struct _VIDEO {
 
     struct {
         GLuint program;
-        GLint  uSampler;  /* Sampler, sampler2D */
+        GLint  uSampler; /* Sampler, sampler2D */
 
         GLuint block_index_font_data;
         GLuint block_binding_font_data;
@@ -75,7 +75,7 @@ typedef struct _VIDEO {
         } attributes;
 
         struct {
-            GLint main_texture; /* sampler2D */
+            GLint main_texture;  /* sampler2D */
             GLint index_texture; /* usampler2D */
         } uniforms;
 

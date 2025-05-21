@@ -9,7 +9,6 @@
  */
 #include "brender.h"
 
-
 /*
  * 8 Vertices
  */
@@ -55,5 +54,5 @@ br_model _BrDefaultModel = {
     .user         = NULL,
     .crease_angle = BR_ANGLE_DEG(90),
     .radius       = BR_SCALAR(1.732050808),
-    .bounds = {{BR_SCALAR(-1.0), BR_SCALAR(-1.0), BR_SCALAR(-1.0)}, {BR_SCALAR(1.0), BR_SCALAR(1.0), BR_SCALAR(1.0)}}
+    .bounds       = {{BR_SCALAR(-1.0), BR_SCALAR(-1.0), BR_SCALAR(-1.0)}, {BR_SCALAR(1.0), BR_SCALAR(1.0), BR_SCALAR(1.0)}}
 };

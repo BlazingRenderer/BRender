@@ -12,7 +12,6 @@
 #include "brassert.h"
 #include "datafile.h"
 
-
 /**
  ** Specific versions of registry calls for each class
  **/

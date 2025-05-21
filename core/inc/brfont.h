@@ -9,13 +9,13 @@
 #define _BRFONT_H_
 
 typedef struct br_font {
-    br_uint_32  flags;
-    br_uint_16  glyph_x;
-    br_uint_16  glyph_y;
-    br_int_16   spacing_x;
-    br_int_16   spacing_y;
+    br_uint_32        flags;
+    br_uint_16        glyph_x;
+    br_uint_16        glyph_y;
+    br_int_16         spacing_x;
+    br_int_16         spacing_y;
     const br_int_8   *width;
-    const br_uint_8  **encoding;
+    const br_uint_8 **encoding;
 } br_font;
 
 /*

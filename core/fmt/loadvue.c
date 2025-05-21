@@ -11,7 +11,6 @@
 #include "brender.h"
 #include "fmt.h"
 
-
 //***************************************************************
 // Allocate a vue
 //***************************************************************
@@ -78,8 +77,8 @@ void BR_PUBLIC_ENTRY BrLoadVUE(const char *file_name, br_actor *root, br_vue *vu
         }
         /* Or a transform specification? */
 
-        if(BrSScanf(buff, "transform \"%[^\"]\" %f %f %f %f %f %f %f %f %f %f %f %f", name, &v[0][0], &v[0][1], &v[0][2],
-                    &v[1][0], &v[1][1], &v[1][2], &v[2][0], &v[2][1], &v[2][2], &v[3][0], &v[3][1], &v[3][2]) > 0) {
+        if(BrSScanf(buff, "transform \"%[^\"]\" %f %f %f %f %f %f %f %f %f %f %f %f", name, &v[0][0], &v[0][1], &v[0][2], &v[1][0],
+                    &v[1][1], &v[1][2], &v[2][0], &v[2][1], &v[2][2], &v[3][0], &v[3][1], &v[3][2]) > 0) {
             int k, l;
 
             /* Found a transform so convert it to scalars */
@@ -140,9 +139,7 @@ void BR_PUBLIC_ENTRY BrApplyVue(br_vue *vue, br_actor *actors)
         // Apply animation to world.
         if(frame_delta != 0)
             for(i = 0; i < vue->frames[vue->current_frame].ntransforms; i++)
-                vue->frames[vue->current_frame].transforms[i].actor->t.t.mat = vue->frames[vue->current_frame]
-                                                                                   .transforms[i]
-                                                                                   .mat;
+                vue->frames[vue->current_frame].transforms[i].actor->t.t.mat = vue->frames[vue->current_frame].transforms[i].mat;
 
         // Move to next frame.
 

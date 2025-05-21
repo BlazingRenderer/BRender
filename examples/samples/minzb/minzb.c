@@ -57,7 +57,6 @@ static void MinZBUpdate(br_demo *demo, br_scalar dt)
     a->t.t.euler.e.c = BrScalarToAngle(cc);
 }
 
-
 const static br_demo_dispatch dispatch = {
     .init          = MinZBInit,
     .process_event = BrDemoDefaultProcessEvent,

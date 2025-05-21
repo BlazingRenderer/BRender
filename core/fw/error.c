@@ -9,7 +9,6 @@
 
 #include "fw.h"
 
-
 br_error BR_RESIDENT_ENTRY BrLastErrorGet(void **valuep)
 {
     if(valuep)

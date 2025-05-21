@@ -18,8 +18,7 @@ br_clip_result DevicePixelmapSDL2PointClip(SDL_Point *out, const br_point *in, c
     return r;
 }
 
-br_clip_result DevicePixelmapSDL2LineClip(SDL_Point *s_out, SDL_Point *e_out, const br_point *s_in,
-                                          const br_point *e_in, const br_pixelmap *pm)
+br_clip_result DevicePixelmapSDL2LineClip(SDL_Point *s_out, SDL_Point *e_out, const br_point *s_in, const br_point *e_in, const br_pixelmap *pm)
 {
     br_clip_result r;
     br_point       stmp, etmp;
@@ -57,8 +56,8 @@ br_clip_result DevicePixelmapSDL2RectangleClip(SDL_Rect *out, const br_rectangle
     return r;
 }
 
-br_clip_result DevicePixelmapSDL2RectangleClipTwo(SDL_Rect *r_out, SDL_Point *p_out, const br_rectangle *r_in,
-                                                  const br_point *p_in, const br_pixelmap *pm_dst, const br_pixelmap *pm_src)
+br_clip_result DevicePixelmapSDL2RectangleClipTwo(SDL_Rect *r_out, SDL_Point *p_out, const br_rectangle *r_in, const br_point *p_in,
+                                                  const br_pixelmap *pm_dst, const br_pixelmap *pm_src)
 {
     br_clip_result r;
     br_rectangle   rect;
@@ -290,8 +289,7 @@ static int xblit(SDL_Surface *src, const SDL_Rect *sr, SDL_Surface *dst, SDL_Rec
      * Go via an intermediate surface (possibly again). This is slow, and indexed pixelmaps
      * should be de-indexed at load-time. See BrPixelmapDeCLUT().
      */
-    if(SDL_ISPIXELFORMAT_INDEXED(src->format->format) &&
-       (dst->format->format == SDL_PIXELFORMAT_XRGB8888 || blit == SDL_BlitScaled)) {
+    if(SDL_ISPIXELFORMAT_INDEXED(src->format->format) && (dst->format->format == SDL_PIXELFORMAT_XRGB8888 || blit == SDL_BlitScaled)) {
         int          r;
         SDL_Surface *newsrc;
 

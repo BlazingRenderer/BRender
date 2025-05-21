@@ -10,7 +10,6 @@
 #include "fw.h"
 #include "brassert.h"
 
-
 /*
  * Allocate a new template structure
  */
@@ -89,8 +88,7 @@ static void templateMakeMap(br_tv_template *template)
     template->map_base      = min;
     template->n_map_entries = n;
 
-    map = BrResAllocate(template->res, n * (sizeof(*template->map_query_entry) + sizeof(*template->map_set_entry)),
-                        BR_MEMORY_TOKEN_MAP);
+    map = BrResAllocate(template->res, n * (sizeof(*template->map_query_entry) + sizeof(*template->map_set_entry)), BR_MEMORY_TOKEN_MAP);
 
     template->map_query_entry = (void *)map;
     map += n * sizeof(*template->map_query_entry);
@@ -379,7 +377,6 @@ static br_error ValueQuery(br_token_value *tv,                  /* Destination f
     return BRE_OK;
 }
 
-
 /*
  * Set one value
  */
@@ -642,8 +639,7 @@ static br_size_t ValueExtraSize(void *block, const br_tv_template_entry *tep)
 /*
  * Get the value coresponding to one token
  */
-br_error BR_RESIDENT_ENTRY BrTokenValueQuery(void *pvalue, void *extra, br_size_t extra_size, br_token t, void *block,
-                                             br_tv_template *template)
+br_error BR_RESIDENT_ENTRY BrTokenValueQuery(void *pvalue, void *extra, br_size_t extra_size, br_token t, void *block, br_tv_template *template)
 {
     br_int_32                   o;
     const br_tv_template_entry *tep;
@@ -681,8 +677,8 @@ br_error BR_RESIDENT_ENTRY BrTokenValueQuery(void *pvalue, void *extra, br_size_
  * Fetch values into a token/value list (with optional extra buffer) according
  * to the given template
  */
-br_error BR_RESIDENT_ENTRY BrTokenValueQueryMany(br_token_value *tv, void *extra, br_size_t extra_size,
-                                                 br_int_32 *pcount, void *block, br_tv_template *template)
+br_error BR_RESIDENT_ENTRY BrTokenValueQueryMany(br_token_value *tv, void *extra, br_size_t extra_size, br_int_32 *pcount, void *block,
+                                                 br_tv_template *template)
 {
     br_int_32                   o;
     const br_tv_template_entry *tep;
@@ -757,8 +753,7 @@ br_error BR_RESIDENT_ENTRY BrTokenValueQueryManySize(br_size_t *psize, br_token_
     return BRE_OK;
 }
 
-br_error BR_RESIDENT_ENTRY BrTokenValueQueryAll(br_token_value *buffer, br_size_t buffer_size, void *block,
-                                                br_tv_template *template)
+br_error BR_RESIDENT_ENTRY BrTokenValueQueryAll(br_token_value *buffer, br_size_t buffer_size, void *block, br_tv_template *template)
 {
     const br_tv_template_entry *tp;
     int                         n, e;
@@ -872,8 +867,7 @@ br_error BR_RESIDENT_ENTRY BrTokenValueQueryAllSize(br_size_t *psize, void *bloc
     return BRE_OK;
 }
 
-br_error BR_RESIDENT_ENTRY BrTokenValueSet(void *mem, br_uint_32 *pcombined_mask, br_token t, br_value value,
-                                           br_tv_template *template)
+br_error BR_RESIDENT_ENTRY BrTokenValueSet(void *mem, br_uint_32 *pcombined_mask, br_token t, br_value value, br_tv_template *template)
 {
     br_int_32            o;
     br_error             r;
@@ -912,8 +906,7 @@ br_error BR_RESIDENT_ENTRY BrTokenValueSet(void *mem, br_uint_32 *pcombined_mask
     }
 }
 
-br_error BR_RESIDENT_ENTRY BrTokenValueSetMany(void *mem, br_int_32 *pcount, br_uint_32 *pcombined_mask,
-                                               br_token_value *tv, br_tv_template *template)
+br_error BR_RESIDENT_ENTRY BrTokenValueSetMany(void *mem, br_int_32 *pcount, br_uint_32 *pcombined_mask, br_token_value *tv, br_tv_template *template)
 {
     br_int_32  o, n;
     br_error   r;
@@ -962,8 +955,7 @@ br_error BR_RESIDENT_ENTRY BrTokenValueSetMany(void *mem, br_int_32 *pcount, br_
 
 #if DEBUG
 
-static void DumpMatrixInteger(br_int_32 *ip, int rows, int cols, const char *prefix, char *info_0, char *info_n,
-                              br_putline_cbfn *putline, void *arg)
+static void DumpMatrixInteger(br_int_32 *ip, int rows, int cols, const char *prefix, char *info_0, char *info_n, br_putline_cbfn *putline, void *arg)
 {
     int   i, j;
     char *cp;
@@ -981,8 +973,7 @@ static void DumpMatrixInteger(br_int_32 *ip, int rows, int cols, const char *pre
     }
 }
 
-static void DumpMatrixFixed(br_fixed_ls *xp, int rows, int cols, const char *prefix, char *info_0, char *info_n,
-                            br_putline_cbfn *putline, void *arg)
+static void DumpMatrixFixed(br_fixed_ls *xp, int rows, int cols, const char *prefix, char *info_0, char *info_n, br_putline_cbfn *putline, void *arg)
 {
     int   i, j;
     char *cp;
@@ -1000,8 +991,7 @@ static void DumpMatrixFixed(br_fixed_ls *xp, int rows, int cols, const char *pre
     }
 }
 
-static void DumpMatrixFloat(br_float *fp, int rows, int cols, const char *prefix, char *info_0, char *info_n,
-                            br_putline_cbfn *putline, void *arg)
+static void DumpMatrixFloat(br_float *fp, int rows, int cols, const char *prefix, char *info_0, char *info_n, br_putline_cbfn *putline, void *arg)
 {
     int   i, j;
     char *cp;
@@ -1581,10 +1571,9 @@ static br_error parseTokenValue(br_lexer *l, br_token_value *tv, br_size_t size)
                  * else Look for i32, float, fixed or boolean
                  */
                 case T_INTEGER: {
-                    static br_token pos_int_types[] = {BRT_INT_64, BRT_UINT_64, BRT_INT_32,  BRT_UINT_32,
-                                                       BRT_INT_16, BRT_UINT_16, BRT_INT_8,   BRT_UINT_8,
-                                                       BRT_FLOAT,  BRT_FIXED,   BRT_BOOLEAN, BRT_POINTER,
-                                                       BRT_OBJECT, BRT_HANDLE,  BRT_INTPTR,  BRT_UINTPTR};
+                    static br_token pos_int_types[] = {BRT_INT_64, BRT_UINT_64, BRT_INT_32, BRT_UINT_32, BRT_INT_16,  BRT_UINT_16,
+                                                       BRT_INT_8,  BRT_UINT_8,  BRT_FLOAT,  BRT_FIXED,   BRT_BOOLEAN, BRT_POINTER,
+                                                       BRT_OBJECT, BRT_HANDLE,  BRT_INTPTR, BRT_UINTPTR};
                     static br_token neg_int_types[] = {BRT_INT_64, BRT_INT_32, BRT_INT_16,  BRT_INT_8,
                                                        BRT_FLOAT,  BRT_FIXED,  BRT_BOOLEAN, BRT_INTPTR};
 

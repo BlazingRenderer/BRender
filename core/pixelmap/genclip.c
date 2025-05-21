@@ -9,7 +9,6 @@
 #include "pm.h"
 #include "brassert.h"
 
-
 /*
  * Clip a point to a pixelmap, producing coordinates relative to base of pixelmap
  */
@@ -30,8 +29,8 @@ br_clip_result BR_RESIDENT_ENTRY PixelmapPointClip(br_point *out, const br_point
 /*
  * Clip a line to a pixelmap, producing coordinates relative to base of pixelmap
  */
-br_clip_result BR_RESIDENT_ENTRY PixelmapLineClip(br_point *s_out, br_point *e_out, const br_point *s_in,
-                                                  const br_point *e_in, const br_pixelmap *pm)
+br_clip_result BR_RESIDENT_ENTRY PixelmapLineClip(br_point *s_out, br_point *e_out, const br_point *s_in, const br_point *e_in,
+                                                  const br_pixelmap *pm)
 {
     int       temp;
     br_int_32 w, h;
@@ -182,9 +181,8 @@ br_clip_result BR_RESIDENT_ENTRY PixelmapRectangleClip(br_rectangle *out, const 
 /*
  * Clip a rectangle to two pixelmaps, producing coordinates relative to base of pixelmap
  */
-br_clip_result BR_RESIDENT_ENTRY PixelmapRectangleClipTwo(br_rectangle *r_out, br_point *p_out,
-                                                          const br_rectangle *r_in, const br_point *p_in,
-                                                          const br_pixelmap *pm_dst, const br_pixelmap *pm_src)
+br_clip_result BR_RESIDENT_ENTRY PixelmapRectangleClipTwo(br_rectangle *r_out, br_point *p_out, const br_rectangle *r_in,
+                                                          const br_point *p_in, const br_pixelmap *pm_dst, const br_pixelmap *pm_src)
 {
     r_out->x = r_in->x + pm_src->origin_x;
     r_out->y = r_in->y + pm_src->origin_y;
@@ -263,9 +261,8 @@ br_clip_result BR_RESIDENT_ENTRY PixelmapRectangleClipTwo(br_rectangle *r_out, b
 /*
  * Clip two rectangles rectangle to two pixelmaps, producing coordinates relative to base of pixelmaps
  */
-br_clip_result BR_RESIDENT_ENTRY PixelmapRectanglesClipTwo(br_rectangle *s_out, br_rectangle *d_out,
-                                                           const br_rectangle *s_in, const br_rectangle *d_in,
-                                                           const br_pixelmap *pm_dst, const br_pixelmap *pm_src)
+br_clip_result BR_RESIDENT_ENTRY PixelmapRectanglesClipTwo(br_rectangle *s_out, br_rectangle *d_out, const br_rectangle *s_in,
+                                                           const br_rectangle *d_in, const br_pixelmap *pm_dst, const br_pixelmap *pm_src)
 {
     br_int_32 adjust;
 
@@ -380,8 +377,8 @@ br_clip_result BR_RESIDENT_ENTRY PixelmapRectanglesClipTwo(br_rectangle *s_out, 
 /*
  * Clip CopyBits arguments to a pixelmap
  */
-br_clip_result BR_RESIDENT_ENTRY PixelmapCopyBitsClip(br_rectangle *r_out, br_point *p_out, const br_rectangle *r_in,
-                                                      const br_point *p_in, const br_pixelmap *pm)
+br_clip_result BR_RESIDENT_ENTRY PixelmapCopyBitsClip(br_rectangle *r_out, br_point *p_out, const br_rectangle *r_in, const br_point *p_in,
+                                                      const br_pixelmap *pm)
 {
     r_out->x = r_in->x;
     r_out->y = r_in->y;

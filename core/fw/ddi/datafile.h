@@ -341,10 +341,7 @@ typedef struct br_file_enum {
 /*
  * Macros for building enums
  */
-#define _ENUM_MEMBER(e) \
-    {                   \
-        e, #e           \
-    }
+#define _ENUM_MEMBER(e) {e, #e}
 
 #define _FILE_ENUM(name)      \
     br_file_enum name##_F = { \

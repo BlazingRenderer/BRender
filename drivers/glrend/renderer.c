@@ -12,11 +12,11 @@ static const struct br_renderer_dispatch rendererDispatch;
 #define F(f) offsetof(struct br_renderer, f)
 
 static struct br_tv_template_entry rendererTemplateEntries[] = {
-    {BRT(IDENTIFIER_CSTR),              F(identifier),                     BRTV_QUERY | BRTV_ALL, BRTV_CONV_COPY},
-    {BRT(FACE_GROUP_COUNT_U32),         F(stats.face_group_count),         BRTV_QUERY | BRTV_ALL, BRTV_CONV_COPY},
-    {BRT(TRIANGLES_DRAWN_COUNT_U32),    F(stats.triangles_drawn_count),    BRTV_QUERY | BRTV_ALL, BRTV_CONV_COPY},
-    {BRT(TRIANGLES_RENDERED_COUNT_U32), F(stats.triangles_rendered_count), BRTV_QUERY | BRTV_ALL, BRTV_CONV_COPY},
-    {BRT(VERTICES_RENDERED_COUNT_U32),  F(stats.vertices_rendered_count),  BRTV_QUERY | BRTV_ALL, BRTV_CONV_COPY},
+    {BRT(IDENTIFIER_CSTR),                   F(identifier),                     BRTV_QUERY | BRTV_ALL, BRTV_CONV_COPY},
+    {BRT(FACE_GROUP_COUNT_U32),              F(stats.face_group_count),         BRTV_QUERY | BRTV_ALL, BRTV_CONV_COPY},
+    {BRT(TRIANGLES_DRAWN_COUNT_U32),         F(stats.triangles_drawn_count),    BRTV_QUERY | BRTV_ALL, BRTV_CONV_COPY},
+    {BRT(TRIANGLES_RENDERED_COUNT_U32),      F(stats.triangles_rendered_count), BRTV_QUERY | BRTV_ALL, BRTV_CONV_COPY},
+    {BRT(VERTICES_RENDERED_COUNT_U32),       F(stats.vertices_rendered_count),  BRTV_QUERY | BRTV_ALL, BRTV_CONV_COPY},
     {DEV(OPENGL_OPAQUE_DRAW_COUNT_U32),      F(stats.opaque_draw_count),        BRTV_QUERY | BRTV_ALL, BRTV_CONV_COPY},
     {DEV(OPENGL_TRANSPARENT_DRAW_COUNT_U32), F(stats.transparent_draw_count),   BRTV_QUERY | BRTV_ALL, BRTV_CONV_COPY},
 };
@@ -50,8 +50,8 @@ static void RendererGLInitImm(br_renderer *self, HVIDEO hVideo)
 
     if(hVideo->brenderProgram.attributes.aColour >= 0) {
         glEnableVertexAttribArray(hVideo->brenderProgram.attributes.aColour);
-        glVertexAttribPointer(hVideo->brenderProgram.attributes.aColour, 4, GL_UNSIGNED_BYTE, GL_TRUE,
-                              sizeof(br_immvert_gl), (void *)offsetof(br_immvert_gl, colour));
+        glVertexAttribPointer(hVideo->brenderProgram.attributes.aColour, 4, GL_UNSIGNED_BYTE, GL_TRUE, sizeof(br_immvert_gl),
+                              (void *)offsetof(br_immvert_gl, colour));
     }
 
     glBindVertexArray(0);
@@ -117,8 +117,8 @@ br_renderer *RendererGLAllocate(br_device *device, br_renderer_facility *facilit
 
     self->uniform_buffer_offset_alignment = alignment;
     BufferRingGLInit(&self->model_ring, "model", alignment, BR_GLREND_MAX_DRAWS_IN_FLIGHT,
-                     dest->screen->asFront.video.brenderProgram.blockBindingModel, sizeof(shader_data_model),
-                     GL_UNIFORM_BUFFER, dest->screen->asFront.quirks.orphan_model_buffers ? BUFFER_RING_GL_FLAG_ORPHAN : 0);
+                     dest->screen->asFront.video.brenderProgram.blockBindingModel, sizeof(shader_data_model), GL_UNIFORM_BUFFER,
+                     dest->screen->asFront.quirks.orphan_model_buffers ? BUFFER_RING_GL_FLAG_ORPHAN : 0);
 
     self->has_begun = 0;
     return (br_renderer *)self;
@@ -283,8 +283,7 @@ static struct br_tv_template *BR_CMETHOD_DECL(br_renderer_gl, templateQuery)(br_
     br_renderer *self = (br_renderer *)_self;
 
     if(self->device->templates.rendererTemplate == NULL) {
-        self->device->templates.rendererTemplate = BrTVTemplateAllocate(self->device, rendererTemplateEntries,
-                                                                        BR_ASIZE(rendererTemplateEntries));
+        self->device->templates.rendererTemplate = BrTVTemplateAllocate(self->device, rendererTemplateEntries, BR_ASIZE(rendererTemplateEntries));
     }
 
     return self->device->templates.rendererTemplate;
@@ -301,8 +300,8 @@ static br_error BR_CMETHOD_DECL(br_renderer_gl, validDestination)(br_renderer *s
     return BRE_OK;
 }
 
-static br_error BR_CMETHOD_DECL(br_renderer_gl, stateStoredNew)(br_renderer *self, br_renderer_state_stored **pss,
-                                                                br_uint_32 mask, br_token_value *tv)
+static br_error BR_CMETHOD_DECL(br_renderer_gl, stateStoredNew)(br_renderer *self, br_renderer_state_stored **pss, br_uint_32 mask,
+                                                                br_token_value *tv)
 {
     br_renderer_state_stored *ss;
 
@@ -313,8 +312,7 @@ static br_error BR_CMETHOD_DECL(br_renderer_gl, stateStoredNew)(br_renderer *sel
     return BRE_OK;
 }
 
-static br_error BR_CMETHOD_DECL(br_renderer_gl, stateStoredAvail)(br_renderer *self, br_int_32 *psize, br_uint_32 mask,
-                                                                  br_token_value *tv)
+static br_error BR_CMETHOD_DECL(br_renderer_gl, stateStoredAvail)(br_renderer *self, br_int_32 *psize, br_uint_32 mask, br_token_value *tv)
 {
     BrLogTrace("GLREND", "%s", __FUNCTION__);
     return BRE_FAIL;
@@ -332,8 +330,7 @@ static br_error BR_CMETHOD_DECL(br_renderer_gl, bufferStoredNew)(br_renderer *se
     return BRE_OK;
 }
 
-static br_error BR_CMETHOD_DECL(br_renderer_gl, bufferStoredAvail)(br_renderer *self, br_int_32 *space, br_token use,
-                                                                   br_token_value *tv)
+static br_error BR_CMETHOD_DECL(br_renderer_gl, bufferStoredAvail)(br_renderer *self, br_int_32 *space, br_token use, br_token_value *tv)
 {
     (void)self;
     (void)space;
@@ -362,8 +359,7 @@ br_error BR_CMETHOD_DECL(br_renderer_gl, partSet)(br_renderer *self, br_token pa
     return r;
 }
 
-static br_error BR_CMETHOD_DECL(br_renderer_gl, partSetMany)(br_renderer *self, br_token part, br_int_32 index,
-                                                             br_token_value *tv, br_int_32 *pcount)
+static br_error BR_CMETHOD_DECL(br_renderer_gl, partSetMany)(br_renderer *self, br_token part, br_int_32 index, br_token_value *tv, br_int_32 *pcount)
 {
     br_error               r;
     br_uint_32             m;
@@ -383,8 +379,7 @@ static br_error BR_CMETHOD_DECL(br_renderer_gl, partSetMany)(br_renderer *self, 
 /*
  * Reading current state
  */
-static br_error BR_CMETHOD_DECL(br_renderer_gl, partQuery)(br_renderer *self, br_token part, br_int_32 index,
-                                                           void *pvalue, br_token t)
+static br_error BR_CMETHOD_DECL(br_renderer_gl, partQuery)(br_renderer *self, br_token part, br_int_32 index, void *pvalue, br_token t)
 {
     struct br_tv_template *tp;
 
@@ -394,8 +389,8 @@ static br_error BR_CMETHOD_DECL(br_renderer_gl, partQuery)(br_renderer *self, br
     return BrTokenValueQuery(pvalue, NULL, 0, t, self->state.current, tp);
 }
 
-static br_error BR_CMETHOD_DECL(br_renderer_gl, partQueryBuffer)(br_renderer *self, br_token part, br_int_32 index,
-                                                                 void *pvalue, void *buffer, br_size_t buffer_size, br_token t)
+static br_error BR_CMETHOD_DECL(br_renderer_gl, partQueryBuffer)(br_renderer *self, br_token part, br_int_32 index, void *pvalue,
+                                                                 void *buffer, br_size_t buffer_size, br_token t)
 {
     struct br_tv_template *tp;
 
@@ -405,9 +400,8 @@ static br_error BR_CMETHOD_DECL(br_renderer_gl, partQueryBuffer)(br_renderer *se
     return BrTokenValueQuery(pvalue, buffer, buffer_size, t, self->state.current, tp);
 }
 
-static br_error BR_CMETHOD_DECL(br_renderer_gl, partQueryMany)(br_renderer *self, br_token part, br_int_32 index,
-                                                               br_token_value *tv, void *extra, br_size_t extra_size,
-                                                               br_int_32 *pcount)
+static br_error BR_CMETHOD_DECL(br_renderer_gl, partQueryMany)(br_renderer *self, br_token part, br_int_32 index, br_token_value *tv,
+                                                               void *extra, br_size_t extra_size, br_int_32 *pcount)
 {
     struct br_tv_template *tp;
 
@@ -428,8 +422,8 @@ static br_error BR_CMETHOD_DECL(br_renderer_gl, partQueryManySize)(br_renderer *
     return BrTokenValueQueryManySize(pextra_size, tv, self->state.current, tp);
 }
 
-static br_error BR_CMETHOD_DECL(br_renderer_gl, partQueryAll)(br_renderer *self, br_token part, br_int_32 index,
-                                                              br_token_value *buffer, br_size_t buffer_size)
+static br_error BR_CMETHOD_DECL(br_renderer_gl, partQueryAll)(br_renderer *self, br_token part, br_int_32 index, br_token_value *buffer,
+                                                              br_size_t buffer_size)
 {
     struct br_tv_template *tp;
 
@@ -439,8 +433,7 @@ static br_error BR_CMETHOD_DECL(br_renderer_gl, partQueryAll)(br_renderer *self,
     return BrTokenValueQueryAll(buffer, buffer_size, self->state.current, tp);
 }
 
-static br_error BR_CMETHOD_DECL(br_renderer_gl, partQueryAllSize)(br_renderer *self, br_token part, br_int_32 index,
-                                                                  br_size_t *psize)
+static br_error BR_CMETHOD_DECL(br_renderer_gl, partQueryAllSize)(br_renderer *self, br_token part, br_int_32 index, br_size_t *psize)
 {
     struct br_tv_template *tp;
 
@@ -824,8 +817,8 @@ GLuint RendererGLGetSampler(br_renderer *self, const br_sampler_info_gl *info)
 {
     const br_quirks_gl *quirks = &self->pixelmap->screen->asFront.quirks;
     void               *raw_sampler;
-    br_sampler_info_gl  *key;
-    GLuint sampler;
+    br_sampler_info_gl *key;
+    GLuint              sampler;
 
     raw_sampler = BrHashMapFindByHash(self->sampler_pool, SamplerInfoGLHash(info));
     if(raw_sampler != NULL)
@@ -844,11 +837,10 @@ GLuint RendererGLGetSampler(br_renderer *self, const br_sampler_info_gl *info)
         }
     }
 
-
-    key = BrResAllocate(self->sampler_pool, sizeof(br_sampler_info_gl), BR_MEMORY_DRIVER);
+    key  = BrResAllocate(self->sampler_pool, sizeof(br_sampler_info_gl), BR_MEMORY_DRIVER);
     *key = *info;
 
-    BrHashMapInsert(self->sampler_pool, key, (void*)(br_uintptr_t)sampler);
+    BrHashMapInsert(self->sampler_pool, key, (void *)(br_uintptr_t)sampler);
 
     return sampler;
 }

@@ -8,7 +8,6 @@
  */
 #include "brender.h"
 
-
 static br_uint_32 BrNullAttributes(void)
 {
     return 0;

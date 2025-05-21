@@ -10,7 +10,6 @@
 #include "brassert.h"
 #include "vecifns.h"
 
-
 #define COMBINE_TRANSFORMS(a, b) (_CombineTransforms[(a)][(b)])
 #define IS_LP(a)                 ((a) != BR_TRANSFORM_MATRIX34)
 

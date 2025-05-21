@@ -90,30 +90,26 @@ static struct br_tv_template *BR_CMETHOD_DECL(br_geometry_primitives_null, templ
     return ((br_geometry_primitives *)self)->templates;
 }
 
-br_error BR_CMETHOD_DECL(br_geometry_primitives_null, render)(struct br_geometry_primitives *self,
-                                                              struct br_renderer *renderer, struct fmt_vertex *vertices,
-                                                              int nvertices, br_token type)
+br_error BR_CMETHOD_DECL(br_geometry_primitives_null, render)(struct br_geometry_primitives *self, struct br_renderer *renderer,
+                                                              struct fmt_vertex *vertices, int nvertices, br_token type)
 {
     return BRE_FAIL;
 }
 
-br_error BR_CMETHOD_DECL(br_geometry_primitives_null,
-                         renderOnScreen)(struct br_geometry_primitives *self, struct br_renderer *renderer,
-                                         struct fmt_vertex *vertices, int nvertices, br_token type)
+br_error BR_CMETHOD_DECL(br_geometry_primitives_null, renderOnScreen)(struct br_geometry_primitives *self, struct br_renderer *renderer,
+                                                                      struct fmt_vertex *vertices, int nvertices, br_token type)
 {
     return BRE_FAIL;
 }
 
-br_error BR_CMETHOD_DECL(br_geometry_primitives_null,
-                         storedNew)(struct br_geometry_primitives *self, struct br_renderer *renderer,
-                                    struct br_geometry_stored **psg, struct fmt_vertex *vertices, int nvertices,
-                                    br_token type, br_token_value *tv)
+br_error BR_CMETHOD_DECL(br_geometry_primitives_null, storedNew)(struct br_geometry_primitives *self, struct br_renderer *renderer,
+                                                                 struct br_geometry_stored **psg, struct fmt_vertex *vertices,
+                                                                 int nvertices, br_token type, br_token_value *tv)
 {
     return BRE_FAIL;
 }
 
-static br_error BR_CMETHOD_DECL(br_geometry_primitives_null, storedAvail)(struct br_geometry_primitives *self,
-                                                                          br_int_32 *psize, br_token_value *tv)
+static br_error BR_CMETHOD_DECL(br_geometry_primitives_null, storedAvail)(struct br_geometry_primitives *self, br_int_32 *psize, br_token_value *tv)
 {
     return BRE_FAIL;
 }

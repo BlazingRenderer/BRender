@@ -73,8 +73,7 @@ typedef int BR_CALLBACK br_qsort_cbfn(const void *, const void *);
 void BR_RESIDENT_ENTRY  BrQsort(void *basep, unsigned int nelems, unsigned int size, br_qsort_cbfn *comp);
 
 typedef int BR_CALLBACK br_bsearch_cbfn(const void *, const void *);
-void *BR_RESIDENT_ENTRY BrBSearch(const void *key, const void *base, unsigned int nmemb, unsigned int size,
-                                  br_bsearch_cbfn *comp);
+void *BR_RESIDENT_ENTRY BrBSearch(const void *key, const void *base, unsigned int nmemb, unsigned int size, br_bsearch_cbfn *comp);
 
 /*
  * Diagnostic generation
@@ -106,7 +105,7 @@ br_loghandler *BR_PUBLIC_ENTRY  BrLogHandlerSet(br_loghandler *newlh);
  */
 br_uint_32 BR_PUBLIC_ENTRY BrFileAttributes(void);
 
-void *BR_PUBLIC_ENTRY BrFileOpenRead(const char *name, br_size_t n_magics, br_mode_test_cbfn *mode_test, int *mode_result);
+void *BR_PUBLIC_ENTRY     BrFileOpenRead(const char *name, br_size_t n_magics, br_mode_test_cbfn *mode_test, int *mode_result);
 void *BR_PUBLIC_ENTRY     BrFileOpenWrite(const char *name, int text);
 void BR_PUBLIC_ENTRY      BrFileClose(void *f);
 int BR_PUBLIC_ENTRY       BrFileEof(void *f);
@@ -196,7 +195,7 @@ char *BR_RESIDENT_ENTRY     BrScratchString(void);
 /*
  * Error retrieval
  */
-br_error BR_RESIDENT_ENTRY BrGetLastError(void **valuep);
+br_error BR_RESIDENT_ENTRY    BrGetLastError(void **valuep);
 const char *BR_RESIDENT_ENTRY BrStrError(br_error error);
 
 /*
@@ -215,16 +214,13 @@ br_error BR_RESIDENT_ENTRY BrDevRemove(struct br_device *dev);
 
 br_error BR_RESIDENT_ENTRY BrDevicesQuery(struct br_device **devices, br_int_32 *ndevices, br_int_32 max_devices);
 
-br_error BR_RESIDENT_ENTRY BrDevFindMany(struct br_device **devices, br_int_32 *ndevices, br_int_32 max_devices,
-                                         const char *pattern);
+br_error BR_RESIDENT_ENTRY BrDevFindMany(struct br_device **devices, br_int_32 *ndevices, br_int_32 max_devices, const char *pattern);
 br_error BR_RESIDENT_ENTRY BrDevCount(br_int_32 *ndevices, const char *pattern);
 br_error BR_RESIDENT_ENTRY BrDevFind(struct br_device **pdev, const char *pattern);
 
-br_error BR_RESIDENT_ENTRY BrDevContainedFind(struct br_object **ph, br_token type, const char *pattern,
-                                              br_token_value *tv);
-br_error BR_RESIDENT_ENTRY BrDevContainedFindMany(struct br_object **objects, br_int_32 max_objects,
-                                                  br_int_32 *pnum_objects, br_token type, const char *pattern,
-                                                  br_token_value *tv);
+br_error BR_RESIDENT_ENTRY BrDevContainedFind(struct br_object **ph, br_token type, const char *pattern, br_token_value *tv);
+br_error BR_RESIDENT_ENTRY BrDevContainedFindMany(struct br_object **objects, br_int_32 max_objects, br_int_32 *pnum_objects, br_token type,
+                                                  const char *pattern, br_token_value *tv);
 br_error BR_RESIDENT_ENTRY BrDevContainedCount(br_int_32 *pcount, br_token type, const char *pattern, br_token_value *tv);
 
 br_error BR_PUBLIC_ENTRY     BrDevBegin(br_pixelmap **ppm, const char *setup_string);
@@ -238,9 +234,8 @@ void BR_PUBLIC_ENTRY         BrDevPaletteSetEntryOld(int i, br_colour colour);
 /*
  * Callback function invoked when a device is enumerated
  */
-typedef br_boolean BR_CALLBACK br_device_enum_cbfn(const char *identifer, br_uint_32 version, const char *creator,
-                                                   const char *title, const char *product, const char *product_version,
-                                                   void *args);
+typedef br_boolean BR_CALLBACK br_device_enum_cbfn(const char *identifer, br_uint_32 version, const char *creator, const char *title,
+                                                   const char *product, const char *product_version, void *args);
 
 /*
  * Callback function invoked when an output facility is enumerated
@@ -282,25 +277,20 @@ br_error BR_PUBLIC_ENTRY BrOutputFacilityEnum(const char *name, br_outfcty_enum_
 
 struct br_renderer_facility;
 
-br_error BR_RESIDENT_ENTRY BrRendererFacilityFind(struct br_renderer_facility **prf,
-                                                  struct br_device_pixelmap *destination, br_token scalar_type);
+br_error BR_RESIDENT_ENTRY BrRendererFacilityFind(struct br_renderer_facility **prf, struct br_device_pixelmap *destination, br_token scalar_type);
 
-br_error BR_RESIDENT_ENTRY BrRendererFacilityListFind(struct br_renderer_facility **prf, br_int_32 *num_rf,
-                                                      br_int_32 max_rf, struct br_device_pixelmap *destination,
-                                                      br_token scalar_type);
+br_error BR_RESIDENT_ENTRY BrRendererFacilityListFind(struct br_renderer_facility **prf, br_int_32 *num_rf, br_int_32 max_rf,
+                                                      struct br_device_pixelmap *destination, br_token scalar_type);
 
 struct br_primitive_library;
 
-br_error BR_RESIDENT_ENTRY BrPrimitiveLibraryFind(struct br_primitive_library **ppl,
-                                                  struct br_device_pixelmap *destination, br_token scalar_type);
+br_error BR_RESIDENT_ENTRY BrPrimitiveLibraryFind(struct br_primitive_library **ppl, struct br_device_pixelmap *destination, br_token scalar_type);
 
-br_error BR_RESIDENT_ENTRY BrPrimitiveLibraryListFind(struct br_primitive_library **ppl, br_int_32 *num_pl,
-                                                      br_int_32 max_pl, struct br_device_pixelmap *destination,
-                                                      br_token scalar_type);
+br_error BR_RESIDENT_ENTRY BrPrimitiveLibraryListFind(struct br_primitive_library **ppl, br_int_32 *num_pl, br_int_32 max_pl,
+                                                      struct br_device_pixelmap *destination, br_token scalar_type);
 
 br_error BR_RESIDENT_ENTRY BrGeometryFormatFind(struct br_geometry **pgf, struct br_renderer *renderer,
-                                                struct br_renderer_facility *renderer_facility, br_token scalar_type,
-                                                br_token format_type);
+                                                struct br_renderer_facility *renderer_facility, br_token scalar_type, br_token format_type);
 
 /*
  * lists
@@ -352,7 +342,7 @@ br_hash BR_RESIDENT_ENTRY BrHashMapHash(const br_hashmap *hm, const void *key);
 br_boolean BR_RESIDENT_ENTRY BrHashMapCompare(const br_hashmap *hm, const void *a, const void *b);
 
 br_hashmap *BR_RESIDENT_ENTRY BrHashMapAllocate(void *vparent, br_hashmap_hash_cbfn *hash, br_hashmap_compare_cbfn *compare);
-int BR_RESIDENT_ENTRY BrHashMapClear(br_hashmap *hm);
+int BR_RESIDENT_ENTRY         BrHashMapClear(br_hashmap *hm);
 
 void BR_RESIDENT_ENTRY BrHashMapSetResizePolicy(br_hashmap *hm, br_hashmap_resize_policy policy);
 
@@ -372,8 +362,7 @@ void BR_RESIDENT_ENTRY BrHashMapSetResizePolicy(br_hashmap *hm, br_hashmap_resiz
  *            respective denominator.
  *          - The minimum load factor is greater than the maximum load factor.
  */
-int BR_RESIDENT_ENTRY BrHashMapSetLoadFactor(br_hashmap *hm, uint16_t min_num, uint16_t min_den, uint16_t max_num,
-                                             uint16_t max_den);
+int BR_RESIDENT_ENTRY BrHashMapSetLoadFactor(br_hashmap *hm, uint16_t min_num, uint16_t min_den, uint16_t max_num, uint16_t max_den);
 
 /**
  * @brief Reset a hash map to its default state, releasing all memory.

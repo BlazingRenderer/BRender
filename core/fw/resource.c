@@ -20,7 +20,6 @@
 #include "fw.h"
 #include "brassert.h"
 
-
 /*
  * The granularity of resource sizes
  */
@@ -60,7 +59,7 @@ struct resource_header {
         (r)->size = (s) >> BR_RES_GRANULARITY_SHIFT; \
     } while(0)
 
-#define ALIGN(ptr, a) (((br_uintptr_t)(ptr) + ((a)-1)) & ~((a)-1))
+#define ALIGN(ptr, a) (((br_uintptr_t)(ptr) + ((a) - 1)) & ~((a) - 1))
 
 #if BR_RES_TAGGING
 #define ISRESOURCE(res) ((res->magic_ptr == res) && (res->magic_num == BR_RES_MAGIC))
@@ -117,7 +116,7 @@ static struct resource_header *UserToRes(void *r)
     while(*(p - 1) == 0)
         --p;
 
-        /* Account for any excess structure padding the compiler's added. */
+    /* Account for any excess structure padding the compiler's added. */
 #if BR_RES_TAGGING
     p -= offsetof(struct resource_header, magic_num) + sizeof(((struct resource_header *)NULL)->magic_num);
 #else

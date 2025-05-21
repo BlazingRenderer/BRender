@@ -9,7 +9,6 @@
 #include "fw.h"
 #include "brassert.h"
 
-
 #define MEM_LOG 0
 
 void *BR_RESIDENT_ENTRY BrMemAllocate(br_size_t size, br_uint_8 type)

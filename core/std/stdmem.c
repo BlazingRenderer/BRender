@@ -9,7 +9,6 @@
 #include <stdlib.h>
 #include "brender.h"
 
-
 /*
  * Glue functions for malloc()/free()
  */

@@ -25,8 +25,8 @@ br_size_t BrPixelmapMipMemorySize(int dimension, br_uint_8 type)
 }
 
 #define SQ(a) ((a) * (a))
-br_pixelmap *BR_PUBLIC_ENTRY BrPixelmapMakeMipMap(br_pixelmap *source, br_uint_32 destinationType, br_pixelmap *palette,
-                                                  br_uint_32 base, br_uint_32 range, br_uint_32 quantizationMethod)
+br_pixelmap *BR_PUBLIC_ENTRY BrPixelmapMakeMipMap(br_pixelmap *source, br_uint_32 destinationType, br_pixelmap *palette, br_uint_32 base,
+                                                  br_uint_32 range, br_uint_32 quantizationMethod)
 {
     br_pixelmap *destination;
     int          dimension;
@@ -152,13 +152,11 @@ br_pixelmap *BR_PUBLIC_ENTRY BrPixelmapMakeMipMap(br_pixelmap *source, br_uint_3
             switch(destination->type) {
 
                 case BR_PMT_RGB_555:
-                    *((short *)destPtr) = (short)(((BR_RED(colour) >> 3) << 10) | ((BR_GRN(colour) >> 3) << 5) |
-                                                  (BR_BLU(colour) >> 3));
+                    *((short *)destPtr) = (short)(((BR_RED(colour) >> 3) << 10) | ((BR_GRN(colour) >> 3) << 5) | (BR_BLU(colour) >> 3));
                     break;
 
                 case BR_PMT_RGB_565:
-                    *((short *)destPtr) = (short)(((BR_RED(colour) >> 3) << 11) | ((BR_GRN(colour) >> 2) << 5) |
-                                                  (BR_BLU(colour) >> 3));
+                    *((short *)destPtr) = (short)(((BR_RED(colour) >> 3) << 11) | ((BR_GRN(colour) >> 2) << 5) | (BR_BLU(colour) >> 3));
                     break;
 
                 case BR_PMT_RGB_888:
@@ -194,8 +192,7 @@ br_pixelmap *BR_PUBLIC_ENTRY BrPixelmapMakeMipMap(br_pixelmap *source, br_uint_3
                             green = BR_GRN(colour);
                             blue  = BR_BLU(colour);
                             for(paletteEntry = base; paletteEntry < base + range; paletteEntry++) {
-                                value = SQ(red - r[paletteEntry]) + SQ(green - g[paletteEntry]) +
-                                        SQ(blue - b[paletteEntry]);
+                                value = SQ(red - r[paletteEntry]) + SQ(green - g[paletteEntry]) + SQ(blue - b[paletteEntry]);
                                 if(value < lowestValue) {
                                     lowestValue = value;
                                     lowest      = paletteEntry;
@@ -219,14 +216,11 @@ br_pixelmap *BR_PUBLIC_ENTRY BrPixelmapMakeMipMap(br_pixelmap *source, br_uint_3
         agregateSourcePtr = agregateDestinationPtr = agregateMap;
         for(row = 0; row < (unsigned)dimension; row++, agregateSourcePtr += 3 * dimension << 1) {
             for(col = 0; col < (unsigned)dimension; col++, agregateSourcePtr += 6, agregateDestinationPtr += 3) {
-                agregateDestinationPtr[0] = agregateSourcePtr[0] + agregateSourcePtr[3] +
-                                            agregateSourcePtr[0 + 3 * (dimension << 1)] +
+                agregateDestinationPtr[0] = agregateSourcePtr[0] + agregateSourcePtr[3] + agregateSourcePtr[0 + 3 * (dimension << 1)] +
                                             agregateSourcePtr[3 + 3 * (dimension << 1)];
-                agregateDestinationPtr[1] = agregateSourcePtr[1] + agregateSourcePtr[4] +
-                                            agregateSourcePtr[1 + 3 * (dimension << 1)] +
+                agregateDestinationPtr[1] = agregateSourcePtr[1] + agregateSourcePtr[4] + agregateSourcePtr[1 + 3 * (dimension << 1)] +
                                             agregateSourcePtr[4 + 3 * (dimension << 1)];
-                agregateDestinationPtr[2] = agregateSourcePtr[2] + agregateSourcePtr[5] +
-                                            agregateSourcePtr[2 + 3 * (dimension << 1)] +
+                agregateDestinationPtr[2] = agregateSourcePtr[2] + agregateSourcePtr[5] + agregateSourcePtr[2 + 3 * (dimension << 1)] +
                                             agregateSourcePtr[5 + 3 * (dimension << 1)];
 
                 red   = agregateDestinationPtr[0];
@@ -238,13 +232,11 @@ br_pixelmap *BR_PUBLIC_ENTRY BrPixelmapMakeMipMap(br_pixelmap *source, br_uint_3
                 switch(destination->type) {
 
                     case BR_PMT_RGB_555:
-                        *((short *)destPtr) = (short)(((BR_RED(colour) >> 3) << 10) | ((BR_GRN(colour) >> 3) << 5) |
-                                                      (BR_BLU(colour) >> 3));
+                        *((short *)destPtr) = (short)(((BR_RED(colour) >> 3) << 10) | ((BR_GRN(colour) >> 3) << 5) | (BR_BLU(colour) >> 3));
                         break;
 
                     case BR_PMT_RGB_565:
-                        *((short *)destPtr) = (short)(((BR_RED(colour) >> 3) << 11) | ((BR_GRN(colour) >> 2) << 5) |
-                                                      (BR_BLU(colour) >> 3));
+                        *((short *)destPtr) = (short)(((BR_RED(colour) >> 3) << 11) | ((BR_GRN(colour) >> 2) << 5) | (BR_BLU(colour) >> 3));
                         break;
 
                     case BR_PMT_RGB_888:
@@ -280,8 +272,7 @@ br_pixelmap *BR_PUBLIC_ENTRY BrPixelmapMakeMipMap(br_pixelmap *source, br_uint_3
                                 green = BR_GRN(colour);
                                 blue  = BR_BLU(colour);
                                 for(paletteEntry = base; paletteEntry < base + range; paletteEntry++) {
-                                    value = SQ(red - r[paletteEntry]) + SQ(green - g[paletteEntry]) +
-                                            SQ(blue - b[paletteEntry]);
+                                    value = SQ(red - r[paletteEntry]) + SQ(green - g[paletteEntry]) + SQ(blue - b[paletteEntry]);
                                     if(value < lowestValue) {
                                         lowestValue = value;
                                         lowest      = paletteEntry;

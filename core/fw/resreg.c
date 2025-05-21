@@ -9,7 +9,6 @@
 #include "fw.h"
 #include "brassert.h"
 
-
 /*
  * Resource Classes
  */
@@ -22,8 +21,7 @@ br_resource_class *BR_PUBLIC_ENTRY BrResClassAdd(br_resource_class *rclass)
     /*
      * The registry resource is initally faked
      */
-    UASSERT(rclass->res_class == BR_MEMORY_REGISTRY || rclass->res_class == BR_MEMORY_ANCHOR ||
-            fw.resource_class_index[rclass->res_class] == NULL);
+    UASSERT(rclass->res_class == BR_MEMORY_REGISTRY || rclass->res_class == BR_MEMORY_ANCHOR || fw.resource_class_index[rclass->res_class] == NULL);
 
     r = BrRegistryAdd(&fw.reg_resource_classes, rclass);
 

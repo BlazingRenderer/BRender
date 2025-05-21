@@ -101,8 +101,8 @@ static br_tv_template *BR_CMETHOD_DECL(br_device_pixelmap_sub_gl, templateQuery)
     br_device_pixelmap *self = (br_device_pixelmap *)_self;
 
     if(self->device->templates.devicePixelmapTemplate == NULL)
-        self->device->templates.devicePixelmapSubTemplate = BrTVTemplateAllocate(
-            self->device, devicePixelmapSubTemplateEntries, BR_ASIZE(devicePixelmapSubTemplateEntries));
+        self->device->templates.devicePixelmapSubTemplate = BrTVTemplateAllocate(self->device, devicePixelmapSubTemplateEntries,
+                                                                                 BR_ASIZE(devicePixelmapSubTemplateEntries));
 
     return self->device->templates.devicePixelmapSubTemplate;
 }
@@ -132,21 +132,19 @@ static br_error BR_CMETHOD_DECL(br_device_pixelmap_sub_gl, resize)(br_device_pix
     return BRE_OK;
 }
 
-static br_error BR_CMETHOD_DECL(br_device_pixelmap_sub_gl, match)(br_device_pixelmap *self, br_device_pixelmap **newpm,
-                                                                  br_token_value *tv)
+static br_error BR_CMETHOD_DECL(br_device_pixelmap_sub_gl, match)(br_device_pixelmap *self, br_device_pixelmap **newpm, br_token_value *tv)
 {
     return BRE_FAIL;
 }
 
-static br_error BR_CMETHOD_DECL(br_device_pixelmap_sub_gl, rectangleCopy)(br_device_pixelmap *self, br_point *p,
-                                                                          br_device_pixelmap *src, br_rectangle *sr)
+static br_error BR_CMETHOD_DECL(br_device_pixelmap_sub_gl, rectangleCopy)(br_device_pixelmap *self, br_point *p, br_device_pixelmap *src,
+                                                                          br_rectangle *sr)
 {
     br_point dpoint = map_to_parent_point(self, self->asSub.parent, *p);
     return DevicePixelmapRectangleCopy(self->asSub.parent, &dpoint, src, sr);
 }
 
-static br_error BR_CMETHOD_DECL(br_device_pixelmap_sub_gl, rectangleFill)(br_device_pixelmap *self, br_rectangle *rect,
-                                                                          br_uint_32 colour)
+static br_error BR_CMETHOD_DECL(br_device_pixelmap_sub_gl, rectangleFill)(br_device_pixelmap *self, br_rectangle *rect, br_uint_32 colour)
 {
     br_rectangle drect = map_to_parent_rect(self, self->asSub.parent, *rect);
     return DevicePixelmapRectangleFill(self->asSub.parent, &drect, colour);
@@ -159,8 +157,8 @@ static br_error BR_CMETHOD(br_device_pixelmap_sub_gl, rectangleStretchCopyTo)(br
     return DevicePixelmapRectangleStretchCopyTo(self->asSub.parent, &drect, src, s);
 }
 
-static br_error BR_CMETHOD_DECL(br_device_pixelmap_sub_gl, rectangleCopyTo)(br_device_pixelmap *self, br_point *p,
-                                                                            br_device_pixelmap *src, br_rectangle *sr)
+static br_error BR_CMETHOD_DECL(br_device_pixelmap_sub_gl, rectangleCopyTo)(br_device_pixelmap *self, br_point *p, br_device_pixelmap *src,
+                                                                            br_rectangle *sr)
 {
     br_point dpoint = map_to_parent_point(self, self->asSub.parent, *p);
     return DevicePixelmapRectangleCopyTo(self->asSub.parent, &dpoint, src, sr);
@@ -180,30 +178,27 @@ static br_error BR_CMETHOD_DECL(br_device_pixelmap_sub_gl, rectangleStretchCopy)
     return DevicePixelmapRectangleStretchCopy(self->asSub.parent, &drect, src, s);
 }
 
-static br_error BR_CMETHOD_DECL(br_device_pixelmap_sub_gl, line)(br_device_pixelmap *self, br_point *s, br_point *e,
-                                                                 br_uint_32 colour)
+static br_error BR_CMETHOD_DECL(br_device_pixelmap_sub_gl, line)(br_device_pixelmap *self, br_point *s, br_point *e, br_uint_32 colour)
 {
     br_point spoint = map_to_parent_point(self, self->asSub.parent, *s);
     br_point epoint = map_to_parent_point(self, self->asSub.parent, *e);
     return DevicePixelmapLine(self->asSub.parent, &spoint, &epoint, colour);
 }
 
-static br_error BR_CMETHOD_DECL(br_device_pixelmap_sub_gl, text)(br_device_pixelmap *self, br_point *point,
-                                                                 br_font *font, const char *text, br_uint_32 colour)
+static br_error BR_CMETHOD_DECL(br_device_pixelmap_sub_gl, text)(br_device_pixelmap *self, br_point *point, br_font *font, const char *text,
+                                                                 br_uint_32 colour)
 {
     br_point p = map_to_parent_point(self, self->asSub.parent, *point);
     return DevicePixelmapText(self->asSub.parent, &p, font, text, colour);
 }
 
-static br_error BR_CMETHOD_DECL(br_device_pixelmap_sub_gl, allocateSub)(br_device_pixelmap  *self,
-                                                                        br_device_pixelmap **newpm, br_rectangle *rect)
+static br_error BR_CMETHOD_DECL(br_device_pixelmap_sub_gl, allocateSub)(br_device_pixelmap *self, br_device_pixelmap **newpm, br_rectangle *rect)
 {
     br_rectangle drect = map_to_parent_rect(self, self->asSub.parent, *rect);
     return DevicePixelmapAllocateSub(self->asSub.parent, newpm, &drect);
 }
 
-br_error BR_CMETHOD_DECL(br_device_pixelmap_gl, allocateSub)(br_device_pixelmap *self, br_device_pixelmap **newpm,
-                                                             br_rectangle *rect)
+br_error BR_CMETHOD_DECL(br_device_pixelmap_gl, allocateSub)(br_device_pixelmap *self, br_device_pixelmap **newpm, br_rectangle *rect)
 {
     br_rectangle        out;
     br_device_pixelmap *pm;

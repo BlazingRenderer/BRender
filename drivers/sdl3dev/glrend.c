@@ -162,8 +162,7 @@ static br_error configure_device(br_device *dev)
     return BRE_OK;
 }
 
-static br_error create_gl_pixelmap(SDL_Window *window, br_device *gldev, br_device_sdl_ext_procs *ext_procs,
-                                   br_device_pixelmap **ppmap)
+static br_error create_gl_pixelmap(SDL_Window *window, br_device *gldev, br_device_sdl_ext_procs *ext_procs, br_device_pixelmap **ppmap)
 {
 
     br_error      err;

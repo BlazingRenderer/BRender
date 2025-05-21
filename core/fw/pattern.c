@@ -9,7 +9,6 @@
 #include "fw.h"
 #include "brassert.h"
 
-
 /*
  * Compare a pattern against a string
  *

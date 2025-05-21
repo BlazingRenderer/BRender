@@ -11,8 +11,7 @@
  */
 static const struct br_device_pixelmap_dispatch devicePixelmapFrontDispatch;
 
-static br_error custom_query(br_value *pvalue, void **extra, br_size_t *pextra_size, void *block,
-                             const struct br_tv_template_entry *tep)
+static br_error custom_query(br_value *pvalue, void **extra, br_size_t *pextra_size, void *block, const struct br_tv_template_entry *tep)
 {
     const br_device_pixelmap *self = block;
 
@@ -39,17 +38,17 @@ static const br_tv_custom custom = {
 #define F(f)  offsetof(br_device_pixelmap, f)
 #define FF(f) offsetof(br_device_pixelmap, asFront.f)
 static struct br_tv_template_entry devicePixelmapFrontTemplateEntries[] = {
-    {BRT(WIDTH_I32),            F(pm_width),        BRTV_QUERY | BRTV_ALL, BRTV_CONV_I32_U16, 0                    },
-    {BRT(HEIGHT_I32),           F(pm_height),       BRTV_QUERY | BRTV_ALL, BRTV_CONV_I32_U16, 0                    },
-    {BRT(PIXEL_TYPE_U8),        F(pm_type),         BRTV_QUERY | BRTV_ALL, BRTV_CONV_I32_U8,  0                    },
-    {BRT(OUTPUT_FACILITY_O),    F(output_facility), BRTV_QUERY | BRTV_ALL, BRTV_CONV_COPY,    0                    },
-    {BRT(FACILITY_O),           F(output_facility), BRTV_QUERY,            BRTV_CONV_COPY,    0                    },
-    {BRT(IDENTIFIER_CSTR),      F(pm_identifier),   BRTV_QUERY | BRTV_ALL, BRTV_CONV_COPY,    0                    },
-    {BRT(MSAA_SAMPLES_I32),     F(msaa_samples),    BRTV_QUERY | BRTV_ALL, BRTV_CONV_COPY,    0                    },
-    {BRT(OPENGL_EXT_PROCS_P),   0,                  BRTV_QUERY | BRTV_ALL, BRTV_CONV_CUSTOM,  (br_uintptr_t)&custom},
-    {BRT(OPENGL_VERSION_CSTR),  FF(gl_version),     BRTV_QUERY | BRTV_ALL, BRTV_CONV_COPY,    0                    },
-    {BRT(OPENGL_VENDOR_CSTR),   FF(gl_vendor),      BRTV_QUERY | BRTV_ALL, BRTV_CONV_COPY,    0                    },
-    {BRT(OPENGL_RENDERER_CSTR), FF(gl_renderer),    BRTV_QUERY | BRTV_ALL, BRTV_CONV_COPY,    0                    },
+    {BRT(WIDTH_I32),                 F(pm_width),           BRTV_QUERY | BRTV_ALL, BRTV_CONV_I32_U16, 0                    },
+    {BRT(HEIGHT_I32),                F(pm_height),          BRTV_QUERY | BRTV_ALL, BRTV_CONV_I32_U16, 0                    },
+    {BRT(PIXEL_TYPE_U8),             F(pm_type),            BRTV_QUERY | BRTV_ALL, BRTV_CONV_I32_U8,  0                    },
+    {BRT(OUTPUT_FACILITY_O),         F(output_facility),    BRTV_QUERY | BRTV_ALL, BRTV_CONV_COPY,    0                    },
+    {BRT(FACILITY_O),                F(output_facility),    BRTV_QUERY,            BRTV_CONV_COPY,    0                    },
+    {BRT(IDENTIFIER_CSTR),           F(pm_identifier),      BRTV_QUERY | BRTV_ALL, BRTV_CONV_COPY,    0                    },
+    {BRT(MSAA_SAMPLES_I32),          F(msaa_samples),       BRTV_QUERY | BRTV_ALL, BRTV_CONV_COPY,    0                    },
+    {BRT(OPENGL_EXT_PROCS_P),        0,                     BRTV_QUERY | BRTV_ALL, BRTV_CONV_CUSTOM,  (br_uintptr_t)&custom},
+    {BRT(OPENGL_VERSION_CSTR),       FF(gl_version),        BRTV_QUERY | BRTV_ALL, BRTV_CONV_COPY,    0                    },
+    {BRT(OPENGL_VENDOR_CSTR),        FF(gl_vendor),         BRTV_QUERY | BRTV_ALL, BRTV_CONV_COPY,    0                    },
+    {BRT(OPENGL_RENDERER_CSTR),      FF(gl_renderer),       BRTV_QUERY | BRTV_ALL, BRTV_CONV_COPY,    0                    },
 
     {DEV(OPENGL_NUM_EXTENSIONS_I32), FF(gl_num_extensions), BRTV_QUERY | BRTV_ALL, BRTV_CONV_COPY,    0                    },
     {DEV(OPENGL_EXTENSIONS_PL),      FF(gl_extensions),     BRTV_QUERY | BRTV_ALL, BRTV_CONV_LIST,    0                    },
@@ -102,7 +101,8 @@ static void setup_qiurks(br_device_pixelmap *self)
     }
 }
 
-static void APIENTRY gl_debug_callback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar *message, const void *user)
+static void APIENTRY gl_debug_callback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar *message,
+                                       const void *user)
 {
     const char *source_string, *type_string, *severity_string;
 
@@ -142,7 +142,8 @@ static void APIENTRY gl_debug_callback(GLenum source, GLenum type, GLuint id, GL
     // clang-format on
 
     if(length < 0) {
-        BrLogDebug("GLREND", "glDebug: source=%s, type=%s, id=%u, severity=%s: %.*s", source_string, type_string, id, severity_string, (int)length, message);
+        BrLogDebug("GLREND", "glDebug: source=%s, type=%s, id=%u, severity=%s: %.*s", source_string, type_string, id, severity_string,
+                   (int)length, message);
     } else {
         BrLogDebug("GLREND", "glDebug: source=%s, type=%s, id=%u, severity=%s: %s", source_string, type_string, id, severity_string, message);
     }
@@ -150,24 +151,23 @@ static void APIENTRY gl_debug_callback(GLenum source, GLenum type, GLuint id, GL
 
 br_device_pixelmap *DevicePixelmapGLAllocateFront(br_device *dev, br_output_facility *outfcty, br_token_value *tv)
 {
-    br_device_pixelmap      *self;
-    br_int_32                count;
-    GLint                    red_bits = 0, grn_bits = 0, blu_bits = 0, alpha_bits = 0;
+    br_device_pixelmap       *self;
+    br_int_32                 count;
+    GLint                     red_bits = 0, grn_bits = 0, blu_bits = 0, alpha_bits = 0;
     const br_pixelmap_gl_fmt *fmt;
-    struct pixelmapNewTokens pt = {
-        .width           = -1,
-        .height          = -1,
-        .pixel_bits      = -1,
-        .pixel_type      = BR_PMT_MAX,
-        .msaa_samples    = 0,
-        .ext_procs       = NULL,
-        .vertex_shader   = NULL,
-        .fragment_shader = NULL,
+    struct pixelmapNewTokens  pt = {
+         .width           = -1,
+         .height          = -1,
+         .pixel_bits      = -1,
+         .pixel_type      = BR_PMT_MAX,
+         .msaa_samples    = 0,
+         .ext_procs       = NULL,
+         .vertex_shader   = NULL,
+         .fragment_shader = NULL,
     };
 
     if(dev->templates.pixelmapNewTemplate == NULL) {
-        dev->templates.pixelmapNewTemplate = BrTVTemplateAllocate(dev, pixelmapNewTemplateEntries,
-                                                                  BR_ASIZE(pixelmapNewTemplateEntries));
+        dev->templates.pixelmapNewTemplate = BrTVTemplateAllocate(dev, pixelmapNewTemplateEntries, BR_ASIZE(pixelmapNewTemplateEntries));
     }
 
     BrTokenValueSetMany(&pt, &count, NULL, tv, dev->templates.pixelmapNewTemplate);
@@ -241,7 +241,7 @@ br_device_pixelmap *DevicePixelmapGLAllocateFront(br_device *dev, br_output_faci
     BrLogTrace("GLREND", "OpenGL Vendor   = %s", self->asFront.gl_vendor);
     BrLogTrace("GLREND", "OpenGL Renderer = %s", self->asFront.gl_renderer);
 
-    if (GLVersion.major < 3 || (GLVersion.major == 3 && GLVersion.minor < 2)) {
+    if(GLVersion.major < 3 || (GLVersion.major == 3 && GLVersion.minor < 2)) {
         BrLogError("ERROR", "Got OpenGL %d.%d context, expected 3.2", GLVersion.major, GLVersion.minor);
         goto cleanup_context;
     }
@@ -281,8 +281,7 @@ br_device_pixelmap *DevicePixelmapGLAllocateFront(br_device *dev, br_output_faci
          */
         self->pm_type = BR_PMT_RGBA_4444;
     } else {
-        BrLogWarn("GLREND", "OpenGL gave us an unknown screen format (R%dG%dB%dA%d), soldiering on...", red_bits,
-                  grn_bits, blu_bits, alpha_bits);
+        BrLogWarn("GLREND", "OpenGL gave us an unknown screen format (R%dG%dB%dA%d), soldiering on...", red_bits, grn_bits, blu_bits, alpha_bits);
     }
 
     if(VIDEO_Open(&self->asFront.video, pt.vertex_shader, pt.fragment_shader) == NULL) {
@@ -387,8 +386,8 @@ struct br_tv_template *BR_CMETHOD_DECL(br_device_pixelmap_glf, templateQuery)(br
     br_device_pixelmap *self = (br_device_pixelmap *)_self;
 
     if(self->device->templates.devicePixelmapFrontTemplate == NULL)
-        self->device->templates.devicePixelmapFrontTemplate = BrTVTemplateAllocate(
-            self->device, devicePixelmapFrontTemplateEntries, BR_ASIZE(devicePixelmapFrontTemplateEntries));
+        self->device->templates.devicePixelmapFrontTemplate = BrTVTemplateAllocate(self->device, devicePixelmapFrontTemplateEntries,
+                                                                                   BR_ASIZE(devicePixelmapFrontTemplateEntries));
 
     return self->device->templates.devicePixelmapFrontTemplate;
 }
@@ -429,8 +428,7 @@ br_error BR_CMETHOD_DECL(br_device_pixelmap_glf, doubleBuffer)(br_device_pixelma
     glBindFramebuffer(GL_READ_FRAMEBUFFER, src->asBack.glFbo);
     glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
 
-    glBlitFramebuffer(0, 0, src->pm_width, src->pm_height, 0, 0, self->pm_width, self->pm_height, GL_COLOR_BUFFER_BIT,
-                      GL_NEAREST);
+    glBlitFramebuffer(0, 0, src->pm_width, src->pm_height, 0, 0, self->pm_width, self->pm_height, GL_COLOR_BUFFER_BIT, GL_NEAREST);
 
     glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
     glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);

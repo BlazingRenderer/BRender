@@ -8,7 +8,6 @@
  */
 #include "brender.h"
 
-
 /*
  * Find Failed callbacks to automatically load textures & tables
  */

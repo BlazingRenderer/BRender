@@ -88,17 +88,15 @@ static struct br_tv_template *BR_CMETHOD_DECL(br_geometry_v1_model_gl, templateQ
     return self->device->templates.geometryV1ModelTemplate;
 }
 
-static br_error BR_CMETHOD_DECL(br_geometry_v1_model_gl, storedAvail)(struct br_geometry_v1_model *self,
-                                                                      br_int_32 *psize, br_token_value *tv)
+static br_error BR_CMETHOD_DECL(br_geometry_v1_model_gl, storedAvail)(struct br_geometry_v1_model *self, br_int_32 *psize, br_token_value *tv)
 {
     BrLogTrace("GL1MDL", "%s", __FUNCTION__);
     return BRE_FAIL;
 }
 
-static br_error BR_CMETHOD_DECL(br_geometry_v1_model_gl,
-                                storedNew)(struct br_geometry_v1_model *self, struct br_renderer *renderer,
-                                           struct br_geometry_stored **psg, struct v11model_f *model, br_token type,
-                                           br_token_value *tv)
+static br_error BR_CMETHOD_DECL(br_geometry_v1_model_gl, storedNew)(struct br_geometry_v1_model *self, struct br_renderer *renderer,
+                                                                    struct br_geometry_stored **psg, struct v11model_f *model,
+                                                                    br_token type, br_token_value *tv)
 {
     ASSERT(type == BRT_TRIANGLE);
     if((*psg = GeometryStoredGLAllocate(self, "model", renderer, (struct v11model *)model)) == NULL)
@@ -107,9 +105,8 @@ static br_error BR_CMETHOD_DECL(br_geometry_v1_model_gl,
     return BRE_OK;
 }
 
-br_error BR_CMETHOD_DECL(br_geometry_v1_model_gl, render)(struct br_geometry_v1_model *self,
-                                                          struct br_renderer *renderer, struct v11model_f *model,
-                                                          struct br_renderer_state_stored *default_state, br_token type)
+br_error BR_CMETHOD_DECL(br_geometry_v1_model_gl, render)(struct br_geometry_v1_model *self, struct br_renderer *renderer,
+                                                          struct v11model_f *model, struct br_renderer_state_stored *default_state, br_token type)
 {
     static br_boolean warned_imm = BR_FALSE;
 

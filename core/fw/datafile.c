@@ -12,7 +12,6 @@
 #include "datafile.h"
 #include "shortcut.h"
 
-
 #define CHUNK_LOG 0
 
 /*
@@ -936,13 +935,12 @@ static br_uint_32 StructWriteTextSub(br_datafile *df, br_file_struct *str, void 
                 break;
 
             case FSM_COLOUR:
-                w = BrFilePrintf(df->h, "%d,%d,%d", BR_RED(*((br_colour *)mp)), BR_GRN(*((br_colour *)mp)),
-                                 BR_BLU(*((br_colour *)mp)));
+                w = BrFilePrintf(df->h, "%d,%d,%d", BR_RED(*((br_colour *)mp)), BR_GRN(*((br_colour *)mp)), BR_BLU(*((br_colour *)mp)));
                 break;
 
             case FSM_COLOUR_ALPHA:
-                w = BrFilePrintf(df->h, "%d,%d,%d,%d", BR_RED(*((br_colour *)mp)), BR_GRN(*((br_colour *)mp)),
-                                 BR_BLU(*((br_colour *)mp)), BR_ALPHA(*((br_colour *)mp)));
+                w = BrFilePrintf(df->h, "%d,%d,%d,%d", BR_RED(*((br_colour *)mp)), BR_GRN(*((br_colour *)mp)), BR_BLU(*((br_colour *)mp)),
+                                 BR_ALPHA(*((br_colour *)mp)));
                 break;
 
             case FSM_INT_32:
@@ -1001,19 +999,17 @@ static br_uint_32 StructWriteTextSub(br_datafile *df, br_file_struct *str, void 
                 break;
 
             case FSM_FIXED_VECTOR2:
-                w = BrFilePrintf(df->h, "%g,%g", BrFixedToFloat(((br_vector2_x *)mp)->v[0]),
-                                 BrFixedToFloat(((br_vector2_x *)mp)->v[1]));
+                w = BrFilePrintf(df->h, "%g,%g", BrFixedToFloat(((br_vector2_x *)mp)->v[0]), BrFixedToFloat(((br_vector2_x *)mp)->v[1]));
                 break;
 
             case FSM_FIXED_VECTOR3:
-                w = BrFilePrintf(df->h, "%g,%g,%g", BrFixedToFloat(((br_vector3_x *)mp)->v[0]),
-                                 BrFixedToFloat(((br_vector3_x *)mp)->v[1]), BrFixedToFloat(((br_vector3_x *)mp)->v[2]));
+                w = BrFilePrintf(df->h, "%g,%g,%g", BrFixedToFloat(((br_vector3_x *)mp)->v[0]), BrFixedToFloat(((br_vector3_x *)mp)->v[1]),
+                                 BrFixedToFloat(((br_vector3_x *)mp)->v[2]));
                 break;
 
             case FSM_FIXED_VECTOR4:
-                w = BrFilePrintf(df->h, "%g,%g,%g,%g", BrFixedToFloat(((br_vector4_x *)mp)->v[0]),
-                                 BrFixedToFloat(((br_vector4_x *)mp)->v[1]), BrFixedToFloat(((br_vector4_x *)mp)->v[2]),
-                                 BrFixedToFloat(((br_vector4_x *)mp)->v[3]));
+                w = BrFilePrintf(df->h, "%g,%g,%g,%g", BrFixedToFloat(((br_vector4_x *)mp)->v[0]), BrFixedToFloat(((br_vector4_x *)mp)->v[1]),
+                                 BrFixedToFloat(((br_vector4_x *)mp)->v[2]), BrFixedToFloat(((br_vector4_x *)mp)->v[3]));
                 break;
 
             case FSM_FLOAT_VECTOR2:
@@ -1021,30 +1017,26 @@ static br_uint_32 StructWriteTextSub(br_datafile *df, br_file_struct *str, void 
                 break;
 
             case FSM_FLOAT_VECTOR3:
-                w = BrFilePrintf(df->h, "%g,%g,%g", ((br_vector3_f *)mp)->v[0], ((br_vector3_f *)mp)->v[1],
-                                 ((br_vector3_f *)mp)->v[2]);
+                w = BrFilePrintf(df->h, "%g,%g,%g", ((br_vector3_f *)mp)->v[0], ((br_vector3_f *)mp)->v[1], ((br_vector3_f *)mp)->v[2]);
                 break;
 
             case FSM_FLOAT_VECTOR4:
-                w = BrFilePrintf(df->h, "%g,%g,%g,%g", ((br_vector4_f *)mp)->v[0], ((br_vector4_f *)mp)->v[1],
-                                 ((br_vector4_f *)mp)->v[2], ((br_vector4_f *)mp)->v[3]);
+                w = BrFilePrintf(df->h, "%g,%g,%g,%g", ((br_vector4_f *)mp)->v[0], ((br_vector4_f *)mp)->v[1], ((br_vector4_f *)mp)->v[2],
+                                 ((br_vector4_f *)mp)->v[3]);
                 break;
 
             case FSM_FIXED_FVECTOR2:
-                w = BrFilePrintf(df->h, "%g,%g", BrFixedLSFToFloat(((br_fvector2_x *)mp)->v[0]),
-                                 BrFixedLSFToFloat(((br_fvector2_x *)mp)->v[1]));
+                w = BrFilePrintf(df->h, "%g,%g", BrFixedLSFToFloat(((br_fvector2_x *)mp)->v[0]), BrFixedLSFToFloat(((br_fvector2_x *)mp)->v[1]));
                 break;
 
             case FSM_FIXED_FVECTOR3:
                 w = BrFilePrintf(df->h, "%g,%g,%g", BrFixedLSFToFloat(((br_fvector3_x *)mp)->v[0]),
-                                 BrFixedLSFToFloat(((br_fvector3_x *)mp)->v[1]),
-                                 BrFixedLSFToFloat(((br_fvector3_x *)mp)->v[2]));
+                                 BrFixedLSFToFloat(((br_fvector3_x *)mp)->v[1]), BrFixedLSFToFloat(((br_fvector3_x *)mp)->v[2]));
                 break;
 
             case FSM_FIXED_FVECTOR4:
                 w = BrFilePrintf(df->h, "%g,%g,%g,%g", BrFixedLSFToFloat(((br_fvector4_x *)mp)->v[0]),
-                                 BrFixedLSFToFloat(((br_fvector4_x *)mp)->v[1]),
-                                 BrFixedLSFToFloat(((br_fvector4_x *)mp)->v[2]),
+                                 BrFixedLSFToFloat(((br_fvector4_x *)mp)->v[1]), BrFixedLSFToFloat(((br_fvector4_x *)mp)->v[2]),
                                  BrFixedLSFToFloat(((br_fvector4_x *)mp)->v[3]));
                 break;
 
@@ -1053,8 +1045,7 @@ static br_uint_32 StructWriteTextSub(br_datafile *df, br_file_struct *str, void 
                 break;
 
             case FSM_FLOAT_FVECTOR3:
-                w = BrFilePrintf(df->h, "%g,%g,%g", ((br_fvector3_f *)mp)->v[0], ((br_fvector3_f *)mp)->v[1],
-                                 ((br_fvector3_f *)mp)->v[2]);
+                w = BrFilePrintf(df->h, "%g,%g,%g", ((br_fvector3_f *)mp)->v[0], ((br_fvector3_f *)mp)->v[1], ((br_fvector3_f *)mp)->v[2]);
                 break;
 
             case FSM_FLOAT_FVECTOR4:

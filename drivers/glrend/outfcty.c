@@ -121,8 +121,7 @@ static br_error BR_CMETHOD_DECL(br_output_facility_sdl, validSource)(br_output_f
 /*
  * Instantiate an output pixelmap from the output type
  */
-static br_error BR_CMETHOD_DECL(br_output_facility_sdl, pixelmapNew)(br_output_facility  *self,
-                                                                     br_device_pixelmap **ppmap, br_token_value *tv)
+static br_error BR_CMETHOD_DECL(br_output_facility_sdl, pixelmapNew)(br_output_facility *self, br_device_pixelmap **ppmap, br_token_value *tv)
 {
     br_device_pixelmap *pm;
 
@@ -142,8 +141,7 @@ static br_error BR_CMETHOD_DECL(br_output_facility_sdl, pixelmapNew)(br_output_f
 /*
  * Cannot create new CLUTs, stuck with the single hardware one
  */
-static br_error BR_CMETHOD_DECL(br_output_facility_sdl, clutNew)(br_output_facility *self, br_device_clut **pclut,
-                                                                 br_token_value *tv)
+static br_error BR_CMETHOD_DECL(br_output_facility_sdl, clutNew)(br_output_facility *self, br_device_clut **pclut, br_token_value *tv)
 {
     (void)self;
     (void)pclut;

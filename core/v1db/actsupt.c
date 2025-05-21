@@ -12,7 +12,6 @@
 #include "datafile.h"
 #include "math_ip.h"
 
-
 /*
  * Invoke a callback for each one of an actors children
  */
@@ -439,8 +438,8 @@ br_boolean ActorToRootTyped(br_actor *a, br_actor *world, br_matrix34 *m, br_int
     return (a == world);
 }
 
-void Matrix4PerspectiveNew(br_matrix4 *mat, br_angle field_of_view, br_scalar aspect, br_scalar hither, br_scalar yon,
-                           br_scalar origin_x, br_scalar origin_y)
+void Matrix4PerspectiveNew(br_matrix4 *mat, br_angle field_of_view, br_scalar aspect, br_scalar hither, br_scalar yon, br_scalar origin_x,
+                           br_scalar origin_y)
 {
     br_scalar scale;
 
@@ -489,15 +488,14 @@ br_token CameraToScreenMatrix4(br_matrix4 *mat, br_actor *camera)
     switch(camera_type->type) {
 
         case BR_CAMERA_PERSPECTIVE_FOV:
-            Matrix4PerspectiveNew(mat, camera_type->field_of_view, camera_type->aspect, -camera_type->hither_z,
-                                  -camera_type->yon_z, v1db.origin.v[0], v1db.origin.v[1]);
+            Matrix4PerspectiveNew(mat, camera_type->field_of_view, camera_type->aspect, -camera_type->hither_z, -camera_type->yon_z,
+                                  v1db.origin.v[0], v1db.origin.v[1]);
 
             return BRT_PERSPECTIVE;
 
         case BR_CAMERA_PERSPECTIVE_FOV_OLD:
 
-            BrMatrix4Perspective(mat, camera_type->field_of_view, camera_type->aspect, -camera_type->hither_z,
-                                 -camera_type->yon_z);
+            BrMatrix4Perspective(mat, camera_type->field_of_view, camera_type->aspect, -camera_type->hither_z, -camera_type->yon_z);
 
             return BRT_PERSPECTIVE;
 
@@ -540,8 +538,7 @@ br_token CameraToScreenMatrix4(br_matrix4 *mat, br_actor *camera)
             if(camera_type->yon_z <= camera_type->hither_z)
                 BR_ERROR0("Parallel camera has invalid yon and hither");
 
-            BrMatrix34Scale(&mat34, BR_RCP(camera_type->width), BR_RCP(camera_type->height),
-                            BR_RCP(camera_type->yon_z - camera_type->hither_z));
+            BrMatrix34Scale(&mat34, BR_RCP(camera_type->width), BR_RCP(camera_type->height), BR_RCP(camera_type->yon_z - camera_type->hither_z));
             BrMatrix34PreTranslate(&mat34, S0, S0, camera_type->hither_z);
 
             BrMatrix4Copy34(mat, &mat34);

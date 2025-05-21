@@ -10,7 +10,6 @@
 
 #include "brender.h"
 
-
 float BR_PUBLIC_ENTRY BrFloatFloor(float f)
 {
     return floorf(f);

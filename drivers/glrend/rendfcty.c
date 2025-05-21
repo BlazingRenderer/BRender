@@ -100,8 +100,7 @@ static struct br_tv_template *BR_CMETHOD_DECL(br_renderer_facility_gl, templateQ
     return self->device->templates.rendererFacilityTemplate;
 }
 
-static br_error BR_CMETHOD_DECL(br_renderer_facility_gl, validDestination)(br_renderer_facility *self, br_boolean *bp,
-                                                                           br_object *h)
+static br_error BR_CMETHOD_DECL(br_renderer_facility_gl, validDestination)(br_renderer_facility *self, br_boolean *bp, br_object *h)
 {
     (void)self;
     (void)bp;
@@ -128,8 +127,7 @@ static struct br_tv_template_entry rendererNewTemplateEntries[] = {
 /*
  * Create a new renderer
  */
-static br_error BR_CMETHOD_DECL(br_renderer_facility_gl, rendererNew)(br_renderer_facility *self,
-                                                                      struct br_renderer **prenderer, br_token_value *tv)
+static br_error BR_CMETHOD_DECL(br_renderer_facility_gl, rendererNew)(br_renderer_facility *self, struct br_renderer **prenderer, br_token_value *tv)
 {
     struct newRendererTokens rt = {.dest = NULL};
     br_int_32                count;

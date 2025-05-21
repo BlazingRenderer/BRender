@@ -14,7 +14,6 @@
 #include "pmmem.h"
 #include "brassert.h"
 
-
 /*
  * Useful info about each pixelmap type
  */
@@ -171,8 +170,7 @@ void _CheckDispatch(br_device_pixelmap *pm)
         pm->dispatch = &devicePixelmapDispatch;
 }
 
-br_error BR_CMETHOD_DECL(br_device_pixelmap_mem, allocateSub)(br_device_pixelmap *self, br_device_pixelmap **newpm,
-                                                              br_rectangle *rect)
+br_error BR_CMETHOD_DECL(br_device_pixelmap_mem, allocateSub)(br_device_pixelmap *self, br_device_pixelmap **newpm, br_rectangle *rect)
 {
     br_device_pixelmap *pm;
     br_rectangle        out;
@@ -335,8 +333,7 @@ static struct br_tv_template_entry matchTemplateEntries[] = {
 };
 #undef F
 
-br_error BR_CMETHOD_DECL(br_device_pixelmap_mem, match)(br_device_pixelmap *self, br_device_pixelmap **newpm,
-                                                        br_token_value *tv)
+br_error BR_CMETHOD_DECL(br_device_pixelmap_mem, match)(br_device_pixelmap *self, br_device_pixelmap **newpm, br_token_value *tv)
 {
     struct match_tokens mt = {BRT_NONE, 0};
     br_int_32           count;
@@ -344,8 +341,7 @@ br_error BR_CMETHOD_DECL(br_device_pixelmap_mem, match)(br_device_pixelmap *self
     br_int_32           bytes, r;
 
     if(_pixelmap.pixelmap_match_template == NULL) {
-        _pixelmap.pixelmap_match_template = BrTVTemplateAllocate(_pixelmap.res, matchTemplateEntries,
-                                                                 BR_ASIZE(matchTemplateEntries));
+        _pixelmap.pixelmap_match_template = BrTVTemplateAllocate(_pixelmap.res, matchTemplateEntries, BR_ASIZE(matchTemplateEntries));
 
         if(_pixelmap.pixelmap_match_template == NULL)
             return BRE_FAIL;
@@ -382,6 +378,7 @@ br_error BR_CMETHOD_DECL(br_device_pixelmap_mem, match)(br_device_pixelmap *self
             break;
 
         case BRT_CLONE:
+            break;
         case BRT_OFFSCREEN:
         case BRT_HIDDEN:
         case BRT_HIDDEN_BUFFER:
@@ -450,8 +447,7 @@ br_error BR_CMETHOD_DECL(br_device_pixelmap_mem, copyTo)(br_device_pixelmap *sel
 {
     br_int_8 bytes;
 
-    UASSERT((self->pm_type == src->pm_type) && (self->pm_width == src->pm_width) &&
-            (self->pm_height == src->pm_height));
+    UASSERT((self->pm_type == src->pm_type) && (self->pm_width == src->pm_width) && (self->pm_height == src->pm_height));
 
     bytes = DevicePixelmapPixelBytes(self);
 
@@ -517,13 +513,11 @@ br_error BR_CMETHOD_DECL(br_device_pixelmap_mem, copyTo)(br_device_pixelmap *sel
                        self->pm_width * self->pm_height, bytes);
         else
             _MemCopy_A(DevicePixelmapMemAddress(self, 0, self->pm_height - 1, bytes),
-                       DevicePixelmapMemAddress(src, 0, src->pm_height - 1, bytes), self->pm_width * self->pm_height,
-                       bytes);
+                       DevicePixelmapMemAddress(src, 0, src->pm_height - 1, bytes), self->pm_width * self->pm_height, bytes);
 
     else if((self->pm_row_bytes & 7) == 0)
 
-        _MemRectCopy_A(self->pm_pixels, src->pm_pixels, self->pm_width, self->pm_height, self->pm_row_bytes,
-                       src->pm_row_bytes, bytes);
+        _MemRectCopy_A(self->pm_pixels, src->pm_pixels, self->pm_width, self->pm_height, self->pm_row_bytes, src->pm_row_bytes, bytes);
 
     else {
 
@@ -549,8 +543,7 @@ br_error BR_CMETHOD_DECL(br_device_pixelmap_mem, copyFrom)(br_device_pixelmap *s
 {
     br_int_8 bytes;
 
-    UASSERT((self->pm_type == dest->pm_type) && (self->pm_width == dest->pm_width) &&
-            (self->pm_height == dest->pm_height));
+    UASSERT((self->pm_type == dest->pm_type) && (self->pm_width == dest->pm_width) && (self->pm_height == dest->pm_height));
 
     bytes = DevicePixelmapPixelBytes(self);
 
@@ -616,13 +609,11 @@ br_error BR_CMETHOD_DECL(br_device_pixelmap_mem, copyFrom)(br_device_pixelmap *s
                        self->pm_width * self->pm_height, bytes);
         else
             _MemCopy_A(DevicePixelmapMemAddress(dest, 0, dest->pm_height - 1, bytes),
-                       DevicePixelmapMemAddress(self, 0, self->pm_height - 1, bytes), self->pm_width * self->pm_height,
-                       bytes);
+                       DevicePixelmapMemAddress(self, 0, self->pm_height - 1, bytes), self->pm_width * self->pm_height, bytes);
 
     else if((dest->pm_row_bytes & 7) == 0)
 
-        _MemRectCopy_A(dest->pm_pixels, self->pm_pixels, self->pm_width, self->pm_height, dest->pm_row_bytes,
-                       self->pm_row_bytes, bytes);
+        _MemRectCopy_A(dest->pm_pixels, self->pm_pixels, self->pm_width, self->pm_height, dest->pm_row_bytes, self->pm_row_bytes, bytes);
 
     else {
 
@@ -659,8 +650,7 @@ br_error BR_CMETHOD_DECL(br_device_pixelmap_mem, fill)(br_device_pixelmap *self,
 
             _MemFill_A(DevicePixelmapMemAddress(self, 0, 0, bytes), self->pm_width * self->pm_height, bytes, colour);
         else
-            _MemFill_A(DevicePixelmapMemAddress(self, 0, self->pm_height - 1, bytes), self->pm_width * self->pm_height,
-                       bytes, colour);
+            _MemFill_A(DevicePixelmapMemAddress(self, 0, self->pm_height - 1, bytes), self->pm_width * self->pm_height, bytes, colour);
 
     else {
 
@@ -685,32 +675,30 @@ br_error BR_CMETHOD_DECL(br_device_pixelmap_mem, doubleBuffer)(br_device_pixelma
     return BRE_UNSUPPORTED;
 }
 
-br_error BR_CMETHOD_DECL(br_device_pixelmap_mem, copyDirty)(br_device_pixelmap *self, br_device_pixelmap *src,
-                                                            br_rectangle *dirty, br_int_32 num_rects)
+br_error BR_CMETHOD_DECL(br_device_pixelmap_mem, copyDirty)(br_device_pixelmap *self, br_device_pixelmap *src, br_rectangle *dirty, br_int_32 num_rects)
 {
     return BRE_UNSUPPORTED;
 }
 
-br_error BR_CMETHOD_DECL(br_device_pixelmap_mem, copyToDirty)(br_device_pixelmap *self, br_device_pixelmap *src,
-                                                              br_rectangle *dirty, br_int_32 num_rects)
+br_error BR_CMETHOD_DECL(br_device_pixelmap_mem, copyToDirty)(br_device_pixelmap *self, br_device_pixelmap *src, br_rectangle *dirty,
+                                                              br_int_32 num_rects)
 {
     return BRE_UNSUPPORTED;
 }
 
-br_error BR_CMETHOD_DECL(br_device_pixelmap_mem, copyFromDirty)(br_device_pixelmap *self, br_device_pixelmap *src,
-                                                                br_rectangle *dirty, br_int_32 num_rects)
+br_error BR_CMETHOD_DECL(br_device_pixelmap_mem, copyFromDirty)(br_device_pixelmap *self, br_device_pixelmap *src, br_rectangle *dirty,
+                                                                br_int_32 num_rects)
 {
     return BRE_UNSUPPORTED;
 }
 
-br_error BR_CMETHOD_DECL(br_device_pixelmap_mem, fillDirty)(br_device_pixelmap *self, br_uint_32 colour,
-                                                            br_rectangle *dirty, br_int_32 num_rects)
+br_error BR_CMETHOD_DECL(br_device_pixelmap_mem, fillDirty)(br_device_pixelmap *self, br_uint_32 colour, br_rectangle *dirty, br_int_32 num_rects)
 {
     return BRE_UNSUPPORTED;
 }
 
-br_error BR_CMETHOD_DECL(br_device_pixelmap_mem, doubleBufferDirty)(br_device_pixelmap *self, br_device_pixelmap *src,
-                                                                    br_rectangle *dirty, br_int_32 num_rects)
+br_error BR_CMETHOD_DECL(br_device_pixelmap_mem, doubleBufferDirty)(br_device_pixelmap *self, br_device_pixelmap *src, br_rectangle *dirty,
+                                                                    br_int_32 num_rects)
 {
     return BRE_UNSUPPORTED;
 }
@@ -718,8 +706,7 @@ br_error BR_CMETHOD_DECL(br_device_pixelmap_mem, doubleBufferDirty)(br_device_pi
 /*
  * Direct 2D rendering operations
  */
-br_error BR_CMETHOD_DECL(br_device_pixelmap_mem, rectangleCopyTo)(br_device_pixelmap *self, br_point *p,
-                                                                  br_device_pixelmap *src, br_rectangle *r)
+br_error BR_CMETHOD_DECL(br_device_pixelmap_mem, rectangleCopyTo)(br_device_pixelmap *self, br_point *p, br_device_pixelmap *src, br_rectangle *r)
 {
     int          bytes;
     br_rectangle ar;
@@ -786,8 +773,7 @@ br_error BR_CMETHOD_DECL(br_device_pixelmap_mem, rectangleCopyTo)(br_device_pixe
 
         if(self->pm_row_bytes > 0)
 
-            _MemCopy_A(DevicePixelmapMemAddress(self, ap.x, ap.y, bytes),
-                       DevicePixelmapMemAddress(src, ar.x, ar.y, bytes), ar.w * ar.h, bytes);
+            _MemCopy_A(DevicePixelmapMemAddress(self, ap.x, ap.y, bytes), DevicePixelmapMemAddress(src, ar.x, ar.y, bytes), ar.w * ar.h, bytes);
         else
             _MemCopy_A(DevicePixelmapMemAddress(self, ap.x, ap.y + ar.h - 1, bytes),
                        DevicePixelmapMemAddress(src, ar.x, ar.y + ar.h - 1, bytes), ar.w * ar.h, bytes);
@@ -798,9 +784,8 @@ br_error BR_CMETHOD_DECL(br_device_pixelmap_mem, rectangleCopyTo)(br_device_pixe
      */
     else if((self->pm_row_bytes & 7) == 0)
 
-        _MemRectCopy_A(DevicePixelmapMemAddress(self, ap.x, ap.y, bytes),
-                       DevicePixelmapMemAddress(src, ar.x, ar.y, bytes), ar.w, ar.h, self->pm_row_bytes,
-                       src->pm_row_bytes, bytes);
+        _MemRectCopy_A(DevicePixelmapMemAddress(self, ap.x, ap.y, bytes), DevicePixelmapMemAddress(src, ar.x, ar.y, bytes), ar.w, ar.h,
+                       self->pm_row_bytes, src->pm_row_bytes, bytes);
 
     else {
 
@@ -822,8 +807,8 @@ br_error BR_CMETHOD_DECL(br_device_pixelmap_mem, rectangleCopyTo)(br_device_pixe
     return BRE_OK;
 }
 
-br_error BR_CMETHOD_DECL(br_device_pixelmap_mem, rectangleCopyFrom)(br_device_pixelmap *self, br_point *p,
-                                                                    br_device_pixelmap *dest, br_rectangle *r)
+br_error BR_CMETHOD_DECL(br_device_pixelmap_mem, rectangleCopyFrom)(br_device_pixelmap *self, br_point *p, br_device_pixelmap *dest,
+                                                                    br_rectangle *r)
 {
     int          bytes;
     br_rectangle ar;
@@ -891,8 +876,7 @@ br_error BR_CMETHOD_DECL(br_device_pixelmap_mem, rectangleCopyFrom)(br_device_pi
 
         if(self->pm_row_bytes > 0)
 
-            _MemCopy_A(DevicePixelmapMemAddress(dest, ap.x, ap.y, bytes),
-                       DevicePixelmapMemAddress(self, ar.x, ar.y, bytes), ar.w * ar.h, bytes);
+            _MemCopy_A(DevicePixelmapMemAddress(dest, ap.x, ap.y, bytes), DevicePixelmapMemAddress(self, ar.x, ar.y, bytes), ar.w * ar.h, bytes);
         else
             _MemCopy_A(DevicePixelmapMemAddress(dest, ap.x, ap.y + ar.h - 1, bytes),
                        DevicePixelmapMemAddress(self, ar.x, ar.y + ar.h - 1, bytes), ar.w * ar.h, bytes);
@@ -903,9 +887,8 @@ br_error BR_CMETHOD_DECL(br_device_pixelmap_mem, rectangleCopyFrom)(br_device_pi
      */
     else if((dest->pm_row_bytes & 7) == 0)
 
-        _MemRectCopy_A(DevicePixelmapMemAddress(dest, ap.x, ap.y, bytes),
-                       DevicePixelmapMemAddress(self, ar.x, ar.y, bytes), ar.w, ar.h, dest->pm_row_bytes,
-                       self->pm_row_bytes, bytes);
+        _MemRectCopy_A(DevicePixelmapMemAddress(dest, ap.x, ap.y, bytes), DevicePixelmapMemAddress(self, ar.x, ar.y, bytes), ar.w, ar.h,
+                       dest->pm_row_bytes, self->pm_row_bytes, bytes);
 
     else {
 
@@ -936,9 +919,8 @@ br_error BR_CMETHOD_DECL(br_device_pixelmap_mem, rectangleCopyFrom)(br_device_pi
 // absoloute value of negative part of an integer
 #define I_ABS_NEG(x) ((x) <= 0 ? (-x) : 0)
 
-br_error BR_CMETHOD_DECL(br_device_pixelmap_mem,
-                         rectangleStretchCopyTo)(br_device_pixelmap *self, br_rectangle *destinationRectangle,
-                                                 br_device_pixelmap *src, br_rectangle *sourceRectangle)
+br_error BR_CMETHOD_DECL(br_device_pixelmap_mem, rectangleStretchCopyTo)(br_device_pixelmap *self, br_rectangle *destinationRectangle,
+                                                                         br_device_pixelmap *src, br_rectangle *sourceRectangle)
 {
 #if 0
 	int bytes;
@@ -1009,8 +991,7 @@ br_error BR_CMETHOD_DECL(br_device_pixelmap_mem, rectangleStretchCopyFrom)(br_de
     return BRE_FAIL;
 }
 
-br_error BR_CMETHOD_DECL(br_device_pixelmap_mem, rectangleFill)(br_device_pixelmap *self, br_rectangle *rect,
-                                                                br_uint_32 colour)
+br_error BR_CMETHOD_DECL(br_device_pixelmap_mem, rectangleFill)(br_device_pixelmap *self, br_rectangle *rect, br_uint_32 colour)
 {
     br_rectangle arect;
     br_int_8     bytes;
@@ -1023,15 +1004,13 @@ br_error BR_CMETHOD_DECL(br_device_pixelmap_mem, rectangleFill)(br_device_pixelm
     /*
      * Try to do full width fills with block fill
      */
-    if(arect.w == self->pm_width &&
-       (self->pm_flags & (BR_PMF_LINEAR | BR_PMF_ROW_WHOLEPIXELS)) == (BR_PMF_LINEAR | BR_PMF_ROW_WHOLEPIXELS))
+    if(arect.w == self->pm_width && (self->pm_flags & (BR_PMF_LINEAR | BR_PMF_ROW_WHOLEPIXELS)) == (BR_PMF_LINEAR | BR_PMF_ROW_WHOLEPIXELS))
 
         if(self->pm_row_bytes > 0)
 
             _MemFill_A(DevicePixelmapMemAddress(self, arect.x, arect.y, bytes), arect.w * arect.h, bytes, colour);
         else
-            _MemFill_A(DevicePixelmapMemAddress(self, arect.x, arect.y + arect.h - 1, bytes), arect.w * arect.h, bytes,
-                       colour);
+            _MemFill_A(DevicePixelmapMemAddress(self, arect.x, arect.y + arect.h - 1, bytes), arect.w * arect.h, bytes, colour);
 
     else {
 
@@ -1061,8 +1040,7 @@ br_error BR_CMETHOD_DECL(br_device_pixelmap_mem, pixelSet)(br_device_pixelmap *s
     return BRE_OK;
 }
 
-br_error BR_CMETHOD_DECL(br_device_pixelmap_mem, line)(br_device_pixelmap *self, br_point *s, br_point *e,
-                                                       br_uint_32 colour)
+br_error BR_CMETHOD_DECL(br_device_pixelmap_mem, line)(br_device_pixelmap *self, br_point *s, br_point *e, br_uint_32 colour)
 {
     int      dx, dy, incr1, incr2, D, x, y, xend, c, pixels_left;
     int      x1, y1;
@@ -1074,10 +1052,10 @@ br_error BR_CMETHOD_DECL(br_device_pixelmap_mem, line)(br_device_pixelmap *self,
     if(PixelmapLineClip(&as, &ae, s, e, (br_pixelmap *)self) == BR_CLIP_REJECT)
         return BRE_OK;
 
-        /*
-         * Symmetric Double Step Line Algorithm by Brian Wyvill from "Graphics Gems",
-         * Academic Press, 1990
-         */
+    /*
+     * Symmetric Double Step Line Algorithm by Brian Wyvill from "Graphics Gems",
+     * Academic Press, 1990
+     */
 
 #define LINEPLOT(x, y, flag)                                    \
     do {                                                        \
@@ -1277,8 +1255,7 @@ br_error BR_CMETHOD_DECL(br_device_pixelmap_mem, line)(br_device_pixelmap *self,
 }
 
 br_error BR_CMETHOD_DECL(br_device_pixelmap_mem, copyBits)(br_device_pixelmap *self, br_point *point, const br_uint_8 *src,
-                                                           br_uint_16 s_stride, br_rectangle *bit_rect,
-                                                           br_uint_32 colour)
+                                                           br_uint_16 s_stride, br_rectangle *bit_rect, br_uint_32 colour)
 {
     int          bytes, bit;
     br_rectangle ar;
@@ -1290,8 +1267,8 @@ br_error BR_CMETHOD_DECL(br_device_pixelmap_mem, copyBits)(br_device_pixelmap *s
     bytes = DevicePixelmapPixelBytes(self);
     bit   = (ar.x & 7);
 
-    _MemCopyBits_A(DevicePixelmapMemAddress(self, ap.x + (ar.x & ~7) - bit, ap.y, bytes), self->pm_row_bytes,
-                   src + ar.y * s_stride, s_stride, bit, bit + ar.w, ar.h, bytes, colour);
+    _MemCopyBits_A(DevicePixelmapMemAddress(self, ap.x + (ar.x & ~7) - bit, ap.y, bytes), self->pm_row_bytes, src + ar.y * s_stride,
+                   s_stride, bit, bit + ar.w, ar.h, bytes, colour);
 
     return BRE_OK;
 }
@@ -1314,8 +1291,7 @@ br_error BR_CMETHOD_DECL(br_device_pixelmap_mem, pixelQuery)(br_device_pixelmap 
     return BRE_OK;
 }
 
-br_error BR_CMETHOD_DECL(br_device_pixelmap_mem, pixelAddressQuery)(br_device_pixelmap *self, void **pptr,
-                                                                    br_uint_32 *pqual, br_point *p)
+br_error BR_CMETHOD_DECL(br_device_pixelmap_mem, pixelAddressQuery)(br_device_pixelmap *self, void **pptr, br_uint_32 *pqual, br_point *p)
 {
     br_int_8 bytes;
     br_point ap;
@@ -1358,14 +1334,12 @@ br_error BR_CMETHOD_DECL(br_device_pixelmap_mem, rowSize)(br_device_pixelmap *se
     return BRE_OK;
 }
 
-br_error BR_CMETHOD_DECL(br_device_pixelmap_mem, rowQuery)(br_device_pixelmap *self, void *buffer,
-                                                           br_size_t buffer_size, br_uint_32 row)
+br_error BR_CMETHOD_DECL(br_device_pixelmap_mem, rowQuery)(br_device_pixelmap *self, void *buffer, br_size_t buffer_size, br_uint_32 row)
 {
     return BRE_OK;
 }
 
-br_error BR_CMETHOD_DECL(br_device_pixelmap_mem, rowSet)(br_device_pixelmap *self, void *buffer, br_size_t buffer_size,
-                                                         br_uint_32 row)
+br_error BR_CMETHOD_DECL(br_device_pixelmap_mem, rowSet)(br_device_pixelmap *self, void *buffer, br_size_t buffer_size, br_uint_32 row)
 {
     return BRE_OK;
 }
@@ -1374,8 +1348,7 @@ br_error BR_CMETHOD_DECL(br_device_pixelmap_mem, flush)(struct br_device_pixelma
 {
     return BRE_OK;
 }
-br_error BR_CMETHOD_DECL(br_device_pixelmap_mem, synchronise)(struct br_device_pixelmap *self, br_token sync_type,
-                                                              br_boolean block)
+br_error BR_CMETHOD_DECL(br_device_pixelmap_mem, synchronise)(struct br_device_pixelmap *self, br_token sync_type, br_boolean block)
 {
     return BRE_OK;
 }

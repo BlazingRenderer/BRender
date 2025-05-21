@@ -1,44 +1,45 @@
 #include <brender.h>
 
 static br_vertex cube_vertices[24] = {
-    {.p = BR_VECTOR3(0.5f, -0.5f, -0.5f), .n = BR_VECTOR3(0.0f, 0.0f, -1.0f), .map = BR_VECTOR2(1.0f, 0.0f), .red = 255, .grn = 255, .blu = 255},
-    {.p = BR_VECTOR3(-0.5f, -0.5f, -0.5f), .n = BR_VECTOR3(0.0f, 0.0f, -1.0f), .map = BR_VECTOR2(0.0f, 0.0f), .red = 255, .grn = 255, .blu = 255},
-    {.p = BR_VECTOR3(0.5f, 0.5f, -0.5f), .n = BR_VECTOR3(0.0f, 0.0f, -1.0f), .map = BR_VECTOR2(1.0f, 1.0f), .red = 255, .grn = 255, .blu = 255},
-    {.p = BR_VECTOR3(-0.5f, 0.5f, -0.5f), .n = BR_VECTOR3(0.0f, 0.0f, -1.0f), .map = BR_VECTOR2(0.0f, 1.0f), .red = 255, .grn = 255, .blu = 255},
+    {.p = BR_VECTOR3(0.5f,  -0.5f, -0.5f), .n = BR_VECTOR3(0.0f,  0.0f,  -1.0f), .map = BR_VECTOR2(1.0f, 0.0f), .red = 255, .grn = 255, .blu = 255},
+    {.p = BR_VECTOR3(-0.5f, -0.5f, -0.5f), .n = BR_VECTOR3(0.0f,  0.0f,  -1.0f), .map = BR_VECTOR2(0.0f, 0.0f), .red = 255, .grn = 255, .blu = 255},
+    {.p = BR_VECTOR3(0.5f,  0.5f,  -0.5f), .n = BR_VECTOR3(0.0f,  0.0f,  -1.0f), .map = BR_VECTOR2(1.0f, 1.0f), .red = 255, .grn = 255, .blu = 255},
+    {.p = BR_VECTOR3(-0.5f, 0.5f,  -0.5f), .n = BR_VECTOR3(0.0f,  0.0f,  -1.0f), .map = BR_VECTOR2(0.0f, 1.0f), .red = 255, .grn = 255, .blu = 255},
 
-    {.p = BR_VECTOR3(0.5f, 0.5f, -0.5f), .n = BR_VECTOR3(0.0f, 1.0f, 0.0f), .map = BR_VECTOR2(1.0f, 0.0f), .red = 255, .grn = 255, .blu = 255},
-    {.p = BR_VECTOR3(-0.5f, 0.5f, -0.5f), .n = BR_VECTOR3(0.0f, 1.0f, 0.0f), .map = BR_VECTOR2(0.0f, 0.0f), .red = 255, .grn = 255, .blu = 255},
-    {.p = BR_VECTOR3(0.5f, 0.5f, 0.5f), .n = BR_VECTOR3(0.0f, 1.0f, 0.0f), .map = BR_VECTOR2(1.0f, 1.0f), .red = 255, .grn = 255, .blu = 255},
-    {.p = BR_VECTOR3(-0.5f, 0.5f, 0.5f), .n = BR_VECTOR3(0.0f, 1.0f, 0.0f), .map = BR_VECTOR2(0.0f, 1.0f), .red = 255, .grn = 255, .blu = 255},
+    {.p = BR_VECTOR3(0.5f,  0.5f,  -0.5f), .n = BR_VECTOR3(0.0f,  1.0f,  0.0f),  .map = BR_VECTOR2(1.0f, 0.0f), .red = 255, .grn = 255, .blu = 255},
+    {.p = BR_VECTOR3(-0.5f, 0.5f,  -0.5f), .n = BR_VECTOR3(0.0f,  1.0f,  0.0f),  .map = BR_VECTOR2(0.0f, 0.0f), .red = 255, .grn = 255, .blu = 255},
+    {.p = BR_VECTOR3(0.5f,  0.5f,  0.5f),  .n = BR_VECTOR3(0.0f,  1.0f,  0.0f),  .map = BR_VECTOR2(1.0f, 1.0f), .red = 255, .grn = 255, .blu = 255},
+    {.p = BR_VECTOR3(-0.5f, 0.5f,  0.5f),  .n = BR_VECTOR3(0.0f,  1.0f,  0.0f),  .map = BR_VECTOR2(0.0f, 1.0f), .red = 255, .grn = 255, .blu = 255},
 
-    {.p = BR_VECTOR3(-0.5f, -0.5f, 0.5f), .n = BR_VECTOR3(0.0f, 0.0f, 1.0f), .map = BR_VECTOR2(1.0f, 0.0f), .red = 255, .grn = 255, .blu = 255},
-    {.p = BR_VECTOR3(0.5f, -0.5f, 0.5f), .n = BR_VECTOR3(0.0f, 0.0f, 1.0f), .map = BR_VECTOR2(0.0f, 0.0f), .red = 255, .grn = 255, .blu = 255},
-    {.p = BR_VECTOR3(-0.5f, 0.5f, 0.5f), .n = BR_VECTOR3(0.0f, 0.0f, 1.0f), .map = BR_VECTOR2(1.0f, 1.0f), .red = 255, .grn = 255, .blu = 255},
-    {.p = BR_VECTOR3(0.5f, 0.5f, 0.5f), .n = BR_VECTOR3(0.0f, 0.0f, 1.0f), .map = BR_VECTOR2(0.0f, 1.0f), .red = 255, .grn = 255, .blu = 255},
+    {.p = BR_VECTOR3(-0.5f, -0.5f, 0.5f),  .n = BR_VECTOR3(0.0f,  0.0f,  1.0f),  .map = BR_VECTOR2(1.0f, 0.0f), .red = 255, .grn = 255, .blu = 255},
+    {.p = BR_VECTOR3(0.5f,  -0.5f, 0.5f),  .n = BR_VECTOR3(0.0f,  0.0f,  1.0f),  .map = BR_VECTOR2(0.0f, 0.0f), .red = 255, .grn = 255, .blu = 255},
+    {.p = BR_VECTOR3(-0.5f, 0.5f,  0.5f),  .n = BR_VECTOR3(0.0f,  0.0f,  1.0f),  .map = BR_VECTOR2(1.0f, 1.0f), .red = 255, .grn = 255, .blu = 255},
+    {.p = BR_VECTOR3(0.5f,  0.5f,  0.5f),  .n = BR_VECTOR3(0.0f,  0.0f,  1.0f),  .map = BR_VECTOR2(0.0f, 1.0f), .red = 255, .grn = 255, .blu = 255},
 
-    {.p = BR_VECTOR3(0.5f, -0.5f, 0.5f), .n = BR_VECTOR3(0.0f, -1.0f, 0.0f), .map = BR_VECTOR2(1.0f, 0.0f), .red = 255, .grn = 255, .blu = 255},
-    {.p = BR_VECTOR3(-0.5f, -0.5f, 0.5f), .n = BR_VECTOR3(0.0f, -1.0f, 0.0f), .map = BR_VECTOR2(0.0f, 0.0f), .red = 255, .grn = 255, .blu = 255},
-    {.p = BR_VECTOR3(0.5f, -0.5f, -0.5f), .n = BR_VECTOR3(0.0f, -1.0f, 0.0f), .map = BR_VECTOR2(1.0f, 1.0f), .red = 255, .grn = 255, .blu = 255},
-    {.p = BR_VECTOR3(-0.5f, -0.5f, -0.5f), .n = BR_VECTOR3(0.0f, -1.0f, 0.0f), .map = BR_VECTOR2(0.0f, 1.0f), .red = 255, .grn = 255, .blu = 255},
+    {.p = BR_VECTOR3(0.5f,  -0.5f, 0.5f),  .n = BR_VECTOR3(0.0f,  -1.0f, 0.0f),  .map = BR_VECTOR2(1.0f, 0.0f), .red = 255, .grn = 255, .blu = 255},
+    {.p = BR_VECTOR3(-0.5f, -0.5f, 0.5f),  .n = BR_VECTOR3(0.0f,  -1.0f, 0.0f),  .map = BR_VECTOR2(0.0f, 0.0f), .red = 255, .grn = 255, .blu = 255},
+    {.p = BR_VECTOR3(0.5f,  -0.5f, -0.5f), .n = BR_VECTOR3(0.0f,  -1.0f, 0.0f),  .map = BR_VECTOR2(1.0f, 1.0f), .red = 255, .grn = 255, .blu = 255},
+    {.p = BR_VECTOR3(-0.5f, -0.5f, -0.5f), .n = BR_VECTOR3(0.0f,  -1.0f, 0.0f),  .map = BR_VECTOR2(0.0f, 1.0f), .red = 255, .grn = 255, .blu = 255},
 
-    {.p = BR_VECTOR3(-0.5f, -0.5f, -0.5f), .n = BR_VECTOR3(-1.0f, 0.0f, 0.0f), .map = BR_VECTOR2(1.0f, 0.0f), .red = 255, .grn = 255, .blu = 255},
-    {.p = BR_VECTOR3(-0.5f, -0.5f, 0.5f), .n = BR_VECTOR3(-1.0f, 0.0f, 0.0f), .map = BR_VECTOR2(0.0f, 0.0f), .red = 255, .grn = 255, .blu = 255},
-    {.p = BR_VECTOR3(-0.5f, 0.5f, -0.5f), .n = BR_VECTOR3(-1.0f, 0.0f, 0.0f), .map = BR_VECTOR2(1.0f, 1.0f), .red = 255, .grn = 255, .blu = 255},
-    {.p = BR_VECTOR3(-0.5f, 0.5f, 0.5f), .n = BR_VECTOR3(-1.0f, 0.0f, 0.0f), .map = BR_VECTOR2(0.0f, 1.0f), .red = 255, .grn = 255, .blu = 255},
+    {.p = BR_VECTOR3(-0.5f, -0.5f, -0.5f), .n = BR_VECTOR3(-1.0f, 0.0f,  0.0f),  .map = BR_VECTOR2(1.0f, 0.0f), .red = 255, .grn = 255, .blu = 255},
+    {.p = BR_VECTOR3(-0.5f, -0.5f, 0.5f),  .n = BR_VECTOR3(-1.0f, 0.0f,  0.0f),  .map = BR_VECTOR2(0.0f, 0.0f), .red = 255, .grn = 255, .blu = 255},
+    {.p = BR_VECTOR3(-0.5f, 0.5f,  -0.5f), .n = BR_VECTOR3(-1.0f, 0.0f,  0.0f),  .map = BR_VECTOR2(1.0f, 1.0f), .red = 255, .grn = 255, .blu = 255},
+    {.p = BR_VECTOR3(-0.5f, 0.5f,  0.5f),  .n = BR_VECTOR3(-1.0f, 0.0f,  0.0f),  .map = BR_VECTOR2(0.0f, 1.0f), .red = 255, .grn = 255, .blu = 255},
 
-    {.p = BR_VECTOR3(0.5f, -0.5f, 0.5f), .n = BR_VECTOR3(1.0f, 0.0f, 0.0f), .map = BR_VECTOR2(1.0f, 0.0f), .red = 255, .grn = 255, .blu = 255},
-    {.p = BR_VECTOR3(0.5f, -0.5f, -0.5f), .n = BR_VECTOR3(1.0f, 0.0f, 0.0f), .map = BR_VECTOR2(0.0f, 0.0f), .red = 255, .grn = 255, .blu = 255},
-    {.p = BR_VECTOR3(0.5f, 0.5f, 0.5f), .n = BR_VECTOR3(1.0f, 0.0f, 0.0f), .map = BR_VECTOR2(1.0f, 1.0f), .red = 255, .grn = 255, .blu = 255},
-    {.p = BR_VECTOR3(0.5f, 0.5f, -0.5f), .n = BR_VECTOR3(1.0f, 0.0f, 0.0f), .map = BR_VECTOR2(0.0f, 1.0f), .red = 255, .grn = 255, .blu = 255},
+    {.p = BR_VECTOR3(0.5f,  -0.5f, 0.5f),  .n = BR_VECTOR3(1.0f,  0.0f,  0.0f),  .map = BR_VECTOR2(1.0f, 0.0f), .red = 255, .grn = 255, .blu = 255},
+    {.p = BR_VECTOR3(0.5f,  -0.5f, -0.5f), .n = BR_VECTOR3(1.0f,  0.0f,  0.0f),  .map = BR_VECTOR2(0.0f, 0.0f), .red = 255, .grn = 255, .blu = 255},
+    {.p = BR_VECTOR3(0.5f,  0.5f,  0.5f),  .n = BR_VECTOR3(1.0f,  0.0f,  0.0f),  .map = BR_VECTOR2(1.0f, 1.0f), .red = 255, .grn = 255, .blu = 255},
+    {.p = BR_VECTOR3(0.5f,  0.5f,  -0.5f), .n = BR_VECTOR3(1.0f,  0.0f,  0.0f),  .map = BR_VECTOR2(0.0f, 1.0f), .red = 255, .grn = 255, .blu = 255},
 };
 
+// clang-format off
 static br_face cube_faces[12] = {
-    {.vertices = {0, 2, 3}},
-    {.vertices = {0, 3, 1}},
-    {.vertices = {4, 6, 7}},
-    {.vertices = {4, 7, 5}},
-    {.vertices = {8, 10, 11}},
-    {.vertices = {8, 11, 9}},
+    {.vertices = { 0,  2,  3}},
+    {.vertices = { 0,  3,  1}},
+    {.vertices = { 4,  6,  7}},
+    {.vertices = { 4,  7,  5}},
+    {.vertices = { 8, 10, 11}},
+    {.vertices = { 8, 11,  9}},
     {.vertices = {12, 14, 15}},
     {.vertices = {12, 15, 13}},
     {.vertices = {16, 18, 19}},
@@ -46,6 +47,7 @@ static br_face cube_faces[12] = {
     {.vertices = {20, 22, 23}},
     {.vertices = {20, 23, 21}},
 };
+// clang-format on
 
 br_model *mkres_make_cube(const char *name)
 {

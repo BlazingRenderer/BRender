@@ -9,7 +9,6 @@
 #include "fw.h"
 #include "brassert.h"
 
-
 /*
  * Private structure used to reference a registered token
  */
@@ -62,7 +61,7 @@ static const br_token_entry *TokenEntryFind(br_token t)
      * we find it or hit our last predefined.
      */
     BR_FOR_LIST_R(&fw.tokens, te) {
-        if(te->token == NEXT_FREE_TOKEN-1)
+        if(te->token == NEXT_FREE_TOKEN - 1)
             break;
 
         if(te->token == t)

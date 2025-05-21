@@ -125,8 +125,7 @@ typedef struct state_light {
     br_boolean culled;
 } state_light;
 
-typedef void insert_cbfn(br_primitive *primitive, void *arg1, void *arg2, void *arg3, br_order_table *order_table,
-                         br_scalar *z);
+typedef void insert_cbfn(br_primitive *primitive, void *arg1, void *arg2, void *arg3, br_order_table *order_table, br_scalar *z);
 
 typedef struct state_hidden {
     br_token           type;

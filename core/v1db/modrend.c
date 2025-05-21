@@ -11,12 +11,10 @@
 #include "brassert.h"
 #include "formats.h"
 
-
 /*
  * Render model faces
  */
-static void renderFaces(br_actor *actor, br_model *model, br_material *material, void *render_data, br_uint_8 style,
-                        int on_screen)
+static void renderFaces(br_actor *actor, br_model *model, br_material *material, void *render_data, br_uint_8 style, int on_screen)
 {
     if(model->stored) {
         if(on_screen == BRT_ACCEPT)
@@ -26,8 +24,7 @@ static void renderFaces(br_actor *actor, br_model *model, br_material *material,
 
     } else if(model->prepared) {
         if(on_screen == BRT_ACCEPT)
-            GeometryV1ModelRenderOnScreen(v1db.format_model, v1db.renderer, model->prepared, material->stored,
-                                          BRT_TRIANGLE);
+            GeometryV1ModelRenderOnScreen(v1db.format_model, v1db.renderer, model->prepared, material->stored, BRT_TRIANGLE);
         else
             GeometryV1ModelRender(v1db.format_model, v1db.renderer, model->prepared, material->stored, BRT_TRIANGLE);
     }
@@ -36,8 +33,7 @@ static void renderFaces(br_actor *actor, br_model *model, br_material *material,
 /*
  * Render model edges
  */
-static void renderEdges(br_actor *actor, br_model *model, br_material *material, void *render_data, br_uint_8 style,
-                        int on_screen)
+static void renderEdges(br_actor *actor, br_model *model, br_material *material, void *render_data, br_uint_8 style, int on_screen)
 {
     if(on_screen == BRT_ACCEPT)
         GeometryV1ModelRenderOnScreen(v1db.format_model, v1db.renderer, model->prepared, material->stored, BRT_LINE);
@@ -48,8 +44,7 @@ static void renderEdges(br_actor *actor, br_model *model, br_material *material,
 /*
  * Render model points
  */
-static void renderPoints(br_actor *actor, br_model *model, br_material *material, void *render_data, br_uint_8 style,
-                         int on_screen)
+static void renderPoints(br_actor *actor, br_model *model, br_material *material, void *render_data, br_uint_8 style, int on_screen)
 {
     if(on_screen == BRT_ACCEPT)
         GeometryV1ModelRenderOnScreen(v1db.format_model, v1db.renderer, model->prepared, material->stored, BRT_POINT);
@@ -60,8 +55,7 @@ static void renderPoints(br_actor *actor, br_model *model, br_material *material
 /*
  * Render function for BR_RSTYLE_NONE
  */
-static void nullRender(br_actor *actor, br_model *model, br_material *material, void *render_data, br_uint_8 style,
-                       int on_screen)
+static void nullRender(br_actor *actor, br_model *model, br_material *material, void *render_data, br_uint_8 style, int on_screen)
 {
 }
 
@@ -254,8 +248,7 @@ static struct br_model *makeMeshFromBounds(br_bounds *b)
 /*
  * Render bounding box points
  */
-static void boundingBoxRenderPoints(br_actor *actor, br_model *model, br_material *material, void *render_data,
-                                    br_uint_8 style, int on_screen)
+static void boundingBoxRenderPoints(br_actor *actor, br_model *model, br_material *material, void *render_data, br_uint_8 style, int on_screen)
 {
     renderPoints(actor, makeMeshFromBounds(&model->bounds), material, render_data, style, on_screen);
 }
@@ -263,8 +256,7 @@ static void boundingBoxRenderPoints(br_actor *actor, br_model *model, br_materia
 /*
  * Render bounding box edges
  */
-static void boundingBoxRenderEdges(br_actor *actor, br_model *model, br_material *material, void *render_data,
-                                   br_uint_8 style, int on_screen)
+static void boundingBoxRenderEdges(br_actor *actor, br_model *model, br_material *material, void *render_data, br_uint_8 style, int on_screen)
 {
     renderEdges(actor, makeMeshFromBounds(&model->bounds), material, render_data, style, on_screen);
 }
@@ -272,8 +264,7 @@ static void boundingBoxRenderEdges(br_actor *actor, br_model *model, br_material
 /*
  * Render bounding box faces
  */
-static void boundingBoxRenderFaces(br_actor *actor, br_model *model, br_material *material, void *render_data,
-                                   br_uint_8 style, int on_screen)
+static void boundingBoxRenderFaces(br_actor *actor, br_model *model, br_material *material, void *render_data, br_uint_8 style, int on_screen)
 {
     renderFaces(actor, makeMeshFromBounds(&model->bounds), material, render_data, style, on_screen);
 }

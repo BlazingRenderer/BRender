@@ -9,7 +9,6 @@
 #include "fw.h"
 #include "brassert.h"
 
-
 /*
  * Parts that lists are constructed from
  */
@@ -145,8 +144,8 @@ br_error BR_CMETHOD_DECL(br_object_container, removeFront)(struct br_object_cont
  *	void tokensMatchEnd(void *tvarg)
  *		Perform any cleaning up.
  */
-br_error BR_CMETHOD_DECL(br_object_container, find)(br_object_container *self, br_object **ph, br_token type,
-                                                    const char *pattern, br_token_value *tv)
+br_error BR_CMETHOD_DECL(br_object_container, find)(br_object_container *self, br_object **ph, br_token type, const char *pattern,
+                                                    br_token_value *tv)
 {
     struct object_list       *hl;
     struct object_list_entry *he;
@@ -183,9 +182,8 @@ br_error BR_CMETHOD_DECL(br_object_container, find)(br_object_container *self, b
 /*
  * Find all objects that match above criteria (and that fit into destination buffer)
  */
-br_error BR_CMETHOD_DECL(br_object_container, findMany)(br_object_container *self, br_object **objects,
-                                                        br_int_32 max_objects, br_int_32 *num_objects, br_token type,
-                                                        const char *pattern, br_token_value *tv)
+br_error BR_CMETHOD_DECL(br_object_container, findMany)(br_object_container *self, br_object **objects, br_int_32 max_objects,
+                                                        br_int_32 *num_objects, br_token type, const char *pattern, br_token_value *tv)
 {
     struct object_list       *hl;
     struct object_list_entry *he;
@@ -235,8 +233,8 @@ br_error BR_CMETHOD_DECL(br_object_container, findMany)(br_object_container *sel
 /*
  * Count number of matching objects
  */
-br_error BR_CMETHOD_DECL(br_object_container, count)(br_object_container *self, br_int_32 *pcount, br_token type,
-                                                     const char *pattern, br_token_value *tv)
+br_error BR_CMETHOD_DECL(br_object_container, count)(br_object_container *self, br_int_32 *pcount, br_token type, const char *pattern,
+                                                     br_token_value *tv)
 {
     struct object_list       *hl;
     struct object_list_entry *he;
@@ -287,8 +285,7 @@ struct token_match {
     br_size_t       extra_size;
 };
 
-void *BR_CMETHOD_DECL(br_object_container, tokensMatchBegin)(struct br_object_container *self, br_token t,
-                                                             br_token_value *tv)
+void *BR_CMETHOD_DECL(br_object_container, tokensMatchBegin)(struct br_object_container *self, br_token t, br_token_value *tv)
 {
     struct token_match *tm;
     br_int_32           i;

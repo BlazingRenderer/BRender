@@ -10,7 +10,6 @@
 #include "brassert.h"
 #include "shortcut.h"
 
-
 void BR_PUBLIC_ENTRY BrTableUpdate(br_pixelmap *table, br_uint_16 flags)
 {
     UASSERT_MESSAGE("Invalid BrTableUpdate pointer", table != NULL);

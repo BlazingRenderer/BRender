@@ -26,7 +26,6 @@ typedef br_scalar br_angle;
 #define BrAngleToScalar(a)  (a)
 #define BrScalarToAngle(s)  (s)
 
-
 #define BR_SIN(a)           ((br_scalar)sinf(BrAngleToRadian(a)))
 #define BR_COS(a)           ((br_scalar)cosf(BrAngleToRadian(a)))
 #define BR_ASIN(a)          BrRadianToAngle(asinf(a))

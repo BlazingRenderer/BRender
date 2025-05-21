@@ -84,8 +84,8 @@ static struct br_tv_template *BR_CMETHOD_DECL(br_geometry_v1_buckets_gl, templat
     return self->device->templates.geometryV1BucketsTemplate;
 }
 
-br_error BR_CMETHOD_DECL(br_geometry_v1_buckets_gl, render)(br_geometry_v1_buckets *self, br_renderer *renderer,
-                                                            br_primitive **buckets, br_int_32 nbuckets)
+br_error BR_CMETHOD_DECL(br_geometry_v1_buckets_gl, render)(br_geometry_v1_buckets *self, br_renderer *renderer, br_primitive **buckets,
+                                                            br_int_32 nbuckets)
 {
     if(nbuckets <= 0)
         return BRE_OK;

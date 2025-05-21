@@ -10,7 +10,6 @@
 #include "brddi.h"
 #include "brassert.h"
 
-
 static br_boolean rendfctyEnum(br_object *rendfcty, br_rendfcty_enum_cbfn *cbfn, void *args)
 {
     const char      *identifier = NULL;
@@ -32,8 +31,8 @@ br_error BR_PUBLIC_ENTRY BrRendererFacilityEnum(br_pixelmap *destination, br_ren
     br_int_32  num_objects, i;
     br_error   r;
 
-    r = BrRendererFacilityListFind((br_renderer_facility **)objects, &num_objects, BR_ASIZE(objects),
-                                   (br_device_pixelmap *)destination, BR_SCALAR_TOKEN);
+    r = BrRendererFacilityListFind((br_renderer_facility **)objects, &num_objects, BR_ASIZE(objects), (br_device_pixelmap *)destination,
+                                   BR_SCALAR_TOKEN);
 
     if(r != BRE_OK)
         return r;
@@ -63,8 +62,8 @@ br_error BR_PUBLIC_ENTRY BrPrimitiveLibraryEnum(br_pixelmap *destination, br_pri
     br_int_32  num_objects, i;
     br_error   r;
 
-    r = BrPrimitiveLibraryListFind((br_primitive_library **)objects, &num_objects, BR_ASIZE(objects),
-                                   (br_device_pixelmap *)destination, BR_SCALAR_TOKEN);
+    r = BrPrimitiveLibraryListFind((br_primitive_library **)objects, &num_objects, BR_ASIZE(objects), (br_device_pixelmap *)destination,
+                                   BR_SCALAR_TOKEN);
 
     if(r != BRE_OK)
         return r;

@@ -27,7 +27,7 @@ static void create_scene(br_pixelmap *screen, br_actor **_world, br_actor **_cam
     BrMapFindHook(BrMapFindFailedLoad);
     BrMaterialFindHook(BrMaterialFindFailedLoad);
 
-    world = BrActorAllocate(BR_ACTOR_NONE, NULL);
+    world       = BrActorAllocate(BR_ACTOR_NONE, NULL);
     order_table = BrZsOrderTableAllocate(1024, BR_ORDER_TABLE_LEAVE_BOUNDS | BR_ORDER_TABLE_BUCKET_SORT, BR_SORT_AVERAGE);
     BrZsActorOrderTableSet(world, order_table);
 
@@ -143,8 +143,7 @@ int main(int argc, char **argv)
                     /*
                      * Update the camera's aspect ratio to match the camera.
                      */
-                    ((br_camera *)camera->type_data)->aspect = BR_DIV(BR_SCALAR(screen->width),
-                                                                      BR_SCALAR(screen->height));
+                    ((br_camera *)camera->type_data)->aspect = BR_DIV(BR_SCALAR(screen->width), BR_SCALAR(screen->height));
                     break;
                 case SDL_EVENT_KEY_DOWN: {
                     if(BrSDL3UtilIsAltEnter(&evt.key)) {

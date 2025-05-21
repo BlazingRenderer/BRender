@@ -35,8 +35,8 @@ br_output_facility *OutputFacilitySDL2CreateGeneric(br_device *dev);
  * devpixmp.c
  */
 
-br_device_pixelmap *DevicePixelmapSDL2Allocate(br_device *dev, br_output_facility *outfcty, SDL_Window *window,
-                                               SDL_Surface *surface, br_boolean owned);
+br_device_pixelmap *DevicePixelmapSDL2Allocate(br_device *dev, br_output_facility *outfcty, SDL_Window *window, SDL_Surface *surface,
+                                               br_boolean owned);
 br_boolean          DevicePixelmapSDL2IsOurs(const br_pixelmap *pm);
 void               *DevicePixelmapSDLMemAddress(br_device_pixelmap *self, br_int_32 x, br_int_32 y);
 
@@ -51,11 +51,10 @@ br_boolean DeviceClutSDL2IsOurs(const br_device_clut *pm);
  * surface.c
  */
 br_clip_result DevicePixelmapSDL2PointClip(SDL_Point *out, const br_point *in, const br_pixelmap *pm);
-br_clip_result DevicePixelmapSDL2LineClip(SDL_Point *s_out, SDL_Point *e_out, const br_point *s_in,
-                                          const br_point *e_in, const br_pixelmap *pm);
+br_clip_result DevicePixelmapSDL2LineClip(SDL_Point *s_out, SDL_Point *e_out, const br_point *s_in, const br_point *e_in, const br_pixelmap *pm);
 br_clip_result DevicePixelmapSDL2RectangleClip(SDL_Rect *out, const br_rectangle *in, const br_pixelmap *pm);
-br_clip_result DevicePixelmapSDL2RectangleClipTwo(SDL_Rect *r_out, SDL_Point *p_out, const br_rectangle *r_in,
-                                                  const br_point *p_in, const br_pixelmap *pm_dst, const br_pixelmap *pm_src);
+br_clip_result DevicePixelmapSDL2RectangleClipTwo(SDL_Rect *r_out, SDL_Point *p_out, const br_rectangle *r_in, const br_point *p_in,
+                                                  const br_pixelmap *pm_dst, const br_pixelmap *pm_src);
 
 /*
  * If the pixelmap exposes an SDL surface, get it.

@@ -19,11 +19,9 @@
 
 #include "formats.h"
 
-#define MODU_FACE_COPY_FLAGS (BR_MODU_FACE_COLOURS | BR_MODU_FACE_EQUATIONS)
+#define MODU_FACE_COPY_FLAGS   (BR_MODU_FACE_COLOURS | BR_MODU_FACE_EQUATIONS)
 
-#define MODU_VERTEX_COPY_FLAGS \
-    (BR_MODU_VERTEX_POSITIONS | BR_MODU_VERTEX_COLOURS | BR_MODU_VERTEX_MAPPING | BR_MODU_VERTEX_NORMALS)
-
+#define MODU_VERTEX_COPY_FLAGS (BR_MODU_VERTEX_POSITIONS | BR_MODU_VERTEX_COLOURS | BR_MODU_VERTEX_MAPPING | BR_MODU_VERTEX_NORMALS)
 
 /*
  * Temporary structure used whilst processing normals and groups
@@ -597,14 +595,12 @@ static void PrepareGroups(br_model *model)
      */
     block_size = PREP_ALIGN(sizeof(struct v11model)) + PREP_ALIGN(ng * sizeof(struct v11group)) +
 
-                 PREP_ALIGN(nf * sizeof(*v11g->vertex_numbers)) + PREP_ALIGN(nf * sizeof(*v11g->edges)) +
-                 PREP_ALIGN(nf * sizeof(*v11g->eqn)) +
+                 PREP_ALIGN(nf * sizeof(*v11g->vertex_numbers)) + PREP_ALIGN(nf * sizeof(*v11g->edges)) + PREP_ALIGN(nf * sizeof(*v11g->eqn)) +
 
-                 PREP_ALIGN(nv * sizeof(*v11g->position)) + PREP_ALIGN(nv * sizeof(*v11g->map)) +
-                 PREP_ALIGN(nv * sizeof(*v11g->normal)) +
+                 PREP_ALIGN(nv * sizeof(*v11g->position)) + PREP_ALIGN(nv * sizeof(*v11g->map)) + PREP_ALIGN(nv * sizeof(*v11g->normal)) +
 
-                 PREP_ALIGN(nf * sizeof(br_colour)) + PREP_ALIGN(nv * sizeof(br_colour)) +
-                 PREP_ALIGN(nf * sizeof(br_uint_8)) + nv * sizeof(br_int_16) + nf * sizeof(br_int_16);
+                 PREP_ALIGN(nf * sizeof(br_colour)) + PREP_ALIGN(nv * sizeof(br_colour)) + PREP_ALIGN(nf * sizeof(br_uint_8)) +
+                 nv * sizeof(br_int_16) + nf * sizeof(br_int_16);
 
     if(model->prepared && block_size > ((struct v11model *)(model->prepared))->size) {
         BrResFree(model->prepared);
@@ -791,8 +787,7 @@ static void PrepareBoundingRadius(br_model *model)
     br_vertex *vp;
 
     for(v = 0, vp = model->vertices; v < model->nvertices; v++, vp++) {
-        d = BrScalarToFloat(vp->p.v[0]) * BrScalarToFloat(vp->p.v[0]) +
-            BrScalarToFloat(vp->p.v[1]) * BrScalarToFloat(vp->p.v[1]) +
+        d = BrScalarToFloat(vp->p.v[0]) * BrScalarToFloat(vp->p.v[0]) + BrScalarToFloat(vp->p.v[1]) * BrScalarToFloat(vp->p.v[1]) +
             BrScalarToFloat(vp->p.v[2]) * BrScalarToFloat(vp->p.v[2]);
 
         if(d > max)
@@ -868,8 +863,7 @@ void RegenerateFaceNormals(struct v11model *v11m)
         vertex_numbers = v11m->groups[g].vertex_numbers;
         for(f = 0; f < v11m->groups[g].nfaces; f++, eqn++, vertex_numbers++) {
 
-            BrPlaneEquation(eqn, &v11m->groups[g].position[vertex_numbers->v[0]],
-                            &v11m->groups[g].position[vertex_numbers->v[1]],
+            BrPlaneEquation(eqn, &v11m->groups[g].position[vertex_numbers->v[0]], &v11m->groups[g].position[vertex_numbers->v[1]],
                             &v11m->groups[g].position[vertex_numbers->v[2]]);
         }
     }
@@ -924,8 +918,8 @@ static void GenerateStoredModel(br_model *model)
     struct br_geometry_stored *sg;
     br_boolean                 b;
     br_token_value             tv[] = {
-                    {.t = BRT_CAN_SHARE_B, {.b = BR_TRUE}},
-                    {.t = BR_NULL_TOKEN                   },
+        {.t = BRT_CAN_SHARE_B, {.b = BR_TRUE}},
+        {.t = BR_NULL_TOKEN},
     };
 
     /*
@@ -1059,8 +1053,7 @@ void BR_PUBLIC_ENTRY BrModelUpdate(br_model *model, br_uint_16 flags)
         /*
          * See if the only thing needed is to copy new parts over
          */
-    } else if(model->prepared && !(flags & ~(MODU_VERTEX_COPY_FLAGS | MODU_FACE_COPY_FLAGS)) &&
-              !(model->flags & BR_MODF_USED_PREPARED_USER)) {
+    } else if(model->prepared && !(flags & ~(MODU_VERTEX_COPY_FLAGS | MODU_FACE_COPY_FLAGS)) && !(model->flags & BR_MODF_USED_PREPARED_USER)) {
 
         v11m = model->prepared;
 
@@ -1127,8 +1120,8 @@ void BR_PUBLIC_ENTRY BrModelUpdate(br_model *model, br_uint_16 flags)
         if(flags & BR_MODU_VERTEX_POSITIONS) {
 
 #if !BRENDER_BUILD_FOR_CROC // Disabled for Croc - it doesn't work right anyhow!
-			if(!(model->flags & BR_MODF_CUSTOM_NORMALS))
-				RegenerateVertexNormals(v11m);
+            if(!(model->flags & BR_MODF_CUSTOM_NORMALS))
+                RegenerateVertexNormals(v11m);
 #endif
 
             if(!(model->flags & BR_MODF_CUSTOM_EQUATIONS))

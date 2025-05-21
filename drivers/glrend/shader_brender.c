@@ -7,8 +7,7 @@ static void VIDEOI_GetShaderVariables(HVIDEO hVideo)
 {
     glGenBuffers(1, &hVideo->brenderProgram.uboScene);
     glBindBuffer(GL_UNIFORM_BUFFER, hVideo->brenderProgram.uboScene);
-    glUniformBlockBinding(hVideo->brenderProgram.program, hVideo->brenderProgram.blockIndexScene,
-                          hVideo->brenderProgram.blockBindingScene);
+    glUniformBlockBinding(hVideo->brenderProgram.program, hVideo->brenderProgram.blockIndexScene, hVideo->brenderProgram.blockBindingScene);
     glBindBufferBase(GL_UNIFORM_BUFFER, hVideo->brenderProgram.blockBindingScene, hVideo->brenderProgram.uboScene);
     glBufferData(GL_UNIFORM_BUFFER, sizeof(shader_data_scene), NULL, GL_DYNAMIC_DRAW);
 
@@ -16,11 +15,11 @@ static void VIDEOI_GetShaderVariables(HVIDEO hVideo)
 
     glUniformBlockBinding(hVideo->brenderProgram.program, hVideo->brenderProgram.blockIndexModel, hVideo->brenderProgram.blockBindingModel);
 
-    hVideo->brenderProgram.attributes.aPosition  = glGetAttribLocation(hVideo->brenderProgram.program, "aPosition");
-    hVideo->brenderProgram.attributes.aUV        = glGetAttribLocation(hVideo->brenderProgram.program, "aUV");
-    hVideo->brenderProgram.attributes.aNormal    = glGetAttribLocation(hVideo->brenderProgram.program, "aNormal");
-    hVideo->brenderProgram.attributes.aColour    = glGetAttribLocation(hVideo->brenderProgram.program, "aColour");
-    hVideo->brenderProgram.uniforms.main_texture = glGetUniformLocation(hVideo->brenderProgram.program, "main_texture");
+    hVideo->brenderProgram.attributes.aPosition   = glGetAttribLocation(hVideo->brenderProgram.program, "aPosition");
+    hVideo->brenderProgram.attributes.aUV         = glGetAttribLocation(hVideo->brenderProgram.program, "aUV");
+    hVideo->brenderProgram.attributes.aNormal     = glGetAttribLocation(hVideo->brenderProgram.program, "aNormal");
+    hVideo->brenderProgram.attributes.aColour     = glGetAttribLocation(hVideo->brenderProgram.program, "aColour");
+    hVideo->brenderProgram.uniforms.main_texture  = glGetUniformLocation(hVideo->brenderProgram.program, "main_texture");
     hVideo->brenderProgram.uniforms.index_texture = glGetUniformLocation(hVideo->brenderProgram.program, "index_texture");
     glBindFragDataLocation(hVideo->textProgram.program, 0, "mainColour");
 }
@@ -29,18 +28,17 @@ br_boolean VIDEOI_CompileBRenderShader(HVIDEO hVideo, const char *vertPath, cons
 {
     GLuint vert, frag;
 
-    hVideo->brenderProgram.mainTextureBinding = 0;
+    hVideo->brenderProgram.mainTextureBinding  = 0;
     hVideo->brenderProgram.indexTextureBinding = 1;
-    hVideo->brenderProgram.blockBindingScene  = 1;
-    hVideo->brenderProgram.blockBindingModel  = 2;
+    hVideo->brenderProgram.blockBindingScene   = 1;
+    hVideo->brenderProgram.blockBindingModel   = 2;
 
     {
 #define _MAX(a, b) ((a) > (b) ? (a) : (b))
         int neededSize = _MAX(sizeof(shader_data_scene), sizeof(shader_data_model));
 #undef _MAX
         if(hVideo->maxUniformBlockSize < neededSize) {
-            BrLogError("VIDEO", "GL_MAX_UNIFORM_BLOCK_SIZE too small, got %d, needed %d.", hVideo->maxUniformBlockSize,
-                       neededSize);
+            BrLogError("VIDEO", "GL_MAX_UNIFORM_BLOCK_SIZE too small, got %d, needed %d.", hVideo->maxUniformBlockSize, neededSize);
             return BR_FALSE;
         }
     }

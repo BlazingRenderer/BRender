@@ -8,7 +8,7 @@
 extern "C" {
 #endif
 
-//#define BR_OBJECT_PRIVATE
+// #define BR_OBJECT_PRIVATE
 #define BR_DEVICE_PRIVATE
 #define BR_GEOMETRY_PRIMITIVES_PRIVATE
 #define BR_GEOMETRY_LIGHTING_PRIVATE

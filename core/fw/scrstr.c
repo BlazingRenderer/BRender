@@ -8,7 +8,6 @@
  */
 #include "fw.h"
 
-
 /*
  * Initialised to a value because IBM Cset++ LIB hides the symbol
  * otherwise ???

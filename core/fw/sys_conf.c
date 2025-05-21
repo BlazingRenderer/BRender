@@ -14,8 +14,7 @@
 #define BRENDER_INI_FILE     "BRender.ini"
 #define BRENDER_REGISTRY_KEY "SOFTWARE\\Argonaut\\BRender"
 
-#define DEFAULT_BRENDER_PATH \
-    "dat;../dat;../../dat;../../../dat;../../../../dat;dll;../dll;../../dll;../../../dll;../../../../dll"
+#define DEFAULT_BRENDER_PATH "dat;../dat;../../dat;../../../dat;../../../../dat;dll;../dll;../../dll;../../../dll;../../../../dll"
 
 // extern br_framework_state BR_ASM_DATA fw ;
 
@@ -207,9 +206,9 @@ br_lexer_keyword keywords[] = {
  */
 br_error BR_PUBLIC_ENTRY BrReadEnvironmentEntry(br_associative_array *a, const char *name)
 {
-    br_lexer *l;
-    br_error  r;
-    char      entry[256], tv[256];
+    br_lexer   *l;
+    br_error    r;
+    char        entry[256], tv[256];
     const char *value;
 
     /*
@@ -250,7 +249,7 @@ br_error BR_PUBLIC_ENTRY BrReadEnvironmentEntry(br_associative_array *a, const c
      * separately
      */
     if(BrTokenType(((br_token_value *)tv)->t) == BRT_STRING && ((br_token_value *)tv)->v.str == NULL)
-        ((br_token_value *)tv)->v.str = (char*)BrGetEnv(name);
+        ((br_token_value *)tv)->v.str = (char *)BrGetEnv(name);
 
     r = BrAssociativeArraySet(a, ((br_token_value *)tv)->t, ((br_token_value *)tv)->v);
 
@@ -909,10 +908,10 @@ static br_error parseEntryLine(br_lexer *l, br_token_value *tv, br_size_t size)
                  * look for any valid type and set it to the NULL or zero value - a bit gross
                  * but it works.
                  */
-                static br_token none_types[] = {
-                    BRT_NONE,   BRT_BOOLEAN, BRT_TOKEN,      BRT_INT_8,   BRT_UINT_8,         BRT_INT_16,  BRT_UINT_16,
-                    BRT_INT_32, BRT_UINT_32, BRT_INT_64,     BRT_UINT_64, BRT_INTPTR,         BRT_UINTPTR, BRT_FIXED,
-                    BRT_FLOAT,  BRT_ANGLE,   BRT_COLOUR_RGB, BRT_STRING,  BRT_CONSTANT_STRING};
+                static br_token none_types[] = {BRT_NONE,    BRT_BOOLEAN,    BRT_TOKEN,   BRT_INT_8,          BRT_UINT_8,
+                                                BRT_INT_16,  BRT_UINT_16,    BRT_INT_32,  BRT_UINT_32,        BRT_INT_64,
+                                                BRT_UINT_64, BRT_INTPTR,     BRT_UINTPTR, BRT_FIXED,          BRT_FLOAT,
+                                                BRT_ANGLE,   BRT_COLOUR_RGB, BRT_STRING,  BRT_CONSTANT_STRING};
 
                 if(tv->t != BR_NULL_TOKEN)
                     type = BrTokenType(tv->t);
@@ -967,10 +966,9 @@ static br_error parseEntryLine(br_lexer *l, br_token_value *tv, br_size_t size)
          * look for any valid type and set it to the NULL or zero value - a bit gross
          * but it works.
          */
-        static br_token none_types[] = {BRT_NONE,    BRT_BOOLEAN,    BRT_TOKEN,   BRT_INT_8,          BRT_UINT_8,
-                                        BRT_INT_16,  BRT_UINT_16,    BRT_INT_32,  BRT_UINT_32,        BRT_INT_64,
-                                        BRT_UINT_64, BRT_INTPTR,     BRT_UINTPTR, BRT_FIXED,          BRT_FLOAT,
-                                        BRT_ANGLE,   BRT_COLOUR_RGB, BRT_STRING,  BRT_CONSTANT_STRING};
+        static br_token none_types[] = {BRT_NONE,   BRT_BOOLEAN, BRT_TOKEN,      BRT_INT_8,   BRT_UINT_8,         BRT_INT_16,  BRT_UINT_16,
+                                        BRT_INT_32, BRT_UINT_32, BRT_INT_64,     BRT_UINT_64, BRT_INTPTR,         BRT_UINTPTR, BRT_FIXED,
+                                        BRT_FLOAT,  BRT_ANGLE,   BRT_COLOUR_RGB, BRT_STRING,  BRT_CONSTANT_STRING};
 
         if(tv->t != BR_NULL_TOKEN)
             type = BrTokenType(tv->t);

@@ -19,7 +19,6 @@
 #include <windows.h>
 #endif
 
-
 #if defined(_WIN32)
 static wchar_t *BrStdioToWinWchar(void *vres, const char *s)
 {
@@ -77,8 +76,7 @@ static FILE *BrStdioFopenUtf8(const char *name, const char *mode)
  */
 static br_uint_32 BR_CALLBACK BrStdioAttributes(void)
 {
-    return BR_FS_ATTR_READABLE | BR_FS_ATTR_WRITEABLE | BR_FS_ATTR_HAS_TEXT | BR_FS_ATTR_HAS_BINARY |
-           BR_FS_ATTR_HAS_ADVANCE;
+    return BR_FS_ATTR_READABLE | BR_FS_ATTR_WRITEABLE | BR_FS_ATTR_HAS_TEXT | BR_FS_ATTR_HAS_BINARY | BR_FS_ATTR_HAS_ADVANCE;
 }
 
 /*

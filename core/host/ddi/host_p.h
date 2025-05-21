@@ -38,8 +38,7 @@ br_error BR_RESIDENT_ENTRY HostConfigStringQuery(char *buffer, br_size_t buffer_
 
 // INI File
 
-br_error BR_RESIDENT_ENTRY HostGetIniEntry(const char *ini_file, const char *section_name, char *entry, char *Buffer,
-                                           int max);
+br_error BR_RESIDENT_ENTRY HostGetIniEntry(const char *ini_file, const char *section_name, char *entry, char *Buffer, int max);
 
 br_error BR_RESIDENT_ENTRY HostIniReadSection(const char *filename, const char *section, char *buffer, br_size_t size);
 
@@ -47,8 +46,7 @@ br_error BR_RESIDENT_ENTRY HostIniWriteSection(const char *filename, const char 
 
 // Registry entry query
 
-br_error BR_RESIDENT_ENTRY HostRegistryQuery(const void *hKey, const char *Path, const char *entry, char *Buffer,
-                                             br_uint_16 max, br_uint_16 *size);
+br_error BR_RESIDENT_ENTRY HostRegistryQuery(const void *hKey, const char *Path, const char *entry, char *Buffer, br_uint_16 max, br_uint_16 *size);
 
 br_error BR_RESIDENT_ENTRY HostRegistryReadKey(const void *key, const char *subkey, char *buffer, br_size_t size);
 
@@ -56,8 +54,7 @@ br_error BR_RESIDENT_ENTRY HostRegistryWriteKey(const void *key, const char *sub
 
 // INI file query
 
-br_error BR_RESIDENT_ENTRY HostIniQuery(const char *ini_file, const char *section_name, const char *entry, char *Buffer,
-                                        int max, br_uint_16 *size);
+br_error BR_RESIDENT_ENTRY HostIniQuery(const char *ini_file, const char *section_name, const char *entry, char *Buffer, int max, br_uint_16 *size);
 
 // Environment variable query.
 

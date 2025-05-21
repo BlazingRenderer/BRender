@@ -37,7 +37,7 @@ extern "C" {
 #define BRT(t) BRT_##t, 0
 #define DEV(t) 0, #t
 
-typedef bool (br_sdl_blit_cbfn)(SDL_Surface *src, const SDL_Rect *srcrect, SDL_Surface *dst, const SDL_Rect *dstrect);
+typedef bool(br_sdl_blit_cbfn)(SDL_Surface *src, const SDL_Rect *srcrect, SDL_Surface *dst, const SDL_Rect *dstrect);
 
 /*
  * Pull in private prototypes

@@ -9,7 +9,6 @@
 #include "fw.h"
 #include "brassert.h"
 
-
 #if BR_POOL_DEBUG
 #undef PoolAllocate
 #undef PoolFree

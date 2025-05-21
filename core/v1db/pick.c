@@ -12,7 +12,6 @@
 #include "brassert.h"
 #include "math_ip.h"
 
-
 static br_matrix34 pick_model_to_view;
 
 /*
@@ -25,8 +24,8 @@ static br_matrix34 pick_model_to_view;
  * If the active section of the ray intersects the box, then returns
  * TRUE, and stores the new t_near and t_far
  */
-static int PickBoundsTestRay(br_bounds *b, br_vector3 *rp, br_vector3 *rd, br_scalar t_near, br_scalar t_far,
-                             br_scalar *new_t_near, br_scalar *new_t_far)
+static int PickBoundsTestRay(br_bounds *b, br_vector3 *rp, br_vector3 *rd, br_scalar t_near, br_scalar t_far, br_scalar *new_t_near,
+                             br_scalar *new_t_far)
 {
     int       i;
     br_scalar s, t;
@@ -160,8 +159,8 @@ static int ActorPick2D(br_actor *ap, br_model *model, br_material *material, br_
              */
             BrMatrix34Inverse(&v_to_m, &pick_model_to_view);
 
-            if(PickBoundsTestRay(&this_model->bounds, (br_vector3 *)v_to_m.m[3], (br_vector3 *)v_to_m.m[2],
-                                 BR_SCALAR(0.0), BR_SCALAR_MAX, &t_near, &t_far)) {
+            if(PickBoundsTestRay(&this_model->bounds, (br_vector3 *)v_to_m.m[3], (br_vector3 *)v_to_m.m[2], BR_SCALAR(0.0), BR_SCALAR_MAX,
+                                 &t_near, &t_far)) {
                 br_vector3 dir;
                 dir.v[0] = -v_to_m.m[2][0];
                 dir.v[1] = -v_to_m.m[2][1];
@@ -196,8 +195,7 @@ static int ActorPick2D(br_actor *ap, br_model *model, br_material *material, br_
 
             BrMatrix34Inverse(&v_to_m, &pick_model_to_view);
 
-            if(PickBoundsTestRay(ap->type_data, (br_vector3 *)v_to_m.m[3], (br_vector3 *)v_to_m.m[2], BR_SCALAR(0.0),
-                                 BR_SCALAR_MAX, &t_near, &t_far))
+            if(PickBoundsTestRay(ap->type_data, (br_vector3 *)v_to_m.m[3], (br_vector3 *)v_to_m.m[2], BR_SCALAR(0.0), BR_SCALAR_MAX, &t_near, &t_far))
                 BR_FOR_SIMPLELIST(&ap->children, a) {
                     r = ActorPick2D(a, this_model, this_material, callback, arg);
                     if(r)
@@ -272,8 +270,7 @@ int BR_PUBLIC_ENTRY BrScenePick2D(br_actor *world, br_actor *camera, br_pixelmap
         case BR_CAMERA_PERSPECTIVE_FOV:
         case BR_CAMERA_PERSPECTIVE_FOV_OLD:
             UASSERT_MESSAGE("BrScenePick2D divide by zero error", BR_SIN((br_angle)(camera_data->field_of_view / 2)) != 0);
-            scale = BR_DIV(BR_COS((br_angle)(camera_data->field_of_view / 2)),
-                           BR_SIN((br_angle)(camera_data->field_of_view / 2)));
+            scale = BR_DIV(BR_COS((br_angle)(camera_data->field_of_view / 2)), BR_SIN((br_angle)(camera_data->field_of_view / 2)));
 
             BrMatrix34PostScale(&pick_model_to_view, BR_DIV(scale, camera_data->aspect), scale, BR_SCALAR(1.0));
             // 		BrMatrix34PostScale(&pick_model_to_view,BR_DIV(scale,camera_data->aspect),scale,BR_RCP(camera_data->yon_z));
@@ -293,8 +290,7 @@ int BR_PUBLIC_ENTRY BrScenePick2D(br_actor *world, br_actor *camera, br_pixelmap
             BrMatrix34PostScale(&pick_model_to_view, BR_RCP(camera_data->width), BR_RCP(camera_data->height),
                                 BR_RCP(camera_data->yon_z - camera_data->hither_z));
 
-            BrMatrix34PostTranslate(&pick_model_to_view,
-                                    BR_DIV(BrIntToScalar(-2 * pick_x), BrIntToScalar(viewport->width)),
+            BrMatrix34PostTranslate(&pick_model_to_view, BR_DIV(BrIntToScalar(-2 * pick_x), BrIntToScalar(viewport->width)),
                                     BR_DIV(BrIntToScalar(2 * pick_y), BrIntToScalar(viewport->height)), S0);
 
             break;
@@ -363,8 +359,7 @@ static int PickBoundsTestBox(br_bounds *model_bounds, br_bounds *bounds, br_matr
 /*
  * Recursive function for 3D picking within a hierachy
  */
-static int ActorPick3D(br_actor *ap, br_model *model, br_material *material, br_bounds *bounds,
-                       br_pick3d_cbfn *callback, void *arg)
+static int ActorPick3D(br_actor *ap, br_model *model, br_material *material, br_bounds *bounds, br_pick3d_cbfn *callback, void *arg)
 {
     br_actor    *a;
     br_model    *this_model;
@@ -475,8 +470,8 @@ int BR_PUBLIC_ENTRY BrScenePick3D(br_actor *world, br_actor *actor, br_bounds *b
  *  U,V parameters of hit point
  *
  */
-int BR_PUBLIC_ENTRY BrModelPick2D(br_model *model, br_material *material, br_vector3 *ray_pos, br_vector3 *ray_dir,
-                                  br_scalar t_near, br_scalar t_far, br_modelpick2d_cbfn *callback, void *arg)
+int BR_PUBLIC_ENTRY BrModelPick2D(br_model *model, br_material *material, br_vector3 *ray_pos, br_vector3 *ray_dir, br_scalar t_near,
+                                  br_scalar t_far, br_modelpick2d_cbfn *callback, void *arg)
 {
     br_face     *fp;
     int          f, axis_m, axis_0, axis_1;

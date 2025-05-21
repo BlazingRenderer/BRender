@@ -8,7 +8,6 @@
  */
 #include "brender.h"
 
-
 void BR_CALLBACK _BrBeginHook(void)
 {
 }

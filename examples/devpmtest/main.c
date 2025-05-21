@@ -269,8 +269,7 @@ static void linepoint8_draw(br_pixelmap *dest, float dt, void *user)
         }
     }
 
-    BrPixelmapRectangleCopy(dest, -state->pm->width / 2, -state->pm->height / 2, state->pm, 0, 0, state->pm->width,
-                            state->pm->height);
+    BrPixelmapRectangleCopy(dest, -state->pm->width / 2, -state->pm->height / 2, state->pm, 0, 0, state->pm->width, state->pm->height);
 }
 
 static void linepoint8_fini(void *user)
@@ -362,8 +361,7 @@ static br_error earth8_init(void *user, br_pixelmap *screen, br_pixelmap *backbu
         return BRE_FAIL;
     }
 
-    if((state->pal_grey = BrPixelmapAllocate(BR_PMT_RGBX_888, state->pal_std->width, state->pal_std->height, NULL,
-                                             BR_PMAF_NORMAL)) == NULL) {
+    if((state->pal_grey = BrPixelmapAllocate(BR_PMT_RGBX_888, state->pal_std->width, state->pal_std->height, NULL, BR_PMAF_NORMAL)) == NULL) {
         BrLogError("APP", "Error allocating greyscale palette");
         earth8_fini(user);
         return BRE_FAIL;
@@ -377,8 +375,8 @@ static br_error earth8_init(void *user, br_pixelmap *screen, br_pixelmap *backbu
         }
     }
 
-    if((state->target_nopal = BrPixelmapMatchTypedSized(screen, BR_PMMATCH_OFFSCREEN, BR_PMT_RGBA_8888,
-                                                        state->earth->width, state->earth->height)) == NULL) {
+    if((state->target_nopal = BrPixelmapMatchTypedSized(screen, BR_PMMATCH_OFFSCREEN, BR_PMT_RGBA_8888, state->earth->width,
+                                                        state->earth->height)) == NULL) {
         BrLogError("APP", "Error creating BR_PMT_RGBA_8888 device pixelmap.");
         return BRE_FAIL;
     }
@@ -386,8 +384,8 @@ static br_error earth8_init(void *user, br_pixelmap *screen, br_pixelmap *backbu
     state->target_nopal->origin_x = (br_int_16)(state->target_nopal->width / 2);
     state->target_nopal->origin_y = (br_int_16)(state->target_nopal->height / 2);
 
-    if((state->target_pal = BrPixelmapMatchTypedSized(screen, BR_PMMATCH_OFFSCREEN, BR_PMT_INDEX_8, state->earth->width,
-                                                      state->earth->height)) == NULL) {
+    if((state->target_pal = BrPixelmapMatchTypedSized(screen, BR_PMMATCH_OFFSCREEN, BR_PMT_INDEX_8, state->earth->width, state->earth->height)) ==
+       NULL) {
         BrLogError("APP", "Error creating BR_PMT_INDEX_8 device pixelmap.");
         earth8_fini(user);
         return BRE_FAIL;
@@ -413,16 +411,15 @@ static void earth8_draw(br_pixelmap *dest, float dt, void *user)
      * Test 1 - Blit from indexed texture w/o palette to non-indexed destination.
      * Expected failure.
      */
-    BrPixelmapText(dest, base_x, base_y - (text_height * 2), BR_COLOUR_RGBA(255, 255, 255, 255), BrFontProp7x9,
-                   "Indexed w/o palette -> non-indexed");
+    BrPixelmapText(dest, base_x, base_y - (text_height * 2), BR_COLOUR_RGBA(255, 255, 255, 255), BrFontProp7x9, "Indexed w/o palette -> non-indexed");
     BrPixelmapFill(state->target_nopal, BR_COLOUR_RGBA(255, 255, 255, 255));
     BrPixelmapCopy(state->target_nopal, state->earth);
 
     white_len = BrPixelmapTextWidth(state->target_nopal, BrFontProp7x9, "This square should be white.");
     BrPixelmapText(state->target_nopal, -white_len / 2, -text_height / 2, BR_COLOUR_RGBA(0, 0, 0, 255), BrFontProp7x9,
                    "This square should be white.");
-    BrPixelmapRectangleCopy(dest, base_x, base_y, state->target_nopal, -state->target_nopal->origin_x,
-                            -state->target_nopal->origin_y, state->target_nopal->width, state->target_nopal->height);
+    BrPixelmapRectangleCopy(dest, base_x, base_y, state->target_nopal, -state->target_nopal->origin_x, -state->target_nopal->origin_y,
+                            state->target_nopal->width, state->target_nopal->height);
 
     base_y += 256 + text_height * 3;
 
@@ -434,8 +431,8 @@ static void earth8_draw(br_pixelmap *dest, float dt, void *user)
     BrPixelmapPaletteSet(state->target_pal, state->pal_std);
     BrPixelmapFill(state->target_pal, BR_COLOUR_RGBA(0, 0, 0, 255));
     BrPixelmapCopy(state->target_pal, state->earth);
-    BrPixelmapRectangleCopy(dest, base_x, base_y, state->target_pal, -state->target_pal->origin_x,
-                            -state->target_pal->origin_y, state->target_pal->width, state->target_pal->height);
+    BrPixelmapRectangleCopy(dest, base_x, base_y, state->target_pal, -state->target_pal->origin_x, -state->target_pal->origin_y,
+                            state->target_pal->width, state->target_pal->height);
 
     base_x += 256 + text_height * 3;
     base_y -= 256 + text_height * 3;
@@ -444,12 +441,11 @@ static void earth8_draw(br_pixelmap *dest, float dt, void *user)
      * Test 3 - Blit from indexed texture w/ palette to non-indexed destination.
      */
     state->earth->map = state->pal_std;
-    BrPixelmapText(dest, base_x, base_y - (text_height * 2), BR_COLOUR_RGBA(255, 255, 255, 255), BrFontProp7x9,
-                   "Indexed w/ palette -> non-indexed");
+    BrPixelmapText(dest, base_x, base_y - (text_height * 2), BR_COLOUR_RGBA(255, 255, 255, 255), BrFontProp7x9, "Indexed w/ palette -> non-indexed");
     BrPixelmapFill(state->target_nopal, BR_COLOUR_RGBA(0, 0, 0, 255));
     BrPixelmapCopy(state->target_nopal, state->earth);
-    BrPixelmapRectangleCopy(dest, base_x, base_y, state->target_nopal, -state->target_nopal->origin_x,
-                            -state->target_nopal->origin_y, state->target_nopal->width, state->target_nopal->height);
+    BrPixelmapRectangleCopy(dest, base_x, base_y, state->target_nopal, -state->target_nopal->origin_x, -state->target_nopal->origin_y,
+                            state->target_nopal->width, state->target_nopal->height);
 
     base_y += 256 + text_height * 3;
 
@@ -463,8 +459,8 @@ static void earth8_draw(br_pixelmap *dest, float dt, void *user)
     BrPixelmapPaletteSet(state->target_pal, state->pal_grey);
     BrPixelmapFill(state->target_pal, BR_COLOUR_RGBA(0, 0, 0, 255));
     BrPixelmapCopy(state->target_pal, state->earth);
-    BrPixelmapRectangleCopy(dest, base_x, base_y, state->target_pal, -state->target_pal->origin_x,
-                            -state->target_pal->origin_y, state->target_pal->width, state->target_pal->height);
+    BrPixelmapRectangleCopy(dest, base_x, base_y, state->target_pal, -state->target_pal->origin_x, -state->target_pal->origin_y,
+                            state->target_pal->width, state->target_pal->height);
 }
 
 typedef struct br_device2mem_state {
@@ -497,7 +493,7 @@ static br_error device2mem_init(void *user, br_pixelmap *screen, br_pixelmap *ba
 
     state->last_frame_memory = BrPixelmapAllocate(backbuffer->type, backbuffer->width, backbuffer->height, NULL, BR_PMAF_NORMAL);
     state->last_frame_device = BrPixelmapMatch(backbuffer, BR_PMMATCH_OFFSCREEN);
-    state->last_frame_hxw = BrPixelmapAllocate(BR_PMT_RGBX_888, backbuffer->height, backbuffer->width, NULL, BR_PMAF_NORMAL);
+    state->last_frame_hxw    = BrPixelmapAllocate(BR_PMT_RGBX_888, backbuffer->height, backbuffer->width, NULL, BR_PMAF_NORMAL);
 
     if((state->checkerboard = BrPixelmapLoad("checkerboard.pix")) == NULL) {
         device2mem_fini(user);
@@ -528,29 +524,24 @@ static void device2mem_draw(br_pixelmap *dest, float dt, void *user)
      * Draw the previous frame (black initially) in the top-right corner.
      * Tests memory->device stretch copy.
      */
-    BrPixelmapRectangleStretchCopy(dest, base_x, base_y, width, height, state->last_frame_memory, 0, 0,
-                                   state->last_frame_memory->width, state->last_frame_memory->height);
-    BrPixelmapText(dest, base_x, base_y - (text_height * 2), BR_COLOUR_RGBA(255, 255, 255, 255), BrFontProp7x9,
-                   "Memory->device stretch copy");
+    BrPixelmapRectangleStretchCopy(dest, base_x, base_y, width, height, state->last_frame_memory, 0, 0, state->last_frame_memory->width,
+                                   state->last_frame_memory->height);
+    BrPixelmapText(dest, base_x, base_y - (text_height * 2), BR_COLOUR_RGBA(255, 255, 255, 255), BrFontProp7x9, "Memory->device stretch copy");
 
-    BrPixelmapRectangleStretchCopy(dest, base_x + (width / 2) - (128 / 2), 128 / 2, 128, 128, state->checkerboard,
-                                   -state->checkerboard->origin_x, -state->checkerboard->origin_y,
-                                   state->checkerboard->width, state->checkerboard->height);
+    BrPixelmapRectangleStretchCopy(dest, base_x + (width / 2) - (128 / 2), 128 / 2, 128, 128, state->checkerboard, -state->checkerboard->origin_x,
+                                   -state->checkerboard->origin_y, state->checkerboard->width, state->checkerboard->height);
 
     base_x += width + text_height;
     /*
      * Draw the previous frame (black initially) underneath it.
      * Tests device->device stretch copy.
      */
-    BrPixelmapRectangleStretchCopy(dest, base_x, base_y, width, height, state->last_frame_device,
-                                   -state->last_frame_device->origin_x, -state->last_frame_device->origin_y,
-                                   state->last_frame_device->width, state->last_frame_device->height);
-    BrPixelmapText(dest, base_x, base_y - (text_height * 2), BR_COLOUR_RGBA(255, 255, 255, 255), BrFontProp7x9,
-                   "Device->device stretch copy");
+    BrPixelmapRectangleStretchCopy(dest, base_x, base_y, width, height, state->last_frame_device, -state->last_frame_device->origin_x,
+                                   -state->last_frame_device->origin_y, state->last_frame_device->width, state->last_frame_device->height);
+    BrPixelmapText(dest, base_x, base_y - (text_height * 2), BR_COLOUR_RGBA(255, 255, 255, 255), BrFontProp7x9, "Device->device stretch copy");
 
-    BrPixelmapRectangleStretchCopy(dest, base_x + (width / 2) - (128 / 2), 128 / 2, 128, 128, state->checkerboard,
-                                   -state->checkerboard->origin_x, -state->checkerboard->origin_y,
-                                   state->checkerboard->width, state->checkerboard->height);
+    BrPixelmapRectangleStretchCopy(dest, base_x + (width / 2) - (128 / 2), 128 / 2, 128, 128, state->checkerboard, -state->checkerboard->origin_x,
+                                   -state->checkerboard->origin_y, state->checkerboard->width, state->checkerboard->height);
     /*
      * Tests a device->memory non-stretch copy, with device memory non-addressable.
      * Hack to invoke rectangleStretchCopyFrom().
@@ -560,16 +551,14 @@ static void device2mem_draw(br_pixelmap *dest, float dt, void *user)
         int hh = state->last_frame_hxw->height / 6;
 
         state->last_frame_device->flags |= BR_PMF_NO_ACCESS;
-        BrPixelmapRectangleStretchCopy(state->last_frame_hxw, -state->last_frame_hxw->origin_x,
-                                       -state->last_frame_hxw->origin_y, state->last_frame_hxw->width,
-                                       state->last_frame_hxw->height, state->last_frame_device,
+        BrPixelmapRectangleStretchCopy(state->last_frame_hxw, -state->last_frame_hxw->origin_x, -state->last_frame_hxw->origin_y,
+                                       state->last_frame_hxw->width, state->last_frame_hxw->height, state->last_frame_device,
                                        -state->last_frame_device->origin_x, -state->last_frame_device->origin_y,
                                        state->last_frame_device->width, state->last_frame_device->height);
         state->last_frame_device->flags &= ~BR_PMF_NO_ACCESS;
 
-        BrPixelmapRectangleStretchCopy(dest, -ww + (ww / 2), 128 / 2, state->last_frame_hxw->width / 6,
-                                       state->last_frame_hxw->height / 6, state->last_frame_hxw,
-                                       -state->last_frame_hxw->origin_x, -state->last_frame_hxw->origin_y,
+        BrPixelmapRectangleStretchCopy(dest, -ww + (ww / 2), 128 / 2, state->last_frame_hxw->width / 6, state->last_frame_hxw->height / 6,
+                                       state->last_frame_hxw, -state->last_frame_hxw->origin_x, -state->last_frame_hxw->origin_y,
                                        state->last_frame_hxw->width, state->last_frame_hxw->height);
     }
 }
@@ -655,9 +644,8 @@ static br_error submap_init(void *user, br_pixelmap *screen, br_pixelmap *backbu
     state->left_square->origin_x = (br_int_16)(state->left_square->width / 2);
     state->left_square->origin_y = (br_int_16)(state->left_square->height / 2);
 
-    if((state->left_square2 = BrPixelmapAllocateSub(
-            backbuffer, -backbuffer->origin_x + 20 + state->checkerboard_memory->width + 20, 0,
-            state->checkerboard_memory->width, state->checkerboard_memory->height)) == NULL) {
+    if((state->left_square2 = BrPixelmapAllocateSub(backbuffer, -backbuffer->origin_x + 20 + state->checkerboard_memory->width + 20, 0,
+                                                    state->checkerboard_memory->width, state->checkerboard_memory->height)) == NULL) {
         submap_fini(user);
         return BRE_FAIL;
     }
@@ -695,8 +683,7 @@ static void pixelquery_fini(void *user)
     pixelquery_state *state = user;
 
     br_pixelmap **const pms[] = {
-        &state->tex32, &state->tex32m, &state->tex24, &state->tex24,
-        &state->tex16, &state->tex16m, &state->tex8,  &state->tex8m,
+        &state->tex32, &state->tex32m, &state->tex24, &state->tex24, &state->tex16, &state->tex16m, &state->tex8, &state->tex8m,
     };
 
     for(size_t i = 0; i < BR_ASIZE(pms); ++i) {
@@ -807,8 +794,8 @@ static void draw_pixelbypixel(br_pixelmap *dest, br_pixelmap *pm, br_int_32 base
             break;
     }
 
-    BrPixelmapTextF(dest, base_x + text_offset.v[0], base_y + text_offset.v[1], BR_COLOUR_RGBA(255, 255, 255, 255),
-                    BrFontProp7x9, "%s -> %s, %d-bit", src_str, dst_str, src_bpp);
+    BrPixelmapTextF(dest, base_x + text_offset.v[0], base_y + text_offset.v[1], BR_COLOUR_RGBA(255, 255, 255, 255), BrFontProp7x9,
+                    "%s -> %s, %d-bit", src_str, dst_str, src_bpp);
 
     base_x -= pm->width / 2;
     base_y -= pm->height / 2;
@@ -993,14 +980,13 @@ static void rwclut_draw(br_pixelmap *dest, float dt, void *user)
         }
 
         for(br_int_32 i = 0; i < state->pm->width; ++i) {
-            BrPixelmapLine(state->pm, -state->pm->origin_x + i, -state->pm->origin_y, -state->pm->origin_x + i,
-                           state->pm->origin_y, i);
+            BrPixelmapLine(state->pm, -state->pm->origin_x + i, -state->pm->origin_y, -state->pm->origin_x + i, state->pm->origin_y, i);
         }
     }
 
     state->accum = fmodf(state->accum + dt, 2.0f);
-    BrPixelmapRectangleCopy(dest, -state->pm->width / 2, -state->pm->height / 2, state->pm, -state->pm->origin_x,
-                            -state->pm->origin_y, state->pm->width, state->pm->height);
+    BrPixelmapRectangleCopy(dest, -state->pm->width / 2, -state->pm->height / 2, state->pm, -state->pm->origin_x, -state->pm->origin_y,
+                            state->pm->width, state->pm->height);
 
     BrPixelmapText(dest, -dest->origin_x + 16, dest->origin_y - 100, 0xFFFFFFFF, BrFontProp7x9, "Tests that a pixelmap keeps its palette on resize.");
 }
@@ -1049,8 +1035,7 @@ static br_error nitclut_init(void *user, br_pixelmap *screen, br_pixelmap *backb
         return BRE_FAIL;
     }
 
-    if((state->pal_grey = BrPixelmapAllocate(BR_PMT_RGBX_888, state->pal_std->width, state->pal_std->height, NULL,
-                                             BR_PMAF_NORMAL)) == NULL) {
+    if((state->pal_grey = BrPixelmapAllocate(BR_PMT_RGBX_888, state->pal_std->width, state->pal_std->height, NULL, BR_PMAF_NORMAL)) == NULL) {
         BrLogError("APP", "Error allocating greyscale palette");
         earth8_fini(user);
         return BRE_FAIL;
@@ -1064,8 +1049,7 @@ static br_error nitclut_init(void *user, br_pixelmap *screen, br_pixelmap *backb
         }
     }
 
-    state->target = BrPixelmapMatchTypedSized(backbuffer, BR_PMMATCH_OFFSCREEN, BR_PMT_RGBX_888, state->earth->width,
-                                              state->earth->height);
+    state->target = BrPixelmapMatchTypedSized(backbuffer, BR_PMMATCH_OFFSCREEN, BR_PMT_RGBX_888, state->earth->width, state->earth->height);
     if(state->target == NULL) {
         BrLogError("APP", "Unable to match BR_PMT_RGBX_888 pixelmap.");
         nitclut_fini(user);
@@ -1104,8 +1088,8 @@ static void nitclut_draw(br_pixelmap *dest, float dt, void *user)
     state->accum = fmodf(state->accum + dt, 2.0f);
     BrPixelmapCopy(state->target, state->earth);
 
-    BrPixelmapRectangleCopy(dest, -state->target->width / 2, -state->target->height / 2, state->target,
-                            -state->target->origin_x, -state->target->origin_y, state->target->width, state->target->height);
+    BrPixelmapRectangleCopy(dest, -state->target->width / 2, -state->target->height / 2, state->target, -state->target->origin_x,
+                            -state->target->origin_y, state->target->width, state->target->height);
 
     BrPixelmapText(dest, -dest->origin_x + 16, dest->origin_y - 100, 0xFFFFFFFF, BrFontProp7x9,
                    "Tests that a non-indexed pixelmap has a CLUT for source indexed pixelmaps without a CLUT.");
@@ -1282,7 +1266,7 @@ int main(int argc, char **argv)
     br_error     r;
     br_uint_64   ticks_last, ticks_now;
     int          want_screenshot;
-    int          test_index = 0;/* BR_ASIZE(tests) - 1; */
+    int          test_index = 0; /* BR_ASIZE(tests) - 1; */
 
     BrBegin();
 
@@ -1422,14 +1406,12 @@ int main(int argc, char **argv)
             int text_width = BrPixelmapTextWidth(colour_buffer, BrFontProp7x9, tests[test_index].name);
 
             if(tests[test_index]._failed) {
-                BrPixelmapText(colour_buffer, base_x - text_width / 2, base_y + text_height, 0xFFFFFFFF, BrFontProp7x9,
-                               "INIT FAILED");
+                BrPixelmapText(colour_buffer, base_x - text_width / 2, base_y + text_height, 0xFFFFFFFF, BrFontProp7x9, "INIT FAILED");
             } else {
                 tests[test_index].draw(colour_buffer, dt, tests[test_index]._user);
             }
             BrPixelmapText(colour_buffer, base_x - text_width / 2, base_y, 0xFFFFFFFF, BrFontProp7x9, tests[test_index].name);
         }
-
 
         /* Add in some text. */
         {

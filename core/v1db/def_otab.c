@@ -8,7 +8,6 @@
  */
 #include "v1db.h"
 
-
 #define DEFAULT_ORDER_TABLE_SIZE 256
 
 static br_primitive *default_table[DEFAULT_ORDER_TABLE_SIZE];

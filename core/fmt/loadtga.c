@@ -13,7 +13,6 @@
 #include "brender.h"
 #include "fmt.h"
 
-
 #define RED 2
 #define GRN 1
 #define BLU 0
@@ -131,8 +130,7 @@ br_pixelmap *BR_PUBLIC_ENTRY BrFmtTGALoad(const char *name, br_uint_32 flags)
         BR_ERROR1("Unable to read header information from '%s'", name);
 
     for(i = 0, supported = 255; i < BR_ASIZE(Supported_TGA_types); i++)
-        if((Supported_TGA_types[i].image_type == TGAheader.imagetype) &
-               (Supported_TGA_types[i].pixel_bits == TGAheader.bits) &&
+        if((Supported_TGA_types[i].image_type == TGAheader.imagetype) & (Supported_TGA_types[i].pixel_bits == TGAheader.bits) &&
            (Supported_TGA_types[i].supported))
             supported = i;
 
@@ -223,7 +221,7 @@ br_pixelmap *BR_PUBLIC_ENTRY BrFmtTGALoad(const char *name, br_uint_32 flags)
                             if(BrFileRead(&RGB_16, 1, sizeof(RGB_16), fh) != sizeof(RGB_16))
                                 BR_ERROR1("Unable to read palette from '%s'", name);
 
-                            ((char *)(pm->map->pixels))[i * 4 + RED] = ((RGB_16)&0x1f) << 3;
+                            ((char *)(pm->map->pixels))[i * 4 + RED] = ((RGB_16) & 0x1f) << 3;
                             ((char *)(pm->map->pixels))[i * 4 + GRN] = ((RGB_16 >> 5) & 0x1f) << 3;
                             ((char *)(pm->map->pixels))[i * 4 + BLU] = ((RGB_16 >> 10) & 0x1f) << 3;
                             ((char *)(pm->map->pixels))[i * 4 + PAD] = 0;

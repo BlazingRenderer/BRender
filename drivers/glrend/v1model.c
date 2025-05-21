@@ -334,8 +334,8 @@ static void apply_stored_properties(HVIDEO hVideo, br_renderer *renderer, state_
         BrVector2Set(&model->fog_range, info.fog_min, info.fog_max);
     }
 
-    if (states & MASK_STATE_OUTPUT) {
-        if (state->output.depth == NULL)
+    if(states & MASK_STATE_OUTPUT) {
+        if(state->output.depth == NULL)
             depth_test = BR_FALSE;
     }
 
@@ -347,11 +347,11 @@ static void apply_stored_properties(HVIDEO hVideo, br_renderer *renderer, state_
 
 static br_boolean apply_state(br_renderer *renderer)
 {
-    state_cache              *cache  = &renderer->state.cache;
-    br_device_pixelmap       *screen = renderer->pixelmap->screen;
-    HVIDEO                    hVideo = &screen->asFront.video;
-    br_boolean                unlit;
-    shader_data_model         model;
+    state_cache        *cache  = &renderer->state.cache;
+    br_device_pixelmap *screen = renderer->pixelmap->screen;
+    HVIDEO              hVideo = &screen->asFront.video;
+    br_boolean          unlit;
+    shader_data_model   model;
 
     /* Update the per-model cache (matrices and lights) */
     StateGLUpdateModel(cache, &renderer->state.current->matrix);
@@ -367,7 +367,8 @@ static br_boolean apply_state(br_renderer *renderer)
     // int model_lit = self->model->flags & V11MODF_LIT;
 
     unlit = BR_TRUE;
-    apply_stored_properties(hVideo, renderer, renderer->state.current, MASK_STATE_STORED | MASK_STATE_OUTPUT, &unlit, &model, screen->asFront.tex_white);
+    apply_stored_properties(hVideo, renderer, renderer->state.current, MASK_STATE_STORED | MASK_STATE_OUTPUT, &unlit, &model,
+                            screen->asFront.tex_white);
 
     model.unlit = (br_uint_32)unlit;
 

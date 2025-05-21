@@ -11,7 +11,6 @@
 #include "fw.h"
 #include "brassert.h"
 
-
 /*
  * Allocate a scratch buffer of the given size
  */

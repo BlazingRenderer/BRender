@@ -13,7 +13,6 @@
 #include "brassert.h"
 #include "datafile.h"
 
-
 /**
  ** End Marker
  **/

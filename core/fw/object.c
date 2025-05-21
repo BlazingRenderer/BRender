@@ -9,7 +9,6 @@
 #include "fw.h"
 #include "brassert.h"
 
-
 /*
  * Token/Value support methods (via private templateQuery() method)
  */
@@ -18,14 +17,12 @@ br_error BR_CMETHOD_DECL(br_object, query)(br_object *self, void *pvalue, br_tok
     return BrTokenValueQuery(pvalue, NULL, 0, t, self, ObjectTemplateQuery(self));
 }
 
-br_error BR_CMETHOD_DECL(br_object, queryBuffer)(br_object *self, void *pvalue, void *buffer, br_size_t buffer_size,
-                                                 br_token t)
+br_error BR_CMETHOD_DECL(br_object, queryBuffer)(br_object *self, void *pvalue, void *buffer, br_size_t buffer_size, br_token t)
 {
     return BrTokenValueQuery(pvalue, buffer, buffer_size, t, self, ObjectTemplateQuery(self));
 }
 
-br_error BR_CMETHOD_DECL(br_object, queryMany)(br_object *self, br_token_value *tv, void *extra, br_size_t extra_size,
-                                               br_int_32 *pcount)
+br_error BR_CMETHOD_DECL(br_object, queryMany)(br_object *self, br_token_value *tv, void *extra, br_size_t extra_size, br_int_32 *pcount)
 {
     return BrTokenValueQueryMany(tv, extra, extra_size, pcount, self, ObjectTemplateQuery(self));
 }

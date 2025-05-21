@@ -344,7 +344,7 @@ enum {
 
     BR_MODF_UPDATEABLE = 0x0080, /* ModelUpdate can be used */
 
-    BR_MODF_CREASE = 0x0100, /* Create creases in smoothing along edges if face<->face angle is g.t model->crease */
+    BR_MODF_CREASE         = 0x0100, /* Create creases in smoothing along edges if face<->face angle is g.t model->crease */
     BR_MODF_CUSTOM_NORMALS = 0x0200, /* Uses vertex normals from br_vertex structure */
     BR_MODF_CUSTOM_BOUNDS  = 0x0400, /* Bounding box is already set up				*/
     BR_MODF_FACES_ONLY     = 0x0800, /* Model will only be used to render faces (not edges or points) */

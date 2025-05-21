@@ -13,7 +13,6 @@
 #include "shortcut.h"
 #include "brassert.h"
 
-
 br_quat *BR_PUBLIC_ENTRY BrQuatMul(br_quat *q, const br_quat *l, const br_quat *r)
 {
 #if 1

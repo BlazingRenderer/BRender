@@ -11,7 +11,6 @@
 #include "fw.h"
 #include "brassert.h"
 
-
 /*
  * Resource block used to represent an open file
  */

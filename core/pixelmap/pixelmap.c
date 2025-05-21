@@ -10,7 +10,6 @@
 #include "pm.h"
 #include "brassert.h"
 
-
 /*
  * Allocate a new, pixelmap of the given type and size
  *

@@ -70,9 +70,8 @@ extern struct pm_type_info pmTypeInfo[];
 
 #define DevicePixelmapChannels(pm)   (pmTypeInfo[((br_device_pixelmap *)(pm))->pm_type].channels)
 
-#define DevicePixelmapMemAddress(pm, x, y, bpp)                                                     \
-    ((char *)(((br_device_pixelmap *)(pm))->pm_pixels) +                                            \
-     (((br_device_pixelmap *)(pm))->pm_base_y + (y)) * ((br_device_pixelmap *)(pm))->pm_row_bytes + \
+#define DevicePixelmapMemAddress(pm, x, y, bpp)                                                                                                         \
+    ((char *)(((br_device_pixelmap *)(pm))->pm_pixels) + (((br_device_pixelmap *)(pm))->pm_base_y + (y)) * ((br_device_pixelmap *)(pm))->pm_row_bytes + \
      (((br_device_pixelmap *)(pm))->pm_base_x + (x)) * (bpp))
 
 #endif

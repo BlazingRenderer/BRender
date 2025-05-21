@@ -12,7 +12,6 @@
 #include "brassert.h"
 #include "shortcut.h"
 
-
 /*
  * Table of axes for each order
  */

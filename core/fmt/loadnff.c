@@ -8,7 +8,6 @@
  */
 #include "brender.h"
 
-
 /*
  * Current line buffer
  */
@@ -48,8 +47,8 @@ static int AddVertex(br_scalar x, br_scalar y, br_scalar z)
      *
      * Assumes that br_scalar is at least as big as 2 shorts
      */
-    hash = ((br_uint_16 *)&x)[0] + ((br_uint_16 *)&x)[1] + ((br_uint_16 *)&y)[0] + ((br_uint_16 *)&y)[1] +
-           ((br_uint_16 *)&z)[0] + ((br_uint_16 *)&z)[1];
+    hash = ((br_uint_16 *)&x)[0] + ((br_uint_16 *)&x)[1] + ((br_uint_16 *)&y)[0] + ((br_uint_16 *)&y)[1] + ((br_uint_16 *)&z)[0] +
+           ((br_uint_16 *)&z)[1];
 
     hash = hash % VTX_HASH_SIZE;
 
@@ -67,8 +66,8 @@ static int AddVertex(br_scalar x, br_scalar y, br_scalar z)
         /*
          * Refill pool (pool blocks are linked by pointers in first
          */
-        pp  = BrResAllocate(NULL, VTX_POOL_SIZE * sizeof(*temp_vertex_pool) + sizeof(void *), BR_MEMORY_APPLICATION);
-        *pp = pool_chain;
+        pp               = BrResAllocate(NULL, VTX_POOL_SIZE * sizeof(*temp_vertex_pool) + sizeof(void *), BR_MEMORY_APPLICATION);
+        *pp              = pool_chain;
         pool_chain       = pp;
         temp_vertex_pool = (nff_vertex *)(pp + 1);
 

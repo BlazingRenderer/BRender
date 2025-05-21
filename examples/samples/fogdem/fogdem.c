@@ -55,8 +55,7 @@ void Initground(br_model *model, const int square, br_material *material)
     for(i = 0; i <= square; i++)
         for(j = 0; j <= square; j++, vertex++) {
             BrVector3SetFloat(&vertex->p, ((float)i - ((float)square) / 2.0) / 4.0, 0, ((float)j - ((float)square) / 2.0) / 4.0);
-            BrVector2SetFloat(&vertex->map, ((float)i - ((float)square) / 2.0) / 16.0,
-                              ((float)j - ((float)square) / 2.0) / 16.0);
+            BrVector2SetFloat(&vertex->map, ((float)i - ((float)square) / 2.0) / 16.0, ((float)j - ((float)square) / 2.0) / 16.0);
         }
 
     for(i = 0; i < square; i++)
@@ -455,8 +454,7 @@ static void FogUpdate(br_demo *demo, br_scalar dt)
     state->y = BR_MUL(BR_SIN(state->a + BR_ANGLE_DEG(65)), BR_SCALAR(0.007));
 
     BrMatrix23PostTranslate(&state->ground->material->map_transform, state->x, state->y);
-    BrMatrix23PreRotate(&state->ground->material->map_transform,
-                        BR_ANGLE_DEG(BrScalarToFloat(BR_MUL(BR_SIN(state->a), BR_SCALAR(1)))));
+    BrMatrix23PreRotate(&state->ground->material->map_transform, BR_ANGLE_DEG(BrScalarToFloat(BR_MUL(BR_SIN(state->a), BR_SCALAR(1)))));
     BrMaterialUpdate(state->ground->material, BR_MATU_MAP_TRANSFORM);
 
     BrMatrix34Translate(&state->ground->t.t.mat, 0, BR_SCALAR(-0.75), 0);

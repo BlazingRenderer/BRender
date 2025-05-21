@@ -331,8 +331,7 @@ static br_error ForestInit(br_demo *demo)
         if(state->counter1 >= 360)
             state->counter1 -= 360;
 
-        BrMatrix34Translate(&state->object->t.t.mat,
-                            BR_ADD(BR_MUL(BR_SIN(BR_ANGLE_DEG(state->counter1)), BR_SCALAR(8)), BR_SCALAR(18)),
+        BrMatrix34Translate(&state->object->t.t.mat, BR_ADD(BR_MUL(BR_SIN(BR_ANGLE_DEG(state->counter1)), BR_SCALAR(8)), BR_SCALAR(18)),
                             BR_SIN(BR_ANGLE_DEG(state->counter1 * 2)), 0);
         BrMatrix34PostRotateY(&state->object->t.t.mat, BR_ANGLE_DEG(state->counter));
         BrMatrix34PreRotateZ(&state->object->t.t.mat, BR_CONST_DIV(BR_SIN(BR_ANGLE_DEG(state->counter1)), 10));
