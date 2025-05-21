@@ -1,0 +1,20 @@
+core/fmt/dr_pcx.h
+core/fmt/cbase64.h
+core/fmt/cbase64.c
+core/fmt/cgltf.c
+core/fmt/cgltf.h
+core/fmt/cgltf_write.h
+core/fmt/stb_image.h
+core/fmt/stb_image_write.h
+core/fw/dev_objs.hpp
+core/fw/xxhash.h
+core/pixelmap/fnt*.c
+examples/brdemo/parg.c
+examples/brdemo/parg.h
+drivers/glrend/glad.c
+drivers/glrend/include/glad
+drivers/glrend/include/KHR
+
+# Easier to diff against the originals
+drivers/softrend
+drivers/pentprim
