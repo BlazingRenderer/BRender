@@ -152,12 +152,16 @@ br_device_pixelmap *DevicePixelmapSDL3Allocate(br_device *dev, br_output_facilit
     UASSERT(dev != NULL);
     UASSERT(outfcty == NULL || ObjectDevice(outfcty) == dev);
 
-    if(SDLToBRenderPixelFormat(surface->format, &bpp, &type) != BRE_OK)
+    if(SDLToBRenderPixelFormat(surface->format, &bpp, &type) != BRE_OK) {
+        SDL_DestroySurface(surface);
         return NULL;
+    }
 
     self = BrResAllocate(dev->res, sizeof(br_device_pixelmap), BR_MEMORY_OBJECT);
-    if(self == NULL)
+    if(self == NULL) {
+        SDL_DestroySurface(surface);
         return NULL;
+    }
 
     self->dispatch        = &devicePixelmapDispatch;
     self->pm_identifier   = BrResSprintf(self, "SDL3:%s:%dx%d", window != NULL ? "Window" : "Surface", surface->w, surface->h);
