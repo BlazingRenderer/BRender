@@ -378,6 +378,8 @@ br_error BR_CMETHOD_DECL(br_device_pixelmap_mem, match)(br_device_pixelmap *self
             break;
 
         case BRT_CLONE:
+            return DevicePixelmapMemCloneTyped(self, mt.pixel_type, newpm);
+
         case BRT_OFFSCREEN:
         case BRT_HIDDEN:
         case BRT_HIDDEN_BUFFER:

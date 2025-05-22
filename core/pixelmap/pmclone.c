@@ -9,7 +9,7 @@
  * BR_PMT_INDEX_8
  */
 
-br_colour index_8_read(const br_uint_8 *pixels, const br_pixelmap *pm)
+br_colour index_8_read(const br_uint_8 *pixels, const br_device_pixelmap *pm)
 {
     br_uint_8 index;
     br_colour colour;
@@ -23,7 +23,7 @@ br_colour index_8_read(const br_uint_8 *pixels, const br_pixelmap *pm)
     /*
      * get rgba colour
      */
-    colour = BrPixelmapPixelGet(pm->map, 0, index - pm->map->origin_y);
+    colour = BrPixelmapPixelGet(pm->pm_map, 0, index - pm->pm_map->origin_y);
 
     /*
      * get colour components
@@ -56,7 +56,7 @@ void index_8_write(br_uint_8 *pixels, br_colour colour)
  * BR_PMT_RGB_555
  */
 
-br_colour rgb_555_read(const br_uint_8 *pixels, const br_pixelmap *pm)
+br_colour rgb_555_read(const br_uint_8 *pixels, const br_device_pixelmap *pm)
 {
     br_uint_8 r, g, b;
 
@@ -82,7 +82,7 @@ void rgb_555_write(br_uint_8 *pixels, br_colour colour)
  * BR_PMT_RGB_565
  */
 
-br_colour rgb_565_read(const br_uint_8 *pixels, const br_pixelmap *pm)
+br_colour rgb_565_read(const br_uint_8 *pixels, const br_device_pixelmap *pm)
 {
     br_uint_8 r, g, b;
 
@@ -112,7 +112,7 @@ void rgb_565_write(br_uint_8 *pixels, br_colour colour)
  * BR_PMT_BGR_565
  */
 
-br_colour bgr_565_read(const br_uint_8 *pixels, const br_pixelmap *pm)
+br_colour bgr_565_read(const br_uint_8 *pixels, const br_device_pixelmap *pm)
 {
     br_uint_8 r, g, b;
 
@@ -142,7 +142,7 @@ void bgr_565_write(br_uint_8 *pixels, br_colour colour)
  * BR_PMT_RGB_888
  */
 
-br_colour rgb_888_read(const br_uint_8 *pixels, const br_pixelmap *pm)
+br_colour rgb_888_read(const br_uint_8 *pixels, const br_device_pixelmap *pm)
 {
     br_uint_8 r, g, b;
 
@@ -164,7 +164,7 @@ void rgb_888_write(br_uint_8 *pixels, br_colour colour)
  * BR_PMT_RGBX_888
  */
 
-br_colour rgbx_888_read(const br_uint_8 *pixels, const br_pixelmap *pm)
+br_colour rgbx_888_read(const br_uint_8 *pixels, const br_device_pixelmap *pm)
 {
     return *((br_colour *)pixels);
 }
@@ -178,7 +178,7 @@ void rgbx_888_write(br_uint_8 *pixels, br_colour colour)
  * BR_PMT_RGBA_8888
  */
 
-br_colour rgba_8888_read(const br_uint_8 *pixels, const br_pixelmap *pm)
+br_colour rgba_8888_read(const br_uint_8 *pixels, const br_device_pixelmap *pm)
 {
     return *((br_colour *)pixels);
 }
@@ -192,7 +192,7 @@ void rgba_8888_write(br_uint_8 *pixels, br_colour colour)
  * BR_PMT_BGR_555
  */
 
-br_colour bgr_555_read(const br_uint_8 *pixels, const br_pixelmap *pm)
+br_colour bgr_555_read(const br_uint_8 *pixels, const br_device_pixelmap *pm)
 {
     br_uint_8 r, g, b;
 
@@ -218,7 +218,7 @@ void bgr_555_write(br_uint_8 *pixels, br_colour colour)
  * BR_PMT_RGBA_4444
  */
 
-br_colour rgba_4444_read(const br_uint_8 *pixels, const br_pixelmap *pm)
+br_colour rgba_4444_read(const br_uint_8 *pixels, const br_device_pixelmap *pm)
 {
     br_uint_8 r, g, b, a;
 
@@ -251,7 +251,7 @@ void rgba_4444_write(br_uint_8 *pixels, br_colour colour)
  * BR_PMT_ARGB_4444
  */
 
-br_colour argb_4444_read(const br_uint_8 *pixels, const br_pixelmap *pm)
+br_colour argb_4444_read(const br_uint_8 *pixels, const br_device_pixelmap *pm)
 {
     br_uint_8 r, g, b, a;
 
@@ -284,7 +284,7 @@ void argb_4444_write(br_uint_8 *pixels, br_colour colour)
  * BR_PMT_RGBA_8888_ARR
  */
 
-br_colour rgba_8888_arr_read(const br_uint_8 *pixels, const br_pixelmap *pm)
+br_colour rgba_8888_arr_read(const br_uint_8 *pixels, const br_device_pixelmap *pm)
 {
     br_uint_8 r, g, b, a;
 
@@ -304,7 +304,7 @@ void rgba_8888_arr_write(br_uint_8 *pixels, br_colour colour)
     pixels[3] = BR_ALPHA(colour);
 }
 
-static br_colour r8b8g8a8_read(const br_uint_8 *pixels, const br_pixelmap *pm)
+static br_colour r8b8g8a8_read(const br_uint_8 *pixels, const br_device_pixelmap *pm)
 {
     br_uint_8 r, g, b, a;
 
@@ -408,9 +408,9 @@ br_error BR_RESIDENT_ENTRY BrColourUnpack(br_colour pixel, br_uint_8 type, br_ui
     return BRE_OK;
 }
 
-br_pixelmap *BR_PUBLIC_ENTRY BrPixelmapCloneTyped(br_pixelmap *src, br_uint_8 type)
+br_error BR_RESIDENT_ENTRY DevicePixelmapMemCloneTyped(br_device_pixelmap *src, br_uint_8 type, br_device_pixelmap **newpm)
 {
-    br_pixelmap           *dst;
+    br_device_pixelmap    *dst;
     br_pixelmap_converter *src_converter;
     br_pixelmap_converter *dst_converter;
     void                  *dst_pixels;
@@ -421,9 +421,9 @@ br_pixelmap *BR_PUBLIC_ENTRY BrPixelmapCloneTyped(br_pixelmap *src, br_uint_8 ty
     /*
      * check for accessibility
      */
-    if(src->flags & BR_PMF_NO_ACCESS) {
-        BrLogError("PM", "Source pixelmap \"%s\" has BR_PMF_NO_ACCESS flag, cannot clone.", src->identifier);
-        return NULL;
+    if(src->pm_flags & BR_PMF_NO_ACCESS) {
+        BrLogError("PM", "Source pixelmap \"%s\" has BR_PMF_NO_ACCESS flag, cannot clone.", src->pm_identifier);
+        return BRE_FAIL;
     }
 
     /*
@@ -431,13 +431,13 @@ br_pixelmap *BR_PUBLIC_ENTRY BrPixelmapCloneTyped(br_pixelmap *src, br_uint_8 ty
      */
     if(type >= BR_PMT_MAX) {
         BrLogError("PM", "Invalid pixelmap type %d.", type);
-        return NULL;
+        return BRE_FAIL;
     }
 
     /*
      * get converter facilities
      */
-    src_converter = &br_pixelmap_converters[src->type];
+    src_converter = &br_pixelmap_converters[src->pm_type];
     dst_converter = &br_pixelmap_converters[type];
 
     /*
@@ -445,7 +445,7 @@ br_pixelmap *BR_PUBLIC_ENTRY BrPixelmapCloneTyped(br_pixelmap *src, br_uint_8 ty
      */
     if(src_converter->read == NULL || src_converter->write == NULL) {
         BrLogError("PM", "\"%s\" is not supported as a pixelmap cloning source.", src_converter->name);
-        return NULL;
+        return BRE_FAIL;
     }
 
     /*
@@ -453,49 +453,50 @@ br_pixelmap *BR_PUBLIC_ENTRY BrPixelmapCloneTyped(br_pixelmap *src, br_uint_8 ty
      */
     if(dst_converter->read == NULL || dst_converter->write == NULL) {
         BrLogError("PM", "\"%s\" is not supported as a pixelmap cloning destination.", dst_converter->name);
-        return NULL;
+        return BRE_FAIL;
     }
 
     /*
      * check for palette if necessary
      */
-    if(src->type == BR_PMT_INDEX_8 && src->map == NULL) {
-        BrLogError("PM", "Source pixelmap \"%s\" is BR_PMT_INDEX_8, but has no palette.", src->identifier);
-        return NULL;
+    if(src->pm_type == BR_PMT_INDEX_8 && src->pm_map == NULL) {
+        BrLogError("PM", "Source pixelmap \"%s\" is BR_PMT_INDEX_8, but has no palette.", src->pm_identifier);
+        return BRE_FAIL;
     }
 
     /*
      * get bits per pixel
      */
     dst_bits = pmTypeInfo[type].bits;
-    src_bits = pmTypeInfo[src->type].bits;
+    src_bits = pmTypeInfo[src->pm_type].bits;
 
     /*
      * allocate destination pixelmap
      */
-    dst = BrPixelmapAllocate(type, src->width, src->height, NULL, BR_PMAF_NORMAL);
+
+    dst = DevicePixelmapMemAllocate(type, src->pm_width, src->pm_height, NULL, BR_PMAF_NORMAL);
     if(dst == NULL) {
         BrLogError("PM", "Failed to allocate pixelmap.");
-        return NULL;
+        return BRE_NO_MEMORY;
     }
 
     /*
      * duplicate identifier
      */
-    if(src->identifier != NULL)
-        dst->identifier = BrResStrDup(dst, src->identifier);
+    if(src->pm_identifier != NULL)
+        dst->pm_identifier = BrResStrDup(dst, src->pm_identifier);
 
     /*
      * duplicate values
      */
-    dst->origin_x = src->origin_x;
-    dst->origin_y = src->origin_y;
+    dst->pm_origin_x = src->pm_origin_x;
+    dst->pm_origin_y = src->pm_origin_y;
 
     /*
      * get pointers to pixels
      */
-    src_pixels = (br_uint_8 *)(src->pixels) + (src->base_y * src->row_bytes) + (src->base_x * (src_bits >> 3));
-    dst_pixels = (br_uint_8 *)(dst->pixels) + (dst->base_y * dst->row_bytes) + (dst->base_x * (dst_bits >> 3));
+    src_pixels = (br_uint_8 *)(src->pm_pixels) + (src->pm_base_y * src->pm_row_bytes) + (src->pm_base_x * (src_bits >> 3));
+    dst_pixels = (br_uint_8 *)(dst->pm_pixels) + (dst->pm_base_y * dst->pm_row_bytes) + (dst->pm_base_x * (dst_bits >> 3));
 
     /*
      * check if we need to quantize
@@ -510,15 +511,15 @@ br_pixelmap *BR_PUBLIC_ENTRY BrPixelmapCloneTyped(br_pixelmap *src, br_uint_8 ty
         /*
          * create palette pixelmap
          */
-        dst->map = BrPixelmapAllocate(BR_PMT_RGBX_888, 1, 256, NULL, BR_PMAF_NORMAL);
-        BrResAdd(dst, dst->map);
+        dst->pm_map = (br_pixelmap *)DevicePixelmapMemAllocate(BR_PMT_RGBX_888, 1, 256, NULL, BR_PMAF_NORMAL);
+        BrResAdd(dst, dst->pm_map);
 
         /*
          * add rgb values to quantizer
          */
-        for(int y = -src->origin_y; y < -src->origin_y + src->height; y++) {
-            for(int x = -src->origin_x; x < -src->origin_x + src->width; x++) {
-                br_uint_8 *pixel  = (br_uint_8 *)src_pixels + (x + src->origin_x) * (src_bits >> 3);
+        for(int y = -src->pm_origin_y; y < -src->pm_origin_y + src->pm_height; y++) {
+            for(int x = -src->pm_origin_x; x < -src->pm_origin_x + src->pm_width; x++) {
+                br_uint_8 *pixel  = (br_uint_8 *)src_pixels + (x + src->pm_origin_x) * (src_bits >> 3);
                 br_colour  colour = src_converter->read(pixel, src);
                 br_uint_8  rgb[3] = {
                     [0] = BR_RED(colour),
@@ -533,33 +534,33 @@ br_pixelmap *BR_PUBLIC_ENTRY BrPixelmapCloneTyped(br_pixelmap *src, br_uint_8 ty
         /*
          * create quantized palette
          */
-        BrQuantMakePalette(0, 256, dst->map);
-        BrQuantPrepareMapping(0, 256, dst->map);
+        BrQuantMakePalette(0, 256, dst->pm_map);
+        BrQuantPrepareMapping(0, 256, dst->pm_map);
     }
 
     /*
      * pixel conversion loop
      */
-    for(int y = -src->origin_y; y < -src->origin_y + src->height; y++) {
-        for(int x = -src->origin_x; x < -src->origin_x + src->width; x++) {
-            br_uint_8 *dst_pixel  = (br_uint_8 *)dst_pixels + (x + dst->origin_x) * (dst_bits >> 3);
-            br_uint_8 *src_pixel  = (br_uint_8 *)src_pixels + (x + src->origin_x) * (src_bits >> 3);
+    for(int y = -src->pm_origin_y; y < -src->pm_origin_y + src->pm_height; y++) {
+        for(int x = -src->pm_origin_x; x < -src->pm_origin_x + src->pm_width; x++) {
+            br_uint_8 *dst_pixel  = (br_uint_8 *)dst_pixels + (x + dst->pm_origin_x) * (dst_bits >> 3);
+            br_uint_8 *src_pixel  = (br_uint_8 *)src_pixels + (x + src->pm_origin_x) * (src_bits >> 3);
             br_colour  dst_colour = src_converter->read(src_pixel, src);
 
             /*
              * do keyed transparency if necessary
              * otherwise write destination colour
              */
-            if(src->flags & BR_PMF_KEYED_TRANSPARENCY) {
+            if(src->pm_flags & BR_PMF_KEYED_TRANSPARENCY) {
                 br_uint_8 dr, dg, db, kr, kg, kb;
 
                 dr = BR_RED(dst_colour);
                 dg = BR_GRN(dst_colour);
                 db = BR_BLU(dst_colour);
 
-                kr = BR_RED(src->key);
-                kg = BR_GRN(src->key);
-                kb = BR_BLU(src->key);
+                kr = BR_RED(src->pm_key);
+                kg = BR_GRN(src->pm_key);
+                kb = BR_BLU(src->pm_key);
 
                 /*
                  * we found a match
@@ -575,8 +576,8 @@ br_pixelmap *BR_PUBLIC_ENTRY BrPixelmapCloneTyped(br_pixelmap *src, br_uint_8 ty
         /*
          * advance to next row
          */
-        src_pixels = (br_uint_8 *)src_pixels + src->row_bytes;
-        dst_pixels = (br_uint_8 *)dst_pixels + dst->row_bytes;
+        src_pixels = (br_uint_8 *)src_pixels + src->pm_row_bytes;
+        dst_pixels = (br_uint_8 *)dst_pixels + dst->pm_row_bytes;
     }
 
     /*
@@ -586,5 +587,6 @@ br_pixelmap *BR_PUBLIC_ENTRY BrPixelmapCloneTyped(br_pixelmap *src, br_uint_8 ty
         BrQuantEnd();
     }
 
-    return dst;
+    *newpm = dst;
+    return BRE_OK;
 }

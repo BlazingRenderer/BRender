@@ -31,6 +31,11 @@ br_error BR_CMETHOD_DECL(br_device_pixelmap_mem, allocateSub)(struct br_device_p
                                                               br_rectangle *rect);
 
 /*
+ * pmclone.c
+ */
+br_error BR_RESIDENT_ENTRY DevicePixelmapMemCloneTyped(struct br_device_pixelmap *src, br_uint_8 type, struct br_device_pixelmap **newpm);
+
+/*
  * Operations on whole pixemap (with versions that include a hint dirty rectangle)
  */
 br_error BR_CMETHOD_DECL(br_device_pixelmap_mem, copyTo)(struct br_device_pixelmap *self, struct br_device_pixelmap *src);
