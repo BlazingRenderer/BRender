@@ -1095,6 +1095,177 @@ static void nitclut_draw(br_pixelmap *dest, float dt, void *user)
                    "Tests that a non-indexed pixelmap has a CLUT for source indexed pixelmaps without a CLUT.");
 }
 
+typedef struct br_clone_state {
+    void *res;
+
+    br_pixelmap *earth8;
+    br_pixelmap *pal_std;
+
+    br_pixelmap *earth16;
+    br_pixelmap *earth32;
+    br_pixelmap *earth_backto8;
+
+    br_pixelmap *earth8_device;
+    br_pixelmap *earth16_device;
+    br_pixelmap *earth32_device;
+    br_pixelmap *earth_backto8_device;
+} br_clone_state;
+
+static void clone_fini(void *user)
+{
+    br_clone_state *state = user;
+    BrResFree(state->res);
+}
+
+static br_error clone_init(void *user, br_pixelmap *screen, br_pixelmap *backbuffer, void *arg)
+{
+    br_clone_state *state = user;
+
+    state->res = BrResAllocate(state, 0, BR_MEMORY_ANCHOR);
+
+    if((state->earth8 = BrPixelmapLoad("earth8.pix")) == NULL) {
+        BrLogError("APP", "Error loading earth8.pix");
+        clone_fini(user);
+        return BRE_FAIL;
+    }
+    BrResAdd(state, state->earth8);
+
+    if((state->pal_std = BrPixelmapLoad("std.pal")) == NULL) {
+        BrLogError("APP", "Error loading std.pal");
+        clone_fini(user);
+        return BRE_FAIL;
+    }
+    BrResAdd(state->res, state->pal_std);
+
+    state->earth8->map = state->pal_std;
+
+    state->earth16 = BrPixelmapCloneTyped(state->earth8, BR_PMT_RGB_565);
+    if(state->earth16 == NULL) {
+        BrLogError("APP", "BrPixelmapCloneTyped(BR_PMT_RGB_565) failed on memory pixelmap");
+        clone_fini(user);
+        return BRE_FAIL;
+    }
+    BrResAdd(state->res, state->earth16);
+
+    state->earth32 = BrPixelmapCloneTyped(state->earth8, BR_PMT_RGBA_8888);
+    if(state->earth32 == NULL) {
+        BrLogError("APP", "BrPixelmapCloneTyped(BR_PMT_RGBA_8888) failed on memory pixelmap");
+        clone_fini(user);
+        return BRE_FAIL;
+    }
+    BrResAdd(state->res, state->earth32);
+
+    state->earth_backto8 = BrPixelmapCloneTyped(state->earth32, BR_PMT_INDEX_8);
+    if(state->earth_backto8 == NULL) {
+        BrLogError("APP", "BrPixelmapCloneTyped(BR_PMT_INDEX_8) failed on memory pixelmap");
+        clone_fini(user);
+        return BRE_FAIL;
+    }
+    BrResAdd(state->res, state->earth_backto8);
+
+    state->earth8_device = BrPixelmapMatchTypedSized(backbuffer, BR_PMMATCH_OFFSCREEN, state->earth8->type, state->earth8->width,
+                                                     state->earth8->height);
+    if(state->earth8_device == NULL) {
+        BrLogError("APP", "Error creating device version of earth8.pix");
+        clone_fini(user);
+        return BRE_FAIL;
+    }
+    BrResAdd(state->res, state->earth8_device);
+
+    BrPixelmapPaletteSet(state->earth8_device, state->pal_std);
+    BrPixelmapCopy(state->earth8_device, state->earth8);
+
+    state->earth16_device = BrPixelmapCloneTyped(state->earth8_device, BR_PMT_RGB_565);
+    if(state->earth16_device == NULL) {
+        BrLogError("APP", "Error creating device BR_PMT_RGB_565 version of earth8.pix");
+        return BRE_FAIL;
+    }
+    BrResAdd(state->res, state->earth16_device);
+
+    state->earth32_device = BrPixelmapCloneTyped(state->earth8_device, BR_PMT_RGBA_8888);
+    if(state->earth32_device == NULL) {
+        BrLogError("APP", "Error creating device BR_PMT_RGBA_8888 version of earth8.pix");
+        return BRE_FAIL;
+    }
+    BrResAdd(state->res, state->earth32_device);
+
+    state->earth_backto8_device = BrPixelmapCloneTyped(state->earth32_device, BR_PMT_INDEX_8);
+    if(state->earth_backto8_device == NULL) {
+        BrLogError("APP", "Error creating device BR_PMT_INDEX_8 version of earth8.pix");
+        return BRE_FAIL;
+    }
+    BrResAdd(state->res, state->earth_backto8_device);
+
+    return BRE_OK;
+}
+
+static void clone_draw(br_pixelmap *dest, float dt, void *user)
+{
+    br_clone_state *state       = user;
+    br_uint_16      text_height = BrPixelmapTextHeight(dest, BrFontProp7x9);
+    int             base_x      = -(384 + text_height * 3);
+    int             base_y      = -(256 + text_height * 3);
+
+    /*
+     * Test 1 - A INDEX_8 -> RGBA_8888 -> INDEX_8 (memory)
+     */
+    BrPixelmapText(dest, base_x, base_y - (text_height * 2), BR_COLOUR_RGBA(255, 255, 255, 255), BrFontProp7x9,
+                   "BR_PMT_RGBA_8888 -> BR_PMT_INDEX_8 (Memory)");
+    BrPixelmapRectangleCopy(dest, base_x, base_y, state->earth_backto8, -state->earth_backto8->origin_x, -state->earth_backto8->origin_y,
+                            state->earth_backto8->width, state->earth_backto8->height);
+
+    base_x += 256 + text_height * 3;
+
+    /*
+     * Test 2 - INDEX_8 -> RGB_565 (memory)
+     */
+    BrPixelmapText(dest, base_x, base_y - (text_height * 2), BR_COLOUR_RGBA(255, 255, 255, 255), BrFontProp7x9,
+                   "BR_PMT_INDEX_8 -> BR_PMT_RGB_565 (Memory)");
+    BrPixelmapRectangleCopy(dest, base_x, base_y, state->earth16, -state->earth16->origin_x, -state->earth16->origin_y,
+                            state->earth16->width, state->earth16->height);
+
+    base_x += 256 + text_height * 3;
+
+    /*
+     * Test 3 - INDEX_8 -> RGBA_8888 (memory)
+     */
+    BrPixelmapText(dest, base_x, base_y - (text_height * 2), BR_COLOUR_RGBA(255, 255, 255, 255), BrFontProp7x9,
+                   "BR_PMT_INDEX_8 -> BR_PMT_RGBA_8888 (Memory)");
+    BrPixelmapRectangleCopy(dest, base_x, base_y, state->earth32, -state->earth32->origin_x, -state->earth32->origin_y,
+                            state->earth32->width, state->earth32->height);
+
+    base_x = -(384 + text_height * 3);
+    base_y += 256 + text_height * 3;
+
+    /*
+     * Test 3 - A INDEX_8 -> RGBA_8888 -> INDEX_8 (device)
+     */
+    BrPixelmapText(dest, base_x, base_y - (text_height * 2), BR_COLOUR_RGBA(255, 255, 255, 255), BrFontProp7x9,
+                   "BR_PMT_RGBA_8888 -> BR_PMT_INDEX_8 (Device)");
+    BrPixelmapRectangleCopy(dest, base_x, base_y, state->earth_backto8_device, -state->earth_backto8_device->origin_x,
+                            -state->earth_backto8_device->origin_y, state->earth_backto8_device->width, state->earth_backto8_device->height);
+
+    base_x += 256 + text_height * 3;
+
+    /*
+     * Test 4 - INDEX_8 -> RGB_565 (device)
+     */
+    BrPixelmapText(dest, base_x, base_y - (text_height * 2), BR_COLOUR_RGBA(255, 255, 255, 255), BrFontProp7x9,
+                   "BR_PMT_INDEX_8 -> BR_PMT_RGB_565 (Device)");
+    BrPixelmapRectangleCopy(dest, base_x, base_y, state->earth16_device, -state->earth16_device->origin_x, -state->earth16_device->origin_y,
+                            state->earth16_device->width, state->earth16_device->height);
+
+    base_x += 256 + text_height * 3;
+
+    /*
+     * Test 5 - INDEX_8 -> RGBA_8888 (device)
+     */
+    BrPixelmapText(dest, base_x, base_y - (text_height * 2), BR_COLOUR_RGBA(255, 255, 255, 255), BrFontProp7x9,
+                   "BR_PMT_INDEX_8 -> BR_PMT_RGBA_8888 (Device)");
+    BrPixelmapRectangleCopy(dest, base_x, base_y, state->earth32_device, -state->earth32_device->origin_x, -state->earth32_device->origin_y,
+                            state->earth32_device->width, state->earth32_device->height);
+}
+
 typedef br_error(br_drawtest_init_cbfn)(void *user, br_pixelmap *screen, br_pixelmap *backbuffer, void *arg);
 typedef void(br_drawtest_draw_cbfn)(br_pixelmap *dest, float dt, void *user);
 typedef void(br_drawtest_swap_cbfn)(br_pixelmap *screen, br_pixelmap *backbuffer, void *user);
@@ -1211,6 +1382,13 @@ static br_drawtest tests[] = {
         .draw      = nitclut_draw,
         .fini      = nitclut_fini,
         .user_size = sizeof(nitclut_state),
+    },
+    {
+        .name      = "BrPixelmapCloneType() Test",
+        .init      = clone_init,
+        .draw      = clone_draw,
+        .fini      = clone_fini,
+        .user_size = sizeof(br_clone_state),
     },
 };
 // clang-format on
