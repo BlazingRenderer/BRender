@@ -185,6 +185,12 @@ static br_error BR_CMETHOD_DECL(br_device_pixelmap_sub_gl, line)(br_device_pixel
     return DevicePixelmapLine(self->asSub.parent, &spoint, &epoint, colour);
 }
 
+static br_error BR_CMETHOD_DECL(br_device_pixelmap_sub_gl, pixelSet)(br_device_pixelmap *self, br_point *p, br_uint_32 colour)
+{
+    br_point point = map_to_parent_point(self, self->asSub.parent, *p);
+    return DevicePixelmapPixelSet(self->asSub.parent, &point, colour);
+}
+
 static br_error BR_CMETHOD_DECL(br_device_pixelmap_sub_gl, text)(br_device_pixelmap *self, br_point *point, br_font *font, const char *text,
                                                                  br_uint_32 colour)
 {
@@ -301,7 +307,7 @@ static const struct br_device_pixelmap_dispatch devicePixelmapSubDispatch = {
     ._rectangleStretchCopyTo   = BR_CMETHOD_REF(br_device_pixelmap_sub_gl, rectangleStretchCopyTo),
     ._rectangleStretchCopyFrom = BR_CMETHOD_REF(br_device_pixelmap_fail, rectangleStretchCopyFrom),
     ._rectangleFill            = BR_CMETHOD_REF(br_device_pixelmap_sub_gl, rectangleFill),
-    ._pixelSet                 = BR_CMETHOD_REF(br_device_pixelmap_fail, pixelSet),
+    ._pixelSet                 = BR_CMETHOD_REF(br_device_pixelmap_sub_gl, pixelSet),
     ._line                     = BR_CMETHOD_REF(br_device_pixelmap_sub_gl, line),
     ._copyBits                 = BR_CMETHOD_REF(br_device_pixelmap_fail, copyBits),
 
