@@ -759,7 +759,6 @@ br_error BR_CMETHOD_DECL(br_device_pixelmap_sdl3, match)(br_device_pixelmap *sel
     }
 
     if(mt.use == BRT_CLONE) {
-        mt.type       = self->pm_type;
         mt.pixel_bits = SDL_BITSPERPIXEL(self->surface->format);
     }
 
@@ -770,7 +769,13 @@ br_error BR_CMETHOD_DECL(br_device_pixelmap_sdl3, match)(br_device_pixelmap *sel
         return BR_CMETHOD(br_device_pixelmap_mem, match)(self, newpm, tv);
     }
 
-    surface = DevicePixelmapSDL3CreateSurface(mt.width, mt.height, format);
+    if(mt.use == BRT_CLONE) {
+        SDL_Palette *pal = SDL_GetSurfacePalette(self->surface);
+        surface = SDL_ConvertSurfaceAndColorspace(self->surface, format, pal, SDL_COLORSPACE_SRGB, 0);
+    } else {
+        surface = DevicePixelmapSDL3CreateSurface(mt.width, mt.height, format);
+    }
+
     if(surface == NULL) {
         BrLogError("SDL3", "Error creating surface: %s", SDL_GetError());
         return BRE_FAIL;
