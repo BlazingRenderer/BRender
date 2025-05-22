@@ -435,10 +435,8 @@ br_error BR_RESIDENT_ENTRY DevicePixelmapMemCloneTyped(br_device_pixelmap *src, 
     br_device_pixelmap    *dst;
     br_pixelmap_converter *src_converter;
     br_pixelmap_converter *dst_converter;
-    void                  *dst_pixels;
-    void                  *src_pixels;
-    br_uint_16             dst_bits;
-    br_uint_16             src_bits;
+    br_uint_16             dst_bytes;
+    br_uint_16             src_bytes;
 
     /*
      * check for accessibility
@@ -487,10 +485,10 @@ br_error BR_RESIDENT_ENTRY DevicePixelmapMemCloneTyped(br_device_pixelmap *src, 
     }
 
     /*
-     * get bits per pixel
+     * get bytes per pixel
      */
-    dst_bits = pmTypeInfo[type].bits;
-    src_bits = pmTypeInfo[src->pm_type].bits;
+    dst_bytes = pmTypeInfo[type].bits >> 3;
+    src_bytes = pmTypeInfo[src->pm_type].bits >> 3;
 
     /*
      * allocate destination pixelmap
@@ -515,12 +513,6 @@ br_error BR_RESIDENT_ENTRY DevicePixelmapMemCloneTyped(br_device_pixelmap *src, 
     dst->pm_origin_y = src->pm_origin_y;
 
     /*
-     * get pointers to pixels
-     */
-    src_pixels = (br_uint_8 *)(src->pm_pixels) + (src->pm_base_y * src->pm_row_bytes) + (src->pm_base_x * (src_bits >> 3));
-    dst_pixels = (br_uint_8 *)(dst->pm_pixels) + (dst->pm_base_y * dst->pm_row_bytes) + (dst->pm_base_x * (dst_bits >> 3));
-
-    /*
      * check if we need to quantize
      */
     if(type == BR_PMT_INDEX_8) {
@@ -539,9 +531,9 @@ br_error BR_RESIDENT_ENTRY DevicePixelmapMemCloneTyped(br_device_pixelmap *src, 
         /*
          * add rgb values to quantizer
          */
-        for(int y = -src->pm_origin_y; y < -src->pm_origin_y + src->pm_height; y++) {
-            for(int x = -src->pm_origin_x; x < -src->pm_origin_x + src->pm_width; x++) {
-                br_uint_8 *pixel  = (br_uint_8 *)src_pixels + (x + src->pm_origin_x) * (src_bits >> 3);
+        for(int y = 0; y < src->pm_height; y++) {
+            for(int x = 0; x < src->pm_width; x++) {
+                br_uint_8 *pixel  = (br_uint_8 *)DevicePixelmapMemAddress(src, x, y, src_bytes);
                 br_colour  colour = src_converter->read(pixel, src);
                 br_uint_8  rgb[3] = {
                     [0] = BR_RED(colour),
@@ -563,10 +555,10 @@ br_error BR_RESIDENT_ENTRY DevicePixelmapMemCloneTyped(br_device_pixelmap *src, 
     /*
      * pixel conversion loop
      */
-    for(int y = -src->pm_origin_y; y < -src->pm_origin_y + src->pm_height; y++) {
-        for(int x = -src->pm_origin_x; x < -src->pm_origin_x + src->pm_width; x++) {
-            br_uint_8 *dst_pixel  = (br_uint_8 *)dst_pixels + (x + dst->pm_origin_x) * (dst_bits >> 3);
-            br_uint_8 *src_pixel  = (br_uint_8 *)src_pixels + (x + src->pm_origin_x) * (src_bits >> 3);
+    for(int y = 0; y < src->pm_height; y++) {
+        for(int x = 0; x < src->pm_width; x++) {
+            br_uint_8 *dst_pixel  = (br_uint_8 *)DevicePixelmapMemAddress(dst, x, y, dst_bytes);
+            br_uint_8 *src_pixel  = (br_uint_8 *)DevicePixelmapMemAddress(src, x, y, src_bytes);
             br_colour  dst_colour = src_converter->read(src_pixel, src);
 
             /*
@@ -594,12 +586,6 @@ br_error BR_RESIDENT_ENTRY DevicePixelmapMemCloneTyped(br_device_pixelmap *src, 
                 dst_converter->write(dst_pixel, dst_colour);
             }
         }
-
-        /*
-         * advance to next row
-         */
-        src_pixels = (br_uint_8 *)src_pixels + src->pm_row_bytes;
-        dst_pixels = (br_uint_8 *)dst_pixels + dst->pm_row_bytes;
     }
 
     /*
