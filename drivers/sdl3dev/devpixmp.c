@@ -744,11 +744,6 @@ br_error BR_CMETHOD_DECL(br_device_pixelmap_sdl3, match)(br_device_pixelmap *sel
 
     BrTokenValueSetMany(&mt, &count, NULL, tv, self->device->templates.matchOffTemplate);
 
-    if(mt.use == BRT_CLONE) {
-        mt.type       = self->pm_type;
-        mt.pixel_bits = SDL_BITSPERPIXEL(self->surface->format);
-    }
-
     /*
      * SDL has no depth or single-channel formats, so we can't handle depth
      * textures - fall back to memory.
@@ -757,6 +752,11 @@ br_error BR_CMETHOD_DECL(br_device_pixelmap_sdl3, match)(br_device_pixelmap *sel
      */
     if(mt.use == BRT_DEPTH) {
         return BR_CMETHOD(br_device_pixelmap_mem, match)(self, newpm, tv);
+    }
+
+    if(mt.use == BRT_CLONE) {
+        mt.type       = self->pm_type;
+        mt.pixel_bits = SDL_BITSPERPIXEL(self->surface->format);
     }
 
     if(BRenderToSDLPixelFormat(mt.type, &format, &bpp) != BRE_OK) {
