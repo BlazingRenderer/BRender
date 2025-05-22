@@ -149,7 +149,7 @@ static void delete_gl_resources(br_device_pixelmap *self)
     }
 }
 
-void BR_CMETHOD_DECL(br_device_pixelmap_gl, free)(br_object *_self)
+static void BR_CMETHOD_DECL(br_device_pixelmap_gl, free)(br_object *_self)
 {
     br_device_pixelmap *self = (br_device_pixelmap *)_self;
 
@@ -166,36 +166,36 @@ void BR_CMETHOD_DECL(br_device_pixelmap_gl, free)(br_object *_self)
     BrResFreeNoCallback(self);
 }
 
-const char *BR_CMETHOD_DECL(br_device_pixelmap_gl, identifier)(br_object *self)
+static const char *BR_CMETHOD_DECL(br_device_pixelmap_gl, identifier)(br_object *self)
 {
     return ((br_device_pixelmap *)self)->pm_identifier;
 }
 
-br_token BR_CMETHOD_DECL(br_device_pixelmap_gl, type)(br_object *self)
+static br_token BR_CMETHOD_DECL(br_device_pixelmap_gl, type)(br_object *self)
 {
     (void)self;
     return BRT_DEVICE_PIXELMAP;
 }
 
-br_boolean BR_CMETHOD_DECL(br_device_pixelmap_gl, isType)(br_object *self, br_token t)
+static br_boolean BR_CMETHOD_DECL(br_device_pixelmap_gl, isType)(br_object *self, br_token t)
 {
     (void)self;
     return (t == BRT_DEVICE_PIXELMAP) || (t == BRT_OBJECT);
 }
 
-br_device *BR_CMETHOD_DECL(br_device_pixelmap_gl, device)(br_object *self)
+static br_device *BR_CMETHOD_DECL(br_device_pixelmap_gl, device)(br_object *self)
 {
     (void)self;
     return ((br_device_pixelmap *)self)->device;
 }
 
-br_size_t BR_CMETHOD_DECL(br_device_pixelmap_gl, space)(br_object *self)
+static br_size_t BR_CMETHOD_DECL(br_device_pixelmap_gl, space)(br_object *self)
 {
     (void)self;
     return sizeof(br_device_pixelmap);
 }
 
-struct br_tv_template *BR_CMETHOD_DECL(br_device_pixelmap_gl, templateQuery)(br_object *_self)
+static struct br_tv_template *BR_CMETHOD_DECL(br_device_pixelmap_gl, templateQuery)(br_object *_self)
 {
     br_device_pixelmap *self = (br_device_pixelmap *)_self;
 
@@ -206,7 +206,7 @@ struct br_tv_template *BR_CMETHOD_DECL(br_device_pixelmap_gl, templateQuery)(br_
     return self->device->templates.devicePixelmapTemplate;
 }
 
-br_error BR_CMETHOD_DECL(br_device_pixelmap_gl, resize)(br_device_pixelmap *self, br_int_32 width, br_int_32 height)
+static br_error BR_CMETHOD_DECL(br_device_pixelmap_gl, resize)(br_device_pixelmap *self, br_int_32 width, br_int_32 height)
 {
     self->pm_width  = width;
     self->pm_height = height;
@@ -373,8 +373,8 @@ br_error BR_CMETHOD_DECL(br_device_pixelmap_gl, match)(br_device_pixelmap *self,
     return BRE_OK;
 }
 
-br_error BR_CMETHOD_DECL(br_device_pixelmap_gl, rectangleStretchCopy)(br_device_pixelmap *self, br_rectangle *d, br_device_pixelmap *src,
-                                                                      br_rectangle *s)
+static br_error BR_CMETHOD_DECL(br_device_pixelmap_gl, rectangleStretchCopy)(br_device_pixelmap *self, br_rectangle *d,
+                                                                             br_device_pixelmap *src, br_rectangle *s)
 {
     /*
      * Device->Device non-addressable stretch copy.
@@ -430,7 +430,8 @@ br_error BR_CMETHOD_DECL(br_device_pixelmap_gl, rectangleStretchCopy)(br_device_
     return BRE_OK;
 }
 
-br_error BR_CMETHOD_DECL(br_device_pixelmap_gl, rectangleCopy)(br_device_pixelmap *self, br_point *p, br_device_pixelmap *src, br_rectangle *sr)
+static br_error BR_CMETHOD_DECL(br_device_pixelmap_gl, rectangleCopy)(br_device_pixelmap *self, br_point *p, br_device_pixelmap *src,
+                                                                      br_rectangle *sr)
 {
     /* Device->Device non-addressable same-size copy. */
     br_rectangle r = {
@@ -443,7 +444,7 @@ br_error BR_CMETHOD_DECL(br_device_pixelmap_gl, rectangleCopy)(br_device_pixelma
     return BR_CMETHOD(br_device_pixelmap_gl, rectangleStretchCopy)(self, &r, src, sr);
 }
 
-br_error BR_CMETHOD_DECL(br_device_pixelmap_gl, rectangleFill)(br_device_pixelmap *self, br_rectangle *rect, br_uint_32 colour)
+static br_error BR_CMETHOD_DECL(br_device_pixelmap_gl, rectangleFill)(br_device_pixelmap *self, br_rectangle *rect, br_uint_32 colour)
 {
     GLuint       fbo;
     GLbitfield   mask;
@@ -489,8 +490,8 @@ br_error BR_CMETHOD_DECL(br_device_pixelmap_gl, rectangleFill)(br_device_pixelma
     return BRE_OK;
 }
 
-br_error BR_CMETHOD(br_device_pixelmap_gl, rectangleStretchCopyTo)(br_device_pixelmap *self, br_rectangle *d, br_device_pixelmap *_src,
-                                                                   br_rectangle *s)
+static br_error BR_CMETHOD(br_device_pixelmap_gl, rectangleStretchCopyTo)(br_device_pixelmap *self, br_rectangle *d,
+                                                                          br_device_pixelmap *_src, br_rectangle *s)
 {
     /* Pixelmap->Device, addressable stretch copy. */
 
@@ -600,7 +601,8 @@ br_error BR_CMETHOD(br_device_pixelmap_gl, rectangleStretchCopyTo)(br_device_pix
     return BRE_OK;
 }
 
-br_error BR_CMETHOD_DECL(br_device_pixelmap_gl, rectangleCopyTo)(br_device_pixelmap *self, br_point *p, br_device_pixelmap *src, br_rectangle *sr)
+static br_error BR_CMETHOD_DECL(br_device_pixelmap_gl, rectangleCopyTo)(br_device_pixelmap *self, br_point *p, br_device_pixelmap *src,
+                                                                        br_rectangle *sr)
 {
     /* Pixelmap->Device, addressable same-size copy. */
 
@@ -621,7 +623,8 @@ br_error BR_CMETHOD_DECL(br_device_pixelmap_gl, rectangleCopyTo)(br_device_pixel
 /*
  * Device->Pixelmap, addressable same-size copy.
  */
-br_error BR_CMETHOD_DECL(br_device_pixelmap_gl, rectangleCopyFrom)(br_device_pixelmap *self, br_point *p, br_device_pixelmap *dest, br_rectangle *r)
+static br_error BR_CMETHOD_DECL(br_device_pixelmap_gl, rectangleCopyFrom)(br_device_pixelmap *self, br_point *p, br_device_pixelmap *dest,
+                                                                          br_rectangle *r)
 {
     br_error                  err;
     void                     *row_temp;
@@ -668,7 +671,7 @@ br_error BR_CMETHOD_DECL(br_device_pixelmap_gl, rectangleCopyFrom)(br_device_pix
     return BRE_OK;
 }
 
-br_error BR_CMETHOD(br_device_pixelmap_gl, text)(br_device_pixelmap *self, br_point *point, br_font *font, const char *text, br_uint_32 colour)
+static br_error BR_CMETHOD(br_device_pixelmap_gl, text)(br_device_pixelmap *self, br_point *point, br_font *font, const char *text, br_uint_32 colour)
 {
 
     size_t      len = strlen(text);
@@ -798,7 +801,7 @@ br_error BR_CMETHOD(br_device_pixelmap_gl, text)(br_device_pixelmap *self, br_po
     return BRE_OK;
 }
 
-br_error BR_CMETHOD_DECL(br_device_pixelmap_gl, line)(br_device_pixelmap *self, br_point *s, br_point *e, br_uint_32 colour)
+static br_error BR_CMETHOD_DECL(br_device_pixelmap_gl, line)(br_device_pixelmap *self, br_point *s, br_point *e, br_uint_32 colour)
 {
 #pragma pack(push, 16)
     typedef struct br_line_gl {
