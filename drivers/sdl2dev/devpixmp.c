@@ -817,8 +817,10 @@ br_error BR_CMETHOD_DECL(br_device_pixelmap_sdl2, match)(br_device_pixelmap *sel
     BrTokenValueSetMany(&mt, &count, NULL, tv, self->device->templates.matchOffTemplate);
 
     if(mt.use == BRT_CLONE) {
-        mt.type       = self->pm_type;
-        mt.pixel_bits = self->surface->format->BitsPerPixel;
+        /*
+         * Sorry, sdl2dev is legacy.
+         */
+        return BRE_UNSUPPORTED;
     }
 
     /*
