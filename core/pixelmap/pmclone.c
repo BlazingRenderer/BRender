@@ -408,7 +408,7 @@ br_error BR_RESIDENT_ENTRY BrColourUnpack(br_colour pixel, br_uint_8 type, br_ui
     return BRE_OK;
 }
 
-static br_pixelmap *BR_PUBLIC_ENTRY BrPixelmapCloneTypedXX(br_pixelmap *src, br_uint_8 type)
+br_pixelmap *BR_PUBLIC_ENTRY BrPixelmapCloneTyped(br_pixelmap *src, br_uint_8 type)
 {
     br_pixelmap           *dst;
     br_pixelmap_converter *src_converter;

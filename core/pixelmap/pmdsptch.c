@@ -390,24 +390,6 @@ br_pixelmap *BR_PUBLIC_ENTRY BrPixelmapClone(br_pixelmap *src)
     return new;
 }
 
-br_pixelmap *BR_PUBLIC_ENTRY BrPixelmapCloneTyped(br_pixelmap *src, br_uint_8 type)
-{
-    br_pixelmap *new;
-
-    br_token_value tv[] = {
-        {.t = BRT_USE_T,         .v = {.t = BRT_CLONE}},
-        {.t = BRT_PIXEL_TYPE_U8, .v = {.u8 = type}    },
-        {.t = BR_NULL_TOKEN,     .v = 0               },
-    };
-
-    CheckDispatch(src);
-
-    if((new = BrPixelmapMatchTV(src, tv)) == NULL)
-        return NULL;
-
-    return new;
-}
-
 void BR_PUBLIC_ENTRY BrPixelmapFill(br_pixelmap *dst, br_uint_32 colour)
 {
     CheckDispatch(dst);
