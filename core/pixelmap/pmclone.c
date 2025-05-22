@@ -9,7 +9,7 @@
  * BR_PMT_INDEX_8
  */
 
-br_colour index_8_read(const br_uint_8 *pixels, const br_device_pixelmap *pm)
+static br_colour index_8_read(const br_uint_8 *pixels, const br_device_pixelmap *pm)
 {
     br_uint_8 index;
     br_colour colour;
@@ -41,7 +41,7 @@ br_colour index_8_read(const br_uint_8 *pixels, const br_device_pixelmap *pm)
     return BR_COLOUR_RGBA(r, g, b, 255);
 }
 
-void index_8_write(br_uint_8 *pixels, br_colour colour)
+static void index_8_write(br_uint_8 *pixels, br_colour colour)
 {
     br_uint_8 rgb[3] = {
         [0] = BR_RED(colour),
@@ -56,9 +56,11 @@ void index_8_write(br_uint_8 *pixels, br_colour colour)
  * BR_PMT_RGB_555
  */
 
-br_colour rgb_555_read(const br_uint_8 *pixels, const br_device_pixelmap *pm)
+static br_colour rgb_555_read(const br_uint_8 *pixels, const br_device_pixelmap *pm)
 {
     br_uint_8 r, g, b;
+
+    (void)pm;
 
     r = BR_RED_555(*((br_uint_16 *)pixels));
     g = BR_GRN_555(*((br_uint_16 *)pixels));
@@ -67,7 +69,7 @@ br_colour rgb_555_read(const br_uint_8 *pixels, const br_device_pixelmap *pm)
     return BR_COLOUR_RGBA(r, g, b, 255);
 }
 
-void rgb_555_write(br_uint_8 *pixels, br_colour colour)
+static void rgb_555_write(br_uint_8 *pixels, br_colour colour)
 {
     br_uint_8 r, g, b;
 
@@ -82,9 +84,11 @@ void rgb_555_write(br_uint_8 *pixels, br_colour colour)
  * BR_PMT_RGB_565
  */
 
-br_colour rgb_565_read(const br_uint_8 *pixels, const br_device_pixelmap *pm)
+static br_colour rgb_565_read(const br_uint_8 *pixels, const br_device_pixelmap *pm)
 {
     br_uint_8 r, g, b;
+
+    (void)pm;
 
     r = BR_RED_565(*((br_uint_16 *)pixels));
     g = BR_GRN_565(*((br_uint_16 *)pixels));
@@ -97,7 +101,7 @@ br_colour rgb_565_read(const br_uint_8 *pixels, const br_device_pixelmap *pm)
     return BR_COLOUR_RGBA(r, g, b, 255);
 }
 
-void rgb_565_write(br_uint_8 *pixels, br_colour colour)
+static void rgb_565_write(br_uint_8 *pixels, br_colour colour)
 {
     br_uint_8 r, g, b;
 
@@ -112,9 +116,11 @@ void rgb_565_write(br_uint_8 *pixels, br_colour colour)
  * BR_PMT_BGR_565
  */
 
-br_colour bgr_565_read(const br_uint_8 *pixels, const br_device_pixelmap *pm)
+static br_colour bgr_565_read(const br_uint_8 *pixels, const br_device_pixelmap *pm)
 {
     br_uint_8 r, g, b;
+
+    (void)pm;
 
     r = BR_BLU_565(*((br_uint_16 *)pixels));
     g = BR_GRN_565(*((br_uint_16 *)pixels));
@@ -127,7 +133,7 @@ br_colour bgr_565_read(const br_uint_8 *pixels, const br_device_pixelmap *pm)
     return BR_COLOUR_RGBA(r, g, b, 255);
 }
 
-void bgr_565_write(br_uint_8 *pixels, br_colour colour)
+static void bgr_565_write(br_uint_8 *pixels, br_colour colour)
 {
     br_uint_8 r, g, b;
 
@@ -142,9 +148,11 @@ void bgr_565_write(br_uint_8 *pixels, br_colour colour)
  * BR_PMT_RGB_888
  */
 
-br_colour rgb_888_read(const br_uint_8 *pixels, const br_device_pixelmap *pm)
+static br_colour rgb_888_read(const br_uint_8 *pixels, const br_device_pixelmap *pm)
 {
     br_uint_8 r, g, b;
+
+    (void)pm;
 
     r = pixels[2];
     g = pixels[1];
@@ -153,7 +161,7 @@ br_colour rgb_888_read(const br_uint_8 *pixels, const br_device_pixelmap *pm)
     return BR_COLOUR_RGBA(r, g, b, 255);
 }
 
-void rgb_888_write(br_uint_8 *pixels, br_colour colour)
+static void rgb_888_write(br_uint_8 *pixels, br_colour colour)
 {
     pixels[2] = BR_RED(colour);
     pixels[1] = BR_GRN(colour);
@@ -164,12 +172,14 @@ void rgb_888_write(br_uint_8 *pixels, br_colour colour)
  * BR_PMT_RGBX_888
  */
 
-br_colour rgbx_888_read(const br_uint_8 *pixels, const br_device_pixelmap *pm)
+static br_colour rgbx_888_read(const br_uint_8 *pixels, const br_device_pixelmap *pm)
 {
+    (void)pm;
+
     return *((br_colour *)pixels);
 }
 
-void rgbx_888_write(br_uint_8 *pixels, br_colour colour)
+static void rgbx_888_write(br_uint_8 *pixels, br_colour colour)
 {
     *((br_colour *)pixels) = colour;
 }
@@ -178,12 +188,14 @@ void rgbx_888_write(br_uint_8 *pixels, br_colour colour)
  * BR_PMT_RGBA_8888
  */
 
-br_colour rgba_8888_read(const br_uint_8 *pixels, const br_device_pixelmap *pm)
+static br_colour rgba_8888_read(const br_uint_8 *pixels, const br_device_pixelmap *pm)
 {
+    (void)pm;
+
     return *((br_colour *)pixels);
 }
 
-void rgba_8888_write(br_uint_8 *pixels, br_colour colour)
+static void rgba_8888_write(br_uint_8 *pixels, br_colour colour)
 {
     *((br_colour *)pixels) = colour;
 }
@@ -192,9 +204,11 @@ void rgba_8888_write(br_uint_8 *pixels, br_colour colour)
  * BR_PMT_BGR_555
  */
 
-br_colour bgr_555_read(const br_uint_8 *pixels, const br_device_pixelmap *pm)
+static br_colour bgr_555_read(const br_uint_8 *pixels, const br_device_pixelmap *pm)
 {
     br_uint_8 r, g, b;
+
+    (void)pm;
 
     r = BR_BLU_555(*((br_uint_16 *)pixels));
     g = BR_GRN_555(*((br_uint_16 *)pixels));
@@ -203,7 +217,7 @@ br_colour bgr_555_read(const br_uint_8 *pixels, const br_device_pixelmap *pm)
     return BR_COLOUR_RGBA(r, g, b, 255);
 }
 
-void bgr_555_write(br_uint_8 *pixels, br_colour colour)
+static void bgr_555_write(br_uint_8 *pixels, br_colour colour)
 {
     br_uint_8 r, g, b;
 
@@ -218,9 +232,11 @@ void bgr_555_write(br_uint_8 *pixels, br_colour colour)
  * BR_PMT_RGBA_4444
  */
 
-br_colour rgba_4444_read(const br_uint_8 *pixels, const br_device_pixelmap *pm)
+static br_colour rgba_4444_read(const br_uint_8 *pixels, const br_device_pixelmap *pm)
 {
     br_uint_8 r, g, b, a;
+
+    (void)pm;
 
     r = BR_RED_4444(*((br_uint_16 *)pixels));
     g = BR_GRN_4444(*((br_uint_16 *)pixels));
@@ -235,7 +251,7 @@ br_colour rgba_4444_read(const br_uint_8 *pixels, const br_device_pixelmap *pm)
     return BR_COLOUR_RGBA(r, g, b, a);
 }
 
-void rgba_4444_write(br_uint_8 *pixels, br_colour colour)
+static void rgba_4444_write(br_uint_8 *pixels, br_colour colour)
 {
     br_uint_8 r, g, b, a;
 
@@ -251,9 +267,11 @@ void rgba_4444_write(br_uint_8 *pixels, br_colour colour)
  * BR_PMT_ARGB_4444
  */
 
-br_colour argb_4444_read(const br_uint_8 *pixels, const br_device_pixelmap *pm)
+static br_colour argb_4444_read(const br_uint_8 *pixels, const br_device_pixelmap *pm)
 {
     br_uint_8 r, g, b, a;
+
+    (void)pm;
 
     r = BR_RED_4444(*((br_uint_16 *)pixels));
     g = BR_GRN_4444(*((br_uint_16 *)pixels));
@@ -268,7 +286,7 @@ br_colour argb_4444_read(const br_uint_8 *pixels, const br_device_pixelmap *pm)
     return BR_COLOUR_RGBA(r, g, b, a);
 }
 
-void argb_4444_write(br_uint_8 *pixels, br_colour colour)
+static void argb_4444_write(br_uint_8 *pixels, br_colour colour)
 {
     br_uint_8 r, g, b, a;
 
@@ -284,9 +302,11 @@ void argb_4444_write(br_uint_8 *pixels, br_colour colour)
  * BR_PMT_RGBA_8888_ARR
  */
 
-br_colour rgba_8888_arr_read(const br_uint_8 *pixels, const br_device_pixelmap *pm)
+static br_colour rgba_8888_arr_read(const br_uint_8 *pixels, const br_device_pixelmap *pm)
 {
     br_uint_8 r, g, b, a;
+
+    (void)pm;
 
     r = pixels[0];
     g = pixels[1];
@@ -296,7 +316,7 @@ br_colour rgba_8888_arr_read(const br_uint_8 *pixels, const br_device_pixelmap *
     return BR_COLOUR_RGBA(r, g, b, a);
 }
 
-void rgba_8888_arr_write(br_uint_8 *pixels, br_colour colour)
+static void rgba_8888_arr_write(br_uint_8 *pixels, br_colour colour)
 {
     pixels[0] = BR_RED(colour);
     pixels[1] = BR_GRN(colour);
@@ -309,6 +329,8 @@ static br_colour r8b8g8a8_read(const br_uint_8 *pixels, const br_device_pixelmap
     br_uint_8 r, g, b, a;
 
     br_uint_32 pixel = *(br_uint_32 *)pixels;
+
+    (void)pm;
 
     r = (pixel & 0xFF000000) >> 24;
     g = (pixel & 0x00FF0000) >> 16;
