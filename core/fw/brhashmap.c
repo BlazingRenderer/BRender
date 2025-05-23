@@ -448,6 +448,18 @@ void *BR_RESIDENT_ENTRY BrHashMapFind(const br_hashmap *hm, const void *key)
     return bkt->value;
 }
 
+br_boolean BR_RESIDENT_ENTRY BrHashMapUpdate(br_hashmap *hm, const void *key, void *value)
+{
+    br_hashmap_bucket *bkt;
+
+    /* NB: Safe const-away cast. */
+    if((bkt = (br_hashmap_bucket *)find_bucket(hm, key, NULL)) == NULL)
+        return BR_FALSE;
+
+    bkt->value = value;
+    return BR_TRUE;
+}
+
 void *BR_RESIDENT_ENTRY BrHashMapRemove(br_hashmap *hm, const void *key)
 {
     br_hashmap_bucket *bkt;

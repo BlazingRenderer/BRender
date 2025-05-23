@@ -392,12 +392,13 @@ void BR_RESIDENT_ENTRY BrHashMapFree(br_hashmap *hm);
  *
  * @remark  This is *not* affected by the current resize policy.
  */
-int BR_RESIDENT_ENTRY       BrHashMapResize(br_hashmap *hm, br_size_t nelem);
-int BR_RESIDENT_ENTRY       BrHashMapInsert(br_hashmap *hm, const void *key, void *value);
-void *BR_RESIDENT_ENTRY     BrHashMapFindByHash(const br_hashmap *hm, br_hash hash);
-void *BR_RESIDENT_ENTRY     BrHashMapFind(const br_hashmap *hm, const void *key);
-void *BR_RESIDENT_ENTRY     BrHashMapRemove(br_hashmap *hm, const void *key);
-br_size_t BR_RESIDENT_ENTRY BrHashMapSize(const br_hashmap *hm);
+int BR_RESIDENT_ENTRY        BrHashMapResize(br_hashmap *hm, br_size_t nelem);
+int BR_RESIDENT_ENTRY        BrHashMapInsert(br_hashmap *hm, const void *key, void *value);
+void *BR_RESIDENT_ENTRY      BrHashMapFindByHash(const br_hashmap *hm, br_hash hash);
+void *BR_RESIDENT_ENTRY      BrHashMapFind(const br_hashmap *hm, const void *key);
+br_boolean BR_RESIDENT_ENTRY BrHashMapUpdate(br_hashmap *hm, const void *key, void *value);
+void *BR_RESIDENT_ENTRY      BrHashMapRemove(br_hashmap *hm, const void *key);
+br_size_t BR_RESIDENT_ENTRY  BrHashMapSize(const br_hashmap *hm);
 
 int BR_RESIDENT_ENTRY BrHashMapEnumerate(const br_hashmap *hm, br_hashmap_enum_cbfn proc, void *user);
 
