@@ -180,8 +180,7 @@ static int fixup_actor_map(const void *key, void *value, br_hash hash, void *use
     (void)value;
     (void)hash;
 
-    /* Technically modifying the map during iteration, but we're just updating the value so it's fine. */
-    BrHashMapInsert(state->actor_map, actor, get_next_node(state));
+    BrHashMapUpdate(state->actor_map, actor, get_next_node(state));
     return 0;
 }
 
@@ -583,8 +582,7 @@ static int fixup_model_map(const void *key, void *value, br_hash hash, void *use
     (void)value;
     (void)hash;
 
-    /* Technically modifying the map during iteration, but we're just updating the value so it's fine. */
-    BrHashMapInsert(state->model_map, model, get_next_mesh(state));
+    BrHashMapUpdate(state->model_map, model, get_next_mesh(state));
     return 0;
 }
 
@@ -596,8 +594,7 @@ static int fixup_material_map(const void *key, void *value, br_hash hash, void *
     (void)value;
     (void)hash;
 
-    /* Technically modifying the map during iteration, but we're just updating the value so it's fine. */
-    BrHashMapInsert(state->material_map, mat, get_next_material(state));
+    BrHashMapUpdate(state->material_map, mat, get_next_material(state));
     return 0;
 }
 
@@ -608,8 +605,7 @@ static int fixup_sampler_map(const void *key, void *value, br_hash hash, void *u
     (void)value;
     (void)hash;
 
-    /* Technically modifying the map during iteration, but we're just updating the value so it's fine. */
-    BrHashMapInsert(state->sampler_map, key, get_next_sampler(state));
+    BrHashMapUpdate(state->sampler_map, key, get_next_sampler(state));
     return 0;
 }
 
@@ -636,8 +632,7 @@ static int fixup_pixelmap_map(const void *key, void *value, br_hash hash, void *
     (void)value;
     (void)hash;
 
-    /* Technically modifying the map during iteration, but we're just updating the value so it's fine. */
-    BrHashMapInsert(state->pixelmap_map, pm, get_next_image(state));
+    BrHashMapUpdate(state->pixelmap_map, pm, get_next_image(state));
     return 0;
 }
 
