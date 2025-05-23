@@ -1308,16 +1308,15 @@ br_error BR_PUBLIC_ENTRY BrFmtGLTFActorSaveMany(const char *name, br_actor **act
     /*
      * Allocate space for the scenes, and fill in the nodes.
      */
-    data->scenes_count = num;
+    data->scenes_count = 1;
     data->scenes       = BrResAllocate(data, data->scenes_count * sizeof(cgltf_scene), BR_MEMORY_SCRATCH);
+    data->scene        = data->scenes + 0;
+
+    data->scene->nodes_count = num;
+    data->scene->nodes       = BrResAllocate(data, num * sizeof(cgltf_node *), BR_MEMORY_SCRATCH);
 
     for(br_size_t i = 0; i < num; ++i) {
-        cgltf_scene *scene = data->scenes + i;
-
-        scene->name        = actors[i]->identifier;
-        scene->nodes_count = 1;
-        scene->nodes       = BrResAllocate(data, scene->nodes_count * sizeof(cgltf_node *), BR_MEMORY_SCRATCH);
-        scene->nodes[0]    = BrHashMapFind(state->actor_map, actors[i]);
+        data->scene->nodes[i] = BrHashMapFind(state->actor_map, actors[i]);
     }
 
     /*
