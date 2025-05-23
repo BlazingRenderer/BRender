@@ -116,6 +116,9 @@ static void *cgltf_alloc_br(void *user, cgltf_size size)
 
 static void cgltf_free_br(void *user, void *ptr)
 {
+    if(ptr == NULL)
+        return;
+
     (void)user;
     BrResFree(ptr);
 }
