@@ -515,7 +515,7 @@ br_hash BR_RESIDENT_ENTRY BrHashMapDefaultHash(const void *k)
     return (br_hash)k;
 }
 
-int BR_RESIDENT_ENTRY BrHashMapDefaultCompare(const void *a, const void *b)
+br_boolean BR_RESIDENT_ENTRY BrHashMapDefaultCompare(const void *a, const void *b)
 {
     return a == b;
 }
@@ -528,10 +528,10 @@ br_hash BR_RESIDENT_ENTRY BrHashMapStringHash(const void *s)
 int BR_RESIDENT_ENTRY BrHashMapStringCompare(const void *a, const void *b)
 {
     if(a == b)
-        return 0;
+        return BR_FALSE;
 
     if(a == NULL || b == NULL)
-        return 0;
+        return BR_FALSE;
 
     return BrStrCmp(a, b) == 0;
 }
