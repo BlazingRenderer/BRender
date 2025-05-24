@@ -48,6 +48,9 @@ set(FMT_FILES
 
         cgltf.h
         cgltf_write.h
+        cgltf_write_brender.h
+        cgltf_brender.h
+        cgltf_brender_impl.h
         cgltf.c
         )
 

@@ -108,6 +108,8 @@ typedef int cgltf_int;
 typedef unsigned int cgltf_uint;
 typedef int cgltf_bool;
 
+#include "cgltf_brender.h"
+
 typedef enum cgltf_file_type
 {
 	cgltf_file_type_invalid,
@@ -251,15 +253,6 @@ typedef enum cgltf_light_type {
 	cgltf_light_type_spot,
 	cgltf_light_type_max_enum
 } cgltf_light_type;
-
-typedef enum cgltf_brender_light_type {
-	cgltf_brender_light_type_invalid,
-	cgltf_brender_light_type_point,
-	cgltf_brender_light_type_direct,
-	cgltf_brender_light_type_spot,
-	cgltf_brender_light_type_ambient,
-	cgltf_brender_light_type_max,
-} cgltf_brender_light_type;
 
 typedef enum cgltf_data_free_method {
 	cgltf_data_free_method_none,
@@ -582,33 +575,6 @@ typedef struct cgltf_mesh_gpu_instancing {
 	cgltf_size attributes_count;
 } cgltf_mesh_gpu_instancing;
 
-typedef struct cgltf_brender_material {
-	char       *identifier;
-	cgltf_float colour[3];
-	cgltf_float opacity;
-	cgltf_float ka;
-	cgltf_float kd;
-	cgltf_float ks;
-	cgltf_float power;
-	cgltf_int flags;
-	cgltf_float map_transform[6];
-	cgltf_int mode;
-	cgltf_int index_base;
-	cgltf_int index_range;
-	cgltf_image *colour_map;
-	cgltf_image *screendoor;
-	cgltf_image *index_shade;
-	cgltf_image *index_blend;
-	cgltf_image *index_fog;
-	// TODO: extra_surf
-	// TODO: extra_prim
-	cgltf_float fog_min;
-	cgltf_float fog_max;
-	cgltf_float fog_colour[3];
-	cgltf_int   subdivide_tolerance;
-	cgltf_float depth_bias;
-} cgltf_brender_material;
-
 typedef struct cgltf_primitive {
 	cgltf_primitive_type type;
 	cgltf_accessor* indices;
@@ -693,23 +659,6 @@ typedef struct cgltf_light {
 	cgltf_float spot_outer_cone_angle;
 	cgltf_extras extras;
 } cgltf_light;
-
-typedef struct cgltf_brender_light {
-	char                    *identifier;
-	cgltf_brender_light_type type;
-	cgltf_bool               view_space;
-	cgltf_bool               linear_falloff;
-	cgltf_float              colour[3];
-	cgltf_float              attenuation_c;
-	cgltf_float              attenuation_l;
-	cgltf_float              attenuation_q;
-	cgltf_float              cone_outer;
-	cgltf_float              cone_inner;
-	cgltf_float              radius_outer;
-	cgltf_float              radius_inner;
-
-	/* TODO: volumes, if I ever see any. */
-} cgltf_brender_light;
 
 struct cgltf_node {
 	char* name;
@@ -3207,70 +3156,7 @@ static int cgltf_parse_json_material_mapping_data(cgltf_options* options, jsmnto
 	return i;
 }
 
-
-static int cgltf_parse_json_brender_light_mappings(cgltf_options* options, jsmntok_t const* tokens, int i, const uint8_t* json_chunk, cgltf_brender_light **out_light)
-{
-	CGLTF_CHECK_TOKTYPE(tokens[i], JSMN_OBJECT);
-
-	int size = tokens[i].size;
-	++i;
-
-	for (int j = 0; j < size; ++j)
-	{
-		CGLTF_CHECK_KEY(tokens[i]);
-
-		if (cgltf_json_strcmp(tokens + i, json_chunk, "light") == 0)
-		{
-			++i;
-			CGLTF_CHECK_TOKTYPE(tokens[i], JSMN_PRIMITIVE);
-			*out_light = CGLTF_PTRINDEX(cgltf_brender_light, cgltf_json_to_int(tokens + i, json_chunk));
-			++i;
-		}
-		else
-		{
-			i = cgltf_skip_json(tokens, i+1);
-		}
-
-		if (i < 0)
-		{
-			return i;
-		}
-	}
-
-	return i;
-}
-
-static int cgltf_parse_json_brender_material_mappings(cgltf_options* options, jsmntok_t const* tokens, int i, const uint8_t* json_chunk, cgltf_brender_material **out_material)
-{
-	CGLTF_CHECK_TOKTYPE(tokens[i], JSMN_OBJECT);
-
-	int size = tokens[i].size;
-	++i;
-
-	for (int j = 0; j < size; ++j)
-	{
-		CGLTF_CHECK_KEY(tokens[i]);
-
-		if (cgltf_json_strcmp(tokens + i, json_chunk, "material") == 0)
-		{
-			++i;
-			CGLTF_CHECK_TOKTYPE(tokens[i], JSMN_PRIMITIVE);
-			*out_material = CGLTF_PTRINDEX(cgltf_brender_material, cgltf_json_to_int(tokens + i, json_chunk));
-			++i;
-		}
-		else
-		{
-			i = cgltf_skip_json(tokens, i+1);
-		}
-
-		if (i < 0)
-		{
-			return i;
-		}
-	}
-
-	return i;
-}
+#include "cgltf_brender_impl.h"
 
 static int cgltf_parse_json_material_mappings(cgltf_options* options, jsmntok_t const* tokens, int i, const uint8_t* json_chunk, cgltf_primitive* out_prim)
 {
@@ -5672,341 +5558,6 @@ static int cgltf_parse_json_lights(cgltf_options* options, jsmntok_t const* toke
 	return i;
 }
 
-static int cgltf_parse_json_brender_light(cgltf_options* options, jsmntok_t const* tokens, int i, const uint8_t* json_chunk, cgltf_brender_light* out_light)
-{
-	CGLTF_CHECK_TOKTYPE(tokens[i], JSMN_OBJECT);
-
-	out_light->type = cgltf_brender_light_type_direct;
-	out_light->colour[0] = 1.0f;
-	out_light->colour[1] = 1.0f;
-	out_light->colour[2] = 1.0f;
-	out_light->attenuation_c = 1.0f;
-	out_light->attenuation_l = 0.0f;
-	out_light->attenuation_q = 0.0f;
-	out_light->cone_outer = 15.0f / 360.0f;
-	out_light->cone_inner = 10.0f / 360.0f;
-	out_light->radius_outer = 0.0f;
-	out_light->radius_inner = 0.0f;
-
-	int size = tokens[i].size;
-	++i;
-
-	for(int j = 0; j < size; ++j)
-	{
-		CGLTF_CHECK_KEY(tokens[i]);
-
-		if(cgltf_json_strcmp(tokens+i, json_chunk, "identifier") == 0)
-		{
-			i = cgltf_parse_json_string(options, tokens, i + 1, json_chunk, &out_light->identifier);
-		}
-		else if(cgltf_json_strcmp(tokens + i, json_chunk, "type") == 0)
-		{
-			++i;
-			if (cgltf_json_strcmp(tokens + i, json_chunk, "point") == 0)
-			{
-				out_light->type = cgltf_brender_light_type_point;
-			}
-			else if (cgltf_json_strcmp(tokens + i, json_chunk, "direct") == 0)
-			{
-				out_light->type = cgltf_brender_light_type_direct;
-			}
-			else if (cgltf_json_strcmp(tokens + i, json_chunk, "spot") == 0)
-			{
-				out_light->type = cgltf_brender_light_type_spot;
-			}
-			else if (cgltf_json_strcmp(tokens + i, json_chunk, "ambient") == 0)
-			{
-				out_light->type = cgltf_brender_light_type_ambient;
-			}
-			++i;
-		}
-		else if(cgltf_json_strcmp(tokens + i, json_chunk, "view_space") == 0)
-		{
-			++i;
-			out_light->view_space = cgltf_json_to_bool(tokens+i, json_chunk);
-			++i;
-		}
-		else if(cgltf_json_strcmp(tokens + i, json_chunk, "linear_falloff") == 0)
-		{
-			++i;
-			out_light->linear_falloff = cgltf_json_to_bool(tokens+i, json_chunk);
-			++i;
-		}
-		else if (cgltf_json_strcmp(tokens + i, json_chunk, "colour") == 0)
-		{
-			i = cgltf_parse_json_float_array(tokens, i + 1, json_chunk, out_light->colour, 3);
-		}
-		else if (cgltf_json_strcmp(tokens + i, json_chunk, "attenuation_c") == 0)
-		{
-			++i;
-			out_light->attenuation_c = cgltf_json_to_float(tokens+i, json_chunk);
-			++i;
-		}
-		else if (cgltf_json_strcmp(tokens + i, json_chunk, "attenuation_l") == 0) {
-			++i;
-			out_light->attenuation_l = cgltf_json_to_float(tokens+i, json_chunk);
-			++i;
-		}
-		else if (cgltf_json_strcmp(tokens + i, json_chunk, "attenuation_l") == 0)
-		{
-			++i;
-			out_light->attenuation_q = cgltf_json_to_float(tokens+i, json_chunk);
-			++i;
-		}
-		else if (cgltf_json_strcmp(tokens + i, json_chunk, "cone_outer") == 0)
-		{
-			++i;
-			out_light->cone_outer = cgltf_json_to_float(tokens+i, json_chunk);
-			++i;
-		}
-		else if (cgltf_json_strcmp(tokens + i, json_chunk, "cone_inner") == 0)
-		{
-			++i;
-			out_light->cone_inner = cgltf_json_to_float(tokens+i, json_chunk);
-			++i;
-		}
-		else if (cgltf_json_strcmp(tokens + i, json_chunk, "radius_outer") == 0)
-		{
-			++i;
-			out_light->radius_outer = cgltf_json_to_float(tokens+i, json_chunk);
-			++i;
-		}
-		else if (cgltf_json_strcmp(tokens + i, json_chunk, "radius_inner") == 0)
-		{
-			++i;
-			out_light->radius_inner = cgltf_json_to_float(tokens+i, json_chunk);
-			++i;
-		}
-		else
-		{
-			i = cgltf_skip_json(tokens, i+1);
-		}
-
-		if (i < 0)
-		{
-			return i;
-		}
-	}
-
-	return i;
-}
-
-static int cgltf_parse_json_brender_lights(cgltf_options* options, jsmntok_t const* tokens, int i, const uint8_t* json_chunk, cgltf_data* out_data)
-{
-	i = cgltf_parse_json_array(options, tokens, i, json_chunk, sizeof(cgltf_brender_light), (void**)&out_data->brender_lights, &out_data->brender_lights_count);
-	if (i < 0)
-	{
-		return i;
-	}
-
-	for (cgltf_size j = 0; j < out_data->brender_lights_count; ++j)
-	{
-		i = cgltf_parse_json_brender_light(options, tokens, i, json_chunk, &out_data->brender_lights[j]);
-		if (i < 0)
-		{
-			return i;
-		}
-	}
-	return i;
-}
-
-static int cgltf_parse_json_brender_material(cgltf_options* options, jsmntok_t const* tokens, int i, const uint8_t* json_chunk, cgltf_brender_material* out_material)
-{
-	CGLTF_CHECK_TOKTYPE(tokens[i], JSMN_OBJECT);
-
-	out_material->colour[0] = 1.0f;
-	out_material->colour[1] = 1.0f;
-	out_material->colour[2] = 1.0f;
-
-	out_material->opacity = 1.0f;
-	out_material->ka = 1.0f;
-	out_material->kd = 0.7f;
-	out_material->ks = 0.0f;
-	out_material->power = 20.0f;
-
-	out_material->flags = 1;
-	out_material->mode = 4;
-
-	out_material->map_transform[0] = 1.0f;
-	out_material->map_transform[3] = 1.0f;
-
-	out_material->index_base = 10;
-	out_material->index_range = 31;
-
-	out_material->fog_min = 0.0f;
-	out_material->fog_max = 0.0f;
-
-	out_material->fog_colour[0] = 0.0f;
-	out_material->fog_colour[1] = 0.0f;
-	out_material->fog_colour[2] = 0.0f;
-
-	out_material->subdivide_tolerance = 0;
-	out_material->depth_bias = 0.0f;
-
-	int size = tokens[i].size;
-	++i;
-
-	for(int j = 0; j < size; ++j) {
-		CGLTF_CHECK_KEY(tokens[i]);
-
-		if(cgltf_json_strcmp(tokens+i, json_chunk, "identifier") == 0)
-		{
-			i = cgltf_parse_json_string(options, tokens, i + 1, json_chunk, &out_material->identifier);
-		}
-		else if (cgltf_json_strcmp(tokens + i, json_chunk, "colour") == 0)
-		{
-			i = cgltf_parse_json_float_array(tokens, i + 1, json_chunk, out_material->colour, 3);
-		}
-		else if(cgltf_json_strcmp(tokens + i, json_chunk, "opacity") == 0)
-		{
-			++i;
-			out_material->opacity = cgltf_json_to_float(tokens+i, json_chunk);
-			++i;
-		}
-		else if(cgltf_json_strcmp(tokens + i, json_chunk, "ka") == 0)
-		{
-			++i;
-			out_material->ka = cgltf_json_to_float(tokens+i, json_chunk);
-			++i;
-		}
-		else if(cgltf_json_strcmp(tokens + i, json_chunk, "kd") == 0)
-		{
-			++i;
-			out_material->kd = cgltf_json_to_float(tokens+i, json_chunk);
-			++i;
-		}
-		else if(cgltf_json_strcmp(tokens + i, json_chunk, "ks") == 0)
-		{
-			++i;
-			out_material->ks = cgltf_json_to_float(tokens+i, json_chunk);
-			++i;
-		}
-		else if(cgltf_json_strcmp(tokens + i, json_chunk, "power") == 0)
-		{
-			++i;
-			out_material->power = cgltf_json_to_float(tokens+i, json_chunk);
-			++i;
-		}
-		else if(cgltf_json_strcmp(tokens + i, json_chunk, "flags") == 0)
-		{
-			++i;
-			out_material->flags = cgltf_json_to_int(tokens+i, json_chunk);
-			++i;
-		}
-		else if(cgltf_json_strcmp(tokens + i, json_chunk, "mode") == 0)
-		{
-			++i;
-			out_material->mode = cgltf_json_to_int(tokens+i, json_chunk);
-			++i;
-		}
-		else if (cgltf_json_strcmp(tokens + i, json_chunk, "map_transform") == 0)
-		{
-			i = cgltf_parse_json_float_array(tokens, i + 1, json_chunk, out_material->map_transform, 6);
-		}
-		else if(cgltf_json_strcmp(tokens + i, json_chunk, "index_base") == 0)
-		{
-			++i;
-			out_material->index_base = cgltf_json_to_int(tokens+i, json_chunk);
-			++i;
-		}
-		else if(cgltf_json_strcmp(tokens + i, json_chunk, "index_range") == 0)
-		{
-			++i;
-			out_material->index_range = cgltf_json_to_int(tokens+i, json_chunk);
-			++i;
-		}
-		else if(cgltf_json_strcmp(tokens + i, json_chunk, "colour_map") == 0)
-		{
-			++i;
-			out_material->colour_map = CGLTF_PTRINDEX(cgltf_image, cgltf_json_to_int(tokens + i, json_chunk));
-			++i;
-		}
-		else if(cgltf_json_strcmp(tokens + i, json_chunk, "screendoor") == 0)
-		{
-			++i;
-			out_material->screendoor = CGLTF_PTRINDEX(cgltf_image, cgltf_json_to_int(tokens + i, json_chunk));
-			++i;
-		}
-		else if(cgltf_json_strcmp(tokens + i, json_chunk, "index_shade") == 0)
-		{
-			++i;
-			out_material->index_shade = CGLTF_PTRINDEX(cgltf_image, cgltf_json_to_int(tokens + i, json_chunk));
-			++i;
-		}
-		else if(cgltf_json_strcmp(tokens + i, json_chunk, "index_blend") == 0)
-		{
-			++i;
-			out_material->index_blend = CGLTF_PTRINDEX(cgltf_image, cgltf_json_to_int(tokens + i, json_chunk));
-			++i;
-		}
-		else if(cgltf_json_strcmp(tokens + i, json_chunk, "index_fog") == 0)
-		{
-			++i;
-			out_material->index_fog = CGLTF_PTRINDEX(cgltf_image, cgltf_json_to_int(tokens + i, json_chunk));
-			++i;
-		}
-		else if(cgltf_json_strcmp(tokens + i, json_chunk, "fog_min") == 0)
-		{
-			++i;
-			out_material->fog_min = cgltf_json_to_float(tokens+i, json_chunk);
-			++i;
-		}
-		else if(cgltf_json_strcmp(tokens + i, json_chunk, "fog_max") == 0)
-		{
-			++i;
-			out_material->fog_max = cgltf_json_to_float(tokens+i, json_chunk);
-			++i;
-		}
-		else if (cgltf_json_strcmp(tokens + i, json_chunk, "fog_colour") == 0)
-		{
-			i = cgltf_parse_json_float_array(tokens, i + 1, json_chunk, out_material->fog_colour, 3);
-		}
-		else if(cgltf_json_strcmp(tokens + i, json_chunk, "subdivide_tolerance") == 0)
-		{
-			++i;
-			out_material->subdivide_tolerance = cgltf_json_to_int(tokens+i, json_chunk);
-			++i;
-		}
-		else if(cgltf_json_strcmp(tokens + i, json_chunk, "depth_bias") == 0)
-		{
-			++i;
-			out_material->depth_bias = cgltf_json_to_float(tokens+i, json_chunk);
-			++i;
-		}
-		else
-		{
-			i = cgltf_skip_json(tokens, i+1);
-		}
-
-		if (i < 0)
-		{
-			return i;
-		}
-	}
-
-
-	return i;
-}
-
-static int cgltf_parse_json_brender_materials(cgltf_options* options, jsmntok_t const* tokens, int i, const uint8_t* json_chunk, cgltf_data* out_data)
-{
-	i = cgltf_parse_json_array(options, tokens, i, json_chunk, sizeof(cgltf_brender_material ), (void**)&out_data->brender_materials, &out_data->brender_materials_count);
-	if (i < 0)
-	{
-		return i;
-	}
-
-	for (cgltf_size j = 0; j < out_data->brender_materials_count; ++j)
-	{
-		i = cgltf_parse_json_brender_material(options, tokens, i, json_chunk, &out_data->brender_materials[j]);
-		if (i < 0)
-		{
-			return i;
-		}
-	}
-	return i;
-}
-
 static int cgltf_parse_json_node(cgltf_options* options, jsmntok_t const* tokens, int i, const uint8_t* json_chunk, cgltf_node* out_node)
 {
 	CGLTF_CHECK_TOKTYPE(tokens[i], JSMN_OBJECT);
@@ -6849,59 +6400,11 @@ static int cgltf_parse_json_root(cgltf_options* options, jsmntok_t const* tokens
 				}
 				else if (cgltf_json_strcmp(tokens+i, json_chunk, "BR_lights") == 0)
 				{
-					++i;
-
-					CGLTF_CHECK_TOKTYPE(tokens[i], JSMN_OBJECT);
-
-					int data_size = tokens[i].size;
-					++i;
-
-					for (int m = 0; m < data_size; ++m)
-					{
-						CGLTF_CHECK_KEY(tokens[i]);
-
-						if (cgltf_json_strcmp(tokens + i, json_chunk, "lights") == 0)
-						{
-							i = cgltf_parse_json_brender_lights(options, tokens, i + 1, json_chunk, out_data);
-						}
-						else
-						{
-							i = cgltf_skip_json(tokens, i + 1);
-						}
-
-						if (i < 0)
-						{
-							return i;
-						}
-					}
+					i = cgltf_parse_BR_lights(options, tokens, i, json_chunk, out_data);
 				}
 				else if (cgltf_json_strcmp(tokens+i, json_chunk, "BR_materials") == 0)
 				{
-					++i;
-
-					CGLTF_CHECK_TOKTYPE(tokens[i], JSMN_OBJECT);
-
-					int data_size = tokens[i].size;
-					++i;
-
-					for (int m = 0; m < data_size; ++m)
-					{
-						CGLTF_CHECK_KEY(tokens[i]);
-
-						if (cgltf_json_strcmp(tokens + i, json_chunk, "materials") == 0)
-						{
-							i = cgltf_parse_json_brender_materials(options, tokens, i + 1, json_chunk, out_data);
-						}
-						else
-						{
-							i = cgltf_skip_json(tokens, i + 1);
-						}
-
-						if (i < 0)
-						{
-							return i;
-						}
-					}
+					i = cgltf_parse_BR_materials(options, tokens, i, json_chunk, out_data);
 				}
 				else
 				{
