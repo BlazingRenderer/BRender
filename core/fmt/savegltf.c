@@ -11,10 +11,10 @@
 
 #pragma pack(push, 1)
 typedef struct br_gltf_save_sampler_key {
-    int filter_min;
-    int filter_mag;
-    int wrap_s;
-    int wrap_t;
+    cgltf_wrap_mode filter_min;
+    cgltf_wrap_mode filter_mag;
+    cgltf_wrap_mode wrap_s;
+    cgltf_wrap_mode wrap_t;
 } br_gltf_save_sampler_key;
 #pragma pack(pop)
 
@@ -256,68 +256,55 @@ static int count_textures(const void *key, void *value, br_hash hash, void *user
 
 static br_gltf_save_sampler_key material_to_sampler_key(const br_material *mat)
 {
-    enum {
-        NEAREST                = 9728,
-        LINEAR                 = 9729,
-        NEAREST_MIPMAP_NEAREST = 9984,
-        LINEAR_MIPMAP_NEAREST  = 9985,
-        NEAREST_MIPMAP_LINEAR  = 9986,
-        LINEAR_MIPMAP_LINEAR   = 9987,
-
-        CLAMP_TO_EDGE   = 33071,
-        MIRRORED_REPEAT = 33648,
-        REPEAT          = 10497,
-    };
-
     br_gltf_save_sampler_key key = {
-        .filter_mag = NEAREST,
-        .filter_min = NEAREST,
-        .wrap_s     = REPEAT,
-        .wrap_t     = REPEAT,
+        .filter_mag = cgltf_filter_type_nearest,
+        .filter_min = cgltf_filter_type_nearest,
+        .wrap_s     = cgltf_wrap_mode_repeat,
+        .wrap_t     = cgltf_wrap_mode_repeat,
     };
 
     br_boolean map_filtering = (mat->flags & BR_MATF_MAP_INTERPOLATION) != 0;
     br_boolean mip_filtering = (mat->flags & BR_MATF_MIP_INTERPOLATION) != 0;
 
     if(map_filtering && mip_filtering) {
-        key.filter_min = LINEAR_MIPMAP_LINEAR;
-        key.filter_mag = LINEAR;
+        key.filter_min = cgltf_filter_type_linear_mipmap_linear;
+        key.filter_mag = cgltf_filter_type_linear;
     } else if(map_filtering && !mip_filtering) {
-        key.filter_min = LINEAR;
-        key.filter_mag = LINEAR;
+        key.filter_min = cgltf_filter_type_linear;
+        key.filter_mag = cgltf_filter_type_linear;
     } else if(!map_filtering && mip_filtering) {
-        key.filter_min = NEAREST_MIPMAP_NEAREST;
-        key.filter_mag = NEAREST;
+        key.filter_min = cgltf_filter_type_nearest_mipmap_nearest;
+        key.filter_mag = cgltf_filter_type_nearest;
     } else if(!map_filtering && !mip_filtering) {
-        key.filter_min = NEAREST;
-        key.filter_mag = NEAREST;
+        key.filter_min = cgltf_filter_type_nearest;
+        key.filter_mag = cgltf_filter_type_nearest;
     }
 
     switch(mat->mode & BR_MATM_MAP_WIDTH_LIMIT_MASK) {
         case BR_MATM_MAP_WIDTH_LIMIT_WRAP:
-            key.wrap_s = REPEAT;
+            key.wrap_s = cgltf_wrap_mode_repeat;
             break;
 
         case BR_MATM_MAP_WIDTH_LIMIT_CLAMP:
-            key.wrap_s = CLAMP_TO_EDGE;
+            key.wrap_s = cgltf_wrap_mode_clamp_to_edge;
             break;
 
         case BR_MATM_MAP_WIDTH_LIMIT_MIRROR:
-            key.wrap_s = MIRRORED_REPEAT;
+            key.wrap_s = cgltf_wrap_mode_mirrored_repeat;
             break;
     }
 
     switch(mat->mode & BR_MATM_MAP_HEIGHT_LIMIT_MASK) {
         case BR_MATM_MAP_HEIGHT_LIMIT_WRAP:
-            key.wrap_t = REPEAT;
+            key.wrap_t = cgltf_wrap_mode_repeat;
             break;
 
         case BR_MATM_MAP_HEIGHT_LIMIT_CLAMP:
-            key.wrap_t = CLAMP_TO_EDGE;
+            key.wrap_t = cgltf_wrap_mode_clamp_to_edge;
             break;
 
         case BR_MATM_MAP_HEIGHT_LIMIT_MIRROR:
-            key.wrap_t = MIRRORED_REPEAT;
+            key.wrap_t = cgltf_wrap_mode_mirrored_repeat;
             break;
     }
 
