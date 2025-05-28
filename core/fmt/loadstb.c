@@ -12,9 +12,8 @@
 static br_pixelmap *BrFmtSTBLoad(const char *name)
 {
     /* variables */
-    br_pixelmap *pixelmap;
-    int          x, y, c, i;
-    br_uint_8    type;
+    br_pixelmap *pixelmap, *tmp;
+    int          x, y, c;
     stbi_uc     *pixels;
     void        *file;
 
@@ -25,8 +24,11 @@ static br_pixelmap *BrFmtSTBLoad(const char *name)
         return NULL;
     }
 
-    /* get pixels */
-    pixels = stbi_load_from_callbacks(&br_stb_file_cbfns, file, &x, &y, &c, 0);
+    /*
+     * Get pixels, always request 4 components.
+     * Makes our lives easier.
+     */
+    pixels = stbi_load_from_callbacks(&br_stb_file_cbfns, file, &x, &y, &c, 4);
     if(pixels == NULL) {
         BrLogError("FMT", "Failed to process \"%s\". Reason: %s", name, stbi_failure_reason());
         return NULL;
@@ -35,80 +37,17 @@ static br_pixelmap *BrFmtSTBLoad(const char *name)
     /* close file */
     BrFileClose(file);
 
-    /* decide depth and swap based on endianness */
-    switch(c) {
-        /* RGB */
-        case 3: {
-            type = BR_PMT_RGB_888;
-#if BR_ENDIAN_LITTLE
-            i = 0;
-            while(i < x * y * 3) {
-                /* variables */
-                br_uint_8 *pixel;
-                br_uint_8  r, g, b;
+    /*
+     * pixels isn't a resource so we can't use it directly.
+     * Instead, shove it in a temporary pixelmap, then convert it to BR_PMT_RGBA_8888.
+     */
+    tmp             = BrPixelmapAllocate(BR_PMT_RGBA_8888_ARR, x, y, pixels, BR_PMAF_NORMAL);
+    tmp->identifier = (char *)name; /* NB: This is safe, the clone below will copy it. */
 
-                /* get pixel pointer */
-                pixel = &(((br_uint_8 *)pixels)[i]);
+    pixelmap = BrPixelmapCloneTyped(tmp, BR_PMT_RGBA_8888);
 
-                /* extract components */
-                r = pixel[0];
-                g = pixel[1];
-                b = pixel[2];
-
-                /* reassign */
-                pixel[0] = b;
-                pixel[1] = g;
-                pixel[2] = r;
-
-                /* advance 3 bytes */
-                i += 3;
-            }
-#endif
-            break;
-        }
-
-        /* RGBA */
-        case 4: {
-            type = BR_PMT_RGBA_8888;
-            for(i = 0; i < x * y; i++) {
-                /* variables */
-                br_uint_32 *ptr;
-                br_uint_8  *pixel;
-                br_uint_8   r, g, b, a;
-
-                /* get pixel pointer */
-                ptr   = &(((br_uint_32 *)pixels)[i]);
-                pixel = (br_uint_8 *)ptr;
-
-                /* extract components */
-                r = pixel[0];
-                g = pixel[1];
-                b = pixel[2];
-                a = pixel[3];
-
-                /* reassign */
-                *ptr = BR_COLOUR_RGBA(r, g, b, a);
-            }
-            break;
-        }
-
-        /* unsupported */
-        default:
-            BrLogError("FMT", "Unhandled number of components for pixelmap: %d", c);
-            return NULL;
-    }
-
-    /* allocate pixmap */
-    pixelmap = BrPixelmapAllocate(type, x, y, pixels, 0);
-    if(pixelmap == NULL) {
-        BrLogError("FMT", "Failed to allocate pixelmap");
-        return NULL;
-    }
-
-    pixelmap->identifier = BrResStrDup(pixelmap, name);
-
-    /* add pixels to pixelmap */
-    BrResAdd(pixelmap, pixels);
+    BrPixelmapFree(tmp);
+    BrMemFree(pixels);
 
     /* return ptr */
     return pixelmap;
