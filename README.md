@@ -24,6 +24,14 @@ cmake ..
 make
 ```
 
+## Building With Emscripten
+
+```shell
+mkdir cmake-build-emscripten && cd cmake-build-emscripten
+emcmake cmake ..
+emmake make
+```
+
 ## License
 
 This is released under the MIT license.
