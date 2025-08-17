@@ -96,6 +96,8 @@ br_error BR_PUBLIC_ENTRY BrFmtGLTFActorSave(const char *name, br_actor *actor);
 br_error BR_PUBLIC_ENTRY BrFmtGLTFModelSaveMany(const char *name, br_model **models, br_size_t num);
 br_error BR_PUBLIC_ENTRY BrFmtGLTFModelSave(const char *name, br_model *model);
 
+br_fmt_results *BR_PUBLIC_ENTRY BrFmtGLTFActorLoadMany(const char *name);
+
 #ifdef __cplusplus
 };
 #endif
