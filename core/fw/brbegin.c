@@ -12,6 +12,34 @@
 
 static br_boolean active = BR_FALSE;
 
+#if defined(__DEVKITA64__)
+#include <switch.h>
+#include <unistd.h>
+
+static int s_nxlinkSock = -1;
+
+static void NxBegin(void)
+{
+    if(R_FAILED(socketInitializeDefault()))
+        return;
+
+    s_nxlinkSock = nxlinkStdio();
+    if(s_nxlinkSock >= 0)
+        BrLogTrace("PLAT", "printf output now goes to nxlink server");
+    else
+        socketExit();
+}
+
+static void NxEnd(void)
+{
+    if(s_nxlinkSock >= 0) {
+        close(s_nxlinkSock);
+        socketExit();
+        s_nxlinkSock = -1;
+    }
+}
+#endif
+
 br_error BR_PUBLIC_ENTRY BrBegin(void)
 {
     if(active)
@@ -20,6 +48,11 @@ br_error BR_PUBLIC_ENTRY BrBegin(void)
     /*
      * Fire up other libraries
      */
+
+#if defined(__DEVKITA64__)
+    NxBegin();
+#endif
+
     BrFwBegin();
     HostBegin();
     BrPixelmapBegin();
@@ -57,5 +90,9 @@ br_error BR_PUBLIC_ENTRY BrEnd(void)
     HostEnd();
     BrFwEnd();
 
+
+#if defined(__DEVKITA64__)
+    NxEnd();
+#endif
     return BRE_OK;
 }
