@@ -126,7 +126,7 @@ if (BRENDER_BUILD_TOOLS)
     add_subdirectory(tools)
 endif ()
 
-if (BRENDER_BUILD_EXAMPLES AND BRENDER_BUILD_DRIVERS AND TARGET SDL3::SDL3)
+if (BRENDER_BUILD_EXAMPLES AND BRENDER_BUILD_DRIVERS AND TARGET BRender::Drivers::SDL3Dev AND TARGET BRender::Drivers::GLRend)
     add_subdirectory(examples)
 endif ()
 
