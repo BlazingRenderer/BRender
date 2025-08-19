@@ -32,5 +32,5 @@ br_hash BR_RESIDENT_ENTRY BrHashString(const char *s)
     if(s == NULL)
         return BR_INVALID_HASH;
 
-    return BrHash(s, strlen(s));
+    return BrHash(s, BrStrLen(s));
 }
