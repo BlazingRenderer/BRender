@@ -68,7 +68,7 @@ message(STATUS "Building software renderer: ${BRENDER_BUILD_SOFT}")
 
 # CMake does _not_ handle this well.
 if (BRENDER_BUILD_SOFT)
-    if (NOT (CMAKE_SYSTEM_PROCESSOR MATCHES "i686.*|i386.*|x86.*|amd64.*|AMD64.*|x86_64.*" AND "${CMAKE_SIZEOF_VOID_P}" EQUAL "4"))
+    if (NOT (CMAKE_SYSTEM_PROCESSOR MATCHES "i586.*|i686.*|i386.*|x86.*|amd64.*|AMD64.*|x86_64.*" AND "${CMAKE_SIZEOF_VOID_P}" EQUAL "4"))
         message(FATAL_ERROR "Can only build the software renderer on 32-bit x86.")
     endif ()
 
