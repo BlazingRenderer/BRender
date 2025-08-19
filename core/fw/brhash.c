@@ -7,12 +7,18 @@
  */
 #include "fw.h"
 
+#ifndef __DJGPP__
 #define XXH_STATIC_LINKING_ONLY
 #define XXH_IMPLEMENTATION
 #include "xxhash.h"
+#endif
 
 br_hash BR_RESIDENT_ENTRY BrHash(const void *data, size_t size)
 {
+#ifdef __DJGPP__
+    // FIXME: implement this with some other backend
+    return BR_INVALID_HASH;
+#else
     if(data == NULL && size != 0)
         return BR_INVALID_HASH;
 
@@ -24,6 +30,7 @@ br_hash BR_RESIDENT_ENTRY BrHash(const void *data, size_t size)
     return XXH3_64bits_withSeed(data, size, 0);
 #else /* LONG_MAX == 2147483647L */
     return XXH32(data, size, 0);
+#endif
 #endif
 }
 
