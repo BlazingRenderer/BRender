@@ -43,7 +43,7 @@ static const struct br_primitive_state_dispatch primitiveStateDispatch;
 #define F(f)	offsetof(struct br_primitive_state, f)
 #define P(f)	((br_uintptr_t)(&(f)))
 
-static const struct br_tv_template_entry primitiveStateTemplateEntries[] = {
+static struct br_tv_template_entry primitiveStateTemplateEntries[] = {
 	{BRT(IDENTIFIER_CSTR),		F(identifier),				Q | A,				BRTV_CONV_COPY,},
 	{BRT(PARTS_TL),				P(PrimPartsTokens),			Q | A | BRTV_ABS,	BRTV_CONV_LIST, },
 	/*
