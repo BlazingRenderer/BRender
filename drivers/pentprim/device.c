@@ -96,7 +96,7 @@ static struct br_tv_template * BR_CMETHOD_DECL(br_device_softprim,templateQuery)
 
     if(self->templates.deviceTemplate == NULL)
         self->templates.deviceTemplate = BrTVTemplateAllocate(self,
-            deviceTemplateEntries,
+            (br_tv_template_entry *)deviceTemplateEntries,
             BR_ASIZE(deviceTemplateEntries));
 
     return self->templates.deviceTemplate;

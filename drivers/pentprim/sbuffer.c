@@ -218,7 +218,7 @@ static struct br_tv_template * BR_CMETHOD_DECL(br_buffer_stored_soft,templateQue
 
     if(self->device->templates.bufferStoredTemplate == NULL)
         self->device->templates.bufferStoredTemplate = BrTVTemplateAllocate(self->device,
-            bufferStoredTemplateEntries, BR_ASIZE(bufferStoredTemplateEntries));
+            (br_tv_template_entry *)bufferStoredTemplateEntries, BR_ASIZE(bufferStoredTemplateEntries));
 
     return self->device->templates.bufferStoredTemplate;
 }

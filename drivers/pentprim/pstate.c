@@ -110,7 +110,7 @@ static struct br_tv_template * BR_CMETHOD_DECL(br_primitive_state_soft,templateQ
 
     if(self->device->templates.primitiveStateTemplate == NULL)
         self->device->templates.primitiveStateTemplate = BrTVTemplateAllocate(self->device,
-            primitiveStateTemplateEntries,
+            (br_tv_template_entry *)primitiveStateTemplateEntries,
             BR_ASIZE(primitiveStateTemplateEntries));
 
     return self->device->templates.primitiveStateTemplate;
