@@ -1,7 +1,5 @@
 project(glrend)
 
-find_package(OpenGL REQUIRED COMPONENTS OpenGL)
-
 # NB: Don't use this, it's fragile as fuck.
 # find_package(glslang CONFIG REQUIRED)
 # set(GLSLANG_EXECUTABLE "$<TARGET_FILE:glslang::glslang-standalone>")

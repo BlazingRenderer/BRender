@@ -1,4 +1,11 @@
-add_subdirectory(glrend)
+
+find_package(OpenGL COMPONENTS OpenGL)
+
+if (TARGET OpenGL::OpenGL)
+    add_subdirectory(glrend)
+else ()
+    message("OpenGL not found, not building glrend")
+endif ()
 
 if (TARGET SDL2::SDL2)
     add_subdirectory(sdl2dev)
