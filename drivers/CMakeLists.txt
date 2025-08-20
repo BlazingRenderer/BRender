@@ -19,6 +19,11 @@ endif ()
      message("SDL3 not found, not building sdl3dev")
  endif ()
 
+if (CMAKE_SYSTEM_NAME STREQUAL "DOS")
+    add_subdirectory(dosdev)
+    target_link_libraries(brender-full INTERFACE dosdev)
+endif ()
+
 target_link_libraries(brender-full INTERFACE glrend)
 
 add_subdirectory(softrend)
