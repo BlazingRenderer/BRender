@@ -142,7 +142,7 @@ set(masm_flags )
 if(CMAKE_ASM_MASM_COMPILER MATCHES ".*/uasm$")
 	list(APPEND masm_flags "-q" "-Zne" "-6" "-Zp4")
 
-	if(MINGW)
+	if(MINGW OR DJGPP)
 		list(APPEND masm_flags "-coff")
 	else()
 		list(APPEND masm_flags "-elf" "-zcw")
