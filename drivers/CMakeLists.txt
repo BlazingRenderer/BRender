@@ -20,8 +20,10 @@ endif ()
  endif ()
 
 if (CMAKE_SYSTEM_NAME STREQUAL "DOS")
-    add_subdirectory(dosdev)
-    target_link_libraries(brender-full INTERFACE dosdev)
+    add_subdirectory(vesa)
+    target_link_libraries(brender-full INTERFACE vesa)
+    # add_subdirectory(dosdev)
+    # target_link_libraries(brender-full INTERFACE dosdev)
 endif ()
 
 target_link_libraries(brender-full INTERFACE glrend)
