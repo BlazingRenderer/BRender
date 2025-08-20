@@ -8,6 +8,7 @@
  */
 #include <stddef.h>
 #include <string.h>
+#include <sys/nearptr.h>
 
 #include "drv.h"
 #include "pm.h"
@@ -70,7 +71,18 @@ br_device_pixelmap *DevicePixelmapMCGAAllocateMode(br_device *dev, br_output_fac
     self->restore_mode  = BR_TRUE;
     self->original_mode = original_mode;
 
-    self->pm_pixels = (void *)0xA0000;
+    self->meminfo.address = 0x000A0000;
+    self->meminfo.size    = 0x10000;
+    self->meminfo.handle  = 0;
+    if(__dpmi_physical_address_mapping(&self->meminfo) != 0) {
+        if(self->restore_mode) {
+            DeviceVGACurrentModeSet(dev, original_mode);
+            dev->active = BR_FALSE;
+            return NULL;
+        }
+    }
+
+    self->pm_pixels = (void *)(self->meminfo.address + __djgpp_conventional_base);
 
     self->pm_type      = OutputFacilityVGAType(facility);
     self->pm_width     = w;
@@ -106,6 +118,8 @@ static void BR_CMETHOD_DECL(br_device_pixelmap_mcga, free)(br_object *_self)
         DeviceVGACurrentModeSet(ObjectDevice(self), self->original_mode);
         ObjectDevice(self)->active = BR_FALSE;
     }
+
+    __dpmi_free_physical_address_mapping(&self->meminfo);
 
     /*
      * Free up pixelmap structure

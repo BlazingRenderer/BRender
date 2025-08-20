@@ -9,6 +9,8 @@
 #ifndef _DRV_H_
 #define _DRV_H_
 
+#include <dpmi.h>
+
 #define BR_OBJECT_PRIVATE
 #define BR_DEVICE_PRIVATE
 #define BR_OUTPUT_FACILITY_PRIVATE

@@ -46,6 +46,7 @@ typedef struct br_device_pixelmap {
     br_boolean restore_mode;
     br_uint_16 original_mode;
 
+    __dpmi_meminfo meminfo;
 } br_device_pixelmap;
 
 #ifdef __cplusplus
