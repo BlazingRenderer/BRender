@@ -128,6 +128,10 @@ if (BRENDER_BUILD_EXAMPLES AND BRENDER_BUILD_DRIVERS AND TARGET BRender::Drivers
     add_subdirectory(examples)
 endif ()
 
+if (BRENDER_BUILD_EXAMPLES AND BRENDER_BUILD_DRIVERS AND TARGET BRender::Drivers::MCGA AND TARGET BRender::Drivers::SoftRend AND TARGET BRender::Drivers::SoftPrim)
+    add_subdirectory(examples-dos)
+endif ()
+
 if (NOT BRENDER_DISABLE_INSTALL)
     include(cmake/packaging.cmake)
 endif ()
