@@ -23,18 +23,18 @@ extern br_device DriverDeviceVGA;
 /*
  * object.c
  */
-char      *BR_CMETHOD_DECL(br_object_vga, identifier)(br_object *self);
-br_device *BR_CMETHOD_DECL(br_object_vga, device)(br_object *self);
+const char *BR_CMETHOD_DECL(br_object_vga, identifier)(br_object *self);
+br_device  *BR_CMETHOD_DECL(br_object_vga, device)(br_object *self);
 
 /*
  * device.c
  */
-br_device *DeviceVGAAllocate(char *identifier);
+br_device *DeviceVGAAllocate(const char *identifier);
 
 /*
  * outclass.c
  */
-br_output_facility *OutputFacilityVGAAllocate(br_device *dev, char *identifier, br_int_32 mode, br_int_32 width, br_int_32 height,
+br_output_facility *OutputFacilityVGAAllocate(br_device *dev, const char *identifier, br_int_32 mode, br_int_32 width, br_int_32 height,
                                               br_int_32 bits, br_int_32 type, br_boolean indexed);
 
 /*
@@ -45,7 +45,7 @@ br_device_pixelmap *DevicePixelmapMCGAAllocateMode(br_device *dev, br_output_fac
 /*
  * devclut.c
  */
-br_device_clut *DeviceClutVGAAllocate(br_device *dev, char *identifier);
+br_device_clut *DeviceClutVGAAllocate(br_device *dev, const char *identifier);
 
 /*
  * bios.c

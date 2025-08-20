@@ -11,11 +11,6 @@
 
 #include "drv.h"
 #include "pm.h"
-#include "host.h"
-#include "shortcut.h"
-#include "brassert.h"
-
-BR_RCS_ID("$Id: devpixmp.c 1.2 1998/10/21 15:41:12 jon Exp $");
 
 /*
  * Display mode and stride are fixed for MCGA
@@ -33,7 +28,7 @@ static const struct br_device_pixelmap_dispatch devicePixelmapDispatch;
  */
 #define F(f) offsetof(struct br_device_pixelmap, f)
 
-static const struct br_tv_template_entry devicePixelmapTemplateEntries[] = {
+static br_tv_template_entry devicePixelmapTemplateEntries[] = {
     {BRT_WIDTH_I32,         0, F(pm_width),        BRTV_QUERY | BRTV_ALL, BRTV_CONV_I32_U16},
     {BRT_HEIGHT_I32,        0, F(pm_height),       BRTV_QUERY | BRTV_ALL, BRTV_CONV_I32_U16},
     {BRT_PIXEL_TYPE_U8,     0, F(pm_type),         BRTV_QUERY | BRTV_ALL, BRTV_CONV_I32_U8 },
@@ -52,9 +47,7 @@ static const struct br_tv_template_entry devicePixelmapTemplateEntries[] = {
 br_device_pixelmap *DevicePixelmapMCGAAllocateMode(br_device *dev, br_output_facility *facility, br_uint_16 w, br_uint_16 h)
 {
     br_device_pixelmap *self;
-    br_error            r;
     br_uint_16          original_mode;
-    br_uint_16          sel;
 
     if(dev->active)
         return NULL;
@@ -63,7 +56,7 @@ br_device_pixelmap *DevicePixelmapMCGAAllocateMode(br_device *dev, br_output_fac
      * _DEV_ Setup mode
      */
     original_mode = BIOSVideoGetMode();
-    if(r = BIOSVideoSetMode(BIOS_MODE))
+    if(BIOSVideoSetMode(BIOS_MODE) != BRE_OK)
         return NULL;
 
     DeviceVGACurrentModeSet(dev, BIOS_MODE);
@@ -78,9 +71,6 @@ br_device_pixelmap *DevicePixelmapMCGAAllocateMode(br_device *dev, br_output_fac
     self->original_mode = original_mode;
 
     self->pm_pixels = (void *)0xA0000;
-
-    HostSelectorReal(&sel);
-    self->pm_pixels_qualifier = sel;
 
     self->pm_type      = OutputFacilityVGAType(facility);
     self->pm_width     = w;
@@ -101,8 +91,9 @@ br_device_pixelmap *DevicePixelmapMCGAAllocateMode(br_device *dev, br_output_fac
     return self;
 }
 
-static void BR_CMETHOD_DECL(br_device_pixelmap_mcga, free)(br_device_pixelmap *self)
+static void BR_CMETHOD_DECL(br_device_pixelmap_mcga, free)(br_object *_self)
 {
+    br_device_pixelmap *self = (br_device_pixelmap *)_self;
 
     ObjectContainerRemove(self->output_facility, (br_object *)self);
     self->output_facility->num_instances--;
@@ -122,28 +113,30 @@ static void BR_CMETHOD_DECL(br_device_pixelmap_mcga, free)(br_device_pixelmap *s
     BrResFreeNoCallback(self);
 }
 
-static br_device *BR_CMETHOD_DECL(br_device_pixelmap_mcga, device)(br_device_pixelmap *self)
+static br_device *BR_CMETHOD_DECL(br_device_pixelmap_mcga, device)(br_object *self)
 {
     return self->device;
 }
 
-static br_token BR_CMETHOD_DECL(br_device_pixelmap_mcga, type)(br_device_pixelmap *self)
+static br_token BR_CMETHOD_DECL(br_device_pixelmap_mcga, type)(br_object *self)
 {
     return BRT_DEVICE_PIXELMAP;
 }
 
-static br_boolean BR_CMETHOD_DECL(br_device_pixelmap_mcga, isType)(br_device_pixelmap *self, br_token t)
+static br_boolean BR_CMETHOD_DECL(br_device_pixelmap_mcga, isType)(br_object *self, br_token t)
 {
     return (t == BRT_DEVICE_PIXELMAP) || (t == BRT_OBJECT);
 }
 
-static br_int_32 BR_CMETHOD_DECL(br_device_pixelmap_mcga, space)(br_device_pixelmap *self)
+static br_size_t BR_CMETHOD_DECL(br_device_pixelmap_mcga, space)(br_object *self)
 {
     return sizeof(br_device_pixelmap);
 }
 
-static struct br_tv_template *BR_CMETHOD_DECL(br_device_pixelmap_vga, queryTemplate)(br_device_pixelmap *self)
+static struct br_tv_template *BR_CMETHOD_DECL(br_device_pixelmap_vga, queryTemplate)(br_object *_self)
 {
+    br_device_pixelmap *self = (br_device_pixelmap *)_self;
+
     if(self->device->templates.devicePixelmapTemplate == NULL)
         self->device->templates.devicePixelmapTemplate = BrTVTemplateAllocate(self->device, devicePixelmapTemplateEntries,
                                                                               BR_ASIZE(devicePixelmapTemplateEntries));
@@ -155,73 +148,73 @@ static struct br_tv_template *BR_CMETHOD_DECL(br_device_pixelmap_vga, queryTempl
  * Default dispatch table for device pixelmap
  */
 static const struct br_device_pixelmap_dispatch devicePixelmapDispatch = {
-    NULL,
-    NULL,
-    NULL,
-    NULL,
-    BR_CMETHOD_REF(br_device_pixelmap_mcga, free),
-    BR_CMETHOD_REF(br_object_vga, identifier),
-    BR_CMETHOD_REF(br_device_pixelmap_mcga, type),
-    BR_CMETHOD_REF(br_device_pixelmap_mcga, isType),
-    BR_CMETHOD_REF(br_device_pixelmap_mcga, device),
-    BR_CMETHOD_REF(br_device_pixelmap_mcga, space),
+    .__reserved0 = NULL,
+    .__reserved1 = NULL,
+    .__reserved2 = NULL,
+    .__reserved3 = NULL,
+    ._free       = BR_CMETHOD_REF(br_device_pixelmap_mcga, free),
+    ._identifier = BR_CMETHOD_REF(br_object_vga, identifier),
+    ._type       = BR_CMETHOD_REF(br_device_pixelmap_mcga, type),
+    ._isType     = BR_CMETHOD_REF(br_device_pixelmap_mcga, isType),
+    ._device     = BR_CMETHOD_REF(br_device_pixelmap_mcga, device),
+    ._space      = BR_CMETHOD_REF(br_device_pixelmap_mcga, space),
 
-    BR_CMETHOD_REF(br_device_pixelmap_vga, queryTemplate),
-    BR_CMETHOD_REF(br_object, query),
-    BR_CMETHOD_REF(br_object, queryBuffer),
-    BR_CMETHOD_REF(br_object, queryMany),
-    BR_CMETHOD_REF(br_object, queryManySize),
-    BR_CMETHOD_REF(br_object, queryAll),
-    BR_CMETHOD_REF(br_object, queryAllSize),
+    ._templateQuery = BR_CMETHOD_REF(br_device_pixelmap_vga, queryTemplate),
+    ._query         = BR_CMETHOD_REF(br_object, query),
+    ._queryBuffer   = BR_CMETHOD_REF(br_object, queryBuffer),
+    ._queryMany     = BR_CMETHOD_REF(br_object, queryMany),
+    ._queryManySize = BR_CMETHOD_REF(br_object, queryManySize),
+    ._queryAll      = BR_CMETHOD_REF(br_object, queryAll),
+    ._queryAllSize  = BR_CMETHOD_REF(br_object, queryAllSize),
 
-    BR_CMETHOD_REF(br_device_pixelmap_mem, validSource),
-    BR_CMETHOD_REF(br_device_pixelmap_mem, resize),
-    BR_CMETHOD_REF(br_device_pixelmap_mem, match),
-    BR_CMETHOD_REF(br_device_pixelmap_mem, allocateSub),
+    ._validSource = BR_CMETHOD_REF(br_device_pixelmap_mem, validSource),
+    ._resize      = BR_CMETHOD_REF(br_device_pixelmap_mem, resize),
+    ._match       = BR_CMETHOD_REF(br_device_pixelmap_mem, match),
+    ._allocateSub = BR_CMETHOD_REF(br_device_pixelmap_mem, allocateSub),
 
-    BR_CMETHOD_REF(br_device_pixelmap_mem, copyTo),
-    BR_CMETHOD_REF(br_device_pixelmap_mem, copyTo),
-    BR_CMETHOD_REF(br_device_pixelmap_mem, copyFrom),
-    BR_CMETHOD_REF(br_device_pixelmap_mem, fill),
-    BR_CMETHOD_REF(br_device_pixelmap_gen, doubleBuffer),
+    ._copyTo       = BR_CMETHOD_REF(br_device_pixelmap_mem, copyTo),
+    ._copyTo       = BR_CMETHOD_REF(br_device_pixelmap_mem, copyTo),
+    ._copyFrom     = BR_CMETHOD_REF(br_device_pixelmap_mem, copyFrom),
+    ._fill         = BR_CMETHOD_REF(br_device_pixelmap_mem, fill),
+    ._doubleBuffer = BR_CMETHOD_REF(br_device_pixelmap_gen, doubleBuffer),
 
-    BR_CMETHOD_REF(br_device_pixelmap_gen, copyDirty),
-    BR_CMETHOD_REF(br_device_pixelmap_gen, copyToDirty),
-    BR_CMETHOD_REF(br_device_pixelmap_gen, copyFromDirty),
-    BR_CMETHOD_REF(br_device_pixelmap_gen, fillDirty),
-    BR_CMETHOD_REF(br_device_pixelmap_gen, doubleBufferDirty),
+    ._copyDirty         = BR_CMETHOD_REF(br_device_pixelmap_gen, copyDirty),
+    ._copyToDirty       = BR_CMETHOD_REF(br_device_pixelmap_gen, copyToDirty),
+    ._copyFromDirty     = BR_CMETHOD_REF(br_device_pixelmap_gen, copyFromDirty),
+    ._fillDirty         = BR_CMETHOD_REF(br_device_pixelmap_gen, fillDirty),
+    ._doubleBufferDirty = BR_CMETHOD_REF(br_device_pixelmap_gen, doubleBufferDirty),
 
-    BR_CMETHOD_REF(br_device_pixelmap_gen, rectangle),
-    BR_CMETHOD_REF(br_device_pixelmap_gen, rectangle2),
-    BR_CMETHOD_REF(br_device_pixelmap_mem, rectangleCopyTo),
-    BR_CMETHOD_REF(br_device_pixelmap_mem, rectangleCopyTo),
-    BR_CMETHOD_REF(br_device_pixelmap_mem, rectangleCopyFrom),
-    BR_CMETHOD_REF(br_device_pixelmap_mem, rectangleStretchCopyTo),
-    BR_CMETHOD_REF(br_device_pixelmap_mem, rectangleStretchCopyTo),
-    BR_CMETHOD_REF(br_device_pixelmap_mem, rectangleStretchCopyFrom),
-    BR_CMETHOD_REF(br_device_pixelmap_mem, rectangleFill),
-    BR_CMETHOD_REF(br_device_pixelmap_mem, pixelSet),
-    BR_CMETHOD_REF(br_device_pixelmap_mem, line),
-    BR_CMETHOD_REF(br_device_pixelmap_mem, copyBits),
+    ._rectangle                = BR_CMETHOD_REF(br_device_pixelmap_gen, rectangle),
+    ._rectangle2               = BR_CMETHOD_REF(br_device_pixelmap_gen, rectangle2),
+    ._rectangleCopyTo          = BR_CMETHOD_REF(br_device_pixelmap_mem, rectangleCopyTo),
+    ._rectangleCopyTo          = BR_CMETHOD_REF(br_device_pixelmap_mem, rectangleCopyTo),
+    ._rectangleCopyFrom        = BR_CMETHOD_REF(br_device_pixelmap_mem, rectangleCopyFrom),
+    ._rectangleStretchCopyTo   = BR_CMETHOD_REF(br_device_pixelmap_mem, rectangleStretchCopyTo),
+    ._rectangleStretchCopyTo   = BR_CMETHOD_REF(br_device_pixelmap_mem, rectangleStretchCopyTo),
+    ._rectangleStretchCopyFrom = BR_CMETHOD_REF(br_device_pixelmap_mem, rectangleStretchCopyFrom),
+    ._rectangleFill            = BR_CMETHOD_REF(br_device_pixelmap_mem, rectangleFill),
+    ._pixelSet                 = BR_CMETHOD_REF(br_device_pixelmap_mem, pixelSet),
+    ._line                     = BR_CMETHOD_REF(br_device_pixelmap_mem, line),
+    ._copyBits                 = BR_CMETHOD_REF(br_device_pixelmap_mem, copyBits),
 
-    BR_CMETHOD_REF(br_device_pixelmap_gen, text),
-    BR_CMETHOD_REF(br_device_pixelmap_gen, textBounds),
+    ._text       = BR_CMETHOD_REF(br_device_pixelmap_gen, text),
+    ._textBounds = BR_CMETHOD_REF(br_device_pixelmap_gen, textBounds),
 
-    BR_CMETHOD_REF(br_device_pixelmap_mem, rowSize),
-    BR_CMETHOD_REF(br_device_pixelmap_mem, rowQuery),
-    BR_CMETHOD_REF(br_device_pixelmap_mem, rowSet),
+    ._rowSize  = BR_CMETHOD_REF(br_device_pixelmap_mem, rowSize),
+    ._rowQuery = BR_CMETHOD_REF(br_device_pixelmap_mem, rowQuery),
+    ._rowSet   = BR_CMETHOD_REF(br_device_pixelmap_mem, rowSet),
 
-    BR_CMETHOD_REF(br_device_pixelmap_mem, pixelQuery),
-    BR_CMETHOD_REF(br_device_pixelmap_mem, pixelAddressQuery),
+    ._pixelQuery        = BR_CMETHOD_REF(br_device_pixelmap_mem, pixelQuery),
+    ._pixelAddressQuery = BR_CMETHOD_REF(br_device_pixelmap_mem, pixelAddressQuery),
 
-    BR_CMETHOD_REF(br_device_pixelmap_mem, pixelAddressSet),
-    BR_CMETHOD_REF(br_device_pixelmap_mem, originSet),
+    ._pixelAddressSet = BR_CMETHOD_REF(br_device_pixelmap_mem, pixelAddressSet),
+    ._originSet       = BR_CMETHOD_REF(br_device_pixelmap_mem, originSet),
 
-    BR_CMETHOD_REF(br_device_pixelmap_gen, flush),
-    BR_CMETHOD_REF(br_device_pixelmap_gen, synchronise),
-    BR_CMETHOD_REF(br_device_pixelmap_gen, directLock),
-    BR_CMETHOD_REF(br_device_pixelmap_gen, directUnlock),
+    ._flush        = BR_CMETHOD_REF(br_device_pixelmap_gen, flush),
+    ._synchronise  = BR_CMETHOD_REF(br_device_pixelmap_gen, synchronise),
+    ._directLock   = BR_CMETHOD_REF(br_device_pixelmap_gen, directLock),
+    ._directUnlock = BR_CMETHOD_REF(br_device_pixelmap_gen, directUnlock),
 
-    BR_CMETHOD_REF(br_device_pixelmap_gen, getControls),
-    BR_CMETHOD_REF(br_device_pixelmap_gen, setControls),
+    ._getControls = BR_CMETHOD_REF(br_device_pixelmap_gen, getControls),
+    ._setControls = BR_CMETHOD_REF(br_device_pixelmap_gen, setControls),
 };

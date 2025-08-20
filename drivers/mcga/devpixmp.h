@@ -20,12 +20,12 @@ typedef struct br_device_pixelmap {
     /*
      * Dispatch table
      */
-    struct br_device_pixelmap_dispatch *dispatch;
+    const struct br_device_pixelmap_dispatch *dispatch;
 
     /*
      * Standard handle identifier
      */
-    char *pm_identifier;
+    const char *pm_identifier;
 
     /** Standard pixelmap members (not including identifier**/
 

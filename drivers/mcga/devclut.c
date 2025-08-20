@@ -8,18 +8,9 @@
  */
 #include <stddef.h>
 #include <string.h>
+#include <pc.h>
 
 #include "drv.h"
-#include "shortcut.h"
-#include "brassert.h"
-
-#if _MSC_VER
-#include "ports.h"
-#else
-#include <conio.h>
-#endif
-
-BR_RCS_ID("$Id: devclut.c 1.1 1997/12/10 16:45:31 jon Exp $");
 
 /*
  * Default dispatch table for device_clut (defined at end of file)
@@ -31,15 +22,15 @@ static const struct br_device_clut_dispatch deviceClutDispatch;
  */
 #define F(f) offsetof(struct br_device_clut, f)
 
-static const struct br_tv_template_entry deviceClutTemplateEntries[] = {
-    {BRT_IDENTIFIER_CSTR, 0, F(identifier), BRTV_QUERY | BRTV_ALL, BRTV_CONV_COPY},
+static br_tv_template_entry deviceClutTemplateEntries[] = {
+    {BRT(IDENTIFIER_CSTR), F(identifier), BRTV_QUERY | BRTV_ALL, BRTV_CONV_COPY},
 };
 #undef F
 
 /*
  * Create a new device CLUT
  */
-br_device_clut *DeviceClutVGAAllocate(br_device *dev, char *identifier)
+br_device_clut *DeviceClutVGAAllocate(br_device *dev, const char *identifier)
 {
     br_device_clut *self;
 
@@ -55,30 +46,32 @@ br_device_clut *DeviceClutVGAAllocate(br_device *dev, char *identifier)
     return self;
 }
 
-static void BR_CMETHOD_DECL(br_device_clut_vga, free)(br_device_clut *self)
+static void BR_CMETHOD_DECL(br_device_clut_vga, free)(br_object *self)
 {
-    ObjectContainerRemove(ObjectDevice(self), (br_object *)self);
+    ObjectContainerRemove(ObjectDevice(self), self);
 
     BrResFreeNoCallback(self);
 }
 
-static br_token BR_CMETHOD_DECL(br_device_clut_vga, type)(br_device_clut *self)
+static br_token BR_CMETHOD_DECL(br_device_clut_vga, type)(br_object *self)
 {
     return BRT_DEVICE_CLUT;
 }
 
-static br_boolean BR_CMETHOD_DECL(br_device_clut_vga, isType)(br_device_clut *self, br_token t)
+static br_boolean BR_CMETHOD_DECL(br_device_clut_vga, isType)(br_object *self, br_token t)
 {
     return (t == BRT_DEVICE_CLUT) || (t == BRT_OBJECT);
 }
 
-static br_int_32 BR_CMETHOD_DECL(br_device_clut_vga, space)(br_device_clut *self)
+static br_size_t BR_CMETHOD_DECL(br_device_clut_vga, space)(br_object *self)
 {
     return sizeof(br_device_clut);
 }
 
-static struct br_tv_template *BR_CMETHOD_DECL(br_device_clut_vga, queryTemplate)(br_device_clut *self)
+static br_tv_template *BR_CMETHOD_DECL(br_device_clut_vga, queryTemplate)(br_object *_self)
 {
+    br_device_clut *self = (br_device_clut *)_self;
+
     if(self->device->templates.deviceClutTemplate == NULL)
         self->device->templates.deviceClutTemplate = BrTVTemplateAllocate(self->device, deviceClutTemplateEntries,
                                                                           BR_ASIZE(deviceClutTemplateEntries));
@@ -173,27 +166,27 @@ static br_error BR_CMETHOD_DECL(br_device_clut_vga, entryQueryMany)(br_device_cl
  * Default dispatch table for device CLUT
  */
 static const struct br_device_clut_dispatch deviceClutDispatch = {
-    NULL,
-    NULL,
-    NULL,
-    NULL,
-    BR_CMETHOD_REF(br_device_clut_vga, free),
-    BR_CMETHOD_REF(br_object_vga, identifier),
-    BR_CMETHOD_REF(br_device_clut_vga, type),
-    BR_CMETHOD_REF(br_device_clut_vga, isType),
-    BR_CMETHOD_REF(br_object_vga, device),
-    BR_CMETHOD_REF(br_device_clut_vga, space),
+    .__reserved0 = NULL,
+    .__reserved1 = NULL,
+    .__reserved2 = NULL,
+    .__reserved3 = NULL,
+    ._free       = BR_CMETHOD_REF(br_device_clut_vga, free),
+    ._identifier = BR_CMETHOD_REF(br_object_vga, identifier),
+    ._type       = BR_CMETHOD_REF(br_device_clut_vga, type),
+    ._isType     = BR_CMETHOD_REF(br_device_clut_vga, isType),
+    ._device     = BR_CMETHOD_REF(br_object_vga, device),
+    ._space      = BR_CMETHOD_REF(br_device_clut_vga, space),
 
-    BR_CMETHOD_REF(br_device_clut_vga, queryTemplate),
-    BR_CMETHOD_REF(br_object, query),
-    BR_CMETHOD_REF(br_object, queryBuffer),
-    BR_CMETHOD_REF(br_object, queryMany),
-    BR_CMETHOD_REF(br_object, queryManySize),
-    BR_CMETHOD_REF(br_object, queryAll),
-    BR_CMETHOD_REF(br_object, queryAllSize),
+    ._templateQuery = BR_CMETHOD_REF(br_device_clut_vga, queryTemplate),
+    ._query         = BR_CMETHOD_REF(br_object, query),
+    ._queryBuffer   = BR_CMETHOD_REF(br_object, queryBuffer),
+    ._queryMany     = BR_CMETHOD_REF(br_object, queryMany),
+    ._queryManySize = BR_CMETHOD_REF(br_object, queryManySize),
+    ._queryAll      = BR_CMETHOD_REF(br_object, queryAll),
+    ._queryAllSize  = BR_CMETHOD_REF(br_object, queryAllSize),
 
-    BR_CMETHOD_REF(br_device_clut_vga, entrySet),
-    BR_CMETHOD_REF(br_device_clut_vga, entryQuery),
-    BR_CMETHOD_REF(br_device_clut_vga, entrySetMany),
-    BR_CMETHOD_REF(br_device_clut_vga, entryQueryMany),
+    ._entrySet       = BR_CMETHOD_REF(br_device_clut_vga, entrySet),
+    ._entryQuery     = BR_CMETHOD_REF(br_device_clut_vga, entryQuery),
+    ._entrySetMany   = BR_CMETHOD_REF(br_device_clut_vga, entrySetMany),
+    ._entryQueryMany = BR_CMETHOD_REF(br_device_clut_vga, entryQueryMany),
 };

@@ -28,3 +28,8 @@ if (BRENDER_BUILD_SOFT)
     add_subdirectory(pentprim)
     target_link_libraries(brender-full INTERFACE pentprim)
 endif ()
+
+if (CMAKE_SYSTEM_NAME STREQUAL "DOS")
+    add_subdirectory(mcga)
+    target_link_libraries(brender-full INTERFACE mcga)
+endif()
