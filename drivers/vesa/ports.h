@@ -7,12 +7,12 @@
 #ifndef _PORTS_H_
 #define _PORTS_H_
 
-int BR_ASM_CALL inp(unsigned short);
+int BR_ASM_CALL            inp(unsigned short);
 unsigned short BR_ASM_CALL inpw(unsigned short);
-unsigned long BR_ASM_CALL inpd(unsigned short);
+unsigned long BR_ASM_CALL  inpd(unsigned short);
 
-int BR_ASM_CALL outp(unsigned short, int);
+int BR_ASM_CALL            outp(unsigned short, int);
 unsigned short BR_ASM_CALL outpw(unsigned short, unsigned short);
-unsigned long BR_ASM_CALL outpd(unsigned short, unsigned long);
+unsigned long BR_ASM_CALL  outpd(unsigned short, unsigned long);
 
 #endif

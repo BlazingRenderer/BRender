@@ -17,26 +17,25 @@ extern "C" {
  * Private state object - all device objects have an identifer pointer as their first element
  */
 typedef struct br_object {
-	/*
-	 * Dispatch table
-	 */
-	struct br_object_dispatch *dispatch;
+    /*
+     * Dispatch table
+     */
+    struct br_object_dispatch *dispatch;
 
-	/*
-	 * Standard object identifier
-	 */
-	char *identifier;
+    /*
+     * Standard object identifier
+     */
+    char *identifier;
 
 } br_object;
 
 /*
  * Override general case with special case for this driver
  */
-#define ObjectVESADevice(d) ((br_device *)&DriverDeviceVESA)
+#define ObjectVESADevice(d)     ((br_device *)&DriverDeviceVESA)
 #define ObjectVESAIdentifier(d) (((br_object *)d)->identifier)
 
 #ifdef __cplusplus
 };
 #endif
 #endif
-

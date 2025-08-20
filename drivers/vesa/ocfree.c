@@ -18,27 +18,26 @@
  */
 br_error ObjectContainerFree(br_object_container *self, br_token type, char *pattern, br_token_value *tv)
 {
-	br_error r;
-	br_object **handles;
-	br_int_32 count,n,i;
+    br_error    r;
+    br_object **handles;
+    br_int_32   count, n, i;
 
-	r = ObjectContainerCount(self, &count, type, pattern, tv);
+    r = ObjectContainerCount(self, &count, type, pattern, tv);
 
-	if(r != BRE_OK)
-		return r;
+    if(r != BRE_OK)
+        return r;
 
-	if(count == 0)
-		return BRE_OK;
+    if(count == 0)
+        return BRE_OK;
 
-	handles = BrMemAllocate(count * sizeof(*handles), BR_MEMORY_DRIVER);
+    handles = BrMemAllocate(count * sizeof(*handles), BR_MEMORY_DRIVER);
 
-	r = ObjectContainerFindMany(self, handles, count, &n, type, pattern, tv);
+    r = ObjectContainerFindMany(self, handles, count, &n, type, pattern, tv);
 
-	for(i=0; i < n; i++)
-		ObjectFree(handles[i]);
+    for(i = 0; i < n; i++)
+        ObjectFree(handles[i]);
 
-	BrMemFree(handles);
+    BrMemFree(handles);
 
-	return BRE_OK;
+    return BRE_OK;
 }
-
