@@ -28,7 +28,7 @@ char *BR_RESIDENT_ENTRY GetWinRegistryValue(char *name);
 /* CPUInfo.c
  *
  */
-void CPUInfo(br_token *cpu_type, br_uint_32 *features);
+void CPUInfo(host_info *info);
 
 #ifdef __cplusplus
 };

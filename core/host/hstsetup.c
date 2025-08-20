@@ -62,8 +62,8 @@ br_error BR_RESIDENT_ENTRY HostInfo(host_info *buffer, br_size_t buffersize)
     /*
      * Set processor type field
      */
-    buffer->processor_type = BRT_INTEL_PENTIUM_PRO;
-    buffer->capabilities |= HOST_CAPS_FPU | HOST_CAPS_MMX | HOST_CAPS_CMOV;
+    CPUInfo(buffer);
+
     /*
      * If the USE_MMX flag is present, and is false, disable the MMX
      * capability

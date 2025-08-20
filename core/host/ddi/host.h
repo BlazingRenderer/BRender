@@ -17,6 +17,7 @@
 typedef struct host_info {
     br_uint_32 size;
     char       identifier[40];
+    char       vendor_string[13];
     br_uint_32 capabilities;
     br_token   processor_family;
     br_token   processor_type;
@@ -35,6 +36,14 @@ typedef struct host_info {
 #define HOST_CAPS_MMX                  0x00000400 /* Has MMX extensions						*/
 #define HOST_CAPS_FPU                  0x00000800 /* Has hardware FPU							*/
 #define HOST_CAPS_CMOV                 0x00001000 /* Has CMOV extensions */
+#define HOST_CAPS_SSE                  0x00002000 /* Has SSE */
+#define HOST_CAPS_SSE2                 0x00004000 /* Has SSE2 */
+#define HOST_CAPS_SSE3                 0x00008000 /* Has SSE3 */
+#define HOST_CAPS_SSSE3                0x00010000 /* Has SSSE3 */
+#define HOST_CAPS_SSE4_1               0x00020000 /* Has SSE4.1 */
+#define HOST_CAPS_SSE4_2               0x00040000 /* Has SSE4.2 */
+#define HOST_CAPS_POPCNT               0x00080000 /* Has POPCNT instruction  */
+#define HOST_CAPS_AVX                  0x00080000 /* Has AVX */
 
 #ifndef _HOST_P_H_
 #include "host_p.h"

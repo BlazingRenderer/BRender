@@ -23,6 +23,7 @@ set(HOST_FILES
         hostcfg.c
         hstsetup.c
         host_ip.h
+        cpuinfo.c
         )
 
 add_library(host OBJECT
