@@ -1,6 +1,7 @@
 find_package(OpenGL COMPONENTS OpenGL)
 if (TARGET OpenGL::GL)
     add_subdirectory(glrend)
+    target_link_libraries(brender-full INTERFACE glrend)
 else ()
     message("OpenGL not found, not building glrend")
 endif ()
@@ -18,8 +19,6 @@ endif ()
  else ()
      message("SDL3 not found, not building sdl3dev")
  endif ()
-
-target_link_libraries(brender-full INTERFACE glrend)
 
 add_subdirectory(softrend)
 target_link_libraries(brender-full INTERFACE softrend)
