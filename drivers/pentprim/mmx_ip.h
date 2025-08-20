@@ -30,6 +30,7 @@ void BR_ASM_CALL RasteriseBufferDisable(void);
 #define RasteriseBufferBegin()
 #define RasteriseBufferEnd()
 #define RasteriseBufferFlush()
+#define RasteriseBufferDisable()
 #endif
 
 /*
