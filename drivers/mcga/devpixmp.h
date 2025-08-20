@@ -17,34 +17,34 @@ extern "C" {
  * Private state of device pixelmap
  */
 typedef struct br_device_pixelmap {
-	/*
-	 * Dispatch table
-	 */
-	struct br_device_pixelmap_dispatch *dispatch;
+    /*
+     * Dispatch table
+     */
+    struct br_device_pixelmap_dispatch *dispatch;
 
-	/*
-	 * Standard handle identifier
-	 */
-	char *pm_identifier;
+    /*
+     * Standard handle identifier
+     */
+    char *pm_identifier;
 
-	/** Standard pixelmap members (not including identifier**/
+    /** Standard pixelmap members (not including identifier**/
 
-	BR_PIXELMAP_MEMBERS
+    BR_PIXELMAP_MEMBERS
 
-	/** End of br_pixelmap fields **/
-	
-        /*
-         * Pointer to owning device - special case - has to be after public fields
-         * because of backwards compatibility for the pixelmaps structure
-         */
-	struct br_device *device;
+    /** End of br_pixelmap fields **/
 
-	struct br_output_facility *output_facility;
+    /*
+     * Pointer to owning device - special case - has to be after public fields
+     * because of backwards compatibility for the pixelmaps structure
+     */
+    struct br_device *device;
 
-	struct br_device_clut *clut;
+    struct br_output_facility *output_facility;
 
-	br_boolean	restore_mode;
-	br_uint_16 original_mode;
+    struct br_device_clut *clut;
+
+    br_boolean restore_mode;
+    br_uint_16 original_mode;
 
 } br_device_pixelmap;
 
@@ -52,5 +52,3 @@ typedef struct br_device_pixelmap {
 };
 #endif
 #endif
-
-

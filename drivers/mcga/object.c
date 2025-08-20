@@ -19,17 +19,15 @@ BR_RCS_ID("$Id: object.c 1.1 1997/12/10 16:45:44 jon Exp $");
 /*
  * Get identifier associated with a object
  */
-char * BR_CMETHOD_DECL(br_object_vga, identifier)(br_object *self)
+char *BR_CMETHOD_DECL(br_object_vga, identifier)(br_object *self)
 {
-	return self->identifier;
+    return self->identifier;
 }
 
 /*
  * Find the device assocaited with a object
  */
-br_device *	BR_CMETHOD_DECL(br_object_vga, device)(br_object *self)
+br_device *BR_CMETHOD_DECL(br_object_vga, device)(br_object *self)
 {
-	return self->device;
+    return self->device;
 }
-
-

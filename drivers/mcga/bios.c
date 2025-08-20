@@ -15,17 +15,15 @@ static host_regs regs;
 
 br_uint_16 BIOSVideoGetMode(void)
 {
-	regs.h.ah = 0x0F;
-	HostRealInterruptCall(0x10, &regs);
-	return (br_uint_16)regs.h.al;
+    regs.h.ah = 0x0F;
+    HostRealInterruptCall(0x10, &regs);
+    return (br_uint_16)regs.h.al;
 }
 
 br_error BIOSVideoSetMode(br_uint_16 mode)
 {
-	regs.w.ax = mode;
-	HostRealInterruptCall(0x10, &regs);
-	
-	return (regs.x.flags & HOST_FLAG_CARRY)?BRE_FAIL:BRE_OK;
+    regs.w.ax = mode;
+    HostRealInterruptCall(0x10, &regs);
+
+    return (regs.x.flags & HOST_FLAG_CARRY) ? BRE_FAIL : BRE_OK;
 }
-
-

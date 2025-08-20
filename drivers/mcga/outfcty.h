@@ -18,73 +18,74 @@ extern "C" {
  */
 
 typedef struct br_output_facility {
-	/*
-	 * Dispatch table
-	 */
-	struct br_output_facility_dispatch *dispatch;
+    /*
+     * Dispatch table
+     */
+    struct br_output_facility_dispatch *dispatch;
 
-	/*
-	 * Standard object identifier
-	 */
-	char *identifier;
+    /*
+     * Standard object identifier
+     */
+    char *identifier;
 
-        /*
-         * Pointer to owning device
-         */
-        struct br_device *device;
+    /*
+     * Pointer to owning device
+     */
+    struct br_device *device;
 
-	/*
-	 * List of instances associated with type
-	 */
-	void *object_list;
+    /*
+     * List of instances associated with type
+     */
+    void *object_list;
 
-        /*
-         * BIOS mode for INT 10
-         */
-       	br_int_32	bios_mode;
+    /*
+     * BIOS mode for INT 10
+     */
+    br_int_32 bios_mode;
 
-	/* Size of mode in pixels
-	 */
-	br_int_32	width;
-	br_int_32	height;	
+    /* Size of mode in pixels
+     */
+    br_int_32 width;
+    br_int_32 height;
 
-	/* Bit depth
-	 */
-	br_int_32	colour_bits;
-//	br_int_32	depth_bits;
+    /* Bit depth
+     */
+    br_int_32 colour_bits;
+    //	br_int_32	depth_bits;
 
-	/* Pixelmap types
-	 */
-	br_int_32	colour_type;
-//	br_int_32	depth_type;
+    /* Pixelmap types
+     */
+    br_int_32 colour_type;
+    //	br_int_32	depth_type;
 
-	/* Is there a CLUT?
-	 */
-	br_boolean	indexed;
+    /* Is there a CLUT?
+     */
+    br_boolean indexed;
 
-	/* Video memory size
-	 */
-	br_int_32	video_memory;
-	br_int_32	host_memory;
+    /* Video memory size
+     */
+    br_int_32 video_memory;
+    br_int_32 host_memory;
 
-	/*
-	 * Number of instances
-	 */
-	br_int_32	num_instances;
+    /*
+     * Number of instances
+     */
+    br_int_32 num_instances;
 
-	/* Default CLUT
-	 */
-	struct br_device_clut *default_clut;
+    /* Default CLUT
+     */
+    struct br_device_clut *default_clut;
 
 } br_output_facility;
 
 #define OutputFacilityVGAType(c) (((br_output_facility *)c)->colour_type)
 
-#define STATIC_OUTPUT_FACILITY_VGA(id,w,h,cb,db,ct,dt,idx, vm, hm)\
-	{NULL,  id, NULL, w, h, cb, db, ct, dt, idx, vm, hm, }
+#define STATIC_OUTPUT_FACILITY_VGA(id, w, h, cb, db, ct, dt, idx, vm, hm) \
+    {                                                                     \
+        NULL, id, NULL, w, h, cb, db, ct, dt, idx, vm, hm,                \
+    }
 
 #ifdef __cplusplus
 };
 #endif
 #endif
-

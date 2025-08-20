@@ -17,31 +17,30 @@ extern "C" {
  * Private state of device pixelmap
  */
 typedef struct br_object {
-	/*
-	 * Dispatch table
-	 */
-	struct br_object_dispatch *dispatch;
+    /*
+     * Dispatch table
+     */
+    struct br_object_dispatch *dispatch;
 
-	/*
-	 * Standard object identifier
-	 */
-	char *identifier;
+    /*
+     * Standard object identifier
+     */
+    char *identifier;
 
-        /*
-         * Device pointer
-         */
-        br_device *device;
+    /*
+     * Device pointer
+     */
+    br_device *device;
 
 } br_object;
 
 /*
  * Override general case with special case for this driver
  */
-#define ObjectVGADevice(d) (((br_object *)d)->device)
+#define ObjectVGADevice(d)     (((br_object *)d)->device)
 #define ObjectVGAIdentifier(d) (((br_object *)d)->identifier)
 
 #ifdef __cplusplus
 };
 #endif
 #endif
-
