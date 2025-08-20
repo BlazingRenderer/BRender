@@ -26,12 +26,15 @@ set_target_properties(dosdev-headers PROPERTIES
 add_library(dosdev
         drv.h
         drv_ip.h
+        driver.c
 
         device.c
         device.h
 
+        outfcty.c
         outfcty.h
 
+        devpixmp.c
         devpixmp.h
 
         devclut.h

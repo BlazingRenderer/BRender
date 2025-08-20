@@ -15,6 +15,19 @@ extern "C" {
  */
 br_device *DeviceDOSAllocate(const char *identifier);
 
+/*
+ * outfcty.c
+ */
+br_output_facility *OutputFacilityDOSCreateGeneric(br_device *dev);
+
+/*
+ * devpixmp.c
+ */
+
+br_device_pixelmap *DevicePixelmapDOSAllocate(br_device *dev, br_output_facility *outfcty, br_int_32 width, br_int_32 height);
+br_boolean          DevicePixelmapDOSIsOurs(const br_pixelmap *pm);
+void               *DevicePixelmapDOSMemAddress(br_device_pixelmap *self, br_int_32 x, br_int_32 y);
+
 #ifdef __cplusplus
 };
 #endif
