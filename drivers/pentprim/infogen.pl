@@ -398,10 +398,14 @@ sub print_entry {
 	.input_colour_type = $input_colour_type,
 
 	/* Autoload info
-	 * Now always kept around because it makes debugging easier.
 	 */
+#if AUTOLOAD
 	.image_name = $image,
 	.entry_info = (void *)$image_entry,
+#else
+	.image_name = NULL,
+	.entry_info = NULL,
+#endif
 END
 	print <<END if($generic_setup);
 	/* Generic setup info.
