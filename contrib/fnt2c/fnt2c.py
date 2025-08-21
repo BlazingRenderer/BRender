@@ -129,26 +129,27 @@ def write_font_c(font: Font, s: IO):
 		print('};', file=s)
 		print(file=s)
 
-		print(f'const static br_int_8 widths[{len(font.width_table)}] = {{', file=s)
+		print(f'static const br_int_8 widths[{len(font.width_table)}] = {{', file=s)
 		for k, v in font.width_table.items():
 			print(f'    [{k}] = width_{v},', file=s)
 		print('};', file=s)
 		print(file=s)
 
 	for k, v in font.glyphs.items():
-		print(f'const static br_uint_8 glyph_{k}[{len(v)}] = {{', file=s)
+		print(f'static const br_uint_8 glyph_{k}[{len(v)}] = {{', file=s)
 
 		nbytes = (font.widths.get(k, font.glyph_x) // 8) + 1
 		if len(v) % nbytes != 0:
 			raise Exception('invalid font width/encoding')
 
 		for row in itertools.batched(v, nbytes):
-			print(f'    {', '.join(format(i, '#010b') for i in row)},', file=s)
+			print(f'    {', '.join(format(i, '#04x') for i in row)},', file=s, end='')
+			print(f' /* {', '.join(format(i, '#010b') for i in row)} */', file=s)
 
 		print('};', file=s)
 		print(file=s)
 
-	print(f'const static br_uint_8 *encodings[{len(font.encoding_table)}] = {{', file=s)
+	print(f'static const br_uint_8 *encodings[{len(font.encoding_table)}] = {{', file=s)
 	for k, v in font.encoding_table.items():
 		print(f'    [{k}] = glyph_{v},', file=s)
 	print('};', file=s)
