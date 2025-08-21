@@ -98,12 +98,12 @@ static void CPUInfo_x86(host_info *info)
             info->processor_type = BRT_INTEL_PENTIUM_PRO;
         }
 
-        for(int i = 0; i < BR_ASIZE(ecx_bits); ++i) {
+        for(br_size_t i = 0; i < BR_ASIZE(ecx_bits); ++i) {
             if(ecx & (1 << ecx_bits[i].bit))
                 info->capabilities |= ecx_bits[i].cap;
         }
 
-        for(int i = 0; i < BR_ASIZE(edx_bits); ++i) {
+        for(br_size_t i = 0; i < BR_ASIZE(edx_bits); ++i) {
             if(edx & (1 << edx_bits[i].bit))
                 info->capabilities |= edx_bits[i].cap;
         }
