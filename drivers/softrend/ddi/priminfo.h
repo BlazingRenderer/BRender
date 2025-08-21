@@ -132,13 +132,16 @@ typedef union brp_vertex {
 /*
  * Render a primitive - takes 1 or more vertices
  */
+struct brp_block;
+typedef struct brp_block brp_block;
+
 #ifndef __H2INC__
-typedef void BR_ASM_CALL brp_render_fn(struct brp_block *block, ...);
+typedef void BR_ASM_CALL brp_render_fn(brp_block *block, ...);
 #else
-typedef void BR_ASM_CALL brp_render_fn(struct brp_block *block);
+typedef void BR_ASM_CALL brp_render_fn(brp_block *block);
 #endif
 
-typedef struct brp_block {
+struct brp_block {
 	/*
 	 * Pointer to rendering function (single)
 	 */
@@ -147,7 +150,7 @@ typedef struct brp_block {
 	/*
 	 * Link for chaining blocks together
 	 */
-	struct brp_block *chain;
+	brp_block *chain;
 
 	/*
 	 * String giving a readable identification of this primitive
@@ -209,7 +212,7 @@ typedef struct brp_block {
 	br_uint_32	_reserved_1;
 	br_uint_32	_reserved_2;
 
-} brp_block;
+};
 
 /*
  * A cut down version of the above block that is used to chain
