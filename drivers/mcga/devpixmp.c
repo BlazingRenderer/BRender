@@ -181,6 +181,16 @@ static br_error BR_CMETHOD_DECL(br_device_pixelmap_vga, synchronise)(br_device_p
     return BRE_OK;
 }
 
+static br_error BR_CMETHOD_DECL(br_device_pixelmap_vga, doubleBuffer)(br_device_pixelmap *self, br_device_pixelmap *src)
+{
+    br_error r;
+
+    if((r = BR_CMETHOD_REF(br_device_pixelmap_vga, synchronise)(self, BRT_VERTICAL_BLANK, BR_TRUE)) != BRE_OK)
+        return r;
+
+    return BR_CMETHOD_REF(br_device_pixelmap_gen, doubleBuffer)(self, src);
+}
+
 /*
  * Default dispatch table for device pixelmap
  */
@@ -213,7 +223,7 @@ static const struct br_device_pixelmap_dispatch devicePixelmapDispatch = {
     ._copyTo       = BR_CMETHOD_REF(br_device_pixelmap_mem, copyTo),
     ._copyFrom     = BR_CMETHOD_REF(br_device_pixelmap_mem, copyFrom),
     ._fill         = BR_CMETHOD_REF(br_device_pixelmap_mem, fill),
-    ._doubleBuffer = BR_CMETHOD_REF(br_device_pixelmap_gen, doubleBuffer),
+    ._doubleBuffer = BR_CMETHOD_REF(br_device_pixelmap_vga, doubleBuffer),
 
     ._copyDirty         = BR_CMETHOD_REF(br_device_pixelmap_gen, copyDirty),
     ._copyToDirty       = BR_CMETHOD_REF(br_device_pixelmap_gen, copyToDirty),
