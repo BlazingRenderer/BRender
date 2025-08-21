@@ -9,10 +9,11 @@ br_material *mkres_make_checkerboard_material(const char *name, br_pixelmap *pm)
 br_model    *mkres_make_quad(const char *name);
 br_model    *mkres_make_cube(const char *name);
 br_pixelmap *mkres_make_smtpe_bars(br_uint_8 type, br_int_16 width);
+br_pixelmap *mkres_vgapal(void);
 
 int main(int argc, char **argv)
 {
-    br_pixelmap *pm_checkerboard, *pm_checkerboard8, *pm_checkerboard24, *pm_checkerboard32;
+    br_pixelmap *pm_checkerboard, *pm_checkerboard8, *pm_checkerboard24, *pm_checkerboard32, *pm_vgapal;
     br_material *mat_checkerboard, *mat_checkerboard8, *mat_checkerboard24, *mat_checkerboard32;
     br_model    *mdl_quad, *mdl_cube;
     int          ret = 1;
@@ -36,6 +37,11 @@ int main(int argc, char **argv)
 
     if((pm_checkerboard32 = mkres_make_checkerboard32_pixelmap("checkerboard32.pix")) == NULL) {
         fprintf(stderr, "failed to allocate checkerboard32 pixelmap\n");
+        goto done;
+    }
+
+    if((pm_vgapal = mkres_vgapal()) == NULL) {
+        fprintf(stderr, "failed to allocate vgapal pixelmap\n");
         goto done;
     }
 
@@ -75,6 +81,7 @@ int main(int argc, char **argv)
     BrPixelmapSave("checkerboard8.pix", pm_checkerboard8);
     BrPixelmapSave("checkerboard24.pix", pm_checkerboard24);
     BrPixelmapSave("checkerboard32.pix", pm_checkerboard32);
+    BrPixelmapSave("vga.pal", pm_vgapal);
     BrMaterialSave("checkerboard.mat", mat_checkerboard);
     BrMaterialSave("checkerboard8.mat", mat_checkerboard8);
     BrMaterialSave("checkerboard24.mat", mat_checkerboard24);
