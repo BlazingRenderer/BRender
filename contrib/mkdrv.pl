@@ -76,6 +76,8 @@ sub run_h2inc {
         s/(fmt_vertex(_f|_x)?\s*STRUCT)\s*4t/$1 ; 4t H2INCFIX/;
         s/(v11face(_f|_x)?\s*STRUCT)\s*4t/$1 ; 4t H2INCFIX/;
         s/(v11group(_f|_x)?\s*STRUCT)\s*4t/$1 ; 4t H2INCFIX/;
+        s/(_workspace\s*STRUCT)\s*4t/$1 8; H2INCFIX/;
+        s/(ArbitraryWidthWorkspace\s*STRUCT)\s*4t/$1 8; H2INCFIX/;
         print $fhdst $_;
     }
     close $fhsrc;

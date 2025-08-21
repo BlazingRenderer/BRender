@@ -2072,11 +2072,6 @@ temp		dword		0
 endif
 .data
 
-align 8
-workspace _workspace <>
-align 8
-workspaceA ArbitraryWidthWorkspace {}
-
 ; Conversion values for major and minor edges, indexed by LR/RL flag*8
 ;
 	; Fixed

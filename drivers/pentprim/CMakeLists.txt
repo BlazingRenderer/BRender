@@ -195,6 +195,9 @@ add_library(pentprim
         work.c
         work.h
 
+		workspace.c
+		workspace.h
+
 		"${CMAKE_CURRENT_BINARY_DIR}/drv.inc"
 
 		${ASM_FILES}

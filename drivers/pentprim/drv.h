@@ -27,6 +27,10 @@
 #include "work.h"
 #endif
 
+#ifndef _WORKSPACE_H_
+#include "workspace.h"
+#endif
+
 #ifndef _OBJECT_H_
 #include "object.h"
 #endif
