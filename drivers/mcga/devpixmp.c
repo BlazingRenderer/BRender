@@ -161,6 +161,8 @@ static struct br_tv_template *BR_CMETHOD_DECL(br_device_pixelmap_vga, queryTempl
 
 static br_error BR_CMETHOD_DECL(br_device_pixelmap_vga, synchronise)(br_device_pixelmap *self, br_token sync_type, br_boolean block)
 {
+    unsigned long spins;
+
     if(sync_type != BRT_VERTICAL_BLANK || !block)
         return BRE_UNSUPPORTED;
 
@@ -169,14 +171,22 @@ static br_error BR_CMETHOD_DECL(br_device_pixelmap_vga, synchronise)(br_device_p
     /*
      * Finish our current vblank.
      */
-    while((inportb(0x03DA) & 0x08) == 0x08)
+    spins = 200000UL;
+    while(((inportb(0x03DA) & 0x08) == 0x08) && spins--)
         ;
+
+    if(spins == 0)
+        return BRE_FAIL;
 
     /*
      * Wait for the next to start.
      */
-    while((inportb(0x03DA) & 0x08) == 0x00)
+    spins = 200000UL;
+    while(((inportb(0x03DA) & 0x08) == 0x00) && spins--)
         ;
+
+    if(spins == 0)
+        return BRE_FAIL;
 
     return BRE_OK;
 }
