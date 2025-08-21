@@ -55,8 +55,6 @@ function(find_sdl)
     if(TARGET SDL2::SDL2)
         return()
     endif()
-
-    message(FATAL_ERROR "Unable to find either SDL2 or SDL3, please install one of them.")
 endfunction()
 
 find_sdl()
