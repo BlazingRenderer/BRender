@@ -9,6 +9,7 @@
 #include <stddef.h>
 #include <string.h>
 #include <sys/nearptr.h>
+#include <pc.h>
 
 #include "drv.h"
 #include "pm.h"
@@ -158,6 +159,28 @@ static struct br_tv_template *BR_CMETHOD_DECL(br_device_pixelmap_vga, queryTempl
     return self->device->templates.devicePixelmapTemplate;
 }
 
+static br_error BR_CMETHOD_DECL(br_device_pixelmap_vga, synchronise)(br_device_pixelmap *self, br_token sync_type, br_boolean block)
+{
+    if(sync_type != BRT_VERTICAL_BLANK || !block)
+        return BRE_UNSUPPORTED;
+
+    /* http://www.techhelpmanual.com/899-enhanced_graphics_adapter_i_o_ports.html */
+
+    /*
+     * Finish our current vblank.
+     */
+    while((inportb(0x03DA) & 0x08) == 0x08)
+        ;
+
+    /*
+     * Wait for the next to start.
+     */
+    while((inportb(0x03DA) & 0x08) == 0x00)
+        ;
+
+    return BRE_OK;
+}
+
 /*
  * Default dispatch table for device pixelmap
  */
@@ -225,7 +248,7 @@ static const struct br_device_pixelmap_dispatch devicePixelmapDispatch = {
     ._originSet       = BR_CMETHOD_REF(br_device_pixelmap_mem, originSet),
 
     ._flush        = BR_CMETHOD_REF(br_device_pixelmap_gen, flush),
-    ._synchronise  = BR_CMETHOD_REF(br_device_pixelmap_gen, synchronise),
+    ._synchronise  = BR_CMETHOD_REF(br_device_pixelmap_vga, synchronise),
     ._directLock   = BR_CMETHOD_REF(br_device_pixelmap_gen, directLock),
     ._directUnlock = BR_CMETHOD_REF(br_device_pixelmap_gen, directUnlock),
 
