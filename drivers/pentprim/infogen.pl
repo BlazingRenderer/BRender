@@ -494,6 +494,8 @@ sub property_z_buffered
 sub property_shade_table
 {
 	if($properties{"constant_intensity"} || $properties{"interpolated_intensity"}) {
+		$identifier .= "Indexed Shading, ";
+
 		push(@use_buffers,("SHADE"));
 
  		$shade_type = $colour_type;
