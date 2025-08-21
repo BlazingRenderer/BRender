@@ -28,11 +28,21 @@ static br_size_t BrNullInquire(br_uint_8 type)
     return 0;
 }
 
+static br_uint_32 BrNullAlign(br_uint_8 type)
+{
+    return 0;
+}
+
 /*
  * Allocator structure
  */
 br_allocator BrNullAllocator = {
-    "Null", BrNullAllocate, BrNullReallocate, BrNullFree, BrNullInquire,
+    .identifier = "Null",
+    .allocate   = BrNullAllocate,
+    .reallocate = BrNullReallocate,
+    .free       = BrNullFree,
+    .inquire    = BrNullInquire,
+    .align      = BrNullAlign,
 };
 
 // Nope, we're using std now
