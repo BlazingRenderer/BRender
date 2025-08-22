@@ -94,34 +94,6 @@ RasteriseBufferEnd proc
 			ret
 RasteriseBufferEnd endp
 
-; void * BR_ASM_CALL RasteriseBufferAllocate(br_size_t param_size,br_size_t work_size);
-;
-; Allocate workspace on the rasterise stack
-;
-RasteriseBufferAllocate proc uses esi edi ebx, param_size:dword, work_size:dword
-
-		; See how mush free space is left on stack
-		;
-			mov		eax,offset rasteriseBuffer
-			mov		edx,rasteriseBufferTop
-
-			sub		edx,eax
-
-			cmp		edx,work_size
-			jae		no_flush
-
-		; Flush out existing stack
-		;
-			call    RasteriseBufferFlush
-
-
-no_flush:	mov		eax,rasteriseBufferTop
-			sub		eax,param_size
-			mov		rasteriseBufferTop,eax
-			ret
-
-RasteriseBufferAllocate endp
-
 ; void BR_ASM_CALL RasteriseBufferFlush(void);
 ;
 ; Executes the current set of stacked rasterisation blocks

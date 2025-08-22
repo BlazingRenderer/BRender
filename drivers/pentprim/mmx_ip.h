@@ -21,7 +21,6 @@ extern "C" {
  */
 void BR_ASM_CALL RasteriseBufferBegin(void);
 void BR_ASM_CALL RasteriseBufferEnd(void);
-void * BR_ASM_CALL RasteriseBufferAllocate(br_size_t param_size,br_size_t work_size);
 void BR_ASM_CALL RasteriseBufferFlush(void);
 void BR_ASM_CALL RasteriseBufferDone(void);
 void BR_ASM_CALL RasteriseBufferDisable(void);
