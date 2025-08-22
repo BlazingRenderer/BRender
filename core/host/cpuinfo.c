@@ -13,14 +13,14 @@ static int x86_cpuid(unsigned int leaf, unsigned int *eax, unsigned int *ebx, un
 #elif defined(_MSC_VER) && (defined(_M_IX86) || defined(_M_X64))
 #include <intrin.h>
 
-static int x86_cpuid(unsigned int leaf, unsigned int *eax, unsigned int *ebx, unsigned int *ecx, unsigned int *edx)
+static int x86_cpuid(unsigned int leaf, unsigned int *_eax, unsigned int *_ebx, unsigned int *_ecx, unsigned int *_edx)
 {
     int CPUInfo[4];
     __cpuid(CPUInfo, leaf);
-    memcpy(eax, CPUInfo + 0);
-    memcpy(ebx, CPUInfo + 1);
-    memcpy(ecx, CPUInfo + 2);
-    memcpy(edx, CPUInfo + 3);
+    memcpy(_eax, CPUInfo + 0, sizeof(_eax));
+    memcpy(_ebx, CPUInfo + 1, sizeof(_ebx));
+    memcpy(_ecx, CPUInfo + 2, sizeof(_ecx));
+    memcpy(_edx, CPUInfo + 3, sizeof(_edx));
     return 1;
 }
 
