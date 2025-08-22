@@ -50,7 +50,7 @@ static void CPUInfo_x86(host_info *info)
     char         vendor[13];
 
     info->processor_family = BRT_INTEL;
-    info->processor_type   = BRT_INTEL_PENTIUM_PRO;
+    info->processor_type   = BRT_INTEL_386;
     if(x86_cpuid(0, &eax, &ebx, &ecx, &edx) == 0) {
         return;
     }
@@ -90,7 +90,9 @@ static void CPUInfo_x86(host_info *info)
         if(family == 0xF)
             family += ext_family;
 
-        if(family == 4) {
+        if(family <= 3) {
+            info->processor_type = BRT_INTEL_386;
+        } else if(family == 4) {
             info->processor_type = BRT_INTEL_486;
         } else if(family == 5) {
             info->processor_type = BRT_INTEL_PENTIUM;
