@@ -39,6 +39,8 @@ static host_info hostInfo = {
     .size = sizeof(host_info),
 #if defined(__WIN_32__)
     .identifier = "Microsoft WIN32",
+#elif defined(__GO32__)
+    .identifier = "DJGPP GO32",
 #elif defined(__DOS__)
     .identifier = "Generic DOS",
 #else
