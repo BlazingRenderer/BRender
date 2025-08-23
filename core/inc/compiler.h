@@ -96,6 +96,8 @@ typedef float br_float;
 #define BR_DLL_EXPORT __declspec(dllexport)
 #define BR_DLL_IMPORT __declspec(dllimport)
 
+#define BR_ALIGNAS(N) __declspec(align(N))
+
 /*
  * Public entry point into library
  */
@@ -161,6 +163,8 @@ typedef float br_float;
 #define BR_DLL_EXPORT __attribute__((visibility("default")))
 #define BR_DLL_IMPORT
 #endif
+
+#define BR_ALIGNAS(N) __attribute__((aligned(N)))
 
 /*
  * Public entry point into library
@@ -290,6 +294,8 @@ typedef float br_float;
 #define BR_ASM_CALL
 #define BR_ASM_CALLBACK
 
+#undef BR_ALIGNAS
+#define BR_ALIGNAS(N)
 #endif
 
 /*
