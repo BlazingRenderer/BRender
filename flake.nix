@@ -15,7 +15,7 @@
     mkShells = packages: builtins.mapAttrs (k: v: v.overrideAttrs(old: {
       hardeningDisable = [ "all" ];
       nativeBuildInputs = old.nativeBuildInputs ++ v.devTools;
-    })) (nixpkgs.lib.removeAttrs packages [ "wineserverHook" ]);
+    })) (nixpkgs.lib.removeAttrs packages [ "wineserverHook" "uasm" ]);
   in {
     packages = forAllSystems(pkgs: rec {
       wineserverHook = pkgs.callPackage ./nix/wineserver-hook.nix { };
