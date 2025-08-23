@@ -237,6 +237,23 @@ endif()
 target_compile_definitions(pentprim PRIVATE "-DPARTS=0xffff")
 set_source_files_properties(${ASM_FILES} PROPERTIES COMPILE_DEFINITIONS "PARTS=0ffffh")
 
+if(DJGPP)
+	# i586-pc-msdosdjgpp-gcc -E -dM - </dev/null | grep -i 'DOS\|GO32\|DJGPP' | sort -u
+	set_source_files_properties(${ASM_FILES} PROPERTIES COMPILE_DEFINITIONS
+			"__DJGPP=2"
+			"__DJGPP__=2"
+			"DJGPP=2"
+
+			"__GO32=1"
+			"__GO32__=1"
+			"GO32=1"
+
+			"__MSDOS=1"
+			"__MSDOS__=1"
+			"MSDOS=1"
+	)
+endif()
+
 get_target_property(target_type pentprim TYPE)
 if(NOT target_type STREQUAL SHARED_LIBRARY)
     target_compile_definitions(pentprim PRIVATE -DDEFINE_BR_ENTRY_POINT)
