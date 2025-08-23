@@ -170,7 +170,7 @@ struct ArbitraryWidthWorkspace {
 
 #pragma pack(pop)
 
-extern alignas(8) struct _workspace workspace;
-extern alignas(8) struct ArbitraryWidthWorkspace workspaceA;
+extern BR_ALIGNAS(8) struct _workspace workspace;
+extern BR_ALIGNAS(8) struct ArbitraryWidthWorkspace workspaceA;
 
 #endif /* _WORKSPACE_H_ */
