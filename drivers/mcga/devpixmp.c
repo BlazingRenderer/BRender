@@ -1,18 +1,24 @@
 /*
  * Copyright (c) 1993-1995 Argonaut Technologies Limited. All rights reserved.
+ * Copyright (c) 2005 Zane van Iperen
  *
  * $Id: devpixmp.c 1.2 1998/10/21 15:41:12 jon Exp $
  * $Locker: $
  *
- * Device pixelmap methods
+ * Device pixelmap methods for VGA mode 13h (MCGA).
+ *
+ * These routines are not particular well-optimised, but that doesn't matter
+ * because you should be double-buffering anyway :)
  */
 #include <stddef.h>
 #include <string.h>
-#include <sys/nearptr.h>
+#include <sys/segments.h>
+#include <sys/farptr.h>
 #include <pc.h>
 
 #include "drv.h"
 #include "pm.h"
+#include "brassert.h"
 
 /*
  * Display mode and stride are fixed for MCGA
@@ -72,18 +78,8 @@ br_device_pixelmap *DevicePixelmapMCGAAllocateMode(br_device *dev, br_output_fac
     self->restore_mode  = BR_TRUE;
     self->original_mode = original_mode;
 
-    self->meminfo.address = 0x000A0000;
-    self->meminfo.size    = 0x10000;
-    self->meminfo.handle  = 0;
-    if(__dpmi_physical_address_mapping(&self->meminfo) != 0) {
-        if(self->restore_mode) {
-            DeviceVGACurrentModeSet(dev, original_mode);
-        }
-        dev->active = BR_FALSE;
-        return NULL;
-    }
-
-    self->pm_pixels = (void *)(self->meminfo.address + __djgpp_conventional_base);
+    self->vga_sel = __dpmi_segment_to_descriptor(0xA000);
+    self->my_sel  = _my_ds();
 
     self->pm_type      = OutputFacilityVGAType(facility);
     self->pm_width     = w;
@@ -92,12 +88,15 @@ br_device_pixelmap *DevicePixelmapMCGAAllocateMode(br_device *dev, br_output_fac
     self->pm_origin_x  = 0;
     self->pm_origin_y  = 0;
 
-    self->pm_flags  = BR_PMF_ROW_WHOLEPIXELS | BR_PMF_LINEAR;
+    self->pm_pixels = NULL;
+    self->pm_flags  = BR_PMF_NO_ACCESS;
     self->pm_base_x = 0;
     self->pm_base_y = 0;
 
     self->output_facility = facility;
     self->clut            = DeviceVGAClut(dev);
+
+    self->tmp_row = BrResAllocate(self, self->pm_row_bytes, BR_MEMORY_SCRATCH);
 
     ObjectContainerAddFront(facility, (br_object *)self);
 
@@ -119,8 +118,6 @@ static void BR_CMETHOD_DECL(br_device_pixelmap_mcga, free)(br_object *_self)
         DeviceVGACurrentModeSet(ObjectDevice(self), self->original_mode);
         ObjectDevice(self)->active = BR_FALSE;
     }
-
-    __dpmi_free_physical_address_mapping(&self->meminfo);
 
     /*
      * Free up pixelmap structure
@@ -157,6 +154,146 @@ static struct br_tv_template *BR_CMETHOD_DECL(br_device_pixelmap_vga, queryTempl
                                                                               BR_ASIZE(devicePixelmapTemplateEntries));
 
     return self->device->templates.devicePixelmapTemplate;
+}
+
+static br_uintptr_t DevicePixelmapMCGAMemOffset(br_device_pixelmap *self, br_int_32 x, br_int_32 y)
+{
+    return (br_uintptr_t)self->pm_pixels + ((self->pm_base_y + y) * BIOS_STRIDE) + ((self->pm_base_x + x) * 1);
+}
+
+static br_error BR_CMETHOD_DECL(br_device_pixelmap_vga, validSource)(br_device_pixelmap *self, br_boolean *bp, br_object *h)
+{
+    (void)self;
+    (void)h;
+    *bp = BR_FALSE;
+    return BRE_OK;
+}
+
+static br_error BR_CMETHOD_DECL(br_device_pixelmap_vga, resize)(br_device_pixelmap *self, br_int_32 width, br_int_32 height)
+{
+    if(width == self->pm_width && height == self->pm_height)
+        return BRE_OK;
+
+    return BRE_FAIL;
+}
+
+static br_error BR_CMETHOD_DECL(br_device_pixelmap_vga, rectangleCopyTo)(br_device_pixelmap *self, br_point *p, br_device_pixelmap *src,
+                                                                         br_rectangle *r)
+{
+    br_rectangle ar;
+    br_point     ap;
+    br_boolean   is_contig;
+
+    UASSERT(self->pm_type == src->pm_type);
+
+    if(PixelmapRectangleClipTwo(&ar, &ap, r, p, (br_pixelmap *)self, (br_pixelmap *)src) == BR_CLIP_REJECT)
+        return BRE_OK;
+
+    is_contig = (src->pm_flags & (BR_PMF_LINEAR | BR_PMF_ROW_WHOLEPIXELS)) == (BR_PMF_LINEAR | BR_PMF_ROW_WHOLEPIXELS);
+
+    if(ar.w == self->pm_width && ar.h == self->pm_height && self->pm_row_bytes == src->pm_row_bytes && is_contig) {
+        void        *pp;
+        br_uint_32   pqual;
+        br_uintptr_t vga_off;
+        br_point     dp = {
+                .x = -src->pm_origin_x + ap.x,
+                .y = -src->pm_origin_y + ap.y,
+        };
+        if(DevicePixelmapPixelAddressQuery(src, &pp, &pqual, &dp) != BRE_OK)
+            return BRE_FAIL;
+
+        vga_off = DevicePixelmapMCGAMemOffset(self, ar.x, ar.y);
+        movedata(self->my_sel, (unsigned)pp, self->vga_sel, vga_off, ar.w * ar.h);
+    } else {
+        for(br_int_32 y = 0; y < ar.h; y++) {
+            void        *pp;
+            br_uint_32   pqual;
+            br_uintptr_t vga_off;
+            br_point     dp = {
+                    .x = -src->pm_origin_x + ap.x,
+                    .y = -src->pm_origin_y + ap.y + y,
+            };
+            if(DevicePixelmapPixelAddressQuery(src, &pp, &pqual, &dp) != BRE_OK)
+                return BRE_FAIL;
+
+            vga_off = DevicePixelmapMCGAMemOffset(self, ar.x, ar.y + y);
+            movedata(self->my_sel, (br_uintptr_t)pp, self->vga_sel, vga_off, ar.w);
+        }
+    }
+
+    return BRE_FAIL;
+}
+
+static br_error BR_CMETHOD_DECL(br_device_pixelmap_vga, rectangleCopy)(br_device_pixelmap *self, br_point *p, br_device_pixelmap *src,
+                                                                       br_rectangle *r)
+{
+    UASSERT(self->pm_type == src->pm_type);
+
+    /*
+     * This will be the case if we're from a "match()"'d pixelmap. Same device, but using
+     * memory dispatch. Punt us off to our memory copy.
+     */
+    if(src->dispatch != self->dispatch)
+        return BR_CMETHOD_REF(br_device_pixelmap_vga, rectangleCopyTo)(self, p, src, r);
+
+    /*
+     * This should never be hit as there'll never be front screens.
+     */
+    return BRE_FAIL;
+}
+
+static br_error BR_CMETHOD_DECL(br_device_pixelmap_vga, rectangleCopyFrom)(br_device_pixelmap *self, br_point *p, br_device_pixelmap *dest,
+                                                                           br_rectangle *r)
+{
+    /*
+     * Why are you copying _from_ the screen? No. Implement this yourself.
+     */
+    return BRE_FAIL;
+}
+
+static br_error BR_CMETHOD_DECL(br_device_pixelmap_vga, rectangleFill)(br_device_pixelmap *self, br_rectangle *rect, br_uint_32 colour)
+{
+    br_rectangle arect;
+
+    if(PixelmapRectangleClip(&arect, rect, (br_pixelmap *)self) == BR_CLIP_REJECT)
+        return BRE_OK;
+
+    /*
+     * Fill our temporary row.
+     */
+    BrMemSet(self->tmp_row, (int)colour, arect.w);
+
+    /*
+     * Now copy it, row-by-row.
+     */
+    for(br_int_32 y = arect.y; y < arect.y + arect.h; ++y) {
+        const br_uintptr_t base = DevicePixelmapMCGAMemOffset(self, 0, y);
+        movedata(self->my_sel, (unsigned)self->tmp_row, self->vga_sel, base, arect.w);
+    }
+
+    return BRE_OK;
+}
+
+static br_error BR_CMETHOD_DECL(br_device_pixelmap_vga, pixelSet)(br_device_pixelmap *self, br_point *p, br_uint_32 colour)
+{
+    br_point ap;
+
+    if(PixelmapPointClip(&ap, p, (br_pixelmap *)self) == BR_CLIP_REJECT)
+        return BRE_OK;
+
+    _farpokeb(self->vga_sel, DevicePixelmapMCGAMemOffset(self, p->x, p->y), (char)colour);
+    return BRE_OK;
+}
+
+static br_error BR_CMETHOD_DECL(br_device_pixelmap_vga, pixelQuery)(br_device_pixelmap *self, br_uint_32 *pcolour, br_point *p)
+{
+    br_point ap;
+
+    if(PixelmapPointClip(&ap, p, (br_pixelmap *)self) == BR_CLIP_REJECT)
+        return BRE_FAIL;
+
+    *pcolour = _farpeekb(self->vga_sel, DevicePixelmapMCGAMemOffset(self, p->x, p->y));
+    return BRE_OK;
 }
 
 static br_error BR_CMETHOD_DECL(br_device_pixelmap_vga, synchronise)(br_device_pixelmap *self, br_token sync_type, br_boolean block)
@@ -198,6 +335,16 @@ static br_error BR_CMETHOD_DECL(br_device_pixelmap_vga, doubleBuffer)(br_device_
     if((r = BR_CMETHOD_REF(br_device_pixelmap_vga, synchronise)(self, BRT_VERTICAL_BLANK, BR_TRUE)) != BRE_OK)
         return r;
 
+    /*
+     * "Fast"-path. If we're the same size/type, and they have linear+whole rows, just do a copy.
+     */
+    if(src->pm_width == self->pm_width && src->pm_height == self->pm_height && src->pm_type == self->pm_type &&
+       ((src->pm_flags & (BR_PMF_LINEAR | BR_PMF_ROW_WHOLEPIXELS)) == (BR_PMF_LINEAR | BR_PMF_ROW_WHOLEPIXELS))) {
+
+        movedata(self->my_sel, (br_uintptr_t)src->pm_pixels, self->vga_sel, 0, self->pm_width * self->pm_height);
+        return BRE_OK;
+    }
+
     return BR_CMETHOD_REF(br_device_pixelmap_gen, doubleBuffer)(self, src);
 }
 
@@ -224,15 +371,15 @@ static const struct br_device_pixelmap_dispatch devicePixelmapDispatch = {
     ._queryAll      = BR_CMETHOD_REF(br_object, queryAll),
     ._queryAllSize  = BR_CMETHOD_REF(br_object, queryAllSize),
 
-    ._validSource = BR_CMETHOD_REF(br_device_pixelmap_mem, validSource),
-    ._resize      = BR_CMETHOD_REF(br_device_pixelmap_mem, resize),
+    ._validSource = BR_CMETHOD_REF(br_device_pixelmap_vga, validSource),
+    ._resize      = BR_CMETHOD_REF(br_device_pixelmap_vga, resize),
     ._match       = BR_CMETHOD_REF(br_device_pixelmap_mem, match),
-    ._allocateSub = BR_CMETHOD_REF(br_device_pixelmap_mem, allocateSub),
+    ._allocateSub = BR_CMETHOD_REF(br_device_pixelmap_fail, allocateSub),
 
-    ._copy         = BR_CMETHOD_REF(br_device_pixelmap_mem, copyTo),
-    ._copyTo       = BR_CMETHOD_REF(br_device_pixelmap_mem, copyTo),
-    ._copyFrom     = BR_CMETHOD_REF(br_device_pixelmap_mem, copyFrom),
-    ._fill         = BR_CMETHOD_REF(br_device_pixelmap_mem, fill),
+    ._copy         = BR_CMETHOD_REF(br_device_pixelmap_gen, copy),
+    ._copyTo       = BR_CMETHOD_REF(br_device_pixelmap_gen, copyTo),
+    ._copyFrom     = BR_CMETHOD_REF(br_device_pixelmap_gen, copyFrom),
+    ._fill         = BR_CMETHOD_REF(br_device_pixelmap_gen, fill),
     ._doubleBuffer = BR_CMETHOD_REF(br_device_pixelmap_vga, doubleBuffer),
 
     ._copyDirty         = BR_CMETHOD_REF(br_device_pixelmap_gen, copyDirty),
@@ -243,34 +390,34 @@ static const struct br_device_pixelmap_dispatch devicePixelmapDispatch = {
 
     ._rectangle                = BR_CMETHOD_REF(br_device_pixelmap_gen, rectangle),
     ._rectangle2               = BR_CMETHOD_REF(br_device_pixelmap_gen, rectangle2),
-    ._rectangleCopyTo          = BR_CMETHOD_REF(br_device_pixelmap_mem, rectangleCopyTo),
-    ._rectangleCopyTo          = BR_CMETHOD_REF(br_device_pixelmap_mem, rectangleCopyTo),
-    ._rectangleCopyFrom        = BR_CMETHOD_REF(br_device_pixelmap_mem, rectangleCopyFrom),
-    ._rectangleStretchCopyTo   = BR_CMETHOD_REF(br_device_pixelmap_mem, rectangleStretchCopyTo),
-    ._rectangleStretchCopyTo   = BR_CMETHOD_REF(br_device_pixelmap_mem, rectangleStretchCopyTo),
-    ._rectangleStretchCopyFrom = BR_CMETHOD_REF(br_device_pixelmap_mem, rectangleStretchCopyFrom),
-    ._rectangleFill            = BR_CMETHOD_REF(br_device_pixelmap_mem, rectangleFill),
-    ._pixelSet                 = BR_CMETHOD_REF(br_device_pixelmap_mem, pixelSet),
-    ._line                     = BR_CMETHOD_REF(br_device_pixelmap_mem, line),
-    ._copyBits                 = BR_CMETHOD_REF(br_device_pixelmap_mem, copyBits),
+    ._rectangleCopy            = BR_CMETHOD_REF(br_device_pixelmap_vga, rectangleCopy),
+    ._rectangleCopyTo          = BR_CMETHOD_REF(br_device_pixelmap_vga, rectangleCopyTo),
+    ._rectangleCopyFrom        = BR_CMETHOD_REF(br_device_pixelmap_vga, rectangleCopyFrom),
+    ._rectangleStretchCopyTo   = BR_CMETHOD_REF(br_device_pixelmap_fail, rectangleStretchCopyTo),
+    ._rectangleStretchCopyTo   = BR_CMETHOD_REF(br_device_pixelmap_fail, rectangleStretchCopyTo),
+    ._rectangleStretchCopyFrom = BR_CMETHOD_REF(br_device_pixelmap_fail, rectangleStretchCopyFrom),
+    ._rectangleFill            = BR_CMETHOD_REF(br_device_pixelmap_vga, rectangleFill),
+    ._pixelSet                 = BR_CMETHOD_REF(br_device_pixelmap_vga, pixelSet),
+    ._line                     = BR_CMETHOD_REF(br_device_pixelmap_gen, line),
+    ._copyBits                 = BR_CMETHOD_REF(br_device_pixelmap_gen, copyBits),
 
     ._text       = BR_CMETHOD_REF(br_device_pixelmap_gen, text),
     ._textBounds = BR_CMETHOD_REF(br_device_pixelmap_gen, textBounds),
 
-    ._rowSize  = BR_CMETHOD_REF(br_device_pixelmap_mem, rowSize),
-    ._rowQuery = BR_CMETHOD_REF(br_device_pixelmap_mem, rowQuery),
-    ._rowSet   = BR_CMETHOD_REF(br_device_pixelmap_mem, rowSet),
+    ._rowSize  = BR_CMETHOD_REF(br_device_pixelmap_fail, rowSize),
+    ._rowQuery = BR_CMETHOD_REF(br_device_pixelmap_fail, rowQuery),
+    ._rowSet   = BR_CMETHOD_REF(br_device_pixelmap_fail, rowSet),
 
-    ._pixelQuery        = BR_CMETHOD_REF(br_device_pixelmap_mem, pixelQuery),
-    ._pixelAddressQuery = BR_CMETHOD_REF(br_device_pixelmap_mem, pixelAddressQuery),
+    ._pixelQuery        = BR_CMETHOD_REF(br_device_pixelmap_vga, pixelQuery),
+    ._pixelAddressQuery = BR_CMETHOD_REF(br_device_pixelmap_fail, pixelAddressQuery),
 
-    ._pixelAddressSet = BR_CMETHOD_REF(br_device_pixelmap_mem, pixelAddressSet),
-    ._originSet       = BR_CMETHOD_REF(br_device_pixelmap_mem, originSet),
+    ._pixelAddressSet = BR_CMETHOD_REF(br_device_pixelmap_fail, pixelAddressSet),
+    ._originSet       = BR_CMETHOD_REF(br_device_pixelmap_gen, originSet),
 
     ._flush        = BR_CMETHOD_REF(br_device_pixelmap_gen, flush),
     ._synchronise  = BR_CMETHOD_REF(br_device_pixelmap_vga, synchronise),
-    ._directLock   = BR_CMETHOD_REF(br_device_pixelmap_gen, directLock),
-    ._directUnlock = BR_CMETHOD_REF(br_device_pixelmap_gen, directUnlock),
+    ._directLock   = BR_CMETHOD_REF(br_device_pixelmap_fail, directLock),
+    ._directUnlock = BR_CMETHOD_REF(br_device_pixelmap_fail, directUnlock),
 
     ._getControls = BR_CMETHOD_REF(br_device_pixelmap_gen, getControls),
     ._setControls = BR_CMETHOD_REF(br_device_pixelmap_gen, setControls),
