@@ -33,6 +33,30 @@ TRANSPARENCY	equ	1
 
 		.data
 
+; Fix to stop masm creating prologue\epilogue to handle stack frame. 
+
+PROLOGUE MACRO procname, flags, argbytes, localbytes, reglist, userparms:VARARG
+	push ebp
+	
+	mov ebp,esp
+	push ebx
+
+	push edi
+	push esi
+	exitm <0>
+endm
+
+EPILOGUE MACRO procname, flags, argbytes, localbytes, reglist, userparms:VARARG
+	pop	esi													   
+	pop	edi
+
+	pop	ebx
+	pop	ebp
+
+	ret
+endm
+
+
 ; Alternative versions of useful instructions for making forward and backward
 ; scanning versions of rasterisers
 ;
@@ -1319,6 +1343,9 @@ ScanlineRender_PT_I8_&size&_&dirn&_u&udirn&_v&vdirn endp
 
 
 		.code
+
+OPTION PROLOGUE:PROLOGUE 
+OPTION EPILOGUE:EPILOGUE
 
 
 	if PARTS and PART_8
