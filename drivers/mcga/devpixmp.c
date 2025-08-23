@@ -78,9 +78,9 @@ br_device_pixelmap *DevicePixelmapMCGAAllocateMode(br_device *dev, br_output_fac
     if(__dpmi_physical_address_mapping(&self->meminfo) != 0) {
         if(self->restore_mode) {
             DeviceVGACurrentModeSet(dev, original_mode);
-            dev->active = BR_FALSE;
-            return NULL;
         }
+        dev->active = BR_FALSE;
+        return NULL;
     }
 
     self->pm_pixels = (void *)(self->meminfo.address + __djgpp_conventional_base);
