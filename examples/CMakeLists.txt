@@ -15,6 +15,10 @@ if(TARGET BRender::Drivers::SDL3Dev AND TARGET BRender::Drivers::SoftPrim)
     add_subdirectory(softcube)
 endif()
 
+if(TARGET BRender::Drivers::MCGA AND TARGET BRender::Drivers::SoftPrim)
+    add_subdirectory(doscube)
+endif()
+
 if(BRENDER_BUILD_GLFW_EXAMPLE AND TARGET BRender::Drivers::GLRend)
     find_package(glfw3 3)
     if(TARGET glfw)
