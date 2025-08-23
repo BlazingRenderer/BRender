@@ -23,7 +23,7 @@ void BR_CALLBACK _BrEndHook(void)
 
 static char primitive_heap[1500 * 1024];
 
-static void draw_info(br_pixelmap *screen, br_material *mat)
+static void draw_info(br_pixelmap *screen, br_material *mat, br_colour text_colour)
 {
     br_token   pstate_token = BR_NULL_TOKEN;
     br_object *primstate    = NULL;
@@ -44,7 +44,7 @@ static void draw_info(br_pixelmap *screen, br_material *mat)
 
     font_height = BrPixelmapTextHeight(screen, BrFontProp7x9);
 
-    BrPixelmapTextF(screen, -(screen->width / 2) + font_height, -(screen->height / 2) + font_height, 0xFFFFFFFF, BrFontProp7x9,
+    BrPixelmapTextF(screen, -(screen->width / 2) + font_height, -(screen->height / 2) + font_height, text_colour, BrFontProp7x9,
                     "Rasteriser: %s", block->identifier);
 }
 
@@ -54,7 +54,7 @@ int main(int argc, char **argv)
     br_actor    *world, *camera, *cube, *light;
     int          ret = 1;
     br_uint_64   ticks_last, ticks_now;
-    br_colour    clear_colour;
+    br_colour    clear_colour, text_colour;
     br_error     err;
 
     BrBegin();
@@ -74,20 +74,44 @@ int main(int argc, char **argv)
         goto create_fail;
     }
 
-    {
-#if defined(SOFTCUBE_16BIT)
-        BrLogInfo("APP", "Running at 16-bpp");
-        colour_buffer = BrPixelmapMatchTyped(screen, BR_PMMATCH_OFFSCREEN, BR_PMT_RGB_565);
-        ;
-        clear_colour = BR_COLOUR_565(66, 66, 66);
+#if defined(SOFTCUBE_8BIT)
+    BrLogInfo("APP", "Running at 8-bpp");
+    colour_buffer = BrPixelmapMatchTyped(screen, BR_PMMATCH_OFFSCREEN, BR_PMT_INDEX_8);
+    clear_colour  = 16;
+    text_colour   = 63;
 
-#else
-        BrLogInfo("APP", "Running at 24-bpp");
-        colour_buffer = BrPixelmapMatchTyped(screen, BR_PMMATCH_OFFSCREEN, BR_PMT_RGB_888);
-        ;
-        clear_colour = BR_COLOUR_RGB(66, 66, 66);
-#endif
+    {
+        br_pixelmap *pal = NULL, *shade_table = NULL;
+
+        if((pal = BrPixelmapLoad("std.pal")) == NULL) {
+            BrPixelmapFree(colour_buffer);
+            BrLogError("APP", "Error loading std.pal");
+            goto create_fail;
+        }
+
+        BrPixelmapPaletteSet(colour_buffer, pal);
+        BrPixelmapFree(pal);
+
+        if((shade_table = BrPixelmapLoad("shade.tab")) == NULL) {
+            BrLogError("DEMO", "Unable to load shade.tab");
+            return BRE_FAIL;
+        }
+        BrTableAdd(shade_table);
     }
+#else
+#if defined(SOFTCUBE_16BIT)
+    BrLogInfo("APP", "Running at 16-bpp");
+    colour_buffer = BrPixelmapMatchTyped(screen, BR_PMMATCH_OFFSCREEN, BR_PMT_RGB_565);
+    clear_colour  = BR_COLOUR_565(66, 66, 66);
+    text_colour   = BR_COLOUR_565(0xFF, 0xFF, 0xFF);
+#else
+    BrLogInfo("APP", "Running at 24-bpp");
+    colour_buffer = BrPixelmapMatchTyped(screen, BR_PMMATCH_OFFSCREEN, BR_PMT_RGB_888);
+    clear_colour  = BR_COLOUR_RGB(66, 66, 66);
+    text_colour   = BR_COLOUR_RGB(0xFF, 0xFF, 0xFF);
+#endif
+
+#endif
 
     if(colour_buffer == NULL) {
         BrLogError("APP", "BrPixelmapAllocate() failed");
@@ -125,17 +149,21 @@ int main(int argc, char **argv)
     cube->t.type = BR_TRANSFORM_MATRIX34;
     cube->model  = BrModelFind("cube.dat");
 
-#if defined(SOFTCUBE_16BIT)
+#if defined(SOFTCUBE_8BIT) || defined(SOFTCUBE_16BIT)
     cube->material = BrMaterialLoad("checkerboard8.mat");
 #else
     cube->material = BrMaterialLoad("checkerboard24.mat");
 #endif
 
-    cube->material->flags |= BR_MATF_PERSPECTIVE; // Perspective-correct texture mapping. Doesn't actually work.
+    // cube->material->flags |= BR_MATF_PERSPECTIVE; // Perspective-correct texture mapping. Doesn't actually work. Breaks 8-bit lighting.
     cube->material->flags |= BR_MATF_DITHER;      // Dithering.
     cube->material->flags |= BR_MATF_SMOOTH;      // Makes lighting look _much_ better.
     // cube->material->flags |= BR_MATF_DISABLE_COLOUR_KEY;  // Not supported by software.
     cube->material->opacity = 255; // < 255 selects screendoor renderer
+
+    cube->material->index_shade = BrTableFind("shade_table");
+    cube->material->index_base  = 0;
+    cube->material->index_range = 63;
 
     BrMapUpdate(cube->material->colour_map, BR_MAPU_ALL);
     BrMaterialUpdate(cube->material, BR_MATU_ALL);
@@ -169,7 +197,7 @@ int main(int argc, char **argv)
         BrZbSceneRender(world, camera, colour_buffer, depth_buffer);
         BrRendererFrameEnd();
 
-        draw_info(colour_buffer, cube->material);
+        draw_info(colour_buffer, cube->material, text_colour);
 
         BrPixelmapDoubleBuffer(screen, colour_buffer);
     }
