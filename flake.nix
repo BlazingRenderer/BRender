@@ -20,9 +20,7 @@
     packages = forAllSystems(pkgs: rec {
       wineserverHook = pkgs.callPackage ./nix/wineserver-hook.nix { };
 
-      uasm = pkgs.uasm.overrideAttrs(old: {
-        meta = old.meta // { license = []; };
-      });
+      uasm = pkgs.callPackage ./nix/uasm { };
 
       brender = pkgs.callPackage ./nix/brender.nix {
         inherit wineserverHook uasm;

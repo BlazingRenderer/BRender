@@ -1,0 +1,24 @@
+From 99ebee9129d5aab6bec302558b756def03c52519 Mon Sep 17 00:00:00 2001
+From: Zane van Iperen <zane@zanevaniperen.com>
+Date: Sat, 23 Aug 2025 16:36:09 +1000
+Subject: [PATCH 2/2] H/globals: add SFORMAT_DJGPP from JWasm
+
+---
+ H/globals.h | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/H/globals.h b/H/globals.h
+index 223d015..f6ea8ae 100644
+--- a/H/globals.h
++++ b/H/globals.h
+@@ -287,6 +287,7 @@ enum sformat
+     SFORMAT_NONE,
+     SFORMAT_MZ,    /* MZ binary */
+     SFORMAT_PE,    /* PE (32- or 64-bit) binary */
++    SFORMAT_DJGPP, /* Djgpp variant of COFF */
+     SFORMAT_64BIT, /* 64bit COFF or ELF */
+ };
+ 
+-- 
+2.50.1
+

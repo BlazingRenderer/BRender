@@ -1,0 +1,66 @@
+From 807f559b630943f2d40884a458f45267d6a5b429 Mon Sep 17 00:00:00 2001
+From: Zane van Iperen <zane@zanevaniperen.com>
+Date: Sat, 23 Aug 2025 16:32:58 +1000
+Subject: [PATCH] Makefile-{Linux-GCC,OSX-Clang}-64: allow enabling djgpp
+ support
+
+---
+ Makefile-Linux-GCC-64.mak | 8 ++++++++
+ Makefile-OSX-Clang-64.mak | 8 ++++++++
+ 2 files changed, 16 insertions(+)
+
+diff --git a/Makefile-Linux-GCC-64.mak b/Makefile-Linux-GCC-64.mak
+index 9d4431a..2aa4de1 100644
+--- a/Makefile-Linux-GCC-64.mak
++++ b/Makefile-Linux-GCC-64.mak
+@@ -7,6 +7,10 @@ ifndef DEBUG
+ DEBUG=0
+ endif
+ 
++ifndef DJGPP
++DJGPP=0
++endif
++
+ inc_dirs  = -IH
+ 
+ #cflags stuff
+@@ -19,6 +23,10 @@ extra_c_flags = -DDEBUG_OUT -g
+ OUTD=GccUnixD
+ endif
+ 
++ifneq ($(DJGPP), 0)
++extra_c_flags += -DDJGPP_SUPPORT=1
++endif
++
+ c_flags =-D __UNIX__ $(extra_c_flags)
+ 
+ #From CLANG 11+, default has changed from allowing global variables to be defined in the headers (-fcommon) to not allowing it (-fno-common)."   USE: make CC="clang -fcommon" -f gccLinux64.mak
+diff --git a/Makefile-OSX-Clang-64.mak b/Makefile-OSX-Clang-64.mak
+index b861947..5c32e80 100644
+--- a/Makefile-OSX-Clang-64.mak
++++ b/Makefile-OSX-Clang-64.mak
+@@ -7,6 +7,10 @@ ifndef DEBUG
+ DEBUG=0
+ endif
+ 
++ifndef DJGPP
++DJGPP=0
++endif
++
+ inc_dirs  = -IH
+ 
+ #cflags stuff
+@@ -19,6 +23,10 @@ extra_c_flags = -DDEBUG_OUT -g
+ OUTD=GccUnixD
+ endif
+ 
++ifneq ($(DJGPP), 0)
++extra_c_flags += -DDJGPP_SUPPORT=1
++endif
++
+ c_flags =-D __UNIX__ $(extra_c_flags)
+ 
+ CC = gcc
+-- 
+2.50.1
+

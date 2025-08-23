@@ -1,0 +1,25 @@
+From 4e070e2b89010e76beca446aa0f76c897553d2f9 Mon Sep 17 00:00:00 2001
+From: Zane van Iperen <zane@zanevaniperen.com>
+Date: Sat, 23 Aug 2025 16:38:35 +1000
+Subject: [PATCH 3/3] fixup: fix djgpp compile error
+
+---
+ fixup.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/fixup.c b/fixup.c
+index 8e313a0..f444dbb 100644
+--- a/fixup.c
++++ b/fixup.c
+@@ -245,7 +245,7 @@ void store_fixup( struct fixup *fixup, struct dsym *seg, int_32 *pdata )
+             } else if ( fixup->type == FIX_OFF32 ) {
+                 *pdata += fixup->sym->offset;
+                 fixup->offset += fixup->sym->offset; /* ok? */
+-                fixup->segment = fixup->sym->segment;/* ok? */
++                fixup->segment_var = fixup->sym->segment;/* ok? */
+             }
+         } else
+ #endif
+-- 
+2.50.1
+
