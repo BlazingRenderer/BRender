@@ -229,7 +229,7 @@ static const struct br_device_pixelmap_dispatch devicePixelmapDispatch = {
     ._match       = BR_CMETHOD_REF(br_device_pixelmap_mem, match),
     ._allocateSub = BR_CMETHOD_REF(br_device_pixelmap_mem, allocateSub),
 
-    ._copyTo       = BR_CMETHOD_REF(br_device_pixelmap_mem, copyTo),
+    ._copy         = BR_CMETHOD_REF(br_device_pixelmap_mem, copyTo),
     ._copyTo       = BR_CMETHOD_REF(br_device_pixelmap_mem, copyTo),
     ._copyFrom     = BR_CMETHOD_REF(br_device_pixelmap_mem, copyFrom),
     ._fill         = BR_CMETHOD_REF(br_device_pixelmap_mem, fill),
