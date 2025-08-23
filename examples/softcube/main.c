@@ -151,7 +151,7 @@ int main(int argc, char **argv)
         float dt;
 
         ticks_now  = SDL_GetTicksNS();
-        dt         = (float)(ticks_now - ticks_last) / 1000.0f;
+        dt         = (float)(ticks_now - ticks_last) / 1e9f;
         ticks_last = ticks_now;
 
         while(SDL_PollEvent(&evt) > 0) {
