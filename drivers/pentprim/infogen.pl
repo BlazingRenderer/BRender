@@ -332,7 +332,7 @@ sub print_entry {
 		.chain  = NULL,
 #endif
 
-		.identifier = "$identifier ($render)",
+		.identifier = "$identifier",
 		._reserved0 = NULL,
 
 		.type  = BRT_$type,
