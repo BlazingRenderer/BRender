@@ -51,6 +51,28 @@ set(ASM_FILES
 	fti8_pip.asm
 )
 
+set(INC_FILES
+		586_macs.inc
+		common.inc
+		fpsetup.inc
+		fpu.inc
+		fpwork.inc
+		iammx.inc
+		locmacs.inc
+		rastmacs.inc
+		setupdat.inc
+		unpack.inc
+		xzrgb.inc
+		xzrgbs.inc
+		xzuv1.inc
+		xzuvb.inc
+		xzuvc.inc
+		xzuvcb.inc
+		xzuvrgb.inc
+)
+
+set_source_files_properties(${INC_FILES} PROPERTIES HEADER_FILE_ONLY TRUE)
+
 set(INFOGEN ${CMAKE_CURRENT_SOURCE_DIR}/infogen.pl)
 
 set(PRIM_FILES ${CMAKE_CURRENT_SOURCE_DIR}/infogen.pl)
@@ -201,6 +223,7 @@ add_library(pentprim
 		"${CMAKE_CURRENT_BINARY_DIR}/drv.inc"
 
 		${ASM_FILES}
+		${INC_FILES}
 		${PRIM_FILES}
 )
 
