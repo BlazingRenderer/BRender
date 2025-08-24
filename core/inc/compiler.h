@@ -366,4 +366,9 @@ typedef float br_float;
 #endif
 #endif
 
+#if defined(__MSDOS__) || defined(__DJGPP__)
+#undef __DOS__
+#define __DOS__ 1
+#endif
+
 #endif
