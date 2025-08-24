@@ -24,7 +24,7 @@ br_boolean BR_RESIDENT_ENTRY BrImageRemove(br_image *img)
     return BR_TRUE;
 }
 
-#if defined(__WIN_32__)
+#if defined(__WIN_32__) || defined(__MSDOS__)
 static const char *const DriverExtensions[] = {
     ".bdd", /* BRender Device Driver        */
     ".bed", /* BRender Device Driver (Eval) */
