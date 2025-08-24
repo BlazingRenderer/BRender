@@ -54,7 +54,7 @@ br_device *DeviceVGAAllocate(const char *identifier)
     self      = BrResAllocate(NULL, sizeof(*self), BR_MEMORY_OBJECT_DATA);
     self->res = BrResAllocate(self, 0, BR_MEMORY_DRIVER);
 
-    self->identifier = identifier;
+    self->identifier = BrResStrDup(self, identifier);
     self->dispatch   = &deviceDispatch;
     self->device     = self;
 
