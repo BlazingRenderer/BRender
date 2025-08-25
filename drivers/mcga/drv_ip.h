@@ -47,11 +47,6 @@ br_device_clut *DeviceClutVGAAllocate(br_device *dev, const char *identifier);
 br_error   BIOSVideoSetMode(br_uint_16 mode);
 br_uint_16 BIOSVideoGetMode(void);
 
-/*
- * ocfree.c
- */
-br_error ObjectContainerFree(struct br_object_container *self, br_token type, char *pattern, br_token_value *tv);
-
 #ifdef __cplusplus
 };
 #endif
