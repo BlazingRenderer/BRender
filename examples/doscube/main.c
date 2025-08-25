@@ -65,9 +65,8 @@ int main(int argc, char **argv)
     br_colour    clear_colour = CLEAR_COLOUR, text_colour = TEXT_COLOUR;
     br_error     err;
 
+    BrLogSetLevel(BR_LOG_TRACE);
     BrBegin();
-
-    BrLogSetLevel(BR_LOG_DEBUG);
 
     if((pal = BrPixelmapLoad(PALETTE_NAME)) == NULL) {
         BrLogError("APP", "loading " PALETTE_NAME " failed");
