@@ -5,7 +5,6 @@
 #include <stdio.h>
 #include <time.h>
 #include <pc.h>
-#include <sys/nearptr.h>
 
 void BR_CALLBACK _BrBeginHook(void)
 {
@@ -13,7 +12,6 @@ void BR_CALLBACK _BrBeginHook(void)
     struct br_device *BR_EXPORT BrDrv1SoftRendBegin(const char *arguments);
     struct br_device *BR_EXPORT BrDrv1MCGABegin(const char *arguments);
 
-    __djgpp_nearptr_enable();
     BrDevAddStatic(NULL, BrDrv1SoftPrimBegin, NULL);
     BrDevAddStatic(NULL, BrDrv1SoftRendBegin, NULL);
     BrDevAddStatic(NULL, BrDrv1MCGABegin, NULL);
@@ -21,7 +19,6 @@ void BR_CALLBACK _BrBeginHook(void)
 
 void BR_CALLBACK _BrEndHook(void)
 {
-    __djgpp_nearptr_disable();
 }
 
 static char primitive_heap[1500 * 1024];
