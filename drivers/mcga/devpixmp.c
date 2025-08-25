@@ -126,8 +126,9 @@ static void BR_CMETHOD_DECL(br_device_pixelmap_mcga, free)(br_object *_self)
     BrResFreeNoCallback(self);
 }
 
-static br_device *BR_CMETHOD_DECL(br_device_pixelmap_mcga, device)(br_object *self)
+static br_device *BR_CMETHOD_DECL(br_device_pixelmap_mcga, device)(br_object *_self)
 {
+    br_device_pixelmap *self = (br_device_pixelmap *)_self;
     return self->device;
 }
 
