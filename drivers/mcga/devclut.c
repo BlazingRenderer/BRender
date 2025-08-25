@@ -36,10 +36,9 @@ br_device_clut *DeviceClutVGAAllocate(br_device *dev, const char *identifier)
 
     self = BrResAllocate(DeviceVGAResource(dev), sizeof(*self), BR_MEMORY_OBJECT_DATA);
 
-    self->dispatch = &deviceClutDispatch;
-    if(identifier)
-        self->identifier = identifier;
-    self->device = dev;
+    self->dispatch   = &deviceClutDispatch;
+    self->identifier = BrResStrDup(self, identifier);
+    self->device     = dev;
 
     ObjectContainerAddFront(dev, (br_object *)self);
 
