@@ -38,17 +38,21 @@ void BR_PUBLIC_ENTRY HostEnd(void)
 static host_info hostInfo = {
     .size = sizeof(host_info),
 #if defined(__WIN_32__)
-    .identifier = "Microsoft WIN32",
+    .identifier   = "Microsoft WIN32",
+    .capabilities = 0,
 #elif defined(__GO32__)
-    .identifier = "DJGPP GO32",
+    .identifier   = "DJGPP GO32",
+    .capabilities = 0,
 #elif defined(__DOS__)
-    .identifier = "Generic DOS",
+    .identifier   = "Generic DOS",
+    .capabilities = 0,
 #elif defined(__unix__)
-    .identifier = "Generic UNIX",
+    .identifier   = "Generic UNIX",
+    .capabilities = 0,
 #else
-    .identifier = "Unknown",
+    .identifier   = "Unknown",
+    .capabilities = 0,
 #endif
-    .capabilities     = 0,
     .processor_family = BRT_INTEL,
     .processor_type   = BRT_INTEL_386,
 };
