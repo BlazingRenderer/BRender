@@ -11,7 +11,6 @@
 
 #include <dpmi.h>
 
-#define BR_OBJECT_PRIVATE
 #define BR_DEVICE_PRIVATE
 #define BR_OUTPUT_FACILITY_PRIVATE
 #define BR_DEVICE_PIXELMAP_PRIVATE
@@ -39,10 +38,6 @@
 
 #ifndef _DEVCLUT_H_
 #include "devclut.h"
-#endif
-
-#ifndef _OBJECT_H_
-#include "object.h"
 #endif
 
 /*

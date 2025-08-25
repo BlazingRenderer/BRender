@@ -95,6 +95,18 @@ static void BR_CMETHOD_DECL(br_output_facility_vga, free)(br_object *self)
     BrResFreeNoCallback(self);
 }
 
+static const char *BR_CMETHOD_DECL(br_output_facility_vga, identifier)(br_object *_self)
+{
+    br_output_facility *self = (br_output_facility *)_self;
+    return self->identifier;
+}
+
+static br_device *BR_CMETHOD_DECL(br_output_facility_vga, device)(br_object *_self)
+{
+    br_output_facility *self = (br_output_facility *)_self;
+    return self->device;
+}
+
 static br_token BR_CMETHOD_DECL(br_output_facility_vga, type)(br_object *self)
 {
     return BRT_OUTPUT_FACILITY;
@@ -180,10 +192,10 @@ static const struct br_output_facility_dispatch outputFacilityDispatch = {
     .__reserved2 = NULL,
     .__reserved3 = NULL,
     ._free       = BR_CMETHOD_REF(br_output_facility_vga, free),
-    ._identifier = BR_CMETHOD_REF(br_object_vga, identifier),
+    ._identifier = BR_CMETHOD_REF(br_output_facility_vga, identifier),
     ._type       = BR_CMETHOD_REF(br_output_facility_vga, type),
     ._isType     = BR_CMETHOD_REF(br_output_facility_vga, isType),
-    ._device     = BR_CMETHOD_REF(br_object_vga, device),
+    ._device     = BR_CMETHOD_REF(br_output_facility_vga, device),
     ._space      = BR_CMETHOD_REF(br_output_facility_vga, space),
 
     ._templateQuery = BR_CMETHOD_REF(br_output_facility_vga, queryTemplate),

@@ -21,12 +21,6 @@ extern "C" {
 extern br_device DriverDeviceVGA;
 
 /*
- * object.c
- */
-const char *BR_CMETHOD_DECL(br_object_vga, identifier)(br_object *self);
-br_device  *BR_CMETHOD_DECL(br_object_vga, device)(br_object *self);
-
-/*
  * device.c
  */
 br_device *DeviceVGAAllocate(const char *identifier);

@@ -126,6 +126,12 @@ static void BR_CMETHOD_DECL(br_device_pixelmap_mcga, free)(br_object *_self)
     BrResFreeNoCallback(self);
 }
 
+static const char *BR_CMETHOD_DECL(br_device_pixelmap_mcga, identifier)(br_object *_self)
+{
+    br_device_pixelmap *self = (br_device_pixelmap *)_self;
+    return self->pm_identifier;
+}
+
 static br_device *BR_CMETHOD_DECL(br_device_pixelmap_mcga, device)(br_object *_self)
 {
     br_device_pixelmap *self = (br_device_pixelmap *)_self;
@@ -359,7 +365,7 @@ static const struct br_device_pixelmap_dispatch devicePixelmapDispatch = {
     .__reserved2 = NULL,
     .__reserved3 = NULL,
     ._free       = BR_CMETHOD_REF(br_device_pixelmap_mcga, free),
-    ._identifier = BR_CMETHOD_REF(br_object_vga, identifier),
+    ._identifier = BR_CMETHOD_REF(br_device_pixelmap_mcga, identifier),
     ._type       = BR_CMETHOD_REF(br_device_pixelmap_mcga, type),
     ._isType     = BR_CMETHOD_REF(br_device_pixelmap_mcga, isType),
     ._device     = BR_CMETHOD_REF(br_device_pixelmap_mcga, device),

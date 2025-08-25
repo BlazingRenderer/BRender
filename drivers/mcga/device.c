@@ -87,6 +87,18 @@ static void BR_CMETHOD_DECL(br_device_vga, free)(br_object *self)
     BrResFreeNoCallback(self);
 }
 
+static const char *BR_CMETHOD_DECL(br_device_vga, identifier)(br_object *_self)
+{
+    br_device *self = (br_device *)_self;
+    return self->identifier;
+}
+
+static br_device *BR_CMETHOD_DECL(br_device_vga, device)(br_object *_self)
+{
+    br_device *self = (br_device *)_self;
+    return self->device;
+}
+
 static br_token BR_CMETHOD_DECL(br_device_vga, type)(br_object *self)
 {
     return BRT_DEVICE;
@@ -127,10 +139,10 @@ static const struct br_device_dispatch deviceDispatch = {
     .__reserved2 = NULL,
     .__reserved3 = NULL,
     ._free       = BR_CMETHOD_REF(br_device_vga, free),
-    ._identifier = BR_CMETHOD_REF(br_object_vga, identifier),
+    ._identifier = BR_CMETHOD_REF(br_device_vga, identifier),
     ._type       = BR_CMETHOD_REF(br_device_vga, type),
     ._isType     = BR_CMETHOD_REF(br_device_vga, isType),
-    ._device     = BR_CMETHOD_REF(br_object_vga, device),
+    ._device     = BR_CMETHOD_REF(br_device_vga, device),
     ._space      = BR_CMETHOD_REF(br_device_vga, space),
 
     ._templateQuery = BR_CMETHOD_REF(br_device_vga, templateQuery),

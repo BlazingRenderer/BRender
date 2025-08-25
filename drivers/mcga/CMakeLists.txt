@@ -11,8 +11,6 @@ add_library(mcga
         driver.c
         drv.h
         drv_ip.h
-        object.c
-        object.h
         outfcty.c
         outfcty.h
         template.h
