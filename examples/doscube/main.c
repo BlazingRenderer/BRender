@@ -102,7 +102,7 @@ int main(int argc, char **argv)
 
     BrLogInfo("APP", "Running at 8-bpp");
 
-    if((colour_buffer = BrPixelmapMatchTyped(screen, BR_PMMATCH_OFFSCREEN, BR_PMT_INDEX_8)) == NULL) {
+    if((colour_buffer = BrPixelmapMatch(screen, BR_PMMATCH_OFFSCREEN)) == NULL) {
         BrLogError("APP", "BrPixelmapAllocate() failed");
         goto create_fail;
     }
