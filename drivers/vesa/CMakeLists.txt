@@ -8,21 +8,15 @@ add_library(vesa
         device.h
         devpixmp.c
         devpixmp.h
-        devpml.c
-        devpmwb.c
-        devpmw.c
         driver.c
         drv.h
         drv_ip.h
-        object.c
-        object.h
-        ocfree.c
         outfcty.c
         outfcty.h
-        ports.h
         vesaapi.c
         vesaapi.h
-        vesaloop.h
+
+        template.h
 )
 
 get_target_property(target_type vesa TYPE)

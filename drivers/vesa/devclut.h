@@ -27,6 +27,11 @@ typedef struct br_device_clut {
      */
     char *identifier;
 
+    /*
+     * Pointer to owning device
+     */
+    br_device *device;
+
 } br_device_clut;
 
 #define VGA_PAL_READ  0x3c7

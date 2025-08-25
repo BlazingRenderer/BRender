@@ -31,4 +31,7 @@ endif ()
 if (CMAKE_SYSTEM_NAME STREQUAL "DOS")
     add_subdirectory(mcga)
     target_link_libraries(brender-full INTERFACE mcga)
+
+    add_subdirectory(vesa)
+    target_link_libraries(brender-full INTERFACE vesa)
 endif()

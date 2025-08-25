@@ -24,34 +24,10 @@ struct vesa_scanline {
 };
 
 struct vesa_work {
-    br_uint_32            window_start;
-    br_uint_16            selector;
-    br_uint_32            window_end;
-    br_uint_32            scanline_max;
-    struct vesa_scanline *scanline_table;
-
-    br_uint_32 pixel_size;
-    br_uint_32 full_banks;
-    br_uint_32 bytes_left;
-    br_uint_32 bank_increment;
-
-    br_uint_32 scanlines_per_page;
-    br_uint_32 scanlines_remainder;
-
-    br_uint_32 page_size;
-    br_uint_32 stride;
-
-    br_uint_32 current_page;
-
-    br_boolean access_linear;
-    br_boolean bank_protected;
-    br_uint_16 scanline_breaks;
-
-    void *bank_function;
-
-    br_uint_16 physical_selector;
-    br_uint_32 physical_address;
-    void      *linear;
+    br_uint_32     stride;
+    br_uint_8      bits_per_pixel;
+    int            selector;
+    __dpmi_meminfo mapping;
 };
 
 /*
@@ -69,6 +45,11 @@ typedef struct br_device {
     char *identifier;
 
     /*
+     * Pointer to owning device
+     */
+    struct br_device *device;
+
+    /*
      * List of objects associated with this device
      */
     void *object_list;
@@ -79,17 +60,14 @@ typedef struct br_device {
     void *res;
 
     /*
+     * Driver-wide template store
+     */
+    struct device_templates templates;
+
+    /*
      * VESA mode at startup
      */
     br_uint_16 original_mode;
-
-    /*
-     * Information from arguments
-     */
-    br_uint_16 version_limit;
-    br_boolean use_pmi;
-    br_boolean use_linear;
-    br_boolean set_stride;
 
     /*
      * Current mode
@@ -99,7 +77,16 @@ typedef struct br_device {
     /*
      * Bank switching info
      */
-    struct vesa_info info;
+    struct vesa_info *info;
+
+    /*
+     * Local copies of data in info, so templates can get at them.
+     */
+    br_uint_16  vbe_version;
+    const char *vbe_oem_string;
+    const char *vbe_oem_product_name;
+    const char *vbe_oem_product_rev;
+    const char *vbe_oem_vendor_name;
 
     struct vesa_work work;
 
@@ -116,14 +103,9 @@ typedef struct br_device {
 #define DeviceVESAOriginalMode(d)      (((br_device *)d)->original_mode)
 #define DeviceVESACurrentMode(d)       (((br_device *)d)->current_mode)
 #define DeviceVESACurrentModeSet(d, m) ((((br_device *)d)->current_mode) = m)
-#define DeviceVESAInfo(d)              (&(((br_device *)d)->info))
+#define DeviceVESAInfo(d)              ((((br_device *)d)->info))
 #define DeviceVESAWork(d)              (&(((br_device *)d)->work))
 #define DeviceVESAClut(d)              (((br_device *)d)->clut)
-
-/*
- * Global device structure - so that low level asm code can get at it
- */
-extern br_device DriverDeviceVESA;
 
 #ifdef __cplusplus
 };

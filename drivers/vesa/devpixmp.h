@@ -33,6 +33,11 @@ typedef struct br_device_pixelmap {
 
     /** End of br_pixelmap fields **/
 
+    /*
+     * Pointer to owning device
+     */
+    struct br_device *device;
+
     struct br_output_facility *output_facility;
     struct br_device_clut     *clut;
 

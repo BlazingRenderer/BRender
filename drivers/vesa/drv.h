@@ -9,7 +9,8 @@
 #ifndef _DRV_H_
 #define _DRV_H_
 
-#define BR_OBJECT_PRIVATE
+#include <dpmi.h>
+
 #define BR_DEVICE_PRIVATE
 #define BR_OUTPUT_FACILITY_PRIVATE
 #define BR_DEVICE_PIXELMAP_PRIVATE
@@ -21,6 +22,10 @@
 
 #ifndef _VESAAPI_H_
 #include "vesaapi.h"
+#endif
+
+#ifndef _TEMPLATE_H_
+#include "template.h"
 #endif
 
 #ifndef _DEVICE_H_
@@ -37,10 +42,6 @@
 
 #ifndef _DEVCLUT_H_
 #include "devclut.h"
-#endif
-
-#ifndef _OBJECT_H_
-#include "object.h"
 #endif
 
 /*
@@ -61,8 +62,4 @@
 
 #endif
 
-#ifdef __cplusplus
-}
-;
-#endif
 #endif

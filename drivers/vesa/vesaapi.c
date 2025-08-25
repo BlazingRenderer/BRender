@@ -8,46 +8,88 @@
  */
 #include <stddef.h>
 #include <string.h>
+#include <brender.h>
+#include <dpmi.h>
+#include <go32.h>
 
-#include "host.h"
 #include "vesaapi.h"
-#include "brassert.h"
-
-BR_RCS_ID("$Id: vesaapi.c 1.1 1997/12/10 16:54:28 jon Exp $");
 
 #define SCRATCH_SIZE 1024
 
-static host_real_memory scratch;
-static br_boolean       scratchAllocated = BR_FALSE;
-static host_regs        r;
+#define __tb_sel     (__tb >> 4)
+#define __tb_off     (__tb & 0x0f)
 
-#define MAX_MODES (sizeof(vip->reserved) / sizeof(br_uint_16))
+#define MAX_MODES    (sizeof(vip->reserved) / sizeof(br_uint_16))
+
+BR_STATIC_ASSERT(sizeof(struct vesa_info) == sizeof(struct vesa_info_rm), "sizeof(struct vesa_info) != sizeof(struct vesa_info_rm)");
+
+static size_t RealStrLen(uint16_t seg, uint16_t off)
+{
+    size_t len = 0;
+
+    for(unsigned char ch;;) {
+        dosmemget((seg * (1 << 4)) + off + len, 1, &ch);
+
+        if(ch == '\0')
+            break;
+
+        len++;
+    }
+
+    return len;
+}
+
+static char *RealResStrDup(void *vres, br_uint_16 seg, br_uint_16 off)
+{
+    size_t len = RealStrLen(seg, off);
+    char  *buf = BrResAllocate(vres, (len + 1) * sizeof(char), BR_MEMORY_STRING);
+    dosmemget((seg * (1 << 4)) + off, len, buf);
+    buf[len] = '\0';
+    return buf;
+}
+
+static void *read_modes(void *vres, br_uint_16 seg, br_uint_16 off, br_size_t *count)
+{
+    br_size_t    n;
+    br_uint_16  *modes;
+    br_uintptr_t addr = (seg * (1 << 4)) + off;
+
+    for(n = 0;; ++n) {
+        br_uint_16 mode;
+        _dosmemgetw(addr + (n * sizeof(br_uint_16)), 1, &mode);
+        if(mode == 0xFFFF) {
+            break;
+        }
+    }
+
+    modes = BrResAllocate(vres, sizeof(br_uint_16) * (n + 1), BR_MEMORY_DRIVER);
+    dosmemget((seg * (1 << 4)) + off, sizeof(br_uint_16) * n, modes);
+    modes[n] = 0xFFFF;
+
+    if(count != NULL)
+        *count = n;
+
+    return modes;
+}
 
 br_error VESAInfo(struct vesa_info *vip)
 {
     struct vesa_info_rm *vip_rm;
-    br_uint_16           mode, o, s, *modes;
-    br_uint_8           *cp;
-    int                  n;
+    __dpmi_regs          r;
 
-    ASSERT(sizeof(struct vesa_info) == sizeof(struct vesa_info_rm));
-
-    /*
-     * Allocate scratch buffer
-     */
-    if(!scratchAllocated) {
-        HostRealAllocate(&scratch, SCRATCH_SIZE);
-        scratchAllocated = BR_TRUE;
-    }
+    if(__tb_size < SCRATCH_SIZE)
+        return BRE_FAIL;
 
     /*
      * Call VBE status interrupt
      */
-    HostFarDWordWrite(scratch.pm_off, scratch.pm_seg, 'V' | ('B' << 8) | ('E' << 16) | ('2' << 24));
-    r.x.eax = 0x4f00;
-    r.w.es  = scratch.rm_seg;
-    r.w.di  = scratch.rm_off;
-    HostRealInterruptCall(0x10, &r);
+    /* VBE 2.0 applications should preset this field with the ASCII characters 'VBE2' */
+    BrMemCpy(vip->vbe_signature, "VBE2", 4);
+    _dosmemputl(vip, 1, __tb);
+    r = (__dpmi_regs){
+        .x = {.ax = 0x4f00, .di = __tb_off, .es = __tb_sel},
+    };
+    __dpmi_int(0x10, &r);
 
     if(r.h.al != 0x4f)
         return BRE_UNSUPPORTED;
@@ -58,66 +100,63 @@ br_error VESAInfo(struct vesa_info *vip)
     /*
      * Copy vesa info. block into user's block
      */
-    HostFarBlockRead(scratch.pm_off, scratch.pm_seg, vip, sizeof(struct vesa_info));
+    dosmemget(__tb, sizeof(struct vesa_info), vip);
+
+    /* Upon return from VBE Function 00h, this field should always be set to 'VESA' by the VBE implementation. */
+    if(BrMemCmp(vip->vbe_signature, "VESA", 4) != 0)
+        return BRE_FAIL;
+
     vip_rm = (struct vesa_info_rm *)vip;
 
     /*
      * Grab modes
      */
-    modes = (br_uint_16 *)vip->reserved;
-    for(n = 0; n < MAX_MODES; n++) {
-        modes[n] = HostRealWordRead(vip_rm->videomode_off + n * 2, vip_rm->videomode_seg);
-        if(modes[n] == 0xFFFF)
-            break;
-    }
-    vip->videomode_ptr                = modes;
-    vip->videomode_ptr[MAX_MODES - 1] = 0xFFFF;
+    vip->videomode_ptr = read_modes(vip, vip_rm->videomode_seg, vip_rm->videomode_off, NULL);
 
     /*
-     * Grab OEM strings
+     * Grab OEM strings.
      */
-    cp = vip->oem_data;
-
-    n = HostRealStringRead(vip_rm->oem_string_off, vip_rm->oem_string_seg, cp, sizeof(vip->oem_data) - (cp - vip->oem_data));
-    vip->oem_string_ptr = cp;
-    cp += n;
+    vip->oem_string_ptr = (br_uint_8 *)RealResStrDup(vip, vip_rm->oem_string_seg, vip_rm->oem_string_off);
 
     if(vip_rm->vbe_version >= 0x200) {
+        if(vip->oem_vendor_name_ptr != NULL)
+            vip->oem_vendor_name_ptr = (br_uint_8 *)RealResStrDup(vip, vip_rm->oem_vendor_name_seg, vip_rm->oem_vendor_name_off);
 
-        n = HostRealStringRead(vip_rm->oem_vendor_name_off, vip_rm->oem_vendor_name_seg, cp, sizeof(vip->oem_data) - (cp - vip->oem_data));
-        vip->oem_vendor_name_ptr = cp;
-        cp += n;
+        if(vip->oem_product_name_ptr != NULL)
+            vip->oem_product_name_ptr = (br_uint_8 *)RealResStrDup(vip, vip_rm->oem_product_name_seg, vip_rm->oem_product_name_off);
 
-        n = HostRealStringRead(vip_rm->oem_product_name_off, vip_rm->oem_product_name_seg, cp, sizeof(vip->oem_data) - (cp - vip->oem_data));
-        vip->oem_product_name_ptr = cp;
-        cp += n;
-
-        n = HostRealStringRead(vip_rm->oem_product_rev_off, vip_rm->oem_product_rev_seg, cp, sizeof(vip->oem_data) - (cp - vip->oem_data));
-        vip->oem_product_rev_ptr = cp;
-        cp += n;
+        if(vip->oem_product_rev_ptr != NULL)
+            vip->oem_product_rev_ptr = (br_uint_8 *)RealResStrDup(vip, vip_rm->oem_product_rev_seg, vip_rm->oem_product_rev_off);
+    } else {
+        vip->oem_vendor_name_ptr  = NULL;
+        vip->oem_product_name_ptr = NULL;
+        vip->oem_product_rev_ptr  = NULL;
     }
+
+    if(vip->oem_vendor_name_ptr == NULL)
+        vip->oem_vendor_name_ptr = (br_uint_8 *)BrResStrDup(vip, "<empty>");
+
+    if(vip->oem_product_name_ptr == NULL)
+        vip->oem_product_name_ptr = (br_uint_8 *)BrResStrDup(vip, "<empty>");
+
+    if(vip->oem_product_rev_ptr == NULL)
+        vip->oem_product_rev_ptr = (br_uint_8 *)BrResStrDup(vip, "<empty>");
 
     return BRE_OK;
 }
 
 br_error VESAModeInfo(struct vesa_modeinfo *vmip, br_uint_32 mode)
 {
-    /*
-     * Allocate scratch buffer
-     */
-    if(!scratchAllocated) {
-        HostRealAllocate(&scratch, SCRATCH_SIZE);
-        scratchAllocated = BR_TRUE;
-    }
+    __dpmi_regs r = {0};
 
     /*
      * Call VBE mode information
      */
-    r.x.eax = 0x4f01;
-    r.w.cx  = mode;
-    r.w.es  = scratch.rm_seg;
-    r.w.di  = scratch.rm_off;
-    HostRealInterruptCall(0x10, &r);
+    r.d.eax = 0x4f01;
+    r.x.cx  = mode;
+    r.x.es  = __tb_sel;
+    r.x.di  = __tb_off;
+    __dpmi_int(0x10, &r);
 
     if(r.h.al != 0x4f)
         return BRE_UNSUPPORTED;
@@ -128,16 +167,18 @@ br_error VESAModeInfo(struct vesa_modeinfo *vmip, br_uint_32 mode)
     /*
      * Copy mode info. block into user's block
      */
-    HostFarBlockRead(scratch.pm_off, scratch.pm_seg, vmip, sizeof(struct vesa_modeinfo));
+    dosmemget(__tb, sizeof(struct vesa_modeinfo), vmip);
 
     return BRE_OK;
 }
 
 br_error VESAModeSet(br_uint_32 mode)
 {
-    r.x.eax = 0x4f02;
-    r.w.bx  = mode;
-    HostRealInterruptCall(0x10, &r);
+    __dpmi_regs r = {0};
+    r.d.eax       = 0x4f02;
+    r.x.bx        = mode;
+
+    __dpmi_int(0x10, &r);
 
     if(r.h.al != 0x4f)
         return BRE_UNSUPPORTED;
@@ -145,13 +186,16 @@ br_error VESAModeSet(br_uint_32 mode)
     if(r.h.ah != 0x00)
         return BRE_FAIL;
 
+    BrLogError("XX", "SET MODE %04x", mode);
     return BRE_OK;
 }
 
 br_error VESAModeGet(br_uint_16 *mode)
 {
-    r.x.eax = 0x4f03;
-    HostRealInterruptCall(0x10, &r);
+    __dpmi_regs r = {0};
+    r.d.eax       = 0x4f03;
+
+    __dpmi_int(0x10, &r);
 
     if(r.h.al != 0x4f)
         return BRE_UNSUPPORTED;
@@ -159,17 +203,19 @@ br_error VESAModeGet(br_uint_16 *mode)
     if(r.h.ah != 0x00)
         return BRE_FAIL;
 
-    *mode = r.w.bx;
+    *mode = r.x.bx;
 
     return BRE_OK;
 }
 
 br_error VESAScanlineBytesSet(br_uint_32 width, br_uint_16 *bytes, br_uint_16 *pixels, br_uint_16 *scanlines)
 {
-    r.x.eax = 0x4f06;
-    r.h.bl  = 2;
-    r.w.cx  = width;
-    HostRealInterruptCall(0x10, &r);
+    __dpmi_regs r = {0};
+    r.d.eax       = 0x4f06;
+    r.h.bl        = 2;
+    r.x.cx        = width;
+
+    __dpmi_int(0x10, &r);
 
     if(r.h.al != 0x4f)
         return BRE_UNSUPPORTED;
@@ -177,19 +223,20 @@ br_error VESAScanlineBytesSet(br_uint_32 width, br_uint_16 *bytes, br_uint_16 *p
     if(r.h.ah != 0x00)
         return BRE_FAIL;
 
-    *bytes     = r.w.bx;
-    *pixels    = r.w.cx;
-    *scanlines = r.w.dx;
+    *bytes     = r.x.bx;
+    *pixels    = r.x.cx;
+    *scanlines = r.x.dx;
 
     return BRE_OK;
 }
 
 br_error VESAScanlinePixelsSet(br_uint_32 width, br_uint_16 *bytes, br_uint_16 *pixels, br_uint_16 *scanlines)
 {
-    r.x.eax = 0x4f06;
-    r.h.bl  = 0;
-    r.w.cx  = width;
-    HostRealInterruptCall(0x10, &r);
+    __dpmi_regs r = {0};
+    r.d.eax       = 0x4f06;
+    r.h.bl        = 0;
+    r.x.cx        = width;
+    __dpmi_int(0x10, &r);
 
     if(r.h.al != 0x4f)
         return BRE_UNSUPPORTED;
@@ -197,18 +244,19 @@ br_error VESAScanlinePixelsSet(br_uint_32 width, br_uint_16 *bytes, br_uint_16 *
     if(r.h.ah != 0x00)
         return BRE_FAIL;
 
-    *bytes     = r.w.bx;
-    *pixels    = r.w.cx;
-    *scanlines = r.w.dx;
+    *bytes     = r.x.bx;
+    *pixels    = r.x.cx;
+    *scanlines = r.x.dx;
 
     return BRE_OK;
 }
 
 br_error VESAScanlineLengthGet(br_uint_16 *bytes, br_uint_16 *pixels, br_uint_16 *scanlines)
 {
-    r.x.eax = 0x4f06;
-    r.h.bl  = 1;
-    HostRealInterruptCall(0x10, &r);
+    __dpmi_regs r = {0};
+    r.d.eax       = 0x4f06;
+    r.h.bl        = 1;
+    __dpmi_int(0x10, &r);
 
     if(r.h.al != 0x4f)
         return BRE_UNSUPPORTED;
@@ -216,20 +264,21 @@ br_error VESAScanlineLengthGet(br_uint_16 *bytes, br_uint_16 *pixels, br_uint_16
     if(r.h.ah != 0x00)
         return BRE_FAIL;
 
-    *bytes     = r.w.bx;
-    *pixels    = r.w.cx;
-    *scanlines = r.w.dx;
+    *bytes     = r.x.bx;
+    *pixels    = r.x.cx;
+    *scanlines = r.x.dx;
 
     return BRE_OK;
 }
 
 br_error VESADisplayStartSet(br_uint_32 x, br_uint_32 y)
 {
-    r.x.eax = 0x4f07;
-    r.h.bl  = 0;
-    r.w.cx  = x;
-    r.w.dx  = y;
-    HostRealInterruptCall(0x10, &r);
+    __dpmi_regs r = {0};
+    r.d.eax       = 0x4f07;
+    r.h.bl        = 0;
+    r.x.cx        = x;
+    r.x.dx        = y;
+    __dpmi_int(0x10, &r);
 
     if(r.h.al != 0x4f)
         return BRE_UNSUPPORTED;
@@ -242,9 +291,11 @@ br_error VESADisplayStartSet(br_uint_32 x, br_uint_32 y)
 
 br_error VESADisplayStartGet(br_uint_32 *px, br_uint_32 *py)
 {
-    r.x.eax = 0x4f07;
-    r.h.bl  = 1;
-    HostRealInterruptCall(0x10, &r);
+    __dpmi_regs r = {0};
+    r.d.eax       = 0x4f07;
+    r.h.bl        = 1;
+
+    __dpmi_int(0x10, &r);
 
     if(r.h.al != 0x4f)
         return BRE_UNSUPPORTED;
@@ -252,20 +303,21 @@ br_error VESADisplayStartGet(br_uint_32 *px, br_uint_32 *py)
     if(r.h.ah != 0x00)
         return BRE_FAIL;
 
-    *px = r.w.cx;
-    *py = r.w.dx;
+    *px = r.x.cx;
+    *py = r.x.dx;
 
     return BRE_OK;
 }
 
 br_error VESAWindowSet(br_uint_32 window, br_uint_32 position)
 {
-    r.x.eax = 0x4f05;
-    r.h.bh  = 0;
-    r.h.bl  = window;
-    r.w.dx  = position;
+    __dpmi_regs r = {0};
+    r.d.eax       = 0x4f05;
+    r.h.bh        = 0;
+    r.h.bl        = window;
+    r.x.dx        = position;
 
-    HostRealInterruptCall(0x10, &r);
+    __dpmi_int(0x10, &r);
 
     if(r.h.al != 0x4f)
         return BRE_UNSUPPORTED;
@@ -278,11 +330,12 @@ br_error VESAWindowSet(br_uint_32 window, br_uint_32 position)
 
 br_error VESAWindowGet(br_uint_32 window, br_uint_32 *position)
 {
-    r.x.eax = 0x4f05;
-    r.h.bh  = 1;
-    r.h.bl  = window;
+    __dpmi_regs r = {0};
+    r.d.eax       = 0x4f05;
+    r.h.bh        = 1;
+    r.h.bl        = window;
 
-    HostRealInterruptCall(0x10, &r);
+    __dpmi_int(0x10, &r);
 
     if(r.h.al != 0x4f)
         return BRE_UNSUPPORTED;
@@ -290,18 +343,19 @@ br_error VESAWindowGet(br_uint_32 window, br_uint_32 *position)
     if(r.h.ah != 0x00)
         return BRE_FAIL;
 
-    *position = r.w.dx;
+    *position = r.x.dx;
 
     return BRE_OK;
 }
 
 br_error VESAPaletteFormatSet(br_uint_32 format)
 {
-    r.x.eax = 0x4f08;
-    r.h.bl  = 0;
-    r.h.bh  = format;
+    __dpmi_regs r = {0};
+    r.d.eax       = 0x4f08;
+    r.h.bl        = 0;
+    r.h.bh        = format;
 
-    HostRealInterruptCall(0x10, &r);
+    __dpmi_int(0x10, &r);
 
     if(r.h.al != 0x4f)
         return BRE_UNSUPPORTED;
@@ -314,10 +368,11 @@ br_error VESAPaletteFormatSet(br_uint_32 format)
 
 br_error VESAPaletteFormatGet(br_uint_32 *formatp)
 {
-    r.x.eax = 0x4f08;
-    r.h.bl  = 1;
+    __dpmi_regs r = {0};
+    r.d.eax       = 0x4f08;
+    r.h.bl        = 1;
 
-    HostRealInterruptCall(0x10, &r);
+    __dpmi_int(0x10, &r);
 
     if(r.h.al != 0x4f)
         return BRE_UNSUPPORTED;
@@ -332,24 +387,17 @@ br_error VESAPaletteFormatGet(br_uint_32 *formatp)
 
 br_error VESAPaletteSet(br_int_32 *values, br_int_32 first, br_int_32 count, br_boolean blank)
 {
-    /*
-     * Allocate scratch buffer
-     */
-    if(!scratchAllocated) {
-        HostRealAllocate(&scratch, SCRATCH_SIZE);
-        scratchAllocated = BR_TRUE;
-    }
+    __dpmi_regs r = {0};
+    r.d.eax       = 0x4f09;
+    r.h.bl        = 0;
+    r.x.cx        = count;
+    r.x.dx        = first;
+    r.x.es        = __tb_sel;
+    r.x.di        = __tb_off;
 
-    r.x.eax = 0x4f09;
-    r.h.bl  = 0;
-    r.w.cx  = count;
-    r.w.dx  = first;
-    r.w.es  = scratch.rm_seg;
-    r.w.di  = scratch.rm_off;
+    dosmemput(values, count * sizeof(*values), __tb);
 
-    HostFarBlockWrite(scratch.pm_off, scratch.pm_seg, (br_uint_8 *)values, count * sizeof(*values));
-
-    HostRealInterruptCall(0x10, &r);
+    __dpmi_int(0x10, &r);
 
     if(r.h.al != 0x4f)
         return BRE_UNSUPPORTED;
@@ -362,22 +410,15 @@ br_error VESAPaletteSet(br_int_32 *values, br_int_32 first, br_int_32 count, br_
 
 br_error VESAPaletteGet(br_int_32 *values, br_int_32 first, br_int_32 count)
 {
-    /*
-     * Allocate scratch buffer
-     */
-    if(!scratchAllocated) {
-        HostRealAllocate(&scratch, SCRATCH_SIZE);
-        scratchAllocated = BR_TRUE;
-    }
+    __dpmi_regs r = {0};
+    r.d.eax       = 0x4f09;
+    r.h.bl        = 1;
+    r.x.cx        = count;
+    r.x.dx        = first;
+    r.x.es        = __tb_sel;
+    r.x.di        = __tb_off;
 
-    r.x.eax = 0x4f09;
-    r.h.bl  = 1;
-    r.w.cx  = count;
-    r.w.dx  = first;
-    r.w.es  = scratch.rm_seg;
-    r.w.di  = scratch.rm_off;
-
-    HostRealInterruptCall(0x10, &r);
+    __dpmi_int(0x10, &r);
 
     if(r.h.al != 0x4f)
         return BRE_UNSUPPORTED;
@@ -385,17 +426,18 @@ br_error VESAPaletteGet(br_int_32 *values, br_int_32 first, br_int_32 count)
     if(r.h.ah != 0x00)
         return BRE_FAIL;
 
-    HostFarBlockRead(scratch.pm_off, scratch.pm_seg, (br_uint_8 *)values, count * sizeof(*values));
+    dosmemget(__tb, count * sizeof(*values), values);
 
     return BRE_OK;
 }
 
 br_error VESAProtectedModeInterface(br_uint_16 *poffset, br_uint_16 *pseg, br_uint_16 *psize)
 {
-    r.x.eax = 0x4f0a;
-    r.h.bl  = 0;
+    __dpmi_regs r = {0};
+    r.d.eax       = 0x4f0a;
+    r.h.bl        = 0;
 
-    HostRealInterruptCall(0x10, &r);
+    __dpmi_int(0x10, &r);
 
     if(r.h.al != 0x4f)
         return BRE_UNSUPPORTED;
@@ -403,9 +445,9 @@ br_error VESAProtectedModeInterface(br_uint_16 *poffset, br_uint_16 *pseg, br_ui
     if(r.h.ah != 0x00)
         return BRE_FAIL;
 
-    *poffset = r.w.di;
-    *pseg    = r.w.es;
-    *psize   = r.w.cx;
+    *poffset = r.x.di;
+    *pseg    = r.x.es;
+    *psize   = r.x.cx;
 
     return BRE_OK;
 }

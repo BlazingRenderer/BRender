@@ -10,11 +10,6 @@
 #include <string.h>
 
 #include "drv.h"
-#include "host.h"
-#include "shortcut.h"
-#include "brassert.h"
-
-BR_RCS_ID("$Id: outfcty.c 1.1 1997/12/10 16:54:15 jon Exp $");
 
 /*
  * Default dispatch table for device (defined at end of file)
@@ -56,8 +51,6 @@ static struct br_tv_template_entry outputFacilityTemplateEntries[] = {
     {DEV(VESA_MODE_U16),    F(vesa_mode),   BRTV_QUERY | BRTV_ALL, BRTV_CONV_I32_U16, 0},
 };
 #undef F
-
-static struct br_tv_template outputFacilityTemplate = {BR_ASIZE(outputFacilityTemplateEntries), outputFacilityTemplateEntries};
 
 static struct masks_to_mode {
     br_uint_8 red_mask_size;
@@ -112,6 +105,9 @@ br_error OutputFacilityVESAInitialise(int *count, br_device *dev)
             continue;
 
         if(!(modeinfo.mode_attributes & VESA_MA_GRAPHICS))
+            continue;
+
+        if(!(modeinfo.mode_attributes & VESA_MA_LINEAR))
             continue;
 
         type = -1;
@@ -173,13 +169,13 @@ br_error OutputFacilityVESAInitialise(int *count, br_device *dev)
         self->colour_type = type;
         self->colour_bits = bits;
         self->dispatch    = &outputFacilityDispatch;
+        self->device      = dev;
         self->width       = modeinfo.x_resolution;
         self->height      = modeinfo.y_resolution;
         self->vesa_mode   = vip->videomode_ptr[m];
         self->modeinfo    = modeinfo;
 
-        BrSprintfN(tmp, sizeof(tmp) - 1, "%dx%dx%d", self->width, self->height, bits);
-        self->identifier = BrResStrDup(self, tmp);
+        self->identifier = BrResSprintf(self, "%dx%dx%d", self->width, self->height, bits);
 
         self->object_list = BrObjectListAllocate(self);
 
@@ -194,37 +190,56 @@ br_error OutputFacilityVESAInitialise(int *count, br_device *dev)
 /*
  * Common object methods
  */
-static void BR_CMETHOD_DECL(br_output_facility_vesa, free)(br_output_facility *self)
+static void BR_CMETHOD_DECL(br_output_facility_vesa, free)(br_object *_self)
 {
+    br_output_facility *self = (br_output_facility *)_self;
+
     ObjectContainerRemove(ObjectDevice(self), (br_object *)self);
 
     /*
      * Remove attached objects
      */
-    ObjectContainerFree((br_object_container *)self, BR_NULL_TOKEN, NULL, NULL);
+    BrObjectContainerFree((br_object_container *)self, BR_NULL_TOKEN, NULL, NULL);
 
     BrResFreeNoCallback(self);
 }
 
-static br_token BR_CMETHOD_DECL(br_output_facility_vesa, type)(br_output_facility *self)
+static const char *BR_CMETHOD_DECL(br_output_facility_vesa, identifier)(br_object *_self)
+{
+    br_output_facility *self = (br_output_facility *)_self;
+    return self->identifier;
+}
+
+static br_token BR_CMETHOD_DECL(br_output_facility_vesa, type)(br_object *self)
 {
     return BRT_OUTPUT_FACILITY;
 }
 
-static br_boolean BR_CMETHOD_DECL(br_output_facility_vesa, isType)(br_output_facility *self, br_token t)
+static br_boolean BR_CMETHOD_DECL(br_output_facility_vesa, isType)(br_object *self, br_token t)
 {
     return (t == BRT_OUTPUT_FACILITY) || (t == BRT_OBJECT_CONTAINER) || (t == BRT_OBJECT);
 }
 
-static br_int_32 BR_CMETHOD_DECL(br_output_facility_vesa, space)(br_output_facility *self)
+static br_device *BR_CMETHOD_DECL(br_output_facility_vesa, device)(br_object *_self)
+{
+    br_output_facility *self = (br_output_facility *)_self;
+    return self->device;
+}
+
+static br_size_t BR_CMETHOD_DECL(br_output_facility_vesa, space)(br_object *self)
 {
     return sizeof(br_output_facility);
 }
 
-static struct br_tv_template *BR_CMETHOD_DECL(br_output_facility_vesa, templateQuery)(br_output_facility *self)
+static struct br_tv_template *BR_CMETHOD_DECL(br_output_facility_vesa, templateQuery)(br_object *_self)
 {
-    outputFacilityTemplate.res = DeviceVESAResource(ObjectVESADevice(self));
-    return &outputFacilityTemplate;
+    br_output_facility *self = (br_output_facility *)_self;
+
+    if(self->device->templates.outputFacilityTemplate == NULL)
+        self->device->templates.outputFacilityTemplate = BrTVTemplateAllocate(self->device, outputFacilityTemplateEntries,
+                                                                              BR_ASIZE(outputFacilityTemplateEntries));
+
+    return self->device->templates.outputFacilityTemplate;
 }
 
 static br_error BR_CMETHOD_DECL(br_output_facility_vesa, validSource)(br_output_facility *self, br_boolean *bp, br_object *h)
@@ -238,7 +253,6 @@ static br_error BR_CMETHOD_DECL(br_output_facility_vesa, validSource)(br_output_
  */
 static br_error BR_CMETHOD_DECL(br_output_facility_vesa, pixelmapNew)(br_output_facility *self, br_device_pixelmap **ppmap, br_token_value *tv)
 {
-    br_error            r;
     br_device_pixelmap *pm;
 
     /*
@@ -263,8 +277,23 @@ static br_error BR_CMETHOD_DECL(br_output_facility_vesa, clutNew)(br_output_faci
     return BRE_FAIL;
 }
 
-static void *BR_CMETHOD_DECL(br_output_facility_vesa, listQuery)(br_output_facility *self)
+/*
+ * No querying ability yet
+ */
+static br_error BR_CMETHOD_DECL(br_output_facility_vesa, queryCapability)(br_output_facility *self, br_token_value *buffer_in,
+                                                                          br_token_value *buffer_out, br_size_t size_buffer_out)
 {
+    (void)self;
+    (void)buffer_in;
+    (void)buffer_out;
+    (void)size_buffer_out;
+    return BRE_FAIL;
+}
+
+static void *BR_CMETHOD_DECL(br_output_facility_vesa, listQuery)(br_object_container *_self)
+{
+    br_output_facility *self = (br_output_facility *)_self;
+
     return self->object_list;
 }
 
@@ -272,37 +301,39 @@ static void *BR_CMETHOD_DECL(br_output_facility_vesa, listQuery)(br_output_facil
  * Default dispatch table for device
  */
 static struct br_output_facility_dispatch outputFacilityDispatch = {
-    NULL,
-    NULL,
-    NULL,
-    NULL,
-    BR_CMETHOD_REF(br_output_facility_vesa, free),
-    BR_CMETHOD_REF(br_object_vesa, identifier),
-    BR_CMETHOD_REF(br_output_facility_vesa, type),
-    BR_CMETHOD_REF(br_output_facility_vesa, isType),
-    BR_CMETHOD_REF(br_object_vesa, device),
-    BR_CMETHOD_REF(br_output_facility_vesa, space),
+    .__reserved0 = NULL,
+    .__reserved1 = NULL,
+    .__reserved2 = NULL,
+    .__reserved3 = NULL,
+    ._free       = BR_CMETHOD_REF(br_output_facility_vesa, free),
+    ._identifier = BR_CMETHOD_REF(br_output_facility_vesa, identifier),
+    ._type       = BR_CMETHOD_REF(br_output_facility_vesa, type),
+    ._isType     = BR_CMETHOD_REF(br_output_facility_vesa, isType),
+    ._device     = BR_CMETHOD_REF(br_output_facility_vesa, device),
+    ._space      = BR_CMETHOD_REF(br_output_facility_vesa, space),
 
-    BR_CMETHOD_REF(br_output_facility_vesa, templateQuery),
-    BR_CMETHOD_REF(br_object, query),
-    BR_CMETHOD_REF(br_object, queryBuffer),
-    BR_CMETHOD_REF(br_object, queryMany),
-    BR_CMETHOD_REF(br_object, queryManySize),
-    BR_CMETHOD_REF(br_object, queryAll),
-    BR_CMETHOD_REF(br_object, queryAllSize),
+    ._templateQuery = BR_CMETHOD_REF(br_output_facility_vesa, templateQuery),
+    ._query         = BR_CMETHOD_REF(br_object, query),
+    ._queryBuffer   = BR_CMETHOD_REF(br_object, queryBuffer),
+    ._queryMany     = BR_CMETHOD_REF(br_object, queryMany),
+    ._queryManySize = BR_CMETHOD_REF(br_object, queryManySize),
+    ._queryAll      = BR_CMETHOD_REF(br_object, queryAll),
+    ._queryAllSize  = BR_CMETHOD_REF(br_object, queryAllSize),
 
-    BR_CMETHOD_REF(br_output_facility_vesa, listQuery),
-    BR_CMETHOD_REF(br_object_container, tokensMatchBegin),
-    BR_CMETHOD_REF(br_object_container, tokensMatch),
-    BR_CMETHOD_REF(br_object_container, tokensMatchEnd),
-    BR_CMETHOD_REF(br_object_container, addFront),
-    BR_CMETHOD_REF(br_object_container, removeFront),
-    BR_CMETHOD_REF(br_object_container, remove),
-    BR_CMETHOD_REF(br_object_container, find),
-    BR_CMETHOD_REF(br_object_container, findMany),
-    BR_CMETHOD_REF(br_object_container, count),
+    ._queryCapability      = BR_CMETHOD_REF(br_output_facility_vesa, queryCapability),
+    ._listQuery            = BR_CMETHOD_REF(br_output_facility_vesa, listQuery),
+    ._tokensMatchBegin     = BR_CMETHOD_REF(br_object_container, tokensMatchBegin),
+    ._tokensMatch          = BR_CMETHOD_REF(br_object_container, tokensMatch),
+    ._tokensMatchEnd       = BR_CMETHOD_REF(br_object_container, tokensMatchEnd),
+    ._tokensMatchInfoQuery = BR_CMETHOD_REF(br_object_container, tokensMatchInfoQuery),
+    ._addFront             = BR_CMETHOD_REF(br_object_container, addFront),
+    ._removeFront          = BR_CMETHOD_REF(br_object_container, removeFront),
+    ._remove               = BR_CMETHOD_REF(br_object_container, remove),
+    ._find                 = BR_CMETHOD_REF(br_object_container, find),
+    ._findMany             = BR_CMETHOD_REF(br_object_container, findMany),
+    ._count                = BR_CMETHOD_REF(br_object_container, count),
 
-    BR_CMETHOD_REF(br_output_facility_vesa, validSource),
-    BR_CMETHOD_REF(br_output_facility_vesa, pixelmapNew),
-    BR_CMETHOD_REF(br_output_facility_vesa, clutNew),
+    ._validSource = BR_CMETHOD_REF(br_output_facility_vesa, validSource),
+    ._pixelmapNew = BR_CMETHOD_REF(br_output_facility_vesa, pixelmapNew),
+    ._clutNew     = BR_CMETHOD_REF(br_output_facility_vesa, clutNew),
 };

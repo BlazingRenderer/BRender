@@ -28,6 +28,11 @@ typedef struct br_output_facility {
     char *identifier;
 
     /*
+     * Pointer to owning device
+     */
+    br_device *device;
+
+    /*
      * List of instances associated with facility
      */
     void *object_list;
