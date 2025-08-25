@@ -11,10 +11,12 @@ void BR_CALLBACK _BrBeginHook(void)
     struct br_device *BR_EXPORT BrDrv1SoftPrimBegin(const char *arguments);
     struct br_device *BR_EXPORT BrDrv1SoftRendBegin(const char *arguments);
     struct br_device *BR_EXPORT BrDrv1MCGABegin(const char *arguments);
+    struct br_device *BR_EXPORT BrDrv1VESABegin(const char *arguments);
 
     BrDevAddStatic(NULL, BrDrv1SoftPrimBegin, NULL);
     BrDevAddStatic(NULL, BrDrv1SoftRendBegin, NULL);
     BrDevAddStatic(NULL, BrDrv1MCGABegin, NULL);
+    BrDevAddStatic(NULL, BrDrv1VESABegin, NULL);
 }
 
 void BR_CALLBACK _BrEndHook(void)
@@ -81,13 +83,20 @@ int main(int argc, char **argv)
     }
     BrTableAdd(shade_table);
 
+#if 1 // For VESA
     // clang-format off
-    err = BrDevBeginVar(&screen, "MCGA",
-        BRT_WIDTH_I32, 320,
-        BRT_HEIGHT_I32, 200,
+    err = BrDevBeginVar(&screen, "VESA",
+        BRT_WIDTH_I32,      1024,
+        BRT_HEIGHT_I32,     768,
+        BRT_PIXEL_TYPE_U8,  BR_PMT_RGB_565,
         BR_NULL_TOKEN
     );
     // clang-format on
+#else // For MCGA
+    // clang-format off
+    err = BrDevBeginVar(&screen, "MCGA", BR_NULL_TOKEN);
+    // clang-format on
+#endif
 
     if(err != BRE_OK) {
         BrLogError("APP", "BrDevBeginVar() failed");
