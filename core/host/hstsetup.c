@@ -43,8 +43,10 @@ static host_info hostInfo = {
     .identifier = "DJGPP GO32",
 #elif defined(__DOS__)
     .identifier = "Generic DOS",
-#else
+#elif defined(__unix__)
     .identifier = "Generic UNIX",
+#else
+    .identifier = "Unknown",
 #endif
     .capabilities     = 0,
     .processor_family = BRT_INTEL,
