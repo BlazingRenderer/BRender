@@ -98,6 +98,7 @@ br_device_pixelmap *DevicePixelmapMCGAAllocateMode(br_device *dev, br_output_fac
 
     self->tmp_row = BrResAllocate(self, self->pm_row_bytes, BR_MEMORY_SCRATCH);
 
+    self->output_facility->num_instances++;
     ObjectContainerAddFront(facility, (br_object *)self);
 
     return self;
