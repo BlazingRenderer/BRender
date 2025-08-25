@@ -41,11 +41,27 @@ static host_info hostInfo = {
     .identifier   = "Microsoft WIN32",
     .capabilities = 0,
 #elif defined(__GO32__)
+    // clang-format off
     .identifier   = "DJGPP GO32",
-    .capabilities = 0,
+    .capabilities = HOST_CAPS_REAL_MEMORY
+                  | HOST_CAPS_REAL_INT_CALL
+                  | HOST_CAPS_REAL_INT_HOOK
+                  | HOST_CAPS_PROTECTED_INT_CALL
+                  | HOST_CAPS_PROTECTED_INT_HOOK
+                  | HOST_CAPS_ALLOC_SELECTORS
+                  | HOST_CAPS_PHYSICAL_MAP
+                  | HOST_CAPS_EXCEPTION_HOOK
+                  | HOST_CAPS_BASE_SELECTORS_WRITE
+                  | HOST_CAPS_PORTS,
+// clang-format on
 #elif defined(__DOS__)
+    // clang-format off
     .identifier   = "Generic DOS",
-    .capabilities = 0,
+    .capabilities = HOST_CAPS_REAL_MEMORY
+                  | HOST_CAPS_REAL_INT_CALL
+                  | HOST_CAPS_REAL_INT_HOOK
+                  ,
+// clang-format on
 #elif defined(__unix__)
     .identifier   = "Generic UNIX",
     .capabilities = 0,
