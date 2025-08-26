@@ -33,8 +33,10 @@
 #include "dos_p.h"
 #endif
 
+#if 0
 #ifndef _DOS_X_H_
 #include "dos_x.h"
+#endif
 #endif
 
 #endif

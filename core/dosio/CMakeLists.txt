@@ -25,6 +25,7 @@ set(DOSIO_FILES
         divtrap.c
         dossetup.c
         eventq.c
+        hook.c
         keyboard.c
         readmse.c
         )

@@ -9,6 +9,7 @@
 #include "brender.h"
 #include "host.h"
 #include "dosio.h"
+#include "hook.h"
 
 static host_exception_hook div_hook;
 extern void BR_ASM_CALL DivTrapHandler(void);
