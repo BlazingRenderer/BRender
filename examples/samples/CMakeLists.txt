@@ -5,3 +5,5 @@ add_subdirectory(rdemo)
 
 add_subdirectory(forest)
 add_subdirectory(fogdem)
+
+add_subdirectory(spacerig)

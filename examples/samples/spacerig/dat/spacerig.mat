@@ -1,0 +1,1792 @@
+## script file for room.dat produced from 3ds2br -scr room.mat 
+## 21st November 1995
+## 
+## BRender Material Script
+
+
+## material for hull_up  (front wall) 
+material=[
+    identifier = "MATERIAL 30";
+    flags=[perspective, light, smooth];
+    ambient=0.10;
+    diffuse=0.0;
+    specular=0.05;
+    power=20;
+    index_shade="shade_table";
+    colour_map="gridw.pix";
+    index_base = 42; index_range = 31;
+    map_transform=[[3,0],[0,3],[0,0]];    
+];
+## material for hull_up  (corridor area outer)
+material=[
+    identifier = "MATERIAL 31";
+    flags=[perspective, light, smooth];
+    ambient=0.10;
+    diffuse=0.0;
+    specular=0.05;
+    power=20;
+    index_shade="shade_table";
+    colour_map="gridw.pix";
+    map_transform=[[6,0],[0,1],[0,0]];    
+    index_base = 42; index_range = 31;
+];
+
+## material for hull_up  (corridor area outer)
+material=[
+    identifier = "MATERIAL 32";
+    flags=[perspective, light, smooth];
+    ambient=0.10;
+    diffuse=0.0;
+    specular=0.05;
+    power=20;
+    index_shade="shade_table";
+    colour_map="gridw.pix";
+    map_transform=[[3,0],[0,3],[0,0]];    
+    index_base = 42; index_range = 31;
+];
+
+## material for hull (top of basement area)
+material=[
+    identifier = "MATERIAL 26";
+    flags=[perspective, light, smooth];
+    ambient=0.10;
+    diffuse=0.0;
+    specular=0.05;
+    power=20;
+    index_shade="shade_table";
+    colour_map="gridw.pix";
+    map_transform=[[3,0],[0,3],[0,0]];    
+    index_base = 42; index_range = 31;
+];
+
+## material for hull left
+material=[
+    identifier = "MATERIAL 28";
+    flags=[perspective, light, smooth];
+    ambient=0.10;
+    diffuse=0.0;
+    specular=0.05;
+    power=20;
+    index_shade="shade_table";
+    colour_map="gridw.pix";
+    map_transform=[[2,0],[0,2],[0,0]];
+    index_base = 42; index_range = 31;
+];
+
+## material for hull right
+material=[
+    identifier = "MATERIAL 27";
+    flags=[perspective, light, smooth];
+    ambient=0.10;
+    diffuse=0.0;
+    specular=0.05;
+    power=20;
+    index_shade="shade_table";
+    colour_map="gridw.pix";
+    map_transform=[[2,0],[0,2],[0,0]];
+    index_base = 42; index_range = 31;
+];
+
+## material for top of viewing bay
+material=[
+    identifier = "MATERIAL 25";
+    flags=[perspective, light, smooth];
+    ambient=0.19;
+    diffuse=0.19;
+    specular=0.05;
+    power=20;
+    index_base = 42; index_range = 31;
+    index_shade="shade_table";
+    colour_map="marblew.pix";
+];
+
+## material for probe 'antenae'
+material=[
+    identifier = "PROBE METAL1";
+    flags=[perspective, light, smooth, two_sided];
+    ambient=0.10;
+    diffuse=0.19;
+    specular=0.05;
+    power=20;
+    index_base=15;
+    index_range=15;
+    index_shade="shade_table";
+    colour_map="marblew.pix";
+    index_base = 42; index_range = 31;
+];
+
+## material for Probe sphere
+material=[
+    identifier = "PROBE METAL2";
+    flags=[perspective, light, smooth];
+    ambient=0.10;
+    diffuse=0.19;
+    specular=0.05;
+    power=20;
+    index_base = 42; index_range = 31;
+    index_shade="shade_table";
+    colour_map="marblew.pix";
+];
+
+## material for Probe camera
+material=[
+    identifier = "PROBE METAL3";
+    flags=[perspective, light, smooth];
+    ambient=0.10;
+    diffuse=0.19;
+    specular=0.05;
+    power=20;
+    index_base = 42; index_range = 31;
+    index_shade="shade_table";
+    colour_map="marblew.pix";
+];
+
+## material for Probe camera lens
+material=[
+    identifier = "PROBE METAL4";
+    flags=[perspective, light, smooth];
+    colour=[255,100,150];
+    ambient=0.10;
+    diffuse=0.19;
+    specular=0.05;
+    power=20;
+    index_base = 42; index_range = 31;
+    index_shade="shade_table";
+];
+
+## material for table
+material=[
+    identifier = "MATERIAL 24";
+    flags=[perspective, light, smooth];
+    ambient=0.19;
+    diffuse=0.19;
+    specular=0.05;
+    power=20;
+    index_base=15;
+    index_range=15;
+    index_shade="shade_table";
+    colour_map="marblew.pix";
+];
+
+## material for box
+material = [
+    identifier = "MATERIAL 23";
+    flags = [perspective, light, smooth, two_sided];
+    ambient = 0.19;
+    diffuse = 0.19;
+    specular = 0.05;
+    power = 20; 
+    index_base = 64;
+    index_range = 31;
+    index_shade="shade_table";     
+    colour_map="logow.pix";
+];
+
+
+## power rod inner column pulse_core
+material = [
+    identifier = "MATERIAL 21";
+    flags = [];
+    ambient = 0.65;
+    diffuse = 0.30;
+    specular = 0.05;
+    power = 20; 
+    index_base = 64;
+    index_range = 31;
+    index_shade="shade_table";     
+    map_transform=[[1,0],[0,1],[0,0]];
+    colour_map="energyd1";
+];
+## power rod outer column pulse_coat
+material = [
+    identifier = "MATERIAL 22";
+    flags = [];
+    ambient = 0.65;
+    diffuse = 0.30;
+    specular = 0.05;
+    power = 20; 
+    index_base = 64;
+    index_range = 31;
+    index_shade="shade_table";     
+    map_transform=[[1,0],[0,1],[0,0]];
+    colour_map="gridholw.pix";
+];
+## vertical rising door to basement
+material = [
+    identifier = "PITTED METAL";
+    flags = [perspective];
+    ambient = 0.65;
+    diffuse = 0.30;
+    specular = 0.05;
+    power = 20; 
+    index_base = 64;
+    index_range = 31;
+    index_shade="shade_table";     
+    colour_map="corwallw.pix";
+    
+];
+## vertical rising door to basement
+material = [
+    identifier = "POLKADOT PATTERN";
+    flags = [perspective];
+    ambient = 0.65;
+    diffuse = 0.30;
+    specular = 0.05;
+    power = 20;
+    index_base = 64;
+    index_range = 31;
+    index_shade="shade_table";     
+    colour_map="corwallw.pix";
+    
+];
+## viewer _06 (floor area to viewing area)
+material = [
+    identifier = "MATERIAL 15";
+    flags = [perspective, light, smooth];
+    ambient = 0.5;
+    diffuse = 0.30;
+    specular = 0.05;
+    power = 20;
+    index_shade="shade_table";     
+    colour_map="ruffloow.pix";
+
+    
+];
+## viewer_05 (edge area of viewing area)
+material = [
+    identifier = "MATERIAL 14";
+    flags = [perspective, light, smooth];
+    ambient = 0.19;
+    diffuse = 0.19;
+    specular = 0.05;
+    power = 20;
+    index_shade="shade_table";     
+    colour_map="marblew.pix";
+
+    
+];
+## viewer_04 (larger portion of viewing area)
+material = [
+    identifier = "MATERIAL 13";
+    flags = [perspective, light, smooth];
+    ambient = 0.19;
+    diffuse = 0.19;
+    specular = 0.05;
+    power = 20;
+    index_shade="shade_table";     
+    map_transform=[[1,0],[0,2],[0,0]];
+    colour_map="vieww.pix";
+
+];
+##  viewer_03 (smaller of viewing window inclined)
+material = [
+    identifier = "MATERIAL 12";
+    flags = [perspective, light, smooth];
+    ambient = 0.19;
+    diffuse = 0.19;
+    specular = 0.05;
+    power = 20;
+    index_shade="shade_table";     
+    colour_map="marblew.pix";
+    
+];
+## viewer_01 (dented side of viewing window)
+## viewer_02
+material = [
+    identifier = "MATERIAL 11";
+    flags = [perspective, light, smooth];
+    ambient = 0.19;
+    diffuse = 0.19;
+    specular = 0.05;
+    power = 20;
+    index_shade="shade_table";     
+    colour_map="marblew.pix";
+
+    
+];
+## level_1bot (upper level floor)
+material = [
+    identifier = "MATERIAL 10";
+    flags = [perspective, light, smooth];
+    ambient = 0.65;
+    diffuse = 0.0;
+    specular = 0.05;
+    power = 20;
+    index_shade="shade_table";     
+    map_transform=[[4,0],[0,4],[0,0]];
+    colour_map="floorw.pix";
+
+    
+];
+## level_1top (upper level roof texture)
+material = [
+    identifier = "MATERIAL 09";
+    flags = [perspective, light, smooth];
+    ambient = 0.65;
+    diffuse = 0.0;
+    specular = 0.05;
+    power = 20;
+    index_shade="shade_table";     
+    map_transform=[[4,0],[0,4],[0,0]];
+    colour_map="roofw.pix";
+
+    
+];
+
+## level_1w3 (far wall of upper level)
+material = [
+    identifier = "MATERIAL 08";
+    flags = [perspective, light, smooth];
+    ambient = 0.50;
+    diffuse = 0.19;
+    specular = 0.05;
+    power = 20;
+    index_shade="shade_table";     
+    map_transform=[[-4,0],[0,-1],[0,0]];
+    colour_map="walltexw.pix";
+];
+
+## level_1w2 (wall of upper room adjacent to elevator)
+material = [
+    identifier = "MATERIAL 07";
+    flags = [perspective, light, smooth];
+    ambient = 0.50;
+    diffuse = 0.19;
+    specular = 0.05;
+    power = 20;
+    index_shade="shade_table";     
+    map_transform=[[0,1],[-3,0],[0,0]];
+    colour_map="techwalw.pix";
+
+    
+];
+## hall_bot (bottom of hall to coridor)
+material = [
+    identifier = "MATERIAL 20";
+    flags = [perspective, light, smooth];
+    ambient = 0.19;
+    diffuse = 0.19;
+    specular = 0.05;
+    power = 20;
+    index_shade="shade_table";     
+    colour_map="marblew.pix";
+];
+
+## level_1w1 (wall of upper floor next to exit of curve corridor)
+material = [
+    identifier = "MATERIAL 06";
+    flags = [perspective, light, smooth];
+    ambient = 0.50;
+    diffuse = 0.19;
+    specular = 0.05;
+    power = 20;
+    index_shade="shade_table";     
+    map_transform=[[-3,0],[0,-1],[0,0]];
+    colour_map="techwalw.pix";
+];
+
+## level_1w4 (wall between entrance to curve corridor flat)
+material = [
+    identifier = "MATERIAL 16";
+    flags = [perspective, light, smooth];
+    ambient = 0.50;
+    diffuse = 0.19;
+    specular = 0.05;
+    power = 20;
+    index_shade="shade_table";     
+    map_transform=[[0,1],[-1,0],[0,0]];
+    colour_map="techwalw.pix";
+];
+
+## hall_top (roof of hall)
+material = [
+    identifier = "MATERIAL 05";
+    flags = [perspective, light, smooth];
+    ambient = 0.19;
+    diffuse = 0.19;
+    specular = 0.05;
+    power = 20;
+    index_shade="shade_table";     
+    colour_map="marblew.pix";
+
+    
+];
+## curve_out  (curved corridor outer wall)
+material = [
+    identifier = "MATERIAL 04";
+    flags = [light, smooth];
+    ambient = 0.50;
+    diffuse = 0.10;
+    specular = 0.05;
+    power = 20;
+    index_shade="shade_table";     
+    map_transform=[[-1,0],[0,-1],[0,0]];
+    colour_map="veinsw.pix";
+
+    
+];
+## curve_in   (inner wall of corridor)
+material = [
+    identifier = "MATERIAL 03";
+    flags = [light, smooth];
+    ambient = 0.50;
+    diffuse = 0.10;
+    specular = 0.05;
+    power = 20;
+    index_shade="shade_table";     
+    map_transform=[[-1,0],[0,-1],[0,0]];
+    colour_map="veinsw.pix";
+
+    
+];
+## curve_top (curve corridor floor)
+material = [
+    identifier = "MATERIAL 02";
+    flags = [perspective, light, smooth];
+    ambient = 0.50;
+    diffuse = 0.19;
+    specular = 0.2;
+    power = 20;
+    index_shade="shade_table";     
+    map_transform=[[-1,0],[0,-1],[0,0]];
+    colour_map="ruffloow.pix";
+
+    
+];
+## curve_bot (roof of curved corridor/same texture as floor)
+material = [
+    identifier = "MATERIAL 01";
+    flags = [perspective, light, smooth];
+    ambient = 0.50;
+    diffuse = 0.19;
+    specular = 0.05;
+    power = 20;
+    index_shade="shade_table";     
+    map_transform=[[-1,0],[0,-1],[0,0]];
+    colour_map="ruffloow.pix";
+
+    
+];
+## level_1_01 (back wall of elevator shaft on upper level)
+material = [
+    identifier = "MATERIAL 18";
+    flags = [perspective, light, smooth];
+    ambient = 0.65;
+    diffuse = 0.0;
+    specular = 0.05;
+    power = 20;
+    index_shade="shade_table";     
+    map_transform=[[-1,0],[0,-1],[0,0]];
+    colour_map="vieww.pix";
+    
+    ];
+
+
+## level_1_04  (top of elevator shaft on upper level)
+material = [
+    identifier = "Y-GRID PATTERN";
+    flags = [perspective, light, smooth];
+    ambient = 0.65;
+    diffuse = 0.19;
+    specular = 0.05;
+    power = 20;
+    index_base = 64;
+    index_range = 31;
+    index_shade="shade_table";     
+    colour_map="roofw.pix";
+];
+
+
+## elev_front (front elevator shaft wall)
+material = [
+    identifier = "YELLOW PLSTC REF";
+    flags = [perspective];
+    ambient = 0.65;
+    diffuse = 0.30;
+    specular = 0.05;
+    power = 20;
+    index_base = 64;
+    index_range = 31;
+    index_shade="shade_table";     
+    map_transform=[[0,-1],[1,0],[0,0]];
+    colour_map="vieww.pix";
+    
+];
+## elev_back (elevator shaft back wall)
+material = [
+    identifier = "YELLOW PLSTC BMP";
+    flags = [perspective];
+    ambient = 0.65;
+    diffuse = 0.30;
+    specular = 0.05;
+    power = 20;
+    index_shade="shade_table";     
+    map_transform=[[0,-1],[1,0],[0,0]];
+    colour_map="vieww.pix";
+
+];
+## elev_lft (elevator shaft left wall)
+material = [
+    identifier = "YELLOW PLSTC";
+    flags = [perspective, light, smooth];
+    ambient = 0.60;
+    diffuse = 0.35;
+    specular = 0.05;
+    power = 20;
+    index_shade="shade_table";     
+    colour_map="vieww.pix";
+
+];
+## elev_rgt (elevator shaft right wall)
+material = [
+    identifier = "YELLOW PLASTIC";
+    flags = [perspective];
+    ambient = 0.60;
+    diffuse = 0.35;
+    specular = 0.05;
+    power = 20;
+    index_shade="shade_table";     
+    colour_map="vieww.pix";
+
+];
+## door_1_lft (elevator door internal left)
+material = [
+    identifier = "YELLOW METAL";
+    flags = [perspective];
+    ambient = 0.65;
+    diffuse = 0.30;
+    specular = 0.05;
+    power = 20;
+    index_base = 64;
+    index_range = 31;
+    index_shade="shade_table";     
+    map_transform=[[0,3],[-1,0],[0,0]];
+    colour_map="elevatow.pix";
+    
+];
+## door_1_lft (elevator door external left)
+material = [
+    identifier = "WOOD INLAY - B";
+    flags = [perspective, light, smooth];
+    ambient = 0.50;
+    diffuse = 0.0;
+    specular = 0.05;
+    power = 20;
+    index_base = 64;
+    index_range = 31;
+    index_shade="shade_table";     
+    map_transform=[[0,1],[1,0],[0,0]];
+    colour_map="leftdoow.pix";
+    
+];
+## door_1_rgt (elevator door internal right)
+material = [
+    identifier = "YELLOW MATTE";
+    flags = [perspective];
+    ambient = 0.65;
+    diffuse = 0.30;
+    specular = 0.05;
+    power = 20;
+    index_shade="shade_table";     
+    map_transform=[[0,3],[-1,0],[0,0]];
+    colour_map="elevatow.pix";
+
+];
+## door_1_rgt (elevator door external right)
+material = [
+    identifier = "WOOD INLAY - A";
+    flags = [perspective, light, smooth];
+    ambient = 0.50;
+    diffuse = 0.0;
+    specular = 0.05;
+    power = 20;
+    index_base = 64;
+    index_range = 31;
+    index_shade="shade_table";     
+    map_transform=[[0,1],[1,0],[0,0]];
+    colour_map="rgtdoorw.pix";
+    
+];
+## b_door_rgt (elevator door internal right)
+material = [
+    identifier = "WOOD - WHITE ASH";
+    flags = [perspective];
+    ambient = 0.65;
+    diffuse = 0.30;
+    specular = 0.05;
+    power = 20;
+    index_base = 64;
+    index_range = 31;
+    index_shade="shade_table";     
+    map_transform=[[0,3],[-1,0],[0,0]];
+    colour_map="elevatow.pix";
+    
+];
+## b_door_rgt (elevator door external right)
+material = [
+    identifier = "WOOD - TEAK";
+    flags = [perspective];
+    ambient = 0.65;
+    diffuse = 0.30;
+    specular = 0.05;
+    power = 20;
+    index_base = 64;
+    index_range = 31;
+    index_shade="shade_table";     
+    map_transform=[[0,1],[-1,0],[0,0]];
+    colour_map="rgtdoorw.pix";
+    
+];
+##b_door_lft (internal elevator door right)
+material = [
+    identifier = "WOOD - ROSEWOOD";
+    flags = [perspective];
+    ambient = 0.65;
+    diffuse = 0.30;
+    specular = 0.05;
+    power = 20;
+    index_base = 64;
+    index_range = 31;
+    index_shade="shade_table";     
+    map_transform=[[0,3],[-1,0],[0,0]];
+    colour_map="elevatow.pix";
+    
+];
+## b_door_lft (elevator door external left)
+material = [
+    identifier = "WOOD - MED. ASH";
+    flags = [perspective];
+    ambient = 0.65;
+    diffuse = 0.30;
+    specular = 0.05;
+    power = 20;
+    index_base = 64;
+    index_range = 31;
+    index_shade="shade_table";     
+    map_transform=[[0,1],[-1,0],[0,0]];
+    colour_map="leftdoow.pix";
+    
+];
+## base_elev (bottom of base elevator shaft)
+material = [
+    identifier = "WOOD - DARK RED";
+    flags = [perspective];
+    ambient = 0.65;
+    diffuse = 0.30;
+    specular = 0.05;
+    power = 20;
+    index_base = 64;
+    index_range = 31;
+    index_shade="shade_table";     
+    colour_map="floorw.pix";
+    
+];
+## baseroof (roof of basement)
+material = [
+    identifier = "WOOD - DARK ASH";
+    flags = [perspective];
+    ambient = 0.65;
+    diffuse = 0.30;
+    specular = 0.05;
+    power = 20;
+    index_base = 64;
+    index_range = 31;
+    index_shade="shade_table";     
+    map_transform=[[4,0],[0,4],[0,0]];
+    colour_map="roofw.pix";
+    
+];
+## basefloor
+material = [
+    identifier = "WOOD - AVODIRE";
+    flags = [perspective];
+    ambient = 0.65;
+    diffuse = 0.30;
+    specular = 0.05;
+    power = 20;
+    index_base = 64;
+    index_range = 31;
+    index_shade="shade_table";     
+    map_transform=[[4,0],[0,4],[0,0]];
+    colour_map="floorw.pix";
+    
+];
+## baewall10 (basewall area with indentations)
+## baewall_11  ditto
+material = [
+    identifier = "WOOD - ASH";
+    flags = [perspective];
+    ambient = 0.65;
+    diffuse = 0.30;
+    specular = 0.05;
+    power = 20;
+    index_base = 64;
+    index_range = 31;
+    index_shade="shade_table";     
+    map_transform=[[0,1],[-1,0],[0,0]];
+    colour_map="dungeonw.pix";
+    
+];
+## baewall_ (centre section of basement wall non dented)
+material = [
+    identifier = "WHITE PLSTC REF";
+    flags = [perspective];
+    ambient = 0.65;
+    diffuse = 0.30;
+    specular = 0.05;
+    power = 20;
+    index_base = 64;
+    index_range = 31;
+    index_shade="shade_table";     
+    map_transform=[[0,1],[-2,0],[0,0]]; 
+    colour_map="techwalw.pix";
+    
+];
+## basewall_8 far wall of basement room
+material = [
+    identifier = "WHITE PLSTC BMP";
+    flags = [perspective];
+    ambient = 0.65;
+    diffuse = 0.30;
+    specular = 0.05;
+    power = 20;
+    index_shade="shade_table";     
+    map_transform=[[-3,0],[0,-1],[0,0]];
+    colour_map="techwalw.pix";
+
+];
+## opposite walls of basement elevator shaft
+## basewall_4
+## basewall_6
+material = [
+    identifier = "WHITE PLSTC";
+    flags = [perspective];
+    ambient = 0.65;
+    diffuse = 0.30;
+    specular = 0.05;
+    power = 20;
+    index_shade="shade_table";     
+    map_transform=[[-1,0],[0,-1],[0,0]];
+    colour_map="vieww.pix";
+
+];
+## basewall_5 (back section of basement elevator shaft
+material = [
+    identifier = "WHITE MATTE";
+    flags = [perspective, light, smooth];
+    ambient = 0.30;
+    diffuse = 0.0;
+    specular = 0.05;
+    power = 20;
+    index_shade="shade_table";     
+    map_transform=[[0,1],[-1,0],[0,0]];
+    colour_map="lev_tagw.pix";
+    
+    ];
+## basewall_7 (short basement wall next to elevator)
+material = [
+    identifier = "VALLEY";
+    flags = [perspective];
+    ambient = 0.65;
+    diffuse = 0.30;
+    specular = 0.05;
+    power = 20;
+    index_base = 64;
+    index_range = 31;
+    index_shade="shade_table";     
+    map_transform=[[0,1],[-1,0],[0,0]];
+    colour_map="walltexw.pix";
+    
+];
+## basewall_3 (long basewall next to elevator)
+material = [
+    identifier = "V PATTERN";
+    flags = [perspective];
+    ambient = 0.65;
+    diffuse = 0.30;
+    specular = 0.05;
+    power = 20;
+    index_base = 64;
+    index_range = 31;
+    index_shade="shade_table";     
+    map_transform=[[0,1],[-3,0],[0,0]];
+    colour_map="walltexw.pix";
+    
+];
+## base_wall_2 (walls near corriodor entrance)
+## base_wall_1
+material = [
+    identifier = "TILE WHITE";
+    flags = [perspective];
+    ambient = 0.65;
+    diffuse = 0.30;
+    specular = 0.05;
+    power = 20;
+    index_base = 64;
+    index_range = 31;
+    index_shade="shade_table";     
+    map_transform=[[-1,0],[0,-1],[0,0]];
+    colour_map="walltexw.pix";
+    
+];
+## cor_16_rgt (corridor 16 wall straight)
+material = [
+    identifier = "TILE TAN GRANITE";
+    flags = [perspective];
+    ambient = 0.19;
+    diffuse = 0.30;
+    specular = 0.05;
+    power = 20;
+    index_base = 64;
+    index_range = 31;
+    index_shade="shade_table";     
+    colour_map="marblew.pix";
+    
+];
+## cor_16_left (corridor 16 straight wall)
+material = [
+    identifier = "TILE PINKGRANITE";
+    flags = [perspective];
+    ambient = 0.19;
+    diffuse = 0.30;
+    specular = 0.05;
+    power = 20;
+    index_base = 64;
+    index_range = 31;
+    index_shade="shade_table";     
+    colour_map="marblew.pix";
+    
+];
+## cor_16_bot (corridor 16 bottom)
+material = [
+    identifier = "TILE GRAYGRANITE";
+    flags = [perspective];
+    ambient = 0.19;
+    diffuse = 0.30;
+    specular = 0.05;
+    power = 20;
+    index_base = 64;
+    index_range = 31;
+    index_shade="shade_table";     
+    colour_map="corflorw.pix";
+    
+];
+## cor_16_top (corridor 16 roof)
+material = [
+    identifier = "TILE GOLDGRANITE";
+    flags = [perspective];
+    ambient = 0.19;
+    diffuse = 0.30;
+    specular = 0.05;
+    power = 20;
+    index_base = 64;
+    index_range = 31;
+    index_shade="shade_table";     
+    colour_map="marblew.pix";
+    
+];
+## cor_15_lft (corridor 15 wall)
+material = [
+    identifier = "TEXTURE";
+    flags = [perspective];
+    ambient = 0.65;
+    diffuse = 0.30;
+    specular = 0.05;
+    power = 20;
+    index_base = 64;
+    index_range = 31;
+    index_shade="shade_table";     
+    map_transform=[[1,0],[0,-1],[0,0]];
+    colour_map="wallmarw.pix";
+    
+];
+## cor_15_bot (corridor 15 floor)
+material = [
+    identifier = "TAN TILE PATTERN";
+    flags = [perspective];
+    ambient = 0.65;
+    diffuse = 0.30;
+    specular = 0.05;
+    power = 20;
+    index_base = 64;
+    index_range = 31;
+    index_shade="shade_table";     
+    colour_map="corflorw.pix";
+    
+];
+## cor_15_top (corridor 15 roof)
+material = [
+    identifier = "STONE COMPOSITE";
+    flags = [perspective];
+    ambient = 0.65;
+    diffuse = 0.30;
+    specular = 0.05;
+    power = 20;
+    index_base = 64;
+    index_range = 31;
+    index_shade="shade_table";     
+    colour_map="roofgriw.pix";
+    
+];
+## cor_14_lft (corridor 14 left straight wall)
+material = [
+    identifier = "STITCHED PATTERN";
+    flags = [perspective];
+    ambient = 0.65;
+    diffuse = 0.30;
+    specular = 0.05;
+    power = 20;
+    index_base = 64;
+    index_range = 31;
+    index_shade="shade_table";     
+    map_transform=[[-2,0],[0,-1],[0,0]];
+    colour_map="corwallw.pix";
+    
+];
+## cor_14_rgt (corridor 14 straight wall)
+material = [
+    identifier = "SQUARE DOT PATRN";
+    flags = [perspective];
+    ambient = 0.65;
+    diffuse = 0.30;
+    specular = 0.05;
+    power = 20;
+    index_base = 64;
+    index_range = 31;
+    index_shade="shade_table";     
+    map_transform=[[-2,0],[0,-1],[0,0]];
+    colour_map="corwallw.pix";
+    
+];
+## cor_14_top (corridor 14 roof)
+material = [
+    identifier = "SOUTHWEST PATTRN";
+    flags = [perspective];
+    ambient = 0.65;
+    diffuse = 0.30;
+    specular = 0.05;
+    power = 20;
+    index_base = 64;
+    index_range = 31;
+    index_shade="shade_table";     
+    map_transform=[[3,0],[0,1],[0,0]];
+    colour_map="roofgriw.pix";
+    
+];
+## cor_14_bot (corridor 14 floor)
+material = [
+    identifier = "SLATE L-PATTERN";
+    flags = [perspective];
+    ambient = 0.65;
+    diffuse = 0.30;
+    specular = 0.05;
+    power = 20;
+    index_base = 64;
+    index_range = 31;
+    index_shade="shade_table";     
+    map_transform=[[3,0],[0,1],[0,0]];
+    colour_map="corflorw.pix";
+    
+];
+## cor_13_bot (corridor 13 floor)
+material = [
+    identifier = "SKY TEXTURE";
+    flags = [perspective];
+    ambient = 0.65;
+    diffuse = 0.30;
+    specular = 0.05;
+    power = 20;
+    index_base = 64;
+    index_range = 31;
+    index_shade="shade_table";     
+    colour_map="corflorw.pix";
+    
+];
+## cor_13_top (corridor 13 roof)
+material = [
+    identifier = "SKIN TEXTURE";
+    flags = [perspective];
+    ambient = 0.65;
+    diffuse = 0.30;
+    specular = 0.05;
+    power = 20;
+    index_base = 0;
+    index_range = 63;
+    index_shade="shade_table";     
+    colour_map="roofgriw.pix";
+    
+];
+## cor_13 (corridor 13 left walll) 
+material = [
+    identifier = "SHINGLES";
+    flags = [perspective];
+    ambient = 0.65;
+    diffuse = 0.30;
+    specular = 0.05;
+    power = 20;
+    index_base = 0;
+    index_range = 63;
+    map_transform=[[-1,0],[0,-1],[0,0]];
+    index_shade = "shade_table"; 
+    colour_map = "corwallw.pix";
+ 
+];
+## cor_12_bot (corridor 12 floor)
+material = [
+    identifier = "SEMICIRCLE PATRN";
+    flags = [perspective];
+    ambient = 0.65;
+    diffuse = 0.30;
+    specular = 0.05;
+    power = 20;
+    index_base = 0;
+    index_range = 63;
+    index_shade="shade_table";     
+    colour_map="corflorw.pix";
+                      
+];
+## cor_12_top (corridor 12 roof)
+material = [
+    identifier = "SAND TEXTURE";
+    flags = [perspective];
+    ambient = 0.65;
+    diffuse = 0.30;
+    specular = 0.05;
+    power = 20;
+    index_base = 64;
+    index_range = 31;
+    index_shade="shade_table";     
+    colour_map="roofgriw.pix";
+    
+];
+## cor_12_lft (corridor 12 left straight wall)
+material = [
+    identifier = "SILVER";
+    flags = [perspective];
+    ambient = 0.65;
+    diffuse = 0.30;
+    specular = 0.05;
+    power = 20;
+    index_base = 64;
+    index_range = 31;
+    index_shade="shade_table";     
+    colour_map="wallmonw.pix";
+    map_transform=[[0,1],[-1,0],[0,0]];      
+];
+## cor_11_bot (corridor 11 floor)
+material = [
+    identifier = "RED PLSTC REF";
+    flags = [perspective];
+    ambient = 0.65;
+    diffuse = 0.30;
+    specular = 0.05;
+    power = 20;
+    index_base = 64;
+    index_range = 31;
+    index_shade="shade_table";     
+    colour_map="corflorw.pix";
+    
+];
+## cor_11_top (corridor 11 roof)
+material = [
+    identifier = "RED PLSTC BMP";
+    flags = [perspective];
+    ambient = 0.65;
+    diffuse = 0.30;
+    specular = 0.05;
+    power = 20;
+    index_shade="shade_table";     
+    colour_map="roofgriw.pix";
+
+];
+## cor_12_rgt (corridor 12 dented wall)
+material = [
+    identifier = "RED PLSTC";
+    flags = [perspective];
+    ambient = 0.65;
+    diffuse = 0.30;
+    specular = 0.05;
+    power = 20;
+    index_shade="shade_table";     
+    colour_map="texturew.pix";
+
+];
+## corrid_11 (corridor 11 dented wall)
+## cor_11_rgt (corridor 11 dented wall)
+## cor_13_rgt (corridor 13 dented wall)
+## corrid_15 (corridor 15 dented wall)
+material = [
+    identifier = "RED PLASTIC";
+    flags = [perspective];
+    ambient = 0.65;
+    diffuse = 0.30;
+    specular = 0.05;
+    power = 20;
+    index_shade="shade_table";     
+    map_transform=[[-1,0],[0,-1],[0,0]];
+    colour_map="corwallw.pix";
+];
+## cor_10_rght (corridor 10 right straight wall)
+## cor_10_left (corridor 10 left straight wall)
+material = [
+    identifier = "RED METAL";
+    flags = [perspective];
+    ambient = 0.65;
+    diffuse = 0.30;
+    specular = 0.05;
+    power = 20;
+    index_base = 64;
+    index_range = 31;
+    index_shade="shade_table";     
+    map_transform=[[-2,0],[0,-1],[0,0]];
+    colour_map="corwallw.pix";
+    
+];
+## cor_10_bot (corridor 10 floor)
+material = [
+    identifier = "RED MATTE";
+    flags = [perspective];
+    ambient = 0.463922;
+    diffuse = 0.463922;
+    specular = 1.000000;
+    power = 5.950000;
+    index_shade="shade_table";     
+    map_transform=[[2,0],[0,1],[0,0]];
+    colour_map="corflorw.pix";
+
+];
+## cor_10_top (corridor 10 roof)
+## viewer_07 (roof of viewing area)
+material = [
+    identifier = "PURPLE PLSTC REF";
+    flags = [perspective];
+    ambient = 0.551765;
+    diffuse = 0.551765;
+    specular = 1.000000;
+    power = 53.469997;
+    index_base = 64;
+    index_range = 31;
+    index_shade="shade_table";     
+    map_transform=[[2,0],[0,1],[0,0]];
+    colour_map="roofgriw.pix";
+    
+];
+## corn_3_bot (corner 3 floor)
+## corn_4_bot (corner 4 floor)
+material = [
+    identifier = "PURPLE METAL";
+    flags = [perspective];
+    ambient = 0.65;
+    diffuse = 0.30;
+    specular = 0.05;
+    power = 20;
+    index_base = 64;
+    index_range = 31;
+    index_shade="shade_table";     
+    colour_map="corflorw.pix";
+    
+];
+## corn_3_top (corner 3 roof)
+## corn_4_top (corner 4 roof)
+material = [
+    identifier = "PURPLE MATTE";
+    flags = [perspective];
+    ambient = 0.65;
+    diffuse = 0.30;
+    specular = 0.05;
+    power = 20;
+    index_shade="shade_table";     
+    colour_map="roofgriw.pix";
+
+];
+## corner_3 (corner with dented wall)
+## corner_4 (corner with dented wall)
+material = [
+    identifier = "PINK PLSTC BMP";
+    flags = [perspective];
+    ambient = 0.65;
+    diffuse = 0.30;
+    specular = 0.05;
+    power = 20;
+    index_shade="shade_table";     
+    map_transform=[[0,-1],[1,0],[0,0]];
+    colour_map="corwallw.pix";
+
+];
+## cor_9_top (corridor 9 roof)
+material = [
+    identifier = "PINK PLSTC";
+    flags = [perspective];
+    ambient = 0.65;
+    diffuse = 0.30;
+    specular = 0.05;
+    power = 20;
+    index_shade="shade_table";     
+    colour_map="roofgriw.pix";
+
+];
+## cor_9_bot (corridor 9 bottom)
+material = [
+    identifier = "ORANGE PLSTC REF";
+    flags = [perspective];
+    ambient = 0.65;
+    diffuse = 0.30;
+    specular = 0.05;
+    power = 20;
+    index_base = 64;
+    index_range = 31;
+    index_shade="shade_table";     
+    colour_map="corflorw.pix";
+    
+];
+## cor_9_rght (corridor 9 straight right wall)
+material = [
+    identifier = "ORANGE PLSTC BMP";
+    flags = [perspective];
+    ambient = 0.65;
+    diffuse = 0.30;
+    specular = 0.05;
+    power = 20;
+    index_shade="shade_table";     
+    colour_map="liftdoow.pix";  
+    map_transform=[[-1,0],[0,-1],[0,0]];
+];
+## cor_8_top (corridor 8 roof)
+material = [
+    identifier = "ORANGE PLSTC";
+    flags = [perspective];
+    ambient = 0.65;
+    diffuse = 0.30;
+    specular = 0.05;
+    power = 20;
+    index_shade="shade_table";     
+    colour_map="roofgriw.pix";
+
+];
+## vault (vaulted roof)
+material = [
+    identifier = "METAL CHERRY RED";
+    flags = [perspective];
+    ambient = 0.65;
+    diffuse = 0.30;
+    specular = 0.05;
+    power = 20;
+    index_shade="shade_table";     
+    colour_map="texturew.pix";
+
+];
+## cor_7_left & cor_7_rgt  (corridor 7 left and right walls) 
+material = [
+    identifier = "GREY_FLAT";
+    flags = [perspective];
+    ambient = 0.65;
+    diffuse = 0.30;
+    specular = 0.05;
+    power = 20;
+    index_shade="shade_table";     
+    map_transform=[[-1,0],[0,-1],[0,0]];
+    colour_map="corwallw.pix";
+];
+
+## hall_rgt & hall_lft (hall straight left and right walls)
+material = [
+    identifier = "MATERIAL 19";
+    flags = [perspective, light, smooth, two_sided, always_visible];
+    ambient = 0.19;
+    diffuse = 0.19;
+    specular = 0.05;
+    power = 20;
+    index_shade="shade_table";     
+    map_transform=[[-1,0],[0,-1],[0,0]];
+    colour_map="marblew.pix";
+];
+
+## corridor_7 (corridor 7 floor)
+## corridor_8 (corridor 8 floor)
+material = [
+    identifier = "GREY PLSTC REF";
+    flags = [perspective];
+    ambient = 0.65;
+    diffuse = 0.30;
+    specular = 0.05;
+    power = 20;
+    index_base = 64;
+    index_range = 31;
+    index_shade="shade_table";     
+    colour_map="corflorw.pix";
+    
+];
+
+## cor_6_left (corridor 6 left and right dented walls)
+material = [
+    identifier = "GREY PLSTC";
+    flags = [perspective];
+    ambient = 0.65;
+    diffuse = 0.30;
+    specular = 0.05;
+    power = 20;
+    index_shade="shade_table";     
+    map_transform=[[1,0],[0,-1],[0,0]];
+    colour_map="marblew.pix";
+];
+
+## cor_6_bot (corridor 6 floor)
+material = [
+    identifier = "GREEN PLSTC REF";
+    flags = [perspective];
+    ambient = 0.65;
+    diffuse = 0.30;
+    specular = 0.05;
+    power = 20;
+    index_base = 42; index_range = 31;
+    index_shade="shade_table";     
+    colour_map="corflorw.pix";
+    
+];
+## cor_6_top (corridor 6 roof)
+material = [
+    identifier = "GREEN PLSTC BMP";
+    flags = [perspective];
+    ambient = 0.65;
+    diffuse = 0.30;
+    specular = 0.05;
+    power = 20;
+    index_shade="shade_table";     
+    colour_map="roofgriw.pix";
+
+];
+## corridor_6 (corridor 6 straight wall dead end)
+material = [
+    identifier = "GREEN NEON";
+    flags = [perspective];
+    index_base = 42; index_range = 31;
+    ambient = 0.65;
+    diffuse = 0.30;
+    specular = 0.05;
+    power = 20;
+    index_shade="shade_table";     
+    map_transform=[[-1,0],[0,-1],[0,0]];
+    colour_map="airlockw.pix";
+
+];
+## cor_5_bot (corridor 5 floor)
+material = [
+    identifier = "GREEN METAL";
+    flags = [perspective];
+    ambient = 0.65;
+    diffuse = 0.30;
+    specular = 0.05;
+    power = 20;
+    index_shade="shade_table";     
+    colour_map="corflorw.pix";
+    index_base = 42; index_range = 31;
+];
+
+## cor_5_top (corridor 5 roof)
+material = [
+    identifier = "GREEN MATTE";
+    flags = [perspective];
+    ambient = 0.65;
+    diffuse = 0.30;
+    specular = 0.05;
+    power = 20;
+    index_shade="shade_table";     
+    colour_map="roofgriw.pix";
+    index_base = 42; index_range = 31;
+];
+## cor_5_left (corridor 5 straight wall)
+material = [
+    identifier = "GOLD (LIGHT)";
+    flags = [perspective];
+    ambient = 0.65;
+    diffuse = 0.30;
+    specular = 0.05;
+    power = 20;
+    index_shade="shade_table";     
+    map_transform=[[1,0],[0,-1],[0,0]];
+    colour_map="wallmonw.pix";
+    index_base = 42; index_range = 31;
+];
+## cor_4_bot (corridor 4 floor)
+material = [
+    identifier = "GOLD (DARK)";
+    flags = [perspective];
+    ambient = 0.65;
+    diffuse = 0.30;
+    specular = 0.05;
+    power = 20;
+    index_base = 64;
+    index_range = 31;
+    index_shade="shade_table";     
+    colour_map="corflorw.pix";
+    
+];
+## cor_4_top (corridor 4 roof)
+material = [
+    identifier = "CYAN PLSTC REF";
+    flags = [perspective];
+    ambient = 0.65;
+    diffuse = 0.30;
+    specular = 0.05;
+    power = 20;
+    index_base = 64;
+    index_range = 31;
+    index_shade="shade_table";     
+    colour_map="roofgriw.pix";
+    
+];
+## corrridor_3 (corridor 3 dented wall)
+## corrridor_5 walls
+## corridor_4 walls
+## corridor_9 (dented wall)
+material = [
+    identifier = "CYAN METAL";
+    flags = [perspective];
+    ambient = 0.65;
+    diffuse = 0.30;
+    specular = 0.05;
+    power = 20;
+    index_base = 64;
+    index_range = 31;
+    index_shade="shade_table";     
+    map_transform=[[-1,0],[0,-1],[0,0]];
+    colour_map="corwallw.pix";
+];
+## cor_8_left/cor_8_rgt (corridor_8 walls)
+material = [
+    identifier = "MATERIAL 17";
+    flags = [perspective];
+    ambient = 0.65;
+    diffuse = 0.30;
+    specular = 0.05;
+    power = 20;
+    index_base = 64;
+    index_range = 31;
+    index_shade="shade_table";     
+    map_transform=[[0,1],[-1,0],[0,0]];
+    colour_map="corwallw.pix";
+];
+
+
+## cor_3_bot (corridor 3 floor)
+material = [
+    identifier = "CYAN MATTE";
+    flags = [perspective];
+    ambient = 0.65;
+    diffuse = 0.30;
+    specular = 0.05;
+    power = 20;
+    index_shade="shade_table";     
+    colour_map="corflorw.pix";
+
+];
+## cor_3_top (corridor 2 roof)
+material = [
+    identifier = "COPPER";
+    flags = [perspective];
+    ambient = 0.65;
+    diffuse = 0.30;
+    specular = 0.05;
+    power = 20;
+    index_base = 64;
+    index_range = 31;
+    index_shade="shade_table";     
+    colour_map="roofgriw.pix";
+    
+];
+## corn_2_bot (corner 2 floor)
+material = [
+    identifier = "CHROME VALLEY";
+    flags = [perspective];
+    ambient = 0.65;
+    diffuse = 0.30;
+    specular = 0.05;
+    power = 20;
+    index_base = 64;
+    index_range = 31;
+    index_shade="shade_table";     
+    colour_map="corflorw.pix";
+    
+];
+## corn_2_top (corner 2 top)
+material = [
+    identifier = "CHROME TUSCANY";
+    flags = [perspective];
+    ambient = 0.65;
+    diffuse = 0.30;
+    specular = 0.05;
+    power = 20;
+    index_base = 64;
+    index_range = 31;
+    index_shade="shade_table";     
+    colour_map="roofgriw.pix";
+    
+];
+##  corn_2 (corner 2 dented wall)
+material = [
+    identifier = "CHROME SUNSET";
+    flags = [perspective];
+    ambient = 0.65;
+    diffuse = 0.30;
+    specular = 0.05;
+    power = 20;
+    index_base = 64;
+    index_range = 31;
+    index_shade="shade_table";     
+    map_transform=[[-1,0],[0,-1],[0,0]];
+    colour_map="corwallw.pix";
+    
+];
+## cor_2_top (corridor 2 top)
+material = [
+    identifier = "CHROME PEARL";
+    flags = [perspective];
+    ambient = 0.65;
+    diffuse = 0.30;
+    specular = 0.05;
+    power = 20;
+    index_base = 64;
+    index_range = 31;
+    index_shade="shade_table";     
+    map_transform=[[1,0],[0,2],[0,0]];
+    colour_map="roofgriw.pix";
+    
+];
+## cor_2_bot (corrridor 2 floor)
+material = [
+    identifier = "CHROME GIFMAP";
+    flags = [perspective];
+    ambient = 0.65;
+    diffuse = 0.30;
+    specular = 0.05;
+    power = 20;
+    index_base = 64;
+    index_range = 31;
+    index_shade="shade_table";     
+    map_transform=[[1,0],[0,2],[0,0]];
+    colour_map="corflorw.pix";
+    
+];
+## cor_2_rght (corridor 2 dented wall)
+material = [
+    identifier = "CHROME BLUE SKY";
+    flags = [perspective];
+    ambient = 0.65;
+    diffuse = 0.30;
+    specular = 0.05;
+    power = 20;
+    index_base = 64;
+    index_range = 31;
+    index_shade="shade_table";     
+    map_transform=[[0,1],[-1,0],[0,0]];
+    colour_map="corwallw.pix";
+    
+];
+## corridor_2 (smooth wall)
+material = [
+    identifier ="BRASS";
+    flags = [perspective];
+    ambient = 0.65;
+    diffuse = 0.30;
+    specular = 0.05;
+    power = 20;
+    index_base = 64;
+    index_range = 31;
+    index_shade="shade_table";     
+    map_transform=[[0,1],[1,0],[0,0]];
+    colour_map="liftdoow.pix";
+
+];
+## corn_1_bot (botton of triangular corridor)
+material = [
+    identifier = "BLUE PLSTC REF";
+    flags = [perspective];
+    ambient = 0.65;
+    diffuse = 0.30;
+    specular = 0.05;
+    power = 20;
+    index_base = 64;
+    index_range = 31;
+    colour_map = "corflorw.pix";
+    index_shade = "shade_table";
+];
+## corner_1_top (top of triangular corridor)
+material = [
+    identifier = "BLUE PLSTC";
+    flags = [perspective];
+    ambient = 0.65;
+    diffuse = 0.30;
+    specular = 0.05;
+    power = 20;
+    index_shade="shade_table";     
+    colour_map="roofgriw.pix";
+
+];
+## corner_1 (wall)
+material = [
+    identifier = "BLUE PLASTIC";
+    flags = [perspective];
+    ambient = 0.65;
+    diffuse = 0.30;
+    specular = 0.05;
+    power = 20;
+    index_shade="shade_table";     
+    map_transform=[[-1,0],[0,-1],[0,0]];
+    colour_map="corwallw.pix";
+
+];
+## bulk heads 
+material = [
+    identifier = "BLUE MATTE";
+    flags = [perspective];
+    ambient = 0.65;
+    diffuse = 0.30;
+    specular = 0.05;
+    power = 20;
+    index_shade="shade_table";     
+    map_transform=[[0,1],[-1,0],[0,0]];
+    colour_map="bulkheaw.pix";
+
+];
+## cor_1_rght (corridor 1 right)
+material = [
+    identifier = "BLACK MATTE";
+    flags = [perspective];
+    ambient = 0.65;
+    diffuse = 0.30;
+    specular = 0.05;
+    power = 20;
+    index_shade="shade_table";     
+    map_transform=[[-2,0],[0,-1],[0,0]];
+    colour_map="corwallw.pix";
+
+];
+## cor_1_left (corridor 1 left)
+material = [
+    identifier = "BEIGE PLSTC";
+    flags = [perspective, always_visible];
+    ambient = 0.65;
+    diffuse = 0.30;
+    specular = 0.05;
+    power = 20;
+    index_shade="shade_table";     
+    map_transform=[[-2,0],[0,-1],[0,0]];
+    colour_map="corwallw.pix";
+    
+];
+## cor_1_flr (corridor 1 floor)
+material = [
+    identifier = "BLACK PLSTC";
+    flags = [perspective, always_visible];
+    ambient = 0.65;
+    diffuse = 0.30;
+    specular = 0.05;
+    power = 20;
+    index_shade="shade_table";     
+    map_transform=[[2,0],[0,1],[0,0]];
+    colour_map="corflorw.pix";
+
+];
+## cor_1_roof (corridor 1 roof)
+material = [
+    identifier = "BEIGE MATTE";
+    flags = [perspective, always_visible];
+    ambient = 0.65;
+    diffuse = 0.30;
+    specular = 0.05;
+    power = 20;
+    index_shade="shade_table";     
+    map_transform=[[2,0],[0,1],[0,0]];
+    colour_map="roofgriw.pix";
+
+];
+## corridor_1 (end stop)
+material = [
+    identifier = "AQUA GLAZE";
+    flags = [perspective, always_visible];
+    ambient = 0.65;
+    diffuse = 0.30;
+    specular = 0.05;
+    power = 20;
+    index_shade="shade_table";     
+    map_transform=[[-1,0],[0,-1],[0,0]];
+    colour_map="airlockw.pix";
+
+];
+
+## material for argohead (blue_flat)
+material=[
+    identifier="blue_flat";
+    flags=[light, smooth];
+    colour=[0,0,255];
+    ambient=0.19;
+    diffuse=0.19;
+    specular=0.05;
+    power=20;
+    index_base=64;
+    index_range=31;
+    ];
+## material for argohead (green_flat)
+material=[
+    identifier="green_flat";
+    flags=[light, smooth];
+    colour=[0,255,0];
+    ambient=0.19;
+    diffuse=0.19;
+    specular=0.05;
+    power=20;
+    index_base=96;
+    index_range=31;
+    ];
+## material for argohead (yellow_flat)
+material=[
+    identifier="yellow_flat";
+    flags=[light,smooth];
+    colour=[255,255,0];
+    ambient=0.19;
+    diffuse=0.19;
+    specular=0.05;
+    power=20;
+    index_base=224;
+    index_range=31;
+    ];
+## material for argohead (red_flat)
+material=[
+    identifier="red_flat";
+    flags=[light, smooth];
+    colour=[255,0,0];
+    ambient=0.19;
+    diffuse=0.19;
+    specular=0.05;
+    power=20;
+    index_base=160;
+    index_range=31;
+    ];
+## material for tv (monitor)
+material=[
+    identifier="MONITOR";
+    flags=[perspective, smooth, light];
+    ambient=0.40;
+    diffuse=0.0;
+    specular=0.05;
+    power=20;
+    index_base=160;
+    index_range=31;
+    index_shade="shade_table";
+    map_transform=[[-1,0],[0,-1],[0,0]];
+    colour_map="page_0";
+    ];
+## material for tv (case_cover)
+material=[
+    identifier="CASE_COVER";
+    flags=[perspective, light, smooth];
+    ambient=0.19;
+    diffuse=0.19;
+    specular=0.05;
+    power=20;
+    index_base=160;
+    index_range=31;
+    index_shade="shade_table";
+    colour_map="florpipw.pix";
+];
+
