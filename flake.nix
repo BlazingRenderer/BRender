@@ -22,6 +22,8 @@
 
       uasm = pkgs.callPackage ./nix/uasm { };
 
+      uasm-static = pkgs.pkgsStatic.callPackage ./nix/uasm { };
+
       brender = pkgs.callPackage ./nix/brender.nix {
         inherit wineserverHook uasm;
 
