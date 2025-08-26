@@ -10,8 +10,6 @@
 #include "host.h"
 #include "dosio.h"
 
-BR_RCS_ID("$Id: readmse.c 1.2 1998/07/13 21:49:54 jon Exp $")
-
 /*
  * Real mode interrupt handler for mouse
  */

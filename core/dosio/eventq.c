@@ -13,8 +13,6 @@
 #include "host.h"
 #include "dosio.h"
 
-BR_RCS_ID("$Id: eventq.c 1.1 1997/12/10 16:40:59 jon Exp $")
-
 #define MAX_EVENTS 50
 
 host_real_memory _DOSEventMemory;

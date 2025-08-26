@@ -10,8 +10,6 @@
 #include "host.h"
 #include "dosio.h"
 
-BR_RCS_ID("$Id: keyboard.c 1.2 1998/02/17 23:01:15 jon Exp $")
-
 /*
  * Real mode interrupt handler for INT15
  */

@@ -10,8 +10,6 @@
 #include "host.h"
 #include "dosio.h"
 
-BR_RCS_ID("$Id: divtrap.c 1.1 1997/12/10 16:40:58 jon Exp $")
-
 static host_exception_hook div_hook;
 extern void BR_ASM_CALL DivTrapHandler(void);
 static int trapActive = BR_FALSE;

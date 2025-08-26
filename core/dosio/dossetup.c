@@ -9,8 +9,6 @@
 #include "brender.h"
 #include "dosio.h"
 
-BR_RCS_ID("$Id: dossetup.c 1.1 1997/12/10 16:40:59 jon Exp $")
-
 br_error BR_PUBLIC_ENTRY DOSBegin(void)
 {
 	return BRE_OK;
