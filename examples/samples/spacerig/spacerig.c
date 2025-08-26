@@ -164,18 +164,18 @@ static br_error SpaceRigInit(br_demo *demo)
     
     BrMapFindHook(LoadMapFFHook);    
 
-
     if((demo->palette = BrPixelmapLoad("winpal.pal")) == NULL) {
         BrLogError("DEMO", "Error loading winpal.pal");
         return BRE_FAIL;
     }
     BrMapAdd(demo->palette);
 
-    screen->origin_x=0;//screen->width/2;
-    screen->origin_y=0;//screen->height/2;
-    colour_buffer->origin_x = screen->origin_x;
-    colour_buffer->origin_y = screen->origin_y;
-	depth_buffer->origin_x=depth_buffer->origin_y=0;
+	// HACK
+	screen = demo->_screen;
+	colour_buffer = demo->colour_buffer;
+	depth_buffer = demo->depth_buffer;
+	palette = demo->palette;
+
     // Variables set to current screen height/width used for screen reduction 
     
     curr_width  = colour_buffer->width;
@@ -194,14 +194,14 @@ static br_error SpaceRigInit(br_demo *demo)
 
     // Set pixelmaps for camera_rear used in collision detection
 
-    rear_pm = BrPixelmapMatchSized( colour_buffer, BR_PMMATCH_HIDDEN_BUFFER,4,4 );       
+    rear_pm = BrPixelmapMatchSized( colour_buffer, BR_PMMATCH_HIDDEN_BUFFER,4,4 );
     
 	if ( rear_pm )
 	   rear_depth = BrPixelmapMatch( rear_pm, BR_PMMATCH_DEPTH_16 );   
 	else
 	   rear_depth = NULL ;
 
-    BrZbBegin( screen->type, BR_PMT_DEPTH_16 );
+    // BrZbBegin( screen->type, BR_PMT_DEPTH_16 );
 
     pShade = NULL ;
 
@@ -257,6 +257,7 @@ static br_error SpaceRigInit(br_demo *demo)
    m2=BrModelLoadMany("spotlite.dat",mod2s,BR_ASIZE(mod2s));
    BrModelAddMany(mod2s,m2);
 
+   // HACK
    world=demo->world;
 
    Init_World_Bounds( world, &lift_area );
@@ -693,10 +694,10 @@ void Door_Stuff()
 }
 
   
-br_error BrDemo_Render_Loop()
+void SpaceRigUpdate(br_demo *demo, br_scalar dt)
 {    
     if (!colour_buffer) 
-      return BRE_OK;
+      return;
 
     if (info || menu)
        BrPixelmapFill(colour_buffer,0x0);   
@@ -1036,7 +1037,7 @@ br_error BrDemo_Render_Loop()
        names ^= 1 ;
              
     if (DOSKeyTest(SC_Q,0,REPT_FIRST_DOWN) || DOSKeyTest(SC_ESC,0,REPT_FIRST_DOWN))
-       return BRE_FAIL;
+       return;
        
     if ( DOSKeyTest( SC_F1,0, REPT_FIRST_DOWN ) )
 		bShowHelp ^= 1;
@@ -1060,7 +1061,7 @@ br_error BrDemo_Render_Loop()
 
     BrPixelmapDoubleBuffer(screen,colour_buffer);
 
-    return BRE_OK;
+    return;
 }  // End Render_Loop()
 
 
@@ -1443,7 +1444,7 @@ void Init_Light(br_actor *parent, br_actor **light, br_scalar atten)
 }
 
 
-br_pixelmap *BR_CALLBACK LoadMapFFHook(char *name)
+br_pixelmap *BR_CALLBACK LoadMapFFHook(const char *name)
 {
      br_pixelmap *pm;
 
@@ -1652,11 +1653,16 @@ void RiseDoors(br_actor *first_door, br_actor *second_door)
 }
 
 
-br_error BrDemo_OnResize() 
+void SpaceRigOnResize(br_demo *demo, br_uint_16 width, br_uint_16 height)
 {
+	BrDemoDefaultOnResize(demo, width, height);
 
-	BrDemo_Refresh_Pointers(&screen,&colour_buffer,&depth_buffer);
-    
+	// HACK
+	screen = demo->_screen;
+	colour_buffer = demo->colour_buffer;
+	depth_buffer = demo->depth_buffer;
+	palette = demo->palette;
+
 	screen->origin_x=0;//screen->width/2;
     screen->origin_y=0;//screen->height/2;
     colour_buffer->origin_x = screen->origin_x;
@@ -1674,8 +1680,6 @@ br_error BrDemo_OnResize()
     Collision_Detect_Y[1] = (colour_buffer->height)*0.5;
     Collision_Detect_X[2] = ((screen_scale*window_dx)/2)+(curr_width*0.95);
     Collision_Detect_Y[2] = (colour_buffer->height)*0.5;
-
-  return BRE_OK;
 }
 
 const static br_demo_dispatch dispatch = {
@@ -1683,7 +1687,7 @@ const static br_demo_dispatch dispatch = {
 	.process_event = BrDemoDefaultProcessEvent,
 	.update        = SpaceRigUpdate,
 	.render        = BrDemoDefaultRender,
-	.on_resize     = BrDemoDefaultOnResize,
+	.on_resize     = SpaceRigOnResize,
 	.destroy       = BrDemoDefaultDestroy,
 };
 

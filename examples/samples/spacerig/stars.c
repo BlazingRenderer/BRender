@@ -1,7 +1,6 @@
 //#include "brender.h"
 //#include "dosio.h"
 #include <stdlib.h>
-#include "..\misc\br_demo.h"
 #include "stars.h"
 
 #ifdef RAND_MAX
@@ -12,12 +11,6 @@
 
 
 // STUFF FOR STARFIELD
-
-//extern __cdecl SafeFixedMac2Div(int,int,int,int,int);
-
-//extern __cdecl BrFixedMac2Div(int,int,int,int,int);
-extern br_fixed_ls __cdecl BrFixedMac2Div(br_fixed_ls,br_fixed_ls,br_fixed_ls,br_fixed_ls,br_fixed_ls);
-
 
 STAR starfield[2001] = {
 /* 101.287500 -16.716667 */

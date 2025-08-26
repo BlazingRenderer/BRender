@@ -83,7 +83,7 @@ void Init_Light(br_actor *parent, br_actor **light, br_scalar atten);
 
 void Quit();
 
-br_pixelmap *BR_CALLBACK LoadMapFFHook(char *name); 
+br_pixelmap *BR_CALLBACK LoadMapFFHook(const char *name);
 
 br_scalar DimLight(br_pixelmap *colour_buffer, br_actor *light1, br_scalar atten);
 
