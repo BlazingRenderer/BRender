@@ -18,6 +18,10 @@ target_link_libraries(brender-inc-ddi INTERFACE brender-inc)
 set(BRENDER_TARGETS inc host fw fmt math pixelmap nulldev std v1db)
 set(BRENDER_OBJECTS)
 
+if (CMAKE_SYSTEM_NAME STREQUAL "DOS")
+    list(APPEND BRENDER_TARGETS dosio)
+endif ()
+
 foreach (target ${BRENDER_TARGETS})
     add_subdirectory(${target})
     list(APPEND BRENDER_OBJECTS "$<TARGET_OBJECTS:${target}>")
