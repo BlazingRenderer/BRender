@@ -95,7 +95,7 @@ br_error StateCopyToStored(struct br_renderer_state_stored *dest, struct state_a
 	/*
 	 * Copy cache, or mark destination's cache as invalid as necessary
 	 */
-	if (copy_mask & MASK_STATE_CACHE)
+	if (copy_mask & MASK_STATE_CACHE) {
 		
 		if (src->cache.valid && dest->cull.timestamp == src->cull.timestamp &&
 			dest->surface.timestamp == src->surface.timestamp) {
@@ -109,6 +109,7 @@ br_error StateCopyToStored(struct br_renderer_state_stored *dest, struct state_a
 		} else 
 
 			dest->cache.valid = BR_FALSE;
+	}
 
 	return BRE_OK;
 }
@@ -169,7 +170,7 @@ br_error StateCopyFromStored(struct state_all *dest, struct br_renderer_state_st
 	/*
 	 * Copy cache, or mark destination's cache as invalid as necessary
 	 */
-	if (copy_mask & MASK_STATE_CACHE)
+	if (copy_mask & MASK_STATE_CACHE) {
 		
 		if (src->cache.valid && dest->cull.timestamp == src->cull.timestamp &&
 			dest->surface.timestamp == src->surface.timestamp) {
@@ -183,6 +184,7 @@ br_error StateCopyFromStored(struct state_all *dest, struct br_renderer_state_st
 		} else 
 
 			dest->cache.valid = BR_FALSE;
+	}
 
 	return BRE_OK;
 }

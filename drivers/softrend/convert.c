@@ -41,7 +41,7 @@ void ConvertVertex(brp_vertex *dest, brp_vertex *src)
 			if(m & 1)
 				dest[0].comp_i[c] = ICONV(src->comp[c]);
 
-	if(m = 0x0000ffff ^ (rend.block->convert_mask_i | rend.block->convert_mask_x | rend.block->convert_mask_f))
+	if((m = 0x0000ffff ^ (rend.block->convert_mask_i | rend.block->convert_mask_x | rend.block->convert_mask_f)))
 		for(c = 0; m; c++, m >>=1)
 			if(m & 1)
 				dest[0].comp[c] = src->comp[c];
@@ -73,7 +73,7 @@ void BR_ASM_CALL RenderConvert1(struct brp_block *block,
 			if(m & 1)
 				outv[0].comp_i[c] = ICONV(v0->comp[c]);
 
-	if(m=0x0000ffff^(rend.block->convert_mask_i|rend.block->convert_mask_x|rend.block->convert_mask_f))
+	if((m=0x0000ffff^(rend.block->convert_mask_i|rend.block->convert_mask_x|rend.block->convert_mask_f)))
 		for(c = 0; m; c++, m >>=1)
 			if(m & 1)
                                 outv[0].comp_i[c] = v0->comp_i[c];
@@ -112,7 +112,7 @@ void BR_ASM_CALL RenderConvert2(struct brp_block *block,
 				outv[1].comp_i[c] = ICONV(v1->comp[c]);
 			}
 
-	if(m=0x0000ffff^(rend.block->convert_mask_i|rend.block->convert_mask_x|rend.block->convert_mask_f))
+	if((m=0x0000ffff^(rend.block->convert_mask_i|rend.block->convert_mask_x|rend.block->convert_mask_f)))
 		for(c = 0; m; c++, m >>=1)
 			if(m & 1) {
                                 outv[0].comp_i[c] = v0->comp_i[c];
@@ -156,7 +156,7 @@ void BR_ASM_CALL RenderConvert3(struct brp_block *block,
 				outv[2].comp_i[c] = ICONV(v2->comp[c]);
 			}
 
-	if(m=0x0000ffff^(rend.block->convert_mask_i|rend.block->convert_mask_x|rend.block->convert_mask_f))
+	if((m=0x0000ffff^(rend.block->convert_mask_i|rend.block->convert_mask_x|rend.block->convert_mask_f)))
 		for(c = 0; m; c++, m >>=1)
 			if(m & 1) {
                                 outv[0].comp_i[c] = v0->comp_i[c];
@@ -204,7 +204,7 @@ void BR_ASM_CALL RenderConvert4(struct brp_block *block,
 				outv[3].comp_i[c] = ICONV(v3->comp[c]);
 			}
 
-	if(m=0x0000ffff^(rend.block->convert_mask_i|rend.block->convert_mask_x|rend.block->convert_mask_f))
+	if((m=0x0000ffff^(rend.block->convert_mask_i|rend.block->convert_mask_x|rend.block->convert_mask_f)))
 		for(c = 0; m; c++, m >>=1)
 			if(m & 1) {
                                 outv[0].comp_i[c] = v0->comp_i[c];

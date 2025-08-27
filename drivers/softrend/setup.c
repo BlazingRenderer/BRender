@@ -930,12 +930,13 @@ br_int_32 GenerateSurfaceFunctions(br_renderer *self, surface_fn **fns, br_uint_
 
 	/* Alpha
 	 */
-	if(mask & CM_A)
+	if(mask & CM_A) {
 		if(self->state.surface.opacity_source == BRT_GEOMETRY) {
 			fns[f++] = SurfaceAlphaPrealpha;
 		} else {
 			fns[f++] = SurfaceAlpha;
 		}
+	}
 
 	/* Linear Z
 	 */

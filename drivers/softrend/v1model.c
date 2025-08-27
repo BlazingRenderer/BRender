@@ -700,7 +700,7 @@ static void GEOMETRY_CALL V1Faces_GeometryFnsUpdate(struct br_geometry *self, st
 	/*
 	 * Quad based texture mapping
 	 */
-	if((renderer->state.surface.mapping_source == BRT_QUAD)) {
+	if(renderer->state.surface.mapping_source == BRT_QUAD) {
 
 		PrimBlockAddBoth(renderer, (brp_render_fn *)OpTriangleMapQuad);
 

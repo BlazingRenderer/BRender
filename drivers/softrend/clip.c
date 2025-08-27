@@ -339,7 +339,7 @@ static int ClipFaceToMinus1(
 }
 
 #define CLIP_TOGGLE 			\
-	if(toggle = !toggle) {		\
+	if((toggle = !toggle)) {	\
 		cp_in = clip_poly_2;	\
 		cp_out = clip_poly_1;	\
 	} else {					\
