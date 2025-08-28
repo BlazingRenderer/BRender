@@ -18,29 +18,29 @@ static const struct br_output_facility_dispatch outputFacilityDispatch;
 #define F(f) offsetof(struct br_output_facility, f)
 
 static struct br_tv_template_entry outputFacilityTemplateEntries[] = {
-    {BRT_IDENTIFIER_CSTR,     NULL, F(identifier),          BRTV_QUERY | BRTV_ALL, BRTV_CONV_COPY,   0},
+    {BRT(IDENTIFIER_CSTR),     F(identifier),          BRTV_QUERY | BRTV_ALL, BRTV_CONV_COPY,   0},
 
-    {BRT_WIDTH_I32,           NULL, F(width),               BRTV_QUERY | BRTV_ALL, BRTV_CONV_COPY,   0},
-    {BRT_WIDTH_MIN_I32,       NULL, F(width),               BRTV_QUERY | BRTV_ALL, BRTV_CONV_COPY,   0},
-    {BRT_WIDTH_MAX_I32,       NULL, F(width),               BRTV_QUERY | BRTV_ALL, BRTV_CONV_COPY,   0},
-    {BRT_HEIGHT_I32,          NULL, F(height),              BRTV_QUERY | BRTV_ALL, BRTV_CONV_COPY,   0},
-    {BRT_HEIGHT_MIN_I32,      NULL, F(height),              BRTV_QUERY | BRTV_ALL, BRTV_CONV_COPY,   0},
-    {BRT_HEIGHT_MAX_I32,      NULL, F(height),              BRTV_QUERY | BRTV_ALL, BRTV_CONV_COPY,   0},
+    {BRT(WIDTH_I32),           F(width),               BRTV_QUERY | BRTV_ALL, BRTV_CONV_COPY,   0},
+    {BRT(WIDTH_MIN_I32),       F(width),               BRTV_QUERY | BRTV_ALL, BRTV_CONV_COPY,   0},
+    {BRT(WIDTH_MAX_I32),       F(width),               BRTV_QUERY | BRTV_ALL, BRTV_CONV_COPY,   0},
+    {BRT(HEIGHT_I32),          F(height),              BRTV_QUERY | BRTV_ALL, BRTV_CONV_COPY,   0},
+    {BRT(HEIGHT_MIN_I32),      F(height),              BRTV_QUERY | BRTV_ALL, BRTV_CONV_COPY,   0},
+    {BRT(HEIGHT_MAX_I32),      F(height),              BRTV_QUERY | BRTV_ALL, BRTV_CONV_COPY,   0},
 
-    {BRT_PIXEL_TYPE_U8,       NULL, F(colour_type),         BRTV_QUERY | BRTV_ALL, BRTV_CONV_COPY,   0},
-    {BRT_PIXEL_BITS_I32,      NULL, F(colour_bits),         BRTV_QUERY | BRTV_ALL, BRTV_CONV_COPY,   0},
+    {BRT(PIXEL_TYPE_U8),       F(colour_type),         BRTV_QUERY | BRTV_ALL, BRTV_CONV_COPY,   0},
+    {BRT(PIXEL_BITS_I32),      F(colour_bits),         BRTV_QUERY | BRTV_ALL, BRTV_CONV_COPY,   0},
 
-    {BRT_WINDOW_MONITOR_I32,  NULL, F(monitor),             BRTV_QUERY | BRTV_ALL, BRTV_CONV_COPY,   0},
+    {BRT(WINDOW_MONITOR_I32),  F(monitor),             BRTV_QUERY | BRTV_ALL, BRTV_CONV_COPY,   0},
 
     /* Unused, just required for matching. */
-    {BRT_WINDOW_HANDLE_H,     NULL, (br_uintptr_t)NULL,     BRTV_QUERY | BRTV_ALL, BRTV_CONV_DIRECT, 0},
-    {BRT_WINDOW_NAME_CSTR,    NULL, (br_uintptr_t)NULL,     BRTV_QUERY | BRTV_ALL, BRTV_CONV_DIRECT, 0},
-    {BRT_USE_T,               NULL, (br_uintptr_t)BRT_NONE, BRTV_QUERY | BRTV_ALL, BRTV_CONV_DIRECT, 0},
-    {BRT_HIDPI_B,             NULL, (br_uintptr_t)BR_FALSE, BRTV_QUERY | BRTV_ALL, BRTV_CONV_DIRECT, 0},
-    {BRT_RESIZABLE_B,         NULL, (br_uintptr_t)BR_FALSE, BRTV_QUERY | BRTV_ALL, BRTV_CONV_DIRECT, 0},
-    {BRT_OPENGL_B,            NULL, (br_uintptr_t)BR_FALSE, BRTV_QUERY | BRTV_ALL, BRTV_CONV_DIRECT, 0},
-    {BRT_WINDOW_FULLSCREEN_B, NULL, (br_uintptr_t)BR_FALSE, BRTV_QUERY | BRTV_ALL, BRTV_CONV_DIRECT, 0},
-    {BRT_SDL_EXT_PROCS_P,     NULL, 0,                      BRTV_QUERY | BRTV_ALL, BRTV_CONV_DIRECT, 0},
+    {BRT(WINDOW_HANDLE_H),     (br_uintptr_t)NULL,     BRTV_QUERY | BRTV_ALL, BRTV_CONV_DIRECT, 0},
+    {BRT(WINDOW_NAME_CSTR),    (br_uintptr_t)NULL,     BRTV_QUERY | BRTV_ALL, BRTV_CONV_DIRECT, 0},
+    {BRT(USE_T),               (br_uintptr_t)BRT_NONE, BRTV_QUERY | BRTV_ALL, BRTV_CONV_DIRECT, 0},
+    {BRT(HIDPI_B),             (br_uintptr_t)BR_FALSE, BRTV_QUERY | BRTV_ALL, BRTV_CONV_DIRECT, 0},
+    {BRT(RESIZABLE_B),         (br_uintptr_t)BR_FALSE, BRTV_QUERY | BRTV_ALL, BRTV_CONV_DIRECT, 0},
+    {BRT(OPENGL_B),            (br_uintptr_t)BR_FALSE, BRTV_QUERY | BRTV_ALL, BRTV_CONV_DIRECT, 0},
+    {BRT(WINDOW_FULLSCREEN_B), (br_uintptr_t)BR_FALSE, BRTV_QUERY | BRTV_ALL, BRTV_CONV_DIRECT, 0},
+    {BRT(SDL_EXT_PROCS_P),     0,                      BRTV_QUERY | BRTV_ALL, BRTV_CONV_DIRECT, 0},
 };
 
 #undef F
