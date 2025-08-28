@@ -46,7 +46,7 @@ br_boolean VIDEOI_CompileTextShader(HVIDEO hVideo)
 
     DeviceGLObjectLabel(GL_BUFFER, hVideo->textProgram.ubo_glyphs, BR_GLREND_DEBUG_INTERNAL_PREFIX "text:ubo");
 
-    glBindFragDataLocation(hVideo->textProgram.program, 0, "main_colour");
+    // glBindFragDataLocation(hVideo->textProgram.program, 0, "main_colour");
 
 prog_failed:
     glDeleteShader(frag);

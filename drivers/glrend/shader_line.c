@@ -37,7 +37,7 @@ br_boolean VIDEOI_CompileLineShader(HVIDEO hVideo)
 
     DeviceGLObjectLabel(GL_BUFFER, hVideo->lineProgram.ubo, BR_GLREND_DEBUG_INTERNAL_PREFIX "line:ubo");
 
-    glBindFragDataLocation(hVideo->lineProgram.program, 0, "main_colour");
+    // glBindFragDataLocation(hVideo->lineProgram.program, 0, "main_colour");
 
 prog_failed:
     glDeleteShader(frag);

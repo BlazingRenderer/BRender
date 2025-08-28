@@ -37,7 +37,7 @@ function(compile_shader)
 
             COMMAND "${PERL_EXECUTABLE}" "${shaderpp}" "${arg_SOURCE}" "${processed_file}"
             COMMAND "${GLSLANG_EXECUTABLE}" -G100 -S "${arg_STAGE}" -o "${spv_file}" "${processed_file}"
-            COMMAND "${SPIRV_CROSS_EXECUTABLE}" "${spv_file}" --version 330 --no-420pack-extension --no-es --output "${optimised_file}"
+            COMMAND "${SPIRV_CROSS_EXECUTABLE}" "${spv_file}" --version 300 --es --output "${optimised_file}"
             COMMAND "${PERL_EXECUTABLE}" "${embedshader}" "${arg_VARNAME}" "${optimised_file}" "${arg_DESTINATION}"
     )
 endfunction()

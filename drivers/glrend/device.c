@@ -26,21 +26,21 @@ static const char deviceProduct[] = DEVICE_PRODUCT;
 #define A(a) ((br_uintptr_t)(a))
 
 static struct br_tv_template_entry deviceTemplateEntries[] = {
-    {BRT(IDENTIFIER_CSTR),         F(identifier),    BRTV_QUERY | BRTV_ALL,            BRTV_CONV_COPY,   0                      },
-    {BRT(VERSION_U32),             0,                BRTV_QUERY | BRTV_ALL,            BRTV_CONV_DIRECT, DEVICE_VERSION         },
-    {BRT(BRENDER_VERSION_U32),     0,                BRTV_QUERY | BRTV_ALL,            BRTV_CONV_DIRECT, __BRENDER__            },
-    {BRT(DDI_VERSION_U32),         0,                BRTV_QUERY | BRTV_ALL,            BRTV_CONV_DIRECT, __BRENDER_DDI__        },
-    {BRT(CREATOR_CSTR),            A(deviceCreator), BRTV_QUERY | BRTV_ALL | BRTV_ABS, BRTV_CONV_COPY,   0                      },
-    {BRT(TITLE_CSTR),              A(deviceTitle),   BRTV_QUERY | BRTV_ALL | BRTV_ABS, BRTV_CONV_COPY,   0                      },
-    {BRT(PRODUCT_CSTR),            A(deviceProduct), BRTV_QUERY | BRTV_ALL | BRTV_ABS, BRTV_CONV_COPY,   0                      },
+    {BRT(IDENTIFIER_CSTR),         F(identifier),    BRTV_QUERY | BRTV_ALL,            BRTV_CONV_COPY,   0                    },
+    {BRT(VERSION_U32),             0,                BRTV_QUERY | BRTV_ALL,            BRTV_CONV_DIRECT, DEVICE_VERSION       },
+    {BRT(BRENDER_VERSION_U32),     0,                BRTV_QUERY | BRTV_ALL,            BRTV_CONV_DIRECT, __BRENDER__          },
+    {BRT(DDI_VERSION_U32),         0,                BRTV_QUERY | BRTV_ALL,            BRTV_CONV_DIRECT, __BRENDER_DDI__      },
+    {BRT(CREATOR_CSTR),            A(deviceCreator), BRTV_QUERY | BRTV_ALL | BRTV_ABS, BRTV_CONV_COPY,   0                    },
+    {BRT(TITLE_CSTR),              A(deviceTitle),   BRTV_QUERY | BRTV_ALL | BRTV_ABS, BRTV_CONV_COPY,   0                    },
+    {BRT(PRODUCT_CSTR),            A(deviceProduct), BRTV_QUERY | BRTV_ALL | BRTV_ABS, BRTV_CONV_COPY,   0                    },
 
     /*
      * Minimum version of OpenGL supported by this driver.
      * Other devices (e.g. SDL) may query these to create appropriate windows.
      */
-    {BRT(OPENGL_VERSION_MAJOR_U8), 0,                BRTV_QUERY | BRTV_ALL,            BRTV_CONV_DIRECT, 3                      },
-    {BRT(OPENGL_VERSION_MINOR_U8), 0,                BRTV_QUERY | BRTV_ALL,            BRTV_CONV_DIRECT, 3                      },
-    {BRT(OPENGL_PROFILE_T),        0,                BRTV_QUERY | BRTV_ALL,            BRTV_CONV_DIRECT, BRT_OPENGL_PROFILE_CORE},
+    {BRT(OPENGL_VERSION_MAJOR_U8), 0,                BRTV_QUERY | BRTV_ALL,            BRTV_CONV_DIRECT, 3                    },
+    {BRT(OPENGL_VERSION_MINOR_U8), 0,                BRTV_QUERY | BRTV_ALL,            BRTV_CONV_DIRECT, 0                    },
+    {BRT(OPENGL_PROFILE_T),        0,                BRTV_QUERY | BRTV_ALL,            BRTV_CONV_DIRECT, BRT_OPENGL_PROFILE_ES},
 };
 #undef F
 #undef A

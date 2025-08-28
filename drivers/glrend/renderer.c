@@ -169,7 +169,7 @@ static void BR_CMETHOD_DECL(br_renderer_gl, sceneBegin)(br_renderer *self)
     StateGLReset(&self->state.cache);
     StateGLUpdateScene(&self->state.cache, self->state.current);
 
-    glDepthRange(1.0f, 0.0f);
+    glDepthRangef(1.0f, 0.0f);
 
     glUseProgram(hVideo->brenderProgram.program);
     glUniform1i(hVideo->brenderProgram.uniforms.main_texture, hVideo->brenderProgram.mainTextureBinding);
@@ -182,9 +182,6 @@ static void BR_CMETHOD_DECL(br_renderer_gl, sceneBegin)(br_renderer *self)
     br_rectangle viewport = DevicePixelmapGLGetViewport(colour_target);
     glViewport(viewport.x, viewport.y, viewport.w, viewport.h);
 
-    if(self->pixelmap->msaa_samples)
-        glEnable(GL_MULTISAMPLE);
-
     /*
      * Now enable our clip planes.
      */
@@ -192,12 +189,12 @@ static void BR_CMETHOD_DECL(br_renderer_gl, sceneBegin)(br_renderer *self)
 
     if(last_num_clip_planes > current_num_clip_planes) {
         for(br_uint_32 i = current_num_clip_planes; i < last_num_clip_planes; ++i) {
-            glDisable(GL_CLIP_DISTANCE0 + i);
+            // glDisable(GL_CLIP_DISTANCE0 + i);
         }
     }
 
     for(br_uint_32 i = last_num_clip_planes; i < current_num_clip_planes; ++i) {
-        glEnable(GL_CLIP_DISTANCE0 + i);
+        // glEnable(GL_CLIP_DISTANCE0 + i);
     }
 
     BufferRingGLBegin(&self->model_ring);
@@ -212,7 +209,6 @@ void BR_CMETHOD_DECL(br_renderer_gl, sceneEnd)(br_renderer *self)
     glDisable(GL_CULL_FACE);
     glDisable(GL_DEPTH_TEST);
     glDisable(GL_BLEND);
-    glDisable(GL_MULTISAMPLE);
 
     glBindTexture(GL_TEXTURE_2D, 0);
     glBindBuffer(GL_UNIFORM_BUFFER, 0);
@@ -830,12 +826,6 @@ GLuint RendererGLGetSampler(br_renderer *self, const br_sampler_info_gl *info)
     glSamplerParameteri(sampler, GL_TEXTURE_WRAP_T, info->wrap_t);
     glSamplerParameteri(sampler, GL_TEXTURE_MIN_FILTER, info->filter_min);
     glSamplerParameteri(sampler, GL_TEXTURE_MAG_FILTER, info->filter_mag);
-
-    if(!quirks->disable_anisotropic_filtering) {
-        if(GLAD_GL_ARB_texture_filter_anisotropic && info->filter_min != GL_NEAREST && info->filter_mag != GL_NEAREST) {
-            glSamplerParameterf(sampler, GL_TEXTURE_MAX_ANISOTROPY, self->pixelmap->screen->asFront.video.maxAnisotropy);
-        }
-    }
 
     key  = BrResAllocate(self->sampler_pool, sizeof(br_sampler_info_gl), BR_MEMORY_DRIVER);
     *key = *info;

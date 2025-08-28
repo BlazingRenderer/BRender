@@ -215,7 +215,7 @@ br_device_pixelmap *DevicePixelmapGLAllocateFront(br_device *dev, br_output_faci
     if(DevicePixelmapGLExtMakeCurrent(self, self->asFront.gl_context) != BRE_OK)
         goto cleanup_context;
 
-    if(gladLoadGLLoader(DevicePixelmapGLExtGetGetProcAddress(self)) == 0) {
+    if(gladLoadGLES2Loader(DevicePixelmapGLExtGetGetProcAddress(self)) == 0) {
         BrLogError("GLREND", "Unable to load OpenGL functions.");
         goto cleanup_context;
     }
@@ -264,10 +264,10 @@ br_device_pixelmap *DevicePixelmapGLAllocateFront(br_device *dev, br_output_faci
      * This isn't a big deal if we don't know what it is - we can only be written to by a doubleBuffer().
      */
     glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
-    glGetFramebufferAttachmentParameteriv(GL_DRAW_FRAMEBUFFER, GL_BACK_LEFT, GL_FRAMEBUFFER_ATTACHMENT_RED_SIZE, &red_bits);
-    glGetFramebufferAttachmentParameteriv(GL_DRAW_FRAMEBUFFER, GL_BACK_LEFT, GL_FRAMEBUFFER_ATTACHMENT_GREEN_SIZE, &grn_bits);
-    glGetFramebufferAttachmentParameteriv(GL_DRAW_FRAMEBUFFER, GL_BACK_LEFT, GL_FRAMEBUFFER_ATTACHMENT_BLUE_SIZE, &blu_bits);
-    glGetFramebufferAttachmentParameteriv(GL_DRAW_FRAMEBUFFER, GL_BACK_LEFT, GL_FRAMEBUFFER_ATTACHMENT_ALPHA_SIZE, &alpha_bits);
+    glGetFramebufferAttachmentParameteriv(GL_DRAW_FRAMEBUFFER, GL_BACK, GL_FRAMEBUFFER_ATTACHMENT_RED_SIZE, &red_bits);
+    glGetFramebufferAttachmentParameteriv(GL_DRAW_FRAMEBUFFER, GL_BACK, GL_FRAMEBUFFER_ATTACHMENT_GREEN_SIZE, &grn_bits);
+    glGetFramebufferAttachmentParameteriv(GL_DRAW_FRAMEBUFFER, GL_BACK, GL_FRAMEBUFFER_ATTACHMENT_BLUE_SIZE, &blu_bits);
+    glGetFramebufferAttachmentParameteriv(GL_DRAW_FRAMEBUFFER, GL_BACK, GL_FRAMEBUFFER_ATTACHMENT_ALPHA_SIZE, &alpha_bits);
 
     if(red_bits == 5 && grn_bits == 6 && blu_bits == 5) {
         self->pm_type = BR_PMT_RGB_565;

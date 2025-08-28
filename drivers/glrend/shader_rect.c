@@ -40,7 +40,7 @@ br_boolean VIDEOI_CompileRectShader(HVIDEO hVideo)
 
     DeviceGLObjectLabel(GL_BUFFER, hVideo->rectProgram.ubo, BR_GLREND_DEBUG_INTERNAL_PREFIX "rect:ubo");
 
-    glBindFragDataLocation(hVideo->rectProgram.program, 0, "main_colour");
+    // glBindFragDataLocation(hVideo->rectProgram.program, 0, "main_colour");
 
 prog_failed:
     glDeleteShader(frag);

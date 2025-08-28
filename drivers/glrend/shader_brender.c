@@ -21,7 +21,7 @@ static void VIDEOI_GetShaderVariables(HVIDEO hVideo)
     hVideo->brenderProgram.attributes.aColour     = glGetAttribLocation(hVideo->brenderProgram.program, "aColour");
     hVideo->brenderProgram.uniforms.main_texture  = glGetUniformLocation(hVideo->brenderProgram.program, "main_texture");
     hVideo->brenderProgram.uniforms.index_texture = glGetUniformLocation(hVideo->brenderProgram.program, "index_texture");
-    glBindFragDataLocation(hVideo->textProgram.program, 0, "mainColour");
+    // glBindFragDataLocation(hVideo->textProgram.program, 0, "mainColour");
 }
 
 br_boolean VIDEOI_CompileBRenderShader(HVIDEO hVideo, const char *vertPath, const char *fragPath)

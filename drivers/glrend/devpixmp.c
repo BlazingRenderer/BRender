@@ -67,8 +67,9 @@ static struct br_tv_template_entry devicePixelmapTemplateEntries[] = {
  */
 static br_error recreate_renderbuffers(br_device_pixelmap *self)
 {
-    GLuint fbo           = 0;
-    GLenum binding_point = self->msaa_samples > 1 ? GL_TEXTURE_2D_MULTISAMPLE : GL_TEXTURE_2D;
+    GLuint fbo = 0;
+    // GLenum binding_point = self->msaa_samples > 1 ? GL_TEXTURE_2D_MULTISAMPLE : GL_TEXTURE_2D;
+    GLenum binding_point = GL_TEXTURE_2D;
 
     UASSERT(self->use_type == BRT_OFFSCREEN || self->use_type == BRT_DEPTH);
 
@@ -86,12 +87,8 @@ static br_error recreate_renderbuffers(br_device_pixelmap *self)
         glGenTextures(1, &self->asBack.glTex);
         glBindTexture(binding_point, self->asBack.glTex);
 
-        if(self->msaa_samples) {
-            glTexImage2DMultisample(binding_point, self->msaa_samples, fmt->internal_format, self->pm_width, self->pm_height, GL_TRUE);
-        } else {
-            glTexParameteri(binding_point, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-            glTexImage2D(binding_point, 0, fmt->internal_format, self->pm_width, self->pm_height, 0, fmt->format, fmt->type, NULL);
-        }
+        glTexParameteri(binding_point, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+        glTexImage2D(binding_point, 0, fmt->internal_format, self->pm_width, self->pm_height, 0, fmt->format, fmt->type, NULL);
 
         DeviceGLObjectLabelF(GL_TEXTURE, self->asBack.glTex, "%s:colour", self->pm_identifier);
 
@@ -112,11 +109,7 @@ static br_error recreate_renderbuffers(br_device_pixelmap *self)
         glGenTextures(1, &self->asDepth.glDepth);
         glBindTexture(binding_point, self->asDepth.glDepth);
 
-        if(self->msaa_samples) {
-            glTexImage2DMultisample(binding_point, self->msaa_samples, GL_DEPTH_COMPONENT, self->pm_width, self->pm_height, GL_TRUE);
-        } else {
-            glTexImage2D(binding_point, 0, GL_DEPTH_COMPONENT, self->pm_width, self->pm_height, 0, GL_DEPTH_COMPONENT, GL_UNSIGNED_BYTE, NULL);
-        }
+        glTexImage2D(binding_point, 0, GL_DEPTH_COMPONENT, self->pm_width, self->pm_height, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
 
         DeviceGLObjectLabelF(GL_TEXTURE, self->asDepth.glDepth, "%s:depth", self->pm_identifier);
 
@@ -470,7 +463,7 @@ static br_error BR_CMETHOD_DECL(br_device_pixelmap_gl, rectangleFill)(br_device_
         fbo  = self->asDepth.backbuffer->asBack.glFbo;
         mask = GL_DEPTH_BUFFER_BIT;
         glDepthMask(GL_TRUE);
-        glClearDepth(1.0f);
+        glClearDepthf(1.0f);
     } else {
         return BRE_UNSUPPORTED;
     }
