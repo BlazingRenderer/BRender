@@ -152,6 +152,9 @@ static br_error configure_device(br_device *dev)
         case BRT_OPENGL_PROFILE_COMPATIBILITY:
             SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_COMPATIBILITY);
             break;
+        case BRT_OPENGL_PROFILE_ES:
+            SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_ES);
+            break;
         default:
             return BRE_FAIL;
     }
