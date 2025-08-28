@@ -77,7 +77,7 @@ static const br_tv_custom custom = {
     .extra_size = NULL,
 };
 
-static struct br_tv_template_entry devicePixelmapTemplateEntries[] = {
+static br_tv_template_entry devicePixelmapTemplateEntries[] = {
     {BRT(IDENTIFIER_CSTR),    F(pm_identifier),   BRTV_QUERY | BRTV_ALL, BRTV_CONV_COPY,    0                    },
     {BRT(WIDTH_I32),          F(pm_width),        BRTV_QUERY | BRTV_ALL, BRTV_CONV_I32_U16, 0                    },
     {BRT(HEIGHT_I32),         F(pm_height),       BRTV_QUERY | BRTV_ALL, BRTV_CONV_I32_U16, 0                    },
