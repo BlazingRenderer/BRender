@@ -875,6 +875,7 @@ OPENGL_VERSION_MINOR                uint_8
 OPENGL_PROFILE                      token
   OPENGL_PROFILE_COMPATIBILITY      none
   OPENGL_PROFILE_CORE               none
+  OPENGL_PROFILE_ES                 none
 
 OPENGL                              boolean
 
