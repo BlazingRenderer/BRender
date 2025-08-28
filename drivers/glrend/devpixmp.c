@@ -533,6 +533,10 @@ static br_error BR_CMETHOD(br_device_pixelmap_gl, rectangleStretchCopyTo)(br_dev
         fmt     = DeviceGLGetFormatDetails(src->type);
     }
 
+    if(fmt == NULL) {
+        return BRE_FAIL;
+    }
+
     clut = self->asBack.clut->gl_tex ? self->asBack.clut->gl_tex : self->screen->asFront.tex_white;
     if(fmt->indexed && src->map != NULL) {
         if(src->map->stored != NULL) {
