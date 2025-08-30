@@ -225,6 +225,8 @@ void BR_PUBLIC_ENTRY BrMatrix34ApplyPlaneEquation(br_vector4 *A, const br_vector
 
 void BR_PUBLIC_ENTRY BrMatrix34FixedToFloat(br_matrix34_f *A, const br_matrix34_x *B);
 
+br_scalar BR_PUBLIC_ENTRY BrMatrix34Determinant3(const br_matrix34 *m);
+
 /*
  * 4x4 Matrix ops.
  */
