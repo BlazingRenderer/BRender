@@ -363,6 +363,16 @@ static br_boolean apply_state(br_renderer *renderer)
     model.environment_matrix = cache->model.environment;
     model.eye_m              = cache->model.eye_m;
 
+    /*
+     * If we've got a negative determinant for the upper 3x3 MV matrix,
+     * we're reflecting, i.e. changing handedness.
+     * To keep the same behaviour as the software renderer, flip the winding order.
+     */
+    if(BrScalarToFloat(cache->model.mv_det3) < 1e-6f)
+        glFrontFace(GL_CW);
+    else
+        glFrontFace(GL_CCW);
+
     /* NB: Flag is never set */
     // int model_lit = self->model->flags & V11MODF_LIT;
 

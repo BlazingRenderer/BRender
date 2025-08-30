@@ -258,6 +258,7 @@ typedef struct {
 
         br_matrix4 view_to_model; /* Inverse of mv, needed for eye_model calc. */
         br_vector4 eye_m;
+        br_scalar  mv_det3; /* Determinate of the upper 3x3 of MV. */
     } model;
 } state_cache;
 

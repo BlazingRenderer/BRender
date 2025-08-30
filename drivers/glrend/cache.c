@@ -209,6 +209,7 @@ static void UpdateMatrices(state_cache *cache, state_matrix *matrix)
      * ModelView Matrix
      */
     BrMatrix4Copy34(&cache->model.mv, &matrix->model_to_view);
+    cache->model.mv_det3 = BrMatrix34Determinant3(&matrix->model_to_view);
 
     /*
      * Inverse of ModelView.
@@ -330,6 +331,7 @@ void StateGLReset(state_cache *cache)
     BrMatrix4Identity(&cache->model.mvp);
     BrMatrix4Identity(&cache->model.normal);
     BrMatrix4Identity(&cache->model.environment);
+    cache->model.mv_det3 = 0;
     BrVector4Set(&cache->model.eye_m, 0, 0, 0, 1);
 
     BrVector4Set(&cache->scene.eye_view, 0, 0, 0, 0);
