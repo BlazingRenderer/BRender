@@ -9,7 +9,6 @@
 material = [
 	identifier = "tiles";
 	flags = [perspective];
-	colour = [0,0,255];
 	ambient = 0.20; diffuse = 0.50; specular = 0.60;
 	power=20;
 	index_base = 64; index_range = 31;
@@ -23,7 +22,6 @@ material = [
 material = [
 	identifier = "test_mat";
         flags = [light,smooth,perspective];
-	colour = [0,0,255];
 	ambient = 0.20; diffuse = 0.50; specular = 0.60;
 	power=20;
 

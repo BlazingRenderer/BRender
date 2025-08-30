@@ -32,7 +32,8 @@ typedef struct br_demo_mirror {
     br_uint_32 mouse_buttons;
     br_uint_32 kb_buttons;
 
-    br_pixelmap *render_pm, *reflected_pm;
+    br_pixelmap *render_pm;
+    br_pixelmap *reflected_pm, *reflected_depth;
     br_pixelmap *palette;
     br_pixelmap *blend_table;
 
@@ -50,42 +51,28 @@ typedef struct br_demo_mirror {
     br_light *light;
 } br_demo_mirror;
 
-void xyprintf(br_pixelmap *pm, int x, int y, char *fmt, ...);
-void PrintMatrix34(br_pixelmap *pm, int x, int y, br_matrix34 *t);
+void xyprintf(br_demo *demo, br_pixelmap *pm, int x, int y, const char *fmt, ...);
+void PrintMatrix34(br_demo *demo, br_pixelmap *pm, int x, int y, br_matrix34 *t);
 
 void BuildTestWorld(br_demo *demo, br_model *model_cube, br_model *model_mirror);
 
 void BlendPixelmaps(br_pixelmap *, br_pixelmap *, br_pixelmap *, br_pixelmap *);
 
-void ControlObject(br_demo_mirror *state, br_actor *camera_actor, br_actor *translate_actor, br_actor *rotate_actor,
-                   br_scalar mouse_x, br_scalar mouse_y);
+void ControlObject(br_demo_mirror *state, br_actor *camera_actor, br_actor *translate_actor, br_actor *rotate_actor, br_scalar mouse_x,
+                   br_scalar mouse_y);
 
 void UpdateMirror(br_actor *dest, br_actor *src, br_actor *world);
 
-br_error MirrorInit(br_demo *demo)
+static br_error MirrorLoadSWRes(br_demo *demo)
 {
-    br_demo_mirror *state;
-    br_model       *cube_model, *mirror_model;
-    br_pixelmap    *shade_table;
-    int             nmats;
-    br_material    *mats[8];
+    br_pixelmap *shade_table;
 
-    state      = BrResAllocate(demo, sizeof(br_demo_mirror), BR_MEMORY_APPLICATION);
-    demo->user = state;
-
-    *state = (br_demo_mirror){
-        .mouse_x       = 0,
-        .mouse_y       = 0,
-        .mouse_buttons = 0,
-        .kb_buttons    = 0,
-    };
+    br_demo_mirror *state = demo->user;
 
     if((state->palette = BrPixelmapLoad("winstd.pal")) == NULL) {
         BrLogError("DEMO", "Could not load winstd.pal.");
         return BRE_FAIL;
     }
-    BrTableAdd(state->palette);
-    BrPixelmapPaletteSet(demo->colour_buffer, state->palette);
 
     if((shade_table = BrPixelmapLoad("winsh8.tab")) == NULL) {
         BrLogError("DEMO", "Could not load winsh8.tab.");
@@ -97,16 +84,46 @@ br_error MirrorInit(br_demo *demo)
         BrLogError("DEMO", "Cound not load blend.tab.");
         return BRE_FAIL;
     }
+    BrTableAdd(state->blend_table);
+
+    if(demo->colour_buffer->type == BR_PMT_INDEX_8) {
+        BrPixelmapPaletteSet(demo->colour_buffer, state->palette);
+        demo->text_colour = 41;
+    }
+
+    return BRE_OK;
+}
+
+static br_error MirrorLoadHWRes(br_demo *demo)
+{
+    return BRE_OK;
+}
+
+br_error MirrorInit(br_demo *demo)
+{
+    br_demo_mirror *state;
+    br_model       *cube_model, *mirror_model;
+
+    int          nmats;
+    br_material *mats[8];
+    br_error     err;
+
+    state      = BrResAllocate(demo, sizeof(br_demo_mirror), BR_MEMORY_APPLICATION);
+    demo->user = state;
+
+    *state = (br_demo_mirror){
+        .mouse_x       = 0,
+        .mouse_y       = 0,
+        .mouse_buttons = 0,
+        .kb_buttons    = 0,
+    };
+
+    if((err = demo->hw_accel ? MirrorLoadHWRes(demo) : MirrorLoadSWRes(demo)) != BRE_OK)
+        return err;
 
     /*
      * Load some materials
      */
-
-    /*
-     * The demo framework will install the de-CLUT'ting hook.
-     * We don't want that.
-     */
-    BrMapFindHook(BrMapFindFailedLoad);
 
     if((nmats = BrFmtScriptMaterialLoadMany("test.mat", mats, BR_ASIZE(mats))) == 0) {
         BrLogError("DEMO", "Cound not load test.mat.");
@@ -277,20 +294,15 @@ static void MirrorRender(br_demo *demo)
      * Clear the buffers
      */
 
-    BrPixelmapFill(state->render_pm, 0);
-    BrPixelmapFill(state->reflected_pm, 0);
+    BrRendererFrameBegin();
 
-    if(demo->colour_buffer->type != BR_PMT_INDEX_8) {
-        BrPixelmapTextF(demo->colour_buffer,
-                        -(BrPixelmapTextWidth(demo->colour_buffer, BrFontProp7x9, "ONLY 8 BIT SCREEN MODES ARE SUPPORTED") / 2),
-                        (BrFontProp7x9->glyph_y) / 2, BR_COLOUR_RGB(200, 200, 200), BrFontProp7x9,
-                        "ONLY 8 BIT SCREEN MODES ARE SUPPORTED");
-        return;
-    }
+    BrPixelmapFill(state->render_pm, 0);
+    BrPixelmapFill(demo->depth_buffer, 0xFFFFFFFF);
+
+    BrPixelmapFill(state->reflected_pm, 0);
+    BrPixelmapFill(state->reflected_depth, 0xFFFFFFFF);
 
     BrClipPlaneEnable(state->mirror_actor);
-
-    BrPixelmapFill(demo->depth_buffer, 0xFFFFFFFF);
 
     state->floor_actor->render_style = BR_RSTYLE_NONE;
     state->world->render_style       = BR_RSTYLE_DEFAULT;
@@ -305,7 +317,7 @@ static void MirrorRender(br_demo *demo)
      * Render the reflection
      */
     UpdateMirror(state->world, state->mirror_actor, state->world);
-    BrZbSceneRender(demo->world, demo->camera, state->reflected_pm, demo->depth_buffer);
+    BrZbSceneRender(demo->world, demo->camera, state->reflected_pm, state->reflected_depth);
 
     BrClipPlaneDisable(state->mirror_actor);
 
@@ -317,17 +329,21 @@ static void MirrorRender(br_demo *demo)
     BrActorToActorMatrix34(&state->floor_actor->t.t.mat, state->mirror_actor, state->world);
     BrZbSceneRender(demo->world, demo->camera, state->render_pm, demo->depth_buffer);
 
-    BlendPixelmaps(state->render_pm, state->render_pm, state->reflected_pm, state->blend_table);
+    if(state->blend_table != NULL && state->render_pm->type == BR_PMT_INDEX_8) {
+        BlendPixelmaps(state->render_pm, state->render_pm, state->reflected_pm, state->blend_table);
+    }
 
 #if 1
-    PrintMatrix34(demo->colour_buffer, 0, 0, &state->model_actor->t.t.mat);
+    PrintMatrix34(demo, demo->colour_buffer, 0, 0, &state->model_actor->t.t.mat);
 #endif
+    BrRendererFrameEnd();
 }
 
 void MirrorDestroy(br_demo *demo)
 {
     br_demo_mirror *state = demo->user;
 
+    BrPixelmapFree(state->reflected_depth);
     BrPixelmapFree(state->reflected_pm);
 }
 
@@ -342,6 +358,9 @@ void MirrorOnResize(br_demo *demo, br_uint_16 width, br_uint_16 height)
     state->render_pm->origin_x = (br_int_16)(state->render_pm->width / 2);
     state->render_pm->origin_y = (br_int_16)(state->render_pm->height / 2);
 
+    if(state->reflected_depth != NULL)
+        BrPixelmapFree(state->reflected_depth);
+
     if(state->reflected_pm != NULL)
         BrPixelmapFree(state->reflected_pm);
 
@@ -349,13 +368,19 @@ void MirrorOnResize(br_demo *demo, br_uint_16 width, br_uint_16 height)
     state->reflected_pm->origin_x = (br_int_16)(state->reflected_pm->width / 2);
     state->reflected_pm->origin_y = (br_int_16)(state->reflected_pm->height / 2);
 
-    BrPixelmapPaletteSet(state->reflected_pm, state->palette);
+    state->reflected_depth           = BrPixelmapMatch(state->reflected_pm, BR_PMMATCH_DEPTH);
+    state->reflected_depth->origin_x = (br_int_16)(state->reflected_depth->width / 2);
+    state->reflected_depth->origin_y = (br_int_16)(state->reflected_depth->height / 2);
+
+    if(demo->colour_buffer->type == BR_PMT_INDEX_8) {
+        BrPixelmapPaletteSet(state->reflected_pm, state->palette);
+    }
 }
 
 #define MSCALE BR_SCALAR(0.006)
 
-void ControlObject(br_demo_mirror *state, br_actor *camera_actor, br_actor *translate_actor, br_actor *rotate_actor,
-                   br_scalar mouse_x, br_scalar mouse_y)
+void ControlObject(br_demo_mirror *state, br_actor *camera_actor, br_actor *translate_actor, br_actor *rotate_actor, br_scalar mouse_x,
+                   br_scalar mouse_y)
 {
     br_matrix34 mat_roll;
     br_scalar   tx, ty, tz;
@@ -384,20 +409,19 @@ void ControlObject(br_demo_mirror *state, br_actor *camera_actor, br_actor *tran
     }
 }
 
-void PrintMatrix34(br_pixelmap *pm, int x, int y, br_matrix34 *t)
+void PrintMatrix34(br_demo *demo, br_pixelmap *pm, int x, int y, br_matrix34 *t)
 {
-    int i, j;
-
-    for(i = 0; i < 3; i++)
-        for(j = 0; j < 4; j++)
-            xyprintf(pm, x + i * 12, y + j * 2, "%11.5f", BrScalarToFloat(t->m[j][i]));
+    for(int i = 0; i < 3; i++) {
+        for(int j = 0; j < 4; j++)
+            xyprintf(demo, pm, x + i * 12, y + j * 2, "%11.5f", BrScalarToFloat(t->m[j][i]));
+    }
 }
 
-void xyprintf(br_pixelmap *pm, int x, int y, char *fmt, ...)
+void xyprintf(br_demo *demo, br_pixelmap *pm, int x, int y, const char *fmt, ...)
 {
     char    temp[256];
     va_list args;
-    int     o = 0;
+
     /*
      * Build output string
      */
@@ -405,7 +429,7 @@ void xyprintf(br_pixelmap *pm, int x, int y, char *fmt, ...)
     BrVSprintf(temp, fmt, args);
     va_end(args);
 
-    BrPixelmapText(pm, x * 4, y * 6, 255, BrFontFixed3x5, temp);
+    BrPixelmapText(pm, x * 4, y * 6, demo->text_colour, BrFontFixed3x5, temp);
 }
 
 void BuildTestWorld(br_demo *demo, br_model *model_cube, br_model *model_mirror)
@@ -517,12 +541,10 @@ void BlendPixelmaps(br_pixelmap *dest, br_pixelmap *a, br_pixelmap *b, br_pixelm
 
     if(a->pixels) {
         BrPixelmapDirectUnlock(a);
-        ap = a->pixels;
     }
 
     if(b->pixels) {
         BrPixelmapDirectUnlock(b);
-        bp = b->pixels;
     }
 }
 
@@ -537,5 +559,5 @@ const static br_demo_dispatch dispatch = {
 
 int main(int argc, char **argv)
 {
-    return BrDemoRun("Mirror Demo", 1280, 720, &dispatch);
+    return BrDemoRunArgv("Mirror Demo", &dispatch, argc, argv);
 }
