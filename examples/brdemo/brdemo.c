@@ -308,6 +308,9 @@ static int BrDemoRunArg(const br_demo_dispatch *dispatch, const br_demo_run_args
 
     ticks_last = SDL_GetTicksNS();
 
+    const float initial_wait_time = 20.0f;
+    float wait_accum = 0.0f;
+
     for(SDL_Event evt;;) {
         float dt;
 
@@ -362,15 +365,24 @@ static int BrDemoRunArg(const br_demo_dispatch *dispatch, const br_demo_run_args
             demo->dispatch->process_event(demo, &evt);
         }
 
-        demo->dispatch->update(demo, BR_SCALAR(dt));
-        demo->dispatch->render(demo);
+        if (wait_accum >= initial_wait_time) {
+            demo->dispatch->update(demo, BR_SCALAR(dt));
+            demo->dispatch->render(demo);
+        } else {
+            wait_accum += dt;
+            BrPixelmapFill(demo->colour_buffer, demo->clear_colour);
 
-        {
-            br_int_32 base_x = -demo->colour_buffer->origin_x + 5;
-            br_int_32 base_y = -demo->colour_buffer->origin_y + 5;
-
-            BrPixelmapTextF(demo->colour_buffer, base_x, base_y, demo->text_colour, BrFontProp7x9, "last frame delta (msec): %f", dt * 1000);
+            if ((initial_wait_time - wait_accum) > 1.0f) {
+                BrPixelmapTextF(demo->colour_buffer, 0, 0, demo->text_colour, BrFontProp7x9, "%f", initial_wait_time - wait_accum);
+            }
         }
+
+        // {
+        //     br_int_32 base_x = -demo->colour_buffer->origin_x + 5;
+        //     br_int_32 base_y = -demo->colour_buffer->origin_y + 5;
+        //
+        //     BrPixelmapTextF(demo->colour_buffer, base_x, base_y, demo->text_colour, BrFontProp7x9, "last frame delta (msec): %f", dt * 1000);
+        // }
 
         BrPixelmapDoubleBuffer(demo->_screen, demo->colour_buffer);
     }
@@ -521,8 +533,8 @@ int BrDemoRunArgv(const char *title, const br_demo_dispatch *dispatch, int argc,
 
     br_demo_run_args args = {
         .title             = title,
-        .width             = 1280,
-        .height            = 720,
+        .width             = 1920,
+        .height            = 1080, // 1440
         .verbose           = BR_LOG_INFO,
         .force_software    = 0,
         .software_pm_type  = BR_PMT_INDEX_8,
