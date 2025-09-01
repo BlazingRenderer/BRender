@@ -103,6 +103,19 @@ int main(int argc, char **argv)
         goto create_fail;
     }
 
+    switch(screen->type) {
+        case BR_PMT_INDEX_8:
+            clear_colour = CLEAR_COLOUR;
+            text_colour  = TEXT_COLOUR;
+            break;
+        case BR_PMT_RGB_565:
+            clear_colour = BR_COLOUR_565(66, 66, 66);
+            text_colour  = BR_COLOUR_565(255, 255, 255);
+            break;
+        default:
+            goto create_fail;
+    }
+
     BrPixelmapPaletteSet(screen, pal);
 
     BrLogInfo("APP", "Running at 8-bpp");
