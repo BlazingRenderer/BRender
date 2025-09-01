@@ -60,8 +60,10 @@ static int load_pixelmaps(void)
         if(pixtable[i] == palette)
             continue;
 
-        if(pixtable[i]->type == BR_PMT_INDEX_8 && pixtable[i]->map == NULL)
+        if(pixtable[i]->type == BR_PMT_INDEX_8 && pixtable[i]->map == NULL) {
             pixtable[i]->map = palette;
+            BrMapUpdate(pixtable[i], BR_MAPU_ALL);
+        }
     }
 
     return 0;
