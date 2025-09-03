@@ -242,7 +242,7 @@ br_device_pixelmap *DevicePixelmapGLAllocateFront(br_device *dev, br_output_faci
     BrLogTrace("GLREND", "OpenGL Renderer = %s", self->asFront.gl_renderer);
 
     if(GLVersion.major < 3 || (GLVersion.major == 3 && GLVersion.minor < 2)) {
-        BrLogError("ERROR", "Got OpenGL %d.%d context, expected 3.2", GLVersion.major, GLVersion.minor);
+        BrLogError("GLREND", "Got OpenGL %d.%d context, expected 3.2", GLVersion.major, GLVersion.minor);
         goto cleanup_context;
     }
 
