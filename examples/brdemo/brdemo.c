@@ -197,6 +197,7 @@ static br_error create_window(br_demo *demo, const br_demo_run_args *args)
                         BR_NULL_TOKEN);
     // clang-format on
     if(err == BRE_OK) {
+        SDL_GL_SetSwapInterval(1);
         demo->hw_accel = BR_TRUE;
         return err;
     }
