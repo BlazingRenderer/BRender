@@ -41,7 +41,7 @@ static br_error sdl_gl_make_current(br_pixelmap *dev, void *ctx, void *user)
 
     (void)dev;
 
-    if(SDL_GL_MakeCurrent(state->window, (SDL_GLContext)ctx) < 0) {
+    if(!SDL_GL_MakeCurrent(state->window, (SDL_GLContext)ctx)) {
         BrLogError("SDL3", "OpenGL MakeCurrent failed: %s", SDL_GetError());
         return BRE_FAIL;
     }
