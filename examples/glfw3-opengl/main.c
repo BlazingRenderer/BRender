@@ -43,7 +43,7 @@ static br_error glfw_gl_make_current(br_pixelmap *pm, void *ctx, void *user)
     return BRE_OK;
 }
 
-static void *glfw_gl_get_proc_address(const char *name)
+static void (*glfw_gl_get_proc_address(const char *name))(void)
 {
     return glfwGetProcAddress(name);
 }

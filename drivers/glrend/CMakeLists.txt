@@ -183,14 +183,14 @@ set(GLREND_FILES
 
         util.c
 
-        glad.c
+        gl.c
         )
 
 set(INC_FILES
         include/brglrend.h
         include/brglrend_p.h
 
-        include/glad/glad.h
+        include/glad/gl.h
         include/KHR/khrplatform.h
         )
 

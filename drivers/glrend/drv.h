@@ -12,7 +12,7 @@ extern "C" {
 
 #include <assert.h>
 
-#include "glad/glad.h"
+#include "glad/gl.h"
 
 #define BR_DEVICE_PRIVATE
 #define BR_OUTPUT_FACILITY_PRIVATE

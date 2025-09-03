@@ -101,8 +101,8 @@ static void setup_qiurks(br_device_pixelmap *self)
     }
 }
 
-static void APIENTRY gl_debug_callback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar *message,
-                                       const void *user)
+static void GLAD_API_PTR gl_debug_callback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar *message,
+                                           const void *user)
 {
     const char *source_string, *type_string, *severity_string;
 
@@ -155,6 +155,7 @@ br_device_pixelmap *DevicePixelmapGLAllocateFront(br_device *dev, br_output_faci
     br_int_32                 count;
     GLint                     red_bits = 0, grn_bits = 0, blu_bits = 0, alpha_bits = 0;
     const br_pixelmap_gl_fmt *fmt;
+    int                       glad_version, glad_major, glad_minor;
     struct pixelmapNewTokens  pt = {
          .width           = -1,
          .height          = -1,
@@ -215,10 +216,13 @@ br_device_pixelmap *DevicePixelmapGLAllocateFront(br_device *dev, br_output_faci
     if(DevicePixelmapGLExtMakeCurrent(self, self->asFront.gl_context) != BRE_OK)
         goto cleanup_context;
 
-    if(gladLoadGLLoader(DevicePixelmapGLExtGetGetProcAddress(self)) == 0) {
+    if((glad_version = gladLoadGL(DevicePixelmapGLExtGetGetProcAddress(self))) == 0) {
         BrLogError("GLREND", "Unable to load OpenGL functions.");
         goto cleanup_context;
     }
+
+    glad_major = GLAD_VERSION_MAJOR(glad_version);
+    glad_minor = GLAD_VERSION_MINOR(glad_version);
 
     /*
      * Always register the debug stuff, it needs to be explicitly glEnable(GL_DEBUG_OUTPUT)'d anyway.
@@ -241,8 +245,8 @@ br_device_pixelmap *DevicePixelmapGLAllocateFront(br_device *dev, br_output_faci
     BrLogTrace("GLREND", "OpenGL Vendor   = %s", self->asFront.gl_vendor);
     BrLogTrace("GLREND", "OpenGL Renderer = %s", self->asFront.gl_renderer);
 
-    if(GLVersion.major < 3 || (GLVersion.major == 3 && GLVersion.minor < 2)) {
-        BrLogError("GLREND", "Got OpenGL %d.%d context, expected 3.2", GLVersion.major, GLVersion.minor);
+    if(glad_major < 3 || (glad_major == 3 && glad_minor < 3)) {
+        BrLogError("GLREND", "Got OpenGL %d.%d context, expected 3.3", glad_major, glad_minor);
         goto cleanup_context;
     }
 
