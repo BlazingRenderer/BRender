@@ -110,7 +110,7 @@ br_renderer *RendererGLAllocate(br_device *device, br_renderer_facility *facilit
     /*
      * State starts out as default
      */
-    RendererStateDefault(self, (br_uint_32)BR_STATE_ALL);
+    RendererStateDefault(self, BR_STATE_ALL);
 
     GLint alignment = 256;
     glGetIntegerv(GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT, &alignment);
@@ -121,7 +121,7 @@ br_renderer *RendererGLAllocate(br_device *device, br_renderer_facility *facilit
                      dest->screen->asFront.quirks.orphan_model_buffers ? BUFFER_RING_GL_FLAG_ORPHAN : 0);
 
     self->has_begun = 0;
-    return (br_renderer *)self;
+    return self;
 }
 
 static void BR_CMETHOD_DECL(br_renderer_gl, sceneBegin)(br_renderer *self)
@@ -361,9 +361,9 @@ br_error BR_CMETHOD_DECL(br_renderer_gl, partSet)(br_renderer *self, br_token pa
 
 static br_error BR_CMETHOD_DECL(br_renderer_gl, partSetMany)(br_renderer *self, br_token part, br_int_32 index, br_token_value *tv, br_int_32 *pcount)
 {
-    br_error               r;
-    br_uint_32             m;
-    struct br_tv_template *tp;
+    br_error        r;
+    br_uint_32      m;
+    br_tv_template *tp;
 
     if((tp = StateGLGetStateTemplate(&self->state, part, index)) == NULL)
         return BRE_FAIL;
@@ -381,7 +381,7 @@ static br_error BR_CMETHOD_DECL(br_renderer_gl, partSetMany)(br_renderer *self, 
  */
 static br_error BR_CMETHOD_DECL(br_renderer_gl, partQuery)(br_renderer *self, br_token part, br_int_32 index, void *pvalue, br_token t)
 {
-    struct br_tv_template *tp;
+    br_tv_template *tp;
 
     if((tp = StateGLGetStateTemplate(&self->state, part, index)) == NULL)
         return BRE_FAIL;
@@ -392,7 +392,7 @@ static br_error BR_CMETHOD_DECL(br_renderer_gl, partQuery)(br_renderer *self, br
 static br_error BR_CMETHOD_DECL(br_renderer_gl, partQueryBuffer)(br_renderer *self, br_token part, br_int_32 index, void *pvalue,
                                                                  void *buffer, br_size_t buffer_size, br_token t)
 {
-    struct br_tv_template *tp;
+    br_tv_template *tp;
 
     if((tp = StateGLGetStateTemplate(&self->state, part, index)) == NULL)
         return BRE_FAIL;
@@ -403,7 +403,7 @@ static br_error BR_CMETHOD_DECL(br_renderer_gl, partQueryBuffer)(br_renderer *se
 static br_error BR_CMETHOD_DECL(br_renderer_gl, partQueryMany)(br_renderer *self, br_token part, br_int_32 index, br_token_value *tv,
                                                                void *extra, br_size_t extra_size, br_int_32 *pcount)
 {
-    struct br_tv_template *tp;
+    br_tv_template *tp;
 
     if((tp = StateGLGetStateTemplate(&self->state, part, index)) == NULL)
         return BRE_FAIL;
@@ -414,7 +414,7 @@ static br_error BR_CMETHOD_DECL(br_renderer_gl, partQueryMany)(br_renderer *self
 static br_error BR_CMETHOD_DECL(br_renderer_gl, partQueryManySize)(br_renderer *self, br_token part, br_int_32 index,
                                                                    br_size_t *pextra_size, br_token_value *tv)
 {
-    struct br_tv_template *tp;
+    br_tv_template *tp;
 
     if((tp = StateGLGetStateTemplate(&self->state, part, index)) == NULL)
         return BRE_FAIL;
@@ -425,7 +425,7 @@ static br_error BR_CMETHOD_DECL(br_renderer_gl, partQueryManySize)(br_renderer *
 static br_error BR_CMETHOD_DECL(br_renderer_gl, partQueryAll)(br_renderer *self, br_token part, br_int_32 index, br_token_value *buffer,
                                                               br_size_t buffer_size)
 {
-    struct br_tv_template *tp;
+    br_tv_template *tp;
 
     if((tp = StateGLGetStateTemplate(&self->state, part, index)) == NULL)
         return BRE_FAIL;
@@ -435,7 +435,7 @@ static br_error BR_CMETHOD_DECL(br_renderer_gl, partQueryAll)(br_renderer *self,
 
 static br_error BR_CMETHOD_DECL(br_renderer_gl, partQueryAllSize)(br_renderer *self, br_token part, br_int_32 index, br_size_t *psize)
 {
-    struct br_tv_template *tp;
+    br_tv_template *tp;
 
     if((tp = StateGLGetStateTemplate(&self->state, part, index)) == NULL)
         return BRE_FAIL;
