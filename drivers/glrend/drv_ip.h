@@ -25,8 +25,6 @@ br_boolean VIDEOI_CompileLineShader(HVIDEO hVideo);
 
 br_boolean VIDEOI_CompileBRenderShader(HVIDEO hVideo, const char *vertPath, const char *fragPath);
 
-const br_pixelmap_gl_fmt *DeviceGLGetFormatDetails(br_uint_8 type);
-
 /*
  * device.c
  */
@@ -191,6 +189,11 @@ br_clip_result DevicePixelmapGLRectangleClip(br_rectangle *restrict out, const b
 GLuint DeviceGLCreateAndCompileShader(const GladGLContext *gl, GLenum type, const char *shader, size_t size);
 GLuint DeviceGLLoadAndCompileShader(const GladGLContext *gl, GLenum type, const char *path, const char *default_data, size_t default_size);
 GLuint DeviceGLCreateAndCompileProgram(const GladGLContext *gl, GLuint vert, GLuint frag);
+
+/*
+ * formats.c
+ */
+const br_pixelmap_gl_fmt *DeviceGLGetFormatDetails(br_uint_8 type);
 
 /*
  * Wrappers for br_device_gl_procs.

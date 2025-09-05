@@ -189,6 +189,7 @@ set(GLREND_FILES
         template.h
 
         util.c
+        formats.c
         )
 
 set(INC_FILES
