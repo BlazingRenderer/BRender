@@ -81,7 +81,7 @@ br_renderer *RendererGLAllocate(br_device *device, br_renderer_facility *facilit
 {
     br_renderer *self;
 
-    ASSERT(dest != NULL && ObjectDevice(self) == device);
+    ASSERT(dest != NULL && ObjectDevice(dest) == device);
 
     if(dest->use_type != BRT_OFFSCREEN)
         return NULL;
