@@ -12,19 +12,38 @@ typedef struct sdl_gl_state {
     br_device_sdl_ext_procs ext_procs;
 } sdl_gl_state;
 
-static void *sdl_gl_create_context(br_pixelmap *dev, void *user)
+static br_error sdl_gl_create_context(br_pixelmap *dev, br_device_gl_context_info *info, void *user)
 {
     sdl_gl_state *state = user;
-    void         *ctx;
+    SDL_GLContext ctx;
+    int           major, minor, mask;
 
     (void)dev;
 
     if((ctx = SDL_GL_CreateContext(state->window)) == NULL) {
         BrLogError("SDL2", "OpenGL context creation failed: %s", SDL_GetError());
-        return NULL;
+        return BRE_FAIL;
     }
 
-    return ctx;
+    SDL_GL_GetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, &major);
+    SDL_GL_GetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, &minor);
+    SDL_GL_GetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, &mask);
+
+    *info = (br_device_gl_context_info){
+        .native  = ctx,
+        .major   = major,
+        .minor   = minor,
+        .profile = BRT_NONE,
+    };
+
+    if(mask & SDL_GL_CONTEXT_PROFILE_CORE)
+        info->profile = BRT_OPENGL_PROFILE_CORE;
+    else if(mask & SDL_GL_CONTEXT_PROFILE_COMPATIBILITY)
+        info->profile = BRT_OPENGL_PROFILE_COMPATIBILITY;
+    else if(mask & SDL_GL_CONTEXT_PROFILE_ES)
+        info->profile = BRT_OPENGL_PROFILE_ES;
+
+    return BRE_OK;
 }
 
 static void sdl_gl_delete_context(br_pixelmap *dev, void *ctx, void *user)

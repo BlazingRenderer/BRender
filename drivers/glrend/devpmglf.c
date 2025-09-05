@@ -155,6 +155,7 @@ br_device_pixelmap *DevicePixelmapGLAllocateFront(br_device *dev, br_output_faci
     br_int_32                 count;
     GLint                     red_bits = 0, grn_bits = 0, blu_bits = 0, alpha_bits = 0;
     const br_pixelmap_gl_fmt *fmt;
+    br_device_gl_context_info context_info;
     int                       glad_version, glad_major, glad_minor;
     struct pixelmapNewTokens  pt = {
          .width           = -1,
@@ -208,9 +209,21 @@ br_device_pixelmap *DevicePixelmapGLAllocateFront(br_device *dev, br_output_faci
      */
     self->asFront.ext_procs = *pt.ext_procs;
 
-    if((self->asFront.gl_context = DevicePixelmapGLExtCreateContext(self)) == NULL) {
+    if(DevicePixelmapGLExtCreateContext(self, &context_info) != BRE_OK) {
         BrResFreeNoCallback(self);
         return NULL;
+    }
+    self->asFront.gl_context = context_info.native;
+
+    BrLogInfo("GLREND", "Created an OpenGL%s %d.%d%s context.", context_info.profile == BRT_OPENGL_PROFILE_ES ? " ES" : "",
+              context_info.major, context_info.minor,
+              context_info.profile == BRT_OPENGL_PROFILE_COMPATIBILITY
+                  ? " (Compatibility Profile)"
+                  : (context_info.profile == BRT_OPENGL_PROFILE_CORE ? " (Core Profile)" : ""));
+
+    if(context_info.major < 3 || (context_info.minor == 3 && context_info.minor < 3)) {
+        BrLogError("GLREND", "Got an OpenGL %d.%d context, expected 3.3", context_info.major, context_info.minor);
+        goto cleanup_context;
     }
 
     if(DevicePixelmapGLExtMakeCurrent(self, self->asFront.gl_context) != BRE_OK)

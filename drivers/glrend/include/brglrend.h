@@ -19,7 +19,14 @@ extern br_token BRT_OPENGL_EXTENSIONS_PL;
 }
 #endif
 
-typedef void *BR_CALLBACK br_device_pixelmap_gl_createcontext_cbfn(br_pixelmap *pm, void *user);
+typedef struct br_device_gl_context_info {
+    void     *native;
+    br_int_32 major;
+    br_int_32 minor;
+    br_token  profile;
+} br_device_gl_context_info;
+
+typedef br_error BR_CALLBACK br_device_pixelmap_gl_createcontext_cbfn(br_pixelmap *pm, br_device_gl_context_info *info, void *user);
 
 typedef void BR_CALLBACK br_device_pixelmap_gl_deletecontext_cbfn(br_pixelmap *pm, void *ctx, void *user);
 

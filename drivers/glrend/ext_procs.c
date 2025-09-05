@@ -1,10 +1,10 @@
 #include "drv.h"
 #include <brassert.h>
 
-void *DevicePixelmapGLExtCreateContext(br_device_pixelmap *self)
+br_error DevicePixelmapGLExtCreateContext(br_device_pixelmap *self, br_device_gl_context_info *info)
 {
     UASSERT(self->use_type == BRT_NONE);
-    return self->asFront.ext_procs.create_context((br_pixelmap *)self, self->asFront.ext_procs.user);
+    return self->asFront.ext_procs.create_context((br_pixelmap *)self, info, self->asFront.ext_procs.user);
 }
 
 void DevicePixelmapGLExtDeleteContext(br_device_pixelmap *self, void *ctx)

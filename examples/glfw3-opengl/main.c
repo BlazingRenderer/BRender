@@ -11,14 +11,47 @@ typedef struct glfw_gl_state {
     br_pixelmap *depth_buffer;
 } glfw_gl_state;
 
-static void *glfw_gl_create_context(br_pixelmap *pm, void *user)
+static br_error glfw_gl_create_context(br_pixelmap *pm, br_device_gl_context_info *info, void *user)
 {
     glfw_gl_state *state = user;
 
     (void)pm;
 
     /* GLFW doesn't support manual context creation, just return the window. */
-    return state->window;
+    info->native  = state->window;
+    info->major   = glfwGetWindowAttrib(state->window, GLFW_CONTEXT_VERSION_MAJOR);
+    info->minor   = glfwGetWindowAttrib(state->window, GLFW_CONTEXT_VERSION_MINOR);
+    info->profile = BRT_NONE;
+
+    switch(glfwGetWindowAttrib(state->window, GLFW_CLIENT_API)) {
+        case GLFW_OPENGL_API: {
+            int prof = glfwGetWindowAttrib(state->window, GLFW_OPENGL_PROFILE);
+            switch(prof) {
+                case GLFW_OPENGL_CORE_PROFILE:
+                    info->profile = BRT_OPENGL_PROFILE_CORE;
+                    break;
+
+                case GLFW_OPENGL_COMPAT_PROFILE:
+                    info->profile = BRT_OPENGL_PROFILE_COMPATIBILITY;
+                    break;
+
+                default:
+                    break;
+            }
+            break;
+        }
+
+        case GLFW_OPENGL_ES_API:
+            info->profile = BRT_OPENGL_PROFILE_ES;
+            break;
+
+        case GLFW_NO_API:
+        default:
+            BrLogError("GLFW", "Window has no OpenGL context.");
+            return BRE_FAIL;
+    }
+
+    return BRE_OK;
 }
 
 static void glfw_gl_delete_context(br_pixelmap *pm, void *ctx, void *user)

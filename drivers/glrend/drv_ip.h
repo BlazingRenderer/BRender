@@ -195,7 +195,7 @@ br_clip_result DevicePixelmapGLRectangleClip(br_rectangle *restrict out, const b
 /*
  * Wrappers for br_device_gl_procs.
  */
-void *DevicePixelmapGLExtCreateContext(br_device_pixelmap *self);
+br_error DevicePixelmapGLExtCreateContext(br_device_pixelmap *self, br_device_gl_context_info *info);
 
 void DevicePixelmapGLExtDeleteContext(br_device_pixelmap *self, void *ctx);
 
