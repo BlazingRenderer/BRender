@@ -68,8 +68,9 @@ static br_error sdl_gl_make_current(br_pixelmap *dev, void *ctx, void *user)
     return BRE_OK;
 }
 
-static void (*sdl_gl_get_proc_address(const char *name))(void)
+static void (*sdl_gl_get_proc_address(const char *name, void *user))(void)
 {
+    (void)user;
     return SDL_GL_GetProcAddress(name);
 }
 

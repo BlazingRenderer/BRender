@@ -230,7 +230,7 @@ br_device_pixelmap *DevicePixelmapGLAllocateFront(br_device *dev, br_output_faci
     if(DevicePixelmapGLExtMakeCurrent(self, self->asFront.gl_context) != BRE_OK)
         goto cleanup_context;
 
-    if((glad_version = gladLoadGLContext(&self->asFront.glad_gl_context, DevicePixelmapGLExtGetGetProcAddress(self))) == 0) {
+    if((glad_version = gladLoadGLContextUserPtr(&self->asFront.glad_gl_context, DevicePixelmapGLExtGetGetProcAddress(self), self)) == 0) {
         BrLogError("GLREND", "Unable to load OpenGL functions.");
         goto cleanup_context;
     }

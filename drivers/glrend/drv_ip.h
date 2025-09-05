@@ -205,7 +205,7 @@ br_error DevicePixelmapGLExtMakeCurrent(br_device_pixelmap *self, void *ctx);
 
 void DevicePixelmapGLExtSwapBuffers(br_device_pixelmap *self);
 
-br_device_pixelmap_gl_getprocaddress_cbfn *DevicePixelmapGLExtGetGetProcAddress(br_device_pixelmap *self);
+GLADuserptrloadfunc DevicePixelmapGLExtGetGetProcAddress(br_device_pixelmap *self);
 
 br_error DevicePixelmapGLExtResize(br_device_pixelmap *self, br_int_32 w, br_int_32 h);
 

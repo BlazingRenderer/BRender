@@ -36,7 +36,7 @@ typedef void BR_CALLBACK br_device_pixelmap_gl_swapbuffers_cbfn(br_pixelmap *pm,
 
 typedef br_error BR_CALLBACK br_device_pixelmap_gl_resize_cbfn(br_pixelmap *pm, br_int_32 w, br_int_32 h, void *user);
 
-typedef void (*BR_CALLBACK br_device_pixelmap_gl_getprocaddress_cbfn(const char *name))(void);
+typedef void (*BR_CALLBACK br_device_pixelmap_gl_getprocaddress_cbfn(const char *name, void *user))(void);
 
 typedef void BR_CALLBACK br_device_pixelmap_gl_preswap_hook_cbfn(br_pixelmap *pm, unsigned int fbo, void *user);
 

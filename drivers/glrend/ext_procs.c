@@ -34,10 +34,17 @@ br_error DevicePixelmapGLExtResize(br_device_pixelmap *self, br_int_32 w, br_int
     return self->asFront.ext_procs.resize((br_pixelmap *)self, w, h, self->asFront.ext_procs.user);
 }
 
-br_device_pixelmap_gl_getprocaddress_cbfn *DevicePixelmapGLExtGetGetProcAddress(br_device_pixelmap *self)
+static GLADapiproc GetProcAddressInternal(void *userptr, const char *name)
 {
+    br_device_pixelmap *self = userptr;
     UASSERT(self->use_type == BRT_NONE);
-    return self->asFront.ext_procs.get_proc_address;
+    return self->asFront.ext_procs.get_proc_address(name, self->asFront.ext_procs.user);
+}
+
+GLADuserptrloadfunc DevicePixelmapGLExtGetGetProcAddress(br_device_pixelmap *self)
+{
+    (void)self;
+    return GetProcAddressInternal;
 }
 
 void DevicePixelmapGLExtPreSwap(br_device_pixelmap *self, GLuint fbo)
