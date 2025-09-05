@@ -292,7 +292,6 @@ static void *BR_CMETHOD_DECL(br_renderer_gl, listQuery)(br_object_container *sel
 
 static br_error BR_CMETHOD_DECL(br_renderer_gl, validDestination)(br_renderer *self, br_boolean *bp, br_object *h)
 {
-    BrLogTrace("GLREND", "%s", __FUNCTION__);
     return BRE_OK;
 }
 
@@ -310,7 +309,6 @@ static br_error BR_CMETHOD_DECL(br_renderer_gl, stateStoredNew)(br_renderer *sel
 
 static br_error BR_CMETHOD_DECL(br_renderer_gl, stateStoredAvail)(br_renderer *self, br_int_32 *psize, br_uint_32 mask, br_token_value *tv)
 {
-    BrLogTrace("GLREND", "%s", __FUNCTION__);
     return BRE_FAIL;
 }
 
@@ -654,13 +652,11 @@ static br_error BR_CMETHOD_DECL(br_renderer_gl, synchronise)(br_renderer *self, 
 static br_error BR_CMETHOD_DECL(br_renderer_gl, partQueryCapability)(br_renderer *self, br_token part, br_int_32 index,
                                                                      br_token_value *buffer, br_size_t buffer_size)
 {
-    BrLogTrace("GLREND", "%s", __FUNCTION__);
     return BRE_FAIL;
 }
 
 static br_error BR_CMETHOD_DECL(br_renderer_gl, stateQueryPerformance)(br_renderer *self, br_fixed_lu *speed)
 {
-    BrLogTrace("GLREND", "%s", __FUNCTION__);
     return BRE_FAIL;
 }
 

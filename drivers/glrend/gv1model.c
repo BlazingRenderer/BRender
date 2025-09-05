@@ -90,7 +90,6 @@ static struct br_tv_template *BR_CMETHOD_DECL(br_geometry_v1_model_gl, templateQ
 
 static br_error BR_CMETHOD_DECL(br_geometry_v1_model_gl, storedAvail)(struct br_geometry_v1_model *self, br_int_32 *psize, br_token_value *tv)
 {
-    BrLogTrace("GL1MDL", "%s", __FUNCTION__);
     return BRE_FAIL;
 }
 
