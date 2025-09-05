@@ -37,7 +37,7 @@ static const br_tv_custom custom = {
  */
 #define F(f)  offsetof(br_device_pixelmap, f)
 #define FF(f) offsetof(br_device_pixelmap, asFront.f)
-static struct br_tv_template_entry devicePixelmapFrontTemplateEntries[] = {
+static br_tv_template_entry devicePixelmapFrontTemplateEntries[] = {
     {BRT(WIDTH_I32),                 F(pm_width),           BRTV_QUERY | BRTV_ALL, BRTV_CONV_I32_U16, 0                    },
     {BRT(HEIGHT_I32),                F(pm_height),          BRTV_QUERY | BRTV_ALL, BRTV_CONV_I32_U16, 0                    },
     {BRT(PIXEL_TYPE_U8),             F(pm_type),            BRTV_QUERY | BRTV_ALL, BRTV_CONV_I32_U8,  0                    },
@@ -68,7 +68,7 @@ struct pixelmapNewTokens {
 };
 
 #define F(f) offsetof(struct pixelmapNewTokens, f)
-static struct br_tv_template_entry pixelmapNewTemplateEntries[] = {
+static br_tv_template_entry pixelmapNewTemplateEntries[] = {
     {BRT(WIDTH_I32),                  F(width),           BRTV_SET, BRTV_CONV_COPY},
     {BRT(HEIGHT_I32),                 F(height),          BRTV_SET, BRTV_CONV_COPY},
     {BRT(PIXEL_BITS_I32),             F(pixel_bits),      BRTV_SET, BRTV_CONV_COPY},

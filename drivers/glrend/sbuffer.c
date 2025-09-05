@@ -16,7 +16,7 @@ static struct br_buffer_stored_dispatch bufferStoredDispatch;
  */
 #define F(f) offsetof(struct br_buffer_stored, f)
 
-static struct br_tv_template_entry bufferStoredTemplateEntries[] = {
+static br_tv_template_entry bufferStoredTemplateEntries[] = {
     {BRT(IDENTIFIER_CSTR),    F(identifier), BRTV_QUERY | BRTV_ALL, BRTV_CONV_COPY},
     {DEV(OPENGL_TEXTURE_U32), F(gl_tex),     BRTV_QUERY | BRTV_ALL, BRTV_CONV_COPY}
 };
@@ -178,7 +178,7 @@ static br_size_t BR_CMETHOD_DECL(br_buffer_stored_gl, space)(br_object *self)
     return BrResSizeTotal(self);
 }
 
-static struct br_tv_template *BR_CMETHOD_DECL(br_buffer_stored_gl, templateQuery)(br_object *_self)
+static br_tv_template *BR_CMETHOD_DECL(br_buffer_stored_gl, templateQuery)(br_object *_self)
 {
     return ((br_buffer_stored *)_self)->templates;
 }

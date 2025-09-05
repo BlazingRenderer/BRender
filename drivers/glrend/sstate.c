@@ -13,7 +13,7 @@ static const struct br_renderer_state_stored_dispatch rendererStateStoredDispatc
  */
 #define F(f) offsetof(struct br_renderer_state_stored, f)
 
-static struct br_tv_template_entry rendererStateStoredTemplateEntries[] = {
+static br_tv_template_entry rendererStateStoredTemplateEntries[] = {
     {BRT(IDENTIFIER_CSTR), F(identifier),  BRTV_QUERY | BRTV_ALL, BRTV_CONV_COPY},
     {BRT(RENDERER_O),      F(renderer),    BRTV_QUERY | BRTV_ALL, BRTV_CONV_COPY},
     {BRT(PARTS_U32),       F(state.valid), BRTV_QUERY | BRTV_ALL, BRTV_CONV_COPY},
@@ -75,7 +75,7 @@ static br_size_t BR_CMETHOD_DECL(br_renderer_state_stored_gl, space)(br_object *
     return sizeof(br_renderer_state_stored);
 }
 
-static struct br_tv_template *BR_CMETHOD_DECL(br_renderer_state_stored_gl, templateQuery)(br_object *_self)
+static br_tv_template *BR_CMETHOD_DECL(br_renderer_state_stored_gl, templateQuery)(br_object *_self)
 {
     br_renderer_state_stored *self = (br_renderer_state_stored *)_self;
 

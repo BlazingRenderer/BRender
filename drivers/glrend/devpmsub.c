@@ -14,7 +14,7 @@ static const struct br_device_pixelmap_dispatch devicePixelmapSubDispatch;
  * Device pixelmap info. template
  */
 #define F(f) offsetof(struct br_device_pixelmap, f)
-static struct br_tv_template_entry devicePixelmapSubTemplateEntries[] = {
+static br_tv_template_entry devicePixelmapSubTemplateEntries[] = {
     {BRT(WIDTH_I32),       F(pm_width),      BRTV_QUERY | BRTV_ALL, BRTV_CONV_I32_U16, 0},
     {BRT(HEIGHT_I32),      F(pm_height),     BRTV_QUERY | BRTV_ALL, BRTV_CONV_I32_U16, 0},
     {BRT(PIXEL_TYPE_U8),   F(pm_type),       BRTV_QUERY | BRTV_ALL, BRTV_CONV_I32_U8,  0},

@@ -17,7 +17,7 @@ static const struct br_device_clut_dispatch deviceClutDispatch;
  */
 #define F(f) offsetof(struct br_device_clut, f)
 
-static struct br_tv_template_entry deviceClutTemplateEntries[] = {
+static br_tv_template_entry deviceClutTemplateEntries[] = {
     {BRT_IDENTIFIER_CSTR, NULL, F(identifier), BRTV_QUERY | BRTV_ALL, BRTV_CONV_COPY},
 };
 #undef F
@@ -82,7 +82,7 @@ static br_size_t BR_CMETHOD_DECL(br_device_clut_gl, space)(br_object *self)
     return sizeof(br_device_clut);
 }
 
-static struct br_tv_template *BR_CMETHOD_DECL(br_device_clut_gl, queryTemplate)(br_object *_self)
+static br_tv_template *BR_CMETHOD_DECL(br_device_clut_gl, queryTemplate)(br_object *_self)
 {
     br_device_clut *self = (br_device_clut *)_self;
 

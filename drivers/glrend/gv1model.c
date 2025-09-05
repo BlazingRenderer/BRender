@@ -15,7 +15,7 @@ static const struct br_geometry_v1_model_dispatch geometryV1ModelDispatch;
 #define F(f) offsetof(struct br_geometry_v1_model, f)
 #define A(a) ((br_uintptr_t)(a))
 
-static struct br_tv_template_entry geometryV1ModelTemplateEntries[] = {
+static br_tv_template_entry geometryV1ModelTemplateEntries[] = {
     {BRT(IDENTIFIER_CSTR),     F(identifier),        BRTV_QUERY | BRTV_ALL,            BRTV_CONV_COPY},
     {BRT(RENDERER_FACILITY_O), F(renderer_facility), BRTV_QUERY | BRTV_ALL,            BRTV_CONV_COPY},
     {BRT(FACILITY_O),          F(renderer_facility), BRTV_QUERY,                       BRTV_CONV_COPY},
@@ -76,7 +76,7 @@ static br_size_t BR_CMETHOD_DECL(br_geometry_v1_model_gl, space)(br_object *self
     return sizeof(br_geometry_v1_model);
 }
 
-static struct br_tv_template *BR_CMETHOD_DECL(br_geometry_v1_model_gl, templateQuery)(br_object *_self)
+static br_tv_template *BR_CMETHOD_DECL(br_geometry_v1_model_gl, templateQuery)(br_object *_self)
 {
     br_geometry_v1_model *self = (br_geometry_v1_model *)_self;
 

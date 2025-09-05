@@ -14,7 +14,7 @@ static const struct br_output_facility_dispatch outputFacilityDispatch;
 #define F(f) offsetof(br_output_facility, f)
 #define A(a) ((br_uintptr_t)(a))
 
-static struct br_tv_template_entry outputFacilityTemplateEntries[] = {
+static br_tv_template_entry outputFacilityTemplateEntries[] = {
     {BRT(WIDTH_I32),                  A(-1),                BRTV_QUERY | BRTV_ALL | BRTV_ABS, BRTV_CONV_COPY  },
     {BRT(WIDTH_MIN_I32),              A(1),                 BRTV_QUERY | BRTV_ALL | BRTV_ABS, BRTV_CONV_COPY  },
     {BRT(HEIGHT_I32),                 A(-1),                BRTV_QUERY | BRTV_ALL | BRTV_ABS, BRTV_CONV_COPY  },
@@ -99,7 +99,7 @@ static br_size_t BR_CMETHOD_DECL(br_output_facility_sdl, space)(br_object *self)
     return sizeof(br_output_facility);
 }
 
-static struct br_tv_template *BR_CMETHOD_DECL(br_output_facility_sdl, queryTemplate)(br_object *_self)
+static br_tv_template *BR_CMETHOD_DECL(br_output_facility_sdl, queryTemplate)(br_object *_self)
 {
     br_output_facility *self = (br_output_facility *)_self;
 

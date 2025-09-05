@@ -25,7 +25,7 @@ static const char deviceProduct[] = DEVICE_PRODUCT;
 #define F(f) offsetof(br_device, f)
 #define A(a) ((br_uintptr_t)(a))
 
-static struct br_tv_template_entry deviceTemplateEntries[] = {
+static br_tv_template_entry deviceTemplateEntries[] = {
     {BRT(IDENTIFIER_CSTR),         F(identifier),    BRTV_QUERY | BRTV_ALL,            BRTV_CONV_COPY,   0                      },
     {BRT(VERSION_U32),             0,                BRTV_QUERY | BRTV_ALL,            BRTV_CONV_DIRECT, DEVICE_VERSION         },
     {BRT(BRENDER_VERSION_U32),     0,                BRTV_QUERY | BRTV_ALL,            BRTV_CONV_DIRECT, __BRENDER__            },
@@ -134,7 +134,7 @@ static br_size_t BR_CMETHOD_DECL(br_device_gl, space)(struct br_object *self)
     return sizeof(br_device);
 }
 
-static struct br_tv_template *BR_CMETHOD_DECL(br_device_gl, templateQuery)(struct br_object *_self)
+static br_tv_template *BR_CMETHOD_DECL(br_device_gl, templateQuery)(struct br_object *_self)
 {
     br_device *self = (br_device *)_self;
 

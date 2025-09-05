@@ -40,8 +40,8 @@ typedef struct br_device_pixelmap {
 
     /** End of br_pixelmap fields **/
 
-    struct br_device          *device;
-    struct br_output_facility *output_facility;
+    br_device          *device;
+    br_output_facility *output_facility;
 
     /*
      * Type of buffer (when matched)

@@ -49,7 +49,7 @@ static const br_tv_custom custom = {
  * Device pixelmap info. template
  */
 #define F(f) offsetof(struct br_device_pixelmap, f)
-static struct br_tv_template_entry devicePixelmapTemplateEntries[] = {
+static br_tv_template_entry devicePixelmapTemplateEntries[] = {
     {BRT(WIDTH_I32),          F(pm_width),        BRTV_QUERY | BRTV_ALL, BRTV_CONV_I32_U16, 0                    },
     {BRT(HEIGHT_I32),         F(pm_height),       BRTV_QUERY | BRTV_ALL, BRTV_CONV_I32_U16, 0                    },
     {BRT(PIXEL_TYPE_U8),      F(pm_type),         BRTV_QUERY | BRTV_ALL, BRTV_CONV_I32_U8,  0                    },
@@ -195,7 +195,7 @@ static br_size_t BR_CMETHOD_DECL(br_device_pixelmap_gl, space)(br_object *self)
     return sizeof(br_device_pixelmap);
 }
 
-static struct br_tv_template *BR_CMETHOD_DECL(br_device_pixelmap_gl, templateQuery)(br_object *_self)
+static br_tv_template *BR_CMETHOD_DECL(br_device_pixelmap_gl, templateQuery)(br_object *_self)
 {
     br_device_pixelmap *self = (br_device_pixelmap *)_self;
 
@@ -226,7 +226,7 @@ struct pixelmapMatchTokens {
 };
 
 #define F(f) offsetof(struct pixelmapMatchTokens, f)
-static struct br_tv_template_entry pixelmapMatchTemplateEntries[] = {
+static br_tv_template_entry pixelmapMatchTemplateEntries[] = {
     {BRT_WIDTH_I32,        NULL, F(width),        BRTV_SET, BRTV_CONV_COPY},
     {BRT_HEIGHT_I32,       NULL, F(height),       BRTV_SET, BRTV_CONV_COPY},
     {BRT_PIXEL_BITS_I32,   NULL, F(pixel_bits),   BRTV_SET, BRTV_CONV_COPY},
