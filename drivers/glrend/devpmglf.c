@@ -236,7 +236,7 @@ br_device_pixelmap *DevicePixelmapGLAllocateFront(br_device *dev, br_output_faci
     }
 
     gl = &self->asFront.glad_gl_context;
-    self->asFront.glad_gl_context.userptr = self;
+    self->asFront.glad_gl_context.userptr = &self->asFront;
 
     glad_major = GLAD_VERSION_MAJOR(glad_version);
     glad_minor = GLAD_VERSION_MINOR(glad_version);
