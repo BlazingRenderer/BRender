@@ -61,15 +61,15 @@ br_boolean VIDEOI_CompileBRenderShader(HVIDEO hVideo, const char *vertPath, cons
         return BR_FALSE;
     }
 
-    vert = VIDEOI_LoadAndCompileShader(gl, GL_VERTEX_SHADER, vertPath, g_DefaultVertexShader, sizeof(g_DefaultVertexShader));
+    vert = DeviceGLLoadAndCompileShader(gl, GL_VERTEX_SHADER, vertPath, g_DefaultVertexShader, sizeof(g_DefaultVertexShader));
     if(!vert)
         goto vert_failed;
 
-    frag = VIDEOI_LoadAndCompileShader(gl, GL_FRAGMENT_SHADER, fragPath, g_DefaultFragmentShader, sizeof(g_DefaultFragmentShader));
+    frag = DeviceGLLoadAndCompileShader(gl, GL_FRAGMENT_SHADER, fragPath, g_DefaultFragmentShader, sizeof(g_DefaultFragmentShader));
     if(!frag)
         goto frag_failed;
 
-    if(!((hVideo->brenderProgram.program = VIDEOI_CreateAndCompileProgram(gl, vert, frag))))
+    if(!((hVideo->brenderProgram.program = DeviceGLCreateAndCompileProgram(gl, vert, frag))))
         goto prog_failed;
 
     DeviceGLObjectLabel(gl, GL_SHADER, vert, BR_GLREND_DEBUG_INTERNAL_PREFIX "brender:shader:vertex");

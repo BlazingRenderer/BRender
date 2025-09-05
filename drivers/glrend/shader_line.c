@@ -9,13 +9,13 @@ br_boolean VIDEOI_CompileLineShader(HVIDEO hVideo)
 
     GLuint vert, frag;
 
-    if((vert = VIDEOI_CreateAndCompileShader(gl, GL_VERTEX_SHADER, g_LineVertexShader, sizeof(g_LineVertexShader))) == 0)
+    if((vert = DeviceGLCreateAndCompileShader(gl, GL_VERTEX_SHADER, g_LineVertexShader, sizeof(g_LineVertexShader))) == 0)
         goto vert_failed;
 
-    if((frag = VIDEOI_CreateAndCompileShader(gl, GL_FRAGMENT_SHADER, g_LineFragmentShader, sizeof(g_LineFragmentShader))) == 0)
+    if((frag = DeviceGLCreateAndCompileShader(gl, GL_FRAGMENT_SHADER, g_LineFragmentShader, sizeof(g_LineFragmentShader))) == 0)
         goto frag_failed;
 
-    if((hVideo->lineProgram.program = VIDEOI_CreateAndCompileProgram(gl, vert, frag)) == 0)
+    if((hVideo->lineProgram.program = DeviceGLCreateAndCompileProgram(gl, vert, frag)) == 0)
         goto prog_failed;
 
     DeviceGLObjectLabel(gl, GL_SHADER, vert, BR_GLREND_DEBUG_INTERNAL_PREFIX "line:shader:vertex");

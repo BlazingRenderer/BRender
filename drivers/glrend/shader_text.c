@@ -11,13 +11,13 @@ br_boolean VIDEOI_CompileTextShader(HVIDEO hVideo)
     const GladGLContext *gl = hVideo->gl;
     GLuint               vert, frag;
 
-    if((vert = VIDEOI_CreateAndCompileShader(gl, GL_VERTEX_SHADER, g_TextVertexShader, sizeof(g_TextVertexShader))) == 0)
+    if((vert = DeviceGLCreateAndCompileShader(gl, GL_VERTEX_SHADER, g_TextVertexShader, sizeof(g_TextVertexShader))) == 0)
         goto vert_failed;
 
-    if((frag = VIDEOI_CreateAndCompileShader(gl, GL_FRAGMENT_SHADER, g_TextFragmentShader, sizeof(g_TextFragmentShader))) == 0)
+    if((frag = DeviceGLCreateAndCompileShader(gl, GL_FRAGMENT_SHADER, g_TextFragmentShader, sizeof(g_TextFragmentShader))) == 0)
         goto frag_failed;
 
-    if((hVideo->textProgram.program = VIDEOI_CreateAndCompileProgram(gl, vert, frag)) == 0)
+    if((hVideo->textProgram.program = DeviceGLCreateAndCompileProgram(gl, vert, frag)) == 0)
         goto prog_failed;
 
     DeviceGLObjectLabel(gl, GL_SHADER, vert, BR_GLREND_DEBUG_INTERNAL_PREFIX "text:shader:vertex");

@@ -1,4 +1,5 @@
 #include "drv.h"
+#include "brassert.h"
 
 GLuint DeviceGLBuildWhiteTexture(const GladGLContext *gl)
 {
@@ -273,4 +274,94 @@ br_clip_result DevicePixelmapGLRectangleClip(br_rectangle *restrict out, const b
     tmp.y = pm->height - tmp.h - tmp.y;
     *out  = tmp;
     return rr;
+}
+
+GLuint DeviceGLCreateAndCompileShader(const GladGLContext *gl, GLenum type, const char *shader, size_t size)
+{
+    GLuint s;
+    GLint  _size, status;
+
+    ASSERT(type == GL_VERTEX_SHADER || type == GL_FRAGMENT_SHADER);
+
+    s     = gl->CreateShader(type);
+    _size = (GLint)size;
+    gl->ShaderSource(s, 1, &shader, &_size);
+    gl->CompileShader(s);
+
+    status = GL_FALSE;
+    gl->GetShaderiv(s, GL_COMPILE_STATUS, &status);
+    if(status != GL_TRUE) {
+        char  errorBuffer[1024];
+        GLint maxLength;
+        gl->GetShaderiv(s, GL_INFO_LOG_LENGTH, &maxLength);
+
+        if(maxLength > sizeof(errorBuffer))
+            maxLength = sizeof(errorBuffer);
+
+        gl->GetShaderInfoLog(s, maxLength, &maxLength, errorBuffer);
+        errorBuffer[maxLength - 1] = '\0';
+
+        BrLogError("GLREND", "Error compiling shader:\n%s", errorBuffer);
+        gl->DeleteShader(s);
+        return 0;
+    }
+
+    return s;
+}
+
+GLuint DeviceGLLoadAndCompileShader(const GladGLContext *gl, GLenum type, const char *path, const char *default_data, size_t default_size)
+{
+    GLchar *source;
+    size_t  size;
+    GLuint  shader;
+
+    if(path == NULL || (source = BrFileLoad(NULL, path, &size)) == NULL) {
+        source = (GLchar *)default_data;
+        size   = default_size;
+    }
+
+    shader = DeviceGLCreateAndCompileShader(gl, type, source, size);
+
+    if(source != default_data)
+        BrResFree(source);
+
+    return shader;
+}
+
+GLuint DeviceGLCreateAndCompileProgram(const GladGLContext *gl, GLuint vert, GLuint frag)
+{
+    GLuint program;
+    GLint  status;
+
+    if((program = gl->CreateProgram()) == 0) {
+        BrLogError("GLREND", "Error creating program.");
+        return 0;
+    }
+
+    gl->AttachShader(program, vert);
+    gl->AttachShader(program, frag);
+
+    gl->LinkProgram(program);
+
+    status = GL_FALSE;
+    gl->GetProgramiv(program, GL_LINK_STATUS, &status);
+    if(status != GL_TRUE) {
+        char  errorBuffer[1024];
+        GLint maxLength;
+        gl->GetProgramiv(program, GL_INFO_LOG_LENGTH, &maxLength);
+
+        if(maxLength > sizeof(errorBuffer))
+            maxLength = sizeof(errorBuffer);
+
+        gl->GetProgramInfoLog(program, maxLength, &maxLength, errorBuffer);
+        errorBuffer[maxLength - 1] = '\0';
+        BrLogError("GLREND", "Error linking program:\n%s", errorBuffer);
+
+        gl->DetachShader(program, vert);
+        gl->DetachShader(program, frag);
+        gl->DeleteProgram(program);
+        program = 0;
+    }
+
+    return program;
 }

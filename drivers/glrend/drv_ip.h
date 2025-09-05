@@ -17,12 +17,6 @@ HVIDEO VIDEO_Open(HVIDEO hVideo, const GladGLContext *gl, const char *vertShader
 
 void VIDEO_Close(HVIDEO hVideo);
 
-GLuint VIDEOI_CreateAndCompileShader(const GladGLContext *gl, GLenum type, const char *shader, size_t size);
-
-GLuint VIDEOI_LoadAndCompileShader(const GladGLContext *gl, GLenum type, const char *path, const char *default_data, size_t default_size);
-
-GLuint VIDEOI_CreateAndCompileProgram(const GladGLContext *gl, GLuint vert, GLuint frag);
-
 br_boolean VIDEOI_CompileRectShader(HVIDEO hVideo);
 
 br_boolean VIDEOI_CompileTextShader(HVIDEO hVideo);
@@ -193,6 +187,10 @@ const char *DeviceGLStrError(GLenum err);
 br_vector3 DeviceGLTriangleCentroid(const br_vector3 *v1, const br_vector3 *v2, const br_vector3 *v3);
 
 br_clip_result DevicePixelmapGLRectangleClip(br_rectangle *restrict out, const br_rectangle *restrict r, const br_pixelmap *pm);
+
+GLuint DeviceGLCreateAndCompileShader(const GladGLContext *gl, GLenum type, const char *shader, size_t size);
+GLuint DeviceGLLoadAndCompileShader(const GladGLContext *gl, GLenum type, const char *path, const char *default_data, size_t default_size);
+GLuint DeviceGLCreateAndCompileProgram(const GladGLContext *gl, GLuint vert, GLuint frag);
 
 /*
  * Wrappers for br_device_gl_procs.
