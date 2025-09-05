@@ -934,6 +934,11 @@ const GladGLContext *DevicePixelmapGLGetGLContext(br_device_pixelmap *self)
     return &self->screen->asFront.glad_gl_context;
 }
 
+br_gl_context_state *GLContextState(const GladGLContext *gl)
+{
+    return gl->userptr;
+}
+
 /*
  * Default dispatch table for device pixelmap
  */

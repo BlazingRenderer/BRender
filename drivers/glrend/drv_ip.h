@@ -63,6 +63,7 @@ br_error BR_CMETHOD_DECL(br_device_pixelmap_gl, match)(br_device_pixelmap *self,
 br_rectangle DevicePixelmapGLGetViewport(const br_device_pixelmap *pm);
 
 const GladGLContext *DevicePixelmapGLGetGLContext(br_device_pixelmap *self);
+br_gl_context_state *GLContextState(const GladGLContext *gl);
 
 /*
  * devpmsub.c
