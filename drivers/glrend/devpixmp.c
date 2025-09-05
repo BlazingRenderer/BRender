@@ -248,6 +248,7 @@ br_error BR_CMETHOD_DECL(br_device_pixelmap_gl, match)(br_device_pixelmap *self,
     const br_pixelmap_gl_fmt  *fmt;
     HVIDEO                     hVideo;
     const GladGLContext       *gl;
+    br_gl_context_state       *ctx;
     struct pixelmapMatchTokens mt = {
         .width        = self->pm_width,
         .height       = self->pm_height,
@@ -259,6 +260,7 @@ br_error BR_CMETHOD_DECL(br_device_pixelmap_gl, match)(br_device_pixelmap *self,
 
     hVideo = &self->screen->asFront.video;
     gl     = DevicePixelmapGLGetGLContext(self);
+    ctx    = GLContextState(gl);
 
     if(self->device->templates.pixelmapMatchTemplate == NULL) {
         self->device->templates.pixelmapMatchTemplate = BrTVTemplateAllocate(self->device, pixelmapMatchTemplateEntries,
@@ -328,8 +330,8 @@ br_error BR_CMETHOD_DECL(br_device_pixelmap_gl, match)(br_device_pixelmap *self,
 
     if(mt.msaa_samples < 0)
         mt.msaa_samples = 0;
-    else if(mt.msaa_samples > hVideo->maxSamples)
-        mt.msaa_samples = hVideo->maxSamples;
+    else if(mt.msaa_samples > ctx->limits.max_samples)
+        mt.msaa_samples = ctx->limits.max_samples;
 
     pm                  = BrResAllocate(self->device, sizeof(br_device_pixelmap), BR_MEMORY_OBJECT);
     pm->dispatch        = &devicePixelmapDispatch;

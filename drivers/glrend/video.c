@@ -15,15 +15,6 @@ HVIDEO VIDEO_Open(HVIDEO hVideo, const GladGLContext *gl, const char *vertShader
 
     hVideo->gl = gl;
 
-    gl->GetIntegerv(GL_MAX_UNIFORM_BLOCK_SIZE, &hVideo->maxUniformBlockSize);
-    gl->GetIntegerv(GL_MAX_UNIFORM_BUFFER_BINDINGS, &hVideo->maxUniformBufferBindings);
-    gl->GetIntegerv(GL_MAX_VERTEX_UNIFORM_BLOCKS, &hVideo->maxVertexUniformBlocks);
-    gl->GetIntegerv(GL_MAX_FRAGMENT_UNIFORM_BLOCKS, &hVideo->maxFragmentUniformBlocks);
-    gl->GetIntegerv(GL_MAX_SAMPLES, &hVideo->maxSamples);
-
-    if(gl->EXT_texture_filter_anisotropic)
-        gl->GetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, &hVideo->maxAnisotropy);
-
     if(!VIDEOI_CompileRectShader(hVideo))
         return NULL;
 

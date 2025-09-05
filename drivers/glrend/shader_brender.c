@@ -26,7 +26,8 @@ static void VIDEOI_GetShaderVariables(HVIDEO hVideo, const GladGLContext *gl)
 
 br_boolean VIDEOI_CompileBRenderShader(HVIDEO hVideo, const char *vertPath, const char *fragPath)
 {
-    const GladGLContext *gl = hVideo->gl;
+    const GladGLContext *gl  = hVideo->gl;
+    br_gl_context_state *ctx = GLContextState(gl);
     GLuint               vert, frag;
 
     hVideo->brenderProgram.mainTextureBinding  = 0;
@@ -38,26 +39,26 @@ br_boolean VIDEOI_CompileBRenderShader(HVIDEO hVideo, const char *vertPath, cons
 #define _MAX(a, b) ((a) > (b) ? (a) : (b))
         int neededSize = _MAX(sizeof(shader_data_scene), sizeof(shader_data_model));
 #undef _MAX
-        if(hVideo->maxUniformBlockSize < neededSize) {
-            BrLogError("VIDEO", "GL_MAX_UNIFORM_BLOCK_SIZE too small, got %d, needed %d.", hVideo->maxUniformBlockSize, neededSize);
+        if(ctx->limits.max_uniform_block_size < neededSize) {
+            BrLogError("VIDEO", "GL_MAX_UNIFORM_BLOCK_SIZE too small, got %d, needed %d.", ctx->limits.max_uniform_block_size, neededSize);
             return BR_FALSE;
         }
     }
 
-    if(hVideo->maxUniformBufferBindings < 2) {
-        BrLogError("VIDEO", "GL_MAX_UNIFORM_BUFFER_BINDINGS too small, got %d, needed 2.", hVideo->maxUniformBufferBindings);
+    if(ctx->limits.max_uniform_buffer_bindings < 2) {
+        BrLogError("VIDEO", "GL_MAX_UNIFORM_BUFFER_BINDINGS too small, got %d, needed 2.", ctx->limits.max_uniform_buffer_bindings);
         return BR_FALSE;
     }
 
     /* br_model_state */
-    if(hVideo->maxVertexUniformBlocks < 1) {
-        BrLogError("VIDEO", "GL_MAX_VERTEX_UNIFORM_BLOCKS too small, got %d, needed 1.", hVideo->maxVertexUniformBlocks);
+    if(ctx->limits.max_vertex_uniform_blocks < 1) {
+        BrLogError("VIDEO", "GL_MAX_VERTEX_UNIFORM_BLOCKS too small, got %d, needed 1.", ctx->limits.max_vertex_uniform_blocks);
         return BR_FALSE;
     }
 
     /* br_model_state, br_scene_state */
-    if(hVideo->maxFragmentUniformBlocks < 2) {
-        BrLogError("VIDEO", "GL_MAX_FRAGMENT_UNIFORM_BLOCKS too small, got %d, needed 2.", hVideo->maxFragmentUniformBlocks);
+    if(ctx->limits.max_fragment_uniform_blocks < 2) {
+        BrLogError("VIDEO", "GL_MAX_FRAGMENT_UNIFORM_BLOCKS too small, got %d, needed 2.", ctx->limits.max_fragment_uniform_blocks);
         return BR_FALSE;
     }
 

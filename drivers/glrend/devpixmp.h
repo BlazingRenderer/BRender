@@ -50,6 +50,15 @@ typedef struct br_gl_context_state {
 
     br_quirks_gl quirks;
 
+    struct {
+        GLint   max_uniform_block_size;
+        GLint   max_uniform_buffer_bindings;
+        GLint   max_vertex_uniform_blocks;
+        GLint   max_fragment_uniform_blocks;
+        GLint   max_samples;
+        GLfloat max_anisotropy;
+    } limits;
+
     GLuint tex_white;
     GLuint tex_checkerboard;
 

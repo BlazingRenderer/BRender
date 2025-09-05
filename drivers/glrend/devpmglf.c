@@ -158,6 +158,7 @@ br_device_pixelmap *DevicePixelmapGLAllocateFront(br_device *dev, br_output_faci
     br_device_gl_context_info context_info;
     int                       glad_version, glad_major, glad_minor;
     const GladGLContext      *gl;
+    br_gl_context_state      *ctx;
     struct pixelmapNewTokens  pt = {
          .width           = -1,
          .height          = -1,
@@ -235,8 +236,9 @@ br_device_pixelmap *DevicePixelmapGLAllocateFront(br_device *dev, br_output_faci
         goto cleanup_context;
     }
 
-    gl = &self->asFront.glad_gl_context;
+    gl                                    = &self->asFront.glad_gl_context;
     self->asFront.glad_gl_context.userptr = &self->asFront;
+    ctx = GLContextState(gl);
 
     glad_major = GLAD_VERSION_MAJOR(glad_version);
     glad_minor = GLAD_VERSION_MINOR(glad_version);
@@ -304,6 +306,18 @@ br_device_pixelmap *DevicePixelmapGLAllocateFront(br_device *dev, br_output_faci
     } else {
         BrLogWarn("GLREND", "OpenGL gave us an unknown screen format (R%dG%dB%dA%d), soldiering on...", red_bits, grn_bits, blu_bits, alpha_bits);
     }
+
+    /*
+     * Cache some limits.
+     */
+    gl->GetIntegerv(GL_MAX_UNIFORM_BLOCK_SIZE, &ctx->limits.max_uniform_block_size);
+    gl->GetIntegerv(GL_MAX_UNIFORM_BUFFER_BINDINGS, &ctx->limits.max_uniform_buffer_bindings);
+    gl->GetIntegerv(GL_MAX_VERTEX_UNIFORM_BLOCKS, &ctx->limits.max_vertex_uniform_blocks);
+    gl->GetIntegerv(GL_MAX_FRAGMENT_UNIFORM_BLOCKS, &ctx->limits.max_fragment_uniform_blocks);
+    gl->GetIntegerv(GL_MAX_SAMPLES, &ctx->limits.max_samples);
+
+    if(gl->EXT_texture_filter_anisotropic)
+        gl->GetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, &ctx->limits.max_anisotropy);
 
     if(VIDEO_Open(&self->asFront.video, gl, pt.vertex_shader, pt.fragment_shader) == NULL) {
         /*

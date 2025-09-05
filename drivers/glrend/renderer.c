@@ -841,7 +841,7 @@ GLuint RendererGLGetSampler(br_renderer *self, const br_sampler_info_gl *info)
 
     if(!quirks->disable_anisotropic_filtering) {
         if(gl->EXT_texture_filter_anisotropic && info->filter_min != GL_NEAREST && info->filter_mag != GL_NEAREST) {
-            gl->SamplerParameterf(sampler, GL_TEXTURE_MAX_ANISOTROPY_EXT, self->pixelmap->screen->asFront.video.maxAnisotropy);
+            gl->SamplerParameterf(sampler, GL_TEXTURE_MAX_ANISOTROPY_EXT, GLContextState(gl)->limits.max_anisotropy);
         }
     }
 
