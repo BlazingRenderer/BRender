@@ -36,7 +36,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Install Dependencies
-        run: sudo apt install -y --no-install-recommends libsdl2-dev libglfw3-dev ninja-build glslang-tools spirv-cross
+        run: sudo apt-get -y install --no-install-recommends libsdl2-dev libglfw3-dev ninja-build glslang-tools spirv-cross
       - name: Clone Repository
         uses: actions/checkout@v4
       - name: Configure
