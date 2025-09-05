@@ -65,7 +65,7 @@ static br_tv_template_entry devicePixelmapTemplateEntries[] = {
 /*
  * (Re)create the renderbuffers and attach them to the framebuffer.
  */
-static br_error recreate_renderbuffers(br_device_pixelmap *self)
+static br_error recreate_renderbuffers(br_device_pixelmap *self, const GladGLContext *gl)
 {
     GLuint fbo           = 0;
     GLenum binding_point = self->msaa_samples > 1 ? GL_TEXTURE_2D_MULTISAMPLE : GL_TEXTURE_2D;
@@ -80,84 +80,85 @@ static br_error recreate_renderbuffers(br_device_pixelmap *self)
         UASSERT(fbo != 0);
 
         /* Delete */
-        glDeleteTextures(1, &self->asBack.glTex);
+        gl->DeleteTextures(1, &self->asBack.glTex);
 
         /* Create */
-        glGenTextures(1, &self->asBack.glTex);
-        glBindTexture(binding_point, self->asBack.glTex);
+        gl->GenTextures(1, &self->asBack.glTex);
+        gl->BindTexture(binding_point, self->asBack.glTex);
 
         if(self->msaa_samples) {
-            glTexImage2DMultisample(binding_point, self->msaa_samples, fmt->internal_format, self->pm_width, self->pm_height, GL_TRUE);
+            gl->TexImage2DMultisample(binding_point, self->msaa_samples, fmt->internal_format, self->pm_width, self->pm_height, GL_TRUE);
         } else {
-            glTexParameteri(binding_point, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-            glTexImage2D(binding_point, 0, fmt->internal_format, self->pm_width, self->pm_height, 0, fmt->format, fmt->type, NULL);
+            gl->TexParameteri(binding_point, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+            gl->TexImage2D(binding_point, 0, fmt->internal_format, self->pm_width, self->pm_height, 0, fmt->format, fmt->type, NULL);
         }
 
-        DeviceGLObjectLabelF(GL_TEXTURE, self->asBack.glTex, "%s:colour", self->pm_identifier);
+        DeviceGLObjectLabelF(gl, GL_TEXTURE, self->asBack.glTex, "%s:colour", self->pm_identifier);
 
-        glBindTexture(binding_point, 0);
+        gl->BindTexture(binding_point, 0);
 
         /* Attach */
-        glBindFramebuffer(GL_FRAMEBUFFER, fbo);
-        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, binding_point, self->asBack.glTex, 0);
-        glDrawBuffers(1, draw_buffers);
+        gl->BindFramebuffer(GL_FRAMEBUFFER, fbo);
+        gl->FramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, binding_point, self->asBack.glTex, 0);
+        gl->DrawBuffers(1, draw_buffers);
     } else if(self->use_type == BRT_DEPTH) {
         fbo = self->asDepth.backbuffer->asBack.glFbo;
         UASSERT(fbo != 0);
 
         /* Delete */
-        glDeleteTextures(1, &self->asDepth.glDepth);
+        gl->DeleteTextures(1, &self->asDepth.glDepth);
 
         /* Create */
-        glGenTextures(1, &self->asDepth.glDepth);
-        glBindTexture(binding_point, self->asDepth.glDepth);
+        gl->GenTextures(1, &self->asDepth.glDepth);
+        gl->BindTexture(binding_point, self->asDepth.glDepth);
 
         if(self->msaa_samples) {
-            glTexImage2DMultisample(binding_point, self->msaa_samples, GL_DEPTH_COMPONENT, self->pm_width, self->pm_height, GL_TRUE);
+            gl->TexImage2DMultisample(binding_point, self->msaa_samples, GL_DEPTH_COMPONENT, self->pm_width, self->pm_height, GL_TRUE);
         } else {
-            glTexImage2D(binding_point, 0, GL_DEPTH_COMPONENT, self->pm_width, self->pm_height, 0, GL_DEPTH_COMPONENT, GL_UNSIGNED_BYTE, NULL);
+            gl->TexImage2D(binding_point, 0, GL_DEPTH_COMPONENT, self->pm_width, self->pm_height, 0, GL_DEPTH_COMPONENT, GL_UNSIGNED_BYTE, NULL);
         }
 
-        DeviceGLObjectLabelF(GL_TEXTURE, self->asDepth.glDepth, "%s:depth", self->pm_identifier);
+        DeviceGLObjectLabelF(gl, GL_TEXTURE, self->asDepth.glDepth, "%s:depth", self->pm_identifier);
 
-        glBindTexture(binding_point, 0);
+        gl->BindTexture(binding_point, 0);
 
         /* Attach */
-        glBindFramebuffer(GL_FRAMEBUFFER, fbo);
-        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, binding_point, self->asDepth.glDepth, 0);
+        gl->BindFramebuffer(GL_FRAMEBUFFER, fbo);
+        gl->FramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, binding_point, self->asDepth.glDepth, 0);
     }
 
-    DeviceGLObjectLabelF(GL_FRAMEBUFFER, fbo, "%s:fbo", self->pm_identifier);
+    DeviceGLObjectLabelF(gl, GL_FRAMEBUFFER, fbo, "%s:fbo", self->pm_identifier);
 
-    if(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
-        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    if(gl->CheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
+        gl->BindFramebuffer(GL_FRAMEBUFFER, 0);
         return BRE_FAIL;
     }
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    gl->BindFramebuffer(GL_FRAMEBUFFER, 0);
     return BRE_OK;
 }
 
-static void delete_gl_resources(br_device_pixelmap *self)
+static void delete_gl_resources(br_device_pixelmap *self, const GladGLContext *gl)
 {
     if(self->use_type == BRT_DEPTH) {
         // FIXME: We should be destroyed before our parent.
         // FIXME: If we haven't, should I bind the parent and detach?
-        glDeleteTextures(1, &self->asDepth.glDepth);
+        gl->DeleteTextures(1, &self->asDepth.glDepth);
     } else if(self->use_type == BRT_OFFSCREEN) {
-        glDeleteFramebuffers(1, &self->asBack.glFbo);
-        glDeleteTextures(1, &self->asBack.glTex);
+        gl->DeleteFramebuffers(1, &self->asBack.glFbo);
+        gl->DeleteTextures(1, &self->asBack.glTex);
     }
 }
 
 static void BR_CMETHOD_DECL(br_device_pixelmap_gl, free)(br_object *_self)
 {
-    br_device_pixelmap *self = (br_device_pixelmap *)_self;
+    br_device_pixelmap  *self = (br_device_pixelmap *)_self;
+    const GladGLContext *gl   = DevicePixelmapGLGetGLContext(self);
 
     UASSERT(self->num_refs == 0);
 
     BrLogTrace("GLREND", "Freeing %s", self->pm_identifier);
 
-    delete_gl_resources(self);
+    delete_gl_resources(self, gl);
 
     ObjectContainerRemove(self->output_facility, (br_object *)self);
 
@@ -208,9 +209,11 @@ static br_tv_template *BR_CMETHOD_DECL(br_device_pixelmap_gl, templateQuery)(br_
 
 static br_error BR_CMETHOD_DECL(br_device_pixelmap_gl, resize)(br_device_pixelmap *self, br_int_32 width, br_int_32 height)
 {
+    const GladGLContext *gl = DevicePixelmapGLGetGLContext(self);
+
     self->pm_width  = width;
     self->pm_height = height;
-    return recreate_renderbuffers(self);
+    return recreate_renderbuffers(self, gl);
 }
 
 /*
@@ -244,6 +247,7 @@ br_error BR_CMETHOD_DECL(br_device_pixelmap_gl, match)(br_device_pixelmap *self,
     const char                *typestring;
     const br_pixelmap_gl_fmt  *fmt;
     HVIDEO                     hVideo;
+    const GladGLContext       *gl;
     struct pixelmapMatchTokens mt = {
         .width        = self->pm_width,
         .height       = self->pm_height,
@@ -254,6 +258,7 @@ br_error BR_CMETHOD_DECL(br_device_pixelmap_gl, match)(br_device_pixelmap *self,
     };
 
     hVideo = &self->screen->asFront.video;
+    gl     = DevicePixelmapGLGetGLContext(self);
 
     if(self->device->templates.pixelmapMatchTemplate == NULL) {
         self->device->templates.pixelmapMatchTemplate = BrTVTemplateAllocate(self->device, pixelmapMatchTemplateEntries,
@@ -347,17 +352,17 @@ br_error BR_CMETHOD_DECL(br_device_pixelmap_gl, match)(br_device_pixelmap *self,
 
     if(mt.use_type == BRT_OFFSCREEN) {
         pm->asBack.depthbuffer = NULL;
-        pm->asBack.clut        = DeviceClutGLAllocate(pm);
-        glGenFramebuffers(1, &pm->asBack.glFbo);
+        pm->asBack.clut        = DeviceClutGLAllocate(pm, gl);
+        gl->GenFramebuffers(1, &pm->asBack.glFbo);
     } else {
         UASSERT(mt.use_type == BRT_DEPTH);
         self->asBack.depthbuffer = pm;
         pm->asDepth.backbuffer   = self;
     }
 
-    if(recreate_renderbuffers(pm) != BRE_OK) {
+    if(recreate_renderbuffers(pm, gl) != BRE_OK) {
         DevicePixelmapGLDecRef(self->screen);
-        delete_gl_resources(pm);
+        delete_gl_resources(pm, gl);
         BrResFreeNoCallback(pm);
         return BRE_FAIL;
     }
@@ -376,6 +381,8 @@ br_error BR_CMETHOD_DECL(br_device_pixelmap_gl, match)(br_device_pixelmap *self,
 static br_error BR_CMETHOD_DECL(br_device_pixelmap_gl, rectangleStretchCopy)(br_device_pixelmap *self, br_rectangle *d,
                                                                              br_device_pixelmap *src, br_rectangle *s)
 {
+    const GladGLContext *gl = DevicePixelmapGLGetGLContext(self);
+
     /*
      * Device->Device non-addressable stretch copy.
      */
@@ -418,14 +425,14 @@ static br_error BR_CMETHOD_DECL(br_device_pixelmap_gl, rectangleStretchCopy)(br_
     if(self == src)
         return BRE_OK;
 
-    glBindFramebuffer(GL_READ_FRAMEBUFFER, srcFbo);
-    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, dstFbo);
+    gl->BindFramebuffer(GL_READ_FRAMEBUFFER, srcFbo);
+    gl->BindFramebuffer(GL_DRAW_FRAMEBUFFER, dstFbo);
 
-    glBlitFramebuffer(srect.x, srect.y, srect.x + srect.w, srect.y + srect.h, drect.x, drect.y, drect.x + drect.w, drect.y + drect.h, bits,
-                      GL_NEAREST);
+    gl->BlitFramebuffer(srect.x, srect.y, srect.x + srect.w, srect.y + srect.h, drect.x, drect.y, drect.x + drect.w, drect.y + drect.h,
+                        bits, GL_NEAREST);
 
-    glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
-    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+    gl->BindFramebuffer(GL_READ_FRAMEBUFFER, 0);
+    gl->BindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
 
     return BRE_OK;
 }
@@ -446,9 +453,10 @@ static br_error BR_CMETHOD_DECL(br_device_pixelmap_gl, rectangleCopy)(br_device_
 
 static br_error BR_CMETHOD_DECL(br_device_pixelmap_gl, rectangleFill)(br_device_pixelmap *self, br_rectangle *rect, br_uint_32 colour)
 {
-    GLuint       fbo;
-    GLbitfield   mask;
-    br_rectangle drect;
+    GLuint               fbo;
+    GLbitfield           mask;
+    br_rectangle         drect;
+    const GladGLContext *gl = DevicePixelmapGLGetGLContext(self);
 
     /*
      * Clip rectangle to pixelmap
@@ -463,29 +471,29 @@ static br_error BR_CMETHOD_DECL(br_device_pixelmap_gl, rectangleFill)(br_device_
         fbo  = self->asBack.glFbo;
         mask = GL_COLOR_BUFFER_BIT;
 
-        glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
-        glClearColor((float)r8 / 255.0f, (float)g8 / 255.0f, (float)b8 / 255.0f, (float)a8 / 255.0f);
+        gl->ColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
+        gl->ClearColor((float)r8 / 255.0f, (float)g8 / 255.0f, (float)b8 / 255.0f, (float)a8 / 255.0f);
     } else if(self->use_type == BRT_DEPTH) {
         UASSERT(colour == 0xFFFFFFFF);
         fbo  = self->asDepth.backbuffer->asBack.glFbo;
         mask = GL_DEPTH_BUFFER_BIT;
-        glDepthMask(GL_TRUE);
-        glClearDepth(1.0f);
+        gl->DepthMask(GL_TRUE);
+        gl->ClearDepth(1.0f);
     } else {
         return BRE_UNSUPPORTED;
     }
 
-    glBindFramebuffer(GL_FRAMEBUFFER, fbo);
-    glViewport(0, 0, self->pm_width, self->pm_height);
+    gl->BindFramebuffer(GL_FRAMEBUFFER, fbo);
+    gl->Viewport(0, 0, self->pm_width, self->pm_height);
 
-    glEnable(GL_SCISSOR_TEST);
-    glScissor(drect.x, drect.y, drect.w, drect.h);
+    gl->Enable(GL_SCISSOR_TEST);
+    gl->Scissor(drect.x, drect.y, drect.w, drect.h);
 
-    glClear(mask);
+    gl->Clear(mask);
 
-    glDisable(GL_SCISSOR_TEST);
+    gl->Disable(GL_SCISSOR_TEST);
 
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    gl->BindFramebuffer(GL_FRAMEBUFFER, 0);
 
     return BRE_OK;
 }
@@ -505,6 +513,7 @@ static br_error BR_CMETHOD(br_device_pixelmap_gl, rectangleStretchCopyTo)(br_dev
     } br_rect_gl_data;
 #pragma pack(pop)
 
+    const GladGLContext      *gl     = DevicePixelmapGLGetGLContext(self);
     HVIDEO                    hVideo = &self->screen->asFront.video;
     br_pixelmap              *src    = (br_pixelmap *)_src;
     br_buffer_stored         *stored = src->stored;
@@ -528,7 +537,7 @@ static br_error BR_CMETHOD(br_device_pixelmap_gl, rectangleStretchCopyTo)(br_dev
         tex = BufferStoredGLGetTexture(stored);
         fmt = stored->fmt;
     } else {
-        tex     = DeviceGLPixelmapToGLTexture(src);
+        tex     = DeviceGLPixelmapToGLTexture(gl, src);
         tex_tmp = BR_TRUE;
         fmt     = DeviceGLGetFormatDetails(src->type);
     }
@@ -542,38 +551,38 @@ static br_error BR_CMETHOD(br_device_pixelmap_gl, rectangleStretchCopyTo)(br_dev
         if(src->map->stored != NULL) {
             clut = BufferStoredGLGetCLUTTexture(stored, self, clut);
         } else {
-            clut     = DeviceGLPixelmapToGLTexture(src->map);
+            clut     = DeviceGLPixelmapToGLTexture(gl, src->map);
             clut_tmp = BR_TRUE;
         }
     }
 
     if(tex == 0) {
         if(clut != 0 && clut_tmp)
-            glDeleteTextures(1, &clut);
+            gl->DeleteTextures(1, &clut);
         return BRE_FAIL;
     }
 
-    glDisable(GL_DEPTH_TEST);
-    glBindFramebuffer(GL_FRAMEBUFFER, self->asBack.glFbo);
+    gl->Disable(GL_DEPTH_TEST);
+    gl->BindFramebuffer(GL_FRAMEBUFFER, self->asBack.glFbo);
 
-    glViewport(0, 0, self->pm_width, self->pm_height);
+    gl->Viewport(0, 0, self->pm_width, self->pm_height);
 
     /* Render it */
-    glUseProgram(hVideo->rectProgram.program);
+    gl->UseProgram(hVideo->rectProgram.program);
 
     if(fmt->indexed) {
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, clut);
-        glUniform1i(hVideo->rectProgram.uSampler, 0);
+        gl->ActiveTexture(GL_TEXTURE0);
+        gl->BindTexture(GL_TEXTURE_2D, clut);
+        gl->Uniform1i(hVideo->rectProgram.uSampler, 0);
 
-        glActiveTexture(GL_TEXTURE1);
-        glBindTexture(GL_TEXTURE_2D, tex);
-        glUniform1i(hVideo->rectProgram.uIndexTex, 1);
+        gl->ActiveTexture(GL_TEXTURE1);
+        gl->BindTexture(GL_TEXTURE_2D, tex);
+        gl->Uniform1i(hVideo->rectProgram.uIndexTex, 1);
     } else {
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, tex);
+        gl->ActiveTexture(GL_TEXTURE0);
+        gl->BindTexture(GL_TEXTURE_2D, tex);
 
-        glUniform1i(hVideo->rectProgram.uSampler, 0);
+        gl->Uniform1i(hVideo->rectProgram.uSampler, 0);
     }
 
     br_rect_gl_data rect_data = {
@@ -588,20 +597,20 @@ static br_error BR_CMETHOD(br_device_pixelmap_gl, rectangleStretchCopyTo)(br_dev
 
     BrMatrix4Orthographic(&rect_data.mvp, 0.0f, 1.0f, 0.0f, 1.0f, -1.0f, 1.0f);
 
-    glBindVertexArray(hVideo->rectProgram.vao);
-    glBindBuffer(GL_UNIFORM_BUFFER, hVideo->rectProgram.ubo);
-    glBufferData(GL_UNIFORM_BUFFER, sizeof(rect_data), &rect_data, GL_STATIC_DRAW);
-    glDrawArraysInstanced(GL_TRIANGLES, 0, 6, 2);
+    gl->BindVertexArray(hVideo->rectProgram.vao);
+    gl->BindBuffer(GL_UNIFORM_BUFFER, hVideo->rectProgram.ubo);
+    gl->BufferData(GL_UNIFORM_BUFFER, sizeof(rect_data), &rect_data, GL_STATIC_DRAW);
+    gl->DrawArraysInstanced(GL_TRIANGLES, 0, 6, 2);
 
-    glBindVertexArray(0);
+    gl->BindVertexArray(0);
 
     if(tex_tmp)
-        glDeleteTextures(1, &tex);
+        gl->DeleteTextures(1, &tex);
 
     if(clut_tmp)
-        glDeleteTextures(1, &clut);
+        gl->DeleteTextures(1, &clut);
 
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    gl->BindFramebuffer(GL_FRAMEBUFFER, 0);
     return BRE_OK;
 }
 
@@ -637,6 +646,7 @@ static br_error BR_CMETHOD_DECL(br_device_pixelmap_gl, rectangleCopyFrom)(br_dev
     br_point                  dpoint;
     br_uint_16                bytes_per_pixel;
     void                     *dst_pixels;
+    const GladGLContext      *gl = DevicePixelmapGLGetGLContext(self);
 
     /*
      * Need contig pixels and whole rows.
@@ -650,14 +660,14 @@ static br_error BR_CMETHOD_DECL(br_device_pixelmap_gl, rectangleCopyFrom)(br_dev
     if((fmt = DeviceGLGetFormatDetails(dest->pm_type)) == NULL)
         return BRE_FAIL;
 
-    if((err = DevicePixelmapGLBindFramebuffer(GL_READ_FRAMEBUFFER, self)) != BRE_OK)
+    if((err = DevicePixelmapGLBindFramebuffer(gl, GL_READ_FRAMEBUFFER, self)) != BRE_OK)
         return err;
 
     bytes_per_pixel = BrPixelmapPixelSize((br_pixelmap *)dest) >> 3;
     dst_pixels      = DevicePixelmapMemAddress(dest, dpoint.x, dpoint.y, bytes_per_pixel);
 
-    glPixelStorei(GL_PACK_ROW_LENGTH, srect.w);
-    glReadPixels(srect.x, self->pm_height - srect.y - srect.h, srect.w, srect.h, fmt->format, fmt->type, dst_pixels);
+    gl->PixelStorei(GL_PACK_ROW_LENGTH, srect.w);
+    gl->ReadPixels(srect.x, self->pm_height - srect.y - srect.h, srect.w, srect.h, fmt->format, fmt->type, dst_pixels);
 
     size_t bytes_per_subrow = srect.w * bytes_per_pixel;
     row_temp                = BrScratchAllocate(bytes_per_subrow);
@@ -678,12 +688,13 @@ static br_error BR_CMETHOD_DECL(br_device_pixelmap_gl, rectangleCopyFrom)(br_dev
 static br_error BR_CMETHOD(br_device_pixelmap_gl, text)(br_device_pixelmap *self, br_point *point, br_font *font, const char *text, br_uint_32 colour)
 {
 
-    size_t      len = strlen(text);
-    br_point    pp;
-    br_font_gl *gl_font;
-    HVIDEO      hVideo = &self->screen->asFront.video;
-    br_text_gl *text_data;
-    br_uint_8   r8 = 0, g8 = 0, b8 = 0, a8 = 255;
+    size_t               len = strlen(text);
+    br_point             pp;
+    br_font_gl          *gl_font;
+    HVIDEO               hVideo = &self->screen->asFront.video;
+    const GladGLContext *gl     = DevicePixelmapGLGetGLContext(self);
+    br_text_gl          *text_data;
+    br_uint_8            r8 = 0, g8 = 0, b8 = 0, a8 = 255;
 
     /*
      * Make sure we're an offscreen pixelmap.
@@ -716,22 +727,22 @@ static br_error BR_CMETHOD(br_device_pixelmap_gl, text)(br_device_pixelmap *self
     /*
      * All valid, set up the render state.
      */
-    glBindFramebuffer(GL_FRAMEBUFFER, self->asBack.glFbo);
-    glViewport(0, 0, self->pm_width, self->pm_height);
+    gl->BindFramebuffer(GL_FRAMEBUFFER, self->asBack.glFbo);
+    gl->Viewport(0, 0, self->pm_width, self->pm_height);
 
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    gl->Enable(GL_BLEND);
+    gl->BlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-    glDisable(GL_DEPTH_TEST);
-    glDisable(GL_CULL_FACE);
-    glDepthMask(GL_FALSE);
+    gl->Disable(GL_DEPTH_TEST);
+    gl->Disable(GL_CULL_FACE);
+    gl->DepthMask(GL_FALSE);
 
-    glUseProgram(hVideo->textProgram.program);
-    glBindBufferBase(GL_UNIFORM_BUFFER, hVideo->textProgram.block_binding_font_data, gl_font->font_data);
+    gl->UseProgram(hVideo->textProgram.program);
+    gl->BindBufferBase(GL_UNIFORM_BUFFER, hVideo->textProgram.block_binding_font_data, gl_font->font_data);
 
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D_ARRAY, gl_font->tex);
-    glUniform1i(hVideo->textProgram.uSampler, 0);
+    gl->ActiveTexture(GL_TEXTURE0);
+    gl->BindTexture(GL_TEXTURE_2D_ARRAY, gl_font->tex);
+    gl->Uniform1i(hVideo->textProgram.uSampler, 0);
 
     /*
      * Create the per-model/text state.
@@ -742,8 +753,8 @@ static br_error BR_CMETHOD(br_device_pixelmap_gl, text)(br_device_pixelmap *self
     BrColourUnpack(colour, self->pm_type, &r8, &g8, &b8, &a8);
     text_data->colour = (br_vector4)BR_VECTOR4(r8 / 255.0f, g8 / 255.0f, b8 / 255.0f, a8 / 255.0f);
 
-    glBindVertexArray(self->screen->asFront.video.textProgram.vao_glyphs);
-    glBindBuffer(GL_UNIFORM_BUFFER, self->screen->asFront.video.textProgram.ubo_glyphs);
+    gl->BindVertexArray(self->screen->asFront.video.textProgram.vao_glyphs);
+    gl->BindBuffer(GL_UNIFORM_BUFFER, self->screen->asFront.video.textProgram.ubo_glyphs);
 
     br_rectangle r = {
         .x = point->x,
@@ -789,8 +800,8 @@ static br_error BR_CMETHOD(br_device_pixelmap_gl, text)(br_device_pixelmap *self
             r.w += width;
         }
 
-        glBufferData(GL_UNIFORM_BUFFER, sizeof(br_text_gl), text_data, GL_STATIC_DRAW);
-        glDrawArraysInstanced(GL_TRIANGLES, 0, 6, (GLsizei)chunk);
+        gl->BufferData(GL_UNIFORM_BUFFER, sizeof(br_text_gl), text_data, GL_STATIC_DRAW);
+        gl->DrawArraysInstanced(GL_TRIANGLES, 0, 6, (GLsizei)chunk);
 
         len -= chunk;
         text += chunk;
@@ -798,10 +809,10 @@ static br_error BR_CMETHOD(br_device_pixelmap_gl, text)(br_device_pixelmap *self
 
     BrScratchFree(text_data);
 
-    glBindVertexArray(0);
-    glBindBuffer(GL_UNIFORM_BUFFER, 0);
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
-    glDisable(GL_BLEND);
+    gl->BindVertexArray(0);
+    gl->BindBuffer(GL_UNIFORM_BUFFER, 0);
+    gl->BindFramebuffer(GL_FRAMEBUFFER, 0);
+    gl->Disable(GL_BLEND);
     return BRE_OK;
 }
 
@@ -816,30 +827,31 @@ typedef struct br_line_gl {
 
 static br_error render_line(br_device_pixelmap *self, const br_line_gl *line_data, GLenum mode, GLsizei count)
 {
-    HVIDEO hVideo = &self->screen->asFront.video;
+    HVIDEO               hVideo = &self->screen->asFront.video;
+    const GladGLContext *gl     = DevicePixelmapGLGetGLContext(self);
 
-    glBindFramebuffer(GL_FRAMEBUFFER, self->asBack.glFbo);
-    glViewport(0, 0, self->pm_width, self->pm_height);
+    gl->BindFramebuffer(GL_FRAMEBUFFER, self->asBack.glFbo);
+    gl->Viewport(0, 0, self->pm_width, self->pm_height);
 
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    gl->Enable(GL_BLEND);
+    gl->BlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-    glDisable(GL_DEPTH_TEST);
-    glDisable(GL_CULL_FACE);
-    glDepthMask(GL_FALSE);
+    gl->Disable(GL_DEPTH_TEST);
+    gl->Disable(GL_CULL_FACE);
+    gl->DepthMask(GL_FALSE);
 
-    glUseProgram(hVideo->lineProgram.program);
+    gl->UseProgram(hVideo->lineProgram.program);
 
-    glBindVertexArray(self->screen->asFront.video.lineProgram.vao);
-    glBindBuffer(GL_UNIFORM_BUFFER, self->screen->asFront.video.lineProgram.ubo);
-    glBufferData(GL_UNIFORM_BUFFER, sizeof(br_line_gl), line_data, GL_STATIC_DRAW);
+    gl->BindVertexArray(self->screen->asFront.video.lineProgram.vao);
+    gl->BindBuffer(GL_UNIFORM_BUFFER, self->screen->asFront.video.lineProgram.ubo);
+    gl->BufferData(GL_UNIFORM_BUFFER, sizeof(br_line_gl), line_data, GL_STATIC_DRAW);
 
-    glDrawArrays(mode, 0, count);
+    gl->DrawArrays(mode, 0, count);
 
-    glBindVertexArray(0);
-    glBindBuffer(GL_UNIFORM_BUFFER, 0);
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
-    glDisable(GL_BLEND);
+    gl->BindVertexArray(0);
+    gl->BindBuffer(GL_UNIFORM_BUFFER, 0);
+    gl->BindFramebuffer(GL_FRAMEBUFFER, 0);
+    gl->Disable(GL_BLEND);
 
     return BRE_OK;
 }
@@ -915,6 +927,11 @@ br_rectangle DevicePixelmapGLGetViewport(const br_device_pixelmap *pm)
     }
 
     return rect;
+}
+
+const GladGLContext *DevicePixelmapGLGetGLContext(br_device_pixelmap *self)
+{
+    return &self->screen->asFront.glad_gl_context;
 }
 
 /*

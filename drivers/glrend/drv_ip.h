@@ -13,15 +13,15 @@ extern "C" {
 /*
  * video.c
  */
-HVIDEO VIDEO_Open(HVIDEO hVideo, const char *vertShader, const char *fragShader);
+HVIDEO VIDEO_Open(HVIDEO hVideo, const GladGLContext *gl, const char *vertShader, const char *fragShader);
 
 void VIDEO_Close(HVIDEO hVideo);
 
-GLuint VIDEOI_CreateAndCompileShader(GLenum type, const char *shader, size_t size);
+GLuint VIDEOI_CreateAndCompileShader(const GladGLContext *gl, GLenum type, const char *shader, size_t size);
 
-GLuint VIDEOI_LoadAndCompileShader(GLenum type, const char *path, const char *default_data, size_t default_size);
+GLuint VIDEOI_LoadAndCompileShader(const GladGLContext *gl, GLenum type, const char *path, const char *default_data, size_t default_size);
 
-GLuint VIDEOI_CreateAndCompileProgram(GLuint vert, GLuint frag);
+GLuint VIDEOI_CreateAndCompileProgram(const GladGLContext *gl, GLuint vert, GLuint frag);
 
 br_boolean VIDEOI_CompileRectShader(HVIDEO hVideo);
 
@@ -70,6 +70,8 @@ br_error BR_CMETHOD_DECL(br_device_pixelmap_gl, match)(br_device_pixelmap *self,
  */
 br_rectangle DevicePixelmapGLGetViewport(const br_device_pixelmap *pm);
 
+const GladGLContext *DevicePixelmapGLGetGLContext(br_device_pixelmap *self);
+
 /*
  * devpmsub.c
  */
@@ -87,7 +89,7 @@ br_device_pixelmap *DevicePixelmapGLAllocateFront(br_device *dev, br_output_faci
 /*
  * devclut.c
  */
-br_device_clut *DeviceClutGLAllocate(br_device_pixelmap *pm);
+br_device_clut *DeviceClutGLAllocate(br_device_pixelmap *pm, const GladGLContext *gl);
 
 /*
  * sbuffer.c
@@ -151,8 +153,8 @@ void StateGLCopy(state_stack *dst, const state_stack *src, uint32_t mask);
 /*
  * buffer_ring.c
  */
-void       BufferRingGLInit(br_buffer_ring_gl *self, const char *tag, size_t offset_alignment, size_t num_draws, GLuint buffer_index,
-                            size_t elem_size, GLenum binding_point, uint32_t flags);
+void       BufferRingGLInit(br_buffer_ring_gl *self, const GladGLContext *gl, const char *tag, size_t offset_alignment, size_t num_draws,
+                            GLuint buffer_index, size_t elem_size, GLenum binding_point, uint32_t flags);
 void       BufferRingGLBegin(br_buffer_ring_gl *self);
 br_boolean BufferRingGLPush(br_buffer_ring_gl *self, const void *data, GLsizeiptr size);
 void       BufferRingGLEnd(br_buffer_ring_gl *self);
@@ -169,23 +171,23 @@ void RendererGLRenderTri(br_renderer *self, br_uintptr_t offset, const gl_groupi
 /*
  * font.c
  */
-br_error FontGLBuildArray(br_font_gl *gl_font, br_font *font);
+br_error FontGLBuildArray(const GladGLContext *gl, br_font_gl *gl_font, br_font *font);
 
 /*
  * util.c
  */
-br_error DevicePixelmapGLBindFramebuffer(GLenum target, br_device_pixelmap *pm);
-GLuint   DeviceGLBuildWhiteTexture(void);
-GLuint   DeviceGLBuildCheckerboardTexture(void);
-GLuint   DeviceGLPixelmapToGLTexture(br_pixelmap *pm);
-br_error DeviceGLPixelmapToExistingGLTexture(GLuint tex, br_pixelmap *pm);
+br_error DevicePixelmapGLBindFramebuffer(const GladGLContext *gl, GLenum target, br_device_pixelmap *pm);
+GLuint   DeviceGLBuildWhiteTexture(const GladGLContext *gl);
+GLuint   DeviceGLBuildCheckerboardTexture(const GladGLContext *gl);
+GLuint   DeviceGLPixelmapToGLTexture(const GladGLContext *gl, br_pixelmap *pm);
+br_error DeviceGLPixelmapToExistingGLTexture(const GladGLContext *gl, GLuint tex, br_pixelmap *pm);
 
 br_uint_8 DeviceGLTypeOrBits(br_uint_8 pixel_type, br_int_32 pixel_bits);
 
-void DeviceGLObjectLabel(GLenum identifier, GLuint name, const char *s);
-void DeviceGLObjectLabelF(GLenum identifier, GLuint name, const char *fmt, ...);
+void DeviceGLObjectLabel(const GladGLContext *gl, GLenum identifier, GLuint name, const char *s);
+void DeviceGLObjectLabelF(const GladGLContext *gl, GLenum identifier, GLuint name, const char *fmt, ...);
 
-br_boolean  DeviceGLCheckErrors(void);
+br_boolean  DeviceGLCheckErrors(const GladGLContext *gl);
 const char *DeviceGLStrError(GLenum err);
 
 br_vector3 DeviceGLTriangleCentroid(const br_vector3 *v1, const br_vector3 *v2, const br_vector3 *v3);

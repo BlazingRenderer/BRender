@@ -89,6 +89,11 @@ typedef struct br_device_pixelmap {
              */
             void *gl_context;
 
+            /*
+             * GLAD OpenGL context.
+             */
+            GladGLContext glad_gl_context;
+
             const char *gl_version;
             const char *gl_vendor;
             const char *gl_renderer;

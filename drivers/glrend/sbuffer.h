@@ -37,6 +37,8 @@ typedef struct br_buffer_stored {
      */
     br_uint_16 source_flags;
 
+    const GladGLContext *gl;
+
     /*
      * OpenGL texture handle
      */

@@ -39,6 +39,11 @@ typedef struct br_device_clut {
     br_colour entries[BR_GLREND_MAX_CLUT_ENTRIES];
 
     /*
+     * GL Dispatch.
+     */
+    const GladGLContext *gl;
+
+    /*
      * OpenGL texture handle.
      */
     GLuint gl_tex;

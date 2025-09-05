@@ -73,6 +73,11 @@ typedef struct br_geometry_stored {
     br_boolean       shared;
     struct v11model *model;
 
+    /*
+     * GL Dispatch
+     */
+    const GladGLContext *gl;
+
     GLuint gl_vao;
     GLuint gl_vbo;
     GLuint gl_ibo;

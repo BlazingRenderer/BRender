@@ -53,6 +53,8 @@ enum {
 };
 
 typedef struct br_buffer_ring_gl {
+    const GladGLContext *gl;
+
     GLuint   buffers[BR_GLREND_MODEL_RB_FRAMES];
     GLsync   fences[BR_GLREND_MODEL_RB_FRAMES];
     uint32_t flags;
@@ -86,6 +88,11 @@ typedef struct br_renderer {
      * List of objects associated with this renderer
      */
     void *object_list;
+
+    /*
+     * GL Dispatch
+     */
+    const GladGLContext *gl;
 
     br_device_pixelmap   *pixelmap;
     br_renderer_facility *renderer_facility;

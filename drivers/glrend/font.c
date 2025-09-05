@@ -13,7 +13,7 @@ typedef struct font_data {
 } font_data;
 #pragma pack(pop)
 
-br_error FontGLBuildArray(br_font_gl *gl_font, br_font *font)
+br_error FontGLBuildArray(const GladGLContext *gl, br_font_gl *gl_font, br_font *font)
 {
     GLuint                    tex;
     const br_pixelmap_gl_fmt *fmt;
@@ -45,12 +45,12 @@ br_error FontGLBuildArray(br_font_gl *gl_font, br_font *font)
     /*
      * Upload the font data.
      */
-    glGenBuffers(1, &gl_font->font_data);
-    glBindBuffer(GL_UNIFORM_BUFFER, gl_font->font_data);
-    glBufferData(GL_UNIFORM_BUFFER, sizeof(font_data), &fd, GL_STATIC_DRAW);
-    glBindBuffer(GL_UNIFORM_BUFFER, 0);
+    gl->GenBuffers(1, &gl_font->font_data);
+    gl->BindBuffer(GL_UNIFORM_BUFFER, gl_font->font_data);
+    gl->BufferData(GL_UNIFORM_BUFFER, sizeof(font_data), &fd, GL_STATIC_DRAW);
+    gl->BindBuffer(GL_UNIFORM_BUFFER, 0);
 
-    DeviceGLObjectLabelF(GL_BUFFER, gl_font->font_data, BR_GLREND_DEBUG_INTERNAL_PREFIX "Fnt%s%dx%d:Data",
+    DeviceGLObjectLabelF(gl, GL_BUFFER, gl_font->font_data, BR_GLREND_DEBUG_INTERNAL_PREFIX "Fnt%s%dx%d:Data",
                          (font->flags & BR_FONTF_PROPORTIONAL) ? "P" : "F", font->glyph_x, font->glyph_y);
 
     /*
@@ -59,13 +59,13 @@ br_error FontGLBuildArray(br_font_gl *gl_font, br_font *font)
     if((pm = BrPixelmapAllocate(fmt->pm_type, max_width, max_height, NULL, BR_PMAF_NORMAL)) == NULL)
         return BRE_FAIL;
 
-    glGenTextures(1, &tex);
-    glBindTexture(GL_TEXTURE_2D_ARRAY, tex);
-    glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, fmt->internal_format, max_width, max_height, GLYPH_COUNT, 0, fmt->format, fmt->type, NULL);
-    glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    gl->GenTextures(1, &tex);
+    gl->BindTexture(GL_TEXTURE_2D_ARRAY, tex);
+    gl->TexImage3D(GL_TEXTURE_2D_ARRAY, 0, fmt->internal_format, max_width, max_height, GLYPH_COUNT, 0, fmt->format, fmt->type, NULL);
+    gl->TexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    gl->TexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
-    DeviceGLObjectLabelF(GL_TEXTURE, tex, BR_GLREND_DEBUG_INTERNAL_PREFIX "Fnt%s%dx%d:Texture",
+    DeviceGLObjectLabelF(gl, GL_TEXTURE, tex, BR_GLREND_DEBUG_INTERNAL_PREFIX "Fnt%s%dx%d:Texture",
                          (font->flags & BR_FONTF_PROPORTIONAL) ? "P" : "F", font->glyph_x, font->glyph_y);
 
     for(GLsizei i = 0; i < GLYPH_COUNT; ++i) {
@@ -74,10 +74,10 @@ br_error FontGLBuildArray(br_font_gl *gl_font, br_font *font)
         BrPixelmapFill(pm, BR_COLOUR_RGBA(0, 0, 0, 0));
         BrPixelmapText(pm, -pm->origin_x, -pm->origin_y, BR_COLOUR_RGBA(255, 255, 255, 255), font, c);
 
-        glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, 0, 0, i, max_width, max_height, 1, fmt->format, fmt->type, pm->pixels);
+        gl->TexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, 0, 0, i, max_width, max_height, 1, fmt->format, fmt->type, pm->pixels);
     }
 
-    glBindTexture(GL_TEXTURE_2D_ARRAY, 0);
+    gl->BindTexture(GL_TEXTURE_2D_ARRAY, 0);
     BrPixelmapFree(pm);
 
     gl_font->tex  = tex;

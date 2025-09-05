@@ -5,48 +5,50 @@
 
 br_boolean VIDEOI_CompileLineShader(HVIDEO hVideo)
 {
+    const GladGLContext *gl = hVideo->gl;
+
     GLuint vert, frag;
 
-    if((vert = VIDEOI_CreateAndCompileShader(GL_VERTEX_SHADER, g_LineVertexShader, sizeof(g_LineVertexShader))) == 0)
+    if((vert = VIDEOI_CreateAndCompileShader(gl, GL_VERTEX_SHADER, g_LineVertexShader, sizeof(g_LineVertexShader))) == 0)
         goto vert_failed;
 
-    if((frag = VIDEOI_CreateAndCompileShader(GL_FRAGMENT_SHADER, g_LineFragmentShader, sizeof(g_LineFragmentShader))) == 0)
+    if((frag = VIDEOI_CreateAndCompileShader(gl, GL_FRAGMENT_SHADER, g_LineFragmentShader, sizeof(g_LineFragmentShader))) == 0)
         goto frag_failed;
 
-    if((hVideo->lineProgram.program = VIDEOI_CreateAndCompileProgram(vert, frag)) == 0)
+    if((hVideo->lineProgram.program = VIDEOI_CreateAndCompileProgram(gl, vert, frag)) == 0)
         goto prog_failed;
 
-    DeviceGLObjectLabel(GL_SHADER, vert, BR_GLREND_DEBUG_INTERNAL_PREFIX "line:shader:vertex");
-    DeviceGLObjectLabel(GL_SHADER, frag, BR_GLREND_DEBUG_INTERNAL_PREFIX "line:shader:fragment");
-    DeviceGLObjectLabel(GL_PROGRAM, hVideo->lineProgram.program, BR_GLREND_DEBUG_INTERNAL_PREFIX "line:program");
+    DeviceGLObjectLabel(gl, GL_SHADER, vert, BR_GLREND_DEBUG_INTERNAL_PREFIX "line:shader:vertex");
+    DeviceGLObjectLabel(gl, GL_SHADER, frag, BR_GLREND_DEBUG_INTERNAL_PREFIX "line:shader:fragment");
+    DeviceGLObjectLabel(gl, GL_PROGRAM, hVideo->lineProgram.program, BR_GLREND_DEBUG_INTERNAL_PREFIX "line:program");
 
-    glGenVertexArrays(1, &hVideo->lineProgram.vao);
-    glBindVertexArray(hVideo->lineProgram.vao);
-    glBindVertexArray(0);
+    gl->GenVertexArrays(1, &hVideo->lineProgram.vao);
+    gl->BindVertexArray(hVideo->lineProgram.vao);
+    gl->BindVertexArray(0);
 
-    DeviceGLObjectLabel(GL_VERTEX_ARRAY, hVideo->lineProgram.vao, BR_GLREND_DEBUG_INTERNAL_PREFIX "line:vao");
+    DeviceGLObjectLabel(gl, GL_VERTEX_ARRAY, hVideo->lineProgram.vao, BR_GLREND_DEBUG_INTERNAL_PREFIX "line:vao");
 
-    hVideo->lineProgram.block_index_line_data   = glGetUniformBlockIndex(hVideo->lineProgram.program, "LineData");
+    hVideo->lineProgram.block_index_line_data   = gl->GetUniformBlockIndex(hVideo->lineProgram.program, "LineData");
     hVideo->lineProgram.block_binding_line_data = 0;
-    glUniformBlockBinding(hVideo->lineProgram.program, hVideo->lineProgram.block_index_line_data, hVideo->lineProgram.block_binding_line_data);
+    gl->UniformBlockBinding(hVideo->lineProgram.program, hVideo->lineProgram.block_index_line_data, hVideo->lineProgram.block_binding_line_data);
 
-    glGenBuffers(1, &hVideo->lineProgram.ubo);
-    glBindBuffer(GL_UNIFORM_BUFFER, hVideo->lineProgram.ubo);
-    glBindBufferBase(GL_UNIFORM_BUFFER, hVideo->lineProgram.block_binding_line_data, hVideo->lineProgram.ubo);
-    glBindBuffer(GL_UNIFORM_BUFFER, 0);
+    gl->GenBuffers(1, &hVideo->lineProgram.ubo);
+    gl->BindBuffer(GL_UNIFORM_BUFFER, hVideo->lineProgram.ubo);
+    gl->BindBufferBase(GL_UNIFORM_BUFFER, hVideo->lineProgram.block_binding_line_data, hVideo->lineProgram.ubo);
+    gl->BindBuffer(GL_UNIFORM_BUFFER, 0);
 
-    DeviceGLObjectLabel(GL_BUFFER, hVideo->lineProgram.ubo, BR_GLREND_DEBUG_INTERNAL_PREFIX "line:ubo");
+    DeviceGLObjectLabel(gl, GL_BUFFER, hVideo->lineProgram.ubo, BR_GLREND_DEBUG_INTERNAL_PREFIX "line:ubo");
 
-    glBindFragDataLocation(hVideo->lineProgram.program, 0, "main_colour");
+    gl->BindFragDataLocation(hVideo->lineProgram.program, 0, "main_colour");
 
 prog_failed:
-    glDeleteShader(frag);
+    gl->DeleteShader(frag);
 
 frag_failed:
-    glDeleteShader(vert);
+    gl->DeleteShader(vert);
 
 vert_failed:
-    DeviceGLCheckErrors();
+    DeviceGLCheckErrors(gl);
 
     return hVideo->lineProgram.program != 0;
 }

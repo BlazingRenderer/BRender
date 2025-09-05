@@ -157,6 +157,7 @@ br_device_pixelmap *DevicePixelmapGLAllocateFront(br_device *dev, br_output_faci
     const br_pixelmap_gl_fmt *fmt;
     br_device_gl_context_info context_info;
     int                       glad_version, glad_major, glad_minor;
+    const GladGLContext      *gl;
     struct pixelmapNewTokens  pt = {
          .width           = -1,
          .height          = -1,
@@ -229,10 +230,13 @@ br_device_pixelmap *DevicePixelmapGLAllocateFront(br_device *dev, br_output_faci
     if(DevicePixelmapGLExtMakeCurrent(self, self->asFront.gl_context) != BRE_OK)
         goto cleanup_context;
 
-    if((glad_version = gladLoadGL(DevicePixelmapGLExtGetGetProcAddress(self))) == 0) {
+    if((glad_version = gladLoadGLContext(&self->asFront.glad_gl_context, DevicePixelmapGLExtGetGetProcAddress(self))) == 0) {
         BrLogError("GLREND", "Unable to load OpenGL functions.");
         goto cleanup_context;
     }
+
+    gl = &self->asFront.glad_gl_context;
+    self->asFront.glad_gl_context.userptr = self;
 
     glad_major = GLAD_VERSION_MAJOR(glad_version);
     glad_minor = GLAD_VERSION_MINOR(glad_version);
@@ -240,19 +244,19 @@ br_device_pixelmap *DevicePixelmapGLAllocateFront(br_device *dev, br_output_faci
     /*
      * Always register the debug stuff, it needs to be explicitly glEnable(GL_DEBUG_OUTPUT)'d anyway.
      */
-    if(GLAD_GL_KHR_debug) {
-        glDebugMessageCallback(gl_debug_callback, self);
-        glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, NULL, GL_TRUE);
+    if(gl->KHR_debug) {
+        gl->DebugMessageCallback(gl_debug_callback, self);
+        gl->DebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, NULL, GL_TRUE);
 
 #if BR_GLREND_DEBUG
-        glEnable(GL_DEBUG_OUTPUT);
-        // glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
+        gl->Enable(GL_DEBUG_OUTPUT);
+        // gl->Enable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
 #endif
     }
 
-    self->asFront.gl_version  = BrResStrDup(self, (const char *)glGetString(GL_VERSION));
-    self->asFront.gl_vendor   = BrResStrDup(self, (const char *)glGetString(GL_VENDOR));
-    self->asFront.gl_renderer = BrResStrDup(self, (const char *)glGetString(GL_RENDERER));
+    self->asFront.gl_version  = BrResStrDup(self, (const char *)gl->GetString(GL_VERSION));
+    self->asFront.gl_vendor   = BrResStrDup(self, (const char *)gl->GetString(GL_VENDOR));
+    self->asFront.gl_renderer = BrResStrDup(self, (const char *)gl->GetString(GL_RENDERER));
 
     BrLogTrace("GLREND", "OpenGL Version  = %s", self->asFront.gl_version);
     BrLogTrace("GLREND", "OpenGL Vendor   = %s", self->asFront.gl_vendor);
@@ -267,11 +271,11 @@ br_device_pixelmap *DevicePixelmapGLAllocateFront(br_device *dev, br_output_faci
      * Get a copy of the extension list.
      * NULL-terminate so we can expose it as a BRT_POINTER_LIST.
      */
-    glGetIntegerv(GL_NUM_EXTENSIONS, &self->asFront.gl_num_extensions);
+    gl->GetIntegerv(GL_NUM_EXTENSIONS, &self->asFront.gl_num_extensions);
 
     self->asFront.gl_extensions = BrResAllocate(self, sizeof(char *) * (self->asFront.gl_num_extensions + 1), BR_MEMORY_DRIVER);
     for(GLuint i = 0; i < self->asFront.gl_num_extensions; ++i) {
-        const GLubyte *ext             = glGetStringi(GL_EXTENSIONS, i);
+        const GLubyte *ext             = gl->GetStringi(GL_EXTENSIONS, i);
         self->asFront.gl_extensions[i] = BrResStrDup(self->asFront.gl_extensions, (const char *)ext);
     }
     self->asFront.gl_extensions[self->asFront.gl_num_extensions] = NULL;
@@ -280,11 +284,11 @@ br_device_pixelmap *DevicePixelmapGLAllocateFront(br_device *dev, br_output_faci
      * Try to figure out the actual format we got.
      * This isn't a big deal if we don't know what it is - we can only be written to by a doubleBuffer().
      */
-    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
-    glGetFramebufferAttachmentParameteriv(GL_DRAW_FRAMEBUFFER, GL_BACK_LEFT, GL_FRAMEBUFFER_ATTACHMENT_RED_SIZE, &red_bits);
-    glGetFramebufferAttachmentParameteriv(GL_DRAW_FRAMEBUFFER, GL_BACK_LEFT, GL_FRAMEBUFFER_ATTACHMENT_GREEN_SIZE, &grn_bits);
-    glGetFramebufferAttachmentParameteriv(GL_DRAW_FRAMEBUFFER, GL_BACK_LEFT, GL_FRAMEBUFFER_ATTACHMENT_BLUE_SIZE, &blu_bits);
-    glGetFramebufferAttachmentParameteriv(GL_DRAW_FRAMEBUFFER, GL_BACK_LEFT, GL_FRAMEBUFFER_ATTACHMENT_ALPHA_SIZE, &alpha_bits);
+    gl->BindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+    gl->GetFramebufferAttachmentParameteriv(GL_DRAW_FRAMEBUFFER, GL_BACK_LEFT, GL_FRAMEBUFFER_ATTACHMENT_RED_SIZE, &red_bits);
+    gl->GetFramebufferAttachmentParameteriv(GL_DRAW_FRAMEBUFFER, GL_BACK_LEFT, GL_FRAMEBUFFER_ATTACHMENT_GREEN_SIZE, &grn_bits);
+    gl->GetFramebufferAttachmentParameteriv(GL_DRAW_FRAMEBUFFER, GL_BACK_LEFT, GL_FRAMEBUFFER_ATTACHMENT_BLUE_SIZE, &blu_bits);
+    gl->GetFramebufferAttachmentParameteriv(GL_DRAW_FRAMEBUFFER, GL_BACK_LEFT, GL_FRAMEBUFFER_ATTACHMENT_ALPHA_SIZE, &alpha_bits);
 
     if(red_bits == 5 && grn_bits == 6 && blu_bits == 5) {
         self->pm_type = BR_PMT_RGB_565;
@@ -301,7 +305,7 @@ br_device_pixelmap *DevicePixelmapGLAllocateFront(br_device *dev, br_output_faci
         BrLogWarn("GLREND", "OpenGL gave us an unknown screen format (R%dG%dB%dA%d), soldiering on...", red_bits, grn_bits, blu_bits, alpha_bits);
     }
 
-    if(VIDEO_Open(&self->asFront.video, pt.vertex_shader, pt.fragment_shader) == NULL) {
+    if(VIDEO_Open(&self->asFront.video, gl, pt.vertex_shader, pt.fragment_shader) == NULL) {
         /*
          * If this fails we can run our regular cleanup.
          */
@@ -314,8 +318,8 @@ br_device_pixelmap *DevicePixelmapGLAllocateFront(br_device *dev, br_output_faci
      */
     setup_qiurks(self);
 
-    self->asFront.tex_white        = DeviceGLBuildWhiteTexture();
-    self->asFront.tex_checkerboard = DeviceGLBuildCheckerboardTexture();
+    self->asFront.tex_white        = DeviceGLBuildWhiteTexture(gl);
+    self->asFront.tex_checkerboard = DeviceGLBuildCheckerboardTexture(gl);
 
     /*
      * We can't use BRender's fonts directly, so build a POT texture with
@@ -323,13 +327,13 @@ br_device_pixelmap *DevicePixelmapGLAllocateFront(br_device *dev, br_output_faci
      */
 
     BrLogTrace("GLREND", "Building fixed 3x5 font array.");
-    (void)FontGLBuildArray(&self->asFront.font_fixed3x5, BrFontFixed3x5);
+    (void)FontGLBuildArray(gl, &self->asFront.font_fixed3x5, BrFontFixed3x5);
 
     BrLogTrace("GLREND", "Building proportional 4x6 font array.");
-    (void)FontGLBuildArray(&self->asFront.font_prop4x6, BrFontProp4x6);
+    (void)FontGLBuildArray(gl, &self->asFront.font_prop4x6, BrFontProp4x6);
 
     BrLogTrace("GLREND", "Building proportional 7x9 font array.");
-    (void)FontGLBuildArray(&self->asFront.font_prop7x9, BrFontProp7x9);
+    (void)FontGLBuildArray(gl, &self->asFront.font_prop7x9, BrFontProp7x9);
 
     self->num_refs = 0;
 
@@ -346,17 +350,18 @@ cleanup_context:
 
 static void BR_CMETHOD_DECL(br_device_pixelmap_glf, free)(br_object *_self)
 {
-    br_device_pixelmap *self = (br_device_pixelmap *)_self;
+    br_device_pixelmap  *self = (br_device_pixelmap *)_self;
+    const GladGLContext *gl   = DevicePixelmapGLGetGLContext(self);
 
     BrLogTrace("GLREND", "Freeing %s", self->pm_identifier);
 
     UASSERT(self->num_refs == 0);
 
-    glDeleteTextures(1, &self->asFront.font_prop7x9.tex);
-    glDeleteTextures(1, &self->asFront.font_prop4x6.tex);
-    glDeleteTextures(1, &self->asFront.font_fixed3x5.tex);
-    glDeleteTextures(1, &self->asFront.tex_checkerboard);
-    glDeleteTextures(1, &self->asFront.tex_white);
+    gl->DeleteTextures(1, &self->asFront.font_prop7x9.tex);
+    gl->DeleteTextures(1, &self->asFront.font_prop4x6.tex);
+    gl->DeleteTextures(1, &self->asFront.font_fixed3x5.tex);
+    gl->DeleteTextures(1, &self->asFront.tex_checkerboard);
+    gl->DeleteTextures(1, &self->asFront.tex_white);
 
     VIDEO_Close(&self->asFront.video);
 
@@ -427,6 +432,8 @@ br_error BR_CMETHOD_DECL(br_device_pixelmap_glf, resize)(br_device_pixelmap *sel
 
 br_error BR_CMETHOD_DECL(br_device_pixelmap_glf, doubleBuffer)(br_device_pixelmap *self, br_device_pixelmap *src)
 {
+    const GladGLContext *gl = DevicePixelmapGLGetGLContext(self);
+
     /*
      * Ignore self-blit.
      */
@@ -442,27 +449,27 @@ br_error BR_CMETHOD_DECL(br_device_pixelmap_glf, doubleBuffer)(br_device_pixelma
     /*
      * Blit.
      */
-    glBindFramebuffer(GL_READ_FRAMEBUFFER, src->asBack.glFbo);
-    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+    gl->BindFramebuffer(GL_READ_FRAMEBUFFER, src->asBack.glFbo);
+    gl->BindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
 
-    glBlitFramebuffer(0, 0, src->pm_width, src->pm_height, 0, 0, self->pm_width, self->pm_height, GL_COLOR_BUFFER_BIT, GL_NEAREST);
+    gl->BlitFramebuffer(0, 0, src->pm_width, src->pm_height, 0, 0, self->pm_width, self->pm_height, GL_COLOR_BUFFER_BIT, GL_NEAREST);
 
-    glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
-    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+    gl->BindFramebuffer(GL_READ_FRAMEBUFFER, 0);
+    gl->BindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
 
     /*
      * Call our pre-swap hook
      */
     DevicePixelmapGLExtPreSwap(self, src->asBack.glFbo);
 
-    DeviceGLCheckErrors();
+    DeviceGLCheckErrors(gl);
 
     /*
      * Finally, swap the buffers.
      */
     DevicePixelmapGLExtSwapBuffers(self);
 
-    DeviceGLCheckErrors();
+    DeviceGLCheckErrors(gl);
 
     return BRE_OK;
 }

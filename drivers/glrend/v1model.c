@@ -173,7 +173,7 @@ void DeviceGLExtractPrimitiveState(const state_stack *state, br_primitive_state_
     }
 }
 
-static void apply_blend_mode(state_stack *self)
+static void apply_blend_mode(state_stack *self, const GladGLContext *gl)
 {
     /* C_result = (C_source * F_Source) + (C_dest * F_dest) */
 
@@ -189,7 +189,7 @@ static void apply_blend_mode(state_stack *self)
              * Colour = (alpha * src) + ((1 - alpha) * dest)
              * Alpha  = (1     * src) + (0           * dest)
              */
-            glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ZERO);
+            gl->BlendFuncSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ZERO);
             break;
 
         case BRT_BLEND_SUMMED:
@@ -198,7 +198,7 @@ static void apply_blend_mode(state_stack *self)
              * Colour = (alpha * src) + (1 * dest)
              * Alpha  = (1     * src) + (0 * dest)
              */
-            glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE, GL_ONE, GL_ZERO);
+            gl->BlendFuncSeparate(GL_SRC_ALPHA, GL_ONE, GL_ONE, GL_ZERO);
             break;
 
         case BRT_BLEND_PREMULTIPLIED:
@@ -207,12 +207,12 @@ static void apply_blend_mode(state_stack *self)
              * Colour = (1 * src) + ((1 - alpha) * dest)
              * Alpha  = (1 * src) + (0           * dest)
              */
-            glBlendFuncSeparate(GL_ONE, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ZERO);
+            gl->BlendFuncSeparate(GL_ONE, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ZERO);
             break;
     }
 }
 
-static void apply_stored_properties(HVIDEO hVideo, br_renderer *renderer, state_stack *state, uint32_t states, br_boolean *unlit,
+static void apply_stored_properties(const GladGLContext *gl, br_renderer *renderer, state_stack *state, uint32_t states, br_boolean *unlit,
                                     shader_data_model *model, GLuint tex_default)
 {
     br_boolean depth_test = BR_FALSE;
@@ -240,13 +240,13 @@ static void apply_stored_properties(HVIDEO hVideo, br_renderer *renderer, state_
         switch(state->cull.type) {
             case BRT_ONE_SIDED:
             default: /* Default BRender policy, so default. */
-                glEnable(GL_CULL_FACE);
-                glCullFace(GL_BACK);
+                gl->Enable(GL_CULL_FACE);
+                gl->CullFace(GL_BACK);
                 break;
 
             case BRT_TWO_SIDED:
             case BRT_NONE:
-                glDisable(GL_CULL_FACE);
+                gl->Disable(GL_CULL_FACE);
                 break;
         }
     }
@@ -296,37 +296,37 @@ static void apply_stored_properties(HVIDEO hVideo, br_renderer *renderer, state_
         model->disable_colour_key = info.disable_colour_key;
 
         if(info.write_colour) {
-            glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
+            gl->ColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
         } else {
-            glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
+            gl->ColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
         }
 
-        glBindSampler(0, RendererGLGetSampler(renderer, &info.sampler));
+        gl->BindSampler(0, RendererGLGetSampler(renderer, &info.sampler));
 
         if(info.is_indexed) {
             model->texture_mode = info.is_filtered ? 2 : 1;
 
-            glActiveTexture(GL_TEXTURE1);
-            glBindTexture(GL_TEXTURE_2D, info.colour_map);
+            gl->ActiveTexture(GL_TEXTURE1);
+            gl->BindTexture(GL_TEXTURE_2D, info.colour_map);
 
-            glActiveTexture(GL_TEXTURE0);
-            glBindTexture(GL_TEXTURE_2D, info.colour_palette);
+            gl->ActiveTexture(GL_TEXTURE0);
+            gl->BindTexture(GL_TEXTURE_2D, info.colour_palette);
         } else {
-            glActiveTexture(GL_TEXTURE0);
-            glBindTexture(GL_TEXTURE_2D, info.colour_map);
+            gl->ActiveTexture(GL_TEXTURE0);
+            gl->BindTexture(GL_TEXTURE_2D, info.colour_map);
 
             model->texture_mode = 0;
         }
 
         if(info.is_blended) {
-            glEnable(GL_BLEND);
-            apply_blend_mode(state);
+            gl->Enable(GL_BLEND);
+            apply_blend_mode(state, gl);
         } else {
-            glDisable(GL_BLEND);
+            gl->Disable(GL_BLEND);
         }
 
-        glDepthFunc(info.depth_func);
-        glDepthMask(info.write_depth ? GL_TRUE : GL_FALSE);
+        gl->DepthFunc(info.depth_func);
+        gl->DepthMask(info.write_depth ? GL_TRUE : GL_FALSE);
 
         model->enable_fog = info.fog;
         model->fog_colour = info.fog_colour;
@@ -340,16 +340,16 @@ static void apply_stored_properties(HVIDEO hVideo, br_renderer *renderer, state_
     }
 
     if(depth_test == BR_TRUE)
-        glEnable(GL_DEPTH_TEST);
+        gl->Enable(GL_DEPTH_TEST);
     else
-        glDisable(GL_DEPTH_TEST);
+        gl->Disable(GL_DEPTH_TEST);
 }
 
-static br_boolean apply_state(br_renderer *renderer)
+static br_boolean apply_state(br_renderer *renderer, const GladGLContext *gl)
 {
+
     state_cache        *cache  = &renderer->state.cache;
     br_device_pixelmap *screen = renderer->pixelmap->screen;
-    HVIDEO              hVideo = &screen->asFront.video;
     br_boolean          unlit;
     shader_data_model   model;
 
@@ -369,16 +369,15 @@ static br_boolean apply_state(br_renderer *renderer)
      * To keep the same behaviour as the software renderer, flip the winding order.
      */
     if(BrScalarToFloat(cache->model.mv_det3) < 1e-6f)
-        glFrontFace(GL_CW);
+        gl->FrontFace(GL_CW);
     else
-        glFrontFace(GL_CCW);
+        gl->FrontFace(GL_CCW);
 
     /* NB: Flag is never set */
     // int model_lit = self->model->flags & V11MODF_LIT;
 
     unlit = BR_TRUE;
-    apply_stored_properties(hVideo, renderer, renderer->state.current, MASK_STATE_STORED | MASK_STATE_OUTPUT, &unlit, &model,
-                            screen->asFront.tex_white);
+    apply_stored_properties(gl, renderer, renderer->state.current, MASK_STATE_STORED | MASK_STATE_OUTPUT, &unlit, &model, screen->asFront.tex_white);
 
     model.unlit = (br_uint_32)unlit;
 
@@ -387,13 +386,15 @@ static br_boolean apply_state(br_renderer *renderer)
 
 void RendererGLRenderGroup(br_renderer *self, br_geometry_stored *stored, const gl_groupinfo *groupinfo)
 {
-    if(!apply_state(self)) {
+    const GladGLContext *gl = self->gl;
+
+    if(!apply_state(self, gl)) {
         BrLogWarn("GLREND", "Out of model space.");
         return;
     }
 
-    glBindVertexArray(stored->gl_vao);
-    glDrawElements(GL_TRIANGLES, groupinfo->count, GL_UNSIGNED_SHORT, groupinfo->offset);
+    gl->BindVertexArray(stored->gl_vao);
+    gl->DrawElements(GL_TRIANGLES, groupinfo->count, GL_UNSIGNED_SHORT, groupinfo->offset);
 
     self->stats.face_group_count++;
     self->stats.triangles_rendered_count += groupinfo->group->nfaces;
@@ -404,14 +405,16 @@ void RendererGLRenderGroup(br_renderer *self, br_geometry_stored *stored, const 
 
 void RendererGLRenderTri(br_renderer *self, br_uintptr_t offset, const gl_groupinfo *groupinfo)
 {
-    if(!apply_state(self)) {
+    const GladGLContext *gl = self->gl;
+
+    if(!apply_state(self, gl)) {
         BrLogWarn("GLREND", "Out of model space.");
         return;
     }
 
-    glBindVertexArray(self->trans.vao);
-    glBindBuffer(GL_ARRAY_BUFFER, self->trans.vbo);
-    glDrawArrays(GL_TRIANGLES, (GLint)offset, 3);
+    gl->BindVertexArray(self->trans.vao);
+    gl->BindBuffer(GL_ARRAY_BUFFER, self->trans.vbo);
+    gl->DrawArrays(GL_TRIANGLES, (GLint)offset, 3);
 
     self->stats.face_group_count++;
     self->stats.triangles_rendered_count += 1;

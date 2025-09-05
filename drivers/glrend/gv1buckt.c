@@ -87,6 +87,8 @@ static br_tv_template *BR_CMETHOD_DECL(br_geometry_v1_buckets_gl, templateQuery)
 br_error BR_CMETHOD_DECL(br_geometry_v1_buckets_gl, render)(br_geometry_v1_buckets *self, br_renderer *renderer, br_primitive **buckets,
                                                             br_int_32 nbuckets)
 {
+    const GladGLContext *gl = renderer->gl;
+
     if(nbuckets <= 0)
         return BRE_OK;
 
@@ -94,9 +96,9 @@ br_error BR_CMETHOD_DECL(br_geometry_v1_buckets_gl, render)(br_geometry_v1_bucke
      * Upload our transparent triangles, if any.
      */
     if(renderer->trans.next > 0) {
-        glBindBuffer(GL_ARRAY_BUFFER, renderer->trans.vbo);
-        glBufferData(GL_ARRAY_BUFFER, sizeof(renderer->trans.pool), renderer->trans.pool, GL_STATIC_DRAW);
-        glBindBuffer(GL_ARRAY_BUFFER, 0);
+        gl->BindBuffer(GL_ARRAY_BUFFER, renderer->trans.vbo);
+        gl->BufferData(GL_ARRAY_BUFFER, sizeof(renderer->trans.pool), renderer->trans.pool, GL_STATIC_DRAW);
+        gl->BindBuffer(GL_ARRAY_BUFFER, 0);
     }
 
     /*

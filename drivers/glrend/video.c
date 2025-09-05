@@ -4,40 +4,40 @@
 #include "drv.h"
 #include "brassert.h"
 
-GLuint VIDEOI_CreateAndCompileShader(GLenum type, const char *shader, size_t size)
+GLuint VIDEOI_CreateAndCompileShader(const GladGLContext *gl, GLenum type, const char *shader, size_t size)
 {
     GLuint s;
     GLint  _size, status;
 
     ASSERT(type == GL_VERTEX_SHADER || type == GL_FRAGMENT_SHADER);
 
-    s     = glCreateShader(type);
+    s     = gl->CreateShader(type);
     _size = (GLint)size;
-    glShaderSource(s, 1, &shader, &_size);
-    glCompileShader(s);
+    gl->ShaderSource(s, 1, &shader, &_size);
+    gl->CompileShader(s);
 
     status = GL_FALSE;
-    glGetShaderiv(s, GL_COMPILE_STATUS, &status);
+    gl->GetShaderiv(s, GL_COMPILE_STATUS, &status);
     if(status != GL_TRUE) {
         char  errorBuffer[1024];
         GLint maxLength;
-        glGetShaderiv(s, GL_INFO_LOG_LENGTH, &maxLength);
+        gl->GetShaderiv(s, GL_INFO_LOG_LENGTH, &maxLength);
 
         if(maxLength > sizeof(errorBuffer))
             maxLength = sizeof(errorBuffer);
 
-        glGetShaderInfoLog(s, maxLength, &maxLength, errorBuffer);
+        gl->GetShaderInfoLog(s, maxLength, &maxLength, errorBuffer);
         errorBuffer[maxLength - 1] = '\0';
 
         BrLogError("VIDEO", "Error compiling shader:\n%s", errorBuffer);
-        glDeleteShader(s);
+        gl->DeleteShader(s);
         return 0;
     }
 
     return s;
 }
 
-GLuint VIDEOI_LoadAndCompileShader(GLenum type, const char *path, const char *default_data, size_t default_size)
+GLuint VIDEOI_LoadAndCompileShader(const GladGLContext *gl, GLenum type, const char *path, const char *default_data, size_t default_size)
 {
     GLchar *source;
     size_t  size;
@@ -48,7 +48,7 @@ GLuint VIDEOI_LoadAndCompileShader(GLenum type, const char *path, const char *de
         size   = default_size;
     }
 
-    shader = VIDEOI_CreateAndCompileShader(type, source, size);
+    shader = VIDEOI_CreateAndCompileShader(gl, type, source, size);
 
     if(source != default_data)
         BrResFree(source);
@@ -56,45 +56,45 @@ GLuint VIDEOI_LoadAndCompileShader(GLenum type, const char *path, const char *de
     return shader;
 }
 
-GLuint VIDEOI_CreateAndCompileProgram(GLuint vert, GLuint frag)
+GLuint VIDEOI_CreateAndCompileProgram(const GladGLContext *gl, GLuint vert, GLuint frag)
 {
     GLuint program;
     GLint  status;
 
-    if((program = glCreateProgram()) == 0) {
+    if((program = gl->CreateProgram()) == 0) {
         BrLogError("VIDEO", "Error creating program.");
         return 0;
     }
 
-    glAttachShader(program, vert);
-    glAttachShader(program, frag);
+    gl->AttachShader(program, vert);
+    gl->AttachShader(program, frag);
 
-    glLinkProgram(program);
+    gl->LinkProgram(program);
 
     status = GL_FALSE;
-    glGetProgramiv(program, GL_LINK_STATUS, &status);
+    gl->GetProgramiv(program, GL_LINK_STATUS, &status);
     if(status != GL_TRUE) {
         char  errorBuffer[1024];
         GLint maxLength;
-        glGetProgramiv(program, GL_INFO_LOG_LENGTH, &maxLength);
+        gl->GetProgramiv(program, GL_INFO_LOG_LENGTH, &maxLength);
 
         if(maxLength > sizeof(errorBuffer))
             maxLength = sizeof(errorBuffer);
 
-        glGetProgramInfoLog(program, maxLength, &maxLength, errorBuffer);
+        gl->GetProgramInfoLog(program, maxLength, &maxLength, errorBuffer);
         errorBuffer[maxLength - 1] = '\0';
         BrLogError("VIDEO", "Error linking program:\n%s", errorBuffer);
 
-        glDetachShader(program, vert);
-        glDetachShader(program, frag);
-        glDeleteProgram(program);
+        gl->DetachShader(program, vert);
+        gl->DetachShader(program, frag);
+        gl->DeleteProgram(program);
         program = 0;
     }
 
     return program;
 }
 
-HVIDEO VIDEO_Open(HVIDEO hVideo, const char *vertShader, const char *fragShader)
+HVIDEO VIDEO_Open(HVIDEO hVideo, const GladGLContext *gl, const char *vertShader, const char *fragShader)
 {
     if(hVideo == NULL) {
         BrLogError("VIDEO", "Invalid handle.");
@@ -103,33 +103,35 @@ HVIDEO VIDEO_Open(HVIDEO hVideo, const char *vertShader, const char *fragShader)
 
     BrMemSet(hVideo, 0, sizeof(VIDEO));
 
-    glGetIntegerv(GL_MAX_UNIFORM_BLOCK_SIZE, &hVideo->maxUniformBlockSize);
-    glGetIntegerv(GL_MAX_UNIFORM_BUFFER_BINDINGS, &hVideo->maxUniformBufferBindings);
-    glGetIntegerv(GL_MAX_VERTEX_UNIFORM_BLOCKS, &hVideo->maxVertexUniformBlocks);
-    glGetIntegerv(GL_MAX_FRAGMENT_UNIFORM_BLOCKS, &hVideo->maxFragmentUniformBlocks);
-    glGetIntegerv(GL_MAX_SAMPLES, &hVideo->maxSamples);
+    hVideo->gl = gl;
 
-    if(GLAD_GL_EXT_texture_filter_anisotropic)
-        glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, &hVideo->maxAnisotropy);
+    gl->GetIntegerv(GL_MAX_UNIFORM_BLOCK_SIZE, &hVideo->maxUniformBlockSize);
+    gl->GetIntegerv(GL_MAX_UNIFORM_BUFFER_BINDINGS, &hVideo->maxUniformBufferBindings);
+    gl->GetIntegerv(GL_MAX_VERTEX_UNIFORM_BLOCKS, &hVideo->maxVertexUniformBlocks);
+    gl->GetIntegerv(GL_MAX_FRAGMENT_UNIFORM_BLOCKS, &hVideo->maxFragmentUniformBlocks);
+    gl->GetIntegerv(GL_MAX_SAMPLES, &hVideo->maxSamples);
+
+    if(gl->EXT_texture_filter_anisotropic)
+        gl->GetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, &hVideo->maxAnisotropy);
 
     if(!VIDEOI_CompileRectShader(hVideo))
         return NULL;
 
     if(!VIDEOI_CompileTextShader(hVideo)) {
-        glDeleteProgram(hVideo->rectProgram.program);
+        gl->DeleteProgram(hVideo->rectProgram.program);
         return NULL;
     }
 
     if(!VIDEOI_CompileLineShader(hVideo)) {
-        glDeleteProgram(hVideo->textProgram.program);
-        glDeleteProgram(hVideo->rectProgram.program);
+        gl->DeleteProgram(hVideo->textProgram.program);
+        gl->DeleteProgram(hVideo->rectProgram.program);
         return NULL;
     }
 
     if(!VIDEOI_CompileBRenderShader(hVideo, vertShader, fragShader)) {
-        glDeleteProgram(hVideo->textProgram.program);
-        glDeleteProgram(hVideo->rectProgram.program);
-        glDeleteProgram(hVideo->lineProgram.program);
+        gl->DeleteProgram(hVideo->textProgram.program);
+        gl->DeleteProgram(hVideo->rectProgram.program);
+        gl->DeleteProgram(hVideo->lineProgram.program);
         return NULL;
     }
 
@@ -138,27 +140,31 @@ HVIDEO VIDEO_Open(HVIDEO hVideo, const char *vertShader, const char *fragShader)
 
 void VIDEO_Close(HVIDEO hVideo)
 {
+    const GladGLContext *gl;
+
     if(!hVideo)
         return;
 
-    glUseProgram(0);
-    glBindVertexArray(0);
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-    glBindBuffer(GL_UNIFORM_BUFFER, 0);
+    gl = hVideo->gl;
+
+    gl->UseProgram(0);
+    gl->BindVertexArray(0);
+    gl->BindBuffer(GL_ARRAY_BUFFER, 0);
+    gl->BindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+    gl->BindBuffer(GL_UNIFORM_BUFFER, 0);
 
     if(hVideo->brenderProgram.blockIndexScene != GL_INVALID_INDEX)
-        glDeleteBuffers(1, &hVideo->brenderProgram.uboScene);
+        gl->DeleteBuffers(1, &hVideo->brenderProgram.uboScene);
 
-    glDeleteProgram(hVideo->rectProgram.program);
-    glDeleteBuffers(1, &hVideo->rectProgram.ubo);
-    glDeleteVertexArrays(1, &hVideo->rectProgram.vao);
+    gl->DeleteProgram(hVideo->rectProgram.program);
+    gl->DeleteBuffers(1, &hVideo->rectProgram.ubo);
+    gl->DeleteVertexArrays(1, &hVideo->rectProgram.vao);
 
-    glDeleteBuffers(1, &hVideo->lineProgram.ubo);
-    glDeleteVertexArrays(1, &hVideo->lineProgram.vao);
-    glDeleteProgram(hVideo->lineProgram.program);
+    gl->DeleteBuffers(1, &hVideo->lineProgram.ubo);
+    gl->DeleteVertexArrays(1, &hVideo->lineProgram.vao);
+    gl->DeleteProgram(hVideo->lineProgram.program);
 
-    glDeleteProgram(hVideo->textProgram.program);
+    gl->DeleteProgram(hVideo->textProgram.program);
 }
 
 // clang-format off

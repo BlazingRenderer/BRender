@@ -1,26 +1,26 @@
 #include "drv.h"
 
-GLuint DeviceGLBuildWhiteTexture(void)
+GLuint DeviceGLBuildWhiteTexture(const GladGLContext *gl)
 {
     const static uint8_t white_rgba[] = {255, 255, 255, 255};
 
     GLuint tex;
 
-    glGenTextures(1, &tex);
+    gl->GenTextures(1, &tex);
 
-    glBindTexture(GL_TEXTURE_2D, tex);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 1, 1, 0, GL_RGBA, GL_UNSIGNED_BYTE, white_rgba);
+    gl->BindTexture(GL_TEXTURE_2D, tex);
+    gl->TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    gl->TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    gl->TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    gl->TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    gl->TexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 1, 1, 0, GL_RGBA, GL_UNSIGNED_BYTE, white_rgba);
 
-    DeviceGLObjectLabel(GL_TEXTURE, tex, BR_GLREND_DEBUG_INTERNAL_PREFIX "white");
+    DeviceGLObjectLabel(gl, GL_TEXTURE, tex, BR_GLREND_DEBUG_INTERNAL_PREFIX "white");
 
     return tex;
 }
 
-GLuint DeviceGLBuildCheckerboardTexture(void)
+GLuint DeviceGLBuildCheckerboardTexture(const GladGLContext *gl)
 {
     // clang-format off
     const static br_uint_8 checkerboard_rgba[] = {
@@ -31,21 +31,21 @@ GLuint DeviceGLBuildCheckerboardTexture(void)
 
     GLuint tex;
 
-    glGenTextures(1, &tex);
+    gl->GenTextures(1, &tex);
 
-    glBindTexture(GL_TEXTURE_2D, tex);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 2, 2, 0, GL_RGBA, GL_UNSIGNED_BYTE, checkerboard_rgba);
+    gl->BindTexture(GL_TEXTURE_2D, tex);
+    gl->TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    gl->TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    gl->TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    gl->TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    gl->TexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 2, 2, 0, GL_RGBA, GL_UNSIGNED_BYTE, checkerboard_rgba);
 
-    DeviceGLObjectLabel(GL_TEXTURE, tex, BR_GLREND_DEBUG_INTERNAL_PREFIX "checkerboard");
+    DeviceGLObjectLabel(gl, GL_TEXTURE, tex, BR_GLREND_DEBUG_INTERNAL_PREFIX "checkerboard");
 
     return tex;
 }
 
-br_error DevicePixelmapGLBindFramebuffer(GLenum target, br_device_pixelmap *pm)
+br_error DevicePixelmapGLBindFramebuffer(const GladGLContext *gl, GLenum target, br_device_pixelmap *pm)
 {
     GLuint fbo;
 
@@ -65,7 +65,7 @@ br_error DevicePixelmapGLBindFramebuffer(GLenum target, br_device_pixelmap *pm)
             return BRE_FAIL;
     }
 
-    glBindFramebuffer(target, fbo);
+    gl->BindFramebuffer(target, fbo);
     return BRE_OK;
 }
 
@@ -88,7 +88,7 @@ br_uint_8 DeviceGLTypeOrBits(br_uint_8 pixel_type, br_int_32 pixel_bits)
     return BR_PMT_MAX;
 }
 
-br_error DeviceGLPixelmapToExistingGLTexture(GLuint tex, br_pixelmap *pm)
+br_error DeviceGLPixelmapToExistingGLTexture(const GladGLContext *gl, GLuint tex, br_pixelmap *pm)
 {
     GLenum                    err;
     const br_pixelmap_gl_fmt *fmt;
@@ -99,7 +99,7 @@ br_error DeviceGLPixelmapToExistingGLTexture(GLuint tex, br_pixelmap *pm)
     if((fmt = DeviceGLGetFormatDetails(pm->type)) == NULL)
         return BRE_FAIL;
 
-    glBindTexture(GL_TEXTURE_2D, tex);
+    gl->BindTexture(GL_TEXTURE_2D, tex);
 
     /*
      * If the texture isn't linear, or is inverted (i.e. pm->pixels points to the end),
@@ -120,75 +120,75 @@ br_error DeviceGLPixelmapToExistingGLTexture(GLuint tex, br_pixelmap *pm)
              */
         }
 
-        glTexImage2D(GL_TEXTURE_2D, 0, fmt->internal_format, pm->width, pm->height, 0, fmt->format, fmt->type, tmp->pixels);
+        gl->TexImage2D(GL_TEXTURE_2D, 0, fmt->internal_format, pm->width, pm->height, 0, fmt->format, fmt->type, tmp->pixels);
         BrPixelmapFree(tmp);
     } else {
-        glTexImage2D(GL_TEXTURE_2D, 0, fmt->internal_format, pm->width, pm->height, 0, fmt->format, fmt->type, pm->pixels);
+        gl->TexImage2D(GL_TEXTURE_2D, 0, fmt->internal_format, pm->width, pm->height, 0, fmt->format, fmt->type, pm->pixels);
     }
 
-    if((err = glGetError()) != 0) {
+    if((err = gl->GetError()) != 0) {
         BrLogError("GLREND", "glTexImage2D() failed with %s", DeviceGLStrError(err));
-        glBindTexture(GL_TEXTURE_2D, 0);
+        gl->BindTexture(GL_TEXTURE_2D, 0);
         return BRE_FAIL;
     }
 
     if(fmt->pm_type != BR_PMT_INDEX_8)
-        glGenerateMipmap(GL_TEXTURE_2D);
+        gl->GenerateMipmap(GL_TEXTURE_2D);
 
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    gl->TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    gl->TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    gl->TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    gl->TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_SWIZZLE_R, fmt->swizzle_r);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_SWIZZLE_G, fmt->swizzle_g);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_SWIZZLE_B, fmt->swizzle_b);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_SWIZZLE_A, fmt->swizzle_a);
+    gl->TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_SWIZZLE_R, fmt->swizzle_r);
+    gl->TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_SWIZZLE_G, fmt->swizzle_g);
+    gl->TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_SWIZZLE_B, fmt->swizzle_b);
+    gl->TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_SWIZZLE_A, fmt->swizzle_a);
 
-    glBindTexture(GL_TEXTURE_2D, 0);
+    gl->BindTexture(GL_TEXTURE_2D, 0);
 
     return BRE_OK;
 }
 
-GLuint DeviceGLPixelmapToGLTexture(br_pixelmap *pm)
+GLuint DeviceGLPixelmapToGLTexture(const GladGLContext *gl, br_pixelmap *pm)
 {
     if(pm == NULL)
         return 0;
 
     GLuint tex;
-    glGenTextures(1, &tex);
+    gl->GenTextures(1, &tex);
 
-    if(DeviceGLPixelmapToExistingGLTexture(tex, pm) != BRE_OK) {
-        glDeleteTextures(1, &tex);
+    if(DeviceGLPixelmapToExistingGLTexture(gl, tex, pm) != BRE_OK) {
+        gl->DeleteTextures(1, &tex);
         return 0;
     }
 
-    DeviceGLObjectLabelF(GL_TEXTURE, tex, BR_GLREND_DEBUG_INTERNAL_PREFIX "temp:%s", pm->identifier ? pm->identifier : "(unnamed)");
+    DeviceGLObjectLabelF(gl, GL_TEXTURE, tex, BR_GLREND_DEBUG_INTERNAL_PREFIX "temp:%s", pm->identifier ? pm->identifier : "(unnamed)");
     return tex;
 }
 
-void DeviceGLObjectLabel(GLenum identifier, GLuint name, const char *s)
+void DeviceGLObjectLabel(const GladGLContext *gl, GLenum identifier, GLuint name, const char *s)
 {
-    if(GLAD_GL_KHR_debug == 0)
+    if(gl->KHR_debug == 0)
         return;
 
-    while(glGetError() != GL_NO_ERROR)
+    while(gl->GetError() != GL_NO_ERROR)
         ;
 
-    glObjectLabel(identifier, name, -1, s);
+    gl->ObjectLabel(identifier, name, -1, s);
 
-    if(DeviceGLCheckErrors()) {
+    if(DeviceGLCheckErrors(gl)) {
         BrLogDebug("GLREND", "glObjectLabel(%u, %u, %s) failed.", identifier, name, s);
     }
 }
 
-void DeviceGLObjectLabelF(GLenum identifier, GLuint name, const char *fmt, ...)
+void DeviceGLObjectLabelF(const GladGLContext *gl, GLenum identifier, GLuint name, const char *fmt, ...)
 {
     va_list ap;
     char   *s   = BrScratchString();
     size_t  len = BrScratchStringSize();
 
-    if(GLAD_GL_KHR_debug == 0)
+    if(gl->KHR_debug == 0)
         return;
 
     va_start(ap, fmt);
@@ -197,7 +197,7 @@ void DeviceGLObjectLabelF(GLenum identifier, GLuint name, const char *fmt, ...)
 
     s[len - 1] = '\0';
 
-    DeviceGLObjectLabel(identifier, name, s);
+    DeviceGLObjectLabel(gl, identifier, name, s);
 }
 
 const char *DeviceGLStrError(GLenum err)
@@ -237,12 +237,12 @@ const char *DeviceGLStrError(GLenum err)
     return errbuf;
 }
 
-br_boolean DeviceGLCheckErrors(void)
+br_boolean DeviceGLCheckErrors(const GladGLContext *gl)
 {
     GLenum     err;
     br_boolean has_error = BR_FALSE;
 
-    while((err = glGetError()) != GL_NO_ERROR) {
+    while((err = gl->GetError()) != GL_NO_ERROR) {
         has_error = BR_TRUE;
         BrLogTrace("GLREND", "OpenGL reported %s", DeviceGLStrError(err));
     }

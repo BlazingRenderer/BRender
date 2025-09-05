@@ -5,51 +5,52 @@
 
 br_boolean VIDEOI_CompileRectShader(HVIDEO hVideo)
 {
-    GLuint vert, frag;
+    const GladGLContext *gl = hVideo->gl;
+    GLuint               vert, frag;
 
-    if((vert = VIDEOI_CreateAndCompileShader(GL_VERTEX_SHADER, g_RectVertexShader, sizeof(g_RectVertexShader))) == 0)
+    if((vert = VIDEOI_CreateAndCompileShader(gl, GL_VERTEX_SHADER, g_RectVertexShader, sizeof(g_RectVertexShader))) == 0)
         goto vert_failed;
 
-    if((frag = VIDEOI_CreateAndCompileShader(GL_FRAGMENT_SHADER, g_RectFragmentShader, sizeof(g_RectFragmentShader))) == 0)
+    if((frag = VIDEOI_CreateAndCompileShader(gl, GL_FRAGMENT_SHADER, g_RectFragmentShader, sizeof(g_RectFragmentShader))) == 0)
         goto frag_failed;
 
-    if((hVideo->rectProgram.program = VIDEOI_CreateAndCompileProgram(vert, frag)) == 0)
+    if((hVideo->rectProgram.program = VIDEOI_CreateAndCompileProgram(gl, vert, frag)) == 0)
         goto prog_failed;
 
-    DeviceGLObjectLabel(GL_SHADER, vert, BR_GLREND_DEBUG_INTERNAL_PREFIX "rect:shader:vertex");
-    DeviceGLObjectLabel(GL_SHADER, frag, BR_GLREND_DEBUG_INTERNAL_PREFIX "rect:shader:fragment");
-    DeviceGLObjectLabel(GL_PROGRAM, hVideo->rectProgram.program, BR_GLREND_DEBUG_INTERNAL_PREFIX "rect:program");
+    DeviceGLObjectLabel(gl, GL_SHADER, vert, BR_GLREND_DEBUG_INTERNAL_PREFIX "rect:shader:vertex");
+    DeviceGLObjectLabel(gl, GL_SHADER, frag, BR_GLREND_DEBUG_INTERNAL_PREFIX "rect:shader:fragment");
+    DeviceGLObjectLabel(gl, GL_PROGRAM, hVideo->rectProgram.program, BR_GLREND_DEBUG_INTERNAL_PREFIX "rect:program");
 
-    glGenVertexArrays(1, &hVideo->rectProgram.vao);
-    glBindVertexArray(hVideo->rectProgram.vao);
-    glBindVertexArray(0);
+    gl->GenVertexArrays(1, &hVideo->rectProgram.vao);
+    gl->BindVertexArray(hVideo->rectProgram.vao);
+    gl->BindVertexArray(0);
 
-    DeviceGLObjectLabel(GL_VERTEX_ARRAY, hVideo->rectProgram.vao, BR_GLREND_DEBUG_INTERNAL_PREFIX "rect:vao");
+    DeviceGLObjectLabel(gl, GL_VERTEX_ARRAY, hVideo->rectProgram.vao, BR_GLREND_DEBUG_INTERNAL_PREFIX "rect:vao");
 
-    hVideo->rectProgram.uSampler  = glGetUniformLocation(hVideo->rectProgram.program, "uSampler");
-    hVideo->rectProgram.uIndexTex = glGetUniformLocation(hVideo->rectProgram.program, "uIndexTex");
+    hVideo->rectProgram.uSampler  = gl->GetUniformLocation(hVideo->rectProgram.program, "uSampler");
+    hVideo->rectProgram.uIndexTex = gl->GetUniformLocation(hVideo->rectProgram.program, "uIndexTex");
 
-    hVideo->rectProgram.block_index_rect_data   = glGetUniformBlockIndex(hVideo->rectProgram.program, "RectData");
+    hVideo->rectProgram.block_index_rect_data   = gl->GetUniformBlockIndex(hVideo->rectProgram.program, "RectData");
     hVideo->rectProgram.block_binding_rect_data = 4;
-    glUniformBlockBinding(hVideo->rectProgram.program, hVideo->rectProgram.block_index_rect_data, hVideo->rectProgram.block_binding_rect_data);
+    gl->UniformBlockBinding(hVideo->rectProgram.program, hVideo->rectProgram.block_index_rect_data, hVideo->rectProgram.block_binding_rect_data);
 
-    glGenBuffers(1, &hVideo->rectProgram.ubo);
-    glBindBuffer(GL_UNIFORM_BUFFER, hVideo->rectProgram.ubo);
-    glBindBufferBase(GL_UNIFORM_BUFFER, hVideo->rectProgram.block_binding_rect_data, hVideo->rectProgram.ubo);
-    glBindBuffer(GL_UNIFORM_BUFFER, 0);
+    gl->GenBuffers(1, &hVideo->rectProgram.ubo);
+    gl->BindBuffer(GL_UNIFORM_BUFFER, hVideo->rectProgram.ubo);
+    gl->BindBufferBase(GL_UNIFORM_BUFFER, hVideo->rectProgram.block_binding_rect_data, hVideo->rectProgram.ubo);
+    gl->BindBuffer(GL_UNIFORM_BUFFER, 0);
 
-    DeviceGLObjectLabel(GL_BUFFER, hVideo->rectProgram.ubo, BR_GLREND_DEBUG_INTERNAL_PREFIX "rect:ubo");
+    DeviceGLObjectLabel(gl, GL_BUFFER, hVideo->rectProgram.ubo, BR_GLREND_DEBUG_INTERNAL_PREFIX "rect:ubo");
 
-    glBindFragDataLocation(hVideo->rectProgram.program, 0, "main_colour");
+    gl->BindFragDataLocation(hVideo->rectProgram.program, 0, "main_colour");
 
 prog_failed:
-    glDeleteShader(frag);
+    gl->DeleteShader(frag);
 
 frag_failed:
-    glDeleteShader(vert);
+    gl->DeleteShader(vert);
 
 vert_failed:
-    DeviceGLCheckErrors();
+    DeviceGLCheckErrors(gl);
 
     return hVideo->rectProgram.program != 0;
 }

@@ -23,6 +23,8 @@ typedef struct br_pixelmap_gl_fmt {
 } br_pixelmap_gl_fmt;
 
 typedef struct _VIDEO {
+    const GladGLContext *gl;
+
     GLint   maxUniformBlockSize;
     GLint   maxUniformBufferBindings;
     GLint   maxVertexUniformBlocks;

@@ -24,44 +24,44 @@ static br_tv_template_entry templateEntries[] = {
 };
 #undef F
 
-static GLuint create_vao(HVIDEO hVideo, GLuint vbo, GLuint ibo)
+static GLuint create_vao(const GladGLContext *gl, HVIDEO hVideo, GLuint vbo, GLuint ibo)
 {
     GLuint vao;
-    glGenVertexArrays(1, &vao);
-    glBindVertexArray(vao);
+    gl->GenVertexArrays(1, &vao);
+    gl->BindVertexArray(vao);
 
-    glBindBuffer(GL_ARRAY_BUFFER, vbo);
+    gl->BindBuffer(GL_ARRAY_BUFFER, vbo);
 
     if(hVideo->brenderProgram.attributes.aPosition >= 0) {
-        glEnableVertexAttribArray(hVideo->brenderProgram.attributes.aPosition);
-        glVertexAttribPointer(hVideo->brenderProgram.attributes.aPosition, 3, GL_FLOAT, GL_FALSE, sizeof(gl_vertex_f),
-                              (void *)offsetof(gl_vertex_f, p));
+        gl->EnableVertexAttribArray(hVideo->brenderProgram.attributes.aPosition);
+        gl->VertexAttribPointer(hVideo->brenderProgram.attributes.aPosition, 3, GL_FLOAT, GL_FALSE, sizeof(gl_vertex_f),
+                                (void *)offsetof(gl_vertex_f, p));
     }
 
     if(hVideo->brenderProgram.attributes.aUV >= 0) {
-        glEnableVertexAttribArray(hVideo->brenderProgram.attributes.aUV);
-        glVertexAttribPointer(hVideo->brenderProgram.attributes.aUV, 2, GL_FLOAT, GL_FALSE, sizeof(gl_vertex_f),
-                              (void *)offsetof(gl_vertex_f, map));
+        gl->EnableVertexAttribArray(hVideo->brenderProgram.attributes.aUV);
+        gl->VertexAttribPointer(hVideo->brenderProgram.attributes.aUV, 2, GL_FLOAT, GL_FALSE, sizeof(gl_vertex_f),
+                                (void *)offsetof(gl_vertex_f, map));
     }
 
     if(hVideo->brenderProgram.attributes.aNormal >= 0) {
-        glEnableVertexAttribArray(hVideo->brenderProgram.attributes.aNormal);
-        glVertexAttribPointer(hVideo->brenderProgram.attributes.aNormal, 3, GL_FLOAT, GL_FALSE, sizeof(gl_vertex_f),
-                              (void *)offsetof(gl_vertex_f, n));
+        gl->EnableVertexAttribArray(hVideo->brenderProgram.attributes.aNormal);
+        gl->VertexAttribPointer(hVideo->brenderProgram.attributes.aNormal, 3, GL_FLOAT, GL_FALSE, sizeof(gl_vertex_f),
+                                (void *)offsetof(gl_vertex_f, n));
     }
 
     if(hVideo->brenderProgram.attributes.aColour >= 0) {
-        glEnableVertexAttribArray(hVideo->brenderProgram.attributes.aColour);
-        glVertexAttribPointer(hVideo->brenderProgram.attributes.aColour, 4, GL_UNSIGNED_BYTE, GL_TRUE, sizeof(gl_vertex_f),
-                              (void *)offsetof(gl_vertex_f, c));
+        gl->EnableVertexAttribArray(hVideo->brenderProgram.attributes.aColour);
+        gl->VertexAttribPointer(hVideo->brenderProgram.attributes.aColour, 4, GL_UNSIGNED_BYTE, GL_TRUE, sizeof(gl_vertex_f),
+                                (void *)offsetof(gl_vertex_f, c));
     }
 
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
-    glBindVertexArray(0);
+    gl->BindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
+    gl->BindVertexArray(0);
     return vao;
 }
 
-static GLuint build_vbo(const struct v11model *model, size_t total_vertices)
+static GLuint build_vbo(const GladGLContext *gl, const struct v11model *model, size_t total_vertices)
 {
     /* Collate and upload the vertex data. */
     gl_vertex_f *vtx     = (gl_vertex_f *)BrScratchAllocate(total_vertices * sizeof(gl_vertex_f));
@@ -78,14 +78,14 @@ static GLuint build_vbo(const struct v11model *model, size_t total_vertices)
         }
     }
 
-    glGenBuffers(1, &buf);
-    glBindBuffer(GL_ARRAY_BUFFER, buf);
-    glBufferData(GL_ARRAY_BUFFER, (GLsizeiptr)(total_vertices * sizeof(gl_vertex_f)), vtx, GL_STATIC_DRAW);
+    gl->GenBuffers(1, &buf);
+    gl->BindBuffer(GL_ARRAY_BUFFER, buf);
+    gl->BufferData(GL_ARRAY_BUFFER, (GLsizeiptr)(total_vertices * sizeof(gl_vertex_f)), vtx, GL_STATIC_DRAW);
     BrScratchFree(vtx);
     return buf;
 }
 
-static GLuint build_ibo(const struct v11model *model, size_t total_faces, gl_groupinfo *groups)
+static GLuint build_ibo(const GladGLContext *gl, const struct v11model *model, size_t total_faces, gl_groupinfo *groups)
 {
     br_uint_16 *idx = (br_uint_16 *)BrScratchAllocate(total_faces * 3 * sizeof(br_uint_16));
     GLuint      buf;
@@ -112,23 +112,25 @@ static GLuint build_ibo(const struct v11model *model, size_t total_faces, gl_gro
         offset += model->groups[i].nvertices;
     }
 
-    glGenBuffers(1, &buf);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, buf);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, (GLsizeiptr)face_offset, idx, GL_STATIC_DRAW);
+    gl->GenBuffers(1, &buf);
+    gl->BindBuffer(GL_ELEMENT_ARRAY_BUFFER, buf);
+    gl->BufferData(GL_ELEMENT_ARRAY_BUFFER, (GLsizeiptr)face_offset, idx, GL_STATIC_DRAW);
     BrScratchFree(idx);
     return buf;
 }
 
 br_geometry_stored *GeometryStoredGLAllocate(br_geometry_v1_model *gv1model, const char *id, br_renderer *r, struct v11model *model)
 {
-    size_t              total_vertices, total_faces;
-    br_geometry_stored *self;
+    size_t               total_vertices, total_faces;
+    br_geometry_stored  *self;
+    const GladGLContext *gl = r->gl;
 
     self             = BrResAllocate(gv1model->renderer_facility->object_list, sizeof(*self), BR_MEMORY_OBJECT);
     self->dispatch   = &geometryStoredDispatch;
     self->identifier = BrResSprintf(self, BR_GLREND_DEBUG_USER_PREFIX "%s", id);
     self->device     = gv1model->device;
     self->gv1model   = gv1model;
+    self->gl         = gl;
 
     ObjectContainerAddFront(gv1model->renderer_facility, (br_object *)self);
 
@@ -144,31 +146,32 @@ br_geometry_stored *GeometryStoredGLAllocate(br_geometry_v1_model *gv1model, con
         total_faces += model->groups[i].nfaces;
     }
 
-    glBindVertexArray(0);
+    gl->BindVertexArray(0);
 
-    self->gl_vbo = build_vbo(model, total_vertices);
-    self->gl_ibo = build_ibo(model, total_faces, self->groups);
-    self->gl_vao = create_vao(&r->pixelmap->screen->asFront.video, self->gl_vbo, self->gl_ibo);
+    self->gl_vbo = build_vbo(gl, model, total_vertices);
+    self->gl_ibo = build_ibo(gl, model, total_faces, self->groups);
+    self->gl_vao = create_vao(gl, &r->pixelmap->screen->asFront.video, self->gl_vbo, self->gl_ibo);
 
-    DeviceGLObjectLabelF(GL_BUFFER, self->gl_vbo, "%s:vbo", self->identifier);
-    DeviceGLObjectLabelF(GL_BUFFER, self->gl_ibo, "%s:ibo", self->identifier);
-    DeviceGLObjectLabelF(GL_VERTEX_ARRAY, self->gl_vao, "%s:vao", self->identifier);
+    DeviceGLObjectLabelF(gl, GL_BUFFER, self->gl_vbo, "%s:vbo", self->identifier);
+    DeviceGLObjectLabelF(gl, GL_BUFFER, self->gl_ibo, "%s:ibo", self->identifier);
+    DeviceGLObjectLabelF(gl, GL_VERTEX_ARRAY, self->gl_vao, "%s:vao", self->identifier);
 
-    glBindVertexArray(0);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    gl->BindVertexArray(0);
+    gl->BindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+    gl->BindBuffer(GL_ARRAY_BUFFER, 0);
     return (br_geometry_stored *)self;
 }
 
 static void BR_CMETHOD(br_geometry_stored_gl, free)(br_object *_self)
 {
-    br_geometry_stored *self = (br_geometry_stored *)_self;
+    br_geometry_stored  *self = (br_geometry_stored *)_self;
+    const GladGLContext *gl   = self->gl;
 
     ObjectContainerRemove(self->gv1model->renderer_facility, (br_object *)self);
 
-    glDeleteVertexArrays(1, &self->gl_vao);
-    glDeleteBuffers(1, &self->gl_vbo);
-    glDeleteBuffers(1, &self->gl_ibo);
+    gl->DeleteVertexArrays(1, &self->gl_vao);
+    gl->DeleteBuffers(1, &self->gl_vbo);
+    gl->DeleteBuffers(1, &self->gl_ibo);
     BrResFreeNoCallback(self);
 }
 

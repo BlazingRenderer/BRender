@@ -30,6 +30,7 @@ struct br_buffer_stored *BufferStoredGLAllocate(br_renderer *renderer, br_token 
 {
     struct br_buffer_stored *self;
     char                    *ident;
+    const GladGLContext     *gl = renderer->gl;
 
     switch(use) {
 
@@ -74,6 +75,7 @@ struct br_buffer_stored *BufferStoredGLAllocate(br_renderer *renderer, br_token 
     self->identifier = BrResSprintf(self, BR_GLREND_DEBUG_USER_PREFIX "%s:%s", ident, pm->pm_identifier ? pm->pm_identifier : "(unnamed)");
     self->device     = ObjectDevice(renderer);
     self->renderer   = renderer;
+    self->gl         = gl;
     self->gl_tex     = 0;
     self->templates = BrTVTemplateAllocate(self, (br_tv_template_entry *)bufferStoredTemplateEntries, BR_ASIZE(bufferStoredTemplateEntries));
 
@@ -88,6 +90,7 @@ static br_error updateMemory(br_buffer_stored *self, br_pixelmap *pm)
 {
     br_error                  berr;
     const br_pixelmap_gl_fmt *fmt;
+    const GladGLContext      *gl = self->gl;
 
     /*
      * The pixelmap is a plain BRender memory pixelmap. Make sure that the pixels can be accessed
@@ -101,14 +104,14 @@ static br_error updateMemory(br_buffer_stored *self, br_pixelmap *pm)
     self->fmt = fmt;
 
     if(self->gl_tex == 0) {
-        glGenTextures(1, &self->gl_tex);
+        gl->GenTextures(1, &self->gl_tex);
     }
 
-    if((berr = DeviceGLPixelmapToExistingGLTexture(self->gl_tex, pm)) != BRE_OK) {
+    if((berr = DeviceGLPixelmapToExistingGLTexture(gl, self->gl_tex, pm)) != BRE_OK) {
         return berr;
     }
 
-    DeviceGLObjectLabel(GL_TEXTURE, self->gl_tex, self->identifier);
+    DeviceGLObjectLabel(gl, GL_TEXTURE, self->gl_tex, self->identifier);
 
     self->source       = pm;
     self->source_flags = pm->flags;
@@ -143,9 +146,10 @@ static br_error BR_CMETHOD_DECL(br_buffer_stored_gl, update)(struct br_buffer_st
 
 static void BR_CMETHOD_DECL(br_buffer_stored_gl, free)(br_object *_self)
 {
-    br_buffer_stored *self = (br_buffer_stored *)_self;
+    br_buffer_stored    *self = (br_buffer_stored *)_self;
+    const GladGLContext *gl   = self->gl;
 
-    glDeleteTextures(1, &self->gl_tex);
+    gl->DeleteTextures(1, &self->gl_tex);
     self->gl_tex = 0;
 
     ObjectContainerRemove(self->renderer, (br_object *)self);
