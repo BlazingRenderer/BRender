@@ -102,6 +102,13 @@ compile_shader(
         VARNAME     "g_LineFragmentShader"
 )
 
+set(GLAD_FILES
+        glad/src/gl.c
+        glad/include/glad/gl.h
+        glad/include/KHR/khrplatform.h
+)
+source_group("GLAD" FILES ${GLAD_FILES})
+
 set(GLSTATE_FILES
         cache.c
         state.c
@@ -182,16 +189,11 @@ set(GLREND_FILES
         template.h
 
         util.c
-
-        gl.c
         )
 
 set(INC_FILES
         include/brglrend.h
         include/brglrend_p.h
-
-        include/glad/gl.h
-        include/KHR/khrplatform.h
         )
 
 add_library(glrend-headers INTERFACE)
@@ -213,6 +215,7 @@ set_target_properties(glrend-headers PROPERTIES
         )
 
 add_library(glrend
+        ${GLAD_FILES}
         ${GLREND_FILES}
         ${RENDERER_FILES}
         ${VIDEO_FILES}
@@ -239,7 +242,7 @@ if (target_type STREQUAL SHARED_LIBRARY)
     target_compile_definitions(glrend PRIVATE -DDEFINE_BR_ENTRY_POINT)
 endif ()
 
-target_include_directories(glrend PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
+target_include_directories(glrend PRIVATE ${CMAKE_CURRENT_BINARY_DIR} glad/include)
 
 target_link_libraries(glrend PRIVATE OpenGL::GL BRender::DDI)
 target_link_libraries(glrend PUBLIC glrend-headers)
