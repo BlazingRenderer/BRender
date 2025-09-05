@@ -86,7 +86,6 @@ struct br_buffer_stored *BufferStoredGLAllocate(br_renderer *renderer, br_token 
 
 static br_error updateMemory(br_buffer_stored *self, br_pixelmap *pm)
 {
-    GLenum                    err;
     br_error                  berr;
     const br_pixelmap_gl_fmt *fmt;
 
@@ -234,8 +233,6 @@ use_target:
      * If there's no target pixelmap, see if our renderer's current state has one.
      */
     if(target == NULL) {
-        const state_output *output;
-
         if(!(self->renderer->state.current->valid & BR_STATE_OUTPUT))
             return fallback;
 
