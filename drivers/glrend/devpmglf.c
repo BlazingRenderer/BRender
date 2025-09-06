@@ -148,7 +148,7 @@ br_device_pixelmap *DevicePixelmapGLAllocateFront(br_device *dev, br_output_faci
         BrResFreeNoCallback(self);
         return NULL;
     }
-    self->asFront.gl_context = context_info.native;
+    self->asFront.native_context = context_info.native;
 
     BrLogInfo("GLREND", "Created an OpenGL%s %d.%d%s context.", context_info.profile == BRT_OPENGL_PROFILE_ES ? " ES" : "",
               context_info.major, context_info.minor,
@@ -161,7 +161,7 @@ br_device_pixelmap *DevicePixelmapGLAllocateFront(br_device *dev, br_output_faci
         goto cleanup_context;
     }
 
-    if(DevicePixelmapGLExtMakeCurrent(self, self->asFront.gl_context) != BRE_OK)
+    if(DevicePixelmapGLExtMakeCurrent(self, self->asFront.native_context) != BRE_OK)
         goto cleanup_context;
 
     if((glad_version = gladLoadGLContextUserPtr(&self->asFront.glad_gl_context, DevicePixelmapGLExtGetGetProcAddress(self), self)) == 0) {
@@ -223,7 +223,7 @@ br_device_pixelmap *DevicePixelmapGLAllocateFront(br_device *dev, br_output_faci
     return self;
 
 cleanup_context:
-    DevicePixelmapGLExtDeleteContext(self, self->asFront.gl_context);
+    DevicePixelmapGLExtDeleteContext(self, self->asFront.native_context);
     DevicePixelmapGLExtFree(self);
     BrResFreeNoCallback(self);
 
@@ -241,7 +241,7 @@ static void BR_CMETHOD_DECL(br_device_pixelmap_glf, free)(br_object *_self)
 
     ContextStateGLFini(GLContextState(gl));
 
-    DevicePixelmapGLExtDeleteContext(self, self->asFront.gl_context);
+    DevicePixelmapGLExtDeleteContext(self, self->asFront.native_context);
 
     ObjectContainerRemove(self->output_facility, (br_object *)self);
 

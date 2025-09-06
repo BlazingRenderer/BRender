@@ -71,9 +71,9 @@ typedef struct br_device_pixelmap {
             br_device_gl_ext_procs ext_procs;
 
             /*
-             * OpenGL context.
+             * The native context handle.
              */
-            void *gl_context;
+            void *native_context;
 
             /*
              * GLAD OpenGL context.
