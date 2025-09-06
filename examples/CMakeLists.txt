@@ -8,6 +8,7 @@ if(TARGET BRender::Drivers::SDL3Dev AND TARGET BRender::Drivers::GLRend)
     add_subdirectory(devpmtest)
     add_subdirectory(tutorials)
     add_subdirectory(samples)
+    add_subdirectory(brcube)
 
 endif()
 
