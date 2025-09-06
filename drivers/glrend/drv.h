@@ -50,12 +50,30 @@ extern "C" {
  */
 #define BR_GLREND_DEBUG 0
 
-#include "brddi.h"
-#include "brglrend.h"
-#include "formats.h"
-#include "pm.h"
-#include "font.h"
-#include "video.h"
+#include <brddi.h>
+#include <brglrend.h>
+#include <formats.h>
+#include <pm.h>
+
+typedef struct br_pixelmap_gl_fmt {
+    br_uint_8  pm_type;
+    GLint      internal_format;
+    GLenum     format;
+    GLenum     type;
+    GLsizeiptr bytes;
+    br_boolean blended;
+    br_boolean indexed;
+    GLint      swizzle_r;
+    GLint      swizzle_g;
+    GLint      swizzle_b;
+    GLint      swizzle_a;
+} br_pixelmap_gl_fmt;
+
+#include "shader_line.h"
+#include "shader_rect.h"
+#include "shader_text.h"
+#include "shader_main.h"
+#include "context_state.h"
 #include "state.h"
 
 #include "template.h"

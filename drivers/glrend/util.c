@@ -1,51 +1,6 @@
 #include "drv.h"
 #include "brassert.h"
 
-GLuint DeviceGLBuildWhiteTexture(const GladGLContext *gl)
-{
-    const static uint8_t white_rgba[] = {255, 255, 255, 255};
-
-    GLuint tex;
-
-    gl->GenTextures(1, &tex);
-
-    gl->BindTexture(GL_TEXTURE_2D, tex);
-    gl->TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    gl->TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    gl->TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    gl->TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    gl->TexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 1, 1, 0, GL_RGBA, GL_UNSIGNED_BYTE, white_rgba);
-
-    DeviceGLObjectLabel(gl, GL_TEXTURE, tex, BR_GLREND_DEBUG_INTERNAL_PREFIX "white");
-
-    return tex;
-}
-
-GLuint DeviceGLBuildCheckerboardTexture(const GladGLContext *gl)
-{
-    // clang-format off
-    const static br_uint_8 checkerboard_rgba[] = {
-        0x00, 0x00, 0x00, 0xFF,   0xFF, 0x00, 0xFF, 0xFF,
-        0xFF, 0x00, 0xFF, 0xFF,   0x00, 0x00, 0x00, 0xFF,
-    };
-    // clang-format on
-
-    GLuint tex;
-
-    gl->GenTextures(1, &tex);
-
-    gl->BindTexture(GL_TEXTURE_2D, tex);
-    gl->TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    gl->TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    gl->TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    gl->TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-    gl->TexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 2, 2, 0, GL_RGBA, GL_UNSIGNED_BYTE, checkerboard_rgba);
-
-    DeviceGLObjectLabel(gl, GL_TEXTURE, tex, BR_GLREND_DEBUG_INTERNAL_PREFIX "checkerboard");
-
-    return tex;
-}
-
 br_error DevicePixelmapGLBindFramebuffer(const GladGLContext *gl, GLenum target, br_device_pixelmap *pm)
 {
     GLuint fbo;

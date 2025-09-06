@@ -24,7 +24,7 @@ static br_tv_template_entry templateEntries[] = {
 };
 #undef F
 
-static GLuint create_vao(const GladGLContext *gl, HVIDEO hVideo, GLuint vbo, GLuint ibo)
+static GLuint create_vao(const GladGLContext *gl, const br_gl_main_shader *shader, GLuint vbo, GLuint ibo)
 {
     GLuint vao;
     gl->GenVertexArrays(1, &vao);
@@ -32,28 +32,24 @@ static GLuint create_vao(const GladGLContext *gl, HVIDEO hVideo, GLuint vbo, GLu
 
     gl->BindBuffer(GL_ARRAY_BUFFER, vbo);
 
-    if(hVideo->brenderProgram.attributes.aPosition >= 0) {
-        gl->EnableVertexAttribArray(hVideo->brenderProgram.attributes.aPosition);
-        gl->VertexAttribPointer(hVideo->brenderProgram.attributes.aPosition, 3, GL_FLOAT, GL_FALSE, sizeof(gl_vertex_f),
-                                (void *)offsetof(gl_vertex_f, p));
+    if(shader->attributes.aPosition >= 0) {
+        gl->EnableVertexAttribArray(shader->attributes.aPosition);
+        gl->VertexAttribPointer(shader->attributes.aPosition, 3, GL_FLOAT, GL_FALSE, sizeof(gl_vertex_f), (void *)offsetof(gl_vertex_f, p));
     }
 
-    if(hVideo->brenderProgram.attributes.aUV >= 0) {
-        gl->EnableVertexAttribArray(hVideo->brenderProgram.attributes.aUV);
-        gl->VertexAttribPointer(hVideo->brenderProgram.attributes.aUV, 2, GL_FLOAT, GL_FALSE, sizeof(gl_vertex_f),
-                                (void *)offsetof(gl_vertex_f, map));
+    if(shader->attributes.aUV >= 0) {
+        gl->EnableVertexAttribArray(shader->attributes.aUV);
+        gl->VertexAttribPointer(shader->attributes.aUV, 2, GL_FLOAT, GL_FALSE, sizeof(gl_vertex_f), (void *)offsetof(gl_vertex_f, map));
     }
 
-    if(hVideo->brenderProgram.attributes.aNormal >= 0) {
-        gl->EnableVertexAttribArray(hVideo->brenderProgram.attributes.aNormal);
-        gl->VertexAttribPointer(hVideo->brenderProgram.attributes.aNormal, 3, GL_FLOAT, GL_FALSE, sizeof(gl_vertex_f),
-                                (void *)offsetof(gl_vertex_f, n));
+    if(shader->attributes.aNormal >= 0) {
+        gl->EnableVertexAttribArray(shader->attributes.aNormal);
+        gl->VertexAttribPointer(shader->attributes.aNormal, 3, GL_FLOAT, GL_FALSE, sizeof(gl_vertex_f), (void *)offsetof(gl_vertex_f, n));
     }
 
-    if(hVideo->brenderProgram.attributes.aColour >= 0) {
-        gl->EnableVertexAttribArray(hVideo->brenderProgram.attributes.aColour);
-        gl->VertexAttribPointer(hVideo->brenderProgram.attributes.aColour, 4, GL_UNSIGNED_BYTE, GL_TRUE, sizeof(gl_vertex_f),
-                                (void *)offsetof(gl_vertex_f, c));
+    if(shader->attributes.aColour >= 0) {
+        gl->EnableVertexAttribArray(shader->attributes.aColour);
+        gl->VertexAttribPointer(shader->attributes.aColour, 4, GL_UNSIGNED_BYTE, GL_TRUE, sizeof(gl_vertex_f), (void *)offsetof(gl_vertex_f, c));
     }
 
     gl->BindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
@@ -123,7 +119,8 @@ br_geometry_stored *GeometryStoredGLAllocate(br_geometry_v1_model *gv1model, con
 {
     size_t               total_vertices, total_faces;
     br_geometry_stored  *self;
-    const GladGLContext *gl = r->gl;
+    const GladGLContext *gl  = r->gl;
+    br_gl_context_state *ctx = GLContextState(gl);
 
     self             = BrResAllocate(gv1model->renderer_facility->object_list, sizeof(*self), BR_MEMORY_OBJECT);
     self->dispatch   = &geometryStoredDispatch;
@@ -150,7 +147,7 @@ br_geometry_stored *GeometryStoredGLAllocate(br_geometry_v1_model *gv1model, con
 
     self->gl_vbo = build_vbo(gl, model, total_vertices);
     self->gl_ibo = build_ibo(gl, model, total_faces, self->groups);
-    self->gl_vao = create_vao(gl, &r->pixelmap->screen->asFront.video, self->gl_vbo, self->gl_ibo);
+    self->gl_vao = create_vao(gl, &ctx->main_shader, self->gl_vbo, self->gl_ibo);
 
     DeviceGLObjectLabelF(gl, GL_BUFFER, self->gl_vbo, "%s:vbo", self->identifier);
     DeviceGLObjectLabelF(gl, GL_BUFFER, self->gl_ibo, "%s:ibo", self->identifier);

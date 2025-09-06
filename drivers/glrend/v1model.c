@@ -213,7 +213,7 @@ static void apply_blend_mode(state_stack *self, const GladGLContext *gl)
 }
 
 static void apply_stored_properties(const GladGLContext *gl, br_renderer *renderer, state_stack *state, uint32_t states, br_boolean *unlit,
-                                    shader_data_model *model, GLuint tex_default)
+                                    br_gl_main_data_model *model, GLuint tex_default)
 {
     br_boolean depth_test = BR_FALSE;
 
@@ -347,11 +347,10 @@ static void apply_stored_properties(const GladGLContext *gl, br_renderer *render
 
 static br_boolean apply_state(br_renderer *renderer, const GladGLContext *gl)
 {
-
-    state_cache        *cache  = &renderer->state.cache;
-    br_device_pixelmap *screen = renderer->pixelmap->screen;
-    br_boolean          unlit;
-    shader_data_model   model;
+    const br_gl_context_state *ctx   = GLContextState(gl);
+    state_cache               *cache = &renderer->state.cache;
+    br_boolean                 unlit;
+    br_gl_main_data_model      model;
 
     /* Update the per-model cache (matrices and lights) */
     StateGLUpdateModel(cache, &renderer->state.current->matrix);
@@ -377,7 +376,7 @@ static br_boolean apply_state(br_renderer *renderer, const GladGLContext *gl)
     // int model_lit = self->model->flags & V11MODF_LIT;
 
     unlit = BR_TRUE;
-    apply_stored_properties(gl, renderer, renderer->state.current, MASK_STATE_STORED | MASK_STATE_OUTPUT, &unlit, &model, screen->asFront.tex_white);
+    apply_stored_properties(gl, renderer, renderer->state.current, MASK_STATE_STORED | MASK_STATE_OUTPUT, &unlit, &model, ctx->tex_white);
 
     model.unlit = (br_uint_32)unlit;
 

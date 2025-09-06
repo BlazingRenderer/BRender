@@ -124,16 +124,6 @@ set(GLSTATE_FILES
         )
 source_group("STATE" FILES ${GLSTATE_FILES})
 
-set(VIDEO_FILES
-        shader_brender.c
-        shader_rect.c
-        shader_text.c
-        shader_line.c
-        video.c
-        video.h
-        )
-source_group("VIDEO" FILES ${VIDEO_FILES})
-
 set(RENDERER_FILES
         gv1buckt.c
         gv1buckt.h
@@ -164,6 +154,18 @@ set(GLREND_FILES
 
         driver.c
 
+        context_state.c
+        context_state.h
+
+        shader_main.c
+        shader_main.h
+        shader_rect.c
+        shader_rect.h
+        shader_text.c
+        shader_text.h
+        shader_line.c
+        shader_line.h
+
         outfcty.c
         outfcty.h
 
@@ -182,9 +184,6 @@ set(GLREND_FILES
 
         devclut.c
         devclut.h
-
-        font.c
-        font.h
 
         template.h
 
@@ -219,7 +218,6 @@ add_library(glrend
         ${GLAD_FILES}
         ${GLREND_FILES}
         ${RENDERER_FILES}
-        ${VIDEO_FILES}
         ${GLSTATE_FILES}
         ${INC_FILES}
 

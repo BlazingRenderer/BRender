@@ -247,7 +247,7 @@ typedef struct state_stack {
 typedef struct {
     GLuint fbo;
 
-    alignas(16) shader_data_scene scene;
+    alignas(16) br_gl_main_data_scene scene;
 
     struct {
         br_matrix4 p;

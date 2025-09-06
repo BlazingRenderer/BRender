@@ -36,7 +36,7 @@ static const br_tv_custom custom = {
  * Device pixelmap info. template
  */
 #define F(f)  offsetof(br_device_pixelmap, f)
-#define FF(f) offsetof(br_device_pixelmap, asFront.f)
+#define FF(f) offsetof(br_device_pixelmap, asFront.context_state.f)
 static br_tv_template_entry devicePixelmapFrontTemplateEntries[] = {
     {BRT(WIDTH_I32),                 F(pm_width),           BRTV_QUERY | BRTV_ALL, BRTV_CONV_I32_U16, 0                    },
     {BRT(HEIGHT_I32),                F(pm_height),          BRTV_QUERY | BRTV_ALL, BRTV_CONV_I32_U16, 0                    },
@@ -79,75 +79,6 @@ static br_tv_template_entry pixelmapNewTemplateEntries[] = {
     {BRT(OPENGL_FRAGMENT_SHADER_STR), F(fragment_shader), BRTV_SET, BRTV_CONV_COPY},
 };
 #undef F
-
-static void setup_qiurks(br_device_pixelmap *self)
-{
-    const char *gl_renderer = self->asFront.gl_renderer;
-    const char *gl_vendor   = self->asFront.gl_vendor;
-
-    self->asFront.quirks.value = 0;
-
-    /*
-     * Disable anisotropic filtering on llvmpipe. It is _slow_.
-     */
-    if(BrStrCmp(gl_vendor, "Mesa") == 0 && strstr(gl_renderer, "llvmpipe (") == gl_renderer) {
-        BrLogInfo("GLREND", "Quirk - using llvmpipe, disabling anisotropic filtering.");
-        self->asFront.quirks.disable_anisotropic_filtering = 1;
-    }
-
-    if(strstr(gl_renderer, "Apple M") == gl_renderer) {
-        BrLogInfo("GLREND", "Quirk - using Apple Silicon, forcing model uniform buffer orphaning.");
-        self->asFront.quirks.orphan_model_buffers = 1;
-    }
-}
-
-static void GLAD_API_PTR gl_debug_callback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar *message,
-                                           const void *user)
-{
-    const char *source_string, *type_string, *severity_string;
-
-    (void)user;
-
-    // clang-format off
-    switch(source) {
-        case GL_DEBUG_SOURCE_API:             source_string = "API";             break;
-        case GL_DEBUG_SOURCE_OTHER:           source_string = "OTHER";           break;
-        case GL_DEBUG_SOURCE_THIRD_PARTY:     source_string = "THIRD_PARTY";     break;
-        case GL_DEBUG_SOURCE_APPLICATION:     source_string = "APPLICATION";     break;
-        case GL_DEBUG_SOURCE_WINDOW_SYSTEM:   source_string = "WINDOW_SYSTEM";   break;
-        case GL_DEBUG_SOURCE_SHADER_COMPILER: source_string = "SHADER_COMPILER"; break;
-        default:                              source_string = "UNKNOWN";         break;
-    }
-
-    switch(type) {
-        case GL_DEBUG_TYPE_ERROR:               type_string = "ERROR";               break;
-        case GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR: type_string = "DEPRECATED_BEHAVIOR"; break;
-        case GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR:  type_string = "UNDEFINED_BEHAVIOR";  break;
-        case GL_DEBUG_TYPE_PORTABILITY:         type_string = "PORTABILITY";         break;
-        case GL_DEBUG_TYPE_PERFORMANCE:         type_string = "PERFORMANCE";         break;
-        case GL_DEBUG_TYPE_MARKER:              type_string = "MARKER";              break;
-        case GL_DEBUG_TYPE_PUSH_GROUP:          type_string = "PUSH_GROUP";          break;
-        case GL_DEBUG_TYPE_POP_GROUP:           type_string = "POP_GROUP";           break;
-        case GL_DEBUG_TYPE_OTHER:               type_string = "OTHER";               break;
-        default:                                type_string = "UNKNOWN";             break;
-    }
-
-    switch(severity) {
-        case GL_DEBUG_SEVERITY_LOW:          severity_string = "LOW";          break;
-        case GL_DEBUG_SEVERITY_MEDIUM:       severity_string = "MEDIUM";       break;
-        case GL_DEBUG_SEVERITY_HIGH:         severity_string = "HIGH";         break;
-        case GL_DEBUG_SEVERITY_NOTIFICATION: severity_string = "NOTIFICATION"; break;
-        default:                             severity_string = "UNKNOWN";      break;
-    }
-    // clang-format on
-
-    if(length < 0) {
-        BrLogDebug("GLREND", "glDebug: source=%s, type=%s, id=%u, severity=%s: %.*s", source_string, type_string, id, severity_string,
-                   (int)length, message);
-    } else {
-        BrLogDebug("GLREND", "glDebug: source=%s, type=%s, id=%u, severity=%s: %s", source_string, type_string, id, severity_string, message);
-    }
-}
 
 br_device_pixelmap *DevicePixelmapGLAllocateFront(br_device *dev, br_output_facility *outfcty, br_token_value *tv)
 {
@@ -206,6 +137,8 @@ br_device_pixelmap *DevicePixelmapGLAllocateFront(br_device *dev, br_output_faci
     self->pm_height = pt.height;
     self->pm_flags |= BR_PMF_NO_ACCESS;
 
+    self->num_refs = 0;
+
     /*
      * Make a copy, so they can't switch things out from under us.
      */
@@ -236,51 +169,31 @@ br_device_pixelmap *DevicePixelmapGLAllocateFront(br_device *dev, br_output_faci
         goto cleanup_context;
     }
 
-    gl                                    = &self->asFront.glad_gl_context;
-    self->asFront.glad_gl_context.userptr = &self->asFront;
-    ctx = GLContextState(gl);
-
     glad_major = GLAD_VERSION_MAJOR(glad_version);
     glad_minor = GLAD_VERSION_MINOR(glad_version);
 
-    /*
-     * Always register the debug stuff, it needs to be explicitly glEnable(GL_DEBUG_OUTPUT)'d anyway.
-     */
-    if(gl->KHR_debug) {
-        gl->DebugMessageCallback(gl_debug_callback, self);
-        gl->DebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, NULL, GL_TRUE);
+    gl  = &self->asFront.glad_gl_context;
+    ctx = self->asFront.glad_gl_context.userptr = &self->asFront.context_state;
 
-#if BR_GLREND_DEBUG
-        gl->Enable(GL_DEBUG_OUTPUT);
-        // gl->Enable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
-#endif
-    }
-
-    self->asFront.gl_version  = BrResStrDup(self, (const char *)gl->GetString(GL_VERSION));
-    self->asFront.gl_vendor   = BrResStrDup(self, (const char *)gl->GetString(GL_VENDOR));
-    self->asFront.gl_renderer = BrResStrDup(self, (const char *)gl->GetString(GL_RENDERER));
-
-    BrLogTrace("GLREND", "OpenGL Version  = %s", self->asFront.gl_version);
-    BrLogTrace("GLREND", "OpenGL Vendor   = %s", self->asFront.gl_vendor);
-    BrLogTrace("GLREND", "OpenGL Renderer = %s", self->asFront.gl_renderer);
+    BrLogInfo("GLREND", "OpenGL Version  = %s", (const char *)gl->GetString(GL_VERSION));
+    BrLogInfo("GLREND", "OpenGL Vendor   = %s", (const char *)gl->GetString(GL_VENDOR));
+    BrLogInfo("GLREND", "OpenGL Renderer = %s", (const char *)gl->GetString(GL_RENDERER));
 
     if(glad_major < 3 || (glad_major == 3 && glad_minor < 3)) {
         BrLogError("GLREND", "Got OpenGL %d.%d context, expected 3.3", glad_major, glad_minor);
         goto cleanup_context;
     }
 
-    /*
-     * Get a copy of the extension list.
-     * NULL-terminate so we can expose it as a BRT_POINTER_LIST.
-     */
-    gl->GetIntegerv(GL_NUM_EXTENSIONS, &self->asFront.gl_num_extensions);
+    ObjectContainerAddFront(self->output_facility, (br_object *)self);
 
-    self->asFront.gl_extensions = BrResAllocate(self, sizeof(char *) * (self->asFront.gl_num_extensions + 1), BR_MEMORY_DRIVER);
-    for(GLuint i = 0; i < self->asFront.gl_num_extensions; ++i) {
-        const GLubyte *ext             = gl->GetStringi(GL_EXTENSIONS, i);
-        self->asFront.gl_extensions[i] = BrResStrDup(self->asFront.gl_extensions, (const char *)ext);
+    /*
+     * From here, we can run our regular cleanup if we fail.
+     */
+
+    if(ContextStateGLInit(self, ctx, gl) != BRE_OK) {
+        BrResFree(self);
+        return NULL;
     }
-    self->asFront.gl_extensions[self->asFront.gl_num_extensions] = NULL;
 
     /*
      * Try to figure out the actual format we got.
@@ -307,51 +220,6 @@ br_device_pixelmap *DevicePixelmapGLAllocateFront(br_device *dev, br_output_faci
         BrLogWarn("GLREND", "OpenGL gave us an unknown screen format (R%dG%dB%dA%d), soldiering on...", red_bits, grn_bits, blu_bits, alpha_bits);
     }
 
-    /*
-     * Cache some limits.
-     */
-    gl->GetIntegerv(GL_MAX_UNIFORM_BLOCK_SIZE, &ctx->limits.max_uniform_block_size);
-    gl->GetIntegerv(GL_MAX_UNIFORM_BUFFER_BINDINGS, &ctx->limits.max_uniform_buffer_bindings);
-    gl->GetIntegerv(GL_MAX_VERTEX_UNIFORM_BLOCKS, &ctx->limits.max_vertex_uniform_blocks);
-    gl->GetIntegerv(GL_MAX_FRAGMENT_UNIFORM_BLOCKS, &ctx->limits.max_fragment_uniform_blocks);
-    gl->GetIntegerv(GL_MAX_SAMPLES, &ctx->limits.max_samples);
-
-    if(gl->EXT_texture_filter_anisotropic)
-        gl->GetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, &ctx->limits.max_anisotropy);
-
-    if(VIDEO_Open(&self->asFront.video, gl, pt.vertex_shader, pt.fragment_shader) == NULL) {
-        /*
-         * If this fails we can run our regular cleanup.
-         */
-        BrResFree(self);
-        return NULL;
-    }
-
-    /*
-     * Everything's init'd, quirkify.
-     */
-    setup_qiurks(self);
-
-    self->asFront.tex_white        = DeviceGLBuildWhiteTexture(gl);
-    self->asFront.tex_checkerboard = DeviceGLBuildCheckerboardTexture(gl);
-
-    /*
-     * We can't use BRender's fonts directly, so build a POT texture with
-     * glyph from left-to-right. All fonts have 256 possible characters.
-     */
-
-    BrLogTrace("GLREND", "Building fixed 3x5 font array.");
-    (void)FontGLBuildArray(gl, &self->asFront.font_fixed3x5, BrFontFixed3x5);
-
-    BrLogTrace("GLREND", "Building proportional 4x6 font array.");
-    (void)FontGLBuildArray(gl, &self->asFront.font_prop4x6, BrFontProp4x6);
-
-    BrLogTrace("GLREND", "Building proportional 7x9 font array.");
-    (void)FontGLBuildArray(gl, &self->asFront.font_prop7x9, BrFontProp7x9);
-
-    self->num_refs = 0;
-
-    ObjectContainerAddFront(self->output_facility, (br_object *)self);
     return self;
 
 cleanup_context:
@@ -371,13 +239,7 @@ static void BR_CMETHOD_DECL(br_device_pixelmap_glf, free)(br_object *_self)
 
     UASSERT(self->num_refs == 0);
 
-    gl->DeleteTextures(1, &self->asFront.font_prop7x9.tex);
-    gl->DeleteTextures(1, &self->asFront.font_prop4x6.tex);
-    gl->DeleteTextures(1, &self->asFront.font_fixed3x5.tex);
-    gl->DeleteTextures(1, &self->asFront.tex_checkerboard);
-    gl->DeleteTextures(1, &self->asFront.tex_white);
-
-    VIDEO_Close(&self->asFront.video);
+    ContextStateGLFini(GLContextState(gl));
 
     DevicePixelmapGLExtDeleteContext(self, self->asFront.gl_context);
 

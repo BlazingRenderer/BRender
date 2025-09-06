@@ -39,7 +39,7 @@ static int sort_lights(const void *a, const void *b)
  * -1 = completely ignore this light.
  *  0 = ok
  */
-static int casfd(shader_data_scene *scene, const state_light *in, size_t i, br_vector4_i *counts, br_boolean *use_ambient_colour)
+static int casfd(br_gl_main_data_scene *scene, const state_light *in, size_t i, br_vector4_i *counts, br_boolean *use_ambient_colour)
 {
     if(in->type == BRT_NONE)
         return -1;
@@ -61,9 +61,9 @@ static int casfd(shader_data_scene *scene, const state_light *in, size_t i, br_v
         return -1;
     }
 
-    shader_data_light_info  *info  = scene->light_info + i;
-    shader_data_light_atten *atten = scene->light_atten + i;
-    shader_data_light_radii *radii = scene->light_radii + i;
+    br_gl_main_data_light_info  *info  = scene->light_info + i;
+    br_gl_main_data_light_atten *atten = scene->light_atten + i;
+    br_gl_main_data_light_radii *radii = scene->light_radii + i;
 
     switch(in->type) {
         case BRT_AMBIENT:
@@ -138,9 +138,9 @@ static int casfd(shader_data_scene *scene, const state_light *in, size_t i, br_v
 */
 static void ProcessSceneLights(state_cache *cache, state_light *lights)
 {
-    shader_data_scene *scene              = &cache->scene;
-    size_t             num_lights         = 0;
-    br_boolean         use_ambient_colour = BR_FALSE;
+    br_gl_main_data_scene *scene              = &cache->scene;
+    size_t                 num_lights         = 0;
+    br_boolean             use_ambient_colour = BR_FALSE;
 
     br_vector4_i counts = {
         .v = {0, 0, 0, 0},

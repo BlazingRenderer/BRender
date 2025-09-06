@@ -22,7 +22,7 @@ static br_tv_template_entry rendererTemplateEntries[] = {
 };
 #undef F
 
-static void RendererGLInitImm(br_renderer *self, HVIDEO hVideo)
+static void RendererGLInitImm(br_renderer *self, br_gl_main_shader *shader)
 {
     const GladGLContext *gl = self->gl;
 
@@ -32,27 +32,25 @@ static void RendererGLInitImm(br_renderer *self, HVIDEO hVideo)
     gl->GenBuffers(1, &self->trans.vbo);
     gl->BindBuffer(GL_ARRAY_BUFFER, self->trans.vbo);
 
-    if(hVideo->brenderProgram.attributes.aUV >= 0) {
-        gl->EnableVertexAttribArray(hVideo->brenderProgram.attributes.aPosition);
-        gl->VertexAttribPointer(hVideo->brenderProgram.attributes.aPosition, 3, GL_FLOAT, GL_FALSE, sizeof(br_immvert_gl),
+    if(shader->attributes.aUV >= 0) {
+        gl->EnableVertexAttribArray(shader->attributes.aPosition);
+        gl->VertexAttribPointer(shader->attributes.aPosition, 3, GL_FLOAT, GL_FALSE, sizeof(br_immvert_gl),
                                 (void *)offsetof(br_immvert_gl, position));
     }
 
-    if(hVideo->brenderProgram.attributes.aUV >= 0) {
-        gl->EnableVertexAttribArray(hVideo->brenderProgram.attributes.aUV);
-        gl->VertexAttribPointer(hVideo->brenderProgram.attributes.aUV, 2, GL_FLOAT, GL_FALSE, sizeof(br_immvert_gl),
-                                (void *)offsetof(br_immvert_gl, map));
+    if(shader->attributes.aUV >= 0) {
+        gl->EnableVertexAttribArray(shader->attributes.aUV);
+        gl->VertexAttribPointer(shader->attributes.aUV, 2, GL_FLOAT, GL_FALSE, sizeof(br_immvert_gl), (void *)offsetof(br_immvert_gl, map));
     }
 
-    if(hVideo->brenderProgram.attributes.aNormal >= 0) {
-        gl->EnableVertexAttribArray(hVideo->brenderProgram.attributes.aNormal);
-        gl->VertexAttribPointer(hVideo->brenderProgram.attributes.aNormal, 3, GL_FLOAT, GL_FALSE, sizeof(br_immvert_gl),
-                                (void *)offsetof(br_immvert_gl, normal));
+    if(shader->attributes.aNormal >= 0) {
+        gl->EnableVertexAttribArray(shader->attributes.aNormal);
+        gl->VertexAttribPointer(shader->attributes.aNormal, 3, GL_FLOAT, GL_FALSE, sizeof(br_immvert_gl), (void *)offsetof(br_immvert_gl, normal));
     }
 
-    if(hVideo->brenderProgram.attributes.aColour >= 0) {
-        gl->EnableVertexAttribArray(hVideo->brenderProgram.attributes.aColour);
-        gl->VertexAttribPointer(hVideo->brenderProgram.attributes.aColour, 4, GL_UNSIGNED_BYTE, GL_TRUE, sizeof(br_immvert_gl),
+    if(shader->attributes.aColour >= 0) {
+        gl->EnableVertexAttribArray(shader->attributes.aColour);
+        gl->VertexAttribPointer(shader->attributes.aColour, 4, GL_UNSIGNED_BYTE, GL_TRUE, sizeof(br_immvert_gl),
                                 (void *)offsetof(br_immvert_gl, colour));
     }
 
@@ -85,13 +83,15 @@ br_renderer *RendererGLAllocate(br_device *device, br_renderer_facility *facilit
 {
     br_renderer         *self;
     const GladGLContext *gl;
+    br_gl_context_state *ctx;
 
     ASSERT(dest != NULL && ObjectDevice(dest) == device);
 
     if(dest->use_type != BRT_OFFSCREEN)
         return NULL;
 
-    gl = DevicePixelmapGLGetGLContext(dest);
+    gl  = DevicePixelmapGLGetGLContext(dest);
+    ctx = GLContextState(gl);
 
     self                    = BrResAllocate(facility, sizeof(*self), BR_MEMORY_OBJECT);
     self->dispatch          = &rendererDispatch;
@@ -103,7 +103,7 @@ br_renderer *RendererGLAllocate(br_device *device, br_renderer_facility *facilit
     self->renderer_facility = facility;
     self->state_pool        = BrPoolAllocate(sizeof(state_stack), 1024, BR_MEMORY_OBJECT_DATA);
 
-    RendererGLInitImm(self, &dest->screen->asFront.video);
+    RendererGLInitImm(self, &ctx->main_shader);
 
     self->sampler_pool = BrHashMapAllocate(self, SamplerInfoGLHash, SamplerInfoGLCompare);
 
@@ -120,9 +120,8 @@ br_renderer *RendererGLAllocate(br_device *device, br_renderer_facility *facilit
     gl->GetIntegerv(GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT, &alignment);
 
     self->uniform_buffer_offset_alignment = alignment;
-    BufferRingGLInit(&self->model_ring, gl, "model", alignment, BR_GLREND_MAX_DRAWS_IN_FLIGHT,
-                     dest->screen->asFront.video.brenderProgram.blockBindingModel, sizeof(shader_data_model), GL_UNIFORM_BUFFER,
-                     dest->screen->asFront.quirks.orphan_model_buffers ? BUFFER_RING_GL_FLAG_ORPHAN : 0);
+    BufferRingGLInit(&self->model_ring, gl, "model", alignment, BR_GLREND_MAX_DRAWS_IN_FLIGHT, ctx->main_shader.block_binding_model,
+                     sizeof(br_gl_main_data_model), GL_UNIFORM_BUFFER, ctx->quirks.orphan_model_buffers ? BUFFER_RING_GL_FLAG_ORPHAN : 0);
 
     self->has_begun = 0;
     return self;
@@ -130,9 +129,9 @@ br_renderer *RendererGLAllocate(br_device *device, br_renderer_facility *facilit
 
 static void BR_CMETHOD_DECL(br_renderer_gl, sceneBegin)(br_renderer *self)
 {
-    HVIDEO               hVideo        = &self->pixelmap->screen->asFront.video;
-    const GladGLContext *gl            = self->gl;
-    br_device_pixelmap  *colour_target = NULL, *depth_target = NULL;
+    const GladGLContext     *gl            = self->gl;
+    br_device_pixelmap      *colour_target = NULL, *depth_target = NULL;
+    const br_gl_main_shader *shader = &GLContextState(gl)->main_shader;
 
     self->stats.face_group_count         = 0;
     self->stats.triangles_drawn_count    = 0;
@@ -176,12 +175,12 @@ static void BR_CMETHOD_DECL(br_renderer_gl, sceneBegin)(br_renderer *self)
 
     gl->DepthRange(1.0f, 0.0f);
 
-    gl->UseProgram(hVideo->brenderProgram.program);
-    gl->Uniform1i(hVideo->brenderProgram.uniforms.main_texture, hVideo->brenderProgram.mainTextureBinding);
-    gl->Uniform1i(hVideo->brenderProgram.uniforms.index_texture, hVideo->brenderProgram.indexTextureBinding);
+    gl->UseProgram(shader->program);
+    gl->Uniform1i(shader->uniforms.main_texture, shader->main_texture_binding);
+    gl->Uniform1i(shader->uniforms.index_texture, shader->index_texture_binding);
 
     gl->BindFramebuffer(GL_FRAMEBUFFER, self->state.cache.fbo);
-    gl->BindBufferBase(GL_UNIFORM_BUFFER, hVideo->brenderProgram.blockBindingScene, hVideo->brenderProgram.uboScene);
+    gl->BindBufferBase(GL_UNIFORM_BUFFER, shader->block_binding_scene, shader->ubo_scene);
     gl->BufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(self->state.cache.scene), &self->state.cache.scene);
 
     br_rectangle viewport = DevicePixelmapGLGetViewport(colour_target);
@@ -822,11 +821,11 @@ br_int_32 RendererGLNextImmTri(br_renderer *self, struct v11group *group, br_vec
 
 GLuint RendererGLGetSampler(br_renderer *self, const br_sampler_info_gl *info)
 {
-    const br_quirks_gl  *quirks = &self->pixelmap->screen->asFront.quirks;
-    const GladGLContext *gl     = self->gl;
-    void                *raw_sampler;
-    br_sampler_info_gl  *key;
-    GLuint               sampler;
+    const GladGLContext       *gl  = self->gl;
+    const br_gl_context_state *ctx = GLContextState(gl);
+    void                      *raw_sampler;
+    br_sampler_info_gl        *key;
+    GLuint                     sampler;
 
     raw_sampler = BrHashMapFindByHash(self->sampler_pool, SamplerInfoGLHash(info));
     if(raw_sampler != NULL)
@@ -839,7 +838,7 @@ GLuint RendererGLGetSampler(br_renderer *self, const br_sampler_info_gl *info)
     gl->SamplerParameteri(sampler, GL_TEXTURE_MIN_FILTER, info->filter_min);
     gl->SamplerParameteri(sampler, GL_TEXTURE_MAG_FILTER, info->filter_mag);
 
-    if(!quirks->disable_anisotropic_filtering) {
+    if(!ctx->quirks.disable_anisotropic_filtering) {
         if(gl->EXT_texture_filter_anisotropic && info->filter_min != GL_NEAREST && info->filter_mag != GL_NEAREST) {
             gl->SamplerParameterf(sampler, GL_TEXTURE_MAX_ANISOTROPY_EXT, GLContextState(gl)->limits.max_anisotropy);
         }

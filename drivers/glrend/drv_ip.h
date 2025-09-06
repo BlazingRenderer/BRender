@@ -11,19 +11,37 @@ extern "C" {
 #endif
 
 /*
- * video.c
+ * shader_line.c
  */
-HVIDEO VIDEO_Open(HVIDEO hVideo, const GladGLContext *gl, const char *vertShader, const char *fragShader);
+br_boolean ShaderGLLineCompile(br_gl_line_shader *self, const GladGLContext *gl);
+void       ShaderGLLineDraw(br_gl_line_shader *self, const GladGLContext *gl, const br_gl_line_data *data, GLenum mode, GLsizei count);
+/*
+ * shader_rect.c
+ */
+br_boolean ShaderGLRectCompile(br_gl_rect_shader *self, const GladGLContext *gl);
+void       ShaderGLRectDraw(br_gl_rect_shader *self, const GladGLContext *gl, const br_gl_rect_data *rect_data, GLuint tex);
+void       ShaderGLRectDrawCLUT(br_gl_rect_shader *self, const GladGLContext *gl, const br_gl_rect_data *data, GLuint tex, GLuint clut);
 
-void VIDEO_Close(HVIDEO hVideo);
+/*
+ * shader_text.c
+ */
+br_boolean ShaderGLTextCompile(br_gl_text_shader *self, const GladGLContext *gl);
+br_error   ShaderGLTextBuildFont(const GladGLContext *gl, br_gl_text_font *gl_font, br_font *font);
+void       ShaderGLTextBegin(br_gl_text_shader *self, const GladGLContext *gl, const br_gl_text_font *font);
+void       ShaderGLTextDrawInstanced(br_gl_text_shader *self, const GladGLContext *gl, const br_gl_text_data *data, GLsizei instance_count);
+void       ShaderGLTextEnd(br_gl_text_shader *self, const GladGLContext *gl);
 
-br_boolean VIDEOI_CompileRectShader(HVIDEO hVideo);
+/*
+ * shader_brender.c
+ */
+br_boolean ShaderGLMainCompile(br_gl_main_shader *self, const GladGLContext *gl, const char *vert_path, const char *frag_path);
+GLuint     ShaderGLMainCreateVAO(br_gl_main_shader *self, const GladGLContext *gl, GLuint vbo, GLuint ibo);
 
-br_boolean VIDEOI_CompileTextShader(HVIDEO hVideo);
-
-br_boolean VIDEOI_CompileLineShader(HVIDEO hVideo);
-
-br_boolean VIDEOI_CompileBRenderShader(HVIDEO hVideo, const char *vertPath, const char *fragPath);
+/*
+ * context_state.c
+ */
+br_error ContextStateGLInit(void *vparent, br_gl_context_state *self, const GladGLContext *gl);
+void     ContextStateGLFini(br_gl_context_state *self);
 
 /*
  * device.c
@@ -162,16 +180,9 @@ void RendererGLRenderGroup(br_renderer *self, br_geometry_stored *stored, const 
 void RendererGLRenderTri(br_renderer *self, br_uintptr_t offset, const gl_groupinfo *groupinfo);
 
 /*
- * font.c
- */
-br_error FontGLBuildArray(const GladGLContext *gl, br_font_gl *gl_font, br_font *font);
-
-/*
  * util.c
  */
 br_error DevicePixelmapGLBindFramebuffer(const GladGLContext *gl, GLenum target, br_device_pixelmap *pm);
-GLuint   DeviceGLBuildWhiteTexture(const GladGLContext *gl);
-GLuint   DeviceGLBuildCheckerboardTexture(const GladGLContext *gl);
 GLuint   DeviceGLPixelmapToGLTexture(const GladGLContext *gl, br_pixelmap *pm);
 br_error DeviceGLPixelmapToExistingGLTexture(const GladGLContext *gl, GLuint tex, br_pixelmap *pm);
 

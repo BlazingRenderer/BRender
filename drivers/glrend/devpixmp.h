@@ -8,65 +8,6 @@
 extern "C" {
 #endif
 
-typedef union br_quirks_gl {
-    struct {
-        br_uint_32 disable_anisotropic_filtering : 1;
-        br_uint_32 orphan_model_buffers : 1;
-        br_uint_32 reserved : 30;
-    };
-    br_uint_32 value;
-} br_quirks_gl;
-
-/*
- * Context/Front screen data.
- */
-typedef struct br_gl_context_state {
-    /*
-     * System-specific OpenGL function pointers.
-     */
-    br_device_gl_ext_procs ext_procs;
-
-    /*
-     * Device-wide VIDEO instance.
-     */
-    VIDEO video;
-
-    /*
-     * OpenGL context
-     */
-    void *gl_context;
-
-    /*
-     * GLAD OpenGL context.
-     */
-    GladGLContext glad_gl_context;
-
-    const char *gl_version;
-    const char *gl_vendor;
-    const char *gl_renderer;
-
-    GLint  gl_num_extensions;
-    char **gl_extensions;
-
-    br_quirks_gl quirks;
-
-    struct {
-        GLint   max_uniform_block_size;
-        GLint   max_uniform_buffer_bindings;
-        GLint   max_vertex_uniform_blocks;
-        GLint   max_fragment_uniform_blocks;
-        GLint   max_samples;
-        GLfloat max_anisotropy;
-    } limits;
-
-    GLuint tex_white;
-    GLuint tex_checkerboard;
-
-    br_font_gl font_fixed3x5;
-    br_font_gl font_prop4x6;
-    br_font_gl font_prop7x9;
-} br_gl_context_state;
-
 #ifdef BR_DEVICE_PIXELMAP_PRIVATE
 
 /*
@@ -123,7 +64,24 @@ typedef struct br_device_pixelmap {
 
     /* OpenGL crap */
     union {
-        br_gl_context_state asFront;
+        struct {
+            /*
+             * System-specific OpenGL function pointers.
+             */
+            br_device_gl_ext_procs ext_procs;
+
+            /*
+             * OpenGL context.
+             */
+            void *gl_context;
+
+            /*
+             * GLAD OpenGL context.
+             */
+            GladGLContext glad_gl_context;
+
+            br_gl_context_state context_state;
+        } asFront;
         struct {
             struct br_device_pixelmap *depthbuffer;
             GLuint                     glFbo;

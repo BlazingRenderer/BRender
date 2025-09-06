@@ -246,7 +246,6 @@ br_error BR_CMETHOD_DECL(br_device_pixelmap_gl, match)(br_device_pixelmap *self,
     br_device_pixelmap        *pm;
     const char                *typestring;
     const br_pixelmap_gl_fmt  *fmt;
-    HVIDEO                     hVideo;
     const GladGLContext       *gl;
     br_gl_context_state       *ctx;
     struct pixelmapMatchTokens mt = {
@@ -258,9 +257,8 @@ br_error BR_CMETHOD_DECL(br_device_pixelmap_gl, match)(br_device_pixelmap *self,
         .msaa_samples = 0,
     };
 
-    hVideo = &self->screen->asFront.video;
-    gl     = DevicePixelmapGLGetGLContext(self);
-    ctx    = GLContextState(gl);
+    gl  = DevicePixelmapGLGetGLContext(self);
+    ctx = GLContextState(gl);
 
     if(self->device->templates.pixelmapMatchTemplate == NULL) {
         self->device->templates.pixelmapMatchTemplate = BrTVTemplateAllocate(self->device, pixelmapMatchTemplateEntries,
@@ -505,18 +503,8 @@ static br_error BR_CMETHOD(br_device_pixelmap_gl, rectangleStretchCopyTo)(br_dev
 {
     /* Pixelmap->Device, addressable stretch copy. */
 
-#pragma pack(push, 16)
-    typedef struct br_rect_gl_data {
-        alignas(16) br_matrix4 mvp;
-        alignas(16) br_vector4 src_rect;
-        alignas(16) br_vector4 dst_rect;
-        alignas(4) float vertical_flip;
-        alignas(4) float indexed;
-    } br_rect_gl_data;
-#pragma pack(pop)
-
     const GladGLContext      *gl     = DevicePixelmapGLGetGLContext(self);
-    HVIDEO                    hVideo = &self->screen->asFront.video;
+    br_gl_context_state      *ctx    = GLContextState(gl);
     br_pixelmap              *src    = (br_pixelmap *)_src;
     br_buffer_stored         *stored = src->stored;
     br_rectangle              srect, drect;
@@ -548,7 +536,7 @@ static br_error BR_CMETHOD(br_device_pixelmap_gl, rectangleStretchCopyTo)(br_dev
         return BRE_FAIL;
     }
 
-    clut = self->asBack.clut->gl_tex ? self->asBack.clut->gl_tex : self->screen->asFront.tex_white;
+    clut = self->asBack.clut->gl_tex ? self->asBack.clut->gl_tex : ctx->tex_white;
     if(fmt->indexed && src->map != NULL) {
         if(src->map->stored != NULL) {
             clut = BufferStoredGLGetCLUTTexture(stored, self, clut);
@@ -564,30 +552,7 @@ static br_error BR_CMETHOD(br_device_pixelmap_gl, rectangleStretchCopyTo)(br_dev
         return BRE_FAIL;
     }
 
-    gl->Disable(GL_DEPTH_TEST);
-    gl->BindFramebuffer(GL_FRAMEBUFFER, self->asBack.glFbo);
-
-    gl->Viewport(0, 0, self->pm_width, self->pm_height);
-
-    /* Render it */
-    gl->UseProgram(hVideo->rectProgram.program);
-
-    if(fmt->indexed) {
-        gl->ActiveTexture(GL_TEXTURE0);
-        gl->BindTexture(GL_TEXTURE_2D, clut);
-        gl->Uniform1i(hVideo->rectProgram.uSampler, 0);
-
-        gl->ActiveTexture(GL_TEXTURE1);
-        gl->BindTexture(GL_TEXTURE_2D, tex);
-        gl->Uniform1i(hVideo->rectProgram.uIndexTex, 1);
-    } else {
-        gl->ActiveTexture(GL_TEXTURE0);
-        gl->BindTexture(GL_TEXTURE_2D, tex);
-
-        gl->Uniform1i(hVideo->rectProgram.uSampler, 0);
-    }
-
-    br_rect_gl_data rect_data = {
+    br_gl_rect_data rect_data = {
         .mvp      = {},
         .src_rect = BR_VECTOR4((float)srect.x / (float)src->width, (float)srect.y / (float)src->height, (float)srect.w / (float)src->width,
                                (float)srect.h / (float)src->height),
@@ -599,12 +564,14 @@ static br_error BR_CMETHOD(br_device_pixelmap_gl, rectangleStretchCopyTo)(br_dev
 
     BrMatrix4Orthographic(&rect_data.mvp, 0.0f, 1.0f, 0.0f, 1.0f, -1.0f, 1.0f);
 
-    gl->BindVertexArray(hVideo->rectProgram.vao);
-    gl->BindBuffer(GL_UNIFORM_BUFFER, hVideo->rectProgram.ubo);
-    gl->BufferData(GL_UNIFORM_BUFFER, sizeof(rect_data), &rect_data, GL_STATIC_DRAW);
-    gl->DrawArraysInstanced(GL_TRIANGLES, 0, 6, 2);
+    gl->BindFramebuffer(GL_FRAMEBUFFER, self->asBack.glFbo);
+    gl->Viewport(0, 0, self->pm_width, self->pm_height);
 
-    gl->BindVertexArray(0);
+    if(fmt->indexed) {
+        ShaderGLRectDrawCLUT(&ctx->rect_shader, gl, &rect_data, tex, clut);
+    } else {
+        ShaderGLRectDraw(&ctx->rect_shader, gl, &rect_data, tex);
+    }
 
     if(tex_tmp)
         gl->DeleteTextures(1, &tex);
@@ -690,13 +657,13 @@ static br_error BR_CMETHOD_DECL(br_device_pixelmap_gl, rectangleCopyFrom)(br_dev
 static br_error BR_CMETHOD(br_device_pixelmap_gl, text)(br_device_pixelmap *self, br_point *point, br_font *font, const char *text, br_uint_32 colour)
 {
 
-    size_t               len = strlen(text);
-    br_point             pp;
-    br_font_gl          *gl_font;
-    HVIDEO               hVideo = &self->screen->asFront.video;
-    const GladGLContext *gl     = DevicePixelmapGLGetGLContext(self);
-    br_text_gl          *text_data;
-    br_uint_8            r8 = 0, g8 = 0, b8 = 0, a8 = 255;
+    size_t                 len = strlen(text);
+    br_point               pp;
+    const br_gl_text_font *gl_font;
+    const GladGLContext   *gl  = DevicePixelmapGLGetGLContext(self);
+    br_gl_context_state   *ctx = GLContextState(gl);
+    br_gl_text_data       *text_data;
+    br_uint_8              r8 = 0, g8 = 0, b8 = 0, a8 = 255;
 
     /*
      * Make sure we're an offscreen pixelmap.
@@ -718,45 +685,31 @@ static br_error BR_CMETHOD(br_device_pixelmap_gl, text)(br_device_pixelmap *self
      */
 
     if(font == BrFontFixed3x5)
-        gl_font = &self->screen->asFront.font_fixed3x5;
+        gl_font = &ctx->font_fixed3x5;
     else if(font == BrFontProp4x6)
-        gl_font = &self->screen->asFront.font_prop4x6;
+        gl_font = &ctx->font_prop4x6;
     else if(font == BrFontProp7x9)
-        gl_font = &self->screen->asFront.font_prop7x9;
+        gl_font = &ctx->font_prop7x9;
     else
         return BRE_FAIL;
 
     /*
      * All valid, set up the render state.
      */
-    gl->BindFramebuffer(GL_FRAMEBUFFER, self->asBack.glFbo);
-    gl->Viewport(0, 0, self->pm_width, self->pm_height);
-
-    gl->Enable(GL_BLEND);
-    gl->BlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-    gl->Disable(GL_DEPTH_TEST);
-    gl->Disable(GL_CULL_FACE);
-    gl->DepthMask(GL_FALSE);
-
-    gl->UseProgram(hVideo->textProgram.program);
-    gl->BindBufferBase(GL_UNIFORM_BUFFER, hVideo->textProgram.block_binding_font_data, gl_font->font_data);
-
-    gl->ActiveTexture(GL_TEXTURE0);
-    gl->BindTexture(GL_TEXTURE_2D_ARRAY, gl_font->tex);
-    gl->Uniform1i(hVideo->textProgram.uSampler, 0);
 
     /*
      * Create the per-model/text state.
      */
-    text_data = BrScratchAllocate(sizeof(br_text_gl));
+    text_data = BrScratchAllocate(sizeof(br_gl_text_data));
     BrMatrix4Orthographic(&text_data->mvp, 0.0f, 1.0f, 0.0f, 1.0f, -1.0f, 1.0f);
 
     BrColourUnpack(colour, self->pm_type, &r8, &g8, &b8, &a8);
     text_data->colour = (br_vector4)BR_VECTOR4(r8 / 255.0f, g8 / 255.0f, b8 / 255.0f, a8 / 255.0f);
 
-    gl->BindVertexArray(self->screen->asFront.video.textProgram.vao_glyphs);
-    gl->BindBuffer(GL_UNIFORM_BUFFER, self->screen->asFront.video.textProgram.ubo_glyphs);
+    gl->BindFramebuffer(GL_FRAMEBUFFER, self->asBack.glFbo);
+    gl->Viewport(0, 0, self->pm_width, self->pm_height);
+
+    ShaderGLTextBegin(&ctx->text_shader, gl, gl_font);
 
     br_rectangle r = {
         .x = point->x,
@@ -767,8 +720,8 @@ static br_error BR_CMETHOD(br_device_pixelmap_gl, text)(br_device_pixelmap *self
 
     do {
         size_t chunk = len;
-        if(chunk > BR_TEXT_GL_CHUNK_SIZE) {
-            chunk = BR_TEXT_GL_CHUNK_SIZE;
+        if(chunk > BR_GL_TEXT_CHUNK_SIZE) {
+            chunk = BR_GL_TEXT_CHUNK_SIZE;
         }
 
         for(size_t i = 0; i < chunk; ++i) {
@@ -802,8 +755,7 @@ static br_error BR_CMETHOD(br_device_pixelmap_gl, text)(br_device_pixelmap *self
             r.w += width;
         }
 
-        gl->BufferData(GL_UNIFORM_BUFFER, sizeof(br_text_gl), text_data, GL_STATIC_DRAW);
-        gl->DrawArraysInstanced(GL_TRIANGLES, 0, 6, (GLsizei)chunk);
+        ShaderGLTextDrawInstanced(&ctx->text_shader, gl, text_data, (GLsizei)chunk);
 
         len -= chunk;
         text += chunk;
@@ -811,58 +763,18 @@ static br_error BR_CMETHOD(br_device_pixelmap_gl, text)(br_device_pixelmap *self
 
     BrScratchFree(text_data);
 
-    gl->BindVertexArray(0);
-    gl->BindBuffer(GL_UNIFORM_BUFFER, 0);
+    ShaderGLTextEnd(&ctx->text_shader, gl);
     gl->BindFramebuffer(GL_FRAMEBUFFER, 0);
-    gl->Disable(GL_BLEND);
-    return BRE_OK;
-}
-
-#pragma pack(push, 16)
-typedef struct br_line_gl {
-    alignas(16) br_matrix4 mvp;
-    alignas(8) br_vector2 start;
-    alignas(8) br_vector2 end;
-    alignas(16) br_vector4 colour;
-} br_line_gl;
-#pragma pack(pop)
-
-static br_error render_line(br_device_pixelmap *self, const br_line_gl *line_data, GLenum mode, GLsizei count)
-{
-    HVIDEO               hVideo = &self->screen->asFront.video;
-    const GladGLContext *gl     = DevicePixelmapGLGetGLContext(self);
-
-    gl->BindFramebuffer(GL_FRAMEBUFFER, self->asBack.glFbo);
-    gl->Viewport(0, 0, self->pm_width, self->pm_height);
-
-    gl->Enable(GL_BLEND);
-    gl->BlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-    gl->Disable(GL_DEPTH_TEST);
-    gl->Disable(GL_CULL_FACE);
-    gl->DepthMask(GL_FALSE);
-
-    gl->UseProgram(hVideo->lineProgram.program);
-
-    gl->BindVertexArray(self->screen->asFront.video.lineProgram.vao);
-    gl->BindBuffer(GL_UNIFORM_BUFFER, self->screen->asFront.video.lineProgram.ubo);
-    gl->BufferData(GL_UNIFORM_BUFFER, sizeof(br_line_gl), line_data, GL_STATIC_DRAW);
-
-    gl->DrawArrays(mode, 0, count);
-
-    gl->BindVertexArray(0);
-    gl->BindBuffer(GL_UNIFORM_BUFFER, 0);
-    gl->BindFramebuffer(GL_FRAMEBUFFER, 0);
-    gl->Disable(GL_BLEND);
-
     return BRE_OK;
 }
 
 static br_error BR_CMETHOD_DECL(br_device_pixelmap_gl, line)(br_device_pixelmap *self, br_point *s, br_point *e, br_uint_32 colour)
 {
-    br_point   spoint, epoint;
-    br_uint_8  r8 = 0, g8 = 0, b8 = 0, a8 = 255;
-    br_line_gl line_data;
+    br_point             spoint, epoint;
+    br_uint_8            r8 = 0, g8 = 0, b8 = 0, a8 = 255;
+    br_gl_line_data      line_data;
+    const GladGLContext *gl  = DevicePixelmapGLGetGLContext(self);
+    br_gl_context_state *ctx = GLContextState(gl);
 
     if(PixelmapLineClip(&spoint, &epoint, s, e, (br_pixelmap *)self) == BR_CLIP_REJECT)
         return BRE_OK;
@@ -874,14 +786,21 @@ static br_error BR_CMETHOD_DECL(br_device_pixelmap_gl, line)(br_device_pixelmap 
     line_data.end    = (br_vector2)BR_VECTOR2((float)epoint.x / (float)self->pm_width, 1.0f - ((float)epoint.y / (float)self->pm_height));
     line_data.colour = (br_vector4)BR_VECTOR4(r8 / 255.0f, g8 / 255.0f, b8 / 255.0f, a8 / 255.0f);
 
-    return render_line(self, &line_data, GL_LINES, 2);
+    gl->BindFramebuffer(GL_FRAMEBUFFER, self->asBack.glFbo);
+    gl->Viewport(0, 0, self->pm_width, self->pm_height);
+    ShaderGLLineDraw(&ctx->line_shader, gl, &line_data, GL_LINES, 2);
+    gl->BindFramebuffer(GL_FRAMEBUFFER, 0);
+
+    return BRE_OK;
 }
 
 static br_error BR_CMETHOD_DECL(br_device_pixelmap_gl, pixelSet)(br_device_pixelmap *self, br_point *p, br_uint_32 colour)
 {
-    br_point   point;
-    br_uint_8  r8 = 0, g8 = 0, b8 = 0, a8 = 255;
-    br_line_gl line_data;
+    br_point             point;
+    br_uint_8            r8 = 0, g8 = 0, b8 = 0, a8 = 255;
+    br_gl_line_data      line_data;
+    const GladGLContext *gl  = DevicePixelmapGLGetGLContext(self);
+    br_gl_context_state *ctx = GLContextState(gl);
 
     if(PixelmapPointClip(&point, p, (br_pixelmap *)self) == BR_CLIP_REJECT)
         return BRE_OK;
@@ -898,7 +817,12 @@ static br_error BR_CMETHOD_DECL(br_device_pixelmap_gl, pixelSet)(br_device_pixel
     /*
      * What is a point, but half a line?
      */
-    return render_line(self, &line_data, GL_POINTS, 1);
+    gl->BindFramebuffer(GL_FRAMEBUFFER, self->asBack.glFbo);
+    gl->Viewport(0, 0, self->pm_width, self->pm_height);
+    ShaderGLLineDraw(&ctx->line_shader, gl, &line_data, GL_POINTS, 1);
+    gl->BindFramebuffer(GL_FRAMEBUFFER, 0);
+
+    return BRE_OK;
 }
 
 void DevicePixelmapGLIncRef(br_device_pixelmap *self)
