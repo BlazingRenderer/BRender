@@ -11,27 +11,6 @@
  */
 static const struct br_device_pixelmap_dispatch devicePixelmapFrontDispatch;
 
-static br_error custom_query(br_value *pvalue, void **extra, br_size_t *pextra_size, void *block, const struct br_tv_template_entry *tep)
-{
-    const br_device_pixelmap *self = block;
-
-    switch(tep->token) {
-        case BRT_OPENGL_EXT_PROCS_P:
-            pvalue->p = (void *)&self->asFront.ext_procs;
-            break;
-        default:
-            return BRE_UNKNOWN;
-    }
-
-    return BRE_OK;
-}
-
-static const br_tv_custom custom = {
-    .query      = custom_query,
-    .set        = NULL,
-    .extra_size = NULL,
-};
-
 /*
  * Device pixelmap info. template
  */
@@ -45,7 +24,7 @@ static br_tv_template_entry devicePixelmapFrontTemplateEntries[] = {
     {BRT(FACILITY_O),                F(output_facility),    BRTV_QUERY,            BRTV_CONV_COPY,    0                    },
     {BRT(IDENTIFIER_CSTR),           F(pm_identifier),      BRTV_QUERY | BRTV_ALL, BRTV_CONV_COPY,    0                    },
     {BRT(MSAA_SAMPLES_I32),          F(msaa_samples),       BRTV_QUERY | BRTV_ALL, BRTV_CONV_COPY,    0                    },
-    {BRT(OPENGL_EXT_PROCS_P),        0,                     BRTV_QUERY | BRTV_ALL, BRTV_CONV_CUSTOM,  (br_uintptr_t)&custom},
+    {BRT(OPENGL_EXT_PROCS_P),        0,                     BRTV_QUERY | BRTV_ALL, BRTV_CONV_PTR,     0                    },
     {BRT(OPENGL_VERSION_CSTR),       FF(gl_version),        BRTV_QUERY | BRTV_ALL, BRTV_CONV_COPY,    0                    },
     {BRT(OPENGL_VENDOR_CSTR),        FF(gl_vendor),         BRTV_QUERY | BRTV_ALL, BRTV_CONV_COPY,    0                    },
     {BRT(OPENGL_RENDERER_CSTR),      FF(gl_renderer),       BRTV_QUERY | BRTV_ALL, BRTV_CONV_COPY,    0                    },
