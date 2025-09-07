@@ -99,7 +99,9 @@ enum {
     BRTV_CONV_BOOL_TOKEN,
 
     BRTV_CONV_BIT,
-    BRTV_CONV_NOT_BIT
+    BRTV_CONV_NOT_BIT,
+
+    BRTV_CONV_PTR,
 };
 
 /*

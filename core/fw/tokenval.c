@@ -358,6 +358,10 @@ static br_error ValueQuery(br_token_value *tv,                  /* Destination f
             tv->v.b = (MEM(br_token) != BRT_NONE);
             break;
 
+        case BRTV_CONV_PTR:
+            tv->v.p = mem;
+            break;
+
         case BRTV_CONV_CUSTOM:
             /*
              * Use 'conv_arg' as a pointer to a block of function pointers
