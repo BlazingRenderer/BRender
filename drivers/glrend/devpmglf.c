@@ -31,6 +31,8 @@ static br_tv_template_entry devicePixelmapFrontTemplateEntries[] = {
 
     {DEV(OPENGL_NUM_EXTENSIONS_I32), FF(gl_num_extensions), BRTV_QUERY | BRTV_ALL, BRTV_CONV_COPY,    0                    },
     {DEV(OPENGL_EXTENSIONS_PL),      FF(gl_extensions),     BRTV_QUERY | BRTV_ALL, BRTV_CONV_LIST,    0                    },
+    {DEV(OPENGL_NATIVE_CONTEXT_P),   F(asFront.native_context),  BRTV_QUERY | BRTV_ALL, BRTV_CONV_COPY,    0},
+    {DEV(OPENGL_GLAD_CONTEXT_P),     F(asFront.glad_gl_context), BRTV_QUERY | BRTV_ALL, BRTV_CONV_PTR,     0},
 };
 #undef FF
 #undef F
