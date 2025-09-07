@@ -24,7 +24,7 @@ static br_tv_template_entry devicePixelmapFrontTemplateEntries[] = {
     {BRT(FACILITY_O),                F(output_facility),         BRTV_QUERY,            BRTV_CONV_COPY   },
     {BRT(IDENTIFIER_CSTR),           F(pm_identifier),           BRTV_QUERY | BRTV_ALL, BRTV_CONV_COPY   },
     {BRT(MSAA_SAMPLES_I32),          F(msaa_samples),            BRTV_QUERY | BRTV_ALL, BRTV_CONV_COPY   },
-    {BRT(OPENGL_EXT_PROCS_P),        0,                          BRTV_QUERY | BRTV_ALL, BRTV_CONV_PTR    },
+    {BRT(OPENGL_EXT_PROCS_P),        F(asFront.ext_procs),       BRTV_QUERY | BRTV_ALL, BRTV_CONV_PTR    },
     {BRT(OPENGL_VERSION_CSTR),       FF(gl_version),             BRTV_QUERY | BRTV_ALL, BRTV_CONV_COPY   },
     {BRT(OPENGL_VENDOR_CSTR),        FF(gl_vendor),              BRTV_QUERY | BRTV_ALL, BRTV_CONV_COPY   },
     {BRT(OPENGL_RENDERER_CSTR),      FF(gl_renderer),            BRTV_QUERY | BRTV_ALL, BRTV_CONV_COPY   },
