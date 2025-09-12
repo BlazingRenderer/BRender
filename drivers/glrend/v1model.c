@@ -259,8 +259,11 @@ static void apply_stored_properties(const GladGLContext *gl, br_renderer *render
             float      g      = BR_GRN(colour) / 255.0f;
             float      b      = BR_BLU(colour) / 255.0f;
             BrVector4Set(&model->surface_colour, r, g, b, state->surface.opacity);
+            model->use_vertex_colour = 0;
         } else {
+            ASSERT(state->surface.colour_source == BRT_GEOMETRY);
             BrVector4Set(&model->surface_colour, 1.0f, 1.0f, 1.0f, state->surface.opacity);
+            model->use_vertex_colour = 1;
         }
 
         model->ka    = state->surface.ka;
@@ -286,7 +289,7 @@ static void apply_stored_properties(const GladGLContext *gl, br_renderer *render
         BrMatrix4Copy23(&model->map_transform, &state->surface.map_transform);
 
         depth_test = !state->surface.force_front && !state->surface.force_back;
-        *unlit     = !state->surface.lighting;
+        *unlit     = !state->surface.lighting || state->surface.prelighting;
     }
 
     {

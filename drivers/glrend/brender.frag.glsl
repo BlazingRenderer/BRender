@@ -114,7 +114,8 @@ void main()
     accumulateLights(position.xyz, normal, lightA, lightD, lightS);
 #endif
 
-    vec4 fragColour = ((vec4(lightA + lightD, 1.0)) * (surface_colour * texColour)) + vec4(lightS, 0.0);
+    vec4 vertexColour = use_vertex_colour ? colour : vec4(1);
+    vec4 fragColour = ((vec4(lightA + lightD, 1.0)) * (surface_colour * texColour * vertexColour)) + vec4(lightS, 0.0);
 
     if(enable_fog) {
         fragColour = applyFog(fragColour, viewDistance);
