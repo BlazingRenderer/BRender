@@ -79,7 +79,7 @@ void BR_PUBLIC_ENTRY BrMaterialUpdate(br_material *mat, br_uint_16 flags)
         tvp++;
 
         tvp->t   = BRT_MODULATE_ALPHA_B;
-        tvp->v.b = (mat->flags & BR_MATF_MODULATE_ALPHA);
+        tvp->v.b = !!(mat->flags & BR_MATF_MODULATE_ALPHA);
         tvp++;
 
         tvp->t   = BRT_SMOOTH_B;
