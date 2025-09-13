@@ -1,4 +1,4 @@
-foreach(target 3ds2br dquery dripmem mkblend mkfog mkranges mkshades paljoin texconv matconv)
+foreach(target 3ds2br dquery dripmem mkblend mkfog mkranges mkshades paljoin texconv matconv gltfview)
 	add_subdirectory(${target})
 	set_property(TARGET ${target} PROPERTY FOLDER "BRender/Tools")
 endforeach()
