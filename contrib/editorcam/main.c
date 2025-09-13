@@ -8,41 +8,101 @@
 #include <brdemo.h>
 #include "editorcam.h"
 
+static br_error EditorCamLoadHWRes(br_demo *demo)
+{
+    return BRE_OK;
+}
+
+static br_error EditorCamLoadSWRes(br_demo *demo)
+{
+    br_pixelmap *std_pal;
+    br_pixelmap *shade_tab;
+
+    if((std_pal = BrPixelmapLoad("/home/zane/Documents/Coding/CrocDE-BRender/examples/dat/std.pal")) == NULL) {
+        BrLogError("DEMO", "Unable to load std.pal");
+        return BRE_FAIL;
+    }
+
+    if((shade_tab = BrPixelmapLoad("/home/zane/Documents/Coding/CrocDE-BRender/examples/dat/shade.tab")) == NULL) {
+        BrLogError("DEMO", "Unable to load shade.tab");
+        return BRE_FAIL;
+    }
+    BrTableAdd(shade_tab);
+
+    /*
+     * Indexed targets need a palette.
+     */
+    if(demo->colour_buffer->type == BR_PMT_INDEX_8) {
+        BrPixelmapPaletteSet(demo->colour_buffer, std_pal);
+    }
+
+    return BRE_OK;
+}
+
 static br_error EditorCamInit(br_demo *demo)
 {
     br_actor         *obj, *light;
     br_editor_camera *cam;
+    br_error          err;
+
+    if((err = demo->hw_accel ? EditorCamLoadHWRes(demo) : EditorCamLoadSWRes(demo)) != BRE_OK)
+        return err;
 
     cam          = BrEditorCamAllocate(demo);
     demo->user   = cam;
     demo->camera = cam->camera;
     BrActorAdd(demo->world, cam->actor);
 
+    // cam->camera_data.yon_z = 10000.0f;
+
     demo->order_table->min_z = cam->camera_data.hither_z;
     demo->order_table->max_z = cam->camera_data.yon_z;
 
-    /*
-     * Add a box at origin.
-     */
-    obj         = BrActorAdd(demo->world, BrActorAllocate(BR_ACTOR_MODEL, NULL));
-    obj->t.type = BR_TRANSFORM_MATRIX34;
-
+    //
+    // /*
+    //  * Add a box at origin.
+    //  */
+    // obj         = BrActorAdd(demo->world, BrActorAllocate(BR_ACTOR_MODEL, NULL));
+    // obj->t.type = BR_TRANSFORM_MATRIX34;
+    //
     /*
      * Add a directional light and switch it on.
      */
     light                                = BrActorAdd(demo->world, BrActorAllocate(BR_ACTOR_LIGHT, NULL));
     ((br_light *)light->type_data)->type = BR_LIGHT_DIRECT;
-    BrLightEnable(light);
 
-    /*
-     * Move the camera back a bit so it can see the cube.
-     */
-    BrMatrix34Translate(&cam->actor->t.t.mat, 0, 0, 5);
+    //((br_light*)light->type_data)->attenuation_c = 0.5f;
+    BrLightEnable(light);
 
     /*
      * Our scene is small, drop the camera's speed to 10 (from 50).
      */
     cam->standard_speed = BR_SCALAR(10);
+
+    br_model *ship = BrModelLoad("/home/zane/Documents/Coding/CrocDE-BRender/examples/dat/trade-federation-ship.dat");
+    BrModelUpdate(ship, BR_MODU_ALL);
+
+    br_actor *shipa = BrActorAdd(demo->world, BrActorAllocate(BR_ACTOR_MODEL, NULL));
+    shipa->model    = ship;
+
+    br_material *mat = BrMaterialAllocate("ship");
+    // mat->flags &= ~(BR_MATF_LIGHT);
+    mat->flags = 0
+               | BR_MATF_PRELIT
+               //| BR_MATF_LIGHT
+               | BR_MATF_SMOOTH
+               //| BR_MATF_SUBDIVIDE
+               | BR_MATF_PERSPECTIVE
+    ;
+
+    // mat->subdivide_tolerance = 150;
+    BrMaterialUpdate(mat, BR_MATU_ALL);
+
+    shipa->material = mat;
+
+    shipa->t.type = BR_TRANSFORM_MATRIX34;
+    BrMatrix34Scale(&shipa->t.t.mat, 0.05f, 0.05f, 0.05f);
+
     return BRE_OK;
 }
 
@@ -152,6 +212,7 @@ static void EditorCamRender(br_demo *demo)
     BrPixelmapFill(demo->colour_buffer, demo->clear_colour);
     BrPixelmapFill(demo->depth_buffer, 0xFFFFFFFF);
 
+    // BrZsSceneRender(demo->world, demo->camera, demo->colour_buffer);
     BrZbSceneRender(demo->world, demo->camera, demo->colour_buffer, demo->depth_buffer);
 
     {
