@@ -11,10 +11,10 @@
 
 #pragma pack(push, 1)
 typedef struct br_gltf_save_sampler_key {
-    cgltf_wrap_mode filter_min;
-    cgltf_wrap_mode filter_mag;
-    cgltf_wrap_mode wrap_s;
-    cgltf_wrap_mode wrap_t;
+    cgltf_filter_type filter_min;
+    cgltf_filter_type filter_mag;
+    cgltf_wrap_mode   wrap_s;
+    cgltf_wrap_mode   wrap_t;
 } br_gltf_save_sampler_key;
 #pragma pack(pop)
 
@@ -162,7 +162,7 @@ static cgltf_result cgltf_write_brfile(void *res, const cgltf_options *options, 
 
 #pragma clang diagnostic push
 #pragma ide diagnostic ignored "misc-no-recursion"
-static void build_actor_lookup(br_hashmap *hm, br_actor *root)
+static void build_actor_lookup(br_hashmap *hm, br_actor *root) // NOLINT(*-no-recursion)
 {
     BrHashMapInsert(hm, root, NULL);
 
@@ -230,6 +230,9 @@ static int gather_models_and_materials(const void *key, void *value, br_hash has
 
             break;
         }
+
+        default:
+            break;
     }
 
     return 0;
@@ -292,6 +295,9 @@ static br_gltf_save_sampler_key material_to_sampler_key(const br_material *mat)
         case BR_MATM_MAP_WIDTH_LIMIT_MIRROR:
             key.wrap_s = cgltf_wrap_mode_mirrored_repeat;
             break;
+
+        default:
+            break;
     }
 
     switch(mat->mode & BR_MATM_MAP_HEIGHT_LIMIT_MASK) {
@@ -305,6 +311,9 @@ static br_gltf_save_sampler_key material_to_sampler_key(const br_material *mat)
 
         case BR_MATM_MAP_HEIGHT_LIMIT_MIRROR:
             key.wrap_t = cgltf_wrap_mode_mirrored_repeat;
+            break;
+
+        default:
             break;
     }
 
@@ -372,7 +381,7 @@ static int gather_pixelmaps(const void *key, void *value, br_hash hash, void *us
 static void fill_buf_position(const struct v11model *v11m, const struct v11group *gp, cgltf_buffer *buffer, cgltf_buffer_view *view,
                               cgltf_accessor *accessor, cgltf_attribute *attrib, void *res)
 {
-    buffer->name = BrResSprintf(res, "group %lu positions", gp - v11m->groups);
+    buffer->name = BrResSprintf(res, "group %lu positions", (unsigned long)(gp - v11m->groups));
     buffer->size = sizeof(br_vector3) * gp->nvertices;
     buffer->data = gp->position;
     buffer->uri  = build_buffer_uri(buffer, res);
@@ -421,7 +430,7 @@ static void fill_buf_position(const struct v11model *v11m, const struct v11group
 static void fill_buf_normal(const struct v11model *v11m, const struct v11group *gp, cgltf_buffer *buffer, cgltf_buffer_view *view,
                             cgltf_accessor *accessor, cgltf_attribute *attrib, void *res)
 {
-    buffer->name = BrResSprintf(res, "group %lu normals", gp - v11m->groups);
+    buffer->name = BrResSprintf(res, "group %lu normals", (unsigned long)(gp - v11m->groups));
     buffer->size = sizeof(br_vector3) * gp->nvertices;
     buffer->data = gp->normal;
     buffer->uri  = build_buffer_uri(buffer, res);
@@ -445,7 +454,7 @@ static void fill_buf_normal(const struct v11model *v11m, const struct v11group *
 static void fill_buf_uv(const struct v11model *v11m, const struct v11group *gp, cgltf_buffer *buffer, cgltf_buffer_view *view,
                         cgltf_accessor *accessor, cgltf_attribute *attrib, void *res)
 {
-    buffer->name = BrResSprintf(res, "group %lu uvs", gp - v11m->groups);
+    buffer->name = BrResSprintf(res, "group %lu uvs", (unsigned long)(gp - v11m->groups));
     buffer->size = sizeof(br_vector2) * gp->nvertices;
     buffer->data = gp->map;
     buffer->uri  = build_buffer_uri(buffer, res);
@@ -469,7 +478,7 @@ static void fill_buf_uv(const struct v11model *v11m, const struct v11group *gp, 
 static void fill_buf_colour(const struct v11model *v11m, const struct v11group *gp, cgltf_buffer *buffer, cgltf_buffer_view *view,
                             cgltf_accessor *accessor, cgltf_attribute *attrib, void *res)
 {
-    buffer->name = BrResSprintf(res, "group %lu colours", gp - v11m->groups);
+    buffer->name = BrResSprintf(res, "group %lu colours", (unsigned long)(gp - v11m->groups));
     buffer->size = sizeof(br_vector3_f) * gp->nvertices;
     buffer->data = BrResAllocate(res, buffer->size, BR_MEMORY_APPLICATION);
     for(int i = 0; i < gp->nvertices; ++i) {
@@ -499,7 +508,7 @@ static void fill_buf_colour(const struct v11model *v11m, const struct v11group *
 static void fill_buf_index(const struct v11model *v11m, const struct v11group *gp, cgltf_buffer *buffer, cgltf_buffer_view *view,
                            cgltf_accessor *accessor, cgltf_primitive *prims, void *res)
 {
-    buffer->name = BrResSprintf(res, "group %lu indices", gp - v11m->groups);
+    buffer->name = BrResSprintf(res, "group %lu indices", (unsigned long)(gp - v11m->groups));
     buffer->size = 3 * gp->nfaces * sizeof(br_uint_16);
     buffer->data = gp->vertex_numbers;
     buffer->uri  = build_buffer_uri(buffer, res);
@@ -719,6 +728,9 @@ static int build_node_links(const void *key, void *value, br_hash hash, void *us
                 node->mesh = BrHashMapFind(state->model_map, actor->model);
             }
             break;
+
+        default:
+            break;
     }
 
     return 0;
@@ -929,6 +941,9 @@ static void fill_camera(const br_camera *camera_data, cgltf_camera *camera)
             camera->data.perspective.znear            = BrScalarToFloat(camera_data->hither_z);
             camera->data.perspective.zfar             = BrScalarToFloat(camera_data->yon_z);
             camera->data.perspective.has_zfar         = BR_TRUE;
+            break;
+
+        default:
             break;
     }
 }
