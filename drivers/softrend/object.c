@@ -13,16 +13,15 @@
 #include "shortcut.h"
 #include "brassert.h"
 
-
 /*
  * Methods for default object object
  */
-const char * BR_CMETHOD_DECL(br_object_soft, identifier)(br_object *self)
+const char *BR_CMETHOD_DECL(br_object_soft, identifier)(br_object *self)
 {
-	return self->identifier;
+    return self->identifier;
 }
 
-br_device *	BR_CMETHOD_DECL(br_object_soft, device)(br_object *self)
+br_device *BR_CMETHOD_DECL(br_object_soft, device)(br_object *self)
 {
-	return self->device;
+    return self->device;
 }

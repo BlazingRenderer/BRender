@@ -13,105 +13,99 @@
 #include "shortcut.h"
 #include "brassert.h"
 
-
 /*
  * Default dispatch table for renderer type (defined at and of file)
- */								 
+ */
 static const struct br_geometry_primitives_dispatch geometryPrimitivesDispatch;
 
 /*
  * Geometry format info. template
  */
-#define F(f)	offsetof(struct br_geometry_primitives, f)
+#define F(f) offsetof(struct br_geometry_primitives, f)
 
-static const struct br_tv_template_entry geometryPrimitivesTemplateEntries[] = {
-	{BRT_IDENTIFIER_CSTR,		0,	F(identifier),			BRTV_QUERY | BRTV_ALL,	BRTV_CONV_COPY, },
-	{BRT_RENDERER_FACILITY_O,	0,	F(renderer_facility),	BRTV_QUERY | BRTV_ALL,	BRTV_CONV_COPY, },
-	{BRT_FACILITY_O,			0,	F(renderer_facility),	BRTV_QUERY,				BRTV_CONV_COPY, },
+static br_tv_template_entry geometryPrimitivesTemplateEntries[] = {
+    {BRT(IDENTIFIER_CSTR),     F(identifier),        BRTV_QUERY | BRTV_ALL, BRTV_CONV_COPY},
+    {BRT(RENDERER_FACILITY_O), F(renderer_facility), BRTV_QUERY | BRTV_ALL, BRTV_CONV_COPY},
+    {BRT(FACILITY_O),          F(renderer_facility), BRTV_QUERY,            BRTV_CONV_COPY},
 };
 #undef F
 
 /*
  * Allocate a geometry format
  */
-br_geometry_primitives * GeometryPrimitivesAllocate(br_renderer_facility *type, char *id)
+br_geometry_primitives *GeometryPrimitivesAllocate(br_renderer_facility *type, char *id)
 {
-	br_geometry_primitives * self;
+    br_geometry_primitives *self;
 
-	self = BrResAllocate(type->device, sizeof(*self), BR_MEMORY_OBJECT_DATA);
+    self = BrResAllocate(type->device, sizeof(*self), BR_MEMORY_OBJECT_DATA);
 
-	if(self == NULL)
-		return NULL;
+    if(self == NULL)
+        return NULL;
 
-	self->dispatch = (struct br_geometry_primitives_dispatch *)&geometryPrimitivesDispatch;
- 	self->identifier = id;
- 	self->renderer_facility = type;
-    self->device = type->device;
+    self->dispatch          = (struct br_geometry_primitives_dispatch *)&geometryPrimitivesDispatch;
+    self->identifier        = id;
+    self->renderer_facility = type;
+    self->device            = type->device;
 
-	ObjectContainerAddFront(type, (br_object *)self);
-	return self;
+    ObjectContainerAddFront(type, (br_object *)self);
+    return self;
 }
 
 static void BR_CMETHOD_DECL(br_geometry_primitives_soft, free)(br_object *_self)
 {
-	br_geometry_primitives *self = (br_geometry_primitives*)_self;
-	ObjectContainerRemove(self->renderer_facility, (br_object *)self);
+    br_geometry_primitives *self = (br_geometry_primitives *)_self;
+    ObjectContainerRemove(self->renderer_facility, (br_object *)self);
 
-	BrResFreeNoCallback(self);
+    BrResFreeNoCallback(self);
 }
 
 static br_token BR_CMETHOD_DECL(br_geometry_primitives_soft, type)(br_object *self)
 {
-	return BRT_GEOMETRY_PRIMITIVES;
+    return BRT_GEOMETRY_PRIMITIVES;
 }
 
 static br_boolean BR_CMETHOD_DECL(br_geometry_primitives_soft, isType)(br_object *self, br_token t)
 {
-	return (t == BRT_GEOMETRY_PRIMITIVES) || (t == BRT_GEOMETRY) || (t == BRT_OBJECT);
+    return (t == BRT_GEOMETRY_PRIMITIVES) || (t == BRT_GEOMETRY) || (t == BRT_OBJECT);
 }
 
 static br_size_t BR_CMETHOD_DECL(br_geometry_primitives_soft, space)(br_object *self)
 {
-	return sizeof(br_geometry_primitives);
+    return sizeof(br_geometry_primitives);
 }
 
-static struct br_tv_template * BR_CMETHOD_DECL(br_geometry_primitives_soft, templateQuery)(br_object *_self)
+static br_tv_template *BR_CMETHOD_DECL(br_geometry_primitives_soft, templateQuery)(br_object *_self)
 {
-    br_geometry_primitives *self = (br_geometry_primitives*)_self;
+    br_geometry_primitives *self = (br_geometry_primitives *)_self;
 
     if(self->device->templates.geometryPrimitivesTemplate == NULL)
-       self->device->templates.geometryPrimitivesTemplate = BrTVTemplateAllocate(self->device,
-        (br_tv_template_entry *)geometryPrimitivesTemplateEntries,
-		BR_ASIZE(geometryPrimitivesTemplateEntries));
+        self->device->templates.geometryPrimitivesTemplate = BrTVTemplateAllocate(self->device, geometryPrimitivesTemplateEntries,
+                                                                                  BR_ASIZE(geometryPrimitivesTemplateEntries));
 
     return self->device->templates.geometryPrimitivesTemplate;
 }
 
-static br_error BR_CMETHOD_DECL(br_geometry_primitives_soft, storedAvail)(
-		struct br_geometry_primitives *self,
-		br_int_32 *psize,
-		br_token_value *tv)
+static br_error BR_CMETHOD_DECL(br_geometry_primitives_soft, storedAvail)(br_geometry_primitives *self, br_int_32 *psize, br_token_value *tv)
 {
-	return BRE_FAIL;
+    return BRE_FAIL;
 }
 
-br_error BR_CMETHOD_DECL(br_geometry_primitives_soft, render)
-		(struct br_geometry_primitives *self, struct br_renderer *renderer, struct fmt_vertex *vertices, int nvertices, br_token type)
+br_error BR_CMETHOD_DECL(br_geometry_primitives_soft, render)(br_geometry_primitives *self, br_renderer *renderer,
+                                                              struct fmt_vertex *vertices, int nvertices, br_token type)
 {
-	return BRE_FAIL;
+    return BRE_FAIL;
 }
 
-br_error BR_CMETHOD_DECL(br_geometry_primitives_soft, renderOnScreen)
-		(struct br_geometry_primitives *self, struct br_renderer *renderer, struct fmt_vertex *vertices, int nvertices, br_token type)
+br_error BR_CMETHOD_DECL(br_geometry_primitives_soft, renderOnScreen)(br_geometry_primitives *self, br_renderer *renderer,
+                                                                      struct fmt_vertex *vertices, int nvertices, br_token type)
 {
-	return BRE_FAIL;
+    return BRE_FAIL;
 }
 
-br_error BR_CMETHOD_DECL(br_geometry_primitives_soft, storedNew)
-		(struct br_geometry_primitives *self, struct br_renderer *renderer,
-		struct br_geometry_stored **psg, struct fmt_vertex *vertices, int nvertices, br_token type, br_token_value *tv)
+br_error BR_CMETHOD_DECL(br_geometry_primitives_soft, storedNew)(br_geometry_primitives *self, br_renderer *renderer, br_geometry_stored **psg,
+                                                                 struct fmt_vertex *vertices, int nvertices, br_token type, br_token_value *tv)
 {
-	return BRE_FAIL;
+    return BRE_FAIL;
 }
 
 /*
@@ -143,4 +137,3 @@ static const struct br_geometry_primitives_dispatch geometryPrimitivesDispatch =
 
     ._storedAvail = BR_CMETHOD_REF(br_geometry_primitives_soft, storedAvail),
 };
-

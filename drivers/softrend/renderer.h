@@ -17,56 +17,56 @@ extern "C" {
  * Renderer - must be compatible with br_renderer_state
  */
 typedef struct br_renderer {
-	/*
-	 * Dispatch table
-	 */
-	struct br_renderer_dispatch *dispatch;
+    /*
+     * Dispatch table
+     */
+    struct br_renderer_dispatch *dispatch;
 
-	/*
-	 * Standard object identifier
-	 */
-	char *identifier;
+    /*
+     * Standard object identifier
+     */
+    char *identifier;
 
     /*
      * Pointer to owning device
      */
     struct br_device *device;
 
-	/*
-	 * List of objects associated with this renderer
-	 */
-	void *object_list;
+    /*
+     * List of objects associated with this renderer
+     */
+    void *object_list;
 
-	/*
-	 * State of renderer
-	 */
-	struct state_all state;
+    /*
+     * State of renderer
+     */
+    state_all state;
 
-	/*
-	 * Default state of renderer
-	 */
-	struct state_all *default_state;
+    /*
+     * Default state of renderer
+     */
+    state_all *default_state;
 
-	/*
-	 * last restored state
-	 */
-	struct br_renderer_state_stored *last_restored;
+    /*
+     * last restored state
+     */
+    struct br_renderer_state_stored *last_restored;
 
-	/*
-	 * Output primitives
-	 */
-	struct br_primitive_library *plib;
+    /*
+     * Output primitives
+     */
+    br_primitive_library *plib;
 
-	/*
-	 * Stack of saved states (XXX should allocate on the fly)
-	 */
-	struct state_all state_stack[MAX_STATE_STACK];
-	br_uint_32 stack_top;
+    /*
+     * Stack of saved states (XXX should allocate on the fly)
+     */
+    state_all  state_stack[MAX_STATE_STACK];
+    br_uint_32 stack_top;
 
-	/*
-	 * Type of renderer
-	 */
-	br_renderer_facility *renderer_facility;
+    /*
+     * Type of renderer
+     */
+    br_renderer_facility *renderer_facility;
 
 } br_renderer;
 
@@ -74,5 +74,3 @@ typedef struct br_renderer {
 };
 #endif
 #endif
-
-

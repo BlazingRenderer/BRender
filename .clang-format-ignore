@@ -16,5 +16,4 @@ drivers/glrend/include/glad
 drivers/glrend/include/KHR
 
 # Easier to diff against the originals
-drivers/softrend
 drivers/pentprim

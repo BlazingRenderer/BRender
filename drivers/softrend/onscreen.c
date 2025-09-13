@@ -8,7 +8,6 @@
 #include "drv.h"
 #include "shortcut.h"
 
-
 /*
  * Check a bounding box against the view volume and return
  * one of:
@@ -34,125 +33,118 @@
  * XXX Could probably write a mean version of this is assembler
  */
 
-#define MAKE_EQN(sign,row) {\
-	eqn.v[X] =  model_to_screen->m[0][3] sign model_to_screen->m[0][row];\
-	eqn.v[Y] =  model_to_screen->m[1][3] sign model_to_screen->m[1][row];\
-	eqn.v[Z] =  model_to_screen->m[2][3] sign model_to_screen->m[2][row];\
-	eqn.v[W] =-(model_to_screen->m[3][3] sign model_to_screen->m[3][row]);\
-	}
+#define MAKE_EQN(sign, row)                                                     \
+    {                                                                           \
+        eqn.v[X] = model_to_screen->m[0][3] sign model_to_screen->m[0][row];    \
+        eqn.v[Y] = model_to_screen->m[1][3] sign model_to_screen->m[1][row];    \
+        eqn.v[Z] = model_to_screen->m[2][3] sign model_to_screen->m[2][row];    \
+        eqn.v[W] = -(model_to_screen->m[3][3] sign model_to_screen->m[3][row]); \
+    }
 
-#define TEST_NOT_IN\
-		(BR_MAC3(\
-			eqn.v[X],((eqn.v[X]>0)?(bounds->min.v[X]):(bounds->max.v[X])),\
-			eqn.v[Y],((eqn.v[Y]>0)?(bounds->min.v[Y]):(bounds->max.v[Y])),\
-			eqn.v[Z],((eqn.v[Z]>0)?(bounds->min.v[Z]):(bounds->max.v[Z]))) <\
-			eqn.v[W])
-	
-#define TEST_OUT\
-		(BR_MAC3(\
-			eqn.v[X],((eqn.v[X]>0)?(bounds->max.v[X]):(bounds->min.v[X])),\
-			eqn.v[Y],((eqn.v[Y]>0)?(bounds->max.v[Y]):(bounds->min.v[Y])),\
-			eqn.v[Z],((eqn.v[Z]>0)?(bounds->max.v[Z]):(bounds->min.v[Z]))) <\
-			eqn.v[W])
+#define TEST_NOT_IN                                                                          \
+    (BR_MAC3(eqn.v[X], ((eqn.v[X] > 0) ? (bounds->min.v[X]) : (bounds->max.v[X])), eqn.v[Y], \
+             ((eqn.v[Y] > 0) ? (bounds->min.v[Y]) : (bounds->max.v[Y])), eqn.v[Z],           \
+             ((eqn.v[Z] > 0) ? (bounds->min.v[Z]) : (bounds->max.v[Z]))) < eqn.v[W])
 
+#define TEST_OUT                                                                             \
+    (BR_MAC3(eqn.v[X], ((eqn.v[X] > 0) ? (bounds->max.v[X]) : (bounds->min.v[X])), eqn.v[Y], \
+             ((eqn.v[Y] > 0) ? (bounds->max.v[Y]) : (bounds->min.v[Y])), eqn.v[Z],           \
+             ((eqn.v[Z] > 0) ? (bounds->max.v[Z]) : (bounds->min.v[Z]))) < eqn.v[W])
 
 br_token OnScreenCheck(br_renderer *self, br_matrix4 *model_to_screen, br_bounds3 *bounds)
 {
-	int accept = 1;
-	br_vector4 eqn;
-	int c;
+    int        accept = 1;
+    br_vector4 eqn;
+    int        c;
 
-	/*
-	 * Left	  - screen space plane eqn. = ( 1, 0, 0, 1)
-	 */
-	MAKE_EQN(+,0);
+    /*
+     * Left	  - screen space plane eqn. = ( 1, 0, 0, 1)
+     */
+    MAKE_EQN(+, 0);
 
-	if(TEST_OUT)
-		return BRT_REJECT;
+    if(TEST_OUT)
+        return BRT_REJECT;
 
-	if(TEST_NOT_IN)
-		accept = 0;
+    if(TEST_NOT_IN)
+        accept = 0;
 
-	/*
-	 * Right  - screen space plane eqn. = (-1, 0, 0, 1)
-	 */
-	MAKE_EQN(-,0);
+    /*
+     * Right  - screen space plane eqn. = (-1, 0, 0, 1)
+     */
+    MAKE_EQN(-, 0);
 
-	if(TEST_OUT)
-		return BRT_REJECT;
+    if(TEST_OUT)
+        return BRT_REJECT;
 
-	if(accept && TEST_NOT_IN)
-		accept = 0;
+    if(accept && TEST_NOT_IN)
+        accept = 0;
 
-	/*
-	 * Bottom - screen space plane eqn. = ( 0, 1, 0, 1)
-	 */
-	MAKE_EQN(+,1);
+    /*
+     * Bottom - screen space plane eqn. = ( 0, 1, 0, 1)
+     */
+    MAKE_EQN(+, 1);
 
-	if(TEST_OUT)
-		return BRT_REJECT;
+    if(TEST_OUT)
+        return BRT_REJECT;
 
-	if(accept && TEST_NOT_IN)
-		accept = 0;
+    if(accept && TEST_NOT_IN)
+        accept = 0;
 
-	/*
-	 * Top    - screen space plane eqn. = ( 0,-1, 0, 1)
-	 */
-	MAKE_EQN(-,1);
+    /*
+     * Top    - screen space plane eqn. = ( 0,-1, 0, 1)
+     */
+    MAKE_EQN(-, 1);
 
-	if(TEST_OUT)
-		return BRT_REJECT;
+    if(TEST_OUT)
+        return BRT_REJECT;
 
-	if(accept && TEST_NOT_IN)
-		accept = 0;
+    if(accept && TEST_NOT_IN)
+        accept = 0;
 
-	/*
-	 * Yon    - screen space plane eqn. = ( 0, 0, 1, 1)
-	 */
-	MAKE_EQN(+,2);
+    /*
+     * Yon    - screen space plane eqn. = ( 0, 0, 1, 1)
+     */
+    MAKE_EQN(+, 2);
 
-	if(TEST_OUT)
-		return BRT_REJECT;
+    if(TEST_OUT)
+        return BRT_REJECT;
 
-	if(accept && TEST_NOT_IN)
-		accept = 0;
+    if(accept && TEST_NOT_IN)
+        accept = 0;
 
-	/*
-	 * Hither - screen space plane eqn. = ( 0, 0,-1, 1)
-	 */
-	MAKE_EQN(-,2);
+    /*
+     * Hither - screen space plane eqn. = ( 0, 0,-1, 1)
+     */
+    MAKE_EQN(-, 2);
 
-	if(TEST_OUT)
-		return BRT_REJECT;
+    if(TEST_OUT)
+        return BRT_REJECT;
 
-	if(accept && TEST_NOT_IN)
-		accept = 0;
+    if(accept && TEST_NOT_IN)
+        accept = 0;
 
-	/*
-	 * Any user clip planes
-	 *
-	 * XXX - user_clip_active needs checking - getting
-	 * astale version here
-	 */
-//	if(scache.user_clip_active) {
-		for(c = 0; c < MAX_STATE_CLIP_PLANES; c++) {
+    /*
+     * Any user clip planes
+     *
+     * XXX - user_clip_active needs checking - getting
+     * astale version here
+     */
+    //	if(scache.user_clip_active) {
+    for(c = 0; c < MAX_STATE_CLIP_PLANES; c++) {
 
-			if(self->state.clip[c].type != BRT_PLANE)
-				continue;
+        if(self->state.clip[c].type != BRT_PLANE)
+            continue;
 
-			BrMatrix4TApply(&eqn,
-					 &self->state.clip[c].plane,
-					 model_to_screen);
-			eqn.v[W] = -eqn.v[W];
+        BrMatrix4TApply(&eqn, &self->state.clip[c].plane, model_to_screen);
+        eqn.v[W] = -eqn.v[W];
 
-			if(TEST_OUT)
-				return BRT_REJECT;
+        if(TEST_OUT)
+            return BRT_REJECT;
 
-			if(accept && TEST_NOT_IN)
-				accept = 0;
-		}
-//	}
+        if(accept && TEST_NOT_IN)
+            accept = 0;
+    }
+    //	}
 
-	return accept?BRT_ACCEPT:BRT_PARTIAL;
+    return accept ? BRT_ACCEPT : BRT_PARTIAL;
 }
-

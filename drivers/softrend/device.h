@@ -11,7 +11,6 @@
 
 #include "host.h"
 
-
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -19,39 +18,38 @@ extern "C" {
  * Private state of device
  */
 typedef struct br_device {
-	/*
-	 * Dispatch table
-	 */
-	struct br_device_dispatch *dispatch;
+    /*
+     * Dispatch table
+     */
+    struct br_device_dispatch *dispatch;
 
-	/*
-	 * Standard object identifier
-	 */
-	char *identifier;
+    /*
+     * Standard object identifier
+     */
+    char *identifier;
 
     /*
      * Pointer to owning device
      */
     struct br_device *device;
 
-	/*
-	 * List of objects associated with this device
-	 */
-	void *object_list;
+    /*
+     * List of objects associated with this device
+     */
+    void *object_list;
 
-	/*
-	 * Anchor for all device's resources
-	 */
-	void *res;
+    /*
+     * Anchor for all device's resources
+     */
+    void *res;
 
     /*
      * Driver-wide template store
      */
     struct device_templates templates;
 
-// local copy of cpu capabilities
-    struct host_info hostInfo;
-
+    // local copy of cpu capabilities
+    host_info hostInfo;
 
 } br_device;
 
@@ -64,4 +62,3 @@ typedef struct br_device {
 };
 #endif
 #endif
-

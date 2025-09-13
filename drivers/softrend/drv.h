@@ -92,8 +92,8 @@ extern "C" {
  * Macros that exapnd to the first two arguments of a template entry
  * Builtin or device token
  */
-#define BRT(t)	BRT_##t,0
-#define DEV(t)	0,#t
+#define BRT(t) BRT_##t, 0
+#define DEV(t) 0, #t
 
 /*
  * Pull in private prototypes
@@ -110,4 +110,3 @@ extern "C" {
 };
 #endif
 #endif
-

@@ -19,7 +19,6 @@ add_library(softrend
         lighting.c
         mapping.c
         object.c
-        ocfree.c
         onscreen.c
         renderer.c
         rendfcty.c

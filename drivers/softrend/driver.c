@@ -13,9 +13,8 @@
 #include "shortcut.h"
 #include "brassert.h"
 
-
 #define SHORT_SUFFIX "RNDF"
-#define LONG_SUFFIX "-Float"
+#define LONG_SUFFIX  "-Float"
 
 /*
  * Driver-wide timestamp - the only static variable
@@ -25,25 +24,25 @@ br_uint_32 DriverTimestamp;
 /*
  * Main entry point for device - this may get redefined by the makefile
  */
-br_device * BR_EXPORT BrDrv1SoftRendBegin(const char *arguments)
+br_device *BR_EXPORT BrDrv1SoftRendBegin(const char *arguments)
 {
-	br_device *device;
+    br_device *device;
 
-	/*
-	 * Setup static timestamp
-	 */
+    /*
+     * Setup static timestamp
+     */
     if(DriverTimestamp == 0)
-    	DriverTimestamp = TIMESTAMP_START;
+        DriverTimestamp = TIMESTAMP_START;
 
-	/*
-	 * Set up device
-	 */
+    /*
+     * Set up device
+     */
     device = DeviceSoftAllocate("SOFT" SHORT_SUFFIX);
 
     if(device == NULL)
         return NULL;
 
-	if(RendererFacilitySoftAllocate(device, "Default-Renderer" LONG_SUFFIX) == NULL) {
+    if(RendererFacilitySoftAllocate(device, "Default-Renderer" LONG_SUFFIX) == NULL) {
         ObjectFree(device);
         return NULL;
     }

@@ -17,35 +17,34 @@ struct device_templates {
     /*
      * Object query templates
      */
-    struct br_tv_template *deviceTemplate;
-    struct br_tv_template *rendererFacilityTemplate;
-    struct br_tv_template *rendererTemplate;
-    struct br_tv_template *rendererStateStoredTemplate;
-    struct br_tv_template *geometryV1ModelTemplate;
-    struct br_tv_template *geometryV1BucketsTemplate;
-    struct br_tv_template *geometryPrimitivesTemplate;
-    struct br_tv_template *geometryLightingTemplate;
+    br_tv_template *deviceTemplate;
+    br_tv_template *rendererFacilityTemplate;
+    br_tv_template *rendererTemplate;
+    br_tv_template *rendererStateStoredTemplate;
+    br_tv_template *geometryV1ModelTemplate;
+    br_tv_template *geometryV1BucketsTemplate;
+    br_tv_template *geometryPrimitivesTemplate;
+    br_tv_template *geometryLightingTemplate;
 
     /*
      * Argument processing templates
      */
-    struct br_tv_template *rendererNewTemplate;
+    br_tv_template *rendererNewTemplate;
 
     /*
      * Parts templates
      */
-    struct br_tv_template *partCullTemplate;
-    struct br_tv_template *partSurfaceTemplate;
-    struct br_tv_template *partMatrixTemplate;
-    struct br_tv_template *partEnableTemplate;
-    struct br_tv_template *partHiddenSurfaceTemplate;
-    struct br_tv_template *partBoundsTemplate;
-    struct br_tv_template *partLightTemplate;
-    struct br_tv_template *partClipTemplate;
+    br_tv_template *partCullTemplate;
+    br_tv_template *partSurfaceTemplate;
+    br_tv_template *partMatrixTemplate;
+    br_tv_template *partEnableTemplate;
+    br_tv_template *partHiddenSurfaceTemplate;
+    br_tv_template *partBoundsTemplate;
+    br_tv_template *partLightTemplate;
+    br_tv_template *partClipTemplate;
 };
 
 #ifdef __cplusplus
 };
 #endif
 #endif
-

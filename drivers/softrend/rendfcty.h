@@ -17,35 +17,35 @@ extern "C" {
  * Private state of renderer facility
  */
 typedef struct br_renderer_facility {
-	/*
-	 * Dispatch table
-	 */
-	struct br_renderer_facility_dispatch *dispatch;
+    /*
+     * Dispatch table
+     */
+    struct br_renderer_facility_dispatch *dispatch;
 
-	/*
-	 * Standard object identifier
-	 */
-	char *identifier;
+    /*
+     * Standard object identifier
+     */
+    char *identifier;
 
     /*
      * Pointer to owning device
      */
-    struct br_device *device;
+    br_device *device;
 
-	/*
-	 * List of objects associated with this device
-	 */
-	void *object_list;
+    /*
+     * List of objects associated with this device
+     */
+    void *object_list;
 
-	/*
-	 * Default state
-	 */
-	struct state_all default_state;
+    /*
+     * Default state
+     */
+    state_all default_state;
 
-	/*
-	 * Number of instances
-	 */
-	br_int_32	num_instances;
+    /*
+     * Number of instances
+     */
+    br_int_32 num_instances;
 
 } br_renderer_facility;
 
@@ -53,4 +53,3 @@ typedef struct br_renderer_facility {
 };
 #endif
 #endif
-

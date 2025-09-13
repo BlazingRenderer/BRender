@@ -9,8 +9,8 @@
         (m2)->comp[C_P] = BR_CONST_MUL(BR_ADD((v1)->comp[C_P], (v0)->comp[C_P]), BR_SCALAR(0.5)); \
     } while(0)
 
-void averageVerticesOnScreen(const br_renderer *renderer, brp_vertex *restrict m0, brp_vertex *restrict m1,
-                             brp_vertex *restrict m2, brp_vertex *restrict v0, brp_vertex *restrict v1, brp_vertex *restrict v2)
+void averageVerticesOnScreen(const br_renderer *renderer, brp_vertex *restrict m0, brp_vertex *restrict m1, brp_vertex *restrict m2,
+                             brp_vertex *restrict v0, brp_vertex *restrict v1, brp_vertex *restrict v2)
 {
     COMPUTE_COMPONENT_MIDPOINT_VALUES(C_X, m0, m1, m2, v0, v1, v2);
     COMPUTE_COMPONENT_MIDPOINT_VALUES(C_Y, m0, m1, m2, v0, v1, v2);
@@ -122,8 +122,8 @@ static br_uint_32 outcodeOrdinate(br_scalar lValue, br_scalar rValue, const br_u
     return table[esi >> 28];
 }
 
-void averageVertices(const br_renderer *renderer, brp_vertex *restrict m0, brp_vertex *restrict m1,
-                     brp_vertex *restrict m2, brp_vertex *restrict v0, brp_vertex *restrict v1, brp_vertex *restrict v2)
+void averageVertices(const br_renderer *renderer, brp_vertex *restrict m0, brp_vertex *restrict m1, brp_vertex *restrict m2,
+                     brp_vertex *restrict v0, brp_vertex *restrict v1, brp_vertex *restrict v2)
 {
 
     /*

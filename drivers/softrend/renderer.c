@@ -13,7 +13,6 @@
 #include "shortcut.h"
 #include "brassert.h"
 
-
 /*
  * Default dispatch table for renderer (defined at end of file)
  */
@@ -24,13 +23,7 @@ static const struct br_renderer_dispatch rendererDispatch;
  * this library
  */
 const br_token RendererPartsTokens[] = {
-	BRT_CULL,
-	BRT_SURFACE,
-	BRT_MATRIX,
-	BRT_ENABLE,
-	BRT_LIGHT,
-	BRT_CLIP,
-	0
+    BRT_CULL, BRT_SURFACE, BRT_MATRIX, BRT_ENABLE, BRT_LIGHT, BRT_CLIP, 0,
 };
 
 /*
@@ -40,320 +33,304 @@ const br_token RendererPartsTokens[] = {
 /*
  * Return a token list of ourself and that of the primitive library
  */
-static br_error BR_CALLBACK customPartsQuery(br_value *pvalue, void **pextra, br_size_t *pextra_size,
-	void *block, const struct br_tv_template_entry *tep)
+static br_error BR_CALLBACK customPartsQuery(br_value *pvalue, void **pextra, br_size_t *pextra_size, void *block, const br_tv_template_entry *tep)
 {
-	struct br_renderer *self = block;
-	int i;
-	br_uint_32 dummy;
-	br_error r;
-	br_token **ppt = (br_token **)pextra;
+    br_renderer *self = block;
+    int          i;
+    br_uint_32   dummy;
+    br_error     r;
+    br_token   **ppt = (br_token **)pextra;
 
-	if(pextra == NULL || *pextra == NULL || pextra_size == NULL)
-		return BRE_FAIL;
+    if(pextra == NULL || *pextra == NULL || pextra_size == NULL)
+        return BRE_FAIL;
 
-	*((void **)pvalue) = *pextra;
+    *((void **)pvalue) = *pextra;
 
-	/*
-	 * Check there is space 
-	 */
-	if(((BR_ASIZE(RendererPartsTokens)-1) * sizeof(br_token)) > *pextra_size)
-		return BRE_FAIL;
+    /*
+     * Check there is space
+     */
+    if(((BR_ASIZE(RendererPartsTokens) - 1) * sizeof(br_token)) > *pextra_size)
+        return BRE_FAIL;
 
-	/*
-	 * Add our own tokens to list
-	 */
-	for(i=0; i < BR_ASIZE(RendererPartsTokens)-1; i++) {
-		*(*ppt)++ = RendererPartsTokens[i];
-		*pextra_size -= sizeof(br_token);
-	}
-	
-	/*
-	 * Hand off to primitive library for rest of list
-	 */
-	r = ObjectQueryBuffer(self->plib, &dummy, *ppt, *pextra_size, BRT_PARTS_TL);
+    /*
+     * Add our own tokens to list
+     */
+    for(i = 0; i < BR_ASIZE(RendererPartsTokens) - 1; i++) {
+        *(*ppt)++ = RendererPartsTokens[i];
+        *pextra_size -= sizeof(br_token);
+    }
 
-	if(r != BRE_OK)
-		return r;
+    /*
+     * Hand off to primitive library for rest of list
+     */
+    r = ObjectQueryBuffer(self->plib, &dummy, *ppt, *pextra_size, BRT_PARTS_TL);
 
-	/*
-	 * Work out how much space was consumed
-	 */
-	for(i = 0; (*ppt)[i] ; i++)
-		*pextra_size -= sizeof(br_token);
-		
-	/*
-	 * NULL
-	 */
-	*pextra_size -= sizeof(br_token);
-		
-	return BRE_OK;
+    if(r != BRE_OK)
+        return r;
+
+    /*
+     * Work out how much space was consumed
+     */
+    for(i = 0; (*ppt)[i]; i++)
+        *pextra_size -= sizeof(br_token);
+
+    /*
+     * NULL
+     */
+    *pextra_size -= sizeof(br_token);
+
+    return BRE_OK;
 }
 
-static br_size_t BR_CALLBACK customPartsExtra(void *block, const struct br_tv_template_entry *tep)
+static br_size_t BR_CALLBACK customPartsExtra(void *block, const br_tv_template_entry *tep)
 {
-	struct br_renderer *self = block;
-	br_size_t s;
-	br_token_value tv[] = {
-		{BRT_PARTS_TL,0},
-		{0,0}
-	};
+    br_renderer   *self = block;
+    br_size_t      s;
+    br_token_value tv[] = {
+        {BRT_PARTS_TL, 0},
+        {0,            0}
+    };
 
-	/*
-	 * Find out size of primitive's list
-	 */
-	if(ObjectQueryManySize((br_object *)self->plib, &s, tv) != BRE_OK)
-		return 0;
+    /*
+     * Find out size of primitive's list
+     */
+    if(ObjectQueryManySize((br_object *)self->plib, &s, tv) != BRE_OK)
+        return 0;
 
-	/*
-	 * Add our own contribution
-	 */
-	return s + (BR_ASIZE(RendererPartsTokens)-1) * sizeof(br_token);
+    /*
+     * Add our own contribution
+     */
+    return s + (BR_ASIZE(RendererPartsTokens) - 1) * sizeof(br_token);
 }
 
-static struct br_tv_custom customPartsConv = {
+static br_tv_custom customPartsConv = {
     .query      = customPartsQuery,
     .set        = NULL,
     .extra_size = customPartsExtra,
 };
 
-#define F(f)	offsetof(struct br_renderer, f)
+#define F(f) offsetof(struct br_renderer, f)
 
 /*
  * Shortcuts for template flags
  */
-#define _S BRTV_SET
-#define _Q BRTV_QUERY
-#define _A BRTV_ALL
+#define _S  BRTV_SET
+#define _Q  BRTV_QUERY
+#define _A  BRTV_ALL
 
 #define _AX 0
 #define _AF BRTV_ALL
 
-static struct br_tv_template_entry rendererTemplateEntries[] = {
-	{BRT(IDENTIFIER_CSTR),		F(identifier),				_Q | _A,	BRTV_CONV_COPY, },
-	{BRT(PARTS_TL),				0,							_Q | _A,	BRTV_CONV_CUSTOM, (br_uintptr_t)&customPartsConv},
+static br_tv_template_entry rendererTemplateEntries[] = {
+    {BRT(IDENTIFIER_CSTR),     F(identifier),        _Q | _A, BRTV_CONV_COPY,   0                             },
+    {BRT(PARTS_TL),            0,                    _Q | _A, BRTV_CONV_CUSTOM, (br_uintptr_t)&customPartsConv},
 
-	{BRT(RENDERER_FACILITY_O),	F(renderer_facility),		_Q | _A,	BRTV_CONV_COPY, },
+    {BRT(RENDERER_FACILITY_O), F(renderer_facility), _Q | _A, BRTV_CONV_COPY,   0                             },
 
-	/*
-	 * Useful stuff for poking around
-	 */
-	{BRT(PRIMITIVE_LIBRARY_O),	F(plib),					_Q | _A,	BRTV_CONV_COPY, },
-	{DEV(PRIMITIVE_STATE_O),	F(state.pstate),			_Q | _A,	BRTV_CONV_COPY, },
+    /*
+     * Useful stuff for poking around
+     */
+    {BRT(PRIMITIVE_LIBRARY_O), F(plib),              _Q | _A, BRTV_CONV_COPY,   0                             },
+    {DEV(PRIMITIVE_STATE_O),   F(state.pstate),      _Q | _A, BRTV_CONV_COPY,   0                             },
 };
 #undef F
 
 /*
  * Create a new renderer
  */
-br_renderer * RendererSoftAllocate(br_device *dev, struct br_renderer_facility *type, struct br_primitive_library *prims)
+br_renderer *RendererSoftAllocate(br_device *dev, br_renderer_facility *type, br_primitive_library *prims)
 {
-	br_renderer *self;
-	br_uint_32 m;
+    br_renderer *self;
+    br_uint_32   m;
 
-	ASSERT(prims != NULL);
-	
-	self = BrResAllocate(dev, sizeof(*self), BR_MEMORY_OBJECT_DATA);
+    ASSERT(prims != NULL);
 
-	if(self == NULL)
-		return NULL;
+    self = BrResAllocate(dev, sizeof(*self), BR_MEMORY_OBJECT_DATA);
 
-	self->dispatch = (struct br_renderer_dispatch *)&rendererDispatch;
- 	self->identifier = type->identifier;
-    self->device = dev;
- 	self->renderer_facility = type;
+    if(self == NULL)
+        return NULL;
 
-	/*
-	 * Set up out object list
-	 */
-	self->object_list = BrObjectListAllocate(self);
+    self->dispatch          = (struct br_renderer_dispatch *)&rendererDispatch;
+    self->identifier        = type->identifier;
+    self->device            = dev;
+    self->renderer_facility = type;
 
-	/*
-	 * Set the primitives that this renderer will use
-	 */
-	self->plib = prims;
+    /*
+     * Set up out object list
+     */
+    self->object_list = BrObjectListAllocate(self);
 
-	/*
-	 * Remember default state
-	 */
-	self->default_state = &type->default_state;
- 	self->state.renderer = self;
+    /*
+     * Set the primitives that this renderer will use
+     */
+    self->plib = prims;
 
-	/*
-	 * Set valid bits from primitive library
-	 */
-	m = 0;
-	ObjectQuery(self->plib, &m, BRT_PARTS_U32);
-	self->state.valid |= m;
+    /*
+     * Remember default state
+     */
+    self->default_state  = &type->default_state;
+    self->state.renderer = self;
 
-	/*
-	 * State starts out as default
-	 */
-	RendererStateDefault(self,(br_uint_32)BR_STATE_ALL);
+    /*
+     * Set valid bits from primitive library
+     */
+    m = 0;
+    ObjectQuery(self->plib, &m, BRT_PARTS_U32);
+    self->state.valid |= m;
 
-	ObjectContainerAddFront(type,(br_object *)self);
+    /*
+     * State starts out as default
+     */
+    RendererStateDefault(self, (br_uint_32)BR_STATE_ALL);
 
-	return self;
+    ObjectContainerAddFront(type, (br_object *)self);
+
+    return self;
 }
 
 static void BR_CMETHOD_DECL(br_renderer_soft, free)(br_object *_self)
 {
-	br_renderer *self = (br_renderer*)_self;
+    br_renderer *self = (br_renderer *)_self;
 
-	ObjectContainerRemove(self->renderer_facility, (br_object *)self);
+    ObjectContainerRemove(self->renderer_facility, (br_object *)self);
 
-	self->renderer_facility->num_instances--;
+    self->renderer_facility->num_instances--;
 
-	BrObjectContainerFree((br_object_container *)self, BR_NULL_TOKEN, NULL, NULL);
+    BrObjectContainerFree((br_object_container *)self, BR_NULL_TOKEN, NULL, NULL);
 
-	BrResFreeNoCallback(self);
+    BrResFreeNoCallback(self);
 }
 
 static br_token BR_CMETHOD_DECL(br_renderer_soft, type)(br_object *self)
 {
-	return BRT_RENDERER;
+    return BRT_RENDERER;
 }
 
 static br_boolean BR_CMETHOD_DECL(br_renderer_soft, isType)(br_object *self, br_token t)
 {
-	return (t == BRT_RENDERER) || (t == BRT_OBJECT);
+    return (t == BRT_RENDERER) || (t == BRT_OBJECT);
 }
 
 static br_size_t BR_CMETHOD_DECL(br_renderer_soft, space)(br_object *self)
 {
-	return sizeof(br_renderer);
+    return sizeof(br_renderer);
 }
 
-static struct br_tv_template * BR_CMETHOD_DECL(br_renderer_soft,templateQuery)(br_object *_self)
+static br_tv_template *BR_CMETHOD_DECL(br_renderer_soft, templateQuery)(br_object *_self)
 {
-    br_renderer *self = (br_renderer*)_self;
+    br_renderer *self = (br_renderer *)_self;
 
     if(self->device->templates.rendererTemplate == NULL)
-        self->device->templates.rendererTemplate = BrTVTemplateAllocate(self->device,
-            rendererTemplateEntries,
-            BR_ASIZE(rendererTemplateEntries));
+        self->device->templates.rendererTemplate = BrTVTemplateAllocate(self->device, rendererTemplateEntries, BR_ASIZE(rendererTemplateEntries));
 
     return self->device->templates.rendererTemplate;
 }
 
-static void * BR_CMETHOD_DECL(br_renderer_soft,listQuery)(br_object_container *self)
+static void *BR_CMETHOD_DECL(br_renderer_soft, listQuery)(br_object_container *self)
 {
-	return ((br_renderer*)self)->object_list;
+    return ((br_renderer *)self)->object_list;
 }
 
 static br_error BR_CMETHOD_DECL(br_renderer_soft, validDestination)(br_renderer *self, br_boolean *bp, br_object *h)
 {
-	return BRE_OK;
+    return BRE_OK;
 }
 
-static br_error BR_CMETHOD_DECL(br_renderer_soft, stateStoredNew)
-	(struct br_renderer *self, struct br_renderer_state_stored **pss, br_uint_32 mask, br_token_value *tv)
+static br_error BR_CMETHOD_DECL(br_renderer_soft, stateStoredNew)(br_renderer *self, br_renderer_state_stored **pss, br_uint_32 mask,
+                                                                  br_token_value *tv)
 {
-	br_renderer_state_stored *ss;
+    br_renderer_state_stored *ss;
 
-	ss = RendererStateStoredSoftAllocate(self, &self->state, mask, tv);
+    ss = RendererStateStoredSoftAllocate(self, &self->state, mask, tv);
 
-	if(ss) {
-		*pss = ss;
-		return BRE_OK;
-	} else
-		return BRE_FAIL;
+    if(ss) {
+        *pss = ss;
+        return BRE_OK;
+    } else
+        return BRE_FAIL;
 }
 
-static br_error BR_CMETHOD_DECL(br_renderer_soft, stateStoredAvail)
-	(struct br_renderer *self, br_int_32 *psize, br_uint_32 mask, br_token_value *tv)
+static br_error BR_CMETHOD_DECL(br_renderer_soft, stateStoredAvail)(br_renderer *self, br_int_32 *psize, br_uint_32 mask, br_token_value *tv)
 {
-	return BRE_FAIL;
+    return BRE_FAIL;
 }
 
-static br_error BR_CMETHOD_DECL(br_renderer_soft, bufferStoredNew)
-	(struct br_renderer *self, struct br_buffer_stored **psm,
-	br_token use, struct br_device_pixelmap *pm, br_token_value *tv)
+static br_error BR_CMETHOD_DECL(br_renderer_soft, bufferStoredNew)(br_renderer *self, br_buffer_stored **psm, br_token use,
+                                                                   br_device_pixelmap *pm, br_token_value *tv)
 {
-	/*
-	 * Pass on to primitive library
-	 */
-	return PrimitiveLibraryBufferStoredNew(self->plib, psm, use, pm, tv);
+    /*
+     * Pass on to primitive library
+     */
+    return PrimitiveLibraryBufferStoredNew(self->plib, psm, use, pm, tv);
 }
 
-static br_error BR_CMETHOD_DECL(br_renderer_soft, bufferStoredAvail)(
-	struct br_renderer *self,
-		br_int_32 *space,
-		br_token use,
-		br_token_value *tv)
+static br_error BR_CMETHOD_DECL(br_renderer_soft, bufferStoredAvail)(br_renderer *self, br_int_32 *space, br_token use, br_token_value *tv)
 {
-	/*
-	 * Pass on to primitive library
-	 */
-	return PrimitiveLibraryBufferStoredAvail(self->plib, space, use, tv);
+    /*
+     * Pass on to primitive library
+     */
+    return PrimitiveLibraryBufferStoredAvail(self->plib, space, use, tv);
 }
 
-static br_error BR_CMETHOD_DECL(br_renderer_soft, flush)
-	(struct br_renderer *self, br_boolean wait)
+static br_error BR_CMETHOD_DECL(br_renderer_soft, flush)(br_renderer *self, br_boolean wait)
 {
-	/*
-	 * Pass on to primitive library
-	 */
-	return PrimitiveLibraryFlush(self->plib,wait);
+    /*
+     * Pass on to primitive library
+     */
+    return PrimitiveLibraryFlush(self->plib, wait);
 }
 
-static br_error BR_CMETHOD_DECL(br_renderer_soft, synchronise)
-	(struct br_renderer *self, br_token sync_type, br_boolean block)
+static br_error BR_CMETHOD_DECL(br_renderer_soft, synchronise)(br_renderer *self, br_token sync_type, br_boolean block)
 {
-	/*
-	 * Pass on to primitive library
-	 */
-	return PrimitiveLibrarySynchronise(self->plib, sync_type, block);
+    /*
+     * Pass on to primitive library
+     */
+    return PrimitiveLibrarySynchronise(self->plib, sync_type, block);
 }
 
-static br_error BR_CMETHOD_DECL(br_renderer_soft,commandModeSet)
-	(struct br_renderer *self, br_token mode)
+static br_error BR_CMETHOD_DECL(br_renderer_soft, commandModeSet)(br_renderer *self, br_token mode)
 {
-	return BRE_FAIL;
+    return BRE_FAIL;
 }
 
-static br_error BR_CMETHOD_DECL(br_renderer_soft,commandModeQuery)
-	(struct br_renderer *self, br_token *mode)
+static br_error BR_CMETHOD_DECL(br_renderer_soft, commandModeQuery)(br_renderer *self, br_token *mode)
 {
-	return BRE_FAIL;
+    return BRE_FAIL;
 }
 
-static br_error BR_CMETHOD_DECL(br_renderer_soft,commandModeDefault)
-	(struct br_renderer *self)
+static br_error BR_CMETHOD_DECL(br_renderer_soft, commandModeDefault)(br_renderer *self)
 {
-	return BRE_FAIL;
+    return BRE_FAIL;
 }
 
-static br_error BR_CMETHOD_DECL(br_renderer_soft,commandModePush)
-	(struct br_renderer *self)
+static br_error BR_CMETHOD_DECL(br_renderer_soft, commandModePush)(br_renderer *self)
 {
-	return BRE_FAIL;
+    return BRE_FAIL;
 }
 
-static br_error BR_CMETHOD_DECL(br_renderer_soft,commandModePop)
-	(struct br_renderer *self)
+static br_error BR_CMETHOD_DECL(br_renderer_soft, commandModePop)(br_renderer *self)
 {
-	return BRE_FAIL;
+    return BRE_FAIL;
 }
 
 br_error BR_CMETHOD_DECL(br_renderer_soft, frameBegin)(br_renderer *self)
 {
-	return BRE_OK;
+    return BRE_OK;
 }
 
 br_error BR_CMETHOD_DECL(br_renderer_soft, frameEnd)(br_renderer *self)
 {
-	return BRE_OK;
+    return BRE_OK;
 }
 
 br_error BR_CMETHOD_DECL(br_renderer_soft, focusLossBegin)(br_renderer *self)
 {
-	return BRE_OK;
+    return BRE_OK;
 }
 
 br_error BR_CMETHOD_DECL(br_renderer_soft, focusLossEnd)(br_renderer *self)
 {
-	return BRE_OK;
+    return BRE_OK;
 }
 
 void BR_CMETHOD_DECL(br_renderer_soft, sceneBegin)(br_renderer *self)

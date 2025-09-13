@@ -20,20 +20,19 @@ typedef br_uint_32 br_timestamp;
 
 extern br_timestamp DriverTimestamp;
 
-#define Timestamp()		(DriverTimestamp += 2)
+#define Timestamp() (DriverTimestamp += 2)
 
 /*
- * Initial timestamp 
+ * Initial timestamp
  */
-#define TIMESTAMP_START		1
+#define TIMESTAMP_START 1
 
 /*
  * A time that will never happen
  */
-#define INVALID_TIME		0
+#define INVALID_TIME 0
 
 #ifdef __cplusplus
 };
 #endif
 #endif
-

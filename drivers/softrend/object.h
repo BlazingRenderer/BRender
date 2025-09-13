@@ -17,15 +17,15 @@ extern "C" {
  * Private state of device pixelmap
  */
 typedef struct br_object {
-	/*
-	 * Dispatch table
-	 */
-	struct br_object_dispatch *dispatch;
+    /*
+     * Dispatch table
+     */
+    struct br_object_dispatch *dispatch;
 
-	/*
-	 * Standard object identifier
-	 */
-	char *identifier;
+    /*
+     * Standard object identifier
+     */
+    char *identifier;
 
     /*
      * Pointer to owning device
@@ -37,11 +37,10 @@ typedef struct br_object {
 /*
  * Override general case with special case for this driver
  */
-#define ObjectSoftDevice(d) (((br_object *)d)->device)
+#define ObjectSoftDevice(d)     (((br_object *)d)->device)
 #define ObjectSoftIdentifier(d) (((br_object *)d)->identifier)
 
 #ifdef __cplusplus
 };
 #endif
 #endif
-

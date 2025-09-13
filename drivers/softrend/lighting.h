@@ -17,25 +17,25 @@ extern "C" {
  * Private state of geometry format
  */
 typedef struct br_geometry_lighting {
-	/*
-	 * Dispatch table
-	 */
-        struct br_geometry_lighting_dispatch *dispatch;
+    /*
+     * Dispatch table
+     */
+    struct br_geometry_lighting_dispatch *dispatch;
 
-	/*
-	 * Standard object identifier
-	 */
-	char *identifier;
+    /*
+     * Standard object identifier
+     */
+    char *identifier;
 
     /*
      * Pointer to owning device
      */
-    struct br_device *device;
+    br_device *device;
 
-	/*
-	 * Renderer type this format is associated with
-	 */
-	struct br_renderer_facility *renderer_facility;
+    /*
+     * Renderer type this format is associated with
+     */
+    br_renderer_facility *renderer_facility;
 
 } br_geometry_lighting;
 
@@ -43,6 +43,3 @@ typedef struct br_geometry_lighting {
 };
 #endif
 #endif
-
-
-

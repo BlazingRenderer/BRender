@@ -10,18 +10,14 @@
 #include "shortcut.h"
 #include "brassert.h"
 
-void SURFACE_CALL SurfaceAlpha(br_renderer *self,
-	br_vector3 *p, br_vector2 *map, br_vector3 *n, br_colour colour, br_scalar *comp)
+void SURFACE_CALL SurfaceAlpha(br_renderer *self, br_vector3 *p, br_vector2 *map, br_vector3 *n, br_colour colour, br_scalar *comp)
 {
-	comp[C_A] = BR_MUL(self->state.cache.comp_scales[C_A],
- 		BR_CONST_DIV(BrIntToScalar(BR_ALPHA(colour)),256)) +
- 		self->state.cache.comp_offsets[C_A];
+    comp[C_A] = BR_MUL(self->state.cache.comp_scales[C_A], BR_CONST_DIV(BrIntToScalar(BR_ALPHA(colour)), 256)) +
+                self->state.cache.comp_offsets[C_A];
 }
 
-void SURFACE_CALL SurfaceAlphaPrealpha(br_renderer *self,
-	br_vector3 *p, br_vector2 *map, br_vector3 *n, br_colour colour, br_scalar *comp)
+void SURFACE_CALL SurfaceAlphaPrealpha(br_renderer *self, br_vector3 *p, br_vector2 *map, br_vector3 *n, br_colour colour, br_scalar *comp)
 {
-	comp[C_A] = BR_MUL(self->state.cache.comp_scales[C_A],
-		BR_CONST_DIV(BrIntToScalar(BR_ALPHA(rend.prelit_colours[rend.current_index])), 256)) +
- 		self->state.cache.comp_offsets[C_A];
+    comp[C_A] = BR_MUL(self->state.cache.comp_scales[C_A], BR_CONST_DIV(BrIntToScalar(BR_ALPHA(rend.prelit_colours[rend.current_index])), 256)) +
+                self->state.cache.comp_offsets[C_A];
 }

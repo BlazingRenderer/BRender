@@ -13,20 +13,13 @@
 #include "shortcut.h"
 #include "brassert.h"
 
-
-
-br_error BR_CMETHOD_DECL(br_geometry_format_soft, render_v1points)
-		(struct br_geometry *self, struct br_renderer *r,
-			struct v11model *model)
+br_error BR_CMETHOD_DECL(br_geometry_format_soft, render_v1points)(br_geometry *self, br_renderer *r, struct v11model *model)
 {
-	return BRE_FAIL;
+    return BRE_FAIL;
 }
 
-br_error BR_CMETHOD_DECL(br_geometry_format_soft, storedNew_v1points)
-		(struct br_geometry *self, struct br_renderer *r,
-		struct br_geometry_stored **psg, br_token_value *tv, struct v11model *model)
+br_error BR_CMETHOD_DECL(br_geometry_format_soft, storedNew_v1points)(br_geometry *self, br_renderer *r, br_geometry_stored **psg,
+                                                                      br_token_value *tv, struct v11model *model)
 {
-	return BRE_FAIL;
+    return BRE_FAIL;
 }
-
-
