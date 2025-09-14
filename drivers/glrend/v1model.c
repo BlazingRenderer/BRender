@@ -212,7 +212,7 @@ static void apply_blend_mode(state_stack *self, const GladGLContext *gl)
     }
 }
 
-static void apply_stored_properties(const GladGLContext *gl, br_renderer *renderer, state_stack *state, uint32_t states, br_boolean *unlit,
+static void apply_stored_properties(const GladGLContext *gl, br_renderer *renderer, state_stack *state, uint32_t states,
                                     br_gl_main_data_model *model, GLuint tex_default)
 {
     br_boolean depth_test = BR_FALSE;
@@ -251,7 +251,9 @@ static void apply_stored_properties(const GladGLContext *gl, br_renderer *render
         }
     }
 
-    *unlit = BR_FALSE;
+    model->lighting    = BR_FALSE;
+    model->prelighting = BR_FALSE;
+
     if(states & MASK_STATE_SURFACE) {
         if(state->surface.colour_source == BRT_SURFACE) {
             br_uint_32 colour = state->surface.colour;
@@ -259,11 +261,12 @@ static void apply_stored_properties(const GladGLContext *gl, br_renderer *render
             float      g      = BR_GRN(colour) / 255.0f;
             float      b      = BR_BLU(colour) / 255.0f;
             BrVector4Set(&model->surface_colour, r, g, b, state->surface.opacity);
-            model->use_vertex_colour = 0;
+
+            model->colour_source = 1;
         } else {
             ASSERT(state->surface.colour_source == BRT_GEOMETRY);
             BrVector4Set(&model->surface_colour, 1.0f, 1.0f, 1.0f, state->surface.opacity);
-            model->use_vertex_colour = 1;
+            model->colour_source = 0;
         }
 
         model->ka    = state->surface.ka;
@@ -301,7 +304,9 @@ static void apply_stored_properties(const GladGLContext *gl, br_renderer *render
         BrMatrix4Copy23(&model->map_transform, &state->surface.map_transform);
 
         depth_test = !state->surface.force_front && !state->surface.force_back;
-        *unlit     = !state->surface.lighting || state->surface.prelighting;
+
+        model->lighting    = state->surface.lighting;
+        model->prelighting = state->surface.prelighting;
     }
 
     {
@@ -390,10 +395,7 @@ static br_boolean apply_state(br_renderer *renderer, const GladGLContext *gl)
     /* NB: Flag is never set */
     // int model_lit = self->model->flags & V11MODF_LIT;
 
-    unlit = BR_TRUE;
-    apply_stored_properties(gl, renderer, renderer->state.current, MASK_STATE_STORED | MASK_STATE_OUTPUT, &unlit, &model, ctx->tex_white);
-
-    model.unlit = (br_uint_32)unlit;
+    apply_stored_properties(gl, renderer, renderer->state.current, MASK_STATE_STORED | MASK_STATE_OUTPUT, &model, ctx->tex_white);
 
     return BufferRingGLPush(&renderer->model_ring, &model, sizeof(model));
 }

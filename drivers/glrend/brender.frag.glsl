@@ -153,8 +153,22 @@ void main()
     accumulateLights(position.xyz, normal, lightA, lightD, lightS);
 #endif
 
-    vec4 vertexColour = use_vertex_colour ? colour : vec4(1);
-    vec4 fragColour = ((vec4(lightA + lightD, 1.0)) * (surface_colour * texColour * vertexColour)) + vec4(lightS, 0.0);
+    vec4 surfaceColour = colour_source == COLOUR_SOURCE_GEOMETRY ? colour : surface_colour;
+
+    /*
+     * If no lighting at all, fullbright baby.
+     */
+    lightD += (!prelighting && !lighting) ? vec3(1) : vec3(0);
+
+#if DEBUG_DISABLE_LIGHTS
+    lightA = vec3(0);
+    lightD = vec3(1);
+    lightS = vec3(0);
+#endif
+
+    vec4 fragColour = vec4(0);
+    fragColour += prelighting ? vec4(colour.rgb, 1) : vec4(0);
+    fragColour += ((vec4(lightA + lightD, 1.0)) * (surfaceColour * texColour)) + vec4(lightS, 0.0);
 
     if(enable_fog) {
         fragColour = applyFog(fragColour, viewDistance);

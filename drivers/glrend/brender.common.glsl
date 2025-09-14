@@ -22,6 +22,9 @@
 #define BRT_QUADRATIC                0u /* Quadratic attenuation, i.e. standard 1/clq ... */
 #define BRT_RADII                    1u /* Radial attenuation, i.e. linear falloff. */
 
+#define COLOUR_SOURCE_GEOMETRY       0u
+#define COLOUR_SOURCE_SURFACE        1u
+
 #define DEBUG_DISABLE_LIGHTS            0
 #define DEBUG_DISABLE_LIGHT_AMBIENT     0
 #define DEBUG_DISABLE_LIGHT_DIRECTIONAL 0
@@ -66,8 +69,9 @@ layout(std140, binding=1) uniform br_model_state
     float ks; /* Specular mod (doesn't seem to be used by Croc) */
     float kd; /* Diffuse mod */
     float power;
-    uint unlit; /* Is this surface unlit? */
-    bool use_vertex_colour;
+    bool lighting;      /* BRT_LIGHTING_B */
+    bool prelighting;   /* BRT_PRELIGHTING_B */
+    int colour_source;
     int uv_source;
     bool disable_colour_key;
     uint texture_mode;
@@ -223,13 +227,7 @@ void lightingColourSpot(in vec3 p, in vec3 n, in uint i, inout vec3 outA, inout 
  */
 void accumulateLights(in vec3 position, in vec3 normal, inout vec3 ambient, inout vec3 diffuse, inout vec3 specular)
 {
-#if DEBUG_DISABLE_LIGHTS
-    diffuse += vec3(1);
-    return;
-#endif
-
-    if(unlit != 0u) {
-        diffuse += vec3(1);
+    if(!lighting) {
         return;
     }
 

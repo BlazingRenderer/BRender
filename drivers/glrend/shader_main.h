@@ -84,8 +84,9 @@ typedef struct br_gl_main_data_model {
     alignas(4) float ks;
     alignas(4) float kd;
     alignas(4) float power;
-    alignas(4) uint32_t unlit;
-    alignas(4) uint32_t use_vertex_colour;
+    alignas(4) uint32_t lighting;
+    alignas(4) uint32_t prelighting;
+    alignas(4) uint32_t colour_source;
     alignas(4) uint32_t uv_source;
     alignas(4) uint32_t disable_colour_key;
     alignas(4) uint32_t texture_mode;
