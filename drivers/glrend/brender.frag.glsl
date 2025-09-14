@@ -56,49 +56,67 @@ vec2 SurfaceMapEnvironment(in vec3 eye, in vec3 normal, in mat4 model_to_environ
 
 vec2 SurfaceMap(in vec3 position, in vec3 normal, in vec2 uv)
 {
-    if(uv_source == UV_SOURCE_MODEL) {
-        /*
-         * NB: We need this no-op branch explicitly first because
-         * NX Homebrew (Mesa 20.1.0-rc3 + nouveau) is much faster
-         * with it here.
-         */
-    } else if(uv_source == UV_SOURCE_ENV_L) {
-        /*
-         * Generate U,V for environment assuming local eye.
-         *
-         * softrend/mapping.c - SurfaceMapEnvironmentLocal()
-         */
-        vec3 eye = normalize(eye_m.xyz - position);
-        uv = SurfaceMapEnvironment(eye, normal, environment);
-    } else if(uv_source == UV_SOURCE_ENV_I) {
-        /*
-         * Generate U,V for environment assuming infinite eye.
-         *
-         * softrend/mapping.c - SurfaceMapEnvironmentInfinite()
-         */
-        vec3 eye = normalize(eye_m.xyz);
-        uv = SurfaceMapEnvironment(eye, normal, environment);
-    } else if(uv_source == UV_SOURCE_GEOMETRY_X) {
-        /*
-         * Take U,V from vertex Y,Z
-         *
-         * softrend/mapping.c - SurfaceMapGeometryX()
-         */
-        uv = position.yz;
-    } else if(uv_source == UV_SOURCE_GEOMETRY_Y) {
-        /*
-         * Take U,V from vertex Z,X
-         *
-         * softrend/mapping.c - SurfaceMapGeometryY()
-         */
-        uv = position.zx;
-    } else if(uv_source == UV_SOURCE_GEOMETRY_Z) {
-        /*
-         * Take U,V from vertex X,Y
-         *
-         * softrend/mapping.c - SurfaceMapGeometryZ()
-         */
-        uv = position.xy;
+    switch(uv_source) {
+        case UV_SOURCE_MODEL: {
+            /*
+             * NB: We need this no-op branch explicitly first because
+             * NX Homebrew (Mesa 20.1.0-rc3 + nouveau) is much faster
+             * with it here.
+             */
+            break;
+        }
+
+        case UV_SOURCE_ENV_L: {
+            /*
+             * Generate U,V for environment assuming local eye.
+             *
+             * softrend/mapping.c - SurfaceMapEnvironmentLocal()
+             */
+            vec3 eye = normalize(eye_m.xyz - position);
+            uv = SurfaceMapEnvironment(eye, normal, environment);
+            break;
+        }
+
+        case UV_SOURCE_ENV_I: {
+            /*
+             * Generate U,V for environment assuming infinite eye.
+             *
+             * softrend/mapping.c - SurfaceMapEnvironmentInfinite()
+             */
+            vec3 eye = normalize(eye_m.xyz);
+            uv = SurfaceMapEnvironment(eye, normal, environment);
+            break;
+        }
+
+        case UV_SOURCE_GEOMETRY_X: {
+            /*
+             * Take U,V from vertex Y,Z
+             *
+             * softrend/mapping.c - SurfaceMapGeometryX()
+             */
+            uv = position.yz;
+            break;
+        }
+
+        case UV_SOURCE_GEOMETRY_Y: {
+            /*
+             * Take U,V from vertex Z,X
+             *
+             * softrend/mapping.c - SurfaceMapGeometryY()
+             */
+            uv = position.zx;
+            break;
+        }
+
+        case UV_SOURCE_GEOMETRY_Z: {
+            /*
+             * Take U,V from vertex X,Y
+             *
+             * softrend/mapping.c - SurfaceMapGeometryZ()
+             */
+            uv = position.xy;
+            break;
+        }
     }
 
     /* Apply the map transformation. */
