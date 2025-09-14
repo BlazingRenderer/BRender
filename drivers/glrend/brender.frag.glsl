@@ -78,6 +78,27 @@ vec2 SurfaceMap(in vec3 position, in vec3 normal, in vec2 uv)
          */
         vec3 eye = normalize(eye_m.xyz);
         uv = SurfaceMapEnvironment(eye, normal, environment);
+    } else if(uv_source == UV_SOURCE_GEOMETRY_X) {
+        /*
+         * Take U,V from vertex Y,Z
+         *
+         * softrend/mapping.c - SurfaceMapGeometryX()
+         */
+        uv = position.yz;
+    } else if(uv_source == UV_SOURCE_GEOMETRY_Y) {
+        /*
+         * Take U,V from vertex Z,X
+         *
+         * softrend/mapping.c - SurfaceMapGeometryY()
+         */
+        uv = position.zx;
+    } else if(uv_source == UV_SOURCE_GEOMETRY_Z) {
+        /*
+         * Take U,V from vertex X,Y
+         *
+         * softrend/mapping.c - SurfaceMapGeometryZ()
+         */
+        uv = position.xy;
     }
 
     /* Apply the map transformation. */

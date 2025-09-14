@@ -284,6 +284,18 @@ static void apply_stored_properties(const GladGLContext *gl, br_renderer *render
             case BRT_ENVIRONMENT_INFINITE:
                 model->uv_source = 2;
                 break;
+
+            case BRT_GEOMETRY_X:
+                model->uv_source = 3;
+                break;
+
+            case BRT_GEOMETRY_Y:
+                model->uv_source = 4;
+                break;
+
+            case BRT_GEOMETRY_Z:
+                model->uv_source = 5;
+                break;
         }
 
         BrMatrix4Copy23(&model->map_transform, &state->surface.map_transform);

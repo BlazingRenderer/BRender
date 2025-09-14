@@ -6,6 +6,9 @@
 #define UV_SOURCE_MODEL              0
 #define UV_SOURCE_ENV_L              1
 #define UV_SOURCE_ENV_I              2
+#define UV_SOURCE_GEOMETRY_X         3
+#define UV_SOURCE_GEOMETRY_Y         4
+#define UV_SOURCE_GEOMETRY_Z         5
 
 #define TEXTURE_MODE_NORMAL          0u
 #define TEXTURE_MODE_INDEX           1u
