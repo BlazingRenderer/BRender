@@ -71,6 +71,7 @@ enum {
     T_BLEND_MODE,
     T_MAP_WIDTH_LIMIT,
     T_MAP_HEIGHT_LIMIT,
+    T_SHADING_MODE,
 
     /*
      * Material flags
@@ -133,6 +134,13 @@ enum {
     T_WRAP,
     T_CLAMP,
     T_MIRROR,
+
+    /*
+     * Shading Modes
+     * NB: T_GOURAUD shares its name with a flag.
+     */
+    T_FLAT,
+    T_PHONG,
 };
 
 static const br_lexer_keyword keywords[] = {
@@ -160,10 +168,13 @@ static const br_lexer_keyword keywords[] = {
     {"blend_mode",          T_BLEND_MODE         },
     {"map_width_limit",     T_MAP_WIDTH_LIMIT    },
     {"map_height_limit",    T_MAP_HEIGHT_LIMIT   },
+    {"shading_mode",        T_SHADING_MODE       },
     {"light",               T_LIGHT              },
     {"prelit",              T_PRELIT             },
     {"smooth",              T_SMOOTH             },
     {"gouraud",             T_GOURAUD            },
+    {"phong",               T_PHONG              },
+    {"flat",                T_FLAT               },
     {"environment",         T_ENVIRONMENT        },
     {"environment_i",       T_ENVIRONMENT_I      },
     {"environment_local",   T_ENVIRONMENT_LOCAL  },
@@ -472,6 +483,29 @@ static br_material *ParseMaterial(br_lexer *l)
                 BrLexerAdvance(l);
                 break;
 
+            case T_SHADING_MODE:
+                BrLexerAdvance(l);
+                BrLexerExpect(l, T_EQUAL);
+                switch((int)BrLexerCurrent(l)) {
+                    case T_FLAT:
+                        mat->mode = (mat->mode & ~BR_MATM_SHADING_MODE_MASK) | BR_MATM_SHADING_MODE_FLAT;
+                        break;
+
+                    case T_GOURAUD:
+                        mat->mode = (mat->mode & ~BR_MATM_SHADING_MODE_MASK) | BR_MATM_SHADING_MODE_GOURAUD;
+                        break;
+
+                    case T_PHONG:
+                        mat->mode = (mat->mode & ~BR_MATM_SHADING_MODE_MASK) | BR_MATM_SHADING_MODE_PHONG;
+                        break;
+
+                    default:
+                        BrLexerError(l, "unknown shading mode");
+                        break;
+                }
+                BrLexerAdvance(l);
+                break;
+
             case T_INDEX_BASE:
                 BrLexerAdvance(l);
                 BrLexerExpect(l, T_EQUAL);
@@ -575,6 +609,10 @@ static br_material *ParseMaterial(br_lexer *l)
      */
     BrLexerAdvance(l);
     BrLexerExpect(l, T_SEMICOLON);
+
+    if((mat->mode & BR_MATM_SHADING_MODE_MASK) == BR_MATM_SHADING_MODE_FLAT && (mat->flags & BR_MATF_SMOOTH)) {
+        mat->mode = (mat->mode & ~BR_MATM_SHADING_MODE_MASK) | BR_MATM_SHADING_MODE_GOURAUD;
+    }
 
     return mat;
 }

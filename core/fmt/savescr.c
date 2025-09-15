@@ -20,7 +20,6 @@ static const struct {
 } MaterialFlagNames[] = {
     {"light",               BR_MATF_LIGHT              },
     {"prelit",              BR_MATF_PRELIT             },
-    {"smooth",              BR_MATF_SMOOTH             },
     {"environment",         BR_MATF_ENVIRONMENT_I      },
     {"environment_local",   BR_MATF_ENVIRONMENT_L      },
     {"perspective",         BR_MATF_PERSPECTIVE        },
@@ -86,6 +85,15 @@ static const struct {
     {"wrap",   BR_MATM_MAP_HEIGHT_LIMIT_WRAP  },
     {"clamp",  BR_MATM_MAP_HEIGHT_LIMIT_CLAMP },
     {"mirror", BR_MATM_MAP_HEIGHT_LIMIT_MIRROR},
+};
+
+static const struct {
+    const char *name;
+    int         value;
+} ShadingModeNames[] = {
+    {.name = "flat",    .value = BR_MATM_SHADING_MODE_FLAT   },
+    {.name = "gouraud", .value = BR_MATM_SHADING_MODE_GOURAUD},
+    {.name = "phong",   .value = BR_MATM_SHADING_MODE_PHONG  },
 };
 
 static void WriteScriptMaterial(br_material *mat, void *df)
@@ -185,6 +193,22 @@ static void WriteScriptMaterial(br_material *mat, void *df)
                 BrFilePrintf(df, "    map_height_limit = %s;\n", HeightLimitNames[i].name);
                 break;
             }
+
+    if((mat->mode & BR_MATM_SHADING_MODE_MASK) != (_DefaultScriptMaterial.mode & BR_MATM_SHADING_MODE_MASK)) {
+        for(i = 0; i < BR_ASIZE(ShadingModeNames); i++) {
+            if((mat->mode & BR_MATM_SHADING_MODE_MASK) == ShadingModeNames[i].value) {
+                BrFilePrintf(df, "    shading_mode = %s;\n", ShadingModeNames[i].name);
+                break;
+            }
+        }
+    } else if(mat->flags & BR_MATF_SMOOTH) {
+        for(i = 0; i < BR_ASIZE(ShadingModeNames); i++) {
+            if(BR_MATM_SHADING_MODE_GOURAUD == ShadingModeNames[i].value) {
+                BrFilePrintf(df, "    shading_mode = %s;\n", ShadingModeNames[i].name);
+                break;
+            }
+        }
+    }
 
     /*
      * Maps and Tables
