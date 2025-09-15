@@ -83,7 +83,33 @@ void BR_PUBLIC_ENTRY BrMaterialUpdate(br_material *mat, br_uint_16 flags)
         tvp++;
 
         tvp->t   = BRT_SMOOTH_B;
-        tvp->v.b = !!(mat->flags & BR_MATF_SMOOTH);
+        tvp->v.b = (mat->flags & BR_MATF_SMOOTH) || ((mat->mode & BR_MATM_SHADING_MODE_MASK) != BR_MATM_SHADING_MODE_FLAT);
+        tvp++;
+
+        tvp->t = BRT_SHADING_MODE_T;
+        switch(mat->mode & BR_MATM_SHADING_MODE_MASK) {
+            case BR_MATM_SHADING_MODE_FLAT:
+                /*
+                 * Keep compatibility.
+                 */
+                if(mat->flags & BR_MATF_SMOOTH)
+                    tvp->v.t = BRT_GOURAUD;
+                else
+                    tvp->v.t = BRT_FLAT;
+                break;
+
+            case BR_MATM_SHADING_MODE_GOURAUD:
+                tvp->v.t = BRT_GOURAUD;
+                break;
+
+            case BR_MATM_SHADING_MODE_PHONG:
+                tvp->v.t = BRT_PHONG;
+                break;
+
+            default:
+                tvp->v.t = BRT_FLAT;
+                break;
+        }
         tvp++;
 
         tvp->t   = BRT_SMOOTH_OPACITY_B;

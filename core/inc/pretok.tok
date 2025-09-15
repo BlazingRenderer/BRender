@@ -517,6 +517,11 @@ SPACE							token
 	BEST_SPEED						none
 	BEST_QUALITY					none
 
+SHADING_MODE token
+  FLAT    none
+  GOURAUD none
+  PHONG   none
+
 # Tokens used for surface state (handled by renderer)
 #
 LIGHTING						boolean
