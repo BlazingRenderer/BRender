@@ -22,6 +22,7 @@ static br_tv_template_entry template_entries[] = {
     {BRT(BLEND_MODE_T),            F(prim.blend_mode),          Q | S | A, BRTV_CONV_COPY,         0,                  1},
     {BRT(MAP_WIDTH_LIMIT_T),       F(prim.map_width_limit),     Q | S | A, BRTV_CONV_COPY,         0,                  1},
     {BRT(MAP_HEIGHT_LIMIT_T),      F(prim.map_height_limit),    Q | S | A, BRTV_CONV_COPY,         0,                  1},
+    {BRT(SHADING_MODE_T),          F(prim.shading_mode),        Q | S | A, BRTV_CONV_COPY,         0,                  1},
 
     {BRT(INDEX_BASE_I32),          F(prim.index_base),          Q | S | A, BRTV_CONV_COPY,         0,                  1},
     {BRT(INDEX_RANGE_I32),         F(prim.index_range),         Q | S | A, BRTV_CONV_COPY,         0,                  1},
@@ -60,6 +61,7 @@ static const state_primitive default_state = {
     .blend_mode          = BRT_NONE,
     .map_width_limit     = BRT_WRAP,
     .map_height_limit    = BRT_WRAP,
+    .shading_mode        = BRT_FLAT,
     .perspective_type    = BRT_NONE, // BRT_NONE, BRT_SUBDIVIDE
     .subdivide_tolerance = 0,
     .colour_map          = NULL,

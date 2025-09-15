@@ -149,9 +149,10 @@ void main()
     vec3 lightA = vertexLighting[0];
     vec3 lightD = vertexLighting[1];
     vec3 lightS = vertexLighting[2];
-#if ENABLE_PHONG
-    accumulateLights(position.xyz, normal, lightA, lightD, lightS);
-#endif
+
+    if(shading_mode == SHADING_MODE_PHONG) {
+        accumulateLights(position.xyz, normal, lightA, lightD, lightS);
+    }
 
     vec4 surfaceColour = colour_source == COLOUR_SOURCE_GEOMETRY ? colour : surface_colour;
 

@@ -25,14 +25,15 @@
 #define COLOUR_SOURCE_GEOMETRY       0u
 #define COLOUR_SOURCE_SURFACE        1u
 
+#define SHADING_MODE_FLAT            0u
+#define SHADING_MODE_GOURAUD         1u
+#define SHADING_MODE_PHONG           2u
+
 #define DEBUG_DISABLE_LIGHTS            0
 #define DEBUG_DISABLE_LIGHT_AMBIENT     0
 #define DEBUG_DISABLE_LIGHT_DIRECTIONAL 0
 #define DEBUG_DISABLE_LIGHT_POINT       0
 #define DEBUG_DISABLE_LIGHT_SPOT        0
-
-#define ENABLE_GOURAUD                  1
-#define ENABLE_PHONG                    0
 
 layout(std140, binding=0) uniform br_scene_state
 {
@@ -77,6 +78,7 @@ layout(std140, binding=1) uniform br_model_state
     uint texture_mode;
     bool enable_fog;
     float fog_scale;
+    int shading_mode;
 };
 
 float calculateAttenuation(in uint i, in float dist)

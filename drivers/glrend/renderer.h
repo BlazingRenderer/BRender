@@ -45,6 +45,8 @@ typedef struct br_state_info_gl {
     br_scalar  fog_min;
     br_scalar  fog_max;
     br_scalar  fog_scale;
+
+    br_token shading_mode;
 } br_primitive_state_info_gl;
 
 enum {

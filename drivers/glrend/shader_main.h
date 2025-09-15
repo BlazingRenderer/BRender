@@ -92,6 +92,7 @@ typedef struct br_gl_main_data_model {
     alignas(4) uint32_t texture_mode;
     alignas(4) uint32_t enable_fog;
     alignas(4) br_scalar fog_scale;
+    alignas(4) uint32_t shading_mode;
 } br_gl_main_data_model;
 #pragma pack(pop)
 

@@ -29,6 +29,7 @@ void DeviceGLExtractPrimitiveState(const state_stack *state, br_primitive_state_
         .fog_min            = 0,
         .fog_max            = 0,
         .fog_scale          = 1.0f,
+        .shading_mode       = BRT_FLAT,
     };
     // clang-format on
 
@@ -41,6 +42,7 @@ void DeviceGLExtractPrimitiveState(const state_stack *state, br_primitive_state_
     info->write_depth        = (prim->flags & PRIMF_DEPTH_WRITE) != 0;
     info->is_indexed         = prim->colour_map ? (prim->colour_map->fmt->indexed != 0) : 0;
     info->fog                = prim->fog_type != BRT_NONE;
+    info->shading_mode       = prim->shading_mode;
 
     if(prim->colour_map != NULL) {
         const br_buffer_stored *stored = prim->colour_map;
@@ -312,6 +314,21 @@ static void apply_stored_properties(const GladGLContext *gl, br_renderer *render
     {
         br_primitive_state_info_gl info;
         DeviceGLExtractPrimitiveState(state, &info, tex_default);
+
+        switch(info.shading_mode) {
+            case BRT_FLAT:
+            default:
+                model->shading_mode = 1; // FIXME: 0 once I figure out flat
+                break;
+
+            case BRT_GOURAUD:
+                model->shading_mode = 1;
+                break;
+
+            case BRT_PHONG:
+                model->shading_mode = 2;
+                break;
+        }
 
         model->disable_colour_key = info.disable_colour_key;
 

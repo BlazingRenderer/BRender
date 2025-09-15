@@ -39,9 +39,9 @@ void main()
 
     vertexLighting = mat3(0);
 
-#if ENABLE_GOURAUD
-    accumulateLights(position.xyz, normal, vertexLighting[0], vertexLighting[1], vertexLighting[2]);
-#endif
+    if(shading_mode == SHADING_MODE_GOURAUD) {
+        accumulateLights(position.xyz, normal, vertexLighting[0], vertexLighting[1], vertexLighting[2]);
+    }
 
     rawPosition = aPosition;
     rawNormal   = aNormal;

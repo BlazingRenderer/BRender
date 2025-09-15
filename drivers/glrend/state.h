@@ -188,6 +188,8 @@ typedef struct state_primitive {
 
     br_token map_height_limit;
 
+    br_token shading_mode;
+
     /*
      * Type of perspective correct rendering
      */
