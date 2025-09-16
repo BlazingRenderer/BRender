@@ -55,8 +55,6 @@ void DeviceGLExtractPrimitiveState(const state_stack *state, br_primitive_state_
         } else {
             info->colour_palette = 0;
         }
-
-        info->is_blended = info->is_blended || stored->fmt->blended != 0;
     } else {
         info->is_indexed     = BR_FALSE;
         info->colour_map     = tex_white;

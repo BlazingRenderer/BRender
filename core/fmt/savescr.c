@@ -43,6 +43,7 @@ static const struct {
     {"prealpha",            BR_MATF_PREALPHA           },
     {"disable_colour_key",  BR_MATF_DISABLE_COLOUR_KEY },
     {"smooth_alpha",        BR_MATF_SMOOTH_ALPHA       },
+    {"blend",               BR_MATF_BLEND              },
 };
 
 static const struct {

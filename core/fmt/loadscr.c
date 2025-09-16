@@ -107,6 +107,7 @@ enum {
     T_PREALPHA,
     T_DISABLE_COLOUR_KEY,
     T_SMOOTH_ALPHA,
+    T_BLEND,
 
     /*
      * Depth test modes
@@ -231,6 +232,7 @@ static const br_lexer_keyword keywords[] = {
     {"wrap",                T_WRAP               },
     {"clamp",               T_CLAMP              },
     {"mirror",              T_MIRROR             },
+    {"blend",               T_BLEND              },
 };
 
 static void BrLexerPrintPos(struct br_lexer *l)
@@ -287,6 +289,7 @@ static br_uint_32 ParseMatFlags(br_lexer *l)
         case T_PREALPHA:                f |= BR_MATF_PREALPHA;                  break;
         case T_DISABLE_COLOUR_KEY:      f |= BR_MATF_DISABLE_COLOUR_KEY;        break;
         case T_SMOOTH_ALPHA:            f |= BR_MATF_SMOOTH_ALPHA;              break;
+        case T_BLEND:                   f |= BR_MATF_BLEND;                     break;
         default:
             BrLexerError(l, "Unknown material flag");
         }

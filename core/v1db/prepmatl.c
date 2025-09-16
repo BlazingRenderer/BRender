@@ -75,7 +75,7 @@ void BR_PUBLIC_ENTRY BrMaterialUpdate(br_material *mat, br_uint_16 flags)
         tvp++;
 
         tvp->t   = BRT_BLEND_B;
-        tvp->v.b = (mat->opacity < 255) || mat->flags & BR_MATF_PREALPHA;
+        tvp->v.b = (mat->opacity < 255) || mat->flags & (BR_MATF_PREALPHA | BR_MATF_BLEND);
         tvp++;
 
         tvp->t   = BRT_MODULATE_ALPHA_B;
