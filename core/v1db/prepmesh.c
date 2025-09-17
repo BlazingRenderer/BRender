@@ -362,7 +362,8 @@ static void Smoothing(br_model *model, br_scalar crease_limit, struct prep_verte
         /*
          * Kludge normals on all flat shaded faces
          */
-        if(model->faces[(*outer)->f].material != NULL && !(model->faces[(*outer)->f].material->flags & BR_MATF_SMOOTH)) {
+        br_material *croc_mat = model->faces[(*outer)->f].material;
+        if(croc_mat != NULL && !(croc_mat->flags & BR_MATF_SMOOTH) && ((croc_mat->mode & BR_MATM_SHADING_MODE_MASK) == BR_MATM_SHADING_MODE_FLAT)) {
             BrVector3CopyF(&(*outer)->n, &model->faces[(*outer)->f].n);
         } else
 #endif
