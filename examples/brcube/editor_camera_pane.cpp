@@ -10,7 +10,8 @@ Editor::CameraPane::CameraPane(const char *id, br_pixelmap *screen)
     : m_is_focused(false), m_screen(screen), m_camera(nullptr)
 {
     this->m_id.reset(BrResSprintf(nullptr, "Camera##%s", id));
-    this->m_camera = BrEditorCamAllocate(nullptr);
+    this->m_camera                 = BrEditorCamAllocate(nullptr);
+    this->m_camera->standard_speed = 2.0f;
 }
 
 Editor::CameraPane::~CameraPane()
@@ -106,7 +107,7 @@ void Editor::CameraPane::MaybeResize(float width, float height) noexcept
     br_uint_16 iheight = static_cast<br_uint_16>(height);
 
     br_pixelmap *colour_buffer = this->m_colour_buffer.release();
-    br_pixelmap *depth_buffer = this->m_depth_buffer.release();
+    br_pixelmap *depth_buffer  = this->m_depth_buffer.release();
 
     // TODO: error checking
     BrPixelmapResizeBuffers(this->m_screen, &colour_buffer, &depth_buffer);

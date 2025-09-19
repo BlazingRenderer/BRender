@@ -94,6 +94,7 @@ void Editor::GraphPane::DrawActor(br_actor *root)
     ImGui::PushID(root);
 
     node_open = ImGui::TreeNodeEx(root, ImGuiTreeNodeFlags_OpenOnArrow, "%s (%p)", identifier, root);
+    ImGui::SameLine();
 
     if(ImGui::IsItemClicked(0)) {
         this->m_selected        = root;
@@ -101,6 +102,10 @@ void Editor::GraphPane::DrawActor(br_actor *root)
     } else if(root == this->m_selected) {
         this->m_selection_valid = true;
     }
+
+
+    ImGui::Text("XXXX");
+
 
     if(node_open) {
         void *_a;

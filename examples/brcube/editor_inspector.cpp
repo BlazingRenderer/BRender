@@ -181,7 +181,7 @@ static void DrawLightInspector(br_light *light)
 
     if(linear_falloff) {
         float c[2] = {light->radius_inner, light->radius_outer};
-        ImGui::SliderFloat2("Radius", c, 0.0f, 360.0f);
+        ImGui::SliderFloat2("Radius", c, 0.0f, 1.0f);
         light->radius_inner = c[0];
         light->radius_outer = c[1];
     }

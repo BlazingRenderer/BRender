@@ -77,6 +77,41 @@ void XXBrMatrix34FromTRSEuler(br_matrix34 *A, const br_vector3 *T, const br_eule
     BrMatrix34Copy(A, &tmpmat);
 }
 
+
+static void create_scene(br_actor *world, const char *file)
+{
+    br_fmt_results *results;
+
+    // Works
+    // results = BrFmtGLTFActorLoadMany("/dev/glTF-Sample-Assets/Models/TriangleWithoutIndices/glTF-Embedded/TriangleWithoutIndices.gltf");
+    // results = BrFmtGLTFActorLoadMany("/dev/glTF-Sample-Assets/Models/Triangle/glTF-Embedded/Triangle.gltf");
+    // results = BrFmtGLTFActorLoadMany("/dev/glTF-Sample-Assets/Models/SimpleMeshes/glTF-Embedded/SimpleMeshes.gltf");
+    // results = BrFmtGLTFActorLoadMany("/dev/glTF-Sample-Assets/Models/MeshPrimitiveModes/glTF-Embedded/MeshPrimitiveModes.gltf");
+    // results = BrFmtGLTFActorLoadMany("/dev/glTF-Sample-Assets/Models/Avocado/glTF-Binary/Avocado.glb");
+
+    results = BrFmtGLTFActorLoadMany(file);
+
+
+    for(br_size_t i = 0; i < results->nactors; ++i) {
+        BrActorAdd(world, results->actors[i]);
+    }
+
+    for (size_t i = 0; i < results->npixelmaps; ++i) {
+        BrMapUpdate(results->pixelmaps[i], BR_MAPU_ALL);
+    }
+
+    for(br_size_t i = 0; i < results->nmaterials; ++i) {
+        BrMaterialUpdate(results->materials[i], BR_MATU_ALL);
+    }
+
+    for(br_size_t i = 0; i < results->nmodels; ++i) {
+        if(results->models[i] != NULL) {
+            BrModelUpdate(results->models[i], BR_MODU_ALL);
+        }
+    }
+}
+
+
 static br_actor *create_bigscene(br_actor **_pivot)
 {
     br_actor       *root, *ground, *light;
@@ -229,13 +264,16 @@ static void create_scene(BrCubeApplication *app, Editor::Editor *ed)
     BrModelFindHook(BrModelFindFailedLoad);
     BrMapFindHook(BrMapFindFailedLoad);
     BrMaterialFindHook(BrMaterialFindFailedLoad);
-    app->world = create_bigscene(&app->pivot);
+    // app->world = create_bigscene(&app->pivot);
     // app->camera = BrEditorCamAllocate(app->world);
     // BrActorAdd(app->world, app->camera->mTop);
 
-    br_order_table *order_table = BrZsActorOrderTableGet(app->world);
-    order_table->min_z          = ed->GetCameraPane()->GetCamera()->camera_data.hither_z;
-    order_table->max_z          = ed->GetCameraPane()->GetCamera()->camera_data.yon_z;
+    app->world = BrActorAllocate(BR_ACTOR_NONE, NULL);
+    create_scene(app->world, "/home/zane/.local/share/Croc/croc-scene.gltf");
+
+    //br_order_table *order_table = BrZsActorOrderTableGet(app->world);
+    //order_table->min_z          = ed->GetCameraPane()->GetCamera()->camera_data.hither_z;
+    //order_table->max_z          = ed->GetCameraPane()->GetCamera()->camera_data.yon_z;
 }
 
 extern "C" void _BrBeginHook(void)
@@ -380,7 +418,7 @@ int main(int argc, char **argv)
             }
         }
 
-        BrMatrix34PostRotateY(&app.pivot->t.t.mat, BR_ANGLE_DEG(BR_SCALAR(50) * BR_SCALAR(dt)));
+        // BrMatrix34PostRotateY(&app.pivot->t.t.mat, BR_ANGLE_DEG(BR_SCALAR(50) * BR_SCALAR(dt)));
 
         editor.Update(dt);
 
