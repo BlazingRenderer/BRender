@@ -124,7 +124,7 @@ static int casfd(br_gl_main_data_scene *scene, const state_light *in, size_t i, 
             radii->radius_outer = in->radius_outer;
 
             if(radii->radius_inner == radii->radius_outer)
-                radii->radius_outer += 1e6f;
+                radii->radius_inner = 0;
 
             break;
     }
