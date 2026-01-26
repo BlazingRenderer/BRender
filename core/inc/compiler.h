@@ -371,4 +371,9 @@ typedef float br_float;
 #define __DOS__ 1
 #endif
 
+#if defined(__sh__) || defined(__DREAMCAST__) || defined(__dreamcast__)
+#undef __DREAMCAST__
+#define __DREAMCAST__ 1
+#endif
+
 #endif

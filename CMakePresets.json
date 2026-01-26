@@ -1,0 +1,29 @@
+{
+	"version": 10,
+	"cmakeMinimumRequired": {
+		"major": 3,
+		"minor": 21,
+		"patch": 0
+	},
+	"configurePresets": [
+		{
+			"name": "Dreamcast",
+			"displayName": "Dreamcast",
+			"binaryDir": "cmake-build-dreamcast2",
+			"toolchainFile": "/home/erysdren/Software/toolchain-sh4-none-elf.cmake",
+			"generator": "Ninja",
+			"cacheVariables": {
+				"BRENDER_DISABLE_FINDSDL": "ON",
+				"BRENDER_BUILD_TOOLS": "OFF",
+				"BRENDER_BUILD_EXAMPLES": "ON",
+				"BRENDER_DISABLE_INSTALL": "ON"
+			}
+		}
+	],
+	"buildPresets": [
+		{
+			"name": "Dreamcast",
+			"configurePreset": "Dreamcast"
+		}
+	]
+}

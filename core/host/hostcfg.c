@@ -7,10 +7,12 @@
  * Reading config. strings from host environment
  */
 
-#include <stdio.h>
-
 #include "brender.h"
 #include "host.h"
+
+#ifndef __DREAMCAST__
+#include <stdio.h>
+#endif
 
 #ifdef __WIN_32__
 #define DEFAULT_DEVICE "DDRAW"
