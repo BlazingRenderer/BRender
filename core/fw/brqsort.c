@@ -10,9 +10,20 @@
 
 #include "brender.h"
 
+#ifdef __DREAMCAST__
+
+void BR_RESIDENT_ENTRY BrQsort(void *basep, unsigned int nelems, unsigned int size, br_qsort_cbfn *comp)
+{
+    // TODO
+}
+
+#else
+
 #include <stdlib.h>
 
 void BR_RESIDENT_ENTRY BrQsort(void *basep, unsigned int nelems, unsigned int size, br_qsort_cbfn *comp)
 {
     qsort(basep, nelems, size, comp);
 }
+
+#endif

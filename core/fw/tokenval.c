@@ -6,7 +6,6 @@
  *
  * Token/value list mangement
  */
-#include <inttypes.h>
 #include "fw.h"
 #include "brassert.h"
 
