@@ -7,7 +7,6 @@
  * XXX should condense all the BrXXXFind() functions into one,
  * since the logic is the same for each!
  */
-#include <stdio.h>
 #include <stdarg.h>
 
 #include "fw.h"

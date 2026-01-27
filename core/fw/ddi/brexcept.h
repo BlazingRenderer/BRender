@@ -9,7 +9,7 @@
 #ifndef _BREXCEPT_H_
 #define _BREXCEPT_H_
 
-#ifndef __H2INC__
+#if !defined(__H2INC__) && !defined(__DREAMCAST__)
 #include <setjmp.h>
 #endif
 
@@ -29,7 +29,7 @@ typedef struct br_exception_handler {
     /*
      * setjmp/longjmp context to throw to
      */
-#ifndef __H2INC__
+#if !defined(__H2INC__) && !defined(__DREAMCAST__)
     jmp_buf context;
 #endif
 
