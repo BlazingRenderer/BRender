@@ -56,6 +56,26 @@
         version = self.lastModifiedDate;
         withExamples = true;
       };
+
+      brender-dos-i686 = pkgs.callPackage ./nix/dos.nix {
+        inherit wineserverHook uasm;
+
+        version = self.lastModifiedDate;
+
+        systemProcessor = "i686";
+        djgpp = pkgs.djgpp_i686;
+        djgppPrefix = "i686-pc-msdosdjgpp-";
+      };
+
+      brender-dos-i586 = pkgs.callPackage ./nix/dos.nix {
+        inherit wineserverHook uasm;
+
+        version = self.lastModifiedDate;
+
+        systemProcessor = "i586";
+        djgpp = pkgs.djgpp_i586;
+        djgppPrefix = "i586-pc-msdosdjgpp-";
+      };
     });
 
     devShells.x86_64-linux   = mkShells self.packages.x86_64-linux;
