@@ -56,6 +56,9 @@ br_boolean BR_PUBLIC_ENTRY BrIsAlpha(int c);
 br_boolean BR_PUBLIC_ENTRY BrIsDigit(int c);
 br_boolean BR_PUBLIC_ENTRY BrIsSpace(int c);
 br_boolean BR_PUBLIC_ENTRY BrIsPrint(int c);
+br_boolean BR_PUBLIC_ENTRY BrIsUpper(int c);
+
+int BR_PUBLIC_ENTRY BrToLower(int c);
 
 br_int_32 BR_RESIDENT_ENTRY BrVSScanf(const char *str, const char *fmt, va_list args);
 br_int_32 BR_RESIDENT_ENTRY BrVSprintf(char *buf, const char *fmt, va_list args);
