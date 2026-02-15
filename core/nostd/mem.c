@@ -10,8 +10,6 @@
 
 #include "tinyalloc/tinyalloc.h"
 
-static br_boolean br_heap_initialized = BR_FALSE;
-
 #ifndef BR_FREESTANDING_HEAP_SIZE
 #if defined(BR_FREESTANDING_HEAP_SIZE_MB)
 #define BR_FREESTANDING_HEAP_SIZE (BR_FREESTANDING_HEAP_SIZE_MB * 1024 * 1024)
@@ -83,7 +81,7 @@ static void BR_CALLBACK BrFreestandingFree(void *mem)
 static br_size_t BR_CALLBACK BrFreestandingInquire(br_uint_8 type)
 {
     InitializeHeap();
-    return ta_free_bytes();
+    return ta_size_free();
 }
 
 static br_uint_32 BR_CALLBACK BrFreestandingAlign(br_uint_8 type)

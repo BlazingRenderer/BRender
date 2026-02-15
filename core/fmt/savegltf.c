@@ -1,4 +1,3 @@
-#include <string.h>
 #include <brender.h>
 #include <brddi.h>
 #include <brassert.h>

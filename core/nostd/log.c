@@ -1,4 +1,3 @@
-#include <stdio.h>
 #include <brender.h>
 
 static void BR_CALLBACK BrFreestandingLogProc(void *user, br_uint_8 level, const char *component, const char *fmt, va_list ap)

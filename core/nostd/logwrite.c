@@ -6,8 +6,6 @@
  *
  * Glue to stdlib functions
  */
-#include <stdio.h>
-
 #include "brender.h"
 
 int BR_PUBLIC_ENTRY BrLogWrite(void *buffer, br_size_t s, br_size_t n)

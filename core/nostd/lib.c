@@ -87,7 +87,7 @@ char *BR_PUBLIC_ENTRY BrStrNCpy(char *s1, const char *s2, size_t n)
 
 char *BR_PUBLIC_ENTRY BrStrChr(const char *s1, char c)
 {
-    return BrMemChr(s, c, BrStrLen(s));
+    return BrMemChr(s1, c, BrStrLen(s1));
 }
 
 char *BR_PUBLIC_ENTRY BrStrRChr(const char *s1, char c)
@@ -102,7 +102,7 @@ void BR_PUBLIC_ENTRY BrAbort(void)
 
 const char *BR_PUBLIC_ENTRY BrGetEnv(const char *name)
 {
-    return getenv(name);
+    return NULL;
 }
 
 float BR_PUBLIC_ENTRY BrStrToF(const char *nptr, char **endptr)
@@ -207,7 +207,7 @@ br_int_32 BR_PUBLIC_ENTRY BrVSprintfN(char *buf, br_size_t buf_size, const char 
         n = buf_size - 1;
     }
 
-    strncpy(buf, tmp, n);
+    BrStrNCpy(buf, tmp, n);
     buf[n] = '\0';
 
     return n;

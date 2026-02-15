@@ -7,24 +7,17 @@
  * Default file handler that uses <stdio.h>
  */
 #include <stddef.h>
-#include <string.h>
-#include <stdio.h>
 #include <limits.h>
 
 #include "brender.h"
 #include "brassert.h"
-
-static FILE *BrFreestandingFopenUtf8(const char *name, const char *mode)
-{
-    return fopen(name, mode);
-}
 
 /*
  * Access functions for stdio
  */
 static br_uint_32 BR_CALLBACK BrFreestandingAttributes(void)
 {
-    return BR_FS_ATTR_READABLE | BR_FS_ATTR_WRITEABLE | BR_FS_ATTR_HAS_TEXT | BR_FS_ATTR_HAS_BINARY | BR_FS_ATTR_HAS_ADVANCE;
+    return BR_FS_ATTR_READABLE | BR_FS_ATTR_HAS_TEXT | BR_FS_ATTR_HAS_BINARY | BR_FS_ATTR_HAS_ADVANCE;
 }
 
 /*
