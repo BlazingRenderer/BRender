@@ -6,6 +6,7 @@
  *
  * Glue to stdlib functions
  */
+#include <limits.h>
 #include "brender.h"
 
 int BR_PUBLIC_ENTRY BrMemCmp(const void *s1, const void *s2, size_t n)
@@ -97,11 +98,13 @@ char *BR_PUBLIC_ENTRY BrStrRChr(const char *s1, char c)
 
 void BR_PUBLIC_ENTRY BrAbort(void)
 {
-    abort();
+    // TODO
+    // abort();
 }
 
 const char *BR_PUBLIC_ENTRY BrGetEnv(const char *name)
 {
+    // TODO
     return NULL;
 }
 
@@ -173,22 +176,33 @@ float BR_PUBLIC_ENTRY BrAToF(const char *nptr)
 
 br_boolean BR_PUBLIC_ENTRY BrIsAlpha(int c)
 {
-    return isalpha(c);
+    return ((unsigned int)c | 32) - 'a' < 26;
 }
 
 br_boolean BR_PUBLIC_ENTRY BrIsDigit(int c)
 {
-    return isdigit(c);
+    return (unsigned int)c - '0' < 10;
 }
 
 br_boolean BR_PUBLIC_ENTRY BrIsSpace(int c)
 {
-    return isspace(c);
+    return c == ' ' || (unsigned int)c - '\t' < 5;
 }
 
 br_boolean BR_PUBLIC_ENTRY BrIsPrint(int c)
 {
-    return isprint(c);
+    return (unsigned int)c - 0x20 < 0x5f;
+}
+
+br_boolean BR_PUBLIC_ENTRY BrIsUpper(int c)
+{
+	return (unsigned int)c - 'A' < 26;
+}
+
+int BR_PUBLIC_ENTRY BrToLower(int c)
+{
+    if (BrIsUpper(c)) return c | 32;
+    return c;
 }
 
 br_int_32 BR_PUBLIC_ENTRY BrVSprintf(char *buf, const char *fmt, va_list args)
