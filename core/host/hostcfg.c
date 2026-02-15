@@ -10,7 +10,7 @@
 #include "brender.h"
 #include "host.h"
 
-#ifndef __DREAMCAST__
+#ifndef BR_FREESTANDING
 #include <stdio.h>
 #endif
 

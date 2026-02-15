@@ -6,7 +6,6 @@
  *
  * Generic lexer
  */
-#include <inttypes.h>
 #include "fw.h"
 #include "brassert.h"
 

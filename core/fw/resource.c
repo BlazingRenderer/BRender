@@ -15,8 +15,6 @@
  * XXX
  *	Add optional source file/line tracking
  */
-#include <inttypes.h>
-#include <stdio.h>
 #include "fw.h"
 #include "brassert.h"
 

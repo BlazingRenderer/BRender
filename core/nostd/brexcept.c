@@ -6,8 +6,6 @@
  *
  * Simple exception handling
  */
-#include <setjmp.h>
-
 #include "brddi.h"
 
 /*
@@ -83,7 +81,9 @@ void BR_RESIDENT_ENTRY _BrExceptionThrow(br_int_32 type, void *value)
      * Pop stack back down to handler context
      */
     exceptionValue = value;
+#ifndef BR_FREESTANDING
     longjmp(h.context, type);
+#endif
 }
 
 /*

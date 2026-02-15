@@ -22,7 +22,7 @@
 /**
  ** Basic types - float
  **/
-#if !defined(__H2INC__) && !defined(__DREAMCAST__)
+#if !defined(__H2INC__) && !defined(BR_FREESTANDING)
 #include <math.h>
 #endif
 

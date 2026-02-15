@@ -1,6 +1,6 @@
 #include "brender.h"
 
-#ifdef __DREAMCAST__
+#ifdef BR_FREESTANDING
 
 void *BR_RESIDENT_ENTRY BrBSearch(const void *key, const void *base, unsigned int nmemb, unsigned int size, br_bsearch_cbfn *comp)
 {

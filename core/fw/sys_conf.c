@@ -6,7 +6,6 @@
  *
  * System configuration
  */
-#include <inttypes.h>
 #include "fw.h"
 #include "host.h"
 #include <brassert.h>
