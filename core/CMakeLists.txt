@@ -15,7 +15,7 @@ target_include_directories(brender-inc INTERFACE
 add_library(brender-inc-ddi INTERFACE)
 target_link_libraries(brender-inc-ddi INTERFACE brender-inc)
 
-set(BRENDER_TARGETS inc host fw fmt math pixelmap nulldev dreamcast v1db)
+set(BRENDER_TARGETS inc host fw fmt math pixelmap nulldev $<$<BOOL:${BRENDER_FREESTANDING}>:nostd,std> v1db)
 set(BRENDER_OBJECTS)
 
 foreach (target ${BRENDER_TARGETS})

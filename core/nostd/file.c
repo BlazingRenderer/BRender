@@ -14,7 +14,7 @@
 #include "brender.h"
 #include "brassert.h"
 
-static FILE *BrDreamcastFopenUtf8(const char *name, const char *mode)
+static FILE *BrFreestandingFopenUtf8(const char *name, const char *mode)
 {
     return fopen(name, mode);
 }
@@ -22,7 +22,7 @@ static FILE *BrDreamcastFopenUtf8(const char *name, const char *mode)
 /*
  * Access functions for stdio
  */
-static br_uint_32 BR_CALLBACK BrDreamcastAttributes(void)
+static br_uint_32 BR_CALLBACK BrFreestandingAttributes(void)
 {
     return BR_FS_ATTR_READABLE | BR_FS_ATTR_WRITEABLE | BR_FS_ATTR_HAS_TEXT | BR_FS_ATTR_HAS_BINARY | BR_FS_ATTR_HAS_ADVANCE;
 }
@@ -41,7 +41,7 @@ static br_uint_32 BR_CALLBACK BrDreamcastAttributes(void)
  * Return a void * file handle ('FILE *' cast to 'void *') or NULL
  * if open failed
  */
-static void *BR_CALLBACK BrDreamcastOpenRead(const char *name, br_size_t n_magics, br_mode_test_cbfn *identify, int *mode_result)
+static void *BR_CALLBACK BrFreestandingOpenRead(const char *name, br_size_t n_magics, br_mode_test_cbfn *identify, int *mode_result)
 {
     FILE     *fh;
     char     *br_path, config_path[512];
@@ -54,7 +54,7 @@ static void *BR_CALLBACK BrDreamcastOpenRead(const char *name, br_size_t n_magic
      */
     strncpy(try_name, name, BR_ASIZE(try_name) - 1);
 
-    if((fh = BrDreamcastFopenUtf8(try_name, "rb")) == NULL) {
+    if((fh = BrFreestandingFopenUtf8(try_name, "rb")) == NULL) {
 
         /*
          * If that fails, and if a drive or a
@@ -92,7 +92,7 @@ static void *BR_CALLBACK BrDreamcastOpenRead(const char *name, br_size_t n_magic
 
             strcpy(cp, name);
 
-            if((fh = BrDreamcastFopenUtf8(try_name, "rb")) != NULL)
+            if((fh = BrFreestandingFopenUtf8(try_name, "rb")) != NULL)
                 break;
         }
 
@@ -132,11 +132,11 @@ static void *BR_CALLBACK BrDreamcastOpenRead(const char *name, br_size_t n_magic
 
     switch(open_mode) {
         case BR_FS_MODE_TEXT:
-            fh = BrDreamcastFopenUtf8(try_name, "r");
+            fh = BrFreestandingFopenUtf8(try_name, "r");
             break;
 
         case BR_FS_MODE_BINARY:
-            fh = BrDreamcastFopenUtf8(try_name, "rb");
+            fh = BrFreestandingFopenUtf8(try_name, "rb");
             break;
 
         case BR_FS_MODE_UNKNOWN:
@@ -156,11 +156,11 @@ static void *BR_CALLBACK BrDreamcastOpenRead(const char *name, br_size_t n_magic
  * Return a void * file handle ('FILE *' cast to 'void *') or NULL
  * if open failed
  */
-static void *BR_CALLBACK BrDreamcastOpenWrite(const char *name, int mode)
+static void *BR_CALLBACK BrFreestandingOpenWrite(const char *name, int mode)
 {
     FILE *fh = NULL;
 
-    fh = BrDreamcastFopenUtf8(name, (mode == BR_FS_MODE_TEXT) ? "w" : "wb");
+    fh = BrFreestandingFopenUtf8(name, (mode == BR_FS_MODE_TEXT) ? "w" : "wb");
 
     return fh;
 }
@@ -168,7 +168,7 @@ static void *BR_CALLBACK BrDreamcastOpenWrite(const char *name, int mode)
 /*
  * Close an open file
  */
-static void BR_CALLBACK BrDreamcastClose(void *f)
+static void BR_CALLBACK BrFreestandingClose(void *f)
 {
     fclose(f);
 }
@@ -176,7 +176,7 @@ static void BR_CALLBACK BrDreamcastClose(void *f)
 /*
  * Test EOF
  */
-static int BR_CALLBACK BrDreamcastEof(void *f)
+static int BR_CALLBACK BrFreestandingEof(void *f)
 {
     return feof((FILE *)f);
 }
@@ -184,7 +184,7 @@ static int BR_CALLBACK BrDreamcastEof(void *f)
 /*
  * Read one character from file
  */
-static int BR_CALLBACK BrDreamcastGetChar(void *f)
+static int BR_CALLBACK BrFreestandingGetChar(void *f)
 {
     return getc((FILE *)f);
 }
@@ -192,7 +192,7 @@ static int BR_CALLBACK BrDreamcastGetChar(void *f)
 /*
  * Write one character to file
  */
-static void BR_CALLBACK BrDreamcastPutChar(int c, void *f)
+static void BR_CALLBACK BrFreestandingPutChar(int c, void *f)
 {
     fputc(c, (FILE *)f);
 }
@@ -200,7 +200,7 @@ static void BR_CALLBACK BrDreamcastPutChar(int c, void *f)
 /*
  * Read a block from a file
  */
-static br_size_t BR_CALLBACK BrDreamcastRead(void *buf, br_size_t size, br_size_t n, void *f)
+static br_size_t BR_CALLBACK BrFreestandingRead(void *buf, br_size_t size, br_size_t n, void *f)
 {
     return fread(buf, size, n, (FILE *)f);
 }
@@ -208,7 +208,7 @@ static br_size_t BR_CALLBACK BrDreamcastRead(void *buf, br_size_t size, br_size_
 /*
  * Write a block to a file
  */
-static br_size_t BR_CALLBACK BrDreamcastWrite(const void *buf, br_size_t size, br_size_t n, void *f)
+static br_size_t BR_CALLBACK BrFreestandingWrite(const void *buf, br_size_t size, br_size_t n, void *f)
 {
     return fwrite(buf, size, n, (FILE *)f);
 }
@@ -218,7 +218,7 @@ static br_size_t BR_CALLBACK BrDreamcastWrite(const void *buf, br_size_t size, b
  *
  * Return length of line
  */
-static br_size_t BR_CALLBACK BrDreamcastGetLine(char *buf, br_size_t buf_len, void *f)
+static br_size_t BR_CALLBACK BrFreestandingGetLine(char *buf, br_size_t buf_len, void *f)
 {
     br_size_t l;
 
@@ -239,7 +239,7 @@ static br_size_t BR_CALLBACK BrDreamcastGetLine(char *buf, br_size_t buf_len, vo
 /*
  * Write a line to text file, followed by newline
  */
-static void BR_CALLBACK BrDreamcastPutLine(const char *buf, void *f)
+static void BR_CALLBACK BrFreestandingPutLine(const char *buf, void *f)
 {
     fputs(buf, (FILE *)f);
     fputc('\n', (FILE *)f);
@@ -248,18 +248,18 @@ static void BR_CALLBACK BrDreamcastPutLine(const char *buf, void *f)
 /*
  * Advance N bytes through a binary stream
  */
-static void BR_CALLBACK BrDreamcastAdvance(br_size_t count, void *f)
+static void BR_CALLBACK BrFreestandingAdvance(br_size_t count, void *f)
 {
     fseek(f, (long int)count, SEEK_CUR);
 }
 
-static void *BR_CALLBACK BrDreamcastLoad(void *res, const char *name, br_size_t *size)
+static void *BR_CALLBACK BrFreestandingLoad(void *res, const char *name, br_size_t *size)
 {
     FILE *fh    = NULL;
     void *data  = NULL;
     long  fsize = -1;
 
-    fh = BrDreamcastOpenRead(name, 0, NULL, NULL);
+    fh = BrFreestandingOpenRead(name, 0, NULL, NULL);
     if(fh == NULL)
         return NULL;
 
@@ -281,15 +281,15 @@ static void *BR_CALLBACK BrDreamcastLoad(void *res, const char *name, br_size_t 
 
     *size = (br_size_t)fsize;
 done:
-    BrDreamcastClose(fh);
+    BrFreestandingClose(fh);
     return data;
 }
 
 /*
- * Old version of BrDreamcastLoad(), can work on files without seek/tell.
+ * Old version of BrFreestandingLoad(), can work on files without seek/tell.
  * Keeping around for reference.
  */
-static void *BR_CALLBACK BrDreamcastLoadOld(void *res, const char *name, br_size_t *size)
+static void *BR_CALLBACK BrFreestandingLoadOld(void *res, const char *name, br_size_t *size)
 {
     br_size_t currentSize;
     void     *brf    = NULL;
@@ -321,30 +321,30 @@ static void *BR_CALLBACK BrDreamcastLoadOld(void *res, const char *name, br_size
 /*
  * Filesystem structure
  */
-br_filesystem BrDreamcastFilesystem = {
-    .identifier = "Standard IO",
+br_filesystem BrFreestandingFilesystem = {
+    .identifier = "Freestanding IO",
 
-    .attributes = BrDreamcastAttributes,
-    .open_read  = BrDreamcastOpenRead,
-    .open_write = BrDreamcastOpenWrite,
-    .close      = BrDreamcastClose,
-    .eof        = BrDreamcastEof,
+    .attributes = BrFreestandingAttributes,
+    .open_read  = BrFreestandingOpenRead,
+    .open_write = BrFreestandingOpenWrite,
+    .close      = BrFreestandingClose,
+    .eof        = BrFreestandingEof,
 
-    .getchr = BrDreamcastGetChar,
-    .putchr = BrDreamcastPutChar,
+    .getchr = BrFreestandingGetChar,
+    .putchr = BrFreestandingPutChar,
 
-    .read  = BrDreamcastRead,
-    .write = BrDreamcastWrite,
+    .read  = BrFreestandingRead,
+    .write = BrFreestandingWrite,
 
-    .getline = BrDreamcastGetLine,
-    .putline = BrDreamcastPutLine,
+    .getline = BrFreestandingGetLine,
+    .putline = BrFreestandingPutLine,
 
-    .advance = BrDreamcastAdvance,
+    .advance = BrFreestandingAdvance,
 
-    .load = BrDreamcastLoad,
+    .load = BrFreestandingLoad,
 };
 
 /*
  * Override global variable s.t. the default filesystem will be stdio
  */
-br_filesystem *BR_ASM_DATA _BrDefaultFilesystem = &BrDreamcastFilesystem;
+br_filesystem *BR_ASM_DATA _BrDefaultFilesystem = &BrFreestandingFilesystem;

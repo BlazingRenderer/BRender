@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <brender.h>
 
-static void BR_CALLBACK BrStdioLogProc(void *user, br_uint_8 level, const char *component, const char *fmt, va_list ap)
+static void BR_CALLBACK BrFreestandingLogProc(void *user, br_uint_8 level, const char *component, const char *fmt, va_list ap)
 {
     const char *sLevel;
 
@@ -27,18 +27,21 @@ static void BR_CALLBACK BrStdioLogProc(void *user, br_uint_8 level, const char *
             sLevel = "UNKN";
     }
 
+    // TODO
+#if 0
     (void)fprintf(stderr, "%s: %s: ", sLevel, component);
     (void)vfprintf(stderr, fmt, ap);
     (void)fputc('\n', stderr);
+#endif
 }
 
-br_loghandler BrStdioLogHandler = {
-    .identifier = "Stdio LogHandler",
-    .handler    = BrStdioLogProc,
+br_loghandler BrFreestandingLogHandler = {
+    .identifier = "Freestanding LogHandler",
+    .handler    = BrFreestandingLogProc,
     .user       = NULL,
 };
 
 /*
  * Override default
  */
-br_loghandler *BR_ASM_DATA _BrDefaultLogHandler = &BrStdioLogHandler;
+br_loghandler *BR_ASM_DATA _BrDefaultLogHandler = &BrFreestandingLogHandler;

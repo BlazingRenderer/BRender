@@ -8,39 +8,45 @@
  */
 #include "brender.h"
 
-static void BR_CALLBACK BrDreamcastWarning(const char *message)
+static void BR_CALLBACK BrFreestandingWarning(const char *message)
 {
+    // TODO
+#if 0
     fflush(stdout);
     fputs(message, stderr);
     fputc('\n', stderr);
     fflush(stderr);
+#endif
 }
 
-static void BR_CALLBACK BrDreamcastFailure(const char *message)
+static void BR_CALLBACK BrFreestandingFailure(const char *message)
 {
     /*
      * Close down all devices etc.
      */
     BrEnd();
 
+    // TODO
+#if 0
     fflush(stdout);
     fputs(message, stderr);
     fputc('\n', stderr);
     fflush(stderr);
 
     exit(10);
+#endif
 }
 
 /*
  * ErrorHandler structure
  */
-br_diaghandler BrDreamcastDiagHandler = {
-    "Stdio DiagHandler",
-    BrDreamcastWarning,
-    BrDreamcastFailure,
+br_diaghandler BrFreestandingDiagHandler = {
+    "Freestanding DiagHandler",
+    BrFreestandingWarning,
+    BrFreestandingFailure,
 };
 
 /*
  * Override default
  */
-br_diaghandler *BR_ASM_DATA _BrDefaultDiagHandler = &BrDreamcastDiagHandler;
+br_diaghandler *BR_ASM_DATA _BrDefaultDiagHandler = &BrFreestandingDiagHandler;
