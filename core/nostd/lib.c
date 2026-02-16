@@ -109,13 +109,13 @@ char *BR_PUBLIC_ENTRY BrStrChr(const char *s1, char c)
 
 char *BR_PUBLIC_ENTRY BrStrRChr(const char *s1, char c)
 {
-    return BrMemRChr(s, c, BrStrLen(s));
+    return BrMemRChr(s1, c, BrStrLen(s1));
 }
 
 void BR_PUBLIC_ENTRY BrAbort(void)
 {
     // TODO
-    // abort();
+    while (1);
 }
 
 const char *BR_PUBLIC_ENTRY BrGetEnv(const char *name)
