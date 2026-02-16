@@ -31,6 +31,22 @@ void *BR_PUBLIC_ENTRY BrMemSet(void *s, int c, size_t n)
     return s;
 }
 
+void *BR_PUBLIC_ENTRY BrMemChr(const void *m, int c, size_t n)
+{
+    const br_uint_8 *s = m;
+    c = (br_uint_8)c;
+    for (; n && *s != c; s++, n--);
+    return n ? (void *)s : NULL;
+}
+
+void *BR_PUBLIC_ENTRY BrMemRChr(const void *m, int c, size_t n)
+{
+    const br_uint_8 *s = m;
+    c = (br_uint_8)c;
+    while (n--) if (s[n]==c) return (void *)(s+n);
+    return NULL;
+}
+
 char *BR_PUBLIC_ENTRY BrStrCat(char *s1, const char *s2)
 {
     BrStrCpy(s1 + BrStrLen(s1), s2);
