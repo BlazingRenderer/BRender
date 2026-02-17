@@ -2,7 +2,6 @@
  * Inner loops for operations on in-memory pixelmaps.
  * Ported from memloops.asm
  */
-#include <string.h>
 #include <brender.h>
 #include <brassert.h>
 #include "memloops.h"
