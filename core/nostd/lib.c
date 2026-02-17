@@ -126,32 +126,122 @@ const char *BR_PUBLIC_ENTRY BrGetEnv(const char *name)
 
 float BR_PUBLIC_ENTRY BrStrToF(const char *nptr, char **endptr)
 {
-    return (float)strtod(nptr, endptr);
+    return (float)BrStrToD(nptr, endptr);
 }
 
 double BR_PUBLIC_ENTRY BrStrToD(const char *nptr, char **endptr)
 {
-    return strtod(nptr, endptr);
+    double val, power, sign;
+    int i;
+
+    for (i = 0; BrIsSpace(nptr[i]); i++)
+        ;
+    sign = (nptr[i] == '-') ? -1.0 : 1.0;
+    if (nptr[i] == '+' || nptr[i] == '-')
+        i++;
+    for (val = 0.0; BrIsDigit(nptr[i]); i++)
+        val = 10.0 * val + (nptr[i] - '0');
+    if (nptr[i] == '.')
+        i++;
+    for (power = 1.0; BrIsDigit(nptr[i]); i++) {
+        val = 10.0 * val + (nptr[i] - '0');
+        power *= 10.0;
+    }
+
+    if (endptr)
+        *endptr = (char *)nptr + i;
+
+    return sign * val / power;
 }
 
 long int BR_PUBLIC_ENTRY BrStrToL(const char *nptr, char **endptr, int base)
 {
-    return strtol(nptr, endptr, base);
+    long int val, sign;
+    int i;
+
+    // FIXME
+    if (base != 10)
+        return 0;
+
+    for (i = 0; BrIsSpace(nptr[i]); i++)
+        ;
+    sign = (nptr[i] == '-') ? -1 : 1;
+    if (nptr[i] == '+' || nptr[i] == '-')
+        i++;
+    for (val = 0; BrIsDigit(nptr[i]); i++)
+        val = 10 * val + (nptr[i] - '0');
+
+    if (endptr)
+        *endptr = (char *)nptr + i;
+
+    return sign * val;
 }
 
 long long int BR_PUBLIC_ENTRY BrStrToLL(const char *nptr, char **endptr, int base)
 {
-    return strtoll(nptr, endptr, base);
+    long long int val, sign;
+    int i;
+
+    // FIXME
+    if (base != 10)
+        return 0;
+
+    for (i = 0; BrIsSpace(nptr[i]); i++)
+        ;
+    sign = (nptr[i] == '-') ? -1 : 1;
+    if (nptr[i] == '+' || nptr[i] == '-')
+        i++;
+    for (val = 0; BrIsDigit(nptr[i]); i++)
+        val = 10 * val + (nptr[i] - '0');
+
+    if (endptr)
+        *endptr = (char *)nptr + i;
+
+    return sign * val;
 }
 
 unsigned long BR_PUBLIC_ENTRY BrStrToUL(const char *nptr, char **endptr, int base)
 {
-    return strtoul(nptr, endptr, base);
+    unsigned long val;
+    int i;
+
+    // FIXME
+    if (base != 10)
+        return 0;
+
+    for (i = 0; BrIsSpace(nptr[i]); i++)
+        ;
+    while (nptr[i] == '+' || nptr[i] == '-')
+        i++;
+    for (val = 0; BrIsDigit(nptr[i]); i++)
+        val = 10 * val + (nptr[i] - '0');
+
+    if (endptr)
+        *endptr = (char *)nptr + i;
+
+    return val;
 }
 
 unsigned long long BR_PUBLIC_ENTRY BrStrToULL(const char *nptr, char **endptr, int base)
 {
-    return strtoul(nptr, endptr, base);
+    unsigned long long val;
+    int i;
+
+    // FIXME
+    if (base != 10)
+        return 0;
+
+    for (i = 0; BrIsSpace(nptr[i]); i++)
+        ;
+    while (nptr[i] == '+' || nptr[i] == '-')
+        i++;
+    for (val = 0; BrIsDigit(nptr[i]); i++)
+        val = 10 * val + (nptr[i] - '0');
+
+    if (endptr)
+        *endptr = (char *)nptr + i;
+
+    return val;
 }
 
 int BR_PUBLIC_ENTRY BrAToI(const char *nptr)
@@ -223,11 +313,18 @@ int BR_PUBLIC_ENTRY BrToLower(int c)
 
 br_int_32 BR_PUBLIC_ENTRY BrVSprintf(char *buf, const char *fmt, va_list args)
 {
+    // TODO
+    return 0;
+#if 0
     return vsprintf(buf, fmt, args);
+#endif
 }
 
 br_int_32 BR_PUBLIC_ENTRY BrVSprintfN(char *buf, br_size_t buf_size, const char *fmt, va_list args)
 {
+    // TODO
+    return 0;
+#if 0
     unsigned int n;
     char         tmp[512];
 
@@ -241,9 +338,14 @@ br_int_32 BR_PUBLIC_ENTRY BrVSprintfN(char *buf, br_size_t buf_size, const char 
     buf[n] = '\0';
 
     return n;
+#endif
 }
 
 br_int_32 BR_PUBLIC_ENTRY BrVSScanf(const char *buf, const char *fmt, va_list args)
 {
+    // TODO
+    return 0;
+#if 0
     return vsscanf(buf, fmt, args);
+#endif
 }
