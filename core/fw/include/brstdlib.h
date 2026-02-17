@@ -14,6 +14,33 @@
 #include <stdarg.h>
 #endif
 
+#ifdef BR_FREESTANDING
+#define PRIu8 "hu"
+#define PRId8 "hd"
+#define PRIu16 "hu"
+#define PRId16 "hd"
+#define PRIu32 "lu"
+#define PRId32 "ld"
+#define PRIu64 "llu"
+#define PRId64 "lld"
+#define SCNxPTR "lx"
+#define SCNdPTR "ld"
+#define sin(n) __builtin_sin(n)
+#define sinf(n) __builtin_sinf(n)
+#define cos(n) __builtin_cos(n)
+#define cosf(n) __builtin_cosf(n)
+#define tan(n) __builtin_tan(n)
+#define tanf(n) __builtin_tanf(n)
+#define fabs(n) __builtin_fabs(n)
+#define fabsf(n) __builtin_fabsf(n)
+#define fmod(a, b) __builtin_fmod(a, b)
+#define fmodf(a, b) __builtin_fmodf(a, b)
+#define atan2(a, b) __builtin_atan2(a, b)
+#define atan2f(a, b) __builtin_atan2f(a, b)
+#define sqrt(n) __builtin_sqrt(n)
+#define sqrtf(n) __builtin_sqrtf(n)
+#endif
+
 #ifndef _NO_PROTOTYPES
 #ifdef __cplusplus
 extern "C" {
