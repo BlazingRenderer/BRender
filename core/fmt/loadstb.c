@@ -3,9 +3,13 @@
 #include "brender.h"
 #include "fmt.h"
 #include "brstb.h"
+#include "brassert.h"
 
 /* stb implementation */
 #define STB_IMAGE_IMPLEMENTATION
+#define STBI_NO_LINEAR
+#define STBI_NO_HDR
+#define STBI_ASSERT(x) ASSERT(x)
 #include "stb_image.h"
 
 /* load with stb_image (private) */

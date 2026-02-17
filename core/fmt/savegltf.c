@@ -1096,7 +1096,7 @@ static int fill_mesh(const void *key, void *value, br_hash hash, void *user)
 
 static float srgb_to_linear(float f)
 {
-    return (f <= 0.04045f) ? f / 12.92f : powf((f + 0.055f) / 1.055f, 2.4f);
+    return (f <= 0.04045f) ? f / 12.92f : BrFloatPow((f + 0.055f) / 1.055f, 2.4f);
 }
 
 static int fill_material(const void *key, void *value, br_hash hash, void *user)

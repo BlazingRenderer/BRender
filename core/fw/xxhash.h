@@ -1259,7 +1259,7 @@ struct XXH3_state_s {
  * @brief Initializes a stack-allocated `XXH3_state_s`.
  *
  * When the @ref XXH3_state_t structure is merely emplaced on stack,
- * it should be initialized with XXH3_INITSTATE() or a memset()
+ * it should be initialized with XXH3_INITSTATE() or a BrMemSet()
  * in case its first reset uses XXH3_NNbits_reset_withSeed().
  * This init can be omitted if the first reset uses default or _withSecret mode.
  * This operation isn't necessary when the state is created with XXH3_createState().
@@ -1734,15 +1734,13 @@ static void XXH_free(void* p) { free(p); }
 
 #endif  /* XXH_NO_STDLIB */
 
-#include <string.h>
-
 /*!
  * @internal
  * @brief Modify this function to use a different routine than memcpy().
  */
 static void* XXH_memcpy(void* dest, const void* src, size_t size)
 {
-    return memcpy(dest,src,size);
+    return BrMemCpy(dest,src,size);
 }
 
 #include <limits.h>   /* ULLONG_MAX */
@@ -2424,7 +2422,7 @@ XXH_PUBLIC_API void XXH32_copyState(XXH32_state_t* dstState, const XXH32_state_t
 XXH_PUBLIC_API XXH_errorcode XXH32_reset(XXH32_state_t* statePtr, XXH32_hash_t seed)
 {
     XXH_ASSERT(statePtr != NULL);
-    memset(statePtr, 0, sizeof(*statePtr));
+    BrMemSet(statePtr, 0, sizeof(*statePtr));
     statePtr->v[0] = seed + XXH_PRIME32_1 + XXH_PRIME32_2;
     statePtr->v[1] = seed + XXH_PRIME32_2;
     statePtr->v[2] = seed + 0;
@@ -2866,7 +2864,7 @@ XXH_PUBLIC_API void XXH64_copyState(XXH64_state_t* dstState, const XXH64_state_t
 XXH_PUBLIC_API XXH_errorcode XXH64_reset(XXH64_state_t* statePtr, XXH64_hash_t seed)
 {
     XXH_ASSERT(statePtr != NULL);
-    memset(statePtr, 0, sizeof(*statePtr));
+    BrMemSet(statePtr, 0, sizeof(*statePtr));
     statePtr->v[0] = seed + XXH_PRIME64_1 + XXH_PRIME64_2;
     statePtr->v[1] = seed + XXH_PRIME64_2;
     statePtr->v[2] = seed + 0;
@@ -5157,7 +5155,7 @@ XXH3_reset_internal(XXH3_state_t* statePtr,
     XXH_ASSERT(offsetof(XXH3_state_t, nbStripesPerBlock) > initStart);
     XXH_ASSERT(statePtr != NULL);
     /* set members from bufferedSize to nbStripesPerBlock (excluded) to 0 */
-    memset((char*)statePtr + initStart, 0, initLength);
+    BrMemSet((char*)statePtr + initStart, 0, initLength);
     statePtr->acc[0] = XXH_PRIME32_3;
     statePtr->acc[1] = XXH_PRIME64_1;
     statePtr->acc[2] = XXH_PRIME64_2;

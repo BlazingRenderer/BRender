@@ -987,7 +987,7 @@ STBIWDEF unsigned char * stbi_zlib_compress(unsigned char *data, int data_len, i
          stbiw__sbpush(out, STBIW_UCHAR(blocklen >> 8));
          stbiw__sbpush(out, STBIW_UCHAR(~blocklen)); // NLEN
          stbiw__sbpush(out, STBIW_UCHAR(~blocklen >> 8));
-         memcpy(out+stbiw__sbn(out), data+j, blocklen);
+         BrMemCpy(out+stbiw__sbn(out), data+j, blocklen);
          stbiw__sbn(out) += blocklen;
          j += blocklen;
       }
@@ -1095,7 +1095,7 @@ static void stbiw__encode_png_line(unsigned char *pixels, int stride_bytes, int 
    int signed_stride = stbi__flip_vertically_on_write ? -stride_bytes : stride_bytes;
 
    if (type==0) {
-      memcpy(line_buffer, z, width*n);
+      BrMemCpy(line_buffer, z, width*n);
       return;
    }
 

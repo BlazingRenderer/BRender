@@ -23,6 +23,8 @@
 #define PRId32 "ld"
 #define PRIu64 "llu"
 #define PRId64 "lld"
+#define PRIuPTR "lu"
+#define PRIdPTR "ld"
 #define SCNxPTR "lx"
 #define SCNdPTR "ld"
 #define INFINITY __builtin_inf()

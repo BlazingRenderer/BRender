@@ -26,6 +26,8 @@
 #include <math.h>
 #endif
 
+#include "brmath.h"
+
 /*
  * Floating point base types
  */
@@ -102,21 +104,21 @@ typedef br_float br_ufraction;
 #define BR_FMAC3(a, b, c, d, e, f)            ((a) * (b) + (c) * (d) + (e) * (f))
 #define BR_FMAC4(a, b, c, d, e, f, g, h)      ((a) * (b) + (c) * (d) + (e) * (f) + (g) * (h))
 
-#define BR_LENGTH2(a, b)                      ((br_scalar)sqrtf((a) * (a) + (b) * (b)))
-#define BR_LENGTH3(a, b, c)                   ((br_scalar)sqrtf((a) * (a) + (b) * (b) + (c) * (c)))
-#define BR_LENGTH4(a, b, c, d)                ((br_scalar)sqrtf((a) * (a) + (b) * (b) + (c) * (c) + (d) * (d)))
+#define BR_LENGTH2(a, b)                      ((br_scalar)BrFloatSqrt((a) * (a) + (b) * (b)))
+#define BR_LENGTH3(a, b, c)                   ((br_scalar)BrFloatSqrt((a) * (a) + (b) * (b) + (c) * (c)))
+#define BR_LENGTH4(a, b, c, d)                ((br_scalar)BrFloatSqrt((a) * (a) + (b) * (b) + (c) * (c) + (d) * (d)))
 
-#define BR_RLENGTH2(a, b)                     ((br_scalar)(1.0f / sqrtf((a) * (a) + (b) * (b))))
-#define BR_RLENGTH3(a, b, c)                  ((br_scalar)(1.0f / sqrtf((a) * (a) + (b) * (b) + (c) * (c))))
-#define BR_RLENGTH4(a, b, c, d)               ((br_scalar)(1.0f / sqrtf((a) * (a) + (b) * (b) + (c) * (c) + (d) * (d))))
+#define BR_RLENGTH2(a, b)                     ((br_scalar)(1.0f / BrFloatSqrt((a) * (a) + (b) * (b))))
+#define BR_RLENGTH3(a, b, c)                  ((br_scalar)(1.0f / BrFloatSqrt((a) * (a) + (b) * (b) + (c) * (c))))
+#define BR_RLENGTH4(a, b, c, d)               ((br_scalar)(1.0f / BrFloatSqrt((a) * (a) + (b) * (b) + (c) * (c) + (d) * (d))))
 
-#define BR_POW(a, b)                          ((br_scalar)powf((a), (b)))
-#define BR_SQRT(a)                            ((br_scalar)sqrtf(a))
+#define BR_POW(a, b)                          ((br_scalar)BrFloatPow((a), (b)))
+#define BR_SQRT(a)                            ((br_scalar)BrFloatSqrt(a))
 
-#define BR_FLOOR(a)                           ((br_scalar)floorf(a))
-#define BR_CEIL(a)                            ((br_scalar)ceilf(a))
+#define BR_FLOOR(a)                           ((br_scalar)BrFloatFloor(a))
+#define BR_CEIL(a)                            ((br_scalar)BrFloatCeil(a))
 
-#define BR_FMOD(x, y)                         ((br_scalar)fmodf(x, y))
+#define BR_FMOD(x, y)                         ((br_scalar)BrFloatMod(x, y))
 
 /*
  * Make sure PI is defined
