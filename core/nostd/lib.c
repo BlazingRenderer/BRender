@@ -314,6 +314,7 @@ int BR_PUBLIC_ENTRY BrToLower(int c)
 br_int_32 BR_PUBLIC_ENTRY BrVSprintf(char *buf, const char *fmt, va_list args)
 {
     // TODO
+    BR_FATAL0("Unimplemented function: BrVSprintf");
     return 0;
 #if 0
     return vsprintf(buf, fmt, args);
@@ -323,6 +324,7 @@ br_int_32 BR_PUBLIC_ENTRY BrVSprintf(char *buf, const char *fmt, va_list args)
 br_int_32 BR_PUBLIC_ENTRY BrVSprintfN(char *buf, br_size_t buf_size, const char *fmt, va_list args)
 {
     // TODO
+    BR_FATAL0("Unimplemented function: BrVSprintfN");
     return 0;
 #if 0
     unsigned int n;
@@ -344,6 +346,7 @@ br_int_32 BR_PUBLIC_ENTRY BrVSprintfN(char *buf, br_size_t buf_size, const char 
 br_int_32 BR_PUBLIC_ENTRY BrVSScanf(const char *buf, const char *fmt, va_list args)
 {
     // TODO
+    BR_FATAL0("Unimplemented function: BrVSScanf");
     return 0;
 #if 0
     return vsscanf(buf, fmt, args);
