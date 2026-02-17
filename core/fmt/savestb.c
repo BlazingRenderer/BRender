@@ -2,8 +2,10 @@
 #include "brender.h"
 #include "fmt.h"
 #include "brstb.h"
+#include "brassert.h"
 
 #define STB_IMAGE_WRITE_IMPLEMENTATION
+#define STBIW_ASSERT(x) ASSERT(x)
 #include "stb_image_write.h"
 
 /*

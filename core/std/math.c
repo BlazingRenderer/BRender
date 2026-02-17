@@ -34,3 +34,18 @@ float BR_PUBLIC_ENTRY BrFloatAtan2(float x, float y)
 {
     return atan2f(x, y);
 }
+
+float BR_PUBLIC_ENTRY BrFloatMod(float x, float y)
+{
+	return fmodf(x, y);
+}
+
+float BR_PUBLIC_ENTRY BrFloatAbs(float f)
+{
+	return fabsf(f);
+}
+
+int BR_PUBLIC_ENTRY BrIntAbs(int i)
+{
+	return abs(i);
+}

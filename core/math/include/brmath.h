@@ -21,6 +21,10 @@ float BR_PUBLIC_ENTRY BrFloatCeil(float f);
 float BR_PUBLIC_ENTRY BrFloatSqrt(float f);
 float BR_PUBLIC_ENTRY BrFloatPow(float a, float b);
 float BR_PUBLIC_ENTRY BrFloatAtan2(float x, float y);
+float BR_PUBLIC_ENTRY BrFloatMod(float x, float y);
+float BR_PUBLIC_ENTRY BrFloatAbs(float f);
+
+int BR_PUBLIC_ENTRY BrIntAbs(int i);
 
 #ifdef __cplusplus
 };
