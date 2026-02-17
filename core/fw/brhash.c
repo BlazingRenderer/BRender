@@ -18,6 +18,7 @@
 #define XXH_NO_LONG_LONG
 #endif
 
+#define XXH_NO_STDLIB
 #define XXH_STATIC_LINKING_ONLY
 #define XXH_IMPLEMENTATION
 #include "xxhash.h"

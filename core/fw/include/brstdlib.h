@@ -25,6 +25,7 @@
 #define PRId64 "lld"
 #define SCNxPTR "lx"
 #define SCNdPTR "ld"
+#define INFINITY __builtin_inf()
 #define sin(n) __builtin_sin(n)
 #define sinf(n) __builtin_sinf(n)
 #define cos(n) __builtin_cos(n)
