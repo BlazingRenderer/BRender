@@ -106,9 +106,6 @@ drpcx_uint8* drpcx_load_memory(const void* data, size_t dataSize, drpcx_bool32 f
 //
 ///////////////////////////////////////////////////////////////////////////////
 #ifdef DR_PCX_IMPLEMENTATION
-#include <stdlib.h>
-#include <string.h>
-#include <assert.h>
 
 #ifndef DR_PCX_NO_STDIO
 #include <stdio.h>

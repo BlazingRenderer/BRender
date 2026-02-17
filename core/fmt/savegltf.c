@@ -77,7 +77,7 @@ static char *build_buffer_uri(const cgltf_buffer *buffer, void *res)
     char               *code_out_end;
 
     code_out = BrResAllocate(res, sizeof(prefix) + len + 1, BR_MEMORY_APPLICATION);
-    memcpy(code_out, prefix, sizeof(prefix));
+    BrMemCpy(code_out, prefix, sizeof(prefix));
 
     code_out_end = BrStpCpy(code_out, prefix);
 
@@ -97,7 +97,7 @@ static char *build_png_uri(void *data, br_size_t size, void *res)
     char               *code_out_end;
 
     code_out = BrResAllocate(res, sizeof(prefix) + len + 1, BR_MEMORY_APPLICATION);
-    memcpy(code_out, prefix, sizeof(prefix));
+    BrMemCpy(code_out, prefix, sizeof(prefix));
 
     code_out_end = BrStpCpy(code_out, prefix);
 

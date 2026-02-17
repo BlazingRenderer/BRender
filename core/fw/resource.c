@@ -484,7 +484,7 @@ char *BR_RESIDENT_ENTRY BrResVSprintf(void *vparent, const char *fmt, va_list ap
     va_list ap2;
 
     va_copy(ap2, ap);
-    nreq = vsnprintf(NULL, 0, fmt, ap2);
+    nreq = BrVSprintfN(NULL, 0, fmt, ap2);
     va_end(ap2);
 
     if(nreq < 0)
@@ -494,7 +494,7 @@ char *BR_RESIDENT_ENTRY BrResVSprintf(void *vparent, const char *fmt, va_list ap
     if((s = BrResAllocate(vparent, (size_t)nreq, BR_MEMORY_STRING)) == NULL)
         return NULL;
 
-    if(vsnprintf(s, (size_t)nreq, fmt, ap) != nreq - 1) {
+    if(BrVSprintfN(s, (size_t)nreq, fmt, ap) != nreq - 1) {
         BrResFree(s);
         return NULL;
     }
