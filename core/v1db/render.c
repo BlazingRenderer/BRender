@@ -7,8 +7,6 @@
  * Traversal of hierachy for rendering
  */
 
-#include <stdio.h>
-
 #include "v1db.h"
 #include "shortcut.h"
 #include "brassert.h"
