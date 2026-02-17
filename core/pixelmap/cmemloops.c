@@ -2,7 +2,6 @@
  * Inner loops for operations on in-memory pixelmaps.
  * Ported from memloops.asm
  */
-#include <string.h>
 #include <brender.h>
 #include <brassert.h>
 #include "memloops.h"
@@ -59,7 +58,7 @@ static void MemFill24(void *dst, br_uint_32 val, br_size_t num)
     br_uint_8  b = BR_BLU(val);
 
     if((r == g) && (r == b)) {
-        memset(d, r, num * 3);
+        BrMemSet(d, r, num * 3);
     } else {
         for(br_uint_32 i = 0; i < num; ++i) {
             *d++ = r;
@@ -71,7 +70,7 @@ static void MemFill24(void *dst, br_uint_32 val, br_size_t num)
 
 static void MemFill8(void *dst, br_uint_32 value, br_size_t num)
 {
-    memset(dst, (int)(value & 0xFF), num);
+    BrMemSet(dst, (int)(value & 0xFF), num);
 }
 
 typedef void(br_filler_cbfn)(void *dst, br_uint_32 value, br_size_t num);
