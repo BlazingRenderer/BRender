@@ -25,6 +25,9 @@ set(BRENDER_OBJECTS)
 
 foreach (target ${BRENDER_TARGETS})
     add_subdirectory(${target})
+    if(BRENDER_FREESTANDING)
+        target_compile_definitions(${target} PRIVATE BR_FREESTANDING=1)
+    endif()
     list(APPEND BRENDER_OBJECTS "$<TARGET_OBJECTS:${target}>")
 endforeach ()
 

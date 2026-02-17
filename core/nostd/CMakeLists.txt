@@ -14,4 +14,3 @@ set(NOSTD_FILES
 add_library(nostd OBJECT ${NOSTD_FILES})
 target_compile_definitions(nostd PRIVATE __BR_V1DB__=0)
 target_link_libraries(nostd PRIVATE brender-inc-ddi)
-target_compile_definitions(nostd PUBLIC BR_FREESTANDING=1)
