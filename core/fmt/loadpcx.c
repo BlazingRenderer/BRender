@@ -1,5 +1,6 @@
 
 #include "brender.h"
+#include "brassert.h"
 #include "fmt.h"
 
 #define DR_PCX_IMPLEMENTATION
