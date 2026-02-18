@@ -148,8 +148,8 @@ typedef struct
 static size_t drpcx__on_read_memory(void* pUserData, void* bufferOut, size_t bytesToRead)
 {
     drpcx_memory* memory = (drpcx_memory*)pUserData;
-    assert(memory != NULL);
-    assert(memory->dataSize >= memory->currentReadPos);
+    ASSERT(memory != NULL);
+    ASSERT(memory->dataSize >= memory->currentReadPos);
 
     size_t bytesRemaining = memory->dataSize - memory->currentReadPos;
     if (bytesToRead > bytesRemaining) {
@@ -689,8 +689,8 @@ drpcx_uint8* drpcx_load(drpcx_read_proc onRead, void* pUserData, drpcx_bool32 fl
                     pDstData += desiredComponents;
                 }
             } else {
-                assert(pcx.components == 3);
-                assert(desiredComponents == 4);
+                ASSERT(pcx.components == 3);
+                ASSERT(desiredComponents == 4);
                 for (drpcx_uint32 i = 0; i < pcx.width*pcx.height; ++i) {
                     pDstData[0] = pSrcData[0];
                     pDstData[1] = pSrcData[1];

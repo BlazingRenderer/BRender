@@ -54,6 +54,7 @@ void *BR_PUBLIC_ENTRY BrMemCpy(void *s1, const void *s2, br_size_t n);
 void *BR_PUBLIC_ENTRY BrMemSet(void *s, int c, br_size_t n);
 void *BR_PUBLIC_ENTRY BrMemChr(const void *m, int c, size_t n);
 void *BR_PUBLIC_ENTRY BrMemRChr(const void *m, int c, size_t n);
+void *BR_PUBLIC_ENTRY BrMemMove(void *dst, const void *src, size_t n);
 
 char *BR_PUBLIC_ENTRY     BrStrCat(char *s1, const char *s2);
 int BR_PUBLIC_ENTRY       BrStrCmp(const char *s1, const char *s2);
