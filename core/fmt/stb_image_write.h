@@ -231,7 +231,7 @@ STBIWDEF void stbi_flip_vertically_on_write(int flip_boolean);
 
 
 #ifndef STBIW_MEMMOVE
-#define STBIW_MEMMOVE(a,b,sz) memmove(a,b,sz)
+#define STBIW_MEMMOVE(a,b,sz) BrMemMove(a,b,sz)
 #endif
 
 
@@ -562,11 +562,11 @@ static int stbi_write_tga_core(stbi__write_context *s, int x, int y, int comp, v
 
             if (i < x - 1) {
                ++len;
-               diff = memcmp(begin, row + (i + 1) * comp, comp);
+               diff = BrMemCmp(begin, row + (i + 1) * comp, comp);
                if (diff) {
                   const unsigned char *prev = begin;
                   for (k = i + 2; k < x && len < 128; ++k) {
-                     if (memcmp(prev, row + k * comp, comp)) {
+                     if (BrMemCmp(prev, row + k * comp, comp)) {
                         prev += comp;
                         ++len;
                      } else {
@@ -576,7 +576,7 @@ static int stbi_write_tga_core(stbi__write_context *s, int x, int y, int comp, v
                   }
                } else {
                   for (k = i + 2; k < x && len < 128; ++k) {
-                     if (!memcmp(begin, row + k * comp, comp)) {
+                     if (!BrMemCmp(begin, row + k * comp, comp)) {
                         ++len;
                      } else {
                         break;
@@ -1077,7 +1077,7 @@ static void stbiw__wpcrc(unsigned char **data, int len)
 
 static unsigned char stbiw__paeth(int a, int b, int c)
 {
-   int p = a + b - c, pa = abs(p-a), pb = abs(p-b), pc = abs(p-c);
+   int p = a + b - c, pa = BrIntAbs(p-a), pb = BrIntAbs(p-b), pc = BrIntAbs(p-c);
    if (pa <= pb && pa <= pc) return STBIW_UCHAR(a);
    if (pb <= pc) return STBIW_UCHAR(b);
    return STBIW_UCHAR(c);
@@ -1151,7 +1151,7 @@ STBIWDEF unsigned char *stbi_write_png_to_mem(const unsigned char *pixels, int s
             // Estimate the entropy of the line using this filter; the less, the better.
             est = 0;
             for (i = 0; i < x*n; ++i) {
-               est += abs((signed char) line_buffer[i]);
+               est += BrIntAbs((signed char) line_buffer[i]);
             }
             if (est < best_filter_val) {
                best_filter_val = est;
