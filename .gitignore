@@ -11,3 +11,4 @@
 
 # RenderDoc Capture Settings
 **/*.cap
+/staging
