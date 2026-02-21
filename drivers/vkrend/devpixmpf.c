@@ -19,6 +19,7 @@ static br_tv_template_entry devicePixelmapFrontTemplateEntries[] = {
     {BRT(OUTPUT_FACILITY_O),  F(output_facility),              BRTV_QUERY | BRTV_ALL, BRTV_CONV_COPY   },
     {BRT(FACILITY_O),         F(output_facility),              BRTV_QUERY,            BRTV_CONV_COPY   },
     {BRT(IDENTIFIER_CSTR),    F(pm_identifier),                BRTV_QUERY | BRTV_ALL, BRTV_CONV_COPY   },
+    {BRT(WINDOW_HANDLE_H),    F(as_front.window_handle),       BRTV_QUERY | BRTV_ALL, BRTV_CONV_COPY   },
     {DEV(VULKAN_SURFACE_H),   F(as_front.surface),             BRTV_QUERY | BRTV_ALL, BRTV_CONV_COPY   },
     {DEV(VULKAN_SWAPCHAIN_H), F(as_front.swapchain.swapchain), BRTV_QUERY | BRTV_ALL, BRTV_CONV_COPY   },
 };
