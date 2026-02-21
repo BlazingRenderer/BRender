@@ -11,6 +11,8 @@
 , mesa
 , libglvnd
 , clang-tools
+, vulkan-loader
+, vulkan-validation-layers
 , withTools ? true
 , withExamples ? false
 }: let
@@ -45,6 +47,8 @@ stdenv.mkDerivation(finalAttrs: {
     clang-tools
   ];
 
+  passthru.vulkan-loader = vulkan-loader;
+
   buildInputs = [
     sdl3
   ] ++ lib.optionals withExamples [
@@ -54,6 +58,8 @@ stdenv.mkDerivation(finalAttrs: {
   checkInputs = lib.optionals glRuntime [
     mesa
     libglvnd
+    vulkan-loader
+    vulkan-validation-layers
   ];
 
   # Point the GL tests at llvmpipe. SDL dlopens libEGL by soname and the mesa
@@ -61,12 +67,21 @@ stdenv.mkDerivation(finalAttrs: {
   # search path; the vendor JSON names the vendor library explicitly. The
   # per-test LIBGL_ALWAYS_SOFTWARE the corpus sets is not enough on its own -
   # without a device to initialise, EGL never reaches the software driver.
+  #
+  # The Vulkan witness needs the same: on a NixOS host the loader finds its ICD
+  # under /run/opengl-driver, which the sandbox does not mount, so name mesa's
+  # lavapipe manifest explicitly. mesa ships the manifest for the host platform's
+  # word size, so this covers the 32-bit package as well.
   preCheck = lib.optionalString glRuntime ''
     export LIBGL_ALWAYS_SOFTWARE=1
     export GALLIUM_DRIVER=llvmpipe
     export LIBGL_DRIVERS_PATH=${mesa}/lib/dri
     export __EGL_VENDOR_LIBRARY_FILENAMES=${mesa}/share/glvnd/egl_vendor.d/50_mesa.json
     export LD_LIBRARY_PATH=${libglvnd}/lib:${mesa}/lib''${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}
+
+    export VK_DRIVER_FILES=$(echo ${mesa}/share/vulkan/icd.d/lvp_icd.*.json)
+    export VK_LAYER_PATH=${vulkan-validation-layers}/share/vulkan/explicit_layer.d
+    export LD_LIBRARY_PATH=${vulkan-loader}/lib:${vulkan-validation-layers}/lib:$LD_LIBRARY_PATH
   '';
 
   cmakeFlags = [
