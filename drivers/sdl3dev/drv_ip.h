@@ -94,6 +94,13 @@ SDL_Color DevicePixelmapSDL3GetSurfaceColour(SDL_Surface *surf, br_colour colour
 br_error    DevicePixelmapSDL3CreateGL(const pixelmap_new_tokens *pt, br_device_pixelmap **ppmap);
 SDL_Window *DevicePixelmapSDL3GetWindowGL(br_pixelmap *pm);
 
+/*
+ * vkrend.c
+ */
+br_error DeviceSDL3LoadVulkan(br_device *dev);
+void     DeviceSDL3UnloadVulkan(br_device *dev);
+br_error DevicePixelmapSDL3CreateVk(br_device *dev, const pixelmap_new_tokens *pt, br_device_pixelmap **ppmap);
+
 #ifdef __cplusplus
 };
 #endif

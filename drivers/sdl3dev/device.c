@@ -32,6 +32,7 @@ static br_tv_template_entry deviceTemplateEntries[] = {
     {BRT(CREATOR_CSTR),        A(deviceCreator), BRTV_QUERY | BRTV_ALL | BRTV_ABS, BRTV_CONV_COPY,   0              },
     {BRT(TITLE_CSTR),          A(deviceTitle),   BRTV_QUERY | BRTV_ALL | BRTV_ABS, BRTV_CONV_COPY,   0              },
     {BRT(PRODUCT_CSTR),        A(deviceProduct), BRTV_QUERY | BRTV_ALL | BRTV_ABS, BRTV_CONV_COPY,   0              },
+    {DEV(VKREND_INIT_P),       F(vkrend_init),   BRTV_QUERY,                       BRTV_CONV_COPY,   0              },
 };
 #undef A
 #undef F
@@ -62,15 +63,29 @@ br_device *DeviceSDL3Allocate(const char *identifier)
 
     self->templates.deviceTemplate = BrTVTemplateAllocate(self, deviceTemplateEntries, BR_ASIZE(deviceTemplateEntries));
 
+    /*
+     * Attempt to load Vulkan.
+     */
+    self->vulkan_loaded = 0;
+    if(DeviceSDL3LoadVulkan(self) == BRE_OK)
+        self->vulkan_loaded = 1;
+
     return self;
 }
 
-static void BR_CMETHOD_DECL(br_device_sdl3, free)(struct br_object *self)
+static void BR_CMETHOD_DECL(br_device_sdl3, free)(br_object *_self)
 {
+    br_device *self = (br_device*)_self;
+
     /*
      * Remove attached objects
      */
     BrObjectContainerFree((br_object_container *)self, BR_NULL_TOKEN, NULL, NULL);
+
+    /*
+     * Unload Vulkan
+     */
+    DeviceSDL3UnloadVulkan(self);
 
     /*
      * Remove resources
@@ -138,6 +153,7 @@ static const br_token insignificantMatchTokens[] = {
     BRT_HIDPI_B,
     BRT_RESIZABLE_B,
     BRT_OPENGL_B,
+    BRT_VULKAN_B,
     BRT_WINDOW_FULLSCREEN_B,
     BRT_SDL_EXT_PROCS_P,
     BR_NULL_TOKEN,

@@ -39,6 +39,16 @@ typedef struct br_device {
      * Driver-wide template store
      */
     struct device_templates templates;
+
+    /*
+     * Has DeviceSDL3LoadVulkan() been called successfully?
+     */
+    br_boolean vulkan_loaded;
+
+    /**
+     * A vkrend init payload. Actually a br_device_vk_init*.
+     */
+    void *vkrend_init;
 } br_device;
 
 /*

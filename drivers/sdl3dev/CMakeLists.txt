@@ -45,6 +45,7 @@ add_library(sdl3dev
         surface.c
 
         glrend.c
+        vkrend.c
 
         util.c
 
@@ -56,7 +57,7 @@ if (target_type STREQUAL SHARED_LIBRARY)
     target_compile_definitions(sdl3dev PRIVATE -DDEFINE_BR_ENTRY_POINT)
 endif ()
 
-target_link_libraries(sdl3dev PRIVATE SDL3::SDL3 BRender::DDI glrend-headers)
+target_link_libraries(sdl3dev PRIVATE SDL3::SDL3 BRender::DDI glrend-headers vkrend-headers)
 target_link_libraries(sdl3dev PUBLIC SDL3::SDL3 sdl3dev-headers)
 
 set_target_properties(sdl3dev PROPERTIES

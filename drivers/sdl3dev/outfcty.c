@@ -39,6 +39,7 @@ static struct br_tv_template_entry outputFacilityTemplateEntries[] = {
     {BRT(HIDPI_B),             (br_uintptr_t)BR_FALSE, BRTV_QUERY | BRTV_ALL, BRTV_CONV_DIRECT, 0},
     {BRT(RESIZABLE_B),         (br_uintptr_t)BR_FALSE, BRTV_QUERY | BRTV_ALL, BRTV_CONV_DIRECT, 0},
     {BRT(OPENGL_B),            (br_uintptr_t)BR_FALSE, BRTV_QUERY | BRTV_ALL, BRTV_CONV_DIRECT, 0},
+    {BRT(VULKAN_B),            (br_uintptr_t)BR_FALSE, BRTV_QUERY | BRTV_ALL, BRTV_CONV_DIRECT, 0},
     {BRT(WINDOW_FULLSCREEN_B), (br_uintptr_t)BR_FALSE, BRTV_QUERY | BRTV_ALL, BRTV_CONV_DIRECT, 0},
     {BRT(SDL_EXT_PROCS_P),     0,                      BRTV_QUERY | BRTV_ALL, BRTV_CONV_DIRECT, 0},
 };
@@ -58,6 +59,7 @@ static struct br_tv_template_entry pixelmapNewTemplateEntries[] = {
     {BRT(HIDPI_B),             F(flags),      BRTV_SET, BRTV_CONV_BIT,  SDL_WINDOW_HIGH_PIXEL_DENSITY},
     {BRT(RESIZABLE_B),         F(flags),      BRTV_SET, BRTV_CONV_BIT,  SDL_WINDOW_RESIZABLE         },
     {BRT(OPENGL_B),            F(flags),      BRTV_SET, BRTV_CONV_BIT,  SDL_WINDOW_OPENGL            },
+    {BRT(VULKAN_B),            F(flags),      BRTV_SET, BRTV_CONV_BIT,  SDL_WINDOW_VULKAN            },
     {BRT(WINDOW_FULLSCREEN_B), F(flags),      BRTV_SET, BRTV_CONV_BIT,  SDL_WINDOW_FULLSCREEN        },
     {BRT(SDL_EXT_PROCS_P),     F(ext_procs),  BRTV_SET, BRTV_CONV_COPY, 0                            },
 };
@@ -297,6 +299,9 @@ static br_error BR_CMETHOD_DECL(br_output_facility_sdl3, pixelmapNew)(br_output_
      */
     if(pt.flags & SDL_WINDOW_OPENGL)
         return DevicePixelmapSDL3CreateGL(&pt, ppmap);
+
+    if(pt.flags & SDL_WINDOW_VULKAN)
+        return DevicePixelmapSDL3CreateVk(self->device, &pt, ppmap);
 
     if(is_window) {
         if(is_new) {
