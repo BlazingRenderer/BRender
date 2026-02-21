@@ -6,6 +6,13 @@ else ()
     message(STATUS "OpenGL not found, not building glrend")
 endif ()
 
+
+add_subdirectory(vkrend)
+
+if(TARGET vkrend)
+    target_link_libraries(brender-full INTERFACE vkrend)
+endif()
+
 if (TARGET SDL2::SDL2)
     add_subdirectory(sdl2dev)
     target_link_libraries(brender-full INTERFACE sdl2dev)

@@ -34,6 +34,20 @@ if (TARGET glrend)
             )
 endif()
 
+if (TARGET vkrend)
+    install(TARGETS vkrend-headers
+            EXPORT Core
+            FILE_SET include DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/brender/vkrend
+            )
+
+    install(TARGETS vkrend
+            EXPORT Core
+            LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}/brender
+            ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}/brender
+            )
+endif()
+
+
 if (TARGET sdl2dev)
     install(TARGETS sdl2dev-headers
             EXPORT Core

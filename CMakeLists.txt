@@ -60,6 +60,7 @@ endfunction()
 find_sdl()
 
 option(BRENDER_BUILD_DRIVERS "Build Drivers" ON)
+option(BRENDER_BUILD_VKREND "Build Vulkan Renderer" ON)
 option(BRENDER_BUILD_SOFT "Build Software Renderer" OFF)
 
 message(STATUS "Building software renderer: ${BRENDER_BUILD_SOFT}")

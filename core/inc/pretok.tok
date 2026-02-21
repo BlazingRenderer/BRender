@@ -883,6 +883,7 @@ OPENGL_PROFILE                      token
   OPENGL_PROFILE_ES                 none
 
 OPENGL                              boolean
+VULKAN                              boolean
 
 # Tokens for system configuration
 
