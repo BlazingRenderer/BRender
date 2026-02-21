@@ -46,6 +46,19 @@ if (TARGET glrend1x)
             )
 endif()
 
+if (TARGET vkrend)
+    install(TARGETS vkrend-headers
+            EXPORT Core
+            FILE_SET include DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/brender/vkrend
+            )
+
+    install(TARGETS vkrend
+            EXPORT Core
+            LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}/brender
+            ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}/brender
+            )
+endif()
+
 if (TARGET sdl2dev)
     install(TARGETS sdl2dev-headers
             EXPORT Core
@@ -120,7 +133,7 @@ install(FILES
 # pkg-config
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/cmake/brender.pc.in ${CMAKE_CURRENT_BINARY_DIR}/brender.pc @ONLY)
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/brender.pc DESTINATION ${CMAKE_INSTALL_PREFIX}/lib/pkgconfig)
-foreach(driver sdl2dev sdl3dev glrend glrend1x softrend softprim mcga)
+foreach(driver sdl2dev sdl3dev glrend glrend1x vkrend softrend softprim mcga)
 	if (TARGET ${driver})
 		configure_file(${CMAKE_CURRENT_SOURCE_DIR}/cmake/brender-driver.pc.in ${CMAKE_CURRENT_BINARY_DIR}/brender-${driver}.pc @ONLY)
 		install(FILES ${CMAKE_CURRENT_BINARY_DIR}/brender-${driver}.pc DESTINATION ${CMAKE_INSTALL_PREFIX}/lib/pkgconfig)

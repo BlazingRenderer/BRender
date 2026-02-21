@@ -14,3 +14,7 @@ examples/brdemo/parg.h
 drivers/glrend/*.glsl
 
 drivers/glrend1x/glad
+
+drivers/vkrend/vk_mem_alloc.h
+drivers/vkrend/vk_mem_alloc.cpp
+
