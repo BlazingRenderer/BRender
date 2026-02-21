@@ -15,6 +15,8 @@
     mkShells = packages: builtins.mapAttrs (k: v: v.overrideAttrs(old: {
       hardeningDisable = [ "all" ];
       nativeBuildInputs = old.nativeBuildInputs ++ v.devTools;
+
+      env.LD_LIBRARY_PATH = self.inputs.nixpkgs.lib.makeLibraryPath [ v.vulkan-loader ];
     })) (nixpkgs.lib.removeAttrs packages [ "wineserverHook" "uasm" "uasm-static" ]);
   in {
     packages = forAllSystems(pkgs: rec {

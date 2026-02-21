@@ -12,6 +12,7 @@
 , spirv-cross
 , makeBinaryWrapper
 , clang-tools
+, vulkan-loader
 , withTools ? true
 , withExamples ? false
 }: let
@@ -38,6 +39,8 @@ stdenv.mkDerivation(finalAttrs: {
   passthru.devTools = [
     clang-tools
   ];
+
+  passthru.vulkan-loader = vulkan-loader;
 
   buildInputs = [
     sdl3
