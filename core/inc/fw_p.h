@@ -78,9 +78,9 @@ void *BR_RESIDENT_ENTRY BrBSearch(const void *key, const void *base, unsigned in
 /*
  * Diagnostic generation
  */
-void BR_RESIDENT_ENTRY BrFailure(const char *s, ...);
-void BR_RESIDENT_ENTRY BrWarning(const char *s, ...);
-void BR_RESIDENT_ENTRY BrFatal(const char *name, int line, char *s, ...);
+BR_NORETURN void BR_RESIDENT_ENTRY BrFailure(const char *s, ...);
+void BR_RESIDENT_ENTRY             BrWarning(const char *s, ...);
+BR_NORETURN void BR_RESIDENT_ENTRY BrFatal(const char *name, int line, char *s, ...);
 
 /*
  * Debug Break

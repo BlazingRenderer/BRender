@@ -88,8 +88,8 @@ br_value BR_RESIDENT_ENTRY BrTokenValueVaArg(br_token token, va_list *ap);
 /*
  * diag.c
  */
-void BR_RESIDENT_ENTRY _BrAssert(const char *condition, const char *file, unsigned line);
-void BR_RESIDENT_ENTRY _BrUAssert(const char *condition, const char *file, unsigned line);
+BR_NORETURN void BR_RESIDENT_ENTRY _BrAssert(const char *condition, const char *file, unsigned line);
+BR_NORETURN void BR_RESIDENT_ENTRY _BrUAssert(const char *condition, const char *file, unsigned line);
 
 /*
  * lexer.c
