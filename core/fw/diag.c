@@ -28,10 +28,11 @@ void BR_RESIDENT_ENTRY BrFailure(const char *s, ...)
     BrVSprintf(_diag_scratch + (BR_ASIZE(failure_header) - 1), s, args);
     va_end(args);
 
-    if(fw.diag->failure == NULL)
-        BrAbort();
+    if(fw.diag->failure != NULL) {
+        fw.diag->failure(_diag_scratch);
+    }
 
-    fw.diag->failure(_diag_scratch);
+    BrAbort();
 }
 
 void BR_RESIDENT_ENTRY BrWarning(const char *s, ...)
@@ -61,28 +62,31 @@ void BR_RESIDENT_ENTRY BrFatal(const char *name, int line, char *s, ...)
     BrVSprintf(_diag_scratch + n, s, args);
     va_end(args);
 
-    if(fw.diag->failure == NULL)
-        BrAbort();
+    if(fw.diag->failure != NULL) {
+        fw.diag->failure(_diag_scratch);
+    }
 
-    fw.diag->failure(_diag_scratch);
+    BrAbort();
 }
 
 void BR_RESIDENT_ENTRY _BrAssert(const char *condition, const char *file, unsigned line)
 {
-    if(fw.diag->failure == NULL)
-        BrAbort();
+    if(fw.diag->failure != NULL) {
+        BrSprintf(_diag_scratch, "ASSERTION FAILED %s:%d: \"%s\"\n", file, line, condition);
+        fw.diag->failure(_diag_scratch);
+    }
 
-    BrSprintf(_diag_scratch, "ASSERTION FAILED %s:%d: \"%s\"\n", file, line, condition);
-    fw.diag->failure(_diag_scratch);
+    BrAbort();
 }
 
 void BR_RESIDENT_ENTRY _BrUAssert(const char *condition, const char *file, unsigned line)
 {
-    if(fw.diag->failure == NULL)
-        BrAbort();
+    if(fw.diag->failure != NULL) {
+        BrSprintf(_diag_scratch, "ASSERTION FAILED %s:%d: \"%s\"\n", file, line, condition);
+        fw.diag->failure(_diag_scratch);
+    }
 
-    BrSprintf(_diag_scratch, "ASSERTION FAILED %s:%d: \"%s\"\n", file, line, condition);
-    fw.diag->failure(_diag_scratch);
+    BrAbort();
 }
 
 void BR_PUBLIC_ENTRY BrDebugBreak(void)
