@@ -57,6 +57,8 @@ if (BRENDER_BUILD_VKREND)
             uuid.c
             uuid.h
 
+            util.c
+
             vk_mem_alloc.cpp
             vk_mem_alloc.h
     )

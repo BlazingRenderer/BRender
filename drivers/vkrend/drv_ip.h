@@ -35,6 +35,12 @@ br_output_facility *OutputFacilityVkAllocate(br_device *dev, br_renderer_facilit
  */
 const br_pixelmap_vk_fmt *DeviceVkGetFormatDetails(br_uint_8 type);
 
+
+/*
+ * util.c
+ */
+br_uint_8 DeviceVkTypeOrBits(br_uint_8 pixel_type, br_int_32 pixel_bits);
+
 /*
  * uuid.c
  */
