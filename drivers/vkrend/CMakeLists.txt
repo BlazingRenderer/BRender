@@ -41,6 +41,8 @@ if (BRENDER_BUILD_VKREND)
 
             template.h
 
+            formats.c
+
             device.c
             device.h
 

@@ -20,6 +20,17 @@ extern "C" {
 #include "formats.h"
 #include "pm.h"
 
+typedef struct br_pixelmap_vk_fmt {
+    br_uint_8          pm_type;
+    VkFormat           format;
+    br_boolean         blended;
+    br_boolean         indexed;
+    VkComponentSwizzle swizzle_r;
+    VkComponentSwizzle swizzle_g;
+    VkComponentSwizzle swizzle_b;
+    VkComponentSwizzle swizzle_a;
+} br_pixelmap_vk_fmt;
+
 #include "uuid.h"
 #include "template.h"
 #include "device.h"

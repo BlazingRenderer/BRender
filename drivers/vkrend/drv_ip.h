@@ -31,6 +31,11 @@ br_renderer_facility *RendererFacilityVkAllocate(br_device *dev);
 br_output_facility *OutputFacilityVkAllocate(br_device *dev, br_renderer_facility *rendfcty);
 
 /*
+ * formats.c
+ */
+const br_pixelmap_vk_fmt *DeviceVkGetFormatDetails(br_uint_8 type);
+
+/*
  * uuid.c
  */
 void       DeviceVkUUIDNil(br_device_vk_uuid *uuid);
