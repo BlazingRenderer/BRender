@@ -28,8 +28,8 @@ typedef br_scalar br_angle;
 
 #define BR_SIN(a)           ((br_scalar)sinf(BrAngleToRadian(a)))
 #define BR_COS(a)           ((br_scalar)cosf(BrAngleToRadian(a)))
-#define BR_ASIN(a)          BrRadianToAngle(asinf(a))
-#define BR_ACOS(a)          BrRadianToAngle(acosf(a))
+#define BR_ASIN(a)          BrRadianToAngle(BrFloatArcSin(a))
+#define BR_ACOS(a)          BrRadianToAngle(BrFloatArcCos(a))
 #define BR_ATAN2(a, b)      BrRadianToAngle(atan2f((a), (b)))
 #define BR_ATAN2FAST(a, b)  BrRadianToAngle(atan2f((a), (b)))
 
