@@ -40,6 +40,7 @@ const br_pixelmap_vk_fmt *DeviceVkGetFormatDetails(br_uint_8 type);
  * util.c
  */
 br_uint_8 DeviceVkTypeOrBits(br_uint_8 pixel_type, br_int_32 pixel_bits);
+VkResult DeviceVkGetSwapchainFormat(const GladVulkanContext *vk, VkPhysicalDevice phy, VkSurfaceKHR surf, VkFormat in_fmt, VkSurfaceFormatKHR *out);
 
 /*
  * uuid.c
