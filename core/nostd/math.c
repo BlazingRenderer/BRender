@@ -44,6 +44,16 @@ float BR_PUBLIC_ENTRY BrFloatAbs(float f)
     return __builtin_fabsf(f);
 }
 
+float BR_PUBLIC_ENTRY BrFloatArcCos(float f)
+{
+    return __builtin_acosf(f);
+}
+
+float BR_PUBLIC_ENTRY BrFloatArcSin(float f)
+{
+    return __builtin_asinf(f);
+}
+
 int BR_PUBLIC_ENTRY BrIntAbs(int i)
 {
 	return __builtin_abs(i);
