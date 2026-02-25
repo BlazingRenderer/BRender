@@ -82,20 +82,20 @@ static void BR_CMETHOD_DECL(br_device_sdl3, free)(br_object *_self)
      */
     BrObjectContainerFree((br_object_container *)self, BR_NULL_TOKEN, NULL, NULL);
 
-    /*
-     * Unload Vulkan
-     */
-    DeviceSDL3UnloadVulkan(self);
-
-    /*
-     * Remove resources
-     */
-    BrResFreeNoCallback(self);
-
-    /*
-     * Tidy up SDL3.
-     */
-    SDL_QuitSubSystem(SDL_INIT_VIDEO);
+    // /*
+    //  * Unload Vulkan
+    //  */
+    // DeviceSDL3UnloadVulkan(self);
+    //
+    // /*
+    //  * Remove resources
+    //  */
+    // BrResFreeNoCallback(self);
+    //
+    // /*
+    //  * Tidy up SDL3.
+    //  */
+    // SDL_QuitSubSystem(SDL_INIT_VIDEO);
 }
 
 static const char *BR_CMETHOD_DECL(br_device_sdl3, identifier)(struct br_object *self)

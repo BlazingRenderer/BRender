@@ -4,6 +4,7 @@
 #include <brender.h>
 #include <brddi.h> /* To poke the device's CLUT. */
 #include <brglrend.h>
+#include <brvkrend.h>
 
 #if USE_SDL3
 
@@ -1306,97 +1307,107 @@ typedef struct br_drawtest {
 
 // clang-format off
 static br_drawtest tests[] = {
-    {
-        .name      = "Line & Point Test",
-        .init      = linepoint_init,
-        .draw      = linepoint_draw,
-        .user_size = sizeof(linepoint_state),
-        .arg       = NULL
-    },
-    {
-        .name      = "Line & Point Test (indexed)",
-        .init      = linepoint8_init,
-        .draw      = linepoint8_draw,
-        .fini      = linepoint8_fini,
-        .user_size = sizeof(linepoint8_state),
-        .arg       = NULL
-    },
-    MAKE_SMPTE_TEST("smpte_type03_index_8.pix",   BR_PMT_INDEX_8,   ", embedded palette"),
-    MAKE_SMPTE_TEST("smpte_type04_rgb_555.pix",   BR_PMT_RGB_555,   ""),
+    // {
+    //     .name      = "Line & Point Test",
+    //     .init      = linepoint_init,
+    //     .draw      = linepoint_draw,
+    //     .user_size = sizeof(linepoint_state),
+    //     .arg       = NULL
+    // },
+    // {
+    //     .name      = "Line & Point Test (indexed)",
+    //     .init      = linepoint8_init,
+    //     .draw      = linepoint8_draw,
+    //     .fini      = linepoint8_fini,
+    //     .user_size = sizeof(linepoint8_state),
+    //     .arg       = NULL
+    // },
+    // MAKE_SMPTE_TEST("smpte_type03_index_8.pix",   BR_PMT_INDEX_8,   ", embedded palette"),
+    // MAKE_SMPTE_TEST("smpte_type04_rgb_555.pix",   BR_PMT_RGB_555,   ""),
     MAKE_SMPTE_TEST("smpte_type05_rgb_565.pix",   BR_PMT_RGB_565,   ""),
-    MAKE_SMPTE_TEST("smpte_type34_bgr_565.pix",   BR_PMT_BGR_565,   ""),
-    MAKE_SMPTE_TEST("smpte_type06_rgb_888.pix",   BR_PMT_RGB_888,   ""),
-    MAKE_SMPTE_TEST("smpte_type07_rgbx_888.pix",  BR_PMT_RGBX_888,  ""),
-    MAKE_SMPTE_TEST("smpte_type08_rgba_8888.pix", BR_PMT_RGBA_8888, ""),
-    MAKE_SMPTE_TEST("smpte_type17_bgr_555.pix",   BR_PMT_BGR_555,   ""),
-    MAKE_SMPTE_TEST("smpte_type32_argb_4444.pix", BR_PMT_ARGB_4444, ""),
-    MAKE_SMPTE_TEST("smpte_type37_r8g8b8a8.pix",  BR_PMT_R8G8B8A8,  ""),
-    {
-        .name      = "Earth 8-bit",
-        .init      = earth8_init,
-        .draw      = earth8_draw,
-        .fini      = earth8_fini,
-        .user_size = sizeof(br_earth8_state),
-        .arg       = NULL,
-    },
-    {
-        .name      = "Device <-> Memory Copies",
-        .init      = device2mem_init,
-        .draw      = device2mem_draw,
-        .post      = device2mem_swap,
-        .fini      = device2mem_fini,
-        .user_size = sizeof(br_device2mem_state),
-        .arg       = NULL,
-    },
-    {
-        .name      = "Sub-pixelmap Test",
-        .init      = submap_init,
-        .draw      = submap_draw,
-        .fini      = submap_fini,
-        .user_size = sizeof(br_submap_state),
-        .arg       = NULL,
-    },
-    {
-        .name      = "pixelQuery() Test",
-        .init      = pixelquery_init,
-        .draw      = pixelquery_draw,
-        .fini      = pixelquery_fini,
-        .user_size = sizeof(pixelquery_state),
-        .arg       = NULL,
-    },
-    MAKE_XBPP_TEST("smpte_type03_index_8.pix",   BR_PMT_INDEX_8,   ""),
-    MAKE_XBPP_TEST("smpte_type04_rgb_555.pix",   BR_PMT_RGB_555,   ""),
-    MAKE_XBPP_TEST("smpte_type05_rgb_565.pix",   BR_PMT_RGB_565,   ""),
-    MAKE_XBPP_TEST("smpte_type06_rgb_888.pix",   BR_PMT_RGB_888,   ""),
-    MAKE_XBPP_TEST("smpte_type08_rgba_8888.pix", BR_PMT_RGBA_8888, ""),
-    {
-        .name      = "Resize w/ CLUT",
-        .init      = rwclut_init,
-        .draw      = rwclut_draw,
-        .fini      = rwclut_fini,
-        .user_size = sizeof(rwclut_state),
-    },
-    {
-        .name      = "Non-indexed target w/ CLUT",
-        .init      = nitclut_init,
-        .draw      = nitclut_draw,
-        .fini      = nitclut_fini,
-        .user_size = sizeof(nitclut_state),
-    },
-    {
-        .name      = "BrPixelmapCloneType() Test",
-        .init      = clone_init,
-        .draw      = clone_draw,
-        .fini      = clone_fini,
-        .user_size = sizeof(br_clone_state),
-    },
+    // MAKE_SMPTE_TEST("smpte_type34_bgr_565.pix",   BR_PMT_BGR_565,   ""),
+    // MAKE_SMPTE_TEST("smpte_type06_rgb_888.pix",   BR_PMT_RGB_888,   ""),
+    // MAKE_SMPTE_TEST("smpte_type07_rgbx_888.pix",  BR_PMT_RGBX_888,  ""),
+    // MAKE_SMPTE_TEST("smpte_type08_rgba_8888.pix", BR_PMT_RGBA_8888, ""),
+    // MAKE_SMPTE_TEST("smpte_type17_bgr_555.pix",   BR_PMT_BGR_555,   ""),
+    // MAKE_SMPTE_TEST("smpte_type32_argb_4444.pix", BR_PMT_ARGB_4444, ""),
+    // MAKE_SMPTE_TEST("smpte_type37_r8g8b8a8.pix",  BR_PMT_R8G8B8A8,  ""),
+    // {
+    //     .name      = "Earth 8-bit",
+    //     .init      = earth8_init,
+    //     .draw      = earth8_draw,
+    //     .fini      = earth8_fini,
+    //     .user_size = sizeof(br_earth8_state),
+    //     .arg       = NULL,
+    // },
+    // {
+    //     .name      = "Device <-> Memory Copies",
+    //     .init      = device2mem_init,
+    //     .draw      = device2mem_draw,
+    //     .post      = device2mem_swap,
+    //     .fini      = device2mem_fini,
+    //     .user_size = sizeof(br_device2mem_state),
+    //     .arg       = NULL,
+    // },
+    // {
+    //     .name      = "Sub-pixelmap Test",
+    //     .init      = submap_init,
+    //     .draw      = submap_draw,
+    //     .fini      = submap_fini,
+    //     .user_size = sizeof(br_submap_state),
+    //     .arg       = NULL,
+    // },
+    // {
+    //     .name      = "pixelQuery() Test",
+    //     .init      = pixelquery_init,
+    //     .draw      = pixelquery_draw,
+    //     .fini      = pixelquery_fini,
+    //     .user_size = sizeof(pixelquery_state),
+    //     .arg       = NULL,
+    // },
+    // MAKE_XBPP_TEST("smpte_type03_index_8.pix",   BR_PMT_INDEX_8,   ""),
+    // MAKE_XBPP_TEST("smpte_type04_rgb_555.pix",   BR_PMT_RGB_555,   ""),
+    // MAKE_XBPP_TEST("smpte_type05_rgb_565.pix",   BR_PMT_RGB_565,   ""),
+    // MAKE_XBPP_TEST("smpte_type06_rgb_888.pix",   BR_PMT_RGB_888,   ""),
+    // MAKE_XBPP_TEST("smpte_type08_rgba_8888.pix", BR_PMT_RGBA_8888, ""),
+    // {
+    //     .name      = "Resize w/ CLUT",
+    //     .init      = rwclut_init,
+    //     .draw      = rwclut_draw,
+    //     .fini      = rwclut_fini,
+    //     .user_size = sizeof(rwclut_state),
+    // },
+    // {
+    //     .name      = "Non-indexed target w/ CLUT",
+    //     .init      = nitclut_init,
+    //     .draw      = nitclut_draw,
+    //     .fini      = nitclut_fini,
+    //     .user_size = sizeof(nitclut_state),
+    // },
+    // {
+    //     .name      = "BrPixelmapCloneType() Test",
+    //     .init      = clone_init,
+    //     .draw      = clone_draw,
+    //     .fini      = clone_fini,
+    //     .user_size = sizeof(br_clone_state),
+    // },
 };
 // clang-format on
 
 void BR_CALLBACK _BrBeginHook(void)
 {
-    BrDevAddStatic(NULL, DEVICE_FACTORY, NULL);
+    struct br_device *sdl3dev;
+
+    BrDevAddStatic(&sdl3dev, DEVICE_FACTORY, NULL);
     BrDevAddStatic(NULL, BrDrv1GLBegin, NULL);
+
+    //char *args = BrResSprintf(sdl2dev, "DEVICE_UUID=\"00000000-0900-0000-0000-000000000000\",VKREND_INIT_DEVICE=%" PRIuPTR, (br_uintptr_t)sdl2dev);
+    char *args = BrResSprintf(sdl3dev, "VKREND_INIT_DEVICE=%" PRIuPTR, (br_uintptr_t)sdl3dev);
+    BrDevAddStatic(NULL, BrDrv1VkBegin, args);
+    BrResFree(args);
+
+    // VULKAN_INIT_DEVICE=
+
 }
 
 void BR_CALLBACK _BrEndHook(void)
@@ -1448,7 +1459,8 @@ int main(int argc, char **argv)
 
     BrBegin();
 
-    BrLogSetLevel(BR_LOG_DEBUG);
+    BrLogSetLevel(BR_LOG_TRACE);
+    SDL_SetLogPriorities(SDL_LOG_PRIORITY_VERBOSE);
 
     void *anchor = BrResAllocate(NULL, 0, BR_MEMORY_ANCHOR);
 
@@ -1459,7 +1471,8 @@ int main(int argc, char **argv)
                       BRT_HIDPI_B,        BR_TRUE,
                       /* Set these if you dare... */
                       BRT_RESIZABLE_B,    BR_TRUE,
-                      BRT_OPENGL_B,       BR_FALSE,
+                      //BRT_OPENGL_B,       BR_FALSE,
+                      BRT_VULKAN_B,         BR_TRUE,
                       BR_NULL_TOKEN);
     // clang-format on
 
