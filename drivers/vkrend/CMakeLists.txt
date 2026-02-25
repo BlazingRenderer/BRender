@@ -49,6 +49,10 @@ if (BRENDER_BUILD_VKREND)
             outfcty.c
             outfcty.h
 
+            devpixmp.h
+            devpixmp.c
+            devpixmpf.c
+
             rendfcty.c
             rendfcty.h
 
@@ -58,6 +62,8 @@ if (BRENDER_BUILD_VKREND)
             uuid.h
 
             util.c
+
+            ext_procs.c
 
             vk_mem_alloc.cpp
             vk_mem_alloc.h

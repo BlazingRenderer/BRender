@@ -31,16 +31,38 @@ br_renderer_facility *RendererFacilityVkAllocate(br_device *dev);
 br_output_facility *OutputFacilityVkAllocate(br_device *dev, br_renderer_facility *rendfcty);
 
 /*
+ * devpixmpf.c
+ */
+br_device_pixelmap          *DevicePixelmapVkAllocateFront(br_device *dev, br_output_facility *outfcty, br_token_value *tv);
+br_device_pixelmap_vk_frame *DevicePixelmapVkGetCurrentFrame(br_device_pixelmap *self);
+
+/*
+ * devpixmp.c
+ */
+br_error BR_CMETHOD_DECL(br_device_pixelmap_vk, match)(br_device_pixelmap *self, br_device_pixelmap **newpm, br_token_value *tv);
+
+/*
  * formats.c
  */
 const br_pixelmap_vk_fmt *DeviceVkGetFormatDetails(br_uint_8 type);
-
 
 /*
  * util.c
  */
 br_uint_8 DeviceVkTypeOrBits(br_uint_8 pixel_type, br_int_32 pixel_bits);
 VkResult DeviceVkGetSwapchainFormat(const GladVulkanContext *vk, VkPhysicalDevice phy, VkSurfaceKHR surf, VkFormat in_fmt, VkSurfaceFormatKHR *out);
+VkResult DeviceVkCreateSwapchain(const GladVulkanContext *vk, VkPhysicalDevice phy, VkDevice device, VkQueue queue,
+                                 const DeviceVkCreateSwapchainInfo *info, DeviceVkSwapchain *out);
+void     DeviceVkDestroySwapchain(const GladVulkanContext *vk, VkDevice device, DeviceVkSwapchain *swapchain);
+
+/*
+ * ext_procs.c
+ */
+br_error DeviceVkExtCreateSurface(br_device *self, void *window_handle, VkSurfaceKHR *surface);
+void     DeviceVkExtDestroySurface(br_device *self, void *window_handle, VkSurfaceKHR surface);
+br_error DevicePixelmapVkExtResize(br_device_pixelmap *self, br_int_32 w, br_int_32 h);
+br_error DevicePixelmapVkExtHandleWindowEvent(br_device_pixelmap *self, void *arg);
+void     DevicePixelmapVkExtFree(br_device_pixelmap *self);
 
 /*
  * uuid.c

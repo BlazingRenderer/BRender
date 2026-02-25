@@ -10,6 +10,13 @@ enum {
     BR_DEVICE_VK_INIT_VERSION   = BR_DEVICE_VK_INIT_VERSION_1,
 };
 
+typedef br_error BR_CALLBACK br_device_pixelmap_vk_create_surface_cbfn(void *instance, const void *allocator, void *surface, void *user);
+typedef void BR_CALLBACK     br_device_pixelmap_vk_destroy_surface_cbfn(void *instance, const void *allocator, void *surface, void *user);
+typedef br_error BR_CALLBACK br_device_pixelmap_vk_resize_cbfn(br_pixelmap *pm, br_int_32 w, br_int_32 h, void *user);
+typedef void BR_CALLBACK     br_device_pixelmap_vk_preswap_cbfn(br_pixelmap *pm, void *user);
+typedef void BR_CALLBACK     br_device_pixelmap_vk_free_cbfn(br_pixelmap *pm, void *user);
+typedef br_error BR_CALLBACK br_device_pixelmap_vk_handle_window_event_cbfn(br_pixelmap *pm, void *arg, void *user);
+
 typedef void(br_device_vk_void_function)(void);
 
 typedef void(br_device_vk_cbfn)(void);
@@ -21,6 +28,13 @@ typedef struct br_device_vk_init {
     const char *const *required_layer_names;
     uint32_t           required_extension_count;
     const char *const *required_extension_names;
+
+    br_device_pixelmap_vk_create_surface_cbfn      *create_surface;
+    br_device_pixelmap_vk_destroy_surface_cbfn     *destroy_surface;
+    br_device_pixelmap_vk_resize_cbfn              *resize;
+    br_device_pixelmap_vk_preswap_cbfn             *preswap_hook;
+    br_device_pixelmap_vk_free_cbfn                *free;
+    br_device_pixelmap_vk_handle_window_event_cbfn *handle_window_event;
 } br_device_vk_init;
 
 /*

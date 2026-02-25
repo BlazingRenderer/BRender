@@ -14,9 +14,13 @@ struct device_templates {
      */
     br_tv_template *deviceTemplate;
     br_tv_template *outputFacilityTemplate;
+    br_tv_template *devicePixelmapFrontTemplate;
+    br_tv_template *devicePixelmapTemplate;
     br_tv_template *rendererFacilityTemplate;
 
     br_tv_template *deviceAllocateTemplate;
+    br_tv_template *pixelmapNewTemplate;
+    br_tv_template *pixelmapMatchTemplate;
     br_tv_template *rendererNewTemplate;
 };
 

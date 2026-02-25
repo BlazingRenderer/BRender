@@ -125,10 +125,7 @@ static br_error BR_CMETHOD_DECL(br_output_facility_vk, pixelmapNew)(br_output_fa
     /*
      * Create a device pixelmap structure representing display memory
      */
-    /* FIXME: actually do this */
-    pm = NULL;
-
-    if(pm == NULL)
+    if((pm = DevicePixelmapVkAllocateFront(self->device, self, tv)) == NULL)
         return BRE_FAIL;
 
     *ppmap = pm;
