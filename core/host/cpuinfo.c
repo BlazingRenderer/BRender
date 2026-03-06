@@ -17,10 +17,10 @@ static int x86_cpuid(unsigned int leaf, unsigned int *_eax, unsigned int *_ebx, 
 {
     int CPUInfo[4];
     __cpuid(CPUInfo, leaf);
-    memcpy(_eax, CPUInfo + 0, sizeof(_eax));
-    memcpy(_ebx, CPUInfo + 1, sizeof(_ebx));
-    memcpy(_ecx, CPUInfo + 2, sizeof(_ecx));
-    memcpy(_edx, CPUInfo + 3, sizeof(_edx));
+    memcpy(_eax, CPUInfo + 0, sizeof(*_eax));
+    memcpy(_ebx, CPUInfo + 1, sizeof(*_ebx));
+    memcpy(_ecx, CPUInfo + 2, sizeof(*_ecx));
+    memcpy(_edx, CPUInfo + 3, sizeof(*_edx));
     return 1;
 }
 
