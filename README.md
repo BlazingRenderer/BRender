@@ -24,6 +24,31 @@ cmake ..
 make
 ```
 
+### macOS (Apple Silicon)
+
+Install dependencies via [Homebrew](https://brew.sh):
+
+```sh
+brew install cmake sdl3 glslang spirv-cross
+```
+
+Then build with SDL3:
+
+```sh
+mkdir cmake-build && cd cmake-build
+cmake .. -DBRENDER_USE_SDL3=ON
+make -j$(sysctl -n hw.logicalcpu)
+```
+
+The x86 software renderer (`pentprim`) cannot be built on ARM — the OpenGL renderer is used instead. Everything else builds and runs correctly, including the sample apps.
+
+To try it out, run the forest demo from the build directory:
+
+```sh
+cd examples/samples/forest
+./forest
+```
+
 ## License
 
 This is released under the MIT license.
