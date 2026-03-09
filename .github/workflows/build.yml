@@ -48,6 +48,21 @@ jobs:
       - name: Install
         run: sudo cmake --install build --config Release --strip
 
+  build-macos:
+    runs-on: macos-26
+    steps:
+      - name: Clone Repository
+        uses: actions/checkout@v4
+
+      - name: Install Dependencies
+        run: brew install cmake sdl3 glslang spirv-cross
+
+      - name: Configure
+        run: cmake -B build -DCMAKE_BUILD_TYPE=Release
+
+      - name: Build
+        run: cmake --build build --parallel
+
   build-msvc2022:
     runs-on: windows-2022
     env:
