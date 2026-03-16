@@ -8,7 +8,6 @@
     Last change:  TN    4 Apr 97   11:15 am
  */
 #include "v1db.h"
-#include "shortcut.h"
 #include "brassert.h"
 
 /*

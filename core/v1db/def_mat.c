@@ -8,9 +8,6 @@
  */
 
 #include "v1db.h"
-#include "host.h"
-#include "datafile.h"
-#include <brassert.h>
 
 /*
  * Global database state

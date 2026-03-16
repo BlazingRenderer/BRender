@@ -7,7 +7,6 @@
  * order table support code
  */
 #include "v1db.h"
-#include "shortcut.h"
 #include "brassert.h"
 
 #include "zsmacro.h"

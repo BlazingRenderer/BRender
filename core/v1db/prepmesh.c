@@ -14,7 +14,6 @@
 #include "v1db.h"
 #include "vecifns.h"
 #include "brassert.h"
-#include "shortcut.h"
 #include "brmath.h"
 
 #include "formats.h"

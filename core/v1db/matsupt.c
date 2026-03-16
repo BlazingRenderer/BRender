@@ -7,9 +7,7 @@
  * Material support routines
  */
 #include "v1db.h"
-#include "shortcut.h"
 #include "brassert.h"
-#include "datafile.h"
 
 /*
  * Allocate a material

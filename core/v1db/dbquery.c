@@ -8,7 +8,6 @@
  */
 #include "brender.h"
 #include "brddi.h"
-#include "brassert.h"
 
 static br_boolean rendfctyEnum(br_object *rendfcty, br_rendfcty_enum_cbfn *cbfn, void *args)
 {

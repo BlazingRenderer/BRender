@@ -8,7 +8,6 @@
  */
 #include "v1db.h"
 #include "brassert.h"
-#include "shortcut.h"
 
 void BR_PUBLIC_ENTRY BrTableUpdate(br_pixelmap *table, br_uint_16 flags)
 {

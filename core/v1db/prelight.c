@@ -7,7 +7,6 @@
  * Bits of the lighting model for indexed pixels
  */
 #include "brender.h"
-#include "shortcut.h"
 #include "brassert.h"
 #include "formats.h"
 #include "v1db.h"

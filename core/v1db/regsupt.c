@@ -6,11 +6,8 @@
  *
  * Public registry functions
  */
-#include <string.h>
-
 #include "v1db.h"
 #include "brassert.h"
-#include "datafile.h"
 
 /**
  ** Specific versions of registry calls for each class

@@ -8,7 +8,6 @@
  */
 #include "v1db.h"
 #include "shortcut.h"
-#include "brassert.h"
 #include "formats.h"
 
 /*

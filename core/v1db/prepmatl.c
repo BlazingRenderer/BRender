@@ -8,8 +8,6 @@
     Last change:  TN   11 Apr 97   12:22 pm
  */
 #include "v1db.h"
-#include "brassert.h"
-#include "shortcut.h"
 
 /*
  * Mask of renderer state parts that materials are mapped to
