@@ -73,3 +73,19 @@ void BR_RESIDENT_ENTRY BrLogError(const char *component, const char *fmt, ...)
     BrLogV(BR_LOG_ERROR, component, fmt, ap);
     va_end(ap);
 }
+
+int BR_RESIDENT_ENTRY BrLogWrite(const void *buffer, br_size_t s, br_size_t n)
+{
+    BrLogDebug("LOG", "%.*s", (int)(s * n), (const char *)buffer);
+    return (int)n;
+}
+
+int BR_RESIDENT_ENTRY BrLogPrintf(const char *fmt, ...)
+{
+    va_list ap;
+    va_start(ap, fmt);
+    BrLogV(BR_LOG_DEBUG, "LOG", fmt, ap);
+    va_end(ap);
+
+    return 0; /* If anything actually checks this, I'll eat my hat. */
+}

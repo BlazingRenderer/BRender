@@ -20,11 +20,6 @@ extern "C" {
 void BR_ASM_CALLBACK BrPoolAddChunk(br_pool *pool);
 
 /*
- * Debugging writes
- */
-int BR_PUBLIC_ENTRY BrLogWrite(void *buffer, br_size_t s, br_size_t n);
-
-/*
  * file.c
  */
 void BR_CALLBACK _BrFileFree(void *res, br_uint_8 res_class, br_size_t size);

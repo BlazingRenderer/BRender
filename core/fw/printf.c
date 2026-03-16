@@ -52,20 +52,6 @@ br_int_32 BR_RESIDENT_ENTRY BrSprintfN(char *buf, br_size_t buf_size, const char
 #endif
 }
 
-int BR_RESIDENT_ENTRY BrLogPrintf(const char *fmt, ...)
-{
-    int     n;
-    va_list args;
-
-    va_start(args, fmt);
-    n = BrVSprintf(BrScratchString(), fmt, args);
-    va_end(args);
-
-    BrLogWrite(BrScratchString(), 1, n);
-
-    return n;
-}
-
 br_int_32 BR_RESIDENT_ENTRY BrSScanf(char *str, const char *fmt, ...)
 {
     int     n;

@@ -2,7 +2,6 @@ project(std)
 
 set(STD_FILES
         brexcept.c
-        logwrite.c
         math.c
         stddiag.c
         stdfile.c

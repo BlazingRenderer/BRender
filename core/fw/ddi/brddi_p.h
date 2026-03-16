@@ -17,9 +17,10 @@ extern "C" {
 br_boolean BR_RESIDENT_ENTRY BrNamePatternMatch(const char *p, const char *s);
 
 /*
- * Debugging printf
+ * Debugging writes & printf
  */
 int BR_RESIDENT_ENTRY BrLogPrintf(const char *fmt, ...);
+int BR_RESIDENT_ENTRY BrLogWrite(const void *buffer, br_size_t s, br_size_t n);
 
 /*
  * resource.c
