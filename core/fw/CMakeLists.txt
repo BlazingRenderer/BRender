@@ -47,7 +47,6 @@ set(DDI_FILES
         ddi/brassert.h
         ddi/brddi.h
         ddi/brddi_p.h
-        ddi/brexcept.h
         ddi/brhton.h
         ddi/brimage.h
         ddi/datafile.h

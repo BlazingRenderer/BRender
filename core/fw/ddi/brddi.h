@@ -22,10 +22,6 @@
 #include "pool.h"
 #endif
 
-#ifndef _BREXCEPT_H_
-#include "brexcept.h"
-#endif
-
 #ifndef _REGISTER_H_
 #include "register.h"
 #endif

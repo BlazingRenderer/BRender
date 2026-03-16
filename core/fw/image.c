@@ -107,16 +107,6 @@ br_image *BR_RESIDENT_ENTRY BrImageReference(const char *name)
     char       *scratch = BrScratchString();
     br_image   *img;
 
-#if 0
-	br_exception ex_type;
-	void *ex_value;
-
-	if(ex_type = BrExceptionCatch(&ex_value)) {
-		SET_ERROR(ex_type, ex_value);
-		return NULL;
-	}
-#endif
-
     /*
      * See if image is already loaded...
      */

@@ -29,15 +29,6 @@ br_uint_32 BR_RESIDENT_ENTRY BrResCheck(void *vres, int no_tag);
 void BR_RESIDENT_ENTRY       BrResDump(void *vres, br_putline_cbfn *putline, void *arg);
 
 /*
- * brexcept.c
- */
-br_exception_handler *BR_RESIDENT_ENTRY _BrExceptionBegin(void);
-void BR_RESIDENT_ENTRY                  _BrExceptionEnd(void);
-void BR_RESIDENT_ENTRY                  _BrExceptionThrow(br_int_32 type, void *value);
-br_exception BR_RESIDENT_ENTRY          _BrExceptionValueFetch(br_exception type, void **evp);
-void *BR_RESIDENT_ENTRY                 _BrExceptionResource(void);
-
-/*
  * error.c
  */
 void BR_RESIDENT_ENTRY     BrLastErrorSet(br_error type, void *value);
