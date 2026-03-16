@@ -13,6 +13,10 @@ static void setup_quirks(br_gl_context_state *ctx)
         ctx->quirks.disable_anisotropic_filtering = 1;
     }
 
+    /*
+     * glBufferSubData() causes a pipeline flush on macOS (goddamnit Apple), so force orphaning the buffers instead.
+     * https://mojira.dev/MC-295893
+     */
     if(strstr(ctx->gl_renderer, "Apple M") == ctx->gl_renderer) {
         BrLogInfo("GLREND", "Quirk - using Apple Silicon, forcing model uniform buffer orphaning.");
         ctx->quirks.orphan_model_buffers = 1;
