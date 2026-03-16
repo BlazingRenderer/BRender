@@ -628,14 +628,6 @@ static void BR_CALLBACK lexerError(struct br_lexer *l, char *string)
     BR_FAILURE2("%s%s", pos, string);
 }
 
-#if 0
-#include <stdio.h>
-void BR_CALLBACK dumpLine(char *str, void *arg)
-{
-	puts(str);
-}
-#endif
-
 br_uint_32 BR_PUBLIC_ENTRY BrFmtScriptMaterialLoadMany(const char *filename, br_material **materials, br_uint_16 num)
 {
     int       count;
@@ -648,9 +640,6 @@ br_uint_32 BR_PUBLIC_ENTRY BrFmtScriptMaterialLoadMany(const char *filename, br_
 
     BrLexerCommentSet(l, '#');
     BrLexerErrorSet(l, lexerError);
-#if 0
-	BrLexerDumpSet(l, dumpLine, NULL);
-#endif
 
     r = BrLexerPushFile(l, filename);
     if(r != BRE_OK) {
