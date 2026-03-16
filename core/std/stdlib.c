@@ -198,19 +198,7 @@ br_int_32 BR_PUBLIC_ENTRY BrVSprintf(char *buf, const char *fmt, va_list args)
 
 br_int_32 BR_PUBLIC_ENTRY BrVSprintfN(char *buf, br_size_t buf_size, const char *fmt, va_list args)
 {
-    unsigned int n;
-    char         tmp[512];
-
-    n = vsprintf(tmp, fmt, args);
-
-    if(n > buf_size - 1) {
-        n = buf_size - 1;
-    }
-
-    strncpy(buf, tmp, n);
-    buf[n] = '\0';
-
-    return n;
+    return vsnprintf(buf, buf_size, fmt, args);
 }
 
 br_int_32 BR_PUBLIC_ENTRY BrVSScanf(const char *buf, const char *fmt, va_list args)
