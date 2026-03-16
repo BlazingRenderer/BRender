@@ -7,8 +7,6 @@
  * Reading config. strings from host environment
  */
 
-#include <stdio.h>
-
 #include "brender.h"
 #include "host.h"
 
