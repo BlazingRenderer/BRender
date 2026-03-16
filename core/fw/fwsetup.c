@@ -14,17 +14,6 @@
 static br_image Image_BRCORE1;
 
 /*
- * Stubs left over from dealing with Watcom's
- * magic symbols.
- */
-static void _PRO()
-{
-}
-static void _EPI()
-{
-}
-
-/*
  * Global renderer state
  */
 br_framework_state BR_ASM_DATA fw;
@@ -447,7 +436,6 @@ static const br_image_function_info functions[] = {
     REGMETHOD(BrWarning),
     REGMETHOD(_BrAssert),
     REGMETHOD(_BrUAssert),
-    REGMETHOD(_EPI),
     DEVMETHOD(br_object_container, addFront),
     DEVMETHOD(br_object_container, count),
     DEVMETHOD(br_object_container, find),
@@ -463,7 +451,6 @@ static const br_image_function_info functions[] = {
     DEVMETHOD(br_object, queryBuffer),
     DEVMETHOD(br_object, queryMany),
     DEVMETHOD(br_object, queryManySize),
-    REGMETHOD(_PRO),
 };
 
 /*
