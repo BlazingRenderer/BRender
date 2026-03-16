@@ -34,25 +34,25 @@ set(FMT_FILES
         loadstb.c
         loadtga.c
         loadvue.c
-        savescr.c
-        savestb.c
-        savegltf.c
-        loadgltf.c
-        animgltf.c
+        $<$<NOT:$<BOOL:${BRENDER_FREESTANDING}>>:savescr.c>
+        $<$<NOT:$<BOOL:${BRENDER_FREESTANDING}>>:savestb.c>
+        $<$<NOT:$<BOOL:${BRENDER_FREESTANDING}>>:savegltf.c>
+        $<$<NOT:$<BOOL:${BRENDER_FREESTANDING}>>:loadgltf.c>
+        $<$<NOT:$<BOOL:${BRENDER_FREESTANDING}>>:animgltf.c>
 
         stb_image.h
-        stb_image_write.h
+        $<$<NOT:$<BOOL:${BRENDER_FREESTANDING}>>:stb_image_write.h>
         dr_pcx.h
 
         cbase64.h
         cbase64.c
 
-        cgltf.h
-        cgltf_write.h
-        cgltf_write_brender.h
-        cgltf_brender.h
-        cgltf_brender_impl.h
-        cgltf.c
+        $<$<NOT:$<BOOL:${BRENDER_DISABLE_FMT_GLTF}>>:cgltf.h>
+        $<$<NOT:$<BOOL:${BRENDER_DISABLE_FMT_GLTF}>>:cgltf_write.h>
+        $<$<NOT:$<BOOL:${BRENDER_DISABLE_FMT_GLTF}>>:cgltf_write_brender.h>
+        $<$<NOT:$<BOOL:${BRENDER_DISABLE_FMT_GLTF}>>:cgltf_brender.h>
+        $<$<NOT:$<BOOL:${BRENDER_DISABLE_FMT_GLTF}>>:cgltf_brender_impl.h>
+        $<$<NOT:$<BOOL:${BRENDER_DISABLE_FMT_GLTF}>>:cgltf.c>
         )
 
 add_library(fmt OBJECT
