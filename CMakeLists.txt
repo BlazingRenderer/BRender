@@ -23,6 +23,7 @@ option(BRENDER_USE_SDL2 "Use SDL2" OFF)
 option(BRENDER_USE_SDL3 "Use SDL3" OFF)
 option(BRENDER_DISABLE_FINDSDL "Disable searching for SDL" OFF)
 option(BRENDER_FREESTANDING "Disable the use of the C standard library" OFF)
+option(BRENDER_DISABLE_FMT_GLTF "Disable all GLTF related code" OFF)
 
 function(find_sdl)
     if (BRENDER_DISABLE_FINDSDL)

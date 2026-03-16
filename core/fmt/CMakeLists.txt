@@ -35,23 +35,23 @@ set(FMT_FILES
         loadstb.c
         loadtga.c
         loadvue.c
-        savescr.c
-        savestb.c
-        savegltf.c
+        $<IF:$<BOOL:${BRENDER_FREESTANDING}>,,savescr.c>
+        $<IF:$<BOOL:${BRENDER_FREESTANDING}>,,savestb.c>
+        $<IF:$<BOOL:${BRENDER_FREESTANDING}>,,savegltf.c>
 
         stb_image.h
-        stb_image_write.h
+        $<IF:$<BOOL:${BRENDER_FREESTANDING}>,,stb_image_write.h>
         dr_pcx.h
 
         cbase64.h
         cbase64.c
 
-        cgltf.h
-        cgltf_write.h
-        cgltf_write_brender.h
-        cgltf_brender.h
-        cgltf_brender_impl.h
-        cgltf.c
+        $<IF:$<BOOL:${BRENDER_DISABLE_FMT_GLTF}>,,cgltf.h>
+        $<IF:$<BOOL:${BRENDER_DISABLE_FMT_GLTF}>,,cgltf_write.h>
+        $<IF:$<BOOL:${BRENDER_DISABLE_FMT_GLTF}>,,cgltf_write_brender.h>
+        $<IF:$<BOOL:${BRENDER_DISABLE_FMT_GLTF}>,,cgltf_brender.h>
+        $<IF:$<BOOL:${BRENDER_DISABLE_FMT_GLTF}>,,cgltf_brender_impl.h>
+        $<IF:$<BOOL:${BRENDER_DISABLE_FMT_GLTF}>,,cgltf.c>
         )
 
 add_library(fmt OBJECT
