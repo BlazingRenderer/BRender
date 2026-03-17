@@ -152,15 +152,15 @@ void lightingColourPoint(in vec3 p, in vec3 n, in uint i, inout vec3 outA, inout
     const vec3  position         = light_positions[i].xyz;
 
     vec3 dirn = position - p;
-    float dist = length(dirn);
-    vec3 dirn_norm = dirn / dist;
+    float dist_sqr = dot(dirn, dirn);
 
+    if(attenuation_type == BRT_RADII && dist_sqr >= radius_outer * radius_outer)
+        return;
+
+    float dist = sqrt(dist_sqr);
     float atten = 0.0f;
 
     if(attenuation_type == BRT_RADII) {
-        if(dist >= radius_outer)
-            return;
-
         atten = calculateAttenuationRadii(i, dist, intensity);
     } else {
         atten = calculateAttenuation(i, dist);
@@ -168,6 +168,8 @@ void lightingColourPoint(in vec3 p, in vec3 n, in uint i, inout vec3 outA, inout
 
     if(atten <= 0)
         return;
+
+    vec3 dirn_norm = dirn / dist;
 
     float diffDot = max(dot(n, dirn_norm), 0.0);
     outD += diffDot * kd * colour * atten;
