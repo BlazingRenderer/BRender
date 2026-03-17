@@ -159,7 +159,7 @@ void main()
     /*
      * If no lighting at all, fullbright baby.
      */
-    lightD += (!prelighting && !lighting) ? vec3(1) : vec3(0);
+    lightD += (!prelighting && !lighting) ? 1.0 : 0.0;
 
 #if DEBUG_DISABLE_LIGHTS
     lightA = vec3(0);
