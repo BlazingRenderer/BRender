@@ -75,7 +75,7 @@ void BR_ASM_CALL RenderConvert1(struct brp_block *block, brp_vertex *v0)
             if(m & 1)
                 outv[0].comp_i[c] = v0->comp_i[c];
 
-    block->chain->render(block->chain, outv);
+    brp_render1(block->chain, outv);
 }
 
 void BR_ASM_CALL RenderConvert2(struct brp_block *block, brp_vertex *v0, brp_vertex *v1)
@@ -115,7 +115,7 @@ void BR_ASM_CALL RenderConvert2(struct brp_block *block, brp_vertex *v0, brp_ver
                 outv[1].comp_i[c] = v1->comp_i[c];
             }
 
-    block->chain->render(block->chain, outv + 0, outv + 1);
+    brp_render2(block->chain, outv + 0, outv + 1);
 }
 
 void BR_ASM_CALL RenderConvert3(struct brp_block *block, brp_vertex *v0, brp_vertex *v1, brp_vertex *v2)
@@ -159,7 +159,7 @@ void BR_ASM_CALL RenderConvert3(struct brp_block *block, brp_vertex *v0, brp_ver
                 outv[2].comp_i[c] = v2->comp_i[c];
             }
 
-    block->chain->render(block->chain, outv + 0, outv + 1, outv + 2);
+    brp_render3(block->chain, outv + 0, outv + 1, outv + 2);
 }
 
 void BR_ASM_CALL RenderConvert4(struct brp_block *block, brp_vertex *v0, brp_vertex *v1, brp_vertex *v2, brp_vertex *v3)
@@ -207,5 +207,5 @@ void BR_ASM_CALL RenderConvert4(struct brp_block *block, brp_vertex *v0, brp_ver
                 outv[3].comp_i[c] = v3->comp_i[c];
             }
 
-    block->chain->render(block->chain, outv + 0, outv + 1, outv + 2, outv + 3);
+    brp_render4(block->chain, outv + 0, outv + 1, outv + 2, outv + 3);
 }

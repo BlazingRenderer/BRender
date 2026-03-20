@@ -98,7 +98,7 @@ void BR_ASM_CALL OpTriangleConstantSurf(brp_block *block, brp_vertex *v0, brp_ve
     for(i = 0; i < rend.renderer->state.cache.nconstant_fns; i++)
         rend.renderer->state.cache.constant_fns[i](rend.renderer, vp_p, vp_map, (br_vector3 *)fp_eqn, colour, v0->comp);
 
-    block->chain->render(block->chain, v0, v1, v2, fp_vertices, fp_edges);
+    brp_render3_fp(block->chain, v0, v1, v2, fp_vertices, fp_edges);
 }
 
 void BR_ASM_CALL OpTriangleTwoSidedConstantSurf(brp_block *block, brp_vertex *v0, brp_vertex *v1, brp_vertex *v2, br_uint_16 (*fp_vertices)[3],
@@ -128,7 +128,7 @@ void BR_ASM_CALL OpTriangleTwoSidedConstantSurf(brp_block *block, brp_vertex *v0
             rend.renderer->state.cache.constant_fns[i](rend.renderer, vp_p, vp_map, (br_vector3 *)fp_eqn, colour, v0->comp);
     }
 
-    block->chain->render(block->chain, v0, v1, v2, fp_vertices, fp_edges);
+    brp_render3_fp(block->chain, v0, v1, v2, fp_vertices, fp_edges);
 }
 
 /*
@@ -171,7 +171,7 @@ void BR_ASM_CALL OpTriangleMappingWrapFix(brp_block *block, brp_vertex *v0, brp_
         }
     }
 
-    block->chain->render(block->chain, v0, v1, v2, fp_vertices, fp_edges, fp_eqn, tfp);
+    brp_render3_fpx(block->chain, v0, v1, v2, fp_vertices, fp_edges, fp_eqn, tfp);
 }
 
 /*
@@ -215,9 +215,9 @@ void BR_ASM_CALL OpTriangleRelightTwoSided(brp_block *block, brp_vertex *v0, brp
                     rend.renderer->state.cache.vertex_fns[i](rend.renderer, vp_p, vp_map, &rev_normal, colour, tv[v].comp);
             }
         }
-        block->chain->render(block->chain, tv + 0, tv + 1, tv + 2, fp_vertices, fp_edges, fp_eqn, tfp);
+        brp_render3_fpx(block->chain, tv + 0, tv + 1, tv + 2, fp_vertices, fp_edges, fp_eqn, tfp);
     } else {
-        block->chain->render(block->chain, v0, v1, v2, fp_vertices, fp_edges, fp_eqn, tfp);
+        brp_render3_fpx(block->chain, v0, v1, v2, fp_vertices, fp_edges, fp_eqn, tfp);
     }
 }
 
@@ -231,17 +231,17 @@ void BR_ASM_CALL OpTriangleToLines(brp_block *block, brp_vertex *v0, brp_vertex 
      * Generate a line for each unrendered edge
      */
     if(!rend.edge_flags[(*fp_edges)[0]]) {
-        block->chain->render(block->chain, v0, v1);
+        brp_render2(block->chain, v0, v1);
         rend.edge_flags[(*fp_edges)[0]] = 1;
     }
 
     if(!rend.edge_flags[(*fp_edges)[1]]) {
-        block->chain->render(block->chain, v1, v2);
+        brp_render2(block->chain, v1, v2);
         rend.edge_flags[(*fp_edges)[1]] = 1;
     }
 
     if(!rend.edge_flags[(*fp_edges)[2]]) {
-        block->chain->render(block->chain, v2, v0);
+        brp_render2(block->chain, v2, v0);
         rend.edge_flags[(*fp_edges)[2]] = 1;
     }
 }
@@ -263,7 +263,7 @@ void BR_ASM_CALL OpTriangleReplicateConstant(brp_block *block, brp_vertex *v0, b
             v1->comp[c] = v2->comp[c] = v0->comp[c];
     }
 
-    block->chain->render(block->chain, v0, v1, v2, fp_vertices, fp_edges);
+    brp_render3_fp(block->chain, v0, v1, v2, fp_vertices, fp_edges);
 }
 
 /*
@@ -274,7 +274,7 @@ void BR_ASM_CALL OpTriangleReplicateConstantI(brp_block *block, brp_vertex *v0, 
 {
     v1->comp[C_I] = v2->comp[C_I] = v0->comp[C_I];
 
-    block->chain->render(block->chain, v0, v1, v2, fp_vertices, fp_edges);
+    brp_render3_fp(block->chain, v0, v1, v2, fp_vertices, fp_edges);
 }
 
 /*
@@ -287,7 +287,7 @@ void BR_ASM_CALL OpTriangleReplicateConstantRGB(brp_block *block, brp_vertex *v0
     v1->comp[C_G] = v2->comp[C_G] = v0->comp[C_G];
     v1->comp[C_B] = v2->comp[C_B] = v0->comp[C_B];
 
-    block->chain->render(block->chain, v0, v1, v2, fp_vertices, fp_edges);
+    brp_render3_fp(block->chain, v0, v1, v2, fp_vertices, fp_edges);
 }
 
 void BR_ASM_CALL OpTriangleToPoints(brp_block *block, brp_vertex *v0, brp_vertex *v1, brp_vertex *v2, br_uint_16 (*fp_vertices)[3])
@@ -296,17 +296,17 @@ void BR_ASM_CALL OpTriangleToPoints(brp_block *block, brp_vertex *v0, brp_vertex
      * Generate a point for each unrendered vertex
      */
     if(!rend.vertex_flags[(*fp_vertices)[0]] && !(v0->flags & OUTCODES_ALL)) {
-        block->chain->render(block->chain, v0);
+        brp_render1(block->chain, v0);
         rend.vertex_flags[(*fp_vertices)[0]] = 1;
     }
 
     if(!rend.vertex_flags[(*fp_vertices)[1]] && !(v1->flags & OUTCODES_ALL)) {
-        block->chain->render(block->chain, v1);
+        brp_render1(block->chain, v1);
         rend.vertex_flags[(*fp_vertices)[1]] = 1;
     }
 
     if(!rend.vertex_flags[(*fp_vertices)[2]] && !(v2->flags & OUTCODES_ALL)) {
-        block->chain->render(block->chain, v2);
+        brp_render1(block->chain, v2);
         rend.vertex_flags[(*fp_vertices)[2]] = 1;
     }
 }
@@ -317,17 +317,17 @@ void BR_ASM_CALL OpTriangleToPoints_OS(brp_block *block, brp_vertex *v0, brp_ver
      * Generate a point for each unrendered vertex
      */
     if(!rend.vertex_flags[(*fp_vertices)[0]]) {
-        block->chain->render(block->chain, v0);
+        brp_render1(block->chain, v0);
         rend.vertex_flags[(*fp_vertices)[0]] = 1;
     }
 
     if(!rend.vertex_flags[(*fp_vertices)[1]]) {
-        block->chain->render(block->chain, v1);
+        brp_render1(block->chain, v1);
         rend.vertex_flags[(*fp_vertices)[1]] = 1;
     }
 
     if(!rend.vertex_flags[(*fp_vertices)[2]]) {
-        block->chain->render(block->chain, v2);
+        brp_render1(block->chain, v2);
         rend.vertex_flags[(*fp_vertices)[2]] = 1;
     }
 }
@@ -482,7 +482,7 @@ static void triangleSubdivideOnScreen(int depth, brp_block *block, brp_vertex *v
         triangleSubdivideOnScreen(depth - 1, block, v1, &mid1, &mid0, fp_vertices, fp_edges, fp_eqn, tfp);
         triangleSubdivideOnScreen(depth - 1, block, v2, &mid2, &mid1, fp_vertices, fp_edges, fp_eqn, tfp);
     } else {
-        block->chain->render(block->chain, v0, v1, v2, fp_vertices, fp_edges, fp_eqn, tfp);
+        brp_render3_fpx(block->chain, v0, v1, v2, fp_vertices, fp_edges, fp_eqn, tfp);
     }
 }
 
@@ -506,7 +506,7 @@ static void triangleSubdivideCheck(int depth, brp_block *block, brp_vertex *v0, 
         triangleSubdivide(depth - 1, block, v1, &mid1, &mid0, fp_vertices, fp_edges, fp_eqn, tfp);
         triangleSubdivide(depth - 1, block, v2, &mid2, &mid1, fp_vertices, fp_edges, fp_eqn, tfp);
     } else {
-        block->chain->render(block->chain, v0, v1, v2, fp_vertices, fp_edges, fp_eqn, tfp);
+        brp_render3_fpx(block->chain, v0, v1, v2, fp_vertices, fp_edges, fp_eqn, tfp);
     }
 }
 

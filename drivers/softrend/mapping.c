@@ -230,5 +230,5 @@ void BR_ASM_CALL OpTriangleMapQuad(brp_block *block, brp_vertex *v0, brp_vertex 
             break;
     }
 
-    block->chain->render(block->chain, v0, v1, v2, fp_vertices, fp_edges, fp_eqn, tfp);
+    brp_render3_fpx(block->chain, v0, v1, v2, fp_vertices, fp_edges, fp_eqn, tfp);
 }

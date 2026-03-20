@@ -21,7 +21,7 @@ void BR_ASM_CALL RenderForceFront1(brp_block *block, brp_vertex *v0)
 
     v[0].comp[C_SZ] = BR_SCALAR(0.0);
 
-    block->chain->render(block->chain, v + 0);
+    brp_render1(block->chain, v + 0);
 }
 
 void BR_ASM_CALL RenderForceFront2(brp_block *block, brp_vertex *v0, brp_vertex *v1)
@@ -34,7 +34,7 @@ void BR_ASM_CALL RenderForceFront2(brp_block *block, brp_vertex *v0, brp_vertex 
     v[0].comp[C_SZ] = BR_SCALAR(0.0);
     v[1].comp[C_SZ] = BR_SCALAR(0.0);
 
-    block->chain->render(block->chain, v + 0, v + 1);
+    brp_render2(block->chain, v + 0, v + 1);
 }
 
 void BR_ASM_CALL RenderForceFront3(brp_block *block, brp_vertex *v0, brp_vertex *v1, brp_vertex *v2)
@@ -49,7 +49,7 @@ void BR_ASM_CALL RenderForceFront3(brp_block *block, brp_vertex *v0, brp_vertex 
     v[1].comp[C_SZ] = BR_SCALAR(0.0);
     v[2].comp[C_SZ] = BR_SCALAR(0.0);
 
-    block->chain->render(block->chain, v + 0, v + 1, v + 2);
+    brp_render3(block->chain, v + 0, v + 1, v + 2);
 }
 
 void BR_ASM_CALL RenderForceFront4(brp_block *block, brp_vertex *v0, brp_vertex *v1, brp_vertex *v2, brp_vertex *v3)
@@ -66,5 +66,5 @@ void BR_ASM_CALL RenderForceFront4(brp_block *block, brp_vertex *v0, brp_vertex 
     v[2].comp[C_SZ] = BR_SCALAR(0.0);
     v[3].comp[C_SZ] = BR_SCALAR(0.0);
 
-    block->chain->render(block->chain, v + 0, v + 1, v + 2, v + 3);
+    brp_render4(block->chain, v + 0, v + 1, v + 2, v + 3);
 }

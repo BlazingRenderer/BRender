@@ -435,7 +435,7 @@ void ClippedRenderTriangles(br_renderer *renderer, brp_block *block, brp_vertex 
      * Triangulate polygon
      */
     for(i = 2; i < n; i++)
-        block->render(block, &cp_in[0], &cp_in[i - 1], &cp_in[i], fp_vertices, fp_edges);
+        brp_render3_fp(block, &cp_in[0], &cp_in[i - 1], &cp_in[i], fp_vertices, fp_edges);
 }
 
 /*
@@ -627,5 +627,5 @@ void ClippedRenderLine(br_renderer *renderer, brp_block *block, brp_vertex *cp_i
     /*
      * Render the line
      */
-    block->render(block, &cp_in[0], &cp_in[1]);
+    brp_render2(block, &cp_in[0], &cp_in[1]);
 }

@@ -402,11 +402,11 @@ static void GEOMETRY_CALL V1Face_Render(br_geometry *self, br_renderer *renderer
         rend.current_index = f;
 
         if(tfp->flag & TFF_CLIPPED) {
-            clipped->render(clipped, rend.temp_vertices + (*fp_vertices)[0], rend.temp_vertices + (*fp_vertices)[1],
-                            rend.temp_vertices + (*fp_vertices)[2], fp_vertices, fp_edges, fp_eqn, tfp);
+            brp_render3_fpx(clipped, rend.temp_vertices + (*fp_vertices)[0], rend.temp_vertices + (*fp_vertices)[1],
+                          rend.temp_vertices + (*fp_vertices)[2], fp_vertices, fp_edges, fp_eqn, tfp);
         } else {
-            unclipped->render(unclipped, rend.temp_vertices + (*fp_vertices)[0], rend.temp_vertices + (*fp_vertices)[1],
-                              rend.temp_vertices + (*fp_vertices)[2], fp_vertices, fp_edges, fp_eqn, tfp);
+            brp_render3_fpx(unclipped, rend.temp_vertices + (*fp_vertices)[0], rend.temp_vertices + (*fp_vertices)[1],
+                          rend.temp_vertices + (*fp_vertices)[2], fp_vertices, fp_edges, fp_eqn, tfp);
         }
     }
 }
@@ -430,10 +430,8 @@ void GEOMETRY_CALL V1Face_OS_Render(br_geometry *self, struct br_renderer *rende
 
             rend.current_index = f;
 
-#if 1
-            unclipped->render(unclipped, rend.temp_vertices + (*fp_vertices)[0], rend.temp_vertices + (*fp_vertices)[1],
-                              rend.temp_vertices + (*fp_vertices)[2], fp_vertices, fp_edges, fp_eqn, tfp);
-#endif
+            brp_render3_fpx(unclipped, rend.temp_vertices + (*fp_vertices)[0], rend.temp_vertices + (*fp_vertices)[1],
+                          rend.temp_vertices + (*fp_vertices)[2], fp_vertices, fp_edges, fp_eqn, tfp);
         }
     }
 }
@@ -456,8 +454,8 @@ void GEOMETRY_CALL V1Face_OSV_Render(br_geometry *self, struct br_renderer *rend
 
         rend.current_index = f;
 
-        unclipped->render(unclipped, rend.temp_vertices + (*fp_vertices)[0], rend.temp_vertices + (*fp_vertices)[1],
-                          rend.temp_vertices + (*fp_vertices)[2], fp_vertices, fp_edges, fp_eqn, tfp);
+        brp_render3_fpx(unclipped, rend.temp_vertices + (*fp_vertices)[0], rend.temp_vertices + (*fp_vertices)[1],
+                      rend.temp_vertices + (*fp_vertices)[2], fp_vertices, fp_edges, fp_eqn, tfp);
     }
 }
 
