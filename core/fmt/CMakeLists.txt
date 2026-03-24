@@ -38,6 +38,7 @@ set(FMT_FILES
         savescr.c
         savestb.c
         savegltf.c
+        loadgltf.c
 
         stb_image.h
         stb_image_write.h
