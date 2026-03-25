@@ -757,7 +757,7 @@ static void fill_camera(br_camera *camera_data, const cgltf_camera *camera)
     }
 }
 
-br_fmt_results *BR_PUBLIC_ENTRY BrFmtGLTFActorLoadMany(const char *name)
+br_fmt_results *BR_PUBLIC_ENTRY BrFmtGLTFActorLoadMany(const char *name, const char *base_path)
 {
     cgltf_data         *data;
     br_gltf_load_state *state;
@@ -780,6 +780,11 @@ br_fmt_results *BR_PUBLIC_ENTRY BrFmtGLTFActorLoadMany(const char *name)
     state = BrResAllocate(NULL, sizeof(br_gltf_load_state), BR_MEMORY_SCRATCH);
     BrMemSet(state, 0, sizeof(br_gltf_load_state));
 
+    if(base_path == NULL || base_path[0] == '\0') {
+        base_path = ".";
+    }
+    base_path = BrResSprintf(state, "%s/", base_path);
+
     opts.memory.user_data = state;
 
     if(cgltf_parse_file(&opts, name, &data) != cgltf_result_success) {
@@ -789,7 +794,7 @@ br_fmt_results *BR_PUBLIC_ENTRY BrFmtGLTFActorLoadMany(const char *name)
 
     state->data = data;
 
-    if(cgltf_load_buffers(&opts, data, ".") != cgltf_result_success) {
+    if(cgltf_load_buffers(&opts, data, base_path) != cgltf_result_success) {
         BrResFree(state);
         return NULL;
     }
