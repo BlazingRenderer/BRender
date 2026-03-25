@@ -1,4 +1,5 @@
 #include <limits.h>
+#include <stdbool.h>
 #include <brender.h>
 
 #include "brassert.h"
@@ -279,6 +280,11 @@ static br_model *create_model(const cgltf_mesh *mesh, br_gltf_load_state *state)
             for(br_size_t f = 0; f < info->output_face_count; ++f) {
                 base_face[f].material = state->results->materials[prim->brender_material - state->data->brender_materials];
             }
+        } else if(prim->material != NULL) {
+            br_face *base_face = fp;
+            for(br_size_t f = 0; f < info->output_face_count; ++f) {
+                base_face[f].material = state->results->materials[cgltf_material_index(state->data, prim->material)];
+            }
         }
 
         /*
@@ -389,7 +395,90 @@ static br_model *create_model(const cgltf_mesh *mesh, br_gltf_load_state *state)
     return model;
 }
 
-static void fill_material(br_material *mat, const cgltf_brender_material *br_material, const cgltf_data *data, br_pixelmap **pixelmaps)
+static float linear_to_srgb(float f)
+{
+    return (f <= 0.0031308f) ? f * 12.92f : 1.055f * powf(f, 1.0f / 2.4f) - 0.055f;
+}
+
+static void fill_material(br_material *mat, const cgltf_material *material, const cgltf_data *data, br_pixelmap **pixelmaps)
+{
+    if(material->name != NULL) {
+        mat->identifier = BrResStrDup(mat, material->name);
+    }
+
+    mat->flags |= BR_MATF_LIGHT;
+
+    if(material->has_pbr_metallic_roughness) {
+        const cgltf_pbr_metallic_roughness *pbr = &material->pbr_metallic_roughness;
+
+        /*
+         * Base colour factor -> sRGB vertex colour.
+         */
+        mat->colour = BR_COLOUR_RGBA((uint8_t)(linear_to_srgb(pbr->base_color_factor[0]) * 255.0f + 0.5f),
+                                     (uint8_t)(linear_to_srgb(pbr->base_color_factor[1]) * 255.0f + 0.5f),
+                                     (uint8_t)(linear_to_srgb(pbr->base_color_factor[2]) * 255.0f + 0.5f),
+                                     (uint8_t)(pbr->base_color_factor[3] * 255.0f + 0.5f));
+
+        mat->opacity = (br_uint_8)(pbr->base_color_factor[3] * 255.0f + 0.5f);
+
+        /*
+         * Base colour texture -> colour_map.
+         */
+        if(pbr->base_color_texture.texture != NULL) {
+            const cgltf_texture *texture = pbr->base_color_texture.texture;
+
+            if(texture->image != NULL) {
+                cgltf_size image_index = cgltf_image_index(data, texture->image);
+
+                if(image_index < data->images_count && pixelmaps[image_index] != NULL) {
+                    mat->colour_map = pixelmaps[image_index];
+                }
+            }
+        }
+
+        /*
+         * Roughness -> Blinn-Phong power inversion:
+         *   roughness = pow(2 / (power + 2), 0.25)
+         *   roughness^4 = 2 / (power + 2)
+         *   power = (2 / roughness^4) - 2
+         *
+         * Metallic factor is used as ks directly — 'tis the best
+         * we can do without an actual environment/reflection map.
+         */
+        if(pbr->roughness_factor < 1.0f) {
+            float r4    = pbr->roughness_factor * pbr->roughness_factor * pbr->roughness_factor * pbr->roughness_factor;
+            float power = (2.0f / r4) - 2.0f;
+
+            if(power < 1.0f)
+                power = 1.0f;
+
+            mat->ks    = BrFloatToScalar(pbr->metallic_factor);
+            mat->power = BrFloatToScalar(power);
+            mat->kd    = BrFloatToScalar(1.0f - pbr->metallic_factor * 0.5f);
+            mat->ka    = BrFloatToScalar(0.1f);
+        } else {
+            mat->ks    = BrFloatToScalar(0.0f);
+            mat->power = BrFloatToScalar(0.0f);
+            mat->kd    = BrFloatToScalar(0.8f);
+            mat->ka    = BrFloatToScalar(0.2f);
+        }
+    }
+
+    /*
+     * Alpha mode.
+     */
+    switch(material->alpha_mode) {
+        case cgltf_alpha_mode_blend:
+        case cgltf_alpha_mode_mask:
+            mat->flags |= BR_MATF_BLEND;
+            break;
+        case cgltf_alpha_mode_opaque:
+        default:
+            break;
+    }
+}
+
+static void fill_br_material(br_material *mat, const cgltf_brender_material *br_material, const cgltf_data *data, br_pixelmap **pixelmaps)
 {
     if(br_material->identifier != NULL) {
         mat->identifier = BrResStrDup(mat, br_material->identifier);
@@ -722,8 +811,12 @@ br_fmt_results *BR_PUBLIC_ENTRY BrFmtGLTFActorLoadMany(const char *name)
     results->nlights = data->lights_count;
     results->lights  = BrResAllocate(results, results->nlights * sizeof(br_light *), BR_MEMORY_FMT_RESULTS);
 
-    results->nmaterials = data->brender_materials_count;
-    results->materials  = BrResAllocate(results, results->nmaterials * sizeof(br_material *), BR_MEMORY_FMT_RESULTS);
+    if(data->brender_materials_count > 0) {
+        results->nmaterials = data->brender_materials_count;
+    } else {
+        results->nmaterials = data->materials_count;
+    }
+    results->materials = BrResAllocate(results, results->nmaterials * sizeof(br_material *), BR_MEMORY_FMT_RESULTS);
 
     results->npixelmaps = data->images_count;
     results->pixelmaps  = BrResAllocate(results, results->npixelmaps * sizeof(br_pixelmap *), BR_MEMORY_FMT_RESULTS);
@@ -747,9 +840,16 @@ br_fmt_results *BR_PUBLIC_ENTRY BrFmtGLTFActorLoadMany(const char *name)
      *
      * Post: state->results->materials filled.
      */
-    for(br_size_t i = 0; i < data->brender_materials_count; ++i) {
-        results->materials[i] = BrMaterialAllocate(NULL);
-        fill_material(results->materials[i], data->brender_materials + i, data, results->pixelmaps);
+    if(data->brender_materials_count > 0) {
+        for(br_size_t i = 0; i < data->brender_materials_count; ++i) {
+            results->materials[i] = BrMaterialAllocate(NULL);
+            fill_br_material(results->materials[i], data->brender_materials + i, data, results->pixelmaps);
+        }
+    } else {
+        for(br_size_t i = 0; i < data->materials_count; ++i) {
+            results->materials[i] = BrMaterialAllocate(NULL);
+            fill_material(results->materials[i], data->materials + i, data, results->pixelmaps);
+        }
     }
 
     for(br_size_t i = 0; i < data->meshes_count; ++i) {
