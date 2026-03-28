@@ -123,6 +123,17 @@ enum {
 };
 
 /*
+ * Options structure passed to GLTF format loader
+ */
+typedef struct br_gltf_options {
+
+    /*
+     * Base path used to resolve relative URIs against.
+     */
+    const char *base_path;
+} br_gltf_options;
+
+/*
  * VUE format structures
  */
 

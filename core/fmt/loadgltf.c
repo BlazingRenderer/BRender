@@ -8,6 +8,13 @@
 #include "brstb.h"
 #include "cgltf.h"
 
+/*
+ * Default GLTF conversion options
+ */
+static br_gltf_options _BrDefaultGLTFOptions = {
+    .base_path = NULL,
+};
+
 typedef struct br_gltf_load_state {
     cgltf_data     *data;
     br_fmt_results *results;
@@ -791,11 +798,12 @@ static void fill_camera(br_camera *camera_data, const cgltf_camera *camera)
     }
 }
 
-br_fmt_results *BR_PUBLIC_ENTRY BrFmtGLTFActorLoadMany(const char *name, const char *base_path)
+br_fmt_results *BR_PUBLIC_ENTRY BrFmtGLTFActorLoadMany(const char *name, const br_gltf_options *options)
 {
     cgltf_data         *data;
     br_gltf_load_state *state;
     br_fmt_results     *results;
+    const char         *base_path;
 
     // clang-format off
     cgltf_options opts = {
@@ -811,9 +819,17 @@ br_fmt_results *BR_PUBLIC_ENTRY BrFmtGLTFActorLoadMany(const char *name, const c
     };
     // clang-format on
 
+    /*
+     * Use default options if none is supplied
+     */
+    if(options == NULL) {
+        options = &_BrDefaultGLTFOptions;
+    }
+
     state = BrResAllocate(NULL, sizeof(br_gltf_load_state), BR_MEMORY_SCRATCH);
     BrMemSet(state, 0, sizeof(br_gltf_load_state));
 
+    base_path = options->base_path;
     if(base_path == NULL || base_path[0] == '\0') {
         base_path = ".";
     }
