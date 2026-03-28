@@ -27,7 +27,6 @@ set(FMT_FILES
         load3ds.h
         loadasc.c
         loadbmp.c
-        loadgif.c
         loadiff.c
         loadnff.c
         loadpcx.c
