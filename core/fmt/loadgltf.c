@@ -13,12 +13,14 @@
  */
 static br_gltf_options _BrDefaultGLTFOptions = {
     .base_path = NULL,
+    .pm_type   = BR_PMT_RGBA_8888,
 };
 
 typedef struct br_gltf_load_state {
-    cgltf_data     *data;
-    br_fmt_results *results;
-    const char     *base_path; /**< Directory for resolving relative URIs (with trailing slash). */
+    cgltf_data            *data;
+    br_fmt_results        *results;
+    const br_gltf_options *options;
+    const char            *base_path; /**< Directory for resolving relative URIs (with trailing slash). */
 
     br_actor **all_actors; /**< All actors in the same order as the file. */
 } br_gltf_load_state;
@@ -152,7 +154,7 @@ static br_pixelmap *load_pixelmap(br_gltf_load_state *state, const cgltf_image *
     tmp             = BrPixelmapAllocate(BR_PMT_RGBA_8888_ARR, x, y, pixels, BR_PMAF_NORMAL);
     tmp->identifier = (char *)image->name; /* NB: This is safe, the clone below will copy it. */
 
-    pixelmap = BrPixelmapCloneTyped(tmp, BR_PMT_RGBA_8888);
+    pixelmap = BrPixelmapCloneTyped(tmp, state->options->pm_type);
 
     BrPixelmapFree(tmp);
     BrMemFree(pixels);
@@ -843,7 +845,8 @@ br_fmt_results *BR_PUBLIC_ENTRY BrFmtGLTFActorLoadMany(const char *name, const b
         return NULL;
     }
 
-    state->data = data;
+    state->data    = data;
+    state->options = options;
 
     if(cgltf_load_buffers(&opts, data, base_path) != cgltf_result_success) {
         BrResFree(state);

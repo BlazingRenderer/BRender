@@ -131,6 +131,11 @@ typedef struct br_gltf_options {
      * Base path used to resolve relative URIs against.
      */
     const char *base_path;
+
+    /*
+     * Convert all pixelmaps to this BR_PMT_* format on load.
+     */
+    br_uint_8 pm_type;
 } br_gltf_options;
 
 /*
