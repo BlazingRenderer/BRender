@@ -1,4 +1,6 @@
 /cmake-build-*/
+build-mac/
+build-ninja/
 **/.idea/
 **/.vs/
 **/.vscode/

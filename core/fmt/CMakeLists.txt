@@ -36,8 +36,9 @@ set(FMT_FILES
         loadvue.c
         savescr.c
         savestb.c
-        savegltf.c
+        animgltf.c
         loadgltf.c
+        savegltf.c
 
         stb_image.h
         stb_image_write.h

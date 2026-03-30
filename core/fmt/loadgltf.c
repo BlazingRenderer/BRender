@@ -430,6 +430,17 @@ static br_model *create_model(const cgltf_mesh *mesh, br_gltf_load_state *state)
         vertex_base += info->output_vertex_count;
     }
 
+    /*
+     * If any primitive had normals, tell BRender to use them
+     * instead of regenerating from smoothing groups.
+     */
+    for(br_size_t i = 0; i < mesh->primitives_count; ++i) {
+        if(primitive_info[i].attrib_normal != NULL) {
+            model->flags |= BR_MODF_CUSTOM_NORMALS;
+            break;
+        }
+    }
+
     return model;
 }
 
@@ -836,6 +847,7 @@ br_fmt_results *BR_PUBLIC_ENTRY BrFmtGLTFActorLoadMany(const char *name, const b
         base_path = ".";
     }
     base_path        = BrResSprintf(state, "%s/", base_path);
+
     state->base_path = base_path;
 
     opts.memory.user_data = state;
