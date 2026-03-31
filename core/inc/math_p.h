@@ -149,6 +149,8 @@ br_fixed_luf BR_ASM_CALL BrFixedATan2Fast(br_fixed_ls x, br_fixed_ls y);
 br_fixed_ls BR_PUBLIC_ENTRY BrFixedSqrt(br_fixed_ls a);
 br_fixed_ls BR_PUBLIC_ENTRY BrFixedPow(br_fixed_ls a, br_fixed_ls b);
 
+br_scalar BR_PUBLIC_ENTRY BrScalarLerp(br_scalar a, br_scalar b, br_scalar t);
+
 /*
  * Integer sqrt functions
  */

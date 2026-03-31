@@ -545,6 +545,14 @@ void BR_PUBLIC_ENTRY BrVector3Lerp(br_vector3 *r, const br_vector3 *a, const br_
     r->v[2] = BR_ADD(a->v[2], BR_MUL(BR_SUB(b->v[2], a->v[2]), t));
 }
 
+/*
+ * r = lerp(a, b, t) = a + (b - a) * t
+ */
+br_scalar BR_PUBLIC_ENTRY BrScalarLerp(br_scalar a, br_scalar b, br_scalar t)
+{
+    return BR_ADD(a, BR_MUL(BR_SUB(b, a), t));
+}
+
 /**
  ** 4D Vectors
  **/
