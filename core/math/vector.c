@@ -531,6 +531,20 @@ void BR_PUBLIC_ENTRY BrVector3Clamp(br_vector3 *v1, const br_vector3 *v2, br_sca
     v1->v[2] = BR_CLAMP(v2->v[2], min, max);
 }
 
+/*
+ * r = lerp(a, b, t) = a + (b - a) * t
+ */
+void BR_PUBLIC_ENTRY BrVector3Lerp(br_vector3 *r, const br_vector3 *a, const br_vector3 *b, br_scalar t)
+{
+    UASSERT_MESSAGE("Result Vector is NULL", r != NULL);
+    UASSERT_MESSAGE("Vector A is NULL", a != NULL);
+    UASSERT_MESSAGE("Vector B is NULL", b != NULL);
+
+    r->v[0] = BR_ADD(a->v[0], BR_MUL(BR_SUB(b->v[0], a->v[0]), t));
+    r->v[1] = BR_ADD(a->v[1], BR_MUL(BR_SUB(b->v[1], a->v[1]), t));
+    r->v[2] = BR_ADD(a->v[2], BR_MUL(BR_SUB(b->v[2], a->v[2]), t));
+}
+
 /**
  ** 4D Vectors
  **/

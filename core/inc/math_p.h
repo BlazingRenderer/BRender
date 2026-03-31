@@ -306,6 +306,7 @@ void BR_PUBLIC_ENTRY       BrVector3NormaliseQuick(br_vector3 *v1, const br_vect
 void BR_PUBLIC_ENTRY       BrVector3NormaliseLP(br_vector3 *v1, const br_vector3 *v2);
 void BR_PUBLIC_ENTRY       BrVector3ColourSet(br_vector3 *v1, br_colour colour);
 void BR_PUBLIC_ENTRY       BrVector3Clamp(br_vector3 *v1, const br_vector3 *v2, br_scalar min, br_scalar max);
+void BR_PUBLIC_ENTRY       BrVector3Lerp(br_vector3 *r, const br_vector3 *a, const br_vector3 *b, br_scalar t);
 
 br_int_32 BR_PUBLIC_ENTRY BrPlaneEquation(br_vector4 *eqn, const br_vector3 *v0, const br_vector3 *v1, const br_vector3 *v2);
 
