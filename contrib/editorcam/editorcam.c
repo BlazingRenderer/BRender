@@ -124,8 +124,20 @@ void BrEditorCamUpdate(br_editor_camera *cam, float dt)
         BrMatrix34ApplyV(&world_v, &v, &camera_to_world);
         BrMatrix34PreTranslate(&cam->actor->t.t.mat, world_v.v[0], world_v.v[1], world_v.v[2]);
     } else if(cam->flags & BR_ECAMF_MODE_PAN) {
-        /* Pan */
-        BrMatrix34PreTranslate(&cam->camera->t.t.mat, xdiff * -1000, ydiff * 1000, 0);
+        br_scalar  pan_scale = BR_SCALAR(1000);
+        br_vector3 right     = BR_VECTOR3(1, 0, 0);
+        br_vector3 up        = BR_VECTOR3(0, 1, 0);
+        br_vector3 world_right, world_up;
+        br_vector3 pan_right, pan_up, pan_offset;
+
+        BrMatrix34ApplyV(&world_right, &right, &camera_to_world);
+        BrMatrix34ApplyV(&world_up, &up, &camera_to_world);
+
+        BrVector3Scale(&pan_right, &world_right, xdiff * -pan_scale);
+        BrVector3Scale(&pan_up, &world_up, ydiff * pan_scale);
+        BrVector3Add(&pan_offset, &pan_right, &pan_up);
+
+        BrMatrix34PreTranslate(&cam->actor->t.t.mat, pan_offset.v[0], pan_offset.v[1], pan_offset.v[2]);
     } else {
         cam->current_speed = BR_SCALAR(0);
     }
