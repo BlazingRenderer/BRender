@@ -243,7 +243,7 @@ END
 	foreach $method (split(" ",$class_methods{$class})) {
 		($m_class, $m_name) = split("::",$method);
 
-		printf("\tBR_CMETHOD_REF(%-32s %s),\n", $m_class . "," , $m_name);
+		printf("\t._%-24s = BR_CMETHOD_REF(%-24s %s),\n", $m_name, $m_class . "," , $m_name);
 	}
 
 	print "};\n\n";
