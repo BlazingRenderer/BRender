@@ -39,6 +39,7 @@ core/v1db: fix RegenerateVertexNormals to respect smoothing groups
 ```
 ```
 contrib/editorcam: fix camera offset after pan mode, add orbit mode
+
 - Pan mode now applies translations to actor (world position) rather
   than camera (orientation), fixing offset after switching modes
 - Add orbit mode (Alt+LMB drag) with azimuth/elevation rotation
