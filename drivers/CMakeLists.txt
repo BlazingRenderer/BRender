@@ -1,9 +1,11 @@
-find_package(OpenGL COMPONENTS OpenGL)
-if (TARGET OpenGL::GL)
-    add_subdirectory(glrend)
+##
+# We always want glrend-headers so unconditionally include glrend.
+##
+add_subdirectory(glrend)
+if (TARGET glrend)
     target_link_libraries(brender-full INTERFACE glrend)
 else ()
-    message(STATUS "OpenGL not found, not building glrend")
+    target_link_libraries(brender-full INTERFACE glrend-headers)
 endif ()
 
 if (TARGET SDL2::SDL2)

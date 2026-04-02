@@ -20,13 +20,12 @@ install(TARGETS
         FILE_SET ddi DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/brender/ddi
         )
 
+install(TARGETS glrend-headers
+        EXPORT Core
+        FILE_SET include DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/brender/glrend
+        )
 
 if (TARGET glrend)
-    install(TARGETS glrend-headers
-            EXPORT Core
-            FILE_SET include DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/brender/glrend
-            )
-
     install(TARGETS glrend
             EXPORT Core
             LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}/brender

@@ -1,6 +1,36 @@
 project(glrend)
 
-find_package(OpenGL REQUIRED COMPONENTS OpenGL)
+set(INC_FILES
+        include/brglrend.h
+        include/brglrend_p.h
+)
+
+add_library(glrend-headers INTERFACE)
+target_sources(glrend-headers INTERFACE
+        FILE_SET include
+        TYPE HEADERS
+        BASE_DIRS include
+        FILES ${INC_FILES}
+)
+
+target_include_directories(glrend-headers INTERFACE
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+        $<INSTALL_INTERFACE:include/brender/glrend>
+)
+
+set_target_properties(glrend-headers PROPERTIES
+        EXPORT_NAME "Drivers::GLRend::Headers"
+        FOLDER "BRender/Drivers"
+)
+
+add_library(BRender::Drivers::GLRend::Headers ALIAS glrend-headers)
+
+find_package(OpenGL COMPONENTS OpenGL)
+
+if (NOT TARGET OpenGL::GL)
+    message(STATUS "OpenGL not found, not building glrend")
+    return()
+endif ()
 
 # NB: Don't use this, it's fragile as fuck.
 # find_package(glslang CONFIG REQUIRED)
@@ -191,29 +221,6 @@ set(GLREND_FILES
         formats.c
         )
 
-set(INC_FILES
-        include/brglrend.h
-        include/brglrend_p.h
-        )
-
-add_library(glrend-headers INTERFACE)
-target_sources(glrend-headers INTERFACE
-        FILE_SET include
-        TYPE HEADERS
-        BASE_DIRS include
-        FILES ${INC_FILES}
-        )
-
-target_include_directories(glrend-headers INTERFACE
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-        $<INSTALL_INTERFACE:include/brender/glrend>
-        )
-
-set_target_properties(glrend-headers PROPERTIES
-        EXPORT_NAME "Drivers::GLRend::Headers"
-        FOLDER "BRender/Drivers"
-        )
-
 add_library(glrend
         ${GLAD_FILES}
         ${GLREND_FILES}
@@ -253,5 +260,4 @@ set_target_properties(glrend PROPERTIES
         FOLDER "BRender/Drivers"
         )
 
-add_library(BRender::Drivers::GLRend::Headers ALIAS glrend-headers)
 add_library(BRender::Drivers::GLRend ALIAS glrend)
