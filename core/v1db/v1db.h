@@ -203,7 +203,7 @@ extern "C" {
 extern br_v1db_state BR_ASM_DATA v1db;
 
 #ifdef __cplusplus
-}:
+};
 #endif
 
 /*
