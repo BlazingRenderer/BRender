@@ -489,6 +489,38 @@ static void fill_material(br_material *mat, const cgltf_material *material, cons
                 }
             }
 
+            if(texture->sampler != NULL) {
+                const cgltf_sampler *sampler = texture->sampler;
+
+                switch(sampler->wrap_s) {
+                    case cgltf_wrap_mode_repeat:
+                        mat->mode = (mat->mode & ~BR_MATM_MAP_WIDTH_LIMIT_MASK) | BR_MATM_MAP_WIDTH_LIMIT_WRAP;
+                        break;
+                    case cgltf_wrap_mode_clamp_to_edge:
+                        mat->mode = (mat->mode & ~BR_MATM_MAP_WIDTH_LIMIT_MASK) | BR_MATM_MAP_WIDTH_LIMIT_CLAMP;
+                        break;
+                    case cgltf_wrap_mode_mirrored_repeat:
+                        mat->mode = (mat->mode & ~BR_MATM_MAP_WIDTH_LIMIT_MASK) | BR_MATM_MAP_WIDTH_LIMIT_MIRROR;
+                        break;
+                    default:
+                        break;
+                }
+
+                switch(sampler->wrap_t) {
+                    case cgltf_wrap_mode_repeat:
+                        mat->mode = (mat->mode & ~BR_MATM_MAP_HEIGHT_LIMIT_MASK) | BR_MATM_MAP_HEIGHT_LIMIT_WRAP;
+                        break;
+                    case cgltf_wrap_mode_clamp_to_edge:
+                        mat->mode = (mat->mode & ~BR_MATM_MAP_HEIGHT_LIMIT_MASK) | BR_MATM_MAP_HEIGHT_LIMIT_CLAMP;
+                        break;
+                    case cgltf_wrap_mode_mirrored_repeat:
+                        mat->mode = (mat->mode & ~BR_MATM_MAP_HEIGHT_LIMIT_MASK) | BR_MATM_MAP_HEIGHT_LIMIT_MIRROR;
+                        break;
+                    default:
+                        break;
+                }
+            }
+
             if(pbr->base_color_texture.has_transform) {
                 const cgltf_texture_transform *xform = &pbr->base_color_texture.transform;
 
