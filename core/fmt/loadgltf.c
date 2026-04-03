@@ -488,6 +488,21 @@ static void fill_material(br_material *mat, const cgltf_material *material, cons
                     mat->colour_map = pixelmaps[image_index];
                 }
             }
+
+            if(pbr->base_color_texture.has_transform) {
+                const cgltf_texture_transform *xform = &pbr->base_color_texture.transform;
+
+                /*
+                 * glTF's KHR_texture_transform defines (in column-vector convention):
+                 *   uv' = T * R * S * uv
+                 *
+                 * In BRender's row-vector convention this becomes:
+                 *   uv' = uv * S * R(-angle) * T
+                 */
+                BrMatrix23Scale(&mat->map_transform, BrFloatToScalar(xform->scale[0]), BrFloatToScalar(xform->scale[1]));
+                BrMatrix23PostRotate(&mat->map_transform, -BrRadianToAngle(xform->rotation));
+                BrMatrix23PostTranslate(&mat->map_transform, BrFloatToScalar(xform->offset[0]), BrFloatToScalar(xform->offset[1]));
+            }
         }
 
         /*
