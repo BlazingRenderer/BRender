@@ -3,9 +3,9 @@ project(brcube)
 add_executable(brcube
         brcube.cpp
 
-        editorcam.c
-        editorcam_p.h
-        editorcam.h
+        ../../contrib/editorcam/editorcam.c
+        ../../contrib/editorcam/editorcam_p.h
+        ../../contrib/editorcam/editorcam.h
 
         editor.hpp
         editor.cpp
@@ -84,6 +84,6 @@ add_executable(brcube
 )
 target_compile_definitions(brcube PRIVATE "-DIMGUI_USER_CONFIG=\"${CMAKE_CURRENT_SOURCE_DIR}/imgui_config_brender.h\"")
 target_link_libraries(brcube BRender::Full BRender::DDI)
-target_include_directories(brcube PRIVATE imgui)
+target_include_directories(brcube PRIVATE imgui ../../contrib/editorcam)
 
 target_compile_features(brcube PRIVATE cxx_std_17)
