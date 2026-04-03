@@ -31,6 +31,7 @@ private:
     br_pixelmap      *m_screen;
     br_editor_camera *m_camera;
     bool              m_is_focused;
+    br_order_table   *m_order_table;
 
     br_pixelmap_ptr m_depth_buffer;
     br_pixelmap_ptr m_colour_buffer;

@@ -7,16 +7,18 @@
 #include "ImGuizmo/ImGuizmo.h"
 
 Editor::CameraPane::CameraPane(const char *id, br_pixelmap *screen)
-    : m_is_focused(false), m_screen(screen), m_camera(nullptr)
+    : m_is_focused(false), m_screen(screen), m_camera(nullptr), m_order_table(nullptr)
 {
     this->m_id.reset(BrResSprintf(nullptr, "Camera##%s", id));
     this->m_camera                 = BrEditorCamAllocate(nullptr);
     this->m_camera->standard_speed = 2.0f;
+    this->m_order_table = BrZsOrderTableAllocate(4096, BR_ORDER_TABLE_LEAVE_BOUNDS | BR_ORDER_TABLE_BUCKET_SORT, BR_SORT_AVERAGE);
 }
 
 Editor::CameraPane::~CameraPane()
 {
     BrEditorCamFree(this->m_camera);
+    BrZsOrderTableFree(this->m_order_table);
 }
 
 br_editor_camera *Editor::CameraPane::GetCamera() const noexcept
@@ -78,6 +80,9 @@ void Editor::CameraPane::DrawInternal(br_actor *world)
         ImGui::EndPopup();
     }
 
+    this->m_order_table->min_z = this->m_camera->camera_data.hither_z;
+    this->m_order_table->max_z = this->m_camera->camera_data.yon_z;
+
     ImVec2 wsize = ImGui::GetWindowSize();
     this->MaybeResize(wsize.x, wsize.y);
 
@@ -85,11 +90,16 @@ void Editor::CameraPane::DrawInternal(br_actor *world)
         return;
 
     {
+        br_order_table *old_order_table = BrZsActorOrderTableGet(world);
+        BrZsActorOrderTableSet(world, this->m_order_table);
+
         BrRendererFrameBegin();
         BrPixelmapFill(this->m_colour_buffer.get(), BR_COLOUR_RGBA(0, 0, 0, 255));
         BrPixelmapFill(this->m_depth_buffer.get(), 0xFFFFFFFF);
         BrZbSceneRender(world, this->m_camera->camera, this->m_colour_buffer.get(), this->m_depth_buffer.get());
         BrRendererFrameEnd();
+
+        BrZsActorOrderTableSet(world, old_order_table);
     }
 
     ImGui::Image(static_cast<ImTextureID>(tex), wsize, ImVec2(0, 1), ImVec2(1, 0));
