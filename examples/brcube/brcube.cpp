@@ -89,7 +89,7 @@ static void create_scene(br_actor *world, const char *file)
     // results = BrFmtGLTFActorLoadMany("/dev/glTF-Sample-Assets/Models/MeshPrimitiveModes/glTF-Embedded/MeshPrimitiveModes.gltf");
     // results = BrFmtGLTFActorLoadMany("/dev/glTF-Sample-Assets/Models/Avocado/glTF-Binary/Avocado.glb");
 
-    results = BrFmtGLTFActorLoadMany(file);
+    results = BrFmtGLTFActorLoadMany(file, NULL);
 
 
     for(br_size_t i = 0; i < results->nactors; ++i) {
