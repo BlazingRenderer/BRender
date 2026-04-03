@@ -14,6 +14,7 @@ examples/brdemo/parg.h
 drivers/glrend/glad.c
 drivers/glrend/include/glad
 drivers/glrend/include/KHR
+drivers/glrend/*.glsl
 
 # Easier to diff against the originals
 drivers/pentprim
