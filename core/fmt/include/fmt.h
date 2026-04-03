@@ -164,6 +164,39 @@ typedef struct br_vue {
 } br_vue;
 
 /*
+ * glTF animation structures
+ */
+typedef struct br_gltf_keyframes {
+    br_int_32 count;
+    float    *times;
+    float    *values;
+} br_gltf_keyframes;
+
+typedef struct br_gltf_channel {
+    br_int_32          node_index;
+    br_int_32          path;
+    br_int_32          interpolation;
+    br_gltf_keyframes  keys;
+} br_gltf_channel;
+
+typedef struct br_gltf_animation {
+    char               identifier[64];
+    float              duration;
+    br_int_32          nchannels;
+    br_gltf_channel   *channels;
+    br_boolean         loop;
+} br_gltf_animation;
+
+typedef struct br_gltf_anim_data {
+    br_actor          **node_actors;
+    br_int_32           nnodes;
+    float              *rest_trs;
+    br_gltf_animation  *anims;
+    br_int_32           nanims;
+    br_int_32           active_anim;
+} br_gltf_anim_data;
+
+/*
  * Image type enumerations
  */
 enum {
