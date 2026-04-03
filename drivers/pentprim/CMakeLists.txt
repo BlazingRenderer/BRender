@@ -1,3 +1,4 @@
+# CI flake repro: no functional change
 project(pentprim C ASM_MASM)
 
 include(h2inc)
