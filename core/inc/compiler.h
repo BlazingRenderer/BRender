@@ -280,6 +280,7 @@ typedef float br_float;
 #define high   _high
 
 #define name   _name
+#define loop   _loop
 
 /*
  * Supress compiler specific declarators
