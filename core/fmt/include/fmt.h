@@ -164,8 +164,9 @@ typedef struct br_vue {
 } br_vue;
 
 /*
- * glTF animation structures
+ * glTF animation structures (not visible to H2INC/MASM)
  */
+#if !defined(__H2INC__)
 typedef struct br_gltf_keyframes {
     br_int_32 count;
     float    *times;
@@ -195,6 +196,7 @@ typedef struct br_gltf_anim_data {
     br_int_32           nanims;
     br_int_32           active_anim;  /* index of animation to play, or -1 for all */
 } br_gltf_anim_data;
+#endif /* !__H2INC__ */
 
 /*
  * Image type enumerations
