@@ -1,0 +1,46 @@
+{
+  "version": 3,
+  "configurePresets": [
+    {
+      "name": "default",
+      "displayName": "Ninja Multi-Config",
+      "binaryDir": "${sourceDir}/build/${presetName}",
+      "generator": "Ninja Multi-Config",
+      "cacheVariables": {
+        "BRENDER_BUILD_DRIVERS": "ON",
+        "BRENDER_BUILD_TOOLS": "ON",
+        "BRENDER_BUILD_EXAMPLES": "ON"
+      }
+    },
+    {
+      "name": "msvc-x64",
+      "displayName": "Visual Studio 2022 (x64)",
+      "binaryDir": "${sourceDir}/build/${presetName}",
+      "generator": "Visual Studio 17 2022",
+      "architecture": "x64",
+      "cacheVariables": {
+        "BRENDER_BUILD_DRIVERS": "ON",
+        "BRENDER_BUILD_TOOLS": "ON",
+        "BRENDER_BUILD_EXAMPLES": "ON"
+      }
+    },
+    {
+      "name": "msvc-x86",
+      "displayName": "Visual Studio 2022 (x86)",
+      "binaryDir": "${sourceDir}/build/${presetName}",
+      "generator": "Visual Studio 17 2022",
+      "architecture": "Win32",
+      "cacheVariables": {
+        "BRENDER_BUILD_DRIVERS": "ON",
+        "BRENDER_BUILD_TOOLS": "ON",
+        "BRENDER_BUILD_EXAMPLES": "ON"
+      }
+    }
+  ],
+  "buildPresets": [
+    { "name": "default",  "configurePreset": "default",  "configuration": "RelWithDebInfo" },
+    { "name": "debug",    "configurePreset": "default",  "configuration": "Debug" },
+    { "name": "msvc-x64", "configurePreset": "msvc-x64" },
+    { "name": "msvc-x86", "configurePreset": "msvc-x86" }
+  ]
+}
