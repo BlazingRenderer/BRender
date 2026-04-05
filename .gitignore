@@ -5,7 +5,7 @@
 **/*.code-workspace
 /result
 /result-*
-/build/
+/build*/
 **/imgui.ini
 **/.DS_Store
 
