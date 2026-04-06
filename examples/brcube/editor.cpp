@@ -22,7 +22,7 @@ bool ImGui::InputUInt16(const char *label, uint16_t *v, int16_t step, int16_t st
 
 Editor::Editor::Editor()
     : m_screen(nullptr), m_log_handler(), m_log_pane("LogPane"), m_about_dialog("AboutDialog"), m_next_camera_pane_no(0), m_world(nullptr),
-      m_graph_pane(0)
+      m_graph_pane(0), m_show_imgui_demo_window(false)
 {
     this->m_context.reset(ImGui::CreateContext());
     ImGui::SetCurrentContext(this->m_context.get());
@@ -189,6 +189,8 @@ void Editor::Editor::DrawMainMenuBar()
                 this->AddCameraPane();
             }
 
+            ImGui::Checkbox("Show ImGui Demo Window", &this->m_show_imgui_demo_window);
+
             //            if(ImGui::MenuItem("Reset##Camera")) {
             //                for(auto& cam : this->m_camera_panes) {
             //                    if(cam->IsFocused()) {
@@ -241,8 +243,9 @@ void Editor::Editor::Render()
     ImGui::End();
 #endif
 
-    bool show_demo_window = true;
-    ImGui::ShowDemoWindow(&show_demo_window);
+    if(this->m_show_imgui_demo_window) {
+        ImGui::ShowDemoWindow(&m_show_imgui_demo_window);
+    }
 
     m_log_pane.Draw();
     m_graph_pane.Draw(this->m_world);

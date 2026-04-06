@@ -94,6 +94,7 @@ private:
     imgui_context_ptr m_context;
 
     br_registry m_reg;
+    bool        m_show_imgui_demo_window;
 };
 
 } // namespace Editor
