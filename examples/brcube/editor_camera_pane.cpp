@@ -63,7 +63,9 @@ br_token CameraToScreenMatrix4(br_matrix4 *mat, br_actor *camera);
 
 void Editor::CameraPane::DrawInternal(br_actor *world)
 {
-    GLuint tex;
+    GLuint   tex;
+    ImGuiIO& io = ImGui::GetIO();
+
     ImGui::BeginChild("GameRender");
 
     // br_matrix4 proj;
@@ -72,12 +74,16 @@ void Editor::CameraPane::DrawInternal(br_actor *world)
     //
     // BrActorToActorMatrix34(&view, world, this->m_camera->camera);
 
-    // FIXME: only if not dragging
-    if(ImGui::BeginPopupContextWindow()) {
-        if(ImGui::MenuItem("Reset"))
-            BrEditorCamReset(this->m_camera);
+    /* NB: change buttonmap below if you change this. */
+    if(io.MouseDragMaxDistanceSqr[ImGuiMouseButton_Right] == 0) {
+        if(ImGui::BeginPopupContextWindow()) {
+            this->m_camera->flags = 0; /* Stop the camera moving. */
 
-        ImGui::EndPopup();
+            if(ImGui::MenuItem("Reset"))
+                BrEditorCamReset(this->m_camera);
+
+            ImGui::EndPopup();
+        }
     }
 
     this->m_order_table->min_z = this->m_camera->camera_data.hither_z;
