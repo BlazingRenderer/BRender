@@ -79,8 +79,50 @@ void Editor::CameraPane::DrawInternal(br_actor *world)
         if(ImGui::BeginPopupContextWindow()) {
             this->m_camera->flags = 0; /* Stop the camera moving. */
 
-            if(ImGui::MenuItem("Reset"))
+            if(ImGui::MenuItem("Reset")) {
+                br_camera *cam = &this->m_camera->camera_data;
                 BrEditorCamReset(this->m_camera);
+
+                cam->type          = BR_CAMERA_PERSPECTIVE;
+                cam->field_of_view = BR_ANGLE_DEG(60);
+                cam->hither_z      = BR_SCALAR(0.01f);
+                cam->yon_z         = BR_SCALAR(1000.0f);
+            }
+
+            ImGui::Separator();
+            ImGui::PushID("CAMERA");
+
+            ImGui::TextDisabled("Camera Settings");
+
+            {
+                br_camera *cam = &this->m_camera->camera_data;
+                switch(cam->type) {
+                    case BR_CAMERA_PERSPECTIVE_FOV: {
+                        float fov = BrAngleToScalar(cam->field_of_view) * 360.0f;
+                        if(ImGui::DragFloat("FOV", &fov)) {
+                            if (fov <= 0)
+                                fov = 0.001f;
+
+                            cam->field_of_view = BrScalarToAngle(fov / 360.0f);
+                        }
+                    }
+                }
+
+                {
+                    float hy[2] = {BrScalarToFloat(cam->hither_z), BrScalarToFloat(cam->yon_z)};
+                    if(ImGui::DragFloat2("Hither/Yon", hy, 0.01f, 0.001f)) {
+                        if(hy[0] <= 0)
+                            hy[0] = 0.001f;
+
+                        if(hy[1] <= 0)
+                            hy[1] = 0.001f;
+
+                        cam->hither_z = BrFloatToScalar(hy[0]);
+                        cam->yon_z    = BrFloatToScalar(hy[1]);
+                    }
+                }
+            }
+            ImGui::PopID();
 
             ImGui::EndPopup();
         }
