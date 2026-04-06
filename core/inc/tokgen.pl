@@ -12,6 +12,7 @@ $token_id{"NULL"} = 0;
 #
 open(TOK,"<$ARGV[0]");
 while (<>) {
+	s/\r//g;
 
 	# Ignore comments
 	#
