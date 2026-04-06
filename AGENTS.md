@@ -21,13 +21,15 @@ BRender is a 3D rendering engine with multiple renderer backends:
 
 ## Coding Conventions
 - C codebase with `br_*` prefix for public structs, `Br*` prefix for public functions.
-- Run `clang-format` before committing (project has `.clang-format` configuration)
-- Public API functions are decorated with `BR_PUBLIC_ENTRY`, cross-library (non-static internal) functions with `BR_RESIDENT_ENTRY`
+- Run `clang-format` before committing (project has `.clang-format` configuration).
+- `BR_PUBLIC_ENTRY` decorates functions that are part of the public API. `BR_RESIDENT_ENTRY` decorates
+  functions that cross library boundaries internally but are not part of the public API (i.e., non-static
+  internal linkage). Do not omit these on applicable functions.
 
 ## Commit Style
-We use a similar commit style to open source projects like the Linux Kernel and FFmpeg. **Do not use Conventional Commits** (e.g., `chore:`, `feat:`, `fix:`, `docs:`, `style:`, `refactor:`, `test:`, `ci:`).
-
-See the "Commit messages" section in https://ffmpeg.org/developer.html#toc-Patches_002fCommitting
+We use a similar commit style to open source projects like the Linux Kernel and FFmpeg.
+**Do not use Conventional Commits** (e.g., `chore:`, `feat:`, `fix:`, `docs:`, `style:`, `refactor:`, `test:`, `ci:`).
+See the [Commit messages](https://ffmpeg.org/developer.html#toc-Patches_002fCommitting) section of the FFmpeg developer guide.
 
 Format:
 ```
@@ -35,12 +37,19 @@ component: short description
 
 More detailed description if necessary.
 ```
-Each commit should be a single logical unit. Larger commits are acceptable if the change is nontrivial and can't be decoupled.
+
+Each commit should be a single logical unit, though larger commits are acceptable when the change is nontrivial and cannot be cleanly decoupled.
 
 Examples:
+
+```
+gitignore: ignore /build-*/
+```
+
 ```
 core/v1db: fix RegenerateVertexNormals to respect smoothing groups
 ```
+
 ```
 contrib/editorcam: fix camera offset after pan mode, add orbit mode
 
@@ -48,6 +57,9 @@ contrib/editorcam: fix camera offset after pan mode, add orbit mode
   than camera (orientation), fixing offset after switching modes
 - Add orbit mode (Alt+LMB drag) with azimuth/elevation rotation
 ```
+
+## Testing
+There is no formal test suite. Do not attempt to add or run tests unless explicitly instructed.
 
 ## Common Patterns
 
