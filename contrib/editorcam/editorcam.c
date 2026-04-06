@@ -157,8 +157,16 @@ void BrEditorCamUpdate(br_editor_camera *cam, float dt)
 
 void BrEditorCamReset(br_editor_camera *cam)
 {
+    void *cam_user;
+
     BrMatrix34Identity(&cam->actor->t.t.mat);
     BrMatrix34Identity(&cam->camera->t.t.mat);
+
+    cam_user              = cam->camera_data.user;
+    cam->camera_data      = default_camera.camera_data;
+    cam->camera_data.user = cam_user;
+    cam->standard_speed   = default_camera.standard_speed;
+    cam->speed_multiplier = default_camera.speed_multiplier;
 }
 
 void BrEditorCamFree(br_editor_camera *cam)
