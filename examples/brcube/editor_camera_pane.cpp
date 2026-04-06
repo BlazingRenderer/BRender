@@ -95,6 +95,8 @@ void Editor::CameraPane::DrawInternal(br_actor *world)
             ImGui::TextDisabled("Camera Settings");
 
             {
+                ImGui::DragFloat("Speed", &this->m_camera->standard_speed, 0.01f, 0.0f, 10.0f);
+
                 br_camera *cam = &this->m_camera->camera_data;
                 switch(cam->type) {
                     case BR_CAMERA_PERSPECTIVE_FOV: {
