@@ -97,7 +97,12 @@ struct EditorTexture {
 };
 
 static constexpr EditorTexture editor_textures[] = {
-    {.path = "editor/breditor_logo.png", .name = "breditor_logo", .loader = BrFmtPNGLoad},
+    {.path = "editor/breditor_logo.png",          .name = "breditor_logo",               .loader = BrFmtPNGLoad},
+    {.path = "editor/lightbulb-regular-full.png", .name = "breditor_icon_lightbulb_on",  .loader = BrFmtPNGLoad},
+    {.path = "editor/lightbulb-solid-full.png",   .name = "breditor_icon_lightbulb_off", .loader = BrFmtPNGLoad},
+    {.path = "editor/sun-regular-full.png",       .name = "breditor_icon_sun_on",        .loader = BrFmtPNGLoad},
+    {.path = "editor/sun-solid-full.png",         .name = "breditor_icon_sun_off",       .loader = BrFmtPNGLoad},
+    {.path = "editor/video-solid-full.png",       .name = "breditor_icon_camera",        .loader = BrFmtPNGLoad},
 };
 
 void Editor::Editor::LoadResources()
