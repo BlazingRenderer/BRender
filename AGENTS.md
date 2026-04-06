@@ -25,6 +25,10 @@ BRender is a 3D rendering engine with multiple renderer backends:
 - Public API functions are decorated with `BR_PUBLIC_ENTRY`, cross-library (non-static internal) functions with `BR_RESIDENT_ENTRY`
 
 ## Commit Style
+We use a similar commit style to open source projects like the Linux Kernel and FFmpeg. **Do not use Conventional Commits** (e.g., `chore:`, `feat:`, `fix:`, `docs:`, `style:`, `refactor:`, `test:`, `ci:`).
+
+See the "Commit messages" section in https://ffmpeg.org/developer.html#toc-Patches_002fCommitting
+
 Format:
 ```
 component: short description
