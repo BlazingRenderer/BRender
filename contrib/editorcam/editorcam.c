@@ -144,7 +144,7 @@ void BrEditorCamUpdate(br_editor_camera *cam, float dt)
 
     /* Scroll - discrete steps, don't dt multiply. */
     if(BR_ABS(cam->mwheel_rel) > 0.0f) {
-        br_vector3 forward = BR_VECTOR3(0, 0, wheel_diff * -500);
+        br_vector3 forward = BR_VECTOR3(0, 0, wheel_diff * -250 * cam->standard_speed);
         br_vector3 world_forward;
         BrMatrix34ApplyV(&world_forward, &forward, &camera_to_world);
         BrMatrix34PreTranslate(&cam->actor->t.t.mat, world_forward.v[0], world_forward.v[1], world_forward.v[2]);
