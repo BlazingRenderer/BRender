@@ -90,21 +90,33 @@ void Editor::Editor::Init(SDL_Window *window, SDL_GLContext ctx, br_pixelmap *sc
     m_resource_panes.emplace_back(std::make_unique<ResourcesPane>("TestResourcesPane", screen, &this->m_reg));
 }
 
+struct EditorTexture {
+    const char *path;
+    const char *name;
+    br_pixelmap *(*loader)(const char *, br_uint_32);
+};
+
+static constexpr EditorTexture editor_textures[] = {
+    {.path = "editor/breditor_logo.png", .name = "breditor_logo", .loader = BrFmtPNGLoad},
+};
+
 void Editor::Editor::LoadResources()
 {
     br_res_ptr<char> path;
-    br_pixelmap     *pm;
     br_model        *mdl;
 
-    path.reset(BrResSprintf(nullptr, "editor/breditor_logo.png"));
-    if((pm = BrFmtPNGLoad(path.get(), 0)) != nullptr) {
-        if(pm->identifier)
-            BrResFree(pm->identifier);
+    for(const EditorTexture& et : editor_textures) {
+        br_pixelmap *pm;
 
-        pm->identifier = BrResStrDup(pm, "breditor_logo");
+        if((pm = et.loader(et.path, 0)) != nullptr) {
+            if(pm->identifier)
+                BrResFree(pm->identifier);
 
-        BrMapUpdate(pm, BR_MATU_ALL);
-        BrRegistryAdd(&this->m_reg, pm);
+            pm->identifier = BrResStrDup(pm, et.name);
+
+            BrMapUpdate(pm, BR_MATU_ALL);
+            BrRegistryAdd(&this->m_reg, pm);
+        }
     }
 
     path.reset(BrResSprintf(nullptr, "editor/breditor_sph32.dat"));
