@@ -80,13 +80,8 @@ void Editor::CameraPane::DrawInternal(br_actor *world)
             this->m_camera->flags = 0; /* Stop the camera moving. */
 
             if(ImGui::MenuItem("Reset")) {
-                br_camera *cam = &this->m_camera->camera_data;
                 BrEditorCamReset(this->m_camera);
-
-                cam->type          = BR_CAMERA_PERSPECTIVE;
-                cam->field_of_view = BR_ANGLE_DEG(60);
-                cam->hither_z      = BR_SCALAR(0.01f);
-                cam->yon_z         = BR_SCALAR(1000.0f);
+                this->m_camera->standard_speed = 2.0f;
             }
 
             ImGui::Separator();
