@@ -92,7 +92,7 @@ br_quat *BR_PUBLIC_ENTRY BrQuatInvert(br_quat *q, const br_quat *qq)
 
 br_quat *BR_PUBLIC_ENTRY BrQuatSlerp(br_quat *q, const br_quat *l, const br_quat *r, br_scalar a, br_int_16 spins)
 {
-    int       omega, omega_spin;
+    br_scalar omega, omega_spin;
     br_scalar s_omega, c_omega;
     br_scalar scale_l, scale_r;
     br_quat   t;
