@@ -17,6 +17,7 @@ set(INC_FILES
         )
 
 set(V1DB_FILES
+        animation.c
         actsupt.c
         custsupt.c
         dbquery.c

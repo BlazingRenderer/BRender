@@ -91,6 +91,10 @@
 #include "transfrm.h"
 #endif
 
+#ifndef _ANIMATION_H_
+#include "animation.h"
+#endif
+
 /**
  ** Pixelmap support
  **/
