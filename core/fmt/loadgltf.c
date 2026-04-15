@@ -8,6 +8,10 @@
 #include "brstb.h"
 #include "cgltf.h"
 
+/* Defined in animgltf.c */
+br_animation_set      *BrFmtGLTFAnimBuildSet(const cgltf_data *data, br_uint_32 nnodes, void *res_parent);
+br_animation_instance *BrFmtGLTFAnimBuildInstance(br_animation_set *set, br_actor **all_actors, br_uint_32 nnodes, void *res_parent);
+
 /*
  * Default GLTF conversion options
  */
@@ -1060,6 +1064,27 @@ br_fmt_results *BR_PUBLIC_ENTRY BrFmtGLTFActorLoadMany(const char *name, const b
      */
     for(br_size_t i = 0; i < data->scene->nodes_count; ++i) {
         results->actors[i] = state->all_actors[cgltf_node_index(data, data->scene->nodes[i])];
+    }
+
+    /*
+     * Load animations, if present.
+     *
+     * Post: results->animation_sets and animation_instances are filled.
+     */
+    if(data->animations_count > 0) {
+        br_animation_set *set = BrFmtGLTFAnimBuildSet(data, data->nodes_count, results);
+        if(set != NULL) {
+            br_animation_instance *inst = BrFmtGLTFAnimBuildInstance(set, state->all_actors, data->nodes_count, results);
+            results->nanimation_sets    = 1;
+            results->animation_sets     = BrResAllocate(results, sizeof(br_animation_set *), BR_MEMORY_FMT_RESULTS);
+            results->animation_sets[0]  = set;
+
+            if(inst != NULL) {
+                results->nanimation_instances   = 1;
+                results->animation_instances    = BrResAllocate(results, sizeof(br_animation_instance *), BR_MEMORY_FMT_RESULTS);
+                results->animation_instances[0] = inst;
+            }
+        }
     }
 
     BrResRemove(results);

@@ -17,15 +17,17 @@ typedef struct br_fmt_results {
     /*
      * Pointers to tables of pointers to converted items
      */
-    br_actor    **actors;
-    br_model    **models;
-    br_light    **lights;
-    br_camera   **cameras;
-    br_vector4  **clip_planes;
-    br_bounds3  **bounds;
-    br_bounds3  **bounds_correct;
-    br_material **materials;
-    br_pixelmap **pixelmaps;
+    br_actor              **actors;
+    br_model              **models;
+    br_light              **lights;
+    br_camera             **cameras;
+    br_vector4            **clip_planes;
+    br_bounds3            **bounds;
+    br_bounds3            **bounds_correct;
+    br_material           **materials;
+    br_pixelmap           **pixelmaps;
+    br_animation_set      **animation_sets;
+    br_animation_instance **animation_instances;
 
     /*
      * Size of each array
@@ -39,6 +41,8 @@ typedef struct br_fmt_results {
     br_uint_32 nbounds_correct;
     br_uint_32 nmaterials;
     br_uint_32 npixelmaps;
+    br_uint_32 nanimation_sets;
+    br_uint_32 nanimation_instances;
 
 } br_fmt_results;
 
