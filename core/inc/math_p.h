@@ -219,6 +219,8 @@ void BR_PUBLIC_ENTRY      BrMatrix34LPNormalise(br_matrix34 *A, const br_matrix3
 
 void BR_PUBLIC_ENTRY BrMatrix34RollingBall(br_matrix34 *mat, int dx, int dy, int radius);
 
+br_matrix34 *BR_PUBLIC_ENTRY BrMatrix34FromTRS(br_matrix34 *mat, const br_vector3 *t, const br_quat *r, const br_vector3 *s);
+
 br_matrix34 *BR_PUBLIC_ENTRY BrBoundsToMatrix34(br_matrix34 *mat, const br_bounds *bounds);
 
 void BR_PUBLIC_ENTRY BrMatrix34ApplyBounds(br_bounds *A, const br_bounds *B, const br_matrix34 *C);

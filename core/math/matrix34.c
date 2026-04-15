@@ -1094,6 +1094,39 @@ void BR_PUBLIC_ENTRY BrMatrix34FixedToFloat(br_matrix34_f *A, const br_matrix34_
 }
 
 /*
+ * Compose a TRS (Translation * Rotation * Scale) transform.
+ * glTF §3.5.3: M = T * R * S
+ */
+br_matrix34 *BR_PUBLIC_ENTRY BrMatrix34FromTRS(br_matrix34 *mat, const br_vector3 *t, const br_quat *r, const br_vector3 *s)
+{
+    UASSERT_MESSAGE("Destination Matrix is NULL", mat != NULL);
+    UASSERT_MESSAGE("Translation is NULL", t != NULL);
+    UASSERT_MESSAGE("Rotation is NULL", r != NULL);
+    UASSERT_MESSAGE("Scale is NULL", s != NULL);
+
+    BrQuatToMatrix34(mat, r);
+
+    /* Scale each row by the corresponding component */
+    M(0, 0) = BR_MUL(M(0, 0), s->v[0]);
+    M(0, 1) = BR_MUL(M(0, 1), s->v[0]);
+    M(0, 2) = BR_MUL(M(0, 2), s->v[0]);
+
+    M(1, 0) = BR_MUL(M(1, 0), s->v[1]);
+    M(1, 1) = BR_MUL(M(1, 1), s->v[1]);
+    M(1, 2) = BR_MUL(M(1, 2), s->v[1]);
+
+    M(2, 0) = BR_MUL(M(2, 0), s->v[2]);
+    M(2, 1) = BR_MUL(M(2, 1), s->v[2]);
+    M(2, 2) = BR_MUL(M(2, 2), s->v[2]);
+
+    M(3, 0) = t->v[0];
+    M(3, 1) = t->v[1];
+    M(3, 2) = t->v[2];
+
+    return mat;
+}
+
+/*
  * determinate(upper 3x3 of m)
  */
 br_scalar BR_PUBLIC_ENTRY BrMatrix34Determinant3(const br_matrix34 *m)
