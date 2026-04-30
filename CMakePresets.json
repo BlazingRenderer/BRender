@@ -35,12 +35,25 @@
         "BRENDER_BUILD_TOOLS": "ON",
         "BRENDER_BUILD_EXAMPLES": "ON"
       }
+    },
+    {
+      "name": "djgpp-sdl3",
+      "displayName": "MS-DOS with DJGPP and SDL3",
+      "binaryDir": "${sourceDir}/build/${presetName}",
+      "generator": "Ninja",
+      "toolchainFile": "${sourceDir}/cmake/i586-pc-msdosdjgpp.cmake",
+      "cacheVariables": {
+        "BRENDER_BUILD_DRIVERS": "ON",
+        "BRENDER_BUILD_TOOLS": "ON",
+        "BRENDER_BUILD_EXAMPLES": "ON"
+      }
     }
   ],
   "buildPresets": [
-    { "name": "default",  "configurePreset": "default",  "configuration": "RelWithDebInfo" },
-    { "name": "debug",    "configurePreset": "default",  "configuration": "Debug" },
-    { "name": "msvc-x64", "configurePreset": "msvc-x64" },
-    { "name": "msvc-x86", "configurePreset": "msvc-x86" }
+    { "name": "default",    "configurePreset": "default", "configuration": "RelWithDebInfo" },
+    { "name": "debug",      "configurePreset": "default", "configuration": "Debug" },
+    { "name": "djgpp-sdl3", "configurePreset": "djgpp-sdl3" },
+    { "name": "msvc-x64",   "configurePreset": "msvc-x64" },
+    { "name": "msvc-x86",   "configurePreset": "msvc-x86" }
   ]
 }
