@@ -7,6 +7,14 @@
 #include <SDL3/SDL.h>
 #include <assert.h>
 
+#ifdef __DJGPP__
+#define WIDTH (320)
+#define HEIGHT (200)
+#else
+#define WIDTH (1280)
+#define HEIGHT (720)
+#endif
+
 void BR_CALLBACK _BrBeginHook(void)
 {
     struct br_device *BR_EXPORT BrDrv1SoftPrimBegin(const char *arguments);
@@ -63,8 +71,8 @@ int main(int argc, char **argv)
 
     // clang-format off
     err = BrDevBeginVar(&screen, "SDL3",
-        BRT_WIDTH_I32, 1280,
-        BRT_HEIGHT_I32, 720,
+        BRT_WIDTH_I32, WIDTH,
+        BRT_HEIGHT_I32, HEIGHT,
         BR_NULL_TOKEN
     );
     // clang-format on
