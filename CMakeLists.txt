@@ -23,6 +23,19 @@ option(BRENDER_USE_SDL2 "Use SDL2" OFF)
 option(BRENDER_USE_SDL3 "Use SDL3" OFF)
 option(BRENDER_DISABLE_FINDSDL "Disable searching for SDL" OFF)
 
+if(DJGPP AND BRENDER_DISABLE_FINDSDL)
+    include(FetchContent)
+    FetchContent_Declare(
+        sdl3
+        GIT_REPOSITORY "https://github.com/libsdl-org/SDL.git"
+        GIT_TAG 1226725e9ac1321614e1ecd0d7f245285bd73131 # docs/README-platforms.md: Add DOS.
+        EXCLUDE_FROM_ALL
+    )
+    set(SDL_SHARED OFF CACHE BOOL "" FORCE)
+    set(SDL_STATIC ON CACHE BOOL "" FORCE)
+    FetchContent_MakeAvailable(sdl3)
+endif()
+
 function(find_sdl)
     if (BRENDER_DISABLE_FINDSDL)
         # I certainly hope you know what you're doing.
