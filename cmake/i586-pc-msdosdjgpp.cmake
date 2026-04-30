@@ -41,6 +41,7 @@ set(CMAKE_FIND_LIBRARY_SUFFIXES ".a")
 # specify the cross compiler
 find_program(CMAKE_C_COMPILER NAMES "i586-pc-msdosdjgpp-gcc" "i386-pc-msdosdjgpp-gcc" REQUIRED)
 find_program(CMAKE_CXX_COMPILER NAMES "i586-pc-msdosdjgpp-g++" "i386-pc-msdosdjgpp-g++" REQUIRED)
+find_program(CMAKE_ASM_MASM_COMPILER NAMES "uasm" REQUIRED)
 
 execute_process(COMMAND "${CMAKE_C_COMPILER}" -print-search-dirs
     RESULT_VARIABLE CC_SEARCH_DIRS_RESULT
