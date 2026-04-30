@@ -39,7 +39,7 @@ br_device_clut *DeviceClutSDL3Allocate(br_device_pixelmap *pm, const char *ident
     self->dispatch   = &deviceClutDispatch;
     self->device     = pm->device;
     self->identifier = BrResStrDup(self, identifier);
-    self->pal        = SDL_GetSurfacePalette(pm->surface);
+    self->pal        = SDL_CreateSurfacePalette(pm->surface);
     self->owned      = BR_FALSE;
 
     UASSERT(self->pal != NULL);
