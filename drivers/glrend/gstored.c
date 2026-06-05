@@ -57,15 +57,19 @@ static GLuint create_vao(const GladGLContext *gl, const br_gl_main_shader *shade
     return vao;
 }
 
-static GLuint build_vbo(const GladGLContext *gl, const struct v11model *model, size_t total_vertices)
+static GLuint build_vbo(const GladGLContext *gl, const struct v11model *model, size_t total_vertices, gl_groupinfo *groups)
 {
     /* Collate and upload the vertex data. */
-    gl_vertex_f *vtx     = (gl_vertex_f *)BrScratchAllocate(total_vertices * sizeof(gl_vertex_f));
-    gl_vertex_f *nextVtx = vtx;
+    gl_vertex_f *vtx      = (gl_vertex_f *)BrScratchAllocate(total_vertices * sizeof(gl_vertex_f));
+    gl_vertex_f *nextVtx  = vtx;
+    GLsizei      v_offset = 0;
     GLuint       buf;
 
     for(br_uint_16 i = 0; i < model->ngroups; ++i) {
         const struct v11group *gp = model->groups + i;
+
+        groups[i].vertex_offset = v_offset;
+
         for(br_uint_16 v = 0; v < gp->nvertices; ++v, ++nextVtx) {
             nextVtx->p    = *(br_vector3_f *)(gp->position + v);
             nextVtx->map  = *(br_vector2_f *)(gp->map + v);
@@ -75,6 +79,8 @@ static GLuint build_vbo(const GladGLContext *gl, const struct v11model *model, s
             nextVtx->c[2] = BR_BLU(gp->vertex_colours[v]);
             nextVtx->c[3] = 255;
         }
+
+        v_offset += (GLsizei)(gp->nvertices * sizeof(gl_vertex_f));
     }
 
     gl->GenBuffers(1, &buf);
@@ -148,7 +154,7 @@ br_geometry_stored *GeometryStoredGLAllocate(br_geometry_v1_model *gv1model, con
 
     gl->BindVertexArray(0);
 
-    self->gl_vbo = build_vbo(gl, model, total_vertices);
+    self->gl_vbo = build_vbo(gl, model, total_vertices, self->groups);
     self->gl_ibo = build_ibo(gl, model, total_faces, self->groups);
     self->gl_vao = create_vao(gl, &ctx->main_shader, self->gl_vbo, self->gl_ibo);
 

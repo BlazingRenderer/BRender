@@ -42,6 +42,11 @@ typedef struct gl_groupinfo {
     void *offset;
 
     /*
+     * Byte offset of this group's first vertex in the VBO.
+     */
+    GLsizei vertex_offset;
+
+    /*
      * The group itself
      */
     struct v11group *group;
