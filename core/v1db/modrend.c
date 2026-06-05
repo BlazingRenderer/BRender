@@ -10,23 +10,28 @@
 #include "shortcut.h"
 #include "formats.h"
 
+static void renderAll(br_model *model, br_material *material, br_token type, int on_screen)
+{
+    if(model->stored && type == BRT_TRIANGLE) {
+        if(on_screen == BRT_ACCEPT)
+            GeometryStoredRenderOnScreen(model->stored, v1db.renderer, type);
+        else
+            GeometryStoredRender(model->stored, v1db.renderer, type);
+
+    } else if(model->prepared) {
+        if(on_screen == BRT_ACCEPT)
+            GeometryV1ModelRenderOnScreen(v1db.format_model, v1db.renderer, model->prepared, material->stored, type);
+        else
+            GeometryV1ModelRender(v1db.format_model, v1db.renderer, model->prepared, material->stored, type);
+    }
+}
+
 /*
  * Render model faces
  */
 static void renderFaces(br_actor *actor, br_model *model, br_material *material, void *render_data, br_uint_8 style, int on_screen)
 {
-    if(model->stored) {
-        if(on_screen == BRT_ACCEPT)
-            GeometryStoredRenderOnScreen(model->stored, v1db.renderer, BRT_TRIANGLE);
-        else
-            GeometryStoredRender(model->stored, v1db.renderer, BRT_TRIANGLE);
-
-    } else if(model->prepared) {
-        if(on_screen == BRT_ACCEPT)
-            GeometryV1ModelRenderOnScreen(v1db.format_model, v1db.renderer, model->prepared, material->stored, BRT_TRIANGLE);
-        else
-            GeometryV1ModelRender(v1db.format_model, v1db.renderer, model->prepared, material->stored, BRT_TRIANGLE);
-    }
+    renderAll(model, material, BRT_TRIANGLE, on_screen);
 }
 
 /*
@@ -34,10 +39,7 @@ static void renderFaces(br_actor *actor, br_model *model, br_material *material,
  */
 static void renderEdges(br_actor *actor, br_model *model, br_material *material, void *render_data, br_uint_8 style, int on_screen)
 {
-    if(on_screen == BRT_ACCEPT)
-        GeometryV1ModelRenderOnScreen(v1db.format_model, v1db.renderer, model->prepared, material->stored, BRT_LINE);
-    else
-        GeometryV1ModelRender(v1db.format_model, v1db.renderer, model->prepared, material->stored, BRT_LINE);
+    renderAll(model, material, BRT_LINE, on_screen);
 }
 
 /*
@@ -45,10 +47,7 @@ static void renderEdges(br_actor *actor, br_model *model, br_material *material,
  */
 static void renderPoints(br_actor *actor, br_model *model, br_material *material, void *render_data, br_uint_8 style, int on_screen)
 {
-    if(on_screen == BRT_ACCEPT)
-        GeometryV1ModelRenderOnScreen(v1db.format_model, v1db.renderer, model->prepared, material->stored, BRT_POINT);
-    else
-        GeometryV1ModelRender(v1db.format_model, v1db.renderer, model->prepared, material->stored, BRT_POINT);
+    renderAll(model, material, BRT_POINT, on_screen);
 }
 
 /*
@@ -249,7 +248,7 @@ static struct br_model *makeMeshFromBounds(br_bounds *b)
  */
 static void boundingBoxRenderPoints(br_actor *actor, br_model *model, br_material *material, void *render_data, br_uint_8 style, int on_screen)
 {
-    renderPoints(actor, makeMeshFromBounds(&model->bounds), material, render_data, style, on_screen);
+    renderAll(makeMeshFromBounds(&model->bounds), material, BRT_POINT, on_screen);
 }
 
 /*
@@ -257,7 +256,7 @@ static void boundingBoxRenderPoints(br_actor *actor, br_model *model, br_materia
  */
 static void boundingBoxRenderEdges(br_actor *actor, br_model *model, br_material *material, void *render_data, br_uint_8 style, int on_screen)
 {
-    renderEdges(actor, makeMeshFromBounds(&model->bounds), material, render_data, style, on_screen);
+    renderAll(makeMeshFromBounds(&model->bounds), material, BRT_LINE, on_screen);
 }
 
 /*
@@ -265,7 +264,7 @@ static void boundingBoxRenderEdges(br_actor *actor, br_model *model, br_material
  */
 static void boundingBoxRenderFaces(br_actor *actor, br_model *model, br_material *material, void *render_data, br_uint_8 style, int on_screen)
 {
-    renderFaces(actor, makeMeshFromBounds(&model->bounds), material, render_data, style, on_screen);
+    renderAll(makeMeshFromBounds(&model->bounds), material, BRT_TRIANGLE, on_screen);
 }
 
 /*
