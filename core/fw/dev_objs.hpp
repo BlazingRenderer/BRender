@@ -382,8 +382,10 @@ class br_geometry : public br_object {
 
 class br_geometry_stored : public br_geometry {
 	public:
-		virtual br_error BR_METHOD render(class br_renderer *r);
-		virtual br_error BR_METHOD renderOnScreen(class br_renderer *r);
+		virtual br_error BR_METHOD render(class br_renderer *r,
+				br_token type);
+		virtual br_error BR_METHOD renderOnScreen(class br_renderer *r,
+				br_token type);
 }
 
 // Predefined geometry formats

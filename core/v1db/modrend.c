@@ -17,9 +17,9 @@ static void renderFaces(br_actor *actor, br_model *model, br_material *material,
 {
     if(model->stored) {
         if(on_screen == BRT_ACCEPT)
-            GeometryStoredRenderOnScreen(model->stored, v1db.renderer);
+            GeometryStoredRenderOnScreen(model->stored, v1db.renderer, BRT_TRIANGLE);
         else
-            GeometryStoredRender(model->stored, v1db.renderer);
+            GeometryStoredRender(model->stored, v1db.renderer, BRT_TRIANGLE);
 
     } else if(model->prepared) {
         if(on_screen == BRT_ACCEPT)

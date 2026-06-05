@@ -9,7 +9,7 @@
 #ifndef _BRDDI_H_
 #define _BRDDI_H_
 
-#define __BRENDER_DDI__ BR_VERSION(1, 4, 0)
+#define __BRENDER_DDI__ BR_VERSION(1, 5, 0)
 
 /*
  * Pull in all the public definitions/declarations
