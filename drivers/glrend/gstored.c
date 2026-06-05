@@ -531,7 +531,7 @@ static br_error V1Model_RenderStored(br_geometry_stored *self, br_renderer *rend
 
 static br_error BR_CMETHOD(br_geometry_stored_gl, render)(br_geometry_stored *self, br_renderer *renderer, br_token type)
 {
-    if(type != BRT_TRIANGLE)
+    if(type != BRT_TRIANGLE && type != BRT_POINT)
         return BRE_FAIL;
 
     return V1Model_RenderStored(self, renderer, type, BR_FALSE);
@@ -539,7 +539,7 @@ static br_error BR_CMETHOD(br_geometry_stored_gl, render)(br_geometry_stored *se
 
 static br_error BR_CMETHOD(br_geometry_stored_gl, renderOnScreen)(br_geometry_stored *self, br_renderer *renderer, br_token type)
 {
-    if(type != BRT_TRIANGLE)
+    if(type != BRT_TRIANGLE && type != BRT_POINT)
         return BRE_FAIL;
 
     return V1Model_RenderStored(self, renderer, type, BR_TRUE);

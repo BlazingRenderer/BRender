@@ -412,6 +412,17 @@ static br_boolean apply_state(br_renderer *renderer, const GladGLContext *gl)
 
     apply_stored_properties(gl, renderer, renderer->state.current, MASK_STATE_STORED | MASK_STATE_OUTPUT, &model, ctx->tex_white);
 
+    switch(renderer->state.current->render_type) {
+        case BRT_POINT:
+            gl->PolygonMode(GL_FRONT_AND_BACK, GL_POINT);
+            break;
+
+        case BRT_TRIANGLE:
+        default:
+            gl->PolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+            break;
+    }
+
     return BufferRingGLPush(&renderer->model_ring, &model, sizeof(model));
 }
 
@@ -425,7 +436,16 @@ void RendererGLRenderGroup(br_renderer *self, br_geometry_stored *stored, const 
     }
 
     gl->BindVertexArray(stored->gl_vao);
-    gl->DrawElements(GL_TRIANGLES, groupinfo->count, GL_UNSIGNED_SHORT, groupinfo->offset);
+
+    switch(self->state.current->render_type) {
+        case BRT_POINT:
+            gl->DrawArrays(GL_POINTS, (GLint)(groupinfo->vertex_offset / sizeof(gl_vertex_f)), groupinfo->group->nvertices);
+            break;
+
+        case BRT_TRIANGLE:
+        default:
+            gl->DrawElements(GL_TRIANGLES, groupinfo->count, GL_UNSIGNED_SHORT, groupinfo->offset);
+    }
 
     self->stats.face_group_count++;
     self->stats.triangles_rendered_count += groupinfo->group->nfaces;

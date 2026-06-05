@@ -220,6 +220,8 @@ void BR_CMETHOD_DECL(br_renderer_gl, sceneEnd)(br_renderer *self)
     gl->Disable(GL_BLEND);
     gl->Disable(GL_MULTISAMPLE);
 
+    gl->PolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+
     gl->BindTexture(GL_TEXTURE_2D, 0);
     gl->BindBuffer(GL_UNIFORM_BUFFER, 0);
     gl->BindVertexArray(0);
