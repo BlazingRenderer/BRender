@@ -12,7 +12,7 @@
 
 static void renderAll(br_model *model, br_material *material, br_token type, int on_screen)
 {
-    if(model->stored && type == BRT_TRIANGLE) {
+    if(model->stored) {
         if(on_screen == BRT_ACCEPT)
             GeometryStoredRenderOnScreen(model->stored, v1db.renderer, type);
         else
