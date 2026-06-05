@@ -418,7 +418,7 @@ static br_boolean want_defer(const state_hidden *hidden)
     return hidden->order_table != NULL && hidden->heap != NULL;
 }
 
-static br_error V1Model_RenderStored(br_geometry_stored *self, br_renderer *renderer, br_boolean on_screen)
+static br_error V1Model_RenderStored(br_geometry_stored *self, br_renderer *renderer, br_boolean type, br_boolean on_screen)
 {
     br_primitive *prim;
     br_vector3    pos;
@@ -447,6 +447,7 @@ static br_error V1Model_RenderStored(br_geometry_stored *self, br_renderer *rend
         /*
          * If there's a stored state (i.e. a material), apply it to our current state.
          */
+        renderer->state.current->render_type = type;
         state = *renderer->state.current;
         if(stored != NULL) {
             StateGLCopy(&state, &stored->state, MASK_STATE_STORED);
@@ -533,7 +534,7 @@ static br_error BR_CMETHOD(br_geometry_stored_gl, render)(br_geometry_stored *se
     if(type != BRT_TRIANGLE)
         return BRE_FAIL;
 
-    return V1Model_RenderStored(self, renderer, BR_FALSE);
+    return V1Model_RenderStored(self, renderer, type, BR_FALSE);
 }
 
 static br_error BR_CMETHOD(br_geometry_stored_gl, renderOnScreen)(br_geometry_stored *self, br_renderer *renderer, br_token type)
@@ -541,7 +542,7 @@ static br_error BR_CMETHOD(br_geometry_stored_gl, renderOnScreen)(br_geometry_st
     if(type != BRT_TRIANGLE)
         return BRE_FAIL;
 
-    return V1Model_RenderStored(self, renderer, BR_TRUE);
+    return V1Model_RenderStored(self, renderer, type, BR_TRUE);
 }
 
 static const struct br_geometry_stored_dispatch geometryStoredDispatch = {
