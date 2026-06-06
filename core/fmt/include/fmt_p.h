@@ -39,8 +39,18 @@ br_fmt_results *BR_PUBLIC_ENTRY BrFmt3DSLoad(const char *name, br_fmt_options *f
  */
 br_uint_32 BR_PUBLIC_ENTRY BrFmtASCLoad(const char *name, br_model **mtable, br_uint_16 max_models);
 
-/*
- * Eric Haines' NFF format
+/**
+ * \brief Import a model expressed in the Neutral File Format. The model is
+ *        neither updated nor registered.
+ *
+ * Searches for \p name, if no path is specified with file, looks in the current
+ * directory, if not found tries, in order, the directories listed in
+ * BRENDER_PATH (if defined).
+ *
+ * \param name Name of the file containing the model.
+ *
+ * \return Returns a pointer to the imported model, or NULL if it could not
+ *         be imported.
  */
 br_model *BR_PUBLIC_ENTRY BrFmtNFFLoad(const char *name);
 
