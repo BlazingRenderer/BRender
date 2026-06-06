@@ -283,6 +283,19 @@ br_uint_32 BR_PUBLIC_ENTRY BrZbScreenZToDepth(br_scalar sz, const br_camera *cam
  * \sa BrScreenZToCamera(), BrScreenXYZToCamera()
  */
 br_scalar BR_PUBLIC_ENTRY BrZsDepthToScreenZ(br_scalar depth_z, const br_camera *camera);
+
+/**
+ * \brief Convert screen z [-32,768.0, +32,768) to z sort depth [-hither_z, +yon_z].
+ *
+ * \param sz     A screen z value as obtained from functions such as BrOriginToScreenXYZO().
+ * \param camera A non-NULL pointer to the camera being used for rendering, i.e. relevant to the
+ *               depth values used in primitives and order tables.
+ *
+ * \return A depth value suitable for writing to an order table or comparing with values of z
+ *         obtained from a z sort primitive callback.
+ *
+ * \sa BrScreenZToCamera(), BrScreenXYZToCamera()
+ */
 br_scalar BR_PUBLIC_ENTRY BrZsScreenZToDepth(br_scalar sz, const br_camera *camera);
 
 /**
