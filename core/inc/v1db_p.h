@@ -327,6 +327,25 @@ void BR_PUBLIC_ENTRY BrRendererFocusLossEnd(void);
 /*
  * Renderering - Z Buffer
  */
+
+/**
+ * \brief Initialise the Z-buffer renderer.
+ *
+ * This is a rendering engine which utilises a depth buffer (a pixel map matching the colour buffer)
+ * containing z values for each pixel, which can be used to determine whether another pixel at the same
+ * position should be drawn over the existing one.
+ *
+ * \param colour_type Pixel map type of buffer to render into.
+ * \param depth_type  Pixel map type of Z-buffer.
+ *
+ * \pre Between BrBegin() & BrEnd(). The registry is empty. No rendering engine is currently enabled.
+ *
+ * \post Checks that the specified colour and depth types can be supported,
+ *       initialises registry for this renderer.
+ *
+ * \sa BrBegin(), BrEnd()
+ *
+ */
 void BR_PUBLIC_ENTRY BrZbBegin(br_uint_8 colour_type, br_uint_8 depth_type);
 void BR_PUBLIC_ENTRY BrZbEnd(void);
 
