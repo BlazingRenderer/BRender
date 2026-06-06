@@ -441,6 +441,25 @@ void BR_PUBLIC_ENTRY BrZbSceneRenderContinue(br_actor *world, br_actor *camera, 
  * \sa BrZbSceneRenderBegin(), BrZbSceneRenderEnd(), BrZbRenderBoundsCallbackSet(), BrZbModelRender()
  */
 void BR_PUBLIC_ENTRY BrZbSceneRenderAdd(br_actor *tree);
+
+/**
+ * \brief Complete the specification of actors to be rendered in a scene, and their rendering.
+ *
+ * \pre Between BrBegin() & BrEnd(). Between BrZbBegin() & BrZbEnd().
+ *      Currently rendering, i.e. after BrZbSceneRenderBegin().
+ *      Not within a custom model render callback or render bounds callback.
+ *
+ * \post By the time this function returns, the scene as specified in terms of world root,
+ *       camera and sub-trees, will have been rendered to the output buffers.
+ *
+ * \remark Whether rendering takes place during this function or sometime
+ *         before the return of BrZbSceneRenderEnd() is undefined.
+ *         When custom model render and render bounds callback functions are called is
+ *         similarly undefined.
+ *
+ * \sa BrZbSceneRenderBegin(), BrZbSceneRenderAdd(), BrZbRenderBoundsCallbackSet(),
+ *     BrZbModelRender().
+ */
 void BR_PUBLIC_ENTRY BrZbSceneRenderEnd(void);
 
 /**
