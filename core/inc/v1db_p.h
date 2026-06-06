@@ -394,6 +394,19 @@ void BR_PUBLIC_ENTRY BrRendererFocusLossEnd(void);
  *
  */
 void BR_PUBLIC_ENTRY BrZbBegin(br_uint_8 colour_type, br_uint_8 depth_type);
+
+/**
+ * \brief Close down the Z-Buffer renderer.
+ *
+ * \pre Between BrBegin() & BrEnd().
+ *      BrZbBegin() has been called, and BrZbEnd(), has not yet been called since.
+ *      The registry is empty.
+ *      No other rendering engine is currently enabled.
+ *
+ * \post Releases resources used by the Z-Buffer renderer.
+ *
+ * \sa BrZbBegin()
+ */
 void BR_PUBLIC_ENTRY BrZbEnd(void);
 
 /**
