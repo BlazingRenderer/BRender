@@ -19,7 +19,46 @@ extern "C" {
 /*
  * Global setup
  */
+
+/**
+ * \brief Initialise BRender. This function must be called before most BRender functions are used.
+ *
+ * Installs any missing handlers (diagnostic handler, memory allocator, filing
+ * system) to appropriate platform defaults.
+ *
+ *
+ * \pre Static initialisation has completed (main() has been entered). The
+ *      BRender library has not yet been initialised, or has been terminated.
+ *
+ * \post Initialises the filing system, resource registry, and resource classes.
+ * Creates various defaults (models, materials, etc.).
+ *
+ * \remark Do not call BrBegin() again without a preceding BrEnd().
+ *
+ * \return \c BRE_OK on success, or \c BRE_ALLREADY_ACTIVE if already initialised.
+ *
+ * \sa BrEnd()
+ */
 br_error BR_PUBLIC_ENTRY BrBegin(void);
+
+/**
+ * \brief End BRender, freeing its internal resources and memory.
+ *
+ * Releases all memory allocated in resource classes. This is effectively all
+ * memory allocated by BRender for its own use and all memory allocated in the
+ * various BRender allocation functions, such as BrModelAllocate().
+ *
+ * \pre The BRender library has been initialised and has not already been
+ *      terminated.
+ *
+ * \remark Your application should have gracefully released all dependence upon
+ *         BRender data and functions before calling BrEnd().
+ *
+ * \return \c BRE_OK on success, or \c BRE_NOT_ACTIVE if BRender is not
+ *         currently active.
+ *
+ * \sa BrBegin()
+ */
 br_error BR_PUBLIC_ENTRY BrEnd(void);
 
 /*
