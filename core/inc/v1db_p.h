@@ -368,6 +368,48 @@ br_renderbounds_cbfn *BR_PUBLIC_ENTRY BrZbRenderBoundsCallbackSet(br_renderbound
 /*
  * Renderering - Z Sort
  */
+
+/**
+ * \brief Initialise the Z-sort renderer.
+ *
+ * This is a rendering engine which uses a bucket sort to determine the order in which primitives
+ * (faces, lines, points) should be rendered.
+ *
+ * \param colour_type Pixel map type of buffer to render into.
+ * \param primitive   Non-NULL pointer to an allocated block of memory to be used as a heap to hold
+ *                    rendered (i.e. not back faces) primitives and referenced vertices generated during
+ *                    rendering.
+ * \param size        Size of the primitive heap.
+ *                    To ensure that everything is rendered completely, this should be large enough for
+ *                    the renderer to store the temporary data structures used to hold details of each
+ *                    rendered primitive and the transformed vertices indexed by them.
+ *                    A primitive can be anything from a point to a triangle (possibly a quad).
+ *                    For the purposes of estimation you should allow 26 bytes for each primitive and 64
+ *                    bytes for each unique vertex.
+ *                    The number of unique vertices can be calculated from the number of primitives,
+ *                    according to how vertices are shared by the models' faces.
+ *                    At best there will be an average of one vertex per face primitive (a tetrahedron
+ *                    -- four faces, four vertices), at worst there will be an average of three vertices
+ *                    per face primitive (a scene of independent triangles).
+ *
+ *                    Note that clipping is likely to increase the number of vertices.
+ *
+ *                    If you estimate there is an upper limit of about 1,000 faces (of front facing
+ *                    surfaces) in a rendering sequence with an average of 2.5 vertices per triangular
+ *                    face (incude increases due to clipping) then the value of this member should be
+ *                    \f$1,000 \times (26 + 2.6 \times 64)\f$, i.e. \f$186,000\f$ bytes, call it 200KB.
+ *
+ * \pre Between BrBegin() & BrEnd(). The registry is empty. No rendering engine is currently enabled.
+ *
+ * \post Checks that the specified colour types can be supported, initialises registry for this renderer.
+ *
+ * \remark If \p size is insufficiently large, some primitives will be omitted from the rendering.
+ *         In borderline cases, these are likely to be faces of models towards the end of the
+ *         traversal of the actor hierarchy (which may manifest as deterioration of models in a particular
+ *         lineage).
+ *
+ * \sa BrZsEnd(), BrZbBegin()
+ */
 void BR_PUBLIC_ENTRY BrZsBegin(br_uint_8 colour_type, void *primitive, br_uint_32 size);
 void BR_PUBLIC_ENTRY BrZsEnd(void);
 
