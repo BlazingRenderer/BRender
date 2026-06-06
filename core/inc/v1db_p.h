@@ -422,6 +422,24 @@ void BR_PUBLIC_ENTRY BrZbSceneRenderBegin(br_actor *world, br_actor *camera, br_
 
 void BR_PUBLIC_ENTRY BrZbSceneRenderContinue(br_actor *world, br_actor *camera, br_pixelmap *colour_buffer, br_pixelmap *depth_buffer);
 
+/**
+ * \brief Include an actor (and its descendents) of the \p world in the current rendering.
+ *
+ * \param tree A non-NULL pointer to an actor hierarchy, which must be descendent of
+ *             the \p world hierarchy supplied to BrZbSceneRenderBegin().
+ *
+ * \pre Between BrBegin() and BrEnd(). Between BrZbBegin() and BrZbEnd().
+ *      Currently rendering, i.e. between BrZbSceneRenderBegin() and BrZbSceneRenderEnd().
+ *      Not within a custom model render callback or render bounds callback.
+ *
+ * \post Add actor to the list of actors to be rendered.
+ *
+ * \remark Whether rendering takes place during this function or sometime before the return
+ *         of BrZbSceneRenderEnd() is undefined. When custom model render and render bounds
+ *         callback functions are called is similarly undefined.
+ *
+ * \sa BrZbSceneRenderBegin(), BrZbSceneRenderEnd(), BrZbRenderBoundsCallbackSet(), BrZbModelRender()
+ */
 void BR_PUBLIC_ENTRY BrZbSceneRenderAdd(br_actor *tree);
 void BR_PUBLIC_ENTRY BrZbSceneRenderEnd(void);
 
