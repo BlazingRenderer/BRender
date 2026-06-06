@@ -261,6 +261,33 @@ br_scalar BR_PUBLIC_ENTRY BrZsScreenZToDepth(br_scalar sz, const br_camera *came
  * \return Returns the corresponding z value in the camera actor's co-ordinate space (view space).
  */
 br_scalar BR_PUBLIC_ENTRY BrScreenZToCamera(const br_actor *camera, br_scalar sz);
+
+/**
+ * \brief Convert a point in screen space to a point in a camera actor's
+ *        co-ordinate space (view space) (compare with BrPointToScreenXYZO()).
+ *
+ * Computes the x & y co-ordinates in screen space, and together with the z co-ordinate
+ * applies the inverse projection transform, and store the resulting vector at \p point.
+ *
+ * \param point         A non-NULL pointer to the vector to hold the converted point in camera space.
+ * \param camera        A non-NULL pointer to the camera actor into whose co-ordinate space the point is to be converted.
+ * \param screen_buffer A non-NULL pointer to the screen buffer to which the x & y co-ordinates apply.
+ * \param x             X co-ordinate of pixel.
+ * \param y             Y co-ordinate of pixel.
+ * \param sz            Screen z co-ordinate.
+ *
+ * \pre Between BrBegin() & BrEnd(). Between BrZbBegin() & BrZbEnd().
+ *
+ * \par Example
+ * \code{.c}
+ * br_vector3 p;
+ * br_uint_32 depth = BrPixelmapGet(&my_depth_buffer, x, y);
+ * br_scalar  sz    = BrZbDepthToScreenZ(depth, &my_camera);
+ * BrScreenXYZToCamera(&p, &my_camera, &my_screen_buffer, x, y, sz);
+ * \endcode
+ *
+ * \sa BrPointToScreenXYZO(), BrOriginToScreenXYZO(), BrMatrix4Perspective()
+ */
 void BR_PUBLIC_ENTRY      BrScreenXYZToCamera(br_vector3 *point, const br_actor *camera, const br_pixelmap *screen_buffer, br_int_16 x,
                                               br_int_16 y, br_scalar sz);
 
