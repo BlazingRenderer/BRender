@@ -63,8 +63,18 @@ br_material *BR_PUBLIC_ENTRY BrFmtScriptMaterialLoad(const char *filename);
 br_uint_32 BR_PUBLIC_ENTRY BrFmtScriptMaterialSaveMany(const char *filename, br_material **materials, br_uint_16 num);
 br_uint_32 BR_PUBLIC_ENTRY BrFmtScriptMaterialSave(const char *filename, br_material *ptr);
 
-/*
- * Windows .BMP files
+/**
+ * \brief Load a pixel map in the BMP format.
+ *
+ * Searches for \p name, if no path specified with file, looks in current
+ * directory, if not found tries, in order, the directories listed in
+ * BRENDER_PATH (if defined).
+ *
+ * \param name  Name of the file containing the pixel map.
+ * \param flags Either BR_PMT_RGBX_888 or BR_PMT_RGBA_8888, when the source
+ *              pixel map uses 32 bits per pixel. Zero otherwise.
+ *
+ * \return Returns a pointer to the loaded pixel map.
  */
 br_pixelmap *BR_PUBLIC_ENTRY BrFmtBMPLoad(const char *name, br_uint_32 flags);
 
