@@ -577,6 +577,19 @@ br_renderbounds_cbfn *BR_PUBLIC_ENTRY BrZbRenderBoundsCallbackSet(br_renderbound
  * \sa BrZsEnd(), BrZbBegin()
  */
 void BR_PUBLIC_ENTRY BrZsBegin(br_uint_8 colour_type, void *primitive, br_uint_32 size);
+
+/**
+ * \brief Close down the Z-Sort renderer.
+ *
+ * \pre Between BrBegin() & BrEnd().
+ *      BrZsBegin() has been called, and BrZsEnd() has not yet been called since.
+ *      The registry is empty.
+ *      No other rendering engine is currently enabled.
+ *
+ * \post Releases resources used by the Z-Buffer renderer.
+ *
+ * \sa BrZsBegin()
+ */
 void BR_PUBLIC_ENTRY BrZsEnd(void);
 
 void BR_PUBLIC_ENTRY BrZsSceneRenderBegin(br_actor *world, br_actor *camera, br_pixelmap *colour_buffer);
