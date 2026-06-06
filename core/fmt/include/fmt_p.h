@@ -109,8 +109,18 @@ br_pixelmap *BR_PUBLIC_ENTRY BrFmtTGALoad(const char *name, br_uint_32 flags);
  */
 br_pixelmap *BR_PUBLIC_ENTRY BrFmtGIFLoad(const char *name, br_uint_32 flags);
 
-/*
- * .IFF/.LBM files
+/**
+ * \brief Load a pixel map in the IFF format.
+ *
+ * Searches for filename, if no path specified with file looks in current
+ * directory, if not found tries, in order, the directories listed in
+ * BRENDER_PATH (if defined).
+ *
+ * \param name  Name of the file containing the pixel map.
+ * \param flags Either BR_PMT_RGBX_888 or BR_PMT_RGBA_8888, when the source
+ *              pixel map uses 32 bits per pixel. Zero otherwise.
+ *
+ * \return Returns a pointer to the loaded pixel map.
  */
 br_pixelmap *BR_PUBLIC_ENTRY BrFmtIFFLoad(const char *name, br_uint_32 flags);
 
