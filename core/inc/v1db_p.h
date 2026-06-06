@@ -493,6 +493,29 @@ void BR_PUBLIC_ENTRY BrZbSceneRender(br_actor *world, br_actor *camera, br_pixel
  */
 void BR_PUBLIC_ENTRY BrZbModelRender(br_actor *actor, br_model *model, br_material *material, br_uint_8 style, int on_screen, int use_custom);
 
+/**
+ * \brief Set the callback function invoked for each rendered actor.
+ *
+ * For example, a callback can be set up to log those rectangles in the colour buffer
+ * that have been written to (dirty rectangle flagging).
+ *
+ * \param new_cbfn A pointer to the new callback function. Specify the old callback
+ *                 function when a function callback is not required.
+ *
+ * \pre Between BrBegin() & BrEnd(). Between BrZbBegin() and BrZbEnd().
+ *      Not currently rendering.
+ *
+ * \post Defines a function that will be called during rendering for each model that
+ *       affects the output buffers.
+ *
+ * \return Returns a pointer to the old callback function.
+ *
+ * \remark Exactly when the callback gets called is undefined except that it will be
+ *         sometime between BrZbSceneRenderBegin() and BrZbSceneRenderEnd().
+ *         It is also not necessarily associated with a particular point in the rendering process.
+ *
+ * \sa br_renderbounds_cbfn, br_model_custom_cbfn.
+ */
 br_renderbounds_cbfn *BR_PUBLIC_ENTRY BrZbRenderBoundsCallbackSet(br_renderbounds_cbfn *new_cbfn);
 
 /*
