@@ -403,6 +403,30 @@ void BR_PUBLIC_ENTRY BrZbSceneRenderContinue(br_actor *world, br_actor *camera, 
 void BR_PUBLIC_ENTRY BrZbSceneRenderAdd(br_actor *tree);
 void BR_PUBLIC_ENTRY BrZbSceneRenderEnd(void);
 
+/**
+ * \brief All-in-one function to render a scene using the Z-Buffer renderer.
+ *
+ * \param world         A non-NULL pointer to the root actor of a scene.
+ * \param camera        A non-NULL pointer to a camera actor that is a descendant of
+ *                      the root actor.
+ * \param colour_buffer A non-NULL pointer to the pixel map to render the scene into,
+ *                      whose type matches \p colour_type supplied to BrZbBegin().
+ * \param depth_buffer  A non-NULL pointer to the pixel map to be used as a depth
+ *                      buffer whose type matches \p depth_type as supplied to
+ *                      BrZbBegin(). It must have the same width and height
+ *                      as the colour buffer. See BrPixelmapMatch().
+ *
+ * \pre Between BrBegin() & BrEnd(). Between BrZbBegin() & BrZbEnd().
+ *      Not currently rendering.
+ *
+ * \post Equivalent to a call of BrZbSceneRenderBegin() followed by BrZbSceneRenderAdd()
+ *       and BrZbSceneRenderEnd().
+ *
+ * \remark The colour buffer and depth buffer should not be texture maps (or even shade tables), though
+ *         they can of course be subsequently added as such once the rendering has completed.
+ *
+ * \sa BrZbRenderBoundsCallbackSet(), BrZbModelRender()
+ */
 void BR_PUBLIC_ENTRY BrZbSceneRender(br_actor *world, br_actor *camera, br_pixelmap *colour_buffer, br_pixelmap *depth_buffer);
 
 /*
