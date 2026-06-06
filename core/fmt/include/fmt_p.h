@@ -20,8 +20,22 @@ extern "C" {
  */
 br_fmt_results *BR_PUBLIC_ENTRY BrFmt3DSLoad(const char *name, br_fmt_options *fmt_options, br_3ds_options *options);
 
-/*
- * 3D Studio .ASC files
+/**
+ * \brief Import 3D Studio models (geometry only). The models are neither
+ *        updated nor registered.
+ *
+ * Searches for \p name, if no path is specified with file, looks in the current
+ * directory, if not found tries, in order, the directories listed in
+ * BRENDER_PATH (if defined).
+ *
+ * \param name       Name of the file containing the models.
+ * \param mtable     A pointer to an array of pointers to models, which will
+ *                   be filled as they are imported. If NULL, the models are
+ *                   still imported, but must be referenced subsequently by
+ *                   name.
+ * \param max_models Maximum number of models to import.
+ *
+ * \return Returns the number of models successfully imported.
  */
 br_uint_32 BR_PUBLIC_ENTRY BrFmtASCLoad(const char *name, br_model **mtable, br_uint_16 max_models);
 
