@@ -12,7 +12,7 @@ br_pixelmap *BR_PUBLIC_ENTRY BrPixelmapDeCLUT(br_pixelmap *src)
     return BrPixelmapCloneTyped(src, BR_PMT_RGBA_8888);
 }
 
-br_error BrPixelmapResizeBuffersTV(br_pixelmap *screen, br_pixelmap **colour, br_pixelmap **depth, const br_token_value *tv)
+br_error BR_PUBLIC_ENTRY BrPixelmapResizeBuffersTV(br_pixelmap *screen, br_pixelmap **colour, br_pixelmap **depth, const br_token_value *tv)
 {
     br_pixelmap   *tmp;
     br_int_32      msaa_samples = -1;
@@ -184,7 +184,7 @@ full_cleanup:
     return BRE_OK;
 }
 
-br_error BrPixelmapResizeBuffers(br_pixelmap *screen, br_pixelmap **colour, br_pixelmap **depth)
+br_error BR_PUBLIC_ENTRY BrPixelmapResizeBuffers(br_pixelmap *screen, br_pixelmap **colour, br_pixelmap **depth)
 {
     br_token_value tv = {.t = BR_NULL_TOKEN, .v = {}};
     return BrPixelmapResizeBuffersTV(screen, colour, depth, &tv);

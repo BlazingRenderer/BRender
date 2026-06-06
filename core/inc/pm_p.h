@@ -174,7 +174,7 @@ br_pixelmap *BR_PUBLIC_ENTRY BrPixelmapDeCLUT(br_pixelmap *src);
  *
  * \return Returns BRE_OK on success, or a BRE_* error code on failure.
  */
-br_error BrPixelmapResizeBuffers(br_pixelmap *screen, br_pixelmap **colour, br_pixelmap **depth);
+br_error BR_PUBLIC_ENTRY BrPixelmapResizeBuffers(br_pixelmap *screen, br_pixelmap **colour, br_pixelmap **depth);
 
 /**
  * \brief Resize a colour and depth buffer to match their attached screen, falling back to recreation if
@@ -197,7 +197,7 @@ br_error BrPixelmapResizeBuffers(br_pixelmap *screen, br_pixelmap **colour, br_p
  *
  * \return Returns BRE_OK on success, or a BRE_* error code on failure.
  */
-br_error BrPixelmapResizeBuffersTV(br_pixelmap *screen, br_pixelmap **colour, br_pixelmap **depth, const br_token_value *tv);
+br_error BR_PUBLIC_ENTRY BrPixelmapResizeBuffersTV(br_pixelmap *screen, br_pixelmap **colour, br_pixelmap **depth, const br_token_value *tv);
 
 #endif /* _NO_PROTOTYPES */
 
