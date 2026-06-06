@@ -257,6 +257,18 @@ void BR_PUBLIC_ENTRY BrModelToViewQuery(br_matrix34 *dest);
  * \sa BrScreenZToCamera(), BrScreenXYZToCamera()
  */
 br_scalar BR_PUBLIC_ENTRY  BrZbDepthToScreenZ(br_uint_32 depth_z, const br_camera *camera);
+
+/**
+ * \brief Convert screen z [-32,768.0, +32,768) to z buffer depth [0, 0xFFFFFFFF].
+ *
+ * \param sz     A screen z value as obtained from functions such as BrOriginToScreenXYZO().
+ * \param camera A non-NULL pointer to the camera being used for rendering, i.e. relevant to
+ *               the depth values used in the z buffer.
+ *
+ * \return A 32 bit depth value suitable for writing to a z buffer pixel map.
+ *
+ * \sa BrScreenXYZToCamera(), BrScreenZToCamera()
+ */
 br_uint_32 BR_PUBLIC_ENTRY BrZbScreenZToDepth(br_scalar sz, const br_camera *camera);
 
 br_scalar BR_PUBLIC_ENTRY BrZsDepthToScreenZ(br_scalar depth_z, const br_camera *camera);
