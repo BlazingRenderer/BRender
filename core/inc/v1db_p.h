@@ -592,6 +592,27 @@ void BR_PUBLIC_ENTRY BrZsBegin(br_uint_8 colour_type, void *primitive, br_uint_3
  */
 void BR_PUBLIC_ENTRY BrZsEnd(void);
 
+/**
+ * \brief Set up a new scene to be rendered using the Z-Sort renderer, processing the camera,
+ *        lights and environment.
+ *
+ * \param world         A non-NULL pointer to the root actor of a scene.
+ * \param camera        A non-NULL pointer to a camera actor that is a descendant of the root actor.
+ * \param colour_buffer A non-NULL pointer to the pixel map to render the scene info, whose type is
+ *                      \p colour_type as supplied to BrZsBegin().
+ *
+ * \pre Between BrBegin() & BrEnd(). Between BrZsBegin() & BrZsEnd(). Not currently rendering.
+ *
+ * \post Enter rendering state, prepare for destination buffer, preprocess view, screen and
+ *       environment transforms, preprocess enabled lights, handle environment actor, preprocess
+ *       enabled clip planes.
+ *
+ * \remark The colour buffer should not be a texture map (or even a shade table), though it can
+ *         of course be subsequently added as such once the rendering has completed.
+ *
+ * \sa BrZsSceneRenderAdd(), BrZsSceneRenderEnd(), BrZsRenderBoundsCallbackSet(),
+ *     BrZsPrimitiveCallbackSet(), BrZsModelRender().
+ */
 void BR_PUBLIC_ENTRY BrZsSceneRenderBegin(br_actor *world, br_actor *camera, br_pixelmap *colour_buffer);
 
 void BR_PUBLIC_ENTRY BrZsSceneRenderContinue(br_actor *world, br_actor *camera, br_pixelmap *colour_buffer);
