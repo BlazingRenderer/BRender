@@ -251,6 +251,15 @@ br_uint_32 BR_PUBLIC_ENTRY BrZbScreenZToDepth(br_scalar sz, const br_camera *cam
 br_scalar BR_PUBLIC_ENTRY BrZsDepthToScreenZ(br_scalar depth_z, const br_camera *camera);
 br_scalar BR_PUBLIC_ENTRY BrZsScreenZToDepth(br_scalar sz, const br_camera *camera);
 
+/**
+ * \brief Convert screen z [-32,768.0,+32,767.9] to view z [-hither_z,-yon_z].
+ *
+ * \param camera Pointer to camera actor.
+ * \param sz     Screen z value, e.g. as returned by
+ *               BrOriginToScreenXYZO().
+ *
+ * \return Returns the corresponding z value in the camera actor's co-ordinate space (view space).
+ */
 br_scalar BR_PUBLIC_ENTRY BrScreenZToCamera(const br_actor *camera, br_scalar sz);
 void BR_PUBLIC_ENTRY      BrScreenXYZToCamera(br_vector3 *point, const br_actor *camera, const br_pixelmap *screen_buffer, br_int_16 x,
                                               br_int_16 y, br_scalar sz);
