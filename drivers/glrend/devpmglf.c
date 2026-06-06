@@ -304,6 +304,18 @@ br_error BR_CMETHOD_DECL(br_device_pixelmap_glf, doubleBuffer)(br_device_pixelma
         return BRE_UNSUPPORTED;
 
     /*
+     * Ensure we're bound, so our pre-swap hook can draw to us.
+     */
+    gl->BindFramebuffer(GL_DRAW_FRAMEBUFFER, src->asBack.glFbo);
+
+    /*
+     * Call our pre-swap hook.
+     */
+    DevicePixelmapGLExtPreSwap(self, src->asBack.glFbo);
+
+    DeviceGLCheckErrors(gl);
+
+    /*
      * Blit.
      */
     gl->BindFramebuffer(GL_READ_FRAMEBUFFER, src->asBack.glFbo);
@@ -313,13 +325,6 @@ br_error BR_CMETHOD_DECL(br_device_pixelmap_glf, doubleBuffer)(br_device_pixelma
 
     gl->BindFramebuffer(GL_READ_FRAMEBUFFER, 0);
     gl->BindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
-
-    /*
-     * Call our pre-swap hook
-     */
-    DevicePixelmapGLExtPreSwap(self, src->asBack.glFbo);
-
-    DeviceGLCheckErrors(gl);
 
     /*
      * Finally, swap the buffers.
