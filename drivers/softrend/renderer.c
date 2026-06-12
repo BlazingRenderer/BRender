@@ -165,6 +165,11 @@ br_renderer *RendererSoftAllocate(br_device *dev, br_renderer_facility *type, br
         return NULL;
     }
 
+    if(AllocatePartTemplates(self) != BRE_OK) {
+        BrResFreeNoCallback(self);
+        return NULL;
+    }
+
     /*
      * Set the primitives that this renderer will use
      */

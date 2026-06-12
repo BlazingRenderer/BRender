@@ -349,6 +349,39 @@ br_error StateInitialise(state_all *state)
     return BRE_OK;
 }
 
+typedef struct partInfo {
+    br_token                    token;
+    const br_tv_template_entry *entries;
+    int                         n_entries;
+    size_t                      tpp_offset;
+} partInfo;
+
+#define P(tok, x) {.token = BRT_##tok, .entries = x##Entries, .n_entries = BR_ASIZE(x##Entries), .tpp_offset = offsetof(br_renderer, x)}
+static const partInfo part_info[] = {
+    P(CULL, partCullTemplate),
+    P(SURFACE, partSurfaceTemplate),
+    P(MATRIX, partMatrixTemplate),
+    P(ENABLE, partEnableTemplate),
+    P(HIDDEN_SURFACE, partHiddenSurfaceTemplate),
+    P(BOUNDS, partBoundsTemplate),
+    P(LIGHT, partLightTemplate),
+    P(CLIP, partClipTemplate),
+};
+#undef P
+
+br_error AllocatePartTemplates(br_renderer *self)
+{
+    for(br_size_t i = 0; i < BR_ASIZE(part_info); ++i) {
+        const partInfo  *info = part_info + i;
+        br_tv_template **tpp  = (br_tv_template **)((br_uintptr_t)self + info->tpp_offset);
+
+        if((*tpp = BrTVTemplateAllocate(self, (br_tv_template_entry *)info->entries, info->n_entries)) == NULL)
+            return BRE_FAIL;
+    }
+
+    return BRE_OK;
+}
+
 /*
  * Common action for all state operations, finds an appropriate template, given part & index
  *
@@ -356,77 +389,24 @@ br_error StateInitialise(state_all *state)
  */
 br_tv_template *FindStateTemplate(br_renderer *self, state_all **state, br_token part, br_int_32 index)
 {
-    br_tv_template_entry *entries;
-    br_tv_template      **tpp;
-    int                   n_entries;
+    const partInfo *info = NULL;
+
+    for(br_size_t i = 0; i < BR_ASIZE(part_info); ++i) {
+        if(part_info[i].token == part) {
+            info = part_info + i;
+            break;
+        }
+    }
+
+    if(info == NULL)
+        return NULL;
 
     switch(part) {
-        case BRT_CULL:
-            if(self->device->templates.partCullTemplate)
-                return self->device->templates.partCullTemplate;
-
-            entries   = (br_tv_template_entry *)partCullTemplateEntries;
-            n_entries = BR_ASIZE(partCullTemplateEntries);
-            tpp       = &self->device->templates.partCullTemplate;
-            break;
-
-        case BRT_SURFACE:
-            if(self->device->templates.partSurfaceTemplate)
-                return self->device->templates.partSurfaceTemplate;
-
-            entries   = (br_tv_template_entry *)partSurfaceTemplateEntries;
-            n_entries = BR_ASIZE(partSurfaceTemplateEntries);
-            tpp       = &self->device->templates.partSurfaceTemplate;
-            break;
-
-        case BRT_MATRIX:
-            if(self->device->templates.partMatrixTemplate)
-                return self->device->templates.partMatrixTemplate;
-
-            entries   = (br_tv_template_entry *)partMatrixTemplateEntries;
-            n_entries = BR_ASIZE(partMatrixTemplateEntries);
-            tpp       = &self->device->templates.partMatrixTemplate;
-            break;
-
-        case BRT_ENABLE:
-            if(self->device->templates.partEnableTemplate)
-                return self->device->templates.partEnableTemplate;
-
-            entries   = (br_tv_template_entry *)partEnableTemplateEntries;
-            n_entries = BR_ASIZE(partEnableTemplateEntries);
-            tpp       = &self->device->templates.partEnableTemplate;
-            break;
-
-        case BRT_HIDDEN_SURFACE:
-            if(self->device->templates.partHiddenSurfaceTemplate)
-                return self->device->templates.partHiddenSurfaceTemplate;
-
-            entries   = (br_tv_template_entry *)partHiddenSurfaceTemplateEntries;
-            n_entries = BR_ASIZE(partHiddenSurfaceTemplateEntries);
-            tpp       = &self->device->templates.partHiddenSurfaceTemplate;
-            break;
-
-        case BRT_BOUNDS:
-            if(self->device->templates.partBoundsTemplate)
-                return self->device->templates.partBoundsTemplate;
-
-            entries   = (br_tv_template_entry *)partBoundsTemplateEntries;
-            n_entries = BR_ASIZE(partBoundsTemplateEntries);
-            tpp       = &self->device->templates.partBoundsTemplate;
-            break;
-
         case BRT_LIGHT:
             if(index >= BR_ASIZE((*state)->light))
                 return NULL;
 
             *state = (state_all *)((char *)(*state) + index * sizeof((*state)->light[0]));
-
-            if(self->device->templates.partLightTemplate)
-                return self->device->templates.partLightTemplate;
-
-            entries   = (br_tv_template_entry *)partLightTemplateEntries;
-            n_entries = BR_ASIZE(partLightTemplateEntries);
-            tpp       = &self->device->templates.partLightTemplate;
             break;
 
         case BRT_CLIP:
@@ -434,20 +414,13 @@ br_tv_template *FindStateTemplate(br_renderer *self, state_all **state, br_token
                 return NULL;
 
             *state = (state_all *)((char *)(*state) + index * sizeof((*state)->clip[0]));
-
-            if(self->device->templates.partClipTemplate)
-                return self->device->templates.partClipTemplate;
-
-            entries   = (br_tv_template_entry *)partClipTemplateEntries;
-            n_entries = BR_ASIZE(partClipTemplateEntries);
-            tpp       = &self->device->templates.partClipTemplate;
             break;
 
         default:
-            return NULL;
+            break;
     }
 
-    return *tpp = BrTVTemplateAllocate(self->device, entries, n_entries);
+    return *(br_tv_template **)((br_uintptr_t)self + info->tpp_offset);
 }
 
 /*

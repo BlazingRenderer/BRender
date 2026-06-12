@@ -43,6 +43,18 @@ typedef struct br_renderer {
     br_tv_template *templates;
 
     /*
+     * Parts templates
+     */
+    br_tv_template *partCullTemplate;
+    br_tv_template *partSurfaceTemplate;
+    br_tv_template *partMatrixTemplate;
+    br_tv_template *partEnableTemplate;
+    br_tv_template *partHiddenSurfaceTemplate;
+    br_tv_template *partBoundsTemplate;
+    br_tv_template *partLightTemplate;
+    br_tv_template *partClipTemplate;
+
+    /*
      * State of renderer
      */
     state_all state;

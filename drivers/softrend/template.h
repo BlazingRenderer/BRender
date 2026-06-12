@@ -18,18 +18,6 @@ struct device_templates {
      * Object query templates
      */
     br_tv_template *deviceTemplate;
-
-    /*
-     * Parts templates
-     */
-    br_tv_template *partCullTemplate;
-    br_tv_template *partSurfaceTemplate;
-    br_tv_template *partMatrixTemplate;
-    br_tv_template *partEnableTemplate;
-    br_tv_template *partHiddenSurfaceTemplate;
-    br_tv_template *partBoundsTemplate;
-    br_tv_template *partLightTemplate;
-    br_tv_template *partClipTemplate;
 };
 
 #ifdef __cplusplus

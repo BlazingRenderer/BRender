@@ -98,6 +98,7 @@ br_error StateCopyFromStored(state_all *dest, br_renderer_state_stored *src, br_
 /*
  * state.c
  */
+br_error        AllocatePartTemplates(br_renderer *self);
 br_error        StateInitialise(state_all *state);
 br_tv_template *FindStateTemplate(br_renderer *self, state_all **state, br_token part, br_int_32 index);
 void            TemplateActions(state_all *state, br_token part, br_int_32 index, br_uint_32 mask);
