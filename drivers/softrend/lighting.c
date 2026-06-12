@@ -47,6 +47,11 @@ br_geometry_lighting *GeometryLightingAllocate(br_renderer_facility *type, char 
     self->device            = type->device;
     self->renderer_facility = type;
 
+    if((self->templates = BrTVTemplateAllocate(self, geometryLightingTemplateEntries, BR_ASIZE(geometryLightingTemplateEntries))) == NULL) {
+        BrResFreeNoCallback(self);
+        return NULL;
+    }
+
     ObjectContainerAddFront(type, (br_object *)self);
     return self;
 }
@@ -75,15 +80,9 @@ static br_size_t BR_CMETHOD_DECL(br_geometry_lighting_soft, space)(br_object *se
     return sizeof(br_geometry_lighting);
 }
 
-static br_tv_template *BR_CMETHOD_DECL(br_geometry_lighting_soft, templateQuery)(br_object *_self)
+static br_tv_template *BR_CMETHOD_DECL(br_geometry_lighting_soft, templateQuery)(br_object *self)
 {
-    br_geometry_lighting *self = (br_geometry_lighting *)_self;
-
-    if(self->device->templates.geometryLightingTemplate == NULL)
-        self->device->templates.geometryLightingTemplate = BrTVTemplateAllocate(self->device, geometryLightingTemplateEntries,
-                                                                                BR_ASIZE(geometryLightingTemplateEntries));
-
-    return self->device->templates.geometryLightingTemplate;
+    return ((br_geometry_lighting *)self)->templates;
 }
 
 /*
