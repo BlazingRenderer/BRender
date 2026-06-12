@@ -37,6 +37,10 @@ typedef struct br_geometry_primitives {
      */
     br_renderer_facility *renderer_facility;
 
+    /*
+     * Object query templates.
+     */
+    br_tv_template *templates;
 } br_geometry_primitives;
 
 #ifdef __cplusplus

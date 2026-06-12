@@ -47,6 +47,11 @@ br_geometry_primitives *GeometryPrimitivesAllocate(br_renderer_facility *type, c
     self->renderer_facility = type;
     self->device            = type->device;
 
+    if((self->templates = BrTVTemplateAllocate(self, geometryPrimitivesTemplateEntries, BR_ASIZE(geometryPrimitivesTemplateEntries))) == NULL) {
+        BrResFreeNoCallback(self);
+        return NULL;
+    }
+
     ObjectContainerAddFront(type, (br_object *)self);
     return self;
 }
@@ -74,15 +79,9 @@ static br_size_t BR_CMETHOD_DECL(br_geometry_primitives_soft, space)(br_object *
     return sizeof(br_geometry_primitives);
 }
 
-static br_tv_template *BR_CMETHOD_DECL(br_geometry_primitives_soft, templateQuery)(br_object *_self)
+static br_tv_template *BR_CMETHOD_DECL(br_geometry_primitives_soft, templateQuery)(br_object *self)
 {
-    br_geometry_primitives *self = (br_geometry_primitives *)_self;
-
-    if(self->device->templates.geometryPrimitivesTemplate == NULL)
-        self->device->templates.geometryPrimitivesTemplate = BrTVTemplateAllocate(self->device, geometryPrimitivesTemplateEntries,
-                                                                                  BR_ASIZE(geometryPrimitivesTemplateEntries));
-
-    return self->device->templates.geometryPrimitivesTemplate;
+    return ((br_geometry_primitives *)self)->templates;
 }
 
 static br_error BR_CMETHOD_DECL(br_geometry_primitives_soft, storedAvail)(br_geometry_primitives *self, br_int_32 *psize, br_token_value *tv)
