@@ -160,6 +160,11 @@ br_renderer *RendererSoftAllocate(br_device *dev, br_renderer_facility *type, br
      */
     self->object_list = BrObjectListAllocate(self);
 
+    if((self->templates = BrTVTemplateAllocate(self, rendererTemplateEntries, BR_ASIZE(rendererTemplateEntries))) == NULL) {
+        BrResFreeNoCallback(self);
+        return NULL;
+    }
+
     /*
      * Set the primitives that this renderer will use
      */
@@ -216,14 +221,9 @@ static br_size_t BR_CMETHOD_DECL(br_renderer_soft, space)(br_object *self)
     return sizeof(br_renderer);
 }
 
-static br_tv_template *BR_CMETHOD_DECL(br_renderer_soft, templateQuery)(br_object *_self)
+static br_tv_template *BR_CMETHOD_DECL(br_renderer_soft, templateQuery)(br_object *self)
 {
-    br_renderer *self = (br_renderer *)_self;
-
-    if(self->device->templates.rendererTemplate == NULL)
-        self->device->templates.rendererTemplate = BrTVTemplateAllocate(self->device, rendererTemplateEntries, BR_ASIZE(rendererTemplateEntries));
-
-    return self->device->templates.rendererTemplate;
+    return ((br_renderer *)self)->templates;
 }
 
 static void *BR_CMETHOD_DECL(br_renderer_soft, listQuery)(br_object_container *self)

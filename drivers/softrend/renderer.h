@@ -38,6 +38,11 @@ typedef struct br_renderer {
     void *object_list;
 
     /*
+     * Object query templates.
+     */
+    br_tv_template *templates;
+
+    /*
      * State of renderer
      */
     state_all state;
