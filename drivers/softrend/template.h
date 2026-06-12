@@ -21,7 +21,6 @@ struct device_templates {
     br_tv_template *rendererFacilityTemplate;
     br_tv_template *rendererTemplate;
     br_tv_template *rendererStateStoredTemplate;
-    br_tv_template *geometryV1ModelTemplate;
 
     /*
      * Argument processing templates

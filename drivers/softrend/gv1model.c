@@ -47,6 +47,11 @@ br_geometry_v1_model *GeometryV1ModelAllocate(br_renderer_facility *type, char *
     self->device            = type->device;
     self->renderer_facility = type;
 
+    if((self->templates = BrTVTemplateAllocate(self, geometryV1ModelTemplateEntries, BR_ASIZE(geometryV1ModelTemplateEntries))) == NULL) {
+        BrResFreeNoCallback(self);
+        return NULL;
+    }
+
     ObjectContainerAddFront(type, (br_object *)self);
     return self;
 }
@@ -75,15 +80,9 @@ static br_size_t BR_CMETHOD_DECL(br_geometry_v1_model_soft, space)(br_object *se
     return sizeof(br_geometry_v1_model);
 }
 
-static br_tv_template *BR_CMETHOD_DECL(br_geometry_v1_model_soft, templateQuery)(br_object *_self)
+static br_tv_template *BR_CMETHOD_DECL(br_geometry_v1_model_soft, templateQuery)(br_object *self)
 {
-    br_geometry_v1_model *self = (br_geometry_v1_model *)_self;
-
-    if(self->device->templates.geometryV1ModelTemplate == NULL)
-        self->device->templates.geometryV1ModelTemplate = BrTVTemplateAllocate(self->device, geometryV1ModelTemplateEntries,
-                                                                               BR_ASIZE(geometryV1ModelTemplateEntries));
-
-    return self->device->templates.geometryV1ModelTemplate;
+    return ((br_geometry_v1_model *)self)->templates;
 }
 
 static br_error BR_CMETHOD_DECL(br_geometry_v1_model_soft, storedAvail)(br_geometry_v1_model *self, br_int_32 *psize, br_token_value *tv)
