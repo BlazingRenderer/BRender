@@ -22,7 +22,6 @@ struct device_templates {
     br_tv_template *rendererTemplate;
     br_tv_template *rendererStateStoredTemplate;
     br_tv_template *geometryV1ModelTemplate;
-    br_tv_template *geometryV1BucketsTemplate;
     br_tv_template *geometryPrimitivesTemplate;
     br_tv_template *geometryLightingTemplate;
 

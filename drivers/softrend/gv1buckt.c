@@ -47,6 +47,11 @@ br_geometry_v1_buckets *GeometryV1BucketsAllocate(br_renderer_facility *type, ch
     self->device            = type->device;
     self->renderer_facility = type;
 
+    if((self->templates = BrTVTemplateAllocate(self, geometryV1BucketsTemplateEntries, BR_ASIZE(geometryV1BucketsTemplateEntries))) == NULL) {
+        BrResFreeNoCallback(self);
+        return NULL;
+    }
+
     ObjectContainerAddFront(type, (br_object *)self);
     return self;
 }
@@ -75,15 +80,9 @@ static br_size_t BR_CMETHOD_DECL(br_geometry_v1_buckets_soft, space)(br_object *
     return sizeof(br_geometry_v1_buckets);
 }
 
-static br_tv_template *BR_CMETHOD_DECL(br_geometry_v1_buckets_soft, templateQuery)(br_object *_self)
+static br_tv_template *BR_CMETHOD_DECL(br_geometry_v1_buckets_soft, templateQuery)(br_object *self)
 {
-    br_geometry_v1_buckets *self = (br_geometry_v1_buckets *)_self;
-
-    if(self->device->templates.geometryV1BucketsTemplate == NULL)
-        self->device->templates.geometryV1BucketsTemplate = BrTVTemplateAllocate(self->device, geometryV1BucketsTemplateEntries,
-                                                                                 BR_ASIZE(geometryV1BucketsTemplateEntries));
-
-    return self->device->templates.geometryV1BucketsTemplate;
+    return ((br_geometry_v1_buckets *)self)->templates;
 }
 
 br_error BR_CMETHOD_DECL(br_geometry_v1_buckets_soft, render)(br_geometry_v1_buckets *self, br_renderer *renderer, br_primitive **buckets,

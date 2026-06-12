@@ -37,6 +37,10 @@ typedef struct br_geometry_v1_buckets {
      */
     br_renderer_facility *renderer_facility;
 
+    /*
+     * Object query templates.
+     */
+    br_tv_template *templates;
 } br_geometry_v1_buckets;
 
 #ifdef __cplusplus
