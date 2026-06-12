@@ -203,6 +203,11 @@ br_renderer_state_stored *RendererStateStoredSoftAllocate(br_renderer *renderer,
     self->device     = renderer->device;
     self->renderer   = renderer;
 
+    if((self->templates = BrTVTemplateAllocate(self, rendererStateStoredTemplateEntries, BR_ASIZE(rendererStateStoredTemplateEntries))) == NULL) {
+        BrResFreeNoCallback(self);
+        return NULL;
+    }
+
     /*
      * Copy initial state
      */
@@ -240,15 +245,9 @@ static br_size_t BR_CMETHOD_DECL(br_renderer_state_stored_soft, space)(br_object
     return sizeof(br_renderer_state_stored);
 }
 
-static br_tv_template *BR_CMETHOD_DECL(br_renderer_state_stored_soft, templateQuery)(br_object *_self)
+static br_tv_template *BR_CMETHOD_DECL(br_renderer_state_stored_soft, templateQuery)(br_object *self)
 {
-    br_renderer_state_stored *self = (br_renderer_state_stored *)_self;
-
-    if(self->device->templates.rendererStateStoredTemplate == NULL)
-        self->device->templates.rendererStateStoredTemplate = BrTVTemplateAllocate(
-            self->device, (br_tv_template_entry *)rendererStateStoredTemplateEntries, BR_ASIZE(rendererStateStoredTemplateEntries));
-
-    return self->device->templates.rendererStateStoredTemplate;
+    return ((br_renderer_state_stored *)self)->templates;
 }
 
 /*

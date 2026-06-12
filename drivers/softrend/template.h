@@ -18,7 +18,6 @@ struct device_templates {
      * Object query templates
      */
     br_tv_template *deviceTemplate;
-    br_tv_template *rendererStateStoredTemplate;
 
     /*
      * Parts templates

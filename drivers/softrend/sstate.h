@@ -63,6 +63,10 @@ typedef struct br_renderer_state_stored {
      */
     br_primitive_state *pstate;
 
+    /*
+     * Object query templates.
+     */
+    br_tv_template *templates;
 } br_renderer_state_stored;
 
 #ifdef __cplusplus
