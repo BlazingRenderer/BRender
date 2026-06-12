@@ -38,6 +38,16 @@ typedef struct br_renderer_facility {
     void *object_list;
 
     /*
+     * Object query templates.
+     */
+    br_tv_template *templates;
+
+    /*
+     * rendererNew() argument processing templates
+     */
+    br_tv_template *rendererNewTemplate;
+
+    /*
      * Default state
      */
     state_all default_state;
@@ -46,7 +56,6 @@ typedef struct br_renderer_facility {
      * Number of instances
      */
     br_int_32 num_instances;
-
 } br_renderer_facility;
 
 #ifdef __cplusplus

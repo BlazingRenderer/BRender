@@ -31,6 +31,23 @@ static br_tv_template_entry rendererFacilityTemplateEntries[] = {
 #undef F
 
 /*
+ * Structure used to unpack the rendererNew arguments
+ */
+struct newRendererTokens {
+    br_object            *dest;
+    br_primitive_library *prims;
+};
+
+#define F(f) offsetof(struct newRendererTokens, f)
+
+static br_tv_template_entry rendererNewTemplateEntries[] = {
+    {BRT(DESTINATION_O),       F(dest),  BRTV_SET, BRTV_CONV_COPY},
+    {BRT(OUTPUT_FACILITY_O),   F(dest),  BRTV_SET, BRTV_CONV_COPY},
+    {BRT(PRIMITIVE_LIBRARY_O), F(prims), BRTV_SET, BRTV_CONV_COPY},
+};
+#undef F
+
+/*
  * Set up a static renderer type
  */
 br_renderer_facility *RendererFacilitySoftAllocate(br_device *dev, char *identifier)
@@ -44,6 +61,16 @@ br_renderer_facility *RendererFacilitySoftAllocate(br_device *dev, char *identif
     self->device        = dev;
     self->num_instances = 0;
     self->object_list   = BrObjectListAllocate(dev);
+
+    if((self->templates = BrTVTemplateAllocate(self, rendererFacilityTemplateEntries, BR_ASIZE(rendererFacilityTemplateEntries))) == NULL) {
+        BrResFreeNoCallback(self);
+        return NULL;
+    }
+
+    if((self->rendererNewTemplate = BrTVTemplateAllocate(self, rendererNewTemplateEntries, BR_ASIZE(rendererNewTemplateEntries))) == NULL) {
+        BrResFreeNoCallback(self);
+        return NULL;
+    }
 
     /*
      * Create default state
@@ -95,38 +122,15 @@ static br_size_t BR_CMETHOD_DECL(br_renderer_facility_soft, space)(br_object *se
     return sizeof(br_renderer_facility);
 }
 
-static br_tv_template *BR_CMETHOD_DECL(br_renderer_facility_soft, templateQuery)(br_object *_self)
+static br_tv_template *BR_CMETHOD_DECL(br_renderer_facility_soft, templateQuery)(br_object *self)
 {
-    br_renderer_facility *self = (br_renderer_facility *)_self;
-
-    if(self->device->templates.rendererFacilityTemplate == NULL)
-        self->device->templates.rendererFacilityTemplate = BrTVTemplateAllocate(self->device, rendererFacilityTemplateEntries,
-                                                                                BR_ASIZE(rendererFacilityTemplateEntries));
-
-    return self->device->templates.rendererFacilityTemplate;
+    return ((br_renderer_facility *)self)->templates;
 }
 
 static br_error BR_CMETHOD_DECL(br_renderer_facility_soft, validDestination)(br_renderer_facility *self, br_boolean *bp, br_object *h)
 {
     return BRE_OK;
 }
-
-/*
- * Structure used to unpack the rendererNew arguments
- */
-struct newRendererTokens {
-    br_object            *dest;
-    br_primitive_library *prims;
-};
-
-#define F(f) offsetof(struct newRendererTokens, f)
-
-static br_tv_template_entry rendererNewTemplateEntries[] = {
-    {BRT(DESTINATION_O),       F(dest),  BRTV_SET, BRTV_CONV_COPY},
-    {BRT(OUTPUT_FACILITY_O),   F(dest),  BRTV_SET, BRTV_CONV_COPY},
-    {BRT(PRIMITIVE_LIBRARY_O), F(prims), BRTV_SET, BRTV_CONV_COPY},
-};
-#undef F
 
 /*
  * type for entry point into primtiives module
@@ -146,12 +150,7 @@ static br_error BR_CMETHOD_DECL(br_renderer_facility_soft, rendererNew)(br_rende
     /*
      * Process any options
      */
-
-    if(self->device->templates.rendererNewTemplate == NULL)
-        self->device->templates.rendererNewTemplate = BrTVTemplateAllocate(self->device, rendererNewTemplateEntries,
-                                                                           BR_ASIZE(rendererNewTemplateEntries));
-
-    BrTokenValueSetMany(&rt, &count, NULL, tv, self->device->templates.rendererNewTemplate);
+    BrTokenValueSetMany(&rt, &count, NULL, tv, self->rendererNewTemplate);
 
     /*
      * If there is already an instance of this type, then we can't create another
