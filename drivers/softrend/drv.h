@@ -40,10 +40,6 @@ extern "C" {
 #include "object.h"
 #endif
 
-#ifndef _TEMPLATE_H_
-#include "template.h"
-#endif
-
 #ifndef _DEVICE_H_
 #include "device.h"
 #endif

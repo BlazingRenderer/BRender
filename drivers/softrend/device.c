@@ -47,6 +47,11 @@ br_device *DeviceSoftAllocate(char *identifier)
 
     self->object_list = BrObjectListAllocate(self);
 
+    if((self->templates = BrTVTemplateAllocate(self, deviceTemplateEntries, BR_ASIZE(deviceTemplateEntries))) == NULL) {
+        BrResFreeNoCallback(self);
+        return NULL;
+    }
+
     BrTokenCreate("RECALC_BITS_U32", BRT_UINT_32);
     BrTokenCreate("PRIMITIVE_STATE_O", BRT_OBJECT);
 
@@ -97,14 +102,9 @@ static br_size_t BR_CMETHOD_DECL(br_device_soft, space)(br_object *self)
     return sizeof(br_device);
 }
 
-static br_tv_template *BR_CMETHOD_DECL(br_device_soft, templateQuery)(br_object *_self)
+static br_tv_template *BR_CMETHOD_DECL(br_device_soft, templateQuery)(br_object *self)
 {
-    br_device *self = (br_device *)_self;
-
-    if(self->templates.deviceTemplate == NULL)
-        self->templates.deviceTemplate = BrTVTemplateAllocate(self, deviceTemplateEntries, BR_ASIZE(deviceTemplateEntries));
-
-    return self->templates.deviceTemplate;
+    return ((br_device *)self)->templates;
 }
 
 static void *BR_CMETHOD_DECL(br_device_soft, listQuery)(br_object_container *self)

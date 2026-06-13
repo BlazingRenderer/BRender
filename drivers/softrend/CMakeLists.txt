@@ -47,7 +47,6 @@ add_library(softrend
         rend.h
         sstate.h
         state.h
-        template.h
         timestmp.h
         zsrmacro.h
 )

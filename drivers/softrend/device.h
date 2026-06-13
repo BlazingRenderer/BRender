@@ -44,9 +44,9 @@ typedef struct br_device {
     void *res;
 
     /*
-     * Driver-wide template store
+     * Object query templates.
      */
-    struct device_templates templates;
+    br_tv_template *templates;
 
     // local copy of cpu capabilities
     host_info hostInfo;
