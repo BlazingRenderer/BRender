@@ -7,6 +7,7 @@
  * Glue to math functions
  */
 #include <math.h>
+#include <stdlib.h>
 
 #include "brender.h"
 
@@ -37,15 +38,25 @@ float BR_PUBLIC_ENTRY BrFloatAtan2(float x, float y)
 
 float BR_PUBLIC_ENTRY BrFloatMod(float x, float y)
 {
-	return fmodf(x, y);
+    return fmodf(x, y);
 }
 
 float BR_PUBLIC_ENTRY BrFloatAbs(float f)
 {
-	return fabsf(f);
+    return fabsf(f);
 }
 
 int BR_PUBLIC_ENTRY BrIntAbs(int i)
 {
-	return abs(i);
+    return abs(i);
+}
+
+float BR_PUBLIC_ENTRY BrFloatArcCos(float f)
+{
+    return acosf(f);
+}
+
+float BR_PUBLIC_ENTRY BrFloatArcSin(float f)
+{
+    return asinf(f);
 }

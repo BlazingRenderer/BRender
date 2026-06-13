@@ -32,6 +32,11 @@ void *BR_PUBLIC_ENTRY BrMemSet(void *s, int c, size_t n)
     return memset(s, c, n);
 }
 
+void *BR_PUBLIC_ENTRY BrMemMove(void *dst, const void *src, size_t n)
+{
+    return memmove(dst, src, n);
+}
+
 char *BR_PUBLIC_ENTRY BrStrCat(char *s1, const char *s2)
 {
     return strcat(s1, s2);
