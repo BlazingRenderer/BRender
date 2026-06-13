@@ -199,7 +199,7 @@ br_renderer_state_stored *RendererStateStoredSoftAllocate(br_renderer *renderer,
         return NULL;
 
     self->dispatch   = (struct br_renderer_state_stored_dispatch *)&rendererStateStoredDispatch;
-    self->identifier = "Renderer-State-Stored";
+    self->identifier = BrResStrDup(self, "Renderer-State-Stored");
     self->device     = renderer->device;
     self->renderer   = renderer;
 

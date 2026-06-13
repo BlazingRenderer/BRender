@@ -33,7 +33,7 @@ static br_tv_template_entry geometryPrimitivesTemplateEntries[] = {
 /*
  * Allocate a geometry format
  */
-br_geometry_primitives *GeometryPrimitivesAllocate(br_renderer_facility *type, char *id)
+br_geometry_primitives *GeometryPrimitivesAllocate(br_renderer_facility *type, const char *id)
 {
     br_geometry_primitives *self;
 
@@ -43,7 +43,7 @@ br_geometry_primitives *GeometryPrimitivesAllocate(br_renderer_facility *type, c
         return NULL;
 
     self->dispatch          = (struct br_geometry_primitives_dispatch *)&geometryPrimitivesDispatch;
-    self->identifier        = id;
+    self->identifier        = BrResStrDup(self, id);
     self->renderer_facility = type;
     self->device            = type->device;
 

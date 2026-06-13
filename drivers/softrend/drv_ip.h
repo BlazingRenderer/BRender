@@ -24,12 +24,12 @@ br_device  *BR_CMETHOD_DECL(br_object_soft, device)(br_object *self);
 /*
  * device.c
  */
-br_device *DeviceSoftAllocate(char *identifier);
+br_device *DeviceSoftAllocate(const char *identifier);
 
 /*
  * rendtype.c
  */
-br_renderer_facility *RendererFacilitySoftAllocate(br_device *dev, char *identifier);
+br_renderer_facility *RendererFacilitySoftAllocate(br_device *dev, const char *identifier);
 
 /*
  * renderer.c
@@ -115,22 +115,22 @@ void VertexGeometryFns(br_renderer *renderer, geometry_fn *prim_outcode);
 /*
  * gprim.c
  */
-br_geometry_primitives *GeometryPrimitivesAllocate(br_renderer_facility *type, char *id);
+br_geometry_primitives *GeometryPrimitivesAllocate(br_renderer_facility *type, const char *id);
 
 /*
  * gv1model.c
  */
-br_geometry_v1_model *GeometryV1ModelAllocate(br_renderer_facility *type, char *id);
+br_geometry_v1_model *GeometryV1ModelAllocate(br_renderer_facility *type, const char *id);
 
 /*
  * gv1buckt.c
  */
-br_geometry_v1_buckets *GeometryV1BucketsAllocate(br_renderer_facility *type, char *id);
+br_geometry_v1_buckets *GeometryV1BucketsAllocate(br_renderer_facility *type, const char *id);
 
 /*
  * lighting.c
  */
-br_geometry_lighting *GeometryLightingAllocate(br_renderer_facility *type, char *id);
+br_geometry_lighting *GeometryLightingAllocate(br_renderer_facility *type, const char *id);
 
 /*
  * v1model.c

@@ -33,7 +33,7 @@ static br_tv_template_entry geometryV1ModelTemplateEntries[] = {
 /*
  * Allocate a geometry format
  */
-br_geometry_v1_model *GeometryV1ModelAllocate(br_renderer_facility *type, char *id)
+br_geometry_v1_model *GeometryV1ModelAllocate(br_renderer_facility *type, const char *id)
 {
     br_geometry_v1_model *self;
 
@@ -43,7 +43,7 @@ br_geometry_v1_model *GeometryV1ModelAllocate(br_renderer_facility *type, char *
         return NULL;
 
     self->dispatch          = (struct br_geometry_v1_model_dispatch *)&geometryV1ModelDispatch;
-    self->identifier        = id;
+    self->identifier        = BrResStrDup(self, id);
     self->device            = type->device;
     self->renderer_facility = type;
 

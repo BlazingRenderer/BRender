@@ -31,7 +31,7 @@ static br_tv_template_entry deviceTemplateEntries[] = {
 /*
  * Set up a static device object
  */
-br_device *DeviceSoftAllocate(char *identifier)
+br_device *DeviceSoftAllocate(const char *identifier)
 {
     br_device *self;
 
@@ -41,7 +41,7 @@ br_device *DeviceSoftAllocate(char *identifier)
     self      = BrResAllocate(NULL, sizeof(*self), BR_MEMORY_OBJECT_DATA);
     self->res = BrResAllocate(self, 0, BR_MEMORY_DRIVER);
 
-    self->identifier = identifier;
+    self->identifier = BrResStrDup(self, identifier);
     self->dispatch   = (struct br_device_dispatch *)&deviceDispatch;
     self->device     = self;
 

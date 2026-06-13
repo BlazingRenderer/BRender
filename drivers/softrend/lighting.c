@@ -33,7 +33,7 @@ static br_tv_template_entry geometryLightingTemplateEntries[] = {
 /*
  * Allocate a geometry format
  */
-br_geometry_lighting *GeometryLightingAllocate(br_renderer_facility *type, char *id)
+br_geometry_lighting *GeometryLightingAllocate(br_renderer_facility *type, const char *id)
 {
     br_geometry_lighting *self;
 
@@ -43,7 +43,7 @@ br_geometry_lighting *GeometryLightingAllocate(br_renderer_facility *type, char 
         return NULL;
 
     self->dispatch          = (struct br_geometry_lighting_dispatch *)&geometryLightingDispatch;
-    self->identifier        = id;
+    self->identifier        = BrResStrDup(self, id);
     self->device            = type->device;
     self->renderer_facility = type;
 

@@ -50,14 +50,14 @@ static br_tv_template_entry rendererNewTemplateEntries[] = {
 /*
  * Set up a static renderer type
  */
-br_renderer_facility *RendererFacilitySoftAllocate(br_device *dev, char *identifier)
+br_renderer_facility *RendererFacilitySoftAllocate(br_device *dev, const char *identifier)
 {
     br_renderer_facility *self;
 
     self = BrResAllocate(NULL, sizeof(*self), BR_MEMORY_OBJECT_DATA);
 
     self->dispatch      = (struct br_renderer_facility_dispatch *)&rendererFacilityDispatch;
-    self->identifier    = identifier;
+    self->identifier    = BrResStrDup(self, identifier);
     self->device        = dev;
     self->num_instances = 0;
     self->object_list   = BrObjectListAllocate(dev);
