@@ -18,7 +18,7 @@ static struct br_buffer_stored_dispatch bufferStoredDispatch;
 
 static br_tv_template_entry bufferStoredTemplateEntries[] = {
     {BRT(IDENTIFIER_CSTR),    F(identifier), BRTV_QUERY | BRTV_ALL, BRTV_CONV_COPY},
-    {DEV(OPENGL_TEXTURE_U32), F(gl_tex),     BRTV_QUERY | BRTV_ALL, BRTV_CONV_COPY}
+    {BRT(OPENGL_TEXTURE_U32), F(gl_tex),     BRTV_QUERY | BRTV_ALL, BRTV_CONV_COPY},
 };
 
 #undef F

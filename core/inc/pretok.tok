@@ -883,6 +883,7 @@ OPENGL_PROFILE                      token
   OPENGL_PROFILE_ES                 none
 
 OPENGL                              boolean
+OPENGL_TEXTURE                      uint_32
 
 # Tokens for system configuration
 
