@@ -5,17 +5,6 @@
 #error Please include brender.h first
 #endif
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-extern br_token BRT_OPENGL_OPAQUE_DRAW_COUNT_U32;
-extern br_token BRT_OPENGL_TRANSPARENT_DRAW_COUNT_U32;
-
-#ifdef __cplusplus
-}
-#endif
-
 typedef struct br_device_gl_context_info {
     void     *native;
     br_int_32 major;

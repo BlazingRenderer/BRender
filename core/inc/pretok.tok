@@ -296,6 +296,8 @@ FACE_GROUP_COUNT          uint_32
 TRIANGLES_DRAWN_COUNT     uint_32
 TRIANGLES_RENDERED_COUNT  uint_32
 VERTICES_RENDERED_COUNT   uint_32
+OPAQUE_DRAW_COUNT         uint_32
+TRANSPARENT_DRAW_COUNT    uint_32
 
 # Tokens used for br_renderer_type::newRenderer
 #
