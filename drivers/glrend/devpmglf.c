@@ -231,36 +231,36 @@ static void BR_CMETHOD_DECL(br_device_pixelmap_glf, free)(br_object *_self)
     BrResFreeNoCallback(self);
 }
 
-const char *BR_CMETHOD_DECL(br_device_pixelmap_glf, identifier)(br_object *self)
+static const char *BR_CMETHOD_DECL(br_device_pixelmap_glf, identifier)(br_object *self)
 {
     return ((br_device_pixelmap *)self)->pm_identifier;
 }
 
-br_token BR_CMETHOD_DECL(br_device_pixelmap_glf, type)(br_object *self)
+static br_token BR_CMETHOD_DECL(br_device_pixelmap_glf, type)(br_object *self)
 {
     (void)self;
     return BRT_DEVICE_PIXELMAP;
 }
 
-br_boolean BR_CMETHOD_DECL(br_device_pixelmap_glf, isType)(br_object *self, br_token t)
+static br_boolean BR_CMETHOD_DECL(br_device_pixelmap_glf, isType)(br_object *self, br_token t)
 {
     (void)self;
     return (t == BRT_DEVICE_PIXELMAP) || (t == BRT_OBJECT);
 }
 
-br_device *BR_CMETHOD_DECL(br_device_pixelmap_glf, device)(br_object *self)
+static br_device *BR_CMETHOD_DECL(br_device_pixelmap_glf, device)(br_object *self)
 {
     (void)self;
     return ((br_device_pixelmap *)self)->device;
 }
 
-br_size_t BR_CMETHOD_DECL(br_device_pixelmap_glf, space)(br_object *self)
+static br_size_t BR_CMETHOD_DECL(br_device_pixelmap_glf, space)(br_object *self)
 {
     (void)self;
     return sizeof(br_device_pixelmap);
 }
 
-struct br_tv_template *BR_CMETHOD_DECL(br_device_pixelmap_glf, templateQuery)(br_object *_self)
+static struct br_tv_template *BR_CMETHOD_DECL(br_device_pixelmap_glf, templateQuery)(br_object *_self)
 {
     br_device_pixelmap *self = (br_device_pixelmap *)_self;
 
@@ -271,7 +271,7 @@ struct br_tv_template *BR_CMETHOD_DECL(br_device_pixelmap_glf, templateQuery)(br
     return self->device->templates.devicePixelmapFrontTemplate;
 }
 
-br_error BR_CMETHOD_DECL(br_device_pixelmap_glf, resize)(br_device_pixelmap *self, br_int_32 width, br_int_32 height)
+static br_error BR_CMETHOD_DECL(br_device_pixelmap_glf, resize)(br_device_pixelmap *self, br_int_32 width, br_int_32 height)
 {
     br_error err;
 
@@ -287,7 +287,7 @@ br_error BR_CMETHOD_DECL(br_device_pixelmap_glf, resize)(br_device_pixelmap *sel
     return BRE_OK;
 }
 
-br_error BR_CMETHOD_DECL(br_device_pixelmap_glf, doubleBuffer)(br_device_pixelmap *self, br_device_pixelmap *src)
+static br_error BR_CMETHOD_DECL(br_device_pixelmap_glf, doubleBuffer)(br_device_pixelmap *self, br_device_pixelmap *src)
 {
     const GladGLContext *gl = DevicePixelmapGLGetGLContext(self);
 
@@ -336,7 +336,7 @@ br_error BR_CMETHOD_DECL(br_device_pixelmap_glf, doubleBuffer)(br_device_pixelma
     return BRE_OK;
 }
 
-br_error BR_CMETHOD_DECL(br_device_pixelmap_glf, handleWindowEvent)(br_device_pixelmap *self, void *arg)
+static br_error BR_CMETHOD_DECL(br_device_pixelmap_glf, handleWindowEvent)(br_device_pixelmap *self, void *arg)
 {
     return DevicePixelmapGLExtHandleWindowEvent(self, arg);
 }
