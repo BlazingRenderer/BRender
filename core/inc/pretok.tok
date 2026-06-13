@@ -884,6 +884,8 @@ OPENGL_PROFILE                      token
 
 OPENGL                              boolean
 OPENGL_TEXTURE                      uint_32
+OPENGL_EXTENSIONS                   pointer_list
+OPENGL_NUM_EXTENSIONS               int_32
 
 # Tokens for system configuration
 
