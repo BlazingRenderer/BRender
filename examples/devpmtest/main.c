@@ -317,6 +317,60 @@ static void smpte_draw(br_pixelmap *dest, float dt, void *user)
     BrPixelmapRectangleCopy(dest, base_x, base_y, pm, -pm->origin_x, -pm->origin_y, pm->width, pm->height);
 }
 
+typedef struct br_smpte_clut_state {
+    br_pixelmap *pm;
+    br_pixelmap *palette;
+} br_smpte_clut_state;
+
+static void smpte_clut_fini(void *user)
+{
+    br_smpte_clut_state *state = user;
+
+    state->pm->map = state->palette;
+    BrPixelmapFree(state->pm);
+}
+
+static br_error smpte_clut_init(void *user, br_pixelmap *screen, br_pixelmap *backbuffer, void *arg)
+{
+    br_smpte_clut_state *state = user;
+
+    (void)screen;
+    (void)backbuffer;
+    (void)arg;
+
+    if((state->pm = BrPixelmapLoad("smpte_type03_index_8.pix")) == NULL) {
+        BrLogError("APP", "Error loading smpte_type03_index_8.pix");
+        return BRE_FAIL;
+    }
+
+    /*
+     * Save the embedded palette, then strip it from the pixelmap so
+     * the CLUT must come from the backbuffer at copy time.
+     */
+    state->palette = state->pm->map;
+    state->pm->map = NULL;
+
+    return BRE_OK;
+}
+
+static void smpte_clut_draw(br_pixelmap *dest, float dt, void *user)
+{
+    br_smpte_clut_state *state  = user;
+    br_pixelmap         *pm     = state->pm;
+    int                  base_x = -pm->width / 2;
+    int                  base_y = -pm->height / 2;
+
+    /*
+     * Set the palette on the backbuffer - this tests destination-CLUT
+     * inheritance when copying an indexed pixelmap without its own palette.
+     */
+    BrPixelmapPaletteSet(dest, state->palette);
+
+    BrPixelmapRectangleCopy(dest, base_x, base_y, pm, -pm->origin_x, -pm->origin_y, pm->width, pm->height);
+    BrPixelmapText(dest, -dest->origin_x + 16, dest->origin_y - 16, BR_COLOUR_RGBA(255, 255, 255, 255), BrFontProp7x9,
+                   "Tests CLUT inheritance from backbuffer for indexed pixelmaps.");
+}
+
 typedef struct br_index8nopal_state {
     br_pixelmap *earth;
     br_pixelmap *pal_std;
@@ -1322,6 +1376,13 @@ static br_drawtest tests[] = {
         .arg       = NULL
     },
     MAKE_SMPTE_TEST("smpte_type03_index_8.pix",   BR_PMT_INDEX_8,   ", embedded palette"),
+    {
+        .name      = "SMPTE (BR_PMT_INDEX_8, backbuffer CLUT)",
+        .init      = smpte_clut_init,
+        .draw      = smpte_clut_draw,
+        .fini      = smpte_clut_fini,
+        .user_size = sizeof(br_smpte_clut_state),
+    },
     MAKE_SMPTE_TEST("smpte_type04_rgb_555.pix",   BR_PMT_RGB_555,   ""),
     MAKE_SMPTE_TEST("smpte_type05_rgb_565.pix",   BR_PMT_RGB_565,   ""),
     MAKE_SMPTE_TEST("smpte_type34_bgr_565.pix",   BR_PMT_BGR_565,   ""),
