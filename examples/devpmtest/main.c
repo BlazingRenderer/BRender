@@ -546,8 +546,15 @@ static br_error device2mem_init(void *user, br_pixelmap *screen, br_pixelmap *ba
     br_device2mem_state *state = user;
 
     state->last_frame_memory = BrPixelmapAllocate(backbuffer->type, backbuffer->width, backbuffer->height, NULL, BR_PMAF_NORMAL);
-    state->last_frame_device = BrPixelmapMatch(backbuffer, BR_PMMATCH_OFFSCREEN);
     state->last_frame_hxw    = BrPixelmapAllocate(BR_PMT_RGBX_888, backbuffer->height, backbuffer->width, NULL, BR_PMAF_NORMAL);
+
+    /*
+     * Some drivers may not allow creating offscreen buffers.
+     */
+    if((state->last_frame_device = BrPixelmapMatch(backbuffer, BR_PMMATCH_OFFSCREEN)) == NULL) {
+        device2mem_fini(user);
+        return BRE_FAIL;
+    }
 
     if((state->checkerboard = BrPixelmapLoad("checkerboard.pix")) == NULL) {
         device2mem_fini(user);
