@@ -671,22 +671,20 @@ static br_error submap_init(void *user, br_pixelmap *screen, br_pixelmap *backbu
     if((state->checkerboard_memory = BrPixelmapLoad("checkerboard.pix")) == NULL)
         return BRE_FAIL;
 
-    if((state->checkerboard_device = BrPixelmapMatchSized(backbuffer, BR_PMMATCH_OFFSCREEN, state->checkerboard_memory->width,
-                                                          state->checkerboard_memory->height)) == NULL) {
-        submap_fini(user);
-        return BRE_FAIL;
-    }
+    state->checkerboard_device = BrPixelmapMatchSized(backbuffer, BR_PMMATCH_OFFSCREEN, state->checkerboard_memory->width,
+                                                      state->checkerboard_memory->height);
+    if(state->checkerboard_device != NULL) {
+        /*
+         * Memory pixelmaps don't support copying different types.
+         */
+        if(ObjectDevice(state->checkerboard_device) == NULL) {
+            BrLogWarn("APP", "Disable Sub-pixelmap test due to memory device.");
+            submap_fini(user);
+            return BRE_FAIL;
+        }
 
-    /*
-     * Memory pixelmaps don't support copying different types.
-     */
-    if(ObjectDevice(state->checkerboard_device) == NULL) {
-        BrLogWarn("APP", "Disable Sub-pixelmap test due to memory device.");
-        submap_fini(user);
-        return BRE_FAIL;
+        BrPixelmapCopy(state->checkerboard_device, state->checkerboard_memory);
     }
-
-    BrPixelmapCopy(state->checkerboard_device, state->checkerboard_memory);
 
     if((state->middle_square = BrPixelmapAllocateSub(backbuffer, -300, -300, 600, 600)) == NULL) {
         submap_fini(user);
@@ -724,7 +722,11 @@ void submap_draw(br_pixelmap *dest, float dt, void *user)
     linepoint_draw(state->middle_square, dt, &state->linepoint);
 
     BrPixelmapCopy(state->left_square, state->checkerboard_memory);
-    BrPixelmapCopy(state->left_square2, state->checkerboard_device);
+
+    if(state->checkerboard_device != NULL) {
+        BrPixelmapCopy(state->left_square2, state->checkerboard_device);
+    }
+
     // BrPixelmapFill(state->left_square2, 0xFFFFFFFF);
 }
 
