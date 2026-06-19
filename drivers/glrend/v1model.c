@@ -38,7 +38,7 @@ void DeviceGLExtractPrimitiveState(const state_stack *state, br_primitive_state_
 
     info->is_blended         = (prim->flags & PRIMF_BLEND) != 0;
     info->disable_colour_key = (prim->flags & PRIMF_COLOUR_KEY) == 0;
-    info->write_colour       = (prim->flags & PRIMF_COLOUR_WRITE) != 0;
+    info->write_colour       = 1;
     info->write_depth        = (prim->flags & PRIMF_DEPTH_WRITE) != 0;
     info->is_indexed         = prim->colour_map ? (prim->colour_map->fmt->indexed != 0) : 0;
     info->fog                = prim->fog_type != BRT_NONE;

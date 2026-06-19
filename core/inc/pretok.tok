@@ -324,7 +324,6 @@ SMOOTH							boolean
 SMOOTH_OPACITY					boolean
 DECAL							boolean
 DEPTH_WRITE						boolean
-COLOUR_WRITE					boolean
 BLEND							boolean
 MODULATE						boolean
 MODULATE_ALPHA						boolean

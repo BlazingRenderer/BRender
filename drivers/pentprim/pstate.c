@@ -269,7 +269,6 @@ static br_tv_template_entry partPrimitiveTemplateEntries[] = {
 	{BRT(DITHER_COLOUR_B),	F(prim.flags),			Q | S | A,	BRTV_CONV_BIT,	PRIMF_DITHER_COLOUR,		1},
 	{BRT(DITHER_MAP_B),		F(prim.flags),			Q | S | A,	BRTV_CONV_BIT,	PRIMF_DITHER_MAP,			1},
 	{BRT(DEPTH_WRITE_B),	F(prim.flags),			Q | S | A,	BRTV_CONV_BIT,	PRIMF_DEPTH_WRITE,			1},
-	{BRT(COLOUR_WRITE_B),	F(prim.flags),			Q | S | A,	BRTV_CONV_BIT,	PRIMF_COLOUR_WRITE,			1},
 	{BRT(BLEND_B),			F(prim.flags),			Q | S | A,	BRTV_CONV_BIT,	PRIMF_BLEND,				1},
 	{BRT(MODULATE_B),		F(prim.flags),			Q | S | A,	BRTV_CONV_BIT,	PRIMF_MODULATE,				1},
 	{BRT(FOG_T),			F(prim.fog_type),		Q | S | A,	BRTV_CONV_COPY},
@@ -592,7 +591,7 @@ static br_error BR_CMETHOD_DECL(br_primitive_state_soft, stateDefault)(
  	 * Could use inputSet and OutputSet?
 	 */
 	if(mask & MASK_STATE_PRIMITIVE) {
-		self->prim.flags = PRIMF_COLOUR_WRITE | PRIMF_DEPTH_WRITE;
+		self->prim.flags = PRIMF_DEPTH_WRITE;
 		self->prim.colour_map.buffer = NULL;
 		self->prim.index_shade.buffer = NULL;
 		self->prim.index_blend.buffer = NULL;
