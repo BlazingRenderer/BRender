@@ -26,7 +26,7 @@ static br_error sdl_gl_create_context(br_pixelmap *dev, br_device_gl_context_inf
     }
 
     SDL_GL_GetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, &major);
-    SDL_GL_GetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, &minor);
+    SDL_GL_GetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, &minor);
     SDL_GL_GetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, &mask);
 
     *info = (br_device_gl_context_info){
