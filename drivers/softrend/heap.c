@@ -14,7 +14,100 @@
 
 #include "vecifns.h"
 
-#include "zsrmacro.h"
+#define VIEW_Z(v) ((v)->comp[C_W])
+
+/*
+ * Calculate the sort value for a triangle
+ */
+static br_scalar sortValueTriangle(br_uint_16 type, const brp_vertex *v0, const brp_vertex *v1, const brp_vertex *v2)
+{
+    br_scalar zprim = VIEW_Z(v0);
+    switch(type) {
+        case BR_SORT_MIN:
+            if(VIEW_Z(v1) < zprim)
+                zprim = VIEW_Z(v1);
+            if(VIEW_Z(v2) < zprim)
+                zprim = VIEW_Z(v2);
+            break;
+        case BR_SORT_MAX:
+            if(VIEW_Z(v1) > zprim)
+                zprim = VIEW_Z(v1);
+            if(VIEW_Z(v2) > zprim)
+                zprim = VIEW_Z(v2);
+            break;
+        case BR_SORT_AVERAGE:
+            zprim = BR_ADD(zprim, BR_ADD(VIEW_Z(v1), VIEW_Z(v2)));
+            zprim = BR_MUL(zprim, BR_SCALAR(1.0 / 3.0));
+            break;
+        case BR_SORT_FIRST_VERTEX:
+        default:
+            break;
+    }
+
+    return zprim;
+}
+
+/*
+ * Calculate the sort value for an edge
+ */
+static br_scalar sortValueEdge(br_uint_16 type, const brp_vertex *v0, const brp_vertex *v1)
+{
+    br_scalar zprim = VIEW_Z(v0);
+    switch(type) {
+        case BR_SORT_MIN:
+            if(VIEW_Z(v1) < zprim)
+                zprim = VIEW_Z(v1);
+            break;
+        case BR_SORT_MAX:
+            if(VIEW_Z(v1) > zprim)
+                zprim = VIEW_Z(v1);
+            break;
+        case BR_SORT_AVERAGE:
+            zprim = BR_ADD(zprim, VIEW_Z(v1));
+            zprim = BR_MUL(zprim, BR_SCALAR(1.0 / 2.0));
+            break;
+        case BR_SORT_FIRST_VERTEX:
+        default:
+            break;
+    }
+
+    return zprim;
+}
+
+static br_scalar sortValuePoint(br_uint_16 type, const brp_vertex *v0)
+{
+    (void)type;
+    return VIEW_Z(v0);
+}
+
+/*
+ * Insert a primitive into the current order table
+ */
+static void heapInsertPrimitive(br_order_table *ot, br_primitive *prim, br_scalar depth)
+{
+    if(ot->flags & BR_ORDER_TABLE_CONVEX) {
+        /*
+         * Insert a primitive at the head of the first bucket
+         */
+        prim->next   = ot->table[0];
+        ot->table[0] = prim;
+    } else {
+        /*
+         * Insert a primitive at the head of the correct bucket
+         */
+        int bucket;
+        depth = BR_SUB(depth, ot->min_z);
+        if(depth < BR_SCALAR(0.0)) {
+            bucket = 0;
+        } else {
+            bucket = BrScalarToInt(BR_MUL(ot->scale, depth));
+            if(bucket >= ot->size)
+                bucket = ot->size - 1;
+        }
+        prim->next        = ot->table[bucket];
+        ot->table[bucket] = prim;
+    }
+}
 
 static br_boolean heapCheck(br_primitive_heap *heap, br_size_t s)
 {
@@ -87,7 +180,7 @@ void BR_ASM_CALL OpHeapAddTriangle(brp_block *block, brp_vertex *v0, brp_vertex 
         if(rend.renderer->state.surface.force_back) {
             zprim = BR_SCALAR_MAX;
         } else {
-            SORT_VALUE_TRIANGLE(rend.renderer->state.hidden.order_table->type, v0, v1, v2);
+            zprim = sortValueTriangle(rend.renderer->state.hidden.order_table->type, v0, v1, v2);
         }
     }
 
@@ -112,7 +205,7 @@ void BR_ASM_CALL OpHeapAddTriangle(brp_block *block, brp_vertex *v0, brp_vertex 
                                               rend.renderer->state.hidden.insert_arg3, rend.renderer->state.hidden.order_table, z);
 
     } else {
-        INSERT_PRIMITIVE(rend.renderer->state.hidden.order_table, p, zprim);
+        heapInsertPrimitive(rend.renderer->state.hidden.order_table, p, zprim);
     }
 }
 
@@ -137,7 +230,7 @@ void BR_ASM_CALL OpHeapAddLine(brp_block *block, brp_vertex *v0, brp_vertex *v1)
         if(rend.renderer->state.surface.force_back) {
             zprim = BR_SCALAR_MAX;
         } else {
-            SORT_VALUE_EDGE(rend.renderer->state.hidden.order_table->type, v0, v1);
+            zprim = sortValueEdge(rend.renderer->state.hidden.order_table->type, v0, v1);
         }
     }
 
@@ -156,7 +249,7 @@ void BR_ASM_CALL OpHeapAddLine(brp_block *block, brp_vertex *v0, brp_vertex *v1)
         rend.renderer->state.hidden.insert_fn(p, rend.renderer->state.hidden.insert_arg1, rend.renderer->state.hidden.insert_arg2,
                                               rend.renderer->state.hidden.insert_arg3, rend.renderer->state.hidden.order_table, z);
     } else {
-        INSERT_PRIMITIVE(rend.renderer->state.hidden.order_table, p, zprim);
+        heapInsertPrimitive(rend.renderer->state.hidden.order_table, p, zprim);
     }
 }
 
@@ -181,7 +274,7 @@ void BR_ASM_CALL OpHeapAddPoint(brp_block *block, brp_vertex *v0)
         if(rend.renderer->state.surface.force_back) {
             zprim = BR_SCALAR_MAX;
         } else {
-            SORT_VALUE_POINT(rend.renderer->state.hidden.order_table->type, v0);
+            zprim = sortValuePoint(rend.renderer->state.hidden.order_table->type, v0);
         }
     }
 
@@ -199,7 +292,7 @@ void BR_ASM_CALL OpHeapAddPoint(brp_block *block, brp_vertex *v0)
                                               rend.renderer->state.hidden.insert_arg3, rend.renderer->state.hidden.order_table, z);
 
     } else {
-        INSERT_PRIMITIVE(rend.renderer->state.hidden.order_table, p, zprim);
+        heapInsertPrimitive(rend.renderer->state.hidden.order_table, p, zprim);
     }
 }
 
@@ -225,7 +318,7 @@ void BR_ASM_CALL OpHeapAddTriangleConvert(brp_block *block, brp_vertex *v0, brp_
         if(rend.renderer->state.surface.force_back) {
             zprim = BR_SCALAR_MAX;
         } else {
-            SORT_VALUE_TRIANGLE(rend.renderer->state.hidden.order_table->type, v0, v1, v2);
+            zprim = sortValueTriangle(rend.renderer->state.hidden.order_table->type, v0, v1, v2);
         }
     }
 
@@ -254,7 +347,7 @@ void BR_ASM_CALL OpHeapAddTriangleConvert(brp_block *block, brp_vertex *v0, brp_
                                               rend.renderer->state.hidden.insert_arg3, rend.renderer->state.hidden.order_table, z);
 
     } else {
-        INSERT_PRIMITIVE(rend.renderer->state.hidden.order_table, p, zprim);
+        heapInsertPrimitive(rend.renderer->state.hidden.order_table, p, zprim);
     }
 }
 
@@ -280,7 +373,7 @@ void BR_ASM_CALL OpHeapAddLineConvert(brp_block *block, brp_vertex *v0, brp_vert
         if(rend.renderer->state.surface.force_back) {
             zprim = BR_SCALAR_MAX;
         } else {
-            SORT_VALUE_EDGE(rend.renderer->state.hidden.order_table->type, v0, v1);
+            zprim = sortValueEdge(rend.renderer->state.hidden.order_table->type, v0, v1);
         }
     }
 
@@ -302,7 +395,7 @@ void BR_ASM_CALL OpHeapAddLineConvert(brp_block *block, brp_vertex *v0, brp_vert
         rend.renderer->state.hidden.insert_fn(p, rend.renderer->state.hidden.insert_arg1, rend.renderer->state.hidden.insert_arg2,
                                               rend.renderer->state.hidden.insert_arg3, rend.renderer->state.hidden.order_table, z);
     } else {
-        INSERT_PRIMITIVE(rend.renderer->state.hidden.order_table, p, zprim);
+        heapInsertPrimitive(rend.renderer->state.hidden.order_table, p, zprim);
     }
 }
 
@@ -328,7 +421,7 @@ void BR_ASM_CALL OpHeapAddPointConvert(brp_block *block, brp_vertex *v0)
         if(rend.renderer->state.surface.force_back) {
             zprim = BR_SCALAR_MAX;
         } else {
-            SORT_VALUE_POINT(rend.renderer->state.hidden.order_table->type, v0);
+            zprim = sortValuePoint(rend.renderer->state.hidden.order_table->type, v0);
         }
     }
 
@@ -348,6 +441,6 @@ void BR_ASM_CALL OpHeapAddPointConvert(brp_block *block, brp_vertex *v0)
                                               rend.renderer->state.hidden.insert_arg3, rend.renderer->state.hidden.order_table, z);
 
     } else {
-        INSERT_PRIMITIVE(rend.renderer->state.hidden.order_table, p, zprim);
+        heapInsertPrimitive(rend.renderer->state.hidden.order_table, p, zprim);
     }
 }

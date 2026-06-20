@@ -48,7 +48,6 @@ add_library(softrend
         sstate.h
         state.h
         timestmp.h
-        zsrmacro.h
 )
 
 get_target_property(target_type softrend TYPE)
