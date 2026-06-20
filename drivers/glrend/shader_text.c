@@ -75,6 +75,7 @@ void ShaderGLTextBegin(br_gl_text_shader *self, const GladGLContext *gl, const b
     gl->ActiveTexture(GL_TEXTURE0);
     gl->BindTexture(GL_TEXTURE_2D_ARRAY, font->tex);
     gl->Uniform1i(self->uSampler, 0);
+    gl->BindSampler(0, 0);
 
     gl->BindVertexArray(self->vao_glyphs);
     gl->BindBuffer(GL_UNIFORM_BUFFER, self->ubo_glyphs);
