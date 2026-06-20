@@ -38,6 +38,18 @@ When migrating an existing project to **BRender v1.4.0+**, review and update the
 * **Search for:** `BR_MATF_ZTRANSPARENCY`.
 * **Remove:** entirely; the enum slot is reserved.
 
+### 5. Removed pixelmap colour keying
+
+* **Search for:** `BR_PMF_KEYED_TRANSPARENCY`, `br_pixelmap::pm_key`.
+* **Remove:** entirely; the flag is reserved, the field is deleted.
+* **Replace with:** use alpha channels or default black-key behaviour (see `BR_MATF_DISABLE_COLOUR_KEY`).
+
+### 7. Removed pixelmap colour-key copy fields
+
+* **Search for:** `BR_PMCOPY_SRC_KEYED`, `BR_PMCOPY_DST_KEYED`, `BR_PMCOPY_NORMAL`,
+  `pm_copy_function`, `pm_src_key`, `pm_dst_key`.
+* **Remove:** enum, struct fields, and all usages are gone.
+
 ## Major Changes
 
 ### `br_angle` now uses `br_scalar` (was `br_fixed_luf`, 0.16 turns)
