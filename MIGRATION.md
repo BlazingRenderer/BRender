@@ -147,3 +147,14 @@ This flag was unused and is replaced with `BR_PMF_RESERVED_0`.
 The value is reserved and shall not be reused.
 
 The `pm_key` field on `br_pixelmap` has been removed and is no longer consulted.
+
+### Removal of `BR_PMCOPY_*` and pixelmap colour-key copy fields
+
+The `BR_PMCOPY_*` enum (`BR_PMCOPY_NORMAL`, `BR_PMCOPY_SRC_KEYED`,
+`BR_PMCOPY_DST_KEYED`), the `pm_copy_function` field, and the `src_key` /
+`dst_key` fields on `br_pixelmap` have been removed.  These were never
+migrated from BRender 1.3.2 and have never been wired up; the copy-keying
+implementations were `#if 0`'d.
+
+Colour keying should be done with alpha channels, or via the default
+black-key behaviour controlled by `BR_MATF_DISABLE_COLOUR_KEY`.

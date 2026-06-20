@@ -325,12 +325,6 @@ enum {
     struct br_pixelmap *prefix##map;                                      \
                                                                           \
     /*                                                                    \
-     * Key colour ranges                                                  \
-     */                                                                   \
-    br_colour_range prefix##src_key;                                      \
-    br_colour_range prefix##dst_key;                                      \
-                                                                          \
-    /*                                                                    \
      * Byte difference between pixels at same column of adjacent rows     \
      */                                                                   \
     br_int_16 prefix##row_bytes;                                          \
@@ -349,11 +343,6 @@ enum {
      * Flags                                                              \
      */                                                                   \
     br_uint_16 prefix##flags;                                             \
-                                                                          \
-    /*                                                                    \
-     * Copy function                                                      \
-     */                                                                   \
-    br_uint_16 prefix##copy_function;                                     \
                                                                           \
     /*                                                                    \
      * top left visible region in pixels from pixel at 'pixel' pointer    \
@@ -436,15 +425,6 @@ enum br_pmmatch_type {
     BR_PMMATCH_DEPTH_FP16,
 
     BR_PMMATCH_MAX
-};
-
-/*
- * Copy functions
- */
-enum br_pixelmap_copy_function {
-    BR_PMCOPY_NORMAL    = 0x0000,
-    BR_PMCOPY_SRC_KEYED = 0x0001,
-    BR_PMCOPY_DST_KEYED = 0x0002
 };
 
 /*
