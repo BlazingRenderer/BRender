@@ -162,13 +162,12 @@ br_device_pixelmap *DevicePixelmapSDL2Allocate(br_device *dev, br_output_facilit
     self->device          = dev;
     self->output_facility = outfcty;
 
-    self->pm_flags         = 0;
-    self->pm_copy_function = BR_PMCOPY_NORMAL;
-    self->pm_base_x        = 0;
-    self->pm_base_y        = 0;
-    self->pm_origin_x      = 0;
-    self->pm_origin_y      = 0;
-    self->pm_type          = type;
+    self->pm_flags    = 0;
+    self->pm_base_x   = 0;
+    self->pm_base_y   = 0;
+    self->pm_origin_x = 0;
+    self->pm_origin_y = 0;
+    self->pm_type     = type;
 
     self->owned   = owned;
     self->surface = surface;
