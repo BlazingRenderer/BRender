@@ -138,20 +138,18 @@ static brp_vertex *heapVertexAdd(br_primitive_heap *heap, brp_vertex *src, br_bo
          * If src is one of the original temp_vertices, see if there is
          * already a copy in the heap
          */
-        if(src >= rend.temp_vertices) {
-            n = src - rend.temp_vertices;
-            if(n < rend.nvertices) {
-                if(rend.vertex_heap_pointers[n] == NULL) {
-                    /*
-                     * First time this temp has been seen, add it to
-                     * head and remember a pointer to it
-                     */
-                    rend.vertex_heap_pointers[n]  = (brp_vertex *)heap->current;
-                    *rend.vertex_heap_pointers[n] = *src;
-                    heap->current += sizeof(brp_vertex);
-                }
-                return rend.vertex_heap_pointers[n];
+        if(src >= rend.temp_vertices && src < rend.temp_vertices + rend.nvertices) {
+            n = (int)(src - rend.temp_vertices);
+            if(rend.vertex_heap_pointers[n] == NULL) {
+                /*
+                 * First time this temp has been seen, add it to
+                 * head and remember a pointer to it
+                 */
+                rend.vertex_heap_pointers[n]  = (brp_vertex *)heap->current;
+                *rend.vertex_heap_pointers[n] = *src;
+                heap->current += sizeof(brp_vertex);
             }
+            return rend.vertex_heap_pointers[n];
         }
     }
 
