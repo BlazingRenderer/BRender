@@ -140,3 +140,10 @@ above.)*
 
 This flag was unused and is replaced with `BR_MATF_RESERVED_0`.
 The value is reserved and shall not be reused.
+
+### Removal of `BR_PMF_KEYED_TRANSPARENCY` and `pm_key`
+
+This flag was unused and is replaced with `BR_PMF_RESERVED_0`.
+The value is reserved and shall not be reused.
+
+The `pm_key` field on `br_pixelmap` has been removed and is no longer consulted.

@@ -561,30 +561,7 @@ br_error BR_RESIDENT_ENTRY DevicePixelmapMemCloneTyped(br_device_pixelmap *src, 
             br_uint_8 *src_pixel  = (br_uint_8 *)DevicePixelmapMemAddress(src, x, y, src_bytes);
             br_colour  dst_colour = src_converter->read(src_pixel, src);
 
-            /*
-             * do keyed transparency if necessary
-             * otherwise write destination colour
-             */
-            if(src->pm_flags & BR_PMF_KEYED_TRANSPARENCY) {
-                br_uint_8 dr, dg, db, kr, kg, kb;
-
-                dr = BR_RED(dst_colour);
-                dg = BR_GRN(dst_colour);
-                db = BR_BLU(dst_colour);
-
-                kr = BR_RED(src->pm_key);
-                kg = BR_GRN(src->pm_key);
-                kb = BR_BLU(src->pm_key);
-
-                /*
-                 * we found a match
-                 */
-                if(BR_COLOUR_RGBA(dr, dg, db, 255) == BR_COLOUR_RGBA(kr, kg, kb, 255)) {
-                    dst_converter->write(dst_pixel, BR_COLOUR_RGBA(dr, dg, db, 0));
-                }
-            } else {
-                dst_converter->write(dst_pixel, dst_colour);
-            }
+            dst_converter->write(dst_pixel, dst_colour);
         }
     }
 

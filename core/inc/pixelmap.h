@@ -297,7 +297,7 @@ enum {
     BR_PMF_PIXELS_NEAR       = 0x08,
     BR_PMF_PIXELS_NEAR_ALIAS = 0x10,
 
-    BR_PMF_KEYED_TRANSPARENCY = 0x20,
+    BR_PMF_RESERVED_0 = 0x20,
 
     BR_PMF_KEEP_ORIGINAL = 0x40,
     /*
@@ -329,11 +329,6 @@ enum {
      */                                                                   \
     br_colour_range prefix##src_key;                                      \
     br_colour_range prefix##dst_key;                                      \
-                                                                          \
-    /*                                                                    \
-     * Key colour                                                         \
-     */                                                                   \
-    br_uint_32 prefix##key;                                               \
                                                                           \
     /*                                                                    \
      * Byte difference between pixels at same column of adjacent rows     \

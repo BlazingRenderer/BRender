@@ -259,12 +259,6 @@ static int get_render_mode(const state_stack *state)
         /* Has a blend table? Defer. */
         if(state->prim.index_blend != NULL)
             return RM_TRANS;
-
-        if(state->prim.colour_map && state->prim.colour_map->source) {
-            /* Keyed transparency? Defer. */
-            if(state->prim.colour_map->source->flags & BR_PMF_KEYED_TRANSPARENCY)
-                return RM_TRANS;
-        }
     }
 
     return RM_OPAQUE;
