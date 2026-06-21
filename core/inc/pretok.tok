@@ -884,6 +884,7 @@ OPENGL_PROFILE                      token
   OPENGL_PROFILE_ES                 none
 
 OPENGL                              boolean
+OPENGL_DEVICE_NAME                  constant_string
 OPENGL_TEXTURE                      uint_32
 OPENGL_EXTENSIONS                   pointer_list
 OPENGL_NUM_EXTENSIONS               int_32
