@@ -317,7 +317,6 @@ struct match_tokens {
     br_int_32  pixel_bits;
     br_int_32  width;
     br_int_32  height;
-    br_object *renderer;
 };
 
 #define F(f) offsetof(struct match_tokens, f)
@@ -326,7 +325,6 @@ static struct br_tv_template_entry matchTemplateEntries[] = {
     {BRT_USE_T,          NULL, F(use),        BRTV_SET, BRTV_CONV_COPY},
     {BRT_PIXEL_TYPE_U8,  NULL, F(pixel_type), BRTV_SET, BRTV_CONV_COPY},
     {BRT_PIXEL_BITS_I32, NULL, F(pixel_bits), BRTV_SET, BRTV_CONV_COPY},
-    {BRT_RENDERER_O,     NULL, F(renderer),   BRTV_SET, BRTV_CONV_COPY},
     {BRT_WIDTH_I32,      NULL, F(width),      BRTV_SET, BRTV_CONV_COPY},
     {BRT_HEIGHT_I32,     NULL, F(height),     BRTV_SET, BRTV_CONV_COPY},
 };
