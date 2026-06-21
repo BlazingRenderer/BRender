@@ -18,48 +18,50 @@ static const struct br_output_facility_dispatch outputFacilityDispatch;
 #define F(f) offsetof(struct br_output_facility, f)
 
 static struct br_tv_template_entry outputFacilityTemplateEntries[] = {
-    {BRT(IDENTIFIER_CSTR),     F(identifier),          BRTV_QUERY | BRTV_ALL, BRTV_CONV_COPY,   0},
+    {BRT(IDENTIFIER_CSTR),         F(identifier),          BRTV_QUERY | BRTV_ALL, BRTV_CONV_COPY,   0},
 
-    {BRT(WIDTH_I32),           F(width),               BRTV_QUERY | BRTV_ALL, BRTV_CONV_COPY,   0},
-    {BRT(WIDTH_MIN_I32),       F(width),               BRTV_QUERY | BRTV_ALL, BRTV_CONV_COPY,   0},
-    {BRT(WIDTH_MAX_I32),       F(width),               BRTV_QUERY | BRTV_ALL, BRTV_CONV_COPY,   0},
-    {BRT(HEIGHT_I32),          F(height),              BRTV_QUERY | BRTV_ALL, BRTV_CONV_COPY,   0},
-    {BRT(HEIGHT_MIN_I32),      F(height),              BRTV_QUERY | BRTV_ALL, BRTV_CONV_COPY,   0},
-    {BRT(HEIGHT_MAX_I32),      F(height),              BRTV_QUERY | BRTV_ALL, BRTV_CONV_COPY,   0},
+    {BRT(WIDTH_I32),               F(width),               BRTV_QUERY | BRTV_ALL, BRTV_CONV_COPY,   0},
+    {BRT(WIDTH_MIN_I32),           F(width),               BRTV_QUERY | BRTV_ALL, BRTV_CONV_COPY,   0},
+    {BRT(WIDTH_MAX_I32),           F(width),               BRTV_QUERY | BRTV_ALL, BRTV_CONV_COPY,   0},
+    {BRT(HEIGHT_I32),              F(height),              BRTV_QUERY | BRTV_ALL, BRTV_CONV_COPY,   0},
+    {BRT(HEIGHT_MIN_I32),          F(height),              BRTV_QUERY | BRTV_ALL, BRTV_CONV_COPY,   0},
+    {BRT(HEIGHT_MAX_I32),          F(height),              BRTV_QUERY | BRTV_ALL, BRTV_CONV_COPY,   0},
 
-    {BRT(PIXEL_TYPE_U8),       F(colour_type),         BRTV_QUERY | BRTV_ALL, BRTV_CONV_COPY,   0},
-    {BRT(PIXEL_BITS_I32),      F(colour_bits),         BRTV_QUERY | BRTV_ALL, BRTV_CONV_COPY,   0},
+    {BRT(PIXEL_TYPE_U8),           F(colour_type),         BRTV_QUERY | BRTV_ALL, BRTV_CONV_COPY,   0},
+    {BRT(PIXEL_BITS_I32),          F(colour_bits),         BRTV_QUERY | BRTV_ALL, BRTV_CONV_COPY,   0},
 
-    {BRT(WINDOW_MONITOR_I32),  F(monitor),             BRTV_QUERY | BRTV_ALL, BRTV_CONV_COPY,   0},
+    {BRT(WINDOW_MONITOR_I32),      F(monitor),             BRTV_QUERY | BRTV_ALL, BRTV_CONV_COPY,   0},
 
     /* Unused, just required for matching. */
-    {BRT(WINDOW_HANDLE_H),     (br_uintptr_t)NULL,     BRTV_QUERY | BRTV_ALL, BRTV_CONV_DIRECT, 0},
-    {BRT(WINDOW_NAME_CSTR),    (br_uintptr_t)NULL,     BRTV_QUERY | BRTV_ALL, BRTV_CONV_DIRECT, 0},
-    {BRT(USE_T),               (br_uintptr_t)BRT_NONE, BRTV_QUERY | BRTV_ALL, BRTV_CONV_DIRECT, 0},
-    {BRT(HIDPI_B),             (br_uintptr_t)BR_FALSE, BRTV_QUERY | BRTV_ALL, BRTV_CONV_DIRECT, 0},
-    {BRT(RESIZABLE_B),         (br_uintptr_t)BR_FALSE, BRTV_QUERY | BRTV_ALL, BRTV_CONV_DIRECT, 0},
-    {BRT(OPENGL_B),            (br_uintptr_t)BR_FALSE, BRTV_QUERY | BRTV_ALL, BRTV_CONV_DIRECT, 0},
-    {BRT(WINDOW_FULLSCREEN_B), (br_uintptr_t)BR_FALSE, BRTV_QUERY | BRTV_ALL, BRTV_CONV_DIRECT, 0},
-    {BRT(SDL_EXT_PROCS_P),     0,                      BRTV_QUERY | BRTV_ALL, BRTV_CONV_DIRECT, 0},
+    {BRT(WINDOW_HANDLE_H),         (br_uintptr_t)NULL,     BRTV_QUERY | BRTV_ALL, BRTV_CONV_DIRECT, 0},
+    {BRT(WINDOW_NAME_CSTR),        (br_uintptr_t)NULL,     BRTV_QUERY | BRTV_ALL, BRTV_CONV_DIRECT, 0},
+    {BRT(USE_T),                   (br_uintptr_t)BRT_NONE, BRTV_QUERY | BRTV_ALL, BRTV_CONV_DIRECT, 0},
+    {BRT(HIDPI_B),                 (br_uintptr_t)BR_FALSE, BRTV_QUERY | BRTV_ALL, BRTV_CONV_DIRECT, 0},
+    {BRT(RESIZABLE_B),             (br_uintptr_t)BR_FALSE, BRTV_QUERY | BRTV_ALL, BRTV_CONV_DIRECT, 0},
+    {BRT(OPENGL_B),                (br_uintptr_t)BR_FALSE, BRTV_QUERY | BRTV_ALL, BRTV_CONV_DIRECT, 0},
+    {BRT(OPENGL_DEVICE_NAME_CSTR), (br_uintptr_t)NULL,     BRTV_QUERY | BRTV_ALL, BRTV_CONV_DIRECT, 0},
+    {BRT(WINDOW_FULLSCREEN_B),     (br_uintptr_t)BR_FALSE, BRTV_QUERY | BRTV_ALL, BRTV_CONV_DIRECT, 0},
+    {BRT(SDL_EXT_PROCS_P),         0,                      BRTV_QUERY | BRTV_ALL, BRTV_CONV_DIRECT, 0},
 };
 
 #undef F
 
 #define F(f) offsetof(struct pixelmap_new_tokens, f)
 static struct br_tv_template_entry pixelmapNewTemplateEntries[] = {
-    {BRT(WINDOW_NAME_CSTR),    F(title),      BRTV_SET, BRTV_CONV_COPY, 0                            },
-    {BRT(WIDTH_I32),           F(width),      BRTV_SET, BRTV_CONV_COPY, 0                            },
-    {BRT(HEIGHT_I32),          F(height),     BRTV_SET, BRTV_CONV_COPY, 0                            },
-    {BRT(PIXEL_BITS_I32),      F(pixel_bits), BRTV_SET, BRTV_CONV_COPY, 0                            },
-    {BRT(PIXEL_TYPE_U8),       F(pixel_type), BRTV_SET, BRTV_CONV_COPY, 0                            },
-    {BRT(WINDOW_HANDLE_H),     F(window),     BRTV_SET, BRTV_CONV_COPY, 0                            },
-    {BRT(SURFACE_HANDLE_H),    F(surface),    BRTV_SET, BRTV_CONV_COPY, 0                            },
-    {BRT(USE_T),               F(use_type),   BRTV_SET, BRTV_CONV_COPY, 0                            },
-    {BRT(HIDPI_B),             F(flags),      BRTV_SET, BRTV_CONV_BIT,  SDL_WINDOW_HIGH_PIXEL_DENSITY},
-    {BRT(RESIZABLE_B),         F(flags),      BRTV_SET, BRTV_CONV_BIT,  SDL_WINDOW_RESIZABLE         },
-    {BRT(OPENGL_B),            F(flags),      BRTV_SET, BRTV_CONV_BIT,  SDL_WINDOW_OPENGL            },
-    {BRT(WINDOW_FULLSCREEN_B), F(flags),      BRTV_SET, BRTV_CONV_BIT,  SDL_WINDOW_FULLSCREEN        },
-    {BRT(SDL_EXT_PROCS_P),     F(ext_procs),  BRTV_SET, BRTV_CONV_COPY, 0                            },
+    {BRT(WINDOW_NAME_CSTR),        F(title),              BRTV_SET, BRTV_CONV_COPY, 0                            },
+    {BRT(WIDTH_I32),               F(width),              BRTV_SET, BRTV_CONV_COPY, 0                            },
+    {BRT(HEIGHT_I32),              F(height),             BRTV_SET, BRTV_CONV_COPY, 0                            },
+    {BRT(PIXEL_BITS_I32),          F(pixel_bits),         BRTV_SET, BRTV_CONV_COPY, 0                            },
+    {BRT(PIXEL_TYPE_U8),           F(pixel_type),         BRTV_SET, BRTV_CONV_COPY, 0                            },
+    {BRT(WINDOW_HANDLE_H),         F(window),             BRTV_SET, BRTV_CONV_COPY, 0                            },
+    {BRT(SURFACE_HANDLE_H),        F(surface),            BRTV_SET, BRTV_CONV_COPY, 0                            },
+    {BRT(USE_T),                   F(use_type),           BRTV_SET, BRTV_CONV_COPY, 0                            },
+    {BRT(HIDPI_B),                 F(flags),              BRTV_SET, BRTV_CONV_BIT,  SDL_WINDOW_HIGH_PIXEL_DENSITY},
+    {BRT(RESIZABLE_B),             F(flags),              BRTV_SET, BRTV_CONV_BIT,  SDL_WINDOW_RESIZABLE         },
+    {BRT(OPENGL_B),                F(flags),              BRTV_SET, BRTV_CONV_BIT,  SDL_WINDOW_OPENGL            },
+    {BRT(WINDOW_FULLSCREEN_B),     F(flags),              BRTV_SET, BRTV_CONV_BIT,  SDL_WINDOW_FULLSCREEN        },
+    {BRT(SDL_EXT_PROCS_P),         F(ext_procs),          BRTV_SET, BRTV_CONV_COPY, 0                            },
+    {BRT(OPENGL_DEVICE_NAME_CSTR), F(opengl_device_name), BRTV_SET, BRTV_CONV_COPY, 0                            },
 };
 #undef F
 

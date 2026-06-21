@@ -19,6 +19,7 @@ typedef struct pixelmap_new_tokens {
     br_token                 use_type;
     br_uint_32               flags;
     br_boolean               fullscreen;
+    const char              *opengl_device_name;
     br_device_sdl_ext_procs *ext_procs;
 } pixelmap_new_tokens;
 

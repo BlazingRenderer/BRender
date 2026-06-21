@@ -4,8 +4,6 @@
 #include <brsdl3dev.h>
 #include <brassert.h>
 
-#define OPENGL_DEVICE_NAME "glrend"
-
 typedef struct sdl_gl_state {
     SDL_Window *window;
     int         in_resize_callback;
@@ -274,6 +272,7 @@ br_error DevicePixelmapSDL3CreateGL(const pixelmap_new_tokens *pt, br_device_pix
     br_device  *gldev;
     SDL_Window *window;
     br_error    err;
+    const char *device_name = "glrend";
 
     UASSERT(pt->flags & SDL_WINDOW_OPENGL);
 
@@ -283,11 +282,14 @@ br_error DevicePixelmapSDL3CreateGL(const pixelmap_new_tokens *pt, br_device_pix
     if(pt->surface != NULL || pt->window != NULL || pt->use_type != BRT_NONE)
         return BRE_FAIL;
 
+    if(pt->opengl_device_name != NULL)
+        device_name = pt->opengl_device_name;
+
     /*
      * Find or load the device.
      */
-    if(BrDevCheckAdd(&gldev, OPENGL_DEVICE_NAME, NULL) != BRE_OK || gldev == NULL) {
-        BrLogError("SDL3", "OpenGL window requested, but driver can't be loaded.");
+    if(BrDevCheckAdd(&gldev, device_name, NULL) != BRE_OK || gldev == NULL) {
+        BrLogError("SDL3", "OpenGL window requested, but %s driver can't be loaded.", device_name);
         return BRE_FAIL;
     }
 
@@ -314,16 +316,8 @@ br_error DevicePixelmapSDL3CreateGL(const pixelmap_new_tokens *pt, br_device_pix
 SDL_Window *DevicePixelmapSDL3GetWindowGL(br_pixelmap *pm)
 {
     const br_device_gl_ext_procs *procs;
-    br_device                    *gldev;
 
     if(pm == NULL)
-        return NULL;
-
-    gldev = NULL;
-    if(BrDevFind(&gldev, OPENGL_DEVICE_NAME) != BRE_OK || gldev == NULL)
-        return NULL;
-
-    if(ObjectDevice(pm) != gldev)
         return NULL;
 
     procs = NULL;
