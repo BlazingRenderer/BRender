@@ -25,13 +25,6 @@ set_target_properties(glrend-headers PROPERTIES
 
 add_library(BRender::Drivers::GLRend::Headers ALIAS glrend-headers)
 
-find_package(OpenGL COMPONENTS OpenGL)
-
-if (NOT TARGET OpenGL::GL)
-    message(STATUS "OpenGL not found, not building glrend")
-    return()
-endif ()
-
 # NB: Don't use this, it's fragile as fuck.
 # find_package(glslang CONFIG REQUIRED)
 # set(GLSLANG_EXECUTABLE "$<TARGET_FILE:glslang::glslang-standalone>")
@@ -250,7 +243,7 @@ endif ()
 
 target_include_directories(glrend PRIVATE ${CMAKE_CURRENT_BINARY_DIR} glad/include)
 
-target_link_libraries(glrend PRIVATE OpenGL::GL BRender::DDI)
+target_link_libraries(glrend PRIVATE BRender::DDI)
 target_link_libraries(glrend PUBLIC glrend-headers)
 
 set_target_properties(glrend PROPERTIES

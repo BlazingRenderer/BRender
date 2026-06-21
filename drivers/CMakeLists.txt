@@ -2,11 +2,7 @@
 # We always want glrend-headers so unconditionally include glrend.
 ##
 add_subdirectory(glrend)
-if (TARGET glrend)
-    target_link_libraries(brender-full INTERFACE glrend)
-else ()
-    target_link_libraries(brender-full INTERFACE glrend-headers)
-endif ()
+target_link_libraries(brender-full INTERFACE glrend)
 
 if (TARGET SDL2::SDL2)
     add_subdirectory(sdl2dev)
