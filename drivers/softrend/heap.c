@@ -131,7 +131,6 @@ static br_primitive *heapPrimitiveAdd(br_primitive_heap *heap, br_token type)
 static brp_vertex *heapVertexAdd(br_primitive_heap *heap, brp_vertex *src, br_boolean share)
 {
     brp_vertex *v;
-    int         n;
 
     if(share) {
         /*
@@ -139,7 +138,7 @@ static brp_vertex *heapVertexAdd(br_primitive_heap *heap, brp_vertex *src, br_bo
          * already a copy in the heap
          */
         if(src >= rend.temp_vertices && src < rend.temp_vertices + rend.nvertices) {
-            n = (int)(src - rend.temp_vertices);
+            const br_ptrdiff_t n = src - rend.temp_vertices;
             if(rend.vertex_heap_pointers[n] == NULL) {
                 /*
                  * First time this temp has been seen, add it to
