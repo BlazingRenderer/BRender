@@ -189,10 +189,15 @@ static void rgb_888_write(br_uint_8 *pixels, br_colour colour, const br_pixelmap
 
 static br_colour rgbx_888_read(const br_uint_8 *pixels, const br_pixelmap *pm, const br_pixelmap_convert_options *opts)
 {
+    br_uint_8 r, g, b;
+
     (void)pm;
     (void)opts;
 
-    return *((br_colour *)pixels);
+    r = pixels[2];
+    g = pixels[1];
+    b = pixels[0];
+    return BR_COLOUR_RGBA(r, g, b, 255);
 }
 
 static void rgbx_888_write(br_uint_8 *pixels, br_colour colour, const br_pixelmap_convert_options *opts)
