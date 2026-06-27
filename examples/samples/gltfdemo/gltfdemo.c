@@ -2,35 +2,6 @@
  * glTF viewer using brdemo framework.
  * Loads a .gltf/.glb and renders with orbit camera.
  * Supports keyframe animation via br_animation_set.
- *
- * Usage: gltfdemo [options] model.glb
- *
- * Camera:
- *   --dist-mul F     orbit distance as multiplier of scene radius (default 2.5)
- *   --dist F         absolute orbit distance (overrides --dist-mul)
- *   --angle F        starting orbit angle in degrees (default 0)
- *   --elevation F    camera elevation in radians (default 0.15)
- *   --orbit-speed F  orbit rotation speed in deg/sec (default 60, 0 = static)
- *   --center X Y Z   override scene look-at point
- *
- * Animation:
- *   --animspeed F    animation playback speed multiplier (default 1.0)
- *
- * Capture:
- *   --screenshot P   save PNG screenshot to path P
- *   --frame N        capture screenshot on frame N (default 10)
- *   --frames N       render N frames then exit (0 = unlimited)
- *   --timeout S      exit after S seconds (0 = unlimited)
- *
- * Display:
- *   --brightness F   material ambient brightness (default 0.60)
- *
- * Interactive:
- *   Space            pause/resume
- *   A                cycle animation clip
- *   Left/Right       orbit camera
- *   Up/Down          adjust elevation
- *   0/1              zoom out/in
  */
 #include <brdemo.h>
 #include <fmt.h>
@@ -39,21 +10,25 @@
 #include <stdio.h>
 #include <math.h>
 
-/* CLI options (parsed before BrDemoRun) */
-static const char *g_model_path       = NULL;
-static const char *g_screenshot_path  = NULL;
-static int         g_screenshot_frame = 10;
-static int         g_max_frames       = 0;
-static float       g_timeout          = 0.0f;
-static float       g_anim_speed       = 1.0f;
-static float       g_brightness       = 0.60f;
-static float       g_init_dist_mul    = 2.5f;
-static float       g_init_dist_abs    = 0.0f;
-static float       g_init_angle       = 0.0f;
-static float       g_init_elevation   = 0.15f;
-static float       g_orbit_speed      = 60.0f;
-static int         g_center_override  = 0;
-static float       g_center_x, g_center_y, g_center_z;
+typedef struct br_gltfdemo_args {
+    br_demo_run_args args;
+
+    const char *model_path;
+    const char *screenshot_path;
+
+    int   screenshot_frame;
+    int   max_frames;
+    float timeout;
+    float anim_speed;
+    float brightness;
+    float init_dist_mul;
+    float init_dist_abs;
+    float init_angle;
+    float init_elevation;
+    float orbit_speed;
+    int   center_override;
+    float center_x, center_y, center_z;
+} br_gltfdemo_args;
 
 typedef struct gltfview_state {
     br_actor              *model_root;
@@ -130,30 +105,28 @@ static void save_screenshot(br_demo *demo, const char *path)
 
 static br_error GltfviewInit(br_demo *demo)
 {
-    gltfview_state *state;
-    br_fmt_results *results;
-    br_gltf_options opts = {0};
-    br_actor       *light;
-    br_camera      *cam;
-    char            base_path[512];
-    int             i;
+    gltfview_state         *state;
+    const br_gltfdemo_args *args;
+    br_fmt_results         *results;
+    br_gltf_options         opts = {0};
+    br_actor               *light;
+    br_camera              *cam;
+    char                    base_path[512];
+    int                     i;
+
+    args = (const br_gltfdemo_args *)demo->args;
 
     state      = BrResAllocate(demo, sizeof(*state), BR_MEMORY_APPLICATION);
     demo->user = state;
 
-    if(!g_model_path) {
-        BrLogError("GLTFVIEW", "Usage: gltfdemo [options] model.glb");
-        return BRE_FAIL;
-    }
-
     /* Derive base_path from model filename */
     {
-        const char *slash = strrchr(g_model_path, '/');
+        const char *slash = strrchr(args->model_path, '/');
         if(slash) {
-            int len = (int)(slash - g_model_path + 1);
+            int len = (int)(slash - args->model_path + 1);
             if(len >= (int)sizeof(base_path))
                 len = sizeof(base_path) - 1;
-            memcpy(base_path, g_model_path, len);
+            memcpy(base_path, args->model_path, len);
             base_path[len] = '\0';
         } else {
             base_path[0] = '.';
@@ -165,13 +138,13 @@ static br_error GltfviewInit(br_demo *demo)
     opts.base_path = base_path;
     opts.pm_type   = BR_PMT_RGBX_888;
 
-    results = BrFmtGLTFActorLoadMany(g_model_path, &opts);
+    results = BrFmtGLTFActorLoadMany(args->model_path, &opts);
     if(!results || results->nactors == 0) {
-        BrLogError("GLTFVIEW", "Failed to load %s", g_model_path);
+        BrLogError("GLTFVIEW", "Failed to load %s", args->model_path);
         return BRE_FAIL;
     }
 
-    BrLogInfo("GLTFVIEW", "Loaded %d actors from %s", results->nactors, g_model_path);
+    BrLogInfo("GLTFVIEW", "Loaded %d actors from %s", results->nactors, args->model_path);
 
     /* Add all loaded actors to the world */
     state->model_root             = BrActorAllocate(BR_ACTOR_NONE, NULL);
@@ -225,8 +198,8 @@ static br_error GltfviewInit(br_demo *demo)
         br_material *mat = results->materials[i];
         if(mat != NULL) {
             mat->flags |= BR_MATF_LIGHT;
-            mat->ka = BR_UFRACTION(g_brightness);
-            mat->kd = BR_UFRACTION(1.0f - g_brightness);
+            mat->ka = BR_UFRACTION(args->brightness);
+            mat->kd = BR_UFRACTION(1.0f - args->brightness);
             BrMaterialUpdate(mat, BR_MATU_ALL);
         }
     }
@@ -262,15 +235,15 @@ static br_error GltfviewInit(br_demo *demo)
     BrLightEnable(light);
 
     /* Apply center override */
-    if(g_center_override) {
-        state->scene_center.v[0] = BR_SCALAR(g_center_x);
-        state->scene_center.v[1] = BR_SCALAR(g_center_y);
-        state->scene_center.v[2] = BR_SCALAR(g_center_z);
+    if(args->center_override) {
+        state->scene_center.v[0] = BR_SCALAR(args->center_x);
+        state->scene_center.v[1] = BR_SCALAR(args->center_y);
+        state->scene_center.v[2] = BR_SCALAR(args->center_z);
     }
 
-    state->orbit_angle    = g_init_angle;
-    state->orbit_elev     = g_init_elevation;
-    state->orbit_dist_mul = (g_init_dist_abs > 0.0f) ? g_init_dist_abs / BrScalarToFloat(state->scene_radius) : g_init_dist_mul;
+    state->orbit_angle    = args->init_angle;
+    state->orbit_elev     = args->init_elevation;
+    state->orbit_dist_mul = (args->init_dist_abs > 0.0f) ? args->init_dist_abs / BrScalarToFloat(state->scene_radius) : args->init_dist_mul;
     state->paused         = BR_FALSE;
 
     BrLogInfo("GLTFVIEW", "Scene center=(%.1f,%.1f,%.1f) radius=%.1f", BrScalarToFloat(state->scene_center.v[0]),
@@ -281,14 +254,15 @@ static br_error GltfviewInit(br_demo *demo)
 
 static void GltfviewUpdate(br_demo *demo, br_scalar dt)
 {
-    gltfview_state *state = demo->user;
-    br_scalar       dist, cam_x, cam_y, cam_z;
-    float           angle_rad;
-    float           fdt = BrScalarToFloat(dt);
+    gltfview_state         *state = demo->user;
+    const br_gltfdemo_args *args  = (const br_gltfdemo_args *)demo->args;
+    br_scalar               dist, cam_x, cam_y, cam_z;
+    float                   angle_rad;
+    float                   fdt = BrScalarToFloat(dt);
 
     if(!state->paused) {
-        state->orbit_angle += g_orbit_speed * fdt;
-        state->anim_time += fdt * g_anim_speed;
+        state->orbit_angle += args->orbit_speed * fdt;
+        state->anim_time += fdt * args->anim_speed;
     }
     if(state->orbit_angle >= 360.0f)
         state->orbit_angle -= 360.0f;
@@ -370,7 +344,8 @@ static void GltfviewProcessEvent(br_demo *demo, const SDL_Event *evt)
 
 static void GltfviewRender(br_demo *demo)
 {
-    gltfview_state *state = demo->user;
+    gltfview_state         *state = demo->user;
+    const br_gltfdemo_args *args  = (const br_gltfdemo_args *)demo->args;
 
     BrRendererFrameBegin();
     BrPixelmapFill(demo->colour_buffer, demo->clear_colour);
@@ -382,16 +357,16 @@ static void GltfviewRender(br_demo *demo)
     BrRendererFrameEnd();
 
     /* Screenshot on target frame */
-    if(g_screenshot_path && state->frame_count == g_screenshot_frame)
-        save_screenshot(demo, g_screenshot_path);
+    if(args->screenshot_path && state->frame_count == args->screenshot_frame)
+        save_screenshot(demo, args->screenshot_path);
 
     state->frame_count++;
 
     /* Exit conditions */
-    if((g_max_frames > 0 && state->frame_count >= g_max_frames) || (g_timeout > 0.0f && state->elapsed >= g_timeout)) {
+    if((args->max_frames > 0 && state->frame_count >= args->max_frames) || (args->timeout > 0.0f && state->elapsed >= args->timeout)) {
         SDL_Event quit_evt;
-        if(g_timeout > 0.0f && state->elapsed >= g_timeout)
-            BrLogInfo("GLTFVIEW", "Timeout reached (%.1fs)", (double)g_timeout);
+        if(args->timeout > 0.0f && state->elapsed >= args->timeout)
+            BrLogInfo("GLTFVIEW", "Timeout reached (%.1fs)", (double)args->timeout);
         quit_evt.type = SDL_EVENT_QUIT;
         SDL_PushEvent(&quit_evt);
     }
@@ -406,51 +381,274 @@ static const br_demo_dispatch gltfview_dispatch = {
     .destroy       = BrDemoDefaultDestroy,
 };
 
-int main(int argc, char **argv)
-{
-    int    i;
-    int    new_argc = 0;
-    char **new_argv;
+#include "../brdemo/parg.h"
 
-    new_argv = alloca(sizeof(char *) * (argc + 1));
-    for(i = 0; i < argc; i++) {
-        if(i > 0 && strcmp(argv[i], "--screenshot") == 0 && i + 1 < argc)
-            g_screenshot_path = argv[++i];
-        else if(i > 0 && strcmp(argv[i], "--frame") == 0 && i + 1 < argc)
-            g_screenshot_frame = atoi(argv[++i]);
-        else if(i > 0 && strcmp(argv[i], "--frames") == 0 && i + 1 < argc)
-            g_max_frames = atoi(argv[++i]);
-        else if(i > 0 && strcmp(argv[i], "--timeout") == 0 && i + 1 < argc)
-            g_timeout = (float)atof(argv[++i]);
-        else if(i > 0 && strcmp(argv[i], "--animspeed") == 0 && i + 1 < argc)
-            g_anim_speed = (float)atof(argv[++i]);
-        else if(i > 0 && strcmp(argv[i], "--brightness") == 0 && i + 1 < argc)
-            g_brightness = (float)atof(argv[++i]);
-        else if(i > 0 && strcmp(argv[i], "--dist-mul") == 0 && i + 1 < argc)
-            g_init_dist_mul = (float)atof(argv[++i]);
-        else if(i > 0 && strcmp(argv[i], "--dist") == 0 && i + 1 < argc)
-            g_init_dist_abs = (float)atof(argv[++i]);
-        else if(i > 0 && strcmp(argv[i], "--angle") == 0 && i + 1 < argc)
-            g_init_angle = (float)atof(argv[++i]);
-        else if(i > 0 && strcmp(argv[i], "--elevation") == 0 && i + 1 < argc)
-            g_init_elevation = (float)atof(argv[++i]);
-        else if(i > 0 && strcmp(argv[i], "--orbit-speed") == 0 && i + 1 < argc)
-            g_orbit_speed = (float)atof(argv[++i]);
-        else if(i > 0 && strcmp(argv[i], "--center") == 0 && i + 3 < argc) {
-            g_center_override = 1;
-            g_center_x        = (float)atof(argv[++i]);
-            g_center_y        = (float)atof(argv[++i]);
-            g_center_z        = (float)atof(argv[++i]);
-        } else if(i > 0 && argv[i][0] != '-' && !g_model_path)
-            g_model_path = argv[i];
-        else {
-            new_argv[new_argc++] = argv[i];
-            /* Pass through the value of unknown flags (e.g. --width 800) */
-            if(i > 0 && argv[i][0] == '-' && i + 1 < argc && argv[i + 1][0] != '-')
-                new_argv[new_argc++] = argv[++i];
+#define ARGDEF_WIDTH             'w'
+#define ARGDEF_HEIGHT            'h'
+#define ARGDEF_VERBOSE           'v'
+#define ARGDEF_HELP              301
+#define ARGDEF_FORCE_SOFTWARE    302
+#define ARGDEF_SOFTWARE_BPP      303
+#define ARGDEF_BACKBUFFER_WIDTH  304
+#define ARGDEF_BACKBUFFER_HEIGHT 305
+
+#define ARGDEF_DIST_MUL          401
+#define ARGDEF_DIST              402
+#define ARGDEF_ANGLE             403
+#define ARGDEF_ELEVATION         404
+#define ARGDEF_ORBIT_SPEED       405
+#define ARGDEF_CENTER            406
+#define ARGDEF_ANIMSPEED         407
+#define ARGDEF_SCREENSHOT        408
+#define ARGDEF_FRAME             409
+#define ARGDEF_FRAMES            410
+#define ARGDEF_TIMEOUT           411
+#define ARGDEF_BRIGHTNESS        412
+
+const static struct parg_option argdefs[] = {
+    {.name = "width",             .has_arg = PARG_REQARG, .flag = NULL, .val = ARGDEF_WIDTH            },
+    {.name = "height",            .has_arg = PARG_REQARG, .flag = NULL, .val = ARGDEF_HEIGHT           },
+    {.name = "verbose",           .has_arg = PARG_NOARG,  .flag = NULL, .val = ARGDEF_VERBOSE          },
+    {.name = "help",              .has_arg = PARG_NOARG,  .flag = NULL, .val = ARGDEF_HELP             },
+    {.name = "force-software",    .has_arg = PARG_NOARG,  .flag = NULL, .val = ARGDEF_FORCE_SOFTWARE   },
+    {.name = "software-bpp",      .has_arg = PARG_REQARG, .flag = NULL, .val = ARGDEF_SOFTWARE_BPP     },
+    {.name = "backbuffer-width",  .has_arg = PARG_REQARG, .flag = NULL, .val = ARGDEF_BACKBUFFER_WIDTH },
+    {.name = "backbuffer-height", .has_arg = PARG_REQARG, .flag = NULL, .val = ARGDEF_BACKBUFFER_HEIGHT},
+
+    {.name = "dist-mul",          .has_arg = PARG_REQARG, .flag = NULL, .val = ARGDEF_DIST_MUL         },
+    {.name = "dist",              .has_arg = PARG_REQARG, .flag = NULL, .val = ARGDEF_DIST             },
+    {.name = "angle",             .has_arg = PARG_REQARG, .flag = NULL, .val = ARGDEF_ANGLE            },
+    {.name = "elevation",         .has_arg = PARG_REQARG, .flag = NULL, .val = ARGDEF_ELEVATION        },
+    {.name = "orbit-speed",       .has_arg = PARG_REQARG, .flag = NULL, .val = ARGDEF_ORBIT_SPEED      },
+    {.name = "center",            .has_arg = PARG_REQARG, .flag = NULL, .val = ARGDEF_CENTER           },
+
+    {.name = "animspeed",         .has_arg = PARG_REQARG, .flag = NULL, .val = ARGDEF_ANIMSPEED        },
+
+    {.name = "screenshot",        .has_arg = PARG_REQARG, .flag = NULL, .val = ARGDEF_SCREENSHOT       },
+    {.name = "frame",             .has_arg = PARG_REQARG, .flag = NULL, .val = ARGDEF_FRAME            },
+    {.name = "frames",            .has_arg = PARG_REQARG, .flag = NULL, .val = ARGDEF_FRAMES           },
+    {.name = "timeout",           .has_arg = PARG_REQARG, .flag = NULL, .val = ARGDEF_TIMEOUT          },
+
+    {.name = "brightness",        .has_arg = PARG_REQARG, .flag = NULL, .val = ARGDEF_BRIGHTNESS       },
+
+    {.name = NULL,                .has_arg = 0,           .flag = NULL, .val = 0                       },
+};
+
+static int parse_args(int argc, char *const argv[], br_gltfdemo_args *args)
+{
+    struct parg_state ps;
+    parg_init(&ps);
+    int software_bpp = 8;
+
+    for(int c; (c = parg_getopt_long(&ps, argc, argv, "w:h:v", argdefs, NULL)) != -1;) {
+        switch(c) {
+            case ARGDEF_WIDTH:
+                args->args.width = BrAToI(ps.optarg);
+                break;
+
+            case ARGDEF_HEIGHT:
+                args->args.height = BrAToI(ps.optarg);
+                break;
+
+            case ARGDEF_VERBOSE:
+                ++args->args.verbose;
+                break;
+
+            case ARGDEF_FORCE_SOFTWARE:
+                ++args->args.force_software;
+                break;
+
+            case ARGDEF_SOFTWARE_BPP:
+                software_bpp = BrAToI(ps.optarg);
+                break;
+
+            case ARGDEF_BACKBUFFER_WIDTH:
+                args->args.backbuffer_width = BrAToI(ps.optarg);
+                break;
+
+            case ARGDEF_BACKBUFFER_HEIGHT:
+                args->args.backbuffer_height = BrAToI(ps.optarg);
+                break;
+
+            case ARGDEF_SCREENSHOT:
+                args->screenshot_path = ps.optarg;
+                break;
+
+            case ARGDEF_FRAME:
+                args->screenshot_frame = BrAToI(ps.optarg);
+                break;
+
+            case ARGDEF_FRAMES:
+                args->max_frames = BrAToI(ps.optarg);
+                break;
+
+            case ARGDEF_TIMEOUT:
+                args->timeout = BrAToF(ps.optarg);
+                break;
+
+            case ARGDEF_ANIMSPEED:
+                args->anim_speed = BrAToF(ps.optarg);
+                break;
+
+            case ARGDEF_BRIGHTNESS:
+                args->brightness = BrAToF(ps.optarg);
+                break;
+
+            case ARGDEF_DIST_MUL:
+                args->init_dist_mul = BrAToF(ps.optarg);
+                break;
+
+            case ARGDEF_DIST:
+                args->init_dist_abs = BrAToF(ps.optarg);
+                break;
+
+            case ARGDEF_ANGLE:
+                args->init_angle = BrAToF(ps.optarg);
+                break;
+
+            case ARGDEF_ELEVATION:
+                args->init_elevation = BrAToF(ps.optarg);
+                break;
+
+            case ARGDEF_ORBIT_SPEED:
+                args->orbit_speed = BrAToF(ps.optarg);
+                break;
+
+            case ARGDEF_CENTER:
+                args->center_override = 1;
+                if(BrSScanf(ps.optarg, "%f,%f,%f", &args->center_x, &args->center_y, &args->center_z) < 3)
+                    return 2;
+                break;
+
+            case 1:
+                if(args->model_path != NULL)
+                    return 2;
+
+                args->model_path = ps.optarg;
+                break;
+
+            case ARGDEF_HELP:
+            case ':':
+            case '?':
+            default:
+                return 2;
         }
     }
-    new_argv[new_argc] = NULL;
 
-    return BrDemoRunArgv("glTF Viewer", &gltfview_dispatch, new_argc, new_argv);
+    if(args->args.width < 0)
+        return 2;
+
+    if(args->args.height < 0)
+        return 2;
+
+    if(args->model_path == NULL || args->model_path[0] == '\0')
+        return 2;
+
+    switch(software_bpp) {
+        case 16:
+            args->args.software_pm_type = BR_PMT_RGB_565;
+            break;
+        case 15:
+            args->args.software_pm_type = BR_PMT_RGB_555;
+            break;
+        case 24:
+            args->args.software_pm_type = BR_PMT_RGB_888;
+            break;
+        default:
+        case 8:
+            args->args.software_pm_type = BR_PMT_INDEX_8;
+            break;
+    }
+
+    if(args->args.backbuffer_width < 0)
+        args->args.backbuffer_width = 0;
+
+    if(args->args.backbuffer_height < 0)
+        args->args.backbuffer_height = 0;
+
+    if(args->args.title == NULL || args->args.title[0] == '\0')
+        args->args.title = "BRender Application";
+
+    return 0;
+}
+
+// clang-format off
+static const char *usage_options =
+    "Usage: gltfdemo [options] model.glb\n"
+    "\n"
+    "Framework:\n"
+    "  -w, --width          Set the initial window width (default: 1280).\n"
+    "  -h, --height         Set the initial window height (default: 720).\n"
+    "  -v, --verbose        Increase verbosity level. May be given multiple times.\n"
+    "  --force-software     Force use of the software renderer. Only valid on x86.\n"
+    "  --software-bpp       Software renderer bit depth. Valid options: 8 (default), 15, 16.\n"
+    "  --backbuffer-width   Width of the backbuffer, defaults to the same as the screen.\n"
+    "  --backbuffer-height  Height of the backbuffer, defaults to the same as the screen.\n"
+    "  --help               Display this message.\n"
+    "\n"
+    "Camera:\n"
+    "  --dist-mul F         orbit distance as multiplier of scene radius (default 2.5)\n"
+    "  --dist F             absolute orbit distance (overrides --dist-mul)\n"
+    "  --angle F            starting orbit angle in degrees (default 0)\n"
+    "  --elevation F        camera elevation in radians (default 0.15)\n"
+    "  --orbit-speed F      orbit rotation speed in deg/sec (default 60, 0 = static)\n"
+    "  --center X,Y,Z       override scene look-at point\n"
+    "\n"
+    "Animation:\n"
+    "  --animspeed F        animation playback speed multiplier (default 1.0)\n"
+    "\n"
+    "Capture:\n"
+    "  --screenshot P       save PNG screenshot to path P\n"
+    "  --frame N            capture screenshot on frame N (default 10)\n"
+    "  --frames N           render N frames then exit (0 = unlimited)\n"
+    "  --timeout S          exit after S seconds (0 = unlimited)\n"
+    "\n"
+    "Display:\n"
+    "  --brightness F       material ambient brightness (default 0.60)\n"
+    "\n"
+    "Interactive:\n"
+    "  Space                pause/resume\n"
+    "  A                    cycle animation clip\n"
+    "  Left/Right           orbit camera\n"
+    "  Up/Down              adjust elevation\n"
+    "  0/1                  zoom out/in\n"
+    "\n"
+;
+// clang-format on
+
+int main(int argc, char **argv)
+{
+    int r;
+
+    br_gltfdemo_args args = {
+        .args             = {},
+        .model_path       = NULL,
+        .screenshot_path  = NULL,
+        .screenshot_frame = 10,
+        .max_frames       = 0,
+        .timeout          = 0.0f,
+        .anim_speed       = 1.0f,
+        .brightness       = 0.60f,
+        .init_dist_mul    = 2.5f,
+        .init_dist_abs    = 0.0f,
+        .init_angle       = 0.0f,
+        .init_elevation   = 0.15f,
+        .orbit_speed      = 60.0f,
+        .center_override  = 0,
+        .center_x         = 0.0f,
+        .center_y         = 0.0f,
+        .center_z         = 0.0f,
+    };
+
+    BrDemoDefaultArgs(&args.args);
+    args.args.title = "glTF Viewer";
+
+    struct parg_state ps;
+    parg_init(&ps);
+    if((r = parse_args(argc, argv, &args)) != 0) {
+        fprintf(stderr, "%s\n", usage_options);
+        return r;
+    }
+
+    return BrDemoRunArg(&gltfview_dispatch, &args.args);
 }
