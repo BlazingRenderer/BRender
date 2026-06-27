@@ -162,7 +162,7 @@ int BR_PUBLIC_ENTRY BrFilePrintf(void *f, const char *fmt, ...) BR_PRINTF_ATTRIB
 br_int_32 BR_RESIDENT_ENTRY BrSprintf(char *buf, const char *fmt, ...) BR_PRINTF_ATTRIBUTE(2, 3);
 br_int_32 BR_RESIDENT_ENTRY BrSprintfN(char *buf, br_size_t buf_size, const char *fmt, ...) BR_PRINTF_ATTRIBUTE(3, 4);
 
-br_int_32 BR_RESIDENT_ENTRY BrSScanf(char *str, const char *fmt, ...) BR_SCANF_ATTRIBUTE(2, 3);
+br_int_32 BR_RESIDENT_ENTRY BrSScanf(const char *str, const char *fmt, ...) BR_SCANF_ATTRIBUTE(2, 3);
 
 /*
  * Data file output type (one of BR_FS_MODE_xxx)

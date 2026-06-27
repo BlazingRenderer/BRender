@@ -52,7 +52,7 @@ br_int_32 BR_RESIDENT_ENTRY BrSprintfN(char *buf, br_size_t buf_size, const char
 #endif
 }
 
-br_int_32 BR_RESIDENT_ENTRY BrSScanf(char *str, const char *fmt, ...)
+br_int_32 BR_RESIDENT_ENTRY BrSScanf(const char *str, const char *fmt, ...)
 {
     int     n;
     va_list args;
