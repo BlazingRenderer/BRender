@@ -416,8 +416,19 @@ static int parse_args(int argc, char *const argv[], br_demo_run_args *args)
     struct parg_state ps;
     parg_init(&ps);
     int software_bpp = 8;
+    int optend;
 
-    for(int c; (c = parg_getopt_long(&ps, argc, argv, "w:h:v", argdefs, NULL)) != -1;) {
+    /*
+     * NB: Yes, alloca() is dangerous, but realistically not an issue here.
+     */
+    char **tmp_argv = alloca(sizeof(char *) * (argc + 1));
+    BrMemCpy(tmp_argv, argv, argc * sizeof(char *));
+    tmp_argv[argc] = NULL;
+
+    if((optend = parg_reorder(argc, tmp_argv, "w:h:v", argdefs)) < 0)
+        return 2;
+
+    for(int c; (c = parg_getopt_long(&ps, optend, tmp_argv, "w:h:v", argdefs, NULL)) != -1;) {
         switch(c) {
 
             case ARGDEF_WIDTH:
