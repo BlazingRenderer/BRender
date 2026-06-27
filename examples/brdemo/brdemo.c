@@ -498,6 +498,12 @@ static int parse_args(int argc, char *const argv[], br_demo_run_args *args)
     if(args->title == NULL || args->title[0] == '\0')
         args->title = "BRender Application";
 
+    args->pos_argc = argc - optend;
+    if(args->pos_argc > BR_ASIZE(args->pos_argv)) {
+        args->pos_argc = BR_ASIZE(args->pos_argv);
+    }
+
+    memcpy(args->pos_argv, tmp_argv + optend, args->pos_argc * sizeof(char *));
     return 0;
 }
 

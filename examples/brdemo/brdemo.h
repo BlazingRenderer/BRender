@@ -46,6 +46,8 @@ typedef struct br_demo_run_args {
     br_uint_8   software_pm_type;
     br_int_32   backbuffer_width;
     br_int_32   backbuffer_height;
+    int         pos_argc;
+    char       *pos_argv[4]; /* If you need more than 4 positional args, tough. */
 } br_demo_run_args;
 
 /**
