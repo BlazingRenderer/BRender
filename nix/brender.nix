@@ -74,6 +74,9 @@ stdenv.mkDerivation(finalAttrs: {
     wrapProgram $bin/bin/devpmtest${binExtension} \
       --set BRENDER_PATH $data/share/brender-samples/dat
 
+    wrapProgram $bin/bin/gltfview${binExtension} \
+      --set BRENDER_PATH $data/share/brender-samples/dat
+
     wrapProgram $bin/bin/brintro${binExtension} \
       --set BRENDER_PATH $data/share/brender-samples/brintro
 
