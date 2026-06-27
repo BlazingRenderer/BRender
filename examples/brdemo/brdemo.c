@@ -132,17 +132,6 @@ static br_pixelmap *BR_CALLBACK MapFindFailedLoadDeCLUT(const char *name)
     return pm;
 }
 
-typedef struct br_demo_run_args {
-    const char *title;
-    br_int_32   width;
-    br_int_32   height;
-    int         verbose;
-    int         force_software;
-    br_uint_8   software_pm_type;
-    br_int_32   backbuffer_width;
-    br_int_32   backbuffer_height;
-} br_demo_run_args;
-
 static br_error resize_buffers(br_demo *demo, const br_demo_run_args *args)
 {
     br_int_32 width  = args->backbuffer_width;
@@ -223,7 +212,7 @@ try_software:
     return err;
 }
 
-static int BrDemoRunArg(const br_demo_dispatch *dispatch, const br_demo_run_args *args)
+int BrDemoRunArg(const br_demo_dispatch *dispatch, const br_demo_run_args *args)
 {
     int         ret           = 1;
     br_demo    *demo          = NULL;
@@ -514,14 +503,10 @@ static const char *usage_options =
 ;
 // clang-format on
 
-int BrDemoRunArgv(const char *title, const br_demo_dispatch *dispatch, int argc, char *const *argv)
+void BrDemoDefaultArgs(br_demo_run_args *args)
 {
-    int               r;
-    struct parg_state ps;
-    parg_init(&ps);
-
-    br_demo_run_args args = {
-        .title             = title,
+    *args = (br_demo_run_args){
+        .title             = NULL,
         .width             = 1280,
         .height            = 720,
         .verbose           = BR_LOG_INFO,
@@ -530,9 +515,31 @@ int BrDemoRunArgv(const char *title, const br_demo_dispatch *dispatch, int argc,
         .backbuffer_width  = 0,
         .backbuffer_height = 0,
     };
+}
 
-    if((r = parse_args(argc, argv, &args)) != 0) {
+int BrDemoParseArgs(br_demo_run_args *args, int argc, char *const *argv)
+{
+    int               r;
+    struct parg_state ps;
+    parg_init(&ps);
+
+    if((r = parse_args(argc, argv, args)) != 0) {
         fprintf(stderr, "Usage: %s \nOptions:\n%s", argv[0], usage_options);
+        return r;
+    }
+
+    return 0;
+}
+
+int BrDemoRunArgv(const char *title, const br_demo_dispatch *dispatch, int argc, char *const *argv)
+{
+    int              r;
+    br_demo_run_args args;
+
+    BrDemoDefaultArgs(&args);
+    args.title = title;
+
+    if((r = BrDemoParseArgs(&args, argc, argv)) != 0) {
         return r;
     }
 
@@ -543,16 +550,12 @@ int BrDemoRunArgv(const char *title, const br_demo_dispatch *dispatch, int argc,
 
 int BrDemoRun(const char *title, br_uint_16 width, br_uint_16 height, const br_demo_dispatch *dispatch)
 {
-    br_demo_run_args args = {
-        .title             = title,
-        .width             = width,
-        .height            = height,
-        .verbose           = 0,
-        .force_software    = 0,
-        .software_pm_type  = BR_PMT_INDEX_8,
-        .backbuffer_width  = 0,
-        .backbuffer_height = 0,
-    };
+    br_demo_run_args args;
+
+    BrDemoDefaultArgs(&args);
+    args.title  = title;
+    args.width  = width;
+    args.height = height;
 
     return BrDemoRunArg(dispatch, &args);
 }

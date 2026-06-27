@@ -97,21 +97,79 @@ typedef struct br_demo {
     uint8_t      _primitive_heap[1500 * 1024];
 } br_demo;
 
+typedef struct br_demo_run_args {
+    const char *title;
+    br_int_32   width;
+    br_int_32   height;
+    int         verbose;
+    int         force_software;
+    br_uint_8   software_pm_type;
+    br_int_32   backbuffer_width;
+    br_int_32   backbuffer_height;
+} br_demo_run_args;
+
 /**
- * Demo entry point. This function automatically creates a valid BRender state
- * and renderer with the SDL3+GLRend drivers. The intended usage is to return
- * BrDemoRun() from main() with the appropriate arguments.
+ * \brief Default-initialise a br_demo_run_args structure, suitable for passing to BrDemoRunArg().
  *
- * @param title Window title
- * @param width Initial window width
- * @param height Initial window height
- * @param dispatch Dispatch table
- * @return 0 for success, 1 if some error occured
+ * \param args A non-NULL pointer to the target br_demo_run_args structure.
  */
+void BrDemoDefaultArgs(br_demo_run_args *args);
 
-int BrDemoRun(const char *title, br_uint_16 width, br_uint_16 height, const br_demo_dispatch *dispatch);
+/**
+ * \brief Parse the default set of arguments for a BrDemo* application.
+ *
+ * \param args A non-NULL pointer to the target br_demo_run_args structure.
+ * \param argc argc as passed to main().
+ * \param argv argv as passed to main().
+ *
+ * \returns If argument parsing fails, returns <0 and prints the usage to stderr.
+ *          If argument parsing succeeds, returns 0.
+ */
+int BrDemoParseArgs(br_demo_run_args *args, int argc, char *const *argv);
 
+/**
+ * \brief Execute a BrDemo*() application.
+ *
+ * This function automatically creates a valid BRender state and renderer with
+ * the SDL3+GLRend drivers.
+ *
+ * \remark The intended usage is to return BrDemoRunArg() from main with the
+ *         appropriate arguments.
+ *
+ * \param dispatch A non-NULL pointer to the dispatch table.
+ * \param args     A non-NULL pointer to a br_demo_run_args structure.
+ *
+ * \returns 0 for success, 1 if some error occurred.
+ */
+int BrDemoRunArg(const br_demo_dispatch *dispatch, const br_demo_run_args *args);
+
+/**
+ * \brief Convenience BrDemo*() entrypoint.
+ *
+ * This is the same as calling BrDemoRunArg() after BrDemoParseArgs().
+ *
+ * \param title    A non-NULL pointer to the window title.
+ * \param dispatch A non-NULL pointer to the dispatch table.
+ * \param argc     argc as passed to main().
+ * \param argv     argv as passed to main().
+ *
+ * \returns 0 for success, 1 if some error occurred.
+ */
 int BrDemoRunArgv(const char *title, const br_demo_dispatch *dispatch, int argc, char *const *argv);
+
+/**
+ * \brief Legacy BrDemo*() entrypoint.
+ *
+ * \param title    A non-NULL pointer to the window title.
+ * \param width    The initial window width.
+ * \param height   The initial window height.
+ * \param dispatch A non-NULL pointer to the dispatch table.
+ *
+ * \returns 0 for success, 1 if some error occurred.
+ *
+ * \sa BrDemoRunArg().
+ */
+int BrDemoRun(const char *title, br_uint_16 width, br_uint_16 height, const br_demo_dispatch *dispatch);
 
 #ifdef __cplusplus
 }
