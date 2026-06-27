@@ -483,4 +483,34 @@ typedef struct {
     br_int_32  sharpness;
 } br_display_controls;
 
+typedef struct br_pixelmap_convert_options {
+    /**
+     * \brief The alpha transparency threshold for indexed pixelmaps.
+     *
+     * Any alpha <= this will be considered transparent, if treating index-0 as transparent.
+     *
+     * \remark This is only meaningful when writing an indexed pixelmap, and if \p index_0_transparent is set.
+     */
+    br_uint_8 index_alpha_threshold;
+
+    /**
+     * \brief The target CLUT.
+     *
+     * If writing to an indexed pixelmap, use this CLUT instead of generating one.
+     */
+    br_pixelmap *target_clut;
+
+    /**
+     * \brief Should colour keying be enabled?
+     *
+     * If set, any pixels where the RGB matches \p colour_key will have their alpha set to 0 (fully transparent).
+     */
+    br_uint_8 enable_colour_key;
+
+    /**
+     * \brief The colour key. Only the RGB fields are meaningful.
+     */
+    br_colour colour_key;
+} br_pixelmap_convert_options;
+
 #endif
