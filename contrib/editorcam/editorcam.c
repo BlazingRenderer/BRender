@@ -11,7 +11,7 @@
 const static br_editor_camera default_camera = {
     .actor             = NULL,
     .camera            = NULL,
-    .camera_data       = (br_camera){
+    .camera_data       = {
         .type          = BR_CAMERA_PERSPECTIVE,
         .field_of_view = BR_ANGLE_DEG(60),
         .hither_z      = BR_SCALAR(0.01f),
