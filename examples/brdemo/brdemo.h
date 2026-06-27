@@ -37,6 +37,17 @@ void     BrDemoDefaultRender(br_demo *demo);
 void     BrDemoDefaultOnResize(br_demo *demo, br_uint_16 width, br_uint_16 height);
 void     BrDemoDefaultDestroy(br_demo *demo);
 
+typedef struct br_demo_run_args {
+    const char *title;
+    br_int_32   width;
+    br_int_32   height;
+    int         verbose;
+    int         force_software;
+    br_uint_8   software_pm_type;
+    br_int_32   backbuffer_width;
+    br_int_32   backbuffer_height;
+} br_demo_run_args;
+
 /**
  * Demo structure passed to callback functions
  */
@@ -45,6 +56,11 @@ typedef struct br_demo {
      * Dispatch table.
      */
     const br_demo_dispatch *dispatch;
+
+    /*
+     * Copy of the parsed arguments structure.
+     */
+    const br_demo_run_args *args;
 
     /*
      * The world's order table.
@@ -96,17 +112,6 @@ typedef struct br_demo {
     br_pixelmap *_screen;
     uint8_t      _primitive_heap[1500 * 1024];
 } br_demo;
-
-typedef struct br_demo_run_args {
-    const char *title;
-    br_int_32   width;
-    br_int_32   height;
-    int         verbose;
-    int         force_software;
-    br_uint_8   software_pm_type;
-    br_int_32   backbuffer_width;
-    br_int_32   backbuffer_height;
-} br_demo_run_args;
 
 /**
  * \brief Default-initialise a br_demo_run_args structure, suitable for passing to BrDemoRunArg().

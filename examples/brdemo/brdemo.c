@@ -235,6 +235,7 @@ int BrDemoRunArg(const br_demo_dispatch *dispatch, const br_demo_run_args *args)
 
     demo           = BrResAllocate(NULL, sizeof(br_demo), BR_MEMORY_APPLICATION);
     demo->dispatch = dispatch;
+    demo->args     = args;
 
     /* FIXME: hack to work around no args in the find hooks. */
     current_demo = demo;
