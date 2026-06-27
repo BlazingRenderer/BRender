@@ -41,7 +41,7 @@ static br_uint_32 BR_CALLBACK FindFirstCameraCallback(br_actor *a, void *arg)
 {
     FindCameraCtx *ctx = arg;
 
-    if(ctx->found != nullptr)
+    if(ctx->found != NULL)
         return 1;
 
     if(a == ctx->exclude->actor || a == ctx->exclude->camera)
@@ -58,7 +58,7 @@ static br_uint_32 BR_CALLBACK FindFirstCameraCallback(br_actor *a, void *arg)
 
 static void FocusCamOnSceneCamera(br_editor_camera *ecam, br_actor *world)
 {
-    FindCameraCtx ctx = {.found = nullptr, .exclude = ecam};
+    FindCameraCtx ctx = {.found = NULL, .exclude = ecam};
     BrActorEnum(world, FindFirstCameraCallback, &ctx);
     br_actor *scene_cam = ctx.found;
 
