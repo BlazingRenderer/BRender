@@ -153,6 +153,8 @@ static void BR_CMETHOD_DECL(br_buffer_stored_gl, free)(br_object *_self)
     self->gl_tex = 0;
 
     ObjectContainerRemove(self->renderer, (br_object *)self);
+
+    BrResFreeNoCallback(self);
 }
 
 static const char *BR_CMETHOD_DECL(br_buffer_stored_gl, identifier)(br_object *self)
