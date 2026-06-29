@@ -4,6 +4,9 @@
 add_subdirectory(glrend)
 target_link_libraries(brender-full INTERFACE glrend)
 
+add_subdirectory(glrend1x)
+target_link_libraries(brender-full INTERFACE glrend1x)
+
 if (TARGET SDL2::SDL2)
     add_subdirectory(sdl2dev)
     target_link_libraries(brender-full INTERFACE sdl2dev)

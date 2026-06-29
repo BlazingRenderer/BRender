@@ -1,0 +1,226 @@
+/*
+ * Stored buffer methods
+ */
+#include <stddef.h>
+
+#include "drv.h"
+#include "brassert.h"
+
+/*
+ * Default dispatch table for primitive state (defined at end of file)
+ */
+static struct br_buffer_stored_dispatch bufferStoredDispatch;
+
+/*
+ * Primitive state info. template
+ */
+#define F(f) offsetof(struct br_buffer_stored, f)
+
+static br_tv_template_entry bufferStoredTemplateEntries[] = {
+    {BRT(IDENTIFIER_CSTR),    F(identifier),   BRTV_QUERY | BRTV_ALL, BRTV_CONV_COPY},
+    {DEV(OPENGL_TEXTURE_U32), F(gl_tex_nokey), BRTV_QUERY | BRTV_ALL, BRTV_CONV_COPY}
+};
+
+#undef F
+
+/*
+ * Set up a static device object
+ */
+struct br_buffer_stored *BufferStoredGL1xAllocate(br_primitive_library *plib, br_token use, struct br_device_pixelmap *pm, br_token_value *tv)
+{
+    struct br_buffer_stored *self;
+    char                    *ident;
+    const GladGLContext     *gl = plib->gl;
+
+    switch(use) {
+
+        case BRT_TEXTURE_O:
+        case BRT_COLOUR_MAP_O:
+            ident = "colour_map";
+            break;
+
+        case BRT_UNKNOWN:
+            ident = "unknown";
+            break;
+
+        default:
+            return NULL;
+    }
+
+    self = BrResAllocate(DeviceGLResource(ObjectDevice(plib)), sizeof(*self), BR_MEMORY_OBJECT);
+    if(self == NULL)
+        return NULL;
+
+    self->dispatch   = &bufferStoredDispatch;
+    self->identifier = BrResSprintf(self, BR_GLREND_DEBUG_USER_PREFIX "%s:%s", ident, pm->pm_identifier ? pm->pm_identifier : "(unnamed)");
+    self->device     = ObjectDevice(plib);
+    self->plib       = plib;
+    self->gl         = gl;
+    self->templates = BrTVTemplateAllocate(self, (br_tv_template_entry *)bufferStoredTemplateEntries, BR_ASIZE(bufferStoredTemplateEntries));
+
+    BufferStoredUpdate(self, pm, tv);
+
+    ObjectContainerAddFront(plib, (br_object *)self);
+
+    return self;
+}
+
+static br_error updateMemory(br_buffer_stored *self, br_pixelmap *pm)
+{
+    br_error                  berr;
+    const br_pixelmap_gl_fmt *fmt;
+    const GladGLContext      *gl = self->gl;
+
+    /*
+     * The pixelmap is a plain BRender memory pixelmap. Make sure that the pixels can be accessed
+     */
+    if((pm->flags & BR_PMF_NO_ACCESS) || pm->pixels == NULL)
+        return BRE_FAIL;
+
+    if((fmt = DeviceGL1xGetFormatDetails(pm->type)) == NULL)
+        return BRE_FAIL;
+
+    self->fmt = fmt;
+
+    /*
+     * Indexed pixelmaps without a palette (shade tables, blend tables,
+     * screendoor tables) are direct lookup tables used by the software
+     * vertex pipeline.  They do not need a GL texture.  Store the source
+     * reference so inputSet() can read type/width/height.
+     */
+    if(fmt->indexed && pm->map == NULL) {
+        self->source       = pm;
+        self->source_flags = pm->flags;
+        return BRE_OK;
+    }
+
+    if(self->gl_tex_nokey == 0) {
+        gl->GenTextures(1, &self->gl_tex_nokey);
+    }
+
+    if(self->gl_tex_keyed == 0) {
+        gl->GenTextures(1, &self->gl_tex_keyed);
+    }
+
+    if((berr = DeviceGL1xPixelmapToExistingGLTexture(gl, self->gl_tex_nokey, pm)) != BRE_OK) {
+        return berr;
+    }
+
+    const br_pixelmap_convert_options opts = {
+        .enable_colour_key = BR_TRUE,
+    };
+    if((berr = DeviceGL1xPixelmapToExistingGLTextureConvert(gl, self->gl_tex_keyed, pm, &opts)) != BRE_OK) {
+        return berr;
+    }
+
+    DeviceGL1xObjectLabel(gl, GL_TEXTURE, self->gl_tex_nokey, self->identifier);
+    DeviceGL1xObjectLabel(gl, GL_TEXTURE, self->gl_tex_keyed, self->identifier);
+
+    self->source       = pm;
+    self->source_flags = pm->flags;
+    return BRE_OK;
+}
+
+static br_error BR_CMETHOD_DECL(br_buffer_stored_gl, update)(struct br_buffer_stored *self, struct br_device_pixelmap *pm, br_token_value *tv)
+{
+    br_device *pm_device;
+    (void)tv;
+
+    /*
+     * Find out where the pixelmap comes from
+     */
+    pm_device = ObjectDevice(pm);
+    if(pm_device == NULL) {
+        return updateMemory(self, (br_pixelmap *)pm);
+    } else if(pm_device == self->device) {
+        ASSERT(self->source == NULL || self->source == (br_pixelmap *)pm);
+        self->source       = (br_pixelmap *)pm;
+        self->source_flags = pm->pm_flags;
+        self->fmt          = DeviceGL1xGetFormatDetails(pm->pm_type);
+        return BRE_OK;
+    } else {
+        /*
+         * The pixelmap is from another device, we can't use it
+         */
+        return BRE_FAIL;
+    }
+}
+
+static void BR_CMETHOD_DECL(br_buffer_stored_gl, free)(br_object *_self)
+{
+    br_buffer_stored    *self = (br_buffer_stored *)_self;
+    const GladGLContext *gl   = self->gl;
+
+    gl->DeleteTextures(1, &self->gl_tex_keyed);
+    gl->DeleteTextures(1, &self->gl_tex_nokey);
+
+    ObjectContainerRemove(self->plib, (br_object *)self);
+
+    BrResFreeNoCallback(self);
+}
+
+static const char *BR_CMETHOD_DECL(br_buffer_stored_gl, identifier)(br_object *self)
+{
+    return ((br_buffer_stored *)self)->identifier;
+}
+
+static br_token BR_CMETHOD_DECL(br_buffer_stored_gl, type)(br_object *self)
+{
+    (void)self;
+    return BRT_BUFFER_STORED;
+}
+
+static br_boolean BR_CMETHOD_DECL(br_buffer_stored_gl, isType)(br_object *self, br_token t)
+{
+    (void)self;
+    return (t == BRT_BUFFER_STORED) || (t == BRT_OBJECT);
+}
+
+static br_device *BR_CMETHOD_DECL(br_buffer_stored_gl, device)(br_object *self)
+{
+    return ((br_buffer_stored *)self)->device;
+}
+
+static br_size_t BR_CMETHOD_DECL(br_buffer_stored_gl, space)(br_object *self)
+{
+    return BrResSizeTotal(self);
+}
+
+static br_tv_template *BR_CMETHOD_DECL(br_buffer_stored_gl, templateQuery)(br_object *_self)
+{
+    return ((br_buffer_stored *)_self)->templates;
+}
+
+GLuint BufferStoredGL1xGetTexture(const br_buffer_stored *self, br_boolean keyed)
+{
+    if(keyed)
+        return self->gl_tex_keyed;
+
+    return self->gl_tex_nokey;
+}
+
+/*
+ * Default dispatch table for device
+ */
+static struct br_buffer_stored_dispatch bufferStoredDispatch = {
+    .__reserved0 = NULL,
+    .__reserved1 = NULL,
+    .__reserved2 = NULL,
+    .__reserved3 = NULL,
+    ._free       = BR_CMETHOD_REF(br_buffer_stored_gl, free),
+    ._identifier = BR_CMETHOD_REF(br_buffer_stored_gl, identifier),
+    ._type       = BR_CMETHOD_REF(br_buffer_stored_gl, type),
+    ._isType     = BR_CMETHOD_REF(br_buffer_stored_gl, isType),
+    ._device     = BR_CMETHOD_REF(br_buffer_stored_gl, device),
+    ._space      = BR_CMETHOD_REF(br_buffer_stored_gl, space),
+
+    ._templateQuery = BR_CMETHOD_REF(br_buffer_stored_gl, templateQuery),
+    ._query         = BR_CMETHOD_REF(br_object, query),
+    ._queryBuffer   = BR_CMETHOD_REF(br_object, queryBuffer),
+    ._queryMany     = BR_CMETHOD_REF(br_object, queryMany),
+    ._queryManySize = BR_CMETHOD_REF(br_object, queryManySize),
+    ._queryAll      = BR_CMETHOD_REF(br_object, queryAll),
+    ._queryAllSize  = BR_CMETHOD_REF(br_object, queryAllSize),
+
+    ._update = BR_CMETHOD_REF(br_buffer_stored_gl, update),
+};
