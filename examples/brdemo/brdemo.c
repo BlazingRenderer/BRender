@@ -170,19 +170,20 @@ static br_error create_window(br_demo *demo, const br_demo_run_args *args)
         goto try_software;
 
 #if 0
-    char *devs = BrResSprintf(demo, "SDL3,WIDTH=%d,HEIGHT=%d,WINDOW_NAME=\"%s\",HIDPI=1,RESIZABLE=1,OPENGL=%d",
-                              args->width, args->height, args->title, !args->force_software);
+    char *devs = BrResSprintf(demo, "SDL3,WIDTH=%d,HEIGHT=%d,WINDOW_NAME=\"%s\",HIDPI=1,RESIZABLE=1,OPENGL=%d,OPENGL_DEVICE_NAME=%s",
+                              args->width, args->height, args->title, !args->force_software, args->opengl_device_name);
     err = BrDevBeginVar(&demo->_screen, devs, BR_NULL_TOKEN);
 #endif
 
     // clang-format off
-    err = BrDevBeginVar(&demo->_screen,       "SDL3",
-                        BRT_WIDTH_I32,        args->width,
-                        BRT_HEIGHT_I32,       args->height,
-                        BRT_WINDOW_NAME_CSTR, args->title,
-                        BRT_HIDPI_B,          BR_TRUE,
-                        BRT_RESIZABLE_B,      BR_TRUE,
-                        BRT_OPENGL_B,         BR_TRUE,
+    err = BrDevBeginVar(&demo->_screen,              "SDL3",
+                        BRT_WIDTH_I32,               args->width,
+                        BRT_HEIGHT_I32,              args->height,
+                        BRT_WINDOW_NAME_CSTR,        args->title,
+                        BRT_HIDPI_B,                 BR_TRUE,
+                        BRT_RESIZABLE_B,             BR_TRUE,
+                        BRT_OPENGL_B,                BR_TRUE,
+                        BRT_OPENGL_DEVICE_NAME_CSTR, args->opengl_device_name, /* NB: this is optional */
                         BR_NULL_TOKEN);
     // clang-format on
     if(err == BRE_OK) {
@@ -390,25 +391,27 @@ cleanup:
     return ret;
 }
 
-#define ARGDEF_WIDTH             'w'
-#define ARGDEF_HEIGHT            'h'
-#define ARGDEF_VERBOSE           'v'
-#define ARGDEF_HELP              301
-#define ARGDEF_FORCE_SOFTWARE    302
-#define ARGDEF_SOFTWARE_BPP      303
-#define ARGDEF_BACKBUFFER_WIDTH  304
-#define ARGDEF_BACKBUFFER_HEIGHT 305
+#define ARGDEF_WIDTH              'w'
+#define ARGDEF_HEIGHT             'h'
+#define ARGDEF_VERBOSE            'v'
+#define ARGDEF_HELP               301
+#define ARGDEF_FORCE_SOFTWARE     302
+#define ARGDEF_SOFTWARE_BPP       303
+#define ARGDEF_BACKBUFFER_WIDTH   304
+#define ARGDEF_BACKBUFFER_HEIGHT  305
+#define ARGDEF_OPENGL_DEVICE_NAME 306
 
 const static struct parg_option argdefs[] = {
-    {.name = "width",             .has_arg = PARG_REQARG, .flag = NULL, .val = ARGDEF_WIDTH            },
-    {.name = "height",            .has_arg = PARG_REQARG, .flag = NULL, .val = ARGDEF_HEIGHT           },
-    {.name = "verbose",           .has_arg = PARG_NOARG,  .flag = NULL, .val = ARGDEF_VERBOSE          },
-    {.name = "help",              .has_arg = PARG_NOARG,  .flag = NULL, .val = ARGDEF_HELP             },
-    {.name = "force-software",    .has_arg = PARG_NOARG,  .flag = NULL, .val = ARGDEF_FORCE_SOFTWARE   },
-    {.name = "software-bpp",      .has_arg = PARG_REQARG, .flag = NULL, .val = ARGDEF_SOFTWARE_BPP     },
-    {.name = "backbuffer-width",  .has_arg = PARG_REQARG, .flag = NULL, .val = ARGDEF_BACKBUFFER_WIDTH },
-    {.name = "backbuffer-height", .has_arg = PARG_REQARG, .flag = NULL, .val = ARGDEF_BACKBUFFER_HEIGHT},
-    {.name = NULL,                .has_arg = 0,           .flag = NULL, .val = 0                       },
+    {.name = "width",              .has_arg = PARG_REQARG, .flag = NULL, .val = ARGDEF_WIDTH             },
+    {.name = "height",             .has_arg = PARG_REQARG, .flag = NULL, .val = ARGDEF_HEIGHT            },
+    {.name = "verbose",            .has_arg = PARG_NOARG,  .flag = NULL, .val = ARGDEF_VERBOSE           },
+    {.name = "help",               .has_arg = PARG_NOARG,  .flag = NULL, .val = ARGDEF_HELP              },
+    {.name = "force-software",     .has_arg = PARG_NOARG,  .flag = NULL, .val = ARGDEF_FORCE_SOFTWARE    },
+    {.name = "software-bpp",       .has_arg = PARG_REQARG, .flag = NULL, .val = ARGDEF_SOFTWARE_BPP      },
+    {.name = "backbuffer-width",   .has_arg = PARG_REQARG, .flag = NULL, .val = ARGDEF_BACKBUFFER_WIDTH  },
+    {.name = "backbuffer-height",  .has_arg = PARG_REQARG, .flag = NULL, .val = ARGDEF_BACKBUFFER_HEIGHT },
+    {.name = "opengl-device-name", .has_arg = PARG_REQARG, .flag = NULL, .val = ARGDEF_OPENGL_DEVICE_NAME},
+    {.name = NULL,                 .has_arg = 0,           .flag = NULL, .val = 0                        },
 };
 
 static int parse_args(int argc, char *const argv[], br_demo_run_args *args)
@@ -459,6 +462,10 @@ static int parse_args(int argc, char *const argv[], br_demo_run_args *args)
                 args->backbuffer_height = BrAToI(ps.optarg);
                 break;
 
+            case ARGDEF_OPENGL_DEVICE_NAME:
+                args->opengl_device_name = ps.optarg;
+                break;
+
             case ARGDEF_HELP:
             case '?':
             case ':':
@@ -495,6 +502,12 @@ static int parse_args(int argc, char *const argv[], br_demo_run_args *args)
     if(args->backbuffer_height < 0)
         args->backbuffer_height = 0;
 
+    if(args->opengl_device_name == NULL)
+        args->opengl_device_name = "glrend";
+
+    if(BrStrCmp("glrend", args->opengl_device_name) != 0 && BrStrCmp("glrend1x", args->opengl_device_name) != 0)
+        return 2;
+
     if(args->title == NULL || args->title[0] == '\0')
         args->title = "BRender Application";
 
@@ -516,6 +529,7 @@ static const char *usage_options =
     "  --software-bpp       Software renderer bit depth. Valid options: 8 (default), 15, 16.\n"
     "  --backbuffer-width   Width of the backbuffer, defaults to the same as the screen.\n"
     "  --backbuffer-height  Height of the backbuffer, defaults to the same as the screen.\n"
+    "  --opengl-device-name Name of the OpenGL device driver to use. Valid options: glrend (default), glrend1x\n"
     "  --help               Display this message.\n"
     "\n"
 ;
@@ -524,14 +538,15 @@ static const char *usage_options =
 void BrDemoDefaultArgs(br_demo_run_args *args)
 {
     *args = (br_demo_run_args){
-        .title             = NULL,
-        .width             = 1280,
-        .height            = 720,
-        .verbose           = BR_LOG_INFO,
-        .force_software    = 0,
-        .software_pm_type  = BR_PMT_INDEX_8,
-        .backbuffer_width  = 0,
-        .backbuffer_height = 0,
+        .title              = NULL,
+        .width              = 1280,
+        .height             = 720,
+        .verbose            = BR_LOG_INFO,
+        .force_software     = 0,
+        .software_pm_type   = BR_PMT_INDEX_8,
+        .opengl_device_name = "glrend",
+        .backbuffer_width   = 0,
+        .backbuffer_height  = 0,
     };
 }
 
