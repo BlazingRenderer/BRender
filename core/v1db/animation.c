@@ -8,7 +8,7 @@
  * Format-specific loading (glTF, etc.) is handled by core/fmt; this file
  * contains only the format-agnostic runtime.
  */
-#include <brender.h>
+#include "v1db.h"
 #include "brassert.h"
 
 /*
@@ -235,4 +235,63 @@ void BR_PUBLIC_ENTRY BrAnimationInstanceDetach(br_animation_instance *inst)
 
     for(i = 0; i < inst->nactors; ++i)
         inst->actors[i] = NULL;
+}
+
+static const br_animation_set default_animation = {
+    ._reserved  = 0,
+    .identifier = NULL,
+    .nactors    = 0,
+    .rest_poses = NULL,
+    .clips      = NULL,
+    .nclips     = 0,
+};
+
+// clang-format off
+static const br_animation_pose default_pose = {
+    .type = BR_ANIMATION_POSE_TRS,
+    .t    = {
+        .trs = {
+            .trn = BR_VECTOR3(0, 0, 0),
+            .rot = BR_QUAT(0, 0, 0, 1),
+            .scale = BR_VECTOR3(1, 1, 1),
+        },
+    },
+};
+// clang-format on
+
+static const br_animation_clip default_clip = {
+    .identifier = NULL,
+    .duration   = 0.0f,
+    .looping    = BR_FALSE,
+    .nchannels  = 0,
+    .channels   = NULL,
+};
+
+br_animation_set *BR_PUBLIC_ENTRY BrAnimationSetAllocate(const char *name, br_int_32 nactors, br_int_32 nclips)
+{
+    br_animation_set *set;
+
+    set  = BrResAllocate(v1db.res, sizeof(*set), BR_MEMORY_APPLICATION); /* FIXME: add BR_MEMORY_ANIMATION_SET */
+    *set = default_animation;
+
+    if(name != NULL)
+        set->identifier = BrResStrDup(set, name);
+
+    set->nactors = nactors;
+    if(nactors > 0) {
+        set->rest_poses = BrResAllocate(set, sizeof(*set->rest_poses) * nactors, BR_MEMORY_APPLICATION); /* FIXME: add BR_MEMORY_ANIMATION_POSE */
+
+        for(br_int_32 i = 0; i < nactors; ++i)
+            set->rest_poses[i] = default_pose;
+    }
+
+    set->nclips = nclips;
+    if(nclips > 0) {
+        set->clips = BrResAllocate(set, sizeof(*set->clips) * nclips, BR_MEMORY_APPLICATION); /* FIXME: add BR_MEMORY_ANIMATION_CLIP */
+
+        for(br_int_32 i = 0; i < nclips; ++i)
+            set->clips[i] = default_clip;
+    }
+
+    return set;
 }
