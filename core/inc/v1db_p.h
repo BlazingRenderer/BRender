@@ -806,8 +806,9 @@ br_error BR_PUBLIC_ENTRY BrPrimitiveLibraryEnum(br_pixelmap *destination, br_pri
 /*
  * Animation
  */
-void BR_PUBLIC_ENTRY BrAnimationInstanceUpdate(br_animation_instance *inst, br_scalar time);
-void BR_PUBLIC_ENTRY BrAnimationInstanceDetach(br_animation_instance *inst);
+br_animation_set *BR_PUBLIC_ENTRY BrAnimationSetAllocate(const char *name, br_int_32 nactors, br_int_32 nclips);
+void BR_PUBLIC_ENTRY              BrAnimationInstanceUpdate(br_animation_instance *inst, br_scalar time);
+void BR_PUBLIC_ENTRY              BrAnimationInstanceDetach(br_animation_instance *inst);
 
 #ifdef __cplusplus
 };
