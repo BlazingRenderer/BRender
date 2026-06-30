@@ -3,6 +3,7 @@
 #include <SDL3/SDL.h>
 #include <brender.h>
 #include <brglrend.h>
+#include <brglrend1x.h>
 #include <brsdl3dev.h>
 #include "parg.h"
 
@@ -16,6 +17,7 @@ void _BrBeginHook(void) // NOLINT(*-reserved-identifier)
 {
     BrDevAddStatic(NULL, BrDrv1SDL3Begin, NULL);
     BrDevAddStatic(NULL, BrDrv1GLBegin, NULL);
+    BrDevAddStatic(NULL, BrDrv1GL1xBegin, NULL);
 
 #if HAVE_SOFTPRIM
     BrDevAddStatic(NULL, BrDrv1SoftPrimBegin, NULL);
