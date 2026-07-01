@@ -11,18 +11,18 @@
 static const struct br_primitive_state_dispatch primitiveStateDispatch;
 
 static const state_primitive default_state_primitive = {
-    .flags        = PRIMF_DEPTH_WRITE,
-    .colour_type  = BRT_DEFAULT,
-    .depth_test   = BRT_LESS,
-    .blend_mode   = BRT_NONE,
-    .shading_mode = BRT_FLAT,
+    .flags            = PRIMF_DEPTH_WRITE,
+    .colour_type      = BRT_DEFAULT,
+    .depth_test       = BRT_LESS,
+    .blend_mode       = BRT_NONE,
+    .shading_mode     = BRT_FLAT,
     .perspective_type = BRT_NONE,
-    .colour_map   = NULL,
-    .filter       = BRT_NONE,
-    .fog_type     = BRT_NONE,
-    .fog_min      = BR_SCALAR(256),
-    .fog_max      = BR_SCALAR(512),
-    .fog_colour   = BR_COLOUR_RGBA(255, 255, 255, 0),
+    .colour_map       = NULL,
+    .filter           = BRT_NONE,
+    .fog_type         = BRT_NONE,
+    .fog_min          = BR_SCALAR(256),
+    .fog_max          = BR_SCALAR(512),
+    .fog_colour       = BR_COLOUR_RGBA(255, 255, 255, 0),
 };
 
 static const state_output default_state_output = {
