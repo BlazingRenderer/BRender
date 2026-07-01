@@ -407,9 +407,10 @@ br_primitive_state *PrimitiveStateGL1xAllocate(br_primitive_library *plib)
 static br_error BR_CMETHOD_DECL(br_primitive_state_gl1x, renderBegin)(br_primitive_state *self, brp_block **rpb, br_boolean *block_changed,
                                                                       br_boolean *ranges_changed, br_boolean no_render, br_token prim_type)
 {
-    const GladGLContext *gl = self->plib->gl;
+    const GladGLContext       *gl = self->plib->gl;
+    br_primitive_state_info_gl info;
 
-    brp_block *block;
+    DeviceGL1xExtractPrimitiveState(self, &info, self->plib->tex_white);
 
     if(block_changed)
         *block_changed = BR_TRUE;
@@ -433,9 +434,6 @@ static br_error BR_CMETHOD_DECL(br_primitive_state_gl1x, renderBegin)(br_primiti
             gl->MatrixMode(GL_MODELVIEW);
             gl->LoadIdentity();
         }
-
-        br_primitive_state_info_gl info;
-        DeviceGL1xExtractPrimitiveState(self, &info, self->plib->tex_white);
 
         pushGLState(gl, self, info);
 
