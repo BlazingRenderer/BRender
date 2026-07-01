@@ -92,22 +92,38 @@ static br_tv_template_entry partOutputTemplateEntries[] = {
 #define BLOCK_CONVERT_MASK \
     (1 << C_SX) | (1 << C_SY) | (1 << C_SZ) | (1 << C_W) | (1 << C_R) | (1 << C_G) | (1 << C_B) | (1 << C_A) | (1 << C_U) | (1 << C_V)
 
-#define MAKE_BLOCK(render_, type_, flags_)                \
-    {                                                     \
-        .render            = (brp_render_fn *)render_,    \
-        .type              = type_,                       \
-        .flags             = BR_PRIMF_SUBDIVIDE | flags_, \
-        .vertex_components = BLOCK_VERTEX_COMPONENTS,     \
-        .convert_mask_f    = BLOCK_CONVERT_MASK,          \
+#define MAKE_BLOCK(render_, type_, flags_)             \
+    {                                                  \
+        .render            = (brp_render_fn *)render_, \
+        .type              = type_,                    \
+        .flags             = flags_,                   \
+        .vertex_components = BLOCK_VERTEX_COMPONENTS,  \
+        .convert_mask_f    = BLOCK_CONVERT_MASK,       \
     }
 
-static brp_block block_triangle         = MAKE_BLOCK(TriangleRenderGL1x, BRT_TRIANGLE, 0);
-static brp_block block_triangle_blended = MAKE_BLOCK(TriangleRenderGL1x, BRT_TRIANGLE, BR_PRIMF_BLENDED);
-static brp_block block_line             = MAKE_BLOCK(LineRenderGL1x, BRT_LINE, 0);
-static brp_block block_line_blended     = MAKE_BLOCK(LineRenderGL1x, BRT_LINE, BR_PRIMF_BLENDED);
-static brp_block block_point            = MAKE_BLOCK(PointRenderGL1x, BRT_POINT, 0);
-static brp_block block_point_blended    = MAKE_BLOCK(PointRenderGL1x, BRT_POINT, BR_PRIMF_BLENDED);
-static brp_block block_null             = {};
+enum {
+    BR_BLOCKF_BLENDED = 1 << 0,
+    BR_BLOCKF_SUBDIV  = 1 << 1,
+};
+
+#define MAKE_BLOCKS(name, render_, type_)                                                                               \
+    static brp_block block_##name                  = MAKE_BLOCK(render_, type_, 0);                                     \
+    static brp_block block_##name##_blended        = MAKE_BLOCK(render_, type_, BR_PRIMF_BLENDED);                      \
+    static brp_block block_##name##_subdiv         = MAKE_BLOCK(render_, type_, BR_PRIMF_SUBDIVIDE);                    \
+    static brp_block block_##name##_blended_subdiv = MAKE_BLOCK(render_, type_, BR_PRIMF_BLENDED | BR_PRIMF_SUBDIVIDE); \
+                                                                                                                        \
+    static brp_block *const blockmap_##name[] = {                                                                       \
+        [0]                                    = &block_##name,                                                         \
+        [BR_BLOCKF_BLENDED]                    = &block_##name##_blended,                                               \
+        [BR_BLOCKF_SUBDIV]                     = &block_##name##_subdiv,                                                \
+        [BR_BLOCKF_BLENDED | BR_BLOCKF_SUBDIV] = &block_##name##_blended_subdiv,                                        \
+    };
+
+MAKE_BLOCKS(triangle, TriangleRenderGL1x, BRT_TRIANGLE);
+MAKE_BLOCKS(line, LineRenderGL1x, BRT_LINE);
+MAKE_BLOCKS(point, PointRenderGL1x, BRT_POINT);
+
+static brp_block block_null = {};
 
 typedef struct br_state_info_gl {
     GLuint colour_map;
@@ -459,24 +475,27 @@ static br_error BR_CMETHOD_DECL(br_primitive_state_gl1x, renderBegin)(br_primiti
             gl->Begin(GL_POINTS);
     }
 
-    br_boolean b;
-
-    b = !!(self->prim.flags & PRIMF_BLEND);
-
+    brp_block        *block    = NULL;
+    brp_block *const *blockmap = NULL;
+    // clang-format off
     switch(prim_type) {
-        case BRT_TRIANGLE:
-            block = b ? &block_triangle_blended : &block_triangle;
-            break;
-        case BRT_LINE:
-            block = b ? &block_line_blended : &block_line;
-            break;
-        case BRT_POINT:
-            block = b ? &block_point_blended : &block_point;
-            break;
-        default:
-            block = &block_null;
-            break;
+        case BRT_TRIANGLE: blockmap = blockmap_triangle; break;
+        case BRT_LINE:     blockmap = blockmap_line;     break;
+        case BRT_POINT:    blockmap = blockmap_point;    break;
+        default:                                         break;
     }
+    // clang-format on
+
+    if(blockmap != NULL) {
+        br_uint_32 ff = 0;
+        ff |= info.is_blended ? BR_BLOCKF_BLENDED : 0;
+        ff |= info.perspective ? BR_BLOCKF_SUBDIV : 0;
+
+        block = blockmap[ff];
+    }
+
+    if(block == NULL)
+        block = &block_null;
 
     *rpb = block;
 
