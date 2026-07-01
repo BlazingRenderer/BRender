@@ -16,6 +16,7 @@ static const state_primitive default_state_primitive = {
     .depth_test   = BRT_LESS,
     .blend_mode   = BRT_NONE,
     .shading_mode = BRT_FLAT,
+    .perspective_type = BRT_NONE,
     .colour_map   = NULL,
     .filter       = BRT_NONE,
     .fog_type     = BRT_NONE,
@@ -57,6 +58,9 @@ static br_tv_template_entry partPrimitiveTemplateEntries[] = {
     {BRT(MAP_WIDTH_LIMIT_T),   F(prim.map_width_limit),  Q | S | A, BRTV_CONV_COPY,         0,                   1},
     {BRT(MAP_HEIGHT_LIMIT_T),  F(prim.map_height_limit), Q | S | A, BRTV_CONV_COPY,         0,                   1},
     {BRT(SHADING_MODE_T),      F(prim.shading_mode),     Q | S | A, BRTV_CONV_COPY,         0,                   0},
+
+    {BRT(PERSPECTIVE_T),       F(prim.perspective_type), Q | S | A, BRTV_CONV_COPY,         0,                   0},
+    {BRT(PERSPECTIVE_B),       F(prim.perspective_type), S,         BRTV_CONV_BOOL_TOKEN,   BRT_DEFAULT,         1},
 
     {BRT(COLOUR_MAP_O),        F(prim.colour_map),       Q | S | A, BRTV_CONV_COPY,         0,                   0},
     {BRT(TEXTURE_O),           F(prim.colour_map),       Q | S,     BRTV_CONV_COPY,         0,                   0},
@@ -117,6 +121,7 @@ typedef struct br_state_info_gl {
         br_uint_8 write_depth : 1;
         br_uint_8 fog : 1;
         br_uint_8 dither : 1;
+        br_uint_8 perspective : 1;
     };
     GLenum depth_func;
     GLint  texture_env_mode;
@@ -143,6 +148,7 @@ static void DeviceGL1xExtractPrimitiveState(const br_primitive_state *state, br_
         .disable_colour_key = BR_FALSE,
         .write_colour       = BR_TRUE,
         .write_depth        = BR_TRUE,
+        .perspective        = BR_FALSE,
         .depth_func         = GL_LESS,
         .texture_env_mode   = GL_MODULATE,
         .filter_min         = GL_NEAREST,
@@ -164,6 +170,7 @@ static void DeviceGL1xExtractPrimitiveState(const br_primitive_state *state, br_
     info->fog                = (prim->flags & PRIMF_FOG) && prim->fog_type != BRT_NONE;
     info->shading_mode       = prim->shading_mode;
     info->dither             = (prim->flags & PRIMF_DITHER_COLOUR) != 0;
+    info->perspective        = prim->perspective_type == BRT_DEFAULT || prim->perspective_type == BRT_SUBDIVIDE;
 
     if(prim->flags & PRIMF_MODULATE)
         info->texture_env_mode = GL_MODULATE;

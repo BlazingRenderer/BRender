@@ -49,6 +49,7 @@ typedef struct state_primitive {
     br_token                 depth_test;
     br_token                 blend_mode;
     br_token                 shading_mode;
+    br_token                 perspective_type;
     struct br_buffer_stored *colour_map;
     br_token                 map_width_limit;
     br_token                 map_height_limit;
