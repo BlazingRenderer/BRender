@@ -57,17 +57,11 @@ void BR_PUBLIC_ENTRY BrSceneModelLight(br_model *model, br_material *default_mat
             RendererStateRestore(v1db.renderer, group->stored, BR_STATE_ALL);
         else
             RendererStateRestore(v1db.renderer, default_material->stored, BR_STATE_ALL);
-#if 0
-        GeometryLightingRender(v1db.format_lighting, v1db.renderer,
-            (br_vector3_f*)&group->vertices->p, (br_vector3_f*)&group->vertices->n,
-            group->vertex_colours,
-            (br_colour *)(&model->vertices->index),
-            group->vertex_user,
-            sizeof(*group->vertices),
-            sizeof(*group->vertices),
-            sizeof(*group->vertex_colours),
-            sizeof(*model->vertices), group->nvertices);
-#endif
+
+        GeometryLightingRender(v1db.format_lighting, v1db.renderer, (br_vector3_f *)group->position, (br_vector3_f *)group->normal,
+                               group->vertex_colours, (br_colour *)(&model->vertices->index), group->vertex_user, sizeof(*group->position),
+                               sizeof(*group->normal), sizeof(*group->vertex_colours), sizeof(*model->vertices), group->nvertices
+        );
     }
 
     /* Restore previous state */
