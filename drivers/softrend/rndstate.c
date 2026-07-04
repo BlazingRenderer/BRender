@@ -189,12 +189,6 @@ br_error BR_CMETHOD_DECL(br_renderer_soft, partQueryAllSize)(br_renderer *self, 
     }
 }
 
-br_error BR_CMETHOD_DECL(br_renderer_soft, partQueryCapability)(br_renderer *self, br_token part, br_int_32 index, br_token_value *buffer,
-                                                                br_size_t buffer_size)
-{
-    return BRE_FAIL;
-}
-
 br_error BR_CMETHOD_DECL(br_renderer_soft, partIndexQuery)(br_renderer *self, br_token part, br_int_32 *pnindex)
 {
     br_int_32 n;
@@ -231,11 +225,6 @@ br_error BR_CMETHOD_DECL(br_renderer_soft, partIndexQuery)(br_renderer *self, br
     } else {
         return BRE_FAIL;
     }
-}
-
-br_error BR_CMETHOD_DECL(br_renderer_soft, stateQueryPerformance)(br_renderer *self, br_fixed_lu *speed)
-{
-    return BRE_FAIL;
 }
 
 /*

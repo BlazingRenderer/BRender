@@ -56,12 +56,7 @@ br_error BR_CMETHOD_DECL(br_renderer_soft, partQueryAll)(br_renderer *self, br_t
                                                          br_size_t buffer_size);
 br_error BR_CMETHOD_DECL(br_renderer_soft, partQueryAllSize)(br_renderer *self, br_token part, br_int_32 index, br_size_t *psize);
 
-br_error BR_CMETHOD_DECL(br_renderer_soft, partQueryCapability)(br_renderer *self, br_token part, br_int_32 index, br_token_value *buffer,
-                                                                br_size_t buffer_size);
-
 br_error BR_CMETHOD_DECL(br_renderer_soft, partIndexQuery)(br_renderer *self, br_token part, br_int_32 *pnindex);
-
-br_error BR_CMETHOD_DECL(br_renderer_soft, stateQueryPerformance)(br_renderer *self, br_uint_32 *speed);
 
 br_error BR_CMETHOD_DECL(br_renderer_soft, stateMask)(br_renderer *self, br_uint_32 *mask, const br_token *parts, br_size_t n_parts);
 br_error BR_CMETHOD_DECL(br_renderer_soft, stateDefault)(br_renderer *self, br_uint_32 mask);

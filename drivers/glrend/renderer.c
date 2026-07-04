@@ -665,17 +665,6 @@ static br_error BR_CMETHOD_DECL(br_renderer_gl, synchronise)(br_renderer *self, 
     return BRE_UNSUPPORTED;
 }
 
-static br_error BR_CMETHOD_DECL(br_renderer_gl, partQueryCapability)(br_renderer *self, br_token part, br_int_32 index,
-                                                                     br_token_value *buffer, br_size_t buffer_size)
-{
-    return BRE_FAIL;
-}
-
-static br_error BR_CMETHOD_DECL(br_renderer_gl, stateQueryPerformance)(br_renderer *self, br_fixed_lu *speed)
-{
-    return BRE_FAIL;
-}
-
 static br_error BR_CMETHOD_DECL(br_renderer_gl, frameBegin)(br_renderer *self)
 {
     return BRE_OK;
@@ -760,8 +749,6 @@ static const struct br_renderer_dispatch rendererDispatch = {
     ._commandModePop        = BR_CMETHOD(br_renderer_gl, commandModePop),
     ._flush                 = BR_CMETHOD(br_renderer_gl, flush),
     ._synchronise           = BR_CMETHOD(br_renderer_gl, synchronise),
-    ._partQueryCapability   = BR_CMETHOD(br_renderer_gl, partQueryCapability),
-    ._stateQueryPerformance = BR_CMETHOD(br_renderer_gl, stateQueryPerformance),
     ._frameBegin            = BR_CMETHOD(br_renderer_gl, frameBegin),
     ._frameEnd              = BR_CMETHOD(br_renderer_gl, frameEnd),
     ._focusLossBegin        = BR_CMETHOD(br_renderer_gl, focusLossBegin),

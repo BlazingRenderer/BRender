@@ -537,17 +537,6 @@ static br_error BR_CMETHOD_DECL(br_primitive_state_soft, partQueryAllSize)(
 	return BrTokenValueQueryAllSize(psize, self, tp);
 }
 
-static br_error BR_CMETHOD_DECL(br_primitive_state_soft, partQueryCapability)(
-		struct br_primitive_state *self,
-		br_token part,
-		br_int_32 index,
-		br_token_value *buffer,
-        br_size_t buffer_size)
-{
-    return BRE_FAIL;
-}
-
-
 static br_error BR_CMETHOD_DECL(br_primitive_state_soft, partIndexQuery)(
 		struct br_primitive_state *self,
 		br_token part,
@@ -572,13 +561,6 @@ static br_error BR_CMETHOD_DECL(br_primitive_state_soft, partIndexQuery)(
 		return BRE_FAIL;
 	}
 
-}
-
-static br_error BR_CMETHOD_DECL(br_primitive_state_soft, stateQueryPerformance)(
-		struct br_primitive_state *self,
-        br_fixed_lu *speed)
-{
-    return BRE_FAIL;
 }
 
 static br_error BR_CMETHOD_DECL(br_primitive_state_soft, stateDefault)(
@@ -682,7 +664,5 @@ static const struct br_primitive_state_dispatch primitiveStateDispatch = {
 #if BASED_FIXED
     ._rangesQuery           = BR_CMETHOD_REF(br_primitive_state_soft, rangesQueryX),
 #endif
-    ._partQueryCapability   = BR_CMETHOD_REF(br_primitive_state_soft, partQueryCapability),
-    ._stateQueryPerformance = BR_CMETHOD_REF(br_primitive_state_soft, stateQueryPerformance),
 };
 

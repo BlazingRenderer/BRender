@@ -343,10 +343,6 @@ class br_renderer : public br_object_container {
 
 		virtual br_error BR_METHOD synchronise(br_token sync_type, br_boolean block);
 
-	// Query state performance
-		virtual br_error BR_METHOD partQueryCapability(br_token part, br_int_32 index, br_token_value *buffer,
-			br_size_t buffer_size);
-		virtual br_error BR_METHOD stateQueryPerformance(br_fixed_lu *speed);
 		virtual br_error BR_METHOD frameBegin(void);
 		virtual br_error BR_METHOD frameEnd(void);
 		virtual br_error BR_METHOD focusLossBegin(void);
@@ -486,11 +482,6 @@ class br_primitive_state : public br_object {
 	// Find the current component transformations
 	//
 		virtual br_error BR_METHOD CG_F(rangesQuery)(br_float *offset, br_float *scale, br_int_32 max_comp);
-
-	// Query state performance
-		virtual br_error BR_METHOD partQueryCapability(br_token part, br_int_32 index, br_token_value *buffer,
-			br_size_t buffer_size);
-		virtual br_error BR_METHOD stateQueryPerformance(br_fixed_lu *speed);
 };
 
 // clang-format on

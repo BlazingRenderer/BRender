@@ -700,12 +700,6 @@ static br_error BR_CMETHOD_DECL(br_primitive_state_gl1x, partQueryAllSize)(br_pr
     return BrTokenValueQueryAllSize(psize, self, tp);
 }
 
-static br_error BR_CMETHOD_DECL(br_primitive_state_gl1x, partQueryCapability)(br_primitive_state *self, br_token part, br_int_32 index,
-                                                                              br_token_value *buffer, br_size_t buffer_size)
-{
-    return BRE_FAIL;
-}
-
 static br_error BR_CMETHOD_DECL(br_primitive_state_gl1x, partIndexQuery)(br_primitive_state *self, br_token part, br_int_32 *pnindex)
 {
     if(pnindex == NULL)
@@ -717,11 +711,6 @@ static br_error BR_CMETHOD_DECL(br_primitive_state_gl1x, partIndexQuery)(br_prim
         *pnindex = 0;
 
     return BRE_OK;
-}
-
-static br_error BR_CMETHOD_DECL(br_primitive_state_gl1x, stateQueryPerformance)(br_primitive_state *self, br_fixed_lu *speed)
-{
-    return BRE_FAIL;
 }
 
 static const struct br_primitive_state_dispatch primitiveStateDispatch = {
@@ -762,7 +751,4 @@ static const struct br_primitive_state_dispatch primitiveStateDispatch = {
     ._renderEnd   = BR_CMETHOD_REF(br_primitive_state_gl1x, renderEnd),
 
     ._rangesQuery = BR_CMETHOD_REF(br_primitive_state_gl1x, rangesQueryF),
-
-    ._partQueryCapability   = BR_CMETHOD_REF(br_primitive_state_gl1x, partQueryCapability),
-    ._stateQueryPerformance = BR_CMETHOD_REF(br_primitive_state_gl1x, stateQueryPerformance),
 };
