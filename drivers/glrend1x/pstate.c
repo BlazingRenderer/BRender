@@ -375,6 +375,11 @@ static void pushGLState(const GladGLContext *gl, br_primitive_state *self, const
     info.dither ? gl->Enable(GL_DITHER) : gl->Disable(GL_DITHER);
 
     gl->Enable(GL_TEXTURE_2D);
+    gl->BindTexture(GL_TEXTURE_2D, info.colour_map);
+    gl->TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, info.filter_min);
+    gl->TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, info.filter_mag);
+    gl->TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, info.wrap_s);
+    gl->TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, info.wrap_t);
     gl->TexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, info.texture_env_mode);
 
     if(depth_test == BR_TRUE)
@@ -468,13 +473,6 @@ static br_error BR_CMETHOD_DECL(br_primitive_state_gl1x, renderBegin)(br_primiti
         }
 
         pushGLState(gl, self, info);
-
-        gl->BindTexture(GL_TEXTURE_2D, info.colour_map);
-
-        gl->TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, info.filter_min);
-        gl->TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, info.filter_mag);
-        gl->TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, info.wrap_s);
-        gl->TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, info.wrap_t);
 
         if(prim_type == BRT_TRIANGLE)
             gl->Begin(GL_TRIANGLES);
