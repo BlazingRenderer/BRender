@@ -381,6 +381,15 @@ static void pushGLState(const GladGLContext *gl, br_primitive_state *self, const
         gl->Enable(GL_DEPTH_TEST);
     else
         gl->Disable(GL_DEPTH_TEST);
+
+    /*
+     * This doesn't actually do anything on modern drivers.
+     */
+    if(info.perspective) {
+        gl->Hint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
+    } else {
+        gl->Hint(GL_PERSPECTIVE_CORRECTION_HINT, GL_FASTEST);
+    }
 }
 
 static br_tv_template *findTemplate(br_primitive_state *self, br_token part)
