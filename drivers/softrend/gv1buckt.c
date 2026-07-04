@@ -72,7 +72,7 @@ static br_token BR_CMETHOD_DECL(br_geometry_v1_buckets_soft, type)(br_object *se
 
 static br_boolean BR_CMETHOD_DECL(br_geometry_v1_buckets_soft, isType)(br_object *self, br_token t)
 {
-    return (t == BRT_GEOMETRY_PRIMITIVES) || (t == BRT_GEOMETRY) || (t == BRT_OBJECT);
+    return (t == BRT_GEOMETRY_V1_BUCKETS) || (t == BRT_GEOMETRY) || (t == BRT_OBJECT);
 }
 
 static br_size_t BR_CMETHOD_DECL(br_geometry_v1_buckets_soft, space)(br_object *self)
