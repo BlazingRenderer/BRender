@@ -59,7 +59,7 @@ static br_token BR_CMETHOD_DECL(br_geometry_v1_buckets_gl, type)(br_object *self
 
 static br_boolean BR_CMETHOD_DECL(br_geometry_v1_buckets_gl, isType)(br_object *self, br_token t)
 {
-    return (t == BRT_GEOMETRY_PRIMITIVES) || (t == BRT_GEOMETRY) || (t == BRT_OBJECT);
+    return (t == BRT_GEOMETRY_V1_BUCKETS) || (t == BRT_GEOMETRY) || (t == BRT_OBJECT);
 }
 
 static br_device *BR_CMETHOD(br_geometry_v1_buckets_gl, device)(br_object *self)
