@@ -55,7 +55,7 @@ This is released under the MIT license.
 
 Copyright (c) 1992-1998 Argonaut Technologies Limited
 
-Copyright (c) 2014-2025 Zane van Iperen
+Copyright (c) 2014-2026 Zane van Iperen
 
 Copyright (c) 2022-2025 erysdren (it/its)
 
