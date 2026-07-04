@@ -17,6 +17,11 @@ void averageVerticesOnScreen(const br_renderer *renderer, brp_vertex *restrict m
     COMPUTE_COMPONENT_MIDPOINT_VALUES(C_Z, m0, m1, m2, v0, v1, v2);
     COMPUTE_COMPONENT_MIDPOINT_VALUES(C_W, m0, m1, m2, v0, v1, v2);
 
+    if(rend.block->vertex_components & CM_SW) {
+        /* NB: Only works because SurfaceLinearDepth() has already been called. */
+        COMPUTE_COMPONENT_MIDPOINT_VALUES(C_SW, m0, m1, m2, v0, v1, v2);
+    }
+
     if(rend.block->convert_mask_f & (CM_R | CM_G | CM_B)) {
         COMPUTE_COMPONENT_MIDPOINT_VALUES(C_R, m0, m1, m2, v0, v1, v2);
         COMPUTE_COMPONENT_MIDPOINT_VALUES(C_G, m0, m1, m2, v0, v1, v2);
@@ -133,6 +138,11 @@ void averageVertices(const br_renderer *renderer, brp_vertex *restrict m0, brp_v
     COMPUTE_COMPONENT_MIDPOINT_VALUES(C_Y, m0, m1, m2, v0, v1, v2);
     COMPUTE_COMPONENT_MIDPOINT_VALUES(C_Z, m0, m1, m2, v0, v1, v2);
     COMPUTE_COMPONENT_MIDPOINT_VALUES(C_W, m0, m1, m2, v0, v1, v2);
+
+    if(rend.block->vertex_components & CM_SW) {
+        /* NB: Only works because SurfaceLinearDepth() has already been called. */
+        COMPUTE_COMPONENT_MIDPOINT_VALUES(C_SW, m0, m1, m2, v0, v1, v2);
+    }
 
     COMPUTE_COMPONENT_MIDPOINT_VALUES(C_R, m0, m1, m2, v0, v1, v2);
     COMPUTE_COMPONENT_MIDPOINT_VALUES(C_G, m0, m1, m2, v0, v1, v2);
