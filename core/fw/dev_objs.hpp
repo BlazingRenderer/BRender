@@ -316,7 +316,7 @@ class br_renderer : public br_object_container {
 
 	// Given a list of parts, produce a value for the push/pop/default/save/restore masks
 
-		virtual br_error BR_METHOD stateMask(br_uint_32 *mask, br_token *parts, int n_parts);
+		virtual br_error BR_METHOD stateMask(br_uint_32 *mask, const br_token *parts, br_size_t n_parts);
 
 	// Reset parts of state to the default
 
@@ -442,7 +442,7 @@ class br_primitive_library : public br_object_container {
 		virtual br_error BR_METHOD synchronise(br_token sync_type, br_boolean block);
 
 	// Given a list of parts, produce a bitmask
-		virtual br_error BR_METHOD mask(br_uint_32 *mask, br_token *parts, int n_parts);
+		virtual br_error BR_METHOD mask(br_uint_32 *mask, const br_token *parts, br_size_t n_parts);
 
 };
 

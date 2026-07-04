@@ -256,13 +256,12 @@ static br_error BR_CMETHOD_DECL(br_primitive_library_soft, synchronise)(
 static br_error BR_CMETHOD_DECL(br_primitive_library_soft, mask)(
 		struct br_primitive_library *self,
 		br_uint_32 *mask,
-		br_token *parts,
-		int n_parts)
+		const br_token *parts,
+		br_size_t n_parts)
 {
-	int i;
 	br_uint_32 m = 0;
 
-	for(i=0; i < n_parts; i++) {
+	for(br_size_t i=0; i < n_parts; i++) {
 		switch(parts[i]) {
 		case BRT_PRIMITIVE:
 			m |= MASK_STATE_PRIMITIVE;

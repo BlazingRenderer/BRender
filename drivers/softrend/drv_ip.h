@@ -63,7 +63,7 @@ br_error BR_CMETHOD_DECL(br_renderer_soft, partIndexQuery)(br_renderer *self, br
 
 br_error BR_CMETHOD_DECL(br_renderer_soft, stateQueryPerformance)(br_renderer *self, br_uint_32 *speed);
 
-br_error BR_CMETHOD_DECL(br_renderer_soft, stateMask)(br_renderer *self, br_uint_32 *mask, br_token *parts, int n_parts);
+br_error BR_CMETHOD_DECL(br_renderer_soft, stateMask)(br_renderer *self, br_uint_32 *mask, const br_token *parts, br_size_t n_parts);
 br_error BR_CMETHOD_DECL(br_renderer_soft, stateDefault)(br_renderer *self, br_uint_32 mask);
 
 br_error StateCopy(state_all *dest, state_all *src, br_uint_32 copy_mask, void *res);
@@ -83,8 +83,6 @@ br_error BR_CMETHOD_DECL(br_renderer_soft, stateSave)(br_renderer *self, br_rend
 br_error BR_CMETHOD_DECL(br_renderer_soft, stateRestore)(br_renderer *self, br_renderer_state_stored *save, br_uint_32 mask);
 
 br_error BR_CMETHOD_DECL(br_renderer_soft, stateDefault)(br_renderer *self, br_uint_32 mask);
-
-br_error BR_CMETHOD_DECL(br_renderer_soft, stateMask)(br_renderer *self, br_uint_32 *mask, br_token *parts, int n_parts);
 
 /*
  * sstate.c
