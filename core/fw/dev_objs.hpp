@@ -343,17 +343,6 @@ class br_renderer : public br_object_container {
 
 		virtual br_error BR_METHOD synchronise(br_token sync_type, br_boolean block);
 
-#if 0
-	// Possible additions
-	//
-		virtual br_error modelToView
-		virtual br_error modelToScreen
-		virtual br_error viewToModel
-		virtual br_error viewToScreen
-		virtual br_error screenToModel
-		virtual br_error screenToView
-#endif
-
 	// Query state performance
 		virtual br_error BR_METHOD partQueryCapability(br_token part, br_int_32 index, br_token_value *buffer,
 			br_size_t buffer_size);
