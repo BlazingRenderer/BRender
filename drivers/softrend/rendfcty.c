@@ -81,7 +81,6 @@ br_renderer_facility *RendererFacilitySoftAllocate(br_device *dev, const char *i
      * Create geometry objects
      */
     GeometryV1BucketsAllocate(self, "V1Buckets");
-    GeometryPrimitivesAllocate(self, "Primitives");
     GeometryLightingAllocate(self, "Lighting");
     GeometryV1ModelAllocate(self, "V1Model");
 

@@ -234,8 +234,6 @@ br_error DevicePixelmapGLExtHandleWindowEvent(br_device_pixelmap *self, void *ar
  */
 br_geometry_lighting *GeometryLightingNullAllocate(br_renderer_facility *type, const char *id);
 
-br_geometry_primitives *GeometryPrimitivesNullAllocate(br_renderer_facility *type, const char *id);
-
 #ifdef __cplusplus
 };
 #endif

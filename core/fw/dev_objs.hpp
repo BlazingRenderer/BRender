@@ -375,18 +375,6 @@ class br_geometry_stored : public br_geometry {
 
 // Predefined geometry formats
 
-class br_geometry_primitives : public br_geometry {
-	public:
-		virtual br_error BR_METHOD CG_F(render)(class br_renderer *r,
-				struct fmt_vertex *vertices, int nvertices, br_token type);
-		virtual br_error BR_METHOD CG_F(renderOnScreen)(class br_renderer *r,
-				struct fmt_vertex *vertices, int nvertices, br_token type);
-		virtual br_error BR_METHOD CG_F(storedNew)(class br_renderer *r,
-				class br_geometry_stored **psg,
-				struct fmt_vertex *vertices, int nvertices, br_token type, br_token_value *tv);
-		virtual br_error BR_METHOD storedAvail(br_int_32 *psize, br_token_value *tv);
-}
-
 class br_geometry_v1_model : public br_geometry {
 	public:
 		virtual br_error BR_METHOD CG_F(render)(class br_renderer *r, struct v11model_f *model,

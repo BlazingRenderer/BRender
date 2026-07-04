@@ -106,11 +106,6 @@ void GEOMETRY_CALL ScratchFree(br_geometry *self, br_renderer *renderer);
 void VertexGeometryFns(br_renderer *renderer, geometry_fn *prim_outcode);
 
 /*
- * gprim.c
- */
-br_geometry_primitives *GeometryPrimitivesAllocate(br_renderer_facility *type, const char *id);
-
-/*
  * gv1model.c
  */
 br_geometry_v1_model *GeometryV1ModelAllocate(br_renderer_facility *type, const char *id);

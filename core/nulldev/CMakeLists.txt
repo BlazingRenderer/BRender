@@ -11,9 +11,6 @@ add_library(nulldev OBJECT
 
         glighting.c
         glighting.h
-
-        gprim.c
-        gprim.h
         )
 
 target_link_libraries(nulldev PRIVATE brender-inc-ddi)

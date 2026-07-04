@@ -10,7 +10,6 @@ add_library(softrend
         faceops.c
         ffront.c
         genrend.c
-        gprim.c
         gv1buckt.c
         gv1model.c
         heap.c
@@ -35,7 +34,6 @@ add_library(softrend
         device.h
         drv.h
         drv_ip.h
-        gprim.h
         gv1buckt.h
         gv1model.h
         lighting.h

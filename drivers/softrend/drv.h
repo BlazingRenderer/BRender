@@ -21,7 +21,6 @@ extern "C" {
 #define BR_RENDERER_PRIVATE
 #define BR_GEOMETRY_V1_MODEL_PRIVATE
 #define BR_GEOMETRY_V1_BUCKETS_PRIVATE
-#define BR_GEOMETRY_PRIMITIVES_PRIVATE
 #define BR_GEOMETRY_LIGHTING_PRIVATE
 
 #ifndef _BRDDI_H_
@@ -70,10 +69,6 @@ extern "C" {
 
 #ifndef _GLIGHTING_H_
 #include "lighting.h"
-#endif
-
-#ifndef _GPRIM_H_
-#include "gprim.h"
 #endif
 
 #ifndef _FORMATS_H_
