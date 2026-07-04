@@ -84,9 +84,9 @@ static br_tv_template_entry partOutputTemplateEntries[] = {
 #undef Q
 #undef A
 
-#define BLOCK_VERTEX_COMPONENTS CM_SX | CM_SY | CM_SZ | CM_R | CM_G | CM_B | CM_A | CM_U | CM_V
+#define BLOCK_VERTEX_COMPONENTS (CM_SX | CM_SY | CM_SZ | CM_SW | CM_R | CM_G | CM_B | CM_A | CM_U | CM_V)
 #define BLOCK_CONVERT_MASK \
-    (1 << C_SX) | (1 << C_SY) | (1 << C_SZ) | (1 << C_W) | (1 << C_R) | (1 << C_G) | (1 << C_B) | (1 << C_A) | (1 << C_U) | (1 << C_V)
+    ((1 << C_SX) | (1 << C_SY) | (1 << C_SZ) | (1 << C_SW) | (1 << C_W) | (1 << C_R) | (1 << C_G) | (1 << C_B) | (1 << C_A) | (1 << C_U) | (1 << C_V))
 
 #define MAKE_BLOCK(render_, type_, flags_)                \
     {                                                     \

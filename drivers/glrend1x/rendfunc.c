@@ -16,7 +16,7 @@ static void EmitVertex(const brp_vertex *v)
 
     gl->TexCoord2f(v->comp_f[C_U], v->comp_f[C_V]);
     gl->Color4f(v->comp_f[C_R], v->comp_f[C_G], v->comp_f[C_B], a);
-    gl->Vertex3f(v->comp_f[C_SX], v->comp_f[C_SY], v->comp_f[C_SZ]);
+    gl->Vertex4f(v->comp_f[C_SX], v->comp_f[C_SY], v->comp_f[C_SZ], -v->comp_f[C_SW]);
 }
 
 void BR_ASM_CALL TriangleRenderGL1x(brp_block *block, brp_vertex *v0, brp_vertex *v1, brp_vertex *v2)
