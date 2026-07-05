@@ -377,14 +377,14 @@ class br_geometry_stored : public br_geometry {
 
 class br_geometry_v1_model : public br_geometry {
 	public:
-		virtual br_error BR_METHOD CG_F(render)(class br_renderer *r, struct v11model_f *model,
+		virtual br_error BR_METHOD render(class br_renderer *r, struct v11model *model,
 			class br_renderer_state_stored *default_state,
 			br_token type);
-		virtual br_error BR_METHOD CG_F(renderOnScreen)(class br_renderer *r, struct v11model_f *model,
+		virtual br_error BR_METHOD renderOnScreen(class br_renderer *r, struct v11model *model,
 			class br_renderer_state_stored *default_state,
 			br_token type);
-		virtual br_error BR_METHOD CG_F(storedNew)(class br_renderer *r, class br_geometry_stored **psg,
-				struct v11model_f *model, br_token type, br_token_value *tv);
+		virtual br_error BR_METHOD storedNew(class br_renderer *r, class br_geometry_stored **psg,
+				struct v11model *model, br_token type, br_token_value *tv);
 
 		virtual br_error BR_METHOD storedAvail(br_int_32 *psize, br_token_value *tv);
 }

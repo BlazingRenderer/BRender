@@ -120,10 +120,10 @@ br_geometry_lighting *GeometryLightingAllocate(br_renderer_facility *type, const
 /*
  * v1model.c
  */
-br_error BR_CMETHOD_DECL(br_geometry_v1_model_soft, render)(br_geometry_v1_model *self, br_renderer *renderer, struct v11model_f *model,
+br_error BR_CMETHOD_DECL(br_geometry_v1_model_soft, render)(br_geometry_v1_model *self, br_renderer *renderer, struct v11model *model,
                                                             br_renderer_state_stored *default_state, br_token type);
 
-br_error BR_CMETHOD_DECL(br_geometry_v1_model_soft, renderOnScreen)(br_geometry_v1_model *self, br_renderer *renderer, struct v11model_f *model,
+br_error BR_CMETHOD_DECL(br_geometry_v1_model_soft, renderOnScreen)(br_geometry_v1_model *self, br_renderer *renderer, struct v11model *model,
                                                                     br_renderer_state_stored *default_state, br_token type);
 
 /*

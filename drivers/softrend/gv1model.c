@@ -91,7 +91,7 @@ static br_error BR_CMETHOD_DECL(br_geometry_v1_model_soft, storedAvail)(br_geome
 }
 
 static br_error BR_CMETHOD_DECL(br_geometry_v1_model_soft, storedNew)(br_geometry_v1_model *self, br_renderer *renderer, br_geometry_stored **psg,
-                                                                      struct v11model_f *model, br_token type, br_token_value *tv)
+                                                                      struct v11model *model, br_token type, br_token_value *tv)
 {
     return BRE_FAIL;
 }

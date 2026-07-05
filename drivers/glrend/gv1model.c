@@ -94,18 +94,18 @@ static br_error BR_CMETHOD_DECL(br_geometry_v1_model_gl, storedAvail)(struct br_
 }
 
 static br_error BR_CMETHOD_DECL(br_geometry_v1_model_gl, storedNew)(struct br_geometry_v1_model *self, struct br_renderer *renderer,
-                                                                    struct br_geometry_stored **psg, struct v11model_f *model,
+                                                                    struct br_geometry_stored **psg, struct v11model *model,
                                                                     br_token type, br_token_value *tv)
 {
     ASSERT(type == BRT_TRIANGLE);
-    if((*psg = GeometryStoredGLAllocate(self, "model", renderer, (struct v11model *)model)) == NULL)
+    if((*psg = GeometryStoredGLAllocate(self, "model", renderer, model)) == NULL)
         return BRE_FAIL;
 
     return BRE_OK;
 }
 
 br_error BR_CMETHOD_DECL(br_geometry_v1_model_gl, render)(struct br_geometry_v1_model *self, struct br_renderer *renderer,
-                                                          struct v11model_f *model, struct br_renderer_state_stored *default_state, br_token type)
+                                                          struct v11model *model, struct br_renderer_state_stored *default_state, br_token type)
 {
     static br_boolean warned_imm = BR_FALSE;
 

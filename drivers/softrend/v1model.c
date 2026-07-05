@@ -880,22 +880,22 @@ static br_error V1Model_Render(br_geometry *self, br_renderer *renderer, struct 
     return BRE_OK;
 }
 
-br_error BR_CMETHOD_DECL(br_geometry_v1_model_soft, render)(br_geometry_v1_model *self, br_renderer *renderer, struct v11model_f *model,
+br_error BR_CMETHOD_DECL(br_geometry_v1_model_soft, render)(br_geometry_v1_model *self, br_renderer *renderer, struct v11model *model,
                                                             br_renderer_state_stored *default_state, br_token type)
 {
     br_error r;
 
-    r = V1Model_Render((br_geometry *)self, renderer, (struct v11model *)model, default_state, type, BR_FALSE);
+    r = V1Model_Render((br_geometry *)self, renderer, model, default_state, type, BR_FALSE);
 
     return r;
 }
 
-br_error BR_CMETHOD_DECL(br_geometry_v1_model_soft, renderOnScreen)(br_geometry_v1_model *self, br_renderer *renderer, struct v11model_f *model,
+br_error BR_CMETHOD_DECL(br_geometry_v1_model_soft, renderOnScreen)(br_geometry_v1_model *self, br_renderer *renderer, struct v11model *model,
                                                                     br_renderer_state_stored *default_state, br_token type)
 {
     br_error r;
 
-    r = V1Model_Render((br_geometry *)self, renderer, (struct v11model *)model, default_state, type, BR_TRUE);
+    r = V1Model_Render((br_geometry *)self, renderer, model, default_state, type, BR_TRUE);
 
     return r;
 }
