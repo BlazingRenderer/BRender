@@ -300,9 +300,9 @@ class br_renderer : public br_object_container {
 
 	// Special case state manipulation for ease of use
 
-		virtual br_error BR_METHOD CG_F(modelMul)(br_matrix34_f *m);
+		virtual br_error BR_METHOD modelMul(br_matrix34 *m);
 
-		virtual br_error BR_METHOD CG_F(modelPopPushMul)(br_matrix34_f *m);
+		virtual br_error BR_METHOD modelPopPushMul(br_matrix34 *m);
 
 		virtual br_error BR_METHOD modelInvert(void);
 
@@ -324,7 +324,7 @@ class br_renderer : public br_object_container {
 
 	// Various queries based on current transforms
 
-		virtual br_error BR_METHOD CG_F(boundsTest)(br_token *r, br_bounds3_f *bounds);
+		virtual br_error BR_METHOD boundsTest(br_token *r, br_bounds3 *bounds);
 
 	// Control current command mode
 

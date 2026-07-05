@@ -44,7 +44,7 @@
              ((eqn.v[Y] > 0) ? (bounds->max.v[Y]) : (bounds->min.v[Y])), eqn.v[Z],           \
              ((eqn.v[Z] > 0) ? (bounds->max.v[Z]) : (bounds->min.v[Z]))) < eqn.v[W])
 
-br_token GLOnScreenCheck(const br_matrix4 *model_to_screen, const br_bounds3_f *bounds)
+br_token GLOnScreenCheck(const br_matrix4 *model_to_screen, const br_bounds3 *bounds)
 {
     int        accept = 1;
     br_vector4 eqn;

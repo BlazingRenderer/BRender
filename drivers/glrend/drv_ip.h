@@ -128,7 +128,7 @@ br_geometry_stored *GeometryStoredGLAllocate(br_geometry_v1_model *gv1model, con
 /*
  * onscreen.c
  */
-br_token GLOnScreenCheck(const br_matrix4 *model_to_screen, const br_bounds3_f *bounds);
+br_token GLOnScreenCheck(const br_matrix4 *model_to_screen, const br_bounds3 *bounds);
 
 /*
  * sstate.c

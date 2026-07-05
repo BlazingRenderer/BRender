@@ -354,25 +354,13 @@ br_error StateCopy(state_all *dest, state_all *src, br_uint_32 copy_mask, void *
 }
 
 /*
- * Convertions routines for matrices fixed<->float
- */
-static void convertM34FixedToFloat(br_matrix34_f *dest, br_matrix34_x *src)
-{
-    int i, j;
-
-    for(i = 0; i < 4; i++)
-        for(j = 0; j < 3; j++)
-            dest->m[i][j] = BrFixedToFloat(src->m[i][j]);
-}
-
-/*
  * Special case state manipulation for ease of use
  */
-br_error BR_CMETHOD_DECL(br_renderer_soft, modelMulF)(br_renderer *self, br_matrix34_f *m)
+br_error BR_CMETHOD_DECL(br_renderer_soft, modelMul)(br_renderer *self, br_matrix34 *m)
 {
     br_matrix34 om = self->state.matrix.model_to_view;
 
-    BrMatrix34Mul(&self->state.matrix.model_to_view, (br_matrix34 *)m, &om);
+    BrMatrix34Mul(&self->state.matrix.model_to_view, m, &om);
 
     self->state.matrix.model_to_view_hint = BRT_NONE;
 
@@ -381,47 +369,12 @@ br_error BR_CMETHOD_DECL(br_renderer_soft, modelMulF)(br_renderer *self, br_matr
     return BRE_OK;
 }
 
-br_error BR_CMETHOD_DECL(br_renderer_soft, modelMulX)(br_renderer *self, br_matrix34_x *m)
-#define CONV(d, s) convertM34FixedToFloat((br_matrix34_f *)(d), (br_matrix34_x *)(s))
-{
-    br_matrix34 om = self->state.matrix.model_to_view;
-    br_matrix34 cm;
-
-    CONV(&cm, m);
-
-    BrMatrix34Mul(&self->state.matrix.model_to_view, &cm, &om);
-
-    self->state.matrix.model_to_view_hint = BRT_NONE;
-
-    TouchModelToView(self);
-
-    return BRE_OK;
-}
-
-br_error BR_CMETHOD_DECL(br_renderer_soft, modelPopPushMulX)(br_renderer *self, br_matrix34_x *m)
-{
-    br_matrix34 cm;
-
-    if(self->stack_top == 0)
-        return BRE_UNDERFLOW;
-
-    CONV(&cm, m);
-
-    BrMatrix34Mul(&self->state.matrix.model_to_view, &cm, &self->state_stack[0].matrix.model_to_view);
-
-    self->state.matrix.model_to_view_hint = BRT_NONE;
-
-    TouchModelToView(self);
-
-    return BRE_OK;
-}
-
-br_error BR_CMETHOD_DECL(br_renderer_soft, modelPopPushMulF)(br_renderer *self, br_matrix34_f *m)
+br_error BR_CMETHOD_DECL(br_renderer_soft, modelPopPushMul)(br_renderer *self, br_matrix34 *m)
 {
     if(self->stack_top == 0)
         return BRE_UNDERFLOW;
 
-    BrMatrix34Mul(&self->state.matrix.model_to_view, (br_matrix34 *)m, &self->state_stack[0].matrix.model_to_view);
+    BrMatrix34Mul(&self->state.matrix.model_to_view, m, &self->state_stack[0].matrix.model_to_view);
 
     self->state.matrix.model_to_view_hint = BRT_NONE;
 
@@ -477,36 +430,7 @@ br_error BR_CMETHOD_DECL(br_renderer_soft, statePop)(br_renderer *self, br_uint_
     return r;
 }
 
-/*
- * Convertions routines for bounds fixed<->float
- */
-static void convertBounds3FixedToFloat(br_bounds3_f *dest, br_bounds3_x *src)
-{
-    int i;
-
-    for(i = 0; i < 3; i++) {
-        dest->min.v[i] = BrFixedToFloat(src->min.v[i]);
-        dest->max.v[i] = BrFixedToFloat(src->max.v[i]);
-    }
-}
-
-br_error BR_CMETHOD_DECL(br_renderer_soft, boundsTestX)(br_renderer *self, br_token *r, br_bounds3_x *bounds_in)
-#define BOUNDS_CONV(a, b) convertBounds3FixedToFloat((struct br_bounds3_f *)(a), (struct br_bounds3_x *)(b))
-{
-    br_bounds3 bounds;
-
-    BOUNDS_CONV(&bounds, bounds_in);
-    /*
-     * XXX cache check
-     */
-    ModelToScreenUpdate(self);
-
-    *r = OnScreenCheck(self, &scache.model_to_screen, &bounds);
-
-    return BRE_OK;
-}
-
-br_error BR_CMETHOD_DECL(br_renderer_soft, boundsTestF)(br_renderer *self, br_token *r, br_bounds3_f *bounds)
+br_error BR_CMETHOD_DECL(br_renderer_soft, boundsTest)(br_renderer *self, br_token *r, br_bounds3 *bounds)
 {
     /*
      * XXX Cache check
@@ -516,7 +440,7 @@ br_error BR_CMETHOD_DECL(br_renderer_soft, boundsTestF)(br_renderer *self, br_to
         scache.valid_m2s = BR_TRUE;
     }
 
-    *r = OnScreenCheck(self, &scache.model_to_screen, (br_bounds3 *)bounds);
+    *r = OnScreenCheck(self, &scache.model_to_screen, bounds);
 
     return BRE_OK;
 }

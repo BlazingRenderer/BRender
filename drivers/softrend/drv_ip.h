@@ -63,14 +63,11 @@ br_error BR_CMETHOD_DECL(br_renderer_soft, stateDefault)(br_renderer *self, br_u
 
 br_error StateCopy(state_all *dest, state_all *src, br_uint_32 copy_mask, void *res);
 
-br_error BR_CMETHOD_DECL(br_renderer_soft, modelMulF)(br_renderer *self, br_matrix34_f *m);
-br_error BR_CMETHOD_DECL(br_renderer_soft, modelMulX)(br_renderer *self, br_matrix34_x *m);
-br_error BR_CMETHOD_DECL(br_renderer_soft, modelPopPushMulF)(br_renderer *self, br_matrix34_f *m);
-br_error BR_CMETHOD_DECL(br_renderer_soft, modelPopPushMulX)(br_renderer *self, br_matrix34_x *m);
+br_error BR_CMETHOD_DECL(br_renderer_soft, modelMul)(br_renderer *self, br_matrix34 *m);
+br_error BR_CMETHOD_DECL(br_renderer_soft, modelPopPushMul)(br_renderer *self, br_matrix34 *m);
 br_error BR_CMETHOD_DECL(br_renderer_soft, modelInvert)(br_renderer *self);
 
-br_error BR_CMETHOD_DECL(br_renderer_soft, boundsTestF)(br_renderer *self, br_token *r, br_bounds3_f *bounds);
-br_error BR_CMETHOD_DECL(br_renderer_soft, boundsTestX)(br_renderer *self, br_token *r, br_bounds3_x *bounds);
+br_error BR_CMETHOD_DECL(br_renderer_soft, boundsTest)(br_renderer *self, br_token *r, br_bounds3 *bounds);
 
 br_error BR_CMETHOD_DECL(br_renderer_soft, statePush)(br_renderer *self, br_uint_32 mask);
 br_error BR_CMETHOD_DECL(br_renderer_soft, statePop)(br_renderer *self, br_uint_32 mask);

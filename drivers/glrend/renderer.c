@@ -515,23 +515,23 @@ static br_error BR_CMETHOD_DECL(br_renderer_gl, commandModePop)(br_renderer *sel
     return BRE_FAIL;
 }
 
-static br_error BR_CMETHOD_DECL(br_renderer_gl, modelMul)(br_renderer *self, br_matrix34_f *m)
+static br_error BR_CMETHOD_DECL(br_renderer_gl, modelMul)(br_renderer *self, br_matrix34 *m)
 {
     br_matrix34 om = self->state.current->matrix.model_to_view;
 
-    BrMatrix34Mul(&self->state.current->matrix.model_to_view, (br_matrix34 *)m, &om);
+    BrMatrix34Mul(&self->state.current->matrix.model_to_view, m, &om);
 
     self->state.current->matrix.model_to_view_hint = BRT_NONE;
 
     return BRE_OK;
 }
 
-static br_error BR_CMETHOD_DECL(br_renderer_gl, modelPopPushMul)(br_renderer *self, br_matrix34_f *m)
+static br_error BR_CMETHOD_DECL(br_renderer_gl, modelPopPushMul)(br_renderer *self, br_matrix34 *m)
 {
     if(self->state.top == 0)
         return BRE_UNDERFLOW;
 
-    BrMatrix34Mul(&self->state.current->matrix.model_to_view, (br_matrix34 *)m, &self->state.stack[0].matrix.model_to_view);
+    BrMatrix34Mul(&self->state.current->matrix.model_to_view, m, &self->state.stack[0].matrix.model_to_view);
 
     self->state.current->matrix.model_to_view_hint = BRT_NONE;
 
@@ -638,7 +638,7 @@ static br_error BR_CMETHOD_DECL(br_renderer_gl, stateMask)(br_renderer *self, br
     return BRE_OK;
 }
 
-static br_error BR_CMETHOD_DECL(br_renderer_gl, boundsTest)(br_renderer *self, br_token *r, br_bounds3_f *bounds)
+static br_error BR_CMETHOD_DECL(br_renderer_gl, boundsTest)(br_renderer *self, br_token *r, br_bounds3 *bounds)
 {
     // FIXME: Should probably cache this.
     br_matrix4 m2s;
