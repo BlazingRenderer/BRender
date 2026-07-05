@@ -84,8 +84,8 @@ static br_tv_template *BR_CMETHOD_DECL(br_geometry_v1_buckets_gl, templateQuery)
     return self->device->templates.geometryV1BucketsTemplate;
 }
 
-br_error BR_CMETHOD_DECL(br_geometry_v1_buckets_gl, render)(br_geometry_v1_buckets *self, br_renderer *renderer, br_primitive **buckets,
-                                                            br_int_32 nbuckets)
+static br_error BR_CMETHOD_DECL(br_geometry_v1_buckets_gl, render)(br_geometry_v1_buckets *self, br_renderer *renderer,
+                                                                   br_primitive **buckets, br_int_32 nbuckets)
 {
     const GladGLContext *gl = renderer->gl;
 

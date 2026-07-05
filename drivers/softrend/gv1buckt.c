@@ -85,8 +85,8 @@ static br_tv_template *BR_CMETHOD_DECL(br_geometry_v1_buckets_soft, templateQuer
     return ((br_geometry_v1_buckets *)self)->templates;
 }
 
-br_error BR_CMETHOD_DECL(br_geometry_v1_buckets_soft, render)(br_geometry_v1_buckets *self, br_renderer *renderer, br_primitive **buckets,
-                                                              br_int_32 nbuckets)
+static br_error BR_CMETHOD_DECL(br_geometry_v1_buckets_soft, render)(br_geometry_v1_buckets *self, br_renderer *renderer,
+                                                                     br_primitive **buckets, br_int_32 nbuckets)
 {
     br_primitive             *p;
     br_renderer_state_stored *last_state;
