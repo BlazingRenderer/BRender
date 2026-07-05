@@ -16,8 +16,6 @@
 #	define CG_PUBLIC
 #endif
 
-#define CG_F(x) x
-
 class br_object;
 class br_object_container;
 class br_device;
@@ -399,8 +397,8 @@ class br_geometry_v1_buckets : public br_geometry {
 
 class br_geometry_lighting : public br_geometry {
 	public:
-		virtual br_error BR_METHOD CG_F(render)(class br_renderer *r,
-			br_vector3_f *points, br_vector3_f *normals, br_colour *colour_in,
+		virtual br_error BR_METHOD render(class br_renderer *r,
+			br_vector3 *points, br_vector3 *normals, br_colour *colour_in,
 			br_colour *colour_out, br_uint_16 *redirect, int pstride, int nstride,
 			int cinstride, int coutstride, int nvertices);
 }

@@ -89,8 +89,8 @@ static br_tv_template *BR_CMETHOD_DECL(br_geometry_lighting_soft, templateQuery)
  * Lighting function calling facility
  */
 
-br_error BR_CMETHOD_DECL(br_geometry_lighting_soft, render)(br_geometry_lighting *self, br_renderer *renderer, br_vector3_f *points,
-                                                            br_vector3_f *normals, br_colour *colour_in, br_colour *colour_out, br_uint_16 *redirect,
+br_error BR_CMETHOD_DECL(br_geometry_lighting_soft, render)(br_geometry_lighting *self, br_renderer *renderer, br_vector3 *points,
+                                                            br_vector3 *normals, br_colour *colour_in, br_colour *colour_out, br_uint_16 *redirect,
                                                             int pstride, int nstride, int cinstride, int coutstride, int nvertices)
 {
     int        i, j;
@@ -144,8 +144,8 @@ br_error BR_CMETHOD_DECL(br_geometry_lighting_soft, render)(br_geometry_lighting
         *(((char *)colour_out) + 2) = BrScalarToInt(comp[C_G]);
         *(((char *)colour_out) + 3) = BrScalarToInt(comp[C_B]);
 
-        points    = (br_vector3_f *)((br_uintptr_t)points + pstride);
-        normals   = (br_vector3_f *)((br_uintptr_t)normals + nstride);
+        points    = (br_vector3 *)((br_uintptr_t)points + pstride);
+        normals   = (br_vector3 *)((br_uintptr_t)normals + nstride);
         colour_in = (br_colour *)((char *)colour_in + cinstride);
         if(redirect) {
             colour_out = (br_colour *)(((char *)colour_out) + coutstride * ((*(redirect + 1)) - (*redirect)));
