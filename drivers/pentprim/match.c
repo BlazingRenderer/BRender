@@ -849,10 +849,10 @@ void BR_ASM_CALL GenericAutoloadThunk(brp_block *block, brp_vertex *v0, brp_vert
 	pb->p.render(block,v0,v1,v2);
 }
 
-br_error BR_CMETHOD_DECL(br_primitive_state_soft, rangesQueryF)(
+br_error BR_CMETHOD_DECL(br_primitive_state_soft, rangesQuery)(
 		struct br_primitive_state *self,
-		br_float *offset,
-		br_float *scale,
+		br_scalar *offset,
+		br_scalar *scale,
 		br_int_32 max_comp)
 {
 	int i;
@@ -865,31 +865,8 @@ br_error BR_CMETHOD_DECL(br_primitive_state_soft, rangesQueryF)(
 		return BRE_FAIL;
 
 	for(i=0; i < max_comp; i++) {
-		offset[i] = BrScalarToFloat(self->cache.comp_offsets[i]);
-		scale[i] = BrScalarToFloat(self->cache.comp_scales[i]);
-	}
-
-	return BRE_OK;
-}
-
-br_error BR_CMETHOD_DECL(br_primitive_state_soft, rangesQueryX)(
-		struct br_primitive_state *self,
-		br_fixed_ls *offset,
-		br_fixed_ls *scale,
-		br_int_32 max_comp)
-{
-	int i;
-
-	/*
-	 * Fail if the current info is not valid
-	 */
-	if(self->cache.timestamp_prim != self->prim.timestamp_major ||
-		self->cache.timestamp_out != self->out.timestamp_major)
-		return BRE_FAIL;
-
-	for(i=0; i < max_comp; i++) {
-		offset[i] = BrScalarToFixed(self->cache.comp_offsets[i]);
-		scale[i] = BrScalarToFixed(self->cache.comp_scales[i]);
+		offset[i] = self->cache.comp_offsets[i];
+		scale[i] = self->cache.comp_scales[i];
 	}
 
 	return BRE_OK;

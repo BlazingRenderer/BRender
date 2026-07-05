@@ -658,11 +658,6 @@ static const struct br_primitive_state_dispatch primitiveStateDispatch = {
     ._stateCopy             = BR_CMETHOD_REF(br_primitive_state_soft, stateCopy),
     ._renderBegin           = BR_CMETHOD_REF(br_primitive_state_soft, renderBegin),
     ._renderEnd             = BR_CMETHOD_REF(br_primitive_state_soft, renderEnd),
-#if BASED_FLOAT
-    ._rangesQuery           = BR_CMETHOD_REF(br_primitive_state_soft, rangesQueryF),
-#endif
-#if BASED_FIXED
-    ._rangesQuery           = BR_CMETHOD_REF(br_primitive_state_soft, rangesQueryX),
-#endif
+    ._rangesQuery           = BR_CMETHOD_REF(br_primitive_state_soft, rangesQuery),
 };
 

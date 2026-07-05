@@ -469,7 +469,7 @@ class br_primitive_state : public br_object {
 
 	// Find the current component transformations
 	//
-		virtual br_error BR_METHOD CG_F(rangesQuery)(br_float *offset, br_float *scale, br_int_32 max_comp);
+		virtual br_error BR_METHOD rangesQuery(br_scalar *offset, br_scalar *scale, br_int_32 max_comp);
 };
 
 // clang-format on

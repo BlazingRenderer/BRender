@@ -522,22 +522,23 @@ static br_error BR_CMETHOD_DECL(br_primitive_state_gl1x, renderEnd)(br_primitive
     return BRE_OK;
 }
 
-static br_error BR_CMETHOD_DECL(br_primitive_state_gl1x, rangesQueryF)(br_primitive_state *self, br_float *offsets, br_float *scales, br_int_32 max_comp)
+static br_error BR_CMETHOD_DECL(br_primitive_state_gl1x, rangesQuery)(br_primitive_state *self, br_scalar *offsets, br_scalar *scales,
+                                                                      br_int_32 max_comp)
 {
     br_int_32 c;
     for(c = 0; c < max_comp; c++) {
-        offsets[c] = 0.0f;
-        scales[c]  = 1.0f;
+        offsets[c] = BR_SCALAR(0);
+        scales[c]  = BR_SCALAR(1);
     }
 
     if(max_comp > C_SX && self->out.colour != NULL) {
-        br_float w = (br_float)self->out.colour->pm_width;
-        br_float h = (br_float)self->out.colour->pm_height;
+        br_scalar w = BR_SCALAR(self->out.colour->pm_width);
+        br_scalar h = BR_SCALAR(self->out.colour->pm_height);
 
-        offsets[C_SX] = w * 0.5f;
-        scales[C_SX]  = w * 0.5f;
-        offsets[C_SY] = h * 0.5f;
-        scales[C_SY]  = -h * 0.5f;
+        offsets[C_SX] = BR_MUL(w, 0.5f);
+        scales[C_SX]  = BR_MUL(w, 0.5f);
+        offsets[C_SY] = BR_MUL(h, 0.5f);
+        scales[C_SY]  = BR_MUL(-h, 0.5f);
     }
 
     return BRE_OK;
@@ -750,5 +751,5 @@ static const struct br_primitive_state_dispatch primitiveStateDispatch = {
     ._renderBegin = BR_CMETHOD_REF(br_primitive_state_gl1x, renderBegin),
     ._renderEnd   = BR_CMETHOD_REF(br_primitive_state_gl1x, renderEnd),
 
-    ._rangesQuery = BR_CMETHOD_REF(br_primitive_state_gl1x, rangesQueryF),
+    ._rangesQuery = BR_CMETHOD_REF(br_primitive_state_gl1x, rangesQuery),
 };

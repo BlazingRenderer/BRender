@@ -499,16 +499,10 @@ br_error BR_CMETHOD_DECL(br_primitive_state_soft, renderEnd)(
 void BR_ASM_CALL RenderAutoloadThunk(brp_block *block, brp_vertex *v0, brp_vertex *v1,brp_vertex *v2);
 void BR_ASM_CALL GenericAutoloadThunk(brp_block *block, brp_vertex *v0, brp_vertex *v1,brp_vertex *v2);
 
-br_error BR_CMETHOD_DECL(br_primitive_state_soft, rangesQueryF)(
+br_error BR_CMETHOD_DECL(br_primitive_state_soft, rangesQuery)(
 		struct br_primitive_state *self,
-		br_float *offset,
-		br_float *scale,
-		br_int_32 max_comp);
-
-br_error BR_CMETHOD_DECL(br_primitive_state_soft, rangesQueryX)(
-		struct br_primitive_state *self,
-		br_fixed_ls *offset,
-		br_fixed_ls *scale,
+		br_scalar *offset,
+		br_scalar *scale,
 		br_int_32 max_comp);
 
 void BR_ASM_CALL TriangleRenderNull(brp_block *block, brp_vertex *v0, brp_vertex *v1, brp_vertex *v2);
