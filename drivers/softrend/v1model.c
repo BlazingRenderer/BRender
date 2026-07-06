@@ -403,10 +403,10 @@ static void GEOMETRY_CALL V1Face_Render(br_geometry *self, br_renderer *renderer
 
         if(tfp->flag & TFF_CLIPPED) {
             brp_render3_fpx(clipped, rend.temp_vertices + (*fp_vertices)[0], rend.temp_vertices + (*fp_vertices)[1],
-                          rend.temp_vertices + (*fp_vertices)[2], fp_vertices, fp_edges, fp_eqn, tfp);
+                            rend.temp_vertices + (*fp_vertices)[2], fp_vertices, fp_edges, fp_eqn, tfp);
         } else {
             brp_render3_fpx(unclipped, rend.temp_vertices + (*fp_vertices)[0], rend.temp_vertices + (*fp_vertices)[1],
-                          rend.temp_vertices + (*fp_vertices)[2], fp_vertices, fp_edges, fp_eqn, tfp);
+                            rend.temp_vertices + (*fp_vertices)[2], fp_vertices, fp_edges, fp_eqn, tfp);
         }
     }
 }
@@ -431,7 +431,7 @@ void GEOMETRY_CALL V1Face_OS_Render(br_geometry *self, struct br_renderer *rende
             rend.current_index = f;
 
             brp_render3_fpx(unclipped, rend.temp_vertices + (*fp_vertices)[0], rend.temp_vertices + (*fp_vertices)[1],
-                          rend.temp_vertices + (*fp_vertices)[2], fp_vertices, fp_edges, fp_eqn, tfp);
+                            rend.temp_vertices + (*fp_vertices)[2], fp_vertices, fp_edges, fp_eqn, tfp);
         }
     }
 }
@@ -455,7 +455,7 @@ void GEOMETRY_CALL V1Face_OSV_Render(br_geometry *self, struct br_renderer *rend
         rend.current_index = f;
 
         brp_render3_fpx(unclipped, rend.temp_vertices + (*fp_vertices)[0], rend.temp_vertices + (*fp_vertices)[1],
-                      rend.temp_vertices + (*fp_vertices)[2], fp_vertices, fp_edges, fp_eqn, tfp);
+                        rend.temp_vertices + (*fp_vertices)[2], fp_vertices, fp_edges, fp_eqn, tfp);
     }
 }
 
