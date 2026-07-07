@@ -150,6 +150,8 @@ unsigned int cbase64_encode_block(const unsigned char* data_in, unsigned int len
             *codechar++ = cbase64__encode_value(result);
             result  = (fragment & 0x03f) >> 0;
             *codechar++ = cbase64__encode_value(result);
+    case step_D:
+        continue;
         }
     }
     // control should not reach here
@@ -164,7 +166,7 @@ unsigned int cbase64_decode_block(const char* code_in, unsigned int length_in,
     unsigned char* datachar = data_out;
     char fragment;
     char overwrite = state_in->result;
-    
+
     switch (state_in->step)
     {
         for (;;)
@@ -236,6 +238,7 @@ unsigned int cbase64_encode_blockend(char* code_out, cbase64_encodestate* state_
         *codechar++ = '=';
         break;
     case step_A:
+    case step_D:
         break;
     }
     return codechar - code_out;
