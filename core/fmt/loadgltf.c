@@ -99,7 +99,7 @@ void *unbuild_data_url(void *res, const char *uri, size_t *size)
     data_out = BrResAllocate(res, out_len, BR_MEMORY_APPLICATION);
 
     cbase64_init_decodestate(&ds);
-    cbase64_decode_block(comma + 1, in_len, data_out, &ds);
+    out_len = cbase64_decode_block(comma + 1, in_len, data_out, &ds);
 
     *size = out_len;
     return data_out;
