@@ -8,8 +8,6 @@
 extern "C" {
 #endif
 
-#ifdef BR_OUTPUT_FACILITY_PRIVATE
-
 /*
  * Private state of output type
  */
@@ -34,8 +32,6 @@ typedef struct br_output_facility {
      */
     void *object_list;
 } br_output_facility;
-
-#endif /* BR_OUTPUT_FACILITY_PRIVATE */
 
 #ifdef __cplusplus
 };

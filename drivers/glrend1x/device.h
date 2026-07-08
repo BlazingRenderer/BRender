@@ -1,8 +1,6 @@
 #ifndef _DEVICE_H_
 #define _DEVICE_H_
 
-#ifdef BR_DEVICE_PRIVATE
-
 /*
  * Private state of device
  */
@@ -45,5 +43,4 @@ typedef struct br_device {
 
 #define DeviceGLResource(d) (((br_device *)(d))->res)
 
-#endif /* BR_DEVICE_PRIVATE */
 #endif /* _DEVICE_H_ */

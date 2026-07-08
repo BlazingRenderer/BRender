@@ -8,8 +8,6 @@
 extern "C" {
 #endif
 
-#ifdef BR_DEVICE_PIXELMAP_PRIVATE
-
 /*
  * Private state of device pixelmap
  */
@@ -95,8 +93,6 @@ typedef struct br_device_pixelmap {
         } asSub;
     };
 } br_device_pixelmap;
-
-#endif
 
 #ifdef __cplusplus
 };

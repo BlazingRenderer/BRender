@@ -8,8 +8,6 @@
 extern "C" {
 #endif
 
-#ifdef BR_BUFFER_STORED_PRIVATE
-
 /*
  * Block structure
  */
@@ -54,8 +52,6 @@ typedef struct br_buffer_stored {
      */
     struct br_tv_template *templates;
 } br_buffer_stored;
-
-#endif
 
 #ifdef __cplusplus
 };

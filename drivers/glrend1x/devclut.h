@@ -8,7 +8,6 @@
 extern "C" {
 #endif
 
-#ifdef BR_DEVICE_CLUT_PRIVATE
 /*
  * Private state of device CLUT
  */
@@ -38,8 +37,6 @@ typedef struct br_device_clut {
      */
     br_colour entries[BR_GLREND_MAX_CLUT_ENTRIES];
 } br_device_clut;
-
-#endif
 
 #ifdef __cplusplus
 };

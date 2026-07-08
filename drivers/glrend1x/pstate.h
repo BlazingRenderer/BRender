@@ -40,9 +40,6 @@ enum {
     PRIMF_FOG            = (1 << PRIMF_FOG_BIT),
 };
 
-/* Extra internal flag: whether a texture is bound */
-#define PRIMF_TEXTURE_BUFFER (1 << 24)
-
 typedef struct state_primitive {
     br_uint_32               flags;
     br_token                 colour_type;
@@ -73,14 +70,6 @@ typedef struct br_primitive_state {
 
     state_primitive prim;
     state_output    out;
-
-    struct {
-        /* Last GL state pushed — cached flags + texture handle */
-        br_uint_32 last_flags;
-        GLuint     last_tex;
-        br_token   last_type;
-    } cache;
-
 } br_primitive_state;
 
 #ifdef __cplusplus

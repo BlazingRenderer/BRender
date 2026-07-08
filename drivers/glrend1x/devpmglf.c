@@ -55,6 +55,54 @@ static br_tv_template_entry pixelmapNewTemplateEntries[] = {
 };
 #undef F
 
+static void GLAD_API_PTR gl_debug_callback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar *message,
+                                           const void *user)
+{
+    const char *source_string, *type_string, *severity_string;
+
+    (void)user;
+
+    // clang-format off
+    switch(source) {
+        case GL_DEBUG_SOURCE_API:             source_string = "API";             break;
+        case GL_DEBUG_SOURCE_OTHER:           source_string = "OTHER";           break;
+        case GL_DEBUG_SOURCE_THIRD_PARTY:     source_string = "THIRD_PARTY";     break;
+        case GL_DEBUG_SOURCE_APPLICATION:     source_string = "APPLICATION";     break;
+        case GL_DEBUG_SOURCE_WINDOW_SYSTEM:   source_string = "WINDOW_SYSTEM";   break;
+        case GL_DEBUG_SOURCE_SHADER_COMPILER: source_string = "SHADER_COMPILER"; break;
+        default:                              source_string = "UNKNOWN";         break;
+    }
+
+    switch(type) {
+        case GL_DEBUG_TYPE_ERROR:               type_string = "ERROR";               break;
+        case GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR: type_string = "DEPRECATED_BEHAVIOR"; break;
+        case GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR:  type_string = "UNDEFINED_BEHAVIOR";  break;
+        case GL_DEBUG_TYPE_PORTABILITY:         type_string = "PORTABILITY";         break;
+        case GL_DEBUG_TYPE_PERFORMANCE:         type_string = "PERFORMANCE";         break;
+        case GL_DEBUG_TYPE_MARKER:              type_string = "MARKER";              break;
+        case GL_DEBUG_TYPE_PUSH_GROUP:          type_string = "PUSH_GROUP";          break;
+        case GL_DEBUG_TYPE_POP_GROUP:           type_string = "POP_GROUP";           break;
+        case GL_DEBUG_TYPE_OTHER:               type_string = "OTHER";               break;
+        default:                                type_string = "UNKNOWN";             break;
+    }
+
+    switch(severity) {
+        case GL_DEBUG_SEVERITY_LOW:          severity_string = "LOW";          break;
+        case GL_DEBUG_SEVERITY_MEDIUM:       severity_string = "MEDIUM";       break;
+        case GL_DEBUG_SEVERITY_HIGH:         severity_string = "HIGH";         break;
+        case GL_DEBUG_SEVERITY_NOTIFICATION: severity_string = "NOTIFICATION"; break;
+        default:                             severity_string = "UNKNOWN";      break;
+    }
+    // clang-format on
+
+    if(length < 0) {
+        BrLogDebug("GLREND", "glDebug: source=%s, type=%s, id=%u, severity=%s: %.*s", source_string, type_string, id, severity_string,
+                   (int)length, message);
+    } else {
+        BrLogDebug("GLREND", "glDebug: source=%s, type=%s, id=%u, severity=%s: %s", source_string, type_string, id, severity_string, message);
+    }
+}
+
 static char **build_extensions_list(void *vparent, const GladGLContext *gl, GLint *p_num_extensions)
 {
     const char *src;
@@ -181,6 +229,19 @@ br_device_pixelmap *DevicePixelmapGL1xAllocateFront(br_device *dev, br_output_fa
     self->asFront.gl_version  = BrResStrDup(self, (const char *)gl->GetString(GL_VERSION));
     self->asFront.gl_vendor   = BrResStrDup(self, (const char *)gl->GetString(GL_VENDOR));
     self->asFront.gl_renderer = BrResStrDup(self, (const char *)gl->GetString(GL_RENDERER));
+
+    /*
+     * Always register the debug stuff, it needs to be explicitly glEnable(GL_DEBUG_OUTPUT)'d anyway.
+     */
+    if(gl->KHR_debug) {
+        gl->DebugMessageCallback(gl_debug_callback, self);
+        gl->DebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, NULL, GL_TRUE);
+
+#if BR_GLREND_DEBUG
+        gl->Enable(GL_DEBUG_OUTPUT);
+        // gl->Enable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
+#endif
+    }
 
     /*
      * Get a copy of the extension list.

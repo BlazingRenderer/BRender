@@ -20,13 +20,7 @@ extern "C" {
 #define BR_PRIMITIVE_STATE_PRIVATE
 #define BR_DEVICE_PIXELMAP_PRIVATE
 #define BR_DEVICE_CLUT_PRIVATE
-#define BR_RENDERER_FACILITY_PRIVATE
 #define BR_BUFFER_STORED_PRIVATE
-#define BR_GEOMETRY_V1_MODEL_PRIVATE
-#define BR_GEOMETRY_V1_BUCKETS_PRIVATE
-#define BR_GEOMETRY_STORED_PRIVATE
-#define BR_RENDERER_STATE_STORED_PRIVATE
-#define BR_RENDERER_PRIVATE
 
 #define BR_GLREND_DEBUG_INTERNAL_PREFIX "glrend1x:internal:"
 #define BR_GLREND_DEBUG_USER_PREFIX     "glrend1x:user:"
@@ -36,16 +30,6 @@ extern "C" {
  * BRender supports no more than 256 (for BR_PMT_INDEX_8).
  */
 #define BR_GLREND_MAX_CLUT_ENTRIES 256
-
-/*
- * No. frames in the model-state ring buffer.
- */
-#define BR_GLREND_MODEL_RB_FRAMES 3
-
-/*
- * Max. no draws in-flight. This determines the size of the model-state buffer.
- */
-#define BR_GLREND_MAX_DRAWS_IN_FLIGHT 4096
 
 /*
  * Set to nonzero to glEnable(GL_DEBUG_OUTPUT)
