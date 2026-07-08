@@ -310,6 +310,10 @@ br_error StateCopy(state_all *dest, state_all *src, br_uint_32 copy_mask, void *
         dest->matrix.yon_z    = src->matrix.yon_z;
 
         dest->matrix.timestamp = src->matrix.timestamp;
+
+        scache.valid_v2m       = BR_FALSE;
+        scache.valid_m2s       = BR_FALSE;
+        scache.valid_per_model = BR_FALSE;
     }
 
     if(copy_mask & MASK_STATE_ENABLE && dest->enable.timestamp != src->enable.timestamp)
