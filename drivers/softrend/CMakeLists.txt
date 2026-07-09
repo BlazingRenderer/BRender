@@ -22,8 +22,6 @@ add_library(softrend
         renderer.c
         rendfcty.c
         rndstate.c
-        rprim.c
-        rv1point.c
         setup.c
         sstate.c
         state.c
