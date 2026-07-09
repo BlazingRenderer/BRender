@@ -106,7 +106,7 @@ typedef struct br_renderer {
     br_pool *state_pool;
 
     struct {
-        br_immvert_gl pool[1024 * 3];
+        br_immvert_gl pool[4096 * 3];
         br_size_t     next;
         GLuint        vao;
         GLuint        vbo;
