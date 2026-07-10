@@ -133,7 +133,7 @@ void lightingColourDirect(in vec3 p, in vec3 n, in uint i, inout vec3 outA, inou
     const vec3  direction = light_directions[i].xyz;
 
     float diffDot = max(dot(n, direction), 0.0);
-    outD += diffDot * intensity * kd * colour;
+    outD += diffDot * kd * colour; /* NB: Intensity is scaled into the direction CPU-side (in cache.c) */
 
     if(ks > 0.0) {
         float specDot = max(dot(n, light_halfs[i].xyz), 0.0);
