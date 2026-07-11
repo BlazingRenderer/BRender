@@ -76,3 +76,7 @@ See `core/v1db/prepmesh.c` for the primary usage.
 ### Driver Dispatch Tables
 Driver dispatch tables are generated from `core/fw/dev_objs.hpp` (a specially-formatted C++ header)
 by `core/fw/classgen.pl`. Do not edit the generated files directly.
+
+## Documentation
+
+See `resources/aidocs/` for detailed documentation on rendering architecture, lighting, and individual renderers/drivers.
