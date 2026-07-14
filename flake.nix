@@ -1,7 +1,7 @@
 {
   description = "BRender";
 
-  inputs.nixpkgs.url = github:NixOS/nixpkgs;
+  inputs.nixpkgs.url = "nixpkgs";
 
   outputs = { self, nixpkgs, ... }: let
     forAllSystems = function:
