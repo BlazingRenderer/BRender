@@ -2,7 +2,9 @@
 # We always want glrend-headers so unconditionally include glrend.
 ##
 add_subdirectory(glrend)
-target_link_libraries(brender-full INTERFACE glrend)
+if (TARGET glrend)
+    target_link_libraries(brender-full INTERFACE glrend)
+endif()
 
 add_subdirectory(glrend1x)
 target_link_libraries(brender-full INTERFACE glrend1x)

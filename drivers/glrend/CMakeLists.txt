@@ -29,10 +29,20 @@ add_library(BRender::Drivers::GLRend::Headers ALIAS glrend-headers)
 # find_package(glslang CONFIG REQUIRED)
 # set(GLSLANG_EXECUTABLE "$<TARGET_FILE:glslang::glslang-standalone>")
 
-find_program(GLSLANG_EXECUTABLE glslang REQUIRED)
+find_program(GLSLANG_EXECUTABLE glslang)
+if (NOT GLSLANG_EXECUTABLE)
+    message(STATUS "glslang not found, not building glrend.")
+    return()
+endif()
+
 message(STATUS "Found glslang: ${GLSLANG_EXECUTABLE}")
 
-find_program(SPIRV_CROSS_EXECUTABLE spirv-cross REQUIRED)
+find_program(SPIRV_CROSS_EXECUTABLE spirv-cross)
+if (NOT SPIRV_CROSS_EXECUTABLE)
+    message(STATUS "spirv-cross not found, not building glrend.")
+    return()
+endif()
+
 message(STATUS "Found spirv-cross: ${SPIRV_CROSS_EXECUTABLE}")
 
 function(compile_shader)
