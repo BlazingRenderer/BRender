@@ -2686,3 +2686,62 @@ br_error BR_PUBLIC_ENTRY BrMaterialFileCount(const char *filename, br_uint_16 *n
 
     return BRE_OK;
 }
+
+
+static int FopRead_ANIMATION_SET(br_datafile *df, br_uint_32 id, br_uint_32 length, br_uint_32 count)
+{
+    br_actor *ap;
+
+    /*
+     * Allocate and read in actor structure
+     */
+    ap      = BrAnimation(BR_ACTOR_NONE, NULL);
+    df->res = ap;
+    df->prims->struct_read(df, &br_actor_F, ap);
+    df->res = NULL;
+
+    ap->t.type = BR_TRANSFORM_IDENTITY;
+
+    /*
+     * Leave actor on stack
+     */
+    DfPush(DFST_ACTOR, ap, 1);
+
+    return 0;
+}
+
+static br_chunks_table_entry AnimationSetLoadEntries[] = {
+    {FID_END,   0, FopRead_END          },
+    {DFST_ANIM, 0, FopRead_ANIMATION_SET},
+};
+
+static br_chunks_table AnimationSetLoadTable = {
+    .nentries = BR_ASIZE(AnimationSetLoadEntries),
+    .entries  = AnimationSetLoadEntries,
+};
+
+br_uint_32 BR_PUBLIC_ENTRY BrAnimationSetLoadMany(const char *filename, br_animation_set **sets, br_uint_16 num)
+{
+    br_datafile *df;
+    int          count;
+    int          r;
+
+    df = DfOpen(filename, 0, BR_SCALAR_TOKEN);
+
+    if(df == NULL)
+        return 0;
+
+    for(count = 0; count < num;) {
+        r = DfChunksInterpret(df, &AnimationSetLoadTable);
+
+        if(DfTopType() == DFST_ANIM)
+            sets[count++] = DfPop(DFST_ANIM, 0);
+
+        if(r == 0)
+            break;
+    }
+
+    DfClose(df);
+
+    return count;
+}
