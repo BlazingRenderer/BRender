@@ -201,6 +201,8 @@ br_device_pixelmap *DevicePixelmapGLAllocateFront(br_device *dev, br_output_faci
         BrLogWarn("GLREND", "OpenGL gave us an unknown screen format (R%dG%dB%dA%d), soldiering on...", red_bits, grn_bits, blu_bits, alpha_bits);
     }
 
+    void GLStateCacheAttach(GladGLContext *gl);
+    GLStateCacheAttach(gl);
     return self;
 
 cleanup_context:

@@ -222,6 +222,7 @@ set(GLREND_FILES
 
         util.c
         formats.c
+        glcache.c
         )
 
 add_library(glrend
