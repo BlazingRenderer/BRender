@@ -47,6 +47,7 @@ typedef struct br_demo_run_args {
     br_int_32   backbuffer_width;
     br_int_32   backbuffer_height;
     const char *opengl_device_name;
+    int         no_stats;
     int         pos_argc;
     char       *pos_argv[4]; /* If you need more than 4 positional args, tough. */
 } br_demo_run_args;

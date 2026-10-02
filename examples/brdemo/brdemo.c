@@ -359,7 +359,7 @@ int BrDemoRunArg(const br_demo_dispatch *dispatch, const br_demo_run_args *args)
         demo->dispatch->update(demo, BR_SCALAR(dt));
         demo->dispatch->render(demo);
 
-        {
+        if(!demo->args->no_stats) {
             br_int_32 base_x = -demo->colour_buffer->origin_x + 5;
             br_int_32 base_y = -demo->colour_buffer->origin_y + 5;
 
@@ -402,6 +402,7 @@ cleanup:
 #define ARGDEF_BACKBUFFER_WIDTH   304
 #define ARGDEF_BACKBUFFER_HEIGHT  305
 #define ARGDEF_OPENGL_DEVICE_NAME 306
+#define ARGDEF_NO_STATS           307
 
 const static struct parg_option argdefs[] = {
     {.name = "width",              .has_arg = PARG_REQARG, .flag = NULL, .val = ARGDEF_WIDTH             },
@@ -413,6 +414,7 @@ const static struct parg_option argdefs[] = {
     {.name = "backbuffer-width",   .has_arg = PARG_REQARG, .flag = NULL, .val = ARGDEF_BACKBUFFER_WIDTH  },
     {.name = "backbuffer-height",  .has_arg = PARG_REQARG, .flag = NULL, .val = ARGDEF_BACKBUFFER_HEIGHT },
     {.name = "opengl-device-name", .has_arg = PARG_REQARG, .flag = NULL, .val = ARGDEF_OPENGL_DEVICE_NAME},
+    {.name = "no-stats",           .has_arg = PARG_NOARG,  .flag = NULL, .val = ARGDEF_NO_STATS          },
     {.name = NULL,                 .has_arg = 0,           .flag = NULL, .val = 0                        },
 };
 
@@ -466,6 +468,10 @@ static int parse_args(int argc, char *const argv[], br_demo_run_args *args)
 
             case ARGDEF_OPENGL_DEVICE_NAME:
                 args->opengl_device_name = ps.optarg;
+                break;
+
+            case ARGDEF_NO_STATS:
+                args->no_stats = 1;
                 break;
 
             case ARGDEF_HELP:
@@ -532,6 +538,7 @@ static const char *usage_options =
     "  --backbuffer-width   Width of the backbuffer, defaults to the same as the screen.\n"
     "  --backbuffer-height  Height of the backbuffer, defaults to the same as the screen.\n"
     "  --opengl-device-name Name of the OpenGL device driver to use. Valid options: glrend (default), glrend1x\n"
+    "  --no-stats           Suppress the on-screen frame-time text.\n"
     "  --help               Display this message.\n"
     "\n"
 ;
@@ -549,6 +556,7 @@ void BrDemoDefaultArgs(br_demo_run_args *args)
         .opengl_device_name = "glrend",
         .backbuffer_width   = 0,
         .backbuffer_height  = 0,
+        .no_stats           = 0,
     };
 }
 
