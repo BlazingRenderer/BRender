@@ -81,6 +81,40 @@ br_boolean ShaderGLMainCompile(br_gl_main_shader *self, const GladGLContext *gl,
 
     get_shader_variables(self, gl);
 
+    /*
+     * The uniform blocks mirror br_gl_main_data_scene/br_gl_main_data_model
+     * field for field, and a mismatch is not a subtle rendering error - wrong
+     * loop bounds from a misread light_start will hang the GPU. Ask the driver
+     * what it actually laid out and refuse to run if it disagrees.
+     */
+    {
+        const struct {
+            GLuint      index;
+            GLsizeiptr  expected;
+            const char *name;
+        } blocks[] = {
+            {self->block_index_scene, sizeof(br_gl_main_data_scene), "br_scene_state"},
+            {self->block_index_model, sizeof(br_gl_main_data_model), "br_model_state"},
+        };
+
+        for(size_t i = 0; i < BR_ASIZE(blocks); ++i) {
+            GLint size = 0;
+
+            if(blocks[i].index == GL_INVALID_INDEX) {
+                BrLogError("GLREND", "Uniform block %s is missing from the shader.", blocks[i].name);
+                goto prog_failed;
+            }
+
+            gl->GetActiveUniformBlockiv(self->program, blocks[i].index, GL_UNIFORM_BLOCK_DATA_SIZE, &size);
+
+            if((GLsizeiptr)size != blocks[i].expected) {
+                BrLogError("GLREND", "Uniform block %s is %d bytes in the shader but %d in C - refusing to run.",
+                           blocks[i].name, size, (int)blocks[i].expected);
+                goto prog_failed;
+            }
+        }
+    }
+
 prog_failed:
     gl->DeleteShader(frag);
 
