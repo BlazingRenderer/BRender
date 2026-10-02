@@ -28,6 +28,7 @@ void BufferRingGLInit(br_buffer_ring_gl *self, const GladGLContext *gl, const ch
         self->fences[i] = NULL;
     }
 
+    self->mapped            = NULL;
     self->frame_index       = BR_GLREND_MODEL_RB_FRAMES;
     self->offset            = 0;
     self->buffer_size       = buffer_size;
@@ -73,12 +74,24 @@ void BufferRingGLBegin(br_buffer_ring_gl *self)
         gl->BindBufferBase(self->binding_point, self->buffer_index, self->buffers[self->frame_index]);
     } else {
         gl->BindBuffer(self->binding_point, self->buffers[self->frame_index]);
+
+        self->mapped = gl->MapBufferRange(self->binding_point, 0, (GLsizeiptr)self->buffer_size,
+                                          GL_MAP_WRITE_BIT | GL_MAP_UNSYNCHRONIZED_BIT | GL_MAP_INVALIDATE_BUFFER_BIT);
+        if(self->mapped == NULL)
+            BrLogError("GLREND", "Could not map the buffer ring; skipping draws until it succeeds.");
     }
 }
 
 void BufferRingGLEnd(br_buffer_ring_gl *self)
 {
-    const GladGLContext *gl         = self->gl;
+    const GladGLContext *gl = self->gl;
+
+    if(self->mapped != NULL) {
+        gl->BindBuffer(self->binding_point, self->buffers[self->frame_index]);
+        gl->UnmapBuffer(self->binding_point);
+        self->mapped = NULL;
+    }
+
     self->fences[self->frame_index] = gl->FenceSync(GL_SYNC_GPU_COMMANDS_COMPLETE, 0);
 }
 
@@ -101,7 +114,11 @@ br_boolean BufferRingGLPush(br_buffer_ring_gl *self, const void *data, GLsizeipt
         if(self->offset >= self->buffer_size)
             return BR_FALSE;
 
-        gl->BufferSubData(self->binding_point, self->offset, size, data);
+        if(self->mapped == NULL)
+            return BR_FALSE;
+
+        BrMemCpy((br_uint_8 *)self->mapped + self->offset, data, (size_t)size);
+
         gl->BindBufferRange(self->binding_point, self->buffer_index, ubo, self->offset, size);
 
         self->offset += self->aligned_elem_size;
