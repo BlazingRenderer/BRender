@@ -265,6 +265,21 @@ typedef struct {
         br_vector4 eye_m;
         br_scalar  mv_det3; /* Determinate of the upper 3x3 of MV. */
     } model;
+
+    /*
+     * The frame's lights, packed by type, plus what the per-draw cull needs.
+     * CPU-side only - a per-draw subset is copied into the model UBO by
+     * StateGLBuildLightLists().
+     *
+     * NB: radius_outer is taken from the light state rather than from
+     * lights.light_radii, which is only written for radial attenuation.
+     */
+    br_gl_main_data_lights lights;
+    struct {
+        br_boolean radius_cull;
+        br_scalar  radius_outer;
+    } light_cull[BR_MAX_LIGHTS];
+    br_uint_32 num_lights;
 } state_cache;
 
 typedef struct state_all {

@@ -39,7 +39,8 @@ static int sort_lights(const void *a, const void *b)
  * -1 = completely ignore this light.
  *  0 = ok
  */
-static int casfd(br_gl_main_data_scene *scene, const state_light *in, size_t i, br_vector4_i *counts, br_boolean *use_ambient_colour)
+static int casfd(br_gl_main_data_lights *lights, br_vector4 *ambient_colour, const state_light *in, size_t i, br_vector4_i *counts,
+                 br_boolean *use_ambient_colour)
 {
     if(in->type == BRT_NONE)
         return -1;
@@ -56,14 +57,14 @@ static int casfd(br_gl_main_data_scene *scene, const state_light *in, size_t i, 
      * moving work out of the shader.
      */
     if(in->type == BRT_AMBIENT && in->attenuation_type != BRT_RADII) {
-        BrVector4AccumulateScale(&scene->ambient_colour, &colour, intensity);
+        BrVector4AccumulateScale(ambient_colour, &colour, intensity);
         *use_ambient_colour = BR_TRUE;
         return -1;
     }
 
-    br_gl_main_data_light_info  *info  = scene->light_info + i;
-    br_gl_main_data_light_atten *atten = scene->light_atten + i;
-    br_gl_main_data_light_radii *radii = scene->light_radii + i;
+    br_gl_main_data_light_info  *info  = lights->light_info + i;
+    br_gl_main_data_light_atten *atten = lights->light_atten + i;
+    br_gl_main_data_light_radii *radii = lights->light_radii + i;
 
     switch(in->type) {
         case BRT_AMBIENT:
@@ -85,15 +86,15 @@ static int casfd(br_gl_main_data_scene *scene, const state_light *in, size_t i, 
     counts->v[info->type]++;
 
     /* See enables.c:194, BrSetupLights(). All the lights are already converted into view space. */
-    BrVector4Set(scene->light_positions + i, in->position.v[0], in->position.v[1], in->position.v[2], in->type == BRT_DIRECT ? 0.0f : 1.0f);
-    BrVector4Set(scene->light_directions + i, in->direction.v[0], in->direction.v[1], in->direction.v[2], 0.0f);
+    BrVector4Set(lights->light_positions + i, in->position.v[0], in->position.v[1], in->position.v[2], in->type == BRT_DIRECT ? 0.0f : 1.0f);
+    BrVector4Set(lights->light_directions + i, in->direction.v[0], in->direction.v[1], in->direction.v[2], 0.0f);
 
     if(in->type == BRT_DIRECT) {
-        BrVector4Copy(scene->light_halfs + i, scene->light_directions + i);
-        scene->light_halfs[i].v[2] += 1.0f;
-        BrVector4Normalise(scene->light_halfs + i, scene->light_halfs + i);
+        BrVector4Copy(lights->light_halfs + i, lights->light_directions + i);
+        lights->light_halfs[i].v[2] += 1.0f;
+        BrVector4Normalise(lights->light_halfs + i, lights->light_halfs + i);
 
-        BrVector4Scale(scene->light_directions + i, scene->light_directions + i, intensity);
+        BrVector4Scale(lights->light_directions + i, lights->light_directions + i, intensity);
     }
 
     atten->intensity     = intensity;
@@ -101,7 +102,7 @@ static int casfd(br_gl_main_data_scene *scene, const state_light *in, size_t i, 
     atten->attenuation_l = in->attenuation_l;
     atten->attenuation_q = in->attenuation_q;
 
-    scene->light_colours[i] = colour;
+    lights->light_colours[i] = colour;
 
     if(in->type == BRT_SPOT) {
         radii->spot_cos_inner = in->spot_inner;
@@ -156,23 +157,21 @@ static void ProcessSceneLights(state_cache *cache, state_light *lights)
     for(uint32_t i = 0; i < MAX_STATE_LIGHTS; ++i) {
         const state_light *light = lights + i;
 
-        if(casfd(scene, light, num_lights, &counts, &use_ambient_colour) < 0)
+        if(casfd(&cache->lights, &scene->ambient_colour, light, num_lights, &counts, &use_ambient_colour) < 0)
             continue;
+
+        /*
+         * Record what the per-draw cull needs. Taken from the light state,
+         * because the light arrays are only populated for radial attenuation.
+         * See StateGLBuildLightLists().
+         */
+        cache->light_cull[num_lights].radius_cull = light->radius_cull;
+        cache->light_cull[num_lights].radius_outer = light->radius_outer;
 
         ++num_lights;
     }
 
-    scene->light_start.v[0] = 0;
-    scene->light_end.v[0]   = counts.v[0];
-
-    scene->light_start.v[1] = scene->light_end.v[0];
-    scene->light_end.v[1]   = scene->light_start.v[1] + counts.v[1];
-
-    scene->light_start.v[2] = scene->light_end.v[1];
-    scene->light_end.v[2]   = scene->light_start.v[2] + counts.v[2];
-
-    scene->light_start.v[3] = scene->light_end.v[2];
-    scene->light_end.v[3]   = scene->light_start.v[3] + counts.v[3];
+    cache->num_lights = (br_uint_32)num_lights;
 
     if(use_ambient_colour) {
         BrVector4Clamp(&scene->ambient_colour, &scene->ambient_colour, BR_SCALAR(0), BR_SCALAR(1));
@@ -184,6 +183,110 @@ static void ProcessSceneLights(state_cache *cache, state_light *lights)
     /* No, sorry, I'm not dealing with lighting alpha. */
     scene->ambient_colour.v[3] = 1.0f;
     scene->use_ambient_colour  = use_ambient_colour;
+}
+
+/*
+ * Upper bound on the largest singular value of the model->view 3x3, via the
+ * Frobenius norm (always >= the spectral norm). Scales the model's bounding
+ * radius from model space into view space.
+ *
+ * model_to_view is not necessarily an isometry - models can be scaled, and
+ * non-uniformly - so the radius has to be scaled rather than used directly.
+ */
+static br_scalar ModelToViewMaxScale(const br_matrix4 *mv)
+{
+    float sum = 0.0f;
+
+    for(int r = 0; r < 3; ++r)
+        for(int c = 0; c < 3; ++c) {
+            float v = BrScalarToFloat(mv->m[r][c]);
+            sum += v * v;
+        }
+
+    return BrFloatToScalar(sqrtf(sum));
+}
+
+/*
+ * Build the lights this draw can see.
+ *
+ * The survivors of the model cull are copied into the model's light block,
+ * grouped by type with light_start/light_end giving each type's range. The
+ * shader's loops are then identical to the old per-frame set - the arrays it
+ * indexes just hold fewer lights, packed from zero.
+ *
+ * This is what makes the cull pay: keeping the indices affine is the whole
+ * point. An index list or a per-light branch both make the light arrays
+ * indirect, which costs more than the skipped work saves.
+ *
+ * The cull itself follows softrend/setup.c: a light with radius culling enabled
+ * cannot reach the model if it lies further from the model's origin than
+ * radius_outer plus the model's bounding radius. It is evaluated in view space,
+ * which is the space the shader shades in. (softrend's BRT_MODEL path shades in
+ * model space and so culls in model space - each path is consistent with
+ * itself; the space is not interchangeable.)
+ *
+ * TODO: angle culling for spot lights, i.e. sphereIntersectsCone() in
+ *       softrend/setup.c. Spots currently stay lit, which is conservative.
+ */
+void StateGLBuildLightLists(const state_cache *cache, const struct v11model *v11m, br_gl_main_data_model *model)
+{
+    const br_matrix4 *mv = &cache->model.mv;
+
+    /* Model-space origin in view space, i.e. the translation row of mv. */
+    br_scalar ox = mv->m[3][0];
+    br_scalar oy = mv->m[3][1];
+    br_scalar oz = mv->m[3][2];
+
+    /*
+     * When v11m is NULL the model's bounds are unknown (the per-triangle path
+     * draws from the transient buffer), so nothing is culled.
+     */
+    br_scalar bound = v11m != NULL ? BR_MUL(ModelToViewMaxScale(mv), v11m->radius) : BR_SCALAR(0.0);
+
+    br_uint_32 out = 0;
+
+    for(br_uint_32 t = 0; t < 4; ++t) {
+        br_uint_32 start = out;
+
+        model->light_start.v[t] = (br_int_32)start;
+
+        for(br_uint_32 i = 0; i < cache->num_lights; ++i) {
+            if(cache->lights.light_info[i].type != t)
+                continue;
+
+            if(v11m != NULL && cache->light_cull[i].radius_cull) {
+                const br_vector4 *lp = &cache->lights.light_positions[i];
+                br_scalar         dx = lp->v[0] - ox;
+                br_scalar         dy = lp->v[1] - oy;
+                br_scalar         dz = lp->v[2] - oz;
+                br_scalar         radius = cache->light_cull[i].radius_outer + bound;
+
+                /*
+                 * A negative radius_outer would make the test meaningless, so
+                 * clamp before squaring.
+                 */
+                if(radius < BR_SCALAR(0.0))
+                    radius = BR_SCALAR(0.0);
+
+                if(BR_MUL(dx, dx) + BR_MUL(dy, dy) + BR_MUL(dz, dz) > BR_MUL(radius, radius))
+                    continue;
+            }
+
+            model->lights.light_info[out]      = cache->lights.light_info[i];
+            model->lights.light_positions[out] = cache->lights.light_positions[i];
+            model->lights.light_directions[out] = cache->lights.light_directions[i];
+            model->lights.light_halfs[out]     = cache->lights.light_halfs[i];
+            model->lights.light_colours[out]   = cache->lights.light_colours[i];
+            model->lights.light_atten[out]     = cache->lights.light_atten[i];
+            model->lights.light_radii[out]     = cache->lights.light_radii[i];
+
+            ++out;
+        }
+
+        model->light_end.v[t] = (br_int_32)out;
+    }
+
+    ASSERT(out <= BR_MAX_LIGHTS);
 }
 
 /*

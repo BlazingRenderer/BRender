@@ -38,17 +38,8 @@
 layout(std140, binding=0) uniform br_scene_state
 {
     vec4 eye_view; /* Eye position in view-space */
-    uvec4 light_info[MAX_LIGHTS];
-    vec4 light_positions[MAX_LIGHTS];
-    vec4 light_directions[MAX_LIGHTS];
-    vec4 light_halfs[MAX_LIGHTS];
-    vec4 light_colours[MAX_LIGHTS];
-    vec4 light_atten[MAX_LIGHTS];
-    vec4 light_radii[MAX_LIGHTS];
     vec4 clip_planes[MAX_CLIP_PLANES];
     vec4 ambient_colour;
-    uvec4 light_start;
-    uvec4 light_end;
     uint num_clip_planes;
     bool use_ambient_colour;
 };
@@ -79,6 +70,21 @@ layout(std140, binding=1) uniform br_model_state
     bool enable_fog;
     float fog_scale;
     int shading_mode;
+
+    /*
+     * The lights for this draw, packed by type. These are the same names the
+     * light functions have always used - they simply live in the per-draw block
+     * now, so a draw only carries the lights it can actually see.
+     */
+    uvec4 light_start;
+    uvec4 light_end;
+    uvec4 light_info[MAX_LIGHTS];
+    vec4 light_positions[MAX_LIGHTS];
+    vec4 light_directions[MAX_LIGHTS];
+    vec4 light_halfs[MAX_LIGHTS];
+    vec4 light_colours[MAX_LIGHTS];
+    vec4 light_atten[MAX_LIGHTS];
+    vec4 light_radii[MAX_LIGHTS];
 };
 
 float calculateAttenuation(in uint i, in float dist)

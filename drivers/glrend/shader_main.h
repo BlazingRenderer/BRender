@@ -55,8 +55,12 @@ typedef struct br_gl_main_data_light_radii {
 } br_gl_main_data_light_radii;
 BR_STATIC_ASSERT(sizeof(br_gl_main_data_light_radii) == sizeof(br_vector4), "sizeof(br_gl_main_data_light_radii) != sizeof(br_vector4)");
 
-typedef struct br_gl_main_data_scene {
-    alignas(16) br_vector4 eye_view;
+/*
+ * The lights a single draw can see, packed so that each type occupies a
+ * contiguous range and the shader's per-type loops stay affine. Rebuilt for
+ * every draw - see StateGLBuildLightLists().
+ */
+typedef struct br_gl_main_data_lights {
     alignas(16) br_gl_main_data_light_info light_info[BR_MAX_LIGHTS];   /* (type, atten_type, 0, 0) */
     alignas(16) br_vector4 light_positions[BR_MAX_LIGHTS];              /* (X, Y, Z, 0) */
     alignas(16) br_vector4 light_directions[BR_MAX_LIGHTS];             /* (X, Y, Z, 0), normalised */
@@ -64,10 +68,12 @@ typedef struct br_gl_main_data_scene {
     alignas(16) br_vector4 light_colours[BR_MAX_LIGHTS];                /* (R, G, B, 0)   */
     alignas(16) br_gl_main_data_light_atten light_atten[BR_MAX_LIGHTS]; /* (1/C, C, L, Q) */
     alignas(16) br_gl_main_data_light_radii light_radii[BR_MAX_LIGHTS]; /* (cos(inner), cos(outer), radius_inner, radius_outer) */
+} br_gl_main_data_lights;
+
+typedef struct br_gl_main_data_scene {
+    alignas(16) br_vector4 eye_view;
     alignas(16) br_vector4 clip_planes[BR_MAX_CLIP_PLANES];
     alignas(16) br_vector4 ambient_colour;
-    alignas(16) br_vector4_i light_start;
-    alignas(16) br_vector4_i light_end;
     alignas(4) uint32_t num_clip_planes;
     alignas(4) uint32_t use_ambient_colour;
 } br_gl_main_data_scene;
@@ -96,6 +102,14 @@ typedef struct br_gl_main_data_model {
     alignas(4) uint32_t enable_fog;
     alignas(4) br_scalar fog_scale;
     alignas(4) uint32_t shading_mode;
+
+    /*
+     * The lights for this draw. The shader's loops are identical to a per-frame
+     * light set; light_start/light_end just describe a smaller, repacked one.
+     */
+    alignas(16) br_vector4_i light_start;
+    alignas(16) br_vector4_i light_end;
+    br_gl_main_data_lights   lights;
 } br_gl_main_data_model;
 #pragma pack(pop)
 
