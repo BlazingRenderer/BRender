@@ -169,7 +169,7 @@ void StateGLCopy(state_stack *dst, const state_stack *src, uint32_t mask);
 void       BufferRingGLInit(br_buffer_ring_gl *self, const GladGLContext *gl, const char *tag, size_t offset_alignment, size_t num_draws,
                             GLuint buffer_index, size_t elem_size, GLenum binding_point);
 void       BufferRingGLBegin(br_buffer_ring_gl *self);
-br_boolean BufferRingGLPush(br_buffer_ring_gl *self, const void *data, GLsizeiptr size);
+br_boolean BufferRingGLPush(br_buffer_ring_gl *self, const void *data, GLsizeiptr write_size, GLsizeiptr bind_size);
 void       BufferRingGLEnd(br_buffer_ring_gl *self);
 void       BufferRingGLFini(br_buffer_ring_gl *self);
 

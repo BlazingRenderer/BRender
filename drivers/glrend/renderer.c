@@ -130,8 +130,7 @@ br_renderer *RendererGLAllocate(br_device *device, br_renderer_facility *facilit
      * upload avoids the pipeline flush glBufferSubData costs on macOS. One
      * element per frame, at offset 0, so no per-element alignment is needed.
      */
-    BufferRingGLInit(&self->scene_ring, gl, "scene", 1, 1, ctx->main_shader.block_binding_scene, sizeof(br_gl_main_data_scene),
-                     GL_UNIFORM_BUFFER);
+    BufferRingGLInit(&self->scene_ring, gl, "scene", 1, 1, ctx->main_shader.block_binding_scene, sizeof(br_gl_main_data_scene), GL_UNIFORM_BUFFER);
 
     self->has_begun = 0;
     return self;
@@ -141,7 +140,7 @@ static void BR_CMETHOD_DECL(br_renderer_gl, sceneBegin)(br_renderer *self)
 {
     const GladGLContext     *gl            = self->gl;
     br_device_pixelmap      *colour_target = NULL, *depth_target = NULL;
-    const br_gl_main_shader *shader        = &GLContextState(gl)->main_shader;
+    const br_gl_main_shader *shader = &GLContextState(gl)->main_shader;
 
     self->stats.face_group_count         = 0;
     self->stats.triangles_drawn_count    = 0;
@@ -192,7 +191,7 @@ static void BR_CMETHOD_DECL(br_renderer_gl, sceneBegin)(br_renderer *self)
     gl->BindFramebuffer(GL_FRAMEBUFFER, self->state.cache.fbo);
 
     BufferRingGLBegin(&self->scene_ring);
-    if(!BufferRingGLPush(&self->scene_ring, &self->state.cache.scene, sizeof(self->state.cache.scene)))
+    if(!BufferRingGLPush(&self->scene_ring, &self->state.cache.scene, sizeof(self->state.cache.scene), sizeof(self->state.cache.scene)))
         BrLogError("GLREND", "Could not stage the scene uniform block.");
 
     br_rectangle viewport = DevicePixelmapGLGetViewport(colour_target);

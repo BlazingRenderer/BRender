@@ -426,7 +426,20 @@ static br_boolean apply_state(br_renderer *renderer, const GladGLContext *gl, co
             break;
     }
 
-    return BufferRingGLPush(&renderer->model_ring, &model, sizeof(model));
+    /*
+     * Only the lights this draw actually carries need writing. The light record
+     * is the last thing in the block and the survivors are a contiguous prefix,
+     * so the used part ends at the last one.
+     */
+    {
+        br_uint_32 nlights = (br_uint_32)model.light_end.v[3];
+        GLsizeiptr used     = (GLsizeiptr)(offsetof(br_gl_main_data_model, lights.light) + nlights * sizeof(br_gl_main_data_light));
+
+        if(used > (GLsizeiptr)sizeof(model))
+            used = (GLsizeiptr)sizeof(model);
+
+        return BufferRingGLPush(&renderer->model_ring, &model, used, (GLsizeiptr)sizeof(model));
+    }
 }
 
 void RendererGLRenderGroup(br_renderer *self, br_geometry_stored *stored, const gl_groupinfo *groupinfo)

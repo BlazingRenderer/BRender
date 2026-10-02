@@ -20,8 +20,8 @@ typedef struct br_gl_main_shader {
         GLint index_texture; /* usampler2D */
     } uniforms;
 
-    GLuint       block_index_scene;
-    GLuint       block_binding_scene;
+    GLuint block_index_scene;
+    GLuint block_binding_scene;
 
     GLuint block_index_model;
     GLuint block_binding_model;
@@ -56,18 +56,30 @@ typedef struct br_gl_main_data_light_radii {
 BR_STATIC_ASSERT(sizeof(br_gl_main_data_light_radii) == sizeof(br_vector4), "sizeof(br_gl_main_data_light_radii) != sizeof(br_vector4)");
 
 /*
+ * One light, as the shader sees it.
+ *
+ * Kept as an array of these rather than seven parallel arrays: a draw only
+ * carries the lights it can see, and with the fields interleaved the used part
+ * of the block is a contiguous prefix, so the per-draw upload can stop early.
+ * With parallel arrays, eight surviving lights still touch the whole block.
+ */
+typedef struct br_gl_main_data_light {
+    alignas(16) br_gl_main_data_light_info info;   /* (type, atten_type, 0, 0) */
+    alignas(16) br_vector4 position;               /* (X, Y, Z, w) */
+    alignas(16) br_vector4 direction;              /* (X, Y, Z, 0), normalised */
+    alignas(16) br_vector4 halfway;                /* (X, Y, Z, 0), normalised */
+    alignas(16) br_vector4 colour;                 /* (R, G, B, 0) */
+    alignas(16) br_gl_main_data_light_atten atten; /* (intensity, C, L, Q) */
+    alignas(16) br_gl_main_data_light_radii radii; /* (cos(inner), cos(outer), radius_inner, radius_outer) */
+} br_gl_main_data_light;
+
+/*
  * The lights a single draw can see, packed so that each type occupies a
  * contiguous range and the shader's per-type loops stay affine. Rebuilt for
  * every draw - see StateGLBuildLightLists().
  */
 typedef struct br_gl_main_data_lights {
-    alignas(16) br_gl_main_data_light_info light_info[BR_MAX_LIGHTS];   /* (type, atten_type, 0, 0) */
-    alignas(16) br_vector4 light_positions[BR_MAX_LIGHTS];              /* (X, Y, Z, 0) */
-    alignas(16) br_vector4 light_directions[BR_MAX_LIGHTS];             /* (X, Y, Z, 0), normalised */
-    alignas(16) br_vector4 light_halfs[BR_MAX_LIGHTS];                  /* (X, Y, Z, 0), normalised */
-    alignas(16) br_vector4 light_colours[BR_MAX_LIGHTS];                /* (R, G, B, 0)   */
-    alignas(16) br_gl_main_data_light_atten light_atten[BR_MAX_LIGHTS]; /* (1/C, C, L, Q) */
-    alignas(16) br_gl_main_data_light_radii light_radii[BR_MAX_LIGHTS]; /* (cos(inner), cos(outer), radius_inner, radius_outer) */
+    br_gl_main_data_light light[BR_MAX_LIGHTS];
 } br_gl_main_data_lights;
 
 typedef struct br_gl_main_data_scene {
@@ -109,7 +121,7 @@ typedef struct br_gl_main_data_model {
      */
     alignas(16) br_vector4_i light_start;
     alignas(16) br_vector4_i light_end;
-    br_gl_main_data_lights   lights;
+    br_gl_main_data_lights lights;
 } br_gl_main_data_model;
 #pragma pack(pop)
 

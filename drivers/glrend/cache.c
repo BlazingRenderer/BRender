@@ -62,70 +62,68 @@ static int casfd(br_gl_main_data_lights *lights, br_vector4 *ambient_colour, con
         return -1;
     }
 
-    br_gl_main_data_light_info  *info  = lights->light_info + i;
-    br_gl_main_data_light_atten *atten = lights->light_atten + i;
-    br_gl_main_data_light_radii *radii = lights->light_radii + i;
+    br_gl_main_data_light *light = lights->light + i;
 
     switch(in->type) {
         case BRT_AMBIENT:
-            info->type = 0;
+            light->info.type = 0;
             break;
         case BRT_DIRECT:
-            info->type = 1;
+            light->info.type = 1;
             break;
         case BRT_POINT:
-            info->type = 2;
+            light->info.type = 2;
             break;
         case BRT_SPOT:
-            info->type = 3;
+            light->info.type = 3;
             break;
         default:
             return -1;
     }
 
-    counts->v[info->type]++;
+    counts->v[light->info.type]++;
 
     /* See enables.c:194, BrSetupLights(). All the lights are already converted into view space. */
-    BrVector4Set(lights->light_positions + i, in->position.v[0], in->position.v[1], in->position.v[2], in->type == BRT_DIRECT ? 0.0f : 1.0f);
-    BrVector4Set(lights->light_directions + i, in->direction.v[0], in->direction.v[1], in->direction.v[2], 0.0f);
+    BrVector4Set(&light->position, in->position.v[0], in->position.v[1], in->position.v[2], in->type == BRT_DIRECT ? 0.0f : 1.0f);
+    BrVector4Set(&light->direction, in->direction.v[0], in->direction.v[1], in->direction.v[2], 0.0f);
 
     if(in->type == BRT_DIRECT) {
-        BrVector4Copy(lights->light_halfs + i, lights->light_directions + i);
-        lights->light_halfs[i].v[2] += 1.0f;
-        BrVector4Normalise(lights->light_halfs + i, lights->light_halfs + i);
+        BrVector4Copy(&light->halfway, &light->direction);
+        light->halfway.v[2] += 1.0f;
+        BrVector4Normalise(&light->halfway, &light->halfway);
 
-        BrVector4Scale(lights->light_directions + i, lights->light_directions + i, intensity);
+        BrVector4Scale(&light->direction, &light->direction, intensity);
     }
 
-    atten->intensity     = intensity;
-    atten->attenuation_c = in->attenuation_c;
-    atten->attenuation_l = in->attenuation_l;
-    atten->attenuation_q = in->attenuation_q;
+    light->atten.intensity     = intensity;
+    light->atten.attenuation_c = in->attenuation_c;
+    light->atten.attenuation_l = in->attenuation_l;
+    light->atten.attenuation_q = in->attenuation_q;
 
-    lights->light_colours[i] = colour;
+    light->colour = colour;
 
     if(in->type == BRT_SPOT) {
-        radii->spot_cos_inner = in->spot_inner;
-        radii->spot_cos_outer = in->spot_outer;
+        light->radii.spot_cos_inner = in->spot_inner;
+        light->radii.spot_cos_outer = in->spot_outer;
     } else {
-        radii->spot_cos_inner = 0.0f;
-        radii->spot_cos_outer = 0.0f;
+        light->radii.spot_cos_inner = 0.0f;
+        light->radii.spot_cos_outer = 0.0f;
     }
 
     switch(in->attenuation_type) {
         case BRT_QUADRATIC:
         default:
-            info->attenuation_type = 0;
+            light->info.attenuation_type = 0;
             break;
 
         case BRT_RADII:
-            info->attenuation_type = 1;
+            light->info.attenuation_type = 1;
 
-            radii->radius_inner = in->radius_inner;
-            radii->radius_outer = in->radius_outer;
+            light->radii.radius_inner = in->radius_inner;
+            light->radii.radius_outer = in->radius_outer;
 
-            if(radii->radius_inner == radii->radius_outer)
-                radii->radius_inner = 0;
+            if(light->radii.radius_inner == light->radii.radius_outer)
+                light->radii.radius_inner = 0;
 
             break;
     }
@@ -251,11 +249,11 @@ void StateGLBuildLightLists(const state_cache *cache, const struct v11model *v11
         model->light_start.v[t] = (br_int_32)start;
 
         for(br_uint_32 i = 0; i < cache->num_lights; ++i) {
-            if(cache->lights.light_info[i].type != t)
+            if(cache->lights.light[i].info.type != t)
                 continue;
 
             if(v11m != NULL && cache->light_cull[i].radius_cull) {
-                const br_vector4 *lp = &cache->lights.light_positions[i];
+                const br_vector4 *lp = &cache->lights.light[i].position;
                 br_scalar         dx = lp->v[0] - ox;
                 br_scalar         dy = lp->v[1] - oy;
                 br_scalar         dz = lp->v[2] - oz;
@@ -272,13 +270,7 @@ void StateGLBuildLightLists(const state_cache *cache, const struct v11model *v11
                     continue;
             }
 
-            model->lights.light_info[out]      = cache->lights.light_info[i];
-            model->lights.light_positions[out] = cache->lights.light_positions[i];
-            model->lights.light_directions[out] = cache->lights.light_directions[i];
-            model->lights.light_halfs[out]     = cache->lights.light_halfs[i];
-            model->lights.light_colours[out]   = cache->lights.light_colours[i];
-            model->lights.light_atten[out]     = cache->lights.light_atten[i];
-            model->lights.light_radii[out]     = cache->lights.light_radii[i];
+            model->lights.light[out] = cache->lights.light[i];
 
             ++out;
         }

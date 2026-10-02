@@ -86,7 +86,7 @@ void BufferRingGLEnd(br_buffer_ring_gl *self)
     self->fences[self->frame_index] = gl->FenceSync(GL_SYNC_GPU_COMMANDS_COMPLETE, 0);
 }
 
-br_boolean BufferRingGLPush(br_buffer_ring_gl *self, const void *data, GLsizeiptr size)
+br_boolean BufferRingGLPush(br_buffer_ring_gl *self, const void *data, GLsizeiptr write_size, GLsizeiptr bind_size)
 {
     const GladGLContext *gl  = self->gl;
     GLuint               ubo = self->buffers[self->frame_index];
@@ -99,15 +99,23 @@ br_boolean BufferRingGLPush(br_buffer_ring_gl *self, const void *data, GLsizeipt
     }
 #endif
 
+    /*
+     * write_size may be less than bind_size: a draw only fills the prefix of its
+     * data that it actually uses, but the shader's block is still the full size,
+     * so the bound range has to cover it. The unwritten tail is stale, and is
+     * never read.
+     */
+    ASSERT(write_size <= bind_size);
+
     if(self->offset >= self->buffer_size)
         return BR_FALSE;
 
     if(self->mapped == NULL)
         return BR_FALSE;
 
-    BrMemCpy((br_uint_8 *)self->mapped + self->offset, data, (size_t)size);
+    BrMemCpy((br_uint_8 *)self->mapped + self->offset, data, (size_t)write_size);
 
-    gl->BindBufferRange(self->binding_point, self->buffer_index, ubo, self->offset, size);
+    gl->BindBufferRange(self->binding_point, self->buffer_index, ubo, self->offset, bind_size);
 
     self->offset += self->aligned_elem_size;
 

@@ -35,6 +35,20 @@
 #define DEBUG_DISABLE_LIGHT_POINT       0
 #define DEBUG_DISABLE_LIGHT_SPOT        0
 
+/*
+ * One light, mirroring br_gl_main_data_light. Fields are interleaved so the
+ * used part of the block is a contiguous prefix.
+ */
+struct br_light {
+    uvec4 info;      /* (type, atten_type, 0, 0) */
+    vec4  position;  /* (X, Y, Z, w) */
+    vec4  direction; /* (X, Y, Z, 0), normalised */
+    vec4  halfway;   /* (X, Y, Z, 0), normalised */
+    vec4  colour;    /* (R, G, B, 0) */
+    vec4  atten;     /* (intensity, C, L, Q) */
+    vec4  radii;     /* (cos(inner), cos(outer), radius_inner, radius_outer) */
+};
+
 layout(std140, binding=0) uniform br_scene_state
 {
     vec4 eye_view; /* Eye position in view-space */
@@ -78,28 +92,22 @@ layout(std140, binding=1) uniform br_model_state
      */
     uvec4 light_start;
     uvec4 light_end;
-    uvec4 light_info[MAX_LIGHTS];
-    vec4 light_positions[MAX_LIGHTS];
-    vec4 light_directions[MAX_LIGHTS];
-    vec4 light_halfs[MAX_LIGHTS];
-    vec4 light_colours[MAX_LIGHTS];
-    vec4 light_atten[MAX_LIGHTS];
-    vec4 light_radii[MAX_LIGHTS];
+    br_light lights[MAX_LIGHTS];
 };
 
 float calculateAttenuation(in uint i, in float dist)
 {
-    const float attenuation_c = light_atten[i][1];
-    const float attenuation_l = light_atten[i][2];
-    const float attenuation_q = light_atten[i][3];
+    const float attenuation_c = lights[i].atten[1];
+    const float attenuation_l = lights[i].atten[2];
+    const float attenuation_q = lights[i].atten[3];
 
     return 1.0 / (attenuation_c + (attenuation_l * dist) + (attenuation_q * dist * dist));
 }
 
 float calculateAttenuationRadii(in uint i, in float dist, in float intensity)
 {
-    const float radius_inner = light_radii[i][2];
-    const float radius_outer = light_radii[i][3];
+    const float radius_inner = lights[i].radii[2];
+    const float radius_outer = lights[i].radii[3];
 
     /*
      * NB: radius_outer != radius_inner is enforced CPU-side.
@@ -114,9 +122,9 @@ float calculateAttenuationRadii(in uint i, in float dist, in float intensity)
  */
 void lightingColourAmbientRadii(in vec3 p, in vec3 n, in uint i, inout vec3 outA, inout vec3 outD, inout vec3 outS)
 {
-    const float intensity    = light_atten[i][0];
-    const float radius_outer = light_radii[i][3];
-    const vec3  position     = light_positions[i].xyz;
+    const float intensity    = lights[i].atten[0];
+    const float radius_outer = lights[i].radii[3];
+    const vec3  position     = lights[i].position.xyz;
 
     float atten = 1.0f;
 
@@ -129,20 +137,20 @@ void lightingColourAmbientRadii(in vec3 p, in vec3 n, in uint i, inout vec3 outA
     atten = calculateAttenuationRadii(i, dist, intensity);
 
     // FIXME: should the intensity be multiplied here?
-    outA += ka * intensity * light_colours[i].xyz * atten;
+    outA += ka * intensity * lights[i].colour.xyz * atten;
 }
 
 void lightingColourDirect(in vec3 p, in vec3 n, in uint i, inout vec3 outA, inout vec3 outD, inout vec3 outS)
 {
-    const float intensity = light_atten[i][0];
-    const vec3  colour    = light_colours[i].rgb;
-    const vec3  direction = light_directions[i].xyz;
+    const float intensity = lights[i].atten[0];
+    const vec3  colour    = lights[i].colour.rgb;
+    const vec3  direction = lights[i].direction.xyz;
 
     float diffDot = max(dot(n, direction), 0.0);
     outD += diffDot * kd * colour; /* NB: Intensity is scaled into the direction CPU-side (in cache.c) */
 
     if(ks > 0.0) {
-        float specDot = max(dot(n, light_halfs[i].xyz), 0.0);
+        float specDot = max(dot(n, lights[i].halfway.xyz), 0.0);
         if(specDot > 0.0) {
             outS += ks * intensity * colour * pow(specDot, power);
         }
@@ -151,11 +159,11 @@ void lightingColourDirect(in vec3 p, in vec3 n, in uint i, inout vec3 outA, inou
 
 void lightingColourPoint(in vec3 p, in vec3 n, in uint i, inout vec3 outA, inout vec3 outD, inout vec3 outS)
 {
-    const uint  attenuation_type = light_info[i][1];
-    const float intensity        = light_atten[i][0];
-    const vec3  colour           = light_colours[i].rgb;
-    const float radius_outer     = light_radii[i][3];
-    const vec3  position         = light_positions[i].xyz;
+    const uint  attenuation_type = lights[i].info[1];
+    const float intensity        = lights[i].atten[0];
+    const vec3  colour           = lights[i].colour.rgb;
+    const float radius_outer     = lights[i].radii[3];
+    const vec3  position         = lights[i].position.xyz;
 
     vec3 dirn = position - p;
     float dist_sqr = dot(dirn, dirn);
@@ -190,10 +198,10 @@ void lightingColourPoint(in vec3 p, in vec3 n, in uint i, inout vec3 outA, inout
 
 void lightingColourSpot(in vec3 p, in vec3 n, in uint i, inout vec3 outA, inout vec3 outD, inout vec3 outS)
 {
-    const float spot_inner_cos = light_radii[i][0];
-    const float spot_outer_cos = light_radii[i][1];
-    const vec3  position       = light_positions[i].xyz;
-    const vec3  direction      = light_directions[i].xyz;
+    const float spot_inner_cos = lights[i].radii[0];
+    const float spot_outer_cos = lights[i].radii[1];
+    const vec3  position       = lights[i].position.xyz;
+    const vec3  direction      = lights[i].direction.xyz;
 
     /*
      * FIXME: We're calculating this twice (in lightingColourPoint).
