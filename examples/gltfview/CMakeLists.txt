@@ -2,6 +2,8 @@ project(gltfview)
 
 add_executable(gltfview
         main.c
+        bench.c
+        bench.h
         ../../contrib/editorcam/editorcam.c
         ../../contrib/editorcam/editorcam.h
         ../../contrib/editorcam/editorcam_p.h
@@ -9,7 +11,7 @@ add_executable(gltfview
 
 target_include_directories(gltfview PRIVATE ../../contrib/editorcam)
 
-target_link_libraries(gltfview PRIVATE BRender::Full brdemo)
+target_link_libraries(gltfview PRIVATE BRender::Full BRender::DDI brdemo)
 
 if (NOT BRENDER_DISABLE_INSTALL)
     install(TARGETS gltfview DESTINATION ${CMAKE_INSTALL_BINDIR})

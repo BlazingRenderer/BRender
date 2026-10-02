@@ -1,0 +1,524 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+#include <SDL3/SDL.h>
+#include <brender.h>
+#include <brddi.h>
+#include <brsdl3dev.h>
+
+#include "brdemo.h"
+#include "bench.h"
+
+/*
+ * We deliberately do not reach into the driver's glad loader; SDL gives us the
+ * entry points, and we only need a handful.
+ */
+#define BENCH_GL_TIME_ELAPSED 0x88BFu
+#define BENCH_GL_QUERY_RESULT 0x8866u
+
+typedef void (*bench_pfn_GenQueries)(int n, unsigned int *ids);
+typedef void (*bench_pfn_DeleteQueries)(int n, const unsigned int *ids);
+typedef void (*bench_pfn_BeginQuery)(unsigned int target, unsigned int id);
+typedef void (*bench_pfn_EndQuery)(unsigned int target);
+typedef void (*bench_pfn_GetQueryObjectui64v)(unsigned int id, unsigned int pname, unsigned long long *params);
+typedef void (*bench_pfn_Finish)(void);
+typedef void (*bench_pfn_ReadPixels)(int x, int y, int w, int h, unsigned int fmt, unsigned int type, void *pixels);
+typedef void (*bench_pfn_ReadBuffer)(unsigned int mode);
+typedef void (*bench_pfn_PixelStorei)(unsigned int pname, int param);
+
+/*
+ * Ring of queries so we can read back an older frame's result while the current
+ * frame is in flight, rather than stalling the pipeline on every frame.
+ */
+#define BENCH_QUERY_RING 4
+
+typedef struct bench_sample {
+    br_uint_64 cpu_frame_ns;
+    br_uint_64 gpu_ns[BENCH_STAGE_COUNT];
+    br_uint_64 cpu_scene_ns;
+} bench_sample;
+
+const char *const bench_stage_names[BENCH_STAGE_COUNT] = {
+    [BENCH_STAGE_CLEAR] = "clear",
+    [BENCH_STAGE_SCENE] = "scene",
+};
+
+struct gltfview_bench {
+    br_demo    *demo;
+    SDL_Window *window;
+
+    br_uint_32  warmup_frames;
+    br_uint_32  total_frames;
+    br_boolean  finish;
+    const char *csv_path;
+
+    /* GL entry points; NULL when there is no GL context. */
+    bench_pfn_GenQueries          GenQueries;
+    bench_pfn_DeleteQueries       DeleteQueries;
+    bench_pfn_BeginQuery          BeginQuery;
+    bench_pfn_EndQuery            EndQuery;
+    bench_pfn_GetQueryObjectui64v GetQueryObjectui64v;
+    bench_pfn_Finish              Finish;
+    bench_pfn_ReadPixels          ReadPixels;
+    bench_pfn_ReadBuffer          ReadBuffer;
+    bench_pfn_PixelStorei         PixelStorei;
+
+    unsigned int query_ring[BENCH_QUERY_RING];
+    br_boolean   query_pending[BENCH_QUERY_RING];
+    br_int_32    query_sample[BENCH_QUERY_RING];
+    bench_stage  query_stage[BENCH_QUERY_RING];
+    br_uint_32   query_head;
+    br_boolean   stage_query_open;
+
+    bench_sample *samples;
+    br_uint_32    nsamples;
+
+    br_uint_32 frame_index;
+    br_uint_64 last_frame_end_ns;
+    br_uint_64 scene_start_ns;
+    br_uint_64 scene_cpu_ns;
+
+    br_boolean done;
+    br_boolean reported;
+};
+
+static br_uint_32 bench_env_u32(const char *name, br_uint_32 fallback)
+{
+    const char *value = BrGetEnv(name);
+
+    if(value == NULL || value[0] == '\0')
+        return fallback;
+
+    return (br_uint_32)BrAToI(value);
+}
+
+static br_boolean bench_env_bool(const char *name)
+{
+    const char *value = BrGetEnv(name);
+
+    if(value == NULL || value[0] == '\0')
+        return BR_FALSE;
+
+    if(value[0] == '0' && value[1] == '\0')
+        return BR_FALSE;
+
+    return BR_TRUE;
+}
+
+static void bench_load_gl(gltfview_bench *self)
+{
+    self->GenQueries          = (bench_pfn_GenQueries)SDL_GL_GetProcAddress("glGenQueries");
+    self->DeleteQueries       = (bench_pfn_DeleteQueries)SDL_GL_GetProcAddress("glDeleteQueries");
+    self->BeginQuery          = (bench_pfn_BeginQuery)SDL_GL_GetProcAddress("glBeginQuery");
+    self->EndQuery            = (bench_pfn_EndQuery)SDL_GL_GetProcAddress("glEndQuery");
+    self->GetQueryObjectui64v = (bench_pfn_GetQueryObjectui64v)SDL_GL_GetProcAddress("glGetQueryObjectui64v");
+    self->Finish              = (bench_pfn_Finish)SDL_GL_GetProcAddress("glFinish");
+    self->ReadPixels          = (bench_pfn_ReadPixels)SDL_GL_GetProcAddress("glReadPixels");
+    self->ReadBuffer          = (bench_pfn_ReadBuffer)SDL_GL_GetProcAddress("glReadBuffer");
+    self->PixelStorei         = (bench_pfn_PixelStorei)SDL_GL_GetProcAddress("glPixelStorei");
+
+    if(self->GenQueries == NULL || self->BeginQuery == NULL || self->EndQuery == NULL || self->GetQueryObjectui64v == NULL)
+        BrLogWarn("BENCH", "GL timer queries unavailable; GPU timings will be reported as 0.");
+}
+
+/* Read back a slot's result, if one is outstanding. Blocks until it is ready. */
+static void bench_reap_slot(gltfview_bench *self, br_uint_32 slot)
+{
+    unsigned long long ns = 0;
+
+    if(!self->query_pending[slot])
+        return;
+
+    self->GetQueryObjectui64v(self->query_ring[slot], BENCH_GL_QUERY_RESULT, &ns);
+
+    if(self->query_sample[slot] >= 0)
+        self->samples[self->query_sample[slot]].gpu_ns[self->query_stage[slot]] = (br_uint_64)ns;
+
+    self->query_pending[slot] = BR_FALSE;
+    self->query_sample[slot]  = -1;
+}
+
+static void bench_checksum(gltfview_bench *bench);
+
+static void bench_drain(gltfview_bench *self)
+{
+    if(self->GenQueries == NULL)
+        return;
+
+    for(br_uint_32 i = 0; i < BENCH_QUERY_RING; ++i)
+        bench_reap_slot(self, i);
+}
+
+gltfview_bench *GLTFViewBenchAllocate(br_demo *demo)
+{
+    gltfview_bench *self;
+    br_uint_32      frames = bench_env_u32("GLTFVIEW_BENCH_FRAMES", 0);
+
+    if(frames == 0)
+        return NULL;
+
+    self = BrResAllocate(demo, sizeof(*self), BR_MEMORY_APPLICATION);
+
+    self->demo          = demo;
+    self->total_frames  = frames;
+    self->warmup_frames = bench_env_u32("GLTFVIEW_BENCH_WARMUP", 10);
+
+    /* The first frame has no predecessor to measure against. */
+    if(self->warmup_frames < 1)
+        self->warmup_frames = 1;
+    self->finish   = bench_env_bool("GLTFVIEW_BENCH_FINISH");
+    self->csv_path = BrGetEnv("GLTFVIEW_BENCH_CSV");
+    self->samples  = BrResAllocate(self, sizeof(bench_sample) * frames, BR_MEMORY_APPLICATION);
+
+    for(br_uint_32 i = 0; i < BENCH_QUERY_RING; ++i)
+        self->query_sample[i] = -1;
+
+    if(demo->_screen != NULL)
+        self->window = BrSDL3UtilGetWindow(demo->_screen);
+
+    if(self->window == NULL) {
+        BrLogError("BENCH", "No window; the benchmark needs a live GL context.");
+        BrResFree(self);
+        return NULL;
+    }
+
+    if(bench_env_bool("GLTFVIEW_BENCH_NOVSYNC")) {
+        if(!SDL_GL_SetSwapInterval(0))
+            BrLogWarn("BENCH", "Could not disable vsync: %s", SDL_GetError());
+    }
+
+    bench_load_gl(self);
+
+    if(self->GenQueries != NULL) {
+        self->GenQueries(BENCH_QUERY_RING, self->query_ring);
+        BrMemSet(self->query_pending, 0, sizeof(self->query_pending));
+    }
+
+    self->last_frame_end_ns = SDL_GetTicksNS();
+
+    int swap_interval = -1;
+
+    SDL_GL_GetSwapInterval(&swap_interval);
+
+    BrLogInfo("BENCH", "Benchmarking %u frames (%u warmup), swap interval %d, glFinish %d.", self->total_frames, self->warmup_frames,
+              swap_interval, self->finish);
+
+    return self;
+}
+
+void GLTFViewBenchBeginStage(gltfview_bench *bench, bench_stage stage)
+{
+    br_uint_32 slot;
+
+    if(bench == NULL)
+        return;
+
+    bench->scene_start_ns = SDL_GetTicksNS();
+
+    if(bench->GenQueries == NULL)
+        return;
+
+    slot = bench->query_head;
+    bench_reap_slot(bench, slot);
+
+    if(bench->frame_index >= bench->warmup_frames && bench->nsamples < bench->total_frames)
+        bench->query_sample[slot] = (br_int_32)bench->nsamples;
+
+    bench->query_stage[slot] = stage;
+    bench->BeginQuery(BENCH_GL_TIME_ELAPSED, bench->query_ring[slot]);
+    bench->stage_query_open = BR_TRUE;
+}
+
+void GLTFViewBenchEndStage(gltfview_bench *bench, bench_stage stage)
+{
+    if(bench == NULL)
+        return;
+
+    bench->scene_cpu_ns = SDL_GetTicksNS() - bench->scene_start_ns;
+
+    if(!bench->stage_query_open)
+        return;
+
+    bench->EndQuery(BENCH_GL_TIME_ELAPSED);
+    bench->query_pending[bench->query_head] = BR_TRUE;
+    bench->query_head                       = (bench->query_head + 1) % BENCH_QUERY_RING;
+    bench->stage_query_open                 = BR_FALSE;
+}
+
+void GLTFViewBenchEndFrame(gltfview_bench *bench)
+{
+    br_uint_64 cpu_ns;
+
+    if(bench == NULL)
+        return;
+
+    if(bench->Finish != NULL && bench->finish)
+        bench->Finish();
+
+    /*
+     * Measured from the same point in the previous frame, so this is the full
+     * frame period: it includes the present and the event pump.
+     */
+    cpu_ns = SDL_GetTicksNS() - bench->last_frame_end_ns;
+
+    if(bench->frame_index >= bench->warmup_frames && bench->nsamples < bench->total_frames) {
+        bench_sample *s = bench->samples + bench->nsamples;
+
+        s->cpu_frame_ns = cpu_ns;
+        s->cpu_scene_ns = bench->scene_cpu_ns;
+        BrMemSet(s->gpu_ns, 0, sizeof(s->gpu_ns)); /* Filled in as queries are reaped. */
+        ++bench->nsamples;
+    }
+
+    ++bench->frame_index;
+
+    if(bench->frame_index >= bench->warmup_frames + bench->total_frames) {
+        bench->done = BR_TRUE;
+        bench_drain(bench);
+        bench_checksum(bench);
+    }
+
+    bench->last_frame_end_ns = SDL_GetTicksNS();
+}
+
+/*
+ * Read back the final frame and report a checksum plus the fraction of the
+ * frame that is not the clear colour. The checksum is a regression guard: a
+ * change to the render path must not alter it.
+ */
+static void bench_checksum(gltfview_bench *bench)
+{
+    int        w = 0, h = 0;
+    br_uint_8 *px;
+    br_uint_64 hash    = 1469598103934665603ull;
+    br_uint_32 covered = 0, total;
+
+    if(bench->ReadPixels == NULL || bench->window == NULL)
+        return;
+
+    SDL_GetWindowSizeInPixels(bench->window, &w, &h);
+
+    if(w <= 0 || h <= 0)
+        return;
+
+    px = BrResAllocate(bench, (br_size_t)w * h * 4, BR_MEMORY_APPLICATION);
+
+    if(bench->ReadBuffer != NULL)
+        bench->ReadBuffer(0x0405 /* GL_BACK */);
+
+    if(bench->PixelStorei != NULL)
+        bench->PixelStorei(0x0CF5 /* GL_PACK_ALIGNMENT */, 1);
+
+    bench->ReadPixels(0, 0, w, h, 0x1908 /* GL_RGBA */, 0x1401 /* GL_UNSIGNED_BYTE */, px);
+
+    total = (br_uint_32)w * (br_uint_32)h;
+    for(br_uint_32 i = 0; i < total; ++i) {
+        const br_uint_8 *p = px + (br_size_t)i * 4;
+
+        for(int c = 0; c < 4; ++c) {
+            hash ^= p[c];
+            hash *= 1099511628211ull;
+        }
+
+        if(p[0] || p[1] || p[2])
+            ++covered;
+    }
+
+    printf("BENCH checksum=%016llx coverage=%.2f%% (%u/%u px at %dx%d)\n", (unsigned long long)hash,
+           100.0 * (double)covered / (double)total, covered, total, w, h);
+
+    {
+        const char *path = BrGetEnv("GLTFVIEW_BENCH_PPM");
+
+        if(path != NULL && path[0] != '\0') {
+            FILE *fp = fopen(path, "wb");
+
+            if(fp != NULL) {
+                fprintf(fp, "P6\n%d %d\n255\n", w, h);
+
+                /* glReadPixels hands back bottom-up. */
+                for(int y = h - 1; y >= 0; --y)
+                    fwrite(px + (br_size_t)y * w * 4, 1, (size_t)w * 3, fp);
+
+                fclose(fp);
+                printf("BENCH ppm=%s\n", path);
+            } else {
+                BrLogWarn("BENCH", "Could not open %s.", path);
+            }
+        }
+    }
+
+    BrResFree(px);
+}
+
+br_boolean GLTFViewBenchShouldQuit(gltfview_bench *bench)
+{
+    return bench != NULL && bench->done;
+}
+
+static int bench_cmp_u64(const void *a, const void *b)
+{
+    br_uint_64 va = *(const br_uint_64 *)a;
+    br_uint_64 vb = *(const br_uint_64 *)b;
+
+    if(va < vb)
+        return -1;
+
+    if(va > vb)
+        return 1;
+
+    return 0;
+}
+
+typedef struct bench_stats {
+    br_uint_64 min;
+    br_uint_64 p50;
+    br_uint_64 p95;
+    br_uint_64 p99;
+    br_uint_64 max;
+    double     mean;
+} bench_stats;
+
+static bench_stats bench_compute_stats(br_uint_64 *values, br_uint_32 n, br_uint_64 *scratch)
+{
+    bench_stats st  = {0};
+    br_uint_64  sum = 0;
+
+    if(n == 0)
+        return st;
+
+    BrMemCpy(scratch, values, sizeof(br_uint_64) * n);
+    BrQsort(scratch, n, sizeof(br_uint_64), bench_cmp_u64);
+
+    for(br_uint_32 i = 0; i < n; ++i)
+        sum += values[i];
+
+    st.min  = scratch[0];
+    st.max  = scratch[n - 1];
+    st.p50  = scratch[(br_uint_32)(n * 0.50)];
+    st.p95  = scratch[(br_uint_32)((n - 1) * 0.95)];
+    st.p99  = scratch[(br_uint_32)((n - 1) * 0.99)];
+    st.mean = (double)sum / (double)n;
+
+    return st;
+}
+
+/*
+ * Ground truth on how many draw calls the frame actually issued, straight from
+ * the driver's own counters. Only meaningful after a render.
+ */
+static void bench_report_renderer_stats(void)
+{
+    br_renderer   *renderer = BrV1dbRendererQuery();
+    br_token_value tv[]     = {
+        {BRT_TRIANGLES_RENDERED_COUNT_U32, {.i32 = 0}},
+        {BRT_VERTICES_RENDERED_COUNT_U32,  {.i32 = 0}},
+        {BRT_TRIANGLES_DRAWN_COUNT_U32,    {.i32 = 0}},
+        {BRT_OPAQUE_DRAW_COUNT_U32,        {.i32 = 0}},
+        {BRT_TRANSPARENT_DRAW_COUNT_U32,   {.i32 = 0}},
+        {BRT_FACE_GROUP_COUNT_U32,         {.i32 = 0}},
+        {BR_NULL_TOKEN,                    {.i32 = 0}},
+    };
+    br_int_32 count = 0;
+
+    if(renderer == NULL)
+        return;
+
+    if(ObjectQueryMany(renderer, tv, NULL, 0, &count) != BRE_OK)
+        return;
+
+    printf("BENCH renderer tris_rendered=%d verts_rendered=%d tris_drawn=%d opaque_draws=%d transparent_draws=%d face_groups=%d\n",
+           tv[0].v.i32, tv[1].v.i32, tv[2].v.i32, tv[3].v.i32, tv[4].v.i32, tv[5].v.i32);
+}
+
+void GLTFViewBenchReport(gltfview_bench *bench)
+{
+    br_uint_64 *scratch;
+    br_uint_64 *col;
+    bench_stats frame_st, scene_cpu_st, stage_st[BENCH_STAGE_COUNT];
+    br_uint_32  n;
+
+    if(bench == NULL || bench->reported)
+        return;
+
+    bench->reported = BR_TRUE;
+
+    if(!bench->done)
+        bench_drain(bench);
+
+    n = bench->nsamples;
+
+    if(n == 0) {
+        BrLogWarn("BENCH", "No samples recorded.");
+        return;
+    }
+
+    scratch = BrResAllocate(bench, sizeof(br_uint_64) * n, BR_MEMORY_APPLICATION);
+    col     = BrResAllocate(bench, sizeof(br_uint_64) * n, BR_MEMORY_APPLICATION);
+
+    for(br_uint_32 i = 0; i < n; ++i)
+        col[i] = bench->samples[i].cpu_frame_ns;
+    frame_st = bench_compute_stats(col, n, scratch);
+
+    for(br_uint_32 i = 0; i < n; ++i)
+        col[i] = bench->samples[i].cpu_scene_ns;
+    scene_cpu_st = bench_compute_stats(col, n, scratch);
+
+    for(br_uint_32 s = 0; s < BENCH_STAGE_COUNT; ++s) {
+        for(br_uint_32 i = 0; i < n; ++i)
+            col[i] = bench->samples[i].gpu_ns[s];
+
+        stage_st[s] = bench_compute_stats(col, n, scratch);
+    }
+
+    int win_w = 0, win_h = 0;
+
+    if(bench->window != NULL)
+        SDL_GetWindowSizeInPixels(bench->window, &win_w, &win_h);
+
+    printf("BENCH frames=%u warmup=%u\n", n, bench->warmup_frames);
+    printf("BENCH render_target=%dx%d window=%dx%d\n", bench->demo->colour_buffer != NULL ? bench->demo->colour_buffer->width : -1,
+           bench->demo->colour_buffer != NULL ? bench->demo->colour_buffer->height : -1, win_w, win_h);
+    printf("BENCH %-14s %10s %10s %10s %10s %10s %10s\n", "metric", "min_ms", "mean_ms", "p50_ms", "p95_ms", "p99_ms", "max_ms");
+    printf("BENCH %-14s %10.3f %10.3f %10.3f %10.3f %10.3f %10.3f\n", "frame_cpu", frame_st.min / 1e6, frame_st.mean / 1e6,
+           frame_st.p50 / 1e6, frame_st.p95 / 1e6, frame_st.p99 / 1e6, frame_st.max / 1e6);
+    printf("BENCH %-14s %10.3f %10.3f %10.3f %10.3f %10.3f %10.3f\n", "scene_cpu", scene_cpu_st.min / 1e6, scene_cpu_st.mean / 1e6,
+           scene_cpu_st.p50 / 1e6, scene_cpu_st.p95 / 1e6, scene_cpu_st.p99 / 1e6, scene_cpu_st.max / 1e6);
+    for(br_uint_32 s = 0; s < BENCH_STAGE_COUNT; ++s)
+        printf("BENCH %-14s %10.3f %10.3f %10.3f %10.3f %10.3f %10.3f\n", bench_stage_names[s], stage_st[s].min / 1e6,
+               stage_st[s].mean / 1e6, stage_st[s].p50 / 1e6, stage_st[s].p95 / 1e6, stage_st[s].p99 / 1e6, stage_st[s].max / 1e6);
+
+    printf("BENCH mean_fps=%.2f\n", frame_st.mean > 0 ? 1e9 / frame_st.mean : 0.0);
+
+    bench_report_renderer_stats();
+
+    if(bench->csv_path != NULL) {
+        FILE *fp = fopen(bench->csv_path, "w");
+
+        if(fp == NULL) {
+            BrLogWarn("BENCH", "Could not open %s for writing.", bench->csv_path);
+        } else {
+            fprintf(fp, "frame,cpu_frame_ns,cpu_scene_ns");
+            for(br_uint_32 s = 0; s < BENCH_STAGE_COUNT; ++s)
+                fprintf(fp, ",gpu_%s_ns", bench_stage_names[s]);
+            fprintf(fp, "\n");
+
+            for(br_uint_32 i = 0; i < n; ++i) {
+                fprintf(fp, "%u,%llu,%llu", i, (unsigned long long)bench->samples[i].cpu_frame_ns,
+                        (unsigned long long)bench->samples[i].cpu_scene_ns);
+
+                for(br_uint_32 s = 0; s < BENCH_STAGE_COUNT; ++s)
+                    fprintf(fp, ",%llu", (unsigned long long)bench->samples[i].gpu_ns[s]);
+
+                fprintf(fp, "\n");
+            }
+
+            fclose(fp);
+            printf("BENCH csv=%s\n", bench->csv_path);
+        }
+    }
+
+    BrResFree(scratch);
+    BrResFree(col);
+}

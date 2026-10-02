@@ -2,9 +2,11 @@
 #include <brender.h>
 #include <brdemo.h>
 #include "editorcam.h"
+#include "bench.h"
 
 typedef struct br_gltfview_state {
     br_editor_camera *editorcam;
+    gltfview_bench   *bench;
 } br_gltfview_state;
 
 typedef struct KeyMap {
@@ -287,6 +289,8 @@ static br_error GLTFInit(br_demo *demo)
 
     FocusCamOnSceneCamera(state->editorcam, demo->world);
 
+    state->bench = GLTFViewBenchAllocate(demo);
+
     return BRE_OK;
 }
 
@@ -310,14 +314,42 @@ static void GLTFUpdate(br_demo *demo, br_scalar dt)
 
 static void GLTFRender(br_demo *demo)
 {
+    br_gltfview_state *state = demo->user;
+
     BrRendererFrameBegin();
+
+    GLTFViewBenchBeginStage(state->bench, BENCH_STAGE_CLEAR);
     BrPixelmapFill(demo->colour_buffer, demo->clear_colour);
     BrPixelmapFill(demo->depth_buffer, 0xFFFFFFFF);
+    GLTFViewBenchEndStage(state->bench, BENCH_STAGE_CLEAR);
+
+    GLTFViewBenchBeginStage(state->bench, BENCH_STAGE_SCENE);
 
     // BrZsSceneRender(demo->world, demo->camera, demo->colour_buffer);
     BrZbSceneRender(demo->world, demo->camera, demo->colour_buffer, demo->depth_buffer);
 
+    GLTFViewBenchEndStage(state->bench, BENCH_STAGE_SCENE);
+
     BrRendererFrameEnd();
+
+    /*
+     * NB: This measures up to here, so the demo's text overlay and the present
+     * are accounted for in the *following* frame's interval. That is deliberate:
+     * it keeps the measured period to a whole frame including the swap.
+     */
+    GLTFViewBenchEndFrame(state->bench);
+
+    if(GLTFViewBenchShouldQuit(state->bench))
+        SDL_PushEvent(&(SDL_Event){.type = SDL_EVENT_QUIT});
+}
+
+static void GLTFDestroy(br_demo *demo)
+{
+    br_gltfview_state *state = demo->user;
+
+    GLTFViewBenchReport(state->bench);
+
+    BrDemoDefaultDestroy(demo);
 }
 
 const static br_demo_dispatch dispatch = {
@@ -326,7 +358,7 @@ const static br_demo_dispatch dispatch = {
     .update        = GLTFUpdate,
     .render        = GLTFRender,
     .on_resize     = GLTFOnResize,
-    .destroy       = BrDemoDefaultDestroy,
+    .destroy       = GLTFDestroy,
 };
 
 int main(int argc, char **argv)
