@@ -29,22 +29,25 @@ br_device_clut *DeviceClutGL1xAllocate(br_device_pixelmap *pm)
 {
     br_device_clut *self;
 
-    self = BrResAllocate(pm->device->res, sizeof(br_device_clut), BR_MEMORY_OBJECT_DATA);
+    /*
+     * The CLUT belongs to the pixelmap it was created for, not the device: it
+     * holds that pixelmap's palette entries plus an entries pixelmap of its
+     * own. Parenting it here matches glrend, where the CLUT also owns a GL
+     * texture built against the pixelmap's context.
+     */
+    self = BrResAllocate(pm, sizeof(br_device_clut), BR_MEMORY_OBJECT);
 
     self->dispatch   = &deviceClutDispatch;
     self->device     = pm->device;
     self->identifier = BrResSprintf(self, "%s:clut", pm->pm_identifier);
     self->pm         = BrPixelmapAllocate(BR_PMT_RGBX_888, 1, BR_ASIZE(self->entries), self->entries, BR_PMAF_NORMAL);
 
-    ObjectContainerAddFront(pm->device, (br_object *)self);
     return self;
 }
 
 static void BR_CMETHOD_DECL(br_device_clut_gl, free)(br_object *_self)
 {
     br_device_clut *self = (br_device_clut *)_self;
-
-    ObjectContainerRemove(self->device, (br_object *)self);
 
     if(self->pm != NULL)
         BrPixelmapFree(self->pm);
