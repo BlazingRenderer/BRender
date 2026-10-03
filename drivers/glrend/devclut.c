@@ -29,7 +29,7 @@ br_device_clut *DeviceClutGLAllocate(br_device_pixelmap *pm, const GladGLContext
 {
     br_device_clut *self;
 
-    self = BrResAllocate(pm->device->res, sizeof(br_device_clut), BR_MEMORY_OBJECT_DATA);
+    self = BrResAllocate(pm, sizeof(br_device_clut), BR_MEMORY_OBJECT);
 
     self->dispatch   = &deviceClutDispatch;
     self->device     = pm->device;
@@ -38,7 +38,6 @@ br_device_clut *DeviceClutGLAllocate(br_device_pixelmap *pm, const GladGLContext
     self->gl         = gl;
     self->gl_tex     = 0;
 
-    ObjectContainerAddFront(pm->device, (br_object *)self);
     return self;
 }
 
@@ -46,8 +45,6 @@ static void BR_CMETHOD_DECL(br_device_clut_gl, free)(br_object *_self)
 {
     br_device_clut      *self = (br_device_clut *)_self;
     const GladGLContext *gl   = self->gl;
-
-    ObjectContainerRemove(self->device, (br_object *)self);
 
     if(self->pm != NULL)
         BrPixelmapFree(self->pm);
