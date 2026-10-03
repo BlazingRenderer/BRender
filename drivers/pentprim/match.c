@@ -538,9 +538,10 @@ br_error BR_CMETHOD_DECL(br_primitive_state_soft, renderBegin)(
 			    case BR_PMT_INDEX_2: s = 4; break;
 			    case BR_PMT_INDEX_4: s = 16; break;
 			    case BR_PMT_INDEX_8: s = 256; break;
+			    default: s = 0; break;
 			    }
 
-		        if(work.texture.palette_size >= s)
+		        if(s && work.texture.palette_size >= s)
 				    flags |= PRIMF_PALETTE;
 		    }
 
