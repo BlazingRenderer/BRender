@@ -3,7 +3,7 @@
 
 ## Perspective (using the general subdivision mechanism)
 ##
-[mmx, rgb565, triangle, pixel_stride=4, perspective_subdivide, texture, texture_index8_palette, texture_power2, texture_stride_positive]
+[mmx, rgb565, triangle, z_buffered, pixel_stride=4, perspective_subdivide, texture, texture_index8_palette, texture_power2, texture_stride_positive]
 
 # Texture, gouraud,
 #
@@ -31,7 +31,7 @@ mmx:RasteriseMMX565_Z_UV            = [generic_setup=ZUV_A,   parameter_struct=p
 
 ## Linear
 ##
-[mmx, rgb565, triangle, pixel_stride=4, texture, texture_index8_palette,texture_power2, texture_stride_positive]
+[mmx, rgb565, triangle, z_buffered, pixel_stride=4, texture, texture_index8_palette,texture_power2, texture_stride_positive]
 
 # Texture, gouraud,
 #
@@ -57,7 +57,7 @@ mmx:RasteriseMMX565_Z_UV_S          = [generic_setup=ZUVC_A,   parameter_struct=
 mmx:RasteriseMMX565_Z_UV_D          = [generic_setup=ZUV_A,   parameter_struct=param_zuv, dithered]
 mmx:RasteriseMMX565_Z_UV            = [generic_setup=ZUV_A,   parameter_struct=param_zuv]
 
-[mmx, rgb565, triangle, pixel_stride=4]
+[mmx, rgb565, triangle, z_buffered, pixel_stride=4]
 
 # Gouraud
 #

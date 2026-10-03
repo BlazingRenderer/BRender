@@ -375,6 +375,74 @@ static br_boolean isPowerof2(br_int_32 x)
 	return !((x-1) & x);
 }
 
+/*
+ * Find the first block in a table whose requirements the current state meets,
+ * or NULL if the table has none.
+ */
+static struct local_block *match_block(struct local_block *pb, int nb, br_uint_32 flags, br_token input_colour_type,
+				       struct prim_work *pw)
+{
+	int b;
+
+	for(b = 0; b < nb; b++, pb++) {
+
+		/*
+		 * Do the flags match
+		 */
+		if((flags & pb->flags_mask) != pb->flags_cmp)
+			continue;
+
+		/*
+		 * Check buffer types
+		 */
+		if((pb->depth_type) != PMT_NONE && (pw->depth.type != pb->depth_type))
+			continue;
+
+		if((pb->texture_type) != PMT_NONE && (pw->texture.type != pb->texture_type))
+			continue;
+
+		if((pb->shade_type) != PMT_NONE && (pw->shade_type != pb->shade_type))
+			continue;
+
+		if((pb->bump_type) != PMT_NONE && (pw->bump.type != pb->bump_type))
+			continue;
+
+		if((pb->lighting_type) != PMT_NONE && (pw->lighting_type != pb->lighting_type))
+			continue;
+
+		if((pb->screendoor_type) != PMT_NONE && (pw->screendoor_type != pb->screendoor_type))
+			continue;
+
+		if((pb->blend_type) != PMT_NONE && (pw->blend_type != pb->blend_type))
+			continue;
+
+		if((pb->fog_type) != PMT_NONE && (pw->fog_type != pb->fog_type))
+			continue;
+
+		/*
+		 * See if input colour type matches
+		 */
+		if(pb->input_colour_type && (input_colour_type != pb->input_colour_type))
+			continue;
+
+		/*
+		 * See if there are any size restrictions
+		 */
+		if(pb->map_width && (pb->map_width != pw->texture.width_p))
+			continue;
+
+		if(pb->map_height && (pb->map_height != pw->texture.height))
+			continue;
+
+		/*
+		 * Got one!!
+		 */
+		return pb;
+	}
+
+	return NULL;
+}
+
 br_error BR_CMETHOD_DECL(br_primitive_state_soft, renderBegin)(
 		struct br_primitive_state *self,
 		struct brp_block **rpb,
@@ -383,7 +451,7 @@ br_error BR_CMETHOD_DECL(br_primitive_state_soft, renderBegin)(
 		br_boolean no_render,
 		br_token prim_type)
 {
-	int i,j,b,nb;
+	int i,j;
 	struct local_block *pb;
 	br_uint_32 flags;
 	br_token input_colour_type;
@@ -580,85 +648,30 @@ br_error BR_CMETHOD_DECL(br_primitive_state_soft, renderBegin)(
 		    return BRE_FAIL;
 	    }
 
-	    /*
-	     * Match against selected primitives
-	     */
-    #if USE_MMX
-	    if(self->plib->use_mmx) {
-		    pb = mmxInfoTables[i][j].blocks;
-		    nb = mmxInfoTables[i][j].nblocks;
-	    } else {
-		    pb = primInfoTables[i][j].blocks;
-		    nb = primInfoTables[i][j].nblocks;
-	    }
+	/*
+	 * Match against selected primitives.
+	 *
+	 * The MMX tables only carry the z-buffered triangle path for 555/565.
+	 * When nothing in them fits, fall back to the general tables, which hold
+	 * both the z-buffered and the depth-free entries - defaulting to the last
+	 * MMX entry instead selects a rasteriser that writes depth through a
+	 * depth buffer that was never bound.
+	 */
+	pb = NULL;
 
-    #else
-	    pb = primInfoTables[i][j].blocks;
-	    nb = primInfoTables[i][j].nblocks;
-    #endif
+#if USE_MMX
+	if(self->plib->use_mmx)
+		pb = match_block(mmxInfoTables[i][j].blocks, mmxInfoTables[i][j].nblocks, flags, input_colour_type, &work);
+#endif
 
-	    for(b=0; b < nb; b++,pb++) {
+	if(pb == NULL)
+		pb = match_block(primInfoTables[i][j].blocks, primInfoTables[i][j].nblocks, flags, input_colour_type, &work);
 
-		    /*
-		     * Do the flags match
-		     */
-		    if((flags & pb->flags_mask) != pb->flags_cmp)
-			    continue;
-
-		    /*
-		     * Check buffer types
-		     */
-		    if((pb->depth_type)  != PMT_NONE && (work.depth.type != pb->depth_type))
-			    continue;
-
-		    if((pb->texture_type) != PMT_NONE && (work.texture.type != pb->texture_type))
-			    continue;
-
-		    if((pb->shade_type) != PMT_NONE && (work.shade_type != pb->shade_type))
-			    continue;
-
-		    if((pb->bump_type) != PMT_NONE && (work.bump.type != pb->bump_type))
-			    continue;
-
-		    if((pb->lighting_type) != PMT_NONE && (work.lighting_type != pb->lighting_type))
-			    continue;
-
-		    if((pb->screendoor_type) != PMT_NONE && (work.screendoor_type != pb->screendoor_type))
-			    continue;
-
-                    if((pb->blend_type) != PMT_NONE && (work.blend_type != pb->blend_type))
-			    continue;
-
-                    if((pb->fog_type) != PMT_NONE && (work.fog_type != pb->fog_type))
-			    continue;
-
-		    /*
-		     * See if input colour type matches
-		     */
-		    if(pb->input_colour_type && (input_colour_type != pb->input_colour_type))
-			    continue;
-
-		    /*
-		     * See if there are any size restrictions
-		     */
-		    if(pb->map_width && (pb->map_width != work.texture.width_p))
-			    continue;
-
-		    if(pb->map_height && (pb->map_height != work.texture.height))
-			    continue;
-
-		    /*
-		     * Got one!!
-		     */
-		    break;
-	    }
-
-	    /*
-	     * Default to last primitive in block
-	     */
-	    if(b >= nb) {
-		    pb--;
-	    }
+	/*
+	 * Default to last primitive in block
+	 */
+	if(pb == NULL)
+		pb = primInfoTables[i][j].blocks + primInfoTables[i][j].nblocks - 1;
 	}
 
 	/*
