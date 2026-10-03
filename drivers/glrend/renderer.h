@@ -52,8 +52,8 @@ typedef struct br_state_info_gl {
 typedef struct br_buffer_ring_gl {
     const GladGLContext *gl;
 
-    GLuint   buffers[BR_GLREND_MODEL_RB_FRAMES];
-    GLsync   fences[BR_GLREND_MODEL_RB_FRAMES];
+    GLuint   buffers[BR_GLREND_FRAMES_IN_FLIGHT];
+    GLsync   fences[BR_GLREND_FRAMES_IN_FLIGHT];
     size_t   frame_index;
     GLintptr offset;
     size_t   buffer_size;
@@ -113,6 +113,7 @@ typedef struct br_renderer {
 
     GLint             uniform_buffer_offset_alignment;
     br_buffer_ring_gl model_ring;
+    br_buffer_ring_gl scene_ring;
 
     int has_begun;
 

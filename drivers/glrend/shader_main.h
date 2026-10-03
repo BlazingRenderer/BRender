@@ -1,6 +1,10 @@
 #ifndef SHADER_MAIN_H_
 #define SHADER_MAIN_H_
 
+/*
+ * Both uniform blocks are bound to fixed binding points; the buffers behind them
+ * are supplied per frame by the renderer's buffer rings.
+ */
 typedef struct br_gl_main_shader {
     GLuint program;
 
@@ -16,9 +20,8 @@ typedef struct br_gl_main_shader {
         GLint index_texture; /* usampler2D */
     } uniforms;
 
-    GLuint ubo_scene;
-    GLuint block_index_scene;
-    GLuint block_binding_scene;
+    GLuint       block_index_scene;
+    GLuint       block_binding_scene;
 
     GLuint block_index_model;
     GLuint block_binding_model;

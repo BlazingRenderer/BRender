@@ -24,7 +24,7 @@ void BufferRingGLInit(br_buffer_ring_gl *self, const GladGLContext *gl, const ch
     }
 
     self->mapped            = NULL;
-    self->frame_index       = BR_GLREND_MODEL_RB_FRAMES;
+    self->frame_index       = BR_GLREND_FRAMES_IN_FLIGHT;
     self->offset            = 0;
     self->buffer_size       = buffer_size;
     self->aligned_elem_size = (GLsizeiptr)aligned_size;
@@ -50,7 +50,7 @@ void BufferRingGLBegin(br_buffer_ring_gl *self)
     const GladGLContext *gl = self->gl;
 
     ++self->frame_index;
-    if(self->frame_index >= BR_GLREND_MODEL_RB_FRAMES)
+    if(self->frame_index >= BR_GLREND_FRAMES_IN_FLIGHT)
         self->frame_index = 0;
 
     self->offset = 0;

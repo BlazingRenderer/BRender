@@ -123,6 +123,16 @@ br_renderer *RendererGLAllocate(br_device *device, br_renderer_facility *facilit
     BufferRingGLInit(&self->model_ring, gl, "model", alignment, BR_GLREND_MAX_DRAWS_IN_FLIGHT, ctx->main_shader.block_binding_model,
                      sizeof(br_gl_main_data_model), GL_UNIFORM_BUFFER);
 
+    /*
+     * The scene block is uploaded once per frame. Ring it like the model state
+     * rather than rewriting one buffer in place: the ring's fence guarantees the
+     * GPU is finished with a slot before it is written again, and the mapped
+     * upload avoids the pipeline flush glBufferSubData costs on macOS. One
+     * element per frame, at offset 0, so no per-element alignment is needed.
+     */
+    BufferRingGLInit(&self->scene_ring, gl, "scene", 1, 1, ctx->main_shader.block_binding_scene, sizeof(br_gl_main_data_scene),
+                     GL_UNIFORM_BUFFER);
+
     self->has_begun = 0;
     return self;
 }
@@ -131,7 +141,7 @@ static void BR_CMETHOD_DECL(br_renderer_gl, sceneBegin)(br_renderer *self)
 {
     const GladGLContext     *gl            = self->gl;
     br_device_pixelmap      *colour_target = NULL, *depth_target = NULL;
-    const br_gl_main_shader *shader = &GLContextState(gl)->main_shader;
+    const br_gl_main_shader *shader        = &GLContextState(gl)->main_shader;
 
     self->stats.face_group_count         = 0;
     self->stats.triangles_drawn_count    = 0;
@@ -180,8 +190,10 @@ static void BR_CMETHOD_DECL(br_renderer_gl, sceneBegin)(br_renderer *self)
     gl->Uniform1i(shader->uniforms.index_texture, shader->index_texture_binding);
 
     gl->BindFramebuffer(GL_FRAMEBUFFER, self->state.cache.fbo);
-    gl->BindBufferBase(GL_UNIFORM_BUFFER, shader->block_binding_scene, shader->ubo_scene);
-    gl->BufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(self->state.cache.scene), &self->state.cache.scene);
+
+    BufferRingGLBegin(&self->scene_ring);
+    if(!BufferRingGLPush(&self->scene_ring, &self->state.cache.scene, sizeof(self->state.cache.scene)))
+        BrLogError("GLREND", "Could not stage the scene uniform block.");
 
     br_rectangle viewport = DevicePixelmapGLGetViewport(colour_target);
     gl->Viewport(viewport.x, viewport.y, viewport.w, viewport.h);
@@ -214,6 +226,7 @@ void BR_CMETHOD_DECL(br_renderer_gl, sceneEnd)(br_renderer *self)
     const GladGLContext *gl = self->gl;
 
     BufferRingGLEnd(&self->model_ring);
+    BufferRingGLEnd(&self->scene_ring);
 
     gl->Disable(GL_CULL_FACE);
     gl->Disable(GL_DEPTH_TEST);
@@ -259,6 +272,7 @@ static void BR_CMETHOD_DECL(br_renderer_gl, free)(br_object *_self)
     BrObjectContainerFree((br_object_container *)self, BR_NULL_TOKEN, NULL, NULL);
 
     BufferRingGLFini(&self->model_ring);
+    BufferRingGLFini(&self->scene_ring);
 
     BrResFreeNoCallback(self);
 }

@@ -5,14 +5,8 @@
 
 static void get_shader_variables(br_gl_main_shader *self, const GladGLContext *gl)
 {
-    gl->GenBuffers(1, &self->ubo_scene);
-    gl->BindBuffer(GL_UNIFORM_BUFFER, self->ubo_scene);
+    /* Both uniform blocks are fed by buffer rings owned by the renderer. */
     gl->UniformBlockBinding(self->program, self->block_index_scene, self->block_binding_scene);
-    gl->BindBufferBase(GL_UNIFORM_BUFFER, self->block_binding_scene, self->ubo_scene);
-    gl->BufferData(GL_UNIFORM_BUFFER, sizeof(br_gl_main_data_scene), NULL, GL_DYNAMIC_DRAW);
-
-    DeviceGLObjectLabel(gl, GL_BUFFER, self->ubo_scene, BR_GLREND_DEBUG_INTERNAL_PREFIX "brender:shader:ubo:scene");
-
     gl->UniformBlockBinding(self->program, self->block_index_model, self->block_binding_model);
 
     self->attributes.aPosition   = gl->GetAttribLocation(self->program, "aPosition");

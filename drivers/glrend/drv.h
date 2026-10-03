@@ -36,9 +36,11 @@ extern "C" {
 #define BR_GLREND_MAX_CLUT_ENTRIES 256
 
 /*
- * No. frames in the model-state ring buffer.
+ * No. frames of buffer state kept in flight. The model state and the scene block
+ * are each uploaded through a buffer ring, one buffer per frame and fenced, so
+ * the ring guarantees a slot is free before it is written again.
  */
-#define BR_GLREND_MODEL_RB_FRAMES 3
+#define BR_GLREND_FRAMES_IN_FLIGHT 3
 
 /*
  * Max. no draws in-flight. This determines the size of the model-state buffer.

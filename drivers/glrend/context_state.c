@@ -209,7 +209,6 @@ void ContextStateGLFini(br_gl_context_state *self)
     gl->BindBuffer(GL_UNIFORM_BUFFER, 0);
 
     gl->DeleteProgram(self->main_shader.program);
-    gl->DeleteBuffers(1, &self->main_shader.ubo_scene);
 
     gl->DeleteProgram(self->text_shader.program);
     gl->DeleteVertexArrays(1, &self->text_shader.vao_glyphs);
