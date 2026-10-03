@@ -121,11 +121,18 @@ print "#define NEXT_FREE_TOKEN $current\n" ;
 
 close(STDOUT);
 
-# Type table, sorted by suffix length, largest first
+#
+# Type table, sorted by suffix length, largest first. The length comparison on
+# its own is not a total order, and Perl hands out hash keys in a per-process
+# randomised order, so with the ties left open the table - and the binary that
+# embeds it - differs between builds. Tie-break on the suffix itself.
 #
 open(STDOUT,">toktype.c");
 
-foreach $t (sort({length($type_ext{$b}) <=> length($type_ext{$a})} keys %type_tok)) {
+foreach $t (sort({
+		length($type_ext{$b} || "") <=> length($type_ext{$a} || "")
+			|| ($type_ext{$a} || "") cmp ($type_ext{$b} || "")
+	} keys %type_tok)) {
 
 	if($type_member{$t}) {
 		$tsize = "sizeof(((br_value*)0)->$type_member{$t})";
