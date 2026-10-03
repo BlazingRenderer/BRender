@@ -183,7 +183,6 @@ br_token OnScreenCheck(br_renderer *self, br_matrix4 *model_to_screen, br_bounds
 void SURFACE_CALL SurfaceIndexZero(br_renderer *self, br_vector3 *p, br_vector2 *map, br_vector3 *n, br_colour gcolour, br_scalar *comp);
 void SURFACE_CALL SurfaceIndexUnlit(br_renderer *self, br_vector3 *p, br_vector2 *map, br_vector3 *n, br_colour gcolour, br_scalar *comp);
 void SURFACE_CALL SurfaceIndexLit(br_renderer *self, br_vector3 *p, br_vector2 *map, br_vector3 *n, br_colour gcolour, br_scalar *comp);
-void SURFACE_CALL SurfaceIndexLitSimple(br_renderer *self, br_vector3 *p, br_vector2 *map, br_vector3 *n, br_colour gcolour, br_scalar *comp);
 void ActiveLightAccumulateIndexSet(struct active_light *alp);
 
 void SURFACE_CALL SurfaceIndexLit1MD(br_renderer *self, br_vector3 *p, br_vector2 *map, br_vector3 *n, br_colour colour, br_scalar *comp);
