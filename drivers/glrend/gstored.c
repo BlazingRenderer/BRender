@@ -131,14 +131,13 @@ br_geometry_stored *GeometryStoredGLAllocate(br_geometry_v1_model *gv1model, con
     const GladGLContext *gl  = r->gl;
     br_gl_context_state *ctx = GLContextState(gl);
 
-    self             = BrResAllocate(gv1model->renderer_facility->object_list, sizeof(*self), BR_MEMORY_OBJECT);
+    self             = BrResAllocate(r, sizeof(*self), BR_MEMORY_OBJECT);
     self->dispatch   = &geometryStoredDispatch;
     self->identifier = BrResSprintf(self, BR_GLREND_DEBUG_USER_PREFIX "%s", id);
     self->device     = gv1model->device;
     self->gv1model   = gv1model;
+    self->renderer   = r;
     self->gl         = gl;
-
-    ObjectContainerAddFront(gv1model->renderer_facility, (br_object *)self);
 
     self->model  = model;
     self->shared = BR_TRUE;
@@ -173,7 +172,7 @@ static void BR_CMETHOD(br_geometry_stored_gl, free)(br_object *_self)
     br_geometry_stored  *self = (br_geometry_stored *)_self;
     const GladGLContext *gl   = self->gl;
 
-    ObjectContainerRemove(self->gv1model->renderer_facility, (br_object *)self);
+    ObjectContainerRemove(self->renderer, (br_object *)self);
 
     gl->DeleteVertexArrays(1, &self->gl_vao);
     gl->DeleteBuffers(1, &self->gl_vbo);

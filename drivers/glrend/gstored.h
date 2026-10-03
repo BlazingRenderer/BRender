@@ -74,6 +74,7 @@ typedef struct br_geometry_stored {
     struct br_device *device;
 
     struct br_geometry_v1_model *gv1model;
+    struct br_renderer          *renderer;
 
     br_boolean       shared;
     struct v11model *model;
