@@ -46,44 +46,6 @@ void SURFACE_CALL SurfaceIndexLit(br_renderer *self, br_vector3 *p, br_vector2 *
     br_vector3           fvn;
 
     /*
-     * Handle special case lighting of 1 model-space directional light
-     */
-    if(scache.light_1md) {
-        br_scalar l, dot;
-
-        dot = BrVector3Dot(n, &alp->direction);
-
-        if(dot <= BR_SCALAR(0.0)) {
-            comp[C_I] = self->state.surface.ka;
-            CLAMP_SCALE(C_I);
-            return;
-        }
-
-        l = BR_MUL(dot, self->state.surface.kd);
-
-        if(self->state.surface.ks != BR_SCALAR(0.0)) {
-            /*
-             * Specular
-             */
-            dot = BrVector3Dot(n, &alp->half);
-
-            /*
-             * Phong lighting approximation from Gems IV pg. 385
-             */
-            if(dot > SPECULARPOW_CUTOFF)
-                l += SPECULAR_POWER(BR_MUL(self->state.surface.ks, alp->intensity));
-        }
-
-        comp[C_I] = l + self->state.surface.ka;
-
-        /*
-         * Scale final intensity to range of indices
-         */
-        CLAMP_SCALE(C_I);
-        return;
-    }
-
-    /*
      * Ambient component
      */
     if(scache.use_ambient_intensity)
@@ -400,43 +362,3 @@ void ActiveLightAccumulateIndexSet(struct active_light *alp)
             alp->accumulate_index = lightingIndexNull;
     }
 }
-
-#if 0
-/*
- * Special case for 1 directional light in model space
- *
- * Write the results into comp[C_I]
- */
-void SURFACE_CALL SurfaceIndexLit1MD(br_renderer *self, br_vector3 *p, br_vector2 *map, br_vector3 *n, br_colour colour, br_scalar *comp)
-{
-	struct active_light *alp = scache.lights;
-	br_scalar l,dot;
-
-	dot = BrVector3Dot(n,&alp->direction);
-
-	if(dot <= BR_SCALAR(0.0))
-		return;
-
-	l = BR_MUL(dot, self->state.surface.kd);
-
-	if (self->state.surface.ks != BR_SCALAR(0.0)) {
-		/*
-		 * Specular
-		 */
-		dot = BrVector3Dot(n,&alp->half);
-
-		/*
-		 * Phong lighting approximation from Gems IV pg. 385
-		 */
-		if(dot > SPECULARPOW_CUTOFF)
-			l += SPECULAR_POWER(BR_MUL(self->state.surface.ks,alp->intensity));
- 	}
-
-	comp[C_I] = l + self->state.surface.ka;
-
-	/*
-	 * Scale final intensity to range of indices
-	 */
-	CLAMP_SCALE(C_I);
-}
-#endif

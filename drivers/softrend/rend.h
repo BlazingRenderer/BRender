@@ -189,7 +189,6 @@ typedef struct static_cache {
     /*
      * Current lighting info.
      */
-    br_boolean          light_1md;
     struct active_light lights[MAX_STATE_LIGHTS];
     br_int_32           nlights_model;
     br_int_32           nlights_view;

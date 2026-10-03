@@ -446,11 +446,6 @@ void ActiveLightsFind(br_renderer *self)
         alp++;
         scache.nlights_view++;
     }
-
-    /*
-     * Set a flag to indicate special case of 1 directional model light
-     */
-    scache.light_1md = (scache.nlights_view == 0) && (scache.nlights_model == 1) && (scache.lights[0].type == BRT_DIRECT);
 }
 
 static br_boolean sphereIntersectsCone(br_scalar sphere_radius, br_vector3 *cone_apex, br_vector3 *cone_axis, br_angle cone_angle);
