@@ -17,7 +17,6 @@ typedef struct br_gl_context_state {
     struct {
         struct {
             br_uint_32 disable_anisotropic_filtering : 1;
-            br_uint_32 orphan_model_buffers : 1;
             br_uint_32 reserved : 30;
         };
         br_uint_32 value;

@@ -2,22 +2,17 @@
 #include "brassert.h"
 
 void BufferRingGLInit(br_buffer_ring_gl *self, const GladGLContext *gl, const char *tag, size_t offset_alignment, size_t num_draws,
-                      GLuint buffer_index, size_t elem_size, GLenum binding_point, uint32_t flags)
+                      GLuint buffer_index, size_t elem_size, GLenum binding_point)
 {
     size_t aligned_size;
     size_t buffer_size;
-    assert((flags & ~BUFFER_RING_GL_FLAG_MASK) == 0);
-
-    if(flags & BUFFER_RING_GL_FLAG_ORPHAN)
-        num_draws = 1;
 
     aligned_size = ((elem_size + offset_alignment - 1) / offset_alignment) * offset_alignment;
     buffer_size  = aligned_size * num_draws;
 
     assert(aligned_size >= elem_size);
 
-    self->gl    = gl;
-    self->flags = flags;
+    self->gl = gl;
 
     gl->GenBuffers(BR_ASIZE(self->buffers), self->buffers);
     for(int i = 0; i < BR_ASIZE(self->buffers); ++i) {
@@ -70,16 +65,12 @@ void BufferRingGLBegin(br_buffer_ring_gl *self)
         self->fences[self->frame_index] = NULL;
     }
 
-    if(self->flags & BUFFER_RING_GL_FLAG_ORPHAN) {
-        gl->BindBufferBase(self->binding_point, self->buffer_index, self->buffers[self->frame_index]);
-    } else {
-        gl->BindBuffer(self->binding_point, self->buffers[self->frame_index]);
+    gl->BindBuffer(self->binding_point, self->buffers[self->frame_index]);
 
-        self->mapped = gl->MapBufferRange(self->binding_point, 0, (GLsizeiptr)self->buffer_size,
-                                          GL_MAP_WRITE_BIT | GL_MAP_UNSYNCHRONIZED_BIT | GL_MAP_INVALIDATE_BUFFER_BIT);
-        if(self->mapped == NULL)
-            BrLogError("GLREND", "Could not map the buffer ring; skipping draws until it succeeds.");
-    }
+    self->mapped = gl->MapBufferRange(self->binding_point, 0, (GLsizeiptr)self->buffer_size,
+                                      GL_MAP_WRITE_BIT | GL_MAP_UNSYNCHRONIZED_BIT | GL_MAP_INVALIDATE_BUFFER_BIT);
+    if(self->mapped == NULL)
+        BrLogError("GLREND", "Could not map the buffer ring; skipping draws until it succeeds.");
 }
 
 void BufferRingGLEnd(br_buffer_ring_gl *self)
@@ -108,21 +99,17 @@ br_boolean BufferRingGLPush(br_buffer_ring_gl *self, const void *data, GLsizeipt
     }
 #endif
 
-    if(self->flags & BUFFER_RING_GL_FLAG_ORPHAN) {
-        gl->BufferData(self->binding_point, size, data, GL_STATIC_DRAW);
-    } else {
-        if(self->offset >= self->buffer_size)
-            return BR_FALSE;
+    if(self->offset >= self->buffer_size)
+        return BR_FALSE;
 
-        if(self->mapped == NULL)
-            return BR_FALSE;
+    if(self->mapped == NULL)
+        return BR_FALSE;
 
-        BrMemCpy((br_uint_8 *)self->mapped + self->offset, data, (size_t)size);
+    BrMemCpy((br_uint_8 *)self->mapped + self->offset, data, (size_t)size);
 
-        gl->BindBufferRange(self->binding_point, self->buffer_index, ubo, self->offset, size);
+    gl->BindBufferRange(self->binding_point, self->buffer_index, ubo, self->offset, size);
 
-        self->offset += self->aligned_elem_size;
-    }
+    self->offset += self->aligned_elem_size;
 
     return BR_TRUE;
 }

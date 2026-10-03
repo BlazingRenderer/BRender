@@ -121,7 +121,7 @@ br_renderer *RendererGLAllocate(br_device *device, br_renderer_facility *facilit
 
     self->uniform_buffer_offset_alignment = alignment;
     BufferRingGLInit(&self->model_ring, gl, "model", alignment, BR_GLREND_MAX_DRAWS_IN_FLIGHT, ctx->main_shader.block_binding_model,
-                     sizeof(br_gl_main_data_model), GL_UNIFORM_BUFFER, ctx->quirks.orphan_model_buffers ? BUFFER_RING_GL_FLAG_ORPHAN : 0);
+                     sizeof(br_gl_main_data_model), GL_UNIFORM_BUFFER);
 
     self->has_begun = 0;
     return self;

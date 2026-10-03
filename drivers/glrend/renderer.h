@@ -49,17 +49,11 @@ typedef struct br_state_info_gl {
     br_token shading_mode;
 } br_primitive_state_info_gl;
 
-enum {
-    BUFFER_RING_GL_FLAG_ORPHAN = (1 << 0), /**< Orphan the buffer each draw instead of appending to. */
-    BUFFER_RING_GL_FLAG_MASK   = BUFFER_RING_GL_FLAG_ORPHAN,
-};
-
 typedef struct br_buffer_ring_gl {
     const GladGLContext *gl;
 
     GLuint   buffers[BR_GLREND_MODEL_RB_FRAMES];
     GLsync   fences[BR_GLREND_MODEL_RB_FRAMES];
-    uint32_t flags;
     size_t   frame_index;
     GLintptr offset;
     size_t   buffer_size;
