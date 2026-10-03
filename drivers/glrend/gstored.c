@@ -442,7 +442,7 @@ static br_error V1Model_RenderStored(br_geometry_stored *self, br_renderer *rend
          * If there's a stored state (i.e. a material), apply it to our current state.
          */
         renderer->state.current->render_type = type;
-        state = *renderer->state.current;
+        state                                = *renderer->state.current;
         if(stored != NULL) {
             StateGLCopy(&state, &stored->state, MASK_STATE_STORED);
         }

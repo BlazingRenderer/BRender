@@ -94,8 +94,8 @@ static br_error BR_CMETHOD_DECL(br_geometry_v1_model_gl, storedAvail)(struct br_
 }
 
 static br_error BR_CMETHOD_DECL(br_geometry_v1_model_gl, storedNew)(struct br_geometry_v1_model *self, struct br_renderer *renderer,
-                                                                    struct br_geometry_stored **psg, struct v11model *model,
-                                                                    br_token type, br_token_value *tv)
+                                                                    struct br_geometry_stored **psg, struct v11model *model, br_token type,
+                                                                    br_token_value *tv)
 {
     ASSERT(type == BRT_TRIANGLE);
     if((*psg = GeometryStoredGLAllocate(self, "model", renderer, model)) == NULL)

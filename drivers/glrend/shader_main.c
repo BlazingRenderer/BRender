@@ -108,8 +108,8 @@ br_boolean ShaderGLMainCompile(br_gl_main_shader *self, const GladGLContext *gl,
             gl->GetActiveUniformBlockiv(self->program, blocks[i].index, GL_UNIFORM_BLOCK_DATA_SIZE, &size);
 
             if((GLsizeiptr)size != blocks[i].expected) {
-                BrLogError("GLREND", "Uniform block %s is %d bytes in the shader but %d in C - refusing to run.",
-                           blocks[i].name, size, (int)blocks[i].expected);
+                BrLogError("GLREND", "Uniform block %s is %d bytes in the shader but %d in C - refusing to run.", blocks[i].name, size,
+                           (int)blocks[i].expected);
                 goto prog_failed;
             }
         }
