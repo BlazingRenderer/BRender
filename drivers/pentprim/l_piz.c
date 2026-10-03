@@ -718,7 +718,7 @@ void BR_ASM_CALL LineRenderPIZ2T_RGB_888(struct brp_block *block, union brp_vert
 			return;
 			
                 pz = v0->comp_x[C_SZ] ^ 0x80000000;
-                pu = BrScalarToFixed(v0->comp_x[C_U]) % BrIntToFixed(width);
+                pu = v0->comp_x[C_U] % BrIntToFixed(width);
 		if (pu<0)
 		  pu += BrIntToFixed(width);
                 pv = v0->comp_x[C_V] % BrIntToFixed(height);
