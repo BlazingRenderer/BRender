@@ -221,6 +221,7 @@ int BrDemoRunArg(const br_demo_dispatch *dispatch, const br_demo_run_args *args)
     br_demo    *demo          = NULL;
     SDL_Window *window        = NULL;
     br_boolean  is_fullscreen = BR_FALSE;
+    br_boolean  did_init      = BR_FALSE;
     br_uint_64  ticks_now;
     br_uint_64  ticks_last;
 
@@ -292,6 +293,13 @@ int BrDemoRunArg(const br_demo_dispatch *dispatch, const br_demo_run_args *args)
 
     demo->world = BrActorAllocate(BR_ACTOR_NONE, NULL);
     BrZsActorOrderTableSet(demo->world, demo->order_table);
+
+    /*
+     * The destroy callback must only run if init was reached: creating the
+     * window can fail first, and a destroy that assumes its own init ran will
+     * dereference state that was never set up.
+     */
+    did_init = BR_TRUE;
 
     if(demo->dispatch->init(demo) != BRE_OK) {
         BrLogError("DEMO", "Initialisation failed.");
@@ -371,7 +379,8 @@ int BrDemoRunArg(const br_demo_dispatch *dispatch, const br_demo_run_args *args)
 
 cleanup:
 
-    demo->dispatch->destroy(demo);
+    if(did_init)
+        demo->dispatch->destroy(demo);
 
     if(BrV1dbRendererQuery() != NULL)
         BrRendererEnd();
