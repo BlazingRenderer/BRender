@@ -11,3 +11,6 @@
 
 # RenderDoc Capture Settings
 **/*.cap
+
+# Doxygen output
+/doc
