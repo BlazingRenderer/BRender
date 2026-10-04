@@ -267,19 +267,18 @@ typedef struct {
     } model;
 
     /*
-     * The frame's lights, packed by type, plus what the per-draw cull needs.
-     * CPU-side only - a per-draw subset is copied into the model UBO by
-     * StateGLBuildLightLists().
+     * The frame's lights, packed in part order, plus the state part each packed
+     * light came from. CPU-side only - a per-draw subset is copied into the
+     * model UBO by StateGLBuildLightLists().
      *
-     * NB: radius_outer is taken from the light state rather than from
-     * lights.light_radii, which is only written for radial attenuation.
+     * The part is needed because the core publishes the per-model light cull as
+     * BRT_CULLED_B on the light part, after the scene is packed. NB: the light
+     * state array must stay in part order for that flag to land on the right
+     * light - see ProcessSceneLights().
      */
     br_gl_main_data_lights lights;
-    struct {
-        br_boolean radius_cull;
-        br_scalar  radius_outer;
-    } light_cull[BR_MAX_LIGHTS];
-    br_uint_32 num_lights;
+    br_uint_32             light_part[BR_MAX_LIGHTS];
+    br_uint_32             num_lights;
 } state_cache;
 
 typedef struct state_all {

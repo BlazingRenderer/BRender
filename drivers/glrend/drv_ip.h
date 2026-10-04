@@ -159,7 +159,7 @@ void       StateGLDefault(state_all *state, uint32_t mask);
 
 void StateGLUpdateScene(state_cache *cache, state_stack *state);
 struct br_gl_main_data_model;
-void StateGLBuildLightLists(const state_cache *cache, const struct v11model *v11m, struct br_gl_main_data_model *model);
+void StateGLBuildLightLists(const state_cache *cache, const state_light *lights, const struct v11model *v11m, struct br_gl_main_data_model *model);
 void StateGLUpdateModel(state_cache *cache, state_matrix *matrix);
 void StateGLCopy(state_stack *dst, const state_stack *src, uint32_t mask);
 

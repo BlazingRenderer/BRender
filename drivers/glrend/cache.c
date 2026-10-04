@@ -3,38 +3,6 @@
 #include "shortcut.h"
 #include "vecifns.h"
 
-static int light_type_to_int(br_token type)
-{
-    switch(type) {
-        case BRT_AMBIENT:
-            return 0;
-        case BRT_DIRECT:
-            return 1;
-        case BRT_POINT:
-            return 2;
-        case BRT_SPOT:
-            return 3;
-        default:
-            return 100;
-    }
-}
-
-static int sort_lights(const void *a, const void *b)
-{
-    const state_light *l1    = a;
-    const state_light *l2    = b;
-    const int          type1 = light_type_to_int(l1->type);
-    const int          type2 = light_type_to_int(l2->type);
-
-    if(type1 < type2)
-        return -1;
-
-    if(type1 > type2)
-        return 1;
-
-    return 0;
-}
-
 /*
  * -1 = completely ignore this light.
  *  0 = ok
@@ -146,10 +114,12 @@ static void ProcessSceneLights(state_cache *cache, state_light *lights)
     };
 
     /*
-     * Sort the lights first - ambient < direct < point < spot.
+     * Pack in part order rather than sorting by type: the core publishes the
+     * per-model light cull on the light state part, so the state array has to
+     * stay in part order for the flag to land on the light it describes. The
+     * packed order does not need to be grouped - StateGLBuildLightLists()
+     * buckets it by type when it builds the per-draw block.
      */
-    BrQsort(lights, MAX_STATE_LIGHTS, sizeof(state_light), sort_lights);
-
     BrVector4ColourSet(&scene->ambient_colour, BR_COLOUR_RGBA(0, 0, 0, 0xFF));
 
     for(uint32_t i = 0; i < MAX_STATE_LIGHTS; ++i) {
@@ -158,13 +128,8 @@ static void ProcessSceneLights(state_cache *cache, state_light *lights)
         if(casfd(&cache->lights, &scene->ambient_colour, light, num_lights, &counts, &use_ambient_colour) < 0)
             continue;
 
-        /*
-         * Record what the per-draw cull needs. Taken from the light state,
-         * because the light arrays are only populated for radial attenuation.
-         * See StateGLBuildLightLists().
-         */
-        cache->light_cull[num_lights].radius_cull = light->radius_cull;
-        cache->light_cull[num_lights].radius_outer = light->radius_outer;
+        /* Remember where the per-draw cull finds this light's flag. */
+        cache->light_part[num_lights] = i;
 
         ++num_lights;
     }
@@ -184,63 +149,27 @@ static void ProcessSceneLights(state_cache *cache, state_light *lights)
 }
 
 /*
- * Upper bound on the largest singular value of the model->view 3x3, via the
- * Frobenius norm (always >= the spectral norm). Scales the model's bounding
- * radius from model space into view space.
- *
- * model_to_view is not necessarily an isometry - models can be scaled, and
- * non-uniformly - so the radius has to be scaled rather than used directly.
- */
-static br_scalar ModelToViewMaxScale(const br_matrix4 *mv)
-{
-    float sum = 0.0f;
-
-    for(int r = 0; r < 3; ++r)
-        for(int c = 0; c < 3; ++c) {
-            float v = BrScalarToFloat(mv->m[r][c]);
-            sum += v * v;
-        }
-
-    return BrFloatToScalar(sqrtf(sum));
-}
-
-/*
  * Build the lights this draw can see.
  *
- * The survivors of the model cull are copied into the model's light block,
- * grouped by type with light_start/light_end giving each type's range. The
- * shader's loops are then identical to the old per-frame set - the arrays it
+ * The survivors of the core's per-model cull are copied into the model's light
+ * block, grouped by type with light_start/light_end giving each type's range.
+ * The shader's loops are then identical to the old per-frame set - the arrays it
  * indexes just hold fewer lights, packed from zero.
  *
  * This is what makes the cull pay: keeping the indices affine is the whole
  * point. An index list or a per-light branch both make the light arrays
  * indirect, which costs more than the skipped work saves.
  *
- * The cull itself follows softrend/setup.c: a light with radius culling enabled
- * cannot reach the model if it lies further from the model's origin than
- * radius_outer plus the model's bounding radius. It is evaluated in view space,
- * which is the space the shader shades in. (softrend's BRT_MODEL path shades in
- * model space and so culls in model space - each path is consistent with
- * itself; the space is not interchangeable.)
+ * The cull is not evaluated here. The core does that per model, in view space
+ * - where the shader shades and where BrSetupLights() puts light geometry, and
+ * including the spot cone test - and publishes the result as BRT_CULLED_B on
+ * the light state part. This reads that flag; see BrLightCullReset().
  *
- * TODO: angle culling for spot lights, i.e. sphereIntersectsCone() in
- *       softrend/setup.c. Spots currently stay lit, which is conservative.
+ * lights is the live light state, indexed by part, which is where
+ * ProcessSceneLights() recorded each packed light's flag in cache->light_part.
  */
-void StateGLBuildLightLists(const state_cache *cache, const struct v11model *v11m, br_gl_main_data_model *model)
+void StateGLBuildLightLists(const state_cache *cache, const state_light *lights, const struct v11model *v11m, br_gl_main_data_model *model)
 {
-    const br_matrix4 *mv = &cache->model.mv;
-
-    /* Model-space origin in view space, i.e. the translation row of mv. */
-    br_scalar ox = mv->m[3][0];
-    br_scalar oy = mv->m[3][1];
-    br_scalar oz = mv->m[3][2];
-
-    /*
-     * When v11m is NULL the model's bounds are unknown (the per-triangle path
-     * draws from the transient buffer), so nothing is culled.
-     */
-    br_scalar bound = v11m != NULL ? BR_MUL(ModelToViewMaxScale(mv), v11m->radius) : BR_SCALAR(0.0);
-
     br_uint_32 out = 0;
 
     for(br_uint_32 t = 0; t < 4; ++t) {
@@ -252,23 +181,13 @@ void StateGLBuildLightLists(const state_cache *cache, const struct v11model *v11
             if(cache->lights.light[i].info.type != t)
                 continue;
 
-            if(v11m != NULL && cache->light_cull[i].radius_cull) {
-                const br_vector4 *lp = &cache->lights.light[i].position;
-                br_scalar         dx = lp->v[0] - ox;
-                br_scalar         dy = lp->v[1] - oy;
-                br_scalar         dz = lp->v[2] - oz;
-                br_scalar         radius = cache->light_cull[i].radius_outer + bound;
-
-                /*
-                 * A negative radius_outer would make the test meaningless, so
-                 * clamp before squaring.
-                 */
-                if(radius < BR_SCALAR(0.0))
-                    radius = BR_SCALAR(0.0);
-
-                if(BR_MUL(dx, dx) + BR_MUL(dy, dy) + BR_MUL(dz, dz) > BR_MUL(radius, radius))
-                    continue;
-            }
+            /*
+             * The flag describes the model being drawn, so it only applies to a
+             * model draw. The per-triangle path carries no model and so still
+             * holds whichever model was culled last, which must not be used.
+             */
+            if(v11m != NULL && lights[cache->light_part[i]].culled)
+                continue;
 
             model->lights.light[out] = cache->lights.light[i];
 

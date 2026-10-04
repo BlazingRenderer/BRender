@@ -408,7 +408,7 @@ static br_boolean apply_state(br_renderer *renderer, const GladGLContext *gl, co
         gl->FrontFace(GL_CCW);
 
     /* Cull lights that cannot reach this model, and pack what is left. */
-    StateGLBuildLightLists(cache, v11m, &model);
+    StateGLBuildLightLists(cache, renderer->state.current->light, v11m, &model);
 
     /* NB: Flag is never set */
     // int model_lit = self->model->flags & V11MODF_LIT;
@@ -433,7 +433,7 @@ static br_boolean apply_state(br_renderer *renderer, const GladGLContext *gl, co
      */
     {
         br_uint_32 nlights = (br_uint_32)model.light_end.v[3];
-        GLsizeiptr used     = (GLsizeiptr)(offsetof(br_gl_main_data_model, lights.light) + nlights * sizeof(br_gl_main_data_light));
+        GLsizeiptr used    = (GLsizeiptr)(offsetof(br_gl_main_data_model, lights.light) + nlights * sizeof(br_gl_main_data_light));
 
         if(used > (GLsizeiptr)sizeof(model))
             used = (GLsizeiptr)sizeof(model);
