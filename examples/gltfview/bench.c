@@ -349,35 +349,31 @@ static void bench_checksum_gl(gltfview_bench *bench)
         const char *path = BrGetEnv("GLTFVIEW_BENCH_PPM");
 
         if(path != NULL && path[0] != '\0') {
-            FILE *fp = fopen(path, "wb");
+            br_pixelmap *pm = BrPixelmapAllocate(BR_PMT_RGBA_8888, w, h, NULL, BR_PMAF_NORMAL);
 
-            if(fp != NULL) {
-                fprintf(fp, "P6\n%d %d\n255\n", w, h);
-
+            if(pm != NULL) {
                 /*
-                 * glReadPixels hands back bottom-up, four bytes per pixel; a PPM
-                 * wants three. Take three of every four, not a contiguous slice
-                 * of the row.
+                 * glReadPixels hands back bottom-up r,g,b,a and PPM wants
+                 * top-down; BR_PMT_RGBA_8888 stores b,g,r,a, so copy the rows
+                 * in reverse and swap red and blue.
                  */
-                br_uint_8 *row_rgb = BrResAllocate(bench, (br_size_t)w * 3, BR_MEMORY_APPLICATION);
+                for(int y = 0; y < h; ++y) {
+                    const br_uint_8 *src = px + (br_size_t)(h - 1 - y) * w * 4;
+                    br_uint_8       *dst = (br_uint_8 *)pm->pixels + (br_size_t)y * pm->row_bytes;
 
-                if(row_rgb != NULL) {
-                    for(int y = h - 1; y >= 0; --y) {
-                        const br_uint_8 *row = px + (br_size_t)y * w * 4;
-
-                        for(int x = 0; x < w; ++x)
-                            memcpy(row_rgb + (br_size_t)x * 3, row + (br_size_t)x * 4, 3);
-
-                        fwrite(row_rgb, 1, (size_t)w * 3, fp);
+                    for(int x = 0; x < w; ++x) {
+                        dst[x * 4 + 0] = src[x * 4 + 2];
+                        dst[x * 4 + 1] = src[x * 4 + 1];
+                        dst[x * 4 + 2] = src[x * 4 + 0];
+                        dst[x * 4 + 3] = src[x * 4 + 3];
                     }
-
-                    BrResFree(row_rgb);
                 }
 
-                fclose(fp);
+                BrFmtImageSave(path, pm, BR_FMT_IMAGE_PPM);
+                BrPixelmapFree(pm);
                 printf("BENCH ppm=%s\n", path);
             } else {
-                BrLogWarn("BENCH", "Could not open %s.", path);
+                BrLogWarn("BENCH", "Could not allocate a pixelmap for %s.", path);
             }
         }
     }
