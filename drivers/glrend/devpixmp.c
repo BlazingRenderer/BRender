@@ -58,7 +58,7 @@ static br_tv_template_entry devicePixelmapTemplateEntries[] = {
     {BRT(CLUT_O),             0,                  BRTV_QUERY | BRTV_ALL, BRTV_CONV_CUSTOM,  (br_uintptr_t)&custom},
     {BRT(IDENTIFIER_CSTR),    F(pm_identifier),   BRTV_QUERY | BRTV_ALL, BRTV_CONV_COPY,    0                    },
     {BRT(MSAA_SAMPLES_I32),   F(msaa_samples),    BRTV_QUERY | BRTV_ALL, BRTV_CONV_COPY,    0                    },
-    {DEV(OPENGL_TEXTURE_U32), 0,                  BRTV_QUERY | BRTV_ALL, BRTV_CONV_CUSTOM,  (br_uintptr_t)&custom},
+    {BRT(OPENGL_TEXTURE_U32), 0,                  BRTV_QUERY | BRTV_ALL, BRTV_CONV_CUSTOM,  (br_uintptr_t)&custom},
 };
 #undef F
 
