@@ -7,6 +7,7 @@ if(TARGET BRender::Drivers::SDL3Dev AND TARGET BRender::Drivers::GLRend)
     add_subdirectory(mkres)
     add_subdirectory(devpmtest)
     add_subdirectory(gltfview)
+    add_subdirectory(rendertest)
     add_subdirectory(tutorials)
     add_subdirectory(samples)
 
