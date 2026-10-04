@@ -560,7 +560,10 @@ void ActiveLightsUpdate(br_renderer *self)
                 }
 
                 /*
-                 * Transform light's direction
+                 * Transpose, not inverse. The two agree for the similarity
+                 * transforms this path is correct for, and under a non-uniform
+                 * scale neither reproduces the view-space result, because the
+                 * unit model-space normal is not transformed to compensate.
                  */
                 BrMatrix34TApplyV(&alp->direction, &alp->s->direction, &self->state.matrix.model_to_view);
                 BrVector3Normalise(&alp->direction, &alp->direction);
@@ -592,6 +595,7 @@ void ActiveLightsUpdate(br_renderer *self)
                         continue;
                     }
 
+                /* See note in BRT_DIRECT above. */
                 BrMatrix34TApplyV(&alp->direction, &alp->s->direction, &self->state.matrix.model_to_view);
                 BrVector3Normalise(&alp->direction, &alp->direction);
 
