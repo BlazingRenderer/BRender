@@ -122,6 +122,7 @@ static br_pixelmap *load_pixelmap(br_gltf_load_state *state, const cgltf_image *
     size_t       size;
     int          x, y, c;
     int          owns_raw = 0;
+    br_boolean   index_8  = BR_FALSE;
 
     /*
      * GLB: images stored in buffer views.
@@ -130,6 +131,11 @@ static br_pixelmap *load_pixelmap(br_gltf_load_state *state, const cgltf_image *
         raw_data = (void *)cgltf_buffer_view_data(image->buffer_view);
         size     = image->buffer_view->size;
     } else if(image->uri != NULL) {
+        /*
+         * A lookup table: its payload is the pixelmap's indices, not colour.
+         */
+        index_8 = BrStrNCmp(image->uri, CGLTF_BR_INDEX_8_PNG_URI, BR_ASIZE(CGLTF_BR_INDEX_8_PNG_URI) - 1) == 0;
+
         /*
          * Try base64 data URI first, then external file.
          */
@@ -156,7 +162,7 @@ static br_pixelmap *load_pixelmap(br_gltf_load_state *state, const cgltf_image *
         return NULL;
     }
 
-    if((pixels = stbi_load_from_memory(raw_data, (int)size, &x, &y, &c, 4)) == NULL) {
+    if((pixels = stbi_load_from_memory(raw_data, (int)size, &x, &y, &c, index_8 ? 1 : 4)) == NULL) {
         if(owns_raw)
             BrResFree(raw_data);
         return NULL;
@@ -164,6 +170,27 @@ static br_pixelmap *load_pixelmap(br_gltf_load_state *state, const cgltf_image *
 
     if(owns_raw)
         BrResFree(raw_data);
+
+    if(index_8) {
+        /*
+         * Rebuild the lookup table as it was: INDEX_8, one byte per pixel, and
+         * deliberately no palette. The PNG only carries the pixels, so the rows are
+         * copied into the row_bytes the engine would have allocated itself.
+         */
+        pixelmap = BrPixelmapAllocate(BR_PMT_INDEX_8, x, y, NULL, BR_PMAF_NORMAL);
+
+        if(pixelmap != NULL) {
+            for(int row = 0; row < pixelmap->height; ++row) {
+                BrMemCpy((br_uint_8 *)pixelmap->pixels + (row * pixelmap->row_bytes), (const br_uint_8 *)pixels + ((size_t)row * x), x);
+            }
+
+            if(image->name != NULL)
+                pixelmap->identifier = BrResStrDup(pixelmap, image->name);
+        }
+
+        BrMemFree(pixels);
+        return pixelmap;
+    }
 
     tmp             = BrPixelmapAllocate(BR_PMT_RGBA_8888_ARR, x, y, pixels, BR_PMAF_NORMAL);
     tmp->identifier = (char *)image->name; /* NB: This is safe, the clone below will copy it. */

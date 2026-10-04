@@ -16,6 +16,19 @@ typedef enum cgltf_brender_light_type {
 
 typedef struct cgltf_image cgltf_image;
 
+/*
+ * Data URI prefix for an image whose single PNG channel is the raw indices of a
+ * BR_PMT_INDEX_8 pixelmap, rather than colour.
+ *
+ * A material's lookup tables (index_shade, index_blend, index_fog and screendoor)
+ * are INDEX_8 pixelmaps with no palette - that is the engine's own definition of a
+ * lookup table, and the rasterisers index them directly. There is therefore no
+ * palette to expand them through, and any conversion to colour would lose the only
+ * thing that matters: the index bytes. Marking the payload lets the loader read the
+ * indices back verbatim instead of treating the image as colour.
+ */
+#define CGLTF_BR_INDEX_8_PNG_URI "data:image/png;brender=index8;base64,"
+
 typedef struct cgltf_brender_material {
     char        *identifier;
     cgltf_float  colour[3];

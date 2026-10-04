@@ -89,16 +89,15 @@ static char *build_buffer_uri(const cgltf_buffer *buffer, void *res)
     return code_out;
 }
 
-static char *build_png_uri(void *data, br_size_t size, void *res)
+static char *build_png_uri(const char *prefix, void *data, br_size_t size, void *res)
 {
-    const char          prefix[] = "data:image/png;base64,";
-    unsigned int        len      = cbase64_calc_encoded_length((unsigned int)size);
+    const br_size_t     prefix_len = BrStrLen(prefix);
+    const unsigned int  len        = cbase64_calc_encoded_length((unsigned int)size);
     cbase64_encodestate es;
     char               *code_out;
     char               *code_out_end;
 
-    code_out = BrResAllocate(res, sizeof(prefix) + len + 1, BR_MEMORY_APPLICATION);
-    memcpy(code_out, prefix, sizeof(prefix));
+    code_out = BrResAllocate(res, prefix_len + len + 1, BR_MEMORY_APPLICATION);
 
     code_out_end = BrStpCpy(code_out, prefix);
 
@@ -655,46 +654,70 @@ static void write_stbi_actual(void *context, void *data, int size)
     state->cursor += size;
 }
 
+/*
+ * Encode a block of pixels as a PNG, in a buffer allocated below 'res'.
+ *
+ * stbi_write_*() needs to know the output size up front, so the encoder is run
+ * twice: once to count and once to write into an exactly-sized buffer.
+ */
+static br_gltf_save_stbi *build_png(const void *pixels, int width, int height, int channels, br_size_t row_bytes, void *res)
+{
+    br_gltf_save_stbi *sstate = BrResAllocate(res, sizeof(br_gltf_save_stbi), BR_MEMORY_SCRATCH);
+
+    *sstate = (br_gltf_save_stbi){
+        .size   = 0,
+        .cursor = 0,
+        .data   = NULL,
+    };
+
+    stbi_write_png_to_func(write_stbi_count, sstate, width, height, channels, pixels, (int)row_bytes);
+    sstate->data = BrResAllocate(res, sstate->size, BR_MEMORY_SCRATCH);
+    stbi_write_png_to_func(write_stbi_actual, sstate, width, height, channels, pixels, (int)row_bytes);
+
+    return sstate;
+}
+
 static int fill_pixelmap(const void *key, void *value, br_hash hash, void *user)
 {
-    const br_pixelmap  *pm    = key;
-    cgltf_image        *image = value;
-    br_gltf_save_state *state = user;
+    const br_pixelmap  *pm     = key;
+    cgltf_image        *image  = value;
+    br_gltf_save_state *state  = user;
+    br_gltf_save_stbi  *sstate = NULL;
     br_pixelmap        *pm2;
+    const char         *prefix;
 
     (void)hash;
 
     image->name = pm->identifier;
 
-    /*
-     * This code is cursed.
-     */
-    pm2 = BrPixelmapCloneTyped((br_pixelmap *)pm, BR_PMT_RGBA_8888_ARR);
-    if(pm2 != NULL) {
-        br_gltf_save_stbi *sstate;
-
-        sstate  = BrResAllocate(state, sizeof(br_gltf_save_stbi), BR_MEMORY_SCRATCH);
-        *sstate = (br_gltf_save_stbi){
-            .size   = 0,
-            .cursor = 0,
-            .data   = NULL,
-        };
-
-        stbi_write_png_to_func(write_stbi_count, sstate, pm2->width, pm2->height, 4, pm2->pixels, pm2->row_bytes);
-        sstate->data = BrResAllocate(state, sstate->size, BR_MEMORY_SCRATCH);
-        stbi_write_png_to_func(write_stbi_actual, sstate, pm2->width, pm2->height, 4, pm2->pixels, pm2->row_bytes);
+    if(pm->type == BR_PMT_INDEX_8 && pm->map == NULL) {
+        /*
+         * A lookup table. It has no palette, so there is no colour to expand the
+         * indices through and no lossy conversion that could preserve them - carry
+         * the indices themselves in the PNG's single channel. The PNG codec is
+         * lossless, so the bytes survive exactly.
+         */
+        sstate = build_png(pm->pixels, pm->width, pm->height, 1, pm->row_bytes, state);
+        prefix = CGLTF_BR_INDEX_8_PNG_URI;
+    } else if((pm2 = BrPixelmapCloneTyped((br_pixelmap *)pm, BR_PMT_RGBA_8888_ARR)) != NULL) {
+        /*
+         * This code is cursed.
+         */
+        sstate = build_png(pm2->pixels, pm2->width, pm2->height, 4, pm2->row_bytes, state);
+        prefix = "data:image/png;base64,";
 
         BrPixelmapFree(pm2);
-
-        image->uri = build_png_uri(sstate->data, sstate->size, state->data);
-
-        BrResFree(sstate);
     } else {
         /*
          * FIXME: what do here?
          */
         image->uri = "data:image/png;base64,";
+        return 0;
     }
+
+    image->uri = build_png_uri(prefix, sstate->data, sstate->size, state->data);
+
+    BrResFree(sstate);
 
     return 0;
 }
