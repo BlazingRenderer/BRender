@@ -311,6 +311,17 @@ static br_actor *rt_find_camera(br_actor *a)
     return NULL;
 }
 
+/*
+ * A material's lookup tables (index_shade/index_blend/index_fog/screendoor) are
+ * BR_PMT_INDEX_8 pixelmaps with no palette: their pixels are indices into the
+ * table itself, not colours. There is no palette to requantise through and the
+ * rasterisers read the table's bytes directly, so they must be left untouched.
+ */
+static br_boolean rt_is_lookup_table(const br_pixelmap *pm)
+{
+    return pm->type == BR_PMT_INDEX_8 && pm->map == NULL;
+}
+
 /* Build an optimal CLUT for every pixelmap in the scene; gltfview does this. */
 static br_pixelmap *rt_build_clut(br_pixelmap *const *maps, size_t nmaps)
 {
@@ -322,6 +333,9 @@ static br_pixelmap *rt_build_clut(br_pixelmap *const *maps, size_t nmaps)
     BrQuantBegin();
     for(size_t i = 0; i < nmaps; ++i) {
         br_pixelmap *pm = maps[i];
+
+        if(rt_is_lookup_table(pm))
+            continue;
 
         for(int y = 0; y < pm->height; y++) {
             for(int x = 0; x < pm->width; x++) {
@@ -464,7 +478,7 @@ static br_error rt_load_scene(rt_state *st, br_demo *demo, int index)
     for(size_t i = 0; i < results->npixelmaps; ++i) {
         br_pixelmap *pm = results->pixelmaps[i];
 
-        if(demo->colour_buffer->type == BR_PMT_INDEX_8) {
+        if(demo->colour_buffer->type == BR_PMT_INDEX_8 && !rt_is_lookup_table(pm)) {
             const br_pixelmap_convert_options cvtopts = {
                 .index_alpha_threshold = 0,
                 .target_clut           = clut,
