@@ -55,11 +55,16 @@ void SURFACE_CALL SurfaceIndexLit(br_renderer *self, br_vector3 *p, br_vector2 *
 
     /*
      * Accumulate intensities for each active light in model space
+     *
+     * A culled light is left untransformed by ActiveLightsUpdate(), so its
+     * cached position and direction are whatever the last model rendered
+     * with - honour the cull, as the colour path does.
      */
     rend.eye_l = scache.eye_m_normalised;
 
     for(i = 0; i < scache.nlights_model; i++, alp++)
-        alp->accumulate_index(self, p, n, alp, comp);
+        if(!alp->culled)
+            alp->accumulate_index(self, p, n, alp, comp);
 
     /*
      * See if any lights are to be calculated in view space
@@ -80,7 +85,8 @@ void SURFACE_CALL SurfaceIndexLit(br_renderer *self, br_vector3 *p, br_vector2 *
          * ... and accumulate
          */
         for(i = 0; i < scache.nlights_view; i++, alp++)
-            alp->accumulate_index(self, &vp, &fvn, alp, comp);
+            if(!alp->culled)
+                alp->accumulate_index(self, &vp, &fvn, alp, comp);
     }
 
     /*
