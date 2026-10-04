@@ -4,6 +4,7 @@ add_executable(mkres
         mkres.c
         quad.c
         cube.c
+        scene.c
         checkerboard.c
         smpte.c
         vga.c

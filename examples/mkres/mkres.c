@@ -10,6 +10,7 @@ br_model    *mkres_make_quad(const char *name);
 br_model    *mkres_make_cube(const char *name);
 br_pixelmap *mkres_make_smtpe_bars(br_uint_8 type, br_int_16 width);
 br_pixelmap *mkres_vgapal(void);
+br_error     mkres_make_scenes(void);
 
 int main(int argc, char **argv)
 {
@@ -19,6 +20,16 @@ int main(int argc, char **argv)
     int          ret = 1;
 
     BrBegin();
+
+    /*
+     * `mkres scenes` writes the light-cull scene fixtures instead of the
+     * resource set. They are separate artefacts, and regenerating one should
+     * not churn the other.
+     */
+    if(argc > 1 && BrStrCmp(argv[1], "scenes") == 0) {
+        ret = mkres_make_scenes() == BRE_OK ? 0 : 1;
+        goto done;
+    }
 
     if((pm_checkerboard = mkres_make_checkerboard_pixelmap("checkerboard.pix")) == NULL) {
         fprintf(stderr, "failed to allocate checkerboard pixelmap\n");
