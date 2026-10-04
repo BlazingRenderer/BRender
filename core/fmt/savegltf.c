@@ -104,7 +104,10 @@ static char *build_png_uri(void *data, br_size_t size, void *res)
 
     cbase64_init_encodestate(&es);
     code_out_end += cbase64_encode_block(data, (unsigned int)size, code_out_end, &es);
-    (void)cbase64_encode_blockend(code_out_end, &es);
+    code_out_end += cbase64_encode_blockend(code_out_end, &es);
+
+    /* cbase64_encode_blockend() does not terminate the string. */
+    *code_out_end = '\0';
 
     return code_out;
 }
