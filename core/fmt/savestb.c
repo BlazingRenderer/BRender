@@ -64,25 +64,32 @@ br_uint_32 BR_PUBLIC_ENTRY BrFmtImageSave(const char *name, br_pixelmap *pm, br_
     }
 
     /*
-     * open file for writing
-     */
-    file = BrFileOpenWrite(name, BR_FS_MODE_BINARY);
-    if(file == NULL) {
-        BrLogError("FMT", "Failed to open \"%s\" for writing.", name);
-        return 0;
-    }
-
-    /*
-     * check if we need to clone
+     * Convert the source to the RGBA layout stb_image_write and save_ppm()
+     * consume. This is done before the destination is opened so that a
+     * pixelmap we cannot express - most obviously an indexed pixelmap with no
+     * palette - fails loudly without creating a zero-byte file first.
      */
     if(pm->type == BR_PMT_RGBA_8888_ARR) {
         dst = pm;
     } else {
         dst = BrPixelmapCloneTyped(pm, BR_PMT_RGBA_8888_ARR);
         if(dst == NULL) {
-            BrLogError("FMT", "Failed to clone \"%s\".", pm->identifier);
+            BrLogError("FMT", "Failed to convert \"%s\" to RGBA for saving.", pm->identifier);
             return 0;
         }
+    }
+
+    /*
+     * open file for writing
+     */
+    file = BrFileOpenWrite(name, BR_FS_MODE_BINARY);
+    if(file == NULL) {
+        BrLogError("FMT", "Failed to open \"%s\" for writing.", name);
+
+        if(dst != pm)
+            BrPixelmapFree(dst);
+
+        return 0;
     }
 
     /*
@@ -121,7 +128,7 @@ br_uint_32 BR_PUBLIC_ENTRY BrFmtImageSave(const char *name, br_pixelmap *pm, br_
      * free our data
      */
     BrFileClose(file);
-    if(pm->type != BR_PMT_RGBA_8888_ARR) {
+    if(dst != pm) {
         BrPixelmapFree(dst);
     }
 
