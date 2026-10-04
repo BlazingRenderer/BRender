@@ -25,7 +25,13 @@ BRender is a 3D rendering engine with multiple renderer backends:
 ## Benchmarking
 - `examples/gltfview/bench.c` is the benchmark harness, driven by `GLTFVIEW_BENCH_*` environment variables: `FRAMES` (frames to render;
   0 or unset disables it), `WARMUP` (frames to discard, default 10), `NOVSYNC` (`1` to disable vsync), `FINISH` (`1` to `glFinish()`
-  each frame), `CSV` (path to write per-frame samples to) and `PPM` (path to write the final frame to as a PPM).
+  each frame), `CSV` (path to write per-frame samples to), `PPM` (path to write the final frame to as a PPM - GL path only) and
+  `SOFT_PNG` (path to write the software colour buffer as a PNG, via `BrFmtImageSave`, for softrend and the software drivers).
+- **An unset `FRAMES` means the demo never exits.** It renders in an endless loop rather than returning, so a run without it either
+  hangs or has to be killed - and inside `gdb` that looks like a dump that produced nothing. Always set it:
+  `SDL_VIDEODRIVER=offscreen GLTFVIEW_BENCH_FRAMES=5 GLTFVIEW_BENCH_NOVSYNC=1`. Bound anything that could spin with
+  `timeout -s KILL` and never a plain `timeout`, because these programs install a SIGTERM handler and a plain `timeout` leaves the
+  process running. The timeout is a backstop, not a mechanism: if it is the thing ending a run, the invocation is wrong.
 - Every demo built on `examples/brdemo/brdemo.c` is useless as an instrument: it hardcodes vsync on (`SDL_GL_SetSwapInterval(1)`)
   and draws the frame time into the colour buffer, so it reports the refresh period (~16.7ms on a 60Hz display) whatever it rendered.
 - Always measure with `--no-stats` (`examples/brdemo/brdemo.c`, inherited by `gltfview`). Without it the overlay writes frame time
