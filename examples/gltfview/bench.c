@@ -513,6 +513,58 @@ static void bench_checksum_software(gltfview_bench *bench)
 
     printf("BENCH checksum=%016llx coverage=%.2f%% (%u/%u px at %dx%d, software, type=%u)\n", (unsigned long long)hash,
            100.0 * (double)covered / (double)total, covered, total, (int)pm->width, (int)pm->height, (unsigned int)pm->type);
+
+    /*
+     * Local debug dump of the software colour buffer, so a textured frame can be
+     * looked at without a GL context. The indices are written as greys (see
+     * below) and saved through the engine's PNG writer. Scope is deliberately
+     * one env var and one write; the real compare mode is being built
+     * separately.
+     */
+    {
+        const char *path = BrGetEnv("GLTFVIEW_BENCH_SOFT_PNG");
+
+        if(path != NULL && path[0] != '\0') {
+            /*
+             * The software colour buffer is BR_PMT_INDEX_8 with its palette held
+             * as a device CLUT (BrPixelmapPaletteSet), not as pm->map, so the
+             * generic image writer has no palette to resolve and refuses the
+             * conversion. Render the indices as greys instead: enough to see
+             * whether texture detail is landing. This is a local debug view, not
+             * the regression comparison, which is the checksum above.
+             */
+            br_pixelmap *dst = BrPixelmapAllocate(BR_PMT_RGBA_8888_ARR, pm->width, pm->height, NULL, BR_PMAF_NORMAL);
+
+            if(dst != NULL) {
+                br_uint_32 bits      = BrPixelmapPixelSize(pm);
+                br_int_32  row_bytes = (br_int_32)(((br_uint_64)pm->width * bits + 7) / 8);
+                br_int_32  stride    = pm->row_bytes != 0 ? pm->row_bytes : row_bytes;
+
+                for(br_int_32 y = 0; y < pm->height; ++y) {
+                    const br_uint_8 *src = (const br_uint_8 *)pm->pixels + (br_size_t)y * stride;
+                    br_uint_8       *d   = (br_uint_8 *)dst->pixels + (br_size_t)y * dst->row_bytes;
+
+                    for(br_int_32 x = 0; x < pm->width; ++x) {
+                        br_uint_8 v = (br_uint_8)bench_pixel_value(src, x, bits);
+
+                        d[x * 4 + 0] = v;
+                        d[x * 4 + 1] = v;
+                        d[x * 4 + 2] = v;
+                        d[x * 4 + 3] = 0xff;
+                    }
+                }
+
+                if(BrFmtImageSave(path, dst, BR_FMT_IMAGE_PNG))
+                    printf("BENCH soft-png=%s\n", path);
+                else
+                    BrLogWarn("BENCH", "Could not write software frame to %s.", path);
+
+                BrPixelmapFree(dst);
+            } else {
+                BrLogWarn("BENCH", "Could not allocate a pixelmap for %s.", path);
+            }
+        }
+    }
 }
 
 br_boolean GLTFViewBenchShouldQuit(gltfview_bench *bench)
