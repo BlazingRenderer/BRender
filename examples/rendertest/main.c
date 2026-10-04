@@ -58,6 +58,7 @@ static int         rt_cfg_no_depth     = 0;
 static int         rt_cfg_bless        = 0;
 static int         rt_cfg_verbose      = 0;
 static const char *rt_cfg_reference    = RT_REFERENCE_DEFAULT;
+static const char *rt_cfg_ref_driver   = NULL; /* reference driver token; NULL: this binary's own */
 static const char *rt_cfg_scene_dir    = RT_SCENE_DIR_DEFAULT;
 static char        rt_cfg_ppm_dir[512] = "";
 static const char *rt_cfg_scenes[RT_MAX_SCENES];
@@ -92,8 +93,9 @@ typedef struct rt_state {
     int         verbose;
 
     char reference[512];
-    char ppm_dir[512]; /* empty: don't export */
-    char driver[128];  /* short driver token, e.g. "llvmpipe" */
+    char ppm_dir[512];          /* empty: don't export */
+    char driver[128];           /* short driver token, e.g. "llvmpipe" */
+    char reference_driver[128]; /* empty: look up under driver above */
 
     rt_scene *scenes;
     int       nscenes;
@@ -542,10 +544,23 @@ static void rt_unload_scene(rt_state *st, br_demo *demo)
 /* Reference file.                                                    */
 /* ------------------------------------------------------------------ */
 
-static void rt_make_key(char *dst, size_t n, rt_state *st, const char *scene)
+/*
+ * The key names the driver that produced the frame, so a reference records a
+ * build fact and bit-exactness across rasterisers stays visible. --reference-
+ * driver substitutes a different token for lookup only, so a run can score
+ * against another rasteriser's pixels without writing a second copy of the
+ * file; --bless still records the driver that actually rendered.
+ */
+static void rt_make_key(char *dst, size_t n, rt_state *st, const char *driver, const char *scene)
 {
-    snprintf(dst, n, "%s/%s/%s/%u/%dx%d/%s", st->device, st->driver, st->no_depth ? "zs" : "zb", (unsigned)st->pm_type, st->width,
+    snprintf(dst, n, "%s/%s/%s/%u/%dx%d/%s", st->device, driver, st->no_depth ? "zs" : "zb", (unsigned)st->pm_type, st->width,
              st->height, scene);
+}
+
+/* The driver token the reference is looked up under. */
+static const char *rt_lookup_driver(rt_state *st)
+{
+    return st->reference_driver[0] != '\0' ? st->reference_driver : st->driver;
 }
 
 static void rt_load_reference(rt_state *st)
@@ -609,7 +624,7 @@ static void rt_write_reference(rt_state *st)
         char       key[192];
         rt_expect *e;
 
-        rt_make_key(key, sizeof(key), st, st->results[i].scene);
+        rt_make_key(key, sizeof(key), st, st->driver, st->results[i].scene);
         e = rt_find_expect(st, key);
 
         if(e != NULL) {
@@ -744,7 +759,7 @@ static void rt_finish_scene(rt_state *st, br_demo *demo)
         r->total    = total;
     }
 
-    rt_make_key(key, sizeof(key), st, st->scenes[st->scene_index].name);
+    rt_make_key(key, sizeof(key), st, rt_lookup_driver(st), st->scenes[st->scene_index].name);
 
     const char *status;
 
@@ -865,7 +880,7 @@ static br_error rt_init(br_demo *demo)
         if(st->driver[0] == '\0')
             snprintf(st->driver, sizeof(st->driver), "%s", "unknown");
     } else {
-        snprintf(st->driver, sizeof(st->driver), "%s", "software");
+        snprintf(st->driver, sizeof(st->driver), "%s", RT_SOFT_DRIVER);
     }
 
     /*
@@ -892,6 +907,7 @@ static br_error rt_init(br_demo *demo)
 
         snprintf(st->reference, sizeof(st->reference), "%s", rt_cfg_reference);
         snprintf(st->ppm_dir, sizeof(st->ppm_dir), "%s", rt_cfg_ppm_dir);
+        snprintf(st->reference_driver, sizeof(st->reference_driver), "%s", rt_cfg_ref_driver != NULL ? rt_cfg_ref_driver : "");
 
         for(int i = 0; i < st->nscenes; ++i) {
             snprintf(st->scenes[i].name, sizeof(st->scenes[i].name), "%s", rt_cfg_scenes[i]);
@@ -1023,6 +1039,10 @@ static void rt_usage(const char *argv0)
             "  --no-depth         render with Z-sort and no depth buffer\n"
             "  --scene-dir <dir>  where the scenes live\n"
             "  --reference <file> reference file to compare against\n"
+            "  --reference-driver <token>\n"
+            "                     score against another driver's entries (e.g.\n"
+            "                     'software' to read another rasteriser's entries);\n"
+            "                     --bless still records this binary's own driver\n"
             "  --ppm-dir <dir>    write each frame as <dir>/<scene>.ppm\n"
             "  --bless            write the reference instead of comparing\n"
             "  -v, --verbose      log more\n"
@@ -1059,6 +1079,8 @@ int main(int argc, char **argv)
             rt_cfg_scene_dir = argv[++i];
         } else if(strcmp(a, "--reference") == 0 && v != NULL) {
             rt_cfg_reference = argv[++i];
+        } else if(strcmp(a, "--reference-driver") == 0 && v != NULL) {
+            rt_cfg_ref_driver = argv[++i];
         } else if(strcmp(a, "--ppm-dir") == 0 && v != NULL) {
             snprintf(rt_cfg_ppm_dir, sizeof(rt_cfg_ppm_dir), "%s", argv[++i]);
         } else if(strcmp(a, "--bless") == 0) {

@@ -11,6 +11,14 @@ target_compile_definitions(rendertest PRIVATE
         RT_SCENE_DIR_DEFAULT="${CMAKE_CURRENT_SOURCE_DIR}/dat"
 )
 
+#
+# The software rasteriser is chosen at link time, so which one produced a frame
+# is a build fact and belongs in the reference key.
+#
+set (RT_SOFT_DRIVER "software")
+
+target_compile_definitions(rendertest PRIVATE RT_SOFT_DRIVER="${RT_SOFT_DRIVER}")
+
 if (NOT BRENDER_DISABLE_INSTALL)
     install(TARGETS rendertest DESTINATION ${CMAKE_INSTALL_BINDIR})
 endif ()
