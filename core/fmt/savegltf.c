@@ -367,7 +367,7 @@ static int gather_pixelmaps(const void *key, void *value, br_hash hash, void *us
         br_size_t last_size = BrHashMapSize(state->pixelmap_map);
 
         if(maps[i] != NULL) {
-            BrHashMapInsert(state->pixelmap_map, mat->colour_map, NULL);
+            BrHashMapInsert(state->pixelmap_map, maps[i], NULL);
 
             if(BrHashMapSize(state->pixelmap_map) != last_size) {
                 ++state->data->images_count;
