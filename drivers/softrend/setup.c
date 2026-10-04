@@ -448,14 +448,10 @@ void ActiveLightsFind(br_renderer *self)
     }
 }
 
-static br_boolean sphereIntersectsCone(br_scalar sphere_radius, br_vector3 *cone_apex, br_vector3 *cone_axis, br_angle cone_angle);
-
 void ActiveLightsUpdate(br_renderer *self)
 {
     struct active_light *alp = scache.lights;
     int                  l;
-    br_vector3           light_pos;
-    br_scalar            model_radius;
     br_convex_region    *region, *new_region;
     br_vector4          *plane, *new_plane;
 #if 1
@@ -536,34 +532,21 @@ void ActiveLightsUpdate(br_renderer *self)
                      * Transform light's position
                      */
                     BrMatrix34ApplyP(&alp->position, &alp->s->position, &scache.view_to_model);
-
-                    if(BrVector3LengthSquared(&alp->position) > BR_SQR(alp->s->radius_outer + rend.v11model->radius)) {
-
-                        alp->culled = BR_TRUE;
-                        continue;
-                    }
                 }
 
                 break;
 
             case BRT_DIRECT:
 
-                if(alp->s->radius_cull) {
-
+                if(alp->s->radius_cull)
                     BrMatrix34ApplyP(&alp->position, &alp->s->position, &scache.view_to_model);
-
-                    if(BrVector3LengthSquared(&alp->position) > BR_SQR(alp->s->radius_outer + rend.v11model->radius)) {
-
-                        alp->culled = BR_TRUE;
-                        continue;
-                    }
-                }
 
                 /*
                  * Transpose, not inverse. The two agree for the similarity
                  * transforms this path is correct for, and under a non-uniform
                  * scale neither reproduces the view-space result, because the
                  * unit model-space normal is not transformed to compensate.
+                 * See issue #4; the fix is the full view-space conversion.
                  */
                 BrMatrix34TApplyV(&alp->direction, &alp->s->direction, &self->state.matrix.model_to_view);
                 BrVector3Normalise(&alp->direction, &alp->direction);
@@ -587,25 +570,9 @@ void ActiveLightsUpdate(br_renderer *self)
                  */
                 BrMatrix34ApplyP(&alp->position, &alp->s->position, &scache.view_to_model);
 
-                if(alp->s->radius_cull)
-
-                    if(BrVector3LengthSquared(&alp->position) > BR_SQR(alp->s->radius_outer + rend.v11model->radius)) {
-
-                        alp->culled = BR_TRUE;
-                        continue;
-                    }
-
                 /* See note in BRT_DIRECT above. */
                 BrMatrix34TApplyV(&alp->direction, &alp->s->direction, &self->state.matrix.model_to_view);
                 BrVector3Normalise(&alp->direction, &alp->direction);
-
-                if(alp->s->angle_cull)
-
-                    if(!sphereIntersectsCone(rend.v11model->radius, &alp->position, &alp->direction, alp->s->angle_outer)) {
-
-                        alp->culled = BR_TRUE;
-                        continue;
-                    }
 
                 break;
 
@@ -614,14 +581,6 @@ void ActiveLightsUpdate(br_renderer *self)
                  * Transform light's position
                  */
                 BrMatrix34ApplyP(&alp->position, &alp->s->position, &scache.view_to_model);
-
-                if(alp->s->radius_cull)
-
-                    if(BrVector3LengthSquared(&alp->position) > BR_SQR(alp->s->radius_outer + rend.v11model->radius)) {
-
-                        alp->culled = BR_TRUE;
-                        continue;
-                    }
 
                 break;
         }
@@ -634,20 +593,6 @@ void ActiveLightsUpdate(br_renderer *self)
 
     if(scache.nlights_view > 0) {
 
-        /*
-         * Calculate a bounding radius for the model in view space
-         *
-         * This is a horrendous overestimate!
-         */
-        model_radius = BR_MUL(
-            rend.v11model->radius,
-            BR_SQRT(BR_SQR(BR_ABS(self->state.matrix.model_to_view.m[0][0]) + BR_ABS(self->state.matrix.model_to_view.m[1][0]) +
-                           BR_ABS(self->state.matrix.model_to_view.m[2][0])) +
-                    BR_SQR(BR_ABS(self->state.matrix.model_to_view.m[0][1]) + BR_ABS(self->state.matrix.model_to_view.m[1][1]) +
-                           BR_ABS(self->state.matrix.model_to_view.m[2][1])) +
-                    BR_SQR(BR_ABS(self->state.matrix.model_to_view.m[0][2]) + BR_ABS(self->state.matrix.model_to_view.m[1][2]) +
-                           BR_ABS(self->state.matrix.model_to_view.m[2][2]))));
-
         for(l = 0; l < scache.nlights_view; l++, alp++) {
 
             alp->culled = alp->s->culled;
@@ -657,35 +602,9 @@ void ActiveLightsUpdate(br_renderer *self)
             switch(alp->type) {
 
                 case BRT_AMBIENT:
-
-                    if(alp->s->radius_cull) {
-
-                        /*
-                         * Transform light's position
-                         */
-                        BrVector3Sub(&light_pos, &alp->position, (br_vector3 *)&self->state.matrix.model_to_view.m[3]);
-
-                        if(BrVector3LengthSquared(&light_pos) > BR_SQR(alp->s->radius_outer + model_radius)) {
-
-                            alp->culled = BR_TRUE;
-                            continue;
-                        }
-                    }
-
                     break;
 
                 case BRT_DIRECT:
-
-                    if(alp->s->radius_cull) {
-
-                        BrVector3Sub(&light_pos, &alp->position, (br_vector3 *)&self->state.matrix.model_to_view.m[3]);
-
-                        if(BrVector3LengthSquared(&light_pos) > BR_SQR(alp->s->radius_outer + model_radius)) {
-
-                            alp->culled = BR_TRUE;
-                            continue;
-                        }
-                    }
 
                     /*
                      * Work out a unit half vector:
@@ -698,79 +617,13 @@ void ActiveLightsUpdate(br_renderer *self)
                     break;
 
                 case BRT_SPOT:
-
-                    if(!alp->s->radius_cull && !alp->s->angle_cull)
-                        break;
-
-                    BrVector3Sub(&light_pos, &alp->position, (br_vector3 *)&self->state.matrix.model_to_view.m[3]);
-
-                    if(alp->s->radius_cull)
-
-                        if(BrVector3LengthSquared(&light_pos) > BR_SQR(alp->s->radius_outer + model_radius)) {
-
-                            alp->culled = BR_TRUE;
-                            continue;
-                        }
-
-                    if(alp->s->angle_cull)
-
-                        if(!sphereIntersectsCone(rend.v11model->radius, &light_pos, &alp->direction, alp->s->angle_outer)) {
-
-                            alp->culled = BR_TRUE;
-                            continue;
-                        }
-
                     break;
 
                 case BRT_POINT:
-
-                    if(!alp->s->radius_cull)
-                        break;
-
-                    BrVector3Sub(&light_pos, &alp->position, (br_vector3 *)&self->state.matrix.model_to_view.m[3]);
-
-                    if(alp->s->radius_cull)
-
-                        if(BrVector3LengthSquared(&light_pos) > BR_SQR(alp->s->radius_outer + model_radius)) {
-
-                            alp->culled = BR_TRUE;
-                            continue;
-                        }
-
                     break;
             }
         }
     }
-}
-
-static br_boolean sphereIntersectsCone(br_scalar sphere_radius, br_vector3 *cone_apex, br_vector3 *cone_axis, br_angle cone_angle)
-{
-    br_scalar dist;
-    br_angle  sphere_angle;
-    br_scalar axis_dot;
-
-    /*
-     * Find distance between sphere centre and cone apex
-     */
-    dist = BrVector3Length(cone_apex);
-
-    if(dist < sphere_radius)
-        return BR_TRUE;
-
-    /*
-     * Find angle of another cone surrounding the sphere with the same apex as the cone
-     */
-    sphere_angle = BR_ASIN(BR_DIV(sphere_radius, dist));
-
-    /*
-     * Find the cosine of the angle between the two cone axes
-     */
-    axis_dot = BR_DIV(BrVector3Dot(cone_apex, cone_axis), dist);
-
-    /*
-     * See if this angle exceeds the sum of the two cone angles
-     */
-    return axis_dot > BR_COS(sphere_angle + cone_angle);
 }
 
 br_int_32 GenerateSurfaceFunctions(br_renderer *self, surface_fn **fns, br_uint_32 mask)
