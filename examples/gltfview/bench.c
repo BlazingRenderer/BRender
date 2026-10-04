@@ -140,6 +140,8 @@ static void bench_reap_slot(gltfview_bench *self, br_uint_32 slot)
 }
 
 static void bench_checksum(gltfview_bench *bench);
+static void bench_checksum_gl(gltfview_bench *bench);
+static void bench_checksum_software(gltfview_bench *bench);
 
 static void bench_drain(gltfview_bench *self)
 {
@@ -283,19 +285,34 @@ void GLTFViewBenchEndFrame(gltfview_bench *bench)
 }
 
 /*
+ * Hash the final frame - from the GL framebuffer when there is a context, or
+ * from the demo's own colour buffer when there is not (softrend). The two are
+ * not comparable with each other; each guards its own render path.
+ */
+static void bench_checksum(gltfview_bench *bench)
+{
+    /*
+     * hw_accel, not ReadPixels: SDL_GL_GetProcAddress succeeds whenever libGL
+     * can be loaded, context or not, so testing ReadPixels alone sends a
+     * softrend run down the GL path and hashes a readback from nothing.
+     */
+    if(bench->demo != NULL && bench->demo->hw_accel && bench->ReadPixels != NULL && bench->window != NULL)
+        bench_checksum_gl(bench);
+    else
+        bench_checksum_software(bench);
+}
+
+/*
  * Read back the final frame and report a checksum plus the fraction of the
  * frame that is not the clear colour. The checksum is a regression guard: a
  * change to the render path must not alter it.
  */
-static void bench_checksum(gltfview_bench *bench)
+static void bench_checksum_gl(gltfview_bench *bench)
 {
     int        w = 0, h = 0;
     br_uint_8 *px;
     br_uint_64 hash    = 1469598103934665603ull;
     br_uint_32 covered = 0, total;
-
-    if(bench->ReadPixels == NULL || bench->window == NULL)
-        return;
 
     SDL_GetWindowSizeInPixels(bench->window, &w, &h);
 
@@ -350,6 +367,105 @@ static void bench_checksum(gltfview_bench *bench)
     }
 
     BrResFree(px);
+}
+
+/*
+ * The value of pixel x within a packed row, used to decide whether the pixel
+ * counts as covered. Sub-byte types pack the first pixel of a byte into its
+ * most significant field.
+ */
+static br_uint_32 bench_pixel_value(const br_uint_8 *row, br_int_32 x, br_uint_32 bits)
+{
+    if(bits >= 8) {
+        const br_uint_8 *p = row + (br_size_t)x * (bits / 8);
+        br_uint_32       v = 0;
+
+        for(br_uint_32 c = 0; c < bits / 8; ++c)
+            v |= (br_uint_32)p[c] << (8 * c);
+
+        return v;
+    }
+
+    switch(bits) {
+        case 4:
+            return (row[x / 2] >> (4 * (1 - (x % 2)))) & 0xf;
+        case 2:
+            return (row[x / 4] >> (2 * (3 - (x % 4)))) & 0x3;
+        case 1:
+            return (row[x / 8] >> (7 - (x % 8))) & 0x1;
+        default:
+            return 0;
+    }
+}
+
+/*
+ * Fold a pixelmap's pixels into hash, optionally counting the pixels that are
+ * not zero.
+ *
+ * BrPixelmapPixelSize() returns the pixel size in *bits*, and a sub-byte type
+ * packs several pixels into a byte, so a row is not width * pixel size bytes
+ * long. Treating the bit count as a byte count walks off the end of the row
+ * and hashes whatever follows the buffer, which makes the checksum depend on
+ * the binary's memory layout instead of on what was rendered.
+ */
+static br_uint_64 bench_hash_pixelmap(br_uint_64 hash, br_pixelmap *pm, br_uint_32 *covered)
+{
+    br_uint_32 bits      = BrPixelmapPixelSize(pm);
+    br_int_32  row_bytes = (br_int_32)(((br_uint_64)pm->width * bits + 7) / 8);
+    br_int_32  stride    = pm->row_bytes != 0 ? pm->row_bytes : row_bytes;
+
+    for(br_int_32 y = 0; y < pm->height; ++y) {
+        const br_uint_8 *row = (const br_uint_8 *)pm->pixels + (br_size_t)y * stride;
+
+        for(br_int_32 i = 0; i < row_bytes; ++i) {
+            hash ^= row[i];
+            hash *= 1099511628211ull;
+        }
+
+        if(covered == NULL)
+            continue;
+
+        for(br_int_32 x = 0; x < pm->width; ++x) {
+            if(bench_pixel_value(row, x, bits) != 0)
+                ++*covered;
+        }
+    }
+
+    return hash;
+}
+
+/*
+ * The software path renders into the demo's colour buffer rather than a GL
+ * framebuffer, so hash that. Its pixels are a raw buffer with no implicit
+ * format conversion, and an indexed buffer means nothing without its palette,
+ * so fold the palette into the same value.
+ */
+static void bench_checksum_software(gltfview_bench *bench)
+{
+    br_pixelmap *pm      = bench->demo != NULL ? bench->demo->colour_buffer : NULL;
+    br_pixelmap *pal     = NULL;
+    br_uint_64   hash    = 1469598103934665603ull;
+    br_uint_32   covered = 0, total;
+
+    if(pm == NULL || pm->pixels == NULL || pm->width == 0 || pm->height == 0) {
+        BrLogWarn("BENCH", "No colour buffer to checksum - the software run has no guard.");
+        return;
+    }
+
+    if(BrPixelmapPixelSize(pm) == 0) {
+        BrLogWarn("BENCH", "Unknown pixel type %u - the software run has no guard.", (unsigned int)pm->type);
+        return;
+    }
+
+    hash = bench_hash_pixelmap(hash, pm, &covered);
+
+    if((pal = pm->map) != NULL && pal->pixels != NULL && pal->width != 0 && pal->height != 0 && BrPixelmapPixelSize(pal) != 0)
+        hash = bench_hash_pixelmap(hash, pal, NULL);
+
+    total = (br_uint_32)pm->width * (br_uint_32)pm->height;
+
+    printf("BENCH checksum=%016llx coverage=%.2f%% (%u/%u px at %dx%d, software, type=%u)\n", (unsigned long long)hash,
+           100.0 * (double)covered / (double)total, covered, total, (int)pm->width, (int)pm->height, (unsigned int)pm->type);
 }
 
 br_boolean GLTFViewBenchShouldQuit(gltfview_bench *bench)
