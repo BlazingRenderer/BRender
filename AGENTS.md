@@ -11,6 +11,9 @@ BRender is a 3D rendering engine with multiple renderer backends:
 ## Building
 - Uses CMake.
 - The software rasterizer (`drivers/pentprim/`) is disabled by default. It requires explicit enablement with `-DBRENDER_BUILD_SOFT=ON` and only works on 32-bit x86-compatible platforms due to its assembly-heavy implementation.
+- Building `pentprim` also needs [`h2inc`](https://github.com/BlazingRenderer/h2inc), which turns `drivers/pentprim/drv.h` into the
+  MASM include `drv.inc` (`cmake/h2inc.cmake`). It replaces the old Wine + `H2INC.EXE` + `contrib/mkdrv.pl` pipeline; with
+  `BRENDER_BUILD_SOFT=ON`, `-DBRENDER_H2INC_EXECUTABLE=<path>` must point at a release binary or the configure step fails.
 - `drivers/softrend/` is the transform-and-lighting stage only and has no rasteriser of its own. It registers a renderer facility,
   but that facility's `rendererNew()` calls `BrPrimitiveLibraryFind()` (`drivers/softrend/rendfcty.c`), which finds nothing when no
   rasteriser backend is built. `--force-software` then dies with `Failed to load renderer` (`core/v1db/dbsetup.c`).

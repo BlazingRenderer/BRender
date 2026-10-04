@@ -7,7 +7,7 @@
 , cmake
 , perl
 , uasm
-, wineserverHook
+, h2inc
 , clang-tools
 }:
 stdenvNoCC.mkDerivation {
@@ -26,7 +26,7 @@ stdenvNoCC.mkDerivation {
     cmake
     perl
     uasm
-    wineserverHook
+    h2inc
   ];
 
   cmakeFlags = [
@@ -38,6 +38,7 @@ stdenvNoCC.mkDerivation {
     (lib.cmakeFeature "CMAKE_RANLIB" "${djgppPrefix}ranlib")
     (lib.cmakeFeature "CMAKE_AR" "${djgppPrefix}ar")
     (lib.cmakeFeature "CMAKE_ASM_MASM_COMPILER" "uasm")
+    (lib.cmakeFeature "BRENDER_H2INC_EXECUTABLE" (lib.getExe h2inc))
     (lib.cmakeBool "DJGPP" true)
 
     (lib.cmakeBool "BRENDER_BUILD_SOFT" true)

@@ -5,7 +5,8 @@
 #define _WORKSPACE_H_
 
 #if defined(__H2INC__)
-#define alignas(x) /* NB: This is fixed with a regex in mkdrv.pl */
+/* NB: h2inc's --brender-hack restores the 8-byte alignment this erases. */
+#define alignas(x)
 #else
 #include <stdalign.h>
 #endif

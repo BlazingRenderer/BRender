@@ -61,7 +61,7 @@ find_sdl()
 
 option(BRENDER_BUILD_DRIVERS "Build Drivers" ON)
 option(BRENDER_BUILD_SOFT "Build Software Renderer" OFF)
-
+option(BRENDER_H2INC_EXECUTABLE "Path to the BRender-specific h2inc binary - see https://github.com/BlazingRenderer/h2inc")
 message(STATUS "Building software renderer: ${BRENDER_BUILD_SOFT}")
 
 # CMake does _not_ handle this well.
@@ -70,17 +70,8 @@ if (BRENDER_BUILD_SOFT)
         message(FATAL_ERROR "Can only build the software renderer on 32-bit x86.")
     endif ()
 
-    if (NOT (CMAKE_HOST_SYSTEM_NAME MATCHES "Windows"))
-        find_program(
-                WINE_EXECUTABLE
-                NAMES wine
-                DOC "WINE executable location (for H2INC.EXE)"
-                REQUIRED
-        )
-
-        if (WINE_EXECUTABLE)
-            message(STATUS "Found WINE: ${WINE_EXECUTABLE}")
-        endif ()
+    if (NOT BRENDER_H2INC_EXECUTABLE)
+        message(FATAL_ERROR "No h2inc binary specified. Please download one from https://github.com/BlazingRenderer/h2inc/releases")
     endif ()
 endif ()
 

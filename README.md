@@ -24,6 +24,22 @@ cmake ..
 make
 ```
 
+### Software renderer (32-bit x86)
+
+The software renderer's rasterisers are hand-written assembly, so they need the
+structs and constants from `drivers/pentprim/drv.h` as a MASM include file. That
+is generated at build time by
+[h2inc](https://github.com/BlazingRenderer/h2inc), a from-scratch replacement for
+Microsoft's `H2INC.EXE` that runs natively, with no Wine. It is only needed when
+the software renderer is enabled:
+
+```sh
+cmake .. -DBRENDER_BUILD_SOFT=ON -DBRENDER_H2INC_EXECUTABLE=/path/to/h2inc
+```
+
+Prebuilt binaries are on the
+[h2inc releases page](https://github.com/BlazingRenderer/h2inc/releases).
+
 ### macOS (Apple Silicon)
 
 Install dependencies via [Homebrew](https://brew.sh):

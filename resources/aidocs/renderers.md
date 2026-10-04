@@ -151,6 +151,15 @@ Primitive blocks generated via `MAKE_BLOCKS` macro in `pstate.c`. Four variants 
 - Disabled by default; enable with `-DBRENDER_BUILD_SOFT=ON`.
 - 8-bit indexed, 15-bit, 16-bit, and 24-bit true-colour rasterisers.
 
+### Header Generation
+The assembly and the C side share their struct layouts and constants through
+`drv.inc`, a MASM include generated at build time from `drivers/pentprim/drv.h`
+by [`h2inc`](https://github.com/BlazingRenderer/h2inc) (`cmake/h2inc.cmake`). The
+tool is a from-scratch replacement for Microsoft's `H2INC.EXE`; its
+`--brender-hack` flag reproduces the alignment quirks these headers need
+(`br_fvector*` take no alignment operand, while `_workspace` and
+`ArbitraryWidthWorkspace` are 8-byte aligned).
+
 ### Lighting Assumptions
 - CM_A is included in component masks for 32 blocks that use `constant_alpha` in `mmx_t15.ifg`/`mmx_t16.ifg`, but the assembly rasterisers handle alpha via internal constants or lookup tables rather than calling `SurfaceAlpha`.
 - Colour key: hardcoded `test bl,bl; jz skip` in all indexed textured rasterisers — palette index 0 always transparent, regardless of `BRT_COLOUR_KEY_B`.
