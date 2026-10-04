@@ -85,35 +85,103 @@ void BR_PUBLIC_ENTRY BrLightDisable(br_actor *l)
 }
 
 /*
- * Allow all lights to illuminate the current model
+ * Does a sphere touch a cone? The sphere sits at the cone's apex-relative
+ * position, and the axis points away from the apex.
  */
-br_error BrLightCullReset(void)
+static br_boolean sphereIntersectsCone(br_scalar sphere_radius, br_vector3 *cone_apex, br_vector3 *cone_axis, br_angle cone_angle)
 {
-    br_token_value tv[2];
-    br_uint_32     light_part;
-    int            i;
+    br_scalar sphere_angle;
+    br_scalar dist;
+    br_scalar axis_dot;
+
+    dist = BrVector3Length(cone_apex);
+
+    if(dist < sphere_radius)
+        return BR_TRUE;
 
     /*
-     * Find the light in the list of enabled lights and set the appropriate
-     * part of the light state.  N.B. the culled state is reset before each
-     * model is rendered
+     * Angle of a cone around the same apex that just contains the sphere
      */
+    sphere_angle = BR_ASIN(BR_DIV(sphere_radius, dist));
+
+    axis_dot = BR_DIV(BrVector3Dot(cone_apex, cone_axis), dist);
+
+    return axis_dot > BR_COS(sphere_angle + cone_angle);
+}
+
+/*
+ * Upper bound on the largest singular value of the model->view linear part,
+ * via the Frobenius norm (always >= the spectral norm). Scales the model's
+ * bounding radius from model space into view space; using a bound rather than
+ * the exact value keeps the cull conservative.
+ */
+static br_scalar modelToViewRadiusScale(const br_matrix34 *m)
+{
+    br_scalar sum = BR_SCALAR(0.0);
+    int       r, c;
+
+    for(r = 0; r < 3; r++)
+        for(c = 0; c < 3; c++)
+            sum = BR_ADD(sum, BR_SQR(m->m[r][c]));
+
+    return BR_SQRT(sum);
+}
+
+/*
+ * Reset the per-model light cull, then re-evaluate it for the model about to
+ * be rendered: a light is culled when its volume cannot reach the model's
+ * bounding sphere.
+ *
+ * Evaluated in view space, which is where BrSetupLights() puts light geometry.
+ * radius_outer is a view-space distance there, so it is the model's bounding
+ * radius that gets scaled into the space; a model-space test would have to
+ * scale radius_outer by the inverse model scale instead.
+ */
+br_error BrLightCullReset(br_model *model)
+{
+    br_token_value tv[2];
+    br_matrix34    model_to_view;
+    br_uintptr_t   dummy;
+    br_vector3     origin;
+    br_scalar      radius;
+    br_int_32      i;
+
     if(v1db.enabled_lights.enabled == NULL)
         return BRE_FAIL;
 
-    tv[0].t   = BRT_CULLED_B;
-    tv[0].v.b = BR_FALSE;
+    RendererPartQueryBuffer(v1db.renderer, BRT_MATRIX, 0, &dummy, &model_to_view, sizeof(model_to_view),
+                            BRT_AS_MATRIX34_SCALAR(MODEL_TO_VIEW));
 
+    BrVector3CopyMat34Row(&origin, &model_to_view, 3);
+
+    radius = model != NULL ? BR_MUL(model->radius, modelToViewRadiusScale(&model_to_view)) : BR_SCALAR(0.0);
+
+    tv[0].t = BRT_CULLED_B;
     tv[1].t = BR_NULL_TOKEN;
 
-    for(light_part = 0, i = 0; i < v1db.enabled_lights.max; i++) {
+    for(i = 0; i < v1db.max_light; i++) {
+        br_vector3 offset;
+        br_boolean culled = BR_FALSE;
 
-        if(v1db.enabled_lights.enabled[i] == NULL)
-            continue;
+        BrVector3Sub(&offset, &v1db.light_cull[i].position, &origin);
 
-        RendererPartSetMany(v1db.renderer, BRT_LIGHT, light_part, tv, NULL);
+        if(v1db.light_cull[i].radius_cull) {
+            br_scalar reach = BR_ADD(v1db.light_cull[i].radius_outer, radius);
 
-        light_part++;
+            if(reach < BR_SCALAR(0.0))
+                reach = BR_SCALAR(0.0);
+
+            if(BrVector3LengthSquared(&offset) > BR_SQR(reach))
+                culled = BR_TRUE;
+        }
+
+        if(!culled && v1db.light_cull[i].angle_cull)
+            if(!sphereIntersectsCone(radius, &offset, &v1db.light_cull[i].direction, v1db.light_cull[i].angle_outer))
+                culled = BR_TRUE;
+
+        tv[0].v.b = culled;
+
+        RendererPartSetMany(v1db.renderer, BRT_LIGHT, i, tv, NULL);
     }
 
     return BRE_OK;
@@ -285,6 +353,8 @@ void BrSetupLights(br_actor *world, br_matrix34 *world_to_view, br_int_32 w2vt)
 
         ASSERT_MESSAGE("Invalid light data", light != NULL);
 
+        BrMemSet(&v1db.light_cull[light_part], 0, sizeof(v1db.light_cull[light_part]));
+
         /*
          * Work out view<->light transforms - ignore light if not part of current hierachy
          */
@@ -379,6 +449,10 @@ void BrSetupLights(br_actor *world, br_matrix34 *world_to_view, br_int_32 w2vt)
             tvp->v.b = light->radius_outer != BR_SCALAR(0.0);
             tvp++;
 
+            v1db.light_cull[light_part].radius_cull  = light->radius_outer != BR_SCALAR(0.0);
+            v1db.light_cull[light_part].radius_outer = light->radius_outer;
+            BrVector3Copy(&v1db.light_cull[light_part].position, &view_position);
+
         } else {
 
             tvp->t   = BRT_RADIUS_CULL_B;
@@ -401,6 +475,8 @@ void BrSetupLights(br_actor *world, br_matrix34 *world_to_view, br_int_32 w2vt)
             tvp->t   = BRT_AS_VECTOR3_SCALAR(DIRECTION);
             tvp->v.p = &view_direction;
             tvp++;
+
+            BrVector3Copy(&v1db.light_cull[light_part].direction, &view_direction);
 
             if((light->type & BR_LIGHT_TYPE) == BR_LIGHT_SPOT) {
                 br_scalar cone_outer = BR_FMOD(light->cone_outer, BR_SCALAR(1));
@@ -437,6 +513,9 @@ void BrSetupLights(br_actor *world, br_matrix34 *world_to_view, br_int_32 w2vt)
                 tvp->t   = BRT_ANGLE_CULL_B;
                 tvp->v.b = BR_TRUE;
                 tvp++;
+
+                v1db.light_cull[light_part].angle_cull  = BR_TRUE;
+                v1db.light_cull[light_part].angle_outer = cone_outer;
 
             } else {
 

@@ -104,6 +104,22 @@ typedef struct br_v1db_state {
     br_int_32 max_clip;
 
     /*
+     * Per-light inputs for the per-model light cull, filled in by
+     * BrSetupLights() and evaluated by BrLightCullReset(). The geometry is in
+     * view space, which is where the cull runs: radius_outer is a view-space
+     * distance there, so the model's bounding radius is scaled into the space
+     * rather than radius_outer having to be scaled into model space.
+     */
+    struct {
+        br_boolean radius_cull;
+        br_scalar  radius_outer;
+        br_boolean angle_cull;
+        br_angle   angle_outer;
+        br_vector3 position;
+        br_vector3 direction;
+    } light_cull[BR_MAX_LIGHTS];
+
+    /*
      * A pointer to the current environment - if NULL, then the model's
      * local frame will be used
      */

@@ -48,7 +48,7 @@ void BrSetupHorizons(br_actor *world, br_matrix34 *world_to_view, br_int_32 w2vt
 
 void BrActorEnableCheck(br_actor *a);
 
-br_error BrLightCullReset(void);
+br_error BrLightCullReset(br_model *model);
 
 /*
  * modrend.c

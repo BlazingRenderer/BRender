@@ -46,6 +46,12 @@ void BR_PUBLIC_ENTRY BrDbModelRender(br_actor *actor, br_model *model, br_materi
     UASSERT(actor != NULL);
 
     /*
+     * Per-model light cull. Done here rather than in actorRender() so that
+     * every path reaches it, including BrZ{b,s}ModelRender().
+     */
+    BrLightCullReset(model);
+
+    /*
      * Mark local copy of model_to_screen as invalid
      */
     v1db.model_to_screen_valid = BR_FALSE;
@@ -301,7 +307,6 @@ static void actorRender(br_actor *ap, br_model *model, br_material *material, vo
                  * This is a model -  see if model's bounding box is on screen
                  */
                 if((s = BrOnScreenCheck(&this_model->bounds)) != OSC_REJECT) {
-                    BrLightCullReset();
                     BrDbModelRender(ap, this_model, this_material, this_render_data, style, s, 1);
                 }
                 break;
@@ -362,7 +367,6 @@ static void actorRender(br_actor *ap, br_model *model, br_material *material, vo
              * This is a model -  see if model's bounding box is on screen
              */
             if((s = BrOnScreenCheck(&this_model->bounds)) != OSC_REJECT) {
-                BrLightCullReset();
                 BrDbModelRender(ap, this_model, this_material, this_render_data, style, s, 1);
             }
             break;
@@ -450,7 +454,6 @@ static void actorRenderOnScreen(br_actor *ap, br_model *model, br_material *mate
          * This actor has no transform
          */
         if(ap->type == BR_ACTOR_MODEL) {
-            BrLightCullReset();
             BrDbModelRender(ap, this_model, this_material, this_render_data, style, OSC_ACCEPT, 1);
         }
 
@@ -472,7 +475,6 @@ static void actorRenderOnScreen(br_actor *ap, br_model *model, br_material *mate
     t = prependActorTransform(ap, t);
 
     if(ap->type == BR_ACTOR_MODEL) {
-        BrLightCullReset();
         BrDbModelRender(ap, this_model, this_material, this_render_data, style, OSC_ACCEPT, 1);
     }
 
