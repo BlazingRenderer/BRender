@@ -147,6 +147,15 @@ static void EditorCamProcessEvent(br_demo *demo, br_editor_camera *cam, const SD
     }
 }
 
+/*
+ * A material's lookup tables are INDEX_8 pixelmaps with no palette; the
+ * rasterisers read their bytes directly, so they must not be requantised.
+ */
+static br_boolean is_lookup_table(const br_pixelmap *pm)
+{
+    return pm->type == BR_PMT_INDEX_8 && pm->map == NULL;
+}
+
 static br_pixelmap *build_clut(br_pixelmap *const *maps, size_t nmaps)
 {
     br_pixelmap *clut;
@@ -157,6 +166,9 @@ static br_pixelmap *build_clut(br_pixelmap *const *maps, size_t nmaps)
     BrQuantBegin();
     for(size_t i = 0; i < nmaps; ++i) {
         br_pixelmap *pm = maps[i];
+
+        if(is_lookup_table(pm))
+            continue;
 
         for(int y = 0; y < pm->height; y++) {
             for(int x = 0; x < pm->width; x++) {
@@ -237,10 +249,10 @@ static br_error GLTFInit(br_demo *demo)
     for(size_t i = 0; i < results->npixelmaps; ++i) {
         br_pixelmap *pm = results->pixelmaps[i];
 
-        if(demo->colour_buffer->type == BR_PMT_INDEX_8) {
+        if(demo->colour_buffer->type == BR_PMT_INDEX_8 && !is_lookup_table(pm)) {
             /*
-             * If our destination is indexed, re-quantise everything to our palette
-             * by doing a conversion then cannibalising its parts.
+             * If our destination is indexed, re-quantise every colour map to our
+             * palette by doing a conversion then cannibalising its parts.
              */
             const br_pixelmap_convert_options cvtopts = {
                 .index_alpha_threshold = 0,
