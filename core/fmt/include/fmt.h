@@ -175,6 +175,7 @@ enum {
     BR_FMT_IMAGE_JPG = 0x0002,
     BR_FMT_IMAGE_BMP = 0x0003,
     BR_FMT_IMAGE_TGA = 0x0004,
+    BR_FMT_IMAGE_PPM = 0x0005,
 };
 
 #ifndef _FMT_P_H_

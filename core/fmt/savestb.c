@@ -7,6 +7,46 @@
 #include "stb_image_write.h"
 
 /*
+ * Binary PPM (P6). PPM carries no alpha, so take three of every four bytes of
+ * the RGBA the caller clones for us. Rows are written top-down as stored.
+ *
+ * stb_image_write has no PNM writer, which is why this one is hand-rolled;
+ * stb_image (the loader) does read PNM, so this closes the round-trip.
+ */
+static int save_ppm(void *file, br_pixelmap *pm)
+{
+    char       header[64];
+    br_int_32  header_len;
+    br_uint_8 *row;
+
+    header_len = BrSprintf(header, "P6\n%d %d\n255\n", (int)pm->width, (int)pm->height);
+
+    if(BrFileWrite(header, (br_size_t)header_len, 1, file) != 1)
+        return 0;
+
+    if((row = BrMemAllocate((br_size_t)pm->width * 3, BR_MEMORY_SCRATCH)) == NULL)
+        return 0;
+
+    for(int y = 0; y < pm->height; ++y) {
+        const br_uint_8 *src = (const br_uint_8 *)pm->pixels + (br_size_t)y * pm->row_bytes;
+
+        for(int x = 0; x < pm->width; ++x) {
+            row[x * 3 + 0] = src[x * 4 + 0];
+            row[x * 3 + 1] = src[x * 4 + 1];
+            row[x * 3 + 2] = src[x * 4 + 2];
+        }
+
+        if(BrFileWrite(row, (br_size_t)pm->width * 3, 1, file) != 1) {
+            BrMemFree(row);
+            return 0;
+        }
+    }
+
+    BrMemFree(row);
+    return 1;
+}
+
+/*
  * save pixelmap as image, enumerated by type BR_FMT_IMAGE_*
  */
 br_uint_32 BR_PUBLIC_ENTRY BrFmtImageSave(const char *name, br_pixelmap *pm, br_uint_8 type)
@@ -18,7 +58,7 @@ br_uint_32 BR_PUBLIC_ENTRY BrFmtImageSave(const char *name, br_pixelmap *pm, br_
     /*
      * check type
      */
-    if(type > BR_FMT_IMAGE_TGA || type < BR_FMT_IMAGE_PNG) {
+    if(type > BR_FMT_IMAGE_PPM || type < BR_FMT_IMAGE_PNG) {
         BrLogError("FMT", "Invalid image save type %u", type);
         return 0;
     }
@@ -63,6 +103,10 @@ br_uint_32 BR_PUBLIC_ENTRY BrFmtImageSave(const char *name, br_pixelmap *pm, br_
 
         case BR_FMT_IMAGE_TGA:
             ret = stbi_write_tga_to_func(FmtSTBFileWrite, file, dst->width, dst->height, 4, dst->pixels);
+            break;
+
+        case BR_FMT_IMAGE_PPM:
+            ret = save_ppm(file, dst);
             break;
     }
 
