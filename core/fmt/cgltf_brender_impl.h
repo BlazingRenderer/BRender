@@ -180,7 +180,7 @@ static int cgltf_parse_json_brender_material(cgltf_options *options, jsmntok_t c
     out_material->colour[2] = 1.0f;
 
     out_material->opacity = 1.0f;
-    out_material->ka      = 1.0f;
+    out_material->ka      = 0.1f;
     out_material->kd      = 0.7f;
     out_material->ks      = 0.0f;
     out_material->power   = 20.0f;
