@@ -25,6 +25,8 @@ typedef void (*bench_pfn_GetQueryObjectui64v)(unsigned int id, unsigned int pnam
 typedef void (*bench_pfn_Finish)(void);
 typedef void (*bench_pfn_ReadPixels)(int x, int y, int w, int h, unsigned int fmt, unsigned int type, void *pixels);
 typedef void (*bench_pfn_ReadBuffer)(unsigned int mode);
+typedef void (*bench_pfn_BindTexture)(unsigned int target, unsigned int texture);
+typedef void (*bench_pfn_GetTexImage)(unsigned int target, int level, unsigned int fmt, unsigned int type, void *pixels);
 typedef void (*bench_pfn_PixelStorei)(unsigned int pname, int param);
 
 /*
@@ -62,6 +64,8 @@ struct gltfview_bench {
     bench_pfn_Finish              Finish;
     bench_pfn_ReadPixels          ReadPixels;
     bench_pfn_ReadBuffer          ReadBuffer;
+    bench_pfn_BindTexture         BindTexture;
+    bench_pfn_GetTexImage         GetTexImage;
     bench_pfn_PixelStorei         PixelStorei;
 
     unsigned int query_ring[BENCH_QUERY_RING];
@@ -116,6 +120,8 @@ static void bench_load_gl(gltfview_bench *self)
     self->Finish              = (bench_pfn_Finish)SDL_GL_GetProcAddress("glFinish");
     self->ReadPixels          = (bench_pfn_ReadPixels)SDL_GL_GetProcAddress("glReadPixels");
     self->ReadBuffer          = (bench_pfn_ReadBuffer)SDL_GL_GetProcAddress("glReadBuffer");
+    self->BindTexture         = (bench_pfn_BindTexture)SDL_GL_GetProcAddress("glBindTexture");
+    self->GetTexImage         = (bench_pfn_GetTexImage)SDL_GL_GetProcAddress("glGetTexImage");
     self->PixelStorei         = (bench_pfn_PixelStorei)SDL_GL_GetProcAddress("glPixelStorei");
 
     if(self->GenQueries == NULL || self->BeginQuery == NULL || self->EndQuery == NULL || self->GetQueryObjectui64v == NULL)
@@ -285,18 +291,19 @@ void GLTFViewBenchEndFrame(gltfview_bench *bench)
 }
 
 /*
- * Hash the final frame - from the GL framebuffer when there is a context, or
- * from the demo's own colour buffer when there is not (softrend). The two are
- * not comparable with each other; each guards its own render path.
+ * Hash the final frame - from the colour buffer's offscreen texture when there
+ * is a context, or from the demo's own colour buffer when there is not
+ * (softrend). The two are not comparable with each other; each guards its own
+ * render path.
  */
 static void bench_checksum(gltfview_bench *bench)
 {
     /*
-     * hw_accel, not ReadPixels: SDL_GL_GetProcAddress succeeds whenever libGL
-     * can be loaded, context or not, so testing ReadPixels alone sends a
+     * hw_accel, not GetTexImage: SDL_GL_GetProcAddress succeeds whenever libGL
+     * can be loaded, context or not, so testing a GL entry point alone sends a
      * softrend run down the GL path and hashes a readback from nothing.
      */
-    if(bench->demo != NULL && bench->demo->hw_accel && bench->ReadPixels != NULL && bench->window != NULL)
+    if(bench->demo != NULL && bench->demo->hw_accel && (bench->GetTexImage != NULL || bench->ReadPixels != NULL) && bench->window != NULL)
         bench_checksum_gl(bench);
     else
         bench_checksum_software(bench);
@@ -321,13 +328,41 @@ static void bench_checksum_gl(gltfview_bench *bench)
 
     px = BrResAllocate(bench, (br_size_t)w * h * 4, BR_MEMORY_APPLICATION);
 
-    if(bench->ReadBuffer != NULL)
-        bench->ReadBuffer(0x0405 /* GL_BACK */);
+    /*
+     * glrend renders into the colour buffer's own FBO and only blits it to the
+     * window at swap time, which is after this runs, so on glrend the FBO
+     * texture is the only correct source - reading GL_BACK there gives whatever
+     * the swap left behind, i.e. undefined. glrend1x is GL 1.x with no FBOs and
+     * exposes no texture token, so fall back to the window back buffer, which
+     * is exactly right for it.
+     */
+    {
+        br_uint_32 tex = 0;
+        br_boolean from_texture = BR_FALSE;
 
-    if(bench->PixelStorei != NULL)
-        bench->PixelStorei(0x0CF5 /* GL_PACK_ALIGNMENT */, 1);
+        if(bench->PixelStorei != NULL)
+            bench->PixelStorei(0x0CF5 /* GL_PACK_ALIGNMENT */, 1);
 
-    bench->ReadPixels(0, 0, w, h, 0x1908 /* GL_RGBA */, 0x1401 /* GL_UNSIGNED_BYTE */, px);
+        if(bench->BindTexture != NULL && bench->GetTexImage != NULL &&
+           ObjectQuery(bench->demo->colour_buffer, &tex, BRT_OPENGL_TEXTURE_U32) == BRE_OK && tex != 0) {
+            bench->BindTexture(0x0DE1 /* GL_TEXTURE_2D */, tex);
+            bench->GetTexImage(0x0DE1 /* GL_TEXTURE_2D */, 0, 0x1908 /* GL_RGBA */, 0x1401 /* GL_UNSIGNED_BYTE */, px);
+            from_texture = BR_TRUE;
+        }
+
+        if(!from_texture) {
+            if(bench->ReadPixels == NULL) {
+                BrLogWarn("BENCH", "No glReadPixels or colour texture; checksum unavailable.");
+                BrResFree(px);
+                return;
+            }
+
+            if(bench->ReadBuffer != NULL)
+                bench->ReadBuffer(0x0405 /* GL_BACK */);
+
+            bench->ReadPixels(0, 0, w, h, 0x1908 /* GL_RGBA */, 0x1401 /* GL_UNSIGNED_BYTE */, px);
+        }
+    }
 
     total = (br_uint_32)w * (br_uint_32)h;
     for(br_uint_32 i = 0; i < total; ++i) {
