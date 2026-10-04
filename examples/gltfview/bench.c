@@ -354,9 +354,25 @@ static void bench_checksum_gl(gltfview_bench *bench)
             if(fp != NULL) {
                 fprintf(fp, "P6\n%d %d\n255\n", w, h);
 
-                /* glReadPixels hands back bottom-up. */
-                for(int y = h - 1; y >= 0; --y)
-                    fwrite(px + (br_size_t)y * w * 4, 1, (size_t)w * 3, fp);
+                /*
+                 * glReadPixels hands back bottom-up, four bytes per pixel; a PPM
+                 * wants three. Take three of every four, not a contiguous slice
+                 * of the row.
+                 */
+                br_uint_8 *row_rgb = BrResAllocate(bench, (br_size_t)w * 3, BR_MEMORY_APPLICATION);
+
+                if(row_rgb != NULL) {
+                    for(int y = h - 1; y >= 0; --y) {
+                        const br_uint_8 *row = px + (br_size_t)y * w * 4;
+
+                        for(int x = 0; x < w; ++x)
+                            memcpy(row_rgb + (br_size_t)x * 3, row + (br_size_t)x * 4, 3);
+
+                        fwrite(row_rgb, 1, (size_t)w * 3, fp);
+                    }
+
+                    BrResFree(row_rgb);
+                }
 
                 fclose(fp);
                 printf("BENCH ppm=%s\n", path);
