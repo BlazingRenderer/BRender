@@ -365,6 +365,8 @@ static br_material *scene_material_ex(const char *name, br_colour colour, br_uin
  *   scene-persp                 the perspective-correct texture block
  *   scene-persp-shade           + an index_shade ramp
  *   scene-tex-arb               a non-power-of-two map (arbitrary width)
+ *   scene-tex-32                32x32 map, the z-sorted power-of-two
+ *                               perspective block's own size
  *   scene-shade                 the untextured shade-table block
  *   scene-decal                 decal through a shade table
  *   scene-fog                   the indexed fog table
@@ -390,6 +392,8 @@ static br_material *scene_material_ex(const char *name, br_colour colour, br_uin
 #define SCENE_TEX_INDEX_B 224
 #define SCENE_TEX_SIZE    64
 #define SCENE_TEX_CELLS   16
+#define SCENE_TEX32_SIZE  32
+#define SCENE_TEX32_SCALE BR_SCALAR(3.0)
 #define SCENE_ARB_WIDTH   96
 #define SCENE_ARB_HEIGHT  48
 #define SCENE_ARB_CELLS   12
@@ -1640,11 +1644,12 @@ static br_error scene_make_rop_fixtures(br_model *cube)
  */
 static br_error scene_make_feature_fixtures(br_model *cube)
 {
-    br_pixelmap *tex64, *tex_arb, *shade, *shade_ramp, *blend, *fog;
+    br_pixelmap *tex64, *tex32, *tex_arb, *shade, *shade_ramp, *blend, *fog;
     br_actor    *world;
     br_error     r = BRE_OK;
 
     if((tex64 = scene_texture("scene-textured-map", SCENE_TEX_SIZE, SCENE_TEX_SIZE, SCENE_TEX_CELLS)) == NULL ||
+       (tex32 = scene_texture_rows("scene-tex-32-map", SCENE_TEX32_SIZE, SCENE_TEX32_SIZE)) == NULL ||
        (tex_arb = scene_texture("scene-tex-arb-map", SCENE_ARB_WIDTH, SCENE_ARB_HEIGHT, SCENE_ARB_CELLS)) == NULL ||
        (shade = scene_shade_table("scene-shade-table")) == NULL || (shade_ramp = scene_shade_ramp("scene-shade-ramp-table")) == NULL ||
        (blend = scene_blend_table("scene-blend-table")) == NULL || (fog = scene_fog_table("scene-fog-table")) == NULL) {
@@ -1725,6 +1730,37 @@ static br_error scene_make_feature_fixtures(br_model *cube)
         mat->colour_map = tex_arb;
 
         if(scene_save("scene-tex-arb.gltf", scene_fx_world(cube, mat)) != BRE_OK)
+            r = BRE_FAIL;
+    }
+
+    /*
+     * The 32x32 power-of-two perspective block, which only the nine reference
+     * scenes reached. pentprim's z-sorted TriangleRender_PT_I8_32 packs the
+     * texel its first span starts from as if the map were 64 wide (shl cl,2 /
+     * shr ecx,2 / and ecx,63*65), where every other size in both families packs
+     * its own width; a 32x32 map makes that read a row or two away, so the
+     * fixture is the near miss the nine-scene PNG diff had to find.
+     *
+     * The rig is scene-persp's - same cube, same light, same perspective flag -
+     * with a 32x32 map instead of a 64x64 one, so the map dimension is what
+     * selects the block and the map size is what selects the 32 block over the
+     * 64 one. The perspective flag is what selects the perspective entry rather
+     * than the affine twin; both are power-of-two 32 blocks.
+     *
+     * The cube is drawn at SCENE_TEX32_SCALE rather than SCENE_FX_SCALE, and
+     * that too is measured: the trapezium corrects the seed address against the
+     * span's own u/v walk, and on the 1.5x cube the correction absorbs the
+     * wrong seed entirely - rebuilding pentprim with the old 63*65 packing
+     * leaves the 1.5x fixture's checksum unmoved. At 3.0x the spans start with
+     * fractions large enough that the error survives, and the same rebuild moves
+     * the frame.
+     */
+    {
+        br_material *mat = scene_fx_material("scene-tex-32-material", BR_MATF_LIGHT | BR_MATF_SMOOTH | BR_MATF_PERSPECTIVE);
+
+        mat->colour_map = tex32;
+
+        if(scene_save("scene-tex-32.gltf", scene_fx_world_range(cube, mat, SCENE_TEX32_SCALE, BR_SCALAR(0.1), BR_SCALAR(100.0))) != BRE_OK)
             r = BRE_FAIL;
     }
 

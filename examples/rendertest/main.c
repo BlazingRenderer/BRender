@@ -1075,6 +1075,16 @@ static const rt_relation rt_relations[] = {
      .device = "softrend"},
     {.a = "scene-persp-shade",    .b = "scene-persp",            .equal = BR_FALSE, .pm_type = BR_PMT_INDEX_8, .mode = RT_MODE_ZB},
     {.a = "scene-tex-arb",        .b = "scene-textured",         .equal = BR_FALSE, .pm_type = RT_ANY_TYPE, .mode = RT_MODE_ZB},
+    /*
+     * The 32x32 map in the Z-sort mode: the mode is where pentprim's
+     * TriangleRender_PT_I8_32 packs the base texel from the wrong width, and
+     * scene-persp is the same rig one map size away, so a fixture that quietly
+     * kept a 64 map fails here by name rather than by moving a checksum. The
+     * z-buffered pair is the same shape through TriangleRender_ZPT_I8_D16_32,
+     * which never had the slip; this relation is checked in the mode that did.
+     */
+    {.a = "scene-tex-32",         .b = "scene-persp",            .equal = BR_FALSE, .pm_type = BR_PMT_INDEX_8, .mode = RT_MODE_ZS,
+     .device = "softrend"},
     {.a = "scene-shade",          .b = "scene-smooth",           .equal = BR_FALSE, .pm_type = BR_PMT_INDEX_8, .mode = RT_MODE_ZB},
     {.a = "scene-decal",          .b = "scene-textured-shade",   .equal = BR_FALSE, .pm_type = BR_PMT_INDEX_8, .mode = RT_ANY_MODE},
     {.a = "scene-fog",            .b = "scene-smooth",           .equal = BR_FALSE, .pm_type = BR_PMT_INDEX_8, .mode = RT_MODE_ZB},
@@ -1708,8 +1718,8 @@ static const char *const rt_default_scenes[] = {
 
     /* The render-feature fixtures; see scene.c. */
     "scene-flat",       "scene-smooth",    "scene-textured",       "scene-textured-shade", "scene-persp",        "scene-persp-shade",
-    "scene-tex-arb",    "scene-shade",     "scene-decal",          "scene-fog",         "scene-blend",           "scene-dither",
-    "scene-alpha",
+    "scene-tex-arb",    "scene-tex-32",     "scene-shade",          "scene-decal",       "scene-fog",             "scene-blend",
+    "scene-dither",     "scene-alpha",
     "scene-shade-rgb555", "scene-shade-rgb555-flat", "scene-shade-rgb565", "scene-shade-rgb565-flat",
     "scene-shade-rgb888", "scene-tex-rgb555", "scene-tex-rgb565",
     "scene-blend-off",

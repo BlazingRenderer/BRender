@@ -855,3 +855,12 @@ softrend/software/zb/6/320x240/scene-decal-arb-flat 64ec49dc42e4af67
 softrend/software/zs/6/320x240/scene-blend-p2-flat 7f2255d13547467b
 softrend/software/zs/6/320x240/scene-fog-p2-tex a08359bc51813d98
 softrend/software/zs/6/320x240/scene-decal-arb-flat 64ec49dc42e4af67
+glrend/llvmpipe/zb/8/320x240/scene-tex-32 fdf9ac9e75e2086c
+softrend/software/zb/3/320x240/scene-tex-32 f75224794d873fc6
+softrend/software/zs/3/320x240/scene-tex-32 f75224794d873fc6
+softrend/software/zb/4/320x240/scene-tex-32 6eff314ef649ae5e
+softrend/software/zs/4/320x240/scene-tex-32 cacee19e12f98e0f
+softrend/software/zb/5/320x240/scene-tex-32 aff6beddab2ee1a6
+softrend/software/zs/5/320x240/scene-tex-32 2efcd9ddabf5085e
+softrend/software/zb/6/320x240/scene-tex-32 3d13085b7de0910f
+softrend/software/zs/6/320x240/scene-tex-32 3d13085b7de0910f
