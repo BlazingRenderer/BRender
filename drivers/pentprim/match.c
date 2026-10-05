@@ -485,7 +485,7 @@ br_error BR_CMETHOD_DECL(br_primitive_state_soft, renderBegin)(
 	/*
 	 * If previous match is still valid, return that
 	 */
-	if(self->cache.last_type == prim_type) {
+	if(self->cache.last_block != NULL && self->cache.last_type == prim_type) {
 
 		if(self->cache.timestamp_prim == self->prim.timestamp_major &&
 			self->cache.timestamp_out == self->out.timestamp_major) {
@@ -495,13 +495,15 @@ br_error BR_CMETHOD_DECL(br_primitive_state_soft, renderBegin)(
 			*ranges_changed = BR_FALSE;
 
 			/*
-			 * Generate 'work' data
+			 * Generate 'work' data. A custom block may not carry a work area.
 			 */
-			if(self->cache.last_block->work->timestamp_prim != self->prim.timestamp)
-				updateWorkPrim(self->cache.last_block->work, self);
+			if(self->cache.last_block->work != NULL) {
+				if(self->cache.last_block->work->timestamp_prim != self->prim.timestamp)
+					updateWorkPrim(self->cache.last_block->work, self);
 
-			if(self->cache.last_block->work->timestamp_out != self->out.timestamp)
-				updateWorkOut(self->cache.last_block->work, self);
+				if(self->cache.last_block->work->timestamp_out != self->out.timestamp)
+					updateWorkOut(self->cache.last_block->work, self);
+			}
 
 			/*
 			 * Flush rasterise stack if necessary
