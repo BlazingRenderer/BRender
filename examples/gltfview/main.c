@@ -7,6 +7,7 @@
 typedef struct br_gltfview_state {
     br_editor_camera *editorcam;
     gltfview_bench   *bench;
+    br_boolean        z_sort;
 } br_gltfview_state;
 
 typedef struct KeyMap {
@@ -199,6 +200,17 @@ static br_error GLTFInit(br_demo *demo)
     br_gltfview_state *state    = BrResAllocate(demo, sizeof(br_gltfview_state), BR_MEMORY_APPLICATION);
     demo->user                  = state;
 
+    /*
+     * GLTFVIEW_ZSORT selects BrZsSceneRender instead of the Z-buffered path.
+     * Z-buffered is the default because the checked-in baseline records it.
+     * Unset or empty is off, as GLTFVIEW_BENCH_* treat it.
+     */
+    {
+        const char *zsort = BrGetEnv("GLTFVIEW_ZSORT");
+
+        state->z_sort = zsort != NULL && zsort[0] != '\0' && !(zsort[0] == '0' && zsort[1] == '\0');
+    }
+
     if(filename == NULL || filename[0] == '\0') {
         BrLogError("APP", "No GLTF filename passed");
         return BRE_FAIL;
@@ -343,8 +355,14 @@ static void GLTFRender(br_demo *demo)
 
     GLTFViewBenchBeginStage(state->bench, BENCH_STAGE_SCENE);
 
-    // BrZsSceneRender(demo->world, demo->camera, demo->colour_buffer);
-    BrZbSceneRender(demo->world, demo->camera, demo->colour_buffer, demo->depth_buffer);
+    /*
+     * The Z-sorted path binds no depth buffer, so the fill above is left
+     * unconditional rather than gated on the render path.
+     */
+    if(state->z_sort)
+        BrZsSceneRender(demo->world, demo->camera, demo->colour_buffer);
+    else
+        BrZbSceneRender(demo->world, demo->camera, demo->colour_buffer, demo->depth_buffer);
 
     GLTFViewBenchEndStage(state->bench, BENCH_STAGE_SCENE);
 
