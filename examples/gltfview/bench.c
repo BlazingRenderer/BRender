@@ -337,7 +337,7 @@ static void bench_checksum_gl(gltfview_bench *bench)
      * is exactly right for it.
      */
     {
-        br_uint_32 tex = 0;
+        br_uint_32 tex          = 0;
         br_boolean from_texture = BR_FALSE;
 
         if(bench->PixelStorei != NULL)
