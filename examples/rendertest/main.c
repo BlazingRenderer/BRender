@@ -11,6 +11,7 @@
  * path from the colour buffer itself; the scene setup mirrors gltfview's so
  * that the two agree pixel for pixel.
  */
+#include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -50,25 +51,22 @@ typedef const unsigned char *(*rt_pfn_GetString)(unsigned int);
  * a run loads, which bounds a bless as well as a comparison. A run that needs
  * more of either fails rather than dropping what does not fit.
  *
- * The reference key names the device, the driver, the pixel type, the depth
- * mode and the fixture, so the table's size is (devices x drivers) x pixel
- * types x depth modes x fixtures. The harness can key 3 devices x 4 types x 2
- * modes = 24 configurations, and a configuration costs one entry per fixture:
- * 24 x 56 = 1344. 512 was reached at 503 entries - the eight softrend
- * configurations and one glrend - so the table could not take the next
- * blessing round. 4096 holds that space twice over, and a new 56-fixture tier
- * costs 56 of it. Splitting the reference by device or pixel type was the
- * alternative and buys nothing: the key already separates them, and one file
- * is what --reference, --bless and the merge in rt_write_reference() are
- * written against. An entry is 200 bytes, so the table is 800 KiB, allocated
- * once per run.
+ * The key names the device, the driver, the pixel type, the depth mode and the
+ * fixture, so a configuration costs one entry per fixture. 4096 holds every
+ * configuration the harness can key across 128 fixtures, with room for the
+ * fixture set to grow; 512 could not take the next blessing round. One file is
+ * what --reference, --bless and the merge in rt_write_reference() are written
+ * against.
  *
- * RT_MAX_SCENES is the same problem one step out: 64 against the 56 default
- * fixtures, which the MMX round alone (21 of them) would have filled in one
- * more pass. 256 is four times the set.
+ * RT_MAX_SCENES is the same problem one step out: 64 left no room for the
+ * fixture set to grow. 256 is the room the cap was raised to.
+ *
+ * RT_MAX_KEY bounds a reference key and the rt_expect that holds one. A key
+ * that would not fit is refused rather than truncated.
  */
 #define RT_MAX_SCENES  256
 #define RT_MAX_ENTRIES 4096
+#define RT_MAX_KEY     192
 #define RT_MAX_LINE    1024
 
 /* Filled in by main() before the demo runs. */
@@ -100,7 +98,7 @@ typedef struct rt_result {
 } rt_result;
 
 typedef struct rt_expect {
-    char       key[192];
+    char       key[RT_MAX_KEY];
     br_uint_64 hash;
 } rt_expect;
 
@@ -587,11 +585,26 @@ static void rt_unload_scene(rt_state *st, br_demo *demo)
  * driver substitutes a different token for lookup only, so a run can score
  * against another rasteriser's pixels without writing a second copy of the
  * file; --bless still records the driver that actually rendered.
+ *
+ * A key that does not fit the buffer is refused rather than truncated: a
+ * shortened key names a different entry, or none at all, and the run would
+ * score against that without ever saying so.
  */
-static void rt_make_key(char *dst, size_t n, rt_state *st, const char *driver, const char *scene)
+static br_error rt_make_key(char *dst, size_t n, rt_state *st, const char *driver, const char *scene)
 {
-    snprintf(dst, n, "%s/%s/%s/%u/%dx%d/%s", st->device, driver, st->no_depth ? "zs" : "zb", (unsigned)st->pm_type, st->width,
-             st->height, scene);
+    const char *mode = st->no_depth ? "zs" : "zb";
+    int         len  = snprintf(dst, n, "%s/%s/%s/%u/%dx%d/%s", st->device, driver, mode, (unsigned)st->pm_type, st->width, st->height,
+                                scene);
+
+    if(len < 0 || (size_t)len >= n) {
+        BrLogError("RT",
+                   "reference key `%s/%s/%s/%u/%dx%d/%s' is %d characters, more than the %zu this harness holds; the key is not "
+                   "truncated to fit",
+                   st->device, driver, mode, (unsigned)st->pm_type, st->width, st->height, scene, len, n);
+        return BRE_FAIL;
+    }
+
+    return BRE_OK;
 }
 
 /* The driver token the reference is looked up under. */
@@ -600,21 +613,45 @@ static const char *rt_lookup_driver(rt_state *st)
     return st->reference_driver[0] != '\0' ? st->reference_driver : st->driver;
 }
 
+/*
+ * Load the reference table.
+ *
+ * A line that is not "<key> <hash>" names no entry, and an entry that is
+ * missing is scored as NO-REFERENCE - which is not a failure, so a reference
+ * file that half-parsed is a run that reports PASS with nothing behind it. A
+ * key longer than this harness holds is the same defect from the other side:
+ * shortened, it names a different entry.
+ *
+ * A file that will not open, or a read that stops on anything other than
+ * end-of-file (fopen() succeeds on a directory, fgets() then fails with
+ * EISDIR), is the same defect again: every fixture is scored NO-REFERENCE and
+ * the run passes. --bless is the one run that may have nothing to read.
+ */
 static br_error rt_load_reference(rt_state *st)
 {
     FILE *fp = fopen(st->reference, "r");
     char  line[RT_MAX_LINE];
+    int   lineno = 0;
 
-    if(fp == NULL)
-        return BRE_OK;
+    if(fp == NULL) {
+        if(st->bless && errno == ENOENT)
+            return BRE_OK;
+
+        BrLogError("RT", "Could not open reference `%s': %s; an absent reference is not a table with no entry for this key", st->reference,
+                   strerror(errno));
+        return BRE_FAIL;
+    }
 
     while(fgets(line, sizeof(line), fp) != NULL) {
         char *p = line;
+        char *nl;
+
+        ++lineno;
 
         while(*p == ' ' || *p == '\t')
             ++p;
 
-        if(*p == '#' || *p == '\n' || *p == '\0')
+        if(*p == '#' || *p == '\n' || *p == '\r' || *p == '\0')
             continue;
 
         /*
@@ -629,22 +666,60 @@ static br_error rt_load_reference(rt_state *st)
         }
 
         {
-            rt_expect *e = &st->expects[st->nexpects];
-            char      *nl;
+            rt_expect *e  = &st->expects[st->nexpects];
+            char      *sp = strchr(p, ' ');
+            char      *end;
 
             if((nl = strchr(p, '\n')) != NULL)
                 *nl = '\0';
 
-            /* "<key> <hash>" */
-            char *sp = strchr(p, ' ');
+            if((nl = strchr(p, '\r')) != NULL)
+                *nl = '\0';
 
-            if(sp != NULL) {
-                *sp = '\0';
-                snprintf(e->key, sizeof(e->key), "%s", p);
-                e->hash = strtoull(sp + 1, NULL, 16);
-                ++st->nexpects;
+            /* "<key> <hash>" */
+            if(sp == NULL || sp == p || sp[1] == '\0') {
+                BrLogError("RT", "%s:%d: not `<key> <hash>': a reference that does not parse is scored as if the entry were absent",
+                           st->reference, lineno);
+                fclose(fp);
+                return BRE_FAIL;
             }
+
+            *sp = '\0';
+
+            if(strlen(p) >= sizeof(e->key)) {
+                BrLogError("RT", "%s:%d: key is %zu characters, more than the %zu this harness holds; it is not truncated to fit",
+                           st->reference, lineno, strlen(p), sizeof(e->key));
+                fclose(fp);
+                return BRE_FAIL;
+            }
+
+            e->hash = strtoull(sp + 1, &end, 16);
+
+            while(*end == ' ' || *end == '\t')
+                ++end;
+
+            if(end == sp + 1 || *end != '\0') {
+                BrLogError("RT", "%s:%d: `%s' is not a hexadecimal checksum", st->reference, lineno, sp + 1);
+                fclose(fp);
+                return BRE_FAIL;
+            }
+
+            snprintf(e->key, sizeof(e->key), "%s", p);
+            ++st->nexpects;
         }
+    }
+
+    /*
+     * fgets() returns NULL on error as well as at end-of-file, and errno holds
+     * the read error; take it before fclose() can overwrite it.
+     */
+    if(ferror(fp)) {
+        int err = errno;
+
+        BrLogError("RT", "Could not read reference `%s': %s; a reference that failed to read is not a table with no entry for this key",
+                   st->reference, strerror(err));
+        fclose(fp);
+        return BRE_FAIL;
     }
 
     fclose(fp);
@@ -666,9 +741,12 @@ static rt_expect *rt_find_expect(rt_state *st, const char *key)
  * Merge this run's results into the reference so blessing one environment does
  * not drop another's entries.
  *
- * The table is a fixed size, so a bless that would not fit is refused outright
- * rather than writing the entries that do: a reference that quietly lost an
- * entry is a run that quietly stopped checking it.
+ * A bless that would not fit, or a result whose key does not fit, is refused
+ * outright rather than writing the entries that do: a reference that quietly
+ * lost an entry is a run that quietly stopped checking it.
+ *
+ * A bless that cannot open the file for writing is a failed run, not a logged
+ * note: the reference on disk would not be the one the next run scores against.
  */
 static void rt_write_reference(rt_state *st)
 {
@@ -676,9 +754,12 @@ static void rt_write_reference(rt_state *st)
     int   wanted = st->nexpects;
 
     for(int i = 0; i < st->nresults; ++i) {
-        char key[192];
+        char key[RT_MAX_KEY];
 
-        rt_make_key(key, sizeof(key), st, st->driver, st->results[i].scene);
+        if(rt_make_key(key, sizeof(key), st, st->driver, st->results[i].scene) != BRE_OK) {
+            ++st->failures;
+            return;
+        }
 
         if(rt_find_expect(st, key) == NULL)
             ++wanted;
@@ -692,10 +773,14 @@ static void rt_write_reference(rt_state *st)
     }
 
     for(int i = 0; i < st->nresults; ++i) {
-        char       key[192];
+        char       key[RT_MAX_KEY];
         rt_expect *e;
 
-        rt_make_key(key, sizeof(key), st, st->driver, st->results[i].scene);
+        if(rt_make_key(key, sizeof(key), st, st->driver, st->results[i].scene) != BRE_OK) {
+            ++st->failures;
+            return;
+        }
+
         e = rt_find_expect(st, key);
 
         if(e != NULL) {
@@ -708,7 +793,8 @@ static void rt_write_reference(rt_state *st)
     }
 
     if((fp = fopen(st->reference, "w")) == NULL) {
-        BrLogError("RT", "Could not write %s", st->reference);
+        BrLogError("RT", "Could not write %s: %s", st->reference, strerror(errno));
+        ++st->failures;
         return;
     }
 
@@ -811,8 +897,9 @@ static void rt_finish_scene(rt_state *st, br_demo *demo)
 {
     br_uint_64 hash    = 0;
     br_uint_32 covered = 0, total = 0;
-    char       key[192];
+    char       key[RT_MAX_KEY];
     rt_expect *e;
+    const char *status;
 
     if(demo->hw_accel)
         rt_checksum_gl(st, demo, &hash, &covered, &total);
@@ -839,11 +926,14 @@ static void rt_finish_scene(rt_state *st, br_demo *demo)
         r->total    = total;
     }
 
-    rt_make_key(key, sizeof(key), st, rt_lookup_driver(st), st->scenes[st->scene_index].name);
-
-    const char *status;
-
-    if(st->bless) {
+    /*
+     * A key that does not fit is a failed run, not a shortened key: the lookup
+     * would name a different entry, or none, and score against that.
+     */
+    if(rt_make_key(key, sizeof(key), st, rt_lookup_driver(st), st->scenes[st->scene_index].name) != BRE_OK) {
+        status = "BAD-KEY";
+        ++st->failures;
+    } else if(st->bless) {
         status = "BLESS";
     } else if(!st->env_ok) {
         status = "NO-REFERENCE";
@@ -1078,8 +1168,17 @@ static br_error rt_init(br_demo *demo)
             if(r != NULL) {
                 size_t n = strcspn(r, " (");
 
-                if(n >= sizeof(st->driver))
-                    n = sizeof(st->driver) - 1;
+                /*
+                 * The token is a component of every key this run builds, so one
+                 * that does not fit is refused rather than shortened: shortened,
+                 * it records another driver's reference and the run passes on a
+                 * table that was never written for it.
+                 */
+                if(n >= sizeof(st->driver)) {
+                    BrLogError("RT", "GL_RENDERER `%s' is %zu characters, more than the %zu a driver token holds", r, n,
+                               sizeof(st->driver));
+                    return BRE_FAIL;
+                }
 
                 memcpy(st->driver, r, n);
                 st->driver[n] = '\0';
@@ -1115,11 +1214,49 @@ static br_error rt_init(br_demo *demo)
         st->nexpects = 0;
         st->failures = 0;
 
+        /*
+         * The path is a fixed buffer and this is the last point it can be
+         * refused. Truncated, it names a different file - one that may exist,
+         * in which case the run scores against a table it never asked for - and
+         * if it does not, the failed open is the absent reference that
+         * rt_load_reference() no longer treats as usable.
+         */
+        if(strlen(rt_cfg_reference) >= sizeof(st->reference)) {
+            BrLogError("RT", "--reference `%s' is %zu characters, more than the %zu a reference path holds", rt_cfg_reference,
+                       strlen(rt_cfg_reference), sizeof(st->reference));
+            return BRE_FAIL;
+        }
+
         snprintf(st->reference, sizeof(st->reference), "%s", rt_cfg_reference);
         snprintf(st->ppm_dir, sizeof(st->ppm_dir), "%s", rt_cfg_ppm_dir);
-        snprintf(st->reference_driver, sizeof(st->reference_driver), "%s", rt_cfg_ref_driver != NULL ? rt_cfg_ref_driver : "");
+
+        /* The same refusal for the substituted token; see the GL_RENDERER one. */
+        {
+            const char *token = rt_cfg_ref_driver != NULL ? rt_cfg_ref_driver : "";
+
+            if(strlen(token) >= sizeof(st->reference_driver)) {
+                BrLogError("RT", "--reference-driver `%s' is %zu characters, more than the %zu a driver token holds", token,
+                           strlen(token), sizeof(st->reference_driver));
+                return BRE_FAIL;
+            }
+
+            memcpy(st->reference_driver, token, strlen(token) + 1);
+        }
 
         for(int i = 0; i < st->nscenes; ++i) {
+            /*
+             * The name is a fixed buffer and it is what the reference key is
+             * built from, so a name that does not fit is refused rather than
+             * shortened. Shortened, the key names a different fixture, and the
+             * key-length check in rt_make_key() cannot see it: the key built
+             * from the shortened name is inside RT_MAX_KEY and passes.
+             */
+            if(strlen(rt_cfg_scenes[i]) >= sizeof(st->scenes[i].name)) {
+                BrLogError("RT", "scene `%s' is %zu characters, more than the %zu a fixture name holds; it is not truncated to fit",
+                           rt_cfg_scenes[i], strlen(rt_cfg_scenes[i]), sizeof(st->scenes[i].name));
+                return BRE_FAIL;
+            }
+
             snprintf(st->scenes[i].name, sizeof(st->scenes[i].name), "%s", rt_cfg_scenes[i]);
             snprintf(st->scenes[i].path, sizeof(st->scenes[i].path), "%s/%s.gltf", rt_cfg_scene_dir, rt_cfg_scenes[i]);
         }
