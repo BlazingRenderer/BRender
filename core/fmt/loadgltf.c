@@ -254,8 +254,10 @@ static br_gltf_load_prim_info *filter_primitive_attributes(br_gltf_load_prim_inf
 
         default:
             /*
-             * We don't support anything else.
+             * Unreachable: check_primitive_modes() rejects a file carrying any
+             * other mode before a model is built.
              */
+            ASSERT(BR_FALSE);
             output_vertex_count = 0;
             output_face_count   = 0;
             break;
@@ -872,6 +874,71 @@ static void fill_camera(br_camera *camera_data, const cgltf_camera *camera)
     }
 }
 
+/* ------------------------------------------------------------------ */
+/* File-level validation.                                             */
+/* ------------------------------------------------------------------ */
+
+/*
+ * The glTF primitive modes this loader can turn into BRender faces.
+ *
+ * Anything else - points, lines, line strips and loops - has no face
+ * representation at all. The switch in filter_primitive_attributes() used to
+ * fall through to a zero-sized primitive for those, and a zero-sized primitive
+ * is not an empty mesh: create_model() returns NULL, br_actor::model is left
+ * NULL, and the renderer then inherits v1db.default_model down the hierarchy
+ * - so the actor drew BRender's two-unit default cube
+ * in place of the geometry in the file. That is a
+ * substitution, not a refusal, and it is silent: the caller sees a scene that
+ * loaded and rendered.
+ */
+static const char *const primitive_mode_names[] = {
+    "POINTS", "LINES", "LINE_LOOP", "LINE_STRIP", "TRIANGLES", "TRIANGLE_STRIP", "TRIANGLE_FAN",
+};
+
+static const char *primitive_mode_name(cgltf_primitive_type type)
+{
+    /* cgltf_primitive_type_points is glTF mode 0, so the enum value is the mode plus one. */
+    if(type < cgltf_primitive_type_points || type > cgltf_primitive_type_triangle_fan)
+        return "unknown";
+
+    return primitive_mode_names[type - cgltf_primitive_type_points];
+}
+
+static br_boolean primitive_mode_supported(cgltf_primitive_type type)
+{
+    return type == cgltf_primitive_type_triangles || type == cgltf_primitive_type_triangle_strip || type == cgltf_primitive_type_triangle_fan;
+}
+
+static br_error check_primitive_modes(const cgltf_data *data)
+{
+    for(br_size_t m = 0; m < data->meshes_count; ++m) {
+        const cgltf_mesh *mesh = data->meshes + m;
+
+        for(br_size_t p = 0; p < mesh->primitives_count; ++p) {
+            const cgltf_primitive *prim = mesh->primitives + p;
+
+            if(primitive_mode_supported(prim->type))
+                continue;
+
+            if(prim->type == cgltf_primitive_type_invalid) {
+                BrLogError("GLTF",
+                           "mesh \"%s\" primitive %lu has an unrecognised glTF mode (not 0..6), which this loader cannot build faces "
+                           "from; only TRIANGLES, TRIANGLE_STRIP and TRIANGLE_FAN are supported",
+                           mesh->name != NULL ? mesh->name : "<unnamed>", (unsigned long)p);
+            } else {
+                BrLogError("GLTF",
+                           "mesh \"%s\" primitive %lu has glTF mode %d (%s), which this loader cannot build faces from; only TRIANGLES, "
+                           "TRIANGLE_STRIP and TRIANGLE_FAN are supported",
+                           mesh->name != NULL ? mesh->name : "<unnamed>", (unsigned long)p, (int)prim->type - 1, primitive_mode_name(prim->type));
+            }
+
+            return BRE_FAIL;
+        }
+    }
+
+    return BRE_OK;
+}
+
 br_fmt_results *BR_PUBLIC_ENTRY BrFmtGLTFActorLoadMany(const char *name, const br_gltf_options *options)
 {
     cgltf_data         *data;
@@ -919,6 +986,15 @@ br_fmt_results *BR_PUBLIC_ENTRY BrFmtGLTFActorLoadMany(const char *name, const b
 
     state->data    = data;
     state->options = options;
+
+    /*
+     * The check is pure and runs before any state is built, so a file that
+     * cannot be loaded faithfully never gets part-way in.
+     */
+    if(check_primitive_modes(data) != BRE_OK) {
+        BrResFree(state);
+        return NULL;
+    }
 
     if(cgltf_load_buffers(&opts, data, base_path) != cgltf_result_success) {
         BrResFree(state);
