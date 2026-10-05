@@ -869,31 +869,76 @@ typedef struct rt_relation {
     const char *a;
     const char *b;
     br_boolean  equal; /* BR_TRUE: must match. BR_FALSE: must differ. */
+
+    /*
+     * Only check under this colour buffer type, or RT_ANY_TYPE for any. The
+     * indexed lookup tables, the indexed fog and dithered_map are INDEX_8 only:
+     * a shade table of the wrong type simply does not match an RGB block and no
+     * RGB block declares a fog type at all, so the renderer drops both - which
+     * is the behaviour, not a failure, and asserting the relation there would be
+     * asserting something false.
+     */
+    br_uint_8 pm_type;
+
+    /*
+     * Only check in this depth mode, or RT_ANY_MODE. pentprim has no
+     * z-sorted (no depth buffer) block that carries an indexed shade table, an
+     * indexed blend table or a fog table at all, so in that mode those three
+     * pieces of state are dropped and the relation would be asserting the
+     * opposite of what the renderer does.
+     */
+    br_uint_8 mode;
+
+    /*
+     * Only check under this device, or NULL for any. glrend has no indexed
+     * rasteriser and is always perspective correct, so the shading mode and the
+     * affine/perspective distinction do not exist there: asserting either would
+     * be asserting a softrend property of a hardware frame.
+     */
+    const char *device;
 } rt_relation;
 
 /*
  * A colour buffer type, or RT_ANY_TYPE for any; a depth mode, or RT_ANY_MODE
  * for either. Used by both the relation table and the blank table below.
+ *
+ * Both have to be spelled out on every entry. An unset .pm_type is 0, which is
+ * BR_PMT_INDEX_1 - a type this harness never runs - and an unset .mode is 0,
+ * which is RT_MODE_ZB, a real mode, so an entry that omits either is checked in
+ * the configurations that field happens to select and skipped everywhere else,
+ * without a word.
  */
 #define RT_ANY_TYPE 0xff
 #define RT_ANY_MODE 0xff
 #define RT_MODE_ZB  0
 #define RT_MODE_ZS  1
 
+/*
+ * The lighting fixtures. Each pair differs by one property of one light -
+ * whether it hits, how far it reaches, whether it is directional, ambient-only
+ * or view-space - so a light path that stops applying one fails here rather
+ * than only moving a checksum.
+ *
+ * The type is RT_ANY_TYPE and the mode RT_ANY_MODE, and both have to be spelled
+ * out: an unset field is 0, which for the type is BR_PMT_INDEX_1 and for the
+ * mode RT_MODE_ZB, so a relation that omits either is skipped rather than
+ * checked. Neither the lighting nor the material is decided by the output type
+ * or the depth mode.
+ */
 static const rt_relation rt_relations[] = {
-    {.a = "scene-spot-hit",       .b = "scene-spot-miss",        .equal = BR_FALSE},
-    {.a = "scene-radius-near",    .b = "scene-radius-far",       .equal = BR_FALSE},
-    {.a = "scene-directional",    .b = "scene-directional-miss", .equal = BR_FALSE},
-    {.a = "scene-directional",    .b = "scene-unlit",            .equal = BR_FALSE},
-    {.a = "scene-colour",         .b = "scene-unlit",            .equal = BR_FALSE},
-    {.a = "scene-colour",         .b = "scene-colour-two",       .equal = BR_FALSE},
-    {.a = "scene-colour-ambient", .b = "scene-unlit",            .equal = BR_FALSE},
-    {.a = "scene-specular",       .b = "scene-directional",      .equal = BR_FALSE},
-    {.a = "scene-scale-spot",     .b = "scene-unlit",            .equal = BR_FALSE},
+    {.a = "scene-spot-hit",       .b = "scene-spot-miss",        .equal = BR_FALSE, .pm_type = RT_ANY_TYPE, .mode = RT_ANY_MODE},
+    {.a = "scene-radius-near",    .b = "scene-radius-far",       .equal = BR_FALSE, .pm_type = RT_ANY_TYPE, .mode = RT_ANY_MODE},
+    {.a = "scene-directional",    .b = "scene-directional-miss", .equal = BR_FALSE, .pm_type = RT_ANY_TYPE, .mode = RT_ANY_MODE},
+    {.a = "scene-directional",    .b = "scene-unlit",            .equal = BR_FALSE, .pm_type = RT_ANY_TYPE, .mode = RT_ANY_MODE},
+    {.a = "scene-colour",         .b = "scene-unlit",            .equal = BR_FALSE, .pm_type = RT_ANY_TYPE, .mode = RT_ANY_MODE},
+    {.a = "scene-colour",         .b = "scene-colour-two",       .equal = BR_FALSE, .pm_type = RT_ANY_TYPE, .mode = RT_ANY_MODE},
+    {.a = "scene-colour-ambient", .b = "scene-unlit",            .equal = BR_FALSE, .pm_type = RT_ANY_TYPE, .mode = RT_ANY_MODE},
+    {.a = "scene-specular",       .b = "scene-directional",      .equal = BR_FALSE, .pm_type = RT_ANY_TYPE, .mode = RT_ANY_MODE},
+    {.a = "scene-scale-spot",     .b = "scene-unlit",            .equal = BR_FALSE, .pm_type = RT_ANY_TYPE, .mode = RT_ANY_MODE},
     /* The turn has to reach the light, or the fixture is back on-axis. */
-    {.a = "scene-scale-spot",     .b = "scene-scale-spot-off",   .equal = BR_FALSE},
+    {.a = "scene-scale-spot",     .b = "scene-scale-spot-off",   .equal = BR_FALSE, .pm_type = RT_ANY_TYPE, .mode = RT_ANY_MODE},
     /* The negative control: an unlit material ignores lights entirely. */
-    {.a = "scene-unlit",          .b = "scene-unlit-plain",      .equal = BR_TRUE },
+    {.a = "scene-unlit",          .b = "scene-unlit-plain",      .equal = BR_TRUE,  .pm_type = RT_ANY_TYPE, .mode = RT_ANY_MODE},
 };
 
 static rt_result *rt_find_result(rt_state *st, const char *scene)
