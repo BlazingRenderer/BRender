@@ -560,6 +560,11 @@ static int count_model_buffers(const void *key, void *value, br_hash hash, void 
     return 0;
 }
 
+/*
+ * Map the renderer state a material was prepared into back to the material, for
+ * models whose faces _BrModelUpdate() released. Only prepared materials have
+ * one; a NULL state names no material and is never a key.
+ */
 static int add_reverse_material_entry(const void *key, void *value, br_hash hash, void *user)
 {
     const br_material  *mat   = key;
@@ -568,7 +573,9 @@ static int add_reverse_material_entry(const void *key, void *value, br_hash hash
     (void)value;
     (void)hash;
 
-    BrHashMapInsert(state->stored_map, mat->stored, (void *)mat);
+    if(mat->stored != NULL)
+        BrHashMapInsert(state->stored_map, mat->stored, (void *)mat);
+
     return 0;
 }
 
@@ -1317,6 +1324,28 @@ static int fill_br_material(const void *key, void *value, br_hash hash, void *us
     return 0;
 }
 
+/*
+ * A face group's material. v11group::face_user indexes the prepared faces back
+ * into br_model->faces, so while they are there the first names the material.
+ * v11group::stored is the prepared renderer state, not the material, and is
+ * non-NULL only where a renderer prepared one, so it cannot be relied on alone.
+ */
+static br_material *group_material(const br_model *model, const struct v11group *group, br_gltf_save_state *state)
+{
+    if(model->faces != NULL && group->face_user[0] < model->nfaces)
+        return model->faces[group->face_user[0]].material;
+
+    /*
+     * _BrModelUpdate() released the faces, so all that is left is the prepared
+     * state. A NULL there names nothing at all rather than naming a material,
+     * so it is never looked up.
+     */
+    if(group->stored == NULL)
+        return NULL;
+
+    return BrHashMapFind(state->stored_map, group->stored);
+}
+
 static int fill_mesh_materials(const void *key, void *value, br_hash hash, void *user)
 {
     const br_model        *model = key;
@@ -1327,12 +1356,21 @@ static int fill_mesh_materials(const void *key, void *value, br_hash hash, void 
     (void)hash;
 
     for(size_t g = 0; g < v11m->ngroups; ++g) {
-        br_material *mat = BrHashMapFind(state->stored_map, v11m->groups[g].stored);
-        if(mat != NULL) {
-            cgltf_material *material             = BrHashMapFind(state->material_map, mat);
-            mesh->primitives[g].material         = material;
-            mesh->primitives[g].brender_material = state->data->brender_materials + (material - state->data->materials);
-        }
+        br_material    *mat      = group_material(model, v11m->groups + g, state);
+        cgltf_material *material = mat != NULL ? BrHashMapFind(state->material_map, mat) : NULL;
+
+        /*
+         * A group of faces that carry no material has to be written with no
+         * material: naming one here puts it on every face of the model on the
+         * way back in, and the renderer takes a group's material in preference
+         * to its actor's - so naming one would make the whole model, and every
+         * actor sharing it, render as that single material.
+         */
+        if(material == NULL)
+            continue;
+
+        mesh->primitives[g].material         = material;
+        mesh->primitives[g].brender_material = state->data->brender_materials + (material - state->data->materials);
     }
     return 0;
 }
@@ -1483,7 +1521,7 @@ br_error BR_PUBLIC_ENTRY BrFmtGLTFActorSaveMany(const char *name, br_actor **act
     /*
      * Build the br_material::stored -> br_material lookup.
      *
-     * Post: state->material_map is populated.
+     * Post: state->stored_map is populated.
      */
     BrHashMapEnumerate(state->material_map, add_reverse_material_entry, state);
 
@@ -1565,9 +1603,9 @@ br_error BR_PUBLIC_ENTRY BrFmtGLTFActorSaveMany(const char *name, br_actor **act
     /*
      * Fill the mesh materials.
      *
-     * Post: cgltf_mesh::material is set to the face group's material.
-     *
-     * FIXME: This doesn't handle br_actor::material override if NULL.
+     * Post: cgltf_mesh::material is set to the face group's material, where the
+     *       group's faces have one. An actor's own material is carried by
+     *       cgltf_node::brender_material, in build_node_links().
      */
     BrHashMapEnumerate(state->model_map, fill_mesh_materials, state);
 

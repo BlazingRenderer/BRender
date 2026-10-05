@@ -102,17 +102,11 @@
       "primitives": [
         {
           "indices": 4,
-          "material": 0,
           "attributes": {
             "POSITION": 0,
             "NORMAL": 1,
             "TEXCOORD_0": 2,
             "COLOR_0": 3
-          },
-          "extensions": {
-            "BR_materials": {
-              "material": 0
-            }
           }
         }
       ]
