@@ -11,6 +11,10 @@
 
 #include "brender.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /**
  ** Primitive Vertex
  **/
@@ -291,6 +295,5 @@ static inline void brp_render4(brp_block *b, brp_vertex *v0, brp_vertex *v1, brp
 
 #ifdef __cplusplus
 }
-;
 #endif
 #endif
