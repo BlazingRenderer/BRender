@@ -38,10 +38,13 @@ mask_6d				dword	03f003f00h,03f003f00h
 
 mask_argb 			dword	07f7f7f7fh,07f7f7f7fh
 
+	; Indexed by (end pixel & 3); entry N keeps the low N+1 words, so all
+	; four are load-bearing even though the last one is all-ones.
 right_masks label dword
 					word	0ffffh,00000h,00000h,00000h
 					word	0ffffh,0ffffh,00000h,00000h
 					word	0ffffh,0ffffh,0ffffh,00000h
+					word	0ffffh,0ffffh,0ffffh,0ffffh
 left_masks label dword
 					word	0ffffh,0ffffh,0ffffh,0ffffh
 					word	00000h,0ffffh,0ffffh,0ffffh
