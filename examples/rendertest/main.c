@@ -44,8 +44,31 @@ typedef const unsigned char *(*rt_pfn_GetString)(unsigned int);
 /* Configuration and results.                                         */
 /* ------------------------------------------------------------------ */
 
-#define RT_MAX_SCENES  32
-#define RT_MAX_ENTRIES 512
+/*
+ * RT_MAX_SCENES is the most fixtures one run holds: the default set plus any
+ * named on the command line. RT_MAX_ENTRIES is the size of the reference table
+ * a run loads, which bounds a bless as well as a comparison. A run that needs
+ * more of either fails rather than dropping what does not fit.
+ *
+ * The reference key names the device, the driver, the pixel type, the depth
+ * mode and the fixture, so the table's size is (devices x drivers) x pixel
+ * types x depth modes x fixtures. The harness can key 3 devices x 4 types x 2
+ * modes = 24 configurations, and a configuration costs one entry per fixture:
+ * 24 x 56 = 1344. 512 was reached at 503 entries - the eight softrend
+ * configurations and one glrend - so the table could not take the next
+ * blessing round. 4096 holds that space twice over, and a new 56-fixture tier
+ * costs 56 of it. Splitting the reference by device or pixel type was the
+ * alternative and buys nothing: the key already separates them, and one file
+ * is what --reference, --bless and the merge in rt_write_reference() are
+ * written against. An entry is 200 bytes, so the table is 800 KiB, allocated
+ * once per run.
+ *
+ * RT_MAX_SCENES is the same problem one step out: 64 against the 56 default
+ * fixtures, which the MMX round alone (21 of them) would have filled in one
+ * more pass. 256 is four times the set.
+ */
+#define RT_MAX_SCENES  256
+#define RT_MAX_ENTRIES 4096
 #define RT_MAX_LINE    1024
 
 /* Filled in by main() before the demo runs. */
@@ -577,13 +600,13 @@ static const char *rt_lookup_driver(rt_state *st)
     return st->reference_driver[0] != '\0' ? st->reference_driver : st->driver;
 }
 
-static void rt_load_reference(rt_state *st)
+static br_error rt_load_reference(rt_state *st)
 {
     FILE *fp = fopen(st->reference, "r");
     char  line[RT_MAX_LINE];
 
     if(fp == NULL)
-        return;
+        return BRE_OK;
 
     while(fgets(line, sizeof(line), fp) != NULL) {
         char *p = line;
@@ -594,7 +617,18 @@ static void rt_load_reference(rt_state *st)
         if(*p == '#' || *p == '\n' || *p == '\0')
             continue;
 
-        if(st->nexpects < RT_MAX_ENTRIES) {
+        /*
+         * Refuse rather than drop. An entry that does not fit is a reference
+         * the run would score against as if it had never been written.
+         */
+        if(st->nexpects >= RT_MAX_ENTRIES) {
+            BrLogError("RT", "%s holds more than RT_MAX_ENTRIES (%d) entries; raise it rather than score against a short table",
+                       st->reference, RT_MAX_ENTRIES);
+            fclose(fp);
+            return BRE_FAIL;
+        }
+
+        {
             rt_expect *e = &st->expects[st->nexpects];
             char      *nl;
 
@@ -614,6 +648,8 @@ static void rt_load_reference(rt_state *st)
     }
 
     fclose(fp);
+
+    return BRE_OK;
 }
 
 static rt_expect *rt_find_expect(rt_state *st, const char *key)
@@ -629,10 +665,31 @@ static rt_expect *rt_find_expect(rt_state *st, const char *key)
 /*
  * Merge this run's results into the reference so blessing one environment does
  * not drop another's entries.
+ *
+ * The table is a fixed size, so a bless that would not fit is refused outright
+ * rather than writing the entries that do: a reference that quietly lost an
+ * entry is a run that quietly stopped checking it.
  */
 static void rt_write_reference(rt_state *st)
 {
     FILE *fp;
+    int   wanted = st->nexpects;
+
+    for(int i = 0; i < st->nresults; ++i) {
+        char key[192];
+
+        rt_make_key(key, sizeof(key), st, st->driver, st->results[i].scene);
+
+        if(rt_find_expect(st, key) == NULL)
+            ++wanted;
+    }
+
+    if(wanted > RT_MAX_ENTRIES) {
+        BrLogError("RT", "%s would need %d entries, more than the %d this harness holds; raise RT_MAX_ENTRIES", st->reference,
+                   wanted, RT_MAX_ENTRIES);
+        ++st->failures;
+        return;
+    }
 
     for(int i = 0; i < st->nresults; ++i) {
         char       key[192];
@@ -643,7 +700,7 @@ static void rt_write_reference(rt_state *st)
 
         if(e != NULL) {
             e->hash = st->results[i].hash;
-        } else if(st->nexpects < RT_MAX_ENTRIES) {
+        } else {
             e = &st->expects[st->nexpects++];
             snprintf(e->key, sizeof(e->key), "%s", key);
             e->hash = st->results[i].hash;
@@ -764,7 +821,16 @@ static void rt_finish_scene(rt_state *st, br_demo *demo)
 
     rt_export_ppm(st, demo);
 
-    if(st->nresults < RT_MAX_SCENES) {
+    /*
+     * Cannot fire while the scene list fits in RT_MAX_SCENES, which main()
+     * enforces; refuse rather than drop all the same, because a scene with no
+     * result is a scene with no relation and no coverage check.
+     */
+    if(st->nresults >= RT_MAX_SCENES) {
+        BrLogError("RT", "%s: more results than the %d this harness holds; raise RT_MAX_SCENES", st->scenes[st->scene_index].name,
+                   RT_MAX_SCENES);
+        ++st->failures;
+    } else {
         rt_result *r = &st->results[st->nresults++];
 
         snprintf(r->scene, sizeof(r->scene), "%s", st->scenes[st->scene_index].name);
@@ -1017,8 +1083,8 @@ static br_error rt_init(br_demo *demo)
             st->env_ok = 1; /* the driver token above keys the reference */
     }
 
-    if(st->env_ok)
-        rt_load_reference(st);
+    if(st->env_ok && rt_load_reference(st) != BRE_OK)
+        return BRE_FAIL;
 
     if(rt_load_scene(st, demo, 0) != BRE_OK)
         return BRE_FAIL;
@@ -1111,6 +1177,9 @@ static const char *const rt_default_scenes[] = {
     "scene-specular",   "scene-unlit",     "scene-unlit-plain",    "scene-scale-spot",  "scene-scale-direction", "scene-scale-spot-off",
 };
 
+/* The default set has to fit: rt_init() copies it into an RT_MAX_SCENES array. */
+BR_STATIC_ASSERT(BR_ASIZE(rt_default_scenes) <= RT_MAX_SCENES, "the default fixture set does not fit in RT_MAX_SCENES");
+
 static br_uint_8 rt_bpp_to_type(int bpp)
 {
     switch(bpp) {
@@ -1200,8 +1269,16 @@ int main(int argc, char **argv)
             rt_usage(argv[0]);
             return 2;
         } else {
-            if(rt_cfg_nscenes < RT_MAX_SCENES)
-                rt_cfg_scenes[rt_cfg_nscenes++] = a;
+            /*
+             * Refuse rather than drop: a scene the run quietly leaves out is a
+             * fixture with no result, and so nothing asserted about it at all.
+             */
+            if(rt_cfg_nscenes >= RT_MAX_SCENES) {
+                fprintf(stderr, "More than RT_MAX_SCENES (%d) scenes named; raise it rather than run a short set\n", RT_MAX_SCENES);
+                return 2;
+            }
+
+            rt_cfg_scenes[rt_cfg_nscenes++] = a;
         }
     }
 
@@ -1229,7 +1306,12 @@ int main(int argc, char **argv)
         args.opengl_device_name = rt_cfg_device;
     }
 
-    BrDemoRunArg(&rt_dispatch, &args);
+    /*
+     * An init failure - a scene that will not load, or a reference that does not
+     * fit - is a failed run, not a quiet one.
+     */
+    if(BrDemoRunArg(&rt_dispatch, &args) != 0)
+        g_failed = 1;
 
     return g_failed ? 1 : 0;
 }
