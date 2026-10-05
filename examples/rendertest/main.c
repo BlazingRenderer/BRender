@@ -805,6 +805,15 @@ typedef struct rt_relation {
     br_boolean  equal; /* BR_TRUE: must match. BR_FALSE: must differ. */
 } rt_relation;
 
+/*
+ * A colour buffer type, or RT_ANY_TYPE for any; a depth mode, or RT_ANY_MODE
+ * for either. Used by both the relation table and the blank table below.
+ */
+#define RT_ANY_TYPE 0xff
+#define RT_ANY_MODE 0xff
+#define RT_MODE_ZB  0
+#define RT_MODE_ZS  1
+
 static const rt_relation rt_relations[] = {
     {.a = "scene-spot-hit",       .b = "scene-spot-miss",        .equal = BR_FALSE},
     {.a = "scene-radius-near",    .b = "scene-radius-far",       .equal = BR_FALSE},
@@ -829,6 +838,82 @@ static rt_result *rt_find_result(rt_state *st, const char *scene)
     }
 
     return NULL;
+}
+
+/*
+ * Fixtures that must draw something.
+ *
+ * A frame that drew nothing is not a frame that drew correctly, and neither of
+ * the checks above can tell the difference. A checksum only separates the two
+ * when the stored reference is not itself blank: where it is - a fixture whose
+ * feature the renderer under test refuses, or one whose surface quantises to
+ * zero in five-bit channels - a blank frame matches it and reports PASS. And a
+ * negative relation has the same hole from the other side: drawing nothing
+ * differs from drawing something, so "scene-shade != scene-smooth" passes on
+ * the most broken frame in the corpus.
+ *
+ * So every scene has to light at least one pixel, unless it is one of the
+ * expected-blank cases below. Those are listed rather than the assertion being
+ * narrowed to the scenes that pass today, so a fixture that starts rendering
+ * blank fails here by name instead of moving a checksum.
+ */
+typedef struct rt_blank {
+    const char *scene;
+    br_uint_8   pm_type;
+    br_uint_8   mode;
+
+    /*
+     * Only excuse the blank frame under this device, or NULL for any. A device
+     * that refuses a fixture says nothing about the device under test, and the
+     * refusal is a property of one driver, not of the scene.
+     */
+    const char *device;
+} rt_blank;
+
+static const rt_blank rt_expected_blank[] = {
+    /*
+     * pentprim's own frame is blank for each of these, so there is nothing to
+     * require of the driver under test. Measured with the pentprim build at
+     * every bpp x mode; the light-cull fixtures are 8.3% of the screen at
+     * 8bpp and 16bpp but quantise to zero in five-bit channels, which is why
+     * 15bpp is the odd one.
+     */
+    {.scene = "scene-spot-miss",         .pm_type = BR_PMT_RGB_555, .mode = RT_ANY_MODE},
+    {.scene = "scene-radius-far",        .pm_type = BR_PMT_RGB_555, .mode = RT_ANY_MODE},
+    {.scene = "scene-directional-miss",  .pm_type = BR_PMT_RGB_555, .mode = RT_ANY_MODE},
+    {.scene = "scene-scale-spot-off",    .pm_type = BR_PMT_RGB_555, .mode = RT_ANY_MODE},
+};
+
+static void rt_check_drawn(rt_state *st)
+{
+    for(int i = 0; i < st->nresults; ++i) {
+        rt_result *r        = &st->results[i];
+        br_boolean expected = BR_FALSE;
+
+        for(size_t j = 0; j < BR_ASIZE(rt_expected_blank); ++j) {
+            if(strcmp(rt_expected_blank[j].scene, r->scene) != 0)
+                continue;
+
+            if(rt_expected_blank[j].pm_type != RT_ANY_TYPE && rt_expected_blank[j].pm_type != st->pm_type)
+                continue;
+
+            if(rt_expected_blank[j].mode != RT_ANY_MODE && rt_expected_blank[j].mode != (st->no_depth ? RT_MODE_ZS : RT_MODE_ZB))
+                continue;
+
+            if(rt_expected_blank[j].device != NULL && strcmp(rt_expected_blank[j].device, st->device) != 0)
+                continue;
+
+            expected = BR_TRUE;
+            break;
+        }
+
+        if(expected || r->coverage != 0) {
+            continue;
+        }
+
+        printf("RT blank %s drew nothing of %u px where the fixture must draw\n", r->scene, r->total);
+        ++st->failures;
+    }
 }
 
 static void rt_check_relations(rt_state *st)
@@ -973,6 +1058,7 @@ static void rt_render(br_demo *demo)
     ++st->scene_index;
 
     if(st->scene_index >= st->nscenes) {
+        rt_check_drawn(st);
         rt_check_relations(st);
 
         if(st->bless)
