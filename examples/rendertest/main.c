@@ -1017,6 +1017,16 @@ typedef struct rt_relation {
 #define RT_MODE_ZS  1
 
 /*
+ * An MMX-family relation. The MMX rasterisers only exist for the 555 and 565
+ * outputs, so the same pair has to be asserted at both types - and neither of
+ * the other two depths, where the family's flags have no block to select and
+ * the frames agree for reasons that say nothing about the kernel.
+ */
+#define RT_MMX_NE(a_, b_) \
+    {.a = a_, .b = b_, .equal = BR_FALSE, .pm_type = BR_PMT_RGB_555, .mode = RT_MODE_ZB, .device = "softrend"}, \
+        {.a = a_, .b = b_, .equal = BR_FALSE, .pm_type = BR_PMT_RGB_565, .mode = RT_MODE_ZB, .device = "softrend"}
+
+/*
  * The lighting fixtures. Each pair differs by one property of one light -
  * whether it hits, how far it reaches, whether it is directional, ambient-only
  * or view-space - so a light path that stops applying one fails here rather
@@ -1070,6 +1080,33 @@ static const rt_relation rt_relations[] = {
     {.a = "scene-fog",            .b = "scene-smooth",           .equal = BR_FALSE, .pm_type = BR_PMT_INDEX_8, .mode = RT_MODE_ZB},
     {.a = "scene-blend",          .b = "scene-blend-off",        .equal = BR_FALSE, .pm_type = BR_PMT_INDEX_8, .mode = RT_MODE_ZB},
     {.a = "scene-dither",         .b = "scene-persp",            .equal = BR_FALSE, .pm_type = BR_PMT_INDEX_8, .mode = RT_ANY_MODE},
+
+    /*
+     * The MMX family. Every pair differs by exactly one property of one cube:
+     * the perspective flag, the smoothing flag, or one of the two ROP flags
+     * (`BR_MATF_DITHER`, opacity below full). A kernel that stops firing, or
+     * that is selected by the wrong twin, moves one of these frames.
+     */
+    RT_MMX_NE("scene-mmx-uv-dither-persp", "scene-mmx-uv-dither-affine"),
+    RT_MMX_NE("scene-mmx-uv-screen-persp", "scene-mmx-uv-screen-affine"),
+    RT_MMX_NE("scene-mmx-uv-ditherscreen-persp", "scene-mmx-uv-ditherscreen-affine"),
+    RT_MMX_NE("scene-mmx-uvc-dither-persp", "scene-mmx-uvc-dither-affine"),
+    RT_MMX_NE("scene-mmx-uvc-screen-persp", "scene-mmx-uvc-screen-affine"),
+    RT_MMX_NE("scene-mmx-uvc-ditherscreen-persp", "scene-mmx-uvc-ditherscreen-affine"),
+
+    RT_MMX_NE("scene-mmx-rgb-dither-smooth", "scene-mmx-rgb-dither-flat"),
+    RT_MMX_NE("scene-mmx-rgb-ditherscreen-smooth", "scene-mmx-rgb-ditherscreen-flat"),
+
+    RT_MMX_NE("scene-mmx-rgb-dither-flat", "scene-mmx-rgb-screen-flat"),
+    RT_MMX_NE("scene-mmx-rgb-ditherscreen-flat", "scene-mmx-rgb-dither-flat"),
+    RT_MMX_NE("scene-mmx-uv-dither-affine", "scene-mmx-uv-screen-affine"),
+    RT_MMX_NE("scene-mmx-uv-dither-affine", "scene-mmx-uv-ditherscreen-affine"),
+    RT_MMX_NE("scene-mmx-uvc-dither-affine", "scene-mmx-uvc-ditherscreen-affine"),
+    RT_MMX_NE("scene-mmx-uvc-screen-affine", "scene-mmx-uvc-ditherscreen-affine"),
+    RT_MMX_NE("scene-mmx-uvc-dither-persp", "scene-mmx-uvc-ditherscreen-persp"),
+    RT_MMX_NE("scene-mmx-uvc-screen-persp", "scene-mmx-uvc-ditherscreen-persp"),
+    RT_MMX_NE("scene-mmx-uvrgb-dither-affine", "scene-mmx-uvrgb-ditherscreen-affine"),
+    RT_MMX_NE("scene-mmx-uvrgb-screen-persp", "scene-mmx-uvrgb-ditherscreen-persp"),
 };
 
 static rt_result *rt_find_result(rt_state *st, const char *scene)
@@ -1460,6 +1497,30 @@ static const char *const rt_default_scenes[] = {
     "scene-tex-arb",    "scene-shade",     "scene-decal",          "scene-fog",         "scene-blend",           "scene-dither",
     "scene-alpha",
     "scene-blend-off",
+
+    /*
+     * The MMX 555/565 family. pentprim walks the MMX table before the general
+     * one, and its sixteen kernel names cover dithered, screendoor and
+     * dithered-screendoor twins of the textured, flat, gouraud and untextured
+     * blocks - seven of which had no witness anywhere in the tree. One scene
+     * per cube state, so that a frame names the one state that moved it: a
+     * scene can carry several materials - each cube's actor material
+     * round-trips through cgltf_node::brender_material - but then its one
+     * checksum would say only that one of the cubes changed. See scene.c.
+     */
+    "scene-mmx-rgb-dither-smooth",        "scene-mmx-rgb-dither-flat",        "scene-mmx-rgb-screen-flat",
+    "scene-mmx-rgb-ditherscreen-smooth",  "scene-mmx-rgb-ditherscreen-flat",
+
+    "scene-mmx-uv-dither-persp",          "scene-mmx-uv-dither-affine",
+    "scene-mmx-uv-screen-persp",          "scene-mmx-uv-screen-affine",
+    "scene-mmx-uv-ditherscreen-persp",    "scene-mmx-uv-ditherscreen-affine",
+
+    "scene-mmx-uvc-persp",                "scene-mmx-uvc-dither-persp",        "scene-mmx-uvc-dither-affine",
+    "scene-mmx-uvc-screen-persp",         "scene-mmx-uvc-screen-affine",
+    "scene-mmx-uvc-ditherscreen-persp",   "scene-mmx-uvc-ditherscreen-affine",
+
+    "scene-mmx-uvrgb-dither-affine",      "scene-mmx-uvrgb-screen-persp",
+    "scene-mmx-uvrgb-ditherscreen-persp", "scene-mmx-uvrgb-ditherscreen-affine",
 };
 
 /* The default set has to fit: rt_init() copies it into an RT_MAX_SCENES array. */

@@ -717,6 +717,135 @@ static void scene_fx_add_cube(br_actor *world, br_model *cube, br_material *mat,
 }
 
 /*
+ * ------------------------------------------------------------------
+ * The MMX fixture family.
+ *
+ * pentprim walks the MMX 555/565 table before the general one, and that table
+ * carries a family the corpus never reaches: the dithered, screendoor and
+ * dithered-screendoor twins of the textured, flat, gouraud and untextured
+ * blocks.
+ *
+ * Three properties of the family force the design:
+ *
+ *  - The screendoor level is the material alpha byte (`UNPACK_SCREENDOOR_ALPHA`,
+ *    `_c >> 28`). At the default opacity 255 that byte is zero, the mask row is
+ *    sixteen zero words, and the kernel is entered and writes nothing - so every
+ *    screendoor cube carries an opacity below 255.
+ *  - The untextured blocks match only when no colour map is bound, and the
+ *    texture-only ones only when the material does not modulate - which means
+ *    unlit *and* white, because BRT_MODULATE_B is set by the material colour as
+ *    well as by BR_MATF_LIGHT.
+ *  - Each flat/gouraud pair differs by BR_MATF_SMOOTH alone, and each
+ *    affine/perspective pair by BR_MATF_PERSPECTIVE alone.
+ *
+ * One scene per cube state, not one scene holding several: a scene has one
+ * checksum, so a scene of four states says only that one of the four changed.
+ *
+ * The cube, turn, lights and camera are the existing single-cube rig
+ * (`scene_fx_world`), so the constraints the older feature fixtures carry are
+ * inherited unchanged.
+ */
+
+/*
+ * How far below full opacity a screendoor material is set. The level is the top
+ * nibble of the material alpha byte, quantised into the mask rows, and any
+ * value in 1..254 draws; 128 gives a half-density frame that is unmistakably
+ * not the blank one 255 produces.
+ */
+#define SCENE_MMX_OPACITY 128
+
+#define SCENE_MMX_GREY BR_COLOUR_RGB(200, 200, 200)
+#define SCENE_MMX_WHITE BR_COLOUR_RGB(255, 255, 255)
+
+/*
+ * One cube state. `flags` is the material's whole BR_MATF_* set; the screendoor
+ * family is the only one whose `opacity` is not 255, and `textured` selects
+ * whether a colour map is bound - the untextured blocks match only when none is.
+ */
+typedef struct scene_mmx_fixture {
+    const char *name;
+    br_uint_32  flags;
+    br_colour   colour;
+    br_uint_8   opacity;
+    br_boolean  textured;
+} scene_mmx_fixture;
+
+/*
+ * The MMX kernel family, grouped by shading: untextured, texture-only, flat
+ * coloured, gouraud. Within a group each state is a `_D` (dithered), `_S`
+ * (screendoor) or `_SD` (both) variant, and the textured groups add the
+ * affine/perspective split. The scene names spell the groups `rgb` (untextured),
+ * `uv` (texture-only), `uvc` (flat-coloured) and `uvrgb` (gouraud).
+ */
+static const scene_mmx_fixture scene_mmx_fixtures[] = {
+    /* Untextured: no map at all. */
+    {.name = "scene-mmx-rgb-dither-smooth", .flags = BR_MATF_LIGHT | BR_MATF_SMOOTH | BR_MATF_DITHER, .colour = SCENE_MMX_GREY, .opacity = 255, .textured = BR_FALSE},
+    {.name = "scene-mmx-rgb-dither-flat", .flags = BR_MATF_LIGHT | BR_MATF_DITHER, .colour = SCENE_MMX_GREY, .opacity = 255, .textured = BR_FALSE},
+    {.name = "scene-mmx-rgb-screen-flat", .flags = BR_MATF_LIGHT, .colour = SCENE_MMX_GREY, .opacity = SCENE_MMX_OPACITY, .textured = BR_FALSE},
+    {.name = "scene-mmx-rgb-ditherscreen-smooth", .flags = BR_MATF_LIGHT | BR_MATF_SMOOTH | BR_MATF_DITHER, .colour = SCENE_MMX_GREY, .opacity = SCENE_MMX_OPACITY, .textured = BR_FALSE},
+    {.name = "scene-mmx-rgb-ditherscreen-flat", .flags = BR_MATF_LIGHT | BR_MATF_DITHER, .colour = SCENE_MMX_GREY, .opacity = SCENE_MMX_OPACITY, .textured = BR_FALSE},
+
+    /* Texture-only: unlit white, so PRIMF_MODULATE is clear. */
+    {.name = "scene-mmx-uv-dither-persp", .flags = BR_MATF_PERSPECTIVE | BR_MATF_DITHER, .colour = SCENE_MMX_WHITE, .opacity = 255, .textured = BR_TRUE},
+    {.name = "scene-mmx-uv-dither-affine", .flags = BR_MATF_DITHER, .colour = SCENE_MMX_WHITE, .opacity = 255, .textured = BR_TRUE},
+    {.name = "scene-mmx-uv-screen-persp", .flags = BR_MATF_PERSPECTIVE, .colour = SCENE_MMX_WHITE, .opacity = SCENE_MMX_OPACITY, .textured = BR_TRUE},
+    {.name = "scene-mmx-uv-screen-affine", .flags = 0, .colour = SCENE_MMX_WHITE, .opacity = SCENE_MMX_OPACITY, .textured = BR_TRUE},
+    {.name = "scene-mmx-uv-ditherscreen-persp", .flags = BR_MATF_PERSPECTIVE | BR_MATF_DITHER, .colour = SCENE_MMX_WHITE, .opacity = SCENE_MMX_OPACITY, .textured = BR_TRUE},
+    {.name = "scene-mmx-uv-ditherscreen-affine", .flags = BR_MATF_DITHER, .colour = SCENE_MMX_WHITE, .opacity = SCENE_MMX_OPACITY, .textured = BR_TRUE},
+
+    /* Flat-coloured texture. */
+    {.name = "scene-mmx-uvc-persp", .flags = BR_MATF_LIGHT | BR_MATF_PERSPECTIVE, .colour = SCENE_MMX_GREY, .opacity = 255, .textured = BR_TRUE},
+    {.name = "scene-mmx-uvc-dither-persp", .flags = BR_MATF_LIGHT | BR_MATF_PERSPECTIVE | BR_MATF_DITHER, .colour = SCENE_MMX_GREY, .opacity = 255, .textured = BR_TRUE},
+    {.name = "scene-mmx-uvc-dither-affine", .flags = BR_MATF_LIGHT | BR_MATF_DITHER, .colour = SCENE_MMX_GREY, .opacity = 255, .textured = BR_TRUE},
+    {.name = "scene-mmx-uvc-screen-persp", .flags = BR_MATF_LIGHT | BR_MATF_PERSPECTIVE, .colour = SCENE_MMX_GREY, .opacity = SCENE_MMX_OPACITY, .textured = BR_TRUE},
+    {.name = "scene-mmx-uvc-screen-affine", .flags = BR_MATF_LIGHT, .colour = SCENE_MMX_GREY, .opacity = SCENE_MMX_OPACITY, .textured = BR_TRUE},
+    {.name = "scene-mmx-uvc-ditherscreen-persp", .flags = BR_MATF_LIGHT | BR_MATF_PERSPECTIVE | BR_MATF_DITHER, .colour = SCENE_MMX_GREY, .opacity = SCENE_MMX_OPACITY, .textured = BR_TRUE},
+    {.name = "scene-mmx-uvc-ditherscreen-affine", .flags = BR_MATF_LIGHT | BR_MATF_DITHER, .colour = SCENE_MMX_GREY, .opacity = SCENE_MMX_OPACITY, .textured = BR_TRUE},
+
+    /* Gouraud-textured. */
+    {.name = "scene-mmx-uvrgb-dither-affine", .flags = BR_MATF_LIGHT | BR_MATF_SMOOTH | BR_MATF_DITHER, .colour = SCENE_MMX_GREY, .opacity = 255, .textured = BR_TRUE},
+    {.name = "scene-mmx-uvrgb-screen-persp", .flags = BR_MATF_LIGHT | BR_MATF_SMOOTH | BR_MATF_PERSPECTIVE, .colour = SCENE_MMX_GREY, .opacity = SCENE_MMX_OPACITY, .textured = BR_TRUE},
+    {.name = "scene-mmx-uvrgb-ditherscreen-persp", .flags = BR_MATF_LIGHT | BR_MATF_SMOOTH | BR_MATF_PERSPECTIVE | BR_MATF_DITHER, .colour = SCENE_MMX_GREY, .opacity = SCENE_MMX_OPACITY, .textured = BR_TRUE},
+    {.name = "scene-mmx-uvrgb-ditherscreen-affine", .flags = BR_MATF_LIGHT | BR_MATF_SMOOTH | BR_MATF_DITHER, .colour = SCENE_MMX_GREY, .opacity = SCENE_MMX_OPACITY, .textured = BR_TRUE},
+};
+
+static br_error scene_make_mmx_fixtures(br_model *cube)
+{
+    br_pixelmap *map;
+    br_error     r = BRE_OK;
+
+    if((map = scene_texture("scene-mmx-map", SCENE_TEX_SIZE, SCENE_TEX_SIZE, SCENE_TEX_CELLS)) == NULL) {
+        fprintf(stderr, "failed to allocate the mmx fixture map\n");
+        return BRE_FAIL;
+    }
+
+    for(size_t i = 0; i < BR_ASIZE(scene_mmx_fixtures); ++i) {
+        const scene_mmx_fixture *fx  = &scene_mmx_fixtures[i];
+        char                     mat[128];
+        char                     gltf[128];
+        br_material             *m;
+        br_actor                *world;
+
+        snprintf(mat, sizeof(mat), "%s-material", fx->name);
+        snprintf(gltf, sizeof(gltf), "%s.gltf", fx->name);
+
+        if((m = scene_material_ex(mat, fx->colour, fx->flags, BR_SCALAR(0.1), BR_SCALAR(0.7), BR_SCALAR(0.0),
+                                  BR_SCALAR(20.0))) == NULL)
+            return BRE_FAIL;
+
+        m->index_base  = SCENE_FX_BASE;
+        m->index_range = SCENE_FX_RANGE;
+        m->opacity     = fx->opacity;
+        m->colour_map  = fx->textured ? map : NULL;
+
+        if((world = scene_fx_world(cube, m)) == NULL || scene_save(gltf, world) != BRE_OK)
+            r = BRE_FAIL;
+    }
+
+    return r;
+}
+
+/*
  * The render-feature fixtures. `cube` is the model built by mkres_make_cube(),
  * which has both per-face map coordinates in 0..1 and a per-face normal.
  */
@@ -1154,6 +1283,9 @@ br_error mkres_make_scenes(void)
     }
 
     if(scene_make_feature_fixtures(cube) != BRE_OK)
+        r = BRE_FAIL;
+
+    if(scene_make_mmx_fixtures(cube) != BRE_OK)
         r = BRE_FAIL;
 
     return r;
