@@ -1042,6 +1042,34 @@ static const rt_relation rt_relations[] = {
     {.a = "scene-scale-spot",     .b = "scene-scale-spot-off",   .equal = BR_FALSE, .pm_type = RT_ANY_TYPE, .mode = RT_ANY_MODE},
     /* The negative control: an unlit material ignores lights entirely. */
     {.a = "scene-unlit",          .b = "scene-unlit-plain",      .equal = BR_TRUE,  .pm_type = RT_ANY_TYPE, .mode = RT_ANY_MODE},
+
+    /*
+     * The render-feature fixtures. Each pair differs by one piece of material
+     * state, so a path that silently stops firing fails here rather than only
+     * moving a checksum - which for state the renderer ignores looks like a
+     * perfectly good frame.
+     *
+     * scene-persp and scene-tex-arb are pinned to RT_MODE_ZB, and the pin is a
+     * measurement rather than a default: in the Z-sort mode at 555 and 565 the
+     * frames each names are identical to scene-textured's (measured at both
+     * types), so the premise
+     * each asserts - that the perspective flag and the arbitrary-UV flag reach
+     * the rasteriser - is false in that mode. Waking either would fail for a
+     * reason that has nothing to do with the renderer. Every other pair in the
+     * block holds in both modes and is asserted at RT_ANY_MODE.
+     */
+    {.a = "scene-smooth",         .b = "scene-flat",             .equal = BR_FALSE, .pm_type = RT_ANY_TYPE, .mode = RT_ANY_MODE,
+     .device = "softrend"},
+    {.a = "scene-textured-shade", .b = "scene-textured",         .equal = BR_FALSE, .pm_type = BR_PMT_INDEX_8, .mode = RT_MODE_ZB},
+    {.a = "scene-persp",          .b = "scene-textured",         .equal = BR_FALSE, .pm_type = RT_ANY_TYPE, .mode = RT_MODE_ZB,
+     .device = "softrend"},
+    {.a = "scene-persp-shade",    .b = "scene-persp",            .equal = BR_FALSE, .pm_type = BR_PMT_INDEX_8, .mode = RT_MODE_ZB},
+    {.a = "scene-tex-arb",        .b = "scene-textured",         .equal = BR_FALSE, .pm_type = RT_ANY_TYPE, .mode = RT_MODE_ZB},
+    {.a = "scene-shade",          .b = "scene-smooth",           .equal = BR_FALSE, .pm_type = BR_PMT_INDEX_8, .mode = RT_MODE_ZB},
+    {.a = "scene-decal",          .b = "scene-textured-shade",   .equal = BR_FALSE, .pm_type = BR_PMT_INDEX_8, .mode = RT_ANY_MODE},
+    {.a = "scene-fog",            .b = "scene-smooth",           .equal = BR_FALSE, .pm_type = BR_PMT_INDEX_8, .mode = RT_MODE_ZB},
+    {.a = "scene-blend",          .b = "scene-blend-off",        .equal = BR_FALSE, .pm_type = BR_PMT_INDEX_8, .mode = RT_MODE_ZB},
+    {.a = "scene-dither",         .b = "scene-persp",            .equal = BR_FALSE, .pm_type = BR_PMT_INDEX_8, .mode = RT_ANY_MODE},
 };
 
 static rt_result *rt_find_result(rt_state *st, const char *scene)
@@ -1096,6 +1124,22 @@ static const rt_blank rt_expected_blank[] = {
     {.scene = "scene-radius-far",        .pm_type = BR_PMT_RGB_555, .mode = RT_ANY_MODE},
     {.scene = "scene-directional-miss",  .pm_type = BR_PMT_RGB_555, .mode = RT_ANY_MODE},
     {.scene = "scene-scale-spot-off",    .pm_type = BR_PMT_RGB_555, .mode = RT_ANY_MODE},
+
+    /*
+     * The blend fixture has no RGB blend block to select: pentprim draws
+     * nothing for it at 15/16bpp z-buffered, and its stored reference is the
+     * empty frame. The 8bpp configurations are not here - pentprim draws the
+     * fixture there, so a blank frame is a failure.
+     */
+    {.scene = "scene-blend",             .pm_type = BR_PMT_RGB_555, .mode = RT_MODE_ZB},
+    {.scene = "scene-blend",             .pm_type = BR_PMT_RGB_565, .mode = RT_MODE_ZB},
+
+    /*
+     * pentprim draws nothing for the shade fixture in the Z-sort mode either -
+     * no z-sorted block carries an indexed shade table - so the 8bpp z-sorted
+     * key is two blank frames matching.
+     */
+    {.scene = "scene-shade",             .pm_type = BR_PMT_INDEX_8, .mode = RT_MODE_ZS},
 };
 
 static void rt_check_drawn(rt_state *st)
@@ -1137,6 +1181,15 @@ static void rt_check_relations(rt_state *st)
         rt_result *b = rt_find_result(st, rt_relations[i].b);
 
         if(a == NULL || b == NULL)
+            continue;
+
+        if(rt_relations[i].pm_type != RT_ANY_TYPE && rt_relations[i].pm_type != st->pm_type)
+            continue;
+
+        if(rt_relations[i].mode != RT_ANY_MODE && rt_relations[i].mode != (st->no_depth ? RT_MODE_ZS : RT_MODE_ZB))
+            continue;
+
+        if(rt_relations[i].device != NULL && strcmp(rt_relations[i].device, st->device) != 0)
             continue;
 
         br_boolean same = (a->hash == b->hash);
@@ -1401,6 +1454,12 @@ static const char *const rt_default_scenes[] = {
     "scene-spot-hit",   "scene-spot-miss", "scene-spot-hit-miss",  "scene-radius-near", "scene-radius-far",      "scene-scaled",
     "scene-view-space", "scene-colour",    "scene-colour-ambient", "scene-colour-two",  "scene-directional",     "scene-directional-miss",
     "scene-specular",   "scene-unlit",     "scene-unlit-plain",    "scene-scale-spot",  "scene-scale-direction", "scene-scale-spot-off",
+
+    /* The render-feature fixtures; see scene.c. */
+    "scene-flat",       "scene-smooth",    "scene-textured",       "scene-textured-shade", "scene-persp",        "scene-persp-shade",
+    "scene-tex-arb",    "scene-shade",     "scene-decal",          "scene-fog",         "scene-blend",           "scene-dither",
+    "scene-alpha",
+    "scene-blend-off",
 };
 
 /* The default set has to fit: rt_init() copies it into an RT_MAX_SCENES array. */
