@@ -66,8 +66,7 @@ drawPixel:
 	mov al,[esi+eax] 
 	mov esi,workspace.shadeTable
 
-;	and eax,0ffh
-	test al,al
+	and eax,0ffh
 	jz noPlot
 	
 	mov al,[esi+eax]
