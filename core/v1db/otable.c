@@ -16,9 +16,6 @@
  */
 #define MINIMUM_RANGE 0.001
 
-/*
- * Allocate an order table
- */
 br_order_table *BR_PUBLIC_ENTRY BrZsOrderTableAllocate(br_uint_16 size, br_uint_32 flags, br_uint_16 type)
 {
     br_order_table *order_table;
@@ -51,9 +48,6 @@ br_order_table *BR_PUBLIC_ENTRY BrZsOrderTableAllocate(br_uint_16 size, br_uint_
     return order_table;
 }
 
-/*
- * Free an order table
- */
 void BR_PUBLIC_ENTRY BrZsOrderTableFree(br_order_table *order_table)
 {
     UASSERT_MESSAGE("BrZsOrderTableFree NULL pointer to an order table", order_table != NULL);
@@ -61,9 +55,6 @@ void BR_PUBLIC_ENTRY BrZsOrderTableFree(br_order_table *order_table)
     BrResFree(order_table);
 }
 
-/*
- * Set an actor's order table
- */
 br_order_table *BR_PUBLIC_ENTRY BrZsActorOrderTableSet(br_actor *actor, br_order_table *order_table)
 {
     UASSERT(actor != NULL);
@@ -73,9 +64,6 @@ br_order_table *BR_PUBLIC_ENTRY BrZsActorOrderTableSet(br_actor *actor, br_order
     return order_table;
 }
 
-/*
- * Get a pointer to an actor's order table
- */
 br_order_table *BR_PUBLIC_ENTRY BrZsActorOrderTableGet(br_actor *actor)
 {
     UASSERT(actor != NULL);
@@ -83,9 +71,6 @@ br_order_table *BR_PUBLIC_ENTRY BrZsActorOrderTableGet(br_actor *actor)
     return (br_order_table *)actor->render_data;
 }
 
-/*
- * Clear an order table
- */
 br_order_table *BR_PUBLIC_ENTRY BrZsOrderTableClear(br_order_table *order_table)
 {
     UASSERT(order_table != NULL);
@@ -144,9 +129,6 @@ static void InsertSortOrderTablePrimitive(br_primitive **bucket, br_primitive *p
     ASSERT(*bucket != NULL);
 }
 
-/*
- * Insert a primitive into an order table
- */
 void BR_PUBLIC_ENTRY BrZsOrderTablePrimitiveInsert(br_order_table *order_table, br_primitive *primitive, br_uint_16 bucket)
 {
     UASSERT(primitive != NULL);
@@ -161,9 +143,6 @@ void BR_PUBLIC_ENTRY BrZsOrderTablePrimitiveInsert(br_order_table *order_table, 
     }
 }
 
-/*
- * Select a bucket, given vertices, bounds, size and sort type
- */
 br_uint_16 BR_PUBLIC_ENTRY BrZsPrimitiveBucketSelect(br_scalar *z, br_uint_16 type, br_scalar min_z, br_scalar max_z, br_uint_16 size,
                                                      br_uint_16 sort_type)
 {
@@ -214,9 +193,6 @@ br_uint_16 BR_PUBLIC_ENTRY BrZsPrimitiveBucketSelect(br_scalar *z, br_uint_16 ty
     return bucket;
 }
 
-/*
- * Enable the primary order table
- */
 void BR_PUBLIC_ENTRY BrZsOrderTablePrimaryEnable(br_order_table *order_table)
 {
     if(order_table)
@@ -225,9 +201,6 @@ void BR_PUBLIC_ENTRY BrZsOrderTablePrimaryEnable(br_order_table *order_table)
         v1db.primary_order_table = v1db.default_order_table;
 }
 
-/*
- * Disable the primary order table
- */
 void BR_PUBLIC_ENTRY BrZsOrderTablePrimaryDisable(void)
 {
     v1db.primary_order_table = NULL;

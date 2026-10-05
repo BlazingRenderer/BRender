@@ -15,9 +15,6 @@
 #include "shortcut.h"
 #include "brassert.h"
 
-/*
- * A = B
- */
 void BR_PUBLIC_ENTRY BrMatrix23Copy(br_matrix23 *A, const br_matrix23 *B)
 {
     UASSERT_MESSAGE("Destination matrix is NULL", A != NULL);
@@ -33,9 +30,6 @@ void BR_PUBLIC_ENTRY BrMatrix23Copy(br_matrix23 *A, const br_matrix23 *B)
     A(2, 1) = B(2, 1);
 }
 
-/*
- * A = B*C
- */
 void BR_PUBLIC_ENTRY BrMatrix23Mul(br_matrix23 *A, const br_matrix23 *B, const br_matrix23 *C)
 {
     UASSERT_MESSAGE("Destination matrix is NULL", A != NULL);
@@ -212,9 +206,6 @@ br_scalar BR_PUBLIC_ENTRY BrMatrix23Inverse(br_matrix23 *B, const br_matrix23 *A
     return det;
 }
 
-/*
- * Invert a length preserving matrix
- */
 void BR_PUBLIC_ENTRY BrMatrix23LPInverse(br_matrix23 *B, const br_matrix23 *A)
 {
     UASSERT_MESSAGE("Destination matrix is NULL", A != NULL);
@@ -242,9 +233,6 @@ void BR_PUBLIC_ENTRY BrMatrix23LPNormalise(br_matrix23 *A, const br_matrix23 *B)
     A(2, 1) = B(2, 1);
 }
 
-/*
- * [a b ] = [ e f ] . M
- */
 void BR_PUBLIC_ENTRY BrMatrix23ApplyP(br_vector2 *A, const br_vector2 *B, const br_matrix23 *C)
 {
     UASSERT_MESSAGE("Destination vector is NULL", A != NULL);
@@ -256,9 +244,6 @@ void BR_PUBLIC_ENTRY BrMatrix23ApplyP(br_vector2 *A, const br_vector2 *B, const 
     A->v[1] = BR_MAC2(B->v[0], C(0, 1), B->v[1], C(1, 1)) + C(2, 1);
 }
 
-/*
- * [a b c] = [ e f 0 ] . M
- */
 void BR_PUBLIC_ENTRY BrMatrix23ApplyV(br_vector2 *A, const br_vector2 *B, const br_matrix23 *C)
 {
     UASSERT_MESSAGE("Destination vector is NULL", A != NULL);
@@ -270,9 +255,6 @@ void BR_PUBLIC_ENTRY BrMatrix23ApplyV(br_vector2 *A, const br_vector2 *B, const 
     A->v[1] = BR_MAC2(B->v[0], C(0, 1), B->v[1], C(1, 1));
 }
 
-/*
- * [a b] = [ e f] . transpose(M)
- */
 void BR_PUBLIC_ENTRY BrMatrix23TApplyP(br_vector2 *A, const br_vector2 *B, const br_matrix23 *C)
 {
     UASSERT_MESSAGE("Destination vector is NULL", A != NULL);
@@ -284,9 +266,6 @@ void BR_PUBLIC_ENTRY BrMatrix23TApplyP(br_vector2 *A, const br_vector2 *B, const
     A->v[1] = BR_MAC2(B->v[0], C(1, 0), B->v[1], C(1, 1));
 }
 
-/*
- * [a b c] = [ e f 0 ] . transpose(M)
- */
 void BR_PUBLIC_ENTRY BrMatrix23TApplyV(br_vector2 *A, const br_vector2 *B, const br_matrix23 *C)
 {
     UASSERT_MESSAGE("Destination vector is NULL", A != NULL);
@@ -298,10 +277,6 @@ void BR_PUBLIC_ENTRY BrMatrix23TApplyV(br_vector2 *A, const br_vector2 *B, const
     A->v[1] = BR_MAC2(B->v[0], C(1, 0), B->v[1], C(1, 1));
 }
 
-/*
- * Composite matrix operations -
- * pre and post-multiply with an existing matrix
- */
 
 void BR_PUBLIC_ENTRY BrMatrix23Pre(br_matrix23 *mat, const br_matrix23 *A)
 {

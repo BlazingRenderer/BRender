@@ -147,9 +147,6 @@ void BR_PUBLIC_ENTRY BrMatrix4PreTransform(br_matrix4 *mat, const br_transform *
     BrMatrix4Pre34(mat, &tmp);
 }
 
-/*
- * Convert a 3x4 into a transform
- */
 void BR_PUBLIC_ENTRY BrMatrix34ToTransform(br_transform *xform, const br_matrix34 *mat)
 {
     UASSERT_MESSAGE("Source matrix is NULL", mat != NULL);
@@ -214,12 +211,6 @@ void BR_PUBLIC_ENTRY BrMatrix34ToTransform(br_transform *xform, const br_matrix3
     }
 }
 
-/*
- * Copy the source transform into the destination
- *
- * The destination type is retained. The operation tries
- * to keep as much information about the transform as possible
- */
 void BR_PUBLIC_ENTRY BrTransformToTransform(br_transform *dest, const br_transform *src)
 {
     br_matrix34 temp;

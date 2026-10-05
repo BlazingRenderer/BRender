@@ -2236,11 +2236,6 @@ static br_uint_32 BR_CALLBACK WriteModel(br_model *mp, br_datafile *df)
     return 0;
 }
 
-/*
- * Save a set of models to the named file.
- *
- * if models == NULL, then all registered models are saved
- */
 br_uint_32 BR_PUBLIC_ENTRY BrModelSaveMany(const char *filename, br_model **models, br_uint_16 num)
 {
     br_datafile *df;
@@ -2431,9 +2426,6 @@ static int WriteActor(br_actor *a, br_datafile *df)
     return 0;
 }
 
-/*
- * Save a set of actors to the named file.
- */
 br_uint_32 BR_PUBLIC_ENTRY BrActorSaveMany(const char *filename, br_actor **actors, br_uint_16 num)
 {
     br_datafile *df;

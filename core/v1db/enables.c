@@ -64,9 +64,6 @@ static void actorDisable(br_v1db_enable *e, br_actor *a)
     }
 }
 
-/*
- * Add a light to the set that will illuminate the world
- */
 void BR_PUBLIC_ENTRY BrLightEnable(br_actor *l)
 {
     UASSERT_MESSAGE("BrLightEnable NULL pointer to a light actor", l != NULL);
@@ -74,9 +71,6 @@ void BR_PUBLIC_ENTRY BrLightEnable(br_actor *l)
     actorEnable(&v1db.enabled_lights, l);
 }
 
-/*
- * Remove a light from the set that will illuminate the world
- */
 void BR_PUBLIC_ENTRY BrLightDisable(br_actor *l)
 {
 
@@ -227,9 +221,6 @@ br_error BR_PUBLIC_ENTRY BrLightModelCull(br_actor *light)
     return BRE_FAIL;
 }
 
-/*
- * Add a clip plane to world
- */
 void BR_PUBLIC_ENTRY BrClipPlaneEnable(br_actor *c)
 {
 
@@ -237,9 +228,6 @@ void BR_PUBLIC_ENTRY BrClipPlaneEnable(br_actor *c)
     actorEnable(&v1db.enabled_clip_planes, c);
 }
 
-/*
- * Remove a clip plane
- */
 void BR_PUBLIC_ENTRY BrClipPlaneDisable(br_actor *c)
 {
 
@@ -269,11 +257,6 @@ void BR_PUBLIC_ENTRY BrHorizonPlaneDisable(br_actor *h)
     actorDisable(&v1db.enabled_horizon_planes, h);
 }
 
-/*
- * Sets the new environment anchor
- *
- * Returns the previous value
- */
 br_actor *BR_PUBLIC_ENTRY BrEnvironmentSet(br_actor *a)
 {
 

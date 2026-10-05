@@ -16,7 +16,17 @@
 
 // br_vector2
 #ifdef __cplusplus
+/**
+ * \brief This is the two ordinate vector structure, typically used for 2D purposes.
+ *
+ * Functions are provided to allow it be used as though it were an integral type.
+ */
 typedef union {
+    /**
+     * \brief First and second ordinate.
+     *
+     * Conventionally, the first ordinate is the x-axis component, and the second, the y axis component.
+     */
     br_scalar v[2];
     struct {
         br_scalar x;
@@ -30,14 +40,37 @@ typedef union {
     };
 } br_vector2;
 #else
+/**
+ * \brief This is the two ordinate vector structure, typically used for 2D purposes.
+ *
+ * Functions are provided to allow it be used as though it were an integral type.
+ */
 typedef struct br_vector2 {
+    /**
+     * \brief First and second ordinate.
+     *
+     * Conventionally, the first ordinate is the x-axis component, and the second, the y axis component.
+     */
     br_scalar v[2];
 } br_vector2;
 #endif
 
 // br_vector3
 #ifdef __cplusplus
+/**
+ * \brief This is the three ordinate vector structure, typically used for 3D calculations.
+ *
+ * Functions are provided to allow it be used as though it were an integral type.
+ */
 typedef union {
+    /**
+     * \brief First, second and third ordinate.
+     *
+     * Conventionally, the first ordinate is the x-axis component, the second, the y axis component, and
+     * the third, the z axis component. Remember that BRender has a right handed co-ordinate system and
+     * so, with the x axis positive to the right, and the y axis positive upwards, the z axis is
+     * therefore positive toward you (typically, the z axis points out of the screen).
+     */
     br_scalar v[3];
     struct {
         br_scalar x, y, z;
@@ -47,14 +80,42 @@ typedef union {
     };
 } br_vector3;
 #else
+/**
+ * \brief This is the three ordinate vector structure, typically used for 3D calculations.
+ *
+ * Functions are provided to allow it be used as though it were an integral type.
+ */
 typedef struct br_vector3 {
+    /**
+     * \brief First, second and third ordinate.
+     *
+     * Conventionally, the first ordinate is the x-axis component, the second, the y axis component, and
+     * the third, the z axis component. Remember that BRender has a right handed co-ordinate system and
+     * so, with the x axis positive to the right, and the y axis positive upwards, the z axis is
+     * therefore positive toward you (typically, the z axis points out of the screen).
+     */
     br_scalar v[3];
 } br_vector3;
 #endif
 
 // br_vector4
 #ifdef __cplusplus
+/**
+ * \brief This is the four ordinate vector structure, typically used to hold homogenous 3D
+ *        co-ordinates.
+ *
+ * Functions are provided to allow it be used as though it were an integral type.
+ */
 typedef union {
+    /**
+     * \brief First, second, third and fourth ordinate.
+     *
+     * Conventionally, the first ordinate is the x-axis component, the second, the y axis component, the
+     * third, the z axis component, and the fourth, the divisor. Remember that BRender has a right
+     * handed co-ordinate system and so, with the x axis positive to the right, and the y axis positive
+     * upwards, the z axis is therefore positive toward you (typically, the z axis points out of the
+     * screen).
+     */
     br_scalar v[4];
     struct {
         br_scalar x, y, z; // homogeneous coordinates
@@ -65,7 +126,22 @@ typedef union {
     };
 } br_vector4;
 #else
+/**
+ * \brief This is the four ordinate vector structure, typically used to hold homogenous 3D
+ *        co-ordinates.
+ *
+ * Functions are provided to allow it be used as though it were an integral type.
+ */
 typedef struct br_vector4 {
+    /**
+     * \brief First, second, third and fourth ordinate.
+     *
+     * Conventionally, the first ordinate is the x-axis component, the second, the y axis component, the
+     * third, the z axis component, and the fourth, the divisor. Remember that BRender has a right
+     * handed co-ordinate system and so, with the x axis positive to the right, and the y axis positive
+     * upwards, the z axis is therefore positive toward you (typically, the z axis points out of the
+     * screen).
+     */
     br_scalar v[4];
 } br_vector4;
 #endif
@@ -166,22 +242,49 @@ typedef struct br_fvector4_x {
     br_fraction_x v[4];
 } br_fvector4_x;
 
-/*
- * General structures for describing an axis aligned bounds
+/**
+ * \brief A data structure describing an axis-aligned bounding box for a model or hierarchy of
+ *        actors.
  */
 typedef struct br_bounds2 {
-    br_vector2 min; /* Minimum corner */
-    br_vector2 max; /* Maximum corner */
+    /**
+     * \brief Co-ordinates of the minimal corner of the bounding box.
+     */
+    br_vector2 min;
+    /**
+     * \brief Co-ordinates of the maximal corner of the bounding box.
+     */
+    br_vector2 max;
 } br_bounds2;
 
+/**
+ * \brief A data structure describing an axis-aligned bounding box for a model or hierarchy of
+ *        actors.
+ */
 typedef struct br_bounds3 {
-    br_vector3 min; /* Minimum corner */
-    br_vector3 max; /* Maximum corner */
+    /**
+     * \brief Co-ordinates of the minimal corner of the bounding box.
+     */
+    br_vector3 min;
+    /**
+     * \brief Co-ordinates of the maximal corner of the bounding box.
+     */
+    br_vector3 max;
 } br_bounds3;
 
+/**
+ * \brief A data structure describing an axis-aligned bounding box for a model or hierarchy of
+ *        actors.
+ */
 typedef struct br_bounds4 {
-    br_vector4 min; /* Minimum corner */
-    br_vector4 max; /* Maximum corner */
+    /**
+     * \brief Co-ordinates of the minimal corner of the bounding box.
+     */
+    br_vector4 min;
+    /**
+     * \brief Co-ordinates of the maximal corner of the bounding box.
+     */
+    br_vector4 max;
 } br_bounds4;
 
 /*

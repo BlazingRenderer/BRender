@@ -313,72 +313,141 @@ enum {
  * A macro that declares the pixelmap member entries - this is so that
  * various compatible structures can be created
  */
-#define BR_PIXELMAP_MEMBERS_PREFIXED(prefix)                              \
-    /*                                                                    \
-     * pointer to raw pixel data                                          \
-     */                                                                   \
-    void *prefix##pixels;                                                 \
-                                                                          \
-    /*                                                                    \
-     * Optional pixel map when pixels are indexed.                        \
-     */                                                                   \
-    struct br_pixelmap *prefix##map;                                      \
-                                                                          \
-    /*                                                                    \
-     * Byte difference between pixels at same column of adjacent rows     \
-     */                                                                   \
-    br_int_16 prefix##row_bytes;                                          \
-                                                                          \
-    /*                                                                    \
-     * if ! 0, offset (in top level rows) from top map start to top-1 map \
-     */                                                                   \
-    br_int_16 prefix##mip_offset;                                         \
-                                                                          \
-    /*                                                                    \
-     * Type of pixels                                                     \
-     */                                                                   \
-    br_uint_8 prefix##type;                                               \
-                                                                          \
-    /*                                                                    \
-     * Flags                                                              \
-     */                                                                   \
-    br_uint_16 prefix##flags;                                             \
-                                                                          \
-    /*                                                                    \
-     * top left visible region in pixels from pixel at 'pixel' pointer    \
-     */                                                                   \
-    br_uint_16 prefix##base_x;                                            \
-    br_uint_16 prefix##base_y;                                            \
-                                                                          \
-    /*                                                                    \
-     * Width and height of bitmap in pixels                               \
-     */                                                                   \
-    br_uint_16 prefix##width;                                             \
-    br_uint_16 prefix##height;                                            \
-                                                                          \
-    /*                                                                    \
-     * Local origin for any graphics system rendering into map, relative  \
-     * to 'base'                                                          \
-     */                                                                   \
-    br_int_16 prefix##origin_x;                                           \
-    br_int_16 prefix##origin_y;                                           \
-                                                                          \
-    /*                                                                    \
-     * Workspace fields for user and database                             \
-     */                                                                   \
-    void *prefix##user;                                                   \
+// clang-format off
+#define BR_PIXELMAP_MEMBERS_PREFIXED(prefix)                                                              \
+    /**                                                                                                   \
+    \brief When pixel data is directly accessible (see flags), this member points to an area of           \
+           memory containing the raw pixel data.                                                          \
+    */                                                                                                    \
+    /**                                                                                                   \
+    It either points to the start of the memory occupied by the pixel map or the last row_bytes of        \
+    it. However, it always points to the byte of the left hand pixel of the 'first' row. For              \
+    instance, in monochrome pixel maps it will point to the byte whose most significant bit               \
+    represents the left hand pixel of the first row. In true colour pixel maps it will point to the       \
+    least significant byte of the colour of the left hand pixel of the first row, which will be the       \
+    blue component in BR_PMT_RGB_888 pixel maps and the alpha component in BR_PMT_RGBA_8888 pixel         \
+    maps.                                                                                                 \
+    */                                                                                                    \
+    void *prefix##pixels;                                                                                 \
+                                                                                                          \
+    /**                                                                                                   \
+    \brief For indexed pixel maps (of type BR_PMT_INDEX_?), this member points to a colour map.           \
+    */                                                                                                    \
+    /**                                                                                                   \
+    This is used to obtain the 'true colour' corresponding to a particular index.                         \
+    */                                                                                                    \
+    struct br_pixelmap *prefix##map;                                                                      \
+                                                                                                          \
+    /**                                                                                                   \
+    \brief This member defines the physical row length of the pixel map in terms of the byte              \
+           difference between pixels in the same column of adjacent rows.                                 \
+    */                                                                                                    \
+    /**                                                                                                   \
+    It will be negative if the pixel map memory is inverted.                                              \
+    */                                                                                                    \
+    br_int_16 prefix##row_bytes;                                                                          \
+                                                                                                          \
+    /*                                                                                                    \
+     * if ! 0, offset (in top level rows) from top map start to top-1 map                                 \
+     */                                                                                                   \
+    br_int_16 prefix##mip_offset;                                                                         \
+                                                                                                          \
+    /**                                                                                                   \
+    \brief This member defines the type of data stored for each pixel in the pixel map.                   \
+    */                                                                                                    \
+    /**                                                                                                   \
+    The various types have values defined by the following symbols; each symbol's entry on the            \
+    enumeration gives its 32 bit pixel value encoding and the first four bytes of the left hand           \
+    pixel. Values are written with the most significant bit to the left, and the encoding is the          \
+    32 bit value to be supplied as colour to functions such as BrPixelmapPixelSet(). The dots             \
+    represent further pixels.                                                                             \
+    */                                                                                                    \
+    /**                                                                                                   \
+    <br> <br>                                                                                             \
+    */                                                                                                    \
+    /**                                                                                                   \
+    The ordering of bytes pixel maps is independent of word byte order, except in the case of             \
+    depth buffers, in which pixels are read and written as 32 bit values. This means that in a            \
+    16 bit depth buffer the least significant 16 bits are lost. Note, with respect to pixel maps          \
+    used as textures, that zero pixels (irrespective of any palette information) are not rendered,        \
+    and so have the effect of transparency. This only applies to textures and not to pixel map            \
+    operations such as BrPixelmapCopy().                                                                  \
+    */                                                                                                    \
+    /**                                                                                                   \
+    \li \ref BR_PMT_INDEX_1 — 1 bit index into a colour map (2 colours)                                   \
+    \li \ref BR_PMT_INDEX_2 — 2 bit index into a colour map (4 colours)                                   \
+    \li \ref BR_PMT_INDEX_4 — 4 bit index into a colour map (16 colours)                                  \
+    \li \ref BR_PMT_INDEX_8 — 8 bit index into a colour map (256 colours)                                 \
+    \li \ref BR_PMT_RGB_555 — 16 bit 'true colour' RGB, 5 bits each colour                                \
+    \li \ref BR_PMT_RGB_565 — 16 bit 'true colour' RGB, 5 bits red and blue, 6 bits green                 \
+    \li \ref BR_PMT_RGB_888 — 24 bit 'true colour' RGB, 8 bits each colour                                \
+    \li \ref BR_PMT_RGBX_888 — 32 bit 'true colour' RGB, 8 bits each colour, 8 bits unused                \
+    \li \ref BR_PMT_RGBA_8888 — 32 bit 'true colour' RGB, 8 bits each colour with an 8 bit alpha channel  \
+    \li \ref BR_PMT_DEPTH_16 — The pixel map is used as a depth buffer with 16 bit precision              \
+    \li \ref BR_PMT_DEPTH_32 — The pixel map is used as a depth buffer with 32 bit precision              \
+    */                                                                                                    \
+    br_uint_8 prefix##type;                                                                               \
+                                                                                                          \
+    /**                                                                                                   \
+    \brief This is a read-only member, set upon allocation, that contains various flag values.            \
+    */                                                                                                    \
+    /**                                                                                                   \
+    One of the flags that may be useful is BR_PMF_NO_ACCESS which will be set if the pixel data is        \
+    stored at pixels. If not set then pixels is invalid and there is no direct access to pixel data.      \
+    */                                                                                                    \
+    br_uint_16 prefix##flags;                                                                             \
+                                                                                                          \
+    /**                                                                                                   \
+    \brief These members define the top left of the start of pixel map data in terms of base_y as a       \
+           number of row_bytes, and base_x as a smaller offset from this.                                 \
+    */                                                                                                    \
+    br_uint_16 prefix##base_x;                                                                            \
+    br_uint_16 prefix##base_y;                                                                            \
+                                                                                                          \
+    /**                                                                                                   \
+    \brief These members contain the dimensions of the visible region of the pixel map.                   \
+    */                                                                                                    \
+    br_uint_16 prefix##width;                                                                             \
+    br_uint_16 prefix##height;                                                                            \
+                                                                                                          \
+    /**                                                                                                   \
+    \brief These members define the position of the co-ordinate origin of the pixel map relative to       \
+           the base origin (given by base_x, base_y).                                                     \
+    */                                                                                                    \
+    /**                                                                                                   \
+    Thus a point plotted at (0,0) will be plotted at column origin_x from base_x. The co-ordinate         \
+    origin also effectively defines the centre of projection when used as a rendering destination.        \
+    */                                                                                                    \
+    br_int_16 prefix##origin_x;                                                                           \
+    br_int_16 prefix##origin_y;                                                                           \
+                                                                                                          \
+    /**                                                                                                   \
+    \brief This member may be used by the application for its own purposes.                               \
+    */                                                                                                    \
+    /**                                                                                                   \
+    It is initialised to NULL upon allocation (if allocated by BRender), and not accessed by BRender      \
+    thereafter.                                                                                           \
+    */                                                                                                    \
+    void *prefix##user;                                                                                   \
     void *prefix##stored;
+// clang-format on
 
 #define BR_PIXELMAP_MEMBERS BR_PIXELMAP_MEMBERS_PREFIXED(pm_)
 
-/*
- * Public structure that is comaptible with a device_pixelmap
+/**
+ * \brief BRender's pixel map structure, used for texture maps, shade tables, blend tables, colour
+ *        buffers and Z-buffers.
+ *
+ * See Image Support. Texture maps, shade tables, and blend tables being required for rendering
+ * materials should be maintained within the registry as necessary.
  */
 typedef struct br_pixelmap {
     br_uintptr_t _reserved;
 
-    /*
-     * Optional identifier (when maps used as textures/tables etc.)
+    /**
+     * \brief Pointer to unique, zero terminated, character string (or NULL if not required).
+     *
+     * If the pixel map is loaded or imported, the identifier will have been set using BrResStrDup().
      */
     char *identifier;
 

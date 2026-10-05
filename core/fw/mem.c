@@ -100,9 +100,6 @@ br_int_32 BR_RESIDENT_ENTRY BrMemAlign(br_uint_8 type)
     return i;
 }
 
-/*
- * calloc() equivalent
- */
 void *BR_RESIDENT_ENTRY BrMemCalloc(br_size_t nelems, br_size_t size, br_uint_8 type)
 {
     void *b;
@@ -124,9 +121,6 @@ void *BR_RESIDENT_ENTRY BrMemCalloc(br_size_t nelems, br_size_t size, br_uint_8 
     return b;
 }
 
-/*
- * strdup() equivalent
- */
 char *BR_RESIDENT_ENTRY BrMemStrDup(const char *str)
 {
     br_size_t l;

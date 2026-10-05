@@ -852,9 +852,6 @@ br_uint_16 BR_RESIDENT_ENTRY BrPixelmapFileSize(br_pixelmap *pm)
     return DevicePixelmapFileBytes(pm);
 }
 
-/*
- * Return the pixel size in bits
- */
 br_uint_16 BR_RESIDENT_ENTRY BrPixelmapPixelSize(br_pixelmap *pm)
 {
 #if 0
@@ -869,9 +866,6 @@ br_uint_16 BR_RESIDENT_ENTRY BrPixelmapPixelSize(br_pixelmap *pm)
     return DevicePixelmapPixelBits(pm);
 }
 
-/*
- * Return a mask of the channels that a pixelmap has
- */
 br_uint_16 BR_RESIDENT_ENTRY BrPixelmapChannels(br_pixelmap *pm)
 {
 #if 0

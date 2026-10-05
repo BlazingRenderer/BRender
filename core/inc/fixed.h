@@ -59,9 +59,40 @@ typedef br_uint_8  br_fixed_suf; /* Short unsigned fixed fraction 0.8  */
 #define BR_3_PI_2_LUF        0xC000 /* 0.750 turns = (3*pi)/2 rad */
 #define BR_7_PI_4_LUF        0xE000 /* 0.875 turns = (7*pi)/4 rad */
 
+/**
+ * \brief Convert an integer to a fixed-point value.
+ *
+ * \param i The value to convert, of type short or unsigned short.
+ *
+ * \return A value suitable to cast to br_fixed_ls or br_fixed_lu.
+ */
 #define BrIntToFixed(i)      ((i) << 16)
+
+/**
+ * \brief Convert a fixed-point value to an integer.
+ *
+ * \param i The value to convert, of type br_fixed_ls or br_fixed_lu.
+ *
+ * \return A value suitable to cast to a short or unsigned short.
+ */
 #define BrFixedToInt(i)      ((i) >> 16)
+
+/**
+ * \brief Convert a floating point value to a fixed-point value.
+ *
+ * \param f The value to convert.
+ *
+ * \return The value as a br_fixed_ls (br_scalar).
+ */
 #define BrFloatToFixed(f)    ((br_fixed_ls)((f) * (float)BR_ONE_LS))
+
+/**
+ * \brief Convert a fixed-point value to a float.
+ *
+ * \param s The value to convert, of type br_fixed_ls or br_fixed_lu.
+ *
+ * \return The value as a float.
+ */
 #define BrFixedToFloat(s)    ((float)((s) * (1.0f / (float)BR_ONE_LS)))
 
 #define BrFloatToFixedLS(f)  ((br_fixed_ls)((f) * (float)BR_ONE_LS))

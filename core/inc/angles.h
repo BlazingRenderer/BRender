@@ -97,10 +97,61 @@ enum {
  * be applied - loosely based on -
  * 	"Euler Angle Conversion" Ken Shoemake, Graphics Gems IV pp. 222
  */
+/**
+ * \brief Euler angles can be used to represent the orientation of an object.
+ *
+ * Three separate rotations are applied in turn, in a specific order. Euler angles can be either
+ * static or relative. With relative Euler angles, the rotations are performed around axes relative
+ * to the rotations already performed. With static Euler angles, the rotations are performed around
+ * static axes. (Footnote: Pronounced 'oiler' as in boiler.)
+ */
 typedef struct br_euler {
+    /**
+     * \brief First angle of rotation.
+     */
     br_angle  a;
+    /**
+     * \brief Second angle of rotation.
+     */
     br_angle  b;
+    /**
+     * \brief Third angle of rotation.
+     */
     br_angle  c;
+    /**
+     * \brief The order in which the angles of rotation are applied.
+     *
+     * The following symbols define the set of values which may be used. The first three letters (of the
+     * suffix to BR_EULER) indicate the order in which rotations occur about which axes. The last letter
+     * indicates whether the rotations are static or relative.
+     *
+     * \li BR_EULER_XYZ_S
+     * \li BR_EULER_XYY_S
+     * \li BR_EULER_XZY_S
+     * \li BR_EULER_XZX_S
+     * \li BR_EULER_YZX_S
+     * \li BR_EULER_YZY_S
+     * \li BR_EULER_YXZ_S
+     * \li BR_EULER_YXY_S
+     * \li BR_EULER_ZXY_S
+     * \li BR_EULER_ZXZ_S
+     * \li BR_EULER_ZYX_S
+     * \li BR_EULER_ZYZ_S
+     * \li BR_EULER_ZYX_R
+     * \li BR_EULER_XYX_R
+     * \li BR_EULER_YZX_R
+     * \li BR_EULER_XZX_R
+     * \li BR_EULER_XZY_R
+     * \li BR_EULER_YXY_R
+     * \li BR_EULER_ZXY_R
+     * \li BR_EULER_YXY_R
+     * \li BR_EULER_XYZ_R
+     * \li BR_EULER_ZYZ_R
+     *
+     * \par Example
+     * BR_EULER_XYZ_S is equivalent to the matrix transform: Rx(a)Ry(b)Rz(c). BR_EULER_XZY_R is
+     * equivalent to the matrix transform: Ry(c)Rz(b)Rx(a). See br_matrix34.
+     */
     br_uint_8 order;
 } br_euler;
 

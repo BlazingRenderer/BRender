@@ -180,9 +180,6 @@ br_error BR_PUBLIC_ENTRY BrFwEnd(void)
     return BRE_OK;
 }
 
-/*
- * User functions for setting new errorhandler, filesystem, or allocator
- */
 br_diaghandler *BR_PUBLIC_ENTRY BrDiagHandlerSet(br_diaghandler *newdh)
 {
     br_diaghandler *old = fw.diag;

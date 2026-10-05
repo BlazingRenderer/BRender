@@ -9,9 +9,6 @@
 #include "fw.h"
 #include "brassert.h"
 
-/*
- * Resource Classes
- */
 br_resource_class *BR_PUBLIC_ENTRY BrResClassAdd(br_resource_class *rclass)
 {
     br_resource_class *r;

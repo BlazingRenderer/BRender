@@ -67,17 +67,6 @@ static br_camera   *LoadCameras;
 static br_light    *LoadLights;
 static br_actor    *LoadActors;
 
-/*
- * Load a 3D-Studio .ASC file and produce -
- *
- * 	Models
- *
- * TODO:
- * 	Actors
- * 	Materials
- * 	Cameras
- * 	Lights
- */
 br_uint_32 BR_PUBLIC_ENTRY BrFmtASCLoad(const char *name, br_model **mtable, br_uint_16 max_models)
 {
     void     *fh;

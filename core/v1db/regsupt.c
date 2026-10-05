@@ -13,9 +13,6 @@
  ** Specific versions of registry calls for each class
  **/
 
-/*
- * Models
- */
 br_model *BR_PUBLIC_ENTRY BrModelAdd(br_model *model)
 {
     /*
@@ -104,9 +101,6 @@ br_uint_32 BR_PUBLIC_ENTRY BrModelEnum(const char *pattern, br_model_enum_cbfn *
     return BrRegistryEnum(&v1db.reg_models, pattern, (br_enum_cbfn *)callback, arg);
 }
 
-/*
- * Materials
- */
 br_material *BR_PUBLIC_ENTRY BrMaterialAdd(br_material *material)
 {
     /*

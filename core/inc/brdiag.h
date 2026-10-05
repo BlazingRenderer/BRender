@@ -13,12 +13,84 @@
 /*
  * Instance of an error handler
  */
+/**
+ * \brief An application defined call-back function that is called upon a non-serious, unexpected
+ *        failure, with a message describing the warning.
+ *
+ * \param message Pointer to zero terminated character string describing the warning.
+ *
+ * \pre The diagnostic handler has been setup (BrDiagHandlerSet()). BRender has not necessarily
+ *      completed initialisation. In a recoverable state.
+ *
+ * \post Optionally inform user of warning. Return.
+ *
+ * \remark This function is primarily intended for debugging and testing purposes. BRender does not
+ *         currently generate warnings.
+ *
+ * \sa br_diag_failure_cbfn.
+ *
+ * \par Example
+ * \code{.c}
+ * See stddiag.c for examples of diagnostic handler functions.
+ * \endcode
+ */
 typedef void BR_CALLBACK br_diag_warning_cbfn(const char *message);
+/**
+ * \brief An application defined call-back function that is called upon a serious, unexpected error
+ *        or failure, with a descriptive message.
+ *
+ * Remember, a release version of your software should never fail.
+ *
+ * \param message Pointer to zero terminated character string describing the failure.
+ *
+ * \pre The diagnostic handler has been setup (BrDiagHandlerSet()). BRender has not necessarily
+ *      completed initialisation. In an unknown state. A failure has occurred. BRender is not
+ *      expecting the function to return.
+ *
+ * \post Behaviour is up to the application, but the following procedure can be taken as a
+ *       suggestion. Set a failure condition flag (to detect escalation). Optionally, immediately
+ *       inform user of failure. Re-establish a known state. Perform diagnostics of hardware and
+ *       software, inform user of any diagnosed faults (optionally, also of original failure). End
+ *       failure condition, and resume (do not return).
+ *
+ * \remark Avoid allocating memory in your failure call-back function, or you may need special care
+ *         in handling out-of-memory conditions. BRender's default failure call-back function does
+ *         not allocate memory.
+ *
+ * \sa br_diag_warning_cbfn.
+ *
+ * \par Example
+ * \code{.c}
+ * See stddiag.c for examples of diagnostic handler functions.
+ * \endcode
+ */
 typedef void BR_CALLBACK br_diag_failure_cbfn(const char *message);
 
+/**
+ * \brief This structure represents the definition of a diagnostic handler.
+ *
+ * All BRender's diagnostics are handled by just two functions, which can be specified by the
+ * programmer. This is essential in cases where stdout and stderr (as used by the standard C library
+ * functions) are not available (or not suitable).
+ */
 typedef struct br_diaghandler {
+    /**
+     * \brief Pointer to unique, zero terminated, character string (or NULL if not required).
+     *
+     * A string constant is recommended.
+     */
     const char           *identifier;
+    /**
+     * \brief This is a pointer to the warning delivery function (See br_diag_warning_cbfn).
+     *
+     * This is invoked by the warning macros (See Diagnostic Support, page 65).
+     */
     br_diag_warning_cbfn *warning;
+    /**
+     * \brief This is a pointer to the failure delivery function (See br_diag_failure_cbfn).
+     *
+     * This is invoked by the failure, fatal and assertion macros (See Diagnostic Support).
+     */
     br_diag_failure_cbfn *failure;
 } br_diaghandler;
 

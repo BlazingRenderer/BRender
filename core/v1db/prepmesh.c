@@ -953,9 +953,6 @@ static void GenerateStoredModel(br_model *model)
     }
 }
 
-/*
- * Do all model preprocessing
- */
 void BR_PUBLIC_ENTRY BrModelUpdate(br_model *model, br_uint_16 flags)
 {
     int              g, f, v;

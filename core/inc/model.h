@@ -10,16 +10,51 @@
 #ifndef _MODEL_H_
 #define _MODEL_H_
 
+/**
+ * \brief The vertex data structure, describing a single vertex in a model.
+ */
 typedef struct br_vertex {
-    br_vector3 p;   /* Point in model space		*/
-    br_vector2 map; /* Mapping coordinates		*/
+    /**
+     * \brief The co-ordinates of a point (in the model's co-ordinate space) representing the vertex of
+     *        a group of faces (typically triangular).
+     *
+     * For example, a cube has eight vertices. If it had unit side and was centred about (0,0,0), it
+     * would have vertices (0.5,0.5,0.5), (0.5,0.5,-0.5), etc. Faces are polygons (typically triangles)
+     * described in terms of a number of vertex indices.
+     */
+    br_vector3 p;
+    /**
+     * \brief The 2D co-ordinates at which this vertex appears in an infinitely* tiled texture map.
+     *        (Footnote: * Subject of course to limits of br_scalar representation.)
+     */
+    br_vector2 map;
 
-    /*
-     * Colour for prelit models
+    /**
+     * \brief Pre-computed lighting index at this vertex.
+     *
+     * See br_material for how this relates to pre-lit materials.
      */
     br_uint_8 index;
+    /**
+     * \brief Pre-computed light level at this vertex (in terms of colour intensities†).
+     *
+     * See br_material for how this relates to pre-lit materials. (Footnote: † Not all platforms support
+     * coloured lights.)
+     */
     br_uint_8 red;
+    /**
+     * \brief Pre-computed light level at this vertex (in terms of colour intensities†).
+     *
+     * See br_material for how this relates to pre-lit materials. (Footnote: † Not all platforms support
+     * coloured lights.)
+     */
     br_uint_8 grn;
+    /**
+     * \brief Pre-computed light level at this vertex (in terms of colour intensities†).
+     *
+     * See br_material for how this relates to pre-lit materials. (Footnote: † Not all platforms support
+     * coloured lights.)
+     */
     br_uint_8 blu;
 
     /*
@@ -30,10 +65,32 @@ typedef struct br_vertex {
 
 } br_vertex;
 
+/**
+ * \brief The face data structure, describing a single triangular face.
+ */
 typedef struct br_face {
-    br_uint_16   vertices[3]; /* Vertices around face 				*/
-    br_uint_16   smoothing;   /* Controls if shared edges are smooth	*/
-    br_material *material;    /* Face material (or NULL) 				*/
+    /**
+     * \brief An array of vertex indices specifying the vertices of this face.
+     *
+     * This defines a polygon of the model's the surface. The order in which vertices are listed is
+     * important. The primary, visible side of a face from the viewpoint has its vertices listed in
+     * anticlockwise order. See br_model and br_vertex.
+     */
+    br_uint_16   vertices[3];
+    /**
+     * \brief A 16 bit field in which each bit represents a smoothing group.
+     *
+     * If, when smooth-shading a surface, two adjacent faces share a smoothing group, the edge between
+     * them will be smooth.
+     */
+    br_uint_16   smoothing;
+    /**
+     * \brief Pointer to the material structure associated with this face.
+     *
+     * Note that if this is NULL and the face is part of a model actor's model, then the model actor's
+     * material (as specified or inherited) will be used.
+     */
+    br_material *material;
 
     /*
      * Colour for prelit models
@@ -43,7 +100,17 @@ typedef struct br_face {
     br_uint_8 grn;
     br_uint_8 blu;
 
-    br_uint_8  flags; /* Bits 0,1 and 2 denote internal edges	*/
+    /**
+     * \brief Face flags, indicating whether the edges of the face abut co-planar faces, and thus do not
+     *        need to be drawn in the wire-frame render style BR_RSTYLE_EDGES.
+     *
+     * The following table describes each flag.
+     *
+     * \li BR_FACEF_COPLANAR_0 — The face adjoining edge 0 is co-planar with this face.
+     * \li BR_FACEF_COPLANAR_1 — The face adjoining edge 1 is co-planar with this face.
+     * \li BR_FACEF_COPLANAR_2 — The face adjoining edge 2 is co-planar with this face.
+     */
+    br_uint_8  flags;
     br_uint_8  _pad0;
     br_uint_32 _pad1;
 
@@ -261,6 +328,50 @@ struct br_actor;
 struct br_model;
 struct br_material;
 
+/**
+ * \brief An application defined call-back function that is called when a model (whose custom member
+ *        defined as the address of this function) is about to be processed by the rendering engine.
+ *
+ * If this function does nothing, the model will not be rendered. The pass through equivalent would
+ * be for this function to call Br[Zb|Zs]ModelRender().
+ *
+ * \param actor       Pointer to model actor referencing the model referring to this call-back.
+ * \param model       Pointer to model referring to this call-back.
+ * \param material    Pointer to actor's material if defined, or default material otherwise.
+ * \param render_data A pointer to the order table the primitives for this model would be inserted
+ *                    into, if the Z-Sort renderer is used. The value is NULL if no data is
+ *                    appropriate for the renderer, e.g. when using the Z-Buffer renderer.
+ * \param style       Actor's rendering style, or default. BRender will not supply BR_RSTYLE_DEFAULT
+ *                    or BR_RSTYLE_NONE.
+ * \param on_screen   On-screen flag (see BrOnScreenCheck()). The call-back will never be called by
+ *                    BRender with the flag value OSC_REJECT.
+ *
+ * \pre BRender has completed initialisation. Rendering is in progress. The model's bounds intersect
+ *      or are within the viewing volume.
+ *
+ * \post Behaviour is up to the application. Br[Zb|Zs]ModelRender() or any of the operations
+ *       described for br_model_custom_cbfn can be used.
+ *
+ * \remark Any other BRender functions may be called from within this call-back with the following
+ *         restrictions:
+ * \li Don't call any rendering functions, apart from Br[Zb|Zs]ModelRender().
+ * \li Don't modify any light, clip-plane or camera actors.
+ * \li Don't access any output buffers until after rendering has completed.
+ * \li Don't change the environment actor.
+ * \li For best performance, avoid adding, updating or removing registry items – try to do these
+ *     things before rendering.
+ * \li Do not modify the actor hierarchy
+ *
+ * \sa br_renderbounds_cbfn, br_primitive_cbfn, br_pick2d_cbfn, br_pick3d_cbfn.
+ *
+ * \par Example
+ * Possible uses include:
+ * \li Selecting models with different levels of detail according to viewer distance
+ * \li Morphing models (BrModelUpdate() 241 required)
+ * \li Collision detection (not necessarily indicating the best method)
+ * \li Labelling
+ * \li Rendering liquids, gases, particulate, flames, smoke, etc.
+ */
 typedef void BR_CALLBACK br_model_custom_cbfn(struct br_actor *actor, struct br_model *model, struct br_material *material,
                                               void *render_data, br_uint_8 style, int on_screen);
 
@@ -269,34 +380,93 @@ typedef void BR_CALLBACK br_model_custom_cbfn(struct br_actor *actor, struct br_
  *     callback, use BrModelToViewQuery() and BrModelToScreenQuery()
  */
 
+/**
+ * \brief BRender's model data structure, describing a mesh of triangles.
+ */
 typedef struct br_model {
     br_uintptr_t _reserved;
 
+    /**
+     * \brief Pointer to unique, zero terminated, character string (or NULL if not required).
+     *
+     * Can be used as a handle to retrieve a pointer to the model. Not intended for intensive use.
+     * Typically used to collect pointers to models loaded using BrModelLoad() and added to the registry
+     * using BrModelAdd(). Also ideal for diagnostic purposes. A non-unique string can be supplied, but
+     * which of a set of models having the same string will be matched by search functions (See
+     * BrModelFind()), is undefined. Also in consideration of searching, it is not recommended that
+     * non-alphabetic characters are used, especially Slash ('/'), Asterisk ('*'), and Query ('?'),
+     * which are used for pattern matching. This member can be modified by the programmer at any time.
+     * If identifier is set by BrModelLoad() or BrModelLoadMany() it will have been constructed using
+     * BrResStrDup().
+     */
     char *identifier;
 
+    /**
+     * \brief A list of vertex structures describing the model's geometry (also containing texture
+     *        co-ordinates and pre-lighting).
+     *
+     * The vertices can be allocated at the same time as the model, otherwise vertices should point to a
+     * list with a sufficient lifetime (and BR_MODF_KEEP_ORIGINAL must be set).
+     */
     br_vertex *vertices;
+    /**
+     * \brief A list of face structures describing the model's surface in terms of its vertices (also
+     *        containing smoothing information, edge flags, and materials).
+     *
+     * The faces can be allocated at the same time as the model, otherwise faces should point to a list
+     * with a sufficient lifetime (and BR_MODF_KEEP_ORIGINAL must be set).
+     */
     br_face   *faces;
 
+    /**
+     * \brief Number of vertices supplied in the list of vertices.
+     */
     br_uint_16 nvertices;
+    /**
+     * \brief Number of faces supplied in the list of faces.
+     */
     br_uint_16 nfaces;
 
-    /*
-     * Offset of model's pivot point (where it attaches to parent)
+    /**
+     * \brief Offset from model geometry origin to model origin.
+     *
+     * Effectively an offset which is subtracted from each model vertex. Alternatively, it may be
+     * thought of as a vector in the model's co-ordinate space defining the point at which the model
+     * attaches to its parent (assuming an identity transform). This member is provided to facilitate
+     * centring geometry (thus not needing to modify vertex data), and thus enables such things as
+     * tighter bounding radii. It is not really intended to supplement the model actor transform, i.e.
+     * as another way of translating models.
      */
     br_vector3 pivot;
 
-    /*
-     * Flags describing what is allowed in ModelPrepare()
+    /**
+     * \brief This member determines how the model's geometry is computed.
+     *
+     * Various flags can be combined using the 'Or' operation. They're described in the following table.
+     *
+     * \li BR_MODF_KEEP_ORIGINAL — Retain original vertices and faces during model update – otherwise
+     *     these are freed and replaced by an optimised and equivalent set (very likely reordered)
+     * \li BR_MODF_GENERATE_TAGS — Improve update speed at the expense of face and vertex tag tables.
+     *     Only use in conjunction with BR_MODF_KEEP_ORIGINAL
+     * \li BR_MODF_QUICK_UPDATE — Improve update speed at the expense of having models that may take
+     *     longer to render
+     * \li BR_MODF_DONT_WELD — Don't eliminate redundant vertices (having identical co-ordinates)
+     * \li BR_MODF_CUSTOM — Invoke a custom call-back for this model
      */
     br_uint_16 flags;
 
-    /*
-     * Application call
+    /**
+     * \brief If the BR_MODF_CUSTOM flag is specified, instead of being rendered, the function pointed
+     *        to by custom is called.
+     *
+     * This may of course then call BrZbModelRender(), say. See br_model_custom_cbfn.
      */
     br_model_custom_cbfn *custom;
 
-    /*
-     * Application defined data - untouched by system
+    /**
+     * \brief A member whose usage is entirely application dependent.
+     *
+     * It can be useful when writing custom model rendering functions (see br_model_custom_cbfn).
      */
     void *user;
 
@@ -305,13 +475,21 @@ typedef struct br_model {
      */
     br_angle crease_angle;
 
-    /*
-     * Bounding radius of model from origin
+    /**
+     * \brief The maximum vertex length, thus the radius defining the smallest origin centred sphere
+     *        enclosing the model.
+     *
+     * This is computed upon BrModelAdd() and when the BR_MODU_RADIUS flag is specified to
+     * BrModelUpdate().
      */
     br_scalar radius;
 
-    /*
-     * Axis-aligned box that bounds model in model coords
+    /**
+     * \brief The minimum and maximum x,y and z ordinates of the vertices, thus the minimal, axis
+     *        aligned (orthogonal faced) cuboid enclosing the model.
+     *
+     * This is computed upon BrModelAdd() and when the BR_MODU_BOUNDING_BOX flag is specified to
+     * BrModelUpdate().
      */
     br_bounds bounds;
 

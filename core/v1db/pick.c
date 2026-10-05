@@ -429,10 +429,6 @@ static int ActorPick3D(br_actor *ap, br_model *model, br_material *material, br_
     return r;
 }
 
-/*
- * Find any actors whose bounding boxes intersect a 3D
- * pick box
- */
 int BR_PUBLIC_ENTRY BrScenePick3D(br_actor *world, br_actor *actor, br_bounds *bounds, br_pick3d_cbfn *callback, void *arg)
 {
     br_matrix34 mat;

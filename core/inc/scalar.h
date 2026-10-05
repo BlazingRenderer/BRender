@@ -49,19 +49,98 @@ typedef br_float br_ufraction;
 /*
  * Macros for type conversion
  */
+/**
+ * \brief Convert a float or double to a scalar.
+ *
+ * \param f The value to convert.
+ *
+ * \return The value as a br_scalar.
+ */
 #define BrFloatToScalar(f)     ((br_scalar)f)
+
+/**
+ * \brief Convert a scalar to a float.
+ *
+ * \param c The value to convert.
+ *
+ * \return The value as a float.
+ */
 #define BrScalarToFloat(c)     (c)
 
+/**
+ * \brief Convert any integer type to a scalar.
+ *
+ * \param i The value to convert.
+ *
+ * \return The value as a br_scalar.
+ */
 #define BrIntToScalar(i)       ((br_scalar)(i))
+
+/**
+ * \brief Convert a scalar to an int.
+ *
+ * \param s The value to convert.
+ *
+ * \return The value as an int.
+ */
 #define BrScalarToInt(s)       ((int)(s))
 
+/**
+ * \brief Convert a fixed-point value to a scalar.
+ *
+ * \param f The value to convert.
+ *
+ * \return The value as a br_scalar.
+ */
 #define BrFixedToScalar(f)     ((br_scalar)((f) / (br_float)BR_ONE_LS))
+
+/**
+ * \brief Convert a scalar to a fixed-point value.
+ *
+ * \param s The value to convert.
+ *
+ * \return The value as a br_fixed_ls.
+ */
 #define BrScalarToFixed(s)     (br_fixed_ls)((s) * (br_scalar)BR_ONE_LS)
 
+/**
+ * \brief Convert a fraction to a scalar.
+ *
+ * It is up to the application to ensure the value is in the required range.
+ *
+ * \param f The value to convert.
+ *
+ * \return The value as a br_scalar.
+ */
 #define BrFractionToScalar(f)  (f)
+
+/**
+ * \brief Convert a scalar to a fraction.
+ *
+ * It is up to the application to ensure the value is in the required range.
+ *
+ * \param s The value to convert.
+ *
+ * \return The value as a br_fraction.
+ */
 #define BrScalarToFraction(s)  (s)
 
+/**
+ * \brief Convert an unsigned fraction to a scalar.
+ *
+ * \param f The value to convert.
+ *
+ * \return The value as a br_scalar.
+ */
 #define BrUFractionToScalar(f) (f)
+
+/**
+ * \brief Convert a scalar to an unsigned fraction.
+ *
+ * \param s The value to convert.
+ *
+ * \return The value as a br_ufraction.
+ */
 #define BrScalarToUFraction(s) (s)
 
 #define BrFixedLUFToScalar(f)  BrFloatToScalar(BrFixedLUFToFloat(f))

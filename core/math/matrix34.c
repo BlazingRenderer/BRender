@@ -15,9 +15,6 @@
 #include "shortcut.h"
 #include "brassert.h"
 
-/*
- * A = B
- */
 void BR_PUBLIC_ENTRY BrMatrix34Copy(br_matrix34 *A, const br_matrix34 *B)
 {
     UASSERT_MESSAGE("Destination matrix is NULL", A != NULL);
@@ -40,9 +37,6 @@ void BR_PUBLIC_ENTRY BrMatrix34Copy(br_matrix34 *A, const br_matrix34 *B)
     A(3, 2) = B(3, 2);
 }
 
-/*
- * A = B*C
- */
 void BR_PUBLIC_ENTRY BrMatrix34Mul(br_matrix34 *A, const br_matrix34 *B, const br_matrix34 *C)
 {
     UASSERT_MESSAGE("Destination matrix is NULL", A != NULL);
@@ -156,9 +150,6 @@ void BR_PUBLIC_ENTRY BrMatrix34RotateZ(br_matrix34 *mat, br_angle rz)
     // clang-format on
 }
 
-/*
- * Rotation about an arbitary (normalised) axis
- */
 void BR_PUBLIC_ENTRY BrMatrix34Rotate(br_matrix34 *mat, br_angle r, const br_vector3 *a)
 {
     br_scalar t, s, c;
@@ -646,9 +637,6 @@ void BR_PUBLIC_ENTRY BrMatrix34RollingBall(br_matrix34 *mat, int dx, int dy, int
     M(3, 2) = S0;
 }
 
-/*
- * Find the transform that maps a 2 unit cube centred on origin to the given bounding box
- */
 br_matrix34 *BR_PUBLIC_ENTRY BrBoundsToMatrix34(br_matrix34 *mat, const br_bounds *bounds)
 {
     int        i;
@@ -750,9 +738,6 @@ void BrMatrix34TApplyFV(br_vector3 *A, const br_vector3 *B, const br_matrix34 *C
     A->v[2] = BR_FMAC3(B->v[0], C(2, 0), B->v[1], C(2, 1), B->v[2], C(2, 2));
 }
 
-/*
- * vec_a = vec_b * mat
- */
 void BR_PUBLIC_ENTRY BrMatrix34Apply(br_vector3 *A, const br_vector4 *B, const br_matrix34 *C)
 {
     UASSERT_MESSAGE("Destination Vector is NULL", A != NULL);
@@ -765,9 +750,6 @@ void BR_PUBLIC_ENTRY BrMatrix34Apply(br_vector3 *A, const br_vector4 *B, const b
     A->v[2] = BR_MAC4(B->v[0], C(0, 2), B->v[1], C(1, 2), B->v[2], C(2, 2), B->v[3], C(3, 2));
 }
 
-/*
- * [a b c ] = [ e f g ] . M
- */
 void BR_PUBLIC_ENTRY BrMatrix34ApplyP(br_vector3 *A, const br_vector3 *B, const br_matrix34 *C)
 {
     UASSERT_MESSAGE("Destination Vector is NULL", A != NULL);
@@ -782,9 +764,6 @@ void BR_PUBLIC_ENTRY BrMatrix34ApplyP(br_vector3 *A, const br_vector3 *B, const 
     A->v[2] = BR_MAC3(B->v[0], C(0, 2), B->v[1], C(1, 2), B->v[2], C(2, 2)) + C(3, 2);
 }
 
-/*
- * [a b c d] = [ e f g 0 ] . M
- */
 void BR_PUBLIC_ENTRY BrMatrix34ApplyV(br_vector3 *A, const br_vector3 *B, const br_matrix34 *C)
 {
     UASSERT_MESSAGE("Destination Vector is NULL", A != NULL);
@@ -799,9 +778,6 @@ void BR_PUBLIC_ENTRY BrMatrix34ApplyV(br_vector3 *A, const br_vector3 *B, const 
     A->v[2] = BR_MAC3(B->v[0], C(0, 2), B->v[1], C(1, 2), B->v[2], C(2, 2));
 }
 
-/*
- * vec_a = vec_b * transpose(M)
- */
 void BR_PUBLIC_ENTRY BrMatrix34TApply(br_vector4 *A, const br_vector4 *B, const br_matrix34 *C)
 {
     UASSERT_MESSAGE("Destination Vector is NULL", A != NULL);
@@ -817,9 +793,6 @@ void BR_PUBLIC_ENTRY BrMatrix34TApply(br_vector4 *A, const br_vector4 *B, const 
     A->v[3] = BR_ADD(BR_MAC3(B->v[0], C(3, 0), B->v[1], C(3, 1), B->v[2], C(3, 2)), B->v[3]);
 }
 
-/*
- * [a b c] = [ e f g] . transpose(M)
- */
 void BR_PUBLIC_ENTRY BrMatrix34TApplyP(br_vector3 *A, const br_vector3 *B, const br_matrix34 *C)
 {
     UASSERT_MESSAGE("Destination Vector is NULL", A != NULL);
@@ -834,9 +807,6 @@ void BR_PUBLIC_ENTRY BrMatrix34TApplyP(br_vector3 *A, const br_vector3 *B, const
     A->v[2] = BR_MAC3(B->v[0], C(2, 0), B->v[1], C(2, 1), B->v[2], C(2, 2));
 }
 
-/*
- * [a b c d] = [ e f g 0 ] . transpose(M)
- */
 void BR_PUBLIC_ENTRY BrMatrix34TApplyV(br_vector3 *A, const br_vector3 *B, const br_matrix34 *C)
 {
     UASSERT_MESSAGE("Destination Vector is NULL", A != NULL);
@@ -859,10 +829,6 @@ void BR_PUBLIC_ENTRY BrMatrix34TApplyV(br_vector3 *A, const br_vector3 *B, const
  * BrMatrix34ApplyN()
  */
 
-/*
- * Composite matrix operations -
- * pre and post-multiply with an existing matrix
- */
 
 void BR_PUBLIC_ENTRY BrMatrix34Pre(br_matrix34 *mat, const br_matrix34 *A)
 {

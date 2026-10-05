@@ -130,14 +130,6 @@ static struct resource_header *UserToRes(void *r)
     return res;
 }
 
-/*
- * Create a new resource block of the given class, with 'size' bytes associated
- * with it.
- *
- * If parent is not NULL it adds the new resource as a child
- *
- * Returns a pointer to the first byte of the resource data
- */
 void *BR_RESIDENT_ENTRY BrResAllocate(void *vparent, br_size_t size, br_uint_8 res_class)
 {
     struct resource_header *res;
@@ -273,9 +265,6 @@ static void BrResInternalFree(struct resource_header *res, br_boolean callback)
     BrMemFree(res);
 }
 
-/*
- * Public entry for ResFree
- */
 void BR_RESIDENT_ENTRY BrResFree(void *vres)
 {
     UASSERT(vres != NULL);
@@ -290,9 +279,6 @@ void BR_RESIDENT_ENTRY BrResFreeNoCallback(void *vres)
     BrResInternalFree(UserToRes(vres), BR_FALSE);
 }
 
-/*
- * Add a resource as a child of another
- */
 void *BR_RESIDENT_ENTRY BrResAdd(void *vparent, void *vres)
 {
     struct resource_header *res    = UserToRes(vres);
@@ -315,9 +301,6 @@ void *BR_RESIDENT_ENTRY BrResAdd(void *vparent, void *vres)
     return vres;
 }
 
-/*
- * Remove resource from parent
- */
 void *BR_RESIDENT_ENTRY BrResRemove(void *vres)
 {
     struct resource_header *res = UserToRes(vres);
@@ -331,9 +314,6 @@ void *BR_RESIDENT_ENTRY BrResRemove(void *vres)
     return vres;
 }
 
-/*
- * Return the class of a given resource
- */
 br_uint_8 BR_RESIDENT_ENTRY BrResClass(void *vres)
 {
     struct resource_header *res = UserToRes(vres);
@@ -383,9 +363,6 @@ br_boolean BR_RESIDENT_ENTRY BrResIsChild(void *vparent, void *vchild)
     return BR_FALSE;
 }
 
-/*
- * Return the size of a given resource
- */
 br_size_t BR_RESIDENT_ENTRY BrResSize(void *vres)
 {
     struct resource_header *res = UserToRes(vres);
@@ -424,9 +401,6 @@ br_size_t BR_RESIDENT_ENTRY BrResSizeTotal(void *vres)
     return total;
 }
 
-/*
- * Invoke a callback for each of the children of a resource
- */
 br_size_t BR_RESIDENT_ENTRY BrResChildEnum(void *vres, br_resenum_cbfn *callback, void *arg)
 {
     struct resource_header *res = UserToRes(vres);
@@ -459,9 +433,6 @@ br_uint_32 BR_RESIDENT_ENTRY BrResCheck(void *vres, int no_tag)
 #endif
 }
 
-/*
- * strdup() equivalent
- */
 char *BR_RESIDENT_ENTRY BrResStrDup(void *vparent, const char *str)
 {
     br_size_t l;

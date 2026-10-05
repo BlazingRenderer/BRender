@@ -10,30 +10,6 @@
 #include "v1db.h"
 #include "brassert.h"
 
-/*
- * Generate U and V values for a model's vertices.
- *
- * The vertices are optionally transformed by a 3x4 matrix
- *
- * The u,v values are then assigned according to one of the
- * following schemes -
- *
- * Planar mapping:
- * 	u = (x+1)/2
- *  v = (y+1)/2
- *
- * Spherical mapping:
- * 	u = atan2(-z,x)/2*pi
- *  v = 1-atan2(sqrt(x*x+z*z),y)/pi
- *
- * Cylindrical mapping:
- * 	u = atan2(-z,x)/2*pi
- *  v = (y+1)/2
- *
- * Disc mapping:
- * 	u = atan2(-z,x)/2*pi
- *  v = sqrt(x*x+z*z)
- */
 void BR_PUBLIC_ENTRY BrModelApplyMap(br_model *model, int map_type, br_matrix34 *xform)
 {
     int         v;
@@ -121,21 +97,6 @@ void BR_PUBLIC_ENTRY BrModelApplyMap(br_model *model, int map_type, br_matrix34 
     }
 }
 
-/*
- * Work out a transform such that it can be fed to BrModelApplyMap
- * and have the mapping type fit the bounds of the model exactly
- *
- * The two axis along which the mapping can be applied are provided -
- *
- *	BR_FITMAP_PLUS_X,
- *	BR_FITMAP_PLUS_Y,
- *	BR_FITMAP_PLUS_Z,
- *	BR_FITMAP_MINUS_X,
- *	BR_FITMAP_MINUS_Y,
- *	BR_FITMAP_MINUS_Z,
- *
- * Returns the supplied pointer to 'transform'
- */
 
 br_matrix34 *BR_PUBLIC_ENTRY BrModelFitMap(br_model *model, int axis_0, int axis_1, br_matrix34 *transform)
 {
@@ -194,9 +155,6 @@ br_matrix34 *BR_PUBLIC_ENTRY BrModelFitMap(br_model *model, int axis_0, int axis
     return transform;
 }
 
-/*
- * Free a model
- */
 void BR_PUBLIC_ENTRY BrModelFree(br_model *m)
 {
     UASSERT(m != NULL);
@@ -204,9 +162,6 @@ void BR_PUBLIC_ENTRY BrModelFree(br_model *m)
     BrResFree(m);
 }
 
-/*
- * Allocate a model of a given size
- */
 br_model *BR_PUBLIC_ENTRY BrModelAllocate(const char *name, int nvertices, int nfaces)
 {
     br_model *m;

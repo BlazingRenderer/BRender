@@ -9,9 +9,6 @@
 #include "v1db.h"
 #include "brassert.h"
 
-/*
- * Allocate a material
- */
 br_material *BR_PUBLIC_ENTRY BrMaterialAllocate(const char *name)
 {
     br_material *m;
@@ -29,9 +26,6 @@ br_material *BR_PUBLIC_ENTRY BrMaterialAllocate(const char *name)
     return m;
 }
 
-/*
- * Free a material
- */
 void BR_PUBLIC_ENTRY BrMaterialFree(br_material *m)
 {
     UASSERT(m != NULL);

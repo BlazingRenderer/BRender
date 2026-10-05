@@ -75,11 +75,6 @@ void BR_PUBLIC_ENTRY BrModelToViewQuery(br_matrix34 *dest)
     RendererPartQueryBuffer(v1db.renderer, BRT_MATRIX, 0, &dummy, (void *)dest, sizeof(*dest), BRT_AS_MATRIX34_SCALAR(MODEL_TO_VIEW));
 }
 
-/*
- * Transform and project 0,0,0 into screen space
- *
- * Return 1 if point is behind eye
- */
 br_uint_8 BR_PUBLIC_ENTRY BrOriginToScreenXY(br_vector2 *screen)
 {
     UASSERT(v1db.rendering);
@@ -100,11 +95,6 @@ br_uint_8 BR_PUBLIC_ENTRY BrOriginToScreenXY(br_vector2 *screen)
     return (v1db.model_to_screen.m[3][2] > BR_SCALAR(0.0));
 }
 
-/*
- * Transform and project 0,0,0 into screen space, generate X,Y,Z and return outcode
- *
- * If the point is offscreen, it will not be projected
- */
 br_uint_32 BR_PUBLIC_ENTRY BrOriginToScreenXYZO(br_vector3 *screen)
 {
     br_uint_32 outcode = OUTCODES_NOT;
@@ -130,11 +120,6 @@ br_uint_32 BR_PUBLIC_ENTRY BrOriginToScreenXYZO(br_vector3 *screen)
     return outcode;
 }
 
-/*
- * Transform and project a single point into screen space
- *
- * Return 1 if point is behind eye
- */
 br_uint_8 BR_PUBLIC_ENTRY BrPointToScreenXY(br_vector2 *screen, br_vector3 *point)
 {
     br_vector4 sp;
@@ -160,11 +145,6 @@ br_uint_8 BR_PUBLIC_ENTRY BrPointToScreenXY(br_vector2 *screen, br_vector3 *poin
     return (sp.v[2] > BR_SCALAR(0.0));
 }
 
-/*
- * Transform and project a single point into screen space
- *
- * Return 1 if point is behind eye
- */
 br_uint_32 BR_PUBLIC_ENTRY BrPointToScreenXYZO(br_vector3 *screen, br_vector3 *point)
 {
     br_vector4 sp;
@@ -197,9 +177,6 @@ br_uint_32 BR_PUBLIC_ENTRY BrPointToScreenXYZO(br_vector3 *screen, br_vector3 *p
     return outcode;
 }
 
-/*
- * Transform and project many points into screen space
- */
 void BR_PUBLIC_ENTRY BrPointToScreenXYMany(br_vector2 *screens, br_vector3 *points, br_uint_32 npoints)
 {
     br_vector4 sp;
@@ -226,11 +203,6 @@ void BR_PUBLIC_ENTRY BrPointToScreenXYMany(br_vector2 *screens, br_vector3 *poin
     }
 }
 
-/*
- * Transform and project many points into screen space, generate X,Y,Z
- *
- * Outcode each point, and if it is not on screen, don't project it
- */
 void BR_PUBLIC_ENTRY BrPointToScreenXYZOMany(br_vector3 *screens, br_uint_32 *outcodes, br_vector3 *points, br_uint_32 npoints)
 {
     br_vector4 sp;

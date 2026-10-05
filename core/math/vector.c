@@ -29,9 +29,6 @@ void BR_PUBLIC_ENTRY BrVector2Copy(br_vector2 *v1, const br_vector2 *v2)
     v1->v[1] = v2->v[1];
 }
 
-/*
- * v1=(s1,s2)
- */
 void BR_PUBLIC_ENTRY BrVector2Set(br_vector2 *v1, br_scalar s1, br_scalar s2)
 {
     UASSERT_MESSAGE("Destination Vector is NULL", v1 != NULL);
@@ -56,9 +53,6 @@ void BR_PUBLIC_ENTRY BrVector2SetFloat(br_vector2 *v1, float f1, float f2)
     v1->v[1] = BrFloatToScalar(f2);
 }
 
-/*
- * v1=-v2
- */
 void BR_PUBLIC_ENTRY BrVector2Negate(br_vector2 *v1, const br_vector2 *v2)
 {
     UASSERT_MESSAGE("Destination Vector is NULL", v1 != NULL);
@@ -68,9 +62,6 @@ void BR_PUBLIC_ENTRY BrVector2Negate(br_vector2 *v1, const br_vector2 *v2)
     v1->v[1] = -v2->v[1];
 }
 
-/*
- * v1=v2+v3
- */
 void BR_PUBLIC_ENTRY BrVector2Add(br_vector2 *v1, const br_vector2 *v2, const br_vector2 *v3)
 {
     UASSERT_MESSAGE("Destination Vector is NULL", v1 != NULL);
@@ -81,9 +72,6 @@ void BR_PUBLIC_ENTRY BrVector2Add(br_vector2 *v1, const br_vector2 *v2, const br
     v1->v[1] = v2->v[1] + v3->v[1];
 }
 
-/*
- * v1+=v2
- */
 void BR_PUBLIC_ENTRY BrVector2Accumulate(br_vector2 *v1, const br_vector2 *v2)
 {
     UASSERT_MESSAGE("Destination Vector is NULL", v1 != NULL);
@@ -105,9 +93,6 @@ void BR_PUBLIC_ENTRY BrVector2AccumulateScale(br_vector2 *v1, const br_vector2 *
     v1->v[1] += BR_MUL(v2->v[1], s);
 }
 
-/*
- * v1=v2-v3
- */
 void BR_PUBLIC_ENTRY BrVector2Sub(br_vector2 *v1, const br_vector2 *v2, const br_vector2 *v3)
 {
     UASSERT_MESSAGE("Destination Vector is NULL", v1 != NULL);
@@ -118,9 +103,6 @@ void BR_PUBLIC_ENTRY BrVector2Sub(br_vector2 *v1, const br_vector2 *v2, const br
     v1->v[1] = v2->v[1] - v3->v[1];
 }
 
-/*
- * v1=v2*scalar
- */
 void BR_PUBLIC_ENTRY BrVector2Scale(br_vector2 *v1, const br_vector2 *v2, br_scalar s)
 {
     UASSERT_MESSAGE("Destination Vector is NULL", v1 != NULL);
@@ -130,9 +112,6 @@ void BR_PUBLIC_ENTRY BrVector2Scale(br_vector2 *v1, const br_vector2 *v2, br_sca
     v1->v[1] = BR_MUL(v2->v[1], (s));
 }
 
-/*
- * v1=v2/scalar
- */
 void BR_PUBLIC_ENTRY BrVector2InvScale(br_vector2 *v1, const br_vector2 *v2, br_scalar s)
 {
     UASSERT_MESSAGE("Destination Vector is NULL", v1 != NULL);
@@ -142,9 +121,6 @@ void BR_PUBLIC_ENTRY BrVector2InvScale(br_vector2 *v1, const br_vector2 *v2, br_
     v1->v[1] = BR_DIV(v2->v[1], (s));
 }
 
-/*
- *  = v1.v2
- */
 br_scalar BR_PUBLIC_ENTRY BrVector2Dot(br_vector2 *v1, const br_vector2 *v2)
 {
     UASSERT_MESSAGE("Destination Vector is NULL", v1 != NULL);
@@ -153,9 +129,6 @@ br_scalar BR_PUBLIC_ENTRY BrVector2Dot(br_vector2 *v1, const br_vector2 *v2)
     return BR_MAC2(v1->v[0], v2->v[0], v1->v[1], v2->v[1]);
 }
 
-/*
- *  = |v1|
- */
 br_scalar BR_PUBLIC_ENTRY BrVector2Length(br_vector2 *v1)
 {
     UASSERT_MESSAGE("Subject Vector is NULL", v1 != NULL);
@@ -163,9 +136,6 @@ br_scalar BR_PUBLIC_ENTRY BrVector2Length(br_vector2 *v1)
     return BR_LENGTH2(v1->v[0], v1->v[1]);
 }
 
-/*
- *  = |v1| * |v1|
- */
 br_scalar BR_PUBLIC_ENTRY BrVector2LengthSquared(br_vector2 *v1)
 {
     UASSERT_MESSAGE("Subject Vector is NULL", v1 != NULL);
@@ -200,9 +170,6 @@ br_boolean BR_PUBLIC_ENTRY BrVector2Normalise0(br_vector2 *v1, const br_vector2 
     }
 }
 
-/*
- * v1 = v2/|v2|, or (1, 0) if |v2| == 0
- */
 void BR_PUBLIC_ENTRY BrVector2Normalise(br_vector2 *v1, const br_vector2 *v2)
 {
     if(!BrVector2Normalise0(v1, v2))
@@ -238,9 +205,6 @@ void BR_PUBLIC_ENTRY BrVector3Copy(br_vector3 *v1, const br_vector3 *v2)
     v1->v[2] = v2->v[2];
 }
 
-/*
- * v1=(s1,s2,s3)
- */
 void BR_PUBLIC_ENTRY BrVector3Set(br_vector3 *v1, br_scalar s1, br_scalar s2, br_scalar s3)
 {
     UASSERT_MESSAGE("Subject Vector is NULL", v1 != NULL);
@@ -280,9 +244,6 @@ void BR_PUBLIC_ENTRY BrVector3ColourSet(br_vector3 *v1, br_colour colour)
     v1->v[2] = BR_DIV(BR_BLU(colour), 255.0f);
 }
 
-/*
- * v1=-v2
- */
 void BR_PUBLIC_ENTRY BrVector3Negate(br_vector3 *v1, const br_vector3 *v2)
 {
     UASSERT_MESSAGE("Destination Vector is NULL", v1 != NULL);
@@ -293,9 +254,6 @@ void BR_PUBLIC_ENTRY BrVector3Negate(br_vector3 *v1, const br_vector3 *v2)
     v1->v[2] = -v2->v[2];
 }
 
-/*
- * v1=v2+v3
- */
 void BR_PUBLIC_ENTRY BrVector3Add(br_vector3 *v1, const br_vector3 *v2, const br_vector3 *v3)
 {
     UASSERT_MESSAGE("Destination Vector is NULL", v1 != NULL);
@@ -307,9 +265,6 @@ void BR_PUBLIC_ENTRY BrVector3Add(br_vector3 *v1, const br_vector3 *v2, const br
     v1->v[2] = v2->v[2] + v3->v[2];
 }
 
-/*
- * v1+=v2
- */
 void BR_PUBLIC_ENTRY BrVector3Accumulate(br_vector3 *v1, const br_vector3 *v2)
 {
     UASSERT_MESSAGE("Destination Vector is NULL", v1 != NULL);
@@ -346,9 +301,6 @@ void BR_PUBLIC_ENTRY BrVector3AccumulateScale(br_vector3 *v1, const br_vector3 *
     v1->v[2] += BR_MUL(v2->v[2], s);
 }
 
-/*
- * v1=v2-v3
- */
 void BR_PUBLIC_ENTRY BrVector3Sub(br_vector3 *v1, const br_vector3 *v2, const br_vector3 *v3)
 {
     UASSERT_MESSAGE("Destination Vector is NULL", v1 != NULL);
@@ -374,9 +326,6 @@ void BR_PUBLIC_ENTRY BrVector3Mul(br_vector3 *v1, const br_vector3 *v2, const br
     v1->v[2] = BR_MUL(v2->v[2], v3->v[2]);
 }
 
-/*
- * v1=v2*scalar
- */
 void BR_PUBLIC_ENTRY BrVector3Scale(br_vector3 *v1, const br_vector3 *v2, br_scalar s)
 {
     UASSERT_MESSAGE("Destination Vector is NULL", v1 != NULL);
@@ -387,9 +336,6 @@ void BR_PUBLIC_ENTRY BrVector3Scale(br_vector3 *v1, const br_vector3 *v2, br_sca
     v1->v[2] = BR_MUL(v2->v[2], (s));
 }
 
-/*
- * v1=v2/scalar
- */
 void BR_PUBLIC_ENTRY BrVector3InvScale(br_vector3 *v1, const br_vector3 *v2, br_scalar s)
 {
     UASSERT_MESSAGE("Destination Vector is NULL", v1 != NULL);
@@ -400,9 +346,6 @@ void BR_PUBLIC_ENTRY BrVector3InvScale(br_vector3 *v1, const br_vector3 *v2, br_
     v1->v[2] = BR_DIV(v2->v[2], (s));
 }
 
-/*
- *  = v1.v2
- */
 br_scalar BR_PUBLIC_ENTRY BrVector3Dot(const br_vector3 *v1, const br_vector3 *v2)
 {
     UASSERT_MESSAGE("Destination Vector is NULL", v1 != NULL);
@@ -411,9 +354,6 @@ br_scalar BR_PUBLIC_ENTRY BrVector3Dot(const br_vector3 *v1, const br_vector3 *v
     return BR_MAC3(v1->v[0], v2->v[0], v1->v[1], v2->v[1], v1->v[2], v2->v[2]);
 }
 
-/*
- * v1 = v2 x v3
- */
 void BR_PUBLIC_ENTRY BrVector3Cross(br_vector3 *v1, const br_vector3 *v2, const br_vector3 *v3)
 {
     UASSERT_MESSAGE("Destination Vector is NULL", v1 != NULL);
@@ -427,9 +367,6 @@ void BR_PUBLIC_ENTRY BrVector3Cross(br_vector3 *v1, const br_vector3 *v2, const 
     v1->v[2] = BR_MUL(v2->v[0], v3->v[1]) - BR_MUL(v2->v[1], v3->v[0]);
 }
 
-/*
- *  = |v1|
- */
 br_scalar BR_PUBLIC_ENTRY BrVector3Length(br_vector3 *v1)
 {
     UASSERT_MESSAGE("Subject Vector is NULL", v1 != NULL);
@@ -437,9 +374,6 @@ br_scalar BR_PUBLIC_ENTRY BrVector3Length(br_vector3 *v1)
     return BR_LENGTH3(v1->v[0], v1->v[1], v1->v[2]);
 }
 
-/*
- * = |v1| * |v1|
- */
 br_scalar BR_PUBLIC_ENTRY BrVector3LengthSquared(br_vector3 *v1)
 {
     UASSERT_MESSAGE("Subject Vector is NULL", v1 != NULL);
@@ -476,18 +410,12 @@ br_boolean BR_PUBLIC_ENTRY BrVector3Normalise0(br_vector3 *v1, const br_vector3 
     }
 }
 
-/*
- * v1 = v2/|v2|, or (1, 0, 0) if |v2| == 0
- */
 void BR_PUBLIC_ENTRY BrVector3Normalise(br_vector3 *v1, const br_vector3 *v2)
 {
     if(BrVector3Normalise0(v1, v2) != BR_TRUE)
         v1->v[0] = BR_SCALAR(1.0);
 }
 
-/*
- * v1 = v2/|v2|
- */
 void BR_PUBLIC_ENTRY BrVector3NormaliseQuick(br_vector3 *v1, const br_vector3 *v2)
 {
     br_scalar scale;
@@ -499,9 +427,6 @@ void BR_PUBLIC_ENTRY BrVector3NormaliseQuick(br_vector3 *v1, const br_vector3 *v
     BrVector3Scale(v1, v2, scale);
 }
 
-/*
- * v1 = v2/|v2| (low precision)
- */
 void BR_PUBLIC_ENTRY BrVector3NormaliseLP(br_vector3 *v1, const br_vector3 *v2)
 {
     br_scalar scale;
@@ -583,9 +508,6 @@ void BR_PUBLIC_ENTRY BrVector4ColourSet(br_vector4 *v1, br_colour colour)
     v1->v[3] = BR_DIV(BR_ALPHA(colour), 255.0f);
 }
 
-/*
- *  = v1.v2
- */
 br_scalar BR_PUBLIC_ENTRY BrVector4Dot(const br_vector4 *v1, const br_vector4 *v2)
 {
     UASSERT_MESSAGE("Destination Vector is NULL", v1 != NULL);
@@ -594,9 +516,6 @@ br_scalar BR_PUBLIC_ENTRY BrVector4Dot(const br_vector4 *v1, const br_vector4 *v
     return BR_MAC4(v1->v[0], v2->v[0], v1->v[1], v2->v[1], v1->v[2], v2->v[2], v1->v[3], v2->v[3]);
 }
 
-/*
- * v1=v2
- */
 void BR_PUBLIC_ENTRY BrVector4Copy(br_vector4 *v1, const br_vector4 *v2)
 {
     UASSERT_MESSAGE("Destination Vector is NULL", v1 != NULL);

@@ -11,16 +11,6 @@
 #include "formats.h"
 #include "v1db.h"
 
-/*
- * Set the per-vertex i,r,g,b values for the model.
- *
- * This must be called during rendering - eg: as part of a model callback.
- * If you simply want to light a few models, then sandwich the call between
- * ZbSceneRenderBegin() and ZbSceneRenderEnd()
- *
- * If 'a' != NULL, The values are generated as if the model were attached to
- * the actor 'a', otherwise the model will be in the current frame
- */
 void BR_PUBLIC_ENTRY BrSceneModelLight(br_model *model, br_material *default_material, br_actor *root, br_actor *a)
 {
     int              i;

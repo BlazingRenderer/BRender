@@ -11,9 +11,6 @@
 #include "brassert.h"
 #include "math_ip.h"
 
-/*
- * Invoke a callback for each one of an actors children
- */
 br_uint_32 BR_PUBLIC_ENTRY BrActorEnum(br_actor *parent, br_actor_enum_cbfn *callback, void *arg)
 {
     br_actor  *a, *next;
@@ -36,10 +33,6 @@ br_uint_32 BR_PUBLIC_ENTRY BrActorEnum(br_actor *parent, br_actor_enum_cbfn *cal
     return 0;
 }
 
-/*
- * Find all the named actors matching a pattern in the given hierachy
- *
- */
 br_uint_32 BR_PUBLIC_ENTRY BrActorSearchMany(br_actor *root, char *pattern, br_actor **actors, int max)
 {
     br_actor *a;
@@ -94,9 +87,6 @@ br_uint_32 BR_PUBLIC_ENTRY BrActorSearchMany(br_actor *root, char *pattern, br_a
     return max - remaining;
 }
 
-/*
- * Find the first named actor matching a pattern in the given hierachy
- */
 br_actor *BR_PUBLIC_ENTRY BrActorSearch(br_actor *root, char *pattern)
 {
     br_actor *a;
@@ -194,10 +184,6 @@ br_actor *BR_PUBLIC_ENTRY BrActorRemove(br_actor *a)
 
     return a;
 }
-/*
- * Move an actor in the hierachy, but preserve it's apparent world
- * transform by manipulating the transform
- */
 void BR_PUBLIC_ENTRY BrActorRelink(br_actor *parent, br_actor *a)
 {
     br_matrix34 mat;
@@ -227,16 +213,6 @@ void BR_PUBLIC_ENTRY BrActorRelink(br_actor *parent, br_actor *a)
     BrActorAdd(parent, BrActorRemove(a));
 }
 
-/*
- * Allocate a new actor structure and return a pointer to it
- *
- * Model actors are allocated from a pool associated with the renderer -
- * this is a very common case and is worth the speedup
- *
- * All other actor types come from the normal heap - and include any
- * type specific data bocks
- *
- */
 br_actor *BR_PUBLIC_ENTRY BrActorAllocate(br_uint_8 type, void *type_data)
 {
     br_actor   *a = NULL;
@@ -548,13 +524,6 @@ br_token CameraToScreenMatrix4(br_matrix4 *mat, br_actor *camera)
     return 0;
 }
 
-/*
- * Accumulate the transform between one actor an another
- *
- * Returns a transform type that matches the combined result according
- * to the combination rules in transfrm.c
- *
- */
 br_uint_16 BR_PUBLIC_ENTRY BrActorToActorMatrix34(br_matrix34 *m, br_actor *a, br_actor *b)
 {
     br_matrix34 mata, matb, matc;
@@ -669,10 +638,6 @@ br_uint_16 BR_PUBLIC_ENTRY BrActorToActorMatrix34(br_matrix34 *m, br_actor *a, b
     return BrTransformCombineTypes(at, bt);
 }
 
-/*
- * Accumulate the transform between an actor and the screen
- *
- */
 void BR_PUBLIC_ENTRY BrActorToScreenMatrix4(br_matrix4 *m, br_actor *a, br_actor *camera)
 {
     br_matrix34 a2c;

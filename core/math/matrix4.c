@@ -15,9 +15,6 @@
 #include "shortcut.h"
 #include "brassert.h"
 
-/*
- * A = B
- */
 void BR_PUBLIC_ENTRY BrMatrix4Copy(br_matrix4 *A, const br_matrix4 *B)
 {
     UASSERT_MESSAGE("Destination matrix is NULL", A != NULL);
@@ -31,9 +28,6 @@ void BR_PUBLIC_ENTRY BrMatrix4Copy(br_matrix4 *A, const br_matrix4 *B)
     // clang-format on
 }
 
-/*
- * A = B*C
- */
 void BR_PUBLIC_ENTRY BrMatrix4Mul(br_matrix4 *A, const br_matrix4 *B, const br_matrix4 *C)
 {
     UASSERT_MESSAGE("Destination matrix is NULL", A != NULL);
@@ -63,9 +57,6 @@ void BR_PUBLIC_ENTRY BrMatrix4Mul(br_matrix4 *A, const br_matrix4 *B, const br_m
     // clang-format on
 }
 
-/*
- * mat = Identity
- */
 void BR_PUBLIC_ENTRY BrMatrix4Identity(br_matrix4 *mat)
 {
     UASSERT_MESSAGE("Subject matrix is NULL", mat != NULL);
@@ -160,10 +151,6 @@ static br_scalar Determinant3(br_scalar a1, br_scalar a2, br_scalar a3, br_scala
     // clang-format on
 }
 
-/*
- * return determinant(mat)
- *
- */
 br_scalar BR_PUBLIC_ENTRY BrMatrix4Determinant(const br_matrix4 *mat)
 {
     br_scalar a1, a2, a3, a4, b1, b2, b3, b4, c1, c2, c3, c4, d1, d2, d3, d4;
@@ -190,9 +177,6 @@ br_scalar BR_PUBLIC_ENTRY BrMatrix4Determinant(const br_matrix4 *mat)
     // clang-format on
 }
 
-/*
- * A = adjoint(B)
- */
 
 void BR_PUBLIC_ENTRY BrMatrix4Adjoint(br_matrix4 *A, const br_matrix4 *B)
 {
@@ -241,10 +225,6 @@ void BR_PUBLIC_ENTRY BrMatrix4Adjoint(br_matrix4 *A, const br_matrix4 *B)
     // clang-format on
 }
 
-/*
- * Generate a perspective tranform
- *
- */
 void BR_PUBLIC_ENTRY BrMatrix4Perspective(br_matrix4 *mat, br_angle field_of_view, br_scalar aspect, br_scalar hither, br_scalar yon)
 {
     br_scalar scale = BR_DIV(BR_COS((br_angle)(field_of_view / 2)), BR_SIN((br_angle)(field_of_view / 2)));
@@ -284,9 +264,6 @@ void BR_PUBLIC_ENTRY BrMatrix4Orthographic(br_matrix4 *mat, br_scalar left, br_s
     // clang-format on
 }
 
-/*
- * vec_a = vec_b * mat
- */
 void BR_PUBLIC_ENTRY BrMatrix4Apply(br_vector4 *A, const br_vector4 *B, const br_matrix4 *C)
 {
     UASSERT_MESSAGE("Destination vector is NULL", A != NULL);
@@ -300,9 +277,6 @@ void BR_PUBLIC_ENTRY BrMatrix4Apply(br_vector4 *A, const br_vector4 *B, const br
     A->v[3] = BR_MAC4(B->v[0], C(0, 3), B->v[1], C(1, 3), B->v[2], C(2, 3), B->v[3], C(3, 3));
 }
 
-/*
- * [a b c d] = [ e f g 1 ] . M
- */
 void BR_PUBLIC_ENTRY BrMatrix4ApplyP(br_vector4 *A, const br_vector3 *B, const br_matrix4 *C)
 {
     UASSERT_MESSAGE("Destination vector is NULL", A != NULL);
@@ -316,9 +290,6 @@ void BR_PUBLIC_ENTRY BrMatrix4ApplyP(br_vector4 *A, const br_vector3 *B, const b
     A->v[3] = BR_MAC3(B->v[0], C(0, 3), B->v[1], C(1, 3), B->v[2], C(2, 3)) + C(3, 3);
 }
 
-/*
- * [a b c d] = [ e f g 0 ] . M
- */
 void BR_PUBLIC_ENTRY BrMatrix4ApplyV(br_vector4 *A, const br_vector3 *B, const br_matrix4 *C)
 {
     UASSERT_MESSAGE("Destination vector is NULL", A != NULL);
@@ -332,9 +303,6 @@ void BR_PUBLIC_ENTRY BrMatrix4ApplyV(br_vector4 *A, const br_vector3 *B, const b
     A->v[3] = BR_MAC3(B->v[0], C(0, 3), B->v[1], C(1, 3), B->v[2], C(2, 3));
 }
 
-/*
- * vec_a = vec_b * mat
- */
 void BR_PUBLIC_ENTRY BrMatrix4TApply(br_vector4 *A, const br_vector4 *B, const br_matrix4 *C)
 {
     UASSERT_MESSAGE("Destination vector is NULL", A != NULL);
@@ -348,9 +316,6 @@ void BR_PUBLIC_ENTRY BrMatrix4TApply(br_vector4 *A, const br_vector4 *B, const b
     A->v[3] = BR_MAC4(B->v[0], C(3, 0), B->v[1], C(3, 1), B->v[2], C(3, 2), B->v[3], C(3, 3));
 }
 
-/*
- * [a b c d] = [ e f g 1 ] . M
- */
 void BR_PUBLIC_ENTRY BrMatrix4TApplyP(br_vector4 *A, const br_vector3 *B, const br_matrix4 *C)
 {
     UASSERT_MESSAGE("Destination vector is NULL", A != NULL);
@@ -364,9 +329,6 @@ void BR_PUBLIC_ENTRY BrMatrix4TApplyP(br_vector4 *A, const br_vector3 *B, const 
     A->v[3] = BR_MAC3(B->v[0], C(3, 0), B->v[1], C(3, 1), B->v[2], C(3, 2)) + C(3, 3);
 }
 
-/*
- * [a b c d] = [ e f g 0 ] . M
- */
 void BR_PUBLIC_ENTRY BrMatrix4TApplyV(br_vector4 *A, const br_vector3 *B, const br_matrix4 *C)
 {
     UASSERT_MESSAGE("Destination vector is NULL", A != NULL);
@@ -441,9 +403,6 @@ void BR_PUBLIC_ENTRY BrMatrix4Mul34(br_matrix4 *A, const br_matrix34 *B, const b
     A(3, 3) = BR_MAC3(B(3, 0), C(0, 3), B(3, 1), C(1, 3), B(3, 2), C(2, 3)) + C(3, 3);
 }
 
-/*
- * A = B*A
- */
 void BR_PUBLIC_ENTRY BrMatrix4Pre34(br_matrix4 *A, const br_matrix34 *B)
 {
     br_matrix4 C = *A;

@@ -2368,10 +2368,6 @@ void DfClose(br_datafile *df)
     BrResFree(df);
 }
 
-/*
- * Set the current output mode   - page 64
-   either BR_FS_MODE_TEXT or BR_FS_MODE_BINARY should be passed.
- */
 int BR_PUBLIC_ENTRY BrWriteModeSet(int mode)
 {
 
