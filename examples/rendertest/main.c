@@ -1144,6 +1144,74 @@ static const rt_relation rt_relations[] = {
      .device = "softrend"},
 
     /*
+     * The line and point material witnesses. Each scene holds an edge actor and
+     * a point actor sharing one material, so a pair that differs by one knob of
+     * that material fails here by name whatever the topology - and a pair that
+     * is one actor short cannot stand in, which is why each fixture's control
+     * is another two-actor scene rather than scene-edges or scene-points.
+     *
+     * The textured fixtures are asserted at INDEX_8 and RGB_888 only, and that
+     * is a measurement: neither the 555 nor the 565 line/point table has a
+     * textured entry at all, so at those types the map is dropped and both
+     * sides of the relation draw the same untextured frame. Asserting it there
+     * would be asserting a property the renderer does not have.
+     *
+     * At 24bpp the loader re-types the indexed map as RGB_888 and the general
+     * 888 table does have a textured entry, so a relation against a fixture
+     * without a map holds in both depth modes. It does not hold between
+     * scene-lines-map-gouraud and scene-lines-map: the 888 textured line block
+     * carries no shading at all, so both select the same unshaded cell there and
+     * the frames are equal - measured, and why that pair is asserted at 8bpp
+     * alone while the map/no-map pairs are asserted at both.
+     *
+     * Both fields are spelled out; see the note on RT_ANY_TYPE above.
+     */
+    {.a = "scene-lines-gouraud",     .b = "scene-lines-plain",         .equal = BR_FALSE, .pm_type = RT_ANY_TYPE, .mode = RT_ANY_MODE,
+     .device = "softrend"},
+    {.a = "scene-lines-map",         .b = "scene-lines-plain",         .equal = BR_FALSE, .pm_type = BR_PMT_INDEX_8, .mode = RT_ANY_MODE,
+     .device = "softrend"},
+    {.a = "scene-lines-map",         .b = "scene-lines-plain",         .equal = BR_FALSE, .pm_type = BR_PMT_RGB_888, .mode = RT_ANY_MODE,
+     .device = "softrend"},
+    {.a = "scene-lines-map-gouraud", .b = "scene-lines-map",           .equal = BR_FALSE, .pm_type = BR_PMT_INDEX_8, .mode = RT_ANY_MODE,
+     .device = "softrend"},
+    {.a = "scene-lines-map-gouraud", .b = "scene-lines-gouraud",       .equal = BR_FALSE, .pm_type = BR_PMT_INDEX_8, .mode = RT_ANY_MODE,
+     .device = "softrend"},
+    {.a = "scene-lines-map-gouraud", .b = "scene-lines-gouraud",       .equal = BR_FALSE, .pm_type = BR_PMT_RGB_888, .mode = RT_ANY_MODE,
+     .device = "softrend"},
+    {.a = "scene-lines-map-unlit",   .b = "scene-lines-plain-unlit",   .equal = BR_FALSE, .pm_type = BR_PMT_INDEX_8, .mode = RT_ANY_MODE,
+     .device = "softrend"},
+    {.a = "scene-lines-map-unlit",   .b = "scene-lines-plain-unlit",   .equal = BR_FALSE, .pm_type = BR_PMT_RGB_888, .mode = RT_ANY_MODE,
+     .device = "softrend"},
+
+    /*
+     * The RGB-output arbitrary-width shade-table witnesses. The perspective
+     * pairs are asserted at 555 and 565 in the Z-sort mode only: with a depth
+     * buffer the 555/565 walk reaches an untextured block first, and the flag
+     * does not change that frame - the Z-sort tables are where the CORRECT and
+     * AFFINE cells of this family sit at all. At 888 both modes reach them. The
+     * flat/gouraud pair is asserted in the same places for the same reason. The
+     * affine twins of the two RGB-typed colour maps are one flag away from the
+     * perspective fixtures already in the corpus, so the pair is asserted in
+     * the mode those fixtures are witnesses in.
+     */
+    {.a = "scene-shade-arb-flat-persp",   .b = "scene-shade-arb-flat",   .equal = BR_FALSE, .pm_type = BR_PMT_RGB_555, .mode = RT_MODE_ZS,
+     .device = "softrend"},
+    {.a = "scene-shade-arb-flat-persp",   .b = "scene-shade-arb-flat",   .equal = BR_FALSE, .pm_type = BR_PMT_RGB_565, .mode = RT_MODE_ZS,
+     .device = "softrend"},
+    {.a = "scene-shade-arb-flat-persp",   .b = "scene-shade-arb-flat",   .equal = BR_FALSE, .pm_type = BR_PMT_RGB_888, .mode = RT_ANY_MODE,
+     .device = "softrend"},
+    {.a = "scene-shade-arb-smooth-persp", .b = "scene-shade-arb-flat-persp", .equal = BR_FALSE, .pm_type = BR_PMT_RGB_555, .mode = RT_MODE_ZS,
+     .device = "softrend"},
+    {.a = "scene-shade-arb-smooth-persp", .b = "scene-shade-arb-flat-persp", .equal = BR_FALSE, .pm_type = BR_PMT_RGB_565, .mode = RT_MODE_ZS,
+     .device = "softrend"},
+    {.a = "scene-shade-arb-smooth-persp", .b = "scene-shade-arb-flat-persp", .equal = BR_FALSE, .pm_type = BR_PMT_RGB_888, .mode = RT_ANY_MODE,
+     .device = "softrend"},
+    {.a = "scene-tex-rgb555-affine",      .b = "scene-tex-rgb555",      .equal = BR_FALSE, .pm_type = BR_PMT_RGB_555, .mode = RT_MODE_ZS,
+     .device = "softrend"},
+    {.a = "scene-tex-rgb565-affine",      .b = "scene-tex-rgb565",      .equal = BR_FALSE, .pm_type = BR_PMT_RGB_565, .mode = RT_MODE_ZS,
+     .device = "softrend"},
+
+    /*
      * The MMX family. Every pair differs by exactly one property of one cube:
      * the perspective flag, the smoothing flag, or one of the two ROP flags
      * (`BR_MATF_DITHER`, opacity below full). A kernel that stops firing, or
@@ -1583,12 +1651,29 @@ static const char *const rt_default_scenes[] = {
     "scene-blend-off",
 
     /*
+     * The RGB-output arbitrary-width shade-table fixtures and the affine twins
+     * of the two RGB-typed colour maps; see scene.c. The first three carry
+     * one cube per output format, so each is the witness at its own --bpp.
+     */
+    "scene-shade-arb-flat", "scene-shade-arb-flat-persp", "scene-shade-arb-smooth-persp",
+    "scene-tex-rgb555-affine", "scene-tex-rgb565-affine",
+
+    /*
      * The topology witnesses; see scene.c. Non-triangle topologies have no
      * witness without them, because the style they need is actor state and no
      * glTF path carried it before BR_actors.
      */
     "scene-edges",
     "scene-points",
+
+    /*
+     * The line and point material states; see scene.c. Each scene carries an
+     * edge actor and a point actor sharing one material, so one scene witnesses
+     * both topologies - and the two plain fixtures are the controls the others
+     * are one knob away from.
+     */
+    "scene-lines-plain",       "scene-lines-gouraud", "scene-lines-map", "scene-lines-map-gouraud", "scene-lines-plain-unlit",
+    "scene-lines-map-unlit",
 
     /*
      * The MMX 555/565 family. pentprim walks the MMX table before the general

@@ -1,0 +1,336 @@
+{
+  "accessors": [
+    {
+      "bufferView": 0,
+      "componentType": 5126,
+      "type": "VEC3",
+      "count": 24,
+      "min": [-0.5, -0.5, -0.5],
+      "max": [0.5, 0.5, 0.5]
+    },
+    {
+      "bufferView": 1,
+      "componentType": 5126,
+      "type": "VEC3",
+      "count": 24
+    },
+    {
+      "bufferView": 2,
+      "componentType": 5126,
+      "type": "VEC2",
+      "count": 24
+    },
+    {
+      "bufferView": 3,
+      "componentType": 5126,
+      "type": "VEC3",
+      "count": 24
+    },
+    {
+      "bufferView": 4,
+      "componentType": 5123,
+      "type": "SCALAR",
+      "count": 36
+    }
+  ],
+  "asset": {
+    "generator": "BRender 1.4.0 (DDI 2.0.0)",
+    "version": "2.0"
+  },
+  "bufferViews": [
+    {
+      "name": "group 0 positions",
+      "buffer": 0,
+      "byteLength": 288,
+      "target": 34962
+    },
+    {
+      "name": "group 0 normals",
+      "buffer": 1,
+      "byteLength": 288,
+      "target": 34962
+    },
+    {
+      "name": "group 0 uvs",
+      "buffer": 2,
+      "byteLength": 192,
+      "target": 34962
+    },
+    {
+      "name": "group 0 colours",
+      "buffer": 3,
+      "byteLength": 288,
+      "target": 34962
+    },
+    {
+      "name": "group 0 indices",
+      "buffer": 4,
+      "byteLength": 72,
+      "target": 34963
+    }
+  ],
+  "buffers": [
+    {
+      "name": "group 0 positions",
+      "uri": "data:application/octet-stream;base64,AAAAvwAAAL8AAAC/AAAAvwAAAL8AAAC/AAAAvwAAAL8AAAC/AAAAvwAAAL8AAAA/AAAAvwAAAL8AAAA/AAAAvwAAAL8AAAA/AAAAvwAAAD8AAAC/AAAAvwAAAD8AAAC/AAAAvwAAAD8AAAC/AAAAvwAAAD8AAAA/AAAAvwAAAD8AAAA/AAAAvwAAAD8AAAA/AAAAPwAAAL8AAAC/AAAAPwAAAL8AAAC/AAAAPwAAAL8AAAC/AAAAPwAAAL8AAAA/AAAAPwAAAL8AAAA/AAAAPwAAAL8AAAA/AAAAPwAAAD8AAAC/AAAAPwAAAD8AAAC/AAAAPwAAAD8AAAC/AAAAPwAAAD8AAAA/AAAAPwAAAD8AAAA/AAAAPwAAAD8AAAA/",
+      "byteLength": 288
+    },
+    {
+      "name": "group 0 normals",
+      "uri": "data:application/octet-stream;base64,AACAvwAAAAAAAACAAAAAAAAAgL8AAACAAAAAAAAAAAAAAIC/AAAAAAAAAAAAAIA/AAAAAAAAgL8AAACAAACAvwAAAAAAAACAAACAvwAAAAAAAACAAAAAAAAAgD8AAACAAAAAAAAAAAAAAIC/AAAAAAAAgD8AAACAAAAAAAAAAAAAAIA/AACAvwAAAAAAAACAAAAAAAAAAAAAAIC/AAAAAAAAgL8AAACAAACAPwAAAAAAAACAAACAPwAAAAAAAACAAAAAAAAAAAAAAIA/AAAAAAAAgL8AAACAAAAAAAAAAAAAAIC/AAAAAAAAgD8AAACAAACAPwAAAAAAAACAAACAPwAAAAAAAACAAAAAAAAAgD8AAACAAAAAAAAAAAAAAIA/",
+      "byteLength": 288
+    },
+    {
+      "name": "group 0 uvs",
+      "uri": "data:application/octet-stream;base64,AAAAAAAAAAAAAAAAAAAAAAAAgD8AAAAAAAAAAAAAAAAAAAAAAACAPwAAgD8AAAAAAAAAAAAAgD8AAAAAAACAPwAAgD8AAIA/AAAAAAAAAAAAAAAAAACAPwAAgD8AAIA/AAAAAAAAAAAAAIA/AAAAAAAAgD8AAAAAAAAAAAAAAAAAAIA/AAAAAAAAgD8AAIA/AAAAAAAAgD8AAIA/AACAPwAAgD8AAIA/AAAAAAAAgD8AAIA/AAAAAAAAgD8AAIA/",
+      "byteLength": 192
+    },
+    {
+      "name": "group 0 colours",
+      "uri": "data:application/octet-stream;base64,AACAPwAAgD8AAIA/AACAPwAAgD8AAIA/AACAPwAAgD8AAIA/AACAPwAAgD8AAIA/AACAPwAAgD8AAIA/AACAPwAAgD8AAIA/AACAPwAAgD8AAIA/AACAPwAAgD8AAIA/AACAPwAAgD8AAIA/AACAPwAAgD8AAIA/AACAPwAAgD8AAIA/AACAPwAAgD8AAIA/AACAPwAAgD8AAIA/AACAPwAAgD8AAIA/AACAPwAAgD8AAIA/AACAPwAAgD8AAIA/AACAPwAAgD8AAIA/AACAPwAAgD8AAIA/AACAPwAAgD8AAIA/AACAPwAAgD8AAIA/AACAPwAAgD8AAIA/AACAPwAAgD8AAIA/AACAPwAAgD8AAIA/AACAPwAAgD8AAIA/",
+      "byteLength": 288
+    },
+    {
+      "name": "group 0 indices",
+      "uri": "data:application/octet-stream;base64,EAAXAAoAEAAKAAMAFgATAAcAFgAHAAkAAgAIABIAAgASAAwADQARAAQADQAEAAEABQALAAYABQAGAAAADgAUABUADgAVAA8A",
+      "byteLength": 72
+    }
+  ],
+  "images": [
+    {
+      "name": "scene-shade-arb-map",
+      "uri": "data:image/png;brender=index8;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAAAAACPAi4CAAAAWklEQVR4XmN8wMDA4ADEB8ikmRgoBANvAKMCBf4HhdtwCIPRdMAwmg4YGEbLA4bRdMAwmg5AldpoeTCaDkbTAaR5N1ovjNYLDKP1AsNoeTBaHsA6vKPtAwYGAGp6gHFsnHM2AAAAAElFTkSuQmCC"
+    },
+    {
+      "name": "scene-shade-arb-flat-persp-6-material",
+      "uri": "data:image/png;brender=rgb888;base64,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"
+    },
+    {
+      "name": "scene-shade-arb-flat-persp-5-material",
+      "uri": "data:image/png;brender=rgb565;base64,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"
+    },
+    {
+      "name": "scene-shade-arb-flat-persp-4-material",
+      "uri": "data:image/png;brender=rgb555;base64,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"
+    }
+  ],
+  "meshes": [
+    {
+      "name": "cube",
+      "primitives": [
+        {
+          "indices": 4,
+          "attributes": {
+            "POSITION": 0,
+            "NORMAL": 1,
+            "TEXCOORD_0": 2,
+            "COLOR_0": 3
+          }
+        }
+      ]
+    }
+  ],
+  "materials": [
+    {
+      "name": "scene-shade-arb-flat-persp-6-material",
+      "pbrMetallicRoughness": {
+        "baseColorTexture": {
+          "index": 0
+        },
+        "metallicFactor": 0,
+        "baseColorFactor": [0.577580512, 0.577580512, 0.577580512, 1]
+      }
+    },
+    {
+      "name": "scene-shade-arb-flat-persp-5-material",
+      "pbrMetallicRoughness": {
+        "baseColorTexture": {
+          "index": 1
+        },
+        "metallicFactor": 0,
+        "baseColorFactor": [0.577580512, 0.577580512, 0.577580512, 1]
+      }
+    },
+    {
+      "name": "scene-shade-arb-flat-persp-4-material",
+      "pbrMetallicRoughness": {
+        "baseColorTexture": {
+          "index": 2
+        },
+        "metallicFactor": 0,
+        "baseColorFactor": [0.577580512, 0.577580512, 0.577580512, 1]
+      }
+    }
+  ],
+  "nodes": [
+    {
+      "children": [ 1, 2, 3, 4, 5, 6 ],
+      "name": "world"
+    },
+    {
+      "mesh": 0,
+      "name": "cube-888",
+      "matrix": [3, 0, 0, 0, 0, 2.89777756, -0.776457131, 0, 0, 0.776457131, 2.89777756, 0, 2.5999999, 0, 0, 1],
+      "extensions": {
+        "BR_materials": {
+          "material": 0
+        }
+      }
+    },
+    {
+      "mesh": 0,
+      "name": "cube-565",
+      "matrix": [3, 0, 0, 0, 0, 2.89777756, -0.776457131, 0, 0, 0.776457131, 2.89777756, 0, -2.5999999, 0, 0, 1],
+      "extensions": {
+        "BR_materials": {
+          "material": 1
+        }
+      }
+    },
+    {
+      "name": "near",
+      "matrix": [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 2, 2, 2, 1],
+      "extensions": {
+        "KHR_lights_punctual": {
+          "light": 0
+        },
+        "BR_lights": {
+          "light": 0
+        }
+      }
+    },
+    {
+      "name": "ambient",
+      "extensions": {
+        "BR_lights": {
+          "light": 1
+        }
+      }
+    },
+    {
+      "name": "camera",
+      "matrix": [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 6, 1],
+      "camera": 0
+    },
+    {
+      "mesh": 0,
+      "name": "cube",
+      "matrix": [2.59807611, 0, -1.5, 0, 0.513030231, 2.81907797, 0.888594389, 0, 1.40953898, -1.02606046, 2.44139314, 0, 0, 0, 0, 1],
+      "extensions": {
+        "BR_materials": {
+          "material": 2
+        }
+      }
+    }
+  ],
+  "samplers": [
+    {
+      "magFilter": 9728,
+      "minFilter": 9728
+    }
+  ],
+  "scene": 0,
+  "scenes": [
+    {
+      "nodes": [ 0 ]
+    }
+  ],
+  "textures": [
+    {
+      "name": "scene-shade-arb-flat-persp-6-material",
+      "source": 0,
+      "sampler": 0
+    },
+    {
+      "name": "scene-shade-arb-flat-persp-5-material",
+      "source": 0,
+      "sampler": 0
+    },
+    {
+      "name": "scene-shade-arb-flat-persp-4-material",
+      "source": 0,
+      "sampler": 0
+    }
+  ],
+  "cameras": [
+    {
+      "type": "perspective",
+      "perspective": {
+        "aspectRatio": 1,
+        "yfov": 0.785398185,
+        "zfar": 100,
+        "znear": 0.100000001
+      }
+    }
+  ],
+  "extensions": {
+    "KHR_lights_punctual": {
+      "lights": [
+        {
+          "type": "point",
+          "range": 5
+        },
+        {
+          "type": "point",
+          "intensity": 0,
+          "range": 1
+        }
+      ]
+    },
+    "BR_lights": {
+      "lights": [
+        {
+          "identifier": "near",
+          "type": "point",
+          "linear_falloff": true,
+          "colour": [1, 1, 1],
+          "radius_outer": 5
+        },
+        {
+          "identifier": "ambient",
+          "type": "ambient",
+          "colour": [0.188235298, 0.188235298, 0.188235298]
+        }
+      ]
+    },
+    "BR_materials": {
+      "materials": [
+        {
+          "identifier": "scene-shade-arb-flat-persp-6-material",
+          "colour": [0.784313738, 0.784313738, 0.784313738],
+          "flags": 33,
+          "map_transform": [1, 0, 0, 1, 0, 0],
+          "index_base": 0,
+          "index_range": 255,
+          "colour_map": 0,
+          "index_shade": 1
+        },
+        {
+          "identifier": "scene-shade-arb-flat-persp-5-material",
+          "colour": [0.784313738, 0.784313738, 0.784313738],
+          "flags": 33,
+          "map_transform": [1, 0, 0, 1, 0, 0],
+          "index_base": 0,
+          "index_range": 255,
+          "colour_map": 0,
+          "index_shade": 2
+        },
+        {
+          "identifier": "scene-shade-arb-flat-persp-4-material",
+          "colour": [0.784313738, 0.784313738, 0.784313738],
+          "flags": 33,
+          "map_transform": [1, 0, 0, 1, 0, 0],
+          "index_base": 0,
+          "index_range": 255,
+          "colour_map": 0,
+          "index_shade": 3
+        }
+      ]
+    }
+  },
+  "extensionsUsed": [
+    "KHR_lights_punctual",
+    "BR_lights",
+    "BR_materials"
+  ]
+}

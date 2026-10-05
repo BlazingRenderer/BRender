@@ -414,6 +414,18 @@ static br_material *scene_material_ex(const char *name, br_colour colour, br_uin
 #define SCENE_NEAR_LIGHT_RADIUS BR_SCALAR(5.0)
 
 /*
+ * The scale the RGB-output, arbitrary-width shade-table fixtures are drawn at,
+ * measured rather than chosen. The trapezium's u/v correction loops pull the
+ * span's first texel address back towards the span's own walk, and on the 1.5x
+ * feature cube that correction absorbs the wrong seed entirely: a rebuild that
+ * reintroduces the old packing leaves a 1.5x fixture's checksum unmoved. Only
+ * at 3.0x does the error survive. scene-tex-32 carries the same measurement for
+ * the 32x32 block; this is the same trap on the arbitrary-width mapper, so the
+ * fixtures that reach its CORRECT cells have to be at least this large.
+ */
+#define SCENE_ARB_SCALE BR_SCALAR(3.0)
+
+/*
  * Every lookup table is indexed as (row * 256) + column whatever its height, so
  * the width is not a free parameter. An empty table is still a valid table; the
  * builders below fill one in.
@@ -791,8 +803,15 @@ static br_material *scene_fx_material(const char *name, br_uint_32 flags)
  * fronto-parallel face has a constant w across it, which makes the perspective
  * setup's cheat fire and the affine rasteriser render it - so an unturned cube
  * cannot tell the affine and perspective texture paths apart.
+ *
+ * `scale` is almost always SCENE_FX_SCALE. scene-tex-32 enlarges the cube: the
+ * 32x32 z-sorted perspective block's defect is in the texel address its first
+ * span starts from, and that address is corrected by the trapezium's u/v
+ * correction loops when the projected texel fractions are small - which they
+ * are on the 1.5x cube. A cube large enough that the spans start with large
+ * fractions is what leaves the error in place. See scene-tex-32 below.
  */
-static br_actor *scene_fx_world_range(br_model *cube, br_material *mat, br_scalar hither, br_scalar yon)
+static br_actor *scene_fx_world_range(br_model *cube, br_material *mat, br_scalar scale, br_scalar hither, br_scalar yon)
 {
     br_actor   *world = scene_world(cube, mat, BR_SCALAR(1.0));
     br_actor   *a;
@@ -806,7 +825,7 @@ static br_actor *scene_fx_world_range(br_model *cube, br_material *mat, br_scala
             break;
 
     if(a != NULL) {
-        BrMatrix34Scale(&m, SCENE_FX_SCALE, SCENE_FX_SCALE, SCENE_FX_SCALE);
+        BrMatrix34Scale(&m, scale, scale, scale);
         BrMatrix34PostRotateX(&m, BR_ANGLE_DEG(20));
         BrMatrix34PostRotateY(&m, BR_ANGLE_DEG(30));
 
@@ -822,7 +841,7 @@ static br_actor *scene_fx_world_range(br_model *cube, br_material *mat, br_scala
 
 static br_actor *scene_fx_world(br_model *cube, br_material *mat)
 {
-    return scene_fx_world_range(cube, mat, BR_SCALAR(0.1), BR_SCALAR(100.0));
+    return scene_fx_world_range(cube, mat, SCENE_FX_SCALE, BR_SCALAR(0.1), BR_SCALAR(100.0));
 }
 
 /*
@@ -851,6 +870,77 @@ static br_actor *scene_fx_world_topology(br_model *cube, br_material *mat, br_ui
 }
 
 /*
+ * scene_fx_world() with two cube actors sharing one material: the first drawn
+ * as edges, the second as points. The two sit at the same transform and differ
+ * only in render_style, so one material state witnesses both topologies in a
+ * single scene - which is what makes the line/point fixtures five material
+ * states rather than ten.
+ *
+ * The point actor copies the edge actor's transform rather than taking the
+ * identity: at the identity it would be a unit cube at the origin, i.e. a
+ * different shape in a different place, and the frame would no longer be the
+ * same rig scene-edges and scene-points use.
+ *
+ * Both actors also draw at the same place when the style is dropped, so a
+ * fixture whose render_style never reached the loader renders as scene-flat
+ * does - which is what the scene-edges/scene-points relation asserts today.
+ */
+static br_actor *scene_fx_world_topologies(br_model *cube, br_material *mat)
+{
+    br_actor *world = scene_fx_world(cube, mat);
+    br_actor *edges = NULL, *points;
+
+    if(world == NULL)
+        return NULL;
+
+    for(br_actor *a = world->children; a != NULL; a = a->next) {
+        if(a->type == BR_ACTOR_MODEL) {
+            edges = a;
+            break;
+        }
+    }
+
+    if(edges == NULL)
+        return world;
+
+    edges->render_style = BR_RSTYLE_EDGES;
+
+    if((points = scene_actor(world, BR_ACTOR_MODEL, "cube-points")) == NULL)
+        return world;
+
+    points->model        = cube;
+    points->material     = mat;
+    points->render_style = BR_RSTYLE_POINTS;
+    points->t            = edges->t;
+
+    return world;
+}
+
+/*
+ * A cube at an explicit scale and place, named so that a several-cube scene
+ * can say why each is there. scene_fx_add_cube() is this at the feature scale.
+ */
+static void scene_fx_add_cube_named(br_actor *world, br_model *cube, br_material *mat, const char *name, br_scalar scale, br_scalar x,
+                                    br_scalar y, br_scalar z)
+{
+    br_actor   *a;
+    br_matrix34 m;
+
+    if((a = scene_actor(world, BR_ACTOR_MODEL, name)) == NULL)
+        return;
+
+    a->model    = cube;
+    a->material = mat;
+
+    BrMatrix34Scale(&m, scale, scale, scale);
+    BrMatrix34PostRotateX(&m, BR_ANGLE_DEG(-15));
+    BrMatrix34PostTranslate(&m, x, y, z);
+
+    a->t.type  = BR_TRANSFORM_MATRIX34;
+    a->t.t.mat = m;
+}
+
+/*
  * A second cube, nearer the camera and offset to one side so that it overlaps
  * the first on screen. The indexed blend reads the pixel already in the colour
  * buffer, and with z buffering a single convex model writes every pixel exactly
@@ -859,21 +949,7 @@ static br_actor *scene_fx_world_topology(br_model *cube, br_material *mat, br_ui
  */
 static void scene_fx_add_cube(br_actor *world, br_model *cube, br_material *mat, br_scalar x, br_scalar y, br_scalar z)
 {
-    br_actor   *a;
-    br_matrix34 m;
-
-    if((a = scene_actor(world, BR_ACTOR_MODEL, "cube-2")) == NULL)
-        return;
-
-    a->model    = cube;
-    a->material = mat;
-
-    BrMatrix34Scale(&m, SCENE_FX_SCALE, SCENE_FX_SCALE, SCENE_FX_SCALE);
-    BrMatrix34PostRotateX(&m, BR_ANGLE_DEG(-15));
-    BrMatrix34PostTranslate(&m, x, y, z);
-
-    a->t.type  = BR_TRANSFORM_MATRIX34;
-    a->t.t.mat = m;
+    scene_fx_add_cube_named(world, cube, mat, "cube-2", SCENE_FX_SCALE, x, y, z);
 }
 
 /*
@@ -1005,6 +1081,205 @@ static br_error scene_make_mmx_fixtures(br_model *cube)
         if((world = scene_fx_world(cube, m)) == NULL || scene_save(gltf, world) != BRE_OK)
             r = BRE_FAIL;
     }
+
+    return r;
+}
+
+/*
+ * ------------------------------------------------------------------
+ * The line and point material fixtures.
+ *
+ * One scene witnesses both topologies: render_style is per actor, so a scene
+ * can hold an edge actor and a point actor sharing one material
+ * (scene_fx_world_topologies).
+ *
+ *   scene-lines-plain         lit flat, no map            - the control
+ *   scene-lines-gouraud       + BR_MATF_SMOOTH
+ *   scene-lines-map           lit flat, indexed map + shade table
+ *   scene-lines-map-gouraud   + BR_MATF_SMOOTH
+ *   scene-lines-plain-unlit   unlit white, no map        - the second control
+ *   scene-lines-map-unlit     unlit white, indexed map
+ *
+ * Two properties decide whether these draw the block they name:
+ *
+ *  - The gouraud fixtures need the near light scene_fx_world() adds. A light
+ *    far enough away gives each face one intensity, and the flat and
+ *    interpolated kernels then produce the same frame.
+ *  - The unlit fixtures must be unlit *and* white: a texture-only block is one
+ *    whose entry carries no MODULATE requirement, and PRIMF_MODULATE is set by
+ *    the material colour as well as by BR_MATF_LIGHT, so a lit grey material
+ *    matches the shaded block instead.
+ *
+ * The map is scene-tex-arb's shape, an indexed checkerboard of arbitrary width
+ * (96x48): the line and point family has no power-of-two blocks, so every one
+ * of these states is an ADDR_DIVIDE tuple and a power-of-two map would reach
+ * nothing. The palette carries it through the 24bpp run, where the loader
+ * re-types an indexed map as an RGB_888 one.
+ *
+ * The indexed shade table is bound only where a tree entry requires one: the
+ * line/point INTERP_I/TEX_I8 and CONST_I/TEX_I8 blocks declare shade_type
+ * INDEX_8, and pentprim's LineRenderPITI reads work.shade_table unguarded, so a
+ * scene without one would match and then read a NULL pointer.
+ *
+ * The index band is not scene_fx_material()'s: an indexed frame treats index 0
+ * as transparent and an unlit untextured primitive's whole intensity is the
+ * band's base, so SCENE_FX_BASE's 0 draws nothing at 8bpp. A base above zero
+ * keeps the control visible, and these fixtures carry one.
+ */
+#define SCENE_LINES_BASE  16
+#define SCENE_LINES_RANGE 224
+static br_material *scene_lines_material(const char *name, br_colour colour, br_uint_32 flags, br_pixelmap *map, br_pixelmap *shade)
+{
+    br_material *m;
+
+    if((m = scene_material_ex(name, colour, flags, BR_SCALAR(0.1), BR_SCALAR(0.7), BR_SCALAR(0.0), BR_SCALAR(20.0))) == NULL)
+        return NULL;
+
+    m->index_base  = SCENE_LINES_BASE;
+    m->index_range = SCENE_LINES_RANGE;
+    m->colour_map  = map;
+    m->index_shade = shade;
+
+    return m;
+}
+
+static br_error scene_make_line_fixtures(br_model *cube)
+{
+    br_pixelmap *map, *shade;
+    br_error     r = BRE_OK;
+
+    if((map = scene_texture("scene-lines-map", SCENE_ARB_WIDTH, SCENE_ARB_HEIGHT, SCENE_ARB_CELLS)) == NULL ||
+       (shade = scene_shade_table("scene-lines-shade-table")) == NULL) {
+        fprintf(stderr, "failed to allocate the line fixture resources\n");
+        return BRE_FAIL;
+    }
+
+    /* The controls: the plain material each of the fixtures below is one knob away from. */
+    if(scene_save("scene-lines-plain.gltf",
+                  scene_fx_world_topologies(cube, scene_lines_material("scene-lines-plain-material", BR_COLOUR_RGB(200, 200, 200),
+                                                                       BR_MATF_LIGHT, NULL, NULL))) != BRE_OK)
+        r = BRE_FAIL;
+
+    if(scene_save("scene-lines-plain-unlit.gltf",
+                  scene_fx_world_topologies(cube, scene_lines_material("scene-lines-plain-unlit-material", BR_COLOUR_RGB(255, 255, 255), 0,
+                                                                       NULL, NULL))) != BRE_OK)
+        r = BRE_FAIL;
+
+    /* Constant intensity, no map: scene-lines-plain plus BR_MATF_SMOOTH. */
+    if(scene_save("scene-lines-gouraud.gltf",
+                  scene_fx_world_topologies(cube, scene_lines_material("scene-lines-gouraud-material", BR_COLOUR_RGB(200, 200, 200),
+                                                                       BR_MATF_LIGHT | BR_MATF_SMOOTH, NULL, NULL))) != BRE_OK)
+        r = BRE_FAIL;
+
+    /* Constant intensity, indexed map and shade table: scene-lines-plain plus the map. */
+    if(scene_save("scene-lines-map.gltf",
+                  scene_fx_world_topologies(cube, scene_lines_material("scene-lines-map-material", BR_COLOUR_RGB(200, 200, 200),
+                                                                       BR_MATF_LIGHT, map, shade))) != BRE_OK)
+        r = BRE_FAIL;
+
+    /* Interpolated intensity through the same map: scene-lines-map plus BR_MATF_SMOOTH. */
+    if(scene_save("scene-lines-map-gouraud.gltf",
+                  scene_fx_world_topologies(cube, scene_lines_material("scene-lines-map-gouraud-material", BR_COLOUR_RGB(200, 200, 200),
+                                                                       BR_MATF_LIGHT | BR_MATF_SMOOTH, map, shade))) != BRE_OK)
+        r = BRE_FAIL;
+
+    /* Texture-only: scene-lines-plain-unlit plus the map, and no shade table. */
+    if(scene_save("scene-lines-map-unlit.gltf",
+                  scene_fx_world_topologies(
+                      cube, scene_lines_material("scene-lines-map-unlit-material", BR_COLOUR_RGB(255, 255, 255), 0, map, NULL))) != BRE_OK)
+        r = BRE_FAIL;
+
+    return r;
+}
+
+/*
+ * ------------------------------------------------------------------
+ * The RGB-output arbitrary-width shade-table fixtures.
+ *
+ * prim_t24's RGB-typed shade-table blocks - out = shade[(intensity << 8) |
+ * texel] - have a witness at 888 in scene-shade-rgb888, and prim_t15/t16's at
+ * 555 and 565 in scene-shade-rgb555/565. All three are drawn at the 1.5x
+ * feature scale, where the arbitrary-width trapezium's u/v correction absorbs
+ * the difference between the CORRECT and AFFINE cells entirely, so every
+ * CORRECT x DIVIDE cell is still unwitnessed and the flat 888 one is
+ * unwitnessed beside them. These fixtures are the same material at
+ * SCENE_ARB_SCALE, and they are three scenes:
+ *
+ *   scene-shade-arb-flat          constant intensity, no perspective flag
+ *   scene-shade-arb-flat-persp    + BR_MATF_PERSPECTIVE
+ *   scene-shade-arb-smooth-persp  + BR_MATF_SMOOTH as well
+ *
+ * A shade table's type must equal the output format (shared_texture() sets the
+ * block's shade type from its colour type, and the matcher
+ * tests shade_type against the bound table's), and a scene renders at every
+ * output format in turn. So each scene carries three cubes - 555, 565 and 888 -
+ * each with its own material and its own table, and each is the witness at its
+ * own --bpp while the other two fall through to the untextured block. That is
+ * measured rather than assumed: one scene's log names the 555 cell at 15bpp,
+ * the 565 at 16 and the 888 at 24.
+ *
+ * The map is an INDEX_8 map with no palette, the shape scene-shade-rgb888
+ * already uses. It has to stay INDEX_8 at every output: the blocks all require
+ * texture type INDEX_8, and the loader re-types an indexed map that carries a
+ * palette - so a palette here would leave the 24bpp run on the untextured
+ * block. DIVIDE is then forced rather than chosen: the arbitrary-width family
+ * is the only one of these cells the tables emit for 555/565 at all, and 888
+ * has no SHIFT variant of any of them.
+ *
+ * The 565 and 888 cubes are offset from the centre one because three cubes
+ * drawn at SCENE_ARB_SCALE overlap in the middle of the frame; the offsets keep
+ * each cube's own pixels - and so each cube's own response to the perspective
+ * flag - readable in the scene's checksum.
+ */
+static br_error scene_make_rgb_shade_arb(br_model *cube, const char *name, br_uint_32 flags)
+{
+    br_uint_8    types[3] = {BR_PMT_RGB_555, BR_PMT_RGB_565, BR_PMT_RGB_888};
+    br_scalar    xs[3]    = {BR_SCALAR(0.0), BR_SCALAR(-2.6), BR_SCALAR(2.6)};
+    br_pixelmap *map      = scene_shade_texture("scene-shade-arb-map");
+    br_material *mats[3];
+    br_actor    *world;
+    char         gltf[128];
+
+    if(map == NULL)
+        return BRE_FAIL;
+
+    for(int k = 0; k < 3; ++k) {
+        char mname[64];
+
+        snprintf(mname, sizeof(mname), "%s-%u-material", name, (unsigned)types[k]);
+
+        if((mats[k] = scene_fx_material(mname, BR_MATF_LIGHT | flags)) == NULL)
+            return BRE_FAIL;
+
+        mats[k]->colour_map  = map;
+        mats[k]->index_shade = scene_shade_table_rgb(mname, types[k]);
+    }
+
+    world = scene_fx_world_range(cube, mats[0], SCENE_ARB_SCALE, BR_SCALAR(0.1), BR_SCALAR(100.0));
+
+    if(world != NULL)
+        scene_fx_add_cube_named(world, cube, mats[1], "cube-565", SCENE_ARB_SCALE, xs[1], BR_SCALAR(0), BR_SCALAR(0));
+
+    if(world != NULL)
+        scene_fx_add_cube_named(world, cube, mats[2], "cube-888", SCENE_ARB_SCALE, xs[2], BR_SCALAR(0), BR_SCALAR(0));
+
+    snprintf(gltf, sizeof(gltf), "%s.gltf", name);
+
+    return scene_save(gltf, world);
+}
+
+static br_error scene_make_rgb_shade_fixtures(br_model *cube)
+{
+    br_error r = BRE_OK;
+
+    if(scene_make_rgb_shade_arb(cube, "scene-shade-arb-flat", 0) != BRE_OK)
+        r = BRE_FAIL;
+
+    if(scene_make_rgb_shade_arb(cube, "scene-shade-arb-flat-persp", BR_MATF_PERSPECTIVE) != BRE_OK)
+        r = BRE_FAIL;
+
+    if(scene_make_rgb_shade_arb(cube, "scene-shade-arb-smooth-persp", BR_MATF_PERSPECTIVE | BR_MATF_SMOOTH) != BRE_OK)
+        r = BRE_FAIL;
 
     return r;
 }
@@ -1143,7 +1418,7 @@ static br_error scene_make_feature_fixtures(br_model *cube)
         mat->fog_max    = BR_SCALAR(8.0);
         mat->fog_colour = BR_COLOUR_RGB(160, 160, 160);
 
-        if(scene_save("scene-fog.gltf", scene_fx_world_range(cube, mat, BR_SCALAR(4.0), BR_SCALAR(8.0))) != BRE_OK)
+        if(scene_save("scene-fog.gltf", scene_fx_world_range(cube, mat, SCENE_FX_SCALE, BR_SCALAR(4.0), BR_SCALAR(8.0))) != BRE_OK)
             r = BRE_FAIL;
     }
 
@@ -1320,6 +1595,32 @@ static br_error scene_make_feature_fixtures(br_model *cube)
             mat->colour_map = tex565;
 
             if(scene_save("scene-tex-rgb565.gltf", scene_fx_world(cube, mat)) != BRE_OK)
+                r = BRE_FAIL;
+        }
+
+        /*
+         * The affine twins: scene-tex-rgb555/565 with BR_MATF_PERSPECTIVE dropped
+         * and nothing else changed. The CORRECT cells are witnessed by the
+         * perspective fixtures above; the AFFINE cells of the same block are not,
+         * because every fixture that reaches this family carries the flag. The
+         * pair is what makes the flag's effect visible in the checksum rather
+         * than only in the block the walk selects.
+         */
+        {
+            br_material *mat = scene_fx_material("scene-tex-rgb555-affine-material", BR_MATF_LIGHT | BR_MATF_SMOOTH);
+
+            mat->colour_map = tex555;
+
+            if(scene_save("scene-tex-rgb555-affine.gltf", scene_fx_world(cube, mat)) != BRE_OK)
+                r = BRE_FAIL;
+        }
+
+        {
+            br_material *mat = scene_fx_material("scene-tex-rgb565-affine-material", BR_MATF_LIGHT | BR_MATF_SMOOTH);
+
+            mat->colour_map = tex565;
+
+            if(scene_save("scene-tex-rgb565-affine.gltf", scene_fx_world(cube, mat)) != BRE_OK)
                 r = BRE_FAIL;
         }
     }
@@ -1624,6 +1925,12 @@ br_error mkres_make_scenes(void)
     }
 
     if(scene_make_feature_fixtures(cube) != BRE_OK)
+        r = BRE_FAIL;
+
+    if(scene_make_rgb_shade_fixtures(cube) != BRE_OK)
+        r = BRE_FAIL;
+
+    if(scene_make_line_fixtures(cube) != BRE_OK)
         r = BRE_FAIL;
 
     if(scene_make_mmx_fixtures(cube) != BRE_OK)
