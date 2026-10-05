@@ -109,6 +109,9 @@ outer_start:
 		cmp	ebp, ebx
 		jl	uidone
 
+		; work.pq.current must be positive or neither loop can converge
+		test	ebx,ebx
+		jle	uddone
 uiloop:
 		incu						; work.tsl.source = incu(work.tsl.source)
 		add	edi, ecx				; work.pu.grad_x += work.pq.grad_x
@@ -146,6 +149,9 @@ uddone:
 		mov	esi, work.tsl.dv_numerator_nocarry
 		jl	vidone
 
+		; work.pq.current must be positive or neither loop can converge
+		test	ebx,ebx
+		jle	vddone
 viloop:
 		incv						; work.tsl.source = incv(work.tsl.source)
 		add	edi, ecx				; work.pv.grad_x += work.pq.grad_x
@@ -853,6 +859,9 @@ outer_start:
 		cmp	ebp, ebx
 		jl	uidone
 
+		; work.pq.current must be positive or neither loop can converge
+		test	ebx,ebx
+		jle	uddone
 uiloop:
 		incu						; work.tsl.source = incu(work.tsl.source)
 		add	edi, ecx				; work.pu.grad_x += work.pq.grad_x
@@ -890,6 +899,9 @@ uddone:
 		mov	esi, work.tsl.dv_numerator_nocarry
 		jl	vidone
 
+		; work.pq.current must be positive or neither loop can converge
+		test	ebx,ebx
+		jle	vddone
 viloop:
 		incv						; work.tsl.source = incv(work.tsl.source)
 		add	edi, ecx				; work.pv.grad_x += work.pq.grad_x

@@ -202,6 +202,9 @@ scan_loop:
 
 		cmp		ebp,ebx
 		jl		uidone
+		; work.pq.current must be positive or neither loop can converge
+		test		ebx,ebx
+		jle		uddone
 uiloop:
 		incu							; work.tsl.source = incu(work.tsl.source)
 		sub		edi,ecx					; work.pu.grad_x -= work.pq.grad_x
@@ -238,6 +241,9 @@ uddone:
 
 		cmp		ebp,ebx
 		jl		vidone
+		; work.pq.current must be positive or neither loop can converge
+		test		ebx,ebx
+		jle		vddone
 viloop:
 		incv							; work.tsl.source = incv(work.tsl.source)
 		sub		edi,ecx					; work.pv.grad_x -= work.pq.grad_x
@@ -518,6 +524,9 @@ scan_loop:
 
 		cmp		ebp,ebx
 		jl		uidone
+		; work.pq.current must be positive or neither loop can converge
+		test		ebx,ebx
+		jle		uddone
 uiloop:
 		incu							; work.tsl.source = incu(work.tsl.source)
 		sub		edi,ecx					; work.pu.grad_x -= work.pq.grad_x
@@ -554,6 +563,9 @@ uddone:
 
 		cmp		ebp,ebx
 		jl		vidone
+		; work.pq.current must be positive or neither loop can converge
+		test		ebx,ebx
+		jle		vddone
 viloop:
 		incv							; work.tsl.source = incv(work.tsl.source)
 		sub		edi,ecx					; work.pv.grad_x -= work.pq.grad_x
