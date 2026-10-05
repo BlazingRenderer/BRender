@@ -685,20 +685,42 @@ static int fill_pixelmap(const void *key, void *value, br_hash hash, void *user)
     br_gltf_save_stbi  *sstate = NULL;
     br_pixelmap        *pm2;
     const char         *prefix;
+    int                 channels;
 
     (void)hash;
 
     image->name = pm->identifier;
 
-    if(pm->type == BR_PMT_INDEX_8 && pm->map == NULL) {
+    if(pm->map == NULL && (pm->type == BR_PMT_INDEX_8 || pm->type == BR_PMT_RGB_555 || pm->type == BR_PMT_RGB_565 || pm->type == BR_PMT_RGB_888)) {
         /*
-         * A lookup table. It has no palette, so there is no colour to expand the
-         * indices through and no lossy conversion that could preserve them - carry
-         * the indices themselves in the PNG's single channel. The PNG codec is
-         * lossless, so the bytes survive exactly.
+         * A lookup table: its samples are what the rasterisers read and there is
+         * no palette to expand them through. INDEX_8 is one byte per sample; the
+         * RGB-typed tables an RGB output needs are the output's own words. Carry
+         * the sample bytes in the PNG's channels and mark the type, so the loader
+         * rebuilds the same pixelmap instead of treating the image as colour. The
+         * PNG codec is lossless, so the bytes survive exactly. A colour map that
+         * does have a palette still expands through it as before.
          */
-        sstate = build_png(pm->pixels, pm->width, pm->height, 1, pm->row_bytes, state);
-        prefix = CGLTF_BR_INDEX_8_PNG_URI;
+        switch(pm->type) {
+            case BR_PMT_RGB_555:
+                channels = 2;
+                prefix   = CGLTF_BR_RGB_555_PNG_URI;
+                break;
+            case BR_PMT_RGB_565:
+                channels = 2;
+                prefix   = CGLTF_BR_RGB_565_PNG_URI;
+                break;
+            case BR_PMT_RGB_888:
+                channels = 3;
+                prefix   = CGLTF_BR_RGB_888_PNG_URI;
+                break;
+            default:
+                channels = 1;
+                prefix   = CGLTF_BR_INDEX_8_PNG_URI;
+                break;
+        }
+
+        sstate = build_png(pm->pixels, pm->width, pm->height, channels, pm->row_bytes, state);
     } else if((pm2 = BrPixelmapCloneTyped((br_pixelmap *)pm, BR_PMT_RGBA_8888_ARR)) != NULL) {
         /*
          * This code is cursed.

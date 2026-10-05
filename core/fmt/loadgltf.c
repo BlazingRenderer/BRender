@@ -115,14 +115,49 @@ void *unbuild_data_url(void *res, const char *uri, size_t *size)
     return data_out;
 }
 
+/*
+ * A lookup table's samples are carried raw in a marked data URI (see
+ * cgltf_brender.h). Return the pixel type the marker names and set *components
+ * to the PNG channel count it was written with, or return 0 for an ordinary
+ * colour image. The marker names the type rather than the loader inferring it:
+ * BR_PMT_RGB_555 and BR_PMT_RGB_565 are both two bytes per sample, and a shade
+ * table's type must equal the output, so guessing would collapse them.
+ */
+static br_uint_8 load_table_type(const char *uri, int *components)
+{
+    if(BrStrNCmp(uri, CGLTF_BR_INDEX_8_PNG_URI, BR_ASIZE(CGLTF_BR_INDEX_8_PNG_URI) - 1) == 0) {
+        *components = 1;
+        return BR_PMT_INDEX_8;
+    }
+
+    if(BrStrNCmp(uri, CGLTF_BR_RGB_555_PNG_URI, BR_ASIZE(CGLTF_BR_RGB_555_PNG_URI) - 1) == 0) {
+        *components = 2;
+        return BR_PMT_RGB_555;
+    }
+
+    if(BrStrNCmp(uri, CGLTF_BR_RGB_565_PNG_URI, BR_ASIZE(CGLTF_BR_RGB_565_PNG_URI) - 1) == 0) {
+        *components = 2;
+        return BR_PMT_RGB_565;
+    }
+
+    if(BrStrNCmp(uri, CGLTF_BR_RGB_888_PNG_URI, BR_ASIZE(CGLTF_BR_RGB_888_PNG_URI) - 1) == 0) {
+        *components = 3;
+        return BR_PMT_RGB_888;
+    }
+
+    *components = 0;
+    return 0;
+}
+
 static br_pixelmap *load_pixelmap(br_gltf_load_state *state, const cgltf_image *image)
 {
     void        *raw_data, *pixels;
     br_pixelmap *pixelmap, *tmp;
     size_t       size;
     int          x, y, c;
-    int          owns_raw = 0;
-    br_boolean   index_8  = BR_FALSE;
+    int          owns_raw   = 0;
+    br_uint_8    table_type = 0;
+    int          table_comp = 0;
 
     /*
      * GLB: images stored in buffer views.
@@ -132,9 +167,11 @@ static br_pixelmap *load_pixelmap(br_gltf_load_state *state, const cgltf_image *
         size     = image->buffer_view->size;
     } else if(image->uri != NULL) {
         /*
-         * A lookup table: its payload is the pixelmap's indices, not colour.
+         * A lookup table: its payload is the pixelmap's raw samples, not colour,
+         * and the marker names the type so the table comes back as the exact
+         * pixelmap the renderer needs (see cgltf_brender.h).
          */
-        index_8 = BrStrNCmp(image->uri, CGLTF_BR_INDEX_8_PNG_URI, BR_ASIZE(CGLTF_BR_INDEX_8_PNG_URI) - 1) == 0;
+        table_type = load_table_type(image->uri, &table_comp);
 
         /*
          * Try base64 data URI first, then external file.
@@ -162,7 +199,7 @@ static br_pixelmap *load_pixelmap(br_gltf_load_state *state, const cgltf_image *
         return NULL;
     }
 
-    if((pixels = stbi_load_from_memory(raw_data, (int)size, &x, &y, &c, index_8 ? 1 : 4)) == NULL) {
+    if((pixels = stbi_load_from_memory(raw_data, (int)size, &x, &y, &c, table_type ? table_comp : 4)) == NULL) {
         if(owns_raw)
             BrResFree(raw_data);
         return NULL;
@@ -171,17 +208,24 @@ static br_pixelmap *load_pixelmap(br_gltf_load_state *state, const cgltf_image *
     if(owns_raw)
         BrResFree(raw_data);
 
-    if(index_8) {
+    if(table_type) {
         /*
-         * Rebuild the lookup table as it was: INDEX_8, one byte per pixel, and
-         * deliberately no palette. The PNG only carries the pixels, so the rows are
-         * copied into the row_bytes the engine would have allocated itself.
+         * Rebuild the lookup table as it was: the marked type, the samples in
+         * their own channels, and deliberately no palette. The PNG only carries
+         * the samples, so the rows are copied into the row_bytes the engine
+         * would have allocated itself.
          */
-        pixelmap = BrPixelmapAllocate(BR_PMT_INDEX_8, x, y, NULL, BR_PMAF_NORMAL);
+        size_t row_bytes = (size_t)x * (size_t)table_comp;
+
+        pixelmap = BrPixelmapAllocate(table_type, x, y, NULL, BR_PMAF_NORMAL);
 
         if(pixelmap != NULL) {
+            if(row_bytes > (size_t)pixelmap->row_bytes)
+                row_bytes = (size_t)pixelmap->row_bytes;
+
             for(int row = 0; row < pixelmap->height; ++row) {
-                BrMemCpy((br_uint_8 *)pixelmap->pixels + (row * pixelmap->row_bytes), (const br_uint_8 *)pixels + ((size_t)row * x), x);
+                BrMemCpy((br_uint_8 *)pixelmap->pixels + (row * pixelmap->row_bytes),
+                         (const br_uint_8 *)pixels + ((size_t)row * x * (size_t)table_comp), row_bytes);
             }
 
             if(image->name != NULL)
