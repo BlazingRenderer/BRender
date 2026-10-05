@@ -966,6 +966,64 @@ static br_error check_primitive_modes(const cgltf_data *data)
     return BRE_OK;
 }
 
+/*
+ * The glTF extensions this loader implements - that is, the ones whose state
+ * reaches a br_* structure. cgltf parsing an extension is not the same thing:
+ * cgltf resolves KHR_lights_punctual into cgltf_node::light and this loader
+ * never reads that field, so a file carrying its lights only there would lose
+ * them without a word.
+ */
+static const char *const supported_extensions[] = {
+    "BR_lights",
+    "BR_materials",
+    "KHR_texture_transform",
+};
+
+static br_boolean extension_supported(const char *name)
+{
+    for(size_t i = 0; i < BR_ASIZE(supported_extensions); ++i) {
+        if(BrStrCmp(name, supported_extensions[i]) == 0)
+            return BR_TRUE;
+    }
+
+    return BR_FALSE;
+}
+
+static br_error check_extensions(const cgltf_data *data)
+{
+    /*
+     * extensionsRequired is a promise by the file that it cannot be read
+     * without the named extensions. One we cannot honour makes the file
+     * unrenderable, which is what the field is for, so it is an error rather
+     * than something to render around.
+     */
+    for(br_size_t i = 0; i < data->extensions_required_count; ++i) {
+        if(extension_supported(data->extensions_required[i]))
+            continue;
+
+        BrLogError("GLTF",
+                   "file requires glTF extension \"%s\", which this loader does not implement; refusing to load rather than rendering "
+                   "the file without it",
+                   data->extensions_required[i]);
+        return BRE_FAIL;
+    }
+
+    /*
+     * extensionsUsed is only a statement of what the file contains. An optional
+     * extension may be ignored - but saying so is the difference between
+     * ignoring it and losing it.
+     */
+    for(br_size_t i = 0; i < data->extensions_used_count; ++i) {
+        if(extension_supported(data->extensions_used[i]))
+            continue;
+
+        BrLogInfo("GLTF", "ignoring glTF extension \"%s\": the file does not require it and this loader does not implement it",
+                  data->extensions_used[i]);
+    }
+
+    return BRE_OK;
+}
+
 br_fmt_results *BR_PUBLIC_ENTRY BrFmtGLTFActorLoadMany(const char *name, const br_gltf_options *options)
 {
     cgltf_data         *data;
@@ -1015,10 +1073,10 @@ br_fmt_results *BR_PUBLIC_ENTRY BrFmtGLTFActorLoadMany(const char *name, const b
     state->options = options;
 
     /*
-     * The check is pure and runs before any state is built, so a file that
-     * cannot be loaded faithfully never gets part-way in.
+     * Both checks are pure and are run before any state is built, so a file
+     * that cannot be loaded faithfully never gets part-way in.
      */
-    if(check_primitive_modes(data) != BRE_OK) {
+    if(check_extensions(data) != BRE_OK || check_primitive_modes(data) != BRE_OK) {
         BrResFree(state);
         return NULL;
     }
