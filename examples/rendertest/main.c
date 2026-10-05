@@ -135,6 +135,7 @@ typedef struct rt_state {
     /* Output. */
     rt_result *results;
     int        nresults;
+    int        compared; /* results scored against a stored entry, not NO-REFERENCE */
 
     rt_expect *expects;
     int        nexpects;
@@ -941,8 +942,10 @@ static void rt_finish_scene(rt_state *st, br_demo *demo)
         status = "NO-REFERENCE";
     } else if(e->hash == hash) {
         status = "MATCH";
+        ++st->compared;
     } else {
         status = "CHANGED";
+        ++st->compared;
         ++st->failures;
     }
 
@@ -1138,6 +1141,35 @@ static void rt_check_relations(rt_state *st)
     }
 }
 
+/*
+ * A softrend run must score against at least one stored entry.
+ *
+ * The key carries the driver token, so a softrend run that forgets
+ * --reference-driver software, or names a token the table does not hold, finds
+ * no key at all and scores every fixture NO-REFERENCE, which is not a failure:
+ * the run reports PASS with nothing behind it. NO-REFERENCE for one key is
+ * legitimate - a new fixture, or a first --bless - so the check is on the
+ * total, and only a run that compared against nothing anywhere is refused.
+ *
+ * Only softrend is checked. A glrend run on a real GPU legitimately has no
+ * stored reference for any key - the glrend entries are llvmpipe's - so the
+ * same rule would refuse a valid run.
+ */
+static void rt_check_compared(rt_state *st)
+{
+    if(st->bless || strcmp(st->device, "softrend") != 0)
+        return;
+
+    if(st->compared != 0)
+        return;
+
+    BrLogError("RT",
+               "softrend compared against none of the %d fixtures' stored entries: every one is NO-REFERENCE, so PASS asserts nothing "
+               "about the reference. Check that --reference-driver names a token the reference holds (this run looked up `%s').",
+               st->nresults, rt_lookup_driver(st));
+    ++st->failures;
+}
+
 /* ------------------------------------------------------------------ */
 /* Demo callbacks.                                                    */
 /* ------------------------------------------------------------------ */
@@ -1211,6 +1243,7 @@ static br_error rt_init(br_demo *demo)
         st->expects  = BrResAllocate(st, sizeof(rt_expect) * RT_MAX_ENTRIES, BR_MEMORY_APPLICATION);
         st->nscenes  = rt_cfg_nscenes;
         st->nresults = 0;
+        st->compared = 0;
         st->nexpects = 0;
         st->failures = 0;
 
@@ -1308,6 +1341,7 @@ static void rt_render(br_demo *demo)
     if(st->scene_index >= st->nscenes) {
         rt_check_drawn(st);
         rt_check_relations(st);
+        rt_check_compared(st);
 
         if(st->bless)
             rt_write_reference(st);
