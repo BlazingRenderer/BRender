@@ -795,7 +795,7 @@ static void fill_transform_actual(const br_actor *root, cgltf_node *node)
             br_matrix34 mat34;
             br_matrix4  mat44;
             BrTransformToMatrix34(&mat34, &root->t);
-            BrMatrix4Copy34(&mat44, &root->t.t.mat);
+            BrMatrix4Copy34(&mat44, &mat34);
 
             /*
              * Only set the matrix if it's non-identity. The validator complains otherwise.
