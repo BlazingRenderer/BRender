@@ -158,10 +158,34 @@ static void bench_drain(gltfview_bench *self)
         bench_reap_slot(self, i);
 }
 
+/*
+ * The frame count an offscreen run gets when it was not given one. Five is the
+ * point the checked-in baseline was taken at, so a run with the variable
+ * forgotten still produces the baseline checksum.
+ */
+#define BENCH_OFFSCREEN_FRAMES 5u
+
 gltfview_bench *GLTFViewBenchAllocate(br_demo *demo)
 {
     gltfview_bench *self;
-    br_uint_32      frames = bench_env_u32("GLTFVIEW_BENCH_FRAMES", 0);
+    const char     *driver       = SDL_GetCurrentVideoDriver();
+    const char     *frames_value = BrGetEnv("GLTFVIEW_BENCH_FRAMES");
+    br_boolean      frames_unset = frames_value == NULL || frames_value[0] == '\0';
+    br_uint_32      frames       = bench_env_u32("GLTFVIEW_BENCH_FRAMES", 0);
+
+    /*
+     * With no frame count the demo renders forever, which is only sensible when
+     * someone is watching a window. Under the offscreen driver that is an
+     * automated run, so bound it and say so. Naming the variable, including as
+     * 0, keeps the old behaviour.
+     */
+    if(frames_unset && driver != NULL && strcmp(driver, "offscreen") == 0) {
+        BrLogInfo("BENCH",
+                  "GLTFVIEW_BENCH_FRAMES is unset and the video driver is \"offscreen\", so this run would never exit; "
+                  "using the default of %u frames and exiting. Set GLTFVIEW_BENCH_FRAMES explicitly to change this.",
+                  (unsigned int)BENCH_OFFSCREEN_FRAMES);
+        frames = BENCH_OFFSCREEN_FRAMES;
+    }
 
     if(frames == 0)
         return NULL;

@@ -10,10 +10,14 @@ typedef struct br_demo        br_demo;
  * Benchmark harness for gltfview.
  *
  * Enabled by setting GLTFVIEW_BENCH_FRAMES. When disabled, GLTFViewBenchAllocate()
- * returns NULL and every other entry point is a no-op on NULL.
+ * returns NULL and every other entry point is a no-op on NULL. An unset or empty
+ * value disables it too, except under the "offscreen" video driver, where it
+ * defaults to 5 frames so a headless run cannot render forever.
  *
  * Environment:
- *   GLTFVIEW_BENCH_FRAMES   Frames to render before quitting. 0 or unset disables.
+ *   GLTFVIEW_BENCH_FRAMES   Frames to render before quitting. 0 disables. Unset or
+ *                           empty disables, except under "offscreen", where it
+ *                           defaults to 5.
  *   GLTFVIEW_BENCH_WARMUP   Frames to discard before recording. Default 10.
  *   GLTFVIEW_BENCH_NOVSYNC  "1" to disable vsync. Default 0.
  *   GLTFVIEW_BENCH_FINISH   "1" to glFinish() each frame (serialises the pipeline
