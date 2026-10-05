@@ -1563,7 +1563,7 @@ TriangleSetup_ZTIS_ARBITRARY_FLAT proc
 			SETUP_FLOAT_PARAM C_U,_u,workspace.s_u,workspace.d_u_x,fp_conv_d24
 			SETUP_FLOAT_PARAM C_V,_v,workspace.s_v,workspace.d_v_x,fp_conv_d24
 			SETUP_FLOAT_CONST C_I,_i,workspace.s_i,workspace.d_i_x,fp_conv_d16
-			SETUP_FLOAT_PARAM C_S,_s,workspace.s_s,workspace.d_s_x,fp_conv_d16
+			SETUP_FLOAT_CONST C_S,_s,workspace.s_s,workspace.d_s_x,fp_conv_d16
 			ARBITRARY_SETUP
 			ret
 TriangleSetup_ZTIS_ARBITRARY_FLAT endp
