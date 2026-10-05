@@ -5,6 +5,7 @@ import glob, os, re, collections, sys
 
 # <repo>/contrib/trm/dump.py
 REPO = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+EXTRACT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "extract")
 DIRS = ["core/inc", "core/fmt/include", "core/fw/include", "core/math/include"]
 HDRS = [os.path.join(r, f) for d in DIRS for r, _, fs in os.walk(os.path.join(REPO, d)) for f in fs if f.endswith(".h")]
 
@@ -63,7 +64,7 @@ def find_decl(name):
 
 def main():
     all_entries = {}
-    for f in sorted(glob.glob("/tmp/trm-extract/w*.md")):
+    for f in sorted(glob.glob(os.path.join(EXTRACT, "w*.md"))):
         for name, occs in parse(f).items():
             for buf in occs:
                 if name not in all_entries or score(buf) > score(all_entries[name]):

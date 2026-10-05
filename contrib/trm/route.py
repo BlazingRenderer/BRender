@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Route TRM transcript entries to the header that declares them.
 
-Reads /tmp/trm-extract/*.md transcripts (one '# FunctionName' or '## FunctionName'
+Reads contrib/trm/extract/*.md transcripts (one '# FunctionName' or '## FunctionName'
 heading per entry), finds each function's declaration in the tree, and groups by
 header so the docs can be applied module by module.
 """
@@ -9,6 +9,7 @@ import glob, os, re, subprocess, sys, collections
 
 # <repo>/contrib/trm/route.py
 REPO = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+EXTRACT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "extract")
 SEARCH_DIRS = ["core/inc", "core/fmt/include", "core/fw/include",
                "core/math/include", "drivers"]
 
@@ -56,7 +57,7 @@ def decl_of(name):
     return hits
 
 def main():
-    files = sorted(glob.glob("/tmp/trm-extract/*.md"))
+    files = sorted(glob.glob(os.path.join(EXTRACT, "*.md")))
     all_entries = {}
     for f in files:
         for name, buf in parse(f).items():

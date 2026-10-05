@@ -11,7 +11,7 @@ Markdown template; everything after that is deterministic.
 
 ## Input
 
-Transcripts live in `/tmp/trm-extract/`, one file per reading window
+Transcripts live in `contrib/trm/extract/`, one file per reading window
 (`w1-*.md` … `w4b-*.md`).  Each entry is a `## Name` section followed by fields
 (`description:`, `arguments:`, … for functions; a `members:` list for types).
 A wave-4 member is

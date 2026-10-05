@@ -8,6 +8,7 @@ import glob, os, re, collections
 
 # <repo>/contrib/trm/plan.py
 REPO = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+EXTRACT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "extract")
 DIRS = ["core/inc", "core/fmt/include", "core/fw/include", "core/math/include"]
 
 def headers():
@@ -60,7 +61,7 @@ def find_decl(name):
 
 def main():
     all_entries = {}
-    for f in sorted(glob.glob("/tmp/trm-extract/w1-*.md")):
+    for f in sorted(glob.glob(os.path.join(EXTRACT, "w1-*.md"))):
         for name, occs in parse(f).items():
             for buf in occs:
                 if name not in all_entries or score(buf) > score(all_entries[name]):
