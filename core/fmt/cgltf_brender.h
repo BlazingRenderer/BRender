@@ -17,6 +17,30 @@ typedef enum cgltf_brender_light_type {
 typedef struct cgltf_image cgltf_image;
 
 /*
+ * Actor state that a glTF node has no way to carry.
+ *
+ * A node is a transform plus optional references to a mesh, a camera or a
+ * light; a br_actor additionally carries br_actor::render_style, which selects
+ * the topology the engine draws - points, edges or faces - and applies to the
+ * whole subtree below the actor that sets it. glTF's primitive
+ * `mode` is not it: mode says what the indices in the file describe, while
+ * render_style says what BRender draws, and BRender draws an edge or point
+ * topology over a triangle list. Without it every actor loaded from a .gltf is
+ * BR_RSTYLE_DEFAULT and the point and line rasterisers have no witness at all.
+ *
+ * This is actor state rather than mesh state, so it belongs on the node: one
+ * mesh may be referenced by two nodes and drawn as faces by one and edges by
+ * the other. Model-level state (br_model::pivot, ::flags, ::crease_angle) is
+ * not here - it belongs on the mesh, because it is shared with it. Neither
+ * br_actor::type nor the representation of br_actor::t is carried here: a
+ * round trip loses both, and both were audited and deliberately left out.
+ */
+typedef struct cgltf_brender_actor {
+    /* A BR_RSTYLE_* value; absent means BR_RSTYLE_DEFAULT. */
+    cgltf_int render_style;
+} cgltf_brender_actor;
+
+/*
  * Data URI prefixes for an image whose PNG channels are the raw samples of a
  * lookup table, rather than colour.
  *

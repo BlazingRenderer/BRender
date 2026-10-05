@@ -840,6 +840,15 @@ static void fill_actor(br_actor *actor, const cgltf_node *node, const cgltf_data
 
     read_actor_matrix(actor, node);
 
+    /*
+     * BR_actors carries the actor state a node has no field for; see
+     * cgltf_brender.h. A node without the extension keeps the
+     * BR_RSTYLE_DEFAULT that BrActorAllocate() left in the field.
+     */
+    if(node->has_brender_actor) {
+        actor->render_style = (br_uint_8)node->brender_actor.render_style;
+    }
+
     if(node->brender_material != NULL) {
         actor->material = materials[node->brender_material - data->brender_materials];
     }
@@ -1018,6 +1027,7 @@ static br_error check_primitive_modes(const cgltf_data *data)
  * them without a word.
  */
 static const char *const supported_extensions[] = {
+    "BR_actors",
     "BR_lights",
     "BR_materials",
     "KHR_texture_transform",
@@ -1063,6 +1073,37 @@ static br_error check_extensions(const cgltf_data *data)
 
         BrLogInfo("GLTF", "ignoring glTF extension \"%s\": the file does not require it and this loader does not implement it",
                   data->extensions_used[i]);
+    }
+
+    return BRE_OK;
+}
+
+static br_error check_actor_styles(const cgltf_data *data)
+{
+    for(br_size_t i = 0; i < data->nodes_count; ++i) {
+        const cgltf_node *node = data->nodes + i;
+        cgltf_int         style;
+
+        if(!node->has_brender_actor)
+            continue;
+
+        style = node->brender_actor.render_style;
+
+        /*
+         * render_style indexes RenderStyleCalls[] with no bounds check
+         *, and that table only has entries up to
+         * BR_RSTYLE_BOUNDING_FACES - the two
+         * antialiased styles have no entry. A file that named one would be a
+         * call through a NULL or out-of-range pointer, so the value is checked
+         * here rather than trusted.
+         */
+        if(style < BR_RSTYLE_DEFAULT || style > BR_RSTYLE_BOUNDING_FACES) {
+            BrLogError("GLTF",
+                       "node \"%s\" has BR_actors.render_style %d, outside the range the renderer dispatches "
+                       "(BR_RSTYLE_DEFAULT..BR_RSTYLE_BOUNDING_FACES, %d..%d)",
+                       node->name != NULL ? node->name : "<unnamed>", (int)style, (int)BR_RSTYLE_DEFAULT, (int)BR_RSTYLE_BOUNDING_FACES);
+            return BRE_FAIL;
+        }
     }
 
     return BRE_OK;
@@ -1117,10 +1158,11 @@ br_fmt_results *BR_PUBLIC_ENTRY BrFmtGLTFActorLoadMany(const char *name, const b
     state->options = options;
 
     /*
-     * Both checks are pure and are run before any state is built, so a file
-     * that cannot be loaded faithfully never gets part-way in.
+     * The checks below are pure and each refuses the file it names before
+     * any state is built, so a file that cannot be loaded faithfully never
+     * gets part-way in.
      */
-    if(check_extensions(data) != BRE_OK || check_primitive_modes(data) != BRE_OK) {
+    if(check_extensions(data) != BRE_OK || check_primitive_modes(data) != BRE_OK || check_actor_styles(data) != BRE_OK) {
         BrResFree(state);
         return NULL;
     }

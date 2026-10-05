@@ -712,6 +712,8 @@ struct cgltf_node {
 	cgltf_mesh_gpu_instancing mesh_gpu_instancing;
 	cgltf_brender_light* brender_light;
 	cgltf_brender_material* brender_material;
+	cgltf_bool has_brender_actor;
+	cgltf_brender_actor brender_actor;
 	cgltf_size extensions_count;
 	cgltf_extension* extensions;
 };
@@ -5903,6 +5905,11 @@ static int cgltf_parse_json_node(cgltf_options* options, jsmntok_t const* tokens
 				else if (cgltf_json_strcmp(tokens + i, json_chunk, "BR_materials") == 0)
 				{
 					i = cgltf_parse_json_brender_material_mappings(options, tokens, i + 1, json_chunk, &out_node->brender_material);
+				}
+				else if (cgltf_json_strcmp(tokens + i, json_chunk, "BR_actors") == 0)
+				{
+					out_node->has_brender_actor = 1;
+					i = cgltf_parse_json_brender_actor(options, tokens, i + 1, json_chunk, &out_node->brender_actor);
 				}
 				else
 				{

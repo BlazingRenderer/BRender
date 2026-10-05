@@ -91,6 +91,7 @@ cgltf_size cgltf_write(const cgltf_options* options, char* buffer, cgltf_size si
 #define CGLTF_EXTENSION_FLAG_MATERIALS_DIFFUSE_TRANSMISSION (1 << 19)
 #define CGLTF_EXTENSION_FLAG_BR_LIGHTS (1 << 20)
 #define CGLTF_EXTENSION_FLAG_BR_MATERIALS (1 << 21)
+#define CGLTF_EXTENSION_FLAG_BR_ACTORS (1 << 22)
 
 typedef struct {
 	char* buffer;
@@ -1048,7 +1049,7 @@ static void cgltf_write_node(cgltf_write_context* context, const cgltf_node* nod
 		CGLTF_WRITE_IDXPROP("skin", node->skin, context->data->skins);
 	}
 
-	bool has_extension = node->light || node->brender_light || node->brender_material || (node->has_mesh_gpu_instancing && node->mesh_gpu_instancing.attributes_count > 0);
+	bool has_extension = node->light || node->brender_light || node->brender_material || node->has_brender_actor || (node->has_mesh_gpu_instancing && node->mesh_gpu_instancing.attributes_count > 0);
 	if(has_extension)
 		cgltf_write_line(context, "\"extensions\": {");
 
@@ -1071,6 +1072,13 @@ static void cgltf_write_node(cgltf_write_context* context, const cgltf_node* nod
 		context->extension_flags |= CGLTF_EXTENSION_FLAG_BR_MATERIALS;
 		cgltf_write_line(context, "\"BR_materials\": {");
 		CGLTF_WRITE_IDXPROP("material", node->brender_material, context->data->brender_materials);
+		cgltf_write_line(context, "}");
+	}
+
+	if (node->has_brender_actor) {
+		context->extension_flags |= CGLTF_EXTENSION_FLAG_BR_ACTORS;
+		cgltf_write_line(context, "\"BR_actors\": {");
+		cgltf_write_intprop(context, "render_style", node->brender_actor.render_style, 0);
 		cgltf_write_line(context, "}");
 	}
 
@@ -1370,6 +1378,9 @@ static void cgltf_write_extensions(cgltf_write_context* context, uint32_t extens
 	}
 	if (extension_flags & CGLTF_EXTENSION_FLAG_BR_MATERIALS) {
 		cgltf_write_stritem(context, "BR_materials");
+	}
+	if (extension_flags & CGLTF_EXTENSION_FLAG_BR_ACTORS) {
+		cgltf_write_stritem(context, "BR_actors");
 	}
 }
 

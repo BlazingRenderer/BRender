@@ -831,6 +831,32 @@ static int fill_actor_name(const void *key, void *value, br_hash hash, void *use
     return 0;
 }
 
+/*
+ * The BR_actors extension: actor state a node has no field for.
+ *
+ * Only render_style, and only when it is not BR_RSTYLE_DEFAULT. An absent
+ * extension parses back as BR_RSTYLE_DEFAULT - the same value BrActorAllocate()
+ * leaves in the field - so writing the default would add a node extension to
+ * every actor in every file to say nothing.
+ */
+static void fill_actor_render_style_actual(const br_actor *actor, cgltf_node *node)
+{
+    if(actor->render_style == BR_RSTYLE_DEFAULT)
+        return;
+
+    node->has_brender_actor          = BR_TRUE;
+    node->brender_actor.render_style = (cgltf_int)actor->render_style;
+}
+
+static int fill_actor_render_style(const void *key, void *value, br_hash hash, void *user)
+{
+    (void)hash;
+    (void)user;
+
+    fill_actor_render_style_actual(key, value);
+    return 0;
+}
+
 static void fill_transform_actual(const br_actor *root, cgltf_node *node)
 {
     br_matrix4 identity;
@@ -1538,6 +1564,14 @@ br_error BR_PUBLIC_ENTRY BrFmtGLTFActorSaveMany(const char *name, br_actor **act
      */
     BrHashMapEnumerate(state->actor_map, fill_actor_name, state);
     BrHashMapEnumerate(state->actor_map, fill_transform, state);
+
+    /*
+     * Fill the BR_actors extension.
+     *
+     * Post: cgltf_node::brender_actor is set, where the actor's style is not
+     *       the default.
+     */
+    BrHashMapEnumerate(state->actor_map, fill_actor_render_style, state);
 
     /*
      * Fill the type-specific actor stuff.
