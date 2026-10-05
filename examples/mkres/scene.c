@@ -496,6 +496,49 @@ static br_pixelmap *scene_texture(const char *name, int width, int height, int c
 }
 
 /*
+ * A 32x32 texture whose every row differs from every other and whose every
+ * column does too, so that a texel fetched from the wrong row or column cannot
+ * land on the same index and hide itself. The 32x32 z-sorted block's defect is
+ * a wrong seed address, and the checkerboard above repeats every few rows: a
+ * fixture that sampled it would still match the stored reference, which is the
+ * failure mode the fixture exists to rule out.
+ *
+ * Every byte is in 1..255 (index 0 is the rasterisers' transparent texel), and
+ * the palette is the identity grey ramp, which is what lets the glTF exporter
+ * carry the indices through a PNG unchanged.
+ */
+static br_pixelmap *scene_texture_rows(const char *name, int width, int height)
+{
+    br_pixelmap *pm, *pal;
+    br_uint_8   *pixels;
+
+    if((pal = BrPixelmapAllocate(BR_PMT_RGBX_888, 1, 256, NULL, BR_PMAF_NORMAL)) == NULL)
+        return NULL;
+
+    pal->identifier = BrResStrDup(pal, name);
+
+    for(int i = 0; i < 256; ++i)
+        ((br_colour *)pal->pixels)[i] = BR_COLOUR_RGB(i, i, i);
+
+    if((pm = BrPixelmapAllocate(BR_PMT_INDEX_8, width, height, NULL, BR_PMAF_NORMAL)) == NULL)
+        return NULL;
+
+    pm->identifier = BrResStrDup(pm, name);
+    pixels         = pm->pixels;
+
+    for(int y = 0; y < height; ++y)
+        for(int x = 0; x < width; ++x)
+            pixels[(y * pm->row_bytes) + x] = (br_uint_8)(1 + ((x * 3 + y * 7) % 255));
+
+    pm->map = pal;
+
+    BrMapAdd(pal);
+    BrMapAdd(pm);
+
+    return pm;
+}
+
+/*
  * The shade table is indexed shade[intensity][texel]: row = surface intensity,
  * column = the texture index, and the byte is the output index.
  *
@@ -1285,6 +1328,313 @@ static br_error scene_make_rgb_shade_fixtures(br_model *cube)
 }
 
 /*
+ * ------------------------------------------------------------------
+ * The INDEX_8 ROP cross-product fixtures.
+ *
+ * One fixture per cell of the cross-product of shading mode x addressing x
+ * perspective for the blend, fog, decal and blend+fog operators, plus the two
+ * plain `DIVIDE` columns and the two flat untextured blocks: one family of
+ * question - which of the three indexed ROP tables the walk binds, in which
+ * order, and through which intensity path.
+ *
+ * prim_t8.ifg lists the fogged-blended sections first, then blended, then
+ * fogged, then decal, then plain, and each section requires the table it names;
+ * the walk takes the first entry whose requirements the bound state meets. A
+ * blend table bound alongside a fog table therefore selects the combined block.
+ *
+ * The axes:
+ *
+ *  - `depth` is the run, not the scene: rendertest renders every fixture with
+ *    and without a depth buffer. The z-sorted half has no blend, fog or
+ *    corrected-decal entries, so those cells are witnessed by the z-buffered
+ *    run alone.
+ *  - `shade` is the intensity path: a bound INDEX_8 shade table with
+ *    BR_MATF_SMOOTH is INTERP_I, without it CONST_I, and no shade table at all
+ *    is the texture-only NONE. The constant and interpolated entries require a
+ *    shade table, so a fixture without one reaches NONE even when lit.
+ *  - `addr` is the map's shape: a power-of-two map of the entry's own size is
+ *    SHIFT, anything else is DIVIDE. That is what the three map sizes here are
+ *    for.
+ *  - `persp` is BR_MATF_PERSPECTIVE, `blend` is a bound index_blend table or
+ *    BR_MATF_DECAL, and `fog` is a bound index_fog table.
+ *
+ * Every scene is the same rig - the feature cube, the near light and the turned
+ * model that make the flat/gouraud and affine/corrected cells distinguishable -
+ * so each differs from its neighbour by one knob. Where only the shading mode
+ * separates cubes they share a scene, since each cube still selects its own
+ * entry. A scene has one checksum, so a moved checksum says one of the cubes
+ * moved, not which; the cubes are placed so a PPM dump separates them.
+ *
+ * The fog cells use scene-fog's narrowed 4..8 camera range: the indexed fog
+ * level is the high byte of the interpolated z, and the default 0.1..100 range
+ * puts the whole cube inside two or three levels. Every cell uses the near
+ * light the feature rig adds, so that the flat and gouraud cells do not agree
+ * by construction.
+ */
+
+/* scene-fog's camera range; see the note above. */
+#define SCENE_ROP_FOG_HITHER BR_SCALAR(4.0)
+#define SCENE_ROP_FOG_YON    BR_SCALAR(8.0)
+
+/* The 256x256 map the affine power-of-two fog and the z-sorted decal cells need. */
+#define SCENE_ROP_MAP_256 256
+
+/*
+ * The shading modes a scene's cubes can be drawn in, in the order the scenes
+ * place them: the interpolated, constant-intensity and texture-only cells of the
+ * shade axis. `shaded` binds the scene's INDEX_8 shade table, and `flags` is the
+ * material's whole BR_MATF_* set on top of BR_MATF_LIGHT and the scene's own.
+ */
+typedef struct scene_rop_shade {
+    const char *suffix;
+    br_uint_32  flags;
+    br_boolean  shaded;
+} scene_rop_shade;
+
+/* A scene's bit for each entry of scene_rop_shades. */
+#define SCENE_ROP_SMOOTH 1
+#define SCENE_ROP_FLAT   2
+#define SCENE_ROP_TEX    4
+
+/* clang-format off */
+static const scene_rop_shade scene_rop_shades[] = {
+    {.suffix = "smooth", .flags = BR_MATF_SMOOTH, .shaded = BR_TRUE},
+    {.suffix = "flat",   .flags = 0,              .shaded = BR_TRUE},
+    {.suffix = "tex",    .flags = 0,              .shaded = BR_FALSE},
+};
+/* clang-format on */
+
+/*
+ * Where the cubes of a scene sit, by how many there are. None of these overlap:
+ * the cube is 1.5 units across on a camera six units out, so 1.3 apart is clear
+ * of it and the three-cube row is spread to the frame's edges. The placement is
+ * what lets a PPM dump - and so a reader - separate the states one scene's
+ * checksum covers. The first cube is moved to its place after the rig is built,
+ * because the rig puts it at the origin.
+ */
+static const br_scalar scene_rop_x1[] = {BR_SCALAR(0.0)};
+static const br_scalar scene_rop_x2[] = {BR_SCALAR(-1.3), BR_SCALAR(1.3)};
+static const br_scalar scene_rop_x3[] = {BR_SCALAR(-2.0), BR_SCALAR(0.0), BR_SCALAR(2.0)};
+
+static const br_scalar *scene_rop_row(int n)
+{
+    switch(n) {
+        case 2:
+            return scene_rop_x2;
+        case 3:
+            return scene_rop_x3;
+        default:
+            return scene_rop_x1;
+    }
+}
+
+/*
+ * One cube of a ROP scene: the scene's map and the tables its entry of
+ * scene_rop_shades names, plus the material flags the scene shares.
+ */
+static br_material *scene_rop_material(const char *scene, const scene_rop_shade *shade, br_uint_32 flags, br_pixelmap *map,
+                                       br_pixelmap *shade_table, br_pixelmap *blend, br_pixelmap *fog)
+{
+    br_material *m;
+    char         name[160];
+
+    snprintf(name, sizeof(name), "%s-%s-material", scene, shade->suffix);
+
+    if((m = scene_material_ex(name, BR_COLOUR_RGB(200, 200, 200), BR_MATF_LIGHT | shade->flags | flags, BR_SCALAR(0.1), BR_SCALAR(0.7),
+                              BR_SCALAR(0.0), BR_SCALAR(20.0))) == NULL)
+        return NULL;
+
+    m->index_base  = SCENE_FX_BASE;
+    m->index_range = SCENE_FX_RANGE;
+    m->colour_map  = map;
+    m->index_shade = shade->shaded ? shade_table : NULL;
+    m->index_blend = blend;
+    m->index_fog   = fog;
+
+    /*
+     * The fog table only reaches the frame if the material asks for local fog,
+     * which is how scene-fog binds it. The range is the narrowed one: the
+     * default puts the whole cube inside two or three fog levels.
+     */
+    if(fog != NULL) {
+        m->fog_min = SCENE_ROP_FOG_HITHER;
+        m->fog_max = SCENE_ROP_FOG_YON;
+    }
+
+    return m;
+}
+
+/*
+ * A ROP scene. `cubes` selects the entries of scene_rop_shades it draws, `flags`
+ * is what they share (BR_MATF_PERSPECTIVE, BR_MATF_DECAL), and the three tables
+ * are bound to every cube the mask selects or to none - a fixture binds the
+ * table it is named for and drops the ones it is a one-knob variant of.
+ */
+static br_error scene_rop_build(const char *name, br_model *cube, br_uint_8 cubes, br_uint_32 flags, br_pixelmap *map, br_pixelmap *shade,
+                                br_pixelmap *blend, br_pixelmap *fog)
+{
+    br_material     *mats[BR_ASIZE(scene_rop_shades)];
+    const br_scalar *xs;
+    br_actor        *world;
+    char             gltf[192];
+    int              n = 0;
+
+    for(int i = 0; i < BR_ASIZE(scene_rop_shades); ++i)
+        if(cubes & (1u << i)) {
+            if((mats[n] = scene_rop_material(name, &scene_rop_shades[i], flags, map, shade, blend, fog)) == NULL)
+                return BRE_FAIL;
+            ++n;
+        }
+
+    world = scene_fx_world_range(cube, mats[0], SCENE_FX_SCALE, fog != NULL ? SCENE_ROP_FOG_HITHER : BR_SCALAR(0.1),
+                                 fog != NULL ? SCENE_ROP_FOG_YON : BR_SCALAR(100.0));
+
+    if(world == NULL)
+        return BRE_FAIL;
+
+    xs = scene_rop_row(n);
+
+    for(br_actor *a = world->children; a != NULL; a = a->next) {
+        if(a->type != BR_ACTOR_MODEL)
+            continue;
+
+        BrMatrix34PostTranslate(&a->t.t.mat, xs[0], BR_SCALAR(0), BR_SCALAR(0));
+        break;
+    }
+
+    for(int i = 1; i < n; ++i) {
+        char suffix[64];
+
+        snprintf(suffix, sizeof(suffix), "cube-%d", i);
+        scene_fx_add_cube_named(world, cube, mats[i], suffix, SCENE_FX_SCALE, xs[i], BR_SCALAR(0), BR_SCALAR(0));
+    }
+
+    snprintf(gltf, sizeof(gltf), "%s.gltf", name);
+
+    return scene_save(gltf, world);
+}
+
+/*
+ * The ROP fixtures. Each row is one scene: the map its cubes bind, the flags
+ * they share, which of the three shading cubes it carries, and which tables are
+ * bound. The rows are grouped by which operator is under test, and within a
+ * group each neighbour differs by one knob - the perspective flag, the
+ * addressing mode, or one table.
+ *
+ *   blend+fog   the ROP order as a combination; the only cells where the three
+ *               operators meet in one primitive
+ *   blend       one table, so a wrong order cannot show
+ *   fog         scene-fog's neighbours: the corrected cells it never reached,
+ *               the affine cells its 64 map cannot select, the flat twin of the
+ *               untextured block it does, and the texture-only cube of the
+ *               affine cell it carries the two shade-table cubes of
+ *   plain       the two DIVIDE columns no fixture reached, the flat untextured
+ *               shade-table block, and the z-sorted affine pair at the one size
+ *               the table emits them at
+ *   decal       scene-decal's neighbour at the arbitrary width, and the flat
+ *               twin of that neighbour
+ *
+ * A row draws the cubes the note above does not exclude, so a family whose cell
+ * was in dispute is carried by the cube that cube is: each scene stays a
+ * one-knob neighbour of the others.
+ *
+ * The columns are hand-aligned, so the table is held out of clang-format:
+ * AlignArrayOfStructures would strip the padding and reflow the long rows.
+ */
+// clang-format off
+typedef struct scene_rop_fixture {
+    const char *name;
+    br_uint_8   map;    /* which map the cubes bind: 0 = 64x64, 1 = 256x256, 2 = arbitrary width, 3 = none */
+    br_uint_32  flags;  /* shared by the scene's cubes, on top of BR_MATF_LIGHT */
+    br_uint_8   cubes;  /* which of scene_rop_shades are drawn */
+    br_boolean  blend;  /* bind the blend table */
+    br_boolean  fog;    /* bind the fog table */
+} scene_rop_fixture;
+
+static const scene_rop_fixture scene_rop_fixtures[] = {
+    /* Blend and fog at once. */
+    {.name = "scene-blendfog-p2",        .map = 0, .flags = BR_MATF_PERSPECTIVE, .cubes = 7, .blend = BR_TRUE, .fog = BR_TRUE},
+    {.name = "scene-blendfog-arb-persp", .map = 2, .flags = BR_MATF_PERSPECTIVE, .cubes = 7, .blend = BR_TRUE, .fog = BR_TRUE},
+    {.name = "scene-blendfog-arb",       .map = 2, .flags = 0,                   .cubes = 7, .blend = BR_TRUE, .fog = BR_TRUE},
+
+    /* Blend alone. */
+    {.name = "scene-blend-p2-persp",     .map = 0, .flags = BR_MATF_PERSPECTIVE, .cubes = 7, .blend = BR_TRUE, .fog = BR_FALSE},
+    {.name = "scene-blend-p2-smooth",    .map = 0, .flags = 0,                   .cubes = SCENE_ROP_SMOOTH, .blend = BR_TRUE, .fog = BR_FALSE},
+    {.name = "scene-blend-p2-flat",      .map = 0, .flags = 0,                   .cubes = SCENE_ROP_FLAT, .blend = BR_TRUE, .fog = BR_FALSE},
+    {.name = "scene-blend-arb-persp",    .map = 2, .flags = BR_MATF_PERSPECTIVE, .cubes = 7, .blend = BR_TRUE, .fog = BR_FALSE},
+    {.name = "scene-blend-arb",          .map = 2, .flags = 0,                   .cubes = 7, .blend = BR_TRUE, .fog = BR_FALSE},
+
+    /* Fog alone. */
+    {.name = "scene-fog-p2-persp",       .map = 1, .flags = BR_MATF_PERSPECTIVE, .cubes = 7, .blend = BR_FALSE, .fog = BR_TRUE},
+    {.name = "scene-fog-p2",             .map = 1, .flags = 0,                   .cubes = 3, .blend = BR_FALSE, .fog = BR_TRUE},
+    {.name = "scene-fog-p2-tex",         .map = 1, .flags = 0,                   .cubes = SCENE_ROP_TEX, .blend = BR_FALSE, .fog = BR_TRUE},
+    {.name = "scene-fog-arb-persp",      .map = 2, .flags = BR_MATF_PERSPECTIVE, .cubes = 7, .blend = BR_FALSE, .fog = BR_TRUE},
+    {.name = "scene-fog-arb",            .map = 2, .flags = 0,                   .cubes = 7, .blend = BR_FALSE, .fog = BR_TRUE},
+    {.name = "scene-fog-flat",           .map = 3, .flags = 0,                   .cubes = SCENE_ROP_TEX, .blend = BR_FALSE, .fog = BR_TRUE},
+
+    /* Plain: no ROP table at all. */
+    {.name = "scene-idx-arb-persp",      .map = 2, .flags = BR_MATF_PERSPECTIVE, .cubes = 3, .blend = BR_FALSE, .fog = BR_FALSE},
+    {.name = "scene-idx-arb",            .map = 2, .flags = 0,                   .cubes = 3, .blend = BR_FALSE, .fog = BR_FALSE},
+    {.name = "scene-idx-p2-256",         .map = 1, .flags = 0,                   .cubes = 3, .blend = BR_FALSE, .fog = BR_FALSE},
+
+    /* Decal. */
+    {.name = "scene-decal-p2-256",       .map = 1, .flags = BR_MATF_DECAL,       .cubes = 3, .blend = BR_FALSE, .fog = BR_FALSE},
+    {.name = "scene-decal-arb",          .map = 2, .flags = BR_MATF_DECAL,       .cubes = SCENE_ROP_SMOOTH, .blend = BR_FALSE, .fog = BR_FALSE},
+    {.name = "scene-decal-arb-flat",     .map = 2, .flags = BR_MATF_DECAL,       .cubes = SCENE_ROP_FLAT, .blend = BR_FALSE, .fog = BR_FALSE},
+};
+// clang-format on
+
+static br_error scene_make_rop_fixtures(br_model *cube)
+{
+    br_pixelmap *maps[4]; /* the fourth is the unmapped fixture's absent map */
+    br_pixelmap *shade, *blend, *fog;
+    br_error     r = BRE_OK;
+
+    maps[3] = NULL;
+
+    if((maps[0] = scene_texture("scene-rop-map-64", SCENE_TEX_SIZE, SCENE_TEX_SIZE, SCENE_TEX_CELLS)) == NULL ||
+       (maps[1] = scene_texture_rows("scene-rop-map-256", SCENE_ROP_MAP_256, SCENE_ROP_MAP_256)) == NULL ||
+       (maps[2] = scene_texture("scene-rop-map-arb", SCENE_ARB_WIDTH, SCENE_ARB_HEIGHT, SCENE_ARB_CELLS)) == NULL ||
+       (shade = scene_shade_table("scene-rop-shade-table")) == NULL || (blend = scene_blend_table("scene-rop-blend-table")) == NULL ||
+       (fog = scene_fog_table("scene-rop-fog-table")) == NULL) {
+        fprintf(stderr, "failed to allocate the ROP fixture resources\n");
+        return BRE_FAIL;
+    }
+
+    for(size_t i = 0; i < BR_ASIZE(scene_rop_fixtures); ++i) {
+        const scene_rop_fixture *fx = &scene_rop_fixtures[i];
+
+        if(scene_rop_build(fx->name, cube, fx->cubes, fx->flags, maps[fx->map], shade, fx->blend ? blend : NULL, fx->fog ? fog : NULL) != BRE_OK)
+            r = BRE_FAIL;
+    }
+
+    /*
+     * The flat twin of the untextured shade-table block. scene-shade is the same
+     * rig with BR_MATF_SMOOTH, which selects the interpolated block; without the
+     * flag the walk reaches the constant-intensity one. The empty index band is
+     * what makes the untextured family reachable at all: the table's rows are
+     * its intensity and its columns its output, and with index_range zero the
+     * block reads range_zero's row rather than the intensity ramp.
+     */
+    {
+        br_material *mat  = scene_fx_material("scene-shade-flat-material", BR_MATF_LIGHT);
+        br_pixelmap *ramp = scene_shade_ramp("scene-shade-flat-ramp-table");
+
+        if(ramp == NULL)
+            return BRE_FAIL;
+
+        mat->index_shade = ramp;
+        mat->index_base  = 0;
+        mat->index_range = 0;
+
+        if(scene_save("scene-shade-flat.gltf", scene_fx_world(cube, mat)) != BRE_OK)
+            r = BRE_FAIL;
+    }
+
+    return r;
+}
+
+/*
  * The render-feature fixtures. `cube` is the model built by mkres_make_cube(),
  * which has both per-face map coordinates in 0..1 and a per-face normal.
  */
@@ -1931,6 +2281,9 @@ br_error mkres_make_scenes(void)
         r = BRE_FAIL;
 
     if(scene_make_line_fixtures(cube) != BRE_OK)
+        r = BRE_FAIL;
+
+    if(scene_make_rop_fixtures(cube) != BRE_OK)
         r = BRE_FAIL;
 
     if(scene_make_mmx_fixtures(cube) != BRE_OK)

@@ -1237,6 +1237,65 @@ static const rt_relation rt_relations[] = {
     RT_MMX_NE("scene-mmx-uvc-screen-persp", "scene-mmx-uvc-ditherscreen-persp"),
     RT_MMX_NE("scene-mmx-uvrgb-dither-affine", "scene-mmx-uvrgb-ditherscreen-affine"),
     RT_MMX_NE("scene-mmx-uvrgb-screen-persp", "scene-mmx-uvrgb-ditherscreen-persp"),
+
+    /*
+     * The INDEX_8 ROP cross-product. The blend+fog scenes are the only fixtures
+     * where all three operators meet in one primitive, so each is asserted
+     * against the same rig with one of the two tables dropped - the same map,
+     * the same cubes, the same camera: a kernel that applies fog but not the
+     * blend table (or the reverse), or that applies them in the other order,
+     * moves one of these frames.
+     *
+     * The z-buffered mode is where those cells are: the z-sorted half of the
+     * table carries no blend or fog entry at all, so the pairs are not asserted
+     * there. They cannot be asserted equal, either, and that is the fixtures'
+     * own doing rather than the renderer's: a scene that binds a fog table is
+     * drawn at the narrowed 4..8 camera range the fog levels need (scene.c), so
+     * the two frames of a pair are different projections of the same rig and
+     * comparing them in a mode that applies neither table says nothing.
+     */
+    {.a = "scene-blendfog-arb-persp", .b = "scene-blend-arb-persp", .equal = BR_FALSE, .pm_type = BR_PMT_INDEX_8, .mode = RT_MODE_ZB,
+     .device = "softrend"},
+    {.a = "scene-blendfog-arb-persp", .b = "scene-fog-arb-persp",   .equal = BR_FALSE, .pm_type = BR_PMT_INDEX_8, .mode = RT_MODE_ZB,
+     .device = "softrend"},
+    {.a = "scene-blendfog-arb",       .b = "scene-blend-arb",       .equal = BR_FALSE, .pm_type = BR_PMT_INDEX_8, .mode = RT_MODE_ZB,
+     .device = "softrend"},
+    {.a = "scene-blendfog-p2",        .b = "scene-blend-p2-persp",  .equal = BR_FALSE, .pm_type = BR_PMT_INDEX_8, .mode = RT_MODE_ZB,
+     .device = "softrend"},
+
+    /*
+     * The rest of the cross-product, each against the neighbour it is one knob
+     * away from: the perspective flag on the fog rows, the decal flag against
+     * the same rig without it, the empty index band's flat twin, and the two
+     * plain DIVIDE columns. The rows the z-sorted table cannot select are
+     * asserted in the z-buffered mode alone.
+     */
+    {.a = "scene-fog-p2-persp",       .b = "scene-fog-p2",          .equal = BR_FALSE, .pm_type = BR_PMT_INDEX_8, .mode = RT_MODE_ZB,
+     .device = "softrend"},
+    {.a = "scene-fog-arb-persp",      .b = "scene-fog-arb",         .equal = BR_FALSE, .pm_type = BR_PMT_INDEX_8, .mode = RT_MODE_ZB,
+     .device = "softrend"},
+    {.a = "scene-fog-flat",           .b = "scene-flat",            .equal = BR_FALSE, .pm_type = BR_PMT_INDEX_8, .mode = RT_MODE_ZB,
+     .device = "softrend"},
+    {.a = "scene-shade-flat",         .b = "scene-shade",           .equal = BR_FALSE, .pm_type = BR_PMT_INDEX_8, .mode = RT_MODE_ZB,
+     .device = "softrend"},
+    {.a = "scene-idx-arb-persp",      .b = "scene-idx-arb",         .equal = BR_FALSE, .pm_type = BR_PMT_INDEX_8, .mode = RT_ANY_MODE,
+     .device = "softrend"},
+    {.a = "scene-decal-p2-256",       .b = "scene-idx-p2-256",      .equal = BR_FALSE, .pm_type = BR_PMT_INDEX_8, .mode = RT_ANY_MODE,
+     .device = "softrend"},
+    {.a = "scene-blend-p2-smooth",    .b = "scene-blend",            .equal = BR_FALSE, .pm_type = BR_PMT_INDEX_8, .mode = RT_MODE_ZB,
+     .device = "softrend"},
+    /*
+     * The three cells the previous round left out, now bought;
+     * see scene.c. Each is the cube of a cell whose other cubes are the scene it
+     * is asserted against, so a cube that stopped selecting the entry it was
+     * built for moves one of these frames.
+     */
+    {.a = "scene-blend-p2-flat",      .b = "scene-blend-p2-smooth", .equal = BR_FALSE, .pm_type = BR_PMT_INDEX_8, .mode = RT_MODE_ZB,
+     .device = "softrend"},
+    {.a = "scene-decal-arb-flat",     .b = "scene-decal-arb",       .equal = BR_FALSE, .pm_type = BR_PMT_INDEX_8, .mode = RT_MODE_ZB,
+     .device = "softrend"},
+    {.a = "scene-fog-p2-tex",         .b = "scene-fog-p2",          .equal = BR_FALSE, .pm_type = BR_PMT_INDEX_8, .mode = RT_MODE_ZB,
+     .device = "softrend"},
 };
 // clang-format on
 
@@ -1307,9 +1366,14 @@ static const rt_blank rt_expected_blank[] = {
     /*
      * pentprim draws nothing for the shade fixture in the Z-sort mode either -
      * no z-sorted block carries an indexed shade table - so the 8bpp z-sorted
-     * key is two blank frames matching.
+     * key is two blank frames matching. scene-shade-flat is the same rig without
+     * BR_MATF_SMOOTH, and it selects the z-sorted constant-intensity block there,
+     * whose whole intensity is the material's index band: that band is empty
+     * (index_range zero, which is what makes the untextured family reachable at
+     * all), so the frame is index 0 and draws nothing.
      */
     {.scene = "scene-shade",             .pm_type = BR_PMT_INDEX_8, .mode = RT_MODE_ZS},
+    {.scene = "scene-shade-flat",        .pm_type = BR_PMT_INDEX_8, .mode = RT_MODE_ZS},
 
     /*
      * The line topology witness under glrend, and only there.
@@ -1698,6 +1762,20 @@ static const char *const rt_default_scenes[] = {
 
     "scene-mmx-uvrgb-dither-affine",      "scene-mmx-uvrgb-screen-persp",
     "scene-mmx-uvrgb-ditherscreen-persp", "scene-mmx-uvrgb-ditherscreen-affine",
+
+    /*
+     * The INDEX_8 ROP cross-product; see scene.c. The blend+fog group is the
+     * only place the `shade -> fog -> blend` order runs inside one
+     * primitive, so it is bought before the rest of the cross-product, and each
+     * of those three scenes carries the three shading modes as three cubes.
+     */
+    "scene-blendfog-p2",           "scene-blendfog-arb-persp",    "scene-blendfog-arb",
+    "scene-blend-p2-persp",        "scene-blend-p2-smooth",       "scene-blend-p2-flat",
+    "scene-blend-arb-persp",       "scene-blend-arb",             "scene-fog-p2-persp",
+    "scene-fog-p2",                "scene-fog-p2-tex",            "scene-fog-arb-persp",
+    "scene-fog-arb",               "scene-fog-flat",              "scene-idx-arb-persp",
+    "scene-idx-arb",               "scene-idx-p2-256",            "scene-decal-p2-256",
+    "scene-decal-arb",             "scene-decal-arb-flat",        "scene-shade-flat",
 };
 // clang-format on
 
