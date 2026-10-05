@@ -1637,13 +1637,13 @@ TriangleRender_PT_I8_32 proc uses eax ebx ecx edx esi edi,
 		mov		ch,byte ptr work.awsl.v_current
 		mov		work_main_i,eax
 
-		shl		cl,2
+		shl		cl,3
 		mov		work_main_d_i,ebx
 
-		shr		ecx,2
+		shr		ecx,3
 		mov		ebx,work.pq.grad_x
 
-		and		ecx,63*65
+		and		ecx,31*33
 		mov		work.tsl.ddenominator,ebx
 
 		mov		work.tsl.source,ecx
