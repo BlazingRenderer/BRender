@@ -167,9 +167,10 @@ loopf:
 
 	elseifidni <DBPP>,<3>
 
-	mov	bx,[edx+ecx*4]		; Light texel
+	lea	ecx,[ecx+ecx*2]		; Shade table entry is 3 bytes wide
+	mov	bx,[edx+ecx]		; Light texel
 	mov	[edi],bx		; Store texel
-	mov	bl,2[edx+ecx*4]		; Light texel
+	mov	bl,2[edx+ecx]		; Light texel
 	mov	2[edi],bl		; Store texel
 
 	lea	edi,3[edi]		; ptr++
@@ -483,9 +484,10 @@ nosizeb:
 	elseifidni	<DBPP>,<3>
 
 	if	LIGHT
-	mov	bx,[edx+ecx*4]
+	lea	ecx,[ecx+ecx*2]		; Shade table entry is 3 bytes wide
+	mov	bx,[edx+ecx]
 	mov	[edi],bx
-	mov	bl,2[edx+ecx*4]
+	mov	bl,2[edx+ecx]
 	mov	2[edi],bl
 	endif
 
