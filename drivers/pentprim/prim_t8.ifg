@@ -347,10 +347,10 @@ softi:TriangleRender_TID_I8_FLAT = [triangle, index8, constant_intensity, decal,
 #########################################
 [texture_stride_positive,texture_no_skip,image_suffix=]
 
-softd:TriangleRenderPIZ2TPD1024 = [triangle, index8, texture1024x1024, perspective, dithered_map, fixed_components]
-softd:TriangleRenderPIZ2TPD256 = [triangle, index8, texture256x256, perspective, dithered_map, fixed_components]
-softd:TriangleRenderPIZ2TPD128 = [triangle, index8, texture128x128, perspective, dithered_map, fixed_components]
-softd:TriangleRenderPIZ2TPD64 = [triangle, index8, texture64x64, perspective, dithered_map, fixed_components]
+softd:TriangleRenderPITPD1024 = [triangle, index8, texture1024x1024, perspective, dithered_map, fixed_components]
+softd:TriangleRenderPITPD256 = [triangle, index8, texture256x256, perspective, dithered_map, fixed_components]
+softd:TriangleRenderPITPD128 = [triangle, index8, texture128x128, perspective, dithered_map, fixed_components]
+softd:TriangleRenderPITPD64 = [triangle, index8, texture64x64, perspective, dithered_map, fixed_components]
 
 #########################################
 #Perspective (Powers of 2)
