@@ -246,6 +246,12 @@ static br_error GLTFInit(br_demo *demo)
     br_pixelmap *clut = build_clut(results->pixelmaps, results->npixelmaps);
     BrPixelmapPaletteSet(demo->colour_buffer, clut);
 
+    /*
+     * The colour buffer resolves its palette through the device CLUT and leaves
+     * pm->map NULL; publish it so the bench dump can de-CLUT the frame.
+     */
+    demo->palette = clut;
+
     for(size_t i = 0; i < results->npixelmaps; ++i) {
         br_pixelmap *pm = results->pixelmaps[i];
 

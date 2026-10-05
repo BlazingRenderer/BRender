@@ -482,6 +482,32 @@ static br_uint_64 bench_hash_pixelmap(br_uint_64 hash, br_pixelmap *pm, br_uint_
 }
 
 /*
+ * Convert the software colour buffer into an opaque RGB image the image writer
+ * can save. An indexed buffer keeps its palette in the device CLUT, not
+ * pm->map, so hand the demo's palette (demo->palette) to BrPixelmapConvert()
+ * through a shadow of the source - the buffer's own map is part of the
+ * checksum - which also keeps the 555/565/888 cases in one place.
+ */
+static br_pixelmap *bench_soft_dump_image(br_pixelmap *pm, br_pixelmap *palette)
+{
+    br_pixelmap  shadow;
+    br_pixelmap *src = pm;
+
+    if(pm->type == BR_PMT_INDEX_8 && pm->map == NULL) {
+        if(palette == NULL) {
+            BrLogWarn("BENCH", "Indexed colour buffer has no palette to dump through.");
+            return NULL;
+        }
+
+        shadow     = *pm;
+        shadow.map = palette;
+        src        = &shadow;
+    }
+
+    return BrPixelmapConvert(src, BR_PMT_RGB_888, NULL);
+}
+
+/*
  * The software path renders into the demo's colour buffer rather than a GL
  * framebuffer, so hash that. Its pixels are a raw buffer with no implicit
  * format conversion, and an indexed buffer means nothing without its palette,
@@ -516,44 +542,15 @@ static void bench_checksum_software(gltfview_bench *bench)
 
     /*
      * Local debug dump of the software colour buffer, so a textured frame can be
-     * looked at without a GL context. The indices are written as greys (see
-     * below) and saved through the engine's PNG writer. Scope is deliberately
-     * one env var and one write; the real compare mode is being built
-     * separately.
+     * looked at without a GL context.
      */
     {
         const char *path = BrGetEnv("GLTFVIEW_BENCH_SOFT_PNG");
 
         if(path != NULL && path[0] != '\0') {
-            /*
-             * The software colour buffer is BR_PMT_INDEX_8 with its palette held
-             * as a device CLUT (BrPixelmapPaletteSet), not as pm->map, so the
-             * generic image writer has no palette to resolve and refuses the
-             * conversion. Render the indices as greys instead: enough to see
-             * whether texture detail is landing. This is a local debug view, not
-             * the regression comparison, which is the checksum above.
-             */
-            br_pixelmap *dst = BrPixelmapAllocate(BR_PMT_RGBA_8888_ARR, pm->width, pm->height, NULL, BR_PMAF_NORMAL);
+            br_pixelmap *dst = bench_soft_dump_image(pm, bench->demo->palette);
 
             if(dst != NULL) {
-                br_uint_32 bits      = BrPixelmapPixelSize(pm);
-                br_int_32  row_bytes = (br_int_32)(((br_uint_64)pm->width * bits + 7) / 8);
-                br_int_32  stride    = pm->row_bytes != 0 ? pm->row_bytes : row_bytes;
-
-                for(br_int_32 y = 0; y < pm->height; ++y) {
-                    const br_uint_8 *src = (const br_uint_8 *)pm->pixels + (br_size_t)y * stride;
-                    br_uint_8       *d   = (br_uint_8 *)dst->pixels + (br_size_t)y * dst->row_bytes;
-
-                    for(br_int_32 x = 0; x < pm->width; ++x) {
-                        br_uint_8 v = (br_uint_8)bench_pixel_value(src, x, bits);
-
-                        d[x * 4 + 0] = v;
-                        d[x * 4 + 1] = v;
-                        d[x * 4 + 2] = v;
-                        d[x * 4 + 3] = 0xff;
-                    }
-                }
-
                 if(BrFmtImageSave(path, dst, BR_FMT_IMAGE_PNG))
                     printf("BENCH soft-png=%s\n", path);
                 else
@@ -561,7 +558,7 @@ static void bench_checksum_software(gltfview_bench *bench)
 
                 BrPixelmapFree(dst);
             } else {
-                BrLogWarn("BENCH", "Could not allocate a pixelmap for %s.", path);
+                BrLogWarn("BENCH", "Could not convert the software frame for %s.", path);
             }
         }
     }
