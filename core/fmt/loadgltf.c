@@ -136,35 +136,42 @@ void *unbuild_data_url(void *res, const char *uri, size_t *size)
 
 /*
  * A lookup table's samples are carried raw in a marked data URI (see
- * cgltf_brender.h). Return the pixel type the marker names and set *components
- * to the PNG channel count it was written with, or return 0 for an ordinary
- * colour image. The marker names the type rather than the loader inferring it:
- * BR_PMT_RGB_555 and BR_PMT_RGB_565 are both two bytes per sample, and a shade
- * table's type must equal the output, so guessing would collapse them.
+ * cgltf_brender.h). Return the pixel type the marker names, set *components to
+ * the PNG channel count it was written with and *marker to the marker itself,
+ * or return 0 for an ordinary colour image. The marker names the type rather
+ * than the loader inferring it: BR_PMT_RGB_555 and BR_PMT_RGB_565 are both two
+ * bytes per sample, and a shade table's type must equal the output, so guessing
+ * would collapse them. The marker is returned as well so that a PNG which
+ * disagrees with it can be named without printing the whole data URI.
  */
-static br_uint_8 load_table_type(const char *uri, int *components)
+static br_uint_8 load_table_type(const char *uri, int *components, const char **marker)
 {
     if(BrStrNCmp(uri, CGLTF_BR_INDEX_8_PNG_URI, BR_ASIZE(CGLTF_BR_INDEX_8_PNG_URI) - 1) == 0) {
         *components = 1;
+        *marker     = "index8";
         return BR_PMT_INDEX_8;
     }
 
     if(BrStrNCmp(uri, CGLTF_BR_RGB_555_PNG_URI, BR_ASIZE(CGLTF_BR_RGB_555_PNG_URI) - 1) == 0) {
         *components = 2;
+        *marker     = "rgb555";
         return BR_PMT_RGB_555;
     }
 
     if(BrStrNCmp(uri, CGLTF_BR_RGB_565_PNG_URI, BR_ASIZE(CGLTF_BR_RGB_565_PNG_URI) - 1) == 0) {
         *components = 2;
+        *marker     = "rgb565";
         return BR_PMT_RGB_565;
     }
 
     if(BrStrNCmp(uri, CGLTF_BR_RGB_888_PNG_URI, BR_ASIZE(CGLTF_BR_RGB_888_PNG_URI) - 1) == 0) {
         *components = 3;
+        *marker     = "rgb888";
         return BR_PMT_RGB_888;
     }
 
     *components = 0;
+    *marker     = NULL;
     return 0;
 }
 
@@ -180,6 +187,24 @@ static br_error image_not_decodable(br_size_t image_index, const cgltf_image *im
 {
     BrLogError("GLTF", "image %lu (\"%s\") is present but could not be decoded; refusing to load rather than rendering the scene without it",
                (unsigned long)image_index, image->uri != NULL ? image->uri : (image->name != NULL ? image->name : "<unnamed>"));
+    return BRE_FAIL;
+}
+
+/*
+ * Refuse the file for a marked lookup table whose PNG does not carry the number
+ * of channels the marker names. stbi converts silently when asked for a count
+ * the PNG does not have, so a hand-edited or third-party image whose channels
+ * disagree with its marker would be rebuilt as a table made of converted
+ * samples rather than refused - and a lookup table's contents are the one thing
+ * nothing else checks. The image is named by index and name, and the marker is
+ * named too, since the URI it lives in is not readable at a glance.
+ */
+static br_error image_marker_mismatch(br_size_t image_index, const cgltf_image *image, const char *marker, int marker_channels, int png_channels)
+{
+    BrLogError("GLTF",
+               "image %lu (\"%s\") is marked brender=%s, which names %d channels, but its PNG has %d; a table's samples are its "
+               "channels, so decoding between them would rebuild the wrong table",
+               (unsigned long)image_index, image->name != NULL ? image->name : "<unnamed>", marker, marker_channels, png_channels);
     return BRE_FAIL;
 }
 
@@ -201,9 +226,10 @@ static br_error load_pixelmap(br_gltf_load_state *state, br_size_t image_index, 
     br_pixelmap *pixelmap, *tmp;
     size_t       size;
     int          x, y, c;
-    int          owns_raw   = 0;
-    br_uint_8    table_type = 0;
-    int          table_comp = 0;
+    int          owns_raw     = 0;
+    br_uint_8    table_type   = 0;
+    int          table_comp   = 0;
+    const char  *table_marker = NULL;
 
     *out = NULL;
 
@@ -222,7 +248,7 @@ static br_error load_pixelmap(br_gltf_load_state *state, br_size_t image_index, 
          * and the marker names the type so the table comes back as the exact
          * pixelmap the renderer needs (see cgltf_brender.h).
          */
-        table_type = load_table_type(image->uri, &table_comp);
+        table_type = load_table_type(image->uri, &table_comp, &table_marker);
 
         if(is_base64_data_uri(image->uri)) {
             /*
@@ -281,7 +307,13 @@ static br_error load_pixelmap(br_gltf_load_state *state, br_size_t image_index, 
         return image_not_decodable(image_index, image);
     }
 
-    if((pixels = stbi_load_from_memory(raw_data, (int)size, &x, &y, &c, table_type ? table_comp : 4)) == NULL) {
+    /*
+     * A marked table is decoded at the PNG's own channel count, so that an image
+     * whose channels disagree with its marker comes out as that disagreement
+     * rather than a conversion. An ordinary image is decoded as RGBA and
+     * converted to the output type below.
+     */
+    if((pixels = stbi_load_from_memory(raw_data, (int)size, &x, &y, &c, table_type ? 0 : 4)) == NULL) {
         if(owns_raw)
             BrResFree(raw_data);
         return image_not_decodable(image_index, image);
@@ -289,6 +321,11 @@ static br_error load_pixelmap(br_gltf_load_state *state, br_size_t image_index, 
 
     if(owns_raw)
         BrResFree(raw_data);
+
+    if(table_type != 0 && c != table_comp) {
+        BrMemFree(pixels);
+        return image_marker_mismatch(image_index, image, table_marker, table_comp, c);
+    }
 
     if(table_type) {
         /*
