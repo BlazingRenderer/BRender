@@ -1020,6 +1020,79 @@ static br_error check_primitive_modes(const cgltf_data *data)
 }
 
 /*
+ * The count that sizes a model is the primitive's index count, or its first
+ * attribute's vertex count when it has no indices, and create_model() fills the
+ * model by stepping that same count: three at a time for TRIANGLES, and one at
+ * a time for a strip or a fan. The face count it is sized by has to agree with
+ * that step, and glTF requires that it does - a multiple of three for
+ * TRIANGLES, at least three for a strip or a fan - but nothing enforces either.
+ * A count that disagrees is filled past the end of the face array (four indices
+ * size one face and fill two), or sizes it from a face count that underflowed,
+ * which create_model() sees as too large and refuses, leaving the actor with no
+ * model and the renderer's default cube in its place.
+ */
+static br_error check_primitive_counts(const cgltf_data *data)
+{
+    for(br_size_t m = 0; m < data->meshes_count; ++m) {
+        const cgltf_mesh *mesh = data->meshes + m;
+
+        for(br_size_t p = 0; p < mesh->primitives_count; ++p) {
+            const cgltf_primitive *prim = mesh->primitives + p;
+            br_size_t              count;
+
+            /*
+             * check_primitive_modes() refuses an unsupported mode, and
+             * check_primitive_attributes() refuses a primitive with no
+             * attributes.
+             */
+            if(!primitive_mode_supported(prim->type) || prim->attributes_count == 0)
+                continue;
+
+            count = prim->indices != NULL ? prim->indices->count : prim->attributes[0].data->count;
+
+            switch(prim->type) {
+                case cgltf_primitive_type_triangles:
+                    if(count % 3 != 0) {
+                        BrLogError("GLTF",
+                                   "mesh \"%s\" primitive %lu has %lu %s, which is not a multiple of three; a TRIANGLES primitive is "
+                                   "sized for count/3 faces and filled three at a time, so it is filled with one face more than it was "
+                                   "sized for",
+                                   mesh->name != NULL ? mesh->name : "<unnamed>", (unsigned long)p, (unsigned long)count,
+                                   prim->indices != NULL ? "indices" : "vertices");
+                        return BRE_FAIL;
+                    }
+
+                    if(count == 0) {
+                        BrLogError("GLTF",
+                                   "mesh \"%s\" primitive %lu has a count of zero; a TRIANGLES primitive is sized for count/3 faces, so it "
+                                   "builds no model at all and the renderer draws its default cube in the actor's place",
+                                   mesh->name != NULL ? mesh->name : "<unnamed>", (unsigned long)p);
+                        return BRE_FAIL;
+                    }
+                    break;
+
+                case cgltf_primitive_type_triangle_strip:
+                case cgltf_primitive_type_triangle_fan:
+                    if(count < 3) {
+                        BrLogError("GLTF",
+                                   "mesh \"%s\" primitive %lu has a count of %lu, fewer than the three a %s needs; its face count is that "
+                                   "count less two, which underflowed",
+                                   mesh->name != NULL ? mesh->name : "<unnamed>", (unsigned long)p, (unsigned long)count,
+                                   primitive_mode_name(prim->type));
+                        return BRE_FAIL;
+                    }
+                    break;
+
+                default:
+                    break;
+            }
+        }
+    }
+
+    return BRE_OK;
+}
+
+/*
  * The glTF extensions this loader implements - that is, the ones whose state
  * reaches a br_* structure. cgltf parsing an extension is not the same thing:
  * cgltf resolves KHR_lights_punctual into cgltf_node::light and this loader
@@ -1201,8 +1274,8 @@ br_fmt_results *BR_PUBLIC_ENTRY BrFmtGLTFActorLoadMany(const char *name, const b
      * any state is built, so a file that cannot be loaded faithfully never
      * gets part-way in.
      */
-    if(check_extensions(data) != BRE_OK || check_primitive_modes(data) != BRE_OK || check_material_references(data) != BRE_OK ||
-       check_actor_styles(data) != BRE_OK) {
+    if(check_extensions(data) != BRE_OK || check_primitive_modes(data) != BRE_OK || check_primitive_counts(data) != BRE_OK ||
+       check_material_references(data) != BRE_OK || check_actor_styles(data) != BRE_OK) {
         BrResFree(state);
         return NULL;
     }
