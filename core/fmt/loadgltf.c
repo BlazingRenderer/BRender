@@ -46,10 +46,20 @@ static void cgltf_free_br(void *user, void *ptr)
 static cgltf_result cgltf_load_brfile(const cgltf_memory_options *memory_options, const cgltf_file_options *file_options, const char *path,
                                       cgltf_size *size, void **data)
 {
+    cgltf_size declared = *size;
+
     (void)file_options;
 
     if((*data = BrFileLoad(memory_options->user_data, path, size)) == NULL) {
         return cgltf_result_io_error;
+    }
+
+    if(declared != 0 && *size < declared) {
+        BrLogError("GLTF",
+                   "buffer file \"%s\" is %lu bytes where the file declares %lu; every buffer view inside the declared range would be "
+                   "read past the end of the data that was loaded",
+                   path, (unsigned long)*size, (unsigned long)declared);
+        return cgltf_result_data_too_short;
     }
 
     return cgltf_result_success;
