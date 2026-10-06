@@ -121,7 +121,7 @@ static int cgltf_parse_json_brender_light(cgltf_options *options, jsmntok_t cons
             ++i;
             out_light->attenuation_l = cgltf_json_to_float(tokens + i, json_chunk);
             ++i;
-        } else if(cgltf_json_strcmp(tokens + i, json_chunk, "attenuation_l") == 0) {
+        } else if(cgltf_json_strcmp(tokens + i, json_chunk, "attenuation_q") == 0) {
             ++i;
             out_light->attenuation_q = cgltf_json_to_float(tokens + i, json_chunk);
             ++i;
