@@ -1015,7 +1015,13 @@ br_fmt_results *BR_PUBLIC_ENTRY BrFmtGLTFActorLoadMany(const char *name, const b
     results->ncameras = data->cameras_count;
     results->cameras  = BrResAllocate(results, results->ncameras * sizeof(br_actor *), BR_MEMORY_FMT_RESULTS);
 
-    results->nlights = data->lights_count;
+    /*
+     * The light table has one entry per BR_lights entry. The KHR light array
+     * is a parallel sidecar the writer emits and this reader never reads, so
+     * sizing from it produced a table whose entries no node necessarily
+     * filled.
+     */
+    results->nlights = data->brender_lights_count;
     results->lights  = BrResAllocate(results, results->nlights * sizeof(br_light *), BR_MEMORY_FMT_RESULTS);
 
     if(data->brender_materials_count > 0) {
@@ -1092,7 +1098,7 @@ br_fmt_results *BR_PUBLIC_ENTRY BrFmtGLTFActorLoadMany(const char *name, const b
 
             case BR_ACTOR_LIGHT:
                 /* FIXME: non-brender-lights? */
-                results->lights[node->brender_light - data->brender_lights] = a->type_data;
+                fill_light(a->type_data, node->brender_light);
 
                 /*
                  * Seems dodgy, but this is also what the 3ds importer does.
@@ -1135,11 +1141,15 @@ br_fmt_results *BR_PUBLIC_ENTRY BrFmtGLTFActorLoadMany(const char *name, const b
     }
 
     /*
-     * Fill-in the lights.
+     * Build the light table.
      *
-     * Post: br_light::* is filled.
+     * Post: results->lights is filled, one br_light per BR_lights entry. A
+     *       definition no node references has no actor behind it, so it is
+     *       built here rather than aliased from one.
      */
-    for(br_size_t i = 0; i < data->brender_lights_count; ++i) {
+    for(br_size_t i = 0; i < results->nlights; ++i) {
+        results->lights[i] = BrResAllocate(results, sizeof(br_light), BR_MEMORY_LIGHT);
+        BrMemSet(results->lights[i], 0, sizeof(br_light));
         fill_light(results->lights[i], data->brender_lights + i);
     }
 
