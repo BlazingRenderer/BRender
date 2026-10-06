@@ -874,7 +874,7 @@ static float atten_to_range(float c, float l, float q)
     if(discriminant < 0.0f)
         return 0.0f;
 
-    return (-l * sqrtf(discriminant)) / (2.0f * q);
+    return (-l + sqrtf(discriminant)) / (2.0f * q);
 }
 
 static void fill_br_light(const br_light *light_data, cgltf_brender_light *br_light)
