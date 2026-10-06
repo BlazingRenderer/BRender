@@ -1175,6 +1175,50 @@ static br_error check_primitive_counts(const cgltf_data *data)
 }
 
 /*
+ * A face's vertices are indices into the primitive's own attributes, offset into
+ * the model by the vertices of the primitives before it (create_model()), so an
+ * index past the last of them names a vertex that does not exist. BRender's
+ * model preparation refuses such a model outright - "face references invalid
+ * vertex" - which makes a file that has one abort the caller from inside the
+ * renderer rather than fail to load. glTF requires every index to name a
+ * vertex, and cgltf's own validator checks it, but this loader does not call
+ * that. Only an indexed primitive can go wrong: without an index accessor a
+ * face's vertices are the vertex numbers themselves.
+ */
+static br_error check_primitive_index_ranges(const cgltf_data *data)
+{
+    for(br_size_t m = 0; m < data->meshes_count; ++m) {
+        const cgltf_mesh *mesh = data->meshes + m;
+
+        for(br_size_t p = 0; p < mesh->primitives_count; ++p) {
+            const cgltf_primitive *prim = mesh->primitives + p;
+            br_size_t              nvertices;
+
+            if(prim->indices == NULL || prim->attributes_count == 0)
+                continue;
+
+            nvertices = prim->attributes[0].data->count;
+
+            for(br_size_t i = 0; i < prim->indices->count; ++i) {
+                br_size_t index = cgltf_accessor_read_index(prim->indices, i);
+
+                if(index < nvertices)
+                    continue;
+
+                BrLogError("GLTF",
+                           "mesh \"%s\" primitive %lu index %lu is vertex %lu, past the %lu vertices the primitive has; the renderer "
+                           "refuses a model whose faces name vertices it does not have",
+                           mesh->name != NULL ? mesh->name : "<unnamed>", (unsigned long)p, (unsigned long)i, (unsigned long)index,
+                           (unsigned long)nvertices);
+                return BRE_FAIL;
+            }
+        }
+    }
+
+    return BRE_OK;
+}
+
+/*
  * The glTF extensions this loader implements - that is, the ones whose state
  * reaches a br_* structure. cgltf parsing an extension is not the same thing:
  * cgltf resolves KHR_lights_punctual into cgltf_node::light and this loader
@@ -1354,7 +1398,9 @@ br_fmt_results *BR_PUBLIC_ENTRY BrFmtGLTFActorLoadMany(const char *name, const b
     /*
      * The checks below are pure and each refuses the file it names before
      * any state is built, so a file that cannot be loaded faithfully never
-     * gets part-way in.
+     * gets part-way in. check_primitive_index_ranges() reads the index
+     * values out of the buffers, so it runs once cgltf_load_buffers() has
+     * loaded them.
      */
     if(check_extensions(data) != BRE_OK || check_primitive_modes(data) != BRE_OK || check_primitive_attributes(data) != BRE_OK ||
        check_primitive_attribute_counts(data) != BRE_OK || check_primitive_counts(data) != BRE_OK ||
@@ -1364,6 +1410,14 @@ br_fmt_results *BR_PUBLIC_ENTRY BrFmtGLTFActorLoadMany(const char *name, const b
     }
 
     if(cgltf_load_buffers(&opts, data, base_path) != cgltf_result_success) {
+        BrResFree(state);
+        return NULL;
+    }
+
+    /*
+     * The check that reads the index values, and so can only run now.
+     */
+    if(check_primitive_index_ranges(data) != BRE_OK) {
         BrResFree(state);
         return NULL;
     }
