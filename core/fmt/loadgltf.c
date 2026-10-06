@@ -303,7 +303,11 @@ static br_gltf_load_prim_info *filter_primitive_attributes(br_gltf_load_prim_inf
     }
 
     /*
-     * NB: cgltf will ensure that all attributes have the same count and that there's at least one.
+     * The count the model is sized from: the primitive's index count, or the
+     * vertex count of its first attribute when it is not indexed.
+     * check_primitive_attributes(), check_primitive_attribute_counts() and
+     * check_primitive_counts() refuse a primitive whose attributes are absent
+     * or disagree on their count, and one whose count does not fit its mode.
      */
     index_count = prim->indices ? prim->indices->count : prim->attributes[0].data->count;
 
@@ -318,7 +322,7 @@ static br_gltf_load_prim_info *filter_primitive_attributes(br_gltf_load_prim_inf
 
         case cgltf_primitive_type_triangle_strip:
         case cgltf_primitive_type_triangle_fan:
-            ASSERT(index_count > 3);
+            ASSERT(index_count >= 3);
             output_vertex_count = prim->attributes[0].data->count;
             output_face_count   = index_count - 2;
             break;
