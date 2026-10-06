@@ -1019,6 +1019,54 @@ static br_error check_primitive_modes(const cgltf_data *data)
     return BRE_OK;
 }
 
+static br_boolean primitive_has_position(const cgltf_primitive *prim)
+{
+    for(br_size_t a = 0; a < prim->attributes_count; ++a) {
+        if(prim->attributes[a].type == cgltf_attribute_type_position)
+            return BR_TRUE;
+    }
+
+    return BR_FALSE;
+}
+
+/*
+ * filter_primitive_attributes() takes the primitive's vertex count from its
+ * first attribute, so a primitive with no attributes at all reads past the end
+ * of that array, and create_model() takes every vertex's position from its
+ * POSITION attribute, so a primitive without one is built with every vertex
+ * where BrModelAllocate() left it - at the origin, all of them. glTF requires
+ * an attributes object with at least one property in it, and requires POSITION
+ * to be that property; the parser enforces neither.
+ */
+static br_error check_primitive_attributes(const cgltf_data *data)
+{
+    for(br_size_t m = 0; m < data->meshes_count; ++m) {
+        const cgltf_mesh *mesh = data->meshes + m;
+
+        for(br_size_t p = 0; p < mesh->primitives_count; ++p) {
+            const cgltf_primitive *prim = mesh->primitives + p;
+
+            if(prim->attributes_count == 0) {
+                BrLogError("GLTF",
+                           "mesh \"%s\" primitive %lu has no attributes; its vertex count is taken from the first of them, so a "
+                           "primitive with none is read past the end of the array",
+                           mesh->name != NULL ? mesh->name : "<unnamed>", (unsigned long)p);
+                return BRE_FAIL;
+            }
+
+            if(!primitive_has_position(prim)) {
+                BrLogError("GLTF",
+                           "mesh \"%s\" primitive %lu has no POSITION attribute; every vertex's position is read from it, so a "
+                           "primitive without one is built with every vertex at the origin",
+                           mesh->name != NULL ? mesh->name : "<unnamed>", (unsigned long)p);
+                return BRE_FAIL;
+            }
+        }
+    }
+
+    return BRE_OK;
+}
+
 /*
  * The count that sizes a model is the primitive's index count, or its first
  * attribute's vertex count when it has no indices, and create_model() fills the
@@ -1274,8 +1322,8 @@ br_fmt_results *BR_PUBLIC_ENTRY BrFmtGLTFActorLoadMany(const char *name, const b
      * any state is built, so a file that cannot be loaded faithfully never
      * gets part-way in.
      */
-    if(check_extensions(data) != BRE_OK || check_primitive_modes(data) != BRE_OK || check_primitive_counts(data) != BRE_OK ||
-       check_material_references(data) != BRE_OK || check_actor_styles(data) != BRE_OK) {
+    if(check_extensions(data) != BRE_OK || check_primitive_modes(data) != BRE_OK || check_primitive_attributes(data) != BRE_OK ||
+       check_primitive_counts(data) != BRE_OK || check_material_references(data) != BRE_OK || check_actor_styles(data) != BRE_OK) {
         BrResFree(state);
         return NULL;
     }
