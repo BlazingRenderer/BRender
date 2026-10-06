@@ -839,6 +839,32 @@ static int fill_actor_name(const void *key, void *value, br_hash hash, void *use
  * leaves in the field - so writing the default would add a node extension to
  * every actor in every file to say nothing.
  */
+
+/*
+ * BR_RSTYLE_ANTIALIASED_LINES and BR_RSTYLE_ANTIALIASED_FACES are declared by
+ * the enum but have no entry in RenderStyleCalls[], so the reader refuses a
+ * file that names one (check_actor_styles()). Writing one would produce a file
+ * this writer's own reader refuses, and there is no value to clamp to that
+ * means the same thing, so the save is refused instead.
+ */
+static int check_actor_render_styles(const void *key, void *value, br_hash hash, void *user)
+{
+    const br_actor *actor = key;
+    (void)value;
+    (void)hash;
+    (void)user;
+
+    if(actor->render_style <= BR_RSTYLE_BOUNDING_FACES)
+        return 0;
+
+    BrLogError("GLTF",
+               "actor \"%s\" has render_style %d, outside BR_RSTYLE_DEFAULT..BR_RSTYLE_BOUNDING_FACES (%d..%d), which the renderer "
+               "cannot dispatch and this writer's own reader refuses; not writing a file that would not load back",
+               actor->identifier != NULL ? actor->identifier : "<unnamed>", (int)actor->render_style, (int)BR_RSTYLE_DEFAULT,
+               (int)BR_RSTYLE_BOUNDING_FACES);
+    return 1;
+}
+
 static void fill_actor_render_style_actual(const br_actor *actor, cgltf_node *node)
 {
     if(actor->render_style == BR_RSTYLE_DEFAULT)
@@ -1368,6 +1394,14 @@ br_error BR_PUBLIC_ENTRY BrFmtGLTFActorSaveMany(const char *name, br_actor **act
      */
     for(br_size_t i = 0; i < num; ++i) {
         build_actor_lookup(state->actor_map, actors[i]);
+    }
+
+    /*
+     * Refuse before anything is written, as the reader does.
+     */
+    if(BrHashMapEnumerate(state->actor_map, check_actor_render_styles, state) != 0) {
+        BrResFree(state);
+        return BRE_FAIL;
     }
 
     /*
