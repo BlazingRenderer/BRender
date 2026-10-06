@@ -1013,7 +1013,7 @@ br_fmt_results *BR_PUBLIC_ENTRY BrFmtGLTFActorLoadMany(const char *name, const b
     results->models  = BrResAllocate(results, results->nmodels * sizeof(br_model *), BR_MEMORY_FMT_RESULTS);
 
     results->ncameras = data->cameras_count;
-    results->cameras  = BrResAllocate(results, results->ncameras * sizeof(br_actor *), BR_MEMORY_FMT_RESULTS);
+    results->cameras  = BrResAllocate(results, results->ncameras * sizeof(br_camera *), BR_MEMORY_FMT_RESULTS);
 
     /*
      * The light table has one entry per BR_lights entry. The KHR light array
@@ -1079,13 +1079,13 @@ br_fmt_results *BR_PUBLIC_ENTRY BrFmtGLTFActorLoadMany(const char *name, const b
     }
 
     /*
-     * Fill in the result camera/light arrays.
+     * Fill in the camera and light actors from the definition their node
+     * references.
      *
      * We have to use the actor list for this as we need the type_data pointer and
      * cgltf_* struct doesn't have a backref to its node.
      *
-     * Post: results->cameras is filled.
-     *       results->lights is filled.
+     * Post: the camera and light actors' own type_data is filled.
      */
     for(br_size_t i = 0; i < data->nodes_count; ++i) {
         const cgltf_node *node = data->nodes + i;
@@ -1093,7 +1093,7 @@ br_fmt_results *BR_PUBLIC_ENTRY BrFmtGLTFActorLoadMany(const char *name, const b
 
         switch(a->type) {
             case BR_ACTOR_CAMERA:
-                results->cameras[cgltf_camera_index(data, node->camera)] = a->type_data;
+                fill_camera(a->type_data, node->camera);
                 break;
 
             case BR_ACTOR_LIGHT:
@@ -1132,11 +1132,15 @@ br_fmt_results *BR_PUBLIC_ENTRY BrFmtGLTFActorLoadMany(const char *name, const b
     }
 
     /*
-     * Fill-in the cameras.
+     * Build the camera table.
      *
-     * Post: br_camera::* is filled.
+     * Post: results->cameras is filled, one br_camera per camera in the file. A
+     *       camera no node references has no actor behind it, so it is built
+     *       here rather than aliased from one.
      */
-    for(br_size_t i = 0; i < data->cameras_count; ++i) {
+    for(br_size_t i = 0; i < results->ncameras; ++i) {
+        results->cameras[i] = BrResAllocate(results, sizeof(br_camera), BR_MEMORY_CAMERA);
+        BrMemSet(results->cameras[i], 0, sizeof(br_camera));
         fill_camera(results->cameras[i], data->cameras + i);
     }
 
