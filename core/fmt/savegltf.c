@@ -912,8 +912,8 @@ static void fill_br_light(const br_light *light_data, cgltf_brender_light *br_li
     br_light->attenuation_q  = BrScalarToFloat(light_data->attenuation_q);
     br_light->cone_inner     = BrAngleToScalar(light_data->cone_inner);
     br_light->cone_outer     = BrAngleToScalar(light_data->cone_outer);
-    br_light->radius_inner   = BrAngleToScalar(light_data->radius_inner);
-    br_light->radius_outer   = BrAngleToScalar(light_data->radius_outer);
+    br_light->radius_inner   = BrScalarToFloat(light_data->radius_inner);
+    br_light->radius_outer   = BrScalarToFloat(light_data->radius_outer);
 }
 
 static void fill_camera(const br_camera *camera_data, cgltf_camera *camera)
