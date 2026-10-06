@@ -157,6 +157,10 @@ static br_boolean is_lookup_table(const br_pixelmap *pm)
     return pm->type == BR_PMT_INDEX_8 && pm->map == NULL;
 }
 
+/*
+ * Build the CLUT the indexed software paths need. The loader leaves a NULL
+ * entry for an image it could not obtain, so the table can have holes in it.
+ */
 static br_pixelmap *build_clut(br_pixelmap *const *maps, size_t nmaps)
 {
     br_pixelmap *clut;
@@ -168,7 +172,7 @@ static br_pixelmap *build_clut(br_pixelmap *const *maps, size_t nmaps)
     for(size_t i = 0; i < nmaps; ++i) {
         br_pixelmap *pm = maps[i];
 
-        if(is_lookup_table(pm))
+        if(pm == NULL || is_lookup_table(pm))
             continue;
 
         for(int y = 0; y < pm->height; y++) {
@@ -266,6 +270,9 @@ static br_error GLTFInit(br_demo *demo)
 
     for(size_t i = 0; i < results->npixelmaps; ++i) {
         br_pixelmap *pm = results->pixelmaps[i];
+
+        if(pm == NULL)
+            continue;
 
         if(demo->colour_buffer->type == BR_PMT_INDEX_8 && !is_lookup_table(pm)) {
             /*
