@@ -1254,9 +1254,6 @@ static int fill_material(const void *key, void *value, br_hash hash, void *user)
         material->pbr_metallic_roughness.roughness_factor = 1.0f;
     }
 
-    material->has_ior = true;
-    material->ior.ior = 1.5f;
-
     if((mat->opacity < 255) || (mat->flags & (BR_MATF_PREALPHA | BR_MATF_BLEND))) {
         material->alpha_mode = cgltf_alpha_mode_blend;
     } else {

@@ -118,10 +118,6 @@
       "pbrMetallicRoughness": {
         "metallicFactor": 0,
         "baseColorFactor": [0.603827417, 0.13286832, 0.010329823, 1]
-      },
-      "extensions": {
-        "KHR_materials_ior": {
-        }
       }
     }
   ],
@@ -231,7 +227,6 @@
   },
   "extensionsUsed": [
     "KHR_lights_punctual",
-    "KHR_materials_ior",
     "BR_lights",
     "BR_materials"
   ]
