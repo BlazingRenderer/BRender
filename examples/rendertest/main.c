@@ -344,7 +344,14 @@ static br_boolean rt_is_lookup_table(const br_pixelmap *pm)
     return pm->type == BR_PMT_INDEX_8 && pm->map == NULL;
 }
 
-/* Build an optimal CLUT for every pixelmap in the scene; gltfview does this. */
+/*
+ * Build an optimal CLUT for every pixelmap in the scene; gltfview does this.
+ *
+ * The loader leaves a NULL entry for an image it could not obtain - a file the
+ * URI names but that is not there, or that it cannot read; an image that is
+ * present but broken refuses the load instead - so a table it filled can have
+ * holes in it.
+ */
 static br_pixelmap *rt_build_clut(br_pixelmap *const *maps, size_t nmaps)
 {
     br_pixelmap *clut;
@@ -356,7 +363,7 @@ static br_pixelmap *rt_build_clut(br_pixelmap *const *maps, size_t nmaps)
     for(size_t i = 0; i < nmaps; ++i) {
         br_pixelmap *pm = maps[i];
 
-        if(rt_is_lookup_table(pm))
+        if(pm == NULL || rt_is_lookup_table(pm))
             continue;
 
         for(int y = 0; y < pm->height; y++) {
@@ -499,6 +506,9 @@ static br_error rt_load_scene(rt_state *st, br_demo *demo, int index)
 
     for(size_t i = 0; i < results->npixelmaps; ++i) {
         br_pixelmap *pm = results->pixelmaps[i];
+
+        if(pm == NULL)
+            continue;
 
         if(demo->colour_buffer->type == BR_PMT_INDEX_8 && !rt_is_lookup_table(pm)) {
             const br_pixelmap_convert_options cvtopts = {
