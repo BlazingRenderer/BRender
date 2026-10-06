@@ -88,6 +88,27 @@ typedef struct br_gltf_load_prim_info {
     const cgltf_accessor  *indices;
 } br_gltf_load_prim_info;
 
+/*
+ * Is this URI a base64 data URI - the one form whose payload this loader
+ * decodes in place? A URI without the ;base64 marker before the comma is read
+ * as a path, even when it starts with "data:". load_pixelmap() has to tell a
+ * data URI whose payload failed to decode from a URI that was never one, so
+ * the rule is stated once, here.
+ */
+static br_boolean is_base64_data_uri(const char *uri)
+{
+    const char *comma;
+
+    if(BrStrNCmp(uri, "data:", 5) != 0)
+        return BR_FALSE;
+
+    comma = BrStrChr(uri, ',');
+    if(comma == NULL || comma - uri < 7)
+        return BR_FALSE;
+
+    return BrStrNCmp(comma - 7, ";base64", 7) == 0;
+}
+
 void *unbuild_data_url(void *res, const char *uri, size_t *size)
 {
     const char         *comma;
@@ -95,12 +116,10 @@ void *unbuild_data_url(void *res, const char *uri, size_t *size)
     void               *data_out;
     cbase64_decodestate ds;
 
-    if(BrStrNCmp(uri, "data:", 5) != 0)
+    if(!is_base64_data_uri(uri))
         return NULL;
 
     comma = BrStrChr(uri, ',');
-    if(!(comma && comma - uri >= 7 && BrStrNCmp(comma - 7, ";base64", 7) == 0))
-        return NULL;
 
     in_len = BrStrLen(comma + 1);
     if((out_len = cbase64_calc_decoded_length(comma + 1, in_len)) == 0)
@@ -149,7 +168,34 @@ static br_uint_8 load_table_type(const char *uri, int *components)
     return 0;
 }
 
-static br_pixelmap *load_pixelmap(br_gltf_load_state *state, const cgltf_image *image)
+/*
+ * Refuse the file for an image whose payload is present but could not be
+ * turned into a pixelmap. A missing image leaves a NULL entry and the scene
+ * loads without it; an image that is there and broken is a defect in the asset
+ * rather than a fact about the environment, so the load is refused instead.
+ * The image is named by index and URI, as the check_*() helpers name a mesh, a
+ * primitive and a value.
+ */
+static br_error image_not_decodable(br_size_t image_index, const cgltf_image *image)
+{
+    BrLogError("GLTF", "image %lu (\"%s\") is present but could not be decoded; refusing to load rather than rendering the scene without it",
+               (unsigned long)image_index, image->uri != NULL ? image->uri : (image->name != NULL ? image->name : "<unnamed>"));
+    return BRE_FAIL;
+}
+
+/*
+ * Turn one glTF image into a pixelmap.
+ *
+ * Returns BRE_OK and leaves *out NULL for an image the loader could not obtain
+ * - a URI naming a file that is not there, or one it cannot read. Absence is a
+ * deployment state rather than a defect in the file, and an image is optional -
+ * unlike a buffer, which carries the geometry - so it is left unconverted.
+ * Returns BRE_FAIL for an image that *is* there and could not be decoded - a
+ * malformed data URI, a zero-byte or truncated file, a buffer view with no data
+ * - because that is a bug in the asset and rendering without it hides the one
+ * failure that matters.
+ */
+static br_error load_pixelmap(br_gltf_load_state *state, br_size_t image_index, const cgltf_image *image, br_pixelmap **out)
 {
     void        *raw_data, *pixels;
     br_pixelmap *pixelmap, *tmp;
@@ -159,12 +205,17 @@ static br_pixelmap *load_pixelmap(br_gltf_load_state *state, const cgltf_image *
     br_uint_8    table_type = 0;
     int          table_comp = 0;
 
+    *out = NULL;
+
     /*
      * GLB: images stored in buffer views.
      */
     if(image->buffer_view != NULL) {
         raw_data = (void *)cgltf_buffer_view_data(image->buffer_view);
         size     = image->buffer_view->size;
+
+        if(raw_data == NULL)
+            return image_not_decodable(image_index, image);
     } else if(image->uri != NULL) {
         /*
          * A lookup table: its payload is the pixelmap's raw samples, not colour,
@@ -173,36 +224,67 @@ static br_pixelmap *load_pixelmap(br_gltf_load_state *state, const cgltf_image *
          */
         table_type = load_table_type(image->uri, &table_comp);
 
-        /*
-         * Try base64 data URI first, then external file.
-         */
-        if((raw_data = unbuild_data_url(state, image->uri, &size)) != NULL) {
+        if(is_base64_data_uri(image->uri)) {
+            /*
+             * The payload is in the file, so a data URI that does not decode
+             * is malformed rather than missing.
+             */
+            if((raw_data = unbuild_data_url(state, image->uri, &size)) == NULL)
+                return image_not_decodable(image_index, image);
+
             owns_raw = 1;
         } else {
             char      *path = BrResSprintf(state, "%s%s", state->base_path, image->uri);
             cgltf_size fsize;
 
             raw_data = BrFileLoad(state, path, &fsize);
+
+            if(raw_data == NULL) {
+                /*
+                 * BrFileLoad returns NULL both for a file that is not there and
+                 * for one that is there but empty. Probe it: a file that opens
+                 * was obtained and is therefore broken, while one that does not
+                 * is absent - as is one that exists but cannot be opened, such
+                 * as a file with no read permission or a broken symlink, which
+                 * the loader never obtained at all.
+                 */
+                void *handle = BrFileOpenRead(path, 0, NULL, NULL);
+
+                BrResFree(path);
+
+                if(handle == NULL) {
+                    BrLogInfo("GLTF", "image %lu (\"%s\") could not be read; leaving it unconverted", (unsigned long)image_index, image->uri);
+                    return BRE_OK;
+                }
+
+                BrFileClose(handle);
+                return image_not_decodable(image_index, image);
+            }
+
             BrResFree(path);
-            if(raw_data == NULL)
-                return NULL;
             size     = (size_t)fsize;
             owns_raw = 1;
         }
     } else {
-        return NULL;
+        /*
+         * glTF requires an image to carry its payload in a URI or a buffer
+         * view; with neither there is nothing to obtain, so it is absent rather
+         * than broken.
+         */
+        BrLogInfo("GLTF", "image %lu has neither a URI nor a buffer view; leaving it unconverted", (unsigned long)image_index);
+        return BRE_OK;
     }
 
     if(size > INT_MAX) {
         if(owns_raw)
             BrResFree(raw_data);
-        return NULL;
+        return image_not_decodable(image_index, image);
     }
 
     if((pixels = stbi_load_from_memory(raw_data, (int)size, &x, &y, &c, table_type ? table_comp : 4)) == NULL) {
         if(owns_raw)
             BrResFree(raw_data);
-        return NULL;
+        return image_not_decodable(image_index, image);
     }
 
     if(owns_raw)
@@ -233,7 +315,8 @@ static br_pixelmap *load_pixelmap(br_gltf_load_state *state, const cgltf_image *
         }
 
         BrMemFree(pixels);
-        return pixelmap;
+        *out = pixelmap;
+        return BRE_OK;
     }
 
     tmp             = BrPixelmapAllocate(BR_PMT_RGBA_8888_ARR, x, y, pixels, BR_PMAF_NORMAL);
@@ -243,7 +326,8 @@ static br_pixelmap *load_pixelmap(br_gltf_load_state *state, const cgltf_image *
 
     BrPixelmapFree(tmp);
     BrMemFree(pixels);
-    return pixelmap;
+    *out = pixelmap;
+    return BRE_OK;
 }
 
 /*
@@ -1551,7 +1635,20 @@ br_fmt_results *BR_PUBLIC_ENTRY BrFmtGLTFActorLoadMany(const char *name, const b
      * Post: state->results->pixelmaps is filled.
      */
     for(br_size_t i = 0; i < data->images_count; ++i) {
-        results->pixelmaps[i] = load_pixelmap(state, data->images + i);
+        if(load_pixelmap(state, i, data->images + i, &results->pixelmaps[i]) != BRE_OK) {
+            /*
+             * The pixelmaps built so far are not children of state - they are
+             * handed back detached, as materials and models are - so free them
+             * before the half-built result goes away.
+             */
+            for(br_size_t j = 0; j < i; ++j) {
+                if(results->pixelmaps[j] != NULL)
+                    BrPixelmapFree(results->pixelmaps[j]);
+            }
+
+            BrResFree(state);
+            return NULL;
+        }
     }
 
     /*
