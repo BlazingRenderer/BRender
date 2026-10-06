@@ -1068,6 +1068,40 @@ static br_error check_primitive_attributes(const cgltf_data *data)
 }
 
 /*
+ * Every attribute of a primitive is read up to the first one's count:
+ * filter_primitive_attributes() sizes the model's vertices from attributes[0]
+ * and create_model() then reads each attribute once per vertex. An attribute
+ * with fewer elements than the first is therefore read past its own end, into
+ * whatever the allocator left after it. glTF requires the counts to be equal;
+ * the parser does not compare them.
+ */
+static br_error check_primitive_attribute_counts(const cgltf_data *data)
+{
+    for(br_size_t m = 0; m < data->meshes_count; ++m) {
+        const cgltf_mesh *mesh = data->meshes + m;
+
+        for(br_size_t p = 0; p < mesh->primitives_count; ++p) {
+            const cgltf_primitive *prim  = mesh->primitives + p;
+            br_size_t              count = prim->attributes_count > 0 ? prim->attributes[0].data->count : 0;
+
+            for(br_size_t a = 1; a < prim->attributes_count; ++a) {
+                if(prim->attributes[a].data->count == count)
+                    continue;
+
+                BrLogError("GLTF",
+                           "mesh \"%s\" primitive %lu attribute %lu has %lu elements where its first attribute has %lu; every "
+                           "attribute is read once per vertex, so the shorter one is read past its end",
+                           mesh->name != NULL ? mesh->name : "<unnamed>", (unsigned long)p, (unsigned long)a,
+                           (unsigned long)prim->attributes[a].data->count, (unsigned long)count);
+                return BRE_FAIL;
+            }
+        }
+    }
+
+    return BRE_OK;
+}
+
+/*
  * The count that sizes a model is the primitive's index count, or its first
  * attribute's vertex count when it has no indices, and create_model() fills the
  * model by stepping that same count: three at a time for TRIANGLES, and one at
@@ -1323,7 +1357,8 @@ br_fmt_results *BR_PUBLIC_ENTRY BrFmtGLTFActorLoadMany(const char *name, const b
      * gets part-way in.
      */
     if(check_extensions(data) != BRE_OK || check_primitive_modes(data) != BRE_OK || check_primitive_attributes(data) != BRE_OK ||
-       check_primitive_counts(data) != BRE_OK || check_material_references(data) != BRE_OK || check_actor_styles(data) != BRE_OK) {
+       check_primitive_attribute_counts(data) != BRE_OK || check_primitive_counts(data) != BRE_OK ||
+       check_material_references(data) != BRE_OK || check_actor_styles(data) != BRE_OK) {
         BrResFree(state);
         return NULL;
     }
