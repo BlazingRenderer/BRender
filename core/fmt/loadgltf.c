@@ -1078,6 +1078,45 @@ static br_error check_extensions(const cgltf_data *data)
     return BRE_OK;
 }
 
+/*
+ * The BR_materials root array replaces the material table, and glTF's own
+ * primitive.material is then read as an index into it (create_model()). In
+ * files this writer produces the two arrays are parallel and of equal length,
+ * and cgltf has already checked the reference against glTF's own materials
+ * array, so only the BR table's shorter length can put the index out of range.
+ * That index would read past results->materials and crash model preparation.
+ */
+static br_error check_material_references(const cgltf_data *data)
+{
+    if(data->brender_materials_count == 0)
+        return BRE_OK;
+
+    for(br_size_t m = 0; m < data->meshes_count; ++m) {
+        const cgltf_mesh *mesh = data->meshes + m;
+
+        for(br_size_t p = 0; p < mesh->primitives_count; ++p) {
+            const cgltf_primitive *prim = mesh->primitives + p;
+            br_size_t              index;
+
+            if(prim->material == NULL)
+                continue;
+
+            index = cgltf_material_index(data, prim->material);
+
+            if(index >= data->brender_materials_count) {
+                BrLogError("GLTF",
+                           "mesh \"%s\" primitive %lu references material %lu, past the %lu in extensions.BR_materials.materials; "
+                           "a file carrying BR_materials reads primitive.material as an index into that array",
+                           mesh->name != NULL ? mesh->name : "<unnamed>", (unsigned long)p, (unsigned long)index,
+                           (unsigned long)data->brender_materials_count);
+                return BRE_FAIL;
+            }
+        }
+    }
+
+    return BRE_OK;
+}
+
 static br_error check_actor_styles(const cgltf_data *data)
 {
     for(br_size_t i = 0; i < data->nodes_count; ++i) {
@@ -1162,7 +1201,8 @@ br_fmt_results *BR_PUBLIC_ENTRY BrFmtGLTFActorLoadMany(const char *name, const b
      * any state is built, so a file that cannot be loaded faithfully never
      * gets part-way in.
      */
-    if(check_extensions(data) != BRE_OK || check_primitive_modes(data) != BRE_OK || check_actor_styles(data) != BRE_OK) {
+    if(check_extensions(data) != BRE_OK || check_primitive_modes(data) != BRE_OK || check_material_references(data) != BRE_OK ||
+       check_actor_styles(data) != BRE_OK) {
         BrResFree(state);
         return NULL;
     }
