@@ -1351,6 +1351,87 @@ static br_error check_actor_styles(const cgltf_data *data)
     return BRE_OK;
 }
 
+/*
+ * A buffer view is a window into its buffer. Every read through one starts at
+ * cgltf_buffer_view_data()'s pointer, and glTF requires the view to lie inside
+ * the buffer, but the parser does not enforce it, so check it before the
+ * buffers are loaded. The writer cannot produce an out-of-range view; a
+ * hand-written or third-party file can.
+ */
+static br_error check_buffer_views(const cgltf_data *data)
+{
+    for(br_size_t i = 0; i < data->buffer_views_count; ++i) {
+        const cgltf_buffer_view *view   = data->buffer_views + i;
+        const cgltf_buffer      *buffer = view->buffer;
+
+        if(view->offset <= buffer->size && view->size <= buffer->size - view->offset)
+            continue;
+
+        BrLogError("GLTF",
+                   "buffer view %lu (\"%s\") is %lu bytes at offset %lu in buffer %lu, which holds %lu bytes; every read through the "
+                   "view starts at that offset, so the bytes past the end of the buffer would be read as the view's",
+                   (unsigned long)i, view->name != NULL ? view->name : "<unnamed>", (unsigned long)view->size, (unsigned long)view->offset,
+                   (unsigned long)cgltf_buffer_index(data, buffer), (unsigned long)buffer->size);
+        return BRE_FAIL;
+    }
+
+    return BRE_OK;
+}
+
+/*
+ * The check above bounds the view, not what an accessor reaches into it: the
+ * accessor's own offset and stride address its elements, and a sparse
+ * accessor's two views are read the same way.
+ */
+static br_error check_accessor_ranges(const cgltf_data *data)
+{
+    for(br_size_t i = 0; i < data->accessors_count; ++i) {
+        const cgltf_accessor    *accessor     = data->accessors + i;
+        const cgltf_buffer_view *view         = accessor->buffer_view;
+        cgltf_size               element_size = cgltf_calc_size(accessor->type, accessor->component_type);
+
+        if(view != NULL && accessor->count > 0) {
+            cgltf_size required = accessor->offset + accessor->stride * (accessor->count - 1) + element_size;
+
+            if(required > view->size) {
+                BrLogError("GLTF",
+                           "accessor %lu reaches %lu bytes into buffer view %lu, which holds %lu; its offset and stride step past the end "
+                           "of the view, so the bytes past the end of the buffer would be read as its elements",
+                           (unsigned long)i, (unsigned long)required, (unsigned long)cgltf_buffer_view_index(data, view),
+                           (unsigned long)view->size);
+                return BRE_FAIL;
+            }
+        }
+
+        if(accessor->is_sparse) {
+            const cgltf_accessor_sparse *sparse     = &accessor->sparse;
+            cgltf_size                   index_size = cgltf_component_size(sparse->indices_component_type);
+            cgltf_size                   indices    = sparse->indices_byte_offset + index_size * sparse->count;
+            cgltf_size values = sparse->values_byte_offset + (sparse->count > 0 ? accessor->stride * (sparse->count - 1) + element_size : 0);
+
+            if(indices > sparse->indices_buffer_view->size) {
+                BrLogError("GLTF",
+                           "accessor %lu's sparse indices reach %lu bytes into buffer view %lu, which holds %lu; they are read at that "
+                           "byte offset, so the bytes past the end of the buffer would be read as them",
+                           (unsigned long)i, (unsigned long)indices, (unsigned long)cgltf_buffer_view_index(data, sparse->indices_buffer_view),
+                           (unsigned long)sparse->indices_buffer_view->size);
+                return BRE_FAIL;
+            }
+
+            if(values > sparse->values_buffer_view->size) {
+                BrLogError("GLTF",
+                           "accessor %lu's sparse values reach %lu bytes into buffer view %lu, which holds %lu; they are read at that "
+                           "byte offset, so the bytes past the end of the buffer would be read as them",
+                           (unsigned long)i, (unsigned long)values, (unsigned long)cgltf_buffer_view_index(data, sparse->values_buffer_view),
+                           (unsigned long)sparse->values_buffer_view->size);
+                return BRE_FAIL;
+            }
+        }
+    }
+
+    return BRE_OK;
+}
+
 br_fmt_results *BR_PUBLIC_ENTRY BrFmtGLTFActorLoadMany(const char *name, const br_gltf_options *options)
 {
     cgltf_data         *data;
@@ -1407,8 +1488,8 @@ br_fmt_results *BR_PUBLIC_ENTRY BrFmtGLTFActorLoadMany(const char *name, const b
      * loaded them.
      */
     if(check_extensions(data) != BRE_OK || check_primitive_modes(data) != BRE_OK || check_primitive_attributes(data) != BRE_OK ||
-       check_primitive_attribute_counts(data) != BRE_OK || check_primitive_counts(data) != BRE_OK ||
-       check_material_references(data) != BRE_OK || check_actor_styles(data) != BRE_OK) {
+       check_primitive_attribute_counts(data) != BRE_OK || check_primitive_counts(data) != BRE_OK || check_material_references(data) != BRE_OK ||
+       check_actor_styles(data) != BRE_OK || check_buffer_views(data) != BRE_OK || check_accessor_ranges(data) != BRE_OK) {
         BrResFree(state);
         return NULL;
     }
