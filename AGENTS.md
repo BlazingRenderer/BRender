@@ -89,7 +89,8 @@ contrib/editorcam: fix camera offset after pan mode, add orbit mode
 ```
 
 ## Testing
-There is no unit-test suite, and none should be added. There is a render regression harness:
+There is no unit-test suite, and none should be added. `contrib/run-tests.sh [build-dir]` runs every check the project has - the build, the
+fixture invariant, the render corpus and a load of every checked-in `.gltf` - and is the tree-wide gate. The corpus itself is:
 - `examples/rendertest` renders the fixtures in `examples/rendertest/dat/` under one device and diffs each frame against the checked-in
   reference, `examples/rendertest/rendertest.txt`. Run it (`--device <glrend|glrend1x|softrend> [--bpp n] [-w W -h H] [--no-depth]`) after
   any change that can move pixels; `result=PASS failures=0` is the pass condition.

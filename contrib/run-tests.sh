@@ -1,0 +1,188 @@
+#!/usr/bin/env bash
+#
+# Run every check this project has.
+#
+# There is no unit-test suite and none is wanted; the checks are:
+#   1. the tree builds
+#   2. `mkres scenes` reproduces examples/rendertest/dat/ byte-for-byte
+#   3. the render regression corpus passes at every device/bpp/depth
+#   4. every checked-in .gltf loads
+#
+# Nothing here writes to the repository. The fixture check runs in a
+# temporary directory; rendertest compares unless --bless is passed.
+#
+# Usage:
+#   contrib/run-tests.sh [build-dir] [--bless] [--no-build]
+#
+#   build-dir   defaults to cmake-build.
+#   --bless     rewrite the reference table instead of comparing. Only for
+#               accepting a deliberate change; see the note at the end.
+#   --no-build  skip the build step (for re-running after no source change).
+
+set -u
+
+repo=$(cd "$(dirname "$0")/.." && pwd)
+build="cmake-build"
+bless=0
+do_build=1
+
+while [ $# -gt 0 ]; do
+    case "$1" in
+        --bless)     bless=1 ;;
+        --no-build)  do_build=0 ;;
+        -h|--help)   sed -n '2,20p' "$0" | sed 's/^# \?//'; exit 0 ;;
+        -*)          echo "unknown option: $1" >&2; exit 2 ;;
+        *)           build="$1" ;;
+    esac
+    shift
+done
+
+cd "$repo" || exit 1
+
+pass=0
+fail=0
+skipped=0
+
+ok()   { printf '  \033[32mPASS\033[0m  %s\n' "$1"; pass=$((pass + 1)); }
+bad()  { printf '  \033[31mFAIL\033[0m  %s\n' "$1"; fail=$((fail + 1)); }
+skip() { printf '  \033[33mSKIP\033[0m  %s\n' "$1"; skipped=$((skipped + 1)); }
+hdr()  { printf '\n== %s\n' "$1"; }
+
+# ---------------------------------------------------------------- build
+
+hdr "build ($build)"
+
+if [ "$do_build" = 0 ]; then
+    skip "build (--no-build)"
+elif [ ! -d "$build" ]; then
+    bad "$build does not exist - configure it first, see the note at the end of this script"
+else
+    if cmake --build "$build" -j"$(nproc)" >/tmp/run-tests-build.log 2>&1; then
+        # A build that fails silently leaves the old binary, so look for the
+        # targets rather than trusting the exit status alone.
+        if grep -q "Built target rendertest" /tmp/run-tests-build.log; then
+            ok "built (log: /tmp/run-tests-build.log)"
+        else
+            bad "cmake reported success but did not build rendertest - old binary in place?"
+        fi
+    else
+        bad "build failed (log: /tmp/run-tests-build.log)"
+    fi
+fi
+
+rendertest="$build/examples/rendertest/rendertest"
+mkres="$build/examples/mkres/mkres"
+gltfview="$build/examples/gltfview/gltfview"
+
+if [ ! -x "$rendertest" ]; then
+    echo; echo "no rendertest binary at $rendertest - cannot continue" >&2
+    exit 1
+fi
+
+export SDL_VIDEODRIVER=offscreen
+export GLTFVIEW_BENCH_FRAMES=5
+export GLTFVIEW_BENCH_NOVSYNC=1
+
+# ------------------------------------------------------- fixture invariant
+
+hdr "fixtures: mkres scenes reproduces examples/rendertest/dat/"
+
+if [ ! -x "$mkres" ]; then
+    skip "mkres not built"
+else
+    tmp=$(mktemp -d) || exit 1
+    ( cd "$tmp" && "$repo/$mkres" scenes >/dev/null 2>&1 )
+    if diff -rq "$tmp" examples/rendertest/dat/ >/tmp/run-tests-mkres.log 2>&1; then
+        ok "$(ls "$tmp" | wc -l) fixtures byte-identical to dat/"
+    else
+        n=$(grep -c '^Files ' /tmp/run-tests-mkres.log 2>/dev/null || echo '?')
+        bad "$n fixture(s) differ from dat/ (log: /tmp/run-tests-mkres.log)"
+        sed 's/^/        /' /tmp/run-tests-mkres.log | head -10
+    fi
+    rm -rf "$tmp"
+fi
+
+# ------------------------------------------------------------- the corpus
+
+hdr "corpus: rendertest"
+
+ref_args=""
+[ "$bless" = 1 ] && ref_args="--bless"
+
+# bpp N renders through BrZbSceneRender; --no-depth renders through
+# BrZsSceneRender, the Z-sort path. Both are distinct reference keys.
+for bpp in 8 15 16 24; do
+    for mode in zb zs; do
+        if [ "$mode" = zs ]; then depth="--no-depth"; else depth=""; fi
+
+        out=$("$rendertest" --device softrend --bpp "$bpp" $depth $ref_args 2>&1)
+        line=$(echo "$out" | grep -o 'result=PASS failures=[0-9]*' | tail -1)
+        match=$(echo "$out" | grep -c 'MATCH')
+        nref=$(echo "$out" | grep -c 'NO-REFERENCE')
+
+        if [ -z "$line" ]; then
+            bad "softrend $bpp/$mode: no result line"
+        elif [ "$line" = "result=PASS failures=0" ]; then
+            # NO-REFERENCE is not a failure, but it is unverified - say so.
+            if [ "$nref" -gt 0 ]; then
+                ok "softrend $bpp/$mode: $line (${match} match, ${nref} NO-REFERENCE)"
+            else
+                ok "softrend $bpp/$mode: $line (${match} match)"
+            fi
+        else
+            bad "softrend $bpp/$mode: $line"
+            echo "$out" | grep -iE 'CHANGED|FAIL' | head -5 | sed 's/^/        /'
+        fi
+    done
+done
+
+# glrend is the arbiter for anything the software paths disagree on. The
+# checked-in glrend references are llvmpipe-keyed, so force software GL.
+out=$(LIBGL_ALWAYS_SOFTWARE=true "$rendertest" --device glrend --bpp 8 $ref_args 2>&1)
+line=$(echo "$out" | grep -o 'result=PASS failures=[0-9]*' | tail -1)
+if [ "$line" = "result=PASS failures=0" ]; then
+    ok "glrend 8/zb: $line ($(echo "$out" | grep -c MATCH) match)"
+elif [ -z "$line" ]; then
+    bad "glrend 8/zb: no result line (no GL? try LIBGL_ALWAYS_SOFTWARE=true)"
+else
+    bad "glrend 8/zb: $line"
+fi
+
+# ------------------------------------------------------------- gltf loads
+
+hdr "every checked-in .gltf loads"
+
+if [ ! -x "$gltfview" ]; then
+    skip "gltfview not built"
+else
+    n=0; nbad=0
+    for f in examples/rendertest/dat/*.gltf resources/gltf-reference/*.gltf; do
+        [ -e "$f" ] || continue
+        n=$((n + 1))
+        if ! timeout -s KILL 60 "$gltfview" --force-software --software-bpp 8 \
+                -w 320 -h 240 --no-stats "$f" >/dev/null 2>&1; then
+            bad "load: $f"
+            nbad=$((nbad + 1))
+        fi
+    done
+    [ "$nbad" = 0 ] && ok "$n/$n files load"
+fi
+
+# ------------------------------------------------------------------ done
+
+hdr "summary"
+printf '  %d passed, %d failed, %d skipped\n' "$pass" "$fail" "$skipped"
+
+if [ "$fail" != 0 ]; then
+    exit 1
+fi
+exit 0
+
+# Notes
+# -----
+# A fresh configure is all that is needed:
+#
+#   cmake -S . -B cmake-build -DCMAKE_BUILD_TYPE=Release
+#
+# Any call to --bless is a deliberate act: it accepts the current output as
+# correct. This script never passes it unless asked.
