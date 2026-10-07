@@ -6,8 +6,6 @@
 , systemProcessor
 , cmake
 , perl
-, uasm
-, h2inc
 , clang-tools
 }:
 stdenvNoCC.mkDerivation {
@@ -25,8 +23,6 @@ stdenvNoCC.mkDerivation {
     djgpp
     cmake
     perl
-    uasm
-    h2inc
   ];
 
   cmakeFlags = [
@@ -37,11 +33,8 @@ stdenvNoCC.mkDerivation {
     (lib.cmakeFeature "CMAKE_STRIP" "${djgppPrefix}strip")
     (lib.cmakeFeature "CMAKE_RANLIB" "${djgppPrefix}ranlib")
     (lib.cmakeFeature "CMAKE_AR" "${djgppPrefix}ar")
-    (lib.cmakeFeature "CMAKE_ASM_MASM_COMPILER" "uasm")
-    (lib.cmakeFeature "BRENDER_H2INC_EXECUTABLE" (lib.getExe h2inc))
     (lib.cmakeBool "DJGPP" true)
 
-    (lib.cmakeBool "BRENDER_BUILD_SOFT" true)
     (lib.cmakeBool "BRENDER_BUILD_TOOLS" false)
     (lib.cmakeBool "BRENDER_BUILD_EXAMPLES" true)
     (lib.cmakeBool "BRENDER_DISABLE_INSTALL" true)

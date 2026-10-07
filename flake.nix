@@ -15,18 +15,10 @@
     mkShells = packages: builtins.mapAttrs (k: v: v.overrideAttrs(old: {
       hardeningDisable = [ "all" ];
       nativeBuildInputs = old.nativeBuildInputs ++ v.devTools;
-    })) (nixpkgs.lib.removeAttrs packages [ "h2inc" "uasm" "uasm-static" ]);
+    })) packages;
   in {
     packages = forAllSystems(pkgs: rec {
-      h2inc = pkgs.callPackage ./nix/h2inc.nix { };
-
-      uasm = pkgs.callPackage ./nix/uasm { };
-
-      uasm-static = pkgs.pkgsStatic.callPackage ./nix/uasm { };
-
       brender = pkgs.callPackage ./nix/brender.nix {
-        inherit h2inc uasm;
-
         version = self.lastModifiedDate;
       };
 
@@ -37,29 +29,21 @@
       default = brender;
 
       brender-samples-win32 = pkgs.pkgsCross.mingw32.callPackage ./nix/brender.nix {
-        inherit h2inc uasm;
-
         version = self.lastModifiedDate;
         withExamples = true;
       };
 
       brender-samples-win64 = pkgs.pkgsCross.mingwW64.callPackage ./nix/brender.nix {
-        inherit h2inc uasm;
-
         version = self.lastModifiedDate;
         withExamples = true;
       };
 
       brender-samples-linux32 = pkgs.pkgsi686Linux.callPackage ./nix/brender.nix {
-        inherit h2inc uasm;
-
         version = self.lastModifiedDate;
         withExamples = true;
       };
 
       brender-dos-i686 = pkgs.callPackage ./nix/dos.nix {
-        inherit h2inc uasm;
-
         version = self.lastModifiedDate;
 
         systemProcessor = "i686";
@@ -68,8 +52,6 @@
       };
 
       brender-dos-i586 = pkgs.callPackage ./nix/dos.nix {
-        inherit h2inc uasm;
-
         version = self.lastModifiedDate;
 
         systemProcessor = "i586";

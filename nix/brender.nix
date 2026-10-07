@@ -3,8 +3,6 @@
 , version
 , cmake
 , perl
-, uasm
-, h2inc
 , sdl3
 , glfw
 , libGL
@@ -30,9 +28,6 @@ stdenv.mkDerivation(finalAttrs: {
     makeBinaryWrapper
     glslang
     spirv-cross
-  ] ++ lib.optionals stdenv.isx86_32 [
-    uasm
-    h2inc
   ];
 
   passthru.devTools = [
@@ -51,10 +46,6 @@ stdenv.mkDerivation(finalAttrs: {
     (lib.cmakeBool "BRENDER_BUILD_TOOLS" withTools)
     (lib.cmakeBool "BRENDER_BUILD_EXAMPLES" withExamples)
     (lib.cmakeBool "BRENDER_BUILD_GLFW_EXAMPLE" withExamples)
-    (lib.cmakeBool "BRENDER_BUILD_SOFT" stdenv.isx86_32)
-  ] ++ lib.optionals stdenv.isx86_32 [
-    "-DCMAKE_ASM_MASM_COMPILER=uasm"
-    "-DBRENDER_H2INC_EXECUTABLE=${lib.getExe h2inc}"
   ];
 
   postFixup = ''
