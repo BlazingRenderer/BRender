@@ -90,8 +90,11 @@ hdr "fixtures: mkres scenes reproduces examples/rendertest/dat/"
 if [ ! -x "$mkres" ]; then
     skip "mkres not built"
 else
+    # The build dir may be relative or absolute; mktemp runs the binary from
+    # elsewhere, so an absolute path is needed either way.
+    case "$mkres" in /*) mkres_bin="$mkres" ;; *) mkres_bin="$repo/$mkres" ;; esac
     tmp=$(mktemp -d) || exit 1
-    ( cd "$tmp" && "$repo/$mkres" scenes >/dev/null 2>&1 )
+    ( cd "$tmp" && "$mkres_bin" scenes >/dev/null 2>&1 )
     if diff -rq "$tmp" examples/rendertest/dat/ >/tmp/run-tests-mkres.log 2>&1; then
         ok "$(ls "$tmp" | wc -l) fixtures byte-identical to dat/"
     else
