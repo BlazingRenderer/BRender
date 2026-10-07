@@ -7,17 +7,27 @@
 #   2. `mkres scenes` reproduces examples/rendertest/dat/ byte-for-byte
 #   3. the render regression corpus passes at every device/bpp/depth
 #   4. every checked-in .gltf loads
+#   5. every scene the harness names has a fixture, and with --history, that
+#      this held at every commit in a range
 #
 # Nothing here writes to the repository. The fixture check runs in a
 # temporary directory; rendertest compares unless --bless is passed.
 #
 # Usage:
 #   contrib/run-tests.sh [build-dir] [--bless] [--no-build]
+#                        [--reference-driver <token>] [--history <range>]
 #
 #   build-dir   defaults to cmake-build.
 #   --bless     rewrite the reference table instead of comparing. Only for
 #               accepting a deliberate change; see the note at the end.
 #   --no-build  skip the build step (for re-running after no source change).
+#   --reference-driver <token>
+#               score against another driver's entries, e.g. 'software' to
+#               compare a new rasteriser against the recorded ones.
+#   --history <range>
+#               also check the scene/fixture invariant at every commit in
+#               <range>, e.g. upstream/master..HEAD. Slower, and the only way
+#               to catch a commit that named a fixture it did not have.
 
 set -u
 
@@ -25,17 +35,25 @@ repo=$(cd "$(dirname "$0")/.." && pwd)
 build="cmake-build"
 bless=0
 do_build=1
+ref_driver=""
+history=""
 
 while [ $# -gt 0 ]; do
     case "$1" in
-        --bless)     bless=1 ;;
-        --no-build)  do_build=0 ;;
-        -h|--help)   sed -n '2,20p' "$0" | sed 's/^# \?//'; exit 0 ;;
-        -*)          echo "unknown option: $1" >&2; exit 2 ;;
-        *)           build="$1" ;;
+        --bless)            bless=1 ;;
+        --no-build)         do_build=0 ;;
+        --reference-driver) ref_driver="${2:-}"; shift ;;
+        --history)          history="${2:-}"; shift ;;
+        -h|--help)          awk 'NR>1 && /^#/ {sub(/^# ?/, ""); print; next} NR>1 {exit}' "$0"; exit 0 ;;
+        -*)                 echo "unknown option: $1" >&2; exit 2 ;;
+        *)                  build="$1" ;;
     esac
     shift
 done
+
+if [ -n "$history" ] && ! git rev-parse --git-dir >/dev/null 2>&1; then
+    echo "--history needs a git repository" >&2; exit 2
+fi
 
 cd "$repo" || exit 1
 
@@ -69,6 +87,66 @@ else
         bad "build failed (log: /tmp/run-tests-build.log)"
     fi
 fi
+
+# ------------------------------------------------- scene/fixture invariant
+
+# Every scene the harness names must exist as a fixture. A name that does
+# not resolve is a dangling reference: rendertest reports NO-REFERENCE for
+# it, so the run looks merely unverified rather than broken.
+#
+# This is also worth checking across history, which no working-tree check
+# can do. Twelve commits in the history of this repository named scenes
+# they did not have, all invisible at the tip because the tip was
+# consistent - a bisect through one of them silently skipped a scene.
+
+hdr "references: every scene the harness names has a fixture"
+
+rt_main=examples/rendertest/main.c
+rt_dat=examples/rendertest/dat
+
+# Empty argument = the working tree; otherwise a revision. Prints nothing
+# when consistent, and one name per line when not.
+read_main() {
+    if [ -n "$1" ]; then git show "$1:$rt_main" 2>/dev/null; else cat "$rt_main" 2>/dev/null; fi
+}
+read_dat() {
+    if [ -n "$1" ]; then git ls-tree --name-only "$1" "$rt_dat/" 2>/dev/null; else ls "$rt_dat" 2>/dev/null; fi
+}
+dangling() { # $1 = revision, or empty for the working tree
+    names=$(read_main "$1" | grep -oE '"scene-[a-z0-9_-]+"' | tr -d '"' | sort -u)
+    present=$(read_dat "$1" | sed 's|.*/||;s|\.gltf$||' | sort -u)
+    for x in $names; do
+        printf '%s\n' "$present" | grep -qx "$x" || echo "$x"
+    done
+}
+
+missing=$(dangling "")
+if [ -z "$missing" ]; then
+    ok "$(read_main "" | grep -oE '"scene-[a-z0-9_-]+"' | sort -u | wc -l) scene names, all with fixtures"
+else
+    bad "$rt_main names scenes with no fixture under $rt_dat/"
+    printf '%s\n' "$missing" | head -5 | sed 's/^/        /'
+fi
+
+if [ -n "$history" ]; then
+    hdr "references: the same check at every commit in $history"
+    ncommits=0
+    for c in $(git rev-list --reverse "$history"); do
+        ncommits=$((ncommits + 1))
+        commit_missing=$(dangling "$c")
+        if [ -n "$commit_missing" ]; then
+            bad "$(git rev-parse --short "$c") names a scene it does not have"
+            printf '%s\n' "$commit_missing" | head -3 | sed 's/^/        /'
+        fi
+    done
+    if [ "$ncommits" = 0 ]; then
+        bad "$history resolved to no commits"
+    else
+        ok "$ncommits commits checked"
+    fi
+fi
+
+# ---------------------------------------------------------------- binaries
 
 rendertest="$build/examples/rendertest/rendertest"
 mkres="$build/examples/mkres/mkres"
@@ -111,6 +189,7 @@ hdr "corpus: rendertest"
 
 ref_args=""
 [ "$bless" = 1 ] && ref_args="--bless"
+[ -n "$ref_driver" ] && ref_args="$ref_args --reference-driver $ref_driver"
 
 # bpp N renders through BrZbSceneRender; --no-depth renders through
 # BrZsSceneRender, the Z-sort path. Both are distinct reference keys.
@@ -189,3 +268,8 @@ exit 0
 #
 # Any call to --bless is a deliberate act: it accepts the current output as
 # correct. This script never passes it unless asked.
+#
+# --history walks every commit in the range. Slow, but it is the only check
+# here that looks at anything other than the working tree, and the one thing
+# it has caught - commits naming fixtures that did not exist yet - cannot be
+# seen any other way.
