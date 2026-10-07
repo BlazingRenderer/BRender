@@ -800,7 +800,7 @@ static void rt_write_reference(rt_state *st)
     }
 
     fprintf(fp, "# rendertest reference\n");
-    fprintf(fp, "# key=<device>/<driver>/<pixel-type>/<WxH>/<scene> value=checksum\n");
+    fprintf(fp, "# key=<device>/<driver>/<zb|zs>/<pixel-type>/<WxH>/<scene> value=checksum\n");
 
     for(int i = 0; i < st->nexpects; ++i)
         fprintf(fp, "%s %016llx\n", st->expects[i].key, (unsigned long long)st->expects[i].hash);
