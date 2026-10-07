@@ -26,10 +26,8 @@ endif ()
 add_subdirectory(softrend)
 target_link_libraries(brender-full INTERFACE softrend)
 
-if (BRENDER_BUILD_SOFT)
-    add_subdirectory(pentprim)
-    target_link_libraries(brender-full INTERFACE pentprim)
-endif ()
+add_subdirectory(softprim)
+target_link_libraries(brender-full INTERFACE softprim)
 
 if (CMAKE_SYSTEM_NAME STREQUAL "DOS")
     add_subdirectory(mcga)

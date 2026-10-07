@@ -1,3 +1,0 @@
-# pentprim is kept close to the original Argonaut source so that it can be
-# diffed against it, and is deliberately not reformatted.
-DisableFormat: true

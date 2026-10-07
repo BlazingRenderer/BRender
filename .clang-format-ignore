@@ -14,6 +14,3 @@ examples/brdemo/parg.h
 drivers/glrend/*.glsl
 
 drivers/glrend1x/glad
-
-# Easier to diff against the originals
-drivers/pentprim

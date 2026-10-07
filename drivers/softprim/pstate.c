@@ -1,0 +1,547 @@
+/*
+ * softprim primitive state methods
+ */
+#include <stddef.h>
+#include <string.h>
+
+#include "drv.h"
+#include "brassert.h"
+
+/*
+ * Default dispatch table for primitive state (defined at end of file)
+ */
+static const struct br_primitive_state_dispatch primitiveStateDispatch;
+
+/*
+ * Primitive state info. template
+ */
+#define S    BRTV_SET
+#define Q    BRTV_QUERY
+#define A    BRTV_ALL
+
+#define F(f) offsetof(struct br_primitive_state, f)
+#define P(f) ((br_uintptr_t)(&(f)))
+
+static struct br_tv_template_entry primitiveStateTemplateEntries[] = {
+    {
+     BRT(IDENTIFIER_CSTR),
+     F(identifier),
+     Q | A,
+     BRTV_CONV_COPY, },
+    {
+     BRT(PARTS_TL),
+     P(PrimPartsTokens),
+     Q | A | BRTV_ABS,
+     BRTV_CONV_LIST, },
+    /*
+     * Under the hood hack
+     */
+    {BRT(PRIMITIVE_BLOCK_P), F(cache.last_block), Q | S, BRTV_CONV_COPY, 0, 1},
+};
+#undef F
+#undef P
+
+/*
+ * Set up a primitive state object
+ */
+struct br_primitive_state *PrimitiveStateSoftPrimAllocate(struct br_primitive_library *plib)
+{
+    struct br_primitive_state *self;
+
+    self = BrResAllocate(plib->device, sizeof(*self), BR_MEMORY_OBJECT);
+
+    if(self == NULL)
+        return NULL;
+
+    self->plib     = plib;
+    self->dispatch = &primitiveStateDispatch;
+    self->device   = plib->device;
+
+    /*
+     * Setup initial state
+     */
+    self->out.colour.viewport_changed = BR_TRUE;
+
+    ObjectContainerAddFront(plib, (br_object *)self);
+
+    return self;
+}
+
+static void BR_CMETHOD_DECL(br_primitive_state_softprim, free)(br_object *_self)
+{
+    br_primitive_state *self = (br_primitive_state *)_self;
+
+    ObjectContainerRemove(self->plib, (br_object *)self);
+
+    BrResFreeNoCallback(self);
+}
+
+static br_token BR_CMETHOD_DECL(br_primitive_state_softprim, type)(br_object *self)
+{
+    return BRT_PRIMITIVE_STATE;
+}
+
+static br_boolean BR_CMETHOD_DECL(br_primitive_state_softprim, isType)(br_object *self, br_token t)
+{
+    return (t == BRT_PRIMITIVE_STATE) || (t == BRT_OBJECT_CONTAINER) || (t == BRT_OBJECT);
+}
+
+static br_size_t BR_CMETHOD_DECL(br_primitive_state_softprim, space)(br_object *self)
+{
+    return sizeof(br_primitive_state);
+}
+
+static struct br_tv_template *BR_CMETHOD_DECL(br_primitive_state_softprim, templateQuery)(br_object *_self)
+{
+    br_primitive_state *self = (br_primitive_state *)_self;
+
+    if(self->device->templates.primitiveStateTemplate == NULL)
+        self->device->templates.primitiveStateTemplate = BrTVTemplateAllocate(self->device, primitiveStateTemplateEntries,
+                                                                              BR_ASIZE(primitiveStateTemplateEntries));
+
+    return self->device->templates.primitiveStateTemplate;
+}
+
+/*
+ * Functions for setting input and output buffers - returns true if lookup has been invalidated
+ */
+static br_boolean inputSet(struct input_buffer *ib, br_buffer_stored *new)
+{
+    br_buffer_stored *old = ib->buffer;
+
+    /*
+     * Special case of same, NULL value
+     */
+    if(old == NULL && new == NULL)
+        return BR_FALSE;
+
+    /*
+     * If buffer is no longer being used
+     */
+    if(new == NULL) {
+        ib->buffer = NULL;
+        return BR_TRUE;
+    }
+
+    if(old != NULL) {
+        /*
+         * See if new buffer has same character as old...
+         */
+        if(ib->type == new->buffer.type && ib->width == new->buffer.width_p && ib->height == new->buffer.height &&
+           ib->stride == new->buffer.stride_b) {
+            ib->buffer = new;
+            return BR_FALSE;
+        }
+    }
+
+    ib->buffer = new;
+    ib->type   = new->buffer.type;
+    ib->width  = new->buffer.width_p;
+    ib->height = new->buffer.height;
+    ib->stride = new->buffer.stride_b;
+
+    return BR_TRUE;
+}
+
+static br_boolean outputSet(struct output_buffer *ob, br_device_pixelmap *new)
+{
+    br_device_pixelmap *old = ob->pixelmap;
+
+    /*
+     * Special case of same, NULL value
+     */
+    if(old == NULL && new == NULL)
+        return BR_FALSE;
+
+    /*
+     * If pixelmap is no longer being used
+     */
+    if(new == NULL) {
+        ob->pixelmap         = NULL;
+        ob->width            = 0;
+        ob->height           = 0;
+        ob->viewport_changed = BR_TRUE;
+
+        return BR_TRUE;
+    }
+
+    if(old != NULL) {
+        /*
+         * See if new pixelmap has same character as old...
+         */
+        if(ob->type == new->pm_type && ob->width == new->pm_width && ob->height == new->pm_height && ob->stride == new->pm_row_bytes) {
+            ob->pixelmap = new;
+            return BR_FALSE;
+        }
+    }
+
+    ob->pixelmap = new;
+    ob->type     = new->pm_type;
+    ob->width    = new->pm_width;
+    ob->height   = new->pm_height;
+    ob->stride   = new->pm_row_bytes;
+
+    ob->viewport_changed = BR_TRUE;
+
+    return BR_TRUE;
+}
+
+static br_error BR_CALLBACK customInputSet(void *block, const br_value *pvalue, const struct br_tv_template_entry *tep)
+{
+    if(inputSet((struct input_buffer *)((char *)block + tep->offset), (br_buffer_stored *)pvalue->o))
+        ((struct br_tv_template_entry *)tep)->mask = 1;
+    else
+        ((struct br_tv_template_entry *)tep)->mask = 0;
+
+    return BRE_OK;
+}
+
+static struct br_tv_custom customInputConv = {
+    NULL,
+    customInputSet,
+    NULL,
+};
+
+static br_error BR_CALLBACK customOutputSet(void *block, const br_value *pvalue, const struct br_tv_template_entry *tep)
+{
+    if(outputSet((struct output_buffer *)((char *)block + tep->offset), (br_device_pixelmap *)pvalue->o))
+        ((struct br_tv_template_entry *)tep)->mask = 1;
+    else
+        ((struct br_tv_template_entry *)tep)->mask = 0;
+
+    return BRE_OK;
+}
+
+static const struct br_tv_custom customOutputConv = {
+    NULL,
+    customOutputSet,
+    NULL,
+};
+
+/*
+ * Templates for state set/query
+ */
+#define F(f) offsetof(struct br_primitive_state, f)
+#define P(f) ((br_uintptr_t)(&(f)))
+
+static br_tv_template_entry partPrimitiveTemplateEntries[] = {
+    {BRT(FORCE_FRONT_B), F(prim.flags), Q | S | A, BRTV_CONV_BIT, PRIMF_FORCE_FRONT, 1},
+    {BRT(SMOOTH_B), F(prim.flags), Q | S | A, BRTV_CONV_BIT, PRIMF_SMOOTH, 1},
+    {BRT(DECAL_B), F(prim.flags), Q | S | A, BRTV_CONV_BIT, PRIMF_DECAL, 1},
+    {BRT(DITHER_COLOUR_B), F(prim.flags), Q | S | A, BRTV_CONV_BIT, PRIMF_DITHER_COLOUR, 1},
+    {BRT(DITHER_MAP_B), F(prim.flags), Q | S | A, BRTV_CONV_BIT, PRIMF_DITHER_MAP, 1},
+    {BRT(DEPTH_WRITE_B), F(prim.flags), Q | S | A, BRTV_CONV_BIT, PRIMF_DEPTH_WRITE, 1},
+    {BRT(BLEND_B), F(prim.flags), Q | S | A, BRTV_CONV_BIT, PRIMF_BLEND, 1},
+    {BRT(MODULATE_B), F(prim.flags), Q | S | A, BRTV_CONV_BIT, PRIMF_MODULATE, 1},
+    {BRT(FOG_T), F(prim.fog_type), Q | S | A, BRTV_CONV_COPY},
+
+    {BRT(COLOUR_T), F(prim.colour_type), Q | S | A, BRTV_CONV_COPY, 0, 1},
+    {BRT(COLOUR_B), F(prim.colour_type), S, BRTV_CONV_BOOL_TOKEN, BRT_DEFAULT, 1},
+
+    {BRT(INDEX_BASE_I32), F(prim.index_base), Q | S | A, BRTV_CONV_COPY, 0, 1},
+    {BRT(INDEX_RANGE_I32), F(prim.index_range), Q | S | A, BRTV_CONV_COPY, 0, 1},
+
+    {BRT(PERSPECTIVE_T), F(prim.perspective_type), Q | S | A, BRTV_CONV_COPY, 0, 1},
+    {BRT(PERSPECTIVE_B), F(prim.perspective_type), S, BRTV_CONV_BOOL_TOKEN, BRT_DEFAULT, 1},
+
+    {BRT(SUBDIVIDE_TOLERANCE_I32), F(prim.subdivide_tolerance), Q | S | A, BRTV_CONV_COPY, 0, 1},
+
+    {BRT(PRIMITIVE_BLOCK_P), F(prim.custom_block), Q | S, BRTV_CONV_COPY, 0, 1},
+
+    {BRT(COLOUR_MAP_O), F(prim.colour_map.buffer), Q | A, BRTV_CONV_COPY},
+    {BRT(COLOUR_MAP_O), F(prim.colour_map), S, BRTV_CONV_CUSTOM, P(customInputConv)},
+
+    {BRT(TEXTURE_O), F(prim.colour_map.buffer), Q, BRTV_CONV_COPY},
+    {BRT(TEXTURE_O), F(prim.colour_map), S, BRTV_CONV_CUSTOM, P(customInputConv)},
+
+    {BRT(INDEX_SHADE_O), F(prim.index_shade.buffer), Q | A, BRTV_CONV_COPY},
+    {BRT(INDEX_SHADE_O), F(prim.index_shade), S, BRTV_CONV_CUSTOM, P(customInputConv)},
+
+    {BRT(INDEX_BLEND_O), F(prim.index_blend.buffer), Q | A, BRTV_CONV_COPY},
+    {BRT(INDEX_BLEND_O), F(prim.index_blend), S, BRTV_CONV_CUSTOM, P(customInputConv)},
+
+    {BRT(SCREEN_DOOR_O), F(prim.screendoor.buffer), Q | A, BRTV_CONV_COPY},
+    {BRT(SCREEN_DOOR_O), F(prim.screendoor), S, BRTV_CONV_CUSTOM, P(customInputConv)},
+
+    {BRT(INDEX_LIGHT_O), F(prim.lighting.buffer), Q | A, BRTV_CONV_COPY},
+    {BRT(INDEX_LIGHT_O), F(prim.lighting), S, BRTV_CONV_CUSTOM, P(customInputConv)},
+
+    {BRT(BUMP_O), F(prim.bump.buffer), Q | A, BRTV_CONV_COPY},
+    {BRT(BUMP_O), F(prim.bump), S, BRTV_CONV_CUSTOM, P(customInputConv)},
+
+    {BRT(INDEX_FOG_O), F(prim.index_fog.buffer), Q | A, BRTV_CONV_COPY},
+    {BRT(INDEX_FOG_O), F(prim.index_fog), S, BRTV_CONV_CUSTOM, P(customInputConv)},
+};
+
+static br_tv_template_entry partOutputTemplateEntries[] = {
+    {BRT(COLOUR_BUFFER_O), F(out.colour.pixelmap), Q | A, BRTV_CONV_COPY},
+    {BRT(COLOUR_BUFFER_O), F(out.colour), S, BRTV_CONV_CUSTOM, P(customOutputConv)},
+    {BRT(DEPTH_BUFFER_O), F(out.depth.pixelmap), Q | A, BRTV_CONV_COPY},
+    {BRT(DEPTH_BUFFER_O), F(out.depth), S, BRTV_CONV_CUSTOM, P(customOutputConv)},
+};
+
+static br_tv_template *findTemplate(struct br_primitive_state *self, br_token part)
+{
+    switch(part) {
+        case BRT_PRIMITIVE:
+            if(self->device->templates.partPrimitiveTemplate == NULL)
+                self->device->templates.partPrimitiveTemplate = BrTVTemplateAllocate(self->device, partPrimitiveTemplateEntries,
+                                                                                     BR_ASIZE(partPrimitiveTemplateEntries));
+
+            return self->device->templates.partPrimitiveTemplate;
+
+        case BRT_OUTPUT:
+            if(self->device->templates.partOutputTemplate == NULL)
+                self->device->templates.partOutputTemplate = BrTVTemplateAllocate(self->device, partOutputTemplateEntries,
+                                                                                  BR_ASIZE(partOutputTemplateEntries));
+
+            return self->device->templates.partOutputTemplate;
+    }
+
+    return NULL;
+}
+
+static br_error BR_CMETHOD_DECL(br_primitive_state_softprim, partSet)(struct br_primitive_state *self, br_token part, br_int_32 index,
+                                                                     br_token t, br_value value)
+{
+    br_error        r;
+    br_tv_template *tp = findTemplate(self, part);
+    br_uint_32      m;
+
+    if(tp == NULL)
+        return BRE_FAIL;
+
+    m = 0;
+    r = BrTokenValueSet(self, &m, t, value, tp);
+
+    if(r != BRE_OK)
+        return r;
+
+    switch(part) {
+        case BRT_PRIMITIVE:
+            self->prim.timestamp = Timestamp();
+            if(m)
+                self->prim.timestamp_major = Timestamp();
+            break;
+
+        case BRT_OUTPUT:
+            self->out.timestamp = Timestamp();
+            if(m)
+                self->out.timestamp_major = Timestamp();
+            break;
+    }
+
+    return BRE_OK;
+}
+
+static br_error BR_CMETHOD_DECL(br_primitive_state_softprim, partSetMany)(struct br_primitive_state *self, br_token part, br_int_32 index,
+                                                                         br_token_value *tv, br_int_32 *pcount)
+{
+    br_error        r;
+    br_tv_template *tp = findTemplate(self, part);
+    br_uint_32      m;
+    br_int_32       c;
+
+    if(tp == NULL)
+        return BRE_FAIL;
+
+    m = 0;
+    r = BrTokenValueSetMany(self, &c, &m, tv, tp);
+
+    if(r != BRE_OK || c == 0)
+        return r;
+
+    if(pcount)
+        *pcount = c;
+
+    switch(part) {
+        case BRT_PRIMITIVE:
+            self->prim.timestamp = Timestamp();
+            if(m)
+                self->prim.timestamp_major = Timestamp();
+            break;
+
+        case BRT_OUTPUT:
+            self->out.timestamp = Timestamp();
+            if(m)
+                self->out.timestamp_major = Timestamp();
+            break;
+    }
+
+    return BRE_OK;
+}
+
+static br_error BR_CMETHOD_DECL(br_primitive_state_softprim, partQuery)(struct br_primitive_state *self, br_token part, br_int_32 index,
+                                                                       void *pvalue, br_token t)
+{
+    br_tv_template *tp = findTemplate(self, part);
+
+    if(tp == NULL)
+        return BRE_FAIL;
+
+    return BrTokenValueQuery(pvalue, NULL, 0, t, self, tp);
+}
+
+static br_error BR_CMETHOD_DECL(br_primitive_state_softprim, partQueryBuffer)(struct br_primitive_state *self, br_token part, br_int_32 index,
+                                                                             void *pvalue, void *buffer, br_size_t buffer_size, br_token t)
+{
+    br_tv_template *tp = findTemplate(self, part);
+
+    if(tp == NULL)
+        return BRE_FAIL;
+
+    return BrTokenValueQuery(pvalue, buffer, buffer_size, t, self, tp);
+}
+
+static br_error BR_CMETHOD_DECL(br_primitive_state_softprim, partQueryMany)(struct br_primitive_state *self, br_token part, br_int_32 index,
+                                                                           br_token_value *tv, void *extra, br_size_t extra_size, br_int_32 *pcount)
+{
+    br_tv_template *tp = findTemplate(self, part);
+
+    if(tp == NULL)
+        return BRE_FAIL;
+
+    return BrTokenValueQueryMany(tv, extra, extra_size, pcount, self, tp);
+}
+
+static br_error BR_CMETHOD_DECL(br_primitive_state_softprim, partQueryManySize)(struct br_primitive_state *self, br_token part,
+                                                                               br_int_32 index, br_size_t *pextra_size, br_token_value *tv)
+{
+    br_tv_template *tp = findTemplate(self, part);
+
+    if(tp == NULL)
+        return BRE_FAIL;
+
+    return BrTokenValueQueryManySize(pextra_size, tv, self, tp);
+}
+
+static br_error BR_CMETHOD_DECL(br_primitive_state_softprim, partQueryAll)(struct br_primitive_state *self, br_token part, br_int_32 index,
+                                                                          br_token_value *buffer, br_size_t buffer_size)
+{
+    br_tv_template *tp = findTemplate(self, part);
+
+    if(tp == NULL)
+        return BRE_FAIL;
+
+    return BrTokenValueQueryAll(buffer, buffer_size, self, tp);
+}
+
+static br_error BR_CMETHOD_DECL(br_primitive_state_softprim, partQueryAllSize)(struct br_primitive_state *self, br_token part,
+                                                                              br_int_32 index, br_size_t *psize)
+{
+    br_tv_template *tp = findTemplate(self, part);
+
+    if(tp == NULL)
+        return BRE_FAIL;
+
+    return BrTokenValueQueryAllSize(psize, self, tp);
+}
+
+static br_error BR_CMETHOD_DECL(br_primitive_state_softprim, partIndexQuery)(struct br_primitive_state *self, br_token part, br_int_32 *pnindex)
+{
+    int n;
+
+    switch(part) {
+        case BRT_OUTPUT:
+        case BRT_PRIMITIVE:
+            n = 1;
+            break;
+
+        default:
+            n = 0;
+    }
+
+    if(pnindex) {
+        *pnindex = n;
+        return BRE_OK;
+    }
+
+    return BRE_FAIL;
+}
+
+static br_error BR_CMETHOD_DECL(br_primitive_state_softprim, stateDefault)(struct br_primitive_state *self, br_uint_32 mask)
+{
+    if(mask & MASK_STATE_PRIMITIVE) {
+        self->prim.flags              = PRIMF_DEPTH_WRITE;
+        self->prim.colour_map.buffer  = NULL;
+        self->prim.index_shade.buffer = NULL;
+        self->prim.index_blend.buffer = NULL;
+        self->prim.screendoor.buffer  = NULL;
+        self->prim.lighting.buffer    = NULL;
+        self->prim.bump.buffer        = NULL;
+        self->prim.index_fog.buffer   = NULL;
+        self->prim.colour_type        = BRT_DEFAULT;
+
+        self->prim.timestamp       = Timestamp();
+        self->prim.timestamp_major = Timestamp();
+    }
+
+    if(mask & MASK_STATE_OUTPUT) {
+        self->out.colour.pixelmap = NULL;
+        self->out.depth.pixelmap  = NULL;
+
+        self->out.timestamp       = Timestamp();
+        self->out.timestamp_major = Timestamp();
+    }
+
+    return BRE_OK;
+}
+
+static br_error BR_CMETHOD_DECL(br_primitive_state_softprim, stateCopy)(struct br_primitive_state *self, struct br_primitive_state *source,
+                                                                       br_uint_32 mask)
+{
+    if(mask & (MASK_STATE_PRIMITIVE | MASK_STATE_OUTPUT))
+        mask |= MASK_STATE_CACHE;
+
+    if((mask & MASK_STATE_PRIMITIVE) && (self->prim.timestamp != source->prim.timestamp))
+        self->prim = source->prim;
+
+    if((mask & MASK_STATE_OUTPUT) && (self->out.timestamp != source->out.timestamp))
+        self->out = source->out;
+
+    if((mask & MASK_STATE_CACHE) &&
+       ((self->cache.timestamp_prim != source->cache.timestamp_prim) || (self->cache.timestamp_out != source->cache.timestamp_out) ||
+        (self->cache.last_type != source->cache.last_type)))
+        self->cache = source->cache;
+
+    return BRE_OK;
+}
+
+/*
+ * Default dispatch table for primitive state
+ */
+static const struct br_primitive_state_dispatch primitiveStateDispatch = {
+    .__reserved0 = NULL,
+    .__reserved1 = NULL,
+    .__reserved2 = NULL,
+    .__reserved3 = NULL,
+    ._free       = BR_CMETHOD_REF(br_primitive_state_softprim, free),
+    ._identifier = BR_CMETHOD_REF(br_object_softprim, identifier),
+    ._type       = BR_CMETHOD_REF(br_primitive_state_softprim, type),
+    ._isType     = BR_CMETHOD_REF(br_primitive_state_softprim, isType),
+    ._device     = BR_CMETHOD_REF(br_object_softprim, device),
+    ._space      = BR_CMETHOD_REF(br_primitive_state_softprim, space),
+
+    ._templateQuery = BR_CMETHOD_REF(br_primitive_state_softprim, templateQuery),
+    ._query         = BR_CMETHOD_REF(br_object, query),
+    ._queryBuffer   = BR_CMETHOD_REF(br_object, queryBuffer),
+    ._queryMany     = BR_CMETHOD_REF(br_object, queryMany),
+    ._queryManySize = BR_CMETHOD_REF(br_object, queryManySize),
+    ._queryAll      = BR_CMETHOD_REF(br_object, queryAll),
+    ._queryAllSize  = BR_CMETHOD_REF(br_object, queryAllSize),
+
+    ._partSet           = BR_CMETHOD_REF(br_primitive_state_softprim, partSet),
+    ._partSetMany       = BR_CMETHOD_REF(br_primitive_state_softprim, partSetMany),
+    ._partQuery         = BR_CMETHOD_REF(br_primitive_state_softprim, partQuery),
+    ._partQueryBuffer   = BR_CMETHOD_REF(br_primitive_state_softprim, partQueryBuffer),
+    ._partQueryMany     = BR_CMETHOD_REF(br_primitive_state_softprim, partQueryMany),
+    ._partQueryManySize = BR_CMETHOD_REF(br_primitive_state_softprim, partQueryManySize),
+    ._partQueryAll      = BR_CMETHOD_REF(br_primitive_state_softprim, partQueryAll),
+    ._partQueryAllSize  = BR_CMETHOD_REF(br_primitive_state_softprim, partQueryAllSize),
+    ._partIndexQuery    = BR_CMETHOD_REF(br_primitive_state_softprim, partIndexQuery),
+    ._stateDefault      = BR_CMETHOD_REF(br_primitive_state_softprim, stateDefault),
+    ._stateCopy         = BR_CMETHOD_REF(br_primitive_state_softprim, stateCopy),
+    ._renderBegin       = BR_CMETHOD_REF(br_primitive_state_softprim, renderBegin),
+    ._renderEnd         = BR_CMETHOD_REF(br_primitive_state_softprim, renderEnd),
+    ._rangesQuery       = BR_CMETHOD_REF(br_primitive_state_softprim, rangesQuery),
+};

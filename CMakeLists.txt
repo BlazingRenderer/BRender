@@ -60,21 +60,6 @@ endfunction()
 find_sdl()
 
 option(BRENDER_BUILD_DRIVERS "Build Drivers" ON)
-option(BRENDER_BUILD_SOFT "Build Software Renderer" OFF)
-option(BRENDER_H2INC_EXECUTABLE "Path to the BRender-specific h2inc binary - see https://github.com/BlazingRenderer/h2inc")
-message(STATUS "Building software renderer: ${BRENDER_BUILD_SOFT}")
-
-# CMake does _not_ handle this well.
-if (BRENDER_BUILD_SOFT)
-    if (NOT (CMAKE_SYSTEM_PROCESSOR MATCHES "i586.*|i686.*|i386.*|x86.*|amd64.*|AMD64.*|x86_64.*" AND "${CMAKE_SIZEOF_VOID_P}" EQUAL "4"))
-        message(FATAL_ERROR "Can only build the software renderer on 32-bit x86.")
-    endif ()
-
-    if (NOT BRENDER_H2INC_EXECUTABLE)
-        message(FATAL_ERROR "No h2inc binary specified. Please download one from https://github.com/BlazingRenderer/h2inc/releases")
-    endif ()
-endif ()
-
 
 option(BRENDER_BUILD_FOR_CROC "Build for Croc" OFF)
 message(STATUS "Building for Croc: ${BRENDER_BUILD_FOR_CROC}")

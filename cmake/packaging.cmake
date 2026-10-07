@@ -80,8 +80,8 @@ if (TARGET softrend)
             )
 endif()
 
-if (TARGET pentprim)
-    install(TARGETS pentprim
+if (TARGET softprim)
+    install(TARGETS softprim
             EXPORT Core
             LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}/brender
             ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}/brender
@@ -120,7 +120,7 @@ install(FILES
 # pkg-config
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/cmake/brender.pc.in ${CMAKE_CURRENT_BINARY_DIR}/brender.pc @ONLY)
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/brender.pc DESTINATION ${CMAKE_INSTALL_PREFIX}/lib/pkgconfig)
-foreach(driver sdl2dev sdl3dev glrend glrend1x softrend pentprim mcga)
+foreach(driver sdl2dev sdl3dev glrend glrend1x softrend softprim mcga)
 	if (TARGET ${driver})
 		configure_file(${CMAKE_CURRENT_SOURCE_DIR}/cmake/brender-driver.pc.in ${CMAKE_CURRENT_BINARY_DIR}/brender-${driver}.pc @ONLY)
 		install(FILES ${CMAKE_CURRENT_BINARY_DIR}/brender-${driver}.pc DESTINATION ${CMAKE_INSTALL_PREFIX}/lib/pkgconfig)
