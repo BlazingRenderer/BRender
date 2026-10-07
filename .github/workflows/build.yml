@@ -25,6 +25,8 @@ jobs:
           - "brender-samples-linux32"
           - "brender-samples-win64"
           - "brender-samples-win32"
+          - "brender-dos-i586"
+          - "brender-dos-i686"
     steps:
       - uses: actions/checkout@v3
       - uses: cachix/install-nix-action@v20
