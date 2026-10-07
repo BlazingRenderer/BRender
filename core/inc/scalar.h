@@ -22,9 +22,7 @@
 /**
  ** Basic types - float
  **/
-#if !defined(__H2INC__)
 #include <math.h>
-#endif
 
 /*
  * Floating point base types

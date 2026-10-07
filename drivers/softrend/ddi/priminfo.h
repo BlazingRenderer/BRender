@@ -139,11 +139,7 @@ typedef union brp_vertex {
 struct brp_block;
 typedef struct brp_block brp_block;
 
-#ifndef __H2INC__
 typedef void BR_ASM_CALL brp_render_fn(brp_block *block, ...);
-#else
-typedef void BR_ASM_CALL brp_render_fn(brp_block *block);
-#endif
 
 struct brp_block {
     /*
@@ -253,7 +249,6 @@ typedef struct brp_block_min {
  *   brp_render3_fpx  block + 3 verts + fp_vertices + fp_edges + fp_eqn + tfp  (triangle + full face-plane)
  *   brp_render4      block + 4 vertices                                       (quad)
  */
-#ifndef __H2INC__
 typedef void(BR_ASM_CALL *brp_render1_fn)(brp_block *, brp_vertex *);
 typedef void(BR_ASM_CALL *brp_render2_fn)(brp_block *, brp_vertex *, brp_vertex *);
 typedef void(BR_ASM_CALL *brp_render3_fn)(brp_block *, brp_vertex *, brp_vertex *, brp_vertex *);
@@ -290,8 +285,6 @@ static inline void brp_render4(brp_block *b, brp_vertex *v0, brp_vertex *v1, brp
 {
     ((brp_render4_fn)b->render)(b, v0, v1, v2, v3);
 }
-
-#endif /* __H2INC__ */
 
 #ifdef __cplusplus
 }
