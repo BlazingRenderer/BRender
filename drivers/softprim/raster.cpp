@@ -114,6 +114,20 @@ inline int CeilToInt(float v) noexcept
 }
 
 /*
+ * fabs for the long doubles the x87 setup carries. djgpp's libm exports no
+ * _fabsl, so GCC's builtin is used there; it inlines to the x87 fabs instruction
+ * and stays exact. MSVC has no such builtin, but it does have fabsl.
+ */
+inline long double FabsL(long double v) noexcept
+{
+#if defined(__GNUC__)
+    return __builtin_fabsl(v);
+#else
+    return fabsl(v);
+#endif
+}
+
+/*
  * Depth is stored natively, so copy the 16 bits in and out rather than aliasing
  * through a different type (which C++ does not allow).
  */
@@ -1701,11 +1715,7 @@ void TexturedIndexedTriangle(brp_block *block, brp_vertex *v0, brp_vertex *v1, b
     const long double aw = w1 * w2, bw = w2 * w0, cw = w1 * w0;
     const long double q0 = (float)aw, q1 = (float)bw, q2 = (float)cw;
 
-    /*
-     * __builtin_fabsl() rather than fabsl(): djgpp's libm exports no _fabsl,
-     * and the builtin inlines to the x87 fabs instruction, so it is exact.
-     */
-    long double maxuv = __builtin_fabsl(aw) + __builtin_fabsl(au) + __builtin_fabsl(av);
+    long double maxuv = FabsL(aw) + FabsL(au) + FabsL(av);
 
     /* The asm spills maxuv to a float here and reloads it. */
     maxuv = (long double)(float)maxuv;
@@ -1717,7 +1727,7 @@ void TexturedIndexedTriangle(brp_block *block, brp_vertex *v0, brp_vertex *v1, b
     cu *= cw;
     cv *= cw;
 
-    maxuv += __builtin_fabsl(au) + __builtin_fabsl(av) + __builtin_fabsl(bu) + __builtin_fabsl(bv) + __builtin_fabsl(cu) + __builtin_fabsl(cv);
+    maxuv += FabsL(au) + FabsL(av) + FabsL(bu) + FabsL(bv) + FabsL(cu) + FabsL(cv);
 
     const float       maxuv_f = (float)maxuv;
     const long double norm    = (long double)PerspMaxuvNorm(maxuv_f);

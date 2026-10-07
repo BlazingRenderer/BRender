@@ -140,7 +140,20 @@ endif ()
 target_link_libraries(softprim PRIVATE BRender::DDI)
 target_include_directories(softprim PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
 
+#
+# match.c expands the generated block list twice, and the second expansion
+# forwards __VA_ARGS__ from SOFTPRIM_BLOCK_* to SOFTPRIM_ENTRY. MSVC's traditional
+# preprocessor does not unpack a forwarded variadic argument, so the parameters
+# come out empty and the table does not compile. /std:c11 and /std:c17 are the
+# only standards switches that turn on the conforming preprocessor - no C++
+# standard does - so the C sources ask for one. The C++ sources want C++17 for
+# `if constexpr`, which MSVC does not default to either.
+#
 set_target_properties(softprim PROPERTIES
+        C_STANDARD 11
+        C_STANDARD_REQUIRED TRUE
+        CXX_STANDARD 17
+        CXX_STANDARD_REQUIRED TRUE
         EXPORT_NAME "Drivers::SoftPrim"
         FOLDER "BRender/Drivers"
         OUTPUT_NAME "softprmf"
