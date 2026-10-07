@@ -230,8 +230,7 @@ static int rt_readback_gl(rt_state *st, br_demo *demo, int w, int h, br_uint_8 *
     if(st->PixelStorei != NULL)
         st->PixelStorei(RT_GL_PACK_ALIGNMENT, 1);
 
-    if(st->BindTexture != NULL && st->GetTexImage != NULL && ObjectQuery(demo->colour_buffer, &tex, BRT_OPENGL_TEXTURE_U32) == BRE_OK &&
-       tex != 0) {
+    if(st->BindTexture != NULL && st->GetTexImage != NULL && ObjectQuery(demo->colour_buffer, &tex, BRT_OPENGL_TEXTURE_U32) == BRE_OK && tex != 0) {
         st->BindTexture(RT_GL_TEXTURE_2D, tex);
         st->GetTexImage(RT_GL_TEXTURE_2D, 0, RT_GL_RGBA, RT_GL_UNSIGNED_BYTE, px);
         return 1;
@@ -604,8 +603,7 @@ static void rt_unload_scene(rt_state *st, br_demo *demo)
 static br_error rt_make_key(char *dst, size_t n, rt_state *st, const char *driver, const char *scene)
 {
     const char *mode = st->no_depth ? "zs" : "zb";
-    int         len  = snprintf(dst, n, "%s/%s/%s/%u/%dx%d/%s", st->device, driver, mode, (unsigned)st->pm_type, st->width, st->height,
-                                scene);
+    int len = snprintf(dst, n, "%s/%s/%s/%u/%dx%d/%s", st->device, driver, mode, (unsigned)st->pm_type, st->width, st->height, scene);
 
     if(len < 0 || (size_t)len >= n) {
         BrLogError("RT",
@@ -777,8 +775,8 @@ static void rt_write_reference(rt_state *st)
     }
 
     if(wanted > RT_MAX_ENTRIES) {
-        BrLogError("RT", "%s would need %d entries, more than the %d this harness holds; raise RT_MAX_ENTRIES", st->reference,
-                   wanted, RT_MAX_ENTRIES);
+        BrLogError("RT", "%s would need %d entries, more than the %d this harness holds; raise RT_MAX_ENTRIES", st->reference, wanted,
+                   RT_MAX_ENTRIES);
         ++st->failures;
         return;
     }
@@ -906,10 +904,10 @@ static void rt_export_ppm(rt_state *st, br_demo *demo)
 
 static void rt_finish_scene(rt_state *st, br_demo *demo)
 {
-    br_uint_64 hash    = 0;
-    br_uint_32 covered = 0, total = 0;
-    char       key[RT_MAX_KEY];
-    rt_expect *e;
+    br_uint_64  hash    = 0;
+    br_uint_32  covered = 0, total = 0;
+    char        key[RT_MAX_KEY];
+    rt_expect  *e;
     const char *status;
 
     if(demo->hw_accel)
@@ -925,8 +923,7 @@ static void rt_finish_scene(rt_state *st, br_demo *demo)
      * result is a scene with no relation and no coverage check.
      */
     if(st->nresults >= RT_MAX_SCENES) {
-        BrLogError("RT", "%s: more results than the %d this harness holds; raise RT_MAX_SCENES", st->scenes[st->scene_index].name,
-                   RT_MAX_SCENES);
+        BrLogError("RT", "%s: more results than the %d this harness holds; raise RT_MAX_SCENES", st->scenes[st->scene_index].name, RT_MAX_SCENES);
         ++st->failures;
     } else {
         rt_result *r = &st->results[st->nresults++];
@@ -1022,7 +1019,7 @@ typedef struct rt_relation {
  * the other two depths, where the family's flags have no block to select and
  * the frames agree for reasons that say nothing about the kernel.
  */
-#define RT_MMX_NE(a_, b_) \
+#define RT_MMX_NE(a_, b_)                                                                                       \
     {.a = a_, .b = b_, .equal = BR_FALSE, .pm_type = BR_PMT_RGB_555, .mode = RT_MODE_ZB, .device = "softrend"}, \
         {.a = a_, .b = b_, .equal = BR_FALSE, .pm_type = BR_PMT_RGB_565, .mode = RT_MODE_ZB, .device = "softrend"}
 
@@ -1037,7 +1034,10 @@ typedef struct rt_relation {
  * mode RT_MODE_ZB, so a relation that omits either is skipped rather than
  * checked. Neither the lighting nor the material is decided by the output type
  * or the depth mode.
+ *
+ * The columns are hand-aligned, so the table is held out of clang-format.
  */
+// clang-format off
 static const rt_relation rt_relations[] = {
     {.a = "scene-spot-hit",       .b = "scene-spot-miss",        .equal = BR_FALSE, .pm_type = RT_ANY_TYPE, .mode = RT_ANY_MODE},
     {.a = "scene-radius-near",    .b = "scene-radius-far",       .equal = BR_FALSE, .pm_type = RT_ANY_TYPE, .mode = RT_ANY_MODE},
@@ -1082,6 +1082,68 @@ static const rt_relation rt_relations[] = {
     {.a = "scene-dither",         .b = "scene-persp",            .equal = BR_FALSE, .pm_type = BR_PMT_INDEX_8, .mode = RT_ANY_MODE},
 
     /*
+     * The RGB-output shade-table witness. The shape is only reachable at the
+     * z-sorted 555/565 paths: a z-buffered textured primitive matches an MMX
+     * block first, and an 888 output has no such kernel. scene-textured-shade
+     * is the control for the smooth pair (the
+     * same rig with an INDEX_8 table, which at these types matches no shaded
+     * block and draws the untextured one instead); scene-flat is the control for
+     * the flat pair, whose constant-intensity cousin it is.
+     */
+    {.a = "scene-shade-rgb555",      .b = "scene-textured-shade", .equal = BR_FALSE, .pm_type = BR_PMT_RGB_555, .mode = RT_MODE_ZS,
+     .device = "softrend"},
+    {.a = "scene-shade-rgb565",      .b = "scene-textured-shade", .equal = BR_FALSE, .pm_type = BR_PMT_RGB_565, .mode = RT_MODE_ZS,
+     .device = "softrend"},
+    {.a = "scene-shade-rgb555-flat", .b = "scene-flat",           .equal = BR_FALSE, .pm_type = BR_PMT_RGB_555, .mode = RT_MODE_ZS,
+     .device = "softrend"},
+    {.a = "scene-shade-rgb565-flat", .b = "scene-flat",           .equal = BR_FALSE, .pm_type = BR_PMT_RGB_565, .mode = RT_MODE_ZS,
+     .device = "softrend"},
+
+    /*
+     * The two refused families' witnesses. Each differs from a neighbour that
+     * cannot carry the family's defining type, so a fixture that quietly selects
+     * a sibling - the failure mode both fixtures exist to rule out - fails here
+     * by name instead of only moving a checksum.
+     *
+     * Family A (an RGB-typed colour map) is asserted in the Z-sort mode alone,
+     * because the z-buffered 555/565 textured blocks are unreachable: pentprim
+     * walks the MMX table first, its textured rows all require an INDEX_8 map
+     * with a palette, and its untextured rows match any 555/565 triangle, so a
+     * 555/565 map is drawn untextured and the fixture reaches nothing. Measured
+     * at both types in both modes: the two frames differ in exactly the mode
+     * asserted. scene-textured is the control
+     * - the same rig with an INDEX_8 map.
+     *
+     * Family B (a textured primitive with an RGB-typed shade table) is
+     * asserted at 888, where the block is reachable, against
+     * scene-textured-shade - the same rig with an INDEX_8 table, which at 888
+     * matches no shaded block and falls through to the untextured one.
+     */
+    {.a = "scene-tex-rgb555",        .b = "scene-textured",       .equal = BR_FALSE, .pm_type = BR_PMT_RGB_555, .mode = RT_MODE_ZS,
+     .device = "softrend"},
+    {.a = "scene-tex-rgb565",        .b = "scene-textured",       .equal = BR_FALSE, .pm_type = BR_PMT_RGB_565, .mode = RT_MODE_ZS,
+     .device = "softrend"},
+    {.a = "scene-shade-rgb888",      .b = "scene-textured-shade", .equal = BR_FALSE, .pm_type = BR_PMT_RGB_888, .mode = RT_MODE_ZB,
+     .device = "softrend"},
+
+    /*
+     * The topology witnesses. Each is scene-flat's rig with the style changed
+     * and nothing else, so a dropped render_style leaves the actor drawing
+     * faces and the frame equal to scene-flat's. How the style reaches the
+     * renderer is softrend's business, and glrend has no indexed rasteriser to
+     * compare, so the pair is asserted there only.
+     *
+     * Both fields have to be spelled out; see the note on RT_ANY_TYPE above.
+     * Measured, each witness differs from scene-flat in every type and both
+     * depth modes, so they are asserted at RT_ANY_MODE rather than left at the
+     * RT_MODE_ZB an unset field means.
+     */
+    {.a = "scene-edges",          .b = "scene-flat",             .equal = BR_FALSE, .pm_type = RT_ANY_TYPE, .mode = RT_ANY_MODE,
+     .device = "softrend"},
+    {.a = "scene-points",         .b = "scene-flat",             .equal = BR_FALSE, .pm_type = RT_ANY_TYPE, .mode = RT_ANY_MODE,
+     .device = "softrend"},
+
+    /*
      * The MMX family. Every pair differs by exactly one property of one cube:
      * the perspective flag, the smoothing flag, or one of the two ROP flags
      * (`BR_MATF_DITHER`, opacity below full). A kernel that stops firing, or
@@ -1108,6 +1170,7 @@ static const rt_relation rt_relations[] = {
     RT_MMX_NE("scene-mmx-uvrgb-dither-affine", "scene-mmx-uvrgb-ditherscreen-affine"),
     RT_MMX_NE("scene-mmx-uvrgb-screen-persp", "scene-mmx-uvrgb-ditherscreen-persp"),
 };
+// clang-format on
 
 static rt_result *rt_find_result(rt_state *st, const char *scene)
 {
@@ -1149,6 +1212,8 @@ typedef struct rt_blank {
     const char *device;
 } rt_blank;
 
+/* Hand-aligned columns; held out of clang-format for the same reason as rt_relations above. */
+// clang-format off
 static const rt_blank rt_expected_blank[] = {
     /*
      * pentprim's own frame is blank for each of these, so there is nothing to
@@ -1177,7 +1242,23 @@ static const rt_blank rt_expected_blank[] = {
      * key is two blank frames matching.
      */
     {.scene = "scene-shade",             .pm_type = BR_PMT_INDEX_8, .mode = RT_MODE_ZS},
+
+    /*
+     * The line topology witness under glrend, and only there.
+     *
+     * glrend's stored-geometry entry points refuse everything but triangles and
+     * points - `br_geometry_stored_gl::render` and `renderOnScreen` return
+     * BRE_FAIL for BRT_LINE - so the driver
+     * draws nothing for BR_RSTYLE_EDGES. That is a glrend gap the fixture now
+     * makes reachable from a file, not a property of the scene: every other
+     * device here draws it, and the softrend keys in rendertest.txt record
+     * that. The glrend reference entry is the blank frame the driver draws;
+     * this expected-blank entry is what stops a blank frame failing the
+     * draw check.
+     */
+    {.scene = "scene-edges",             .pm_type = RT_ANY_TYPE,    .mode = RT_ANY_MODE, .device = "glrend"},
 };
+// clang-format on
 
 static void rt_check_drawn(rt_state *st)
 {
@@ -1307,8 +1388,7 @@ static br_error rt_init(br_demo *demo)
                  * table that was never written for it.
                  */
                 if(n >= sizeof(st->driver)) {
-                    BrLogError("RT", "GL_RENDERER `%s' is %zu characters, more than the %zu a driver token holds", r, n,
-                               sizeof(st->driver));
+                    BrLogError("RT", "GL_RENDERER `%s' is %zu characters, more than the %zu a driver token holds", r, n, sizeof(st->driver));
                     return BRE_FAIL;
                 }
 
@@ -1368,8 +1448,8 @@ static br_error rt_init(br_demo *demo)
             const char *token = rt_cfg_ref_driver != NULL ? rt_cfg_ref_driver : "";
 
             if(strlen(token) >= sizeof(st->reference_driver)) {
-                BrLogError("RT", "--reference-driver `%s' is %zu characters, more than the %zu a driver token holds", token,
-                           strlen(token), sizeof(st->reference_driver));
+                BrLogError("RT", "--reference-driver `%s' is %zu characters, more than the %zu a driver token holds", token, strlen(token),
+                           sizeof(st->reference_driver));
                 return BRE_FAIL;
             }
 
@@ -1487,6 +1567,8 @@ static const br_demo_dispatch rt_dispatch = {
 /* Argument parsing.                                                  */
 /* ------------------------------------------------------------------ */
 
+/* Laid out as a grid so the set reads as one list; held out of clang-format, which would put one name per line. */
+// clang-format off
 static const char *const rt_default_scenes[] = {
     "scene-spot-hit",   "scene-spot-miss", "scene-spot-hit-miss",  "scene-radius-near", "scene-radius-far",      "scene-scaled",
     "scene-view-space", "scene-colour",    "scene-colour-ambient", "scene-colour-two",  "scene-directional",     "scene-directional-miss",
@@ -1496,7 +1578,17 @@ static const char *const rt_default_scenes[] = {
     "scene-flat",       "scene-smooth",    "scene-textured",       "scene-textured-shade", "scene-persp",        "scene-persp-shade",
     "scene-tex-arb",    "scene-shade",     "scene-decal",          "scene-fog",         "scene-blend",           "scene-dither",
     "scene-alpha",
+    "scene-shade-rgb555", "scene-shade-rgb555-flat", "scene-shade-rgb565", "scene-shade-rgb565-flat",
+    "scene-shade-rgb888", "scene-tex-rgb555", "scene-tex-rgb565",
     "scene-blend-off",
+
+    /*
+     * The topology witnesses; see scene.c. Non-triangle topologies have no
+     * witness without them, because the style they need is actor state and no
+     * glTF path carried it before BR_actors.
+     */
+    "scene-edges",
+    "scene-points",
 
     /*
      * The MMX 555/565 family. pentprim walks the MMX table before the general
@@ -1522,6 +1614,7 @@ static const char *const rt_default_scenes[] = {
     "scene-mmx-uvrgb-dither-affine",      "scene-mmx-uvrgb-screen-persp",
     "scene-mmx-uvrgb-ditherscreen-persp", "scene-mmx-uvrgb-ditherscreen-affine",
 };
+// clang-format on
 
 /* The default set has to fit: rt_init() copies it into an RT_MAX_SCENES array. */
 BR_STATIC_ASSERT(BR_ASIZE(rt_default_scenes) <= RT_MAX_SCENES, "the default fixture set does not fit in RT_MAX_SCENES");

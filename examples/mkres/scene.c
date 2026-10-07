@@ -170,8 +170,7 @@ static br_actor *scene_add_light(br_actor *world, const char *name, br_uint_8 ty
     return scene_add_light_col(world, name, type, BR_COLOUR_RGB(255, 255, 255), radius_outer, at_origin);
 }
 
-static br_actor *scene_add_light_turned(br_actor *world, const char *name, br_uint_8 type, br_scalar radius_outer,
-                                        br_scalar angle_y)
+static br_actor *scene_add_light_turned(br_actor *world, const char *name, br_uint_8 type, br_scalar radius_outer, br_scalar angle_y)
 {
     br_actor *a;
     br_light *l;
@@ -372,10 +371,14 @@ static br_material *scene_material_ex(const char *name, br_colour colour, br_uin
  *   scene-blend                 the indexed blend table
  *   scene-dither                dithered_map
  *   scene-alpha                 opacity < 255, for the RGB blend path
+ *   scene-shade-rgb555/565      the RGB-output shade table, one per output
+ *                               type, each in an interpolated and a flat form
  *
- * The tables are INDEX_8 pixelmaps with no palette. Their bytes are indices
- * into the table itself, not colours, and the rasterisers read them directly;
- * a palette would be a lie about what the data is.
+ * The indexed tables are INDEX_8 pixelmaps with no palette. Their bytes are
+ * indices into the table itself, not colours, and the rasterisers read them
+ * directly; a palette would be a lie about what the data is. The RGB-output
+ * shade tables are the exception: their type must equal the output format, so
+ * scene-shade-rgb555/565 carry an RGB pixelmap whose samples are colours.
  */
 
 /*
@@ -383,15 +386,15 @@ static br_material *scene_material_ex(const char *name, br_colour colour, br_uin
  * INDEX_8 frame goes through a grey ramp built from the material's index band,
  * and a fixture whose two texels land on adjacent indices cannot be read.
  */
-#define SCENE_TEX_INDEX_A   32
-#define SCENE_TEX_INDEX_B   224
-#define SCENE_TEX_SIZE      64
-#define SCENE_TEX_CELLS     16
-#define SCENE_ARB_WIDTH     96
-#define SCENE_ARB_HEIGHT    48
-#define SCENE_ARB_CELLS     12
-#define SCENE_TABLE_WIDTH   256
-#define SCENE_TABLE_ROWS    256
+#define SCENE_TEX_INDEX_A 32
+#define SCENE_TEX_INDEX_B 224
+#define SCENE_TEX_SIZE    64
+#define SCENE_TEX_CELLS   16
+#define SCENE_ARB_WIDTH   96
+#define SCENE_ARB_HEIGHT  48
+#define SCENE_ARB_CELLS   12
+#define SCENE_TABLE_WIDTH 256
+#define SCENE_TABLE_ROWS  256
 
 /*
  * A band of its own for the blend table's output: see scene_blend_table().
@@ -407,7 +410,7 @@ static br_material *scene_material_ex(const char *name, br_colour colour, br_uin
  * inside that threshold - so a perspective fixture would silently test nothing
  * but the affine path.
  */
-#define SCENE_FX_SCALE BR_SCALAR(1.5)
+#define SCENE_FX_SCALE          BR_SCALAR(1.5)
 #define SCENE_NEAR_LIGHT_RADIUS BR_SCALAR(5.0)
 
 /*
@@ -470,8 +473,7 @@ static br_pixelmap *scene_texture(const char *name, int width, int height, int c
 
     for(int y = 0; y < height; ++y)
         for(int x = 0; x < width; ++x)
-            pixels[(y * pm->row_bytes) + x] =
-                (((x / cell_w) + (y / cell_h)) & 1) ? SCENE_TEX_INDEX_A : SCENE_TEX_INDEX_B;
+            pixels[(y * pm->row_bytes) + x] = (((x / cell_w) + (y / cell_h)) & 1) ? SCENE_TEX_INDEX_A : SCENE_TEX_INDEX_B;
 
     pm->map = pal;
 
@@ -535,6 +537,140 @@ static br_pixelmap *scene_shade_ramp(const char *name)
     for(int row = 0; row < SCENE_TABLE_ROWS; ++row)
         for(int col = 0; col < SCENE_TABLE_WIDTH; ++col)
             pixels[(row * pm->row_bytes) + col] = (br_uint_8)((row / 2) + 32);
+
+    return pm;
+}
+
+/*
+ * A shade table whose samples are an output colour rather than an index: the
+ * RGB-output half of the shade-table family. A shade table's type must equal the
+ * output format, and the RGB-output kernel writes the table's sample straight to
+ * the colour buffer (`out = shade[(intensity << 8) | texel]`), so the table is
+ * one of the three RGB pixel types, not INDEX_8.
+ *
+ * The sample carries two axes so that the frame can be read: the red channel is
+ * the intensity (the row), and the green channel is the texel index (the column).
+ * A table that varied only with the intensity would be indistinguishable from the
+ * untextured intensity path, and a dropped table read would look like a working
+ * one.
+ *
+ * The samples are packed here rather than through BrPixelmapPixelSet(): that
+ * writes a br_colour truncated to the pixel's byte width, which for a 16-bit
+ * type keeps only the low two bytes of 0x00RRGGBB - the blue and green channels -
+ * and silently drops the red one. The packing below is the layout the rasterisers
+ * read and write (ScalarsToRGB15/16 for the 16-bit types).
+ */
+static void scene_shade_table_rgb_set(br_pixelmap *pm, int x, int y, br_uint_8 type, br_uint_8 r, br_uint_8 g, br_uint_8 b)
+{
+    br_uint_8 *p = (br_uint_8 *)pm->pixels + (br_size_t)y * pm->row_bytes + (br_size_t)x * ((type == BR_PMT_RGB_888) ? 3 : 2);
+
+    switch(type) {
+        case BR_PMT_RGB_555: {
+            br_uint_16 v = (br_uint_16)(((br_uint_16)(r >> 3) << 10) | ((br_uint_16)(g >> 3) << 5) | (br_uint_16)(b >> 3));
+
+            p[0] = (br_uint_8)v;
+            p[1] = (br_uint_8)(v >> 8);
+            break;
+        }
+
+        case BR_PMT_RGB_565: {
+            br_uint_16 v = (br_uint_16)(((br_uint_16)(r >> 3) << 11) | ((br_uint_16)(g >> 2) << 5) | (br_uint_16)(b >> 3));
+
+            p[0] = (br_uint_8)v;
+            p[1] = (br_uint_8)(v >> 8);
+            break;
+        }
+
+        default:
+            /* RGB_888 is byte-ordered B,G,R in memory. */
+            p[0] = b;
+            p[1] = g;
+            p[2] = r;
+            break;
+    }
+}
+
+static br_pixelmap *scene_shade_table_rgb(const char *name, br_uint_8 type)
+{
+    br_pixelmap *pm;
+
+    if((pm = BrPixelmapAllocate(type, SCENE_TABLE_WIDTH, SCENE_TABLE_ROWS, NULL, BR_PMAF_NORMAL)) == NULL)
+        return NULL;
+
+    pm->identifier = BrResStrDup(pm, name);
+
+    for(int row = 0; row < SCENE_TABLE_ROWS; ++row)
+        for(int col = 0; col < SCENE_TABLE_WIDTH; ++col)
+            scene_shade_table_rgb_set(pm, col, row, type, (br_uint_8)row, (br_uint_8)col, 96);
+
+    BrMapAdd(pm);
+
+    return pm;
+}
+
+/*
+ * A colour map typed to an RGB output: the map a 555/565/888 textured block
+ * samples directly. It has no palette, because the rasteriser reads the map's
+ * own words and a palette would be an indirection the block does not perform.
+ *
+ * It exists because the block's texture type is the output type. infogen.pl's
+ * shared_texture() sets a plain `texture` block's texture_type from the block's
+ * colour type, so the 15bpp block that a textured, unshaded
+ * primitive selects requires a BR_PMT_RGB_555 map. Every colour map the corpus
+ * had was INDEX_8 (either with a palette or as a marked table), so nothing could
+ * ever satisfy that requirement. The two hues are scene_texture()'s, so a
+ * channel-order or channel-drop failure reads the same way on either map.
+ */
+static br_pixelmap *scene_texture_rgb(const char *name, br_uint_8 type, int width, int height, int cells)
+{
+    br_pixelmap *pm;
+    int          cell_w = width / cells;
+    int          cell_h = height / cells;
+
+    if((pm = BrPixelmapAllocate(type, width, height, NULL, BR_PMAF_NORMAL)) == NULL)
+        return NULL;
+
+    pm->identifier = BrResStrDup(pm, name);
+
+    for(int y = 0; y < height; ++y)
+        for(int x = 0; x < width; ++x) {
+            br_boolean a = (((x / cell_w) + (y / cell_h)) & 1) != 0;
+
+            /* RGB_555 is byte-ordered low,high; RGB_565 the same; RGB_888 B,G,R. */
+            scene_shade_table_rgb_set(pm, x, y, type, a ? 32 : 220, a ? 160 : 120, a ? 200 : 32);
+        }
+
+    BrMapAdd(pm);
+
+    return pm;
+}
+
+/*
+ * The shade-table fixtures' texture: an INDEX_8 map with no palette, so its two
+ * indices survive the glTF round trip exactly (the exporter's index8 marker)
+ * instead of being requantised to whatever indices the loader's palette chose.
+ * That keeps the shade table's column - the texel byte - readable in the frame,
+ * and it is honest about what the data is: the RGB-output shade kernel reads the
+ * texel byte as the table's column and never expands a palette. Index 0 is left
+ * unused for the same reason as scene_texture().
+ */
+static br_pixelmap *scene_shade_texture(const char *name)
+{
+    br_pixelmap *pm;
+    br_uint_8   *pixels;
+    const int    cell = SCENE_TEX_SIZE / SCENE_TEX_CELLS;
+
+    if((pm = BrPixelmapAllocate(BR_PMT_INDEX_8, SCENE_TEX_SIZE, SCENE_TEX_SIZE, NULL, BR_PMAF_NORMAL)) == NULL)
+        return NULL;
+
+    pm->identifier = BrResStrDup(pm, name);
+    pixels         = pm->pixels;
+
+    for(int y = 0; y < SCENE_TEX_SIZE; ++y)
+        for(int x = 0; x < SCENE_TEX_SIZE; ++x)
+            pixels[(y * pm->row_bytes) + x] = (((x / cell) + (y / cell)) & 1) ? SCENE_TEX_INDEX_A : SCENE_TEX_INDEX_B;
+
+    BrMapAdd(pm);
 
     return pm;
 }
@@ -634,15 +770,14 @@ static br_actor *scene_add_near_light(br_actor *world)
  * colour buffer through a grey ramp built from the material's index band - is
  * the index buffer and can be read directly.
  */
-#define SCENE_FX_BASE     0
-#define SCENE_FX_RANGE    255
+#define SCENE_FX_BASE  0
+#define SCENE_FX_RANGE 255
 
 static br_material *scene_fx_material(const char *name, br_uint_32 flags)
 {
     br_material *m;
 
-    if((m = scene_material_ex(name, BR_COLOUR_RGB(200, 200, 200), flags, BR_SCALAR(0.1), BR_SCALAR(0.7), BR_SCALAR(0.0),
-                               BR_SCALAR(20.0))) == NULL)
+    if((m = scene_material_ex(name, BR_COLOUR_RGB(200, 200, 200), flags, BR_SCALAR(0.1), BR_SCALAR(0.7), BR_SCALAR(0.0), BR_SCALAR(20.0))) == NULL)
         return NULL;
 
     m->index_base  = SCENE_FX_BASE;
@@ -659,8 +794,8 @@ static br_material *scene_fx_material(const char *name, br_uint_32 flags)
  */
 static br_actor *scene_fx_world_range(br_model *cube, br_material *mat, br_scalar hither, br_scalar yon)
 {
-    br_actor  *world = scene_world(cube, mat, BR_SCALAR(1.0));
-    br_actor  *a;
+    br_actor   *world = scene_world(cube, mat, BR_SCALAR(1.0));
+    br_actor   *a;
     br_matrix34 m;
 
     if(world == NULL)
@@ -688,6 +823,31 @@ static br_actor *scene_fx_world_range(br_model *cube, br_material *mat, br_scala
 static br_actor *scene_fx_world(br_model *cube, br_material *mat)
 {
     return scene_fx_world_range(cube, mat, BR_SCALAR(0.1), BR_SCALAR(100.0));
+}
+
+/*
+ * scene_fx_world() with a render style on the cube actor, for the topology
+ * witnesses below.
+ *
+ * The style goes on the model actor rather than the world so that the camera
+ * and the light actors keep the default; the renderer inherits a style down the
+ * tree, so either would reach the cube.
+ */
+static br_actor *scene_fx_world_topology(br_model *cube, br_material *mat, br_uint_8 render_style)
+{
+    br_actor *world = scene_fx_world(cube, mat);
+
+    if(world == NULL)
+        return NULL;
+
+    for(br_actor *a = world->children; a != NULL; a = a->next) {
+        if(a->type == BR_ACTOR_MODEL) {
+            a->render_style = render_style;
+            break;
+        }
+    }
+
+    return world;
 }
 
 /*
@@ -754,8 +914,8 @@ static void scene_fx_add_cube(br_actor *world, br_model *cube, br_material *mat,
  */
 #define SCENE_MMX_OPACITY 128
 
-#define SCENE_MMX_GREY BR_COLOUR_RGB(200, 200, 200)
-#define SCENE_MMX_WHITE BR_COLOUR_RGB(255, 255, 255)
+#define SCENE_MMX_GREY    BR_COLOUR_RGB(200, 200, 200)
+#define SCENE_MMX_WHITE   BR_COLOUR_RGB(255, 255, 255)
 
 /*
  * One cube state. `flags` is the material's whole BR_MATF_* set; the screendoor
@@ -776,7 +936,11 @@ typedef struct scene_mmx_fixture {
  * (screendoor) or `_SD` (both) variant, and the textured groups add the
  * affine/perspective split. The scene names spell the groups `rgb` (untextured),
  * `uv` (texture-only), `uvc` (flat-coloured) and `uvrgb` (gouraud).
+ *
+ * The columns are hand-aligned, so the table is held out of clang-format:
+ * AlignArrayOfStructures would strip the padding and reflow the long rows.
  */
+// clang-format off
 static const scene_mmx_fixture scene_mmx_fixtures[] = {
     /* Untextured: no map at all. */
     {.name = "scene-mmx-rgb-dither-smooth", .flags = BR_MATF_LIGHT | BR_MATF_SMOOTH | BR_MATF_DITHER, .colour = SCENE_MMX_GREY, .opacity = 255, .textured = BR_FALSE},
@@ -808,6 +972,7 @@ static const scene_mmx_fixture scene_mmx_fixtures[] = {
     {.name = "scene-mmx-uvrgb-ditherscreen-persp", .flags = BR_MATF_LIGHT | BR_MATF_SMOOTH | BR_MATF_PERSPECTIVE | BR_MATF_DITHER, .colour = SCENE_MMX_GREY, .opacity = SCENE_MMX_OPACITY, .textured = BR_TRUE},
     {.name = "scene-mmx-uvrgb-ditherscreen-affine", .flags = BR_MATF_LIGHT | BR_MATF_SMOOTH | BR_MATF_DITHER, .colour = SCENE_MMX_GREY, .opacity = SCENE_MMX_OPACITY, .textured = BR_TRUE},
 };
+// clang-format on
 
 static br_error scene_make_mmx_fixtures(br_model *cube)
 {
@@ -820,7 +985,7 @@ static br_error scene_make_mmx_fixtures(br_model *cube)
     }
 
     for(size_t i = 0; i < BR_ASIZE(scene_mmx_fixtures); ++i) {
-        const scene_mmx_fixture *fx  = &scene_mmx_fixtures[i];
+        const scene_mmx_fixture *fx = &scene_mmx_fixtures[i];
         char                     mat[128];
         char                     gltf[128];
         br_material             *m;
@@ -829,8 +994,7 @@ static br_error scene_make_mmx_fixtures(br_model *cube)
         snprintf(mat, sizeof(mat), "%s-material", fx->name);
         snprintf(gltf, sizeof(gltf), "%s.gltf", fx->name);
 
-        if((m = scene_material_ex(mat, fx->colour, fx->flags, BR_SCALAR(0.1), BR_SCALAR(0.7), BR_SCALAR(0.0),
-                                  BR_SCALAR(20.0))) == NULL)
+        if((m = scene_material_ex(mat, fx->colour, fx->flags, BR_SCALAR(0.1), BR_SCALAR(0.7), BR_SCALAR(0.0), BR_SCALAR(20.0))) == NULL)
             return BRE_FAIL;
 
         m->index_base  = SCENE_FX_BASE;
@@ -857,9 +1021,8 @@ static br_error scene_make_feature_fixtures(br_model *cube)
 
     if((tex64 = scene_texture("scene-textured-map", SCENE_TEX_SIZE, SCENE_TEX_SIZE, SCENE_TEX_CELLS)) == NULL ||
        (tex_arb = scene_texture("scene-tex-arb-map", SCENE_ARB_WIDTH, SCENE_ARB_HEIGHT, SCENE_ARB_CELLS)) == NULL ||
-       (shade = scene_shade_table("scene-shade-table")) == NULL ||
-       (shade_ramp = scene_shade_ramp("scene-shade-ramp-table")) == NULL || (blend = scene_blend_table("scene-blend-table")) == NULL ||
-       (fog = scene_fog_table("scene-fog-table")) == NULL) {
+       (shade = scene_shade_table("scene-shade-table")) == NULL || (shade_ramp = scene_shade_ramp("scene-shade-ramp-table")) == NULL ||
+       (blend = scene_blend_table("scene-blend-table")) == NULL || (fog = scene_fog_table("scene-fog-table")) == NULL) {
         fprintf(stderr, "failed to allocate feature fixture resources\n");
         return BRE_FAIL;
     }
@@ -917,8 +1080,7 @@ static br_error scene_make_feature_fixtures(br_model *cube)
     }
 
     {
-        br_material *mat =
-            scene_fx_material("scene-persp-shade-material", BR_MATF_LIGHT | BR_MATF_SMOOTH | BR_MATF_PERSPECTIVE);
+        br_material *mat = scene_fx_material("scene-persp-shade-material", BR_MATF_LIGHT | BR_MATF_SMOOTH | BR_MATF_PERSPECTIVE);
 
         mat->colour_map  = tex64;
         mat->index_shade = shade;
@@ -1031,8 +1193,7 @@ static br_error scene_make_feature_fixtures(br_model *cube)
      * perspective flag, so this differs from scene-persp by the flag alone.
      */
     {
-        br_material *mat =
-            scene_fx_material("scene-dither-material", BR_MATF_LIGHT | BR_MATF_SMOOTH | BR_MATF_PERSPECTIVE | BR_MATF_DITHER);
+        br_material *mat = scene_fx_material("scene-dither-material", BR_MATF_LIGHT | BR_MATF_SMOOTH | BR_MATF_PERSPECTIVE | BR_MATF_DITHER);
 
         mat->colour_map = tex64;
 
@@ -1051,6 +1212,186 @@ static br_error scene_make_feature_fixtures(br_model *cube)
         mat->opacity    = 128;
 
         if(scene_save("scene-alpha.gltf", scene_fx_world(cube, mat)) != BRE_OK)
+            r = BRE_FAIL;
+    }
+
+    /*
+     * The RGB-output shade table: scene-textured-shade's rig, but the table is
+     * typed to the output format and its sample goes straight to the colour
+     * buffer (`out = shade[(intensity << 8) | texel]`) instead of being an index
+     * into the palette. A shade table's type must equal the output, so the
+     * fixtures carry one table each and each is only a witness at its own --bpp;
+     * a table typed for 555 cannot match a 565 output, and vice versa. The
+     * smooth/flat pair is the interpolated/constant split, which is a different
+     * kernel name even though the walk is shared - see scene-flat/scene-smooth.
+     */
+    {
+        br_pixelmap *shade555  = scene_shade_table_rgb("scene-shade-rgb555-table", BR_PMT_RGB_555);
+        br_pixelmap *shade565  = scene_shade_table_rgb("scene-shade-rgb565-table", BR_PMT_RGB_565);
+        br_pixelmap *shade_tex = scene_shade_texture("scene-shade-rgb-map");
+
+        if(shade555 == NULL || shade565 == NULL || shade_tex == NULL)
+            return BRE_FAIL;
+
+        {
+            br_material *mat = scene_fx_material("scene-shade-rgb555-material", BR_MATF_LIGHT | BR_MATF_SMOOTH);
+
+            mat->colour_map  = shade_tex;
+            mat->index_shade = shade555;
+
+            if(scene_save("scene-shade-rgb555.gltf", scene_fx_world(cube, mat)) != BRE_OK)
+                r = BRE_FAIL;
+        }
+
+        {
+            br_material *mat = scene_fx_material("scene-shade-rgb555-flat-material", BR_MATF_LIGHT);
+
+            mat->colour_map  = shade_tex;
+            mat->index_shade = shade555;
+
+            if(scene_save("scene-shade-rgb555-flat.gltf", scene_fx_world(cube, mat)) != BRE_OK)
+                r = BRE_FAIL;
+        }
+
+        {
+            br_material *mat = scene_fx_material("scene-shade-rgb565-material", BR_MATF_LIGHT | BR_MATF_SMOOTH);
+
+            mat->colour_map  = shade_tex;
+            mat->index_shade = shade565;
+
+            if(scene_save("scene-shade-rgb565.gltf", scene_fx_world(cube, mat)) != BRE_OK)
+                r = BRE_FAIL;
+        }
+
+        {
+            br_material *mat = scene_fx_material("scene-shade-rgb565-flat-material", BR_MATF_LIGHT);
+
+            mat->colour_map  = shade_tex;
+            mat->index_shade = shade565;
+
+            if(scene_save("scene-shade-rgb565-flat.gltf", scene_fx_world(cube, mat)) != BRE_OK)
+                r = BRE_FAIL;
+        }
+    }
+
+    /*
+     * The RGB-typed colour maps, which no earlier fixture reached. The map's
+     * type is not decoration - a block's texture type is its
+     * output type (shared_texture() sets texture_type from colour_type), so a
+     * textured, unshaded 15bpp primitive with a BR_PMT_RGB_555 map selects
+     * TriangleRenderPITA15 and nothing else. No
+     * fixture could reach it before, because the only colour maps in the tree
+     * were INDEX_8; the brender=rgb555/rgb565 glTF markers are what let one be
+     * authored and read back as itself.
+     *
+     * Reachable only in the Z-sort mode, and that is a property of the block set
+     * rather than of the fixture: with a depth buffer the MMX table is walked
+     * first, its textured rows all require an INDEX_8 map with a palette, and
+     * its untextured rows match any 555/565 triangle - so a 555 map is never
+     * sampled at all and the primitive is drawn untextured.
+     * The Z-sort tables have no MMX half, so the general prm_t15 walk reaches
+     * TriangleRenderPITA15 there.
+     *
+     * The map is the arbitrary-width (96x48) one scene-tex-arb uses, so it does
+     * not satisfy any of the power-of-two textureNxN requirements and the walk
+     * reaches the bare `texture` block. The material is smooth and perspective
+     * correct, matching scene-persp's rig, so the selected entry is the
+     * perspective-subdivide one (rather than the affine twin).
+     */
+    {
+        br_pixelmap *tex555 = scene_texture_rgb("scene-tex-rgb555-map", BR_PMT_RGB_555, SCENE_ARB_WIDTH, SCENE_ARB_HEIGHT, SCENE_ARB_CELLS);
+        br_pixelmap *tex565 = scene_texture_rgb("scene-tex-rgb565-map", BR_PMT_RGB_565, SCENE_ARB_WIDTH, SCENE_ARB_HEIGHT, SCENE_ARB_CELLS);
+
+        if(tex555 == NULL || tex565 == NULL)
+            return BRE_FAIL;
+
+        {
+            br_material *mat = scene_fx_material("scene-tex-rgb555-material", BR_MATF_LIGHT | BR_MATF_SMOOTH | BR_MATF_PERSPECTIVE);
+
+            mat->colour_map = tex555;
+
+            if(scene_save("scene-tex-rgb555.gltf", scene_fx_world(cube, mat)) != BRE_OK)
+                r = BRE_FAIL;
+        }
+
+        {
+            br_material *mat = scene_fx_material("scene-tex-rgb565-material", BR_MATF_LIGHT | BR_MATF_SMOOTH | BR_MATF_PERSPECTIVE);
+
+            mat->colour_map = tex565;
+
+            if(scene_save("scene-tex-rgb565.gltf", scene_fx_world(cube, mat)) != BRE_OK)
+                r = BRE_FAIL;
+        }
+    }
+
+    /*
+     * Family B: a textured primitive with an RGB-typed shade table.
+     *
+     * The shape is prim_t24.ifg:8, TriangleRenderPIZ2TIA_RGB_888 - a z-buffered
+     * textured primitive that looks its fragment up in the bound shade table
+     * (`out = shade[(intensity << 8) | texel]`). 24bpp is what makes it
+     * reachable: pentprim has no MMX table for an 888 output, so the general
+     * prim_t24 walk reaches this block, while the 555/565 twins are intercepted
+     * by the MMX table's untextured rows first. The table is RGB_888 because a
+     * shade table's type must equal the output (shared_texture(), and the
+     * matcher's shade_type test).
+     *
+     * The material is deliberately bright: ka 0.5, kd 1.0. scene_fx_material's
+     * kd 0.7 keeps the surface intensity to about half of the table's 256 rows,
+     * and the shape's defect - the reader indexes an RGB_888 table at a four-byte
+     * stride where the table's own row_bytes is three, so `idx * 4` leaves the
+     * allocation at idx 49152, i.e. at an intensity of 192 - only shows itself
+     * near the top of the range. Full diffuse plus a mid ambient puts the lit
+     * faces just past it, so the fixture reaches the end of the table and past
+     * it, which is what makes it a witness rather than a neighbour of one.
+     */
+    {
+        br_pixelmap *shade888  = scene_shade_table_rgb("scene-shade-rgb888-table", BR_PMT_RGB_888);
+        br_pixelmap *shade_tex = scene_shade_texture("scene-shade-rgb888-map");
+
+        if(shade888 == NULL || shade_tex == NULL)
+            return BRE_FAIL;
+
+        {
+            br_material *mat = scene_fx_material("scene-shade-rgb888-material", BR_MATF_LIGHT | BR_MATF_SMOOTH);
+
+            mat->ka = BR_SCALAR(0.5);
+            mat->kd = BR_SCALAR(1.0);
+
+            mat->colour_map  = shade_tex;
+            mat->index_shade = shade888;
+
+            if(scene_save("scene-shade-rgb888.gltf", scene_fx_world(cube, mat)) != BRE_OK)
+                r = BRE_FAIL;
+        }
+    }
+
+    /*
+     * The topology witnesses.
+     *
+     * The topology the renderer draws comes from br_actor::render_style, and no
+     * glTF path carried it until the BR_actors extension: the loader never set
+     * it and the writer never wrote it, so every actor loaded from a .gltf was
+     * BR_RSTYLE_DEFAULT and the blocks that draw points and lines (RP_TOP_POINT,
+     * RP_TOP_LINE) had no witness anywhere in the corpus.
+     *
+     * Each fixture is scene-flat's rig with render_style set on the cube actor
+     * and nothing else changed - the same cube, turn, material flags, light and
+     * camera - so the round trip is witnessed by the frame itself: if the
+     * extension is dropped the actor falls back to BR_RSTYLE_DEFAULT and the
+     * frame is byte-identical to scene-flat.
+     */
+    {
+        br_material *mat = scene_fx_material("scene-edges-material", BR_MATF_LIGHT);
+
+        if(scene_save("scene-edges.gltf", scene_fx_world_topology(cube, mat, BR_RSTYLE_EDGES)) != BRE_OK)
+            r = BRE_FAIL;
+    }
+
+    {
+        br_material *mat = scene_fx_material("scene-points-material", BR_MATF_LIGHT);
+
+        if(scene_save("scene-points.gltf", scene_fx_world_topology(cube, mat, BR_RSTYLE_POINTS)) != BRE_OK)
             r = BRE_FAIL;
     }
 
