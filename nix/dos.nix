@@ -40,4 +40,14 @@ stdenvNoCC.mkDerivation {
     (lib.cmakeBool "BRENDER_DISABLE_INSTALL" true)
     (lib.cmakeBool "BRENDER_DISABLE_FINDSDL" true)
   ];
+
+  installPhase = ''
+    runHook preInstall
+
+    for i in checkerboard8.mat checkerboard8.pix cube.dat shade.tab std.pal doscube.exe; do
+      install -Dm644 "examples/doscube/$i" "$out/$i"
+    done
+
+    runHook postInstall
+  '';
 }
