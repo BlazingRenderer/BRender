@@ -6,7 +6,7 @@ based on the following source code releases:
 - [BRender-1997](https://github.com/foone/BRender-1997)
 - [BRender-v1.3.2](https://github.com/foone/BRender-v1.3.2)
 
-There are OpenGL and SDL2/SDL3 drivers, as well as an x86-specific software rendering
+There are OpenGL and SDL2/SDL3 drivers, as well as a portable software rendering
 backend used as the reference implementation.
 
 Many sample applications are included, as well as most of the original utilities
@@ -24,21 +24,12 @@ cmake ..
 make
 ```
 
-### Software renderer (32-bit x86)
+### Software renderer
 
-The software renderer's rasterisers are hand-written assembly, so they need the
-structs and constants from `drivers/pentprim/drv.h` as a MASM include file. That
-is generated at build time by
-[h2inc](https://github.com/BlazingRenderer/h2inc), a from-scratch replacement for
-Microsoft's `H2INC.EXE` that runs natively, with no Wine. It is only needed when
-the software renderer is enabled:
-
-```sh
-cmake .. -DBRENDER_BUILD_SOFT=ON -DBRENDER_H2INC_EXECUTABLE=/path/to/h2inc
-```
-
-Prebuilt binaries are on the
-[h2inc releases page](https://github.com/BlazingRenderer/h2inc/releases).
+The software renderer (`drivers/softprim/`) is portable C/C++ and is built with
+the other drivers on every architecture. It reproduces the output of the x86
+assembly rasteriser it replaced, whose frames are the checked-in reference for
+`examples/rendertest`.
 
 ### macOS (Apple Silicon)
 
@@ -55,8 +46,6 @@ mkdir cmake-build && cd cmake-build
 cmake .. -DBRENDER_USE_SDL3=ON
 make -j$(sysctl -n hw.logicalcpu)
 ```
-
-The x86 software renderer (`pentprim`) cannot be built on ARM — the OpenGL renderer is used instead. Everything else builds and runs correctly, including the sample apps.
 
 To try it out, run the forest demo from the build directory:
 

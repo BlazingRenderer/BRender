@@ -144,25 +144,23 @@ Primitive blocks generated via `MAKE_BLOCKS` macro in `pstate.c`. Four variants 
 
 ---
 
-## pentprim
+## softprim
 
 ### Platform Constraints
-- x86 assembly only — requires 32-bit x86-compatible build.
-- Disabled by default; enable with `-DBRENDER_BUILD_SOFT=ON`.
+- Portable C/C++ — builds on any architecture.
+- Built with the other drivers; there is no enable flag.
 - 8-bit indexed, 15-bit, 16-bit, and 24-bit true-colour rasterisers.
 
-### Header Generation
-The assembly and the C side share their struct layouts and constants through
-`drv.inc`, a MASM include generated at build time from `drivers/pentprim/drv.h`
-by [`h2inc`](https://github.com/BlazingRenderer/h2inc) (`cmake/h2inc.cmake`). The
-tool is a from-scratch replacement for Microsoft's `H2INC.EXE`; its
-`--brender-hack` flag reproduces the alignment quirks these headers need
-(`br_fvector*` take no alignment operand, while `_workspace` and
-`ArbitraryWidthWorkspace` are 8-byte aligned).
+### Block Tables
+The rasterisers are selected by an ordered block table walked at `renderBegin`.
+It is generated at build time by `infogen.pl`, which projects each `.ifg` block
+description (`drivers/softprim/tables/`) onto the axis vocabulary in
+`softprim_axes.h`, and `merge_blocks.pl`, which expands the result into the
+matcher's table and the kernel definitions.
 
 ### Lighting Assumptions
-- CM_A is included in component masks for 32 blocks that use `constant_alpha` in `mmx_t15.ifg`/`mmx_t16.ifg`, but the assembly rasterisers handle alpha via internal constants or lookup tables rather than calling `SurfaceAlpha`.
-- Colour key: hardcoded `test bl,bl; jz skip` in all indexed textured rasterisers — palette index 0 always transparent, regardless of `BRT_COLOUR_KEY_B`.
+- CM_A is included in component masks for 32 blocks that use `constant_alpha` in `mmx_t15.ifg`/`mmx_t16.ifg`, but the rasterisers handle alpha via internal constants or lookup tables rather than calling `SurfaceAlpha`.
+- Colour key: the indexed textured rasterisers skip palette index 0 unconditionally — it is always transparent, regardless of `BRT_COLOUR_KEY_B`.
 
 ### Blend Behaviour
 - 8-bit blend uses a 2D lookup table, not arithmetic alpha from C_A.
@@ -174,7 +172,7 @@ tool is a from-scratch replacement for Microsoft's `H2INC.EXE`; its
 
 ### Colour Key Convention
 Palette index 0 is universally transparent across BRender:
-- **pentprim**: hardcoded in assembly rasterisers
+- **softprim**: hardcoded in the indexed textured rasterisers
 - **texconv** (`tools/texconv/`): `BR_ALPHA <= 127` → index 0
 - **pmclone** (`core/pixelmap/pmclone.c`): index 0 reads as transparent, writes reserved for transparent output
 - **glrend** shader: `if(texColour.rgb == vec3(0,0,0)) discard` post-CLUT, gated by `PRIMF_COLOUR_KEY`

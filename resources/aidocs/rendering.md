@@ -26,8 +26,8 @@
    ┌──────────┼──────────┐
    ▼                     ▼
    ┌──────────┐          ┌──────────┐
-   │ pentprim │          │ glrend1x │  Rasterisers — consume computed
-   │ (x86 asm)│          │ (GL 1.2  │  vertices, emit pixels
+   │ softprim │          │ glrend1x │  Rasterisers — consume computed
+   │ (C/C++)  │          │ (GL 1.2  │  vertices, emit pixels
    │8/15/16/24│          │ imm.mode)│
    └──────────┘          └──────────┘
 ```
@@ -35,7 +35,7 @@
 - **softrend** does all CPU-side work: transforms, culling, clipping, per-vertex lighting, depth biasing. It builds a vertex buffer (`brp_vertex` array in `rend.temp_vertices`) and hands it to the rasteriser via `brp_block` dispatch.
 - **glrend** is a fully independent driver — it does its own T&L on the GPU (vertex/fragment shaders), maintains its own state stack, and does not use softrend at all.
 - **glrend1x** is a hybrid: softrend does T&L, glrend1x rasterises via GL 1.2 immediate mode (`glBegin`/`glEnd`, `glColor4f`, `glTexCoord2f`).
-- **pentprim** is the traditional x86 assembly rasteriser for 8/15/16/24-bit colour modes.
+- **softprim** is the software rasteriser for 8/15/16/24-bit colour modes.
 
 ## Render Pipeline (softrend + rasteriser)
 
@@ -87,7 +87,7 @@ Since `br_scalar == br_float` (see `scalar.h`), `comp[]` and `comp_f[]` share th
 
 When `rend.block->flags & BR_PRIMF_BLENDED` is set **and** z-sort blending (BRT_BLENDED divert mode) is active, softrend diverts blended geometry to a z-sort heap instead of rendering inline. When BRT_ALL divert mode is active, all geometry is diverted regardless of blend flag. The heap is flushed at render end (`gv1buckt.c`), drawing blended primitives in back-to-front Z order after all opaque geometry.
 
-The divert phase calls `renderBegin(no_render=true)` which skips GL state setup. In glrend1x, `glBegin` is also skipped when `no_render` is true. In pentprim, the begin still runs but suppresses state pushes. The actual bucket flush later calls `renderBegin(no_render=false)` with proper state.
+The divert phase calls `renderBegin(no_render=true)` which skips GL state setup. In glrend1x, `glBegin` is also skipped when `no_render` is true. In softprim, the begin still runs but suppresses state pushes. The actual bucket flush later calls `renderBegin(no_render=false)` with proper state.
 
 ## State Management (softrend)
 

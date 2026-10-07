@@ -4,28 +4,20 @@
 
 BRender palette-indexed textures use **palette index 0 as the transparent
 colour**. This is a hardcoded convention enforced by:
-- pentprim's 8-bit assembly rasterisers (unconditionally skip index 0)
+- softprim's indexed 8-bit rasterisers (unconditionally skip index 0)
 - glrend's shader (`texColour.rgb == vec3(0,0,0)` check)
 - texconv and pmclone (threshold-based pixel keying)
 
-## How pentprim handles it
+## How softprim handles it
 
-All 8-bit textured rasterisers (`drivers/pentprim/t_pia.asm`,
-`ti8_pi.asm`, `ti8_pip.asm`, `ti8_piz.asm`, `fti8_pip.asm`, etc.) have a
-hardcoded transparency check in the pixel-draw loop:
-
-```asm
-mov     bl, [texel]          ; raw palette index from texture
-test    bl, bl               ; is it 0? (some variants use and bl,bl)
-jz      skip_pixel           ; skip pixel (label varies: pixel_behind, nodraw, loopb, etc.)
-```
-
-This happens **before** the CLUT/shade-table lookup — it checks the raw
+All 8-bit textured rasterisers have a hardcoded transparency check in the
+pixel-draw loop: the raw palette index is tested for zero and a zero texel is
+skipped. This happens **before** the CLUT/shade-table lookup — it checks the raw
 index, not the resulting RGB.
 
 **Non-textured** rasterisers (flat PI, gouraud PII) have no transparency check.
 
-The `BRT_COLOUR_KEY_B` material token is **completely ignored** by pentprim.
+The `BRT_COLOUR_KEY_B` material token is **completely ignored** by softprim.
 It has no `PRIMF_COLOUR_KEY_BIT` in its flag enum and no `BRT_COLOUR_KEY_B`
 template entry. Transparency is unconditional for textured 8-bit.
 
@@ -154,5 +146,5 @@ glrend1x uses `GL_ALPHA_TEST` for colour keying, implemented via:
    `GL_ALPHA_TEST` with `AlphaFunc(GL_GREATER, 0.5f)`
 3. **For blended primitives**: alpha test stays disabled (alpha is blend factor)
 
-This matches pentprim's unconditional transparency for textured 8-bit,
+This matches softprim's unconditional transparency for textured 8-bit,
 and glrend's toggleable `PRIMF_COLOUR_KEY` for non-indexed.

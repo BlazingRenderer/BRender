@@ -4,20 +4,18 @@
 BRender is a 3D rendering engine with multiple renderer backends:
 - `core/` - Core engine, model preparation, math utilities
 - `drivers/softrend/` - Software renderer
-- `drivers/pentprim/` - Software rasterizer, or the "primitive library"
+- `drivers/softprim/` - Software rasterizer, or the "primitive library"
 - `drivers/glrend/` - OpenGL renderer
 - `contrib/` - Contributed utilities (e.g., editorcam)
 
 ## Building
 - Uses CMake.
-- The software rasterizer (`drivers/pentprim/`) is disabled by default. It requires explicit enablement with `-DBRENDER_BUILD_SOFT=ON` and only works on 32-bit x86-compatible platforms due to its assembly-heavy implementation.
-- Building `pentprim` also needs [`h2inc`](https://github.com/BlazingRenderer/h2inc), which turns `drivers/pentprim/drv.h` into the
-  MASM include `drv.inc` (`cmake/h2inc.cmake`). It replaces the old Wine + `H2INC.EXE` + `contrib/mkdrv.pl` pipeline; with
-  `BRENDER_BUILD_SOFT=ON`, `-DBRENDER_H2INC_EXECUTABLE=<path>` must point at a release binary or the configure step fails.
+- The software rasterizer (`drivers/softprim/`) is portable C/C++ and is built with the drivers on every architecture. It presents
+  the driver entry point, device identifier (`SOFTPRMF`) and primitive library name (`Default-Primitives-Float`) that the x86 assembly
+  rasteriser it replaced did.
 - `drivers/softrend/` is the transform-and-lighting stage only and has no rasteriser of its own. It registers a renderer facility,
-  but that facility's `rendererNew()` calls `BrPrimitiveLibraryFind()` (`drivers/softrend/rendfcty.c`), which finds nothing when no
-  rasteriser backend is built. `--force-software` then dies with `Failed to load renderer` (`core/v1db/dbsetup.c`).
-- A rasteriser other than pentprim is available in `glrend1x`, giving softrend T&L over an OpenGL rasteriser. The demo programs select
+  whose `rendererNew()` calls `BrPrimitiveLibraryFind()` (`drivers/softrend/rendfcty.c`) to find softprim's primitive library.
+- An OpenGL rasteriser is also available in `glrend1x`, giving softrend T&L over an OpenGL rasteriser. The demo programs select
   it with `--opengl-device-name=glrend1x` (`examples/brdemo/brdemo.c`); that flag is brdemo-level, not engine API - the engine receives
   the name as the `BRT_OPENGL_DEVICE_NAME_CSTR` token, which the SDL device uses to load the named driver (`drivers/sdl3dev/glrend.c`).
   glrend1x exposes a `BRT_PRIMITIVE_LIBRARY_O` that softrend's search then finds (`drivers/glrend1x/devpmglf.c`).
@@ -100,7 +98,7 @@ There is no unit-test suite, and none should be added. There is a render regress
   `NO-REFERENCE` for every scene - force glrend onto llvmpipe with `LIBGL_ALWAYS_SOFTWARE=true` to compare against them.
 - The run also asserts relations between fixtures (e.g. `scene-unlit == scene-unlit-plain`), so a path that silently stops firing fails
   rather than only moving a checksum. `--ppm-dir <dir>` writes each frame as `<dir>/<scene>.ppm` when a checksum cannot show how a render changed.
-- softrend is the 32-bit software rasteriser path and needs `-DBRENDER_BUILD_SOFT=ON` (see Building); `--no-depth` renders through
+- softrend is the software rasteriser path; `--no-depth` renders through
   `BrZsSceneRender()` and covers the Z-sort path. The fixtures come from `mkres scenes` (`examples/mkres/scene.c`), which writes them to
   the current directory.
 

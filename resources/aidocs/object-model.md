@@ -785,7 +785,7 @@ model data and applies the material's stored state.
 **Parent:** `br_object_container`
 **File:** Defined in `dev_objs.hpp:415`.
 
-The software rasterizer library (softrend's primitives layer, or pentprim).
+The software rasterizer library (softrend's primitives layer, or softprim).
 Creates primitive state objects and stored buffers, flushes rasterisation,
 and synchronises.
 
