@@ -109,9 +109,33 @@ static void heapInsertPrimitive(br_order_table *ot, br_primitive *prim, br_scala
     }
 }
 
+/*
+ * A primitive that does not fit is dropped, so the frame that comes out is
+ * short of geometry - and the only symptom without a message is a rendering
+ * difference that looks like a rasteriser bug. Report once; an overflowing
+ * heap drops thousands.
+ */
+static void heapOverflowReport(const br_primitive_heap *heap, br_size_t s)
+{
+    static br_boolean reported = BR_FALSE;
+
+    if(reported)
+        return;
+
+    reported = BR_TRUE;
+
+    BR_ERROR3("Primitive heap space overflow: %d bytes used of %d, %d more needed - the primitive is dropped",
+              (int)(heap->current - heap->base), (int)heap->size, (int)s);
+}
+
 static br_boolean heapCheck(br_primitive_heap *heap, br_size_t s)
 {
-    return (heap->current + s) <= (heap->base + heap->size);
+    if((heap->current + s) <= (heap->base + heap->size))
+        return BR_TRUE;
+
+    heapOverflowReport(heap, s);
+
+    return BR_FALSE;
 }
 
 static br_primitive *heapPrimitiveAdd(br_primitive_heap *heap, br_token type)
@@ -165,11 +189,7 @@ void BR_ASM_CALL OpHeapAddTriangle(brp_block *block, brp_vertex *v0, brp_vertex 
     br_scalar     zprim;
 
     if(!heapCheck(rend.renderer->state.hidden.heap, sizeof(br_primitive) + 3 * sizeof(brp_vertex)))
-#if DEBUG
-        BR_ERROR0("Primitive heap space overflow");
-#else
         return;
-#endif
 
     if(rend.renderer->state.surface.force_front) {
         zprim = BR_SCALAR(0.0);
@@ -215,11 +235,7 @@ void BR_ASM_CALL OpHeapAddLine(brp_block *block, brp_vertex *v0, brp_vertex *v1)
      * Build primitive in heap
      */
     if(!heapCheck(rend.renderer->state.hidden.heap, sizeof(br_primitive) + 2 * sizeof(brp_vertex)))
-#if DEBUG
-        BR_ERROR0("Primitive heap space overflow");
-#else
         return;
-#endif
 
     if(rend.renderer->state.surface.force_front) {
         zprim = BR_SCALAR(0.0);
@@ -259,11 +275,7 @@ void BR_ASM_CALL OpHeapAddPoint(brp_block *block, brp_vertex *v0)
      * Build primitive in heap
      */
     if(!heapCheck(rend.renderer->state.hidden.heap, sizeof(br_primitive) + 1 * sizeof(brp_vertex)))
-#if DEBUG
-        BR_ERROR0("Primitive heap space overflow");
-#else
         return;
-#endif
 
     if(rend.renderer->state.surface.force_front) {
         zprim = BR_SCALAR(0.0);
@@ -303,11 +315,7 @@ void BR_ASM_CALL OpHeapAddTriangleConvert(brp_block *block, brp_vertex *v0, brp_
     brp_vertex    outv[3];
 
     if(!heapCheck(rend.renderer->state.hidden.heap, sizeof(br_primitive) + 3 * sizeof(brp_vertex)))
-#if DEBUG
-        BR_ERROR0("Primitive heap space overflow");
-#else
         return;
-#endif
 
     if(rend.renderer->state.surface.force_front) {
         zprim = BR_SCALAR(0.0);
@@ -358,11 +366,7 @@ void BR_ASM_CALL OpHeapAddLineConvert(brp_block *block, brp_vertex *v0, brp_vert
      * Build primitive in heap
      */
     if(!heapCheck(rend.renderer->state.hidden.heap, sizeof(br_primitive) + 2 * sizeof(brp_vertex)))
-#if DEBUG
-        BR_ERROR0("Primitive heap space overflow");
-#else
         return;
-#endif
 
     if(rend.renderer->state.surface.force_front) {
         zprim = BR_SCALAR(0.0);
@@ -406,11 +410,7 @@ void BR_ASM_CALL OpHeapAddPointConvert(brp_block *block, brp_vertex *v0)
      * Build primitive in heap
      */
     if(!heapCheck(rend.renderer->state.hidden.heap, sizeof(br_primitive) + 1 * sizeof(brp_vertex)))
-#if DEBUG
-        BR_ERROR0("Primitive heap space overflow");
-#else
         return;
-#endif
 
     if(rend.renderer->state.surface.force_front) {
         zprim = BR_SCALAR(0.0);
