@@ -76,4 +76,19 @@ target_sources(fmt INTERFACE
         )
 
 target_include_directories(fmt PRIVATE .)
+#
+# savegltf.c converts colours on the way out, and under FLT_EVAL_METHOD 2 the
+# 80-bit intermediates of that conversion reach the file: what mkres writes
+# would then depend on which floating-point evaluation class built the writer.
+# -ffloat-store rounds every float and double store to its declared type, so
+# the file no longer depends on the class.
+#
+# Only the generator. The rasteriser has to keep its excess precision - the x87
+# half of the rendertest reference is pentprim's output and depends on it.
+#
+include(CheckCCompilerFlag)
+check_c_compiler_flag("-ffloat-store" BRENDER_HAVE_FFLOAT_STORE)
+if(BRENDER_HAVE_FFLOAT_STORE)
+    set_source_files_properties(savegltf.c PROPERTIES COMPILE_OPTIONS "-ffloat-store")
+endif()
 target_link_libraries(fmt PRIVATE brender-inc-ddi)
