@@ -757,6 +757,16 @@ static rt_expect *rt_find_expect(rt_state *st, const char *key)
  * A bless that cannot open the file for writing is a failed run, not a logged
  * note: the reference on disk would not be the one the next run scores against.
  */
+/*
+ * Entries are written in key order. The order they were loaded or blessed in
+ * is otherwise not visible, and without this one changed entry rewrites the
+ * whole file's order and buries the change in the diff.
+ */
+static int rt_expect_compare(const void *a, const void *b)
+{
+    return strcmp(((const rt_expect *)a)->key, ((const rt_expect *)b)->key);
+}
+
 static void rt_write_reference(rt_state *st)
 {
     FILE *fp;
@@ -809,6 +819,8 @@ static void rt_write_reference(rt_state *st)
 
     fprintf(fp, "# rendertest reference\n");
     fprintf(fp, "# key=<device>/<driver>/<zb|zs>/<pixel-type>/<WxH>/<scene> value=checksum\n");
+
+    qsort(st->expects, st->nexpects, sizeof(st->expects[0]), rt_expect_compare);
 
     for(int i = 0; i < st->nexpects; ++i)
         fprintf(fp, "%s %016llx\n", st->expects[i].key, (unsigned long long)st->expects[i].hash);
