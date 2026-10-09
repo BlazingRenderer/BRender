@@ -5,7 +5,6 @@
 , perl
 , sdl3
 , glfw
-, libGL
 , glslang
 , spirv-cross
 , makeBinaryWrapper
@@ -36,8 +35,6 @@ stdenv.mkDerivation(finalAttrs: {
 
   buildInputs = [
     sdl3
-  ] ++ lib.optionals stdenv.isLinux [
-    libGL
   ] ++ lib.optionals withExamples [
     glfw
   ];
