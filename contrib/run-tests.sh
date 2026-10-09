@@ -76,12 +76,15 @@ elif [ ! -d "$build" ]; then
     bad "$build does not exist - configure it first, see the note at the end of this script"
 else
     if cmake --build "$build" -j"$(nproc)" >/tmp/run-tests-build.log 2>&1; then
-        # A build that fails silently leaves the old binary, so look for the
-        # targets rather than trusting the exit status alone.
-        if grep -q "Built target rendertest" /tmp/run-tests-build.log; then
+        # A build that fails silently leaves the old binary in place. The
+        # "Built target" line this used to grep for is a Makefile-generator
+        # message and Ninja says something else, so ask for the target by
+        # name instead and trust that exit status, which means the same thing
+        # under either generator.
+        if cmake --build "$build" --target rendertest >/tmp/run-tests-target.log 2>&1; then
             ok "built (log: /tmp/run-tests-build.log)"
         else
-            bad "cmake reported success but did not build rendertest - old binary in place?"
+            bad "cmake reported success but could not build rendertest - old binary in place?"
         fi
     else
         bad "build failed (log: /tmp/run-tests-build.log)"
@@ -198,12 +201,16 @@ for bpp in 8 15 16 24; do
         if [ "$mode" = zs ]; then depth="--no-depth"; else depth=""; fi
 
         out=$("$rendertest" --device softrend --bpp "$bpp" $depth $ref_args 2>&1)
-        line=$(echo "$out" | grep -o 'result=PASS failures=[0-9]*' | tail -1)
+        # Match FAIL as well as PASS. A failed run does print a result line,
+        # and grepping only for PASS reported every failure as a run that
+        # produced no result at all - which is what hid a whole
+        # architecture's worth of failures here.
+        line=$(echo "$out" | grep -oE 'result=(PASS|FAIL) failures=[0-9]+' | tail -1)
         match=$(echo "$out" | grep -c 'MATCH')
         nref=$(echo "$out" | grep -c 'NO-REFERENCE')
 
         if [ -z "$line" ]; then
-            bad "softrend $bpp/$mode: no result line"
+            bad "softrend $bpp/$mode: no result line - the run did not finish"
         elif [ "$line" = "result=PASS failures=0" ]; then
             # NO-REFERENCE is not a failure, but it is unverified - say so.
             if [ "$nref" -gt 0 ]; then
@@ -221,11 +228,11 @@ done
 # glrend is the arbiter for anything the software paths disagree on. The
 # checked-in glrend references are llvmpipe-keyed, so force software GL.
 out=$(LIBGL_ALWAYS_SOFTWARE=true "$rendertest" --device glrend --bpp 8 $ref_args 2>&1)
-line=$(echo "$out" | grep -o 'result=PASS failures=[0-9]*' | tail -1)
+line=$(echo "$out" | grep -oE 'result=(PASS|FAIL) failures=[0-9]+' | tail -1)
 if [ "$line" = "result=PASS failures=0" ]; then
     ok "glrend 8/zb: $line ($(echo "$out" | grep -c MATCH) match)"
 elif [ -z "$line" ]; then
-    bad "glrend 8/zb: no result line (no GL? try LIBGL_ALWAYS_SOFTWARE=true)"
+    bad "glrend 8/zb: no result line - the run did not finish (no GL? try LIBGL_ALWAYS_SOFTWARE=true)"
 else
     bad "glrend 8/zb: $line"
 fi
