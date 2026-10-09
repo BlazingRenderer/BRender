@@ -105,7 +105,7 @@ softrend/software/zb/3/320x240/scene-blend-p2-flat 18c3884049066684
 softrend/software/zb/3/320x240/scene-blend-p2-persp 31fe9cd5f3212466
 softrend/software/zb/3/320x240/scene-blend-p2-smooth 68fab3ea87e30109
 softrend/software/zb/3/320x240/scene-blendfog-arb b7c43d77665c6594
-softrend/software/zb/3/320x240/scene-blendfog-arb-persp 90eb9faa389c3201
+softrend/software/zb/3/320x240/scene-blendfog-arb-persp 8aaf619d1738f0da
 softrend/software/zb/3/320x240/scene-blendfog-p2 b203c77927d52308
 softrend/software/zb/3/320x240/scene-colour 1b97ecf7852ab183
 softrend/software/zb/3/320x240/scene-colour-ambient 2b8cb69dda4e6e13
@@ -489,7 +489,7 @@ softrend/software/zs/3/320x240/scene-blend-p2-flat 8c51e779ca64e9d6
 softrend/software/zs/3/320x240/scene-blend-p2-persp 7a49565b1af7e9b3
 softrend/software/zs/3/320x240/scene-blend-p2-smooth 8c51e779ca64e9d6
 softrend/software/zs/3/320x240/scene-blendfog-arb ff299a88b4841f31
-softrend/software/zs/3/320x240/scene-blendfog-arb-persp ad0b8d08ef763699
+softrend/software/zs/3/320x240/scene-blendfog-arb-persp 1cf366595b06a6a7
 softrend/software/zs/3/320x240/scene-blendfog-p2 7a49565b1af7e9b3
 softrend/software/zs/3/320x240/scene-colour 1b97ecf7852ab183
 softrend/software/zs/3/320x240/scene-colour-ambient 2b8cb69dda4e6e13
@@ -505,7 +505,7 @@ softrend/software/zs/3/320x240/scene-edges 08aec878ffe19d3e
 softrend/software/zs/3/320x240/scene-flat 6304ed29d5fa7dca
 softrend/software/zs/3/320x240/scene-fog 726e011348c2928c
 softrend/software/zs/3/320x240/scene-fog-arb ff299a88b4841f31
-softrend/software/zs/3/320x240/scene-fog-arb-persp ad0b8d08ef763699
+softrend/software/zs/3/320x240/scene-fog-arb-persp 1cf366595b06a6a7
 softrend/software/zs/3/320x240/scene-fog-flat 6304ed29d5fa7dca
 softrend/software/zs/3/320x240/scene-fog-p2 ce16afbe8dbe2c29
 softrend/software/zs/3/320x240/scene-fog-p2-persp fba158a4658452ee
@@ -777,8 +777,8 @@ softrend/software/zs/6/320x240/scene-blend-p2-flat 7f2255d13547467b
 softrend/software/zs/6/320x240/scene-blend-p2-persp ea7c860e5d2af723
 softrend/software/zs/6/320x240/scene-blend-p2-smooth 7f2255d13547467b
 softrend/software/zs/6/320x240/scene-blendfog-arb c69f8860a27d600f
-softrend/software/zs/6/320x240/scene-blendfog-arb-persp 642cc864a6d80553
-softrend/software/zs/6/320x240/scene-blendfog-p2 fe062306d84cda8b
+softrend/software/zs/6/320x240/scene-blendfog-arb-persp 0cf83389d23e51e3
+softrend/software/zs/6/320x240/scene-blendfog-p2 05f5dae787e31dff
 softrend/software/zs/6/320x240/scene-colour fc1a3ecca6d59673
 softrend/software/zs/6/320x240/scene-colour-ambient f0ee2e98f52a8203
 softrend/software/zs/6/320x240/scene-colour-two 9ff903d953fba6f3
@@ -793,10 +793,10 @@ softrend/software/zs/6/320x240/scene-edges 05bfeb2deef63a70
 softrend/software/zs/6/320x240/scene-flat b139759b43ebc4f6
 softrend/software/zs/6/320x240/scene-fog d6111af9bdeb7ccc
 softrend/software/zs/6/320x240/scene-fog-arb c69f8860a27d600f
-softrend/software/zs/6/320x240/scene-fog-arb-persp 642cc864a6d80553
+softrend/software/zs/6/320x240/scene-fog-arb-persp 0cf83389d23e51e3
 softrend/software/zs/6/320x240/scene-fog-flat b139759b43ebc4f6
 softrend/software/zs/6/320x240/scene-fog-p2 4377bc9d8c96b443
-softrend/software/zs/6/320x240/scene-fog-p2-persp ce464defdb8a568b
+softrend/software/zs/6/320x240/scene-fog-p2-persp 57d53e33f410a655
 softrend/software/zs/6/320x240/scene-fog-p2-tex a08359bc51813d98
 softrend/software/zs/6/320x240/scene-idx-arb e00198450604f47f
 softrend/software/zs/6/320x240/scene-idx-arb-persp 9d5398747999d0cb
