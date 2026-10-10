@@ -101,6 +101,31 @@ if (BUILD_TESTING)
         endforeach ()
     endforeach ()
 
+    #
+    # The same nine scenes through the GL devices. No bpp axis - --bpp is inert
+    # on a GL device - and the same one test per (mode, scene) shape, so a
+    # failure names the scene. The entries are llvmpipe's, as the fixture ones
+    # are, so a run on real hardware reports NO-REFERENCE.
+    #
+    foreach (mode IN ITEMS zb zs)
+        if (mode STREQUAL "zs")
+            set(ref_gl_depth --no-depth)
+        else ()
+            set(ref_gl_depth)
+        endif ()
+
+        foreach (dev IN ITEMS glrend glrend1x)
+            foreach (scene IN LISTS RT_REFERENCE_SCENES)
+                add_test(NAME "refscenes-${dev}-${mode}-${scene}"
+                         COMMAND rendertest --device ${dev} ${ref_gl_depth}
+                                 --scene-dir "${CMAKE_SOURCE_DIR}/resources/gltf-reference"
+                                 ${scene})
+                set_tests_properties("refscenes-${dev}-${mode}-${scene}" PROPERTIES
+                                     ENVIRONMENT "SDL_VIDEODRIVER=offscreen;LIBGL_ALWAYS_SOFTWARE=true")
+            endforeach ()
+        endforeach ()
+    endforeach ()
+
     # The stored glrend reference is llvmpipe's, so ask for software GL.
     #
     # There is no bpp axis and the name carries none: --bpp is inert on a GL
