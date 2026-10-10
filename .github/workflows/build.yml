@@ -49,6 +49,8 @@ jobs:
         run: cmake --build build --config Release --parallel
       - name: Install
         run: sudo cmake --install build --config Release --strip
+      - name: Test
+        run: ctest --test-dir build -C Release --output-on-failure
 
   build-macos:
     runs-on: macos-26
