@@ -1400,15 +1400,6 @@ static const rt_blank rt_expected_blank[] = {
     {.scene = "scene-scale-spot-off",    .pm_type = BR_PMT_RGB_555, .mode = RT_ANY_MODE},
 
     /*
-     * The blend fixture has no RGB blend block to select: pentprim draws
-     * nothing for it at 15/16bpp z-buffered, and its stored reference is the
-     * empty frame. The 8bpp configurations are not here - pentprim draws the
-     * fixture there, so a blank frame is a failure.
-     */
-    {.scene = "scene-blend",             .pm_type = BR_PMT_RGB_555, .mode = RT_MODE_ZB},
-    {.scene = "scene-blend",             .pm_type = BR_PMT_RGB_565, .mode = RT_MODE_ZB},
-
-    /*
      * pentprim draws nothing for the shade fixture in the Z-sort mode either -
      * no z-sorted block carries an indexed shade table - so the 8bpp z-sorted
      * key is two blank frames matching. scene-shade-flat is the same rig without
