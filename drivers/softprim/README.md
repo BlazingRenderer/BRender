@@ -14,10 +14,10 @@ softprim is portable C/C++ and needs none of it: `-DBRENDER_BUILD_SOFT=ON` build
 architecture. It presents the same entry point (`BrDrv1SoftPrimBegin`), device and
 primitive-library identifiers (`SOFTPRMF`, `Default-Primitives-Float`) and install name
 (`softprmf`) pentprim did, so nothing outside `drivers/softprim/` changed. Frames are keyed
-by the `software` driver token, so a run scores directly against the checked-in references.
+by the `softprmf` driver token, so a run scores directly against the checked-in references.
 
 pentprim's pixels are the oracle, and they are frozen: `examples/rendertest/rendertest.txt`
-holds the 768 `softrend/software/...` keys and `scratch/gltfview-baseline{,-zs}.txt` the
+holds the 816 `softrend/softprmf/x87` keys and `scratch/gltfview-baseline{,-zs}.txt` the
 reference scenes, and with pentprim gone they are the only record of its output.
 
 ## The block table, and what a kernel is allowed to be
@@ -89,13 +89,13 @@ and the comparison stops meaning anything.
 
 ## What is implemented
 
-All of pentprim's 393 live blocks are in the matcher's walk; 337 are emitted as blocks with
-a kernel (221 distinct kernels after the tuple collapse) and 56 are refused. Every
-`INDEX_8` and every `RGB_888` shape is implemented; both refusal families are entirely
-555/565. The implemented set includes the `INDEX_8` ROPs (indexed blend, fog, decal,
-dithered map), the shade-table family, the MMX 15/16bpp family including screendoor and
-colour dither and its packed 20.12 texture addressing, the arbitrary-width and perfect-scan
-RGB paths, and lines and points.
+All of pentprim's 393 live blocks are in the matcher's walk; 353 are emitted as blocks with
+a kernel (237 distinct tuples after the collapse) and 40 are refused, every one of them a
+z-buffered 555/565 shape. Every `INDEX_8` and every `RGB_888` shape is implemented. The
+implemented set includes the `INDEX_8` ROPs (indexed blend, fog, decal, dithered map), the
+shade-table family including the 256x256 RGB cells, the MMX 15/16bpp family including
+screendoor and colour dither and its packed 20.12 texture addressing, the arbitrary-width
+and perfect-scan RGB paths, and lines and points.
 
 Two families were refused for a different reason and are implemented now, because pentprim
 itself was corrected first:
@@ -110,11 +110,13 @@ itself was corrected first:
 
 ## What is deliberately not implemented
 
-56 of the 393 entries (40 distinct tuples), in two families. Every one of them is refused
-rather than omitted, and the first thing to establish about any of them is whether the
-matcher can reach it at all - which the generated table answers on its own, since
+40 of the 393 entries (24 distinct tuples). Every one of them is refused rather than
+omitted, and the first thing to establish about any of them is whether the matcher can reach
+it at all - which the generated table answers on its own, since
 `contrib/census/reachable.py` walks it the way `spFindMatch` does and stops on a refused
-entry. The split is **40 unreachable, 16 reachable but with no kernel**. The rule is
+entry. `contrib/census/witness.py` then says whether *any* state can select the rest. The
+answer now is none: **all 40 are unreachable**, so there is no reachable shape without a
+kernel and no shape a fixture could ask for that softprim declines to draw. The rule is
 `infogen.pl`'s `softprim_implemented()`, which carries its reasoning in comments, plus the
 guards in `raster.cpp`.
 
@@ -133,36 +135,16 @@ instead. That is measured, not assumed: the corpus's own `scene-tex-rgb555` and
 same order and the same MMX-first rule, so those kernels do not run there either: refusing
 them costs nothing that can be observed.
 
-**Reachable, but no kernel exists (16 entries).**
-
-- the 555/565-typed line and point shapes, 8 entries. The line/point family here is
-  arbitrary-width only, so they would need kernels of their own. A fixture can ask for a
-  line or a point - the topology comes from `BR_actors.render_style`, not from glTF's
-  `mode`, and `scene-lines-*` and `scene-points` do reach these tables - but none pairs an
-  edges or points actor with a 555/565-typed colour map, which is what these entries
-  require.
-- the z-sorted power-of-two RGB shade-table shapes, 8 entries. These are `perspi.h`'s
-  separate perspective mapper, which packs its base texel from a compiled-in width. Four of
-  the eight also carry `SP_BLEND_ALPHA`, the 50/50 blend against the destination, and are
-  refused because that axis value is not named in `SP_SPEC` at all - the blend has no
-  kernel.
-
-So the reasons are four kinds of thing: unreachable under the matcher's own rules, the 40;
-no kernel for the line/point family, the 8; no kernel for the power-of-two shade-table
-mapper, the 4; and no kernel for the 50/50 destination blend, the other 4. Only the last two
-groups are a gap a reader might expect to see filled one day - a shape that could be given a
-kernel and witnessed - and the `blendrgb` half of that needs an axis value in `SP_SPEC`
-first.
 
 ## How it is verified
 
 Both instruments score softprim against **pentprim's frozen pixels**, never against its own
 output.
 
-- **The fixture corpus.** `examples/rendertest` renders 96 fixtures at four pixel formats
+- **The fixture corpus.** `examples/rendertest` renders 102 fixtures at four pixel formats
   (8/15/16/24bpp) x {z-buffered, z-sorted} and compares each against
-  `examples/rendertest/rendertest.txt`, whose 768 `softrend/software/...` keys are
-  pentprim's. Measured: `PASS failures=0`, 96 comparisons, in all eight configurations.
+  `examples/rendertest/rendertest.txt`, whose 816 `softrend/softprmf/x87` keys are
+  pentprim's. Measured: `PASS failures=0`, 102 comparisons, in all eight configurations.
 - **Nine reference scenes.** `resources/gltf-reference`, rendered with
   `gltfview --force-software` (`GLTFVIEW_ZSORT=1` selects the z-sorted set) and scored
   against `scratch/gltfview-baseline.txt` (z-buffered) and `scratch/gltfview-baseline-zs.txt`
@@ -180,7 +162,7 @@ The frozen references are a **Release** artefact. The optimisation level changes
 an intermediate value is spilled from the x87 register stack to memory, and a spilled value
 rounds differently from the register, so a Debug (`-O0`) build of the same C stages computes
 different last bits from the Release one. Measured: a Debug build differs from the stored
-references by **one pixel in eleven of the 96 fixtures at 24bpp** (both depth modes), by one
+references by **one pixel in eleven of the then-96 fixtures at 24bpp** (both depth modes), by one
 pixel in two fixtures at 8bpp and one at 16bpp (across the two depth modes), and by between
 **38 and 570 pixels** in three more 8bpp fixtures, the `scene-shade-arb-*` cells, where a
 sub-LSB intensity change moves a whole shade-index band. The difference is not softprim's
