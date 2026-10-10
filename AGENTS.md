@@ -89,14 +89,20 @@ contrib/editorcam: fix camera offset after pan mode, add orbit mode
 ```
 
 ## Testing
-There is no unit-test suite, and none should be added. `contrib/run-tests.sh [build-dir]` runs every check the project has - the build, the
-fixture invariant, the render corpus and a load of every checked-in `.gltf` - and is the tree-wide gate. The corpus itself is:
+There is no unit-test suite, and none should be added. `ctest` runs the render corpus with one test per configuration, and CI runs it for
+both floating-point classes. `contrib/run-tests.sh [build-dir]` is the human-facing gate and adds the checks that do not belong in a
+build - the build step itself, the `--history` commit walk, and a load of every checked-in `.gltf`. The corpus itself is:
 - `examples/rendertest` renders the fixtures in `examples/rendertest/dat/` under one device and diffs each frame against the checked-in
   reference, `examples/rendertest/rendertest.txt`. Run it (`--device <glrend|glrend1x|softrend> [--bpp n] [-w W -h H] [--no-depth]`) after
   any change that can move pixels; `result=PASS failures=0` is the pass condition.
-- The reference key is `<device>/<driver>/<zb|zs>/<pixel-type>/<WxH>/<scene>`, so each device, driver and depth mode is held separately.
-  `--bless` rewrites entries; only do so to accept a deliberate change. The checked-in entries are llvmpipe-only, so a real-GPU run reports
-  `NO-REFERENCE` for every scene - force glrend onto llvmpipe with `LIBGL_ALWAYS_SOFTWARE=true` to compare against them.
+- The reference key is `<device>/<driver>/<fp-class>/<zb|zs>/<pixel-type>/<WxH>/<scene>`. `<fp-class>` is the width `float` and `double`
+  expressions are evaluated at - `x87` (80-bit intermediates, `FLT_EVAL_METHOD` 2) or `declared` (each operation rounded at its type's
+  width, `FLT_EVAL_METHOD` 0) - and it reaches the frame through the renderer and through core's scene setup, so every entry is keyed by
+  it and a build looks up its own class. `--bless` rewrites entries; only do so to accept a deliberate change. The `x87` entries are
+  pentprim's output and are the bit-exactness oracle for softprim, and only an x87 build reproduces them; `resources/aidocs/recipes.md`
+  has the recipe for regenerating them.
+- The stored `glrend` entries are llvmpipe's, so a real-GPU run reports `NO-REFERENCE` for every scene - force it onto llvmpipe with
+  `LIBGL_ALWAYS_SOFTWARE=true` to compare against them.
 - The run also asserts relations between fixtures (e.g. `scene-unlit == scene-unlit-plain`), so a path that silently stops firing fails
   rather than only moving a checksum. `--ppm-dir <dir>` writes each frame as `<dir>/<scene>.ppm` when a checksum cannot show how a render changed.
 - softrend is the software rasteriser path; `--no-depth` renders through
