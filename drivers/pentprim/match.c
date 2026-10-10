@@ -10,6 +10,8 @@
 #include "shortcut.h"
 #include "brassert.h"
 
+#include <stdio.h>
+#include <stdlib.h>
 
 /*
  * Invalid value for unknown pixelmap types
@@ -376,6 +378,72 @@ static br_boolean isPowerof2(br_int_32 x)
 }
 
 /*
+ * Witness census instrumentation.
+ *
+ * When BR_WITNESS_LOG names a file, every primitive's block selection appends
+ * one line - "<table>\t<index>\t<match|default>\t<identifier>" - naming the
+ * generated table the entry came from, its position in that table, whether the
+ * walk matched it or fell through to the last entry, and the entry's own
+ * identifier. The table name is the generator's, so an observation joins back
+ * to the generated table by name and index.
+ *
+ * This is a measurement tool, not renderer behaviour: with the variable unset
+ * the file is never opened, and the selection returns exactly what it did
+ * before.
+ *
+ * One blind spot is deliberate. A match the cache at the top of renderBegin()
+ * still holds for the same timestamps is not re-walked, so it is not logged a
+ * second time; the block it stands for is the one already logged for that
+ * state, which is what a census of selections wants.
+ */
+static FILE *witnessLog(void)
+{
+	static FILE      *log;
+	static br_boolean tried;
+
+	if(!tried) {
+		const char *path = getenv("BR_WITNESS_LOG");
+
+		tried = BR_TRUE;
+
+		if(path != NULL && path[0] != '\0')
+			log = fopen(path, "a");
+	}
+
+	return log;
+}
+
+/*
+ * The table the walk is using, named the way the generator names it. The MMX
+ * row substitutes its own table for the 555/565 triangle only; every other cell
+ * shares the general array, so the name has to follow the array rather than the
+ * row that was walked.
+ */
+static const char *witnessTableName(int i, int j, br_boolean mmx)
+{
+	static const char *const bpp[4] = { "8", "15", "16", "24" };
+	static const char *const top[3] = { "p", "l", "t" };
+	static char name[16];
+
+	if(mmx && j == 2 && i >= 1 && i <= 2)
+		snprintf(name, sizeof(name), "mmx_t%s", bpp[i]);
+	else
+		snprintf(name, sizeof(name), "prim_%s%s", top[j], bpp[i]);
+
+	return name;
+}
+
+static void witnessNote(int i, int j, br_boolean mmx, int index, br_boolean def, const struct local_block *pb)
+{
+	FILE *log = witnessLog();
+
+	if(log == NULL)
+		return;
+
+	fprintf(log, "%s\t%d\t%s\t%s\n", witnessTableName(i, j, mmx), index, def ? "default" : "match", pb->p.identifier);
+}
+
+/*
  * Find the first block in a table whose requirements the current state meets,
  * or NULL if the table has none.
  */
@@ -453,6 +521,9 @@ br_error BR_CMETHOD_DECL(br_primitive_state_soft, renderBegin)(
 {
 	int i,j;
 	struct local_block *pb;
+	int         witness_index;
+	br_boolean  witness_mmx;
+	br_boolean  witness_default;
 	br_uint_32 flags;
 	br_token input_colour_type;
 
@@ -659,21 +730,40 @@ br_error BR_CMETHOD_DECL(br_primitive_state_soft, renderBegin)(
 	 * MMX entry instead selects a rasteriser that writes depth through a
 	 * depth buffer that was never bound.
 	 */
+	witness_index   = -1;
+	witness_mmx     = BR_FALSE;
+	witness_default = BR_FALSE;
+
 	pb = NULL;
 
 #if USE_MMX
-	if(self->plib->use_mmx)
+	if(self->plib->use_mmx) {
 		pb = match_block(mmxInfoTables[i][j].blocks, mmxInfoTables[i][j].nblocks, flags, input_colour_type, &work);
+
+		if(pb != NULL) {
+			witness_index = (int)(pb - mmxInfoTables[i][j].blocks);
+			witness_mmx   = BR_TRUE;
+		}
+	}
 #endif
 
-	if(pb == NULL)
+	if(pb == NULL) {
 		pb = match_block(primInfoTables[i][j].blocks, primInfoTables[i][j].nblocks, flags, input_colour_type, &work);
+
+		if(pb != NULL)
+			witness_index = (int)(pb - primInfoTables[i][j].blocks);
+	}
 
 	/*
 	 * Default to last primitive in block
 	 */
-	if(pb == NULL)
+	if(pb == NULL) {
+		witness_index   = primInfoTables[i][j].nblocks - 1;
+		witness_default = BR_TRUE;
 		pb = primInfoTables[i][j].blocks + primInfoTables[i][j].nblocks - 1;
+	}
+
+	witnessNote(i, j, witness_mmx, witness_index, witness_default, pb);
 	}
 
 	/*
