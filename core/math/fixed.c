@@ -116,6 +116,69 @@ br_fixed_ls BR_PUBLIC_ENTRY BrFixedRcp(br_fixed_ls a)
     return BrFixedDiv(BR_ONE_LS, a);
 }
 
+br_fixed_ls BR_PUBLIC_ENTRY BrFixedDivF(br_fixed_ls numerator, br_fixed_ls denominator)
+{
+    if(denominator == 0)
+        return 0;
+
+    return (br_fixed_ls)(((br_uint_64)numerator << 31) / (br_uint_32)denominator);
+}
+
+br_fixed_ls BR_PUBLIC_ENTRY BrFixedDivR(br_fixed_ls numerator, br_fixed_ls denominator)
+{
+    br_int_64 n;
+
+    if(denominator == 0)
+        return 0;
+
+    n = ((br_int_64)numerator << 16) + (numerator < 0 ? 0xFFFF : 0);
+    return (br_fixed_ls)(n / denominator);
+}
+
+br_fixed_ls BR_RESIDENT_ENTRY BrFixedDivP(br_fixed_ls a, br_fixed_ls b)
+{
+    br_uint_32 q;
+
+    if(b == 0)
+        return 0;
+
+    q = (br_uint_32)(((br_int_64)a << 30) / b);
+    return (br_fixed_ls)(0x80000000u - (q + q));
+}
+
+br_fixed_ls BR_PUBLIC_ENTRY BrFixedMulDiv(br_fixed_ls a, br_fixed_ls b, br_fixed_ls c)
+{
+    if(c == 0)
+        return 0;
+
+    return (br_fixed_ls)(((br_int_64)a * b) / c);
+}
+
+br_fixed_ls BR_PUBLIC_ENTRY BrFixedMac2Div(br_fixed_ls a, br_fixed_ls b, br_fixed_ls c, br_fixed_ls d, br_fixed_ls e)
+{
+    if(e == 0)
+        return 0;
+
+    return (br_fixed_ls)(((a * (br_int_64)b) + (c * (br_int_64)d)) / e);
+}
+
+br_fixed_ls BR_PUBLIC_ENTRY BrFixedMac3Div(br_fixed_ls a, br_fixed_ls b, br_fixed_ls c, br_fixed_ls d, br_fixed_ls e, br_fixed_ls f, br_fixed_ls g)
+{
+    if(g == 0)
+        return 0;
+
+    return (br_fixed_ls)(((a * (br_int_64)b) + (c * (br_int_64)d) + (e * (br_int_64)f)) / g);
+}
+
+br_fixed_ls BR_PUBLIC_ENTRY BrFixedMac4Div(br_fixed_ls a, br_fixed_ls b, br_fixed_ls c, br_fixed_ls d, br_fixed_ls e, br_fixed_ls f,
+                                           br_fixed_ls g, br_fixed_ls h, br_fixed_ls i)
+{
+    if(i == 0)
+        return 0;
+
+    return (br_fixed_ls)(((a * (br_int_64)b) + (c * (br_int_64)d) + (e * (br_int_64)f) + (g * (br_int_64)h)) / i);
+}
+
 br_fixed_ls BR_PUBLIC_ENTRY BrFixedFMac2(br_fixed_lsf a, br_fixed_ls b, br_fixed_lsf c, br_fixed_ls d)
 {
     return BrFixedMac2(a << 1, b, c << 1, d);
@@ -243,6 +306,45 @@ br_fixed_luf BrFixedATan2(br_fixed_ls y, br_fixed_ls x)
     octant = OctantInfo + (((x > 0) << X_GT_0_SHIFT) | ((y > 0) << Y_GT_0_SHIFT) | ((abs_x > abs_y) << XA_GT_YA_SHIFT));
     r      = BrFixedDiv(num[octant->nidx], num[1 - octant->nidx]);
     return octant->offset + (octant->mul * interp((br_int_16)r, arctan_table));
+}
+
+br_fixed_luf BR_PUBLIC_ENTRY BrFixedATan2Fast(br_fixed_ls y, br_fixed_ls x)
+{
+    const octant_info *octant;
+    br_fixed_ls        abs_y  = BrFixedAbs(y);
+    br_fixed_ls        abs_x  = BrFixedAbs(x);
+    br_fixed_ls        num[2] = {abs_x, abs_y};
+    br_fixed_ls        r;
+
+    /*
+     * The reference branch tree returns 5*pi/4 for x == 0 and y < 0: its
+     * boundary_45 target is reached by any zero x in the bottom half, rather
+     * than only the |x| == |y| diagonal. Keep the reference behaviour.
+     */
+    if(x == 0 && y < 0)
+        return BR_5_PI_4_LUF;
+
+    /* Handle the boundaries between quadrants. */
+    if(abs_x == abs_y) {
+        if(x > 0 && y < 0)
+            return BR_7_PI_4_LUF;
+
+        if(x < 0 && y < 0)
+            return BR_5_PI_4_LUF;
+
+        if(x < 0 && y > 0)
+            return BR_3_PI_4_LUF;
+
+        if(x > 0 && y > 0)
+            return BR_PI_4_LUF;
+
+        /* (0, 0) */
+        return BR_ZERO_LUF;
+    }
+
+    octant = OctantInfo + (((x > 0) << X_GT_0_SHIFT) | ((y > 0) << Y_GT_0_SHIFT) | ((abs_x > abs_y) << XA_GT_YA_SHIFT));
+    r      = BrFixedDiv(num[octant->nidx], num[1 - octant->nidx]);
+    return octant->offset + (octant->mul * (r >> 3));
 }
 
 br_fixed_ls BR_PUBLIC_ENTRY BrFixedSqrt(br_fixed_ls a)

@@ -134,6 +134,9 @@ br_fixed_ls BR_PUBLIC_ENTRY BrFixedDiv(br_fixed_ls a, br_fixed_ls b);
  */
 /**
  * \brief Return the equivalent of a/b * 2^31.
+ *
+ * Both operands are positive; the reference is an unsigned 32-bit divide of
+ * the 64 bit numerator (a << 31) (see g386ifix.h/wtcifix.h and fixed386.asm).
  */
 br_fixed_ls BR_ASM_CALL BrFixedDivF(br_fixed_ls a, br_fixed_ls b);
 
@@ -141,12 +144,11 @@ br_fixed_ls BR_ASM_CALL BrFixedDivF(br_fixed_ls a, br_fixed_ls b);
  */
 /**
  * \brief Return the equivalent of a/b (rounded towards zero).
+ *
+ * A negative numerator is biased by 2^16-1 before the divide, matching the x86
+ * reference; for a >= 0 this is the same as BrFixedDiv().
  */
 br_fixed_ls BR_ASM_CALL BrFixedDivR(br_fixed_ls a, br_fixed_ls b);
-
-/*
- */
-br_fixed_ls BR_ASM_CALL _FixedDivP(br_fixed_ls a, br_fixed_ls b);
 
 /* result = a*b/c
  */
@@ -239,6 +241,10 @@ br_fixed_luf BR_PUBLIC_ENTRY BrFixedATan2(br_fixed_ls y, br_fixed_ls x);
 
 /**
  * \brief Return the equivalent of atan2(a) (low precision) (see br_angle).
+ *
+ * Low precision BrFixedATan2(): the arctan table lookup is replaced by the
+ * linear approximation atan(r) ~= PI/4 * r, so each octant contributes or
+ * subtracts r >> 3 (r being the 0.16 fractional part of |y|/|x| or |x|/|y|).
  */
 br_fixed_luf BR_ASM_CALL BrFixedATan2Fast(br_fixed_ls x, br_fixed_ls y);
 

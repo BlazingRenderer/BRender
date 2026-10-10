@@ -33,9 +33,13 @@ extern br_uint_8 _CombineTransforms[BR_TRANSFORM_MAX][BR_TRANSFORM_MAX];
 #define BrTransformTypeIsLP(a)        ((a) != BR_TRANSFORM_MATRIX34)
 #define BrTransformTypeIsMatrix34(a)  ((a) <= BR_TRANSFORM_MATRIX34_LP)
 
-/* result = a/b * 2^31
+/**
+ * \brief Return the equivalent of 2^31 * (1 - a/b).
+ *
+ * The fixed point perspective divide: 0x80000000 - 2*((a << 30)/b) for
+ * positive a and b. Declared as BrFixedDivP in some reference headers.
  */
-br_fixed_ls BR_ASM_CALL BrFixedDivP(br_fixed_ls a, br_fixed_ls b);
+br_fixed_ls BR_RESIDENT_ENTRY BrFixedDivP(br_fixed_ls a, br_fixed_ls b);
 
 #ifdef __cplusplus
 };
