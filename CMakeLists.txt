@@ -19,6 +19,10 @@ if (BUILD_SHARED_LIBS)
     message(FATAL_ERROR "BUILD_SHARED_LIBS is not supported at this time.")
 endif ()
 
+# Defines BUILD_TESTING (on by default) and enables testing; the corpus is
+# registered in examples/rendertest.
+include(CTest)
+
 option(BRENDER_USE_SDL2 "Use SDL2" OFF)
 option(BRENDER_USE_SDL3 "Use SDL3" OFF)
 option(BRENDER_DISABLE_FINDSDL "Disable searching for SDL" OFF)

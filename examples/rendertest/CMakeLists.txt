@@ -23,3 +23,50 @@ target_compile_definitions(rendertest PRIVATE RT_SOFT_DRIVER="${RT_SOFT_DRIVER}"
 if (NOT BRENDER_DISABLE_INSTALL)
     install(TARGETS rendertest DESTINATION ${CMAKE_INSTALL_BINDIR})
 endif ()
+
+#
+# The corpus is this project's test suite. Each configuration is its own test so
+# that a failure names the configuration, and nothing here passes --bless:
+# accepting the current output is a deliberate act, not a test.
+#
+# --history is deliberately not registered - it walks commits and needs a git
+# checkout, so it belongs to contrib/run-tests.sh rather than to the build.
+#
+if (BUILD_TESTING)
+    foreach (bpp IN ITEMS 8 15 16 24)
+        foreach (mode IN ITEMS zb zs)
+            if (mode STREQUAL "zs")
+                set(depth --no-depth)
+            else ()
+                set(depth)
+            endif ()
+
+            add_test(NAME "softrend-${bpp}-${mode}"
+                     COMMAND rendertest --device softrend --bpp ${bpp} ${depth})
+            set_tests_properties("softrend-${bpp}-${mode}" PROPERTIES
+                                 ENVIRONMENT "SDL_VIDEODRIVER=offscreen")
+        endforeach ()
+    endforeach ()
+
+    # The stored glrend reference is llvmpipe's, so ask for software GL.
+    add_test(NAME "glrend-8-zb" COMMAND rendertest --device glrend --bpp 8)
+    set_tests_properties("glrend-8-zb" PROPERTIES
+                         ENVIRONMENT "SDL_VIDEODRIVER=offscreen;LIBGL_ALWAYS_SOFTWARE=true")
+
+    add_test(NAME "fixtures"
+             COMMAND ${CMAKE_COMMAND}
+                     "-DMKRES=$<TARGET_FILE:mkres>"
+                     "-DDAT=${CMAKE_CURRENT_SOURCE_DIR}/dat"
+                     "-DWORK=${CMAKE_CURRENT_BINARY_DIR}/fixture-check"
+                     -P "${CMAKE_CURRENT_SOURCE_DIR}/fixture-check.cmake")
+
+    add_test(NAME "gltf-loads"
+             COMMAND ${CMAKE_COMMAND}
+                     "-DGLTFVIEW=$<TARGET_FILE:gltfview>"
+                     "-DDIR1=${CMAKE_CURRENT_SOURCE_DIR}/dat"
+                     "-DDIR2=${CMAKE_SOURCE_DIR}/resources/gltf-reference"
+                     -P "${CMAKE_CURRENT_SOURCE_DIR}/gltf-check.cmake")
+    set_tests_properties("gltf-loads" PROPERTIES
+                         ENVIRONMENT "SDL_VIDEODRIVER=offscreen;GLTFVIEW_BENCH_FRAMES=5;GLTFVIEW_BENCH_NOVSYNC=1"
+                         TIMEOUT 900)
+endif ()
