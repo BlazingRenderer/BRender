@@ -21,6 +21,9 @@ br_error BR_PUBLIC_ENTRY BrPixelmapResizeBuffersTV(br_pixelmap *screen, br_pixel
     br_uint_8      target_type;
     br_int_32      target_depth_bits;
     size_t         tvidx, tvbase;
+    br_colour      palette[256];
+    br_int_32      palette_entries = 0;
+    br_device_clut *clut;
     br_token_value tva[] = {
         {.t = BR_NULL_TOKEN, .v = {}},
         {.t = BR_NULL_TOKEN, .v = {}},
@@ -60,6 +63,20 @@ br_error BR_PUBLIC_ENTRY BrPixelmapResizeBuffersTV(br_pixelmap *screen, br_pixel
 
     if(target_depth_bits < 16)
         target_depth_bits = 16;
+
+    /*
+     * Read back the colour buffer's palette, if it has one. An indexed
+     * pixelmap's palette is a device CLUT rather than a field, so the
+     * recreation fallback below would otherwise hand back an unindexed
+     * picture where the direct resize would have kept it.
+     *
+     * A CLUT does not report its size; an INDEX_8 buffer's palette is 256
+     * entries by definition, and a device holding fewer makes the query fail,
+     * which leaves the fallback as it was.
+     */
+    if(*colour != NULL && (*colour)->type == BR_PMT_INDEX_8 && ObjectQuery(*colour, &clut, BRT_CLUT_O) == BRE_OK && clut != NULL &&
+       DeviceClutEntryQueryMany(clut, palette, 0, BR_ASIZE(palette)) == BRE_OK)
+        palette_entries = BR_ASIZE(palette);
 
     /*
      * Try to resize the framebuffer directly. Fall back to recreation if we can't.
@@ -155,6 +172,12 @@ full_cleanup:
     *colour       = tmp;
     tmp->origin_x = (br_int_16)(tmp->width >> 1);
     tmp->origin_y = (br_int_16)(tmp->height >> 1);
+
+    /*
+     * Put the palette back.
+     */
+    if(palette_entries > 0 && ObjectQuery(*colour, &clut, BRT_CLUT_O) == BRE_OK && clut != NULL)
+        DeviceClutEntrySetMany(clut, 0, palette_entries, palette);
 
     /*
      * Recreate the depth buffer.
