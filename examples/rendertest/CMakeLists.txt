@@ -13,9 +13,10 @@ target_compile_definitions(rendertest PRIVATE
 
 #
 # The software rasteriser is chosen at link time, so which one produced a frame
-# is a build fact and belongs in the reference key.
+# is a build fact and belongs in the reference key. softprim registers the name
+# pentprim did.
 #
-set (RT_SOFT_DRIVER "software")
+set (RT_SOFT_DRIVER "softprmf")
 
 target_compile_definitions(rendertest PRIVATE RT_SOFT_DRIVER="${RT_SOFT_DRIVER}")
 

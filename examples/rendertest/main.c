@@ -51,12 +51,12 @@ typedef const unsigned char *(*rt_pfn_GetString)(unsigned int);
  * a run loads, which bounds a bless as well as a comparison. A run that needs
  * more of either fails rather than dropping what does not fit.
  *
- * The key names the device, the driver, the pixel type, the depth mode and the
- * fixture, so a configuration costs one entry per fixture. 4096 holds every
- * configuration the harness can key across 128 fixtures, with room for the
- * fixture set to grow; 512 could not take the next blessing round. One file is
- * what --reference, --bless and the merge in rt_write_reference() are written
- * against.
+ * The key names the device, the driver, the floating-point class, the pixel
+ * type, the depth mode and the fixture, so a configuration costs one entry per
+ * fixture in each class. 4096 holds every configuration the harness can key
+ * across 128 fixtures in both classes, with room for the fixture set to grow;
+ * 512 could not take the next blessing round. One file is what --reference,
+ * --bless and the merge in rt_write_reference() are written against.
  *
  * RT_MAX_SCENES is the same problem one step out: 64 left no room for the
  * fixture set to grow. 256 is the room the cap was raised to.
@@ -68,6 +68,28 @@ typedef const unsigned char *(*rt_pfn_GetString)(unsigned int);
 #define RT_MAX_ENTRIES 4096
 #define RT_MAX_KEY     192
 #define RT_MAX_LINE    1024
+
+/*
+ * The floating-point evaluation class of this build.
+ *
+ * Both classes implement IEEE-754; what differs is the width float and double
+ * expressions are evaluated at. i686, and MSVC's 32-bit x87, keep them in
+ * 80-bit x87 registers and round only on a store (FLT_EVAL_METHOD 2); x86-64,
+ * aarch64 and a 32-bit build with -mfpmath=sse evaluate each operation at the
+ * width its type declares (FLT_EVAL_METHOD 0). The two round differently, and
+ * the difference reaches the frame through softrend's setup and through core's
+ * scene setup, so the software rasteriser and glrend alike produce different
+ * pixels from the same scene - a key has to say which class produced the
+ * entry.
+ *
+ * MSVC defines no __FLT_EVAL_METHOD__ before C11; _M_IX86_FP is 0 when x87 is
+ * in use rather than SSE.
+ */
+#if (defined(__FLT_EVAL_METHOD__) && __FLT_EVAL_METHOD__ == 2) || (defined(_M_IX86_FP) && _M_IX86_FP == 0)
+#define RT_FP_CLASS "x87"
+#else
+#define RT_FP_CLASS "declared"
+#endif
 
 /* Filled in by main() before the demo runs. */
 static const char *rt_cfg_device       = "glrend";
@@ -590,11 +612,12 @@ static void rt_unload_scene(rt_state *st, br_demo *demo)
 /* ------------------------------------------------------------------ */
 
 /*
- * The key names the driver that produced the frame, so a reference records a
- * build fact and bit-exactness across rasterisers stays visible. --reference-
- * driver substitutes a different token for lookup only, so a run can score
- * against another rasteriser's pixels without writing a second copy of the
- * file; --bless still records the driver that actually rendered.
+ * The key names the driver that produced the frame and the floating-point
+ * class it was built with, so a reference records a build fact and bit-
+ * exactness across rasterisers stays visible. --reference-driver substitutes a
+ * different token for lookup only, so a run can score against another
+ * rasteriser's pixels without writing a second copy of the file; --bless still
+ * records the driver that actually rendered.
  *
  * A key that does not fit the buffer is refused rather than truncated: a
  * shortened key names a different entry, or none at all, and the run would
@@ -603,13 +626,13 @@ static void rt_unload_scene(rt_state *st, br_demo *demo)
 static br_error rt_make_key(char *dst, size_t n, rt_state *st, const char *driver, const char *scene)
 {
     const char *mode = st->no_depth ? "zs" : "zb";
-    int len = snprintf(dst, n, "%s/%s/%s/%u/%dx%d/%s", st->device, driver, mode, (unsigned)st->pm_type, st->width, st->height, scene);
+    int len = snprintf(dst, n, "%s/%s/%s/%s/%u/%dx%d/%s", st->device, driver, RT_FP_CLASS, mode, (unsigned)st->pm_type, st->width, st->height, scene);
 
     if(len < 0 || (size_t)len >= n) {
         BrLogError("RT",
-                   "reference key `%s/%s/%s/%u/%dx%d/%s' is %d characters, more than the %zu this harness holds; the key is not "
+                   "reference key `%s/%s/%s/%s/%u/%dx%d/%s' is %d characters, more than the %zu this harness holds; the key is not "
                    "truncated to fit",
-                   st->device, driver, mode, (unsigned)st->pm_type, st->width, st->height, scene, len, n);
+                   st->device, driver, RT_FP_CLASS, mode, (unsigned)st->pm_type, st->width, st->height, scene, len, n);
         return BRE_FAIL;
     }
 
@@ -808,7 +831,7 @@ static void rt_write_reference(rt_state *st)
     }
 
     fprintf(fp, "# rendertest reference\n");
-    fprintf(fp, "# key=<device>/<driver>/<zb|zs>/<pixel-type>/<WxH>/<scene> value=checksum\n");
+    fprintf(fp, "# key=<device>/<driver>/<fp-class>/<zb|zs>/<pixel-type>/<WxH>/<scene> value=checksum\n");
 
     for(int i = 0; i < st->nexpects; ++i)
         fprintf(fp, "%s %016llx\n", st->expects[i].key, (unsigned long long)st->expects[i].hash);

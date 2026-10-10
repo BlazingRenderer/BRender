@@ -114,7 +114,7 @@ typedef struct br_demo {
      * Private fields.
      */
     br_pixelmap *_screen;
-    uint8_t      _primitive_heap[1500 * 1024];
+    uint8_t      _primitive_heap[8192 * 1024];
 } br_demo;
 
 /**
