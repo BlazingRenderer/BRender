@@ -67,6 +67,13 @@ drawing them there would be a silent wrong draw — so softprim returns no block
 instead. All 24 are z-buffered 555/565 shapes, which the MMX table shadows; see
 `drivers/softprim/README.md`'s "What is deliberately not implemented".
 
+Unreachable *in softprim*, whose walk always carries the MMX table and has no
+toggle. It is not a statement about pentprim: with `BRENDER_USE_MMX=0` the
+general table answers and those kernels do draw. Counting which of pentprim's
+own entries a configuration selects is the other half of the census, on
+`dev/pentprim-verification`; this tool reads softprim's generated matcher, which
+has no MMX axis.
+
 The 16 tuples that were reachable-but-unwitnessed at the previous round are
 implemented and witnessed now: the eight line/point `TEX_555`/`TEX_565` shapes
 and the eight z-sorted power-of-two RGB shade-table cells. Both were reached

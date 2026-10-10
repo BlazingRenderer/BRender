@@ -115,25 +115,33 @@ omitted, and the first thing to establish about any of them is whether the match
 it at all - which the generated table answers on its own, since
 `contrib/census/reachable.py` walks it the way `spFindMatch` does and stops on a refused
 entry. `contrib/census/witness.py` then says whether *any* state can select the rest. The
-answer now is none: **all 40 are unreachable**, so there is no reachable shape without a
-kernel and no shape a fixture could ask for that softprim declines to draw. The rule is
-`infogen.pl`'s `softprim_implemented()`, which carries its reasoning in comments, plus the
-guards in `raster.cpp`.
+answer now is none: **all 40 are unreachable in softprim's walk**, so there is no reachable
+shape without a kernel and no shape a fixture could ask for that softprim declines to draw.
+The rule is `infogen.pl`'s `softprim_implemented()`, which carries its reasoning in comments,
+plus the guards in `raster.cpp`.
 
-**Unreachable: every z-buffered 555/565 shape, in both families (40 entries).**
+**Unreachable in softprim: every z-buffered 555/565 shape, in both families (40 entries).**
 
 - the 555/565-typed colour maps (`SP_TEX_555`/`SP_TEX_565`): 12 entries per format, all
   z-buffered.
 - the RGB-output shade-table shapes at 15/16bpp (`SP_SHADE_CONST_I_RGB`/
   `SP_SHADE_INTERP_I_RGB`): 8 entries per format, all z-buffered.
 
-The mechanism is one thing: the MMX table is tried first for a 555/565 output, its textured
-rows all require an `INDEX_8` map with a palette, and one of its untextured rows then takes
-the primitive - so a 555/565 map is never sampled and the primitive is drawn untextured
-instead. That is measured, not assumed: the corpus's own `scene-tex-rgb555` and
-`scene-tex-rgb565` fixtures draw untextured at 15/16bpp z-buffered. pentprim's table has the
-same order and the same MMX-first rule, so those kernels do not run there either: refusing
-them costs nothing that can be observed.
+The mechanism is one thing: the MMX table is first in softprim's walk for a 555/565 output,
+its textured rows all require an `INDEX_8` map with a palette, and one of its untextured rows
+then takes the primitive - so a 555/565 map is never sampled and the primitive is drawn
+untextured instead. That is measured, not assumed: the corpus's own `scene-tex-rgb555` and
+`scene-tex-rgb565` fixtures draw untextured at 15/16bpp z-buffered.
+
+That is a property of softprim, not of pentprim. pentprim walks the MMX table only while MMX
+is in use (`BRENDER_USE_MMX`, or the CPU's own capability); with it off the general table is
+what answers, and those kernels are neither unreachable nor equivalent to their MMX twins -
+measured on `dev/pentprim-verification` with `BRENDER_USE_MMX=0`, 70 of its 96 fixtures
+change at each of 15bpp and 16bpp z-buffered, `scene-flat` alone by 211 of 76800 pixels, and
+the census there counts 8 entries of `prim_t15` and 8 of `prim_t16` that only the general
+configuration selects. **The reference is the MMX configuration** - the one the frozen
+`x87` entries record - and softprim reproduces it on every architecture; it has no MMX
+toggle and does not reproduce the general path.
 
 
 ## How it is verified
