@@ -1582,6 +1582,17 @@ static br_error rt_init(br_demo *demo)
     }
 
     /*
+     * Say which class this run scores against before anything else can fail.
+     * The reference holds an entry per class, so the first question about a
+     * failure is which one it was, and a run that dies before its result line
+     * would otherwise leave that to be inferred from the build.
+     *
+     * rt_cfg_device rather than st->device: the state is filled in a few lines
+     * below, and this belongs before anything in the run can fail.
+     */
+    printf("RT fp-class=%s device=%s driver=%s\n", RT_FP_CLASS, rt_cfg_device, st->driver);
+
+    /*
      * The configuration was parsed in main(); the demo owns the lifecycle, so
      * copy it into the state that will live for the run.
      */
