@@ -13,6 +13,8 @@
 , withExamples ? false
 }: let
   binExtension = stdenv.hostPlatform.extensions.executable;
+
+  runTests = withExamples && stdenv.buildPlatform.canExecute stdenv.hostPlatform;
 in
 stdenv.mkDerivation(finalAttrs: {
   inherit version;
@@ -86,6 +88,8 @@ stdenv.mkDerivation(finalAttrs: {
       fi
     done
   '';
+
+  doCheck = runTests;
 
   outputs = [ "bin" "lib" "dev" "out" ] ++ (lib.optionals withExamples [
     "data"
