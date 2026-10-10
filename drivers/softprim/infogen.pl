@@ -330,7 +330,7 @@ sub softprim_implemented {
 	}
 
 	# The 555/565-typed colour maps are in the spec for the same reason, and
-	# naming the value admits every shape that samples one. Refprim has a kernel
+	# naming the value admits every shape that samples one. softprim has a kernel
 	# for the z-sorted arbitrary-width triangle only: it is awtmi.h's span with a
 	# two-byte texel decode instead of the RGB_888 one's three, so the addressing
 	# is the same code and only the fragment differs (RgbAwtTriangle).

@@ -209,7 +209,7 @@ struct sp_match {
  * The ordered block list the walk searches, in the order the tables are tried:
  * pentprim's table order, with the refused blocks left where pentprim put them.
  */
-static struct sp_match refPrimBlocks[] = {
+static struct sp_match softPrimBlocks[] = {
 #include "softprim_matchers.inc"
 };
 
@@ -321,7 +321,7 @@ static void spFillBlock(struct sp_match *e)
      * line (the `duplicate` property in prim_l*.ifg) and on no point - and the
      * flag is what makes softrend not share the non-zero vertices of a line in
      * the primitive heap (v1model.c:522), which is the behaviour pentprim's
-     * frames were produced with. Refprim draws the constant into every vertex
+     * frames were produced with. softprim draws the constant into every vertex
      * through softrend's replication either way, so only the heap sharing
      * differs; mirror pentprim so the two agree.
      */
@@ -539,8 +539,8 @@ static struct sp_match *spFindMatch(const struct sp_want *w)
 {
     int i;
 
-    for(i = 0; i < BR_ASIZE(refPrimBlocks); i++) {
-        struct sp_match *e = &refPrimBlocks[i];
+    for(i = 0; i < BR_ASIZE(softPrimBlocks); i++) {
+        struct sp_match *e = &softPrimBlocks[i];
 
         if(e->axes.fmt != w->fmt || e->axes.top != w->top)
             continue;

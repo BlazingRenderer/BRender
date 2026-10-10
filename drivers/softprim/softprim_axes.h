@@ -16,8 +16,8 @@
  * base and range, and shade/blend/fog table contents are runtime values read
  * from the bound buffers and are deliberately absent.
  */
-#ifndef _REFPRIX_AXES_H_
-#define _REFPRIX_AXES_H_
+#ifndef _SOFTPRIM_AXES_H_
+#define _SOFTPRIM_AXES_H_
 
 #ifdef __cplusplus
 extern "C" {
