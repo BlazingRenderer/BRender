@@ -44,6 +44,49 @@ reference scenes, and with pentprim gone they are the only record of its output.
   generator refuses. Widening `SP_SPEC` without writing the kernel stops the build, as
   does a new `.ifg` block that reintroduces a shape nothing implements.
 
+## Porting a kernel from pentprim
+
+Every kernel here came from pentprim, and the requirement is bit-exactness, so the target
+is **pentprim's arithmetic, not a clean reimplementation** of the same algorithm. These are
+the rules the first 221 kernels were ported to, recovered from the session that did it.
+
+- **Read the source the block actually uses.** pentprim has more than one implementation of
+a path and the `.ifg` says which one a block gets: `awtmi.h` for arbitrary-width maps,
+`perspi.h`/`perspzi.h` for the power-of-two and perspective-scan ones, the `tt*.asm`
+family for perfect scan. Port the vertex sort, the `g_divisor`/`g_inverse` setup, the u/v
+fractional parts, the `(1<<28)/maxuv` normalisation, the truncating `(br_int_32)` casts and
+`PDIVIDE` as they are written, not as they would be written afresh.
+- **Where a C reference and the assembly disagree, the assembly is the authority.** It is
+what the branch builds and what the reference entries were blessed from. The 256-wide RGB
+destination blend is the case: `perspi.h` has no blend arm at all, so its `PITIPB256`
+instantiation is the same code as the plain one - while `t15_pip.asm`'s `ScanLinePITIP`
+takes a `BLEND` operand and halves source and destination through per-format masks.
+- **One sanctioned divergence: map dimensions are runtime.** pentprim instantiates a kernel
+per texture size (`texture8x8` … `texture1024x1024`); here one kernel takes its shift and
+mask from the bound map. That is the only deliberate structural difference - anything else
+that looks like one is a bug in the port.
+- **Widen the spec and write the kernel in the same commit.** `SP_SPEC` may only name axes
+whose kernels exist, and the `static_assert`s in `SoftPrimRender` enforce it in both
+directions: a kernel with no spec entry is dead code, and a spec entry with no kernel stops
+the build.
+- **Refuse cleanly rather than guess.** A shape with no kernel returns no block. Drawing it
+with a sibling's kernel is the failure the refusal mechanism exists to prevent, not a
+cheaper way to make a fixture pass.
+- **Witness it before trusting it,** and write the fixture first. The corpus is what says
+the kernel ran and `contrib/census` is what says which tuple the state selected; a kernel
+with neither is untested code that happens to compile.
+- **Fix pentprim first if pentprim is wrong.** Two families here were ported only after
+pentprim itself was corrected - the RGB_888 shade table's four-byte stride over a
+three-byte entry, and the 32x32 block's packing. A pixel-affecting pentprim fix, its
+re-bless and the port that follows are one change, with the reference entries moving in the
+same commit.
+- **Validate in this order.** It builds - check for `Built target`, because a failed build
+leaves the previous binary in place and every measurement of it is meaningless;
+`rendertest` reports `result=PASS failures=0` at 8/15/16/24bpp x {zb, zs}; the nine
+reference scenes reproduce their frozen checksums; `mkres scenes` still writes `dat/`
+byte-for-byte. Bless from pentprim only: a softprim `--bless` records softprim's own output
+and the comparison stops meaning anything.
+
 ## What is implemented
 
 All of pentprim's 393 live blocks are in the matcher's walk; 337 are emitted as blocks with
@@ -70,7 +113,7 @@ itself was corrected first:
 56 of the 393 entries (40 distinct tuples), in two families. Every one of them is refused
 rather than omitted, and the first thing to establish about any of them is whether the
 matcher can reach it at all - which the generated table answers on its own, since
-`scratch/census/reachable2.py` walks it the way `spFindMatch` does and stops on a refused
+`contrib/census/reachable.py` walks it the way `spFindMatch` does and stops on a refused
 entry. The split is **40 unreachable, 16 reachable but with no kernel**. The rule is
 `infogen.pl`'s `softprim_implemented()`, which carries its reasoning in comments, plus the
 guards in `raster.cpp`.
