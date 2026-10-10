@@ -132,6 +132,13 @@
   ],
   "materials": [
     {
+      "name": "scene-blendfog-arb-persp-backdrop-material",
+      "pbrMetallicRoughness": {
+        "metallicFactor": 0,
+        "baseColorFactor": [1, 0, 0, 1]
+      }
+    },
+    {
       "name": "scene-blendfog-arb-persp-tex-material",
       "pbrMetallicRoughness": {
         "baseColorTexture": {
@@ -164,8 +171,18 @@
   ],
   "nodes": [
     {
-      "children": [ 1, 2, 3, 4, 5, 6 ],
+      "children": [ 1, 2, 3, 4, 5, 6, 7 ],
       "name": "world"
+    },
+    {
+      "mesh": 0,
+      "name": "backdrop",
+      "matrix": [12, 0, 0, 0, 0, 12, 0, 0, 0, 0, 0.25, 0, 0, 0, -1.60000002, 1],
+      "extensions": {
+        "BR_materials": {
+          "material": 0
+        }
+      }
     },
     {
       "mesh": 0,
@@ -173,7 +190,7 @@
       "matrix": [1.5, 0, 0, 0, 0, 1.44888878, -0.388228565, 0, 0, 0.388228565, 1.44888878, 0, 2, 0, 0, 1],
       "extensions": {
         "BR_materials": {
-          "material": 0
+          "material": 1
         }
       }
     },
@@ -183,7 +200,7 @@
       "matrix": [1.5, 0, 0, 0, 0, 1.44888878, -0.388228565, 0, 0, 0.388228565, 1.44888878, 0, 0, 0, 0, 1],
       "extensions": {
         "BR_materials": {
-          "material": 1
+          "material": 2
         }
       }
     },
@@ -218,7 +235,7 @@
       "matrix": [1.29903805, 0, -0.75, 0, 0.256515115, 1.40953898, 0.444297194, 0, 0.704769492, -0.513030231, 1.22069657, 0, -2, 0, 0, 1],
       "extensions": {
         "BR_materials": {
-          "material": 2
+          "material": 3
         }
       }
     }
@@ -295,6 +312,12 @@
     },
     "BR_materials": {
       "materials": [
+        {
+          "identifier": "scene-blendfog-arb-persp-backdrop-material",
+          "colour": [1, 0, 0],
+          "flags": 0,
+          "map_transform": [1, 0, 0, 1, 0, 0]
+        },
         {
           "identifier": "scene-blendfog-arb-persp-tex-material",
           "colour": [0.784313738, 0.784313738, 0.784313738],

@@ -431,19 +431,32 @@ static br_material *scene_material_ex(const char *name, br_colour colour, br_uin
 #define SCENE_ARB_SCALE BR_SCALAR(3.0)
 
 /*
- * The backdrop the four p256 fixtures draw behind their cubes, so that the
- * 50/50 destination blend the -blend twins reach has colour to mix with rather
- * than the clear colour. The cube model is drawn wide and shallow and pushed
- * back: scale_x/y of 60 make the front face far larger than the projected frame
- * at its depth, and the small scale_z keeps it flat against the camera, while
- * the z of -20 seats it behind the cubes (whose back face is near z = -2.6) yet
+ * The backdrop the blend fixtures draw behind their cubes, so that the indexed
+ * destination blend has colour to mix with rather than the clear colour. The
+ * cube model is drawn wide and shallow and pushed back: scale_x/y of 60 make
+ * the front face far larger than the projected frame at its depth, and the
+ * small scale_z keeps it flat against the camera, while the z of -20 seats it
+ * behind the cubes (whose back face is near z = -2.6 at the 3x p256 scale) yet
  * inside the scene camera's 0.1..100 range. The front face sits at z = -19, and
  * the widest frame half-width there is the 1280x720 viewport's, 0.7365 * 25 =
  * 18.4, well inside the 30 the scale covers.
+ *
+ * The fogged blend fixtures cannot use that place: their fog tables need the
+ * narrowed 4..8 camera range (scene_fx_world_range), whose far plane is at
+ * z = -2, so a backdrop at -20 is clipped away entirely. Those scenes seat
+ * theirs just inside that plane instead - a thin slab at z = -1.6, behind the
+ * 1.5x cubes' own back face near z = -1.2 - and at a smaller scale, since the
+ * plane is far closer to the camera: at 7.6 out the 320x240 viewport's frame
+ * half-width is 0.4142 * 7.6 * 4/3 = 4.2, inside the 6 the scale covers.
  */
 #define SCENE_BACKDROP_SCALE_XY BR_SCALAR(60.0)
 #define SCENE_BACKDROP_SCALE_Z  BR_SCALAR(2.0)
 #define SCENE_BACKDROP_Z        BR_SCALAR(-20.0)
+
+/* The fogged blend fixtures' place; see the note above. */
+#define SCENE_BACKDROP_FOG_SCALE_XY BR_SCALAR(12.0)
+#define SCENE_BACKDROP_FOG_SCALE_Z  BR_SCALAR(0.25)
+#define SCENE_BACKDROP_FOG_Z        BR_SCALAR(-1.6)
 
 /*
  * Every lookup table is indexed as (row * 256) + column whatever its height, so
@@ -1294,23 +1307,27 @@ static br_error scene_make_line_fixtures(br_model *cube)
 
 /*
  * ------------------------------------------------------------------
- * The backdrop the p256 scenes draw behind their cubes.
+ * The backdrop the blend scenes draw behind their cubes.
  *
- * The blend the -blend twins reach is a 50/50 mix against the *destination*
- * buffer, and against the black clear colour that only halves the cube's own
- * colour - a darker copy of the non-blend twin, which no human reads as
- * blending. A saturated red drawn underneath makes the same pixels half red, an
- * obvious mixture - the same cube pixels, but a colour a person reads at a
- * glance. It is unlit so its colour is the material's and does not vary with the
- * near light, untextured so the mixture is between two flat colours, and opaque
- * whatever the cubes' opacity is: a backdrop that itself blended would mix with
- * black and defeat the point.
+ * The blend the blend fixtures reach is a mix against the *destination* buffer,
+ * and against the black clear colour that only halves the cube's own colour - a
+ * darker copy of the non-blend twin, which no human reads as blending. A
+ * saturated red drawn underneath makes the same pixels half red, an obvious
+ * mixture - the same cube pixels, but a colour a person reads at a glance. It is
+ * unlit so its colour is the material's and does not vary with the near light,
+ * untextured so the mixture is between two flat colours, and opaque whatever the
+ * cubes' opacity is: a backdrop that itself blended would mix with black and
+ * defeat the point.
  *
  * The actor is a wide, shallow, unturned cube rather than the turned one
- * scene_fx_add_cube_named() makes. It is added after the cubes, which puts it at
- * the head of the world's child list and so draws it first - the blend needs it
- * in the colour buffer before the cube that reads it. Under z-sorting its depth
- * puts it first regardless.
+ * scene_fx_add_cube_named() makes, seated at the place SCENE_BACKDROP_* names.
+ * It is added after the cubes, which puts it at the head of the world's child
+ * list and so draws it first - the blend needs it in the colour buffer before
+ * the cube that reads it. Under z-sorting its depth puts it first regardless.
+ *
+ * This is legibility, not coverage: the census already witnesses every blend
+ * tuple these scenes reach, and no block selection moves. The backdrop only
+ * gives a reader's eye the colour the destination blend is reading.
  */
 static br_material *scene_backdrop_material(const char *name)
 {
@@ -1324,7 +1341,8 @@ static br_material *scene_backdrop_material(const char *name)
     return m;
 }
 
-static void scene_fx_add_backdrop(br_actor *world, br_model *cube, br_material *mat, const char *name)
+static void scene_backdrop_actor(br_actor *world, br_model *cube, br_material *mat, const char *name, br_scalar scale_xy, br_scalar scale_z,
+                                 br_scalar z)
 {
     br_actor   *a;
     br_matrix34 m;
@@ -1335,11 +1353,31 @@ static void scene_fx_add_backdrop(br_actor *world, br_model *cube, br_material *
     a->model    = cube;
     a->material = mat;
 
-    BrMatrix34Scale(&m, SCENE_BACKDROP_SCALE_XY, SCENE_BACKDROP_SCALE_XY, SCENE_BACKDROP_SCALE_Z);
-    BrMatrix34PostTranslate(&m, BR_SCALAR(0), BR_SCALAR(0), SCENE_BACKDROP_Z);
+    BrMatrix34Scale(&m, scale_xy, scale_xy, scale_z);
+    BrMatrix34PostTranslate(&m, BR_SCALAR(0), BR_SCALAR(0), z);
 
     a->t.type  = BR_TRANSFORM_MATRIX34;
     a->t.t.mat = m;
+}
+
+/*
+ * Add the backdrop for a scene named `scene`, at the given place. The material
+ * is named after the scene, so each fixture carries its own and a diff of two
+ * fixtures still says which scene drew it.
+ */
+static br_error scene_add_backdrop(br_actor *world, br_model *cube, const char *scene, br_scalar scale_xy, br_scalar scale_z, br_scalar z)
+{
+    char         name[128];
+    br_material *mat;
+
+    snprintf(name, sizeof(name), "%s-backdrop-material", scene);
+
+    if((mat = scene_backdrop_material(name)) == NULL)
+        return BRE_FAIL;
+
+    scene_backdrop_actor(world, cube, mat, "backdrop", scale_xy, scale_z, z);
+
+    return BRE_OK;
 }
 
 /*
@@ -1384,7 +1422,7 @@ static void scene_fx_add_backdrop(br_actor *world, br_model *cube, br_material *
  * The four p256 scenes additionally carry a backdrop, which the three arb
  * scenes do not - hence the parameter and the byte-identical arb regeneration
  * that guards it. The p256 scenes are the ones with a -blend twin, and their
- * blend is the reason the backdrop exists; see scene_fx_add_backdrop().
+ * blend is the reason the backdrop exists; see scene_add_backdrop().
  */
 static br_error scene_make_rgb_shade(br_model *cube, const char *name, const char *mapname, int size, br_uint_32 flags, br_uint_8 opacity,
                                      br_boolean backdrop)
@@ -1421,15 +1459,8 @@ static br_error scene_make_rgb_shade(br_model *cube, const char *name, const cha
         scene_fx_add_cube_named(world, cube, mats[2], "cube-888", SCENE_ARB_SCALE, xs[2], BR_SCALAR(0), BR_SCALAR(0));
 
     if(backdrop && world != NULL) {
-        char         bname[64];
-        br_material *bmat;
-
-        snprintf(bname, sizeof(bname), "%s-backdrop-material", name);
-
-        if((bmat = scene_backdrop_material(bname)) == NULL)
+        if(scene_add_backdrop(world, cube, name, SCENE_BACKDROP_SCALE_XY, SCENE_BACKDROP_SCALE_Z, SCENE_BACKDROP_Z) != BRE_OK)
             return BRE_FAIL;
-
-        scene_fx_add_backdrop(world, cube, bmat, "backdrop");
     }
 
     snprintf(gltf, sizeof(gltf), "%s.gltf", name);
@@ -1613,7 +1644,7 @@ static br_material *scene_rop_material(const char *scene, const scene_rop_shade 
  * table it is named for and drops the ones it is a one-knob variant of.
  */
 static br_error scene_rop_build(const char *name, br_model *cube, br_uint_8 cubes, br_uint_32 flags, br_pixelmap *map, br_pixelmap *shade,
-                                br_pixelmap *blend, br_pixelmap *fog)
+                                br_pixelmap *blend, br_pixelmap *fog, br_boolean backdrop)
 {
     br_material     *mats[BR_ASIZE(scene_rop_shades)];
     const br_scalar *xs;
@@ -1651,6 +1682,17 @@ static br_error scene_rop_build(const char *name, br_model *cube, br_uint_8 cube
         scene_fx_add_cube_named(world, cube, mats[i], suffix, SCENE_FX_SCALE, xs[i], BR_SCALAR(0), BR_SCALAR(0));
     }
 
+    /*
+     * The red backdrop the blend is read against, seated behind the cubes and
+     * so drawn first. The fogged scenes bind a fog table and so run at the
+     * narrowed 4..8 camera range, where only the near place is inside the far
+     * plane; the rest use the wide one; see the SCENE_BACKDROP_* note above.
+     */
+    if(backdrop && scene_add_backdrop(world, cube, name, fog != NULL ? SCENE_BACKDROP_FOG_SCALE_XY : SCENE_BACKDROP_SCALE_XY,
+                                      fog != NULL ? SCENE_BACKDROP_FOG_SCALE_Z : SCENE_BACKDROP_SCALE_Z,
+                                      fog != NULL ? SCENE_BACKDROP_FOG_Z : SCENE_BACKDROP_Z) != BRE_OK)
+        return BRE_FAIL;
+
     snprintf(gltf, sizeof(gltf), "%s.gltf", name);
 
     return scene_save(gltf, world);
@@ -1686,25 +1728,34 @@ static br_error scene_rop_build(const char *name, br_model *cube, br_uint_8 cube
 // clang-format off
 typedef struct scene_rop_fixture {
     const char *name;
-    br_uint_8   map;    /* which map the cubes bind: 0 = 64x64, 1 = 256x256, 2 = arbitrary width, 3 = none */
-    br_uint_32  flags;  /* shared by the scene's cubes, on top of BR_MATF_LIGHT */
-    br_uint_8   cubes;  /* which of scene_rop_shades are drawn */
-    br_boolean  blend;  /* bind the blend table */
-    br_boolean  fog;    /* bind the fog table */
+    br_uint_8   map;       /* which map the cubes bind: 0 = 64x64, 1 = 256x256, 2 = arbitrary width, 3 = none */
+    br_uint_32  flags;     /* shared by the scene's cubes, on top of BR_MATF_LIGHT */
+    br_uint_8   cubes;     /* which of scene_rop_shades are drawn */
+    br_boolean  blend;     /* bind the blend table */
+    br_boolean  fog;       /* bind the fog table */
+    br_boolean  backdrop;  /* draw the red backdrop the blend is read against */
 } scene_rop_fixture;
 
+/*
+ * Only the rows that bind the blend table carry the backdrop: the indexed blend
+ * reads the pixel already in the colour buffer, and against the clear colour
+ * that only halves the cube's own colour. The fog-only, plain and decal rows
+ * bind no blend and are left alone, and so are the scene-fog-* and
+ * scene-decal-* families elsewhere. The three blendfog rows take the near place
+ * because their fog tables narrow the camera; see scene_rop_build().
+ */
 static const scene_rop_fixture scene_rop_fixtures[] = {
     /* Blend and fog at once. */
-    {.name = "scene-blendfog-p2",        .map = 0, .flags = BR_MATF_PERSPECTIVE, .cubes = 7, .blend = BR_TRUE, .fog = BR_TRUE},
-    {.name = "scene-blendfog-arb-persp", .map = 2, .flags = BR_MATF_PERSPECTIVE, .cubes = 7, .blend = BR_TRUE, .fog = BR_TRUE},
-    {.name = "scene-blendfog-arb",       .map = 2, .flags = 0,                   .cubes = 7, .blend = BR_TRUE, .fog = BR_TRUE},
+    {.name = "scene-blendfog-p2",        .map = 0, .flags = BR_MATF_PERSPECTIVE, .cubes = 7, .blend = BR_TRUE, .fog = BR_TRUE,  .backdrop = BR_TRUE},
+    {.name = "scene-blendfog-arb-persp", .map = 2, .flags = BR_MATF_PERSPECTIVE, .cubes = 7, .blend = BR_TRUE, .fog = BR_TRUE,  .backdrop = BR_TRUE},
+    {.name = "scene-blendfog-arb",       .map = 2, .flags = 0,                   .cubes = 7, .blend = BR_TRUE, .fog = BR_TRUE,  .backdrop = BR_TRUE},
 
     /* Blend alone. */
-    {.name = "scene-blend-p2-persp",     .map = 0, .flags = BR_MATF_PERSPECTIVE, .cubes = 7, .blend = BR_TRUE, .fog = BR_FALSE},
-    {.name = "scene-blend-p2-smooth",    .map = 0, .flags = 0,                   .cubes = SCENE_ROP_SMOOTH, .blend = BR_TRUE, .fog = BR_FALSE},
-    {.name = "scene-blend-p2-flat",      .map = 0, .flags = 0,                   .cubes = SCENE_ROP_FLAT, .blend = BR_TRUE, .fog = BR_FALSE},
-    {.name = "scene-blend-arb-persp",    .map = 2, .flags = BR_MATF_PERSPECTIVE, .cubes = 7, .blend = BR_TRUE, .fog = BR_FALSE},
-    {.name = "scene-blend-arb",          .map = 2, .flags = 0,                   .cubes = 7, .blend = BR_TRUE, .fog = BR_FALSE},
+    {.name = "scene-blend-p2-persp",     .map = 0, .flags = BR_MATF_PERSPECTIVE, .cubes = 7, .blend = BR_TRUE, .fog = BR_FALSE, .backdrop = BR_TRUE},
+    {.name = "scene-blend-p2-smooth",    .map = 0, .flags = 0,                   .cubes = SCENE_ROP_SMOOTH, .blend = BR_TRUE, .fog = BR_FALSE, .backdrop = BR_TRUE},
+    {.name = "scene-blend-p2-flat",      .map = 0, .flags = 0,                   .cubes = SCENE_ROP_FLAT, .blend = BR_TRUE, .fog = BR_FALSE, .backdrop = BR_TRUE},
+    {.name = "scene-blend-arb-persp",    .map = 2, .flags = BR_MATF_PERSPECTIVE, .cubes = 7, .blend = BR_TRUE, .fog = BR_FALSE, .backdrop = BR_TRUE},
+    {.name = "scene-blend-arb",          .map = 2, .flags = 0,                   .cubes = 7, .blend = BR_TRUE, .fog = BR_FALSE, .backdrop = BR_TRUE},
 
     /* Fog alone. */
     {.name = "scene-fog-p2-persp",       .map = 1, .flags = BR_MATF_PERSPECTIVE, .cubes = 7, .blend = BR_FALSE, .fog = BR_TRUE},
@@ -1746,7 +1797,8 @@ static br_error scene_make_rop_fixtures(br_model *cube)
     for(size_t i = 0; i < BR_ASIZE(scene_rop_fixtures); ++i) {
         const scene_rop_fixture *fx = &scene_rop_fixtures[i];
 
-        if(scene_rop_build(fx->name, cube, fx->cubes, fx->flags, maps[fx->map], shade, fx->blend ? blend : NULL, fx->fog ? fog : NULL) != BRE_OK)
+        if(scene_rop_build(fx->name, cube, fx->cubes, fx->flags, maps[fx->map], shade, fx->blend ? blend : NULL, fx->fog ? fog : NULL,
+                           fx->backdrop) != BRE_OK)
             r = BRE_FAIL;
     }
 
@@ -1950,6 +2002,9 @@ static br_error scene_make_feature_fixtures(br_model *cube)
      * Indexed blend. No BR_MATF_SMOOTH, so the blend is applied to the raw texel:
      * the shaded-and-blended combination needs a shade table as well, and one
      * thing at a time is what makes a failure name itself.
+     *
+     * The backdrop behind the two cubes is what the blend mixes against - see
+     * the note above scene_backdrop_material().
      */
     {
         br_material *mat = scene_fx_material("scene-blend-material", BR_MATF_LIGHT | BR_MATF_BLEND);
@@ -1962,6 +2017,9 @@ static br_error scene_make_feature_fixtures(br_model *cube)
         if(world != NULL)
             scene_fx_add_cube(world, cube, mat, BR_SCALAR(0.9), BR_SCALAR(0.0), BR_SCALAR(1.0));
 
+        if(world != NULL && scene_add_backdrop(world, cube, "scene-blend", SCENE_BACKDROP_SCALE_XY, SCENE_BACKDROP_SCALE_Z, SCENE_BACKDROP_Z) != BRE_OK)
+            r = BRE_FAIL;
+
         if(scene_save("scene-blend.gltf", world) != BRE_OK)
             r = BRE_FAIL;
     }
@@ -1971,6 +2029,10 @@ static br_error scene_make_feature_fixtures(br_model *cube)
      * no blend table bound. Without it the blend relation would be comparing two
      * differently-shaped scenes and would pass whether the table was read or
      * not.
+     *
+     * It gets the backdrop too, or the relation would stop being readable: a
+     * plain cube over black beside a blended one over red is two changes, not
+     * the one knob the pair exists to isolate.
      */
     {
         br_material *mat = scene_fx_material("scene-blend-off-material", BR_MATF_LIGHT);
@@ -1981,6 +2043,10 @@ static br_error scene_make_feature_fixtures(br_model *cube)
 
         if(world != NULL)
             scene_fx_add_cube(world, cube, mat, BR_SCALAR(0.9), BR_SCALAR(0.0), BR_SCALAR(1.0));
+
+        if(world != NULL &&
+           scene_add_backdrop(world, cube, "scene-blend-off", SCENE_BACKDROP_SCALE_XY, SCENE_BACKDROP_SCALE_Z, SCENE_BACKDROP_Z) != BRE_OK)
+            r = BRE_FAIL;
 
         if(scene_save("scene-blend-off.gltf", world) != BRE_OK)
             r = BRE_FAIL;
