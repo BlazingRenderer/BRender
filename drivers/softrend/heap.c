@@ -100,8 +100,23 @@ static void heapInsertPrimitive(br_order_table *ot, br_primitive *prim, br_scala
         if(depth < BR_SCALAR(0.0)) {
             bucket = 0;
         } else {
+            /*
+             * The conversion is undefined outside int's range and x86-64's
+             * cvttss2si returns INT_MIN for an overflowing value, which the
+             * upper clamp alone cannot see: a negative bucket indexes below
+             * ot->table's base and faults.
+             *
+             * A BR_MATF_FORCE_BACK material asks for exactly that overflow -
+             * it sorts at BR_SCALAR_MAX, so (scale * (depth - min_z)) overflows
+             * at any camera range. On 32-bit x86 the same INT_MIN is harmless:
+             * INT_MIN * sizeof(pointer) wraps to 0 in its address arithmetic, so
+             * the entry lands in bucket 0. Clamping to 0 keeps that behaviour
+             * and makes the index defined.
+             */
             bucket = BrScalarToInt(BR_MUL(ot->scale, depth));
-            if(bucket >= ot->size)
+            if(bucket < 0)
+                bucket = 0;
+            else if(bucket >= ot->size)
                 bucket = ot->size - 1;
         }
         prim->next        = ot->table[bucket];
