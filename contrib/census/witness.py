@@ -47,6 +47,16 @@ FIELD = lambda name, text, pat=r"([^,\n]+)": (
     m.group(1).strip() if (m := re.search(r"\.%s\s*=\s*%s," % (name, pat), text)) else None
 )
 
+# The fields match_block() (drivers/pentprim/match.c) tests besides the flags
+# predicate. They are read out here so reachable.py walks the same entries this
+# census joins against - one parser, one spelling of "what a block requires".
+PREDICATES = [
+    "flags_mask", "flags_cmp",
+    "depth_type", "texture_type", "shade_type", "bump_type",
+    "lighting_type", "screendoor_type", "blend_type", "fog_type",
+    "input_colour_type",
+]
+
 
 def parse_tables(build):
     """-> {(table, index): entry} for the tables this build generated."""
@@ -73,6 +83,11 @@ def parse_tables(build):
                 # this block can call.
                 "kernels": sorted(set(re.findall(
                     r"\.rasterise_(?:rl|lr)_[ls]\s*=\s*([A-Za-z_][A-Za-z0-9_]*),", chunk))),
+                # The requirements match_block() compares against the
+                # primitive state, in the generator's own spelling.
+                "map_width": int(FIELD("map_width", chunk) or 0),
+                "map_height": int(FIELD("map_height", chunk) or 0),
+                **{name: FIELD(name, chunk) for name in PREDICATES},
             }
     return entries
 

@@ -92,6 +92,27 @@ the generated table has at that index, and every `(table, index)` has to exist.
 It says so loudly rather than reporting a census built on the wrong rows — which
 is how the table-name mapping was found to be wrong when this was written.
 
+## Which entries no state can select
+
+An unwitnessed entry is either one no fixture happens to hit, or one no
+primitive state can hit at all. `reachable.py` decides the second without a
+renderer, by running the walk `match_block()` performs over the finite state
+space its comparisons can distinguish, once per (format, topology) and once for
+each of the two MMX configurations:
+
+```
+contrib/census/reachable.py <build>                       # dead per configuration
+contrib/census/reachable.py <build> --census <out>        # + selected / gap / dead
+```
+
+It reads the same generated tables `witness.py` joins against
+(`witness.parse_tables`) and, with `--census`, the same selection logs. The
+one caveat worth remembering is that it enumerates every assignment of the
+`PRIMF_*` tokens the entries name, while the engine derives several of those
+bits from the bound buffers; the flag space is therefore a superset, which makes
+"dead" sound and "selectable" an over-count. See the module docstring for the
+rest of the model and for what it deliberately cannot see.
+
 The nine `resources/gltf-reference` scenes are dumps from Croc, kept because
 they have historically tripped the lighting, so it can be tested without
 starting the game. They are a coverage corpus rather than a reference one: no
