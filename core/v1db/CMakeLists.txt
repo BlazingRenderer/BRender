@@ -31,6 +31,7 @@ set(V1DB_FILES
         modrend.c
         modsupt.c
         otable.c
+        ot_trav.c
         pick.c
         prelight.c
         prepmap.c

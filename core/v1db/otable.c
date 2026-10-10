@@ -332,16 +332,24 @@ void SetOrderTableRange(br_order_table *order_table)
 }
 
 /*
- * Render primitives in the list of order tables
+ * The one order-table walk. Both the Z-sort render path (RenderOrderTableList()
+ * and RenderPrimaryOrderTable()) and ZsOrderTableTraversal() drive their
+ * bucket ordering through it; `action` receives a bucket table and its bucket
+ * count and is the only thing that differs between rendering and traversal.
+ *
+ * Every order table the walk finishes has its visit count cleared:
+ * br_order_table::visits tells the next walk that the table needs clearing and
+ * (under BR_ORDER_TABLE_INIT_BOUNDS) its Z range recalculated, so it must not
+ * outlive the walk that drew the table.
  */
-void RenderOrderTableList(void)
+void BR_RESIDENT_ENTRY WalkOrderTableList(br_order_table_action_fn *action)
 {
     br_order_table *order_table;
 
     order_table = v1db.order_table_list;
 
     while(order_table != NULL) {
-        GeometryV1BucketsRender(v1db.format_buckets, v1db.renderer, order_table->table, order_table->size);
+        action(order_table->table, order_table->size);
         order_table->visits = 0;
         order_table         = order_table->next;
     }
@@ -351,7 +359,7 @@ void RenderOrderTableList(void)
  * Render primitives in the root order table and
  * in the list of order tables
  */
-void RenderPrimaryOrderTable(void)
+void BR_RESIDENT_ENTRY WalkPrimaryOrderTable(br_order_table_action_fn *action)
 {
     br_uint_16      m, size;
     br_scalar       bucket_size;
@@ -367,7 +375,7 @@ void RenderPrimaryOrderTable(void)
      * just render the list of order tables
      */
     if(v1db.primary_order_table->visits == 0) {
-        RenderOrderTableList();
+        WalkOrderTableList(action);
         return;
     }
 
@@ -386,7 +394,7 @@ void RenderPrimaryOrderTable(void)
         if(order_table->sort_z < max_z)
             break;
 
-        GeometryV1BucketsRender(v1db.format_buckets, v1db.renderer, order_table->table, order_table->size);
+        action(order_table->table, order_table->size);
         order_table->visits = 0;
         order_table         = order_table->next;
     }
@@ -404,7 +412,7 @@ void RenderPrimaryOrderTable(void)
          * Render bucket
          */
         if(*bucket)
-            GeometryV1BucketsRender(v1db.format_buckets, v1db.renderer, bucket, 1);
+            action(bucket, 1);
 
         /*
          * Render order tables whose sort Z values lie in this bucket
@@ -415,7 +423,7 @@ void RenderPrimaryOrderTable(void)
             if(order_table->sort_z < max_z)
                 break;
 
-            GeometryV1BucketsRender(v1db.format_buckets, v1db.renderer, order_table->table, order_table->size);
+            action(order_table->table, order_table->size);
             order_table->visits = 0;
             order_table         = order_table->next;
         }
@@ -426,7 +434,7 @@ void RenderPrimaryOrderTable(void)
      */
     while(order_table != NULL) {
 
-        GeometryV1BucketsRender(v1db.format_buckets, v1db.renderer, order_table->table, order_table->size);
+        action(order_table->table, order_table->size);
         order_table->visits = 0;
         order_table         = order_table->next;
     }
@@ -435,4 +443,26 @@ void RenderPrimaryOrderTable(void)
      * Reset visit count
      */
     v1db.primary_order_table->visits = 0;
+}
+
+static void RenderOrderTableBuckets(br_primitive **buckets, br_int_32 nbuckets)
+{
+    GeometryV1BucketsRender(v1db.format_buckets, v1db.renderer, buckets, nbuckets);
+}
+
+/*
+ * Render primitives in the list of order tables
+ */
+void RenderOrderTableList(void)
+{
+    WalkOrderTableList(RenderOrderTableBuckets);
+}
+
+/*
+ * Render primitives in the root order table and
+ * in the list of order tables
+ */
+void RenderPrimaryOrderTable(void)
+{
+    WalkPrimaryOrderTable(RenderOrderTableBuckets);
 }

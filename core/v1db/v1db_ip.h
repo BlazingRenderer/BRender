@@ -58,8 +58,12 @@ typedef void br_render_style_call_fn(br_actor *actor, br_model *model, br_materi
 extern br_render_style_call_fn *const RenderStyleCalls[];
 
 /*
- * otable.c
+ * otable.c - the shared order-table walk, also driven by ot_trav.c
  */
+typedef void br_order_table_action_fn(br_primitive **buckets, br_int_32 nbuckets);
+
+void BR_RESIDENT_ENTRY WalkOrderTableList(br_order_table_action_fn *action);
+void BR_RESIDENT_ENTRY WalkPrimaryOrderTable(br_order_table_action_fn *action);
 void RenderPrimaryOrderTable(void);
 void RenderOrderTableList(void);
 void SetOrderTableRange(br_order_table *order_table);
