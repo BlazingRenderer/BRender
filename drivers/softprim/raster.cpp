@@ -1193,9 +1193,10 @@ void PerspSpan(PerspWalk& w, const softprim_buffer& texture, const softprim_buff
     }
 
     br_int_32  source = (br_int_32)w.source;
-    br_uint_8 *c      = w.scan + (br_int_32)(w.main_i & 0xffffu);
-    br_uint_8 *end    = w.scan + (br_uint_32)(w.minor_i) / 65536u;
-    br_uint_8 *z      = w.zscan + (br_int_32)(w.main_i & 0xffffu) * 2;
+
+    br_uint_8 *c   = w.scan + (br_int_32)(w.main_i & 0xffffu);
+    br_uint_8 *end = w.scan + (br_uint_32)(w.minor_i) / 65536u;
+    br_uint_8 *z   = w.zscan + (br_int_32)(w.main_i & 0xffffu) * 2;
     br_int_32  iv     = w.pi.current;
     br_int_32  zz     = w.pz.current;
 
@@ -1450,6 +1451,8 @@ void PerspTrapezium(PerspWalk& w, const softprim_buffer& colour, const softprim_
             w.zscan += depth.stride_b;
     }
 }
+
+inline br_uint_8 RgbFormatType(sp_fmt F) noexcept;
 
 /*
  * One textured INDEX_8 triangle.
@@ -2382,6 +2385,28 @@ inline br_int_32 PizDecV(br_int_32 a, br_int_32 size) noexcept
 }
 
 /*
+ * Force a float assignment to binary32.
+ *
+ * The setup below is a chain of C float assignments, and the pixels depend on
+ * where each one of them rounds. The casts in this file say where that is, but
+ * on the i386 x87 build a cast alone does not do it: gcc's default
+ * -fexcess-precision=fast lets the x87 carry its extra precision through an
+ * assignment, so `(float)x` can stay extended and a value the C rounds is not
+ * rounded here. pentprim's values are the C's rounded ones wherever its
+ * compiler put them in memory, so an assignment that does not happen moves a
+ * sample - measured, not assumed: with these assignments enforced the last two
+ * differing pixels of scene-shade-p256-flat-persp at 15bpp z-sorted disappear.
+ * The one place the reference does *not* round is the maxuv accumulator, which
+ * is why that one is extended here instead (see its note below).
+ */
+inline float PizRounded(long double v) noexcept
+{
+    volatile float f = (float)v;
+
+    return f;
+}
+
+/*
  * rcp.c's _reciprocal[]: 0x10000/n for n >= 1 (index 0 holds 0x10000), which
  * the table spells out for 2048 entries. Interpreting the table rather than
  * reading it keeps this source free of an 8KB constant, and the values are
@@ -2399,11 +2424,13 @@ inline br_uint_32 PizReciprocal(br_int_32 y) noexcept
 /*
  * frcp.c's frcp[]: 1/n for n in 1..99, the float reciprocal perspzi.h uses for
  * a small positive divisor instead of dividing. 1.0f/(float)n is correctly
- * rounded here, which is what the initialiser of the table is.
+ * rounded here, which is what the initialiser of the table is - and it is a
+ * table entry, so the value is a float and not the extended quotient the x87
+ * would otherwise carry on with.
  */
 inline float PizFrcp(br_int_32 n) noexcept
 {
-    return 1.0f / (float)n;
+    return PizRounded(1.0L / (long double)n);
 }
 
 /*
@@ -2518,6 +2545,10 @@ struct PizWalk {
     br_int_32 pv_current, pv_grad_x, pv_d_nocarry;
     br_int_32 pq_current, pq_grad_x, pq_d_nocarry;
     br_int_32 pz_current, pz_grad_x, pz_d_nocarry;
+
+    /* The intensity is affine, not projective, so it is one more ramp like the
+     * depth and is set up only for the LIGHT cells. */
+    br_int_32 pi_current, pi_grad_x, pi_d_nocarry;
 
     /* The numerators are carried relative to the base texel, so these
      * projective steps replace the ones above once the base point has been
@@ -2796,34 +2827,202 @@ void PizDitherSpan(PizWalk& w, const softprim_buffer& colour, const softprim_buf
 }
 
 /*
- * One dithered-map INDEX_8 perspective triangle: perspz.c's
- * TriangleRenderPIZ2TPD* (z-buffered) or persp.c's TriangleRenderPITPD*
- * (z-sorted), each of which is perspzi.h / perspi.h instantiated for a map
- * size.
+ * One scanline of the RGB shade-table cell: t15_pip.asm's ScanLinePITIP with
+ * its RGB fragment - the LIGHT instantiation of perspi.h, whose ScanLinePITIP
+ * is the SNAME for persp.c's BPP 2 / SIZE 256 / LIGHT 1 cells (the 555/565
+ * PITIP256 and PITIPB256 blocks).
+ *
+ * The walk is the dither span's - the same perspi.h setup, its own copies of
+ * the walk state for the scanline's duration, and no write-back - but the order
+ * of the asm's loop is this file's own: the pixel at the scanline's start is
+ * stored as the C-level PDIVIDE left it, and only then does the loop step and
+ * adjust for the next pixel (t15_pip.asm:66-169). Both orders place the same
+ * sample at the same pixel - measured, not assumed: the dithered span's order
+ * was built first and the frames are identical either way - so neither is a
+ * correction of the other.
+ *
+ * The fragment is the shade table's own word: the intensity is the row and the
+ * texel is the column, the entry is read as a 16-bit value, and a texel of 0 is
+ * transparent. The intensity steps by pi.grad_x a pixel, in the direction of
+ * the walk, and never carries between pixels - only the trapezium's per-row
+ * step moves it down.
+ *
+ * D is deliberately absent: the two cells this serves are z-sorted only
+ * (SP_DEPTH_NONE), because a 555/565 output is taken by the MMX table before
+ * the general one whenever a depth buffer is present, so the z-buffered
+ * PIZ2TIP256 shapes are unreachable and this span has no depth handling.
+ *
+ * The destination advances two bytes a pixel - this is a BPP 2 cell, not the
+ * dither span's one - and the blend is pentprim's destination blend: half of
+ * each, through the mask that clears every channel's low bit so no carry
+ * crosses into its neighbour.
+ */
+template <sp_fmt F, sp_blend B>
+void PizShadeSpan(PizWalk& w, const softprim_buffer& colour, const softprim_buffer& texture, const softprim_buffer& shade,
+                  br_int_32 size) noexcept
+{
+    const br_uint_8 *tex  = texture.base;
+    const br_uint_8 *stbl = shade.base;
+
+    br_int_32  u_num  = w.pu_current;
+    br_int_32  v_num  = w.pv_current;
+    br_int_32  du_num = w.pu_grad_x;
+    br_int_32  dv_num = w.pv_grad_x;
+    br_int_32  den    = w.pq_current;
+    br_int_32  intensity = w.pi_current;
+    br_int_32  source = w.source;
+    br_int_32  dest   = w.start;
+    br_int_32  end    = w.end;
+
+    if(dest == end)
+        return;
+
+    const bool forward = (dest < end);
+
+    /* Bounds for the destination and for the shade table's flat read. The
+     * destination can sit one pixel outside the visible region for a primitive
+     * clipped hard against an edge, which the asm writes and which is invisible
+     * either way, so it is skipped rather than written into whatever the
+     * pixelmap was allocated with. The table is read at 2*index, the flat
+     * offset the asm's `lea ecx,[ecx*2+eax]` forms. */
+    const br_size_t limit       = (br_size_t)colour.stride_b * (br_size_t)colour.height;
+    const br_size_t shade_limit = (br_size_t)shade.stride_b * (br_size_t)shade.height;
+
+    const br_uint_16 mask = (F == SP_FMT_555) ? 0x7bde : 0xf7de;
+
+    for(;;) {
+        if(dest >= 0 && (br_size_t)dest + 1 < limit) {
+            const br_uint_8 texel = tex[source];
+
+            if(texel != 0) {
+                const br_size_t off = (br_size_t)(((((br_uint_32)intensity >> 16) & 0xffu) << 8) | texel) * 2;
+
+                if(off + 2 <= shade_limit) {
+                    br_uint_16 v;
+
+                    memcpy(&v, stbl + off, sizeof(v));
+
+                    if(B == SP_BLEND_ALPHA) {
+                        br_uint_16 dst;
+
+                        memcpy(&dst, colour.base + dest, sizeof(dst));
+                        v = (br_uint_16)(((v & mask) >> 1) + ((dst & mask) >> 1));
+                    }
+
+                    memcpy(colour.base + dest, &v, sizeof(v));
+                }
+            }
+        }
+
+        /* t15_pip.asm:99-105: the intensity steps a pixel in the walk's own
+         * direction, and the destination by BPP, before the end test. */
+        intensity += forward ? w.pi_grad_x : -w.pi_grad_x;
+        dest += forward ? 2 : -2;
+
+        if(forward ? (dest >= end) : (dest <= end))
+            break;
+
+        /*
+         * The per-pixel step and the PDIVIDE, in the asm's order: the u
+         * numerator and the denominator first, then the u correction loops,
+         * then v (t15_pip.asm:115-163). The v step uses the denominator the u
+         * step just produced, and du_num/dv_num are corrected in the same
+         * place, so the next pixel's step uses them.
+         */
+        if(forward) {
+            u_num -= du_num;
+            v_num -= dv_num;
+            den += w.pq_grad_x;
+        } else {
+            u_num += du_num;
+            v_num += dv_num;
+            den -= w.pq_grad_x;
+        }
+
+        /* The denominator is neither guaranteed positive nor constant along
+         * the walk, and the asm's loops would spin on a non-positive one
+         * (subtracting it moves the numerator the wrong way); the correction is
+         * skipped instead of hung, as in the dither span's in-span PDIVIDE. */
+        if(den > 0) {
+            if(u_num >= den) {
+                do {
+                    source = PizIncU(source, size);
+                    du_num += w.pq_grad_x;
+                    u_num -= den;
+                } while(u_num >= den);
+            } else if(u_num < 0) {
+                do {
+                    source = PizDecU(source, size);
+                    du_num -= w.pq_grad_x;
+                    u_num += den;
+                } while(u_num < 0);
+            }
+
+            if(v_num < 0) {
+                do {
+                    source = PizDecV(source, size);
+                    dv_num -= w.pq_grad_x;
+                    v_num += den;
+                } while(v_num < 0);
+            } else if(v_num >= den) {
+                do {
+                    source = PizIncV(source, size);
+                    dv_num += w.pq_grad_x;
+                    v_num -= den;
+                } while(v_num >= den);
+            }
+        }
+    }
+}
+
+/*
+ * perspi.h's setup and trapezium walk, shared by the two cells that reach
+ * persp.c through it. D and F select the cell: F == SP_FMT_I8 is the dithered
+ * INDEX_8 map (BPP 1, no intensity, ScanLinePITPD), and F == SP_FMT_555/565 is
+ * the 256x256 RGB shade-table cell (BPP 2, an intensity parameter and the
+ * shade table, ScanLinePITIP). S and B are the shade-table cell's own two
+ * variants, the intensity source and pentprim's destination blend; the
+ * dithered cell takes no intensity and no blend. PizDitherTriangle and
+ * PizShadeTriangle below name the two cells and fix those axes.
  *
  * The setup works entirely in the fixed components, and the ring of long double
- * values below is the x87: perspz.c is a chain of float assignments, evaluated
+ * values below is the x87: persp.c is a chain of float assignments, evaluated
  * on the i386 build in the x87's extended precision and rounded once per
  * assignment, and the results are truncated to integers later, so the roundings
  * are observable. Each assignment here is one extended expression rounded to
  * float, which is that rule.
  */
-template <sp_depth D>
-void PizDitherTriangle(brp_block *block, brp_vertex *v0, brp_vertex *v1, brp_vertex *v2) noexcept
+template <sp_depth D, sp_fmt F, sp_shade S, sp_blend B>
+void PizTriangle(brp_block *block, brp_vertex *v0, brp_vertex *v1, brp_vertex *v2) noexcept
 {
+    /* F is the destination's own format: the indexed map is the only one-byte
+     * destination, and the shade-table cell's two formats are both two bytes.
+     * LIGHT is whether perspi.h's PARAM_SETUP(work.pi) is instantiated, which
+     * for these blocks is exactly the shade-table cell. */
+    constexpr int  BPP   = (F == SP_FMT_I8) ? 1 : 2;
+    constexpr bool LIGHT = (F != SP_FMT_I8);
+
     (void)block;
 
     const softprim_buffer& colour  = SoftPrimWork.colour;
     const softprim_buffer& dbuf    = SoftPrimWork.depth;
     const softprim_buffer& texture = SoftPrimWork.texture;
+    const softprim_buffer& shade   = SoftPrimWork.shade;
 
-    if(colour.type != BR_PMT_INDEX_8 || colour.base == NULL || colour.width_p <= 0 || colour.height <= 0)
+    if(colour.type != (F == SP_FMT_I8 ? BR_PMT_INDEX_8 : RgbFormatType(F)) || colour.base == NULL || colour.width_p <= 0 ||
+       colour.height <= 0)
         return;
 
     if(D == SP_DEPTH_ZW && (dbuf.type != BR_PMT_DEPTH_16 || dbuf.base == NULL))
         return;
 
     if(texture.base == NULL || texture.type != BR_PMT_INDEX_8)
+        return;
+
+    /* The shade table the LIGHT cells read is typed to the destination: the
+     * texel is the column and the intensity the row, and the entry is the pixel
+     * itself, so the two formats have to agree. */
+    if(LIGHT && (shade.base == NULL || shade.type != RgbFormatType(F)))
         return;
 
     /*
@@ -2848,14 +3047,31 @@ void PizDitherTriangle(brp_block *block, brp_vertex *v0, brp_vertex *v1, brp_ver
         if(!isfinite(src[k]->comp[C_SX]) || !isfinite(src[k]->comp[C_SY]) || !isfinite(src[k]->comp[C_W]))
             return;
 
-        pv[k].x  = BrFloatToFixed(src[k]->comp[C_SX]);
-        pv[k].y  = BrFloatToFixed(src[k]->comp[C_SY]);
-        pv[k].z  = BrFloatToFixed(src[k]->comp[C_SZ]);
-        pv[k].u  = BrFloatToFixed(src[k]->comp[C_U]);
-        pv[k].v  = BrFloatToFixed(src[k]->comp[C_V]);
-        pv[k].w  = BrFloatToFixed(src[k]->comp[C_W]);
+        if(LIGHT && !isfinite(src[k]->comp[C_I]))
+            return;
+
+        pv[k].x = BrFloatToFixed(src[k]->comp[C_SX]);
+        pv[k].y = BrFloatToFixed(src[k]->comp[C_SY]);
+        pv[k].z = BrFloatToFixed(src[k]->comp[C_SZ]);
+        pv[k].u = BrFloatToFixed(src[k]->comp[C_U]);
+        pv[k].v = BrFloatToFixed(src[k]->comp[C_V]);
+        pv[k].w = BrFloatToFixed(src[k]->comp[C_W]);
+
+        if(LIGHT)
+            pv[k].i = BrFloatToFixed(src[k]->comp[C_I]);
+
         pv[k].sy = pv[k].y;
     }
+
+    /*
+     * A constant-intensity block's intensity is vertex 0's for the whole
+     * triangle. pentprim's table marks those blocks `duplicate`, which softrend
+     * honours as BR_PRIMF_CONST_DUPLICATE, but the constant surface op only
+     * writes vertex 0 - so replicate here, as RgbAwtTriangle and
+     * ApplyIntensity() do for their own constant cells.
+     */
+    if(S == SP_SHADE_CONST_I_RGB)
+        pv[1].i = pv[2].i = pv[0].i;
 
     /* perspzi.h:99-132: sort by the SY component itself, not by its integer
      * part, which is what makes the parity of the sort irrelevant here. */
@@ -2912,20 +3128,25 @@ void PizDitherTriangle(brp_block *block, brp_vertex *v0, brp_vertex *v1, brp_ver
 
     /* Only a small positive divisor takes the table; the second arm of the C's
      * test is unreachable, since a zero divisor has already been rejected. */
-    const float g_inverse = (w.divisor > 0 && w.divisor < 100) ? PizFrcp(w.divisor) : (float)(1.0L / (long double)w.divisor);
+    const float g_inverse = (w.divisor > 0 && w.divisor < 100) ? PizFrcp(w.divisor) : PizRounded(1.0L / (long double)w.divisor);
 
     /* perspzi.h:155-171: the base texel, rounded down to a whole texel with the
-     * fraction carried separately. u and v are the integer parts and are always
-     * zero, because the difference the C takes them from is the low 16 bits. */
+     * fraction carried separately. u and v are the C's integer quotients and
+     * are zero by construction, because the difference the C takes them from
+     * is the low 16 bits of a fixed value; the *float* neighbours au..cv are
+     * the same difference before the division, so they are the base point's
+     * fractional texel coordinate within the texel the walk starts on. The
+     * distinction matters: taking the fraction from u/v loses it - the ramp
+     * would start on the texel's corner instead of the point it was given. */
     const br_int_32 u_base16 = pv[0].u & (br_int_32)0xffff0000;
     const br_int_32 v_base16 = pv[0].v & (br_int_32)0xffff0000;
     const br_int_32 u_int    = (pv[0].u - u_base16) / 0x10000;
     const br_int_32 v_int    = (pv[0].v - v_base16) / 0x10000;
 
-    float au = (float)(long double)u_int / 65536.0f;
+    float au = (float)(long double)(pv[0].u - u_base16) / 65536.0f;
     float bu = (float)(long double)(pv[1].u - u_base16) / 65536.0f;
     float cu = (float)(long double)(pv[2].u - u_base16) / 65536.0f;
-    float av = (float)(long double)v_int / 65536.0f;
+    float av = (float)(long double)(pv[0].v - v_base16) / 65536.0f;
     float bv = (float)(long double)(pv[1].v - v_base16) / 65536.0f;
     float cv = (float)(long double)(pv[2].v - v_base16) / 65536.0f;
 
@@ -2938,57 +3159,74 @@ void PizDitherTriangle(brp_block *block, brp_vertex *v0, brp_vertex *v1, brp_ver
     const float wf1 = (float)pv[1].w;
     const float wf2 = (float)pv[2].w;
 
-    float aw = (float)((long double)wf1 * (long double)wf2);
-    float bw = (float)((long double)wf2 * (long double)wf0);
-    float cw = (float)((long double)wf1 * (long double)wf0);
+    float aw = PizRounded((long double)wf1 * (long double)wf2);
+    float bw = PizRounded((long double)wf2 * (long double)wf0);
+    float cw = PizRounded((long double)wf1 * (long double)wf0);
 
-    /* perspzi.h:184-215: the maxuv normalisation, accumulated in the order the
-     * C writes it - each product is folded in as it is formed. */
-    float maxuv = (aw > 0.0f) ? aw : -aw;
+    /*
+     * perspzi.h:184-215: the maxuv normalisation, accumulated in the order the
+     * C writes it - each product is folded in as it is formed.
+     *
+     * The accumulator itself is extended, not float. The C assigns every `+=`
+     * back to the float variable, but on the i386 x87 build the accumulator
+     * stays in a register for the whole chain and is never rounded until it is
+     * used, and the pixels are that register's: the terms are of order 1e13,
+     * where an f32 ulp is 8, so a float accumulator is one ulp out. That ulp
+     * moves `norm`, then one scaled component, then a gradient by one unit, and
+     * at a texel boundary that is a different texel. Measured against
+     * pentprim's own x87 state on scene-shade-p256-flat-persp: its accumulator
+     * is the exact sum 81280910385152 while the float one is 81280913899520,
+     * and only the exact one reproduces pentprim's pixels. This accumulator is
+     * the one value of this setup the reference keeps in a register; every other
+     * assignment in it is a float it stores, so those are rounded here through
+     * PizRounded above, and the two together are what closes the last differing
+     * pixel of that fixture.
+     */
+    long double maxuv = (aw > 0.0f) ? (long double)aw : (long double)(-aw);
 
-    maxuv = (float)((long double)maxuv + (long double)((au > 0.0f) ? au : -au));
-    maxuv = (float)((long double)maxuv + (long double)((av > 0.0f) ? av : -av));
+    maxuv += (long double)((au > 0.0f) ? au : -au);
+    maxuv += (long double)((av > 0.0f) ? av : -av);
 
-    au    = (float)((long double)au * (long double)aw);
-    maxuv = (float)((long double)maxuv + (long double)((au > 0.0f) ? au : -au));
-    av    = (float)((long double)av * (long double)aw);
-    maxuv = (float)((long double)maxuv + (long double)((av > 0.0f) ? av : -av));
-    bu    = (float)((long double)bu * (long double)bw);
-    maxuv = (float)((long double)maxuv + (long double)((bu > 0.0f) ? bu : -bu));
-    bv    = (float)((long double)bv * (long double)bw);
-    maxuv = (float)((long double)maxuv + (long double)((bv > 0.0f) ? bv : -bv));
-    cu    = (float)((long double)cu * (long double)cw);
-    maxuv = (float)((long double)maxuv + (long double)((cu > 0.0f) ? cu : -cu));
-    cv    = (float)((long double)cv * (long double)cw);
-    maxuv = (float)((long double)maxuv + (long double)((cv > 0.0f) ? cv : -cv));
+    au = PizRounded((long double)au * (long double)aw);
+    maxuv += (long double)((au > 0.0f) ? au : -au);
+    av = PizRounded((long double)av * (long double)aw);
+    maxuv += (long double)((av > 0.0f) ? av : -av);
+    bu = PizRounded((long double)bu * (long double)bw);
+    maxuv += (long double)((bu > 0.0f) ? bu : -bu);
+    bv = PizRounded((long double)bv * (long double)bw);
+    maxuv += (long double)((bv > 0.0f) ? bv : -bv);
+    cu = PizRounded((long double)cu * (long double)cw);
+    maxuv += (long double)((cu > 0.0f) ? cu : -cu);
+    cv = PizRounded((long double)cv * (long double)cw);
+    maxuv += (long double)((cv > 0.0f) ? cv : -cv);
 
-    const float norm = (float)(268435456.0L / (long double)maxuv);
+    const float norm = PizRounded(268435456.0L / maxuv);
 
-    au = (float)((long double)au * (long double)norm);
-    av = (float)((long double)av * (long double)norm);
-    aw = (float)((long double)aw * (long double)norm);
-    bu = (float)((long double)bu * (long double)norm);
-    bv = (float)((long double)bv * (long double)norm);
-    bw = (float)((long double)bw * (long double)norm);
-    cu = (float)((long double)cu * (long double)norm);
-    cv = (float)((long double)cv * (long double)norm);
-    cw = (float)((long double)cw * (long double)norm);
+    au = PizRounded((long double)au * (long double)norm);
+    av = PizRounded((long double)av * (long double)norm);
+    aw = PizRounded((long double)aw * (long double)norm);
+    bu = PizRounded((long double)bu * (long double)norm);
+    bv = PizRounded((long double)bv * (long double)norm);
+    bw = PizRounded((long double)bw * (long double)norm);
+    cu = PizRounded((long double)cu * (long double)norm);
+    cv = PizRounded((long double)cv * (long double)norm);
+    cw = PizRounded((long double)cw * (long double)norm);
 
     /* perspzi.h:218-253: the projective x and y gradients. Every expression
      * here is one float assignment in the C, so it is one extended-precision
      * expression rounded once to float, and the final truncation to br_int_32
      * is the C's cast. */
-    const float zmx = (float)((long double)w.main_x * (long double)g_inverse);
-    const float zmy = (float)((long double)w.main_y * (long double)g_inverse);
-    const float ztx = (float)((long double)w.top_x * (long double)g_inverse);
-    const float zty = (float)((long double)w.top_y * (long double)g_inverse);
+    const float zmx = PizRounded((long double)w.main_x * (long double)g_inverse);
+    const float zmy = PizRounded((long double)w.main_y * (long double)g_inverse);
+    const float ztx = PizRounded((long double)w.top_x * (long double)g_inverse);
+    const float zty = PizRounded((long double)w.top_y * (long double)g_inverse);
 
-    const float du1 = (float)((long double)bu - (long double)au);
-    const float du2 = (float)((long double)cu - (long double)au);
-    const float dv1 = (float)((long double)bv - (long double)av);
-    const float dv2 = (float)((long double)cv - (long double)av);
-    const float dq1 = (float)((long double)bw - (long double)aw);
-    const float dq2 = (float)((long double)cw - (long double)aw);
+    const float du1 = PizRounded((long double)bu - (long double)au);
+    const float du2 = PizRounded((long double)cu - (long double)au);
+    const float dv1 = PizRounded((long double)bv - (long double)av);
+    const float dv2 = PizRounded((long double)cv - (long double)av);
+    const float dq1 = PizRounded((long double)bw - (long double)aw);
+    const float dq2 = PizRounded((long double)cw - (long double)aw);
 
     br_int_32 pu_grad_x = (br_int_32)((long double)du1 * (long double)zmy - (long double)du2 * (long double)zty);
     br_int_32 pu_grad_y = (br_int_32)((long double)du2 * (long double)ztx - (long double)du1 * (long double)zmx);
@@ -3041,6 +3279,19 @@ void PizDitherTriangle(brp_block *block, brp_vertex *v0, brp_vertex *v1, brp_ver
         w.pz_current   = pz.current;
     }
 
+    /* perspi.h:225-234 with LIGHT: the intensity ramp, set up exactly as the
+     * depth one and next to it. Its d_carry is unused here - the trapezium adds
+     * grad_x on the major edge's carry instead, which is the same value. */
+    if(LIGHT) {
+        PizParam pi;
+
+        PizParamSetup(pi, pv[0].i, pv[1].i, pv[2].i, w, false);
+
+        w.pi_grad_x    = pi.grad_x;
+        w.pi_d_nocarry = pi.d_nocarry;
+        w.pi_current   = pi.current;
+    }
+
     /* perspzi.h:275-296: the accumulator starts half a pixel in, and the two
      * projective numerators are re-based onto the integer texel the source
      * names. u and v are the C's integer parts of that base point, and are zero
@@ -3066,7 +3317,7 @@ void PizDitherTriangle(brp_block *block, brp_vertex *v0, brp_vertex *v1, brp_ver
 
     w.source = (((v_int + v_base) & (size - 1)) * size) | ((u_int + u_base) & (size - 1));
 
-    w.start  = sxa + sya * colour.stride_b - back;
+    w.start  = sxa * BPP + sya * colour.stride_b - BPP * back;
     w.end    = w.start;
     w.zstart = sxa * 2 + ((D == SP_DEPTH_ZW) ? sya * dbuf.stride_b : 0) - back * 2;
 
@@ -3105,12 +3356,16 @@ void PizDitherTriangle(brp_block *block, brp_vertex *v0, brp_vertex *v1, brp_ver
 
         /* The second half's minor edge restarts at the middle vertex. */
         if(half == 1)
-            w.end = sxb + syb * colour.stride_b - back;
+            w.end = sxb * BPP + syb * colour.stride_b - BPP * back;
 
         for(br_int_32 n = count; n > 0; n--) {
             if((w.direction != 0) ? (w.start < w.end) : (w.start > w.end)) {
                 PizDivide(w, size);
-                PizDitherSpan<D>(w, colour, dbuf, texture, size);
+
+                if(LIGHT)
+                    PizShadeSpan<F, B>(w, colour, texture, shade, size);
+                else
+                    PizDitherSpan<D>(w, colour, dbuf, texture, size);
             }
 
             w.y++;
@@ -3119,7 +3374,7 @@ void PizDitherTriangle(brp_block *block, brp_vertex *v0, brp_vertex *v1, brp_ver
 
             const br_uint_32 minor_carry = (minor_f < minor_d_f) ? 1u : 0u;
 
-            w.end += minor_i + colour.stride_b + (br_int_32)minor_carry;
+            w.end += (minor_i + (br_int_32)minor_carry) * BPP + colour.stride_b;
 
             w.main_f += w.main_d_f;
 
@@ -3128,23 +3383,54 @@ void PizDitherTriangle(brp_block *block, brp_vertex *v0, brp_vertex *v1, brp_ver
             w.pq_current += w.pq_d_nocarry;
             w.pu_current += -w.du_nocarry;
             w.pv_current += -w.dv_nocarry;
-            w.start += w.main_d_i + colour.stride_b + (br_int_32)carry;
+            w.start += (w.main_d_i + (br_int_32)carry) * BPP + colour.stride_b;
 
             if(D == SP_DEPTH_ZW) {
                 w.zstart += w.main_d_i * 2 + dbuf.stride_b + (br_int_32)carry * 2;
                 w.pz_current += w.pz_d_nocarry;
             }
 
+            if(LIGHT)
+                w.pi_current += w.pi_d_nocarry;
+
             if(carry != 0u) {
                 w.pq_current += w.pq_grad_x;
                 w.pu_current += -w.pu_grad_x;
                 w.pv_current += -w.pv_grad_x;
+
+                if(LIGHT)
+                    w.pi_current += w.pi_grad_x;
 
                 if(D == SP_DEPTH_ZW)
                     w.pz_current += w.pz_grad_x;
             }
         }
     }
+}
+
+/*
+ * The dithered-map INDEX_8 perspective cells: perspz.c's
+ * TriangleRenderPIZ2TPD* (z-buffered) or persp.c's TriangleRenderPITPD*
+ * (z-sorted), each of which is perspzi.h / perspi.h instantiated for a map
+ * size. The dither itself is in PizDitherSpan; this only names the cell.
+ */
+template <sp_depth D>
+void PizDitherTriangle(brp_block *block, brp_vertex *v0, brp_vertex *v1, brp_vertex *v2) noexcept
+{
+    PizTriangle<D, SP_FMT_I8, SP_SHADE_NONE, SP_BLEND_NONE>(block, v0, v1, v2);
+}
+
+/*
+ * The 256x256 RGB shade-table cells: persp.c's TriangleRenderPITIP256_RGB_* and
+ * TriangleRenderPITIPB256_RGB_* (prm_t15.ifg:33-36, prm_t16.ifg:33-36), which
+ * are perspi.h at BPP 2, SIZE 256, LIGHT 1. They are z-sorted only - the
+ * z-buffered PIZ2TIP256 twins are taken by the MMX table before the general
+ * one, so no depth parameter reaches PizShadeSpan.
+ */
+template <sp_fmt F, sp_shade S, sp_blend B>
+void PizShadeTriangle(brp_block *block, brp_vertex *v0, brp_vertex *v1, brp_vertex *v2) noexcept
+{
+    PizTriangle<SP_DEPTH_NONE, F, S, B>(block, v0, v1, v2);
 }
 
 /*
@@ -5539,7 +5825,9 @@ static void SoftPrimRender(brp_block *block, brp_vertex *v0, brp_vertex *v1, brp
                   "softprim: intensity shading is INDEX_8 only");
     static_assert((S != SP_SHADE_CONST_RGB && S != SP_SHADE_INTERP_RGB) || F != SP_FMT_I8, "softprim: RGB shading is not an INDEX_8 mode");
     static_assert(P == SP_PERSP_AFFINE || X != SP_TEX_NONE, "softprim: an untextured kernel cannot be perspective-correct");
-    static_assert(B == SP_BLEND_NONE || B == SP_BLEND_INDEX || B == SP_BLEND_DECAL || B == SP_BLEND_SCREENDOOR,
+    static_assert(B == SP_BLEND_NONE || B == SP_BLEND_INDEX || B == SP_BLEND_DECAL || B == SP_BLEND_SCREENDOOR ||
+                      (B == SP_BLEND_ALPHA && X == SP_TEX_I8 && A == SP_ADDR_SHIFT &&
+                       (S == SP_SHADE_CONST_I_RGB || S == SP_SHADE_INTERP_I_RGB)),
                   "softprim: no kernel for this blend mode");
     static_assert(H == SP_DITH_NONE || H == SP_DITH_MAP || H == SP_DITH_COLOUR, "softprim: no kernel for this dithering mode");
     static_assert(H != SP_DITH_MAP || (F == SP_FMT_I8 && S == SP_SHADE_NONE && X == SP_TEX_I8 && A == SP_ADDR_SHIFT &&
@@ -5561,6 +5849,27 @@ static void SoftPrimRender(brp_block *block, brp_vertex *v0, brp_vertex *v1, brp
                 TexturedIndexedTriangle<D, S, P, B, G>(block, v0, v1, v2);
         } else
             IndexedTriangle<D, S, G>(block, v0, v1, v2);
+    } else if(X == SP_TEX_I8 && A == SP_ADDR_SHIFT && D == SP_DEPTH_NONE &&
+              (S == SP_SHADE_CONST_I_RGB || S == SP_SHADE_INTERP_I_RGB)) {
+        /*
+         * The 256x256 RGB shade-table cells: persp.c's PITIP256/PITIPB256, which
+         * are perspi.h at BPP 2, SIZE 256 and LIGHT 1. Their setup, addressing
+         * and trapezium walk are the dithered-map cell's (PizTriangle), and their
+         * span is t15_pip.asm's ScanLinePITIP - not the pfpsetup.asm family the
+         * indexed texture path above ports. ADDR_SHIFT is the map-size
+         * instantiation - the block declares 256x256 and the matcher requires
+         * width and height to equal it - which is why a map of any other size
+         * reaches the arbitrary-width cell instead. They are z-sorted only: at
+         * 15/16bpp the MMX table is tried first and takes the z-buffered twins,
+         * so no depth reaches this kernel. The span reads the destination only
+         * for the blend, which is the one ROP the cell's blocks carry.
+         */
+        static_assert(!(X == SP_TEX_I8 && A == SP_ADDR_SHIFT && D == SP_DEPTH_NONE &&
+                        (S == SP_SHADE_CONST_I_RGB || S == SP_SHADE_INTERP_I_RGB)) ||
+                          B == SP_BLEND_NONE || B == SP_BLEND_ALPHA,
+                      "softprim: no kernel for this blend mode on the 256x256 RGB shade-table cell");
+
+        PizShadeTriangle<F, S, B>(block, v0, v1, v2);
     } else if(X != SP_TEX_NONE && A == SP_ADDR_DIVIDE &&
               (F == SP_FMT_888 || X == SP_TEX_555 || X == SP_TEX_565 || S == SP_SHADE_CONST_I_RGB || S == SP_SHADE_INTERP_I_RGB)) {
         /*
@@ -5616,16 +5925,19 @@ static void SoftPrimRender(brp_block *block, brp_vertex *v0, brp_vertex *v1, brp
          * tuple trips the guard instead of running: that is the colour-map
          * (SP_TEX_555/565) and shade-table shapes at SP_ADDR_DIVIDE, and the
          * exclusion mirrors the routing predicate rather than the shapes the
-         * generator happens to emit today. What still remains in the region -
-         * the power-of-two RGB shade-table and 555/565 colour-map shapes
-         * (perspi.h's and the MMX/perfect-scan mappers) - the generator
-         * refuses, so the guard is silent until SP_SPEC (or an .ifg block) is
-         * widened into them, then the build stops here.
+         * generator happens to emit today. The power-of-two RGB shade-table cells
+         * are routed to PizShadeTriangle above and are excluded here too, by the
+         * second clause.
+         * What remains in the region - the power-of-two 555/565 colour-map shapes
+         * and the MMX/perfect-scan mappers - the generator refuses, so the guard
+         * is silent until SP_SPEC (or an .ifg block) is widened into them, then
+         * the build stops here.
          */
         static_assert(!((F == SP_FMT_555 || F == SP_FMT_565) && D == SP_DEPTH_NONE && X != SP_TEX_NONE &&
-                        !(A == SP_ADDR_DIVIDE && (X == SP_TEX_555 || X == SP_TEX_565 || S == SP_SHADE_CONST_I_RGB || S == SP_SHADE_INTERP_I_RGB))),
+                        !(A == SP_ADDR_DIVIDE && (X == SP_TEX_555 || X == SP_TEX_565 || S == SP_SHADE_CONST_I_RGB || S == SP_SHADE_INTERP_I_RGB)) &&
+                        !(A == SP_ADDR_SHIFT && X == SP_TEX_I8 && (S == SP_SHADE_CONST_I_RGB || S == SP_SHADE_INTERP_I_RGB))),
                       "softprim: no kernel for a z-sorted RGB_555/565 texture that is not the arbitrary-width "
-                      "colour-map or shade-table shape; the power-of-two RGB_555/565 and RGB shade-table shapes are refused");
+                      "colour-map or shade-table shape, nor the 256x256 shade-table cell");
         static_assert(!(F == SP_FMT_888 && X != SP_TEX_NONE && A != SP_ADDR_DIVIDE),
                       "softprim: no kernel for an RGB_888 texture that is not arbitrary-width - SP_TEX_I8/SP_TEX_RGB888 "
                       "with SP_ADDR_NONE/SP_ADDR_SHIFT would fall through to the general SETUP_FLOAT RGB path");

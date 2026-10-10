@@ -1779,6 +1779,15 @@ static const char *const rt_default_scenes[] = {
     "scene-tex-rgb555-affine", "scene-tex-rgb565-affine",
 
     /*
+     * The 256x256 RGB shade-table fixtures; see scene.c. pentprim draws these
+     * from perspi.h rather than the arbitrary-width family above, so they are
+     * the witness for that cell and only --bpp 15/16 exercise it - the other
+     * two output formats do not reach it.
+     */
+    "scene-shade-p256-flat-persp", "scene-shade-p256-smooth-persp", "scene-shade-p256-flat-persp-blend",
+    "scene-shade-p256-smooth-persp-blend",
+
+    /*
      * The topology witnesses; see scene.c. Non-triangle topologies have no
      * witness without them, because the style they need is actor state and no
      * glTF path carried it before BR_actors.

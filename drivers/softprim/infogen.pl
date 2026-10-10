@@ -313,14 +313,18 @@ sub softprim_implemented {
 	# is three bytes, so the reference's reader is in bounds for every index the
 	# packing produces, and softprim ports that reader (RgbAwtPixel).
 	#
-	# The 15/16bpp shapes have a kernel for the arbitrary-width (SP_ADDR_DIVIDE)
-	# z-sorted pair only, whose awtmi.h LIGHT span is ported. The power-of-two
-	# ones are perspi.h's separate perspective mapper, and the z-buffered ones
-	# are unreachable (the MMX table is tried first and one of its untextured
-	# rows always matches). See softprim's RgbAwtTriangle and the render
-	# dispatch.
+	# The 15/16bpp shapes have kernels for two of their cells. The arbitrary-width
+	# z-sorted pair is awtmi.h's LIGHT span, ported as RgbAwtTriangle. The
+	# 256x256 power-of-two cells are perspi.h's separate perspective mapper,
+	# ported as PizShadeTriangle - the dithered-map cell's perspi.h setup at BPP 2
+	# with t15_pip.asm's ScanLinePITIP fragment - and 256 is the only size the
+	# tables declare. The z-buffered ones are unreachable (the MMX table is tried
+	# first and one of its untextured rows always matches). See softprim's
+	# RgbAwtTriangle, PizShadeTriangle and the render dispatch.
 	if(grep { $_ eq "SP_SHADE_CONST_I_RGB" || $_ eq "SP_SHADE_INTERP_I_RGB" } @tuple) {
 		my %t = map { $_ => 1 } @tuple;
+
+		return 1 if($t{"SP_ADDR_SHIFT"} && $t{"SP_TOP_TRI"} && $t{"SP_DEPTH_NONE"} && ($t{"SP_FMT_555"} || $t{"SP_FMT_565"}));
 
 		return 0 if(!$t{"SP_TOP_TRI"});
 		return 0 if(!$t{"SP_ADDR_DIVIDE"});

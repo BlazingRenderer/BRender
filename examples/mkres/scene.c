@@ -392,6 +392,7 @@ static br_material *scene_material_ex(const char *name, br_colour colour, br_uin
 #define SCENE_TEX_INDEX_B 224
 #define SCENE_TEX_SIZE    64
 #define SCENE_TEX_CELLS   16
+#define SCENE_P256_SIZE   256
 #define SCENE_TEX32_SIZE  32
 #define SCENE_TEX32_SCALE BR_SCALAR(3.0)
 #define SCENE_ARB_WIDTH   96
@@ -713,25 +714,30 @@ static br_pixelmap *scene_texture_rgb(const char *name, br_uint_8 type, int widt
  * texel byte as the table's column and never expands a palette. Index 0 is left
  * unused for the same reason as scene_texture().
  */
-static br_pixelmap *scene_shade_texture(const char *name)
+static br_pixelmap *scene_shade_texture_size(const char *name, int size)
 {
     br_pixelmap *pm;
     br_uint_8   *pixels;
-    const int    cell = SCENE_TEX_SIZE / SCENE_TEX_CELLS;
+    const int    cell = size / SCENE_TEX_CELLS;
 
-    if((pm = BrPixelmapAllocate(BR_PMT_INDEX_8, SCENE_TEX_SIZE, SCENE_TEX_SIZE, NULL, BR_PMAF_NORMAL)) == NULL)
+    if((pm = BrPixelmapAllocate(BR_PMT_INDEX_8, size, size, NULL, BR_PMAF_NORMAL)) == NULL)
         return NULL;
 
     pm->identifier = BrResStrDup(pm, name);
     pixels         = pm->pixels;
 
-    for(int y = 0; y < SCENE_TEX_SIZE; ++y)
-        for(int x = 0; x < SCENE_TEX_SIZE; ++x)
+    for(int y = 0; y < size; ++y)
+        for(int x = 0; x < size; ++x)
             pixels[(y * pm->row_bytes) + x] = (((x / cell) + (y / cell)) & 1) ? SCENE_TEX_INDEX_A : SCENE_TEX_INDEX_B;
 
     BrMapAdd(pm);
 
     return pm;
+}
+
+static br_pixelmap *scene_shade_texture(const char *name)
+{
+    return scene_shade_texture_size(name, SCENE_TEX_SIZE);
 }
 
 /*
@@ -1310,11 +1316,12 @@ static br_error scene_make_line_fixtures(br_model *cube)
  * each cube's own pixels - and so each cube's own response to the perspective
  * flag - readable in the scene's checksum.
  */
-static br_error scene_make_rgb_shade_arb(br_model *cube, const char *name, br_uint_32 flags)
+static br_error scene_make_rgb_shade(br_model *cube, const char *name, const char *mapname, int size, br_uint_32 flags,
+                                     br_uint_8 opacity)
 {
     br_uint_8    types[3] = {BR_PMT_RGB_555, BR_PMT_RGB_565, BR_PMT_RGB_888};
     br_scalar    xs[3]    = {BR_SCALAR(0.0), BR_SCALAR(-2.6), BR_SCALAR(2.6)};
-    br_pixelmap *map      = scene_shade_texture("scene-shade-arb-map");
+    br_pixelmap *map      = scene_shade_texture_size(mapname, size);
     br_material *mats[3];
     br_actor    *world;
     char         gltf[128];
@@ -1332,6 +1339,7 @@ static br_error scene_make_rgb_shade_arb(br_model *cube, const char *name, br_ui
 
         mats[k]->colour_map  = map;
         mats[k]->index_shade = scene_shade_table_rgb(mname, types[k]);
+        mats[k]->opacity     = opacity;
     }
 
     world = scene_fx_world_range(cube, mats[0], SCENE_ARB_SCALE, BR_SCALAR(0.1), BR_SCALAR(100.0));
@@ -1351,13 +1359,30 @@ static br_error scene_make_rgb_shade_fixtures(br_model *cube)
 {
     br_error r = BRE_OK;
 
-    if(scene_make_rgb_shade_arb(cube, "scene-shade-arb-flat", 0) != BRE_OK)
+    if(scene_make_rgb_shade(cube, "scene-shade-arb-flat", "scene-shade-arb-map", SCENE_TEX_SIZE, 0, 255) != BRE_OK)
         r = BRE_FAIL;
 
-    if(scene_make_rgb_shade_arb(cube, "scene-shade-arb-flat-persp", BR_MATF_PERSPECTIVE) != BRE_OK)
+    if(scene_make_rgb_shade(cube, "scene-shade-arb-flat-persp", "scene-shade-arb-map", SCENE_TEX_SIZE, BR_MATF_PERSPECTIVE, 255) != BRE_OK)
         r = BRE_FAIL;
 
-    if(scene_make_rgb_shade_arb(cube, "scene-shade-arb-smooth-persp", BR_MATF_PERSPECTIVE | BR_MATF_SMOOTH) != BRE_OK)
+    if(scene_make_rgb_shade(cube, "scene-shade-arb-smooth-persp", "scene-shade-arb-map", SCENE_TEX_SIZE,
+                            BR_MATF_PERSPECTIVE | BR_MATF_SMOOTH, 255) != BRE_OK)
+        r = BRE_FAIL;
+
+    if(scene_make_rgb_shade(cube, "scene-shade-p256-flat-persp", "scene-shade-p256-map", SCENE_P256_SIZE,
+                            BR_MATF_PERSPECTIVE, 255) != BRE_OK)
+        r = BRE_FAIL;
+
+    if(scene_make_rgb_shade(cube, "scene-shade-p256-smooth-persp", "scene-shade-p256-map", SCENE_P256_SIZE,
+                            BR_MATF_PERSPECTIVE | BR_MATF_SMOOTH, 255) != BRE_OK)
+        r = BRE_FAIL;
+
+    if(scene_make_rgb_shade(cube, "scene-shade-p256-flat-persp-blend", "scene-shade-p256-map", SCENE_P256_SIZE,
+                            BR_MATF_PERSPECTIVE, 128) != BRE_OK)
+        r = BRE_FAIL;
+
+    if(scene_make_rgb_shade(cube, "scene-shade-p256-smooth-persp-blend", "scene-shade-p256-map", SCENE_P256_SIZE,
+                            BR_MATF_PERSPECTIVE | BR_MATF_SMOOTH, 128) != BRE_OK)
         r = BRE_FAIL;
 
     return r;
