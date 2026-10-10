@@ -15,15 +15,12 @@
 #
 # Usage:
 #   contrib/run-tests.sh [build-dir] [--bless] [--no-build]
-#                        [--reference-driver <token>] [--history <range>]
+#                        [--history <range>]
 #
 #   build-dir   defaults to cmake-build.
 #   --bless     rewrite the reference table instead of comparing. Only for
 #               accepting a deliberate change; see the note at the end.
 #   --no-build  skip the build step (for re-running after no source change).
-#   --reference-driver <token>
-#               score against another driver's entries, e.g. 'software' to
-#               compare a new rasteriser against the recorded ones.
 #   --history <range>
 #               also check the scene/fixture invariant at every commit in
 #               <range>, e.g. upstream/master..HEAD. Slower, and the only way
@@ -35,14 +32,12 @@ repo=$(cd "$(dirname "$0")/.." && pwd)
 build="cmake-build"
 bless=0
 do_build=1
-ref_driver=""
 history=""
 
 while [ $# -gt 0 ]; do
     case "$1" in
         --bless)            bless=1 ;;
         --no-build)         do_build=0 ;;
-        --reference-driver) ref_driver="${2:-}"; shift ;;
         --history)          history="${2:-}"; shift ;;
         -h|--help)          awk 'NR>1 && /^#/ {sub(/^# ?/, ""); print; next} NR>1 {exit}' "$0"; exit 0 ;;
         -*)                 echo "unknown option: $1" >&2; exit 2 ;;
@@ -164,97 +159,62 @@ export SDL_VIDEODRIVER=offscreen
 export GLTFVIEW_BENCH_FRAMES=5
 export GLTFVIEW_BENCH_NOVSYNC=1
 
-# ------------------------------------------------------- fixture invariant
+# ------------------------------------------------------------- the checks
 
-hdr "fixtures: mkres scenes reproduces examples/rendertest/dat/"
+# The corpus, the fixture reproduction and the glTF sweep are registered as
+# tests by the build (examples/rendertest/CMakeLists.txt), so they are written
+# once. This script used to carry a second copy of the corpus loop, and the two
+# drifted: a run that finished and failed was reported here as one that had
+# produced no result at all.
+#
+# --history and the build step are what this script adds. Neither belongs in a
+# build: one walks git history, the other is the build.
 
-if [ ! -x "$mkres" ]; then
-    skip "mkres not built"
-else
-    # The build dir may be relative or absolute; mktemp runs the binary from
-    # elsewhere, so an absolute path is needed either way.
-    case "$mkres" in /*) mkres_bin="$mkres" ;; *) mkres_bin="$repo/$mkres" ;; esac
-    tmp=$(mktemp -d) || exit 1
-    ( cd "$tmp" && "$mkres_bin" scenes >/dev/null 2>&1 )
-    if diff -rq "$tmp" examples/rendertest/dat/ >/tmp/run-tests-mkres.log 2>&1; then
-        ok "$(ls "$tmp" | wc -l) fixtures byte-identical to dat/"
-    else
-        n=$(grep -c '^Files ' /tmp/run-tests-mkres.log 2>/dev/null || echo '?')
-        bad "$n fixture(s) differ from dat/ (log: /tmp/run-tests-mkres.log)"
-        sed 's/^/        /' /tmp/run-tests-mkres.log | head -10
-    fi
-    rm -rf "$tmp"
-fi
+if [ "$bless" = 1 ]; then
+    hdr "bless: rewriting the reference"
 
-# ------------------------------------------------------------- the corpus
+    # Blessing is not a test, and must not become one - accepting current
+    # output is the one thing a test cannot be allowed to do. The
+    # configurations still come from the build, via `ctest -N', rather than
+    # from a second copy of the list.
+    blessed=0
+    for name in $(ctest --test-dir "$build" -N 2>/dev/null | sed -n 's/.*Test *#[0-9]*: *\([a-z0-9-]*\).*/\1/p'); do
+        device=${name%%-*}
+        rest=${name#*-}
+        type=${rest%%-*}
+        mode=${rest#*-}
 
-hdr "corpus: rendertest"
-
-ref_args=""
-[ "$bless" = 1 ] && ref_args="--bless"
-[ -n "$ref_driver" ] && ref_args="$ref_args --reference-driver $ref_driver"
-
-# bpp N renders through BrZbSceneRender; --no-depth renders through
-# BrZsSceneRender, the Z-sort path. Both are distinct reference keys.
-for bpp in 8 15 16 24; do
-    for mode in zb zs; do
         if [ "$mode" = zs ]; then depth="--no-depth"; else depth=""; fi
 
-        out=$("$rendertest" --device softrend --bpp "$bpp" $depth $ref_args 2>&1)
-        # Match FAIL as well as PASS. A failed run does print a result line,
-        # and grepping only for PASS reported every failure as a run that
-        # produced no result at all - which is what hid a whole
-        # architecture's worth of failures here.
+        case "$device" in
+            softrend) out=$("$rendertest" --device softrend --bpp "$type" $depth --bless 2>&1) ;;
+            glrend)   out=$(LIBGL_ALWAYS_SOFTWARE=true "$rendertest" --device glrend --bpp "$type" --bless 2>&1) ;;
+            *)        continue ;;
+        esac
+
         line=$(echo "$out" | grep -oE 'result=(PASS|FAIL) failures=[0-9]+' | tail -1)
-        match=$(echo "$out" | grep -c 'MATCH')
-        nref=$(echo "$out" | grep -c 'NO-REFERENCE')
-
-        if [ -z "$line" ]; then
-            bad "softrend $bpp/$mode: no result line - the run did not finish"
-        elif [ "$line" = "result=PASS failures=0" ]; then
-            # NO-REFERENCE is not a failure, but it is unverified - say so.
-            if [ "$nref" -gt 0 ]; then
-                ok "softrend $bpp/$mode: $line (${match} match, ${nref} NO-REFERENCE)"
-            else
-                ok "softrend $bpp/$mode: $line (${match} match)"
-            fi
-        else
-            bad "softrend $bpp/$mode: $line"
-            echo "$out" | grep -iE 'CHANGED|FAIL' | head -5 | sed 's/^/        /'
-        fi
+        ok "$name: ${line:-no result line}"
+        blessed=$((blessed + 1))
     done
-done
 
-# glrend is the arbiter for anything the software paths disagree on. The
-# checked-in glrend references are llvmpipe-keyed, so force software GL.
-out=$(LIBGL_ALWAYS_SOFTWARE=true "$rendertest" --device glrend --bpp 8 $ref_args 2>&1)
-line=$(echo "$out" | grep -oE 'result=(PASS|FAIL) failures=[0-9]+' | tail -1)
-if [ "$line" = "result=PASS failures=0" ]; then
-    ok "glrend 8/zb: $line ($(echo "$out" | grep -c MATCH) match)"
-elif [ -z "$line" ]; then
-    bad "glrend 8/zb: no result line - the run did not finish (no GL? try LIBGL_ALWAYS_SOFTWARE=true)"
-else
-    bad "glrend 8/zb: $line"
+    [ "$blessed" != 0 ] || bad "no configurations found to bless"
 fi
 
-# ------------------------------------------------------------- gltf loads
+hdr "corpus: ctest"
 
-hdr "every checked-in .gltf loads"
-
-if [ ! -x "$gltfview" ]; then
-    skip "gltfview not built"
+# --no-tests=error: with no test to run ctest exits 0, and reporting that as a
+# pass says the corpus is clean when nothing looked at it. A build registers no
+# tests either because BUILD_TESTING is off or because the commit predates the
+# corpus being registered with CTest.
+if ctest --test-dir "$build" -j"$(nproc)" --output-on-failure --no-tests=error >/tmp/run-tests-ctest.log 2>&1; then
+    ok "$(grep -oE '[0-9]+% tests passed[^,]*' /tmp/run-tests-ctest.log | tail -1) (log: /tmp/run-tests-ctest.log)"
 else
-    n=0; nbad=0
-    for f in examples/rendertest/dat/*.gltf resources/gltf-reference/*.gltf; do
-        [ -e "$f" ] || continue
-        n=$((n + 1))
-        if ! timeout -s KILL 60 "$gltfview" --force-software --software-bpp 8 \
-                -w 320 -h 240 --no-stats "$f" >/dev/null 2>&1; then
-            bad "load: $f"
-            nbad=$((nbad + 1))
-        fi
-    done
-    [ "$nbad" = 0 ] && ok "$n/$n files load"
+    if grep -q 'tests passed' /tmp/run-tests-ctest.log; then
+        bad "ctest failed (log: /tmp/run-tests-ctest.log)"
+        grep -E '\*\*\*Failed|Failed ' /tmp/run-tests-ctest.log | head -5 | sed 's/^/        /'
+    else
+        bad "this build registered no tests, so the corpus was not run (log: /tmp/run-tests-ctest.log)"
+    fi
 fi
 
 # ------------------------------------------------------------------ done

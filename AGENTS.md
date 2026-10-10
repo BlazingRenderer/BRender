@@ -91,7 +91,7 @@ contrib/editorcam: fix camera offset after pan mode, add orbit mode
 ## Testing
 There is no unit-test suite, and none should be added. `ctest` runs the render corpus with one test per configuration, and CI runs it for
 both floating-point classes. `contrib/run-tests.sh [build-dir]` is the human-facing gate and adds the checks that do not belong in a
-build - the build step itself, the `--history` commit walk, and a load of every checked-in `.gltf`. The corpus itself is:
+build - the build step itself and the `--history` commit walk. The corpus itself is:
 - `examples/rendertest` renders the fixtures in `examples/rendertest/dat/` under one device and diffs each frame against the checked-in
   reference, `examples/rendertest/rendertest.txt`. Run it (`--device <glrend|glrend1x|softrend> [--bpp n] [-w W -h H] [--no-depth]`) after
   any change that can move pixels; `result=PASS failures=0` is the pass condition.
