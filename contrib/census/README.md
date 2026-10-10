@@ -139,3 +139,16 @@ Both are deliberate and both are in the commit message:
   primitives.
 - The fall-through is logged as `default`, but nothing in the current corpus
   reaches it: every pixel type the harness can key has a real entry that matches.
+
+## The line and point fixtures
+
+`scene-lines-rgb555` and `scene-lines-rgb565` (master's
+`examples/rendertest/dat`) carry an edge actor and a point actor over one
+material, so each witnesses both topologies. At `--bpp 15`/`--bpp 16` they select
+the 555/565-typed line and point kernels - `prim_l15#0`, `#3`, `prim_l16#0`,
+`#3`, `prim_p15#0`, `#3`, `prim_p16#0`, `#3` - which are the eight entries
+`reachable.py` reports as selectable but selected by no corpus scored here.
+
+Point `CENSUS_DAT` at master's `examples/rendertest/dat` and name the two
+scenes, one process per scene; nothing else in the tree reaches those cells
+except `scene-points` and the `scene-lines-*` family at their own output type.
