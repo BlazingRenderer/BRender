@@ -169,9 +169,16 @@ void BrPrepareEdges(br_model *model)
 }
 
 /*
- * Comparison function for qsorting pointers to faces
+ * Context for the qsort comparison functions: qsort has no user parameter, so
+ * the callers set these immediately before the sort.
  */
-static int BR_CALLBACK FacesCompare(const void *p1, const void *p2)
+static br_model   *compareModel;
+static br_uint_32 *face_group_key;
+
+/*
+ * Comparison function for qsorting pointers to faces by material address.
+ */
+static int BR_CALLBACK FacesCompareMaterial(const void *p1, const void *p2)
 {
     const br_face *f1 = *(br_face **)p1, *f2 = *(br_face **)p2;
 
@@ -184,9 +191,35 @@ static int BR_CALLBACK FacesCompare(const void *p1, const void *p2)
 }
 
 /*
+ * Comparison function for qsorting pointers to faces into material groups.
+ *
+ * A face's group is keyed by the first face that uses its material, not by
+ * the material's address: comparing the address made a group's position - and
+ * so the draw order - a function of the heap, so a frame depended on what had
+ * been loaded and rendered before it. Two primitives of different materials
+ * at the same depth are resolved by draw order, so that moved the pixels at
+ * every depth tie. First use is fixed by the model.
+ *
+ * Faces within a group are ordered by the model's own face index, which is
+ * likewise fixed.
+ */
+static int BR_CALLBACK FacesCompare(const void *p1, const void *p2)
+{
+    const br_face *f1 = *(br_face **)p1, *f2 = *(br_face **)p2;
+    br_ptrdiff_t   i1 = f1 - compareModel->faces, i2 = f2 - compareModel->faces;
+    br_uint_32     k1 = face_group_key[i1], k2 = face_group_key[i2];
+
+    if(k1 < k2)
+        return -1;
+    if(k1 > k2)
+        return 1;
+
+    return i1 < i2 ? -1 : (i1 > i2 ? 1 : 0);
+}
+
+/*
  * Compare temp vertices by  X,Y,Z
  */
-static br_model *compareModel;
 
 static int BR_CALLBACK TVCompare_XYZ(const void *p1, const void *p2)
 {
@@ -227,11 +260,12 @@ static int BR_CALLBACK TVCompare_MXYZUVN(const void *p1, const void *p2)
     ASSERT(compareModel != NULL);
 
     /*
-     * Compare material
+     * Compare material by the same key the faces are grouped by, so a vertex
+     * group's position matches its face group's (see FacesCompare).
      */
-    if(compareModel->faces[tv1->f].material > compareModel->faces[tv2->f].material)
+    if(face_group_key[tv1->f] > face_group_key[tv2->f])
         return 1;
-    if(compareModel->faces[tv1->f].material < compareModel->faces[tv2->f].material)
+    if(face_group_key[tv1->f] < face_group_key[tv2->f])
         return -1;
 
     if(tv1->v != tv2->v) {
@@ -284,11 +318,12 @@ static int BR_CALLBACK TVCompare_MVN(const void *p1, const void *p2)
     ASSERT(compareModel != NULL);
 
     /*
-     * Compare Material
+     * Compare Material by the same key the faces are grouped by, so a vertex
+     * group's position matches its face group's (see FacesCompare).
      */
-    if(compareModel->faces[tv1->f].material > compareModel->faces[tv2->f].material)
+    if(face_group_key[tv1->f] > face_group_key[tv2->f])
         return 1;
-    if(compareModel->faces[tv1->f].material < compareModel->faces[tv2->f].material)
+    if(face_group_key[tv1->f] < face_group_key[tv2->f])
         return -1;
 
     if(tv1->v > tv2->v)
@@ -447,7 +482,7 @@ static void PrepareGroups(br_model *model)
     struct prep_vertex *temp_verts, *gtvp, **sorted_vertices;
     struct br_face     *fp;
     struct br_vertex   *vp;
-    int                 g, f, v, i, ntemps, count, nf, nv, ng, old_count;
+    int                 g, f, v, i, k, ntemps, count, nf, nv, ng, old_count;
     br_scalar           crease_limit;
     struct v11model    *v11m;
     struct v11group    *v11g;
@@ -502,13 +537,15 @@ static void PrepareGroups(br_model *model)
      */
     ntemps = model->nfaces * 3;
 
-    block_size = ntemps * (sizeof(*temp_verts) + sizeof(*sorted_vertices)) + model->nfaces * sizeof(sorted_faces);
+    block_size = ntemps * (sizeof(*temp_verts) + sizeof(*sorted_vertices)) +
+                 model->nfaces * (sizeof(*sorted_faces) + sizeof(*face_group_key));
     temp_verts = BrScratchAllocate(block_size);
 
     BrMemSet(temp_verts, 0, block_size);
 
     sorted_vertices = (struct prep_vertex **)(temp_verts + ntemps);
     sorted_faces    = (struct br_face **)(sorted_vertices + ntemps);
+    face_group_key  = (br_uint_32 *)(sorted_faces + model->nfaces);
 
     gtvp = temp_verts;
     for(i = 0, f = 0, fp = model->faces; f < model->nfaces; f++, fp++) {
@@ -541,8 +578,29 @@ static void PrepareGroups(br_model *model)
     ASSERT(gtvp == temp_verts + ntemps);
 
     /*
-     * Sort face pointers by material
+     * Group face pointers by material, key each group by the first face that
+     * uses its material, then order the groups by that key: the first sort
+     * brings a material's faces together so the first use can be found, the
+     * second puts the groups in that order (see FacesCompare).
      */
+    BrQsort(sorted_faces, model->nfaces, sizeof(*sorted_faces), FacesCompareMaterial);
+
+    for(f = 0; f < model->nfaces;) {
+        br_uint_32 first = (br_uint_32)model->nfaces;
+
+        for(g = f; g < model->nfaces && sorted_faces[g]->material == sorted_faces[f]->material; g++) {
+            br_uint_32 idx = (br_uint_32)(sorted_faces[g] - model->faces);
+
+            if(idx < first)
+                first = idx;
+        }
+
+        for(k = f; k < g; k++)
+            face_group_key[sorted_faces[k] - model->faces] = first;
+
+        f = g;
+    }
+
     BrQsort(sorted_faces, model->nfaces, sizeof(*sorted_faces), FacesCompare);
 
     /*
