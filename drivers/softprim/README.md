@@ -17,8 +17,8 @@ primitive-library identifiers (`SOFTPRMF`, `Default-Primitives-Float`) and insta
 by the `softprmf` driver token, so a run scores directly against the checked-in references.
 
 pentprim's pixels are the oracle, and they are frozen: `examples/rendertest/rendertest.txt`
-holds the 816 `softrend/softprmf/x87` keys and `scratch/gltfview-baseline{,-zs}.txt` the
-reference scenes, and with pentprim gone they are the only record of its output.
+holds the `softrend/softprmf/x87` keys - fixtures and reference scenes alike - and with
+pentprim gone they are the only record of its output.
 
 ## The block table, and what a kernel is allowed to be
 
@@ -82,10 +82,14 @@ re-bless and the port that follows are one change, with the reference entries mo
 same commit.
 - **Validate in this order.** It builds - check for `Built target`, because a failed build
 leaves the previous binary in place and every measurement of it is meaningless;
-`rendertest` reports `result=PASS failures=0` at 8/15/16/24bpp x {zb, zs}; the nine
-reference scenes reproduce their frozen checksums; `mkres scenes` still writes `dat/`
-byte-for-byte. Bless from pentprim only: a softprim `--bless` records softprim's own output
-and the comparison stops meaning anything.
+`rendertest` reports `result=PASS failures=0` at 8/15/16/24bpp x {zb, zs}; the
+`refscenes-*` tests reproduce the nine reference scenes' frozen checksums; `mkres scenes`
+still writes `dat/` byte-for-byte. Bless from pentprim only: a softprim `--bless` records softprim's own output
+and the comparison stops meaning anything. Bless the reference scenes the same way and one
+scene per process - `rendertest --device softrend --bpp <bpp> [--no-depth] --scene-dir
+resources/gltf-reference --bless <scene>` - adding `--reference
+examples/rendertest/rendertest.txt` when the bless runs from another tree, whose own
+default reference is not this one.
 
 ## What is implemented
 
@@ -151,18 +155,25 @@ output.
 
 - **The fixture corpus.** `examples/rendertest` renders 102 fixtures at four pixel formats
   (8/15/16/24bpp) x {z-buffered, z-sorted} and compares each against
-  `examples/rendertest/rendertest.txt`, whose 816 `softrend/softprmf/x87` keys are
+  `examples/rendertest/rendertest.txt`, whose 888 `softrend/softprmf/x87` keys are
   pentprim's. Measured: `PASS failures=0`, 102 comparisons, in all eight configurations.
-- **Nine reference scenes.** `resources/gltf-reference`, rendered with
-  `gltfview --force-software` (`GLTFVIEW_ZSORT=1` selects the z-sorted set) and scored
-  against `scratch/gltfview-baseline.txt` (z-buffered) and `scratch/gltfview-baseline-zs.txt`
-  (z-sorted): 9 scenes x 8/15/16/24bpp x both modes. Measured: all 72 reproduce pentprim's
-  frozen checksums exactly, byte-for-byte.
+- **Nine reference scenes.** `resources/gltf-reference`, rendered by the same harness with
+  `--scene-dir resources/gltf-reference` and scored against the same table: 9 scenes x
+  8/15/16/24bpp x {z-buffered, z-sorted}, registered as the
+  `refscenes-<bpp>-<mode>-<scene>` ctest tests. Measured: all 72 reproduce pentprim's
+  frozen checksums exactly, byte-for-byte. One scene per process, and not the nine in one:
+  a frame here is not a function of its scene alone - it depends on which scenes ran before
+  it in the same process (measured: `croc-mp033_01` at 24bpp z-buffered is
+  `6d12bbdcba22365e` alone and `d2ea20cea7920cdd` behind `croc-mp032_00`), and pentprim and
+  softprim then disagree on 7 of the 72 configurations. One scene per process is how these
+  were always scored - the gltfview baselines and `contrib/census/run_corpus.sh` both do it
+  - and it is the only form in which the stored checksum means anything.
 
-Both figures are from the 32-bit i386 softrend build, the configuration pentprim itself was
-built in. softprim is portable and compiles for other targets, but the pixel claims are
-measured on i386 only: the x87 register stack rounds differently from SSE, so another target
-is expected to move last bits and would need references of its own.
+The x87 figures are from the 32-bit i386 softrend build, the configuration pentprim itself
+was built in. softprim is portable and compiles for other targets: the `declared` keys are a
+build that rounds every operation at its type's width, and they are softprim's own output,
+because pentprim was never built for x86-64 - which is why a key names the class that
+produced it.
 
 ### Known limitation: a Debug build is expected to differ
 
@@ -191,8 +202,9 @@ The fixture corpus has twice been blind to defects the nine reference scenes cau
   fixture had a 32x32 map on the z-sorted perspective entry until `scene-tex-32` was added
   for it.
 
-Neither condition is one a fixture happens to produce. The corpus is the cheaper instrument
-and the one that runs by default; it is not a superset of the scenes.
+Neither condition is one a fixture happens to produce. The fixture corpus is the cheaper
+instrument, and it is not a superset of the scenes - the nine are scored beside it now,
+one process per scene, rather than only run for the states they build.
 
 ## Where the rest of it lives
 

@@ -34,7 +34,7 @@ contrib/census/run_corpus.sh cmake-build-witness /tmp/census
 contrib/census/witness.py cmake-build-witness /tmp/census
 ```
 
-840 runs: the fixtures the harness names (`--list`) and the nine
+888 runs: the fixtures the harness names (`--list`) and the nine
 `resources/gltf-reference` scenes, at 4 bpp × {zb, zs}, one process per scene so
 a log file is one scene's decisions. `witness.py --json out.json` for the
 machine-readable form.
@@ -101,11 +101,13 @@ making a refusal fail loudly rather than truncate a model in silence.
 
 ## What the tool cannot see
 
-- The nine `resources/gltf-reference` scenes have no entries in any reference
-  table, so their runs report NO-REFERENCE and `result=FAIL`. They are dumps from
-  Croc kept because they have historically tripped the lighting, so they widen
-  the *states* the corpus builds even though they cannot be compared. Read their
-  logs and ignore the verdict.
+- The nine `resources/gltf-reference` scenes are scored now: they have entries in
+  `examples/rendertest/rendertest.txt` in both floating-point classes at
+  8/15/16/24bpp × {z-buffered, z-sorted}, and their own `refscenes-*` ctest
+  tests, so with `CENSUS_REFERENCE` naming this tree's table their runs report
+  MATCH like any fixture and their verdict is no longer something to ignore. What
+  they still cannot say is which tuple a state selected — that is what the logs
+  are for — and a `result=FAIL` from either corpus is now a real difference.
 - `witness.py` refuses to report a census of empty logs. A build without the
   instrument produces one empty file per scene, which would otherwise read as
   "nothing is witnessed" — a wrong answer wearing the shape of a finding.

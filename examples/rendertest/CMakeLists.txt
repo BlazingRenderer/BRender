@@ -49,6 +49,58 @@ if (BUILD_TESTING)
     endforeach ()
 
     #
+    # The reference scenes: the .gltf files under resources/gltf-reference. They
+    # are a second corpus - the same bpp x depth configurations, but a different
+    # --scene-dir and an explicit scene list, because they are not fixtures this
+    # binary links in. They are kept because they reach states the fixtures do
+    # not; drivers/softprim/README.md says what for.
+    #
+    # The directory is the source of truth for which scenes these are: the list
+    # below is a glob of it, never a copy, and contrib/census/run_corpus.sh reads
+    # the same set through rendertest --list-scene-dir. CONFIGURE_DEPENDS so a
+    # scene added or removed re-configures rather than leaving a stale list.
+    #
+    # One test per (bpp, mode, scene), so that a failure names the scene.
+    #
+    # The name deliberately does not start with a device token. The --bless loop
+    # in contrib/run-tests.sh rebuilds each corpus test from its name, and it
+    # cannot rebuild one that carries a different --scene-dir and scene list, so
+    # these are skipped there (as `fixtures' and `gltf-loads' are) rather than
+    # blessed as the wrong configuration. Blessing them is deliberate and
+    # separate; drivers/softprim/README.md says how.
+    #
+    file(GLOB RT_REFERENCE_SCENE_FILES CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/resources/gltf-reference/*.gltf")
+    if (NOT RT_REFERENCE_SCENE_FILES)
+        message(FATAL_ERROR "no .gltf under ${CMAKE_SOURCE_DIR}/resources/gltf-reference; the reference-scene tests would register nothing")
+    endif ()
+
+    set(RT_REFERENCE_SCENES)
+    foreach (f IN LISTS RT_REFERENCE_SCENE_FILES)
+        get_filename_component(f "${f}" NAME)
+        string(REGEX REPLACE "\\.gltf$" "" f "${f}")
+        list(APPEND RT_REFERENCE_SCENES "${f}")
+    endforeach ()
+    list(SORT RT_REFERENCE_SCENES)
+
+    foreach (bpp IN ITEMS 8 15 16 24)
+        foreach (mode IN ITEMS zb zs)
+            if (mode STREQUAL "zs")
+                set(ref_depth --no-depth)
+            else ()
+                set(ref_depth)
+            endif ()
+
+            foreach (scene IN LISTS RT_REFERENCE_SCENES)
+                add_test(NAME "refscenes-${bpp}-${mode}-${scene}"
+                         COMMAND rendertest --device softrend --bpp ${bpp} ${ref_depth}
+                                 --scene-dir "${CMAKE_SOURCE_DIR}/resources/gltf-reference"
+                                 ${scene})
+                set_tests_properties("refscenes-${bpp}-${mode}-${scene}" PROPERTIES
+                                     ENVIRONMENT "SDL_VIDEODRIVER=offscreen")
+            endforeach ()
+        endforeach ()
+    endforeach ()
+
     # The stored glrend reference is llvmpipe's, so ask for software GL.
     #
     # There is no bpp axis and the name carries none: --bpp is inert on a GL

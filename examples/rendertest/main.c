@@ -1853,6 +1853,52 @@ static br_uint_8 rt_bpp_to_type(int bpp)
     }
 }
 
+/*
+ * List the scenes a directory holds: every .gltf file in it, as the name a run
+ * takes on the command line (the file name without its extension), sorted.
+ *
+ * A scene directory is the one place that says which reference scenes exist.
+ * The ctest entries (examples/rendertest/CMakeLists.txt) and the census corpus
+ * (contrib/census/run_corpus.sh) both derive the set from there - the latter
+ * through this flag - rather than carrying a list that can disagree with it.
+ */
+static int rt_str_compare(const void *a, const void *b)
+{
+    return strcmp(*(const char *const *)a, *(const char *const *)b);
+}
+
+static int rt_list_scene_dir(const char *dir)
+{
+    int    count = 0;
+    char **names = SDL_GlobDirectory(dir, "*.gltf", 0, &count);
+
+    if(names == NULL) {
+        fprintf(stderr, "Could not list %s: %s\n", dir, SDL_GetError());
+        return 2;
+    }
+
+    /*
+     * Sort after stripping the extension, so the order is by scene name and
+     * matches the ctest list CMake derives from the same directory.
+     * SDL_GlobDirectory() does not sort at all.
+     */
+    for(int i = 0; i < count; ++i) {
+        char *dot = strrchr(names[i], '.');
+
+        if(dot != NULL)
+            *dot = '\0';
+    }
+
+    qsort(names, count, sizeof(names[0]), rt_str_compare);
+
+    for(int i = 0; i < count; ++i)
+        printf("%s\n", names[i]);
+
+    SDL_free(names);
+
+    return 0;
+}
+
 static void rt_usage(const char *argv0)
 {
     fprintf(stderr,
@@ -1874,6 +1920,8 @@ static void rt_usage(const char *argv0)
             "  --bless            write the reference instead of comparing\n"
             "  -v, --verbose      log more\n"
             "  -l, --list         list the scenes and exit\n"
+            "  --list-scene-dir <dir>\n"
+            "                     list the .gltf scenes in <dir> and exit\n"
             "\n"
             "With no scene arguments the default fixture set is used. glrend can be\n"
             "forced onto llvmpipe with LIBGL_ALWAYS_SOFTWARE=true.\n",
@@ -1919,6 +1967,8 @@ int main(int argc, char **argv)
                 printf("%s\n", rt_default_scenes[k]);
 
             return 0;
+        } else if(strcmp(a, "--list-scene-dir") == 0 && v != NULL) {
+            return rt_list_scene_dir(argv[++i]);
         } else if(strcmp(a, "--help") == 0) {
             rt_usage(argv[0]);
             return 0;
