@@ -72,27 +72,30 @@ rebuilt as well.
 The `x87` entries come from pentprim, which is in the tree up to `076e6db6`
 ("resources/aidocs: specify this fork's glTF extensions") — the commit before
 the portable rasteriser replaced it. They are blessed with the *current*
-harness, so the harness has to be brought forward onto that tree: its key
-format and the demo's primitive heap are both newer.
+harness, so the harness on that tree has to be brought forward: its key format
+and the demo's primitive heap are both newer.
 
-1. A worktree at the pre-softprim commit, and the current harness copied in:
+That is kept as the `dev/pentprim-verification` branch, with those three changes
+committed on it, so there is nothing to reproduce by hand and nothing to keep in
+step with master.
+
+1. A worktree at it:
 
    ```
-   git worktree add --detach ../brender-pent 076e6db6
-   for f in examples/rendertest/main.c examples/rendertest/CMakeLists.txt \
-            examples/brdemo/brdemo.h; do
-       cp "$f" "../brender-pent/$f"
-   done
+   git worktree add ../brender-pent dev/pentprim-verification
    ```
 
    (`brdemo.h` matters because the heap size is a demo constant that the frames
-   depend on once it is too small to hold a scene — see below.)
+   depend on once it is too small to hold a scene — see below. The branch's
+   `contrib/census/README.md` has the command that checks this worktree still
+   reproduces the checked-in `x87` entries, which is worth running before
+   trusting anything it produces.)
 
-2. Build it with the assembler toolchain. `nix/uasm` and `nix/h2inc.nix` at
-   `2e8b44e0^` are the derivations; `h2inc` is a public fetch from GitHub. A
-   shell with `uasm` and `h2inc` on `PATH` is enough — the store paths are not
-   worth recording because they are garbage-collected once nothing references
-   them:
+2. Build it with the assembler toolchain. `nix/uasm` and `nix/h2inc.nix` are on
+   that branch, and were dropped from master in `2e8b44e0`; `h2inc` is a public
+   fetch from GitHub. A shell with `uasm` and `h2inc` on `PATH` is enough — the
+   store paths are not worth recording because they are garbage-collected once
+   nothing references them:
 
    ```
    nix develop .#brender-samples-linux32          # i686, to match pentprim
