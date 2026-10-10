@@ -535,6 +535,65 @@ static br_boolean spWantState(struct br_primitive_state *self, br_token prim_typ
  * format and primitive type before searching it: the generated list carries
  * every format's tables, so a block from another format must not be considered.
  */
+/*
+ * Witness census instrumentation.
+ *
+ * With BRENDER_SOFT_WITNESS_LOG defined and BR_WITNESS_LOG naming a file, every
+ * matcher decision appends one line -
+ * "<index>\t<match|refused|nomatch>\t<identifier>" - where the index is the
+ * winning entry's position in softPrimBlocks, which is the order of the
+ * generated softprim_matchers.inc, so an observation joins back to the emitted
+ * block by line. The census that reads it is contrib/census.
+ *
+ * Off by default, and a measurement tool rather than renderer behaviour: with
+ * the option off spWitnessNote() is empty and the walk below is the walk it was,
+ * and with the option on but the variable unset the file is never opened.
+ */
+#if BRENDER_SOFT_WITNESS_LOG
+
+#include <stdio.h>
+#include <stdlib.h>
+
+static FILE *spWitnessLog(void)
+{
+    static FILE      *log;
+    static br_boolean tried;
+
+    if(!tried) {
+        const char *path = getenv("BR_WITNESS_LOG");
+
+        tried = BR_TRUE;
+
+        if(path != NULL && path[0] != '\0')
+            log = fopen(path, "a");
+    }
+
+    return log;
+}
+
+static void spWitnessNote(const struct sp_match *found, br_boolean refused)
+{
+    FILE *log = spWitnessLog();
+
+    if(log == NULL)
+        return;
+
+    if(found == NULL)
+        fprintf(log, "-1\tnomatch\t-\n");
+    else
+        fprintf(log, "%d\t%s\t%s\n", (int)(found - softPrimBlocks), refused ? "refused" : "match", found->block.identifier);
+}
+
+#else
+
+static void spWitnessNote(const struct sp_match *found, br_boolean refused)
+{
+    (void)found;
+    (void)refused;
+}
+
+#endif
+
 static struct sp_match *spFindMatch(const struct sp_want *w)
 {
     int i;
@@ -566,12 +625,16 @@ static struct sp_match *spFindMatch(const struct sp_want *w)
         if(e->map_size != 0 && (e->map_size != w->map_width || e->map_size != w->map_height))
             continue;
 
-        if(e->refused)
+        if(e->refused) {
+            spWitnessNote(e, BR_TRUE);
             return NULL;
+        }
 
+        spWitnessNote(e, BR_FALSE);
         return e;
     }
 
+    spWitnessNote(NULL, BR_FALSE);
     return NULL;
 }
 

@@ -7,6 +7,13 @@
 # it took pentprim's place.
 ##
 
+#
+# Build the matcher's witness-census instrument: with this on, every block
+# selection is appended to the file BR_WITNESS_LOG names. Off by default, and
+# inert with that variable unset. contrib/census reads the log.
+#
+option(BRENDER_SOFT_WITNESS_LOG "Let the matcher log block selections to BR_WITNESS_LOG" OFF)
+
 add_library(softprim
         device.c
         driver.c
@@ -135,6 +142,10 @@ endif ()
 get_target_property(target_type softprim TYPE)
 if (NOT target_type STREQUAL SHARED_LIBRARY)
     target_compile_definitions(softprim PRIVATE DEFINE_BR_ENTRY_POINT)
+endif ()
+
+if (BRENDER_SOFT_WITNESS_LOG)
+    target_compile_definitions(softprim PRIVATE BRENDER_SOFT_WITNESS_LOG=1)
 endif ()
 
 target_link_libraries(softprim PRIVATE BRender::DDI)
