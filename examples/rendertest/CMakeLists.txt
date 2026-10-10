@@ -48,9 +48,23 @@ if (BUILD_TESTING)
         endforeach ()
     endforeach ()
 
+    #
     # The stored glrend reference is llvmpipe's, so ask for software GL.
-    add_test(NAME "glrend-8-zb" COMMAND rendertest --device glrend --bpp 8)
-    set_tests_properties("glrend-8-zb" PROPERTIES
+    #
+    # There is no bpp axis and the name carries none: --bpp is inert on a GL
+    # device, because the pixel type a key is built from is the colour
+    # buffer's, which the driver chooses, not the flag.
+    #
+    # Both depth modes are registered. 15 of the 102 fixtures place a different
+    # frame under --no-depth than under the depth buffer - the same 15 in each
+    # fp class - so the z-sorted half is coverage, not a duplicate of the
+    # z-buffered one.
+    add_test(NAME "glrend-zb" COMMAND rendertest --device glrend)
+    set_tests_properties("glrend-zb" PROPERTIES
+                         ENVIRONMENT "SDL_VIDEODRIVER=offscreen;LIBGL_ALWAYS_SOFTWARE=true")
+
+    add_test(NAME "glrend-zs" COMMAND rendertest --device glrend --no-depth)
+    set_tests_properties("glrend-zs" PROPERTIES
                          ENVIRONMENT "SDL_VIDEODRIVER=offscreen;LIBGL_ALWAYS_SOFTWARE=true")
 
     add_test(NAME "fixtures"
