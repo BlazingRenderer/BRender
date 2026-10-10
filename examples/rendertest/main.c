@@ -1793,7 +1793,7 @@ static const char *const rt_default_scenes[] = {
      * are one knob away from.
      */
     "scene-lines-plain",       "scene-lines-gouraud", "scene-lines-map", "scene-lines-map-gouraud", "scene-lines-plain-unlit",
-    "scene-lines-map-unlit",
+    "scene-lines-map-unlit",   "scene-lines-rgb555", "scene-lines-rgb565",
 
     /*
      * The MMX 555/565 family. pentprim walks the MMX table before the general

@@ -330,27 +330,28 @@ sub softprim_implemented {
 	}
 
 	# The 555/565-typed colour maps are in the spec for the same reason, and
-	# naming the value admits every shape that samples one. softprim has a kernel
-	# for the z-sorted arbitrary-width triangle only: it is awtmi.h's span with a
-	# two-byte texel decode instead of the RGB_888 one's three, so the addressing
-	# is the same code and only the fragment differs (RgbAwtTriangle).
+	# naming the value admits every shape that samples one. Two are implemented:
+	# the z-sorted arbitrary-width triangle, which is awtmi.h's span with a
+	# two-byte texel decode instead of the RGB_888 one's three (RgbAwtTriangle),
+	# and the line and point walk, which copies the map's own word the same way
+	# (SoftPrimLine and SoftPrimPoint, with l_pi.c, p_pi.c, l_piz.c and p_piz.c as
+	# the arithmetic).
 	#
-	# The z-buffered shapes are unreachable - the MMX table is tried first for a
-	# 555/565 output, its textured rows all require an INDEX_8 map with a
+	# The z-buffered triangles are unreachable - the MMX table is tried first for
+	# a 555/565 output, its textured rows all require an INDEX_8 map with a
 	# palette, and one of its untextured rows always matches, so a 555/565 map is
 	# never sampled and the primitive is drawn untextured. The power-of-two ones
-	# are the MMX and perfect-scan mappers, which pack their own base texel from
-	# a compiled-in width. The line and point ones would need kernels of their
-	# own (the line/point family is arbitrary-width only here) and no .glTF can
-	# reach a line or a point anyway. All of them are refused rather than left to
-	# fall through to the untextured twin.
+	# are the MMX and perfect-scan mappers, which pack their own base texel from a
+	# compiled-in width, and the line/point family has no power-of-two form at
+	# all. What is left is refused rather than left to fall through to the
+	# untextured twin.
 	if(grep { $_ eq "SP_TEX_555" || $_ eq "SP_TEX_565" } @tuple) {
 		my %t = map { $_ => 1 } @tuple;
 
-		return 0 if(!$t{"SP_TOP_TRI"});
-		return 0 if(!$t{"SP_DEPTH_NONE"});
 		return 0 if(!$t{"SP_ADDR_DIVIDE"});
-		return 1;
+		return 1 if($t{"SP_TOP_TRI"} && $t{"SP_DEPTH_NONE"});
+		return 1 if($t{"SP_TOP_LINE"} || $t{"SP_TOP_POINT"});
+		return 0;
 	}
 
 	return 1;

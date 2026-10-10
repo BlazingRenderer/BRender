@@ -231,6 +231,8 @@ softrend/softprmf/declared/zb/3/320x240/scene-lines-map-gouraud 0d49157f4356d286
 softrend/softprmf/declared/zb/3/320x240/scene-lines-map-unlit 3336b04313c18c99
 softrend/softprmf/declared/zb/3/320x240/scene-lines-plain a6abfc9bf24f9bb4
 softrend/softprmf/declared/zb/3/320x240/scene-lines-plain-unlit 759975c253e489e3
+softrend/softprmf/declared/zb/3/320x240/scene-lines-rgb555 53b19a66312a505b
+softrend/softprmf/declared/zb/3/320x240/scene-lines-rgb565 9b9f961e928b7d87
 softrend/softprmf/declared/zb/3/320x240/scene-mmx-rgb-dither-flat 6304ed29d5fa7dca
 softrend/softprmf/declared/zb/3/320x240/scene-mmx-rgb-dither-smooth 726e011348c2928c
 softrend/softprmf/declared/zb/3/320x240/scene-mmx-rgb-ditherscreen-flat 6304ed29d5fa7dca
@@ -327,6 +329,8 @@ softrend/softprmf/declared/zb/4/320x240/scene-lines-map-gouraud 17f4c4360877207f
 softrend/softprmf/declared/zb/4/320x240/scene-lines-map-unlit cd4191a42c8dffc7
 softrend/softprmf/declared/zb/4/320x240/scene-lines-plain 54c60eb1f86f2886
 softrend/softprmf/declared/zb/4/320x240/scene-lines-plain-unlit cd4191a42c8dffc7
+softrend/softprmf/declared/zb/4/320x240/scene-lines-rgb555 8252d14074b2933f
+softrend/softprmf/declared/zb/4/320x240/scene-lines-rgb565 cd4191a42c8dffc7
 softrend/softprmf/declared/zb/4/320x240/scene-mmx-rgb-dither-flat 252b3bc5be082529
 softrend/softprmf/declared/zb/4/320x240/scene-mmx-rgb-dither-smooth 0da00b3fc4e80dff
 softrend/softprmf/declared/zb/4/320x240/scene-mmx-rgb-ditherscreen-flat 08180faaa01ed324
@@ -423,6 +427,8 @@ softrend/softprmf/declared/zb/5/320x240/scene-lines-map-gouraud ef9faa1ce4ee49bb
 softrend/softprmf/declared/zb/5/320x240/scene-lines-map-unlit 6c4857ccc80f0107
 softrend/softprmf/declared/zb/5/320x240/scene-lines-plain a3bc9aa123da49d7
 softrend/softprmf/declared/zb/5/320x240/scene-lines-plain-unlit 6c4857ccc80f0107
+softrend/softprmf/declared/zb/5/320x240/scene-lines-rgb555 6c4857ccc80f0107
+softrend/softprmf/declared/zb/5/320x240/scene-lines-rgb565 1fa17f054176e16f
 softrend/softprmf/declared/zb/5/320x240/scene-mmx-rgb-dither-flat 030d4b30f63400bd
 softrend/softprmf/declared/zb/5/320x240/scene-mmx-rgb-dither-smooth 0c98b7675926ad9f
 softrend/softprmf/declared/zb/5/320x240/scene-mmx-rgb-ditherscreen-flat 763c736263d4a069
@@ -519,6 +525,8 @@ softrend/softprmf/declared/zb/6/320x240/scene-lines-map-gouraud 4bb50e353cad7d33
 softrend/softprmf/declared/zb/6/320x240/scene-lines-map-unlit 4bb50e353cad7d33
 softrend/softprmf/declared/zb/6/320x240/scene-lines-plain 05bfeb2deef63a70
 softrend/softprmf/declared/zb/6/320x240/scene-lines-plain-unlit 329d2b3ab2c8d783
+softrend/softprmf/declared/zb/6/320x240/scene-lines-rgb555 329d2b3ab2c8d783
+softrend/softprmf/declared/zb/6/320x240/scene-lines-rgb565 329d2b3ab2c8d783
 softrend/softprmf/declared/zb/6/320x240/scene-mmx-rgb-dither-flat b139759b43ebc4f6
 softrend/softprmf/declared/zb/6/320x240/scene-mmx-rgb-dither-smooth 1cc98466f2d64da7
 softrend/softprmf/declared/zb/6/320x240/scene-mmx-rgb-ditherscreen-flat b139759b43ebc4f6
@@ -615,6 +623,8 @@ softrend/softprmf/declared/zs/3/320x240/scene-lines-map-gouraud af9dc91b99181586
 softrend/softprmf/declared/zs/3/320x240/scene-lines-map-unlit 414f4d1bfa79dfb3
 softrend/softprmf/declared/zs/3/320x240/scene-lines-plain a6abfc9bf24f9bb4
 softrend/softprmf/declared/zs/3/320x240/scene-lines-plain-unlit 759975c253e489e3
+softrend/softprmf/declared/zs/3/320x240/scene-lines-rgb555 1bcc03ef30f0a0c3
+softrend/softprmf/declared/zs/3/320x240/scene-lines-rgb565 dcf827b6b178d5a9
 softrend/softprmf/declared/zs/3/320x240/scene-mmx-rgb-dither-flat 6304ed29d5fa7dca
 softrend/softprmf/declared/zs/3/320x240/scene-mmx-rgb-dither-smooth 726e011348c2928c
 softrend/softprmf/declared/zs/3/320x240/scene-mmx-rgb-ditherscreen-flat 6304ed29d5fa7dca
@@ -711,6 +721,8 @@ softrend/softprmf/declared/zs/4/320x240/scene-lines-map-gouraud 17f4c4360877207f
 softrend/softprmf/declared/zs/4/320x240/scene-lines-map-unlit cd4191a42c8dffc7
 softrend/softprmf/declared/zs/4/320x240/scene-lines-plain 54c60eb1f86f2886
 softrend/softprmf/declared/zs/4/320x240/scene-lines-plain-unlit cd4191a42c8dffc7
+softrend/softprmf/declared/zs/4/320x240/scene-lines-rgb555 c9a425ac6e6c0027
+softrend/softprmf/declared/zs/4/320x240/scene-lines-rgb565 cd4191a42c8dffc7
 softrend/softprmf/declared/zs/4/320x240/scene-mmx-rgb-dither-flat 31bdec00998c4dc4
 softrend/softprmf/declared/zs/4/320x240/scene-mmx-rgb-dither-smooth c6361a0ccc57e160
 softrend/softprmf/declared/zs/4/320x240/scene-mmx-rgb-ditherscreen-flat 31bdec00998c4dc4
@@ -807,6 +819,8 @@ softrend/softprmf/declared/zs/5/320x240/scene-lines-map-gouraud ef9faa1ce4ee49bb
 softrend/softprmf/declared/zs/5/320x240/scene-lines-map-unlit 6c4857ccc80f0107
 softrend/softprmf/declared/zs/5/320x240/scene-lines-plain a3bc9aa123da49d7
 softrend/softprmf/declared/zs/5/320x240/scene-lines-plain-unlit 6c4857ccc80f0107
+softrend/softprmf/declared/zs/5/320x240/scene-lines-rgb555 6c4857ccc80f0107
+softrend/softprmf/declared/zs/5/320x240/scene-lines-rgb565 84361b9a75ff01f3
 softrend/softprmf/declared/zs/5/320x240/scene-mmx-rgb-dither-flat 0dea49c982ca09a0
 softrend/softprmf/declared/zs/5/320x240/scene-mmx-rgb-dither-smooth 4f9039ec7c10f8eb
 softrend/softprmf/declared/zs/5/320x240/scene-mmx-rgb-ditherscreen-flat 0dea49c982ca09a0
@@ -903,6 +917,8 @@ softrend/softprmf/declared/zs/6/320x240/scene-lines-map-gouraud e30f3bef2800ce7b
 softrend/softprmf/declared/zs/6/320x240/scene-lines-map-unlit e30f3bef2800ce7b
 softrend/softprmf/declared/zs/6/320x240/scene-lines-plain 05bfeb2deef63a70
 softrend/softprmf/declared/zs/6/320x240/scene-lines-plain-unlit 329d2b3ab2c8d783
+softrend/softprmf/declared/zs/6/320x240/scene-lines-rgb555 329d2b3ab2c8d783
+softrend/softprmf/declared/zs/6/320x240/scene-lines-rgb565 329d2b3ab2c8d783
 softrend/softprmf/declared/zs/6/320x240/scene-mmx-rgb-dither-flat b139759b43ebc4f6
 softrend/softprmf/declared/zs/6/320x240/scene-mmx-rgb-dither-smooth 1cc98466f2d64da7
 softrend/softprmf/declared/zs/6/320x240/scene-mmx-rgb-ditherscreen-flat b139759b43ebc4f6
@@ -999,6 +1015,8 @@ softrend/softprmf/x87/zb/3/320x240/scene-lines-map-gouraud 0d49157f4356d286
 softrend/softprmf/x87/zb/3/320x240/scene-lines-map-unlit 3336b04313c18c99
 softrend/softprmf/x87/zb/3/320x240/scene-lines-plain a6abfc9bf24f9bb4
 softrend/softprmf/x87/zb/3/320x240/scene-lines-plain-unlit 759975c253e489e3
+softrend/softprmf/x87/zb/3/320x240/scene-lines-rgb555 53b19a66312a505b
+softrend/softprmf/x87/zb/3/320x240/scene-lines-rgb565 9b9f961e928b7d87
 softrend/softprmf/x87/zb/3/320x240/scene-mmx-rgb-dither-flat 6304ed29d5fa7dca
 softrend/softprmf/x87/zb/3/320x240/scene-mmx-rgb-dither-smooth 726e011348c2928c
 softrend/softprmf/x87/zb/3/320x240/scene-mmx-rgb-ditherscreen-flat 6304ed29d5fa7dca
@@ -1095,6 +1113,8 @@ softrend/softprmf/x87/zb/4/320x240/scene-lines-map-gouraud 17f4c4360877207f
 softrend/softprmf/x87/zb/4/320x240/scene-lines-map-unlit cd4191a42c8dffc7
 softrend/softprmf/x87/zb/4/320x240/scene-lines-plain 54c60eb1f86f2886
 softrend/softprmf/x87/zb/4/320x240/scene-lines-plain-unlit cd4191a42c8dffc7
+softrend/softprmf/x87/zb/4/320x240/scene-lines-rgb555 8252d14074b2933f
+softrend/softprmf/x87/zb/4/320x240/scene-lines-rgb565 cd4191a42c8dffc7
 softrend/softprmf/x87/zb/4/320x240/scene-mmx-rgb-dither-flat 252b3bc5be082529
 softrend/softprmf/x87/zb/4/320x240/scene-mmx-rgb-dither-smooth 0da00b3fc4e80dff
 softrend/softprmf/x87/zb/4/320x240/scene-mmx-rgb-ditherscreen-flat 08180faaa01ed324
@@ -1191,6 +1211,8 @@ softrend/softprmf/x87/zb/5/320x240/scene-lines-map-gouraud ef9faa1ce4ee49bb
 softrend/softprmf/x87/zb/5/320x240/scene-lines-map-unlit 6c4857ccc80f0107
 softrend/softprmf/x87/zb/5/320x240/scene-lines-plain a3bc9aa123da49d7
 softrend/softprmf/x87/zb/5/320x240/scene-lines-plain-unlit 6c4857ccc80f0107
+softrend/softprmf/x87/zb/5/320x240/scene-lines-rgb555 6c4857ccc80f0107
+softrend/softprmf/x87/zb/5/320x240/scene-lines-rgb565 1fa17f054176e16f
 softrend/softprmf/x87/zb/5/320x240/scene-mmx-rgb-dither-flat 030d4b30f63400bd
 softrend/softprmf/x87/zb/5/320x240/scene-mmx-rgb-dither-smooth 0c98b7675926ad9f
 softrend/softprmf/x87/zb/5/320x240/scene-mmx-rgb-ditherscreen-flat 763c736263d4a069
@@ -1287,6 +1309,8 @@ softrend/softprmf/x87/zb/6/320x240/scene-lines-map-gouraud 4bb50e353cad7d33
 softrend/softprmf/x87/zb/6/320x240/scene-lines-map-unlit 4bb50e353cad7d33
 softrend/softprmf/x87/zb/6/320x240/scene-lines-plain 05bfeb2deef63a70
 softrend/softprmf/x87/zb/6/320x240/scene-lines-plain-unlit 329d2b3ab2c8d783
+softrend/softprmf/x87/zb/6/320x240/scene-lines-rgb555 329d2b3ab2c8d783
+softrend/softprmf/x87/zb/6/320x240/scene-lines-rgb565 329d2b3ab2c8d783
 softrend/softprmf/x87/zb/6/320x240/scene-mmx-rgb-dither-flat b139759b43ebc4f6
 softrend/softprmf/x87/zb/6/320x240/scene-mmx-rgb-dither-smooth d6111af9bdeb7ccc
 softrend/softprmf/x87/zb/6/320x240/scene-mmx-rgb-ditherscreen-flat b139759b43ebc4f6
@@ -1383,6 +1407,8 @@ softrend/softprmf/x87/zs/3/320x240/scene-lines-map-gouraud af9dc91b99181586
 softrend/softprmf/x87/zs/3/320x240/scene-lines-map-unlit 414f4d1bfa79dfb3
 softrend/softprmf/x87/zs/3/320x240/scene-lines-plain a6abfc9bf24f9bb4
 softrend/softprmf/x87/zs/3/320x240/scene-lines-plain-unlit 759975c253e489e3
+softrend/softprmf/x87/zs/3/320x240/scene-lines-rgb555 1bcc03ef30f0a0c3
+softrend/softprmf/x87/zs/3/320x240/scene-lines-rgb565 dcf827b6b178d5a9
 softrend/softprmf/x87/zs/3/320x240/scene-mmx-rgb-dither-flat 6304ed29d5fa7dca
 softrend/softprmf/x87/zs/3/320x240/scene-mmx-rgb-dither-smooth 726e011348c2928c
 softrend/softprmf/x87/zs/3/320x240/scene-mmx-rgb-ditherscreen-flat 6304ed29d5fa7dca
@@ -1479,6 +1505,8 @@ softrend/softprmf/x87/zs/4/320x240/scene-lines-map-gouraud 17f4c4360877207f
 softrend/softprmf/x87/zs/4/320x240/scene-lines-map-unlit cd4191a42c8dffc7
 softrend/softprmf/x87/zs/4/320x240/scene-lines-plain 54c60eb1f86f2886
 softrend/softprmf/x87/zs/4/320x240/scene-lines-plain-unlit cd4191a42c8dffc7
+softrend/softprmf/x87/zs/4/320x240/scene-lines-rgb555 c9a425ac6e6c0027
+softrend/softprmf/x87/zs/4/320x240/scene-lines-rgb565 cd4191a42c8dffc7
 softrend/softprmf/x87/zs/4/320x240/scene-mmx-rgb-dither-flat 31bdec00998c4dc4
 softrend/softprmf/x87/zs/4/320x240/scene-mmx-rgb-dither-smooth c6361a0ccc57e160
 softrend/softprmf/x87/zs/4/320x240/scene-mmx-rgb-ditherscreen-flat 31bdec00998c4dc4
@@ -1575,6 +1603,8 @@ softrend/softprmf/x87/zs/5/320x240/scene-lines-map-gouraud ef9faa1ce4ee49bb
 softrend/softprmf/x87/zs/5/320x240/scene-lines-map-unlit 6c4857ccc80f0107
 softrend/softprmf/x87/zs/5/320x240/scene-lines-plain a3bc9aa123da49d7
 softrend/softprmf/x87/zs/5/320x240/scene-lines-plain-unlit 6c4857ccc80f0107
+softrend/softprmf/x87/zs/5/320x240/scene-lines-rgb555 6c4857ccc80f0107
+softrend/softprmf/x87/zs/5/320x240/scene-lines-rgb565 84361b9a75ff01f3
 softrend/softprmf/x87/zs/5/320x240/scene-mmx-rgb-dither-flat 0dea49c982ca09a0
 softrend/softprmf/x87/zs/5/320x240/scene-mmx-rgb-dither-smooth 4f9039ec7c10f8eb
 softrend/softprmf/x87/zs/5/320x240/scene-mmx-rgb-ditherscreen-flat 0dea49c982ca09a0
@@ -1671,6 +1701,8 @@ softrend/softprmf/x87/zs/6/320x240/scene-lines-map-gouraud e30f3bef2800ce7b
 softrend/softprmf/x87/zs/6/320x240/scene-lines-map-unlit e30f3bef2800ce7b
 softrend/softprmf/x87/zs/6/320x240/scene-lines-plain 05bfeb2deef63a70
 softrend/softprmf/x87/zs/6/320x240/scene-lines-plain-unlit 329d2b3ab2c8d783
+softrend/softprmf/x87/zs/6/320x240/scene-lines-rgb555 329d2b3ab2c8d783
+softrend/softprmf/x87/zs/6/320x240/scene-lines-rgb565 329d2b3ab2c8d783
 softrend/softprmf/x87/zs/6/320x240/scene-mmx-rgb-dither-flat b139759b43ebc4f6
 softrend/softprmf/x87/zs/6/320x240/scene-mmx-rgb-dither-smooth d6111af9bdeb7ccc
 softrend/softprmf/x87/zs/6/320x240/scene-mmx-rgb-ditherscreen-flat b139759b43ebc4f6

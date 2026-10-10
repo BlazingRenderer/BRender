@@ -1146,6 +1146,8 @@ static br_error scene_make_mmx_fixtures(br_model *cube)
  *   scene-lines-map-gouraud   + BR_MATF_SMOOTH
  *   scene-lines-plain-unlit   unlit white, no map        - the second control
  *   scene-lines-map-unlit     unlit white, indexed map
+ *   scene-lines-rgb555        unlit white, 555-typed map - the TEX_555 witness
+ *   scene-lines-rgb565        unlit white, 565-typed map - the TEX_565 witness
  *
  * Two properties decide whether these draw the block they name:
  *
@@ -1235,6 +1237,36 @@ static br_error scene_make_line_fixtures(br_model *cube)
                   scene_fx_world_topologies(
                       cube, scene_lines_material("scene-lines-map-unlit-material", BR_COLOUR_RGB(255, 255, 255), 0, map, NULL))) != BRE_OK)
         r = BRE_FAIL;
+
+    /*
+     * The 555/565-typed maps. The line/point TEX_555 and TEX_565 entries require
+     * nothing but the topology and the map's type - no match flags at all - so
+     * these are scene-lines-map-unlit's material with the map typed to the
+     * output, and no shade table. Unlit is what keeps the walk on them: a lit
+     * material sets PRIMF_MODULATE, which the earlier untextured blocks that
+     * require it would take first.
+     *
+     * The map stays arbitrary-width: this family has no power-of-two blocks, so
+     * the entries are all ADDR_DIVIDE and a power-of-two map would reach the
+     * untextured twin instead.
+     */
+    {
+        br_pixelmap *map555 = scene_texture_rgb("scene-lines-rgb555-map", BR_PMT_RGB_555, SCENE_ARB_WIDTH, SCENE_ARB_HEIGHT, SCENE_ARB_CELLS);
+        br_pixelmap *map565 = scene_texture_rgb("scene-lines-rgb565-map", BR_PMT_RGB_565, SCENE_ARB_WIDTH, SCENE_ARB_HEIGHT, SCENE_ARB_CELLS);
+
+        if(map555 == NULL || map565 == NULL)
+            return BRE_FAIL;
+
+        if(scene_save("scene-lines-rgb555.gltf",
+                      scene_fx_world_topologies(cube, scene_lines_material("scene-lines-rgb555-material", BR_COLOUR_RGB(255, 255, 255), 0,
+                                                                           map555, NULL))) != BRE_OK)
+            r = BRE_FAIL;
+
+        if(scene_save("scene-lines-rgb565.gltf",
+                      scene_fx_world_topologies(cube, scene_lines_material("scene-lines-rgb565-material", BR_COLOUR_RGB(255, 255, 255), 0,
+                                                                           map565, NULL))) != BRE_OK)
+            r = BRE_FAIL;
+    }
 
     return r;
 }

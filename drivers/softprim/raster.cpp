@@ -5728,7 +5728,8 @@ static void SoftPrimLine(brp_block *block, brp_vertex *v0, brp_vertex *v1)
     (void)block;
 
     static_assert(F == SP_FMT_I8 || F == SP_FMT_555 || F == SP_FMT_565 || F == SP_FMT_888, "softprim: unknown line output format");
-    static_assert(X == SP_TEX_NONE || (X == SP_TEX_I8 && F == SP_FMT_I8) || (X == SP_TEX_RGB888 && F == SP_FMT_888),
+    static_assert(X == SP_TEX_NONE || (X == SP_TEX_I8 && F == SP_FMT_I8) || (X == SP_TEX_RGB888 && F == SP_FMT_888) ||
+                      (X == SP_TEX_555 && F == SP_FMT_555) || (X == SP_TEX_565 && F == SP_FMT_565),
                   "softprim: a line's texture form must match its output format");
     static_assert(X != SP_TEX_NONE || A == SP_ADDR_NONE, "softprim: a texture-less line has no address mode");
     static_assert(X == SP_TEX_NONE || A == SP_ADDR_DIVIDE, "softprim: a textured line is arbitrary-width only");
@@ -5886,7 +5887,7 @@ static void SoftPrimLine(brp_block *block, brp_vertex *v0, brp_vertex *v1)
                             else
                                 ptr[0] = texel;
                         }
-                    } else {
+                    } else if constexpr(X == SP_TEX_RGB888) {
                         const br_uint_8 *texel = tex.base + (pv >> 16) * tex.stride_b + 3 * (pu >> 16);
 
                         if(texel[0] || texel[1] || texel[2]) {
@@ -5894,6 +5895,20 @@ static void SoftPrimLine(brp_block *block, brp_vertex *v0, brp_vertex *v1)
                             ptr[0] = texel[0];
                             ptr[1] = texel[1];
                             ptr[2] = texel[2];
+                        }
+                    } else {
+                        /*
+                         * A 555/565-typed map: its own two-byte word is the
+                         * output pixel, so it is copied rather than decoded,
+                         * and a zero word is the colour key - the same test the
+                         * RGB_888 arm makes over three bytes.
+                         */
+                        const br_uint_8 *texel = tex.base + (pv >> 16) * tex.stride_b + 2 * (pu >> 16);
+
+                        if(texel[0] || texel[1]) {
+                            StoreDepth(zptr, zp);
+                            ptr[0] = texel[0];
+                            ptr[1] = texel[1];
                         }
                     }
                 } else {
@@ -5913,13 +5928,20 @@ static void SoftPrimLine(brp_block *block, brp_vertex *v0, brp_vertex *v1)
                         ptr[0] = SoftPrimWork.shade.base[((pi >> 8) & 0xff00) + texel];
                     else
                         ptr[0] = texel;
-                } else {
+                } else if constexpr(X == SP_TEX_RGB888) {
                     const br_uint_8 *texel = tex.base + (pv >> 16) * tex.stride_b + 3 * (pu >> 16);
 
                     if(texel[0] || texel[1] || texel[2]) {
                         ptr[0] = texel[0];
                         ptr[1] = texel[1];
                         ptr[2] = texel[2];
+                    }
+                } else {
+                    const br_uint_8 *texel = tex.base + (pv >> 16) * tex.stride_b + 2 * (pu >> 16);
+
+                    if(texel[0] || texel[1]) {
+                        ptr[0] = texel[0];
+                        ptr[1] = texel[1];
                     }
                 }
             } else {
@@ -5970,7 +5992,8 @@ static void SoftPrimPoint(brp_block *block, brp_vertex *tvp)
     (void)block;
 
     static_assert(F == SP_FMT_I8 || F == SP_FMT_555 || F == SP_FMT_565 || F == SP_FMT_888, "softprim: unknown point output format");
-    static_assert(X == SP_TEX_NONE || (X == SP_TEX_I8 && F == SP_FMT_I8) || (X == SP_TEX_RGB888 && F == SP_FMT_888),
+    static_assert(X == SP_TEX_NONE || (X == SP_TEX_I8 && F == SP_FMT_I8) || (X == SP_TEX_RGB888 && F == SP_FMT_888) ||
+                      (X == SP_TEX_555 && F == SP_FMT_555) || (X == SP_TEX_565 && F == SP_FMT_565),
                   "softprim: a point's texture form must match its output format");
     static_assert(F == SP_FMT_I8 ? (S == SP_SHADE_NONE || S == SP_SHADE_INTERP_I || S == SP_SHADE_CONST_I)
                                  : (S == SP_SHADE_NONE || S == SP_SHADE_INTERP_RGB || S == SP_SHADE_CONST_RGB),
@@ -6037,7 +6060,7 @@ static void SoftPrimPoint(brp_block *block, brp_vertex *tvp)
             p[0] = SoftPrimWork.shade.base[256 * (br_fixed_ls)(BrFloatToFixed(tvp->comp[C_I]) >> 16) + texel];
         else
             p[0] = texel;
-    } else {
+    } else if constexpr(X == SP_TEX_RGB888) {
         const br_fixed_ls fw = BrIntToFixed(tex.width_p);
         const br_fixed_ls fh = BrIntToFixed(tex.height);
         br_fixed_ls       pu = BrFloatToFixed(tvp->comp[C_U]) % fw;
@@ -6058,6 +6081,26 @@ static void SoftPrimPoint(brp_block *block, brp_vertex *tvp)
         p[0] = texel[0];
         p[1] = texel[1];
         p[2] = texel[2];
+    } else {
+        const br_fixed_ls fw = BrIntToFixed(tex.width_p);
+        const br_fixed_ls fh = BrIntToFixed(tex.height);
+        br_fixed_ls       pu = BrFloatToFixed(tvp->comp[C_U]) % fw;
+
+        if(pu < 0)
+            pu += fw;
+
+        br_fixed_ls pv = BrFloatToFixed(tvp->comp[C_V]) % fh;
+
+        if(pv < 0)
+            pv += fh;
+
+        const br_uint_8 *texel = tex.base + (pv >> 16) * tex.stride_b + 2 * (pu >> 16);
+
+        if(!(texel[0] || texel[1]))
+            return;
+
+        p[0] = texel[0];
+        p[1] = texel[1];
     }
 
     if constexpr(D == SP_DEPTH_ZW)
