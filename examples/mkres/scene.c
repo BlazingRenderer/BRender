@@ -431,6 +431,21 @@ static br_material *scene_material_ex(const char *name, br_colour colour, br_uin
 #define SCENE_ARB_SCALE BR_SCALAR(3.0)
 
 /*
+ * The backdrop the four p256 fixtures draw behind their cubes, so that the
+ * 50/50 destination blend the -blend twins reach has colour to mix with rather
+ * than the clear colour. The cube model is drawn wide and shallow and pushed
+ * back: scale_x/y of 60 make the front face far larger than the projected frame
+ * at its depth, and the small scale_z keeps it flat against the camera, while
+ * the z of -20 seats it behind the cubes (whose back face is near z = -2.6) yet
+ * inside the scene camera's 0.1..100 range. The front face sits at z = -19, and
+ * the widest frame half-width there is the 1280x720 viewport's, 0.7365 * 25 =
+ * 18.4, well inside the 30 the scale covers.
+ */
+#define SCENE_BACKDROP_SCALE_XY BR_SCALAR(60.0)
+#define SCENE_BACKDROP_SCALE_Z  BR_SCALAR(2.0)
+#define SCENE_BACKDROP_Z        BR_SCALAR(-20.0)
+
+/*
  * Every lookup table is indexed as (row * 256) + column whatever its height, so
  * the width is not a free parameter. An empty table is still a valid table; the
  * builders below fill one in.
@@ -1279,6 +1294,56 @@ static br_error scene_make_line_fixtures(br_model *cube)
 
 /*
  * ------------------------------------------------------------------
+ * The backdrop the p256 scenes draw behind their cubes.
+ *
+ * The blend the -blend twins reach is a 50/50 mix against the *destination*
+ * buffer, and against the black clear colour that only halves the cube's own
+ * colour - a darker copy of the non-blend twin, which no human reads as
+ * blending. A saturated red drawn underneath makes the same pixels half red, an
+ * obvious mixture - the same cube pixels, but a colour a person reads at a
+ * glance. It is unlit so its colour is the material's and does not vary with the
+ * near light, untextured so the mixture is between two flat colours, and opaque
+ * whatever the cubes' opacity is: a backdrop that itself blended would mix with
+ * black and defeat the point.
+ *
+ * The actor is a wide, shallow, unturned cube rather than the turned one
+ * scene_fx_add_cube_named() makes. It is added after the cubes, which puts it at
+ * the head of the world's child list and so draws it first - the blend needs it
+ * in the colour buffer before the cube that reads it. Under z-sorting its depth
+ * puts it first regardless.
+ */
+static br_material *scene_backdrop_material(const char *name)
+{
+    br_material *m;
+
+    if((m = scene_material_ex(name, BR_COLOUR_RGB(255, 0, 0), 0, BR_SCALAR(0.1), BR_SCALAR(0.7), BR_SCALAR(0.0), BR_SCALAR(20.0))) == NULL)
+        return NULL;
+
+    m->opacity = 255;
+
+    return m;
+}
+
+static void scene_fx_add_backdrop(br_actor *world, br_model *cube, br_material *mat, const char *name)
+{
+    br_actor   *a;
+    br_matrix34 m;
+
+    if((a = scene_actor(world, BR_ACTOR_MODEL, name)) == NULL)
+        return;
+
+    a->model    = cube;
+    a->material = mat;
+
+    BrMatrix34Scale(&m, SCENE_BACKDROP_SCALE_XY, SCENE_BACKDROP_SCALE_XY, SCENE_BACKDROP_SCALE_Z);
+    BrMatrix34PostTranslate(&m, BR_SCALAR(0), BR_SCALAR(0), SCENE_BACKDROP_Z);
+
+    a->t.type  = BR_TRANSFORM_MATRIX34;
+    a->t.t.mat = m;
+}
+
+/*
+ * ------------------------------------------------------------------
  * The RGB-output arbitrary-width shade-table fixtures.
  *
  * prim_t24's RGB-typed shade-table blocks - out = shade[(intensity << 8) |
@@ -1315,9 +1380,14 @@ static br_error scene_make_line_fixtures(br_model *cube)
  * drawn at SCENE_ARB_SCALE overlap in the middle of the frame; the offsets keep
  * each cube's own pixels - and so each cube's own response to the perspective
  * flag - readable in the scene's checksum.
+ *
+ * The four p256 scenes additionally carry a backdrop, which the three arb
+ * scenes do not - hence the parameter and the byte-identical arb regeneration
+ * that guards it. The p256 scenes are the ones with a -blend twin, and their
+ * blend is the reason the backdrop exists; see scene_fx_add_backdrop().
  */
-static br_error scene_make_rgb_shade(br_model *cube, const char *name, const char *mapname, int size, br_uint_32 flags,
-                                     br_uint_8 opacity)
+static br_error scene_make_rgb_shade(br_model *cube, const char *name, const char *mapname, int size, br_uint_32 flags, br_uint_8 opacity,
+                                     br_boolean backdrop)
 {
     br_uint_8    types[3] = {BR_PMT_RGB_555, BR_PMT_RGB_565, BR_PMT_RGB_888};
     br_scalar    xs[3]    = {BR_SCALAR(0.0), BR_SCALAR(-2.6), BR_SCALAR(2.6)};
@@ -1350,6 +1420,18 @@ static br_error scene_make_rgb_shade(br_model *cube, const char *name, const cha
     if(world != NULL)
         scene_fx_add_cube_named(world, cube, mats[2], "cube-888", SCENE_ARB_SCALE, xs[2], BR_SCALAR(0), BR_SCALAR(0));
 
+    if(backdrop && world != NULL) {
+        char         bname[64];
+        br_material *bmat;
+
+        snprintf(bname, sizeof(bname), "%s-backdrop-material", name);
+
+        if((bmat = scene_backdrop_material(bname)) == NULL)
+            return BRE_FAIL;
+
+        scene_fx_add_backdrop(world, cube, bmat, "backdrop");
+    }
+
     snprintf(gltf, sizeof(gltf), "%s.gltf", name);
 
     return scene_save(gltf, world);
@@ -1359,30 +1441,29 @@ static br_error scene_make_rgb_shade_fixtures(br_model *cube)
 {
     br_error r = BRE_OK;
 
-    if(scene_make_rgb_shade(cube, "scene-shade-arb-flat", "scene-shade-arb-map", SCENE_TEX_SIZE, 0, 255) != BRE_OK)
+    if(scene_make_rgb_shade(cube, "scene-shade-arb-flat", "scene-shade-arb-map", SCENE_TEX_SIZE, 0, 255, BR_FALSE) != BRE_OK)
         r = BRE_FAIL;
 
-    if(scene_make_rgb_shade(cube, "scene-shade-arb-flat-persp", "scene-shade-arb-map", SCENE_TEX_SIZE, BR_MATF_PERSPECTIVE, 255) != BRE_OK)
+    if(scene_make_rgb_shade(cube, "scene-shade-arb-flat-persp", "scene-shade-arb-map", SCENE_TEX_SIZE, BR_MATF_PERSPECTIVE, 255, BR_FALSE) != BRE_OK)
         r = BRE_FAIL;
 
     if(scene_make_rgb_shade(cube, "scene-shade-arb-smooth-persp", "scene-shade-arb-map", SCENE_TEX_SIZE,
-                            BR_MATF_PERSPECTIVE | BR_MATF_SMOOTH, 255) != BRE_OK)
+                            BR_MATF_PERSPECTIVE | BR_MATF_SMOOTH, 255, BR_FALSE) != BRE_OK)
         r = BRE_FAIL;
 
-    if(scene_make_rgb_shade(cube, "scene-shade-p256-flat-persp", "scene-shade-p256-map", SCENE_P256_SIZE,
-                            BR_MATF_PERSPECTIVE, 255) != BRE_OK)
+    if(scene_make_rgb_shade(cube, "scene-shade-p256-flat-persp", "scene-shade-p256-map", SCENE_P256_SIZE, BR_MATF_PERSPECTIVE, 255, BR_TRUE) != BRE_OK)
         r = BRE_FAIL;
 
     if(scene_make_rgb_shade(cube, "scene-shade-p256-smooth-persp", "scene-shade-p256-map", SCENE_P256_SIZE,
-                            BR_MATF_PERSPECTIVE | BR_MATF_SMOOTH, 255) != BRE_OK)
+                            BR_MATF_PERSPECTIVE | BR_MATF_SMOOTH, 255, BR_TRUE) != BRE_OK)
         r = BRE_FAIL;
 
-    if(scene_make_rgb_shade(cube, "scene-shade-p256-flat-persp-blend", "scene-shade-p256-map", SCENE_P256_SIZE,
-                            BR_MATF_PERSPECTIVE, 128) != BRE_OK)
+    if(scene_make_rgb_shade(cube, "scene-shade-p256-flat-persp-blend", "scene-shade-p256-map", SCENE_P256_SIZE, BR_MATF_PERSPECTIVE, 128,
+                            BR_TRUE) != BRE_OK)
         r = BRE_FAIL;
 
     if(scene_make_rgb_shade(cube, "scene-shade-p256-smooth-persp-blend", "scene-shade-p256-map", SCENE_P256_SIZE,
-                            BR_MATF_PERSPECTIVE | BR_MATF_SMOOTH, 128) != BRE_OK)
+                            BR_MATF_PERSPECTIVE | BR_MATF_SMOOTH, 128, BR_TRUE) != BRE_OK)
         r = BRE_FAIL;
 
     return r;
