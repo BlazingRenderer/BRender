@@ -97,7 +97,7 @@ format and the demo's primitive heap are both newer.
    ```
    nix develop .#brender-samples-linux32          # i686, to match pentprim
    cmake -S . -B build -DCMAKE_BUILD_TYPE=Release \
-         -DBRENDER_BUILD_SOFT=ON -DBRENDER_SOFT_REFPRIM=OFF \
+         -DBRENDER_BUILD_SOFT=ON \
          -DBRENDER_H2INC_EXECUTABLE="$(command -v h2inc)" \
          -DCMAKE_ASM_MASM_COMPILER="$(command -v uasm)"
    cmake --build build -j
