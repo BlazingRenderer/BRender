@@ -67,6 +67,24 @@ if (BUILD_TESTING)
     set_tests_properties("glrend-zs" PROPERTIES
                          ENVIRONMENT "SDL_VIDEODRIVER=offscreen;LIBGL_ALWAYS_SOFTWARE=true")
 
+    #
+    # glrend1x is softrend's transform-and-lighting over glrend's rasteriser. It
+    # is a GL device too, so it shares the bpp-less name and the software-GL
+    # environment, but not the reference: its pixel type is 7 against glrend's
+    # 8, and 15 of the 102 fixtures put a different frame under --no-depth - a
+    # different 15 from glrend's, so this is coverage and not a copy.
+    #
+    # Unlike glrend, the fp class is not inert here: the T&L runs in this
+    # binary, so the key records it, and scene-blend-p2-persp differs between
+    # x87 and declared where the other 101 fixtures agree.
+    add_test(NAME "glrend1x-zb" COMMAND rendertest --device glrend1x)
+    set_tests_properties("glrend1x-zb" PROPERTIES
+                         ENVIRONMENT "SDL_VIDEODRIVER=offscreen;LIBGL_ALWAYS_SOFTWARE=true")
+
+    add_test(NAME "glrend1x-zs" COMMAND rendertest --device glrend1x --no-depth)
+    set_tests_properties("glrend1x-zs" PROPERTIES
+                         ENVIRONMENT "SDL_VIDEODRIVER=offscreen;LIBGL_ALWAYS_SOFTWARE=true")
+
     add_test(NAME "fixtures"
              COMMAND ${CMAKE_COMMAND}
                      "-DMKRES=$<TARGET_FILE:mkres>"

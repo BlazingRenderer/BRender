@@ -187,16 +187,16 @@ if [ "$bless" = 1 ]; then
         if [ "$mode" = zs ]; then depth="--no-depth"; else depth=""; fi
 
         # The name grammar differs by device. A software rasteriser's name is
-        # `<device>-<type>-<mode>`; glrend's is `<device>-<mode>`, because the
-        # GL device has no bpp axis - --bpp is inert there, the pixel type in
-        # the key being the colour buffer's type, which the driver chooses.
-        # The device is the first field either way and the mode the last, so
-        # the split above parses both; only the `--bpp' the softrend command is
-        # built from is absent, and glrend still takes the mode's depth flag.
+        # `<device>-<type>-<mode>`; a GL device's is `<device>-<mode>`, because
+        # it has no bpp axis - --bpp is inert there, the pixel type in the key
+        # being the colour buffer's type, which the driver chooses. The device
+        # is the first field either way and the mode the last, so the split
+        # above parses both; only the `--bpp' the softrend command is built
+        # from is absent, and both GL devices still take the mode's depth flag.
         case "$device" in
-            softrend) out=$("$rendertest" --device softrend --bpp "$type" $depth --bless 2>&1) ;;
-            glrend)   out=$(LIBGL_ALWAYS_SOFTWARE=true "$rendertest" --device glrend $depth --bless 2>&1) ;;
-            *)        continue ;;
+            softrend)        out=$("$rendertest" --device softrend --bpp "$type" $depth --bless 2>&1) ;;
+            glrend|glrend1x) out=$(LIBGL_ALWAYS_SOFTWARE=true "$rendertest" --device "$device" $depth --bless 2>&1) ;;
+            *)               continue ;;
         esac
 
         line=$(echo "$out" | grep -oE 'result=(PASS|FAIL) failures=[0-9]+' | tail -1)
