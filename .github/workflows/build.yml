@@ -34,6 +34,25 @@ jobs:
           nix_path: nixpkgs=channel:nixos-unstable
       - run: nix build -L .#${{matrix.installable}}
 
+  # Every commit has to compile and pass on its own, not just the tip. This is
+  # a full configure, build and corpus run per commit, so it is pull requests
+  # only and not part of the push path.
+  verify-series:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: cachix/install-nix-action@v20
+        with:
+          nix_path: nixpkgs=channel:nixos-unstable
+      - name: Build and check every commit
+        run: |
+          nix develop .#brender-samples --command bash -c '
+            contrib/verify-series.sh "${{ github.event.pull_request.base.sha }}..HEAD"
+          '
+
   build-ubuntu:
     runs-on: ubuntu-latest
     steps:
