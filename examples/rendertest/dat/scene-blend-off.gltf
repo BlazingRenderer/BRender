@@ -264,7 +264,8 @@
           "identifier": "scene-blend-off-backdrop-material",
           "colour": [1, 0, 0],
           "flags": 0,
-          "map_transform": [1, 0, 0, 1, 0, 0]
+          "map_transform": [1, 0, 0, 1, 0, 0],
+          "index_base": 224
         },
         {
           "identifier": "scene-blend-off-material",
