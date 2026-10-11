@@ -9,7 +9,14 @@
 #ifndef _POOL_H_
 #define _POOL_H_
 
+/*
+ * Debug the pool itself: the block counts in br_pool, and the slow allocate and
+ * free paths. A manual flag - independent of BR_DEBUG, and off unless a build
+ * asks for it.
+ */
+#ifndef BR_POOL_DEBUG
 #define BR_POOL_DEBUG 0
+#endif
 #define BR_POOL_ALIGN 7
 
 /**
@@ -76,7 +83,7 @@ typedef struct br_pool {
  * Speedup macros
  */
 #if 0
-#if !POOL_DEBUG
+#if !BR_POOL_DEBUG
 br_pool_block *__bp; /* Hmm, this global is not optimizer friendly */
 
 #define BrPoolAllocate(pool) (void *)(((pool)->free ? 0 : BrPoolAddChunk(pool)), (__bp = (pool)->free), ((pool)->free = __bp->next, __bp))
