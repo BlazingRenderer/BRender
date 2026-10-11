@@ -780,6 +780,16 @@ static rt_expect *rt_find_expect(rt_state *st, const char *key)
  * A bless that cannot open the file for writing is a failed run, not a logged
  * note: the reference on disk would not be the one the next run scores against.
  */
+/*
+ * Entries are written in key order. The order they were loaded or blessed in
+ * is otherwise not visible, and without this one changed entry rewrites the
+ * whole file's order and buries the change in the diff.
+ */
+static int rt_expect_compare(const void *a, const void *b)
+{
+    return strcmp(((const rt_expect *)a)->key, ((const rt_expect *)b)->key);
+}
+
 static void rt_write_reference(rt_state *st)
 {
     FILE *fp;
@@ -832,6 +842,8 @@ static void rt_write_reference(rt_state *st)
 
     fprintf(fp, "# rendertest reference\n");
     fprintf(fp, "# key=<device>/<driver>/<fp-class>/<zb|zs>/<pixel-type>/<WxH>/<scene> value=checksum\n");
+
+    qsort(st->expects, st->nexpects, sizeof(st->expects[0]), rt_expect_compare);
 
     for(int i = 0; i < st->nexpects; ++i)
         fprintf(fp, "%s %016llx\n", st->expects[i].key, (unsigned long long)st->expects[i].hash);
@@ -1075,6 +1087,31 @@ static const rt_relation rt_relations[] = {
     {.a = "scene-scale-spot",     .b = "scene-scale-spot-off",   .equal = BR_FALSE, .pm_type = RT_ANY_TYPE, .mode = RT_ANY_MODE},
     /* The negative control: an unlit material ignores lights entirely. */
     {.a = "scene-unlit",          .b = "scene-unlit-plain",      .equal = BR_TRUE,  .pm_type = RT_ANY_TYPE, .mode = RT_ANY_MODE},
+
+    /*
+     * The cutoff volume is the only difference between the volume scenes and
+     * their control, and every device that honours it must show the difference:
+     * softrend and glrend1x (which borrows softrend's T&L) always have, and
+     * glrend does now that its driver carries the volume.
+     *
+     * softrend is scoped to the colour path: the indexed (8bpp) lighting path
+     * has no volume support at all, here or in 1.3.2 - light8.c carries none of
+     * light24.c's volume variants - so at INDEX_8 the three scenes are
+     * deliberately identical. The GL devices have no bit-depth axis, so their
+     * type is unconstrained.
+     */
+    {.a = "scene-light-volume",     .b = "scene-light-volume-off", .equal = BR_FALSE, .pm_type = BR_PMT_RGB_888, .mode = RT_ANY_MODE,
+     .device = "softrend"},
+    {.a = "scene-light-volume-cut", .b = "scene-light-volume-off", .equal = BR_FALSE, .pm_type = BR_PMT_RGB_888, .mode = RT_ANY_MODE,
+     .device = "softrend"},
+    {.a = "scene-light-volume",     .b = "scene-light-volume-off", .equal = BR_FALSE, .pm_type = RT_ANY_TYPE, .mode = RT_ANY_MODE,
+     .device = "glrend"},
+    {.a = "scene-light-volume-cut", .b = "scene-light-volume-off", .equal = BR_FALSE, .pm_type = RT_ANY_TYPE, .mode = RT_ANY_MODE,
+     .device = "glrend"},
+    {.a = "scene-light-volume",     .b = "scene-light-volume-off", .equal = BR_FALSE, .pm_type = RT_ANY_TYPE, .mode = RT_ANY_MODE,
+     .device = "glrend1x"},
+    {.a = "scene-light-volume-cut", .b = "scene-light-volume-off", .equal = BR_FALSE, .pm_type = RT_ANY_TYPE, .mode = RT_ANY_MODE,
+     .device = "glrend1x"},
 
     /*
      * The render-feature fixtures. Each pair differs by one piece of material
@@ -1388,15 +1425,6 @@ static const rt_blank rt_expected_blank[] = {
     {.scene = "scene-scale-spot-off",    .pm_type = BR_PMT_RGB_555, .mode = RT_ANY_MODE},
 
     /*
-     * The blend fixture has no RGB blend block to select: pentprim draws
-     * nothing for it at 15/16bpp z-buffered, and its stored reference is the
-     * empty frame. The 8bpp configurations are not here - pentprim draws the
-     * fixture there, so a blank frame is a failure.
-     */
-    {.scene = "scene-blend",             .pm_type = BR_PMT_RGB_555, .mode = RT_MODE_ZB},
-    {.scene = "scene-blend",             .pm_type = BR_PMT_RGB_565, .mode = RT_MODE_ZB},
-
-    /*
      * pentprim draws nothing for the shade fixture in the Z-sort mode either -
      * no z-sorted block carries an indexed shade table - so the 8bpp z-sorted
      * key is two blank frames matching. scene-shade-flat is the same rig without
@@ -1570,6 +1598,17 @@ static br_error rt_init(br_demo *demo)
     }
 
     /*
+     * Say which class this run scores against before anything else can fail.
+     * The reference holds an entry per class, so the first question about a
+     * failure is which one it was, and a run that dies before its result line
+     * would otherwise leave that to be inferred from the build.
+     *
+     * rt_cfg_device rather than st->device: the state is filled in a few lines
+     * below, and this belongs before anything in the run can fail.
+     */
+    printf("RT fp-class=%s device=%s driver=%s\n", RT_FP_CLASS, rt_cfg_device, st->driver);
+
+    /*
      * The configuration was parsed in main(); the demo owns the lifecycle, so
      * copy it into the state that will live for the run.
      */
@@ -1739,6 +1778,15 @@ static const char *const rt_default_scenes[] = {
     "scene-view-space", "scene-colour",    "scene-colour-ambient", "scene-colour-two",  "scene-directional",     "scene-directional-miss",
     "scene-specular",   "scene-unlit",     "scene-unlit-plain",    "scene-scale-spot",  "scene-scale-direction", "scene-scale-spot-off",
 
+    /*
+     * The light cutoff-volume fixtures; see scene.c. A vertex inside a region is
+     * lit fully and fades linearly to nothing over the falloff distance beyond a
+     * boundary. `-cut` is the same region with no fade at all (a different
+     * accumulation path) and `-off` carries no volume, so a volume that silently
+     * stops being applied moves a frame.
+     */
+    "scene-light-volume", "scene-light-volume-cut", "scene-light-volume-off",
+
     /* The render-feature fixtures; see scene.c. */
     "scene-flat",       "scene-smooth",    "scene-textured",       "scene-textured-shade", "scene-persp",        "scene-persp-shade",
     "scene-tex-arb",    "scene-tex-32",     "scene-shade",          "scene-decal",       "scene-fog",             "scene-blend",
@@ -1756,6 +1804,15 @@ static const char *const rt_default_scenes[] = {
     "scene-tex-rgb555-affine", "scene-tex-rgb565-affine",
 
     /*
+     * The 256x256 RGB shade-table fixtures; see scene.c. pentprim draws these
+     * from perspi.h rather than the arbitrary-width family above, so they are
+     * the witness for that cell and only --bpp 15/16 exercise it - the other
+     * two output formats do not reach it.
+     */
+    "scene-shade-p256-flat-persp", "scene-shade-p256-smooth-persp", "scene-shade-p256-flat-persp-blend",
+    "scene-shade-p256-smooth-persp-blend",
+
+    /*
      * The topology witnesses; see scene.c. Non-triangle topologies have no
      * witness without them, because the style they need is actor state and no
      * glTF path carried it before BR_actors.
@@ -1770,7 +1827,7 @@ static const char *const rt_default_scenes[] = {
      * are one knob away from.
      */
     "scene-lines-plain",       "scene-lines-gouraud", "scene-lines-map", "scene-lines-map-gouraud", "scene-lines-plain-unlit",
-    "scene-lines-map-unlit",
+    "scene-lines-map-unlit",   "scene-lines-rgb555", "scene-lines-rgb565",
 
     /*
      * The MMX 555/565 family. pentprim walks the MMX table before the general
@@ -1830,6 +1887,52 @@ static br_uint_8 rt_bpp_to_type(int bpp)
     }
 }
 
+/*
+ * List the scenes a directory holds: every .gltf file in it, as the name a run
+ * takes on the command line (the file name without its extension), sorted.
+ *
+ * A scene directory is the one place that says which reference scenes exist.
+ * The ctest entries (examples/rendertest/CMakeLists.txt) and the census corpus
+ * (contrib/census/run_corpus.sh) both derive the set from there - the latter
+ * through this flag - rather than carrying a list that can disagree with it.
+ */
+static int rt_str_compare(const void *a, const void *b)
+{
+    return strcmp(*(const char *const *)a, *(const char *const *)b);
+}
+
+static int rt_list_scene_dir(const char *dir)
+{
+    int    count = 0;
+    char **names = SDL_GlobDirectory(dir, "*.gltf", 0, &count);
+
+    if(names == NULL) {
+        fprintf(stderr, "Could not list %s: %s\n", dir, SDL_GetError());
+        return 2;
+    }
+
+    /*
+     * Sort after stripping the extension, so the order is by scene name and
+     * matches the ctest list CMake derives from the same directory.
+     * SDL_GlobDirectory() does not sort at all.
+     */
+    for(int i = 0; i < count; ++i) {
+        char *dot = strrchr(names[i], '.');
+
+        if(dot != NULL)
+            *dot = '\0';
+    }
+
+    qsort(names, count, sizeof(names[0]), rt_str_compare);
+
+    for(int i = 0; i < count; ++i)
+        printf("%s\n", names[i]);
+
+    SDL_free(names);
+
+    return 0;
+}
+
 static void rt_usage(const char *argv0)
 {
     fprintf(stderr,
@@ -1851,6 +1954,8 @@ static void rt_usage(const char *argv0)
             "  --bless            write the reference instead of comparing\n"
             "  -v, --verbose      log more\n"
             "  -l, --list         list the scenes and exit\n"
+            "  --list-scene-dir <dir>\n"
+            "                     list the .gltf scenes in <dir> and exit\n"
             "\n"
             "With no scene arguments the default fixture set is used. glrend can be\n"
             "forced onto llvmpipe with LIBGL_ALWAYS_SOFTWARE=true.\n",
@@ -1896,6 +2001,8 @@ int main(int argc, char **argv)
                 printf("%s\n", rt_default_scenes[k]);
 
             return 0;
+        } else if(strcmp(a, "--list-scene-dir") == 0 && v != NULL) {
+            return rt_list_scene_dir(argv[++i]);
         } else if(strcmp(a, "--help") == 0) {
             rt_usage(argv[0]);
             return 0;
