@@ -373,7 +373,7 @@ br_error BR_CMETHOD_DECL(br_renderer_gl, partSet)(br_renderer *self, br_token pa
         return BRE_FAIL;
 
     m = 0;
-    r = BrTokenValueSet(self->state.current, &m, t, value, tp);
+    r = BrTokenValueSet(self->state.current, &m, t, value, tp, self);
     if(m)
         StateGLTemplateActions(&self->state, m);
 
@@ -390,7 +390,7 @@ static br_error BR_CMETHOD_DECL(br_renderer_gl, partSetMany)(br_renderer *self, 
         return BRE_FAIL;
 
     m = 0;
-    r = BrTokenValueSetMany(self->state.current, pcount, &m, tv, tp);
+    r = BrTokenValueSetMany(self->state.current, pcount, &m, tv, tp, self);
     if(m)
         StateGLTemplateActions(&self->state, m);
 
@@ -407,7 +407,7 @@ static br_error BR_CMETHOD_DECL(br_renderer_gl, partQuery)(br_renderer *self, br
     if((tp = StateGLGetStateTemplate(&self->state, part, index)) == NULL)
         return BRE_FAIL;
 
-    return BrTokenValueQuery(pvalue, NULL, 0, t, self->state.current, tp);
+    return BrTokenValueQuery(pvalue, NULL, 0, t, self->state.current, tp, self);
 }
 
 static br_error BR_CMETHOD_DECL(br_renderer_gl, partQueryBuffer)(br_renderer *self, br_token part, br_int_32 index, void *pvalue,
@@ -418,7 +418,7 @@ static br_error BR_CMETHOD_DECL(br_renderer_gl, partQueryBuffer)(br_renderer *se
     if((tp = StateGLGetStateTemplate(&self->state, part, index)) == NULL)
         return BRE_FAIL;
 
-    return BrTokenValueQuery(pvalue, buffer, buffer_size, t, self->state.current, tp);
+    return BrTokenValueQuery(pvalue, buffer, buffer_size, t, self->state.current, tp, self);
 }
 
 static br_error BR_CMETHOD_DECL(br_renderer_gl, partQueryMany)(br_renderer *self, br_token part, br_int_32 index, br_token_value *tv,
@@ -429,7 +429,7 @@ static br_error BR_CMETHOD_DECL(br_renderer_gl, partQueryMany)(br_renderer *self
     if((tp = StateGLGetStateTemplate(&self->state, part, index)) == NULL)
         return BRE_FAIL;
 
-    return BrTokenValueQueryMany(tv, extra, extra_size, pcount, self->state.current, tp);
+    return BrTokenValueQueryMany(tv, extra, extra_size, pcount, self->state.current, tp, self);
 }
 
 static br_error BR_CMETHOD_DECL(br_renderer_gl, partQueryManySize)(br_renderer *self, br_token part, br_int_32 index,
@@ -440,7 +440,7 @@ static br_error BR_CMETHOD_DECL(br_renderer_gl, partQueryManySize)(br_renderer *
     if((tp = StateGLGetStateTemplate(&self->state, part, index)) == NULL)
         return BRE_FAIL;
 
-    return BrTokenValueQueryManySize(pextra_size, tv, self->state.current, tp);
+    return BrTokenValueQueryManySize(pextra_size, tv, self->state.current, tp, self);
 }
 
 static br_error BR_CMETHOD_DECL(br_renderer_gl, partQueryAll)(br_renderer *self, br_token part, br_int_32 index, br_token_value *buffer,
@@ -451,7 +451,7 @@ static br_error BR_CMETHOD_DECL(br_renderer_gl, partQueryAll)(br_renderer *self,
     if((tp = StateGLGetStateTemplate(&self->state, part, index)) == NULL)
         return BRE_FAIL;
 
-    return BrTokenValueQueryAll(buffer, buffer_size, self->state.current, tp);
+    return BrTokenValueQueryAll(buffer, buffer_size, self->state.current, tp, self);
 }
 
 static br_error BR_CMETHOD_DECL(br_renderer_gl, partQueryAllSize)(br_renderer *self, br_token part, br_int_32 index, br_size_t *psize)
@@ -461,7 +461,7 @@ static br_error BR_CMETHOD_DECL(br_renderer_gl, partQueryAllSize)(br_renderer *s
     if((tp = StateGLGetStateTemplate(&self->state, part, index)) == NULL)
         return BRE_FAIL;
 
-    return BrTokenValueQueryAllSize(psize, self->state.current, tp);
+    return BrTokenValueQueryAllSize(psize, self->state.current, tp, self);
 }
 
 static br_error BR_CMETHOD_DECL(br_renderer_gl, partIndexQuery)(br_renderer *self, br_token part, br_int_32 *pnindex)

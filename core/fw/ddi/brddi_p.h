@@ -52,23 +52,27 @@ br_tv_template *BR_RESIDENT_ENTRY BrTVTemplateAllocate(void *res, br_tv_template
 
 void BR_RESIDENT_ENTRY BrTVTemplateFree(br_tv_template *t);
 
-br_error BR_RESIDENT_ENTRY BrTokenValueQuery(void *pvalue, void *extra, br_size_t extra_size, br_token t, void *block, br_tv_template *_template);
+br_error BR_RESIDENT_ENTRY BrTokenValueQuery(void *pvalue, void *extra, br_size_t extra_size, br_token t, void *block,
+                                             br_tv_template *_template, void *context);
 
 br_error BR_RESIDENT_ENTRY BrTokenValueQueryMany(br_token_value *tv, void *extra, br_size_t extra_size, br_int_32 *pcount, void *block,
-                                                 br_tv_template *_template);
+                                                 br_tv_template *_template, void *context);
 
-br_error BR_RESIDENT_ENTRY BrTokenValueQueryManySize(br_size_t *psize, br_token_value *tv, void *block, br_tv_template *_template);
+br_error BR_RESIDENT_ENTRY BrTokenValueQueryManySize(br_size_t *psize, br_token_value *tv, void *block, br_tv_template *_template,
+                                                     void *context);
 
-br_error BR_RESIDENT_ENTRY BrTokenValueQueryAll(br_token_value *buffer, br_size_t buffer_size, void *block, br_tv_template *_template);
+br_error BR_RESIDENT_ENTRY BrTokenValueQueryAll(br_token_value *buffer, br_size_t buffer_size, void *block, br_tv_template *_template,
+                                                void *context);
 
-br_error BR_RESIDENT_ENTRY BrTokenValueQueryAllSize(br_size_t *psize, void *block, br_tv_template *_template);
+br_error BR_RESIDENT_ENTRY BrTokenValueQueryAllSize(br_size_t *psize, void *block, br_tv_template *_template, void *context);
 
 /* NB: value doesn't have to be a pointer. A pointer just happens to be large enough.
  * It should really be br_value. */
-br_error BR_RESIDENT_ENTRY BrTokenValueSet(void *mem, br_uint_32 *pcombined_mask, br_token t, br_value value, br_tv_template *_template);
+br_error BR_RESIDENT_ENTRY BrTokenValueSet(void *mem, br_uint_32 *pcombined_mask, br_token t, br_value value, br_tv_template *_template,
+                                           void *context);
 
 br_error BR_RESIDENT_ENTRY BrTokenValueSetMany(void *mem, br_int_32 *pcount, br_uint_32 *pcombined_mask, br_token_value *tv,
-                                               br_tv_template *_template);
+                                               br_tv_template *_template, void *context);
 
 void BR_RESIDENT_ENTRY       BrTokenValueDump(br_token_value *tv, const char *prefix, br_putline_cbfn *putline, void *arg);
 br_error BR_RESIDENT_ENTRY   BrStringToTokenValue(br_token_value *buffer, br_size_t buffer_size, const char *str);

@@ -255,7 +255,7 @@ static br_error BR_CMETHOD_DECL(br_output_facility_sdl2, pixelmapNew)(br_output_
                                                                            BR_ASIZE(pixelmapNewTemplateEntries));
     }
 
-    BrTokenValueSetMany(&pt, &count, NULL, tv, self->device->templates.pixelmapNewTemplate);
+    BrTokenValueSetMany(&pt, &count, NULL, tv, self->device->templates.pixelmapNewTemplate, NULL);
 
     pt.pixel_type = FigureOutFormat(pt.pixel_type, pt.pixel_bits);
 

@@ -168,7 +168,8 @@ static void MemCpyToken(br_token t, void *dst, const void *src)
 static br_error ValueQuery(br_token_value *tv,                  /* Destination for value					*/
                            void          **pextra,              /* Buffer for additional value data			*/
                            br_size_t *pextra_size, void *block, /* Base of block associated with template	*/
-                           const br_tv_template_entry *tep)     /* Template entry to use for conversion		*/
+                           const br_tv_template_entry *tep,     /* Template entry to use for conversion		*/
+                           void *context)                       /* Object whose state is being queried		*/
 {
     void         *mem;
     br_uintptr_t *lp;
@@ -368,7 +369,7 @@ static br_error ValueQuery(br_token_value *tv,                  /* Destination f
              */
             custp = (br_tv_custom *)tep->conv_arg;
             if(custp && custp->query)
-                return custp->query(&tv->v, pextra, pextra_size, block, tep);
+                return custp->query(&tv->v, pextra, pextra_size, block, tep, context);
 
             /* FALL THROUGH */
         default:
@@ -386,7 +387,8 @@ static br_error ValueQuery(br_token_value *tv,                  /* Destination f
  */
 static br_error ValueSet(void                       *block, /* Destination memeory block				*/
                          const br_token_value       *tv,    /* Source value								*/
-                         const br_tv_template_entry *tep)   /* Template entry to use for conversion		*/
+                         const br_tv_template_entry *tep,   /* Template entry to use for conversion		*/
+                         void                       *context) /* Object whose state is being set			*/
 {
     void         *mem;
     int           i, t;
@@ -537,7 +539,7 @@ copy_words:
             custp = (br_tv_custom *)tep->conv_arg;
 
             if(custp && custp->set)
-                return custp->set(block, &tv->v, tep);
+                return custp->set(block, &tv->v, tep, context);
 
             /* FALL THROUGH */
 
@@ -554,7 +556,7 @@ copy_words:
 /*
  * Find out how much extra buffer space a conversion would require
  */
-static br_size_t ValueExtraSize(void *block, const br_tv_template_entry *tep)
+static br_size_t ValueExtraSize(void *block, const br_tv_template_entry *tep, void *context)
 {
     void         *mem;
     br_uintptr_t *lp;
@@ -628,7 +630,7 @@ static br_size_t ValueExtraSize(void *block, const br_tv_template_entry *tep)
             custp = (br_tv_custom *)tep->conv_arg;
 
             if(custp && custp->extra_size)
-                return custp->extra_size(block, tep);
+                return custp->extra_size(block, tep, context);
             else
                 return 0;
     }
@@ -643,7 +645,8 @@ static br_size_t ValueExtraSize(void *block, const br_tv_template_entry *tep)
 /*
  * Get the value coresponding to one token
  */
-br_error BR_RESIDENT_ENTRY BrTokenValueQuery(void *pvalue, void *extra, br_size_t extra_size, br_token t, void *block, br_tv_template *template)
+br_error BR_RESIDENT_ENTRY BrTokenValueQuery(void *pvalue, void *extra, br_size_t extra_size, br_token t, void *block,
+                                            br_tv_template *template, void *context)
 {
     br_int_32                   o;
     const br_tv_template_entry *tep;
@@ -670,7 +673,7 @@ br_error BR_RESIDENT_ENTRY BrTokenValueQuery(void *pvalue, void *extra, br_size_
     tep = template->map_query_entry[o];
 
     if(tep) {
-        r = ValueQuery(&tv, &extra, &extra_size, block, tep);
+        r = ValueQuery(&tv, &extra, &extra_size, block, tep, context);
         MemCpyToken(tv.t, pvalue, &tv.v);
         return r;
     } else
@@ -682,7 +685,7 @@ br_error BR_RESIDENT_ENTRY BrTokenValueQuery(void *pvalue, void *extra, br_size_
  * to the given template
  */
 br_error BR_RESIDENT_ENTRY BrTokenValueQueryMany(br_token_value *tv, void *extra, br_size_t extra_size, br_int_32 *pcount, void *block,
-                                                 br_tv_template *template)
+                                                 br_tv_template *template, void *context)
 {
     br_int_32                   o;
     const br_tv_template_entry *tep;
@@ -713,7 +716,7 @@ br_error BR_RESIDENT_ENTRY BrTokenValueQueryMany(br_token_value *tv, void *extra
         if(tep == NULL)
             continue;
 
-        r = ValueQuery(tv, &extra, &extra_size, block, tep);
+        r = ValueQuery(tv, &extra, &extra_size, block, tep, context);
 
         if(r == BRE_OK)
             (*pcount)++;
@@ -725,7 +728,8 @@ br_error BR_RESIDENT_ENTRY BrTokenValueQueryMany(br_token_value *tv, void *extra
  * Work out how much extra storage would be needed for the values described in the given
  * token/value list
  */
-br_error BR_RESIDENT_ENTRY BrTokenValueQueryManySize(br_size_t *psize, br_token_value *tv, void *block, br_tv_template *template)
+br_error BR_RESIDENT_ENTRY BrTokenValueQueryManySize(br_size_t *psize, br_token_value *tv, void *block, br_tv_template *template,
+                                                     void *context)
 {
     br_int_32 o;
     br_size_t extra_size = 0;
@@ -749,7 +753,7 @@ br_error BR_RESIDENT_ENTRY BrTokenValueQueryManySize(br_size_t *psize, br_token_
             continue;
 
         if(template->map_query_entry[o])
-            extra_size += ValueExtraSize(block, template->map_query_entry[o]);
+            extra_size += ValueExtraSize(block, template->map_query_entry[o], context);
     }
 
     *psize = extra_size;
@@ -757,7 +761,8 @@ br_error BR_RESIDENT_ENTRY BrTokenValueQueryManySize(br_size_t *psize, br_token_
     return BRE_OK;
 }
 
-br_error BR_RESIDENT_ENTRY BrTokenValueQueryAll(br_token_value *buffer, br_size_t buffer_size, void *block, br_tv_template *template)
+br_error BR_RESIDENT_ENTRY BrTokenValueQueryAll(br_token_value *buffer, br_size_t buffer_size, void *block, br_tv_template *template,
+                                                void *context)
 {
     const br_tv_template_entry *tp;
     int                         n, e;
@@ -815,7 +820,7 @@ br_error BR_RESIDENT_ENTRY BrTokenValueQueryAll(br_token_value *buffer, br_size_
         /*
          * Fetch value
          */
-        r = ValueQuery(tv, &extra, &extra_size, block, tp);
+        r = ValueQuery(tv, &extra, &extra_size, block, tp, context);
 
         if(r != BRE_OK)
             return r;
@@ -831,7 +836,7 @@ br_error BR_RESIDENT_ENTRY BrTokenValueQueryAll(br_token_value *buffer, br_size_
     return BRE_OK;
 }
 
-br_error BR_RESIDENT_ENTRY BrTokenValueQueryAllSize(br_size_t *psize, void *block, br_tv_template *template)
+br_error BR_RESIDENT_ENTRY BrTokenValueQueryAllSize(br_size_t *psize, void *block, br_tv_template *template, void *context)
 {
     const br_tv_template_entry *tp;
     int                         e, n;
@@ -859,7 +864,7 @@ br_error BR_RESIDENT_ENTRY BrTokenValueQueryAllSize(br_size_t *psize, void *bloc
         /*
          * Account for any extra info. needed by tokens
          */
-        extra_size += ValueExtraSize(block, tp);
+        extra_size += ValueExtraSize(block, tp, context);
     }
 
     /*
@@ -871,7 +876,8 @@ br_error BR_RESIDENT_ENTRY BrTokenValueQueryAllSize(br_size_t *psize, void *bloc
     return BRE_OK;
 }
 
-br_error BR_RESIDENT_ENTRY BrTokenValueSet(void *mem, br_uint_32 *pcombined_mask, br_token t, br_value value, br_tv_template *template)
+br_error BR_RESIDENT_ENTRY BrTokenValueSet(void *mem, br_uint_32 *pcombined_mask, br_token t, br_value value, br_tv_template *template,
+                                           void *context)
 {
     br_int_32            o;
     br_error             r;
@@ -895,7 +901,7 @@ br_error BR_RESIDENT_ENTRY BrTokenValueSet(void *mem, br_uint_32 *pcombined_mask
         return BRE_UNKNOWN;
 
     if(template->map_set_entry[o]) {
-        r = ValueSet(mem, &tv, template->map_set_entry[o]);
+        r = ValueSet(mem, &tv, template->map_set_entry[o], context);
         if(r != BRE_OK)
             return r;
 
@@ -910,7 +916,8 @@ br_error BR_RESIDENT_ENTRY BrTokenValueSet(void *mem, br_uint_32 *pcombined_mask
     }
 }
 
-br_error BR_RESIDENT_ENTRY BrTokenValueSetMany(void *mem, br_int_32 *pcount, br_uint_32 *pcombined_mask, br_token_value *tv, br_tv_template *template)
+br_error BR_RESIDENT_ENTRY BrTokenValueSetMany(void *mem, br_int_32 *pcount, br_uint_32 *pcombined_mask, br_token_value *tv,
+                                               br_tv_template *template, void *context)
 {
     br_int_32  o, n;
     br_error   r;
@@ -937,7 +944,7 @@ br_error BR_RESIDENT_ENTRY BrTokenValueSetMany(void *mem, br_int_32 *pcount, br_
             continue;
 
         if(template->map_set_entry[o]) {
-            r = ValueSet(mem, tv, template->map_set_entry[o]);
+            r = ValueSet(mem, tv, template->map_set_entry[o], context);
             if(r != BRE_OK)
                 continue;
 

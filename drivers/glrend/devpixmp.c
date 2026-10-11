@@ -14,7 +14,8 @@
  */
 static const struct br_device_pixelmap_dispatch devicePixelmapDispatch;
 
-static br_error custom_query(br_value *pvalue, void **extra, br_size_t *pextra_size, void *block, const struct br_tv_template_entry *tep)
+static br_error custom_query(br_value *pvalue, void **extra, br_size_t *pextra_size, void *block, const struct br_tv_template_entry *tep,
+                             void *context)
 {
     const br_device_pixelmap *self = block;
 
@@ -265,7 +266,7 @@ br_error BR_CMETHOD_DECL(br_device_pixelmap_gl, match)(br_device_pixelmap *self,
                                                                              BR_ASIZE(pixelmapMatchTemplateEntries));
     }
 
-    err = BrTokenValueSetMany(&mt, &count, NULL, tv, self->device->templates.pixelmapMatchTemplate);
+    err = BrTokenValueSetMany(&mt, &count, NULL, tv, self->device->templates.pixelmapMatchTemplate, self);
     if(err != BRE_OK)
         return err;
 

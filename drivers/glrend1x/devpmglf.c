@@ -158,7 +158,7 @@ br_device_pixelmap *DevicePixelmapGL1xAllocateFront(br_device *dev, br_output_fa
         dev->templates.pixelmapNewTemplate = BrTVTemplateAllocate(dev, pixelmapNewTemplateEntries, BR_ASIZE(pixelmapNewTemplateEntries));
     }
 
-    BrTokenValueSetMany(&pt, &count, NULL, tv, dev->templates.pixelmapNewTemplate);
+    BrTokenValueSetMany(&pt, &count, NULL, tv, dev->templates.pixelmapNewTemplate, NULL);
 
     if(pt.ext_procs == NULL || pt.width <= 0 || pt.height <= 0)
         return NULL;

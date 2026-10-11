@@ -149,7 +149,7 @@ static br_error BR_CMETHOD_DECL(br_renderer_facility_soft, rendererNew)(br_rende
     /*
      * Process any options
      */
-    BrTokenValueSetMany(&rt, &count, NULL, tv, self->rendererNewTemplate);
+    BrTokenValueSetMany(&rt, &count, NULL, tv, self->rendererNewTemplate, NULL);
 
     /*
      * If there is already an instance of this type, then we can't create another

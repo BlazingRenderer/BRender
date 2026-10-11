@@ -141,7 +141,7 @@ static br_error BR_CMETHOD_DECL(br_renderer_facility_gl, rendererNew)(br_rendere
                                                                            BR_ASIZE(rendererNewTemplateEntries));
     }
 
-    BrTokenValueSetMany(&rt, &count, NULL, tv, self->device->templates.rendererNewTemplate);
+    BrTokenValueSetMany(&rt, &count, NULL, tv, self->device->templates.rendererNewTemplate, NULL);
 
     /*
      * Check that the destination is valid

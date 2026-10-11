@@ -351,7 +351,7 @@ br_error BR_CMETHOD_DECL(br_device_pixelmap_mem, match)(br_device_pixelmap *self
     mt.width      = self->pm_width;
     mt.height     = self->pm_height;
 
-    BrTokenValueSetMany(&mt, &count, NULL, tv, _pixelmap.pixelmap_match_template);
+    BrTokenValueSetMany(&mt, &count, NULL, tv, _pixelmap.pixelmap_match_template, self);
 
     switch(mt.use) {
         case BRT_DEPTH:

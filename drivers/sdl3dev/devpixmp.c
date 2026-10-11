@@ -34,7 +34,8 @@ br_boolean DevicePixelmapSDL3IsOurs(const br_pixelmap *pm)
     return ((br_device_pixelmap *)pm)->dispatch == &devicePixelmapDispatch;
 }
 
-static br_error custom_query(br_value *pvalue, void **extra, br_size_t *pextra_size, void *block, const struct br_tv_template_entry *tep)
+static br_error custom_query(br_value *pvalue, void **extra, br_size_t *pextra_size, void *block, const struct br_tv_template_entry *tep,
+                             void *context)
 {
     const br_device_pixelmap *self = block;
 
@@ -745,7 +746,7 @@ br_error BR_CMETHOD_DECL(br_device_pixelmap_sdl3, match)(br_device_pixelmap *sel
     mt.height = self->pm_height;
     mt.type   = self->pm_type;
 
-    BrTokenValueSetMany(&mt, &count, NULL, tv, self->device->templates.matchOffTemplate);
+    BrTokenValueSetMany(&mt, &count, NULL, tv, self->device->templates.matchOffTemplate, self);
 
     /*
      * SDL has no depth or single-channel formats, so we can't handle depth

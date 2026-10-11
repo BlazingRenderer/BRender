@@ -91,7 +91,8 @@ static const br_tv_template_entry partSurfaceTemplateEntries[] = {
 /**************************************************************************
  ** Light
  **/
-static br_error BR_CALLBACK customLightingVolumeSet(void *block, const br_value *pvalue, const br_tv_template_entry *tep);
+static br_error BR_CALLBACK customLightingVolumeSet(void *block, const br_value *pvalue, const br_tv_template_entry *tep,
+                                                    void *context);
 
 static const br_tv_custom customLightingVolumeConv = {
     .query      = NULL,
@@ -520,10 +521,19 @@ void TouchModelToView(br_renderer *self)
     scache.valid_per_model = BR_FALSE;
 }
 
-static br_error BR_CALLBACK customLightingVolumeSet(void *block, const br_value *pvalue, const br_tv_template_entry *tep)
+static br_error BR_CALLBACK customLightingVolumeSet(void *block, const br_value *pvalue, const br_tv_template_entry *tep,
+                                                    void *context)
 {
     br_light_volume *volume, *new_volume;
     br_uint_32       i;
+
+    /*
+     * The regions are allocated from scache.res, the software device's resource
+     * anchor for the static cache (see _static_cache in rend.h), not from the
+     * context: the light volumes are part of that cache and share its lifetime.
+     * The context is unused here.
+     */
+    (void)context;
 
     volume     = (br_light_volume *)pvalue->p;
     new_volume = (br_light_volume *)((char *)block + tep->offset);

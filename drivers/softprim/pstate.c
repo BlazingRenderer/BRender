@@ -186,7 +186,7 @@ static br_boolean outputSet(struct output_buffer *ob, br_device_pixelmap *new)
     return BR_TRUE;
 }
 
-static br_error BR_CALLBACK customInputSet(void *block, const br_value *pvalue, const struct br_tv_template_entry *tep)
+static br_error BR_CALLBACK customInputSet(void *block, const br_value *pvalue, const struct br_tv_template_entry *tep, void *context)
 {
     if(inputSet((struct input_buffer *)((char *)block + tep->offset), (br_buffer_stored *)pvalue->o))
         ((struct br_tv_template_entry *)tep)->mask = 1;
@@ -202,7 +202,7 @@ static struct br_tv_custom customInputConv = {
     NULL,
 };
 
-static br_error BR_CALLBACK customOutputSet(void *block, const br_value *pvalue, const struct br_tv_template_entry *tep)
+static br_error BR_CALLBACK customOutputSet(void *block, const br_value *pvalue, const struct br_tv_template_entry *tep, void *context)
 {
     if(outputSet((struct output_buffer *)((char *)block + tep->offset), (br_device_pixelmap *)pvalue->o))
         ((struct br_tv_template_entry *)tep)->mask = 1;
@@ -312,7 +312,7 @@ static br_error BR_CMETHOD_DECL(br_primitive_state_softprim, partSet)(struct br_
         return BRE_FAIL;
 
     m = 0;
-    r = BrTokenValueSet(self, &m, t, value, tp);
+    r = BrTokenValueSet(self, &m, t, value, tp, self);
 
     if(r != BRE_OK)
         return r;
@@ -346,7 +346,7 @@ static br_error BR_CMETHOD_DECL(br_primitive_state_softprim, partSetMany)(struct
         return BRE_FAIL;
 
     m = 0;
-    r = BrTokenValueSetMany(self, &c, &m, tv, tp);
+    r = BrTokenValueSetMany(self, &c, &m, tv, tp, self);
 
     if(r != BRE_OK || c == 0)
         return r;
@@ -379,7 +379,7 @@ static br_error BR_CMETHOD_DECL(br_primitive_state_softprim, partQuery)(struct b
     if(tp == NULL)
         return BRE_FAIL;
 
-    return BrTokenValueQuery(pvalue, NULL, 0, t, self, tp);
+    return BrTokenValueQuery(pvalue, NULL, 0, t, self, tp, self);
 }
 
 static br_error BR_CMETHOD_DECL(br_primitive_state_softprim, partQueryBuffer)(struct br_primitive_state *self, br_token part, br_int_32 index,
@@ -390,7 +390,7 @@ static br_error BR_CMETHOD_DECL(br_primitive_state_softprim, partQueryBuffer)(st
     if(tp == NULL)
         return BRE_FAIL;
 
-    return BrTokenValueQuery(pvalue, buffer, buffer_size, t, self, tp);
+    return BrTokenValueQuery(pvalue, buffer, buffer_size, t, self, tp, self);
 }
 
 static br_error BR_CMETHOD_DECL(br_primitive_state_softprim, partQueryMany)(struct br_primitive_state *self, br_token part, br_int_32 index,
@@ -401,7 +401,7 @@ static br_error BR_CMETHOD_DECL(br_primitive_state_softprim, partQueryMany)(stru
     if(tp == NULL)
         return BRE_FAIL;
 
-    return BrTokenValueQueryMany(tv, extra, extra_size, pcount, self, tp);
+    return BrTokenValueQueryMany(tv, extra, extra_size, pcount, self, tp, self);
 }
 
 static br_error BR_CMETHOD_DECL(br_primitive_state_softprim, partQueryManySize)(struct br_primitive_state *self, br_token part,
@@ -412,7 +412,7 @@ static br_error BR_CMETHOD_DECL(br_primitive_state_softprim, partQueryManySize)(
     if(tp == NULL)
         return BRE_FAIL;
 
-    return BrTokenValueQueryManySize(pextra_size, tv, self, tp);
+    return BrTokenValueQueryManySize(pextra_size, tv, self, tp, self);
 }
 
 static br_error BR_CMETHOD_DECL(br_primitive_state_softprim, partQueryAll)(struct br_primitive_state *self, br_token part, br_int_32 index,
@@ -423,7 +423,7 @@ static br_error BR_CMETHOD_DECL(br_primitive_state_softprim, partQueryAll)(struc
     if(tp == NULL)
         return BRE_FAIL;
 
-    return BrTokenValueQueryAll(buffer, buffer_size, self, tp);
+    return BrTokenValueQueryAll(buffer, buffer_size, self, tp, self);
 }
 
 static br_error BR_CMETHOD_DECL(br_primitive_state_softprim, partQueryAllSize)(struct br_primitive_state *self, br_token part,
@@ -434,7 +434,7 @@ static br_error BR_CMETHOD_DECL(br_primitive_state_softprim, partQueryAllSize)(s
     if(tp == NULL)
         return BRE_FAIL;
 
-    return BrTokenValueQueryAllSize(psize, self, tp);
+    return BrTokenValueQueryAllSize(psize, self, tp, self);
 }
 
 static br_error BR_CMETHOD_DECL(br_primitive_state_softprim, partIndexQuery)(struct br_primitive_state *self, br_token part, br_int_32 *pnindex)

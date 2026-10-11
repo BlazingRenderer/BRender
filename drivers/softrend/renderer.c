@@ -33,7 +33,8 @@ const br_token RendererPartsTokens[] = {
 /*
  * Return a token list of ourself and that of the primitive library
  */
-static br_error BR_CALLBACK customPartsQuery(br_value *pvalue, void **pextra, br_size_t *pextra_size, void *block, const br_tv_template_entry *tep)
+static br_error BR_CALLBACK customPartsQuery(br_value *pvalue, void **pextra, br_size_t *pextra_size, void *block,
+                                             const br_tv_template_entry *tep, void *context)
 {
     br_renderer *self = block;
     int          i;
@@ -82,7 +83,7 @@ static br_error BR_CALLBACK customPartsQuery(br_value *pvalue, void **pextra, br
     return BRE_OK;
 }
 
-static br_size_t BR_CALLBACK customPartsExtra(void *block, const br_tv_template_entry *tep)
+static br_size_t BR_CALLBACK customPartsExtra(void *block, const br_tv_template_entry *tep, void *context)
 {
     br_renderer   *self = block;
     br_size_t      s;

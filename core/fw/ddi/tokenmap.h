@@ -111,11 +111,17 @@ enum {
 
 /*
  * Typedef for custom conversion function
+ *
+ * 'block' is the temporary block the template's offsets address. 'context' is
+ * the object whose state is being set or queried (or NULL where the caller has
+ * no such object), so that a conversion can reach state that lives outside
+ * 'block', such as a renderer's cache.
  */
 typedef br_error BR_CALLBACK  br_tv_custom_query_cbfn(br_value *pvalue, void **extra, br_size_t *pextra_size, void *block,
-                                                      const struct br_tv_template_entry *tep);
-typedef br_error BR_CALLBACK  br_tv_custom_set_cbfn(void *block, const br_value *pvalue, const struct br_tv_template_entry *tep);
-typedef br_size_t BR_CALLBACK br_tv_custom_extra_size_cbfn(void *block, const struct br_tv_template_entry *tep);
+                                                      const struct br_tv_template_entry *tep, void *context);
+typedef br_error BR_CALLBACK  br_tv_custom_set_cbfn(void *block, const br_value *pvalue, const struct br_tv_template_entry *tep,
+                                                    void *context);
+typedef br_size_t BR_CALLBACK br_tv_custom_extra_size_cbfn(void *block, const struct br_tv_template_entry *tep, void *context);
 
 typedef struct br_tv_custom {
     br_tv_custom_query_cbfn      *query;

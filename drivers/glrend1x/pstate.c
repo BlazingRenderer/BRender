@@ -620,7 +620,7 @@ static br_error BR_CMETHOD_DECL(br_primitive_state_gl1x, partSet)(br_primitive_s
         return BRE_FAIL;
 
     m = 0;
-    return BrTokenValueSet(self, &m, t, value, tp);
+    return BrTokenValueSet(self, &m, t, value, tp, self);
 }
 
 static br_error BR_CMETHOD_DECL(br_primitive_state_gl1x, partSetMany)(br_primitive_state *self, br_token part, br_int_32 index,
@@ -633,7 +633,7 @@ static br_error BR_CMETHOD_DECL(br_primitive_state_gl1x, partSetMany)(br_primiti
         return BRE_FAIL;
 
     m = 0;
-    return BrTokenValueSetMany(self, pcount, &m, tv, tp);
+    return BrTokenValueSetMany(self, pcount, &m, tv, tp, self);
 }
 
 static br_error BR_CMETHOD_DECL(br_primitive_state_gl1x, partQuery)(br_primitive_state *self, br_token part, br_int_32 index, void *pvalue,
@@ -644,7 +644,7 @@ static br_error BR_CMETHOD_DECL(br_primitive_state_gl1x, partQuery)(br_primitive
     if(tp == NULL)
         return BRE_FAIL;
 
-    return BrTokenValueQuery(pvalue, NULL, 0, t, self, tp);
+    return BrTokenValueQuery(pvalue, NULL, 0, t, self, tp, self);
 }
 
 static br_error BR_CMETHOD_DECL(br_primitive_state_gl1x, partQueryBuffer)(br_primitive_state *self, br_token part, br_int_32 index,
@@ -655,7 +655,7 @@ static br_error BR_CMETHOD_DECL(br_primitive_state_gl1x, partQueryBuffer)(br_pri
     if(tp == NULL)
         return BRE_FAIL;
 
-    return BrTokenValueQuery(pvalue, buffer, buffer_size, t, self, tp);
+    return BrTokenValueQuery(pvalue, buffer, buffer_size, t, self, tp, self);
 }
 
 static br_error BR_CMETHOD_DECL(br_primitive_state_gl1x, partQueryMany)(br_primitive_state *self, br_token part, br_int_32 index,
@@ -666,7 +666,7 @@ static br_error BR_CMETHOD_DECL(br_primitive_state_gl1x, partQueryMany)(br_primi
     if(tp == NULL)
         return BRE_FAIL;
 
-    return BrTokenValueQueryMany(tv, extra, extra_size, pcount, self, tp);
+    return BrTokenValueQueryMany(tv, extra, extra_size, pcount, self, tp, self);
 }
 
 static br_error BR_CMETHOD_DECL(br_primitive_state_gl1x, partQueryManySize)(br_primitive_state *self, br_token part, br_int_32 index,
@@ -677,7 +677,7 @@ static br_error BR_CMETHOD_DECL(br_primitive_state_gl1x, partQueryManySize)(br_p
     if(tp == NULL)
         return BRE_FAIL;
 
-    return BrTokenValueQueryManySize(pextra_size, tv, self, tp);
+    return BrTokenValueQueryManySize(pextra_size, tv, self, tp, self);
 }
 
 static br_error BR_CMETHOD_DECL(br_primitive_state_gl1x, partQueryAll)(br_primitive_state *self, br_token part, br_int_32 index,
@@ -688,7 +688,7 @@ static br_error BR_CMETHOD_DECL(br_primitive_state_gl1x, partQueryAll)(br_primit
     if(tp == NULL)
         return BRE_FAIL;
 
-    return BrTokenValueQueryAll(buffer, buffer_size, self, tp);
+    return BrTokenValueQueryAll(buffer, buffer_size, self, tp, self);
 }
 
 static br_error BR_CMETHOD_DECL(br_primitive_state_gl1x, partQueryAllSize)(br_primitive_state *self, br_token part, br_int_32 index, br_size_t *psize)
@@ -698,7 +698,7 @@ static br_error BR_CMETHOD_DECL(br_primitive_state_gl1x, partQueryAllSize)(br_pr
     if(tp == NULL)
         return BRE_FAIL;
 
-    return BrTokenValueQueryAllSize(psize, self, tp);
+    return BrTokenValueQueryAllSize(psize, self, tp, self);
 }
 
 static br_error BR_CMETHOD_DECL(br_primitive_state_gl1x, partIndexQuery)(br_primitive_state *self, br_token part, br_int_32 *pnindex)

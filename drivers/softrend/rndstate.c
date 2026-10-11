@@ -56,7 +56,7 @@ br_error BR_CMETHOD_DECL(br_renderer_soft, partSet)(br_renderer *self, br_token 
     br_uint_32      m  = 0;
 
     if(tp != NULL) {
-        r = BrTokenValueSet(sp, &m, t, value, tp);
+        r = BrTokenValueSet(sp, &m, t, value, tp, self);
         if(m)
             TemplateActions(&self->state, part, index, m);
     } else {
@@ -80,7 +80,7 @@ br_error BR_CMETHOD_DECL(br_renderer_soft, partSetMany)(br_renderer *self, br_to
     br_int_32       c;
 
     if(tp != NULL) {
-        r = BrTokenValueSetMany(sp, pcount, &m, tv, tp);
+        r = BrTokenValueSetMany(sp, pcount, &m, tv, tp, self);
         if(m)
             TemplateActions(&self->state, part, index, m);
     } else {
@@ -109,7 +109,7 @@ br_error BR_CMETHOD_DECL(br_renderer_soft, partQuery)(br_renderer *self, br_toke
     br_tv_template *tp = FindStateTemplate(self, &sp, part, index);
 
     if(tp != NULL) {
-        return BrTokenValueQuery(pvalue, NULL, 0, t, sp, tp);
+        return BrTokenValueQuery(pvalue, NULL, 0, t, sp, tp, self);
     } else {
         CHECK_PSTATE;
         return PrimitiveStatePartQuery(self->state.pstate, part, index, pvalue, t);
@@ -124,7 +124,7 @@ br_error BR_CMETHOD_DECL(br_renderer_soft, partQueryBuffer)(br_renderer *self, b
     br_tv_template *tp = FindStateTemplate(self, &sp, part, index);
 
     if(tp != NULL) {
-        return BrTokenValueQuery(pvalue, buffer, buffer_size, t, sp, tp);
+        return BrTokenValueQuery(pvalue, buffer, buffer_size, t, sp, tp, self);
     } else {
         CHECK_PSTATE;
         return PrimitiveStatePartQueryBuffer(self->state.pstate, part, index, pvalue, buffer, buffer_size, t);
@@ -139,7 +139,7 @@ br_error BR_CMETHOD_DECL(br_renderer_soft, partQueryMany)(br_renderer *self, br_
     br_tv_template *tp = FindStateTemplate(self, &sp, part, index);
 
     if(tp != NULL) {
-        return BrTokenValueQueryMany(tv, extra, extra_size, pcount, sp, tp);
+        return BrTokenValueQueryMany(tv, extra, extra_size, pcount, sp, tp, self);
     } else {
         CHECK_PSTATE;
         return PrimitiveStatePartQueryMany(self->state.pstate, part, index, tv, extra, extra_size, pcount);
@@ -154,7 +154,7 @@ br_error BR_CMETHOD_DECL(br_renderer_soft, partQueryManySize)(br_renderer *self,
     br_tv_template *tp = FindStateTemplate(self, &sp, part, index);
 
     if(tp != NULL) {
-        return BrTokenValueQueryManySize(pextra_size, tv, sp, tp);
+        return BrTokenValueQueryManySize(pextra_size, tv, sp, tp, self);
     } else {
         CHECK_PSTATE;
         return PrimitiveStatePartQueryManySize(self->state.pstate, part, index, pextra_size, tv);
@@ -168,7 +168,7 @@ br_error BR_CMETHOD_DECL(br_renderer_soft, partQueryAll)(br_renderer *self, br_t
     br_tv_template *tp = FindStateTemplate(self, &sp, part, index);
 
     if(tp != NULL) {
-        return BrTokenValueQueryAll(buffer, buffer_size, sp, tp);
+        return BrTokenValueQueryAll(buffer, buffer_size, sp, tp, self);
     } else {
         CHECK_PSTATE;
         return PrimitiveStatePartQueryAll(self->state.pstate, part, index, buffer, buffer_size);
@@ -182,7 +182,7 @@ br_error BR_CMETHOD_DECL(br_renderer_soft, partQueryAllSize)(br_renderer *self, 
     br_tv_template *tp = FindStateTemplate(self, &sp, part, index);
 
     if(tp != NULL) {
-        return BrTokenValueQueryAllSize(psize, sp, tp);
+        return BrTokenValueQueryAllSize(psize, sp, tp, self);
     } else {
         CHECK_PSTATE;
         return PrimitiveStatePartQueryAllSize(self->state.pstate, part, index, psize);
