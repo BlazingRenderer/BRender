@@ -11,7 +11,7 @@
 #         the set is the directory's .gltf files and not a copy of them
 #
 # Both at 4 bpp x {zb, zs}. Z-sorted runs go through rendertest --no-depth
-# rather than gltfview, which has GLTFVIEW_ZSORT but would reach the same path.
+# rather than gltfview, which takes the same flag but is not the instrument.
 #
 # Usage: run_corpus.sh <build-dir> <out-dir>
 #

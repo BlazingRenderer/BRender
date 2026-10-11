@@ -205,15 +205,11 @@ static br_error GLTFInit(br_demo *demo)
     demo->user                  = state;
 
     /*
-     * GLTFVIEW_ZSORT selects BrZsSceneRender instead of the Z-buffered path.
-     * Z-buffered is the default because the checked-in baseline records it.
-     * Unset or empty is off, as GLTFVIEW_BENCH_* treat it.
+     * brdemo's --no-depth selects BrZsSceneRender instead of the Z-buffered
+     * path. Z-buffered is the default because the checked-in baseline records
+     * it.
      */
-    {
-        const char *zsort = BrGetEnv("GLTFVIEW_ZSORT");
-
-        state->z_sort = zsort != NULL && zsort[0] != '\0' && !(zsort[0] == '0' && zsort[1] == '\0');
-    }
+    state->z_sort = demo->args->no_depth != 0;
 
     if(filename == NULL || filename[0] == '\0') {
         BrLogError("APP", "No GLTF filename passed");
