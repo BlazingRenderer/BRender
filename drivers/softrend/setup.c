@@ -363,6 +363,15 @@ void ActiveLightsFind(br_renderer *self)
         alp->green = BrFixedToScalar(BR_GRN(lp->colour) << 8);
         alp->blue  = BrFixedToScalar(BR_BLU(lp->colour) << 8);
 
+        /*
+         * These are only assigned when the light has radii, but are read by
+         * the radial accumulation functions that ActiveLightAccumulateIndexSet()
+         * selects for point lights, so a light without radii would otherwise
+         * inherit the previous scene's values.
+         */
+        alp->falloff = BR_SCALAR(0.0);
+        alp->cutoff  = BR_SCALAR(0.0);
+
         if(lp->attenuation_type == BRT_RADII) {
 
             if(lp->radius_inner != lp->radius_outer)
@@ -424,6 +433,10 @@ void ActiveLightsFind(br_renderer *self)
             BrVector3Scale(&alp->direction, &lp->direction, alp->intensity);
         else
             alp->direction = lp->direction;
+
+        /* See the model-space loop above: clear the radial-only fields. */
+        alp->falloff = BR_SCALAR(0.0);
+        alp->cutoff  = BR_SCALAR(0.0);
 
         if(lp->attenuation_type == BRT_RADII) {
 
