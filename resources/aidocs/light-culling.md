@@ -1,12 +1,14 @@
 # Light culling
 
 *Hand-written design note, not generated like the other files here. Written
-2026-10-03 while investigating the scene UBO / renderer-state CPU cost, and
-revised 2026-10-10. The revision matters more than the note: everything it
-described as missing work landed the day after it was written, so its summary and
-its glrend and softrend sections were describing a tree that no longer existed.
-The measurements are unchanged, and they are the reason the glrend half has the
-shape it does.*
+2026-10-03 while investigating the scene UBO / renderer-state CPU cost, revised
+2026-10-10, and revised again 2026-10-11. The revisions matter more than the note:
+the 10th's is when the work it described as missing landed, and the 11th's
+corrected what was left - the per-triangle guard turned out to be a leftover
+rather than a property of the path, softrend's line numbers had drifted, the "no
+spot lights" caveat had been answered by fixtures, and `BrLightModelCull()`'s
+question is settled. The measurements are unchanged, and they are the reason the
+glrend half has the shape it does.*
 
 ## Summary
 
@@ -19,8 +21,8 @@ the test.
 
 - **softrend** reads `culled` and skips those lights.
 - **glrend** reads `culled` and leaves those lights out of the affine list it
-  packs for the draw — but only when the draw names a model. The per-triangle path
-  carries no model, so nothing is culled on it.
+  packs for the draw. Its guard still excludes the per-triangle path, but for a
+  leftover reason rather than a missing model - see the glrend section and #18.
 
 That second bullet is all that is still open here, and it is not a port: the port
 happened, and by the time glrend honoured the token the compaction underneath it
@@ -92,37 +94,41 @@ Lifecycle:
 
 `drivers/softrend/setup.c` starts each light from the engine's flag and skips it:
 
-- `:521`, `:598` — `alp->culled = alp->s->culled;` then skip when set.
-- `:529`, `:541` — `radius_cull` gates the view→model position transform. This is
+- `:534`, `:611` — `alp->culled = alp->s->culled;` then skip when set.
+- `:542`, `:554` — `radius_cull` gates the view→model position transform. This is
   not a test; the test is the core's. A light without a radius never needs its
   position in model space, which is all the condition asks.
-- `:482` — `if(lp->culled) continue;`, so the render loop skips culled lights.
+- `:495` — `if(lp->culled)`, so the render loop skips culled lights.
 
 ## glrend
 
 - `drivers/glrend/state.h:120-125` — `radius_cull`, `angle_cull`, `culled`.
 - `drivers/glrend/state_light.c:52,53,57` — `Q | S` templates for
   `RADIUS_CULL_B`, `ANGLE_CULL_B`, `CULLED_B`; defaults `BR_FALSE` at `:77,78,80`.
-- `drivers/glrend/cache.c:189` — `StateGLBuildLightLists()` skips a light whose
+- `drivers/glrend/cache.c:239` — `StateGLBuildLightLists()` skips a light whose
   `culled` is set, leaving it out of the affine list packed into the model block
   for this draw.
 
-The guard is conditional on the draw naming a model:
+Its guard tests `v11m` as well, and that half is a leftover:
 
 ```c
-/*
- * The flag describes the model being drawn, so it only applies to a
- * model draw. The per-triangle path carries no model and so still
- * holds whichever model was culled last, which must not be used.
- */
 if(v11m != NULL && lights[cache->light_part[i]].culled)
     continue;
 ```
 
-So `radius_cull` and `angle_cull` remain write-only in glrend, and that is now
+Before `8ac4ba03` the guard was `if(v11m != NULL && cache->light_cull[i].radius_cull)`
+- `v11m` supplied the model's bound, so a NULL model meant "bounds unknown, cull
+nothing". The core does the test now, and its result rides in the per-primitive
+state snapshot: `BrLightCullReset()` writes `CULLED_B` into
+`renderer->state.current->light` before the draw (`enables.c:134`), `gstored.c:444`
+snapshots the whole `state_stack` - which holds `state_light light[]` - into the
+primitive, and `gv1buckt.c:132` restores it. So the flag at `:257` already
+describes this model on the per-triangle path, and the guard is the only reason it
+is not honoured. Filed as #18.
+
+`radius_cull` and `angle_cull` remain write-only in glrend, and that is
 deliberate: the core owns the test, and a driver-side one would be a second copy
-of it. What glrend cannot do is cull the per-triangle path, for want of a model to
-test against.
+of it.
 
 ## Why the shape is what it is
 
@@ -155,12 +161,12 @@ The rest of the sequence:
 
 ## Open questions
 
-1. **Does Croc's game call `BrLightModelCull()`?** Still not in this tree. It is
-   additive now rather than load-bearing, since the engine culls regardless, but it
-   is the only way an application can cull a light the engine thinks reaches the
-   model, and nothing here exercises it.
-2. **glrend's per-triangle path is never culled**, because it carries no model to
-   test against.
+1. **Does Croc's game call `BrLightModelCull()`?** Settled: no, and nothing in
+   this tree does either. It is additive rather than load-bearing, since the engine
+   culls regardless, and it is the only way an application can cull a light the
+   engine thinks reaches the model. Kept, and unexercised - see #19.
+2. **glrend's per-triangle path is not culled**, because of the leftover `v11m`
+   guard above rather than for want of a model. Filed as #18.
 
 ## Related, but separate
 
