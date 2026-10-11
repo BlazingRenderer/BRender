@@ -31,6 +31,13 @@ typedef struct br_gl_main_shader {
 } br_gl_main_shader;
 
 #pragma pack(push, 16)
+/*
+ * Caps on the scene-wide cutoff-volume tables. The shader mirrors these as
+ * MAX_LIGHT_VOLUME_REGIONS/MAX_LIGHT_VOLUME_PLANES.
+ */
+#define BR_GL_MAX_LIGHT_VOLUME_REGIONS 16
+#define BR_GL_MAX_LIGHT_VOLUME_PLANES  64
+
 typedef struct br_gl_main_data_light_info {
     alignas(4) uint32_t type;
     alignas(4) uint32_t attenuation_type;
@@ -71,6 +78,7 @@ typedef struct br_gl_main_data_light {
     alignas(16) br_vector4 colour;                 /* (R, G, B, 0) */
     alignas(16) br_gl_main_data_light_atten atten; /* (intensity, C, L, Q) */
     alignas(16) br_gl_main_data_light_radii radii; /* (cos(inner), cos(outer), radius_inner, radius_outer) */
+    alignas(16) br_vector4 volume;                 /* (region_offset, region_count, falloff_distance, 0) */
 } br_gl_main_data_light;
 
 /*
@@ -88,6 +96,16 @@ typedef struct br_gl_main_data_scene {
     alignas(16) br_vector4 ambient_colour;
     alignas(4) uint32_t num_clip_planes;
     alignas(4) uint32_t use_ambient_colour;
+
+    /*
+     * Every light's cutoff volume, gathered into one table per scene. Each
+     * region is (plane_offset, plane_count, 0, 0) into the plane table, and a
+     * light names its first region in br_gl_main_data_light::volume. A light's
+     * identity has to ride in its own record: StateGLBuildLightLists() repacks
+     * the lights for each draw, so a light's index here is not its index there.
+     */
+    alignas(16) br_vector4 light_volume_regions[BR_GL_MAX_LIGHT_VOLUME_REGIONS];
+    alignas(16) br_vector4 light_volume_planes[BR_GL_MAX_LIGHT_VOLUME_PLANES];
 } br_gl_main_data_scene;
 
 typedef struct br_gl_main_data_model {

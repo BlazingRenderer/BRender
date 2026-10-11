@@ -1090,20 +1090,28 @@ static const rt_relation rt_relations[] = {
 
     /*
      * The cutoff volume is the only difference between the volume scenes and
-     * their control, and only softrend (and glrend1x, which borrows its T&L)
-     * honours it - glrend has no volume support yet, so it renders all three
-     * identically and the pair is scoped to the device that can tell them
-     * apart.
+     * their control, and every device that honours it must show the difference:
+     * softrend and glrend1x (which borrows softrend's T&L) always have, and
+     * glrend does now that its driver carries the volume.
      *
-     * Scoped to the colour path as well: the indexed (8bpp) lighting path has
-     * no volume support at all, here or in 1.3.2 - light8.c carries none of
+     * softrend is scoped to the colour path: the indexed (8bpp) lighting path
+     * has no volume support at all, here or in 1.3.2 - light8.c carries none of
      * light24.c's volume variants - so at INDEX_8 the three scenes are
-     * deliberately identical.
+     * deliberately identical. The GL devices have no bit-depth axis, so their
+     * type is unconstrained.
      */
     {.a = "scene-light-volume",     .b = "scene-light-volume-off", .equal = BR_FALSE, .pm_type = BR_PMT_RGB_888, .mode = RT_ANY_MODE,
      .device = "softrend"},
     {.a = "scene-light-volume-cut", .b = "scene-light-volume-off", .equal = BR_FALSE, .pm_type = BR_PMT_RGB_888, .mode = RT_ANY_MODE,
      .device = "softrend"},
+    {.a = "scene-light-volume",     .b = "scene-light-volume-off", .equal = BR_FALSE, .pm_type = RT_ANY_TYPE, .mode = RT_ANY_MODE,
+     .device = "glrend"},
+    {.a = "scene-light-volume-cut", .b = "scene-light-volume-off", .equal = BR_FALSE, .pm_type = RT_ANY_TYPE, .mode = RT_ANY_MODE,
+     .device = "glrend"},
+    {.a = "scene-light-volume",     .b = "scene-light-volume-off", .equal = BR_FALSE, .pm_type = RT_ANY_TYPE, .mode = RT_ANY_MODE,
+     .device = "glrend1x"},
+    {.a = "scene-light-volume-cut", .b = "scene-light-volume-off", .equal = BR_FALSE, .pm_type = RT_ANY_TYPE, .mode = RT_ANY_MODE,
+     .device = "glrend1x"},
 
     /*
      * The render-feature fixtures. Each pair differs by one piece of material

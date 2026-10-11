@@ -100,6 +100,70 @@ static int casfd(br_gl_main_data_lights *lights, br_vector4 *ambient_colour, con
 }
 
 /*
+ * Gather a light's cutoff volume into the scene's shared region and plane
+ * tables, and record where it landed on the light's own record.
+ *
+ * The location rides in the light record rather than being derived from the
+ * light's index: StateGLBuildLightLists() repacks the lights for every draw, so
+ * a light's index in the packed array is not its index in the model block.
+ *
+ * out_region/out_plane are the running fill positions in the two shared tables.
+ * A volume that does not fit them is dropped whole - a partial volume would light
+ * the wrong region.
+ */
+static void PackLightVolume(br_gl_main_data_scene *scene, const state_light_volume_desc *desc, const state_light_volume *volume,
+                            br_gl_main_data_light *out, br_uint_32 *out_region, br_uint_32 *out_plane)
+{
+    static br_boolean warned_overflow = BR_FALSE;
+    br_uint_32        num_planes      = 0;
+
+    out->volume.v[0] = 0.0f;
+    out->volume.v[1] = 0.0f;
+    out->volume.v[2] = 0.0f;
+    out->volume.v[3] = 0.0f;
+
+    if(desc->region_count == 0)
+        return;
+
+    for(br_uint_32 i = 0; i < desc->region_count; ++i)
+        num_planes += volume->regions[i].plane_count;
+
+    if(*out_region + desc->region_count > BR_GL_MAX_LIGHT_VOLUME_REGIONS || *out_plane + num_planes > BR_GL_MAX_LIGHT_VOLUME_PLANES) {
+
+        if(!warned_overflow) {
+            BrLogWarn("GLREND", "Scene has more light-volume regions or planes than the %d/%d the shader supports; dropping the rest.",
+                      BR_GL_MAX_LIGHT_VOLUME_REGIONS, BR_GL_MAX_LIGHT_VOLUME_PLANES);
+            BrLogWarn("GLREND", "This message will not be shown again.");
+            warned_overflow = BR_TRUE;
+        }
+
+        return;
+    }
+
+    out->volume.v[0] = (br_float)*out_region;
+    out->volume.v[1] = (br_float)desc->region_count;
+    out->volume.v[2] = desc->falloff_distance;
+    out->volume.v[3] = 0.0f;
+
+    for(br_uint_32 i = 0; i < desc->region_count; ++i) {
+        const state_light_volume_region *region  = volume->regions + i;
+        br_vector4                      *out_reg = scene->light_volume_regions + *out_region + i;
+
+        out_reg->v[0] = (br_float)*out_plane;
+        out_reg->v[1] = (br_float)region->plane_count;
+        out_reg->v[2] = 0.0f;
+        out_reg->v[3] = 0.0f;
+
+        for(br_uint_32 j = 0; j < region->plane_count; ++j)
+            scene->light_volume_planes[*out_plane + j] = volume->planes[region->plane_offset + j];
+
+        *out_plane += region->plane_count;
+    }
+
+    *out_region += desc->region_count;
+}
+
+/*
 ** Process each light, doing as much once-per-frame work as possible.
 ** - For work that cannot be done here, see GLSTATE_ProcessActiveLights()
 */
@@ -108,6 +172,8 @@ static void ProcessSceneLights(state_cache *cache, state_light *lights)
     br_gl_main_data_scene *scene              = &cache->scene;
     size_t                 num_lights         = 0;
     br_boolean             use_ambient_colour = BR_FALSE;
+    br_uint_32             volume_region      = 0;
+    br_uint_32             volume_plane       = 0;
 
     br_vector4_i counts = {
         .v = {0, 0, 0, 0},
@@ -130,6 +196,8 @@ static void ProcessSceneLights(state_cache *cache, state_light *lights)
 
         /* Remember where the per-draw cull finds this light's flag. */
         cache->light_part[num_lights] = i;
+
+        PackLightVolume(scene, &light->volume, &cache->light_volume[i], cache->lights.light + num_lights, &volume_region, &volume_plane);
 
         ++num_lights;
     }

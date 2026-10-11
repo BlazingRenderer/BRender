@@ -1,5 +1,6 @@
 #include <string.h>
 #include "drv.h"
+#include "brassert.h"
 
 #define S    BRTV_SET
 #define Q    BRTV_QUERY
@@ -77,7 +78,7 @@ static const state_light default_state = {
     .attenuation_hint = BRT_CONSTANT,
     .radius_cull      = BR_FALSE,
     .angle_cull       = BR_FALSE,
-    .volume           = {BR_SCALAR(0.0), NULL, 0},
+    .volume           = {.falloff_distance = BR_SCALAR(0.0)},
     .culled           = BR_FALSE,
 };
 
@@ -102,11 +103,75 @@ void StateGLInitLight(state_all *state)
 static br_error BR_CALLBACK customLightingVolumeSet(void *block, const br_value *pvalue, const struct br_tv_template_entry *tep,
                                                     void *context)
 {
-    (void)context;
+    const br_light_volume   *src             = (const br_light_volume *)pvalue->p;
+    state_stack             *stack           = (state_stack *)block;
+    br_renderer             *renderer        = context;
+    state_light_volume_desc *desc            = (state_light_volume_desc *)((char *)block + tep->offset);
+    static br_boolean        warned_overflow = BR_FALSE;
+    state_light_volume      *dst;
+    br_uint_32               num_planes = 0;
+    br_uint_32               index;
 
     /*
-     * TODO: implement.
-     * See customLightingVolumeSet() in softrend/state.c
+     * The entry targets light[i].volume, and tep->offset already has the light's
+     * part folded in (StateGLInitLight()), so the part falls out of the field's
+     * address. The payload for that part is in the renderer's state_cache, reached
+     * through the object whose state is being set.
      */
+    index = (br_uint_32)((state_light *)((char *)desc - offsetof(state_light, volume)) - stack->light);
+
+    ASSERT(renderer != NULL);
+    ASSERT(index < (br_uint_32)BR_ASIZE(stack->light));
+
+    dst = &renderer->state.cache.light_volume[index];
+
+    /*
+     * No volume, or one with no regions, is the same as not having one. The core
+     * frees the view-space copy it hands us as soon as the set returns, so the
+     * regions and planes have to be copied here, not kept. Both the descriptor and
+     * the slot are cleared, so a light that lost its volume cannot leave stale
+     * data behind.
+     */
+    desc->falloff_distance = BR_SCALAR(0.0);
+    desc->region_count     = 0;
+    dst->falloff_distance  = BR_SCALAR(0.0);
+    dst->region_count      = 0;
+
+    if(src == NULL || src->regions == NULL || src->nregions == 0)
+        return BRE_OK;
+
+    for(br_uint_32 i = 0; i < src->nregions; ++i)
+        num_planes += src->regions[i].nplanes;
+
+    if(src->nregions > MAX_STATE_LIGHT_VOLUME_REGIONS || num_planes > MAX_STATE_LIGHT_VOLUME_PLANES) {
+
+        if(!warned_overflow) {
+            BrLogWarn("GLREND", "Light volume has %u regions and %u planes, more than the %d/%d glrend supports; dropping it.",
+                      (unsigned)src->nregions, (unsigned)num_planes, MAX_STATE_LIGHT_VOLUME_REGIONS, MAX_STATE_LIGHT_VOLUME_PLANES);
+            BrLogWarn("GLREND", "This message will not be shown again.");
+            warned_overflow = BR_TRUE;
+        }
+
+        return BRE_OK;
+    }
+
+    desc->falloff_distance = src->falloff_distance;
+    desc->region_count     = src->nregions;
+    dst->falloff_distance  = src->falloff_distance;
+    dst->region_count      = src->nregions;
+
+    br_uint_32 offset = 0;
+    for(br_uint_32 i = 0; i < src->nregions; ++i) {
+        const br_convex_region *region = src->regions + i;
+
+        dst->regions[i].plane_offset = offset;
+        dst->regions[i].plane_count  = region->nplanes;
+
+        for(br_uint_32 j = 0; j < region->nplanes; ++j)
+            dst->planes[offset + j] = region->planes[j];
+
+        offset += region->nplanes;
+    }
+
     return BRE_OK;
 }

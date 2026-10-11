@@ -1,5 +1,7 @@
 #define MAX_LIGHTS                   48 /* Must match up with BRender */
 #define MAX_CLIP_PLANES              6  /* Must match up with BRender */
+#define MAX_LIGHT_VOLUME_REGIONS     16 /* Must match up with BR_GL_MAX_LIGHT_VOLUME_REGIONS */
+#define MAX_LIGHT_VOLUME_PLANES      64 /* Must match up with BR_GL_MAX_LIGHT_VOLUME_PLANES */
 #define SPECULARPOW_CUTOFF           0.6172
 #define BR_SCALAR_EPSILON            1.192092896e-7f
 
@@ -47,6 +49,7 @@ struct br_light {
     vec4  colour;    /* (R, G, B, 0) */
     vec4  atten;     /* (intensity, C, L, Q) */
     vec4  radii;     /* (cos(inner), cos(outer), radius_inner, radius_outer) */
+    vec4  volume;    /* (region_offset, region_count, falloff_distance, 0) */
 };
 
 layout(std140, binding=0) uniform br_scene_state
@@ -56,6 +59,14 @@ layout(std140, binding=0) uniform br_scene_state
     vec4 ambient_colour;
     uint num_clip_planes;
     bool use_ambient_colour;
+
+    /*
+     * Every light's cutoff volume, gathered into one table per scene. A region
+     * is (plane_offset, plane_count, 0, 0); a light names its first region in
+     * br_light::volume.
+     */
+    vec4 light_volume_regions[MAX_LIGHT_VOLUME_REGIONS];
+    vec4 light_volume_planes[MAX_LIGHT_VOLUME_PLANES];
 };
 
 layout(std140, binding=1) uniform br_model_state
@@ -236,6 +247,62 @@ void lightingColourSpot(in vec3 p, in vec3 n, in uint i, inout vec3 outA, inout 
 }
 
 /*
+ * A light's cutoff volume: a point inside any region is lit in full, and
+ * outside a region's boundary the contribution fades linearly to nothing over
+ * falloff_distance. Mirrors softrend's lightVolumeAttenuation() (light24.c),
+ * including the hard cutoff that a zero falloff distance produces.
+ *
+ * Returns 1.0 when the light has no volume.
+ */
+float lightVolumeAttenuation(in vec3 p, in uint i)
+{
+    const float region_offset = lights[i].volume.x;
+    const float region_count  = lights[i].volume.y;
+    const float falloff       = lights[i].volume.z;
+
+    if(region_count < 0.5)
+        return 1.0;
+
+    float atten_dist = 3.40282347e+38; /* BR_SCALAR_MAX */
+
+    for(uint r = 0u; r < uint(region_count); ++r) {
+        const vec4 region = light_volume_regions[uint(region_offset) + r];
+
+        const uint plane_offset = uint(region.x);
+        const uint plane_count  = uint(region.y);
+
+        bool  inside   = true;
+        bool  outside  = false;
+        float max_dist = 0.0;
+
+        for(uint j = 0u; j < plane_count; ++j) {
+            const vec4  plane = light_volume_planes[plane_offset + j];
+            const float dist  = -(dot(p, plane.xyz) - plane.w);
+
+            if(dist >= 0.0) {
+                inside = false;
+
+                if(dist >= falloff)
+                    outside = true;
+                else if(dist > max_dist)
+                    max_dist = dist;
+            }
+        }
+
+        if(inside)
+            return 1.0;
+
+        if(!outside && max_dist < atten_dist)
+            atten_dist = max_dist;
+    }
+
+    if(atten_dist >= falloff)
+        return 0.0;
+
+    return 1.0 - atten_dist / falloff;
+}
+
+/*
  * Lighting accumulation function. Does A/D/S separately.
  *
  * NB: For regular (i.e. non-radial/non-linear-falloff) ambient lights, if there's no global contribution
@@ -261,25 +328,69 @@ void accumulateLights(in vec3 position, in vec3 normal, inout vec3 ambient, inou
     }
 
     for(uint i = light_start.x; i < light_end.x; ++i) {
-        lightingColourAmbientRadii(position, normal, i, ambient, diffuse, specular);
+        const float volume_atten = lightVolumeAttenuation(position, i);
+
+        if(volume_atten <= 0.0)
+            continue;
+
+        vec3 a = vec3(0.0);
+        vec3 d = vec3(0.0);
+        vec3 s = vec3(0.0);
+        lightingColourAmbientRadii(position, normal, i, a, d, s);
+        ambient  += a * volume_atten;
+        diffuse  += d * volume_atten;
+        specular += s * volume_atten;
     }
 #endif
 
 #if !DEBUG_DISABLE_LIGHT_DIRECTIONAL
     for(uint i = light_start.y; i < light_end.y; ++i) {
-        lightingColourDirect(position, normal, i, ambient, diffuse, specular);
+        const float volume_atten = lightVolumeAttenuation(position, i);
+
+        if(volume_atten <= 0.0)
+            continue;
+
+        vec3 a = vec3(0.0);
+        vec3 d = vec3(0.0);
+        vec3 s = vec3(0.0);
+        lightingColourDirect(position, normal, i, a, d, s);
+        ambient  += a * volume_atten;
+        diffuse  += d * volume_atten;
+        specular += s * volume_atten;
     }
 #endif
 
 #if !DEBUG_DISABLE_LIGHT_POINT
     for(uint i = light_start.z; i < light_end.z; ++i) {
-        lightingColourPoint(position, normal, i, ambient, diffuse, specular);
+        const float volume_atten = lightVolumeAttenuation(position, i);
+
+        if(volume_atten <= 0.0)
+            continue;
+
+        vec3 a = vec3(0.0);
+        vec3 d = vec3(0.0);
+        vec3 s = vec3(0.0);
+        lightingColourPoint(position, normal, i, a, d, s);
+        ambient  += a * volume_atten;
+        diffuse  += d * volume_atten;
+        specular += s * volume_atten;
     }
 #endif
 
 #if !DEBUG_DISABLE_LIGHT_SPOT
     for(uint i = light_start.w; i < light_end.w; ++i) {
-        lightingColourSpot(position, normal, i, ambient, diffuse, specular);
+        const float volume_atten = lightVolumeAttenuation(position, i);
+
+        if(volume_atten <= 0.0)
+            continue;
+
+        vec3 a = vec3(0.0);
+        vec3 d = vec3(0.0);
+        vec3 s = vec3(0.0);
+        lightingColourSpot(position, normal, i, a, d, s);
+        ambient  += a * volume_atten;
+        diffuse  += d * volume_atten;
+        specular += s * volume_atten;
     }
 #endif
 }

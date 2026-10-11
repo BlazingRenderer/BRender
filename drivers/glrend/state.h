@@ -8,6 +8,13 @@
 #define MAX_STATE_CLIP_PLANES BR_MAX_CLIP_PLANES
 
 /*
+ * Caps on a light's cutoff volume. A volume over either is dropped whole,
+ * rather than clipped - a partial volume would light the wrong region.
+ */
+#define MAX_STATE_LIGHT_VOLUME_REGIONS 2
+#define MAX_STATE_LIGHT_VOLUME_PLANES  8
+
+/*
  * State masks - these should match the BR_STATE_* enums.
  */
 enum {
@@ -93,6 +100,38 @@ typedef struct state_surface {
     br_matrix23 map_transform;
 } state_surface;
 
+typedef struct state_light_volume_region {
+    br_uint_32 plane_offset; /* Into state_light_volume::planes */
+    br_uint_32 plane_count;
+} state_light_volume_region;
+
+/*
+ * A light's cutoff volume, stored by value.
+ *
+ * This lives in state_cache, not state_light. state_light sits in the state
+ * stack, which StateGLPush() copies whole, so a payload that owns the region and
+ * plane arrays cannot live there (and it cannot own them the way br_light_volume
+ * does - softrend keeps those in scache.res). The data is copied in here instead,
+ * and ProcessSceneLights() packs it into the scene uniform block. state_light::volume
+ * names the light's slot.
+ */
+typedef struct state_light_volume {
+    br_scalar                 falloff_distance;
+    br_uint_32                region_count; /* 0 means no volume */
+    state_light_volume_region regions[MAX_STATE_LIGHT_VOLUME_REGIONS];
+    br_vector4                planes[MAX_STATE_LIGHT_VOLUME_PLANES];
+} state_light_volume;
+
+/*
+ * The part of a light's cutoff volume that rides in state_light: enough for
+ * ProcessSceneLights() to find the payload in state_cache::light_volume and to
+ * know whether the light has one at all. region_count == 0 means no volume.
+ */
+typedef struct state_light_volume_desc {
+    br_scalar  falloff_distance;
+    br_uint_32 region_count;
+} state_light_volume_desc;
+
 typedef struct state_light {
     br_token type;
     br_token lighting_space;
@@ -120,7 +159,7 @@ typedef struct state_light {
     br_boolean radius_cull;
     br_boolean angle_cull;
 
-    br_light_volume volume;
+    state_light_volume_desc volume;
 
     br_boolean culled;
 } state_light;
@@ -279,6 +318,13 @@ typedef struct {
     br_gl_main_data_lights lights;
     br_uint_32             light_part[BR_MAX_LIGHTS];
     br_uint_32             num_lights;
+
+    /*
+     * Every light's cutoff volume payload, indexed by light part. state_cache is
+     * outside the state stack, so this is not copied by StateGLPush()/StateGLPop();
+     * state_light::volume names the slot.
+     */
+    state_light_volume light_volume[MAX_STATE_LIGHTS];
 } state_cache;
 
 typedef struct state_all {
