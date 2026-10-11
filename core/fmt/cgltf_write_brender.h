@@ -49,6 +49,30 @@ static void cgltf_write_brender_light(cgltf_write_context *context, const cgltf_
         cgltf_write_floatprop(context, "radius_inner", br_light->radius_inner, 0.0f);
     }
 
+    if(br_light->regions_count > 0) {
+        cgltf_write_line(context, "\"volume\": {");
+        cgltf_write_floatprop(context, "falloff_distance", br_light->falloff_distance, 0.0f);
+
+        cgltf_write_line(context, "\"regions\": [");
+        for(cgltf_size i = 0; i < br_light->regions_count; ++i) {
+            const cgltf_brender_light_region *region = br_light->regions + i;
+
+            cgltf_write_line(context, "[");
+            for(cgltf_size j = 0; j < region->planes_count; ++j) {
+                const cgltf_float *plane = region->planes[j];
+
+                cgltf_write_indent(context);
+                CGLTF_SPRINTF("[ %.*g, %.*g, %.*g, %.*g ]", CGLTF_DECIMAL_DIG, plane[0], CGLTF_DECIMAL_DIG, plane[1], CGLTF_DECIMAL_DIG,
+                              plane[2], CGLTF_DECIMAL_DIG, plane[3]);
+                context->needs_comma = 1;
+            }
+            cgltf_write_line(context, "]");
+        }
+        cgltf_write_line(context, "]");
+
+        cgltf_write_line(context, "}");
+    }
+
     cgltf_write_line(context, "}");
 }
 

@@ -87,6 +87,11 @@ typedef struct cgltf_brender_material {
     cgltf_float depth_bias;
 } cgltf_brender_material;
 
+typedef struct cgltf_brender_light_region {
+    cgltf_size   planes_count;
+    cgltf_float (*planes)[4];
+} cgltf_brender_light_region;
+
 typedef struct cgltf_brender_light {
     char                    *identifier;
     cgltf_brender_light_type type;
@@ -101,7 +106,15 @@ typedef struct cgltf_brender_light {
     cgltf_float              radius_outer;
     cgltf_float              radius_inner;
 
-    /* TODO: volumes, if I ever see any. */
+    /*
+     * Cutoff volumes (br_light_volume). Each region is a convex intersection of
+     * half-spaces; a light reaches a vertex inside any region, and fades
+     * linearly to nothing over `falloff_distance` beyond a boundary. The planes
+     * are in the light actor's local space.
+     */
+    cgltf_float                 falloff_distance;
+    cgltf_brender_light_region *regions;
+    cgltf_size                  regions_count;
 } cgltf_brender_light;
 
 #endif /* CGLTF_BRENDER_H_ */
