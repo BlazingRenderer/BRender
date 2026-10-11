@@ -236,7 +236,7 @@ static void ProcessSceneLights(state_cache *cache, state_light *lights)
  * lights is the live light state, indexed by part, which is where
  * ProcessSceneLights() recorded each packed light's flag in cache->light_part.
  */
-void StateGLBuildLightLists(const state_cache *cache, const state_light *lights, const struct v11model *v11m, br_gl_main_data_model *model)
+void StateGLBuildLightLists(const state_cache *cache, const state_light *lights, br_gl_main_data_model *model)
 {
     br_uint_32 out = 0;
 
@@ -250,11 +250,13 @@ void StateGLBuildLightLists(const state_cache *cache, const state_light *lights,
                 continue;
 
             /*
-             * The flag describes the model being drawn, so it only applies to a
-             * model draw. The per-triangle path carries no model and so still
-             * holds whichever model was culled last, which must not be used.
+             * A light the core culled for the model being drawn is dropped.
+             * The flag is the model's on every path: an immediate draw follows
+             * BrLightCullReset() for its own model, and a deferred one has the
+             * whole state_stack, lights included, restored from the primitive
+             * (gv1buckt.c), so neither needs the model threaded through here.
              */
-            if(v11m != NULL && lights[cache->light_part[i]].culled)
+            if(lights[cache->light_part[i]].culled)
                 continue;
 
             model->lights.light[out] = cache->lights.light[i];

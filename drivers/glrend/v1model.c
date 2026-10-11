@@ -380,7 +380,7 @@ static void apply_stored_properties(const GladGLContext *gl, br_renderer *render
         gl->Disable(GL_DEPTH_TEST);
 }
 
-static br_boolean apply_state(br_renderer *renderer, const GladGLContext *gl, const struct v11model *v11m)
+static br_boolean apply_state(br_renderer *renderer, const GladGLContext *gl)
 {
     const br_gl_context_state *ctx   = GLContextState(gl);
     state_cache               *cache = &renderer->state.cache;
@@ -408,7 +408,7 @@ static br_boolean apply_state(br_renderer *renderer, const GladGLContext *gl, co
         gl->FrontFace(GL_CCW);
 
     /* Cull lights that cannot reach this model, and pack what is left. */
-    StateGLBuildLightLists(cache, renderer->state.current->light, v11m, &model);
+    StateGLBuildLightLists(cache, renderer->state.current->light, &model);
 
     /* NB: Flag is never set */
     // int model_lit = self->model->flags & V11MODF_LIT;
@@ -446,7 +446,7 @@ void RendererGLRenderGroup(br_renderer *self, br_geometry_stored *stored, const 
 {
     const GladGLContext *gl = self->gl;
 
-    if(!apply_state(self, gl, stored->model)) {
+    if(!apply_state(self, gl)) {
         BrLogWarn("GLREND", "Out of model space.");
         return;
     }
@@ -474,7 +474,7 @@ void RendererGLRenderTri(br_renderer *self, br_uintptr_t offset, const gl_groupi
 {
     const GladGLContext *gl = self->gl;
 
-    if(!apply_state(self, gl, NULL)) {
+    if(!apply_state(self, gl)) {
         BrLogWarn("GLREND", "Out of model space.");
         return;
     }
