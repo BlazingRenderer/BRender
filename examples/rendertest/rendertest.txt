@@ -83,7 +83,7 @@ glrend/llvmpipe/declared/zb/8/320x240/scene-radius-near a3d06c50848370c3
 glrend/llvmpipe/declared/zb/8/320x240/scene-scale-direction 1751d052b19993a3
 glrend/llvmpipe/declared/zb/8/320x240/scene-scale-spot c9d2e99831c8c9a3
 glrend/llvmpipe/declared/zb/8/320x240/scene-scale-spot-off e35bd42fa6629d23
-glrend/llvmpipe/declared/zb/8/320x240/scene-scaled 7acf057ae10749e3
+glrend/llvmpipe/declared/zb/8/320x240/scene-scaled 986295577022fe43
 glrend/llvmpipe/declared/zb/8/320x240/scene-shade af697abd5d845f33
 glrend/llvmpipe/declared/zb/8/320x240/scene-shade-arb-flat c391f12dcbcc1269
 glrend/llvmpipe/declared/zb/8/320x240/scene-shade-arb-flat-persp c391f12dcbcc1269
@@ -198,7 +198,7 @@ glrend/llvmpipe/declared/zs/8/320x240/scene-radius-near a3d06c50848370c3
 glrend/llvmpipe/declared/zs/8/320x240/scene-scale-direction 1751d052b19993a3
 glrend/llvmpipe/declared/zs/8/320x240/scene-scale-spot c9d2e99831c8c9a3
 glrend/llvmpipe/declared/zs/8/320x240/scene-scale-spot-off e35bd42fa6629d23
-glrend/llvmpipe/declared/zs/8/320x240/scene-scaled 7acf057ae10749e3
+glrend/llvmpipe/declared/zs/8/320x240/scene-scaled 986295577022fe43
 glrend/llvmpipe/declared/zs/8/320x240/scene-shade af697abd5d845f33
 glrend/llvmpipe/declared/zs/8/320x240/scene-shade-arb-flat 052344700496274f
 glrend/llvmpipe/declared/zs/8/320x240/scene-shade-arb-flat-persp 052344700496274f
@@ -313,7 +313,7 @@ glrend/llvmpipe/x87/zb/8/320x240/scene-radius-near a3d06c50848370c3
 glrend/llvmpipe/x87/zb/8/320x240/scene-scale-direction 1751d052b19993a3
 glrend/llvmpipe/x87/zb/8/320x240/scene-scale-spot c9d2e99831c8c9a3
 glrend/llvmpipe/x87/zb/8/320x240/scene-scale-spot-off e35bd42fa6629d23
-glrend/llvmpipe/x87/zb/8/320x240/scene-scaled 7acf057ae10749e3
+glrend/llvmpipe/x87/zb/8/320x240/scene-scaled 986295577022fe43
 glrend/llvmpipe/x87/zb/8/320x240/scene-shade af697abd5d845f33
 glrend/llvmpipe/x87/zb/8/320x240/scene-shade-arb-flat c391f12dcbcc1269
 glrend/llvmpipe/x87/zb/8/320x240/scene-shade-arb-flat-persp c391f12dcbcc1269
@@ -428,7 +428,7 @@ glrend/llvmpipe/x87/zs/8/320x240/scene-radius-near a3d06c50848370c3
 glrend/llvmpipe/x87/zs/8/320x240/scene-scale-direction 1751d052b19993a3
 glrend/llvmpipe/x87/zs/8/320x240/scene-scale-spot c9d2e99831c8c9a3
 glrend/llvmpipe/x87/zs/8/320x240/scene-scale-spot-off e35bd42fa6629d23
-glrend/llvmpipe/x87/zs/8/320x240/scene-scaled 7acf057ae10749e3
+glrend/llvmpipe/x87/zs/8/320x240/scene-scaled 986295577022fe43
 glrend/llvmpipe/x87/zs/8/320x240/scene-shade af697abd5d845f33
 glrend/llvmpipe/x87/zs/8/320x240/scene-shade-arb-flat 052344700496274f
 glrend/llvmpipe/x87/zs/8/320x240/scene-shade-arb-flat-persp 052344700496274f
@@ -543,7 +543,7 @@ glrend1x/llvmpipe/declared/zb/7/320x240/scene-radius-near a3d06c50848370c3
 glrend1x/llvmpipe/declared/zb/7/320x240/scene-scale-direction 2a653329f5256e43
 glrend1x/llvmpipe/declared/zb/7/320x240/scene-scale-spot a0675b983a0e7443
 glrend1x/llvmpipe/declared/zb/7/320x240/scene-scale-spot-off bfda0630d0e838c3
-glrend1x/llvmpipe/declared/zb/7/320x240/scene-scaled de9225e8e8139fa3
+glrend1x/llvmpipe/declared/zb/7/320x240/scene-scaled 9fed76425126fe43
 glrend1x/llvmpipe/declared/zb/7/320x240/scene-shade fbd28a5f06b875b8
 glrend1x/llvmpipe/declared/zb/7/320x240/scene-shade-arb-flat a24c79521aebcee3
 glrend1x/llvmpipe/declared/zb/7/320x240/scene-shade-arb-flat-persp 3dfaa8e28d71a0fc
@@ -658,7 +658,7 @@ glrend1x/llvmpipe/declared/zs/7/320x240/scene-radius-near a3d06c50848370c3
 glrend1x/llvmpipe/declared/zs/7/320x240/scene-scale-direction 2a653329f5256e43
 glrend1x/llvmpipe/declared/zs/7/320x240/scene-scale-spot a0675b983a0e7443
 glrend1x/llvmpipe/declared/zs/7/320x240/scene-scale-spot-off bfda0630d0e838c3
-glrend1x/llvmpipe/declared/zs/7/320x240/scene-scaled de9225e8e8139fa3
+glrend1x/llvmpipe/declared/zs/7/320x240/scene-scaled 9fed76425126fe43
 glrend1x/llvmpipe/declared/zs/7/320x240/scene-shade fbd28a5f06b875b8
 glrend1x/llvmpipe/declared/zs/7/320x240/scene-shade-arb-flat a1081f7dcdfebc39
 glrend1x/llvmpipe/declared/zs/7/320x240/scene-shade-arb-flat-persp 3c0693ee87e4c464
@@ -773,7 +773,7 @@ glrend1x/llvmpipe/x87/zb/7/320x240/scene-radius-near a3d06c50848370c3
 glrend1x/llvmpipe/x87/zb/7/320x240/scene-scale-direction 2a653329f5256e43
 glrend1x/llvmpipe/x87/zb/7/320x240/scene-scale-spot a0675b983a0e7443
 glrend1x/llvmpipe/x87/zb/7/320x240/scene-scale-spot-off bfda0630d0e838c3
-glrend1x/llvmpipe/x87/zb/7/320x240/scene-scaled de9225e8e8139fa3
+glrend1x/llvmpipe/x87/zb/7/320x240/scene-scaled 9fed76425126fe43
 glrend1x/llvmpipe/x87/zb/7/320x240/scene-shade fbd28a5f06b875b8
 glrend1x/llvmpipe/x87/zb/7/320x240/scene-shade-arb-flat a24c79521aebcee3
 glrend1x/llvmpipe/x87/zb/7/320x240/scene-shade-arb-flat-persp 3dfaa8e28d71a0fc
@@ -888,7 +888,7 @@ glrend1x/llvmpipe/x87/zs/7/320x240/scene-radius-near a3d06c50848370c3
 glrend1x/llvmpipe/x87/zs/7/320x240/scene-scale-direction 2a653329f5256e43
 glrend1x/llvmpipe/x87/zs/7/320x240/scene-scale-spot a0675b983a0e7443
 glrend1x/llvmpipe/x87/zs/7/320x240/scene-scale-spot-off bfda0630d0e838c3
-glrend1x/llvmpipe/x87/zs/7/320x240/scene-scaled de9225e8e8139fa3
+glrend1x/llvmpipe/x87/zs/7/320x240/scene-scaled 9fed76425126fe43
 glrend1x/llvmpipe/x87/zs/7/320x240/scene-shade fbd28a5f06b875b8
 glrend1x/llvmpipe/x87/zs/7/320x240/scene-shade-arb-flat a1081f7dcdfebc39
 glrend1x/llvmpipe/x87/zs/7/320x240/scene-shade-arb-flat-persp 3c0693ee87e4c464
@@ -1118,7 +1118,7 @@ softrend/softprmf/declared/zb/4/320x240/scene-radius-near d396ea688895fb03
 softrend/softprmf/declared/zb/4/320x240/scene-scale-direction e9c4fb77cb6deaf3
 softrend/softprmf/declared/zb/4/320x240/scene-scale-spot b0e67bf0e5b50bb3
 softrend/softprmf/declared/zb/4/320x240/scene-scale-spot-off 37dfb25a63112383
-softrend/softprmf/declared/zb/4/320x240/scene-scaled 7aa62c55a9641743
+softrend/softprmf/declared/zb/4/320x240/scene-scaled 42e46de01d9dc6a3
 softrend/softprmf/declared/zb/4/320x240/scene-shade a6dff9cfde08333d
 softrend/softprmf/declared/zb/4/320x240/scene-shade-arb-flat d038f5c8934f71f5
 softrend/softprmf/declared/zb/4/320x240/scene-shade-arb-flat-persp d038f5c8934f71f5
@@ -1233,7 +1233,7 @@ softrend/softprmf/declared/zb/5/320x240/scene-radius-near 6bf3841ec109a303
 softrend/softprmf/declared/zb/5/320x240/scene-scale-direction 7ca27a5ff1514fd3
 softrend/softprmf/declared/zb/5/320x240/scene-scale-spot 3cd6f4df00f86983
 softrend/softprmf/declared/zb/5/320x240/scene-scale-spot-off b0f53f1612e29f83
-softrend/softprmf/declared/zb/5/320x240/scene-scaled 5eb73cae76a058c3
+softrend/softprmf/declared/zb/5/320x240/scene-scaled 77430c0476a596e3
 softrend/softprmf/declared/zb/5/320x240/scene-shade 8bd02630497a107d
 softrend/softprmf/declared/zb/5/320x240/scene-shade-arb-flat 31058744647b144c
 softrend/softprmf/declared/zb/5/320x240/scene-shade-arb-flat-persp 31058744647b144c
@@ -1348,7 +1348,7 @@ softrend/softprmf/declared/zb/6/320x240/scene-radius-near afccfedd1c34f483
 softrend/softprmf/declared/zb/6/320x240/scene-scale-direction 90fce59193279d0b
 softrend/softprmf/declared/zb/6/320x240/scene-scale-spot 8e3b6df210b1be8b
 softrend/softprmf/declared/zb/6/320x240/scene-scale-spot-off 528a28525eda9fa3
-softrend/softprmf/declared/zb/6/320x240/scene-scaled 3ed154ec12b8b243
+softrend/softprmf/declared/zb/6/320x240/scene-scaled d48e1f6f91b95fa3
 softrend/softprmf/declared/zb/6/320x240/scene-shade 1cc98466f2d64da7
 softrend/softprmf/declared/zb/6/320x240/scene-shade-arb-flat cc20f727d3c8a16a
 softrend/softprmf/declared/zb/6/320x240/scene-shade-arb-flat-persp 5bbf9e29b02b1c4e
@@ -1578,7 +1578,7 @@ softrend/softprmf/declared/zs/4/320x240/scene-radius-near d396ea688895fb03
 softrend/softprmf/declared/zs/4/320x240/scene-scale-direction e9c4fb77cb6deaf3
 softrend/softprmf/declared/zs/4/320x240/scene-scale-spot b0e67bf0e5b50bb3
 softrend/softprmf/declared/zs/4/320x240/scene-scale-spot-off 37dfb25a63112383
-softrend/softprmf/declared/zs/4/320x240/scene-scaled 7aa62c55a9641743
+softrend/softprmf/declared/zs/4/320x240/scene-scaled 42e46de01d9dc6a3
 softrend/softprmf/declared/zs/4/320x240/scene-shade c6361a0ccc57e160
 softrend/softprmf/declared/zs/4/320x240/scene-shade-arb-flat d198ad19ccd7af53
 softrend/softprmf/declared/zs/4/320x240/scene-shade-arb-flat-persp 3320b40a3102ecb2
@@ -1693,7 +1693,7 @@ softrend/softprmf/declared/zs/5/320x240/scene-radius-near 6bf3841ec109a303
 softrend/softprmf/declared/zs/5/320x240/scene-scale-direction 7ca27a5ff1514fd3
 softrend/softprmf/declared/zs/5/320x240/scene-scale-spot 3cd6f4df00f86983
 softrend/softprmf/declared/zs/5/320x240/scene-scale-spot-off b0f53f1612e29f83
-softrend/softprmf/declared/zs/5/320x240/scene-scaled 5eb73cae76a058c3
+softrend/softprmf/declared/zs/5/320x240/scene-scaled 77430c0476a596e3
 softrend/softprmf/declared/zs/5/320x240/scene-shade 4f9039ec7c10f8eb
 softrend/softprmf/declared/zs/5/320x240/scene-shade-arb-flat 5758eb4afc8e51da
 softrend/softprmf/declared/zs/5/320x240/scene-shade-arb-flat-persp d714b06d8007606c
@@ -1808,7 +1808,7 @@ softrend/softprmf/declared/zs/6/320x240/scene-radius-near afccfedd1c34f483
 softrend/softprmf/declared/zs/6/320x240/scene-scale-direction 90fce59193279d0b
 softrend/softprmf/declared/zs/6/320x240/scene-scale-spot 8e3b6df210b1be8b
 softrend/softprmf/declared/zs/6/320x240/scene-scale-spot-off 528a28525eda9fa3
-softrend/softprmf/declared/zs/6/320x240/scene-scaled 3ed154ec12b8b243
+softrend/softprmf/declared/zs/6/320x240/scene-scaled d48e1f6f91b95fa3
 softrend/softprmf/declared/zs/6/320x240/scene-shade 1cc98466f2d64da7
 softrend/softprmf/declared/zs/6/320x240/scene-shade-arb-flat 50af23c69f16cec8
 softrend/softprmf/declared/zs/6/320x240/scene-shade-arb-flat-persp 2cf539fa4cab4697
@@ -2038,7 +2038,7 @@ softrend/softprmf/x87/zb/4/320x240/scene-radius-near d396ea688895fb03
 softrend/softprmf/x87/zb/4/320x240/scene-scale-direction e9c4fb77cb6deaf3
 softrend/softprmf/x87/zb/4/320x240/scene-scale-spot b0e67bf0e5b50bb3
 softrend/softprmf/x87/zb/4/320x240/scene-scale-spot-off 37dfb25a63112383
-softrend/softprmf/x87/zb/4/320x240/scene-scaled 7aa62c55a9641743
+softrend/softprmf/x87/zb/4/320x240/scene-scaled 42e46de01d9dc6a3
 softrend/softprmf/x87/zb/4/320x240/scene-shade a6dff9cfde08333d
 softrend/softprmf/x87/zb/4/320x240/scene-shade-arb-flat d038f5c8934f71f5
 softrend/softprmf/x87/zb/4/320x240/scene-shade-arb-flat-persp d038f5c8934f71f5
@@ -2153,7 +2153,7 @@ softrend/softprmf/x87/zb/5/320x240/scene-radius-near 6bf3841ec109a303
 softrend/softprmf/x87/zb/5/320x240/scene-scale-direction 7ca27a5ff1514fd3
 softrend/softprmf/x87/zb/5/320x240/scene-scale-spot 3cd6f4df00f86983
 softrend/softprmf/x87/zb/5/320x240/scene-scale-spot-off b0f53f1612e29f83
-softrend/softprmf/x87/zb/5/320x240/scene-scaled 5eb73cae76a058c3
+softrend/softprmf/x87/zb/5/320x240/scene-scaled 77430c0476a596e3
 softrend/softprmf/x87/zb/5/320x240/scene-shade 8bd02630497a107d
 softrend/softprmf/x87/zb/5/320x240/scene-shade-arb-flat 31058744647b144c
 softrend/softprmf/x87/zb/5/320x240/scene-shade-arb-flat-persp 31058744647b144c
@@ -2268,7 +2268,7 @@ softrend/softprmf/x87/zb/6/320x240/scene-radius-near afccfedd1c34f483
 softrend/softprmf/x87/zb/6/320x240/scene-scale-direction 90fce59193279d0b
 softrend/softprmf/x87/zb/6/320x240/scene-scale-spot 8e3b6df210b1be8b
 softrend/softprmf/x87/zb/6/320x240/scene-scale-spot-off 528a28525eda9fa3
-softrend/softprmf/x87/zb/6/320x240/scene-scaled 3ed154ec12b8b243
+softrend/softprmf/x87/zb/6/320x240/scene-scaled d48e1f6f91b95fa3
 softrend/softprmf/x87/zb/6/320x240/scene-shade d6111af9bdeb7ccc
 softrend/softprmf/x87/zb/6/320x240/scene-shade-arb-flat cc20f727d3c8a16a
 softrend/softprmf/x87/zb/6/320x240/scene-shade-arb-flat-persp 5bbf9e29b02b1c4e
@@ -2498,7 +2498,7 @@ softrend/softprmf/x87/zs/4/320x240/scene-radius-near d396ea688895fb03
 softrend/softprmf/x87/zs/4/320x240/scene-scale-direction e9c4fb77cb6deaf3
 softrend/softprmf/x87/zs/4/320x240/scene-scale-spot b0e67bf0e5b50bb3
 softrend/softprmf/x87/zs/4/320x240/scene-scale-spot-off 37dfb25a63112383
-softrend/softprmf/x87/zs/4/320x240/scene-scaled 7aa62c55a9641743
+softrend/softprmf/x87/zs/4/320x240/scene-scaled 42e46de01d9dc6a3
 softrend/softprmf/x87/zs/4/320x240/scene-shade c6361a0ccc57e160
 softrend/softprmf/x87/zs/4/320x240/scene-shade-arb-flat d198ad19ccd7af53
 softrend/softprmf/x87/zs/4/320x240/scene-shade-arb-flat-persp 3320b40a3102ecb2
@@ -2613,7 +2613,7 @@ softrend/softprmf/x87/zs/5/320x240/scene-radius-near 6bf3841ec109a303
 softrend/softprmf/x87/zs/5/320x240/scene-scale-direction 7ca27a5ff1514fd3
 softrend/softprmf/x87/zs/5/320x240/scene-scale-spot 3cd6f4df00f86983
 softrend/softprmf/x87/zs/5/320x240/scene-scale-spot-off b0f53f1612e29f83
-softrend/softprmf/x87/zs/5/320x240/scene-scaled 5eb73cae76a058c3
+softrend/softprmf/x87/zs/5/320x240/scene-scaled 77430c0476a596e3
 softrend/softprmf/x87/zs/5/320x240/scene-shade 4f9039ec7c10f8eb
 softrend/softprmf/x87/zs/5/320x240/scene-shade-arb-flat 5758eb4afc8e51da
 softrend/softprmf/x87/zs/5/320x240/scene-shade-arb-flat-persp d714b06d8007606c
@@ -2728,7 +2728,7 @@ softrend/softprmf/x87/zs/6/320x240/scene-radius-near afccfedd1c34f483
 softrend/softprmf/x87/zs/6/320x240/scene-scale-direction 90fce59193279d0b
 softrend/softprmf/x87/zs/6/320x240/scene-scale-spot 8e3b6df210b1be8b
 softrend/softprmf/x87/zs/6/320x240/scene-scale-spot-off 528a28525eda9fa3
-softrend/softprmf/x87/zs/6/320x240/scene-scaled 3ed154ec12b8b243
+softrend/softprmf/x87/zs/6/320x240/scene-scaled d48e1f6f91b95fa3
 softrend/softprmf/x87/zs/6/320x240/scene-shade d6111af9bdeb7ccc
 softrend/softprmf/x87/zs/6/320x240/scene-shade-arb-flat 50af23c69f16cec8
 softrend/softprmf/x87/zs/6/320x240/scene-shade-arb-flat-persp 2cf539fa4cab4697
