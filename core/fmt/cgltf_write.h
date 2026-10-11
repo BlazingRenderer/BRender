@@ -231,12 +231,53 @@ static void cgltf_write_line(cgltf_write_context* context, const char* line)
 	}
 }
 
+/*
+ * Write a JSON string, escaped.
+ *
+ * Local patch: cgltf 1.15's cgltf_write_strprop() writes the value straight
+ * between quotes, so a name or URI holding a quote, a backslash or a control
+ * character - BRender identifiers are often Windows paths - produces invalid
+ * JSON, and the loader then refuses the file the writer produced. Upstream
+ * carries the same code, so this belongs upstream as well.
+ */
+static void cgltf_write_string(cgltf_write_context* context, const char* val)
+{
+	const unsigned char* p;
+
+	CGLTF_SPRINTF("\"");
+	for (p = (const unsigned char*)val; *p != 0; ++p)
+	{
+		switch (*p)
+		{
+		case '"':  CGLTF_SPRINTF("\\\""); break;
+		case '\\': CGLTF_SPRINTF("\\\\"); break;
+		case '\b': CGLTF_SPRINTF("\\b"); break;
+		case '\f': CGLTF_SPRINTF("\\f"); break;
+		case '\n': CGLTF_SPRINTF("\\n"); break;
+		case '\r': CGLTF_SPRINTF("\\r"); break;
+		case '\t': CGLTF_SPRINTF("\\t"); break;
+		default:
+			if (*p < 0x20)
+			{
+				CGLTF_SPRINTF("\\u%04x", (unsigned)*p);
+			}
+			else
+			{
+				CGLTF_SPRINTF("%c", *p);
+			}
+			break;
+		}
+	}
+	CGLTF_SPRINTF("\"");
+}
+
 static void cgltf_write_strprop(cgltf_write_context* context, const char* label, const char* val)
 {
 	if (val)
 	{
 		cgltf_write_indent(context);
-		CGLTF_SPRINTF("\"%s\": \"%s\"", label, val);
+		CGLTF_SPRINTF("\"%s\": ", label);
+		cgltf_write_string(context, val);
 		context->needs_comma = 1;
 	}
 }
