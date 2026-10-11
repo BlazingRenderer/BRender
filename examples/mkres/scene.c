@@ -346,6 +346,39 @@ static br_material *scene_material_ex(const char *name, br_colour colour, br_uin
 }
 
 /*
+ * One half-space (x >= 0) in the light actor's own frame. The rig places the
+ * light on +Z with identity rotation, so this is model x >= 0 and it cuts the
+ * visible +Z face down the middle. The smooth material is deliberate: the
+ * volume is evaluated where the lighting is, and a flat-shaded face is lit from
+ * a single point, so the fade would not show across it.
+ */
+static br_vector4       light_volume_planes[1]  = {{{BR_SCALAR(1.0), BR_SCALAR(0.0), BR_SCALAR(0.0), BR_SCALAR(0.0)}}};
+static br_convex_region light_volume_regions[1] = {{light_volume_planes, 1}};
+
+static br_actor *scene_add_volume_light(br_actor *world, br_scalar falloff_distance)
+{
+    br_actor *a = scene_add_light(world, "point", BR_LIGHT_POINT, BR_SCALAR(0.0), BR_TRUE);
+    br_light *l;
+
+    if(a == NULL)
+        return NULL;
+
+    l = a->type_data;
+
+    l->volume.falloff_distance = falloff_distance;
+    l->volume.regions          = light_volume_regions;
+    l->volume.nregions         = 1;
+
+    return a;
+}
+
+static br_material *scene_light_volume_material(void)
+{
+    return scene_material_ex("scene-light-volume-material", BR_COLOUR_RGB(200, 200, 200), BR_MATF_LIGHT | BR_MATF_SMOOTH,
+                             BR_SCALAR(0.1), BR_SCALAR(0.7), BR_SCALAR(0.0), BR_SCALAR(20.0));
+}
+
+/*
  * ------------------------------------------------------------------
  * Render-feature fixtures.
  *
@@ -2550,6 +2583,44 @@ br_error mkres_make_scenes(void)
             scene_add_light_turned(world, "spot", BR_LIGHT_SPOT, BR_SCALAR(0.0), BR_ANGLE_DEG(30));
 
         if(scene_save("scene-scale-spot-off.gltf", world) != BRE_OK)
+            r = BRE_FAIL;
+    }
+
+    /*
+     * Cutoff volumes. A vertex inside a region is lit fully; beyond the
+     * boundary it fades linearly over `falloff_distance` to nothing. `-cut` is
+     * the same region with no fade at all (the hard cutoff path), and `-off`
+     * carries no volume, so the volume is the only difference between them.
+     *
+     * The volume is applied on the colour lighting path only: the indexed
+     * (8bpp) path has no volume variants, so at INDEX_8 all three render
+     * identically.
+     */
+    {
+        br_material *lvm = scene_light_volume_material();
+
+        world = scene_world(cube, lvm, BR_SCALAR(1.0));
+
+        if(world != NULL)
+            scene_add_volume_light(world, BR_SCALAR(1.0));
+
+        if(scene_save("scene-light-volume.gltf", world) != BRE_OK)
+            r = BRE_FAIL;
+
+        world = scene_world(cube, lvm, BR_SCALAR(1.0));
+
+        if(world != NULL)
+            scene_add_volume_light(world, BR_SCALAR(0.0));
+
+        if(scene_save("scene-light-volume-cut.gltf", world) != BRE_OK)
+            r = BRE_FAIL;
+
+        world = scene_world(cube, lvm, BR_SCALAR(1.0));
+
+        if(world != NULL)
+            scene_add_light(world, "point", BR_LIGHT_POINT, BR_SCALAR(0.0), BR_TRUE);
+
+        if(scene_save("scene-light-volume-off.gltf", world) != BRE_OK)
             r = BRE_FAIL;
     }
 

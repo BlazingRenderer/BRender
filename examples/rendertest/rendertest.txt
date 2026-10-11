@@ -42,6 +42,9 @@ glrend/llvmpipe/declared/zb/8/320x240/scene-fog-p2-tex e9b4c35d4eabe44c
 glrend/llvmpipe/declared/zb/8/320x240/scene-idx-arb 3b46a0520eea8fe7
 glrend/llvmpipe/declared/zb/8/320x240/scene-idx-arb-persp 3b46a0520eea8fe7
 glrend/llvmpipe/declared/zb/8/320x240/scene-idx-p2-256 913b533716a96f96
+glrend/llvmpipe/declared/zb/8/320x240/scene-light-volume cbc23a402efbea43
+glrend/llvmpipe/declared/zb/8/320x240/scene-light-volume-cut cbc23a402efbea43
+glrend/llvmpipe/declared/zb/8/320x240/scene-light-volume-off cbc23a402efbea43
 glrend/llvmpipe/declared/zb/8/320x240/scene-lines-gouraud de06572e804847fa
 glrend/llvmpipe/declared/zb/8/320x240/scene-lines-map 6e814d51ea494694
 glrend/llvmpipe/declared/zb/8/320x240/scene-lines-map-gouraud 6e814d51ea494694
@@ -153,6 +156,9 @@ glrend/llvmpipe/declared/zs/8/320x240/scene-fog-p2-tex e9b4c35d4eabe44c
 glrend/llvmpipe/declared/zs/8/320x240/scene-idx-arb 3b46a0520eea8fe7
 glrend/llvmpipe/declared/zs/8/320x240/scene-idx-arb-persp 3b46a0520eea8fe7
 glrend/llvmpipe/declared/zs/8/320x240/scene-idx-p2-256 913b533716a96f96
+glrend/llvmpipe/declared/zs/8/320x240/scene-light-volume cbc23a402efbea43
+glrend/llvmpipe/declared/zs/8/320x240/scene-light-volume-cut cbc23a402efbea43
+glrend/llvmpipe/declared/zs/8/320x240/scene-light-volume-off cbc23a402efbea43
 glrend/llvmpipe/declared/zs/8/320x240/scene-lines-gouraud abac58745ad4466e
 glrend/llvmpipe/declared/zs/8/320x240/scene-lines-map 664c0ef60e5fbeb4
 glrend/llvmpipe/declared/zs/8/320x240/scene-lines-map-gouraud 664c0ef60e5fbeb4
@@ -264,6 +270,9 @@ glrend/llvmpipe/x87/zb/8/320x240/scene-fog-p2-tex e9b4c35d4eabe44c
 glrend/llvmpipe/x87/zb/8/320x240/scene-idx-arb 3b46a0520eea8fe7
 glrend/llvmpipe/x87/zb/8/320x240/scene-idx-arb-persp 3b46a0520eea8fe7
 glrend/llvmpipe/x87/zb/8/320x240/scene-idx-p2-256 913b533716a96f96
+glrend/llvmpipe/x87/zb/8/320x240/scene-light-volume cbc23a402efbea43
+glrend/llvmpipe/x87/zb/8/320x240/scene-light-volume-cut cbc23a402efbea43
+glrend/llvmpipe/x87/zb/8/320x240/scene-light-volume-off cbc23a402efbea43
 glrend/llvmpipe/x87/zb/8/320x240/scene-lines-gouraud de06572e804847fa
 glrend/llvmpipe/x87/zb/8/320x240/scene-lines-map 6e814d51ea494694
 glrend/llvmpipe/x87/zb/8/320x240/scene-lines-map-gouraud 6e814d51ea494694
@@ -375,6 +384,9 @@ glrend/llvmpipe/x87/zs/8/320x240/scene-fog-p2-tex e9b4c35d4eabe44c
 glrend/llvmpipe/x87/zs/8/320x240/scene-idx-arb 3b46a0520eea8fe7
 glrend/llvmpipe/x87/zs/8/320x240/scene-idx-arb-persp 3b46a0520eea8fe7
 glrend/llvmpipe/x87/zs/8/320x240/scene-idx-p2-256 913b533716a96f96
+glrend/llvmpipe/x87/zs/8/320x240/scene-light-volume cbc23a402efbea43
+glrend/llvmpipe/x87/zs/8/320x240/scene-light-volume-cut cbc23a402efbea43
+glrend/llvmpipe/x87/zs/8/320x240/scene-light-volume-off cbc23a402efbea43
 glrend/llvmpipe/x87/zs/8/320x240/scene-lines-gouraud abac58745ad4466e
 glrend/llvmpipe/x87/zs/8/320x240/scene-lines-map 664c0ef60e5fbeb4
 glrend/llvmpipe/x87/zs/8/320x240/scene-lines-map-gouraud 664c0ef60e5fbeb4
@@ -486,6 +498,9 @@ glrend1x/llvmpipe/declared/zb/7/320x240/scene-fog-p2-tex c338a15c7faffd55
 glrend1x/llvmpipe/declared/zb/7/320x240/scene-idx-arb 5a22b584830e46c6
 glrend1x/llvmpipe/declared/zb/7/320x240/scene-idx-arb-persp 1994093f150db2a5
 glrend1x/llvmpipe/declared/zb/7/320x240/scene-idx-p2-256 245de3e153cd5f63
+glrend1x/llvmpipe/declared/zb/7/320x240/scene-light-volume 90aef4673fb3b743
+glrend1x/llvmpipe/declared/zb/7/320x240/scene-light-volume-cut ad334228a57aa423
+glrend1x/llvmpipe/declared/zb/7/320x240/scene-light-volume-off fb3aadec5d39a803
 glrend1x/llvmpipe/declared/zb/7/320x240/scene-lines-gouraud 9e1522ef42499523
 glrend1x/llvmpipe/declared/zb/7/320x240/scene-lines-map d08aec980d916e0d
 glrend1x/llvmpipe/declared/zb/7/320x240/scene-lines-map-gouraud d1a70b1c7b1aa668
@@ -597,6 +612,9 @@ glrend1x/llvmpipe/declared/zs/7/320x240/scene-fog-p2-tex c338a15c7faffd55
 glrend1x/llvmpipe/declared/zs/7/320x240/scene-idx-arb 5a22b584830e46c6
 glrend1x/llvmpipe/declared/zs/7/320x240/scene-idx-arb-persp 1994093f150db2a5
 glrend1x/llvmpipe/declared/zs/7/320x240/scene-idx-p2-256 245de3e153cd5f63
+glrend1x/llvmpipe/declared/zs/7/320x240/scene-light-volume 90aef4673fb3b743
+glrend1x/llvmpipe/declared/zs/7/320x240/scene-light-volume-cut ad334228a57aa423
+glrend1x/llvmpipe/declared/zs/7/320x240/scene-light-volume-off fb3aadec5d39a803
 glrend1x/llvmpipe/declared/zs/7/320x240/scene-lines-gouraud 2354d8286bc62850
 glrend1x/llvmpipe/declared/zs/7/320x240/scene-lines-map 437b93ddd6893562
 glrend1x/llvmpipe/declared/zs/7/320x240/scene-lines-map-gouraud 15de1b631e855c29
@@ -708,6 +726,9 @@ glrend1x/llvmpipe/x87/zb/7/320x240/scene-fog-p2-tex c338a15c7faffd55
 glrend1x/llvmpipe/x87/zb/7/320x240/scene-idx-arb 5a22b584830e46c6
 glrend1x/llvmpipe/x87/zb/7/320x240/scene-idx-arb-persp 1994093f150db2a5
 glrend1x/llvmpipe/x87/zb/7/320x240/scene-idx-p2-256 245de3e153cd5f63
+glrend1x/llvmpipe/x87/zb/7/320x240/scene-light-volume 90aef4673fb3b743
+glrend1x/llvmpipe/x87/zb/7/320x240/scene-light-volume-cut ad334228a57aa423
+glrend1x/llvmpipe/x87/zb/7/320x240/scene-light-volume-off fb3aadec5d39a803
 glrend1x/llvmpipe/x87/zb/7/320x240/scene-lines-gouraud 9e1522ef42499523
 glrend1x/llvmpipe/x87/zb/7/320x240/scene-lines-map d08aec980d916e0d
 glrend1x/llvmpipe/x87/zb/7/320x240/scene-lines-map-gouraud d1a70b1c7b1aa668
@@ -819,6 +840,9 @@ glrend1x/llvmpipe/x87/zs/7/320x240/scene-fog-p2-tex c338a15c7faffd55
 glrend1x/llvmpipe/x87/zs/7/320x240/scene-idx-arb 5a22b584830e46c6
 glrend1x/llvmpipe/x87/zs/7/320x240/scene-idx-arb-persp 1994093f150db2a5
 glrend1x/llvmpipe/x87/zs/7/320x240/scene-idx-p2-256 245de3e153cd5f63
+glrend1x/llvmpipe/x87/zs/7/320x240/scene-light-volume 90aef4673fb3b743
+glrend1x/llvmpipe/x87/zs/7/320x240/scene-light-volume-cut ad334228a57aa423
+glrend1x/llvmpipe/x87/zs/7/320x240/scene-light-volume-off fb3aadec5d39a803
 glrend1x/llvmpipe/x87/zs/7/320x240/scene-lines-gouraud 2354d8286bc62850
 glrend1x/llvmpipe/x87/zs/7/320x240/scene-lines-map 437b93ddd6893562
 glrend1x/llvmpipe/x87/zs/7/320x240/scene-lines-map-gouraud 15de1b631e855c29
@@ -930,6 +954,9 @@ softrend/softprmf/declared/zb/3/320x240/scene-fog-p2-tex f164ece22ec46ce3
 softrend/softprmf/declared/zb/3/320x240/scene-idx-arb 9006f5087e569a27
 softrend/softprmf/declared/zb/3/320x240/scene-idx-arb-persp c3a57c852fdf0bd9
 softrend/softprmf/declared/zb/3/320x240/scene-idx-p2-256 ce16afbe8dbe2c29
+softrend/softprmf/declared/zb/3/320x240/scene-light-volume 37f141e90648b2c3
+softrend/softprmf/declared/zb/3/320x240/scene-light-volume-cut 37f141e90648b2c3
+softrend/softprmf/declared/zb/3/320x240/scene-light-volume-off 37f141e90648b2c3
 softrend/softprmf/declared/zb/3/320x240/scene-lines-gouraud 05e026d1517eac3b
 softrend/softprmf/declared/zb/3/320x240/scene-lines-map 52a655b77610e3ae
 softrend/softprmf/declared/zb/3/320x240/scene-lines-map-gouraud 0d49157f4356d286
@@ -1041,6 +1068,9 @@ softrend/softprmf/declared/zb/4/320x240/scene-fog-p2-tex 600449cf42fca097
 softrend/softprmf/declared/zb/4/320x240/scene-idx-arb 2d250ea8742c6daa
 softrend/softprmf/declared/zb/4/320x240/scene-idx-arb-persp 2d250ea8742c6daa
 softrend/softprmf/declared/zb/4/320x240/scene-idx-p2-256 c4ce99c9d8ffbbda
+softrend/softprmf/declared/zb/4/320x240/scene-light-volume 3bd18f73dd885cfb
+softrend/softprmf/declared/zb/4/320x240/scene-light-volume-cut b7626d3d4ade6b5b
+softrend/softprmf/declared/zb/4/320x240/scene-light-volume-off 9c31a8ff5e7d6b23
 softrend/softprmf/declared/zb/4/320x240/scene-lines-gouraud 17f4c4360877207f
 softrend/softprmf/declared/zb/4/320x240/scene-lines-map 54c60eb1f86f2886
 softrend/softprmf/declared/zb/4/320x240/scene-lines-map-gouraud 17f4c4360877207f
@@ -1152,6 +1182,9 @@ softrend/softprmf/declared/zb/5/320x240/scene-fog-p2-tex 093e3bce639d8c8f
 softrend/softprmf/declared/zb/5/320x240/scene-idx-arb 75fa4de60a33b1c8
 softrend/softprmf/declared/zb/5/320x240/scene-idx-arb-persp 75fa4de60a33b1c8
 softrend/softprmf/declared/zb/5/320x240/scene-idx-p2-256 4cd0d3e7748c860f
+softrend/softprmf/declared/zb/5/320x240/scene-light-volume eceb78ded85c5f2b
+softrend/softprmf/declared/zb/5/320x240/scene-light-volume-cut 42d2b0e42654bdab
+softrend/softprmf/declared/zb/5/320x240/scene-light-volume-off 76d4f72e73e30283
 softrend/softprmf/declared/zb/5/320x240/scene-lines-gouraud ef9faa1ce4ee49bb
 softrend/softprmf/declared/zb/5/320x240/scene-lines-map a3bc9aa123da49d7
 softrend/softprmf/declared/zb/5/320x240/scene-lines-map-gouraud ef9faa1ce4ee49bb
@@ -1263,6 +1296,9 @@ softrend/softprmf/declared/zb/6/320x240/scene-fog-p2-tex a08359bc51813d98
 softrend/softprmf/declared/zb/6/320x240/scene-idx-arb e00198450604f47f
 softrend/softprmf/declared/zb/6/320x240/scene-idx-arb-persp 9d5398747999d0cb
 softrend/softprmf/declared/zb/6/320x240/scene-idx-p2-256 4377bc9d8c96b443
+softrend/softprmf/declared/zb/6/320x240/scene-light-volume 837809b410215b83
+softrend/softprmf/declared/zb/6/320x240/scene-light-volume-cut 40bfddc47bcdaf43
+softrend/softprmf/declared/zb/6/320x240/scene-light-volume-off 4e11433c1c71f133
 softrend/softprmf/declared/zb/6/320x240/scene-lines-gouraud 6d8092c5b5dc9756
 softrend/softprmf/declared/zb/6/320x240/scene-lines-map 4bb50e353cad7d33
 softrend/softprmf/declared/zb/6/320x240/scene-lines-map-gouraud 4bb50e353cad7d33
@@ -1374,6 +1410,9 @@ softrend/softprmf/declared/zs/3/320x240/scene-fog-p2-tex 92272027697a5ce5
 softrend/softprmf/declared/zs/3/320x240/scene-idx-arb 9006f5087e569a27
 softrend/softprmf/declared/zs/3/320x240/scene-idx-arb-persp c3a57c852fdf0bd9
 softrend/softprmf/declared/zs/3/320x240/scene-idx-p2-256 ce16afbe8dbe2c29
+softrend/softprmf/declared/zs/3/320x240/scene-light-volume 37f141e90648b2c3
+softrend/softprmf/declared/zs/3/320x240/scene-light-volume-cut 37f141e90648b2c3
+softrend/softprmf/declared/zs/3/320x240/scene-light-volume-off 37f141e90648b2c3
 softrend/softprmf/declared/zs/3/320x240/scene-lines-gouraud 05e026d1517eac3b
 softrend/softprmf/declared/zs/3/320x240/scene-lines-map bbdc17123615aaae
 softrend/softprmf/declared/zs/3/320x240/scene-lines-map-gouraud af9dc91b99181586
@@ -1485,6 +1524,9 @@ softrend/softprmf/declared/zs/4/320x240/scene-fog-p2-tex 31bdec00998c4dc4
 softrend/softprmf/declared/zs/4/320x240/scene-idx-arb 2368e51460ae83d4
 softrend/softprmf/declared/zs/4/320x240/scene-idx-arb-persp 2368e51460ae83d4
 softrend/softprmf/declared/zs/4/320x240/scene-idx-p2-256 2368e51460ae83d4
+softrend/softprmf/declared/zs/4/320x240/scene-light-volume 2f348aaa681280e3
+softrend/softprmf/declared/zs/4/320x240/scene-light-volume-cut 3047ade989232feb
+softrend/softprmf/declared/zs/4/320x240/scene-light-volume-off 9c31a8ff5e7d6b23
 softrend/softprmf/declared/zs/4/320x240/scene-lines-gouraud 17f4c4360877207f
 softrend/softprmf/declared/zs/4/320x240/scene-lines-map 54c60eb1f86f2886
 softrend/softprmf/declared/zs/4/320x240/scene-lines-map-gouraud 17f4c4360877207f
@@ -1596,6 +1638,9 @@ softrend/softprmf/declared/zs/5/320x240/scene-fog-p2-tex 0dea49c982ca09a0
 softrend/softprmf/declared/zs/5/320x240/scene-idx-arb af061bc021375ec4
 softrend/softprmf/declared/zs/5/320x240/scene-idx-arb-persp af061bc021375ec4
 softrend/softprmf/declared/zs/5/320x240/scene-idx-p2-256 af061bc021375ec4
+softrend/softprmf/declared/zs/5/320x240/scene-light-volume 37bc9eab4d0b676b
+softrend/softprmf/declared/zs/5/320x240/scene-light-volume-cut a06f9c271df7669b
+softrend/softprmf/declared/zs/5/320x240/scene-light-volume-off 76d4f72e73e30283
 softrend/softprmf/declared/zs/5/320x240/scene-lines-gouraud ef9faa1ce4ee49bb
 softrend/softprmf/declared/zs/5/320x240/scene-lines-map a3bc9aa123da49d7
 softrend/softprmf/declared/zs/5/320x240/scene-lines-map-gouraud ef9faa1ce4ee49bb
@@ -1707,6 +1752,9 @@ softrend/softprmf/declared/zs/6/320x240/scene-fog-p2-tex a08359bc51813d98
 softrend/softprmf/declared/zs/6/320x240/scene-idx-arb e00198450604f47f
 softrend/softprmf/declared/zs/6/320x240/scene-idx-arb-persp 9d5398747999d0cb
 softrend/softprmf/declared/zs/6/320x240/scene-idx-p2-256 4377bc9d8c96b443
+softrend/softprmf/declared/zs/6/320x240/scene-light-volume 837809b410215b83
+softrend/softprmf/declared/zs/6/320x240/scene-light-volume-cut 40bfddc47bcdaf43
+softrend/softprmf/declared/zs/6/320x240/scene-light-volume-off 4e11433c1c71f133
 softrend/softprmf/declared/zs/6/320x240/scene-lines-gouraud 6d8092c5b5dc9756
 softrend/softprmf/declared/zs/6/320x240/scene-lines-map e30f3bef2800ce7b
 softrend/softprmf/declared/zs/6/320x240/scene-lines-map-gouraud e30f3bef2800ce7b
@@ -1818,6 +1866,9 @@ softrend/softprmf/x87/zb/3/320x240/scene-fog-p2-tex f164ece22ec46ce3
 softrend/softprmf/x87/zb/3/320x240/scene-idx-arb 9006f5087e569a27
 softrend/softprmf/x87/zb/3/320x240/scene-idx-arb-persp c3a57c852fdf0bd9
 softrend/softprmf/x87/zb/3/320x240/scene-idx-p2-256 ce16afbe8dbe2c29
+softrend/softprmf/x87/zb/3/320x240/scene-light-volume 37f141e90648b2c3
+softrend/softprmf/x87/zb/3/320x240/scene-light-volume-cut 37f141e90648b2c3
+softrend/softprmf/x87/zb/3/320x240/scene-light-volume-off 37f141e90648b2c3
 softrend/softprmf/x87/zb/3/320x240/scene-lines-gouraud 05e026d1517eac3b
 softrend/softprmf/x87/zb/3/320x240/scene-lines-map 52a655b77610e3ae
 softrend/softprmf/x87/zb/3/320x240/scene-lines-map-gouraud 0d49157f4356d286
@@ -1929,6 +1980,9 @@ softrend/softprmf/x87/zb/4/320x240/scene-fog-p2-tex 600449cf42fca097
 softrend/softprmf/x87/zb/4/320x240/scene-idx-arb 2d250ea8742c6daa
 softrend/softprmf/x87/zb/4/320x240/scene-idx-arb-persp 2d250ea8742c6daa
 softrend/softprmf/x87/zb/4/320x240/scene-idx-p2-256 c4ce99c9d8ffbbda
+softrend/softprmf/x87/zb/4/320x240/scene-light-volume 3bd18f73dd885cfb
+softrend/softprmf/x87/zb/4/320x240/scene-light-volume-cut b7626d3d4ade6b5b
+softrend/softprmf/x87/zb/4/320x240/scene-light-volume-off 9c31a8ff5e7d6b23
 softrend/softprmf/x87/zb/4/320x240/scene-lines-gouraud 17f4c4360877207f
 softrend/softprmf/x87/zb/4/320x240/scene-lines-map 54c60eb1f86f2886
 softrend/softprmf/x87/zb/4/320x240/scene-lines-map-gouraud 17f4c4360877207f
@@ -2040,6 +2094,9 @@ softrend/softprmf/x87/zb/5/320x240/scene-fog-p2-tex 093e3bce639d8c8f
 softrend/softprmf/x87/zb/5/320x240/scene-idx-arb 75fa4de60a33b1c8
 softrend/softprmf/x87/zb/5/320x240/scene-idx-arb-persp 75fa4de60a33b1c8
 softrend/softprmf/x87/zb/5/320x240/scene-idx-p2-256 4cd0d3e7748c860f
+softrend/softprmf/x87/zb/5/320x240/scene-light-volume eceb78ded85c5f2b
+softrend/softprmf/x87/zb/5/320x240/scene-light-volume-cut 42d2b0e42654bdab
+softrend/softprmf/x87/zb/5/320x240/scene-light-volume-off 76d4f72e73e30283
 softrend/softprmf/x87/zb/5/320x240/scene-lines-gouraud ef9faa1ce4ee49bb
 softrend/softprmf/x87/zb/5/320x240/scene-lines-map a3bc9aa123da49d7
 softrend/softprmf/x87/zb/5/320x240/scene-lines-map-gouraud ef9faa1ce4ee49bb
@@ -2151,6 +2208,9 @@ softrend/softprmf/x87/zb/6/320x240/scene-fog-p2-tex a08359bc51813d98
 softrend/softprmf/x87/zb/6/320x240/scene-idx-arb e00198450604f47f
 softrend/softprmf/x87/zb/6/320x240/scene-idx-arb-persp 9d5398747999d0cb
 softrend/softprmf/x87/zb/6/320x240/scene-idx-p2-256 4377bc9d8c96b443
+softrend/softprmf/x87/zb/6/320x240/scene-light-volume 837809b410215b83
+softrend/softprmf/x87/zb/6/320x240/scene-light-volume-cut 40bfddc47bcdaf43
+softrend/softprmf/x87/zb/6/320x240/scene-light-volume-off 4e11433c1c71f133
 softrend/softprmf/x87/zb/6/320x240/scene-lines-gouraud 6d8092c5b5dc9756
 softrend/softprmf/x87/zb/6/320x240/scene-lines-map 4bb50e353cad7d33
 softrend/softprmf/x87/zb/6/320x240/scene-lines-map-gouraud 4bb50e353cad7d33
@@ -2262,6 +2322,9 @@ softrend/softprmf/x87/zs/3/320x240/scene-fog-p2-tex 92272027697a5ce5
 softrend/softprmf/x87/zs/3/320x240/scene-idx-arb 9006f5087e569a27
 softrend/softprmf/x87/zs/3/320x240/scene-idx-arb-persp c3a57c852fdf0bd9
 softrend/softprmf/x87/zs/3/320x240/scene-idx-p2-256 ce16afbe8dbe2c29
+softrend/softprmf/x87/zs/3/320x240/scene-light-volume 37f141e90648b2c3
+softrend/softprmf/x87/zs/3/320x240/scene-light-volume-cut 37f141e90648b2c3
+softrend/softprmf/x87/zs/3/320x240/scene-light-volume-off 37f141e90648b2c3
 softrend/softprmf/x87/zs/3/320x240/scene-lines-gouraud 05e026d1517eac3b
 softrend/softprmf/x87/zs/3/320x240/scene-lines-map bbdc17123615aaae
 softrend/softprmf/x87/zs/3/320x240/scene-lines-map-gouraud af9dc91b99181586
@@ -2373,6 +2436,9 @@ softrend/softprmf/x87/zs/4/320x240/scene-fog-p2-tex 31bdec00998c4dc4
 softrend/softprmf/x87/zs/4/320x240/scene-idx-arb 2368e51460ae83d4
 softrend/softprmf/x87/zs/4/320x240/scene-idx-arb-persp 2368e51460ae83d4
 softrend/softprmf/x87/zs/4/320x240/scene-idx-p2-256 2368e51460ae83d4
+softrend/softprmf/x87/zs/4/320x240/scene-light-volume 2f348aaa681280e3
+softrend/softprmf/x87/zs/4/320x240/scene-light-volume-cut 3047ade989232feb
+softrend/softprmf/x87/zs/4/320x240/scene-light-volume-off 9c31a8ff5e7d6b23
 softrend/softprmf/x87/zs/4/320x240/scene-lines-gouraud 17f4c4360877207f
 softrend/softprmf/x87/zs/4/320x240/scene-lines-map 54c60eb1f86f2886
 softrend/softprmf/x87/zs/4/320x240/scene-lines-map-gouraud 17f4c4360877207f
@@ -2484,6 +2550,9 @@ softrend/softprmf/x87/zs/5/320x240/scene-fog-p2-tex 0dea49c982ca09a0
 softrend/softprmf/x87/zs/5/320x240/scene-idx-arb af061bc021375ec4
 softrend/softprmf/x87/zs/5/320x240/scene-idx-arb-persp af061bc021375ec4
 softrend/softprmf/x87/zs/5/320x240/scene-idx-p2-256 af061bc021375ec4
+softrend/softprmf/x87/zs/5/320x240/scene-light-volume 37bc9eab4d0b676b
+softrend/softprmf/x87/zs/5/320x240/scene-light-volume-cut a06f9c271df7669b
+softrend/softprmf/x87/zs/5/320x240/scene-light-volume-off 76d4f72e73e30283
 softrend/softprmf/x87/zs/5/320x240/scene-lines-gouraud ef9faa1ce4ee49bb
 softrend/softprmf/x87/zs/5/320x240/scene-lines-map a3bc9aa123da49d7
 softrend/softprmf/x87/zs/5/320x240/scene-lines-map-gouraud ef9faa1ce4ee49bb
@@ -2595,6 +2664,9 @@ softrend/softprmf/x87/zs/6/320x240/scene-fog-p2-tex a08359bc51813d98
 softrend/softprmf/x87/zs/6/320x240/scene-idx-arb e00198450604f47f
 softrend/softprmf/x87/zs/6/320x240/scene-idx-arb-persp 9d5398747999d0cb
 softrend/softprmf/x87/zs/6/320x240/scene-idx-p2-256 4377bc9d8c96b443
+softrend/softprmf/x87/zs/6/320x240/scene-light-volume 837809b410215b83
+softrend/softprmf/x87/zs/6/320x240/scene-light-volume-cut 40bfddc47bcdaf43
+softrend/softprmf/x87/zs/6/320x240/scene-light-volume-off 4e11433c1c71f133
 softrend/softprmf/x87/zs/6/320x240/scene-lines-gouraud 6d8092c5b5dc9756
 softrend/softprmf/x87/zs/6/320x240/scene-lines-map e30f3bef2800ce7b
 softrend/softprmf/x87/zs/6/320x240/scene-lines-map-gouraud e30f3bef2800ce7b

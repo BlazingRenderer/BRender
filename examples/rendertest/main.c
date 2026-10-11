@@ -1089,6 +1089,23 @@ static const rt_relation rt_relations[] = {
     {.a = "scene-unlit",          .b = "scene-unlit-plain",      .equal = BR_TRUE,  .pm_type = RT_ANY_TYPE, .mode = RT_ANY_MODE},
 
     /*
+     * The cutoff volume is the only difference between the volume scenes and
+     * their control, and only softrend (and glrend1x, which borrows its T&L)
+     * honours it - glrend has no volume support yet, so it renders all three
+     * identically and the pair is scoped to the device that can tell them
+     * apart.
+     *
+     * Scoped to the colour path as well: the indexed (8bpp) lighting path has
+     * no volume support at all, here or in 1.3.2 - light8.c carries none of
+     * light24.c's volume variants - so at INDEX_8 the three scenes are
+     * deliberately identical.
+     */
+    {.a = "scene-light-volume",     .b = "scene-light-volume-off", .equal = BR_FALSE, .pm_type = BR_PMT_RGB_888, .mode = RT_ANY_MODE,
+     .device = "softrend"},
+    {.a = "scene-light-volume-cut", .b = "scene-light-volume-off", .equal = BR_FALSE, .pm_type = BR_PMT_RGB_888, .mode = RT_ANY_MODE,
+     .device = "softrend"},
+
+    /*
      * The render-feature fixtures. Each pair differs by one piece of material
      * state, so a path that silently stops firing fails here rather than only
      * moving a checksum - which for state the renderer ignores looks like a
@@ -1752,6 +1769,15 @@ static const char *const rt_default_scenes[] = {
     "scene-spot-hit",   "scene-spot-miss", "scene-spot-hit-miss",  "scene-radius-near", "scene-radius-far",      "scene-scaled",
     "scene-view-space", "scene-colour",    "scene-colour-ambient", "scene-colour-two",  "scene-directional",     "scene-directional-miss",
     "scene-specular",   "scene-unlit",     "scene-unlit-plain",    "scene-scale-spot",  "scene-scale-direction", "scene-scale-spot-off",
+
+    /*
+     * The light cutoff-volume fixtures; see scene.c. A vertex inside a region is
+     * lit fully and fades linearly to nothing over the falloff distance beyond a
+     * boundary. `-cut` is the same region with no fade at all (a different
+     * accumulation path) and `-off` carries no volume, so a volume that silently
+     * stops being applied moves a frame.
+     */
+    "scene-light-volume", "scene-light-volume-cut", "scene-light-volume-off",
 
     /* The render-feature fixtures; see scene.c. */
     "scene-flat",       "scene-smooth",    "scene-textured",       "scene-textured-shade", "scene-persp",        "scene-persp-shade",
