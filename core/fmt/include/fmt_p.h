@@ -209,6 +209,10 @@ br_pixelmap *BR_PUBLIC_ENTRY BrFmtPCXLoad(const char *name, br_uint_32 flags);
 
 /*
  * .GLTF files
+ *
+ * Every model these actors reference must already be prepared -
+ * BrModelUpdate(model, BR_MODU_ALL) - because the writer reads the prepared
+ * v11model. An unprepared one is asserted against, not dereferenced.
  */
 br_error BR_PUBLIC_ENTRY BrFmtGLTFActorSaveMany(const char *name, br_actor **actors, br_size_t num);
 br_error BR_PUBLIC_ENTRY BrFmtGLTFActorSave(const char *name, br_actor *actor);

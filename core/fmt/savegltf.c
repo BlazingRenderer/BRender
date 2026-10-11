@@ -550,6 +550,8 @@ static int count_model_buffers(const void *key, void *value, br_hash hash, void 
     const struct v11model *v11m     = model->prepared;
     br_size_t              nbuffers = BR_ASIZE(attribute_handlers) + 1; /* attribs + index */
 
+    UASSERT(v11m != NULL);
+
     (void)value;
     (void)hash;
 
@@ -1184,6 +1186,8 @@ static void fill_mesh_actual(const br_model *model, cgltf_mesh *mesh, cgltf_data
     const struct v11model *v11m        = model->prepared;
     size_t                 next_buffer = *offset;
 
+    UASSERT(v11m != NULL);
+
     mesh->name = model->identifier;
 
     mesh->primitives_count = v11m->ngroups;
@@ -1366,6 +1370,8 @@ static int fill_mesh_materials(const void *key, void *value, br_hash hash, void 
     const struct v11model *v11m  = model->prepared;
     cgltf_mesh            *mesh  = value;
     br_gltf_save_state    *state = user;
+
+    UASSERT(v11m != NULL);
 
     (void)hash;
 
