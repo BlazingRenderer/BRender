@@ -486,7 +486,7 @@ char *BR_RESIDENT_ENTRY BrResSprintf(void *vparent, const char *fmt, ...)
     return s;
 }
 
-#if DEBUG
+#if BR_DEBUG
 /*
  * Debug function that will dump a resource hierachy
  *
@@ -529,7 +529,7 @@ static void InternalResourceDump(struct resource_header *res, br_putline_cbfn *p
 
 void BR_RESIDENT_ENTRY BrResDump(void *vres, br_putline_cbfn *putline, void *arg)
 {
-#if DEBUG
+#if BR_DEBUG
     struct resource_header *res = UserToRes(vres);
 
     InternalResourceDump(res, putline, arg, 0);

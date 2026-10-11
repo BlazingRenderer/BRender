@@ -119,7 +119,7 @@ extern br_framework_state BR_ASM_DATA fw;
  */
 #define MIN_WORKSPACE 8192
 
-#if DEBUG
+#if BR_DEBUG
 /*
  * Controls whether the source file/line of each
  * resource allocation is tracked

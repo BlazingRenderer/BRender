@@ -964,7 +964,7 @@ br_error BR_RESIDENT_ENTRY BrTokenValueSetMany(void *mem, br_int_32 *pcount, br_
     return BRE_OK;
 }
 
-#if DEBUG
+#if BR_DEBUG
 
 static void DumpMatrixInteger(br_int_32 *ip, int rows, int cols, const char *prefix, char *info_0, char *info_n, br_putline_cbfn *putline, void *arg)
 {
@@ -1056,7 +1056,7 @@ static void DumpObject(br_object *h, const char *prefix, const char *info, br_pu
  */
 void BR_RESIDENT_ENTRY BrTokenValueDump(br_token_value *tv, const char *prefix, br_putline_cbfn *putline, void *arg)
 {
-#if DEBUG
+#if BR_DEBUG
     char       *id;
     char        value[128], tmp[128], info_0[64], *info_n, *pvalue;
     int         n, i;

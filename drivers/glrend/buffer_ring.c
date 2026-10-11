@@ -91,7 +91,7 @@ br_boolean BufferRingGLPush(br_buffer_ring_gl *self, const void *data, GLsizeipt
     const GladGLContext *gl  = self->gl;
     GLuint               ubo = self->buffers[self->frame_index];
 
-#if DEBUG
+#if BR_DEBUG
     if(self->binding_point == GL_UNIFORM_BUFFER) {
         GLint actual_ubo;
         gl->GetIntegerv(GL_UNIFORM_BUFFER_BINDING, &actual_ubo);

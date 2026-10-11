@@ -69,13 +69,11 @@ option(BRENDER_BUILD_FOR_CROC "Build for Croc" OFF)
 message(STATUS "Building for Croc: ${BRENDER_BUILD_FOR_CROC}")
 
 #
-# DEBUG gates ASSERT() (core/fw/ddi/brassert.h) and comes from _DEBUG, which
-# nothing was defining, so every ASSERT() in the tree compiled out of every
-# configuration. Define it for a Debug build, as the project files this fork
-# came from did. PARANOID, which gates UASSERT(), is unconditional and set in
-# core/inc.
+# BR_DEBUG gates ASSERT() (core/fw/ddi/brassert.h). A generator expression, so
+# it follows the configuration under a multi-config generator too. PARANOID,
+# which gates UASSERT(), is unconditional and set in core/inc.
 #
-add_compile_definitions($<$<CONFIG:Debug>:_DEBUG>)
+add_compile_definitions($<$<CONFIG:Debug>:BR_DEBUG=1>)
 
 add_subdirectory(core)
 

@@ -167,7 +167,7 @@ struct br_renderer *BR_PUBLIC_ENTRY BrV1dbRendererQuery(void);
 br_error BR_PUBLIC_ENTRY            BrV1dbRendererEnd(void);
 
 /*
- * XXX - All the Add/Remove/Find/Count/Enum calls could ( when !(DEBUG | PARANOID))
+ * XXX - All the Add/Remove/Find/Count/Enum calls could ( when !(BR_DEBUG | PARANOID))
  * be #defined in terms of the core Registry fns. with appropriate casts.
  */
 /*

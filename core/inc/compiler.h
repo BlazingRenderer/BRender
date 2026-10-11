@@ -226,16 +226,21 @@ typedef float br_float;
 #define BR_RESIDENT_ENTRY BR_EXPORT
 #define BR_PUBLIC_ENTRY   BR_PUBLIC
 
-#ifdef _DEBUG
-#define DEBUG 1
+/*
+ * CMake defines BR_DEBUG=1 for a Debug configuration. A build that defines the
+ * compiler's own _DEBUG still gets the assertions; DEBUG is deliberately not
+ * consulted, being too generic a name to read in a public header.
+ */
+#if !defined(BR_DEBUG)
+#if defined(_DEBUG)
+#define BR_DEBUG 1
+#else
+#define BR_DEBUG 0
 #endif
-
-#ifndef DEBUG
-#define DEBUG 0
 #endif
 
 /*
-#if DEBUG
+#if BR_DEBUG
 #	define BR_SUFFIX_DEBUG "-DEBUG"
 #else
 #	define BR_SUFFIX_DEBUG ""

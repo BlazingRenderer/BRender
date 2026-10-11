@@ -16,11 +16,11 @@
 
 /*
  * This file should _NOT_ have checks for single inclusion -
- * it is legitimate to re-include it with DEBUG or PARANOID set diffently
+ * it is legitimate to re-include it with BR_DEBUG or PARANOID set differently
  */
 #undef ASSERT
 
-#if DEBUG
+#if BR_DEBUG
 #define ASSERT(e)            ((void)((e) || (_BrAssert(#e, __FILE__, __LINE__), 1)))
 #define ASSERT_MESSAGE(m, e) ((void)((e) || (_BrAssert(m " : " #e, __FILE__, __LINE__), 1)))
 void BR_RESIDENT_ENTRY _BrAssert(const char *condition, const char *file, unsigned line);

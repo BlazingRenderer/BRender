@@ -356,7 +356,7 @@ done:
     }
 }
 
-#if DEBUG
+#if BR_DEBUG
 static void lexerAdvanceDump(struct br_lexer *l)
 {
     char *tname, *tvalue;
@@ -432,7 +432,7 @@ static void lexerAdvanceDump(struct br_lexer *l)
 
 br_error BR_RESIDENT_ENTRY BrLexerDumpSet(struct br_lexer *l, br_putline_cbfn *putline, void *putline_arg)
 {
-#if DEBUG
+#if BR_DEBUG
     if(putline) {
         l->advance     = lexerAdvanceDump;
         l->putline     = putline;
