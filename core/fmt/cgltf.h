@@ -2863,6 +2863,67 @@ static int cgltf_parse_json_float_array(jsmntok_t const* tokens, int i, const ui
 	return i;
 }
 
+/*
+ * Decode one \uXXXX escape's four hex digits.
+ */
+static int cgltf_json_hex4(const char* s, uint32_t* out)
+{
+	uint32_t v = 0;
+	int n;
+
+	for (n = 0; n < 4; ++n)
+	{
+		char c = s[n];
+
+		v <<= 4;
+
+		if (c >= '0' && c <= '9') v |= (uint32_t)(c - '0');
+		else if (c >= 'a' && c <= 'f') v |= (uint32_t)(c - 'a' + 10);
+		else if (c >= 'A' && c <= 'F') v |= (uint32_t)(c - 'A' + 10);
+		else return 0;
+	}
+
+	*out = v;
+	return 1;
+}
+
+/*
+ * Write one code point as UTF-8, returning the number of bytes.
+ */
+static int cgltf_json_utf8_encode(char* out, uint32_t cp)
+{
+	if (cp < 0x80)
+	{
+		out[0] = (char)cp;
+		return 1;
+	}
+	if (cp < 0x800)
+	{
+		out[0] = (char)(0xC0 | (cp >> 6));
+		out[1] = (char)(0x80 | (cp & 0x3F));
+		return 2;
+	}
+	if (cp < 0x10000)
+	{
+		out[0] = (char)(0xE0 | (cp >> 12));
+		out[1] = (char)(0x80 | ((cp >> 6) & 0x3F));
+		out[2] = (char)(0x80 | (cp & 0x3F));
+		return 3;
+	}
+	out[0] = (char)(0xF0 | (cp >> 18));
+	out[1] = (char)(0x80 | ((cp >> 12) & 0x3F));
+	out[2] = (char)(0x80 | ((cp >> 6) & 0x3F));
+	out[3] = (char)(0x80 | (cp & 0x3F));
+	return 4;
+}
+
+/*
+ * Local patch: cgltf 1.15 strncpy()s the token verbatim, so a string written
+ * with escapes - anything cgltf_write_strprop() escapes, and any name or URI a
+ * producer escaped - comes back as the escape text rather than the value.
+ * Decoding only ever shortens, so the size+1 allocated below still fits;
+ * upstream carries the same code, so this belongs upstream as well.
+ */
 static int cgltf_parse_json_string(cgltf_options* options, jsmntok_t const* tokens, int i, const uint8_t* json_chunk, char** out_string)
 {
 	CGLTF_CHECK_TOKTYPE(tokens[i], JSMN_STRING);
@@ -2876,8 +2937,68 @@ static int cgltf_parse_json_string(cgltf_options* options, jsmntok_t const* toke
 	{
 		return CGLTF_ERROR_NOMEM;
 	}
-	strncpy(result, (const char*)json_chunk + tokens[i].start, size);
-	result[size] = 0;
+	const char* in = (const char*)json_chunk + tokens[i].start;
+	const char* in_end = in + size;
+	char* out = result;
+
+	while (in < in_end)
+	{
+		if (*in != '\\')
+		{
+			*out++ = *in++;
+			continue;
+		}
+
+		++in;
+		if (in >= in_end)
+		{
+			break;
+		}
+
+		switch (*in)
+		{
+		case '"':  *out++ = '"';  ++in; break;
+		case '\\': *out++ = '\\'; ++in; break;
+		case '/':  *out++ = '/';  ++in; break;
+		case 'b':  *out++ = '\b'; ++in; break;
+		case 'f':  *out++ = '\f'; ++in; break;
+		case 'n':  *out++ = '\n'; ++in; break;
+		case 'r':  *out++ = '\r'; ++in; break;
+		case 't':  *out++ = '\t'; ++in; break;
+		case 'u':
+		{
+			uint32_t cp;
+
+			++in;
+			if (in + 4 > in_end || !cgltf_json_hex4(in, &cp))
+			{
+				break;
+			}
+			in += 4;
+
+			/* A high surrogate and a following low one are one code point. */
+			if (cp >= 0xD800 && cp <= 0xDBFF && in + 6 <= in_end && in[0] == '\\' && in[1] == 'u')
+			{
+				uint32_t lo;
+
+				if (cgltf_json_hex4(in + 2, &lo) && lo >= 0xDC00 && lo <= 0xDFFF)
+				{
+					cp = 0x10000 + ((cp - 0xD800) << 10) + (lo - 0xDC00);
+					in += 6;
+				}
+			}
+
+			out += cgltf_json_utf8_encode(out, cp);
+			break;
+		}
+		default:
+			/* Not an escape JSON defines; keep the character as written. */
+			*out++ = *in++;
+			break;
+		}
+	}
+
+	*out = 0;
 	*out_string = result;
 	return i + 1;
 }

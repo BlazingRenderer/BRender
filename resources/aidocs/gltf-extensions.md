@@ -24,9 +24,10 @@ Where this document and the code disagree, the code is what ships.
 | converting to and from `br_*` objects | `core/fmt/loadgltf.c`, `core/fmt/savegltf.c` |
 
 `cgltf.h` and `cgltf_write.h` are vendored cgltf with these additions in them; the additions are kept in the
-`cgltf_*_brender.*` files where possible, so the vendored files stay easy to update. One fix had to go inside
-a vendored function: `cgltf_write_strprop()` in `cgltf_write.h` now escapes the string it writes, which cgltf
-1.15 does not. Re-apply it when the vendored files are updated.
+`cgltf_*_brender.*` files where possible, so the vendored files stay easy to update. Two fixes had to go
+inside vendored functions: `cgltf_write_strprop()` in `cgltf_write.h` now escapes the string it writes, and
+`cgltf_parse_json_string()` in `cgltf.h` now decodes the escapes it reads, neither of which cgltf 1.15
+does. Re-apply both when the vendored files are updated.
 
 ## Conventions that hold for all three extensions
 
