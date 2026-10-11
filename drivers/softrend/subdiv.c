@@ -27,6 +27,16 @@ void averageVerticesOnScreen(const br_renderer *renderer, brp_vertex *restrict m
     COMPUTE_COMPONENT_MIDPOINT_VALUES(C_U, m0, m1, m2, v0, v1, v2);
     COMPUTE_COMPONENT_MIDPOINT_VALUES(C_V, m0, m1, m2, v0, v1, v2);
 
+    /*
+     * The midpoints of an on-screen triangle are inside the frustum by
+     * construction, so they carry no outcode. `flags' aliases comp[C_FLAGS]
+     * and the renderer reads it back as an outcode (faceops.c's
+     * combined_codes), so leaving it unwritten would feed the caller undefined
+     * stack. The off-screen path, which does not know the midpoints are
+     * visible, computes real outcodes instead.
+     */
+    m0->flags = m1->flags = m2->flags = 0;
+
     PROJECT_VERTEX_WRITE_Q(m0, m0->comp[C_X], m0->comp[C_Y], m0->comp[C_Z], m0->comp[C_W]);
     PROJECT_VERTEX_WRITE_Q(m1, m1->comp[C_X], m1->comp[C_Y], m1->comp[C_Z], m1->comp[C_W]);
     PROJECT_VERTEX_WRITE_Q(m2, m2->comp[C_X], m2->comp[C_Y], m2->comp[C_Z], m2->comp[C_W]);
