@@ -2063,6 +2063,7 @@ int main(int argc, char **argv)
     } else {
         args.force_software     = 0;
         args.opengl_device_name = rt_cfg_device;
+        args.require_accel      = 1;
     }
 
     /*
