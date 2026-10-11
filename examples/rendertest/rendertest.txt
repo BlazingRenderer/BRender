@@ -690,9 +690,9 @@ glrend1x/llvmpipe/declared/zs/7/320x240/scene-textured-shade 508f99ad2867c975
 glrend1x/llvmpipe/declared/zs/7/320x240/scene-unlit 41fb9300d4b0afc3
 glrend1x/llvmpipe/declared/zs/7/320x240/scene-unlit-plain 41fb9300d4b0afc3
 glrend1x/llvmpipe/declared/zs/7/320x240/scene-view-space fb3aadec5d39a803
-glrend1x/llvmpipe/x87/zb/7/320x240/croc-island-forest b987a855d6122b52
+glrend1x/llvmpipe/x87/zb/7/320x240/croc-island-forest 713344b772568ced
 glrend1x/llvmpipe/x87/zb/7/320x240/croc-mp001-00 479835b2074c6bfc
-glrend1x/llvmpipe/x87/zb/7/320x240/croc-mp001-00-nose f85ee6006a9ecb02
+glrend1x/llvmpipe/x87/zb/7/320x240/croc-mp001-00-nose 5ef61c881aafdb77
 glrend1x/llvmpipe/x87/zb/7/320x240/croc-mp010-03 bb77b7a9ea57f1a7
 glrend1x/llvmpipe/x87/zb/7/320x240/croc-mp032_00 6bad7297d69a5dbf
 glrend1x/llvmpipe/x87/zb/7/320x240/croc-mp033_01 4d8c95c80b6d2030
@@ -807,7 +807,7 @@ glrend1x/llvmpipe/x87/zb/7/320x240/scene-unlit-plain 41fb9300d4b0afc3
 glrend1x/llvmpipe/x87/zb/7/320x240/scene-view-space fb3aadec5d39a803
 glrend1x/llvmpipe/x87/zs/7/320x240/croc-island-forest b0cbd1af8240993b
 glrend1x/llvmpipe/x87/zs/7/320x240/croc-mp001-00 6db5d8a4359ea02a
-glrend1x/llvmpipe/x87/zs/7/320x240/croc-mp001-00-nose 364214e18684b605
+glrend1x/llvmpipe/x87/zs/7/320x240/croc-mp001-00-nose 738edc60a5a7fb45
 glrend1x/llvmpipe/x87/zs/7/320x240/croc-mp010-03 a327c96ad65c1ab4
 glrend1x/llvmpipe/x87/zs/7/320x240/croc-mp032_00 8a58e82b4b690775
 glrend1x/llvmpipe/x87/zs/7/320x240/croc-mp033_01 2d305dd2598c0a6b
