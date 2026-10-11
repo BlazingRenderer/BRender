@@ -8,6 +8,8 @@
 , glslang
 , spirv-cross
 , makeBinaryWrapper
+, mesa
+, libglvnd
 , clang-tools
 , withTools ? true
 , withExamples ? false
@@ -15,6 +17,14 @@
   binExtension = stdenv.hostPlatform.extensions.executable;
 
   runTests = withExamples && stdenv.buildPlatform.canExecute stdenv.hostPlatform;
+
+  # The GL tests ask SDL for an OpenGL window. A sandbox has no GPU and, unlike
+  # a devshell, no system EGL vendor config, so SDL's EGL cannot find a device
+  # and the demo falls back to the software renderer while still labelling the
+  # run `device=glrend`. On Linux, mesa + libglvnd supply llvmpipe for it; on
+  # darwin and the other platforms GL comes from the system and no vendoring is
+  # needed.
+  glRuntime = withExamples && stdenv.hostPlatform.isLinux;
 in
 stdenv.mkDerivation(finalAttrs: {
   inherit version;
@@ -39,7 +49,23 @@ stdenv.mkDerivation(finalAttrs: {
     sdl3
   ] ++ lib.optionals withExamples [
     glfw
+  ] ++ lib.optionals glRuntime [
+    mesa
+    libglvnd
   ];
+
+  # Point the GL tests at llvmpipe. SDL dlopens libEGL by soname and the mesa
+  # EGL vendor lives in the mesa store path, so the loader needs both on the
+  # search path; the vendor JSON names the vendor library explicitly. The
+  # per-test LIBGL_ALWAYS_SOFTWARE the corpus sets is not enough on its own -
+  # without a device to initialise, EGL never reaches the software driver.
+  preCheck = lib.optionalString glRuntime ''
+    export LIBGL_ALWAYS_SOFTWARE=1
+    export GALLIUM_DRIVER=llvmpipe
+    export LIBGL_DRIVERS_PATH=${mesa}/lib/dri
+    export __EGL_VENDOR_LIBRARY_FILENAMES=${mesa}/share/glvnd/egl_vendor.d/50_mesa.json
+    export LD_LIBRARY_PATH=${libglvnd}/lib:${mesa}/lib''${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}
+  '';
 
   cmakeFlags = [
     (lib.cmakeBool "BRENDER_BUILD_TOOLS" withTools)
