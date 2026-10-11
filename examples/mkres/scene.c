@@ -2532,8 +2532,15 @@ br_error mkres_make_scenes(void)
     /*
      * A non-uniformly scaled model: the extent that matters is the model's
      * radius scaled into view space, not the model-space radius.
+     *
+     * The ambient is raised from the 48 the rest of this family uses. Under
+     * view-space shading the lit result is a mean of about 6/255, which
+     * quantises to the clear colour in five-bit channels and leaves the frame
+     * blank at 15bpp. The extra ambient is added equally to any shading path,
+     * so the light's own contribution - and so what this fixture witnesses
+     * about it - is unchanged in absolute terms.
      */
-    world = scene_world(cube, material, BR_SCALAR(3.0));
+    world = scene_world_amb(cube, material, BR_SCALAR(3.0), BR_COLOUR_RGB(128, 128, 128));
 
     if(world != NULL)
         scene_add_light(world, "point", BR_LIGHT_POINT, SCENE_RADIUS_REACHES, BR_TRUE);
