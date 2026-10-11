@@ -106,10 +106,10 @@ step with master.
    cmake --build build -j
    ```
 
-3. Bless against the *current* fixtures and the *current* table, so the
-   worktree's own copies are not used. `--bless` merges: entries already
-   present keep their position and only the covered keys are rewritten, so the
-   order these run in does not matter.
+3. Bless the **softrend** `x87` half against the *current* fixtures and the
+   *current* table, so the worktree's own copies are not used. `--bless` merges:
+   entries already present keep their position and only the covered keys are
+   rewritten, so the order these run in does not matter.
 
    ```
    MAIN=/path/to/the/checkout
@@ -119,10 +119,28 @@ step with master.
            --scene-dir "$MAIN/examples/rendertest/dat" \
            --reference "$MAIN/examples/rendertest/rendertest.txt" --bless
    done
-   SDL_VIDEODRIVER=offscreen LIBGL_ALWAYS_SOFTWARE=true \
-       build/examples/rendertest/rendertest --device glrend --bpp 8 \
-           --scene-dir "$MAIN/examples/rendertest/dat" \
-           --reference "$MAIN/examples/rendertest/rendertest.txt" --bless
+   ```
+
+   **The GL devices are not blessed here.** This worktree's `glrend` does not
+   reproduce the `scene-light-volume{,-cut}` entries — it renders both identical
+   to `scene-light-volume-off` — so blessing it here rewrites those keys to the
+   `-off` value; and `glrend1x` does not involve pentprim at all. Bless their
+   `x87` halves from the fork's own i686 build instead (`$MAIN/cmake-build-32`),
+   which reproduces them; their `declared` halves come from the 64-bit build as
+   usual. Bless both depth modes — glrend's `zb` and `zs` differ — and note that
+   glrend's two fp classes agree (its T&L is in the shader) while glrend1x's do
+   not (its T&L is softrend's):
+
+   ```
+   for cfg in zb zs; do
+       [ "$cfg" = zs ] && d=--no-depth || d=
+       for dev in glrend glrend1x; do
+           SDL_VIDEODRIVER=offscreen LIBGL_ALWAYS_SOFTWARE=true \
+               "$MAIN/cmake-build-32/examples/rendertest/rendertest" --device "$dev" $d \
+                   --scene-dir "$MAIN/examples/rendertest/dat" \
+                   --reference "$MAIN/examples/rendertest/rendertest.txt" --bless
+       done
+   done
    ```
 
 4. Verify by scoring the current tree's x87 build against the new table; it
