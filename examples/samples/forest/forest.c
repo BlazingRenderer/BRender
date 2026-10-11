@@ -346,19 +346,11 @@ static br_error ForestInit(br_demo *demo)
 
 static void ForestRender(br_demo *demo)
 {
-    br_demo_forest *state = demo->user;
-#if 0 /* Enable to use Z-buffering (much faster) instead of Z-sorting. */
+    /*
+     * BrDemoDefaultRender() renders through BrZsSceneRender() when --no-depth
+     * is given, and through the Z-buffered path otherwise.
+     */
     BrDemoDefaultRender(demo);
-#else
-
-    BrPixelmapFill(demo->colour_buffer, 0);
-
-    BrRendererFrameBegin();
-    BrZsSceneRenderBegin(demo->world, demo->camera, demo->colour_buffer);
-    BrZsSceneRenderAdd(state->pivot0);
-    BrZsSceneRenderEnd();
-    BrRendererFrameEnd();
-#endif
 
     {
         br_int_32 base_x      = -demo->colour_buffer->origin_x + 5;
