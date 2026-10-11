@@ -233,17 +233,11 @@ br_error CacheUpdate(br_renderer *self)
 
 br_error CacheClear(void)
 {
-    int                  l;
-    struct active_light *alp;
-
-    for(l = 0, alp = scache.lights; l < scache.nlights_model; l++, alp++) {
-
-        if(alp->volume.regions != NULL) {
-            BrResFree(alp->volume.regions);
-            alp->volume.regions = NULL;
-        }
-    }
-
+    /*
+     * Every light's volume in the static cache is borrowed from the state
+     * light, which owns it, so there is no per-light allocation to release
+     * here; the static cache's resource anchor frees what remains.
+     */
     return BRE_OK;
 }
 
@@ -271,93 +265,37 @@ void ActiveLightsFind(br_renderer *self)
     int                  l;
     struct state_light  *lp;
     struct active_light *alp;
-#if 0
-	br_boolean found_ambient;
-	br_scalar intensity;
-#endif
-    br_uint_32 i;
 
     /*
-     * Clear out previously cached data
+     * The renderer shades in view space, which is where BrSetupLights() puts
+     * light geometry, so a light is taken straight from the state rather than
+     * transformed into each model's space. An ambient light without radii is
+     * summed in ActiveLightsUpdate(); everything else takes part in the
+     * per-surface accumulation.
      */
-    for(l = 0, alp = scache.lights; l < scache.nlights_model; l++, alp++) {
+    scache.nlights = 0;
 
-        if(alp->volume.regions != NULL) {
-            BrResFree(alp->volume.regions);
-            alp->volume.regions = NULL;
-        }
-    }
-
-    scache.nlights_model = 0;
-    scache.nlights_view  = 0;
-
-#if 0
-	/*
-	 * Find all ambient lights and sum them, applying constant attenuation
-	 * only.  If none is found, use white.
-	 */
-	found_ambient = BR_FALSE;
-
-	scache.ambient_red = BR_SCALAR(0.0);
-	scache.ambient_green = BR_SCALAR(0.0);
-	scache.ambient_blue = BR_SCALAR(0.0);
-	scache.ambient_intensity = BR_SCALAR(0.0);
-
-	for(l=0, lp = self->state.light; l < MAX_STATE_LIGHTS; l++, lp++) {
-		if (lp->type != BRT_AMBIENT || lp->attenuation_type == BRT_RADII)
-			continue;
-
-		found_ambient = BR_TRUE;
-
-		intensity = BR_RCP(lp->attenuation_c);
-
-		scache.ambient_red += BR_MUL(BrFixedToScalar(BR_RED(lp->colour) << 8), intensity);
-		scache.ambient_green += BR_MUL(BrFixedToScalar(BR_GRN(lp->colour) << 8), intensity);
-		scache.ambient_blue += BR_MUL(BrFixedToScalar(BR_BLU(lp->colour) << 8), intensity);
-		scache.ambient_intensity += intensity;
-	}
-
-	if (found_ambient) {
-
-		if (scache.ambient_red > BR_SCALAR(1.0))
-			scache.ambient_red = BR_SCALAR(1.0);
-
-		if (scache.ambient_green > BR_SCALAR(1.0))
-			scache.ambient_green = BR_SCALAR(1.0);
-
-		if (scache.ambient_blue > BR_SCALAR(1.0))
-			scache.ambient_blue = BR_SCALAR(1.0);
-
-		scache.use_ambient_colour =
-			scache.ambient_red != BR_SCALAR(1.0) ||
-			scache.ambient_green != BR_SCALAR(1.0) ||
-			scache.ambient_blue != BR_SCALAR(1.0);
-
-		if (scache.ambient_intensity > BR_SCALAR(1.0))
-			scache.ambient_intensity = BR_SCALAR(1.0);
-
-		scache.use_ambient_intensity = scache.ambient_intensity != BR_SCALAR(1.0);
-
-	} else {
-
-		scache.use_ambient_colour = BR_FALSE;
-		scache.use_ambient_intensity = BR_FALSE;
-	}
-#endif
-
-    alp = scache.lights;
-
-    /*
-     * Find all model space lights
-     */
     for(l = 0, lp = self->state.light; l < MAX_STATE_LIGHTS; l++, lp++) {
 
-        if(lp->type == BRT_NONE || lp->lighting_space != BRT_MODEL || lp->type == BRT_AMBIENT && lp->attenuation_type != BRT_RADII)
+        if(lp->type == BRT_NONE || lp->type == BRT_AMBIENT && lp->attenuation_type != BRT_RADII)
             continue;
+
+        alp = scache.lights + scache.nlights;
 
         alp->s         = lp;
         alp->intensity = BR_RCP(lp->attenuation_c);
         alp->type      = lp->type;
+        alp->position  = lp->position;
+
+        /*
+         * A direct light's direction carries its intensity, which the
+         * accumulate functions use as the diffuse term; every other type's
+         * direction is used as it is.
+         */
+        if(lp->type == BRT_DIRECT)
+            BrVector3Scale(&alp->direction, &lp->direction, alp->intensity);
+        else
+            alp->direction = lp->direction;
 
         alp->red   = BrFixedToScalar(BR_RED(lp->colour) << 8);
         alp->green = BrFixedToScalar(BR_GRN(lp->colour) << 8);
@@ -383,81 +321,16 @@ void ActiveLightsFind(br_renderer *self)
         if(lp->type == BRT_SPOT)
             alp->spot_falloff = BR_RCP(lp->spot_outer - lp->spot_inner);
 
-        if(lp->volume.regions != NULL) {
-
-            alp->volume.falloff_distance = lp->volume.falloff_distance;
-            alp->volume.regions  = BrResAllocate(scache.res, sizeof(*alp->volume.regions) * lp->volume.nregions, BR_MEMORY_OBJECT_DATA);
-            alp->volume.nregions = lp->volume.nregions;
-
-            if(alp->volume.regions != NULL)
-
-                for(i = 0; i < lp->volume.nregions; i++) {
-
-                    alp->volume.regions[i].planes = BrResAllocate(
-                        alp->volume.regions, sizeof(*alp->volume.regions[i].planes) * lp->volume.regions[i].nplanes, BR_MEMORY_OBJECT_DATA);
-                    alp->volume.regions[i].nplanes = lp->volume.regions[i].nplanes;
-
-                    if(alp->volume.regions[i].planes == NULL) {
-                        BrResFree(alp->volume.regions);
-                        alp->volume.regions = NULL;
-                        break;
-                    }
-                }
-        }
+        /*
+         * The volume is the state light's own, already in view space; the
+         * static cache borrows it and must not free it.
+         */
+        alp->volume = lp->volume;
 
         ActiveLightAccumulateIndexSet(alp);
         ActiveLightAccumulateColourSet(alp);
 
-        alp++;
-        scache.nlights_model++;
-    }
-
-    /*
-     * Find all view space lights
-     */
-    for(l = 0, lp = self->state.light; l < MAX_STATE_LIGHTS; l++, lp++) {
-
-        if(lp->type == BRT_NONE || lp->lighting_space != BRT_VIEW || lp->type == BRT_AMBIENT && lp->attenuation_type != BRT_RADII)
-            continue;
-
-        alp->s         = lp;
-        alp->intensity = BR_RCP(lp->attenuation_c);
-        alp->type      = lp->type;
-        alp->position  = lp->position;
-
-        alp->red   = BrFixedToScalar(BR_RED(lp->colour) << 8);
-        alp->green = BrFixedToScalar(BR_GRN(lp->colour) << 8);
-        alp->blue  = BrFixedToScalar(BR_BLU(lp->colour) << 8);
-
-        if(lp->type == BRT_DIRECT)
-            BrVector3Scale(&alp->direction, &lp->direction, alp->intensity);
-        else
-            alp->direction = lp->direction;
-
-        /* See the model-space loop above: clear the radial-only fields. */
-        alp->falloff = BR_SCALAR(0.0);
-        alp->cutoff  = BR_SCALAR(0.0);
-
-        if(lp->attenuation_type == BRT_RADII) {
-
-            if(lp->radius_inner != lp->radius_outer)
-                alp->falloff = BR_DIV(alp->intensity, lp->radius_inner - lp->radius_outer);
-
-            alp->cutoff = BR_SQR(lp->radius_outer);
-        }
-
-        if(lp->type == BRT_SPOT)
-            alp->spot_falloff = BR_RCP(lp->spot_outer - lp->spot_inner);
-
-        alp->volume.falloff_distance = lp->volume.falloff_distance;
-        alp->volume.regions          = lp->volume.regions;
-        alp->volume.nregions         = lp->volume.nregions;
-
-        ActiveLightAccumulateIndexSet(alp);
-        ActiveLightAccumulateColourSet(alp);
-
-        alp++;
-        scache.nlights_view++;
+        scache.nlights++;
     }
 }
 
@@ -465,16 +338,10 @@ void ActiveLightsUpdate(br_renderer *self)
 {
     struct active_light *alp = scache.lights;
     int                  l;
-    br_convex_region    *region, *new_region;
-    br_vector4          *plane, *new_plane;
-#if 1
-    struct state_light *lp;
-    br_boolean          found_ambient;
-    br_scalar           intensity;
-#endif
-    br_uint_32 i, j;
+    struct state_light  *lp;
+    br_boolean           found_ambient;
+    br_scalar            intensity;
 
-#if 1
     /*
      * Find all ambient lights and sum them, applying constant attenuation
      * only.  If none is found, use white.
@@ -527,114 +394,28 @@ void ActiveLightsUpdate(br_renderer *self)
         scache.use_ambient_colour    = BR_FALSE;
         scache.use_ambient_intensity = BR_FALSE;
     }
-#endif
 
-    for(l = 0; l < scache.nlights_model; l++, alp++) {
+    /*
+     * The light geometry is already in view space; only the core's per-model
+     * cull flag changes here. A direct light's half vector is independent of
+     * the model, but is cheap to keep beside the cull.
+     */
+    for(l = 0; l < scache.nlights; l++, alp++) {
 
         alp->culled = alp->s->culled;
         if(alp->culled)
             continue;
 
-        switch(alp->type) {
+        if(alp->type == BRT_DIRECT) {
 
-            case BRT_AMBIENT:
-
-                if(alp->s->radius_cull) {
-
-                    /*
-                     * Transform light's position
-                     */
-                    BrMatrix34ApplyP(&alp->position, &alp->s->position, &scache.view_to_model);
-                }
-
-                break;
-
-            case BRT_DIRECT:
-
-                if(alp->s->radius_cull)
-                    BrMatrix34ApplyP(&alp->position, &alp->s->position, &scache.view_to_model);
-
-                /*
-                 * Transpose, not inverse. The two agree for the similarity
-                 * transforms this path is correct for, and under a non-uniform
-                 * scale neither reproduces the view-space result, because the
-                 * unit model-space normal is not transformed to compensate.
-                 * See issue #4; the fix is the full view-space conversion.
-                 */
-                BrMatrix34TApplyV(&alp->direction, &alp->s->direction, &self->state.matrix.model_to_view);
-                BrVector3Normalise(&alp->direction, &alp->direction);
-
-                /*
-                 * Work out a unit half vector
-                 */
-                BrVector3Add(&alp->half, &alp->direction, &scache.eye_m_normalised);
-                BrVector3Normalise(&alp->half, &alp->half);
-
-                /*
-                 * Scale direction vector by light intensity
-                 */
-                BrVector3Scale(&alp->direction, &alp->direction, alp->intensity);
-
-                break;
-
-            case BRT_SPOT:
-                /*
-                 * Transform light's direction and position
-                 */
-                BrMatrix34ApplyP(&alp->position, &alp->s->position, &scache.view_to_model);
-
-                /* See note in BRT_DIRECT above. */
-                BrMatrix34TApplyV(&alp->direction, &alp->s->direction, &self->state.matrix.model_to_view);
-                BrVector3Normalise(&alp->direction, &alp->direction);
-
-                break;
-
-            case BRT_POINT:
-                /*
-                 * Transform light's position
-                 */
-                BrMatrix34ApplyP(&alp->position, &alp->s->position, &scache.view_to_model);
-
-                break;
-        }
-
-        if(alp->volume.regions != NULL)
-            for(region = alp->s->volume.regions, new_region = alp->volume.regions, i = 0; i < alp->volume.nregions; i++, region++, new_region++)
-                for(plane = region->planes, new_plane = new_region->planes, j = 0; j < region->nplanes; j++, plane++, new_plane++)
-                    BrMatrix34ApplyPlaneEquation(new_plane, plane, &scache.view_to_model);
-    }
-
-    if(scache.nlights_view > 0) {
-
-        for(l = 0; l < scache.nlights_view; l++, alp++) {
-
-            alp->culled = alp->s->culled;
-            if(alp->culled)
-                continue;
-
-            switch(alp->type) {
-
-                case BRT_AMBIENT:
-                    break;
-
-                case BRT_DIRECT:
-
-                    /*
-                     * Work out a unit half vector:
-                     *  eye = (0,0,1)
-                     *  half = normalise(light_direection + eye)
-                     */
-                    alp->half = alp->s->direction;
-                    alp->half.v[Z] += BR_SCALAR(1.0);
-                    BrVector3Normalise(&alp->half, &alp->half);
-                    break;
-
-                case BRT_SPOT:
-                    break;
-
-                case BRT_POINT:
-                    break;
-            }
+            /*
+             * Work out a unit half vector:
+             *  eye = (0,0,1)
+             *  half = normalise(light_direction + eye)
+             */
+            alp->half = alp->s->direction;
+            alp->half.v[Z] += BR_SCALAR(1.0);
+            BrVector3Normalise(&alp->half, &alp->half);
         }
     }
 }
