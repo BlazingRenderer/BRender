@@ -826,7 +826,7 @@ static br_error V1Model_Render(br_geometry *self, br_renderer *renderer, struct 
 #if 0
 		{
 			void *fp = BrFileOpenWrite("softlights.txt", 0);
-			for(int i = 0; i < scache.nlights_model + scache.nlights_view; ++i) {
+			for(int i = 0; i < scache.nlights; ++i) {
 				const struct active_light *alp = scache.lights + i;
 
 				BrFilePrintf(fp, "LIGHT %2d:\n", i + 1);

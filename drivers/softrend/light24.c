@@ -175,32 +175,13 @@ void SURFACE_CALL SurfaceColourLit(br_renderer *self, br_vector3 *p, br_vector2 
     specular_b = BR_SCALAR(0.0);
 
     /*
-     * Accumulate intensities for each active light in model space
+     * Accumulate intensities for each active light. Shading is in view space,
+     * which is where the light geometry is, so the model-space point and
+     * normal are transformed into view space here. The normal transform is the
+     * inverse transpose of model_to_view, and so is correct under any scale.
      */
-    rend.eye_l = scache.eye_m_normalised;
+    if(scache.nlights) {
 
-    alp = scache.lights;
-
-    if(self->state.surface.ks != BR_SCALAR(0.0)) {
-
-        for(i = 0; i < scache.nlights_model; i++, alp++)
-            if(!alp->culled)
-                alp->accumulate_colour_specular(self, p, n, alp);
-
-    } else {
-
-        for(i = 0; i < scache.nlights_model; i++, alp++)
-            if(!alp->culled)
-                CALL_LIGHTING_FN(accumulate_colour, p, n);
-    }
-
-    /*
-     * See if any lights are to be calculated in view space
-     */
-    if(scache.nlights_view) {
-        /*
-         * Transform point and normal into view space ...
-         */
         BrMatrix34ApplyP(&vp, p, &self->state.matrix.model_to_view);
         BrMatrix34TApplyV(&vn, n, &scache.view_to_model);
         BrVector3Normalise(&fvn, &vn);
@@ -209,18 +190,17 @@ void SURFACE_CALL SurfaceColourLit(br_renderer *self, br_vector3 *p, br_vector2 
         rend.eye_l.v[1] = BR_SCALAR(0);
         rend.eye_l.v[2] = BR_SCALAR(1);
 
-        /*
-         * ... and accumulate
-         */
+        alp = scache.lights;
+
         if(self->state.surface.ks != BR_SCALAR(0.0)) {
 
-            for(i = 0; i < scache.nlights_view; i++, alp++)
+            for(i = 0; i < scache.nlights; i++, alp++)
                 if(!alp->culled)
                     alp->accumulate_colour_specular(self, &vp, &fvn, alp);
 
         } else {
 
-            for(i = 0; i < scache.nlights_view; i++, alp++)
+            for(i = 0; i < scache.nlights; i++, alp++)
                 if(!alp->culled)
                     CALL_LIGHTING_FN(accumulate_colour, &vp, &fvn);
         }
@@ -274,32 +254,13 @@ void SURFACE_CALL SurfaceColourLitPrelit(br_renderer *self, br_vector3 *p, br_ve
     specular_b = BR_SCALAR(0.0);
 
     /*
-     * Accumulate intensities for each active light in model space
+     * Accumulate intensities for each active light. Shading is in view space,
+     * which is where the light geometry is, so the model-space point and
+     * normal are transformed into view space here. The normal transform is the
+     * inverse transpose of model_to_view, and so is correct under any scale.
      */
-    rend.eye_l = scache.eye_m_normalised;
+    if(scache.nlights) {
 
-    alp = scache.lights;
-
-    if(self->state.surface.ks != BR_SCALAR(0.0)) {
-
-        for(i = 0; i < scache.nlights_model; i++, alp++)
-            if(!alp->culled)
-                alp->accumulate_colour_specular(self, p, n, alp);
-
-    } else {
-
-        for(i = 0; i < scache.nlights_model; i++, alp++)
-            if(!alp->culled)
-                CALL_LIGHTING_FN(accumulate_colour, p, n);
-    }
-
-    /*
-     * See if any lights are to be calculated in view space
-     */
-    if(scache.nlights_view) {
-        /*
-         * Transform point and normal into view space ...
-         */
         BrMatrix34ApplyP(&vp, p, &self->state.matrix.model_to_view);
         BrMatrix34TApplyV(&vn, n, &scache.view_to_model);
         BrVector3Normalise(&fvn, &vn);
@@ -308,18 +269,17 @@ void SURFACE_CALL SurfaceColourLitPrelit(br_renderer *self, br_vector3 *p, br_ve
         rend.eye_l.v[1] = BR_SCALAR(0);
         rend.eye_l.v[2] = BR_SCALAR(1);
 
-        /*
-         * ... and accumulate
-         */
+        alp = scache.lights;
+
         if(self->state.surface.ks != BR_SCALAR(0.0)) {
 
-            for(i = 0; i < scache.nlights_view; i++, alp++)
+            for(i = 0; i < scache.nlights; i++, alp++)
                 if(!alp->culled)
                     alp->accumulate_colour_specular(self, &vp, &fvn, alp);
 
         } else {
 
-            for(i = 0; i < scache.nlights_view; i++, alp++)
+            for(i = 0; i < scache.nlights; i++, alp++)
                 if(!alp->culled)
                     CALL_LIGHTING_FN(accumulate_colour, &vp, &fvn);
         }
