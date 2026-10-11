@@ -334,7 +334,13 @@ static void lightingIndexSpotRadii(br_renderer *self, br_vector3 *p, br_vector3 
  */
 void ActiveLightAccumulateIndexSet(struct active_light *alp)
 {
-    const int is_linear_falloff = !!(alp->s->type & BR_LIGHT_LINEAR_FALLOFF);
+    /*
+     * alp->s->type is a token (BRT_POINT etc.), not the br_light flags, so the
+     * radius test has to go through the attenuation type enables.c derives from
+     * BR_LIGHT_LINEAR_FALLOFF - as the colour path already does. Testing the
+     * token instead made every point light take the radial path (and no spot).
+     */
+    const int is_linear_falloff = (alp->s->attenuation_type == BRT_RADII);
 
     switch(alp->type) {
         case BRT_DIRECT:
