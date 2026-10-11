@@ -164,7 +164,7 @@ matcher's table and the kernel definitions.
 
 ### Blend Behaviour
 - 8-bit blend uses a 2D lookup table, not arithmetic alpha from C_A.
-- 24-bit `blendrgb` rasterisers use internal constants, not `SurfaceAlpha`.
+- 15/16-bit `blendrgb` rasterisers (`prm_t15.ifg`/`prm_t16.ifg`) use internal constants, not `SurfaceAlpha`.
 
 ---
 
