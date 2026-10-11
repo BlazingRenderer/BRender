@@ -6,8 +6,12 @@
  *
  * Assertion macros
  *
- *	ASSERT() is for internal checks
- *	UASSERT() is for user checks
+ *	ASSERT() is for internal invariants
+ *	UASSERT() is for user inputs
+ *
+ * Neither replaces a check: a guard on external input, or on anything whose
+ * violation would be silently wrong rather than loud, belongs in a check that
+ * refuses it and names it, not in an assertion.
  */
 
 /*
