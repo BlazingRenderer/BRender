@@ -288,6 +288,7 @@ also enabled on load (`BrLightEnable()`), as the 3ds importer does.
 | `cone_inner` | number, turns | `10/360` | `cone_inner` |
 | `radius_outer` | number | `0` | `radius_outer` |
 | `radius_inner` | number | `0` | `radius_inner` |
+| `volume` | object: `falloff_distance`, `regions` | absent | `volume` |
 
 The defaults are those of a light actor from `BrActorAllocate()` - a directional light, white, constant
 attenuation 1, cones of 15 and 10 degrees (`core/v1db/actsupt.c`).
@@ -301,6 +302,14 @@ attenuated light, not angles (`core/inc/light.h`).
 engine's attenuation, which for a point or spot light is `1 / (c + l·d + q·d²)` for distance `d`
 (`drivers/softrend/lightmac.h`). No fixture in this repository sets `attenuation_l` or
 `attenuation_q`; they carry their defaults.
+
+`volume` is a cutoff volume (`br_light_volume`): a set of convex regions, each the intersection of a
+number of half-spaces, together with a falloff distance. A vertex inside any region is lit in full;
+beyond a region's boundary the light fades linearly to nothing over `falloff_distance`. `regions` is an
+array of regions and each region an array of planes, each plane four numbers `[x, y, z, w]` - a
+`br_vector4`. The planes are in the **light actor's local space**, exactly as `br_light_volume` holds
+them; the core transforms them to view space when the light is set up (`core/inc/light.h`,
+`core/inc/brvector.h`, `core/v1db/enables.c`).
 
 ### Reader obligations
 
@@ -320,6 +329,12 @@ engine's attenuation, which for a point or spot light is `1 / (c + l·d + q·d²
   all loads.
 * `cone_outer`/`cone_inner` are read for any light and `radius_outer`/`radius_inner` for any light, although
   the writer only writes them in the circumstances described next.
+* **The volume is only read when present, and carries no state when absent.** `falloff_distance`
+  defaults to `0` and `regions` to empty, so a light with no `volume` property reads back with an empty
+  `br_light_volume` - indistinguishable from one whose `volume` had no regions. Each plane is four
+  numbers and each region an array of planes (`cgltf_parse_json_brender_light_volume()`,
+  `core/fmt/cgltf_brender_impl.h`); the region and plane arrays are allocated with the rest of the light
+  table and freed with it.
 
 ### Writer obligations
 
@@ -341,6 +356,9 @@ engine's attenuation, which for a point or spot light is `1 / (c + l·d + q·d²
   accept them.
 * `type` is omitted when the type word is not one of the four (`cgltf_brender_light_type_invalid`), which
   reads back as `"direct"`.
+* **The volume is written only when there is at least one region**, and `falloff_distance` within it only
+  when non-zero (`cgltf_write_brender_light()`, `core/fmt/cgltf_write_brender.h`). A light whose volume
+  is empty is written with no `volume` property at all, which reads back as the same empty volume.
 * The KHR projection is lossy by construction: it derives the KHR `range` from the attenuation terms with
   `atten_to_range()` (`core/fmt/savegltf.c`), so a light that never attenuates with distance - the
   default `c = 1, l = 0, q = 0` - is written with the largest float as its range (`3.40282347e+38` in six
@@ -348,8 +366,8 @@ engine's attenuation, which for a point or spot light is `1 / (c + l·d + q·d²
 
 ### What it deliberately does not carry
 
-* `br_light::volume` - the cutoff volumes, and `br_light::user`. Both are marked `TODO`/unused in
-  `core/fmt/cgltf_brender.h`; no property exists for either.
+* `br_light::user`. It is application state rather than engine state, and the reader and writer leave it
+  alone.
 * The RGB alpha byte, as for `BR_materials`.
 
 ## The `brender=` image URI marker
@@ -457,4 +475,4 @@ this is a defect of the extensions as specified above; it is what a file can hol
 | `br_actor::t`'s representation | the transform survives, its representation does not. `fill_transform()` writes a 4x4 matrix for `MATRIX34`, `MATRIX34_LP` and `LOOK_UP`, a rotation for `QUAT` and `EULER`, a translation for `TRANSLATION` and nothing for `IDENTITY`; `read_actor_matrix()` reads back only `MATRIX34`, `TRANSLATION`, `QUAT` or `IDENTITY`. So `EULER` returns as `QUAT`, `LOOK_UP` and `MATRIX34_LP` as `MATRIX34`, and an identity `MATRIX34` as `IDENTITY` - equal transforms, so no pixel moves, and the value a caller reads back out of `br_actor::t` is of a different kind. This is a property of glTF's node transform, which is a matrix or a TRS triple and says nothing about which BRender form produced it. |
 | `br_actor::render_data`, `br_actor::user` | pointers into the running process; no field. |
 | `br_model::pivot`, `::flags`, `::crease_angle`, per-face `smoothing` and `flags`, per-face colours | nothing carries these. There is no mesh-level extension; only `BR_MODF_CUSTOM_NORMALS` is re-derived, from the presence of a NORMAL accessor. |
-| `br_material::extra_surf`, `extra_prim`, `stored`, `user`; `br_light::volume`, `user` | nothing carries these. |
+| `br_material::extra_surf`, `extra_prim`, `stored`, `user`; `br_light::user` | nothing carries these. |
