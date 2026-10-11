@@ -101,6 +101,71 @@ static int cgltf_parse_json_brender_actor(cgltf_options *options, jsmntok_t cons
     return i;
 }
 
+static int cgltf_parse_json_brender_light_region(cgltf_options *options, jsmntok_t const *tokens, int i, const uint8_t *json_chunk,
+                                                 cgltf_brender_light_region *out_region)
+{
+    CGLTF_CHECK_TOKTYPE(tokens[i], JSMN_ARRAY);
+
+    cgltf_size planes_count = (cgltf_size)tokens[i].size;
+    ++i;
+
+    out_region->planes_count = planes_count;
+    out_region->planes       = cgltf_calloc(options, sizeof(*out_region->planes), planes_count);
+
+    if(out_region->planes == NULL && planes_count > 0) {
+        return CGLTF_ERROR_NOMEM;
+    }
+
+    for(cgltf_size j = 0; j < planes_count; ++j) {
+        i = cgltf_parse_json_float_array(tokens, i, json_chunk, out_region->planes[j], 4);
+        if(i < 0) {
+            return i;
+        }
+    }
+
+    return i;
+}
+
+static int cgltf_parse_json_brender_light_volume(cgltf_options *options, jsmntok_t const *tokens, int i, const uint8_t *json_chunk,
+                                                 cgltf_brender_light *out_light)
+{
+    CGLTF_CHECK_TOKTYPE(tokens[i], JSMN_OBJECT);
+
+    int size = tokens[i].size;
+    ++i;
+
+    for(int j = 0; j < size; ++j) {
+        CGLTF_CHECK_KEY(tokens[i]);
+
+        if(cgltf_json_strcmp(tokens + i, json_chunk, "falloff_distance") == 0) {
+            ++i;
+            out_light->falloff_distance = cgltf_json_to_float(tokens + i, json_chunk);
+            ++i;
+        } else if(cgltf_json_strcmp(tokens + i, json_chunk, "regions") == 0) {
+            i = cgltf_parse_json_array(options, tokens, i + 1, json_chunk, sizeof(cgltf_brender_light_region),
+                                       (void **)&out_light->regions, &out_light->regions_count);
+            if(i < 0) {
+                return i;
+            }
+
+            for(cgltf_size k = 0; k < out_light->regions_count; ++k) {
+                i = cgltf_parse_json_brender_light_region(options, tokens, i, json_chunk, &out_light->regions[k]);
+                if(i < 0) {
+                    return i;
+                }
+            }
+        } else {
+            i = cgltf_skip_json(tokens, i + 1);
+        }
+
+        if(i < 0) {
+            return i;
+        }
+    }
+
+    return i;
+}
+
 static int cgltf_parse_json_brender_light(cgltf_options *options, jsmntok_t const *tokens, int i, const uint8_t *json_chunk,
                                           cgltf_brender_light *out_light)
 {
@@ -176,6 +241,8 @@ static int cgltf_parse_json_brender_light(cgltf_options *options, jsmntok_t cons
             ++i;
             out_light->radius_inner = cgltf_json_to_float(tokens + i, json_chunk);
             ++i;
+        } else if(cgltf_json_strcmp(tokens + i, json_chunk, "volume") == 0) {
+            i = cgltf_parse_json_brender_light_volume(options, tokens, i + 1, json_chunk, out_light);
         } else {
             i = cgltf_skip_json(tokens, i + 1);
         }

@@ -984,7 +984,7 @@ static float atten_to_range(float c, float l, float q)
     return (-l + sqrtf(discriminant)) / (2.0f * q);
 }
 
-static void fill_br_light(const br_light *light_data, cgltf_brender_light *br_light)
+static void fill_br_light(const br_light *light_data, cgltf_brender_light *br_light, cgltf_data *data)
 {
     switch(light_data->type & BR_LIGHT_TYPE) {
         case BR_LIGHT_DIRECT:
@@ -1021,6 +1021,23 @@ static void fill_br_light(const br_light *light_data, cgltf_brender_light *br_li
     br_light->cone_outer     = BrAngleToScalar(light_data->cone_outer);
     br_light->radius_inner   = BrScalarToFloat(light_data->radius_inner);
     br_light->radius_outer   = BrScalarToFloat(light_data->radius_outer);
+
+    if(light_data->volume.regions != NULL && light_data->volume.nregions > 0) {
+        br_light->falloff_distance = BrScalarToFloat(light_data->volume.falloff_distance);
+        br_light->regions_count    = light_data->volume.nregions;
+        br_light->regions          = BrResAllocate(data, sizeof(*br_light->regions) * br_light->regions_count, BR_MEMORY_SCRATCH);
+
+        for(br_uint_32 i = 0; i < br_light->regions_count; ++i) {
+            const br_convex_region *region = light_data->volume.regions + i;
+
+            br_light->regions[i].planes_count = region->nplanes;
+            br_light->regions[i].planes       = BrResAllocate(data, sizeof(*br_light->regions[i].planes) * region->nplanes, BR_MEMORY_SCRATCH);
+
+            for(br_uint_32 j = 0; j < region->nplanes; ++j)
+                for(int k = 0; k < 4; ++k)
+                    br_light->regions[i].planes[j][k] = BrScalarToFloat(region->planes[j].v[k]);
+        }
+    }
 }
 
 static void fill_camera(const br_camera *camera_data, cgltf_camera *camera)
@@ -1113,7 +1130,7 @@ static void fill_light(const br_light *light_data, cgltf_light *light)
     }
 }
 
-static void fill_actor_types_actual(const br_actor *root, cgltf_node *node)
+static void fill_actor_types_actual(const br_actor *root, cgltf_node *node, cgltf_data *data)
 {
     /*
      * NB: This assumes all the fields have already been set.
@@ -1127,7 +1144,7 @@ static void fill_actor_types_actual(const br_actor *root, cgltf_node *node)
         case BR_ACTOR_LIGHT: {
             const br_light *light_data = root->type_data;
 
-            fill_br_light(light_data, node->brender_light);
+            fill_br_light(light_data, node->brender_light, data);
 
             /*
              * KHR_lights_punctual doesn't support ambient lights.
@@ -1156,9 +1173,9 @@ static void fill_actor_types_actual(const br_actor *root, cgltf_node *node)
 static int fill_actor_types(const void *key, void *value, br_hash hash, void *user)
 {
     (void)hash;
-    (void)user;
+    br_gltf_save_state *state = user;
 
-    fill_actor_types_actual(key, value);
+    fill_actor_types_actual(key, value, state->data);
     return 0;
 }
 
