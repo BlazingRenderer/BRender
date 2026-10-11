@@ -1775,7 +1775,16 @@ void TexturedIndexedTriangle(brp_block *block, brp_vertex *v0, brp_vertex *v1, b
     pw.main_d = (br_uint_32)Ror16(NegAdjust(ts.walk.d_xm));
 
     pw.dz           = NegAdjust(pw.pz.grad_x);
-    pw.di           = NegAdjust(pw.pi.grad_x);
+
+    /*
+     * The per-pixel intensity step is the asm's work.tsl._di. The z-sorted
+     * rasteriser (fti8_pip.asm:1430,1439) stores work.pi.grad_x raw; the
+     * z-buffered one (fti8pizp.asm:1682,1685,1687,1697) applies the carry
+     * adjustment `cmp edx,80000000h; adc edx,-1` first. The two files really do
+     * differ, so the step follows D. The drift it causes is one unit per step,
+     * invisible until the interpolated intensity crosses a shade-table row.
+     */
+    pw.di           = (D == SP_DEPTH_ZW) ? NegAdjust(pw.pi.grad_x) : pw.pi.grad_x;
     pw.ddenominator = pw.pq.grad_x;
     pw.direction    = asm_dir;
 

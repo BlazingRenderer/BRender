@@ -1450,6 +1450,16 @@ static const rt_blank rt_expected_blank[] = {
      * draw check.
      */
     {.scene = "scene-edges",             .pm_type = RT_ANY_TYPE,    .mode = RT_ANY_MODE, .device = "glrend"},
+
+    /*
+     * The z-sorted INDEX_8 intensity-step fixture (scene-shade-i8; see scene.c).
+     * Its shade table is INDEX_8 to match the 8bpp output, and glrend's shader
+     * has no INDEX_8 shade table, so it draws nothing; softrend and glrend1x
+     * both draw it, and the glrend reference entry is the blank frame it
+     * produces. Same shape as scene-edges above: a driver gap the fixture makes
+     * reachable from a file, not a property of the scene.
+     */
+    {.scene = "scene-shade-i8",           .pm_type = RT_ANY_TYPE,    .mode = RT_ANY_MODE, .device = "glrend"},
 };
 // clang-format on
 
@@ -1802,6 +1812,13 @@ static const char *const rt_default_scenes[] = {
      */
     "scene-shade-arb-flat", "scene-shade-arb-flat-persp", "scene-shade-arb-smooth-persp",
     "scene-tex-rgb555-affine", "scene-tex-rgb565-affine",
+
+    /*
+     * The z-sorted INDEX_8 intensity-step fixture; see scene.c. Its shade table
+     * steps one output index per intensity row, so it moves when the z-sorted
+     * interpolated-intensity span's per-pixel step drifts by one 16.16 unit.
+     */
+    "scene-shade-i8",
 
     /*
      * The 256x256 RGB shade-table fixtures; see scene.c. pentprim draws these

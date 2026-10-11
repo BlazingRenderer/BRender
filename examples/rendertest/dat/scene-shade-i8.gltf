@@ -1,0 +1,260 @@
+{
+  "accessors": [
+    {
+      "bufferView": 0,
+      "componentType": 5126,
+      "type": "VEC3",
+      "count": 24,
+      "min": [-0.5, -0.5, -0.5],
+      "max": [0.5, 0.5, 0.5]
+    },
+    {
+      "bufferView": 1,
+      "componentType": 5126,
+      "type": "VEC3",
+      "count": 24
+    },
+    {
+      "bufferView": 2,
+      "componentType": 5126,
+      "type": "VEC2",
+      "count": 24
+    },
+    {
+      "bufferView": 3,
+      "componentType": 5126,
+      "type": "VEC3",
+      "count": 24
+    },
+    {
+      "bufferView": 4,
+      "componentType": 5123,
+      "type": "SCALAR",
+      "count": 36
+    }
+  ],
+  "asset": {
+    "generator": "BRender 1.4.0 (DDI 2.0.0)",
+    "version": "2.0"
+  },
+  "bufferViews": [
+    {
+      "name": "group 0 positions",
+      "buffer": 0,
+      "byteLength": 288,
+      "target": 34962
+    },
+    {
+      "name": "group 0 normals",
+      "buffer": 1,
+      "byteLength": 288,
+      "target": 34962
+    },
+    {
+      "name": "group 0 uvs",
+      "buffer": 2,
+      "byteLength": 192,
+      "target": 34962
+    },
+    {
+      "name": "group 0 colours",
+      "buffer": 3,
+      "byteLength": 288,
+      "target": 34962
+    },
+    {
+      "name": "group 0 indices",
+      "buffer": 4,
+      "byteLength": 72,
+      "target": 34963
+    }
+  ],
+  "buffers": [
+    {
+      "name": "group 0 positions",
+      "uri": "data:application/octet-stream;base64,AAAAvwAAAL8AAAC/AAAAvwAAAL8AAAC/AAAAvwAAAL8AAAC/AAAAvwAAAL8AAAA/AAAAvwAAAL8AAAA/AAAAvwAAAL8AAAA/AAAAvwAAAD8AAAC/AAAAvwAAAD8AAAC/AAAAvwAAAD8AAAC/AAAAvwAAAD8AAAA/AAAAvwAAAD8AAAA/AAAAvwAAAD8AAAA/AAAAPwAAAL8AAAC/AAAAPwAAAL8AAAC/AAAAPwAAAL8AAAC/AAAAPwAAAL8AAAA/AAAAPwAAAL8AAAA/AAAAPwAAAL8AAAA/AAAAPwAAAD8AAAC/AAAAPwAAAD8AAAC/AAAAPwAAAD8AAAC/AAAAPwAAAD8AAAA/AAAAPwAAAD8AAAA/AAAAPwAAAD8AAAA/",
+      "byteLength": 288
+    },
+    {
+      "name": "group 0 normals",
+      "uri": "data:application/octet-stream;base64,AACAvwAAAAAAAACAAAAAAAAAgL8AAACAAAAAAAAAAAAAAIC/AAAAAAAAAAAAAIA/AAAAAAAAgL8AAACAAACAvwAAAAAAAACAAACAvwAAAAAAAACAAAAAAAAAgD8AAACAAAAAAAAAAAAAAIC/AAAAAAAAgD8AAACAAAAAAAAAAAAAAIA/AACAvwAAAAAAAACAAAAAAAAAAAAAAIC/AAAAAAAAgL8AAACAAACAPwAAAAAAAACAAACAPwAAAAAAAACAAAAAAAAAAAAAAIA/AAAAAAAAgL8AAACAAAAAAAAAAAAAAIC/AAAAAAAAgD8AAACAAACAPwAAAAAAAACAAACAPwAAAAAAAACAAAAAAAAAgD8AAACAAAAAAAAAAAAAAIA/",
+      "byteLength": 288
+    },
+    {
+      "name": "group 0 uvs",
+      "uri": "data:application/octet-stream;base64,AAAAAAAAAAAAAAAAAAAAAAAAgD8AAAAAAAAAAAAAAAAAAAAAAACAPwAAgD8AAAAAAAAAAAAAgD8AAAAAAACAPwAAgD8AAIA/AAAAAAAAAAAAAAAAAACAPwAAgD8AAIA/AAAAAAAAAAAAAIA/AAAAAAAAgD8AAAAAAAAAAAAAAAAAAIA/AAAAAAAAgD8AAIA/AAAAAAAAgD8AAIA/AACAPwAAgD8AAIA/AAAAAAAAgD8AAIA/AAAAAAAAgD8AAIA/",
+      "byteLength": 192
+    },
+    {
+      "name": "group 0 colours",
+      "uri": "data:application/octet-stream;base64,AACAPwAAgD8AAIA/AACAPwAAgD8AAIA/AACAPwAAgD8AAIA/AACAPwAAgD8AAIA/AACAPwAAgD8AAIA/AACAPwAAgD8AAIA/AACAPwAAgD8AAIA/AACAPwAAgD8AAIA/AACAPwAAgD8AAIA/AACAPwAAgD8AAIA/AACAPwAAgD8AAIA/AACAPwAAgD8AAIA/AACAPwAAgD8AAIA/AACAPwAAgD8AAIA/AACAPwAAgD8AAIA/AACAPwAAgD8AAIA/AACAPwAAgD8AAIA/AACAPwAAgD8AAIA/AACAPwAAgD8AAIA/AACAPwAAgD8AAIA/AACAPwAAgD8AAIA/AACAPwAAgD8AAIA/AACAPwAAgD8AAIA/AACAPwAAgD8AAIA/",
+      "byteLength": 288
+    },
+    {
+      "name": "group 0 indices",
+      "uri": "data:application/octet-stream;base64,EAAXAAoAEAAKAAMAFgATAAcAFgAHAAkAAgAIABIAAgASAAwADQARAAQADQAEAAEABQALAAYABQAGAAAADgAUABUADgAVAA8A",
+      "byteLength": 72
+    }
+  ],
+  "images": [
+    {
+      "name": "scene-shade-i8-map",
+      "uri": "data:image/png;brender=index8;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAAAAACPAi4CAAAAWklEQVR4XmN8wMDA4ADEB8ikmRgoBANvAKMCBf4HhdtwCIPRdMAwmg4YGEbLA4bRdMAwmg5AldpoeTCaDkbTAaR5N1ovjNYLDKP1AsNoeTBaHsA6vKPtAwYGAGp6gHFsnHM2AAAAAElFTkSuQmCC"
+    },
+    {
+      "name": "scene-shade-i8-table",
+      "uri": "data:image/png;brender=index8;base64,iVBORw0KGgoAAAANSUhEUgAAAQAAAAEACAAAAAB5Gfe6AAAC+ElEQVR4XmNkYBwFIzoEmEZ6/I8GwGgKGOEhMJoFRrPAaBZgHG0HjOQQGC0ERwvB0UJwtBAcrQVGa4ERHAKj1eBoNThaDY5Wg6PV4Gg1OFoNjtwQGG0HjLYDRtsBo+2A0XbAaDtgtB0w2g4YsSEw2hAabQiNNoRGG0KjDaHRhtBoQ2i0ITTaEBqpITDaEhxtCY62BEdbgqMtwdGW4GhLcLQlONoSHG0JjtAQGG0KjzaFR5vCo03h0abwaFN4tCnMONoSHG0JjrYER2YIjDaFR5vCo03h0abwiA6B0UJwtBAcLQRHC8HRQpBxtDs82h0esSEw2g4YbQeMtgNG2wGj7YDRdsBoQ2i0ITTaEBqpITDaEhxtCY62BEdbgqMtwdGW4GhLcLQlONoSHG0JjtAQGG0KjzaFR5vCo03h0aYw42hLcLQlONoSHG0JjrYER2YIjDaFR5vCIzwERrPAaBYYzQKMo52h0c7QaG9wtDc4YkNgtB0w2g4YbQeMtgNGG0KjDaHRhtBoQ2i0ITRSQ2C0JTjaEhxtCY62BEdbgqMtwdGW4GhLcLQlONoSHKEhMNoUHm0KjzaFR5vCo01hxtGW4GhLcLQlONoSHG0JjswQGG0KjzaFR3gIjGaB0SwwmgUYRztDo52h0d7gaG9wxIbAaDtgtB0w2g4YbQeMNoRGG0KjDaHRhtBoQ2ikhsBoS3C0JTjaEhxtCY62BEdbgqMtwdGW4GhLcLQlOEJDYLQpPNoUHm0KjzaFR5vCjKMtwdGW4GhLcLQlONoSHJkhMNoUHm0Kj/AQGM0Co1lgNAswjnaGRjtDo73B0d7giA2B0XbAaDtgtB0w2g4YbQiNNoRGG0KjDaHRhtBIDYHRluBoS3C0JTjaEhxtCY62BEdbgqMtwdGW4GhLcISGwGhTeLQpPNoUHm0KjzaFGUdbgqMtwdGW4GhLcLQlODJDYLQpPNoUHuEhMJoFRrPAaBZgHO0MjXaGRnuDo73BERsCo+2A0XbASA+B/yM8AACT+QMKU2EuJAAAAABJRU5ErkJggg=="
+    }
+  ],
+  "meshes": [
+    {
+      "name": "cube",
+      "primitives": [
+        {
+          "indices": 4,
+          "attributes": {
+            "POSITION": 0,
+            "NORMAL": 1,
+            "TEXCOORD_0": 2,
+            "COLOR_0": 3
+          }
+        }
+      ]
+    }
+  ],
+  "materials": [
+    {
+      "name": "scene-shade-i8-material",
+      "pbrMetallicRoughness": {
+        "baseColorTexture": {
+          "index": 0
+        },
+        "metallicFactor": 0,
+        "baseColorFactor": [0.577580512, 0.577580512, 0.577580512, 1]
+      }
+    }
+  ],
+  "nodes": [
+    {
+      "children": [ 1, 2, 3, 4 ],
+      "name": "world"
+    },
+    {
+      "name": "drift",
+      "matrix": [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 20, 1],
+      "extensions": {
+        "KHR_lights_punctual": {
+          "light": 0
+        },
+        "BR_lights": {
+          "light": 0
+        }
+      }
+    },
+    {
+      "name": "ambient",
+      "extensions": {
+        "BR_lights": {
+          "light": 1
+        }
+      }
+    },
+    {
+      "name": "camera",
+      "matrix": [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 6, 1],
+      "camera": 0
+    },
+    {
+      "mesh": 0,
+      "name": "cube",
+      "matrix": [5.43784666, 0, -2.53570986, 0, 0.656289995, 5.79555511, 1.40741825, 0, 2.44930768, -1.55291426, 5.25255632, 0, 0, 0, 0, 1],
+      "extensions": {
+        "BR_materials": {
+          "material": 0
+        }
+      }
+    }
+  ],
+  "samplers": [
+    {
+      "magFilter": 9728,
+      "minFilter": 9728
+    }
+  ],
+  "scene": 0,
+  "scenes": [
+    {
+      "nodes": [ 0 ]
+    }
+  ],
+  "textures": [
+    {
+      "name": "scene-shade-i8-material",
+      "source": 0,
+      "sampler": 0
+    }
+  ],
+  "cameras": [
+    {
+      "type": "perspective",
+      "perspective": {
+        "aspectRatio": 1,
+        "yfov": 0.785398185,
+        "zfar": 100,
+        "znear": 0.100000001
+      }
+    }
+  ],
+  "extensions": {
+    "KHR_lights_punctual": {
+      "lights": [
+        {
+          "type": "point",
+          "range": 60
+        },
+        {
+          "type": "point",
+          "intensity": 0,
+          "range": 1
+        }
+      ]
+    },
+    "BR_lights": {
+      "lights": [
+        {
+          "identifier": "drift",
+          "type": "point",
+          "linear_falloff": true,
+          "colour": [1, 1, 1],
+          "radius_outer": 60
+        },
+        {
+          "identifier": "ambient",
+          "type": "ambient",
+          "colour": [0.188235298, 0.188235298, 0.188235298]
+        }
+      ]
+    },
+    "BR_materials": {
+      "materials": [
+        {
+          "identifier": "scene-shade-i8-material",
+          "colour": [0.784313738, 0.784313738, 0.784313738],
+          "ka": 0.300000012,
+          "kd": 0.00490000006,
+          "flags": 37,
+          "map_transform": [1, 0, 0, 1, 0, 0],
+          "index_base": 0,
+          "index_range": 255,
+          "colour_map": 0,
+          "index_shade": 1
+        }
+      ]
+    }
+  },
+  "extensionsUsed": [
+    "KHR_lights_punctual",
+    "BR_lights",
+    "BR_materials"
+  ]
+}
