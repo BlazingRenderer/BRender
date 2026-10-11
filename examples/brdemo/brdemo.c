@@ -54,8 +54,12 @@ void BrDemoDefaultRender(br_demo *demo)
     BrPixelmapFill(demo->colour_buffer, demo->clear_colour);
     BrPixelmapFill(demo->depth_buffer, 0xFFFFFFFF);
 
-    if(demo->camera != NULL)
-        BrZbSceneRender(demo->world, demo->camera, demo->colour_buffer, demo->depth_buffer);
+    if(demo->camera != NULL) {
+        if(demo->args->no_depth)
+            BrZsSceneRender(demo->world, demo->camera, demo->colour_buffer);
+        else
+            BrZbSceneRender(demo->world, demo->camera, demo->colour_buffer, demo->depth_buffer);
+    }
 
     BrRendererFrameEnd();
 }
@@ -412,6 +416,7 @@ cleanup:
 #define ARGDEF_BACKBUFFER_HEIGHT  305
 #define ARGDEF_OPENGL_DEVICE_NAME 306
 #define ARGDEF_NO_STATS           307
+#define ARGDEF_NO_DEPTH           308
 
 const static struct parg_option argdefs[] = {
     {.name = "width",              .has_arg = PARG_REQARG, .flag = NULL, .val = ARGDEF_WIDTH             },
@@ -424,6 +429,7 @@ const static struct parg_option argdefs[] = {
     {.name = "backbuffer-height",  .has_arg = PARG_REQARG, .flag = NULL, .val = ARGDEF_BACKBUFFER_HEIGHT },
     {.name = "opengl-device-name", .has_arg = PARG_REQARG, .flag = NULL, .val = ARGDEF_OPENGL_DEVICE_NAME},
     {.name = "no-stats",           .has_arg = PARG_NOARG,  .flag = NULL, .val = ARGDEF_NO_STATS          },
+    {.name = "no-depth",           .has_arg = PARG_NOARG,  .flag = NULL, .val = ARGDEF_NO_DEPTH          },
     {.name = NULL,                 .has_arg = 0,           .flag = NULL, .val = 0                        },
 };
 
@@ -481,6 +487,10 @@ static int parse_args(int argc, char *const argv[], br_demo_run_args *args)
 
             case ARGDEF_NO_STATS:
                 args->no_stats = 1;
+                break;
+
+            case ARGDEF_NO_DEPTH:
+                args->no_depth = 1;
                 break;
 
             case ARGDEF_HELP:
@@ -548,6 +558,7 @@ static const char *usage_options =
     "  --backbuffer-height  Height of the backbuffer, defaults to the same as the screen.\n"
     "  --opengl-device-name Name of the OpenGL device driver to use. Valid options: glrend (default), glrend1x\n"
     "  --no-stats           Suppress the on-screen frame-time text.\n"
+    "  --no-depth           Render with Z-sorting and no depth buffer.\n"
     "  --help               Display this message.\n"
     "\n"
 ;
@@ -566,6 +577,7 @@ void BrDemoDefaultArgs(br_demo_run_args *args)
         .backbuffer_width   = 0,
         .backbuffer_height  = 0,
         .no_stats           = 0,
+        .no_depth           = 0,
     };
 }
 
