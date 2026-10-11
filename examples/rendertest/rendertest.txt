@@ -89,6 +89,7 @@ glrend/llvmpipe/declared/zb/8/320x240/scene-shade-arb-flat c391f12dcbcc1269
 glrend/llvmpipe/declared/zb/8/320x240/scene-shade-arb-flat-persp c391f12dcbcc1269
 glrend/llvmpipe/declared/zb/8/320x240/scene-shade-arb-smooth-persp c391f12dcbcc1269
 glrend/llvmpipe/declared/zb/8/320x240/scene-shade-flat af697abd5d845f33
+glrend/llvmpipe/declared/zb/8/320x240/scene-shade-i8 682dd3882e67e383
 glrend/llvmpipe/declared/zb/8/320x240/scene-shade-p256-flat-persp 79b8368cf1fb6282
 glrend/llvmpipe/declared/zb/8/320x240/scene-shade-p256-flat-persp-blend 0dc3ccc989558f5c
 glrend/llvmpipe/declared/zb/8/320x240/scene-shade-p256-smooth-persp 79b8368cf1fb6282
@@ -203,6 +204,7 @@ glrend/llvmpipe/declared/zs/8/320x240/scene-shade-arb-flat 052344700496274f
 glrend/llvmpipe/declared/zs/8/320x240/scene-shade-arb-flat-persp 052344700496274f
 glrend/llvmpipe/declared/zs/8/320x240/scene-shade-arb-smooth-persp 052344700496274f
 glrend/llvmpipe/declared/zs/8/320x240/scene-shade-flat af697abd5d845f33
+glrend/llvmpipe/declared/zs/8/320x240/scene-shade-i8 682dd3882e67e383
 glrend/llvmpipe/declared/zs/8/320x240/scene-shade-p256-flat-persp 8b52e78446019058
 glrend/llvmpipe/declared/zs/8/320x240/scene-shade-p256-flat-persp-blend 0dc3ccc989558f5c
 glrend/llvmpipe/declared/zs/8/320x240/scene-shade-p256-smooth-persp 8b52e78446019058
@@ -317,6 +319,7 @@ glrend/llvmpipe/x87/zb/8/320x240/scene-shade-arb-flat c391f12dcbcc1269
 glrend/llvmpipe/x87/zb/8/320x240/scene-shade-arb-flat-persp c391f12dcbcc1269
 glrend/llvmpipe/x87/zb/8/320x240/scene-shade-arb-smooth-persp c391f12dcbcc1269
 glrend/llvmpipe/x87/zb/8/320x240/scene-shade-flat af697abd5d845f33
+glrend/llvmpipe/x87/zb/8/320x240/scene-shade-i8 682dd3882e67e383
 glrend/llvmpipe/x87/zb/8/320x240/scene-shade-p256-flat-persp 79b8368cf1fb6282
 glrend/llvmpipe/x87/zb/8/320x240/scene-shade-p256-flat-persp-blend 0dc3ccc989558f5c
 glrend/llvmpipe/x87/zb/8/320x240/scene-shade-p256-smooth-persp 79b8368cf1fb6282
@@ -431,6 +434,7 @@ glrend/llvmpipe/x87/zs/8/320x240/scene-shade-arb-flat 052344700496274f
 glrend/llvmpipe/x87/zs/8/320x240/scene-shade-arb-flat-persp 052344700496274f
 glrend/llvmpipe/x87/zs/8/320x240/scene-shade-arb-smooth-persp 052344700496274f
 glrend/llvmpipe/x87/zs/8/320x240/scene-shade-flat af697abd5d845f33
+glrend/llvmpipe/x87/zs/8/320x240/scene-shade-i8 682dd3882e67e383
 glrend/llvmpipe/x87/zs/8/320x240/scene-shade-p256-flat-persp 8b52e78446019058
 glrend/llvmpipe/x87/zs/8/320x240/scene-shade-p256-flat-persp-blend 0dc3ccc989558f5c
 glrend/llvmpipe/x87/zs/8/320x240/scene-shade-p256-smooth-persp 8b52e78446019058
@@ -545,6 +549,7 @@ glrend1x/llvmpipe/declared/zb/7/320x240/scene-shade-arb-flat a24c79521aebcee3
 glrend1x/llvmpipe/declared/zb/7/320x240/scene-shade-arb-flat-persp 3dfaa8e28d71a0fc
 glrend1x/llvmpipe/declared/zb/7/320x240/scene-shade-arb-smooth-persp 201d43fc3a2b230e
 glrend1x/llvmpipe/declared/zb/7/320x240/scene-shade-flat 210c2585b48b2a52
+glrend1x/llvmpipe/declared/zb/7/320x240/scene-shade-i8 3bd2a23dbf864383
 glrend1x/llvmpipe/declared/zb/7/320x240/scene-shade-p256-flat-persp 285991c8e4dc65f2
 glrend1x/llvmpipe/declared/zb/7/320x240/scene-shade-p256-flat-persp-blend 6bd35dfe7c643ae9
 glrend1x/llvmpipe/declared/zb/7/320x240/scene-shade-p256-smooth-persp a862ab768ce61a20
@@ -659,6 +664,7 @@ glrend1x/llvmpipe/declared/zs/7/320x240/scene-shade-arb-flat a1081f7dcdfebc39
 glrend1x/llvmpipe/declared/zs/7/320x240/scene-shade-arb-flat-persp 3c0693ee87e4c464
 glrend1x/llvmpipe/declared/zs/7/320x240/scene-shade-arb-smooth-persp 33ac9ffeeade21c2
 glrend1x/llvmpipe/declared/zs/7/320x240/scene-shade-flat 210c2585b48b2a52
+glrend1x/llvmpipe/declared/zs/7/320x240/scene-shade-i8 3bd2a23dbf864383
 glrend1x/llvmpipe/declared/zs/7/320x240/scene-shade-p256-flat-persp cd924b52e8af562e
 glrend1x/llvmpipe/declared/zs/7/320x240/scene-shade-p256-flat-persp-blend 6bd35dfe7c643ae9
 glrend1x/llvmpipe/declared/zs/7/320x240/scene-shade-p256-smooth-persp 984fd5885a2c5b94
@@ -773,6 +779,7 @@ glrend1x/llvmpipe/x87/zb/7/320x240/scene-shade-arb-flat a24c79521aebcee3
 glrend1x/llvmpipe/x87/zb/7/320x240/scene-shade-arb-flat-persp 3dfaa8e28d71a0fc
 glrend1x/llvmpipe/x87/zb/7/320x240/scene-shade-arb-smooth-persp 201d43fc3a2b230e
 glrend1x/llvmpipe/x87/zb/7/320x240/scene-shade-flat 210c2585b48b2a52
+glrend1x/llvmpipe/x87/zb/7/320x240/scene-shade-i8 3bd2a23dbf864383
 glrend1x/llvmpipe/x87/zb/7/320x240/scene-shade-p256-flat-persp 285991c8e4dc65f2
 glrend1x/llvmpipe/x87/zb/7/320x240/scene-shade-p256-flat-persp-blend 6bd35dfe7c643ae9
 glrend1x/llvmpipe/x87/zb/7/320x240/scene-shade-p256-smooth-persp a862ab768ce61a20
@@ -887,6 +894,7 @@ glrend1x/llvmpipe/x87/zs/7/320x240/scene-shade-arb-flat a1081f7dcdfebc39
 glrend1x/llvmpipe/x87/zs/7/320x240/scene-shade-arb-flat-persp 3c0693ee87e4c464
 glrend1x/llvmpipe/x87/zs/7/320x240/scene-shade-arb-smooth-persp 33ac9ffeeade21c2
 glrend1x/llvmpipe/x87/zs/7/320x240/scene-shade-flat 210c2585b48b2a52
+glrend1x/llvmpipe/x87/zs/7/320x240/scene-shade-i8 3bd2a23dbf864383
 glrend1x/llvmpipe/x87/zs/7/320x240/scene-shade-p256-flat-persp cd924b52e8af562e
 glrend1x/llvmpipe/x87/zs/7/320x240/scene-shade-p256-flat-persp-blend 6bd35dfe7c643ae9
 glrend1x/llvmpipe/x87/zs/7/320x240/scene-shade-p256-smooth-persp 984fd5885a2c5b94
@@ -1001,6 +1009,7 @@ softrend/softprmf/declared/zb/3/320x240/scene-shade-arb-flat f1a231f8942db855
 softrend/softprmf/declared/zb/3/320x240/scene-shade-arb-flat-persp fdaf81ad4c1e5075
 softrend/softprmf/declared/zb/3/320x240/scene-shade-arb-smooth-persp 3293556f856b07f2
 softrend/softprmf/declared/zb/3/320x240/scene-shade-flat 23393e37c49761fc
+softrend/softprmf/declared/zb/3/320x240/scene-shade-i8 506c972d0e57f3ba
 softrend/softprmf/declared/zb/3/320x240/scene-shade-p256-flat-persp 8a711de15276f927
 softrend/softprmf/declared/zb/3/320x240/scene-shade-p256-flat-persp-blend 8a711de15276f927
 softrend/softprmf/declared/zb/3/320x240/scene-shade-p256-smooth-persp 28f64cee0d6d9a3f
@@ -1115,6 +1124,7 @@ softrend/softprmf/declared/zb/4/320x240/scene-shade-arb-flat d038f5c8934f71f5
 softrend/softprmf/declared/zb/4/320x240/scene-shade-arb-flat-persp d038f5c8934f71f5
 softrend/softprmf/declared/zb/4/320x240/scene-shade-arb-smooth-persp 9af8258cacd189f2
 softrend/softprmf/declared/zb/4/320x240/scene-shade-flat 5af7f47ac023f588
+softrend/softprmf/declared/zb/4/320x240/scene-shade-i8 f0846b3e463be383
 softrend/softprmf/declared/zb/4/320x240/scene-shade-p256-flat-persp 73cab9c704f9c401
 softrend/softprmf/declared/zb/4/320x240/scene-shade-p256-flat-persp-blend ad6935aded096643
 softrend/softprmf/declared/zb/4/320x240/scene-shade-p256-smooth-persp cc3b46cae463103e
@@ -1229,6 +1239,7 @@ softrend/softprmf/declared/zb/5/320x240/scene-shade-arb-flat 31058744647b144c
 softrend/softprmf/declared/zb/5/320x240/scene-shade-arb-flat-persp 31058744647b144c
 softrend/softprmf/declared/zb/5/320x240/scene-shade-arb-smooth-persp beed17f5924ed072
 softrend/softprmf/declared/zb/5/320x240/scene-shade-flat 8b8a155c3f103a34
+softrend/softprmf/declared/zb/5/320x240/scene-shade-i8 5e5fb0583926b383
 softrend/softprmf/declared/zb/5/320x240/scene-shade-p256-flat-persp eb5305018901ede4
 softrend/softprmf/declared/zb/5/320x240/scene-shade-p256-flat-persp-blend fb7f68244d88b88c
 softrend/softprmf/declared/zb/5/320x240/scene-shade-p256-smooth-persp 1641434f33301c1a
@@ -1343,6 +1354,7 @@ softrend/softprmf/declared/zb/6/320x240/scene-shade-arb-flat cc20f727d3c8a16a
 softrend/softprmf/declared/zb/6/320x240/scene-shade-arb-flat-persp 5bbf9e29b02b1c4e
 softrend/softprmf/declared/zb/6/320x240/scene-shade-arb-smooth-persp e2fe70899d8e1ce1
 softrend/softprmf/declared/zb/6/320x240/scene-shade-flat b139759b43ebc4f6
+softrend/softprmf/declared/zb/6/320x240/scene-shade-i8 2e1271748ed30383
 softrend/softprmf/declared/zb/6/320x240/scene-shade-p256-flat-persp 46c0cb7104ec8ec2
 softrend/softprmf/declared/zb/6/320x240/scene-shade-p256-flat-persp-blend 46c0cb7104ec8ec2
 softrend/softprmf/declared/zb/6/320x240/scene-shade-p256-smooth-persp 1bac61c0b5a99c31
@@ -1457,6 +1469,7 @@ softrend/softprmf/declared/zs/3/320x240/scene-shade-arb-flat 302281cc34b36923
 softrend/softprmf/declared/zs/3/320x240/scene-shade-arb-flat-persp bf7186e66e029e08
 softrend/softprmf/declared/zs/3/320x240/scene-shade-arb-smooth-persp 7b1e7c040a9d2349
 softrend/softprmf/declared/zs/3/320x240/scene-shade-flat d3d0b151f5d71383
+softrend/softprmf/declared/zs/3/320x240/scene-shade-i8 4360157ede8ae800
 softrend/softprmf/declared/zs/3/320x240/scene-shade-p256-flat-persp 5eb9bcd609032630
 softrend/softprmf/declared/zs/3/320x240/scene-shade-p256-flat-persp-blend 5eb9bcd609032630
 softrend/softprmf/declared/zs/3/320x240/scene-shade-p256-smooth-persp 5b4f63ed4537b5e3
@@ -1571,6 +1584,7 @@ softrend/softprmf/declared/zs/4/320x240/scene-shade-arb-flat d198ad19ccd7af53
 softrend/softprmf/declared/zs/4/320x240/scene-shade-arb-flat-persp 3320b40a3102ecb2
 softrend/softprmf/declared/zs/4/320x240/scene-shade-arb-smooth-persp ea83e6a0d2c34494
 softrend/softprmf/declared/zs/4/320x240/scene-shade-flat 31bdec00998c4dc4
+softrend/softprmf/declared/zs/4/320x240/scene-shade-i8 f0846b3e463be383
 softrend/softprmf/declared/zs/4/320x240/scene-shade-p256-flat-persp 1b2a455d2003b94f
 softrend/softprmf/declared/zs/4/320x240/scene-shade-p256-flat-persp-blend c64b9571c74a7057
 softrend/softprmf/declared/zs/4/320x240/scene-shade-p256-smooth-persp 38c4640c41bf9410
@@ -1685,6 +1699,7 @@ softrend/softprmf/declared/zs/5/320x240/scene-shade-arb-flat 5758eb4afc8e51da
 softrend/softprmf/declared/zs/5/320x240/scene-shade-arb-flat-persp d714b06d8007606c
 softrend/softprmf/declared/zs/5/320x240/scene-shade-arb-smooth-persp 492f3fb407afa7fd
 softrend/softprmf/declared/zs/5/320x240/scene-shade-flat 0dea49c982ca09a0
+softrend/softprmf/declared/zs/5/320x240/scene-shade-i8 5e5fb0583926b383
 softrend/softprmf/declared/zs/5/320x240/scene-shade-p256-flat-persp 7d44a00c4eae2e02
 softrend/softprmf/declared/zs/5/320x240/scene-shade-p256-flat-persp-blend e915af35e727dc0a
 softrend/softprmf/declared/zs/5/320x240/scene-shade-p256-smooth-persp 29aca2cada4ada66
@@ -1799,6 +1814,7 @@ softrend/softprmf/declared/zs/6/320x240/scene-shade-arb-flat 50af23c69f16cec8
 softrend/softprmf/declared/zs/6/320x240/scene-shade-arb-flat-persp 2cf539fa4cab4697
 softrend/softprmf/declared/zs/6/320x240/scene-shade-arb-smooth-persp 8798691a6b42783b
 softrend/softprmf/declared/zs/6/320x240/scene-shade-flat b139759b43ebc4f6
+softrend/softprmf/declared/zs/6/320x240/scene-shade-i8 2e1271748ed30383
 softrend/softprmf/declared/zs/6/320x240/scene-shade-p256-flat-persp 1ec788072d3c1baf
 softrend/softprmf/declared/zs/6/320x240/scene-shade-p256-flat-persp-blend 1ec788072d3c1baf
 softrend/softprmf/declared/zs/6/320x240/scene-shade-p256-smooth-persp 8ee9f2b5cdb5861f
@@ -1913,6 +1929,7 @@ softrend/softprmf/x87/zb/3/320x240/scene-shade-arb-flat bb6629411a980298
 softrend/softprmf/x87/zb/3/320x240/scene-shade-arb-flat-persp 174c5d0aaf2d6754
 softrend/softprmf/x87/zb/3/320x240/scene-shade-arb-smooth-persp e43cf4aa34e9a1f1
 softrend/softprmf/x87/zb/3/320x240/scene-shade-flat 23393e37c49761fc
+softrend/softprmf/x87/zb/3/320x240/scene-shade-i8 0a0049e5117af469
 softrend/softprmf/x87/zb/3/320x240/scene-shade-p256-flat-persp c644659699ec4116
 softrend/softprmf/x87/zb/3/320x240/scene-shade-p256-flat-persp-blend c644659699ec4116
 softrend/softprmf/x87/zb/3/320x240/scene-shade-p256-smooth-persp e089797dcc414f25
@@ -2027,6 +2044,7 @@ softrend/softprmf/x87/zb/4/320x240/scene-shade-arb-flat d038f5c8934f71f5
 softrend/softprmf/x87/zb/4/320x240/scene-shade-arb-flat-persp d038f5c8934f71f5
 softrend/softprmf/x87/zb/4/320x240/scene-shade-arb-smooth-persp 9af8258cacd189f2
 softrend/softprmf/x87/zb/4/320x240/scene-shade-flat 5af7f47ac023f588
+softrend/softprmf/x87/zb/4/320x240/scene-shade-i8 f0846b3e463be383
 softrend/softprmf/x87/zb/4/320x240/scene-shade-p256-flat-persp 73cab9c704f9c401
 softrend/softprmf/x87/zb/4/320x240/scene-shade-p256-flat-persp-blend ad6935aded096643
 softrend/softprmf/x87/zb/4/320x240/scene-shade-p256-smooth-persp cc3b46cae463103e
@@ -2141,6 +2159,7 @@ softrend/softprmf/x87/zb/5/320x240/scene-shade-arb-flat 31058744647b144c
 softrend/softprmf/x87/zb/5/320x240/scene-shade-arb-flat-persp 31058744647b144c
 softrend/softprmf/x87/zb/5/320x240/scene-shade-arb-smooth-persp beed17f5924ed072
 softrend/softprmf/x87/zb/5/320x240/scene-shade-flat 8b8a155c3f103a34
+softrend/softprmf/x87/zb/5/320x240/scene-shade-i8 5e5fb0583926b383
 softrend/softprmf/x87/zb/5/320x240/scene-shade-p256-flat-persp eb5305018901ede4
 softrend/softprmf/x87/zb/5/320x240/scene-shade-p256-flat-persp-blend fb7f68244d88b88c
 softrend/softprmf/x87/zb/5/320x240/scene-shade-p256-smooth-persp 1641434f33301c1a
@@ -2255,6 +2274,7 @@ softrend/softprmf/x87/zb/6/320x240/scene-shade-arb-flat cc20f727d3c8a16a
 softrend/softprmf/x87/zb/6/320x240/scene-shade-arb-flat-persp 5bbf9e29b02b1c4e
 softrend/softprmf/x87/zb/6/320x240/scene-shade-arb-smooth-persp e2fe70899d8e1ce1
 softrend/softprmf/x87/zb/6/320x240/scene-shade-flat b139759b43ebc4f6
+softrend/softprmf/x87/zb/6/320x240/scene-shade-i8 2e1271748ed30383
 softrend/softprmf/x87/zb/6/320x240/scene-shade-p256-flat-persp 46c0cb7104ec8ec2
 softrend/softprmf/x87/zb/6/320x240/scene-shade-p256-flat-persp-blend 46c0cb7104ec8ec2
 softrend/softprmf/x87/zb/6/320x240/scene-shade-p256-smooth-persp 1bac61c0b5a99c31
@@ -2369,6 +2389,7 @@ softrend/softprmf/x87/zs/3/320x240/scene-shade-arb-flat 302281cc34b36923
 softrend/softprmf/x87/zs/3/320x240/scene-shade-arb-flat-persp 0badb559f4a87910
 softrend/softprmf/x87/zs/3/320x240/scene-shade-arb-smooth-persp 8d76107425ab838e
 softrend/softprmf/x87/zs/3/320x240/scene-shade-flat d3d0b151f5d71383
+softrend/softprmf/x87/zs/3/320x240/scene-shade-i8 4360157ede8ae800
 softrend/softprmf/x87/zs/3/320x240/scene-shade-p256-flat-persp e0c6b71f185deae0
 softrend/softprmf/x87/zs/3/320x240/scene-shade-p256-flat-persp-blend e0c6b71f185deae0
 softrend/softprmf/x87/zs/3/320x240/scene-shade-p256-smooth-persp fc0d277a69e1c4d9
@@ -2483,6 +2504,7 @@ softrend/softprmf/x87/zs/4/320x240/scene-shade-arb-flat d198ad19ccd7af53
 softrend/softprmf/x87/zs/4/320x240/scene-shade-arb-flat-persp 3320b40a3102ecb2
 softrend/softprmf/x87/zs/4/320x240/scene-shade-arb-smooth-persp ea83e6a0d2c34494
 softrend/softprmf/x87/zs/4/320x240/scene-shade-flat 31bdec00998c4dc4
+softrend/softprmf/x87/zs/4/320x240/scene-shade-i8 f0846b3e463be383
 softrend/softprmf/x87/zs/4/320x240/scene-shade-p256-flat-persp 1b2a455d2003b94f
 softrend/softprmf/x87/zs/4/320x240/scene-shade-p256-flat-persp-blend c64b9571c74a7057
 softrend/softprmf/x87/zs/4/320x240/scene-shade-p256-smooth-persp 38c4640c41bf9410
@@ -2597,6 +2619,7 @@ softrend/softprmf/x87/zs/5/320x240/scene-shade-arb-flat 5758eb4afc8e51da
 softrend/softprmf/x87/zs/5/320x240/scene-shade-arb-flat-persp d714b06d8007606c
 softrend/softprmf/x87/zs/5/320x240/scene-shade-arb-smooth-persp 492f3fb407afa7fd
 softrend/softprmf/x87/zs/5/320x240/scene-shade-flat 0dea49c982ca09a0
+softrend/softprmf/x87/zs/5/320x240/scene-shade-i8 5e5fb0583926b383
 softrend/softprmf/x87/zs/5/320x240/scene-shade-p256-flat-persp 7d44a00c4eae2e02
 softrend/softprmf/x87/zs/5/320x240/scene-shade-p256-flat-persp-blend e915af35e727dc0a
 softrend/softprmf/x87/zs/5/320x240/scene-shade-p256-smooth-persp 29aca2cada4ada66
@@ -2711,6 +2734,7 @@ softrend/softprmf/x87/zs/6/320x240/scene-shade-arb-flat 50af23c69f16cec8
 softrend/softprmf/x87/zs/6/320x240/scene-shade-arb-flat-persp 2cf539fa4cab4697
 softrend/softprmf/x87/zs/6/320x240/scene-shade-arb-smooth-persp 8798691a6b42783b
 softrend/softprmf/x87/zs/6/320x240/scene-shade-flat b139759b43ebc4f6
+softrend/softprmf/x87/zs/6/320x240/scene-shade-i8 2e1271748ed30383
 softrend/softprmf/x87/zs/6/320x240/scene-shade-p256-flat-persp 1ec788072d3c1baf
 softrend/softprmf/x87/zs/6/320x240/scene-shade-p256-flat-persp-blend 1ec788072d3c1baf
 softrend/softprmf/x87/zs/6/320x240/scene-shade-p256-smooth-persp 8ee9f2b5cdb5861f

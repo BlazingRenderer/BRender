@@ -1573,6 +1573,108 @@ static br_error scene_make_rgb_shade_fixtures(br_model *cube)
 
 /*
  * ------------------------------------------------------------------
+ * The z-sorted INDEX_8 intensity-step fixture.
+ *
+ * softprim rasterises a lit, smooth, perspective-correct, textured INDEX_8
+ * triangle through TexturedIndexedTriangle<SP_DEPTH_NONE, SP_SHADE_INTERP_I,
+ * SP_PERSP_CORRECT, ...> when the run is z-sorted (`rendertest --no-depth`).
+ * That block steps the interpolated intensity by `pw.di`, which the intel
+ * sources define two different ways: the z-sorted kernel (fti8_pip.asm:1430,
+ * 1439) stores work.pi.grad_x raw, while the z-buffered one (fti8pizp.asm)
+ * applies the carry adjustment first. A build that uses the z-buffered step
+ * everywhere moves the accumulator one 16.16 unit too far per pixel, so at
+ * pixel k of a span the buggy intensity is k units below the fixed one. A
+ * shade-table row is 65536 units, so the row - and the pixel - only moves when
+ * the interpolated intensity lands within k units of a row boundary. Nothing
+ * in the corpus does that, so this fixture is built to.
+ *
+ * The shade table is the whole lever: it is a ramp with exactly one output
+ * step per intensity row and the texture index riding as a constant offset on
+ * top, so a one-row drift is a one-index move in the frame rather than the
+ * near-miss `scene-shade-table`'s `row*96/255` is. The drift is only a pixel
+ * when it happens at a row boundary, which is why an ordinary ramp can miss it
+ * on every scene.
+ *
+ * The rig makes that boundary happen late in a long span. The cube is drawn far
+ * larger than the frame, so its spans are long, and it is turned about both
+ * axes so no face is fronto-parallel - a face with a constant w trips the
+ * perspective cheat and renders through the affine span, which has no pw.di.
+ * The light is far enough in front (0,0,20, radius 60) and the material's
+ * diffuse term small enough (ka 0.3, kd 0.0049) that the interpolated intensity
+ * stays within about one shade row over the visible face, stepping only a few
+ * tens of 16.16 units per pixel; a span's crossing of a row boundary then lands
+ * near its end, where the accumulated drift k is large enough to flip the row.
+ * Both the x87 and the declared build cross it, which is the measurement the
+ * values above come from - the window that does is narrow, so they are not free
+ * parameters.
+ */
+static br_pixelmap *scene_shade_i8_table(const char *name)
+{
+    br_pixelmap *pm;
+    br_uint_8   *pixels;
+
+    if((pm = scene_table_alloc(name, SCENE_TABLE_ROWS)) == NULL)
+        return NULL;
+
+    pixels = pm->pixels;
+
+    /*
+     * One output step per intensity row: the row is the ramp and the texel is a
+     * constant column offset, so adjacent rows never land on the same index.
+     * The offset is the texel byte itself, which keeps the texture's own
+     * checkerboard readable in the frame.
+     */
+    for(int row = 0; row < SCENE_TABLE_ROWS; ++row)
+        for(int col = 0; col < SCENE_TABLE_WIDTH; ++col)
+            pixels[(row * pm->row_bytes) + col] = (br_uint_8)((row + col) & 0xff);
+
+    return pm;
+}
+
+static br_error scene_make_shade_i8_fixture(br_model *cube)
+{
+    br_pixelmap *map   = scene_shade_texture_size("scene-shade-i8-map", SCENE_TEX_SIZE);
+    br_pixelmap *shade = scene_shade_i8_table("scene-shade-i8-table");
+    br_material *mat;
+    br_actor    *world, *a;
+    br_matrix34  m;
+
+    if(map == NULL || shade == NULL)
+        return BRE_FAIL;
+
+    if((mat = scene_fx_material("scene-shade-i8-material", BR_MATF_LIGHT | BR_MATF_SMOOTH | BR_MATF_PERSPECTIVE)) == NULL)
+        return BRE_FAIL;
+
+    mat->ka          = BR_SCALAR(0.3);
+    mat->kd          = BR_SCALAR(0.0049);
+    mat->ks          = BR_SCALAR(0.0);
+    mat->colour_map  = map;
+    mat->index_shade = shade;
+
+    if((world = scene_world(cube, mat, BR_SCALAR(1.0))) == NULL)
+        return BRE_FAIL;
+
+    for(a = world->children; a != NULL; a = a->next)
+        if(a->type == BR_ACTOR_MODEL)
+            break;
+
+    if(a != NULL) {
+        BrMatrix34Scale(&m, BR_SCALAR(6.0), BR_SCALAR(6.0), BR_SCALAR(6.0));
+        BrMatrix34PostRotateX(&m, BR_ANGLE_DEG(15));
+        BrMatrix34PostRotateY(&m, BR_ANGLE_DEG(25));
+
+        a->t.type  = BR_TRANSFORM_MATRIX34;
+        a->t.t.mat = m;
+    }
+
+    if((a = scene_add_light(world, "drift", BR_LIGHT_POINT, BR_SCALAR(60.0), BR_TRUE)) != NULL)
+        scene_place_and_aim(a, BR_SCALAR(0.0), BR_SCALAR(0.0), BR_SCALAR(20.0), BR_TRUE);
+
+    return scene_save("scene-shade-i8.gltf", world);
+}
+
+/*
+ * ------------------------------------------------------------------
  * The INDEX_8 ROP cross-product fixtures.
  *
  * One fixture per cell of the cross-product of shading mode x addressing x
@@ -2628,6 +2730,9 @@ br_error mkres_make_scenes(void)
         r = BRE_FAIL;
 
     if(scene_make_rgb_shade_fixtures(cube) != BRE_OK)
+        r = BRE_FAIL;
+
+    if(scene_make_shade_i8_fixture(cube) != BRE_OK)
         r = BRE_FAIL;
 
     if(scene_make_line_fixtures(cube) != BRE_OK)
