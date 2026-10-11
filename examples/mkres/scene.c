@@ -379,6 +379,18 @@ static br_material *scene_light_volume_material(void)
 }
 
 /*
+ * A lit, smooth material for a fixture whose spot cone cuts across a face. A
+ * flat face is lit from a single point, so the spot either covers it whole or
+ * misses it, and glrend has no flat path to compare against (MIGRATION.md):
+ * the edge has to be interpolated for the cone to show.
+ */
+static br_material *scene_scale_spot_material(void)
+{
+    return scene_material_ex("scene-scale-spot-material", BR_COLOUR_RGB(200, 200, 200), BR_MATF_LIGHT | BR_MATF_SMOOTH,
+                             BR_SCALAR(0.1), BR_SCALAR(0.7), BR_SCALAR(0.0), BR_SCALAR(20.0));
+}
+
+/*
  * ------------------------------------------------------------------
  * Render-feature fixtures.
  *
@@ -2685,8 +2697,13 @@ br_error mkres_make_scenes(void)
             r = BRE_FAIL;
     }
 
+    /*
+     * The same scaled model with the spot turned off the Z axis, so its cone
+     * edge crosses the front face. The material is smooth so the edge is
+     * interpolated; see scene_scale_spot_material().
+     */
     {
-        world = scene_world(cube, material, BR_SCALAR(3.0));
+        world = scene_world(cube, scene_scale_spot_material(), BR_SCALAR(3.0));
 
         if(world != NULL)
             scene_add_light_turned(world, "spot", BR_LIGHT_SPOT, BR_SCALAR(0.0), BR_ANGLE_DEG(30));
