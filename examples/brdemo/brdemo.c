@@ -194,6 +194,12 @@ static br_error create_window(br_demo *demo, const br_demo_run_args *args)
         return err;
     }
 
+    if(args->require_accel) {
+        BrLogError("DEMO", "Unable to create a hardware-accelerated window for device `%s', and this run requires one rather than a software fallback.",
+                   args->opengl_device_name);
+        return err;
+    }
+
     BrLogWarn("DEMO", "Unable to create window, falling back to software.");
 
 try_software:
@@ -561,6 +567,7 @@ void BrDemoDefaultArgs(br_demo_run_args *args)
         .height             = 720,
         .verbose            = BR_LOG_INFO,
         .force_software     = 0,
+        .require_accel      = 0,
         .software_pm_type   = BR_PMT_INDEX_8,
         .opengl_device_name = "glrend",
         .backbuffer_width   = 0,

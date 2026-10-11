@@ -43,6 +43,7 @@ typedef struct br_demo_run_args {
     br_int_32   height;
     int         verbose;
     int         force_software;
+    int         require_accel;
     br_uint_8   software_pm_type;
     br_int_32   backbuffer_width;
     br_int_32   backbuffer_height;
