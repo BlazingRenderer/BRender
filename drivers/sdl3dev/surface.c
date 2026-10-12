@@ -309,8 +309,76 @@ br_error DeviceClutSDL3CopyToSurface(SDL_Surface *surf, br_pixelmap *pm, br_devi
     return BRE_FAIL;
 }
 
+/*
+ * Copy a rectangle between two same-format surfaces as bytes.
+ *
+ * A copy is not a colour operation. The palette is not part of the pixel data:
+ * an index is read through the pixelmap's own `map', or the device's CLUT when
+ * it has none, and BRender's own copy is a byte copy - the memory backend
+ * memcpys, asserting the types match rather than converting. SDL_BlitSurface
+ * instead maps an indexed source's indices through its palette and back
+ * through the destination's, so a same-format copy between two INDEX8 buffers
+ * with different (or absent) palettes silently remaps them - in practice to
+ * all-zero. SDL_ConvertPixels copies the bytes when the formats are equal,
+ * whatever the palettes say.
+ *
+ * sr is the (already clipped) source rectangle, dx/dy the destination position
+ * in destination-surface coordinates; NULL sr means the whole source. The copy
+ * is clipped to the destination, as SDL_BlitSurface would be. Returns false
+ * only if a surface that needs locking will not lock.
+ */
+static bool blit_same_format(SDL_Surface *src, const SDL_Rect *sr, SDL_Surface *dst, int dx, int dy)
+{
+    SDL_Rect s = sr != NULL ? *sr : (SDL_Rect){0, 0, src->w, src->h};
+    SDL_Rect d = {dx, dy, s.w, s.h};
+    SDL_Rect clip;
+    bool     locked_src = false, locked_dst = false, ok = false;
+
+    if(!SDL_GetRectIntersection(&d, &(SDL_Rect){0, 0, dst->w, dst->h}, &clip))
+        return true;
+
+    s.x += clip.x - dx;
+    s.y += clip.y - dy;
+    s.w = clip.w;
+    s.h = clip.h;
+
+    if(SDL_MUSTLOCK(src)) {
+        if(!SDL_LockSurface(src))
+            return false;
+        locked_src = true;
+    }
+
+    if(SDL_MUSTLOCK(dst)) {
+        if(!SDL_LockSurface(dst))
+            goto out;
+        locked_dst = true;
+    }
+
+    ok = SDL_ConvertPixels(s.w, s.h, src->format, (const Uint8 *)src->pixels + s.y * src->pitch + s.x * SDL_BYTESPERPIXEL(src->format),
+                           src->pitch, dst->format, (Uint8 *)dst->pixels + clip.y * dst->pitch + clip.x * SDL_BYTESPERPIXEL(dst->format),
+                           dst->pitch);
+
+out:
+    if(locked_dst)
+        SDL_UnlockSurface(dst);
+
+    if(locked_src)
+        SDL_UnlockSurface(src);
+
+    return ok;
+}
+
 static bool xblit(SDL_Surface *src, const SDL_Rect *sr, SDL_Surface *dst, SDL_Rect *dr, br_sdl_blit_cbfn blit)
 {
+    /*
+     * A same-format copy is a byte copy, not a colour one - see
+     * blit_same_format(). Only the unscaled copy, and only indexed formats: a
+     * true-colour blit with a blend mode set is SDL's to do, and nothing here
+     * sets one.
+     */
+    if(SDL_ISPIXELFORMAT_INDEXED(src->format) && src->format == dst->format && blit == SDL_BlitSurface)
+        return blit_same_format(src, sr, dst, dr != NULL ? dr->x : 0, dr != NULL ? dr->y : 0);
+
     /*
      * Handle two special cases that SDL doesn't support.
      *   1. Regular blitting from INDEX* -> XRGB8888
@@ -318,6 +386,9 @@ static bool xblit(SDL_Surface *src, const SDL_Rect *sr, SDL_Surface *dst, SDL_Re
      *
      * Go via an intermediate surface (possibly again). This is slow, and indexed pixelmaps
      * should be de-indexed at load-time. See BrPixelmapDeCLUT().
+     *
+     * Note this special case is for an indexed source that is *not* a
+     * same-format copy; those are handled above.
      */
     if(SDL_ISPIXELFORMAT_INDEXED(src->format) && (dst->format == SDL_PIXELFORMAT_XRGB8888 || blit == DevicePixelmapSDL3BlitScaled)) {
         int          r;

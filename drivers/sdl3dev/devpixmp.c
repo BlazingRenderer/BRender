@@ -395,7 +395,12 @@ static br_error BR_CMETHOD_DECL(br_device_pixelmap_sdl3, copy)(br_device_pixelma
     drect.x += self->pm_base_x;
     drect.y += self->pm_base_y;
 
-    if(!SDL_BlitSurface(src->surface, NULL, self->surface, &drect))
+    /*
+     * Via the driver's blit rather than SDL_BlitSurface directly: a
+     * same-format indexed copy has to stay a byte copy, not go through the
+     * palettes. See blit_same_format() in surface.c.
+     */
+    if(DevicePixelmapSDL3BlitSurface((br_pixelmap *)src, NULL, (br_pixelmap *)self, &drect, SDL_BlitSurface) != BRE_OK)
         return BRE_FAIL;
 
     return BRE_OK;
