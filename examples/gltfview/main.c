@@ -1,3 +1,30 @@
+/*
+ * gltfview - a fly-around viewer for glTF scenes, built on brdemo.
+ *
+ * Two divergences from examples/rendertest are deliberate. Both were
+ * investigated and confirmed by the owner, and they are recorded here so they
+ * are not refiled as defects - the notes they used to live in were untracked.
+ *
+ * 1. At --software-bpp 8 the *frame* is correct, but the PPM/PNG this writes is
+ *    presented through a palette built from the scene's own pixelmaps
+ *    (build_clut() below). A frame whose indices come from a lookup-table band
+ *    rather than a texture is outside what that palette can describe, so every
+ *    index resolves to black. It is bpp8-only, not lookup-table-specific - it
+ *    hits fixtures with no textures at all - and the frame is byte-identical to
+ *    rendertest's from the same scene. `rendertest --ppm-dir` presents through
+ *    the harness's palette and is the way to look at what the reference
+ *    compares.
+ *
+ * 2. The software path renders with editorcam's 0.01..1000 depth range
+ *    (contrib/editorcam/editorcam.c) rather than the scene camera's
+ *    hither/yon: FocusCamOnSceneCamera() leaves those two assignments commented
+ *    out, because a fly camera for an arbitrary scene needs a wide range, and
+ *    there is no way to drive its own from the scene. Scenes whose camera range
+ *    matters therefore differ from rendertest's checksum.
+ *
+ * The window path and the bench's dump resolve the same palette as (1)
+ * (examples/gltfview/bench.c, drivers/sdl3dev/surface.c).
+ */
 #include <SDL3/SDL.h>
 #include <brender.h>
 #include <brdemo.h>
@@ -86,6 +113,12 @@ static void FocusCamOnSceneCamera(br_editor_camera *ecam, br_actor *world)
     ecam->camera->t.t.mat.m[3][2] = BR_SCALAR(0);
 
     ecam->camera_data.field_of_view = scdata->field_of_view;
+
+    /*
+     * hither/yon are deliberately not forwarded - see the file header. The
+     * lines are kept commented because uncommenting them is what makes the
+     * render's checksum match rendertest's.
+     */
     // ecam->camera_data.hither_z      = scdata->hither_z;
     // ecam->camera_data.yon_z         = scdata->yon_z;
 }
@@ -160,6 +193,10 @@ static br_boolean is_lookup_table(const br_pixelmap *pm)
 /*
  * Build the CLUT the indexed software paths need. The loader leaves a NULL
  * entry for an image it could not obtain, so the table can have holes in it.
+ *
+ * A frame whose indices come from a lookup-table band rather than a texture is
+ * outside what this can describe and comes out black - deliberate, and recorded
+ * in the file header.
  */
 static br_pixelmap *build_clut(br_pixelmap *const *maps, size_t nmaps)
 {
