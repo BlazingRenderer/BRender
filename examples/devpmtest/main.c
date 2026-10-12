@@ -1329,6 +1329,152 @@ static void clone_draw(br_pixelmap *dest, float dt, void *user)
                             state->earth32_device->width, state->earth32_device->height);
 }
 
+/*
+ * A copy between two INDEX8 pixelmaps is a byte copy. The palette is not part
+ * of the pixel data - an index is read through the pixelmap's own `map', or
+ * the device's CLUT when it has none - and BRender's memory backend memcpys,
+ * asserting the types match rather than converting. Handing this to a colour
+ * blit (SDL's, in sdl3dev's case) round-trips each index through the palettes
+ * and corrupts the destination - in practice to all-zero. See
+ * blit_same_format() in drivers/sdl3dev/surface.c.
+ *
+ * The check lives in init() because that is how this harness reports a
+ * failure today; it is a copy check, not a drawing test. Revisit when the
+ * harness can fail a test from draw()/post().
+ */
+#define INDEXED_COPY_WIDTH  64
+#define INDEXED_COPY_HEIGHT 64
+
+typedef struct indexed_copy_state {
+    br_pixelmap *src;
+    br_pixelmap *dst;
+    br_pixelmap *pal_src;
+    br_pixelmap *pal_dst;
+} indexed_copy_state;
+
+static br_uint_8 indexed_copy_index(br_int_32 x, br_int_32 y)
+{
+    /* A pattern rather than a constant, so a copy that lands one pixel fails. */
+    return (br_uint_8)((x * 3 + y * 7 + (x ^ y)) & 0xff);
+}
+
+/*
+ * A ramp, or its reverse. Two of these are the "different palettes" case: a
+ * colour round-trip maps index i to 255-i, so a copy that goes through the
+ * palettes fails the check below rather than passing by accident.
+ */
+static br_pixelmap *indexed_copy_palette(br_boolean reverse)
+{
+    br_pixelmap *pal = BrPixelmapAllocate(BR_PMT_RGBX_888, 1, 256, NULL, BR_PMAF_NORMAL);
+
+    if(pal == NULL)
+        return NULL;
+
+    for(br_int_32 i = 0; i < 256; i++) {
+        br_uint_8 v = reverse ? (br_uint_8)(255 - i) : (br_uint_8)i;
+        BrPixelmapPixelSet(pal, 0, i, BR_COLOUR_RGB(v, v, v));
+    }
+
+    return pal;
+}
+
+static void indexed_copy_fini(void *user)
+{
+    indexed_copy_state *state = user;
+
+    if(state->src != NULL)
+        BrPixelmapFree(state->src);
+
+    if(state->dst != NULL)
+        BrPixelmapFree(state->dst);
+
+    if(state->pal_src != NULL)
+        BrPixelmapFree(state->pal_src);
+
+    if(state->pal_dst != NULL)
+        BrPixelmapFree(state->pal_dst);
+
+    state->src = NULL;
+    state->dst = NULL;
+    state->pal_src = NULL;
+    state->pal_dst = NULL;
+}
+
+static br_error indexed_copy_init(void *user, br_pixelmap *screen, br_pixelmap *backbuffer, void *arg)
+{
+    indexed_copy_state *state = user;
+    br_pixelmap        *lock;
+    br_int_32           bad = 0;
+
+    state->src = BrPixelmapMatchTypedSized(screen, BR_PMMATCH_OFFSCREEN, BR_PMT_INDEX_8, INDEXED_COPY_WIDTH, INDEXED_COPY_HEIGHT);
+    state->dst = BrPixelmapMatchTypedSized(screen, BR_PMMATCH_OFFSCREEN, BR_PMT_INDEX_8, INDEXED_COPY_WIDTH, INDEXED_COPY_HEIGHT);
+    state->pal_src = indexed_copy_palette(BR_FALSE);
+    state->pal_dst = indexed_copy_palette(BR_TRUE);
+
+    if(state->src == NULL || state->dst == NULL || state->pal_src == NULL || state->pal_dst == NULL) {
+        BrLogError("APP", "Error creating the INDEX_8 device pixelmaps or their palettes.");
+        goto fail;
+    }
+
+    BrPixelmapPaletteSet(state->src, state->pal_src);
+    BrPixelmapPaletteSet(state->dst, state->pal_dst);
+
+    if((lock = BrPixelmapDirectLock(state->src, BR_TRUE)) == NULL) {
+        BrLogError("APP", "Could not lock the source pixelmap.");
+        goto fail;
+    }
+
+    for(br_int_32 y = 0; y < INDEXED_COPY_HEIGHT; y++)
+        for(br_int_32 x = 0; x < INDEXED_COPY_WIDTH; x++)
+            ((br_uint_8 *)lock->pixels)[y * lock->row_bytes + x] = indexed_copy_index(x, y);
+
+    BrPixelmapDirectUnlock(state->src);
+
+    if((lock = BrPixelmapDirectLock(state->dst, BR_TRUE)) == NULL) {
+        BrLogError("APP", "Could not lock the destination pixelmap.");
+        goto fail;
+    }
+
+    BrMemSet(lock->pixels, 0, (br_size_t)lock->row_bytes * INDEXED_COPY_HEIGHT);
+
+    BrPixelmapDirectUnlock(state->dst);
+
+    BrPixelmapCopy(state->dst, state->src);
+
+    if((lock = BrPixelmapDirectLock(state->dst, BR_TRUE)) == NULL) {
+        BrLogError("APP", "Could not lock the destination pixelmap.");
+        goto fail;
+    }
+
+    for(br_int_32 y = 0; y < INDEXED_COPY_HEIGHT; y++)
+        for(br_int_32 x = 0; x < INDEXED_COPY_WIDTH; x++)
+            if(((const br_uint_8 *)lock->pixels)[y * lock->row_bytes + x] != indexed_copy_index(x, y))
+                ++bad;
+
+    BrPixelmapDirectUnlock(state->dst);
+
+    if(bad != 0) {
+        BrLogError("APP", "BrPixelmapCopy() corrupted %d of %d indices.", (int)bad, INDEXED_COPY_WIDTH * INDEXED_COPY_HEIGHT);
+        goto fail;
+    }
+
+    return BRE_OK;
+
+fail:
+    /* cleanup_tests() skips fini() for a failed test, so free here. */
+    indexed_copy_fini(user);
+    return BRE_FAIL;
+}
+
+static void indexed_copy_draw(br_pixelmap *dest, float dt, void *user)
+{
+    indexed_copy_state *state = user;
+
+    /* Source and copy, side by side: the same indices, and must look it. */
+    BrPixelmapRectangleCopy(dest, -80, -32, state->src, -state->src->origin_x, -state->src->origin_y, state->src->width, state->src->height);
+    BrPixelmapRectangleCopy(dest, 16, -32, state->dst, -state->dst->origin_x, -state->dst->origin_y, state->dst->width, state->dst->height);
+}
+
 typedef br_error(br_drawtest_init_cbfn)(void *user, br_pixelmap *screen, br_pixelmap *backbuffer, void *arg);
 typedef void(br_drawtest_draw_cbfn)(br_pixelmap *dest, float dt, void *user);
 typedef void(br_drawtest_swap_cbfn)(br_pixelmap *screen, br_pixelmap *backbuffer, void *user);
@@ -1417,6 +1563,13 @@ static br_drawtest tests[] = {
         .fini      = device2mem_fini,
         .user_size = sizeof(br_device2mem_state),
         .arg       = NULL,
+    },
+    {
+        .name      = "Indexed Device Copy",
+        .init      = indexed_copy_init,
+        .draw      = indexed_copy_draw,
+        .fini      = indexed_copy_fini,
+        .user_size = sizeof(indexed_copy_state),
     },
     {
         .name      = "Sub-pixelmap Test",
