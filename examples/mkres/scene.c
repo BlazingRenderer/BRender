@@ -13,7 +13,7 @@
  *   scene-spot-hit-miss   both, so one run covers both directions
  *   scene-radius-near     a point light that reaches    - must NOT be culled
  *   scene-radius-far      a point light that cannot     - must be culled
- *   scene-scaled          a non-uniformly scaled cube with a model-space light
+ *   scene-scaled          a non-uniformly scaled cube with a point light
  *   scene-view-space      a BR_LIGHT_VIEW light
  *
  * A light shines along its local -Z (TRM: a light "shines along the negative z
@@ -86,10 +86,8 @@ static void scene_place_and_aim(br_actor *a, br_scalar x, br_scalar y, br_scalar
 }
 
 /*
- * As scene_place_and_aim, but turned about Y so the light's -Z picks up a
- * component on a scaled axis. A direction that lies purely along Z transforms
- * identically under the transpose and the inverse, so a straight-on fixture
- * cannot exercise the model-space direction transform at all.
+ * As scene_place_and_aim, but turned about Y, so the light is not aligned with
+ * the axis a non-uniformly scaled model is scaled along.
  */
 static void scene_place_and_turn(br_actor *a, br_scalar x, br_scalar y, br_scalar z, br_scalar angle_y)
 {
@@ -2560,7 +2558,11 @@ br_error mkres_make_scenes(void)
     if(scene_save("scene-scaled.gltf", world) != BRE_OK)
         r = BRE_FAIL;
 
-    /* A view-space light, which takes a different shading path. */
+    /*
+     * A BR_LIGHT_VIEW light. Lighting is view space for every light now, so
+     * the flag no longer selects a path of its own: this renders identically
+     * to scene-spot-hit, which is the same rig without it.
+     */
     world = scene_world(cube, material, BR_SCALAR(1.0));
 
     if(world != NULL)
@@ -2668,9 +2670,8 @@ br_error mkres_make_scenes(void)
     }
 
     /*
-     * A spot light on a non-uniformly scaled model: the direction transform,
-     * where scene-scaled only covers the position transform. The light is
-     * straight down -Z, so this does not reach the transpose.
+     * A spot light on the non-uniformly scaled model, where scene-scaled uses a
+     * point light. The spot is straight down -Z, so it is centred on the model.
      */
     {
         world = scene_world(cube, material, BR_SCALAR(3.0));
@@ -2683,9 +2684,8 @@ br_error mkres_make_scenes(void)
     }
 
     /*
-     * The same scaled model with the light off the Z axis, so its direction
-     * now has a component on the scaled axis and the model-space direction
-     * transform is actually exercised.
+     * The same scaled model with the light off the Z axis, so it is not aligned
+     * with the axis the model is scaled along.
      */
     {
         world = scene_world(cube, material, BR_SCALAR(3.0));

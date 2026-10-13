@@ -1060,8 +1060,8 @@ typedef struct rt_relation {
 
 /*
  * The lighting fixtures. Each pair differs by one property of one light -
- * whether it hits, how far it reaches, whether it is directional, ambient-only
- * or view-space - so a light path that stops applying one fails here rather
+ * whether it hits, how far it reaches, whether it is directional or
+ * ambient-only - so a light path that stops applying one fails here rather
  * than only moving a checksum.
  *
  * The type is RT_ANY_TYPE and the mode RT_ANY_MODE, and both have to be spelled
