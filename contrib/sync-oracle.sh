@@ -25,6 +25,12 @@
 # cherry-pick that also carries a table change finds it already current and
 # resolves to this sync's.
 #
+# examples/brdemo is synced with examples/rendertest because rendertest is
+# built from the two together: a harness change that reaches one and not the
+# other leaves the worktree's rendertest using a brdemo API the branch does not
+# have, and it does not compile. (The require_accel change was the first one to
+# do that.)
+#
 # The sync is written to the worktree and staged, not committed. The blessing
 # run reads the working tree, so nothing has to land in the branch's history;
 # reset the worktree before the next sync.
@@ -67,7 +73,7 @@ if ! git -C "$worktree" rev-parse --verify --quiet "$from^{commit}" >/dev/null; 
     exit 2
 fi
 
-paths=(examples/rendertest examples/mkres resources/gltf-reference)
+paths=(examples/rendertest examples/brdemo examples/mkres resources/gltf-reference)
 
 if ! git -C "$worktree" checkout "$from" -- "${paths[@]}"; then
     echo "error: could not sync from $from" >&2
