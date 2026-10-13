@@ -365,7 +365,7 @@ INLINE static void lightingColourNull(br_renderer *self, br_vector3 *p, br_vecto
 }
 
 /*
- * Lighting for ambient light source in model space with lighting volume
+ * Lighting for ambient light source with lighting volume
  */
 INLINE static void lightingColourAmbientVolume(br_renderer *self, br_vector3 *p, br_vector3 *n, struct active_light *alp)
 {
@@ -424,7 +424,7 @@ INLINE static void lightingColourAmbientRadiiVolumeFalloff(br_renderer *self, br
 }
 
 /*
- * Lighting for directional light source in model space
+ * Lighting for directional light source
  */
 INLINE static void lightingColourDirect(br_renderer *self, br_vector3 *p, br_vector3 *n, struct active_light *alp)
 {

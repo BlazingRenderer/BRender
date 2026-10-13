@@ -88,7 +88,7 @@ static void lightingIndexNull(br_renderer *self, br_vector3 *p, br_vector3 *n, s
 }
 
 /*
- * Lighting for directional light source in model space
+ * Lighting for directional light source
  */
 static void lightingIndexDirect(br_renderer *self, br_vector3 *p, br_vector3 *n, struct active_light *alp, br_scalar *comp)
 {
