@@ -219,6 +219,13 @@ static br_error SpaceRigInit(br_demo *demo)
     BrMapAdd(demo->palette);
 
     /*
+     * Apply the palette to the colour buffer. On an indexed buffer this is the
+     * screen's CLUT; on the GL buffer it is the global palette that a paletted
+     * texture carrying none of its own is looked up through.
+     */
+    BrPixelmapPaletteSet(demo->colour_buffer, demo->palette);
+
+    /*
      * The demo keeps file-local names for the buffers shared with the
      * framework; alias them to the framework's own pixelmaps.
      */
