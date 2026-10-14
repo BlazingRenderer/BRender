@@ -109,7 +109,6 @@ struct state_surface {
  */
 struct state_light {
     br_token type;
-    br_token lighting_space;
 
     br_vector3 position;
     br_vector3 direction;
