@@ -1087,6 +1087,8 @@ static const rt_relation rt_relations[] = {
     {.a = "scene-scale-spot",     .b = "scene-scale-spot-off",   .equal = BR_FALSE, .pm_type = RT_ANY_TYPE, .mode = RT_ANY_MODE},
     /* The negative control: an unlit material ignores lights entirely. */
     {.a = "scene-unlit",          .b = "scene-unlit-plain",      .equal = BR_TRUE,  .pm_type = RT_ANY_TYPE, .mode = RT_ANY_MODE},
+    /* BR_LIGHT_VIEW selects no path, so the flag is a no-op on the same rig. */
+    {.a = "scene-view-space",     .b = "scene-spot-hit",         .equal = BR_TRUE,  .pm_type = RT_ANY_TYPE, .mode = RT_ANY_MODE},
 
     /*
      * The cutoff volume is the only difference between the volume scenes and
