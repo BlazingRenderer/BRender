@@ -1,10 +1,12 @@
 #include <stdio.h>
+#include <inttypes.h>
 
 #include <SDL3/SDL.h>
 #include <brender.h>
 #include <brglrend.h>
 #include <brglrend1x.h>
 #include <brsdl3dev.h>
+#include <brvkrend.h>
 #include "parg.h"
 
 #include "brdemo.h"
@@ -15,11 +17,19 @@ struct br_device *BR_EXPORT BrDrv1SoftRendBegin(const char *arguments);
 /* begin hook */
 void _BrBeginHook(void) // NOLINT(*-reserved-identifier)
 {
-    BrDevAddStatic(NULL, BrDrv1SDL3Begin, NULL);
+    struct br_device *sdl = NULL;
+
+    BrDevAddStatic(&sdl, BrDrv1SDL3Begin, NULL);
     BrDevAddStatic(NULL, BrDrv1GLBegin, NULL);
     BrDevAddStatic(NULL, BrDrv1GL1xBegin, NULL);
     BrDevAddStatic(NULL, BrDrv1SoftPrimBegin, NULL);
     BrDevAddStatic(NULL, BrDrv1SoftRendBegin, NULL);
+
+    if(sdl != NULL) {
+        char buf[48];
+        BrSprintfN(buf, sizeof(buf), "VKREND_INIT_DEVICE=%" PRIuPTR, (br_uintptr_t)sdl);
+        BrDevAddStatic(NULL, BrDrv1VkBegin, buf);
+    }
 }
 
 /* end hook */
@@ -200,12 +210,19 @@ static br_error create_window(br_demo *demo, const br_demo_run_args *args)
                         BRT_WINDOW_NAME_CSTR,        args->title,
                         BRT_HIDPI_B,                 BR_TRUE,
                         BRT_RESIZABLE_B,             BR_TRUE,
-                        BRT_OPENGL_B,                BR_TRUE,
+                        BRT_OPENGL_B,                args->vulkan ? BR_FALSE : BR_TRUE,
+                        BRT_VULKAN_B,                args->vulkan ? BR_TRUE : BR_FALSE,
                         BRT_OPENGL_DEVICE_NAME_CSTR, args->opengl_device_name, /* NB: this is optional */
                         BR_NULL_TOKEN);
     // clang-format on
+
     if(err == BRE_OK) {
-        SDL_GL_SetSwapInterval(1);
+        /*
+         * Only the OpenGL path owns a GL context to set a swap interval on.
+         */
+        if(!args->vulkan)
+            SDL_GL_SetSwapInterval(1);
+
         demo->hw_accel = BR_TRUE;
         return err;
     }
@@ -435,6 +452,7 @@ cleanup:
 #define ARGDEF_OPENGL_DEVICE_NAME 306
 #define ARGDEF_NO_STATS           307
 #define ARGDEF_NO_DEPTH           308
+#define ARGDEF_VULKAN             309
 
 const static struct parg_option argdefs[] = {
     {.name = "width",              .has_arg = PARG_REQARG, .flag = NULL, .val = ARGDEF_WIDTH             },
@@ -448,6 +466,7 @@ const static struct parg_option argdefs[] = {
     {.name = "opengl-device-name", .has_arg = PARG_REQARG, .flag = NULL, .val = ARGDEF_OPENGL_DEVICE_NAME},
     {.name = "no-stats",           .has_arg = PARG_NOARG,  .flag = NULL, .val = ARGDEF_NO_STATS          },
     {.name = "no-depth",           .has_arg = PARG_NOARG,  .flag = NULL, .val = ARGDEF_NO_DEPTH          },
+    {.name = "vulkan",             .has_arg = PARG_NOARG,  .flag = NULL, .val = ARGDEF_VULKAN            },
     {.name = NULL,                 .has_arg = 0,           .flag = NULL, .val = 0                        },
 };
 
@@ -509,6 +528,10 @@ static int parse_args(int argc, char *const argv[], br_demo_run_args *args)
 
             case ARGDEF_NO_DEPTH:
                 args->no_depth = 1;
+                break;
+
+            case ARGDEF_VULKAN:
+                args->vulkan = 1;
                 break;
 
             case ARGDEF_HELP:
@@ -582,6 +605,7 @@ static const char *usage_options =
     "  --opengl-device-name Name of the OpenGL device driver to use. Valid options: glrend (default), glrend1x\n"
     "  --no-stats           Suppress the on-screen frame-time text.\n"
     "  --no-depth           Render with Z-sorting and no depth buffer.\n"
+    "  --vulkan             Present the window through the Vulkan front-screen driver.\n"
     "  --help               Display this message.\n"
     "\n"
 ;
@@ -598,6 +622,7 @@ void BrDemoDefaultArgs(br_demo_run_args *args)
         .require_accel      = 0,
         .pm_type            = BR_PMT_MAX,
         .opengl_device_name = "glrend",
+        .vulkan             = 0,
         .backbuffer_width   = 0,
         .backbuffer_height  = 0,
         .no_stats           = 0,

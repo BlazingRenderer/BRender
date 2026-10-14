@@ -48,6 +48,7 @@ typedef struct br_demo_run_args {
     br_int_32   backbuffer_width;
     br_int_32   backbuffer_height;
     const char *opengl_device_name;
+    int         vulkan;
     int         no_stats;
     int         no_depth;
     int         pos_argc;
