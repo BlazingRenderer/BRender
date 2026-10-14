@@ -842,7 +842,6 @@ static br_error V1Model_Render(br_geometry *self, br_renderer *renderer, struct 
 				BrFilePrintf(fp, "  red               = %f\n", alp->red);
 				BrFilePrintf(fp, "  green             = %f\n", alp->green);
 				BrFilePrintf(fp, "  blue              = %f\n", alp->blue);
-				BrFilePrintf(fp, "  s->lighting_space = %s\n", BrTokenIdentifier(alp->s->lighting_space));
 			}
 			BrFileClose(fp);
 		}
