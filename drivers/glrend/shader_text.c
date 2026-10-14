@@ -5,10 +5,11 @@
  */
 #include "text.vert.glsl.h"
 #include "text.frag.glsl.h"
+#include "text_int.frag.glsl.h"
 
 br_boolean ShaderGLTextCompile(br_gl_text_shader *self, const GladGLContext *gl)
 {
-    GLuint vert, frag;
+    GLuint vert, frag, frag_int;
 
     if((vert = DeviceGLCreateAndCompileShader(gl, GL_VERTEX_SHADER, g_TextVertexShader, sizeof(g_TextVertexShader))) == 0)
         goto vert_failed;
@@ -16,12 +17,24 @@ br_boolean ShaderGLTextCompile(br_gl_text_shader *self, const GladGLContext *gl)
     if((frag = DeviceGLCreateAndCompileShader(gl, GL_FRAGMENT_SHADER, g_TextFragmentShader, sizeof(g_TextFragmentShader))) == 0)
         goto frag_failed;
 
+    if((frag_int = DeviceGLCreateAndCompileShader(gl, GL_FRAGMENT_SHADER, g_TextIntFragmentShader, sizeof(g_TextIntFragmentShader))) == 0)
+        goto frag_int_failed;
+
     if((self->program = DeviceGLCreateAndCompileProgram(gl, vert, frag)) == 0)
         goto prog_failed;
 
+    /*
+     * The same vertex shader feeds the integer-output program used to draw on an
+     * indexed (GL_R8UI) destination; only the fragment stage differs.
+     */
+    if((self->program_int = DeviceGLCreateAndCompileProgram(gl, vert, frag_int)) == 0)
+        goto prog_int_failed;
+
     DeviceGLObjectLabel(gl, GL_SHADER, vert, BR_GLREND_DEBUG_INTERNAL_PREFIX "text:shader:vertex");
     DeviceGLObjectLabel(gl, GL_SHADER, frag, BR_GLREND_DEBUG_INTERNAL_PREFIX "text:shader:fragment");
+    DeviceGLObjectLabel(gl, GL_SHADER, frag_int, BR_GLREND_DEBUG_INTERNAL_PREFIX "text:shader:fragment:indexed");
     DeviceGLObjectLabel(gl, GL_PROGRAM, self->program, BR_GLREND_DEBUG_INTERNAL_PREFIX "text:program");
+    DeviceGLObjectLabel(gl, GL_PROGRAM, self->program_int, BR_GLREND_DEBUG_INTERNAL_PREFIX "text:program:indexed");
 
     gl->GenVertexArrays(1, &self->vao_glyphs);
     gl->BindVertexArray(self->vao_glyphs);
@@ -29,15 +42,18 @@ br_boolean ShaderGLTextCompile(br_gl_text_shader *self, const GladGLContext *gl)
 
     DeviceGLObjectLabel(gl, GL_VERTEX_ARRAY, self->vao_glyphs, BR_GLREND_DEBUG_INTERNAL_PREFIX "text:vao");
 
-    self->uSampler = gl->GetUniformLocation(self->program, "uSampler");
+    self->uSampler     = gl->GetUniformLocation(self->program, "uSampler");
+    self->uSampler_int = gl->GetUniformLocation(self->program_int, "uSampler");
 
     self->block_index_font_data   = gl->GetUniformBlockIndex(self->program, "FontData");
     self->block_binding_font_data = 2;
     gl->UniformBlockBinding(self->program, self->block_index_font_data, self->block_binding_font_data);
+    gl->UniformBlockBinding(self->program_int, gl->GetUniformBlockIndex(self->program_int, "FontData"), self->block_binding_font_data);
 
     self->block_index_glyphs   = gl->GetUniformBlockIndex(self->program, "TextData");
     self->block_binding_glyphs = 3;
     gl->UniformBlockBinding(self->program, self->block_index_glyphs, self->block_binding_glyphs);
+    gl->UniformBlockBinding(self->program_int, gl->GetUniformBlockIndex(self->program_int, "TextData"), self->block_binding_glyphs);
 
     gl->GenBuffers(1, &self->ubo_glyphs);
     gl->BindBuffer(GL_UNIFORM_BUFFER, self->ubo_glyphs);
@@ -47,8 +63,23 @@ br_boolean ShaderGLTextCompile(br_gl_text_shader *self, const GladGLContext *gl)
     DeviceGLObjectLabel(gl, GL_BUFFER, self->ubo_glyphs, BR_GLREND_DEBUG_INTERNAL_PREFIX "text:ubo");
 
     gl->BindFragDataLocation(self->program, 0, "main_colour");
+    gl->BindFragDataLocation(self->program_int, 0, "main_colour");
+
+    gl->DeleteShader(frag_int);
+    gl->DeleteShader(frag);
+    gl->DeleteShader(vert);
+
+    DeviceGLCheckErrors(gl);
+    return BR_TRUE;
+
+prog_int_failed:
+    gl->DeleteProgram(self->program);
+    self->program = 0;
 
 prog_failed:
+    gl->DeleteShader(frag_int);
+
+frag_int_failed:
     gl->DeleteShader(frag);
 
 frag_failed:
@@ -57,7 +88,25 @@ frag_failed:
 vert_failed:
     DeviceGLCheckErrors(gl);
 
-    return self->program != 0;
+    return BR_FALSE;
+}
+
+static void ShaderGLTextBind(br_gl_text_shader *self, const GladGLContext *gl, GLuint program, GLint sampler, const br_gl_text_font *font)
+{
+    gl->Disable(GL_DEPTH_TEST);
+    gl->Disable(GL_CULL_FACE);
+    gl->DepthMask(GL_FALSE);
+
+    gl->UseProgram(program);
+    gl->BindBufferBase(GL_UNIFORM_BUFFER, self->block_binding_font_data, font->font_data);
+
+    gl->ActiveTexture(GL_TEXTURE0);
+    gl->BindTexture(GL_TEXTURE_2D_ARRAY, font->tex);
+    gl->Uniform1i(sampler, 0);
+    gl->BindSampler(0, 0);
+
+    gl->BindVertexArray(self->vao_glyphs);
+    gl->BindBuffer(GL_UNIFORM_BUFFER, self->ubo_glyphs);
 }
 
 void ShaderGLTextBegin(br_gl_text_shader *self, const GladGLContext *gl, const br_gl_text_font *font)
@@ -65,20 +114,17 @@ void ShaderGLTextBegin(br_gl_text_shader *self, const GladGLContext *gl, const b
     gl->Enable(GL_BLEND);
     gl->BlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-    gl->Disable(GL_DEPTH_TEST);
-    gl->Disable(GL_CULL_FACE);
-    gl->DepthMask(GL_FALSE);
+    ShaderGLTextBind(self, gl, self->program, self->uSampler, font);
+}
 
-    gl->UseProgram(self->program);
-    gl->BindBufferBase(GL_UNIFORM_BUFFER, self->block_binding_font_data, font->font_data);
-
-    gl->ActiveTexture(GL_TEXTURE0);
-    gl->BindTexture(GL_TEXTURE_2D_ARRAY, font->tex);
-    gl->Uniform1i(self->uSampler, 0);
-    gl->BindSampler(0, 0);
-
-    gl->BindVertexArray(self->vao_glyphs);
-    gl->BindBuffer(GL_UNIFORM_BUFFER, self->ubo_glyphs);
+void ShaderGLTextBeginIndexed(br_gl_text_shader *self, const GladGLContext *gl, const br_gl_text_font *font)
+{
+    /*
+     * Blending and a float fragment output are both invalid against an integer
+     * colour attachment, so the indexed variant neither enables blending nor
+     * touches the blend state.
+     */
+    ShaderGLTextBind(self, gl, self->program_int, self->uSampler_int, font);
 }
 
 void ShaderGLTextDrawInstanced(br_gl_text_shader *self, const GladGLContext *gl, const br_gl_text_data *data, GLsizei instance_count)

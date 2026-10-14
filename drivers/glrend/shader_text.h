@@ -36,7 +36,9 @@ typedef struct br_gl_text_font {
 
 typedef struct br_gl_text_shader {
     GLuint program;
-    GLint  uSampler; /* Sampler, sampler2D */
+    GLuint program_int;
+    GLint  uSampler;     /* Sampler, sampler2DArray */
+    GLint  uSampler_int; /* Sampler, sampler2DArray */
 
     GLuint block_index_font_data;
     GLuint block_binding_font_data;

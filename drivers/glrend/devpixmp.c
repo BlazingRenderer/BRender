@@ -842,15 +842,6 @@ static br_error BR_CMETHOD(br_device_pixelmap_gl, text)(br_device_pixelmap *self
         return BRE_UNSUPPORTED;
 
     /*
-     * An indexed pixelmap is a GL_R8UI integer texture, which the text shader -
-     * a float vec4 output - cannot write, and a glyph writes a colour rather
-     * than an index. Refusing beats an invalid draw that leaves pixels
-     * untouched or corrupt.
-     */
-    if(fmt != NULL && fmt->indexed)
-        return BRE_UNSUPPORTED;
-
-    /*
      * Quit if off top, bottom or right screen
      */
     if(PixelmapPointClip(&pp, point, (br_pixelmap *)self) == BR_CLIP_REJECT)
@@ -882,13 +873,25 @@ static br_error BR_CMETHOD(br_device_pixelmap_gl, text)(br_device_pixelmap *self
     text_data = BrScratchAllocate(sizeof(br_gl_text_data));
     BrMatrix4Orthographic(&text_data->mvp, 0.0f, 1.0f, 0.0f, 1.0f, -1.0f, 1.0f);
 
-    BrColourUnpack(colour, self->pm_type, &r8, &g8, &b8, &a8);
-    text_data->colour = (br_vector4)BR_VECTOR4(r8 / 255.0f, g8 / 255.0f, b8 / 255.0f, a8 / 255.0f);
+    /*
+     * An indexed pixelmap is a GL_R8UI integer texture, so its glyphs are drawn
+     * with the integer-output program and the colour argument is the CLUT index
+     * itself; BrColourUnpack() refuses the indexed types.
+     */
+    if(fmt != NULL && fmt->indexed) {
+        text_data->colour = (br_vector4)BR_VECTOR4((float)(colour & 0xff), 0.0f, 0.0f, 0.0f);
+    } else {
+        BrColourUnpack(colour, self->pm_type, &r8, &g8, &b8, &a8);
+        text_data->colour = (br_vector4)BR_VECTOR4(r8 / 255.0f, g8 / 255.0f, b8 / 255.0f, a8 / 255.0f);
+    }
 
     gl->BindFramebuffer(GL_FRAMEBUFFER, self->asBack.glFbo);
     gl->Viewport(0, 0, self->pm_width, self->pm_height);
 
-    ShaderGLTextBegin(&ctx->text_shader, gl, gl_font);
+    if(fmt != NULL && fmt->indexed)
+        ShaderGLTextBeginIndexed(&ctx->text_shader, gl, gl_font);
+    else
+        ShaderGLTextBegin(&ctx->text_shader, gl, gl_font);
 
     br_rectangle r = {
         .x = point->x,

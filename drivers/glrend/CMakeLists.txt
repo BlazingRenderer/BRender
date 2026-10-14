@@ -122,6 +122,13 @@ compile_shader(
 )
 
 compile_shader(
+        SOURCE      "${CMAKE_CURRENT_SOURCE_DIR}/text_int.frag.glsl"
+        DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/text_int.frag.glsl.h"
+        STAGE       "frag"
+        VARNAME     "g_TextIntFragmentShader"
+)
+
+compile_shader(
         SOURCE      "${CMAKE_CURRENT_SOURCE_DIR}/line.vert.glsl"
         DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/line.vert.glsl.h"
         STAGE       "vert"
@@ -248,6 +255,7 @@ add_library(glrend
 
         "${CMAKE_CURRENT_BINARY_DIR}/text.vert.glsl.h"
         "${CMAKE_CURRENT_BINARY_DIR}/text.frag.glsl.h"
+        "${CMAKE_CURRENT_BINARY_DIR}/text_int.frag.glsl.h"
 
         "${CMAKE_CURRENT_BINARY_DIR}/line.vert.glsl.h"
         "${CMAKE_CURRENT_BINARY_DIR}/line.frag.glsl.h"

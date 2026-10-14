@@ -29,6 +29,7 @@ void       ShaderGLRectDrawCLUT(br_gl_rect_shader *self, const GladGLContext *gl
 br_boolean ShaderGLTextCompile(br_gl_text_shader *self, const GladGLContext *gl);
 br_error   ShaderGLTextBuildFont(const GladGLContext *gl, br_gl_text_font *gl_font, br_font *font);
 void       ShaderGLTextBegin(br_gl_text_shader *self, const GladGLContext *gl, const br_gl_text_font *font);
+void       ShaderGLTextBeginIndexed(br_gl_text_shader *self, const GladGLContext *gl, const br_gl_text_font *font);
 void       ShaderGLTextDrawInstanced(br_gl_text_shader *self, const GladGLContext *gl, const br_gl_text_data *data, GLsizei instance_count);
 void       ShaderGLTextEnd(br_gl_text_shader *self, const GladGLContext *gl);
 
