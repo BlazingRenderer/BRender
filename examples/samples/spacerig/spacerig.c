@@ -74,7 +74,7 @@ int        stardraw      = 0;
 int        names         = 0;
 int        airlock_doors = 0;
 int        present_level = 0;
-int        angle         = 0;
+br_angle   angle         = 0;
 int        x, i, n, m, m1, m2, m3, elevator;
 int        camera_probe_flag = 0;
 int        info              = 0;
@@ -104,9 +104,19 @@ br_vector4   v_t          = BR_VECTOR4(0.0, 0.0, 0.0, 0.0);
 char        *default_name = "default";
 br_pixelmap *pShade;
 
-br_uint_16 SysCols8[7]  = {41, 64, 96, 132, 158, 191, 226};
-br_uint_16 SysCols15[7] = {0x7fff, 0xd000, 0xd000, 0xd000, 0xd000, 0xd000, 0xd000};
-br_uint_16 SysCols16[7] = {0xffff, 0xd000, 0xd000, 0xd000, 0xd000, 0xd000, 0xd000};
+br_uint_32 SysCols8[7]  = {41, 64, 96, 132, 158, 191, 226};
+br_uint_32 SysCols15[7] = {0x7fff, 0xd000, 0xd000, 0xd000, 0xd000, 0xd000, 0xd000};
+br_uint_32 SysCols16[7] = {0xffff, 0xd000, 0xd000, 0xd000, 0xd000, 0xd000, 0xd000};
+
+/*
+ * Direct colours for the 32-bit buffers the OpenGL renderer presents.
+ * Indexed by the WHITE..YELLOW enum at the top of spacerig.h.
+ */
+br_uint_32 SysCols32[7] = {
+    BR_COLOUR_RGBA(255, 255, 255, 255), BR_COLOUR_RGBA(0, 0, 255, 255), BR_COLOUR_RGBA(0, 255, 0, 255),
+    BR_COLOUR_RGBA(0, 255, 255, 255),   BR_COLOUR_RGBA(255, 0, 0, 255), BR_COLOUR_RGBA(255, 0, 255, 255),
+    BR_COLOUR_RGBA(255, 255, 0, 255),
+};
 
 void Init_Actor(br_actor *parent, br_actor **new_actor, char *modelname, char *material, br_boolean load_flag, br_boolean material_flag,
                 float X_axis_rotation, float X_translation, float Y_translation, float Z_translation, br_boolean keep_flag)
@@ -141,6 +151,61 @@ void Init_Actor(br_actor *parent, br_actor **new_actor, char *modelname, char *m
     *new_actor = pActor;
 }
 
+/*
+ * SDL keyboard/mouse state for the demo. key_pressed mirrors the old "keys
+ * currently down" set; key_first_down holds the scancodes that went down
+ * since the previous update, giving KeyTest() its one-shot semantics.
+ */
+static Uint8 key_pressed[SDL_SCANCODE_COUNT];
+static Uint8 key_first_down[SDL_SCANCODE_COUNT];
+
+static int KeyTest(SDL_Scancode sc, int rep)
+{
+    if(rep == REPT_FIRST_DOWN)
+        return key_first_down[sc];
+
+    return key_pressed[sc];
+}
+
+static void SpaceRigProcessEvent(br_demo *demo, const SDL_Event *evt)
+{
+    (void)demo;
+
+    switch(evt->type) {
+        case SDL_EVENT_KEY_DOWN:
+            if(!key_pressed[evt->key.scancode])
+                key_first_down[evt->key.scancode] = 1;
+            key_pressed[evt->key.scancode] = 1;
+            break;
+
+        case SDL_EVENT_KEY_UP:
+            key_pressed[evt->key.scancode] = 0;
+            break;
+
+        case SDL_EVENT_MOUSE_MOTION:
+            mouse_x += (long)evt->motion.xrel;
+            mouse_y += (long)evt->motion.yrel;
+            break;
+
+        case SDL_EVENT_MOUSE_BUTTON_DOWN:
+            if(evt->button.button == SDL_BUTTON_LEFT)
+                mouse_buttons |= SDL_BUTTON_LMASK;
+            else if(evt->button.button == SDL_BUTTON_RIGHT)
+                mouse_buttons |= SDL_BUTTON_RMASK;
+            break;
+
+        case SDL_EVENT_MOUSE_BUTTON_UP:
+            if(evt->button.button == SDL_BUTTON_LEFT)
+                mouse_buttons &= ~SDL_BUTTON_LMASK;
+            else if(evt->button.button == SDL_BUTTON_RIGHT)
+                mouse_buttons &= ~SDL_BUTTON_RMASK;
+            break;
+
+        default:
+            break;
+    }
+}
+
 static br_error SpaceRigInit(br_demo *demo)
 {
     // Initialise BRender
@@ -152,6 +217,15 @@ static br_error SpaceRigInit(br_demo *demo)
         return BRE_FAIL;
     }
     BrMapAdd(demo->palette);
+
+    /*
+     * The demo keeps file-local names for the buffers shared with the
+     * framework; alias them to the framework's own pixelmaps.
+     */
+    screen        = demo->_screen;
+    colour_buffer = demo->colour_buffer;
+    depth_buffer  = demo->depth_buffer;
+    palette       = demo->palette;
 
     screen->origin_x        = 0; // screen->width/2;
     screen->origin_y        = 0; // screen->height/2;
@@ -183,30 +257,46 @@ static br_error SpaceRigInit(br_demo *demo)
     else
         rear_depth = NULL;
 
-    BrZbBegin(screen->type, BR_PMT_DEPTH_16);
+    /*
+     * The brdemo framework has already begun the renderer
+     * (BrRendererBegin()), so the old BrZbBegin() compatibility entry point
+     * is dropped.
+     */
 
     pShade = NULL;
 
+    /*
+     * Shade tables only exist for the software pixel formats; the OpenGL
+     * renderer presents a 32-bit buffer for which the demo has none.
+     */
     switch(screen->type) {
         case BR_PMT_INDEX_8:
-            pShade = BrPixelmapLoad("winsh8.tab");
+            if((pShade = BrPixelmapLoad("winsh8.tab")) == NULL) {
+                BR_ERROR0("Couldn't load shade table");
+                return BRE_FAIL;
+            }
+            BrTableAdd(pShade);
             break;
 
         case BR_PMT_RGB_555:
-            pShade = BrPixelmapLoad("winsh15.tab");
+            if((pShade = BrPixelmapLoad("winsh15.tab")) == NULL) {
+                BR_ERROR0("Couldn't load shade table");
+                return BRE_FAIL;
+            }
+            BrTableAdd(pShade);
             break;
 
         case BR_PMT_RGB_565:
-            pShade = BrPixelmapLoad("winsh16.tab");
+            if((pShade = BrPixelmapLoad("winsh16.tab")) == NULL) {
+                BR_ERROR0("Couldn't load shade table");
+                return BRE_FAIL;
+            }
+            BrTableAdd(pShade);
+            break;
+
+        default:
             break;
     }
-
-    if(!pShade) {
-        BR_ERROR0("Couldn't load shade table");
-        return BRE_FAIL;
-    }
-
-    BrTableAdd(pShade);
 
     star_pm = BrPixelmapLoad(STARPIX);
 
@@ -332,6 +422,13 @@ static br_error SpaceRigInit(br_demo *demo)
     BrMatrix34PreRotateY(&camera_rear->t.t.mat, BR_ANGLE_DEG(180.0));
 
     Init_Light(camera, &light1, atten);
+
+    /*
+     * The brdemo framework puts an order table on the world; give it the
+     * camera's depth range so the renderer can sort it (see brdemo.h).
+     */
+    demo->order_table->min_z = ((br_camera *)camera->type_data)->hither_z;
+    demo->order_table->max_z = ((br_camera *)camera->type_data)->yon_z;
 
     // Translate my_view
 
@@ -613,10 +710,15 @@ void Door_Stuff()
         Close_Airlock_Doors();
 }
 
-br_error BrDemo_Render_Loop()
+void SpaceRigUpdate(br_demo *demo, br_scalar dt)
 {
+    (void)demo;
+    (void)dt;
+
     if(!colour_buffer)
-        return BRE_OK;
+        return;
+
+    BrRendererFrameBegin();
 
     if(info || menu)
         BrPixelmapFill(colour_buffer, 0x0);
@@ -659,7 +761,7 @@ br_error BrDemo_Render_Loop()
 
     // Routine for airlock switching
 
-    if((DOSKeyTest(SC_SPACE, 0, 0)) && ((BrScalarToFloat(my_view->t.t.mat.m[3][Z]) > 3.00) && (BrScalarToFloat(my_view->t.t.mat.m[3][Z]) < 11.2))) {
+    if((KeyTest(SC_SPACE, 0)) && ((BrScalarToFloat(my_view->t.t.mat.m[3][Z]) > 3.00) && (BrScalarToFloat(my_view->t.t.mat.m[3][Z]) < 11.2))) {
         if(airlock_doors == 0) {
             airlock_doors           = 1;
             maze_area->render_style = BR_RSTYLE_DEFAULT;
@@ -681,7 +783,7 @@ br_error BrDemo_Render_Loop()
 
     /*  Routine for elevator switching */
 
-    if((DOSKeyTest(SC_SPACE, 0, 0)) && ((BrScalarToFloat(my_view->t.t.mat.m[3][X]) < 5.80) && (BrScalarToFloat(my_view->t.t.mat.m[3][X]) > 3.26))) {
+    if((KeyTest(SC_SPACE, 0)) && ((BrScalarToFloat(my_view->t.t.mat.m[3][X]) < 5.80) && (BrScalarToFloat(my_view->t.t.mat.m[3][X]) > 3.26))) {
         if(present_level == 0)
             elevator = 1;
         if(present_level == 1)
@@ -689,21 +791,18 @@ br_error BrDemo_Render_Loop()
     }
 
     // Allow user to move the system around
-
-    mouse_x = mouse_y = 0;
-
-    DOSMouseRead(&mouse_x, &mouse_y, &mouse_buttons);
+    // (mouse state is accumulated by SpaceRigProcessEvent)
 
     // Allow swivel control of monitor
 
-    if((Rotate == 1) && (mouse_buttons & BR_MSM_BUTTONL)) {
+    if((Rotate == 1) && (mouse_buttons & SDL_BUTTON_LMASK)) {
         BrMatrix34RollingBall(&rotation, mouse_x, -mouse_y, 800);
         BrMatrix34Pre(&tv->t.t.mat, &rotation);
     }
 
     // Allow mouse movement (Rotation) control
 
-    if((Rotate != 1) && (mouse_buttons & BR_MSM_BUTTONL)) {
+    if((Rotate != 1) && (mouse_buttons & SDL_BUTTON_LMASK)) {
         BrMatrix34RollingBall(&rotation, -mouse_x, 0, 800);
         BrMatrix34Pre(&my_view->t.t.mat, &rotation);
     }
@@ -712,24 +811,24 @@ br_error BrDemo_Render_Loop()
 
     if(bCollisionDetect) {
 
-        if((mouse_buttons & BR_MSM_BUTTONR) && depth_value > DEPTH_LOW_VALUE) {
+        if((mouse_buttons & SDL_BUTTON_RMASK) && depth_value > DEPTH_LOW_VALUE) {
             if(mouse_y > 0)
                 mouse_move = BR_SCALAR(-0.3);
 
             BrMatrix34PreTranslate(&my_view->t.t.mat, 0, 0, mouse_move);
         }
 
-        if((mouse_buttons & BR_MSM_BUTTONR) && depth_value > DEPTH_HIGH_VALUE) {
+        if((mouse_buttons & SDL_BUTTON_RMASK) && depth_value > DEPTH_HIGH_VALUE) {
             if(mouse_y > 0)
                 mouse_move = BR_SCALAR(-0.2);
 
             BrMatrix34PreTranslate(&my_view->t.t.mat, 0, 0, mouse_move);
         }
 
-        if((DOSKeyTest(SC_C_UP + SC_EXTENDED, 0, 0)) && (depth_value > DEPTH_LOW_VALUE))
+        if((KeyTest(SC_C_UP + SC_EXTENDED, 0)) && (depth_value > DEPTH_LOW_VALUE))
             BrMatrix34PreTranslate(&my_view->t.t.mat, 0, 0, BR_SCALAR(-0.2));
 
-        if(DOSKeyTest(SC_C_DOWN + SC_EXTENDED, 0, 0)) {
+        if(KeyTest(SC_C_DOWN + SC_EXTENDED, 0)) {
             if(rear_pm) {
                 BrPixelmapFill(rear_depth, 0xffffffff);
                 BrPixelmapFill(rear_pm, 0x0);
@@ -749,30 +848,30 @@ br_error BrDemo_Render_Loop()
     /*  End of bCollisionDetect==1 */
 
     if(bCollisionDetect == 0) {
-        if(mouse_buttons & BR_MSM_BUTTONR)
+        if(mouse_buttons & SDL_BUTTON_RMASK)
             BrMatrix34PreTranslate(&my_view->t.t.mat, 0, 0, BR_MUL(BR_SCALAR(mouse_y), BR_SCALAR(0.01)));
 
-        if(DOSKeyTest(SC_C_UP + SC_EXTENDED, 0, 0))
+        if(KeyTest(SC_C_UP + SC_EXTENDED, 0))
             BrMatrix34PreTranslate(&my_view->t.t.mat, 0, 0, BR_SCALAR(-0.2));
 
-        if((DOSKeyTest(SC_C_UP + SC_EXTENDED, 0, 0)) && ((DOSKeyTest(SC_LSHIFT, 0, 0)) || (DOSKeyTest(SC_RSHIFT, 0, 0))))
+        if((KeyTest(SC_C_UP + SC_EXTENDED, 0)) && ((KeyTest(SC_LSHIFT, 0)) || (KeyTest(SC_RSHIFT, 0))))
             BrMatrix34PreTranslate(&my_view->t.t.mat, 0, 0, BR_SCALAR(-0.6));
 
-        if(DOSKeyTest(SC_C_DOWN + SC_EXTENDED, 0, 0))
+        if(KeyTest(SC_C_DOWN + SC_EXTENDED, 0))
             BrMatrix34PreTranslate(&my_view->t.t.mat, 0, 0, BR_SCALAR(0.2));
     }
 
     // End of collsion==0
 
-    if(DOSKeyTest(SC_C_RIGHT + SC_EXTENDED, 0, 0))
+    if(KeyTest(SC_C_RIGHT + SC_EXTENDED, 0))
         BrMatrix34PreRotateY(&my_view->t.t.mat, BR_ANGLE_DEG(-5.0));
 
-    if(DOSKeyTest(SC_C_LEFT + SC_EXTENDED, 0, 0))
+    if(KeyTest(SC_C_LEFT + SC_EXTENDED, 0))
         BrMatrix34PreRotateY(&my_view->t.t.mat, BR_ANGLE_DEG(+5.0));
 
     // SpaceBar Opening of Doors
 
-    if(DOSKeyTest(SC_SPACE, 0, 0)) {
+    if(KeyTest(SC_SPACE, 0)) {
         if((BrScalarToFloat(my_view->t.t.mat.m[3][Z]) < -1.00) && (elev_flag == 0)) {
 
             // Add elev_shaft and upper level doors actors when door first opens
@@ -811,7 +910,7 @@ br_error BrDemo_Render_Loop()
 
     // Monitor Display
 
-    if(DOSKeyTest(SC_PG_UP, 0, REPT_FIRST_DOWN)) {
+    if(KeyTest(SC_PG_UP, REPT_FIRST_DOWN)) {
         if(camera_probe_flag == 0 && present_level == 1) {
             camera_probe_flag = 1;
             feedback_pm       = BrPixelmapAllocate(BR_PMT_INDEX_8, 256, 256, NULL, 0);
@@ -834,7 +933,7 @@ br_error BrDemo_Render_Loop()
 
     /*  End of monitor display */
 
-    if(DOSKeyTest(SC_PG_DOWN, 0, REPT_FIRST_DOWN)) {
+    if(KeyTest(SC_PG_DOWN, REPT_FIRST_DOWN)) {
         if(camera_probe_flag == 0 && present_level == 1) {
             camera_probe_flag = 2;
 
@@ -853,67 +952,67 @@ br_error BrDemo_Render_Loop()
         }
     }
 
-    if(DOSKeyTest(SC_INSERT, 0, REPT_FIRST_DOWN))
+    if(KeyTest(SC_INSERT, REPT_FIRST_DOWN))
         if(Rotate == 0 && present_level == 1)
             Rotate ^= 1;
         else
             Rotate = 0;
 
-    if(DOSKeyTest(SC_TAB, 0, REPT_FIRST_DOWN))
+    if(KeyTest(SC_TAB, REPT_FIRST_DOWN))
         bCollisionDetect ^= 1;
 
-    if(DOSKeyTest(SC_I, 0, REPT_FIRST_DOWN))
+    if(KeyTest(SC_I, REPT_FIRST_DOWN))
         info ^= 1;
 
-    if(DOSKeyTest(SC_HOME, 0, 0))
+    if(KeyTest(SC_HOME, 0))
         BrMatrix34Identity(&camera->t.t.mat);
 
-    if(DOSKeyTest(SC_R, 0, 0)) {
+    if(KeyTest(SC_R, 0)) {
         BrMatrix34Identity(&tv->t.t.mat);
         BrMatrix34PostTranslate(&tv->t.t.mat, BR_SCALAR(17.58), BR_SCALAR(4.7), BR_SCALAR(-5.38));
     }
 
-    if(DOSKeyTest(SC_A, 0, 0))
+    if(KeyTest(SC_A, 0))
         BrMatrix34PreRotateX(&camera->t.t.mat, BR_ANGLE_DEG(5.0));
 
-    if(DOSKeyTest(SC_Z, 0, 0))
+    if(KeyTest(SC_Z, 0))
         BrMatrix34PreRotateX(&camera->t.t.mat, BR_ANGLE_DEG(-5.0));
 
-    if(DOSKeyTest(SC_X, 0, 0)) {
+    if(KeyTest(SC_X, 0)) {
         (box->material->map_transform.m[0][0]) = (box->material->map_transform.m[0][0]) * (2.0);
         (box->material->map_transform.m[1][1]) = (box->material->map_transform.m[1][1]) * (2.0);
     }
 
-    if(DOSKeyTest(SC_C, 0, 0)) {
+    if(KeyTest(SC_C, 0)) {
         (box->material->map_transform.m[0][0]) = (box->material->map_transform.m[0][0]) / (2.0);
         (box->material->map_transform.m[1][1]) = (box->material->map_transform.m[1][1]) / (2.0);
     }
 
-    if(DOSKeyTest(SC_P, 0, 0)) {
+    if(KeyTest(SC_P, 0)) {
         BrPixelmapSave("scrn_dmp.pix", colour_buffer);
 
         BrPixelmapTextF(colour_buffer, (screen->width) * 0.5, (screen->height) * 0.5, RED, BrFontFixed3x5, "Screen Dumped");
     }
 
-    if(DOSKeyTest(SC_L, 0, REPT_FIRST_DOWN))
+    if(KeyTest(SC_L, REPT_FIRST_DOWN))
         light_tag = Light_on_off(light1, light_tag, present_level);
 
-    if(DOSKeyTest(SC_COMMA, 0, REPT_FIRST_DOWN))
+    if(KeyTest(SC_COMMA, REPT_FIRST_DOWN))
         atten = BrightenLight(colour_buffer, light1, atten);
 
-    if(DOSKeyTest(SC_DOT, 0, REPT_FIRST_DOWN))
+    if(KeyTest(SC_DOT, REPT_FIRST_DOWN))
         atten = DimLight(colour_buffer, light1, atten);
 
-    if(DOSKeyTest(SC_8, 0, REPT_FIRST_DOWN))
+    if(KeyTest(SC_8, REPT_FIRST_DOWN))
         stardraw ^= 1;
 
-    if(DOSKeyTest(SC_N, 0, REPT_FIRST_DOWN))
+    if(KeyTest(SC_N, REPT_FIRST_DOWN))
         names ^= 1;
 
-    if(DOSKeyTest(SC_Q, 0, REPT_FIRST_DOWN) || DOSKeyTest(SC_ESC, 0, REPT_FIRST_DOWN))
-        return BRE_FAIL;
+    if(KeyTest(SC_Q, REPT_FIRST_DOWN) || KeyTest(SC_ESC, REPT_FIRST_DOWN))
+        SDL_PushEvent(&(SDL_Event){.type = SDL_EVENT_QUIT});
 
-    if(DOSKeyTest(SC_F1, 0, REPT_FIRST_DOWN))
+    if(KeyTest(SC_F1, REPT_FIRST_DOWN))
         bShowHelp ^= 1;
 
     if(info) {
@@ -927,14 +1026,29 @@ br_error BrDemo_Render_Loop()
         Show_Help(colour_buffer);
     }
 
-    BrPixelmapDoubleBuffer(screen, colour_buffer);
+    // Reset the per-frame input state
 
-    return BRE_OK;
-} // End Render_Loop()
+    mouse_x = mouse_y = 0;
+    SDL_memset(key_first_down, 0, sizeof(key_first_down));
+
+    BrRendererFrameEnd();
+} // End SpaceRigUpdate()
+
+/*
+ * The demo draws its whole frame in SpaceRigUpdate, the way its original loop
+ * did, and leaves demo->camera unset. The framework's default render clears the
+ * colour buffer before drawing and only renders when demo->camera is set, so it
+ * would wipe the frame; this exists so the dispatch has a render callback that
+ * draws nothing.
+ */
+static void SpaceRigRender(br_demo *demo)
+{
+    (void)demo;
+}
 
 void Add_Camera_Probe_Info(br_pixelmap *colour_buffer, int flag)
 {
-    br_uint_16 *SysCol;
+    br_uint_32 *SysCol;
 
     switch(colour_buffer->type) {
         case BR_PMT_INDEX_8:
@@ -947,6 +1061,10 @@ void Add_Camera_Probe_Info(br_pixelmap *colour_buffer, int flag)
 
         case BR_PMT_RGB_565:
             SysCol = SysCols16;
+            break;
+
+        default:
+            SysCol = SysCols32;
             break;
     }
 
@@ -963,7 +1081,7 @@ void Add_Screen_Info(br_pixelmap *colour_buffer, br_pixelmap *screen, br_uint_16
                      br_uint_16 depth_value1, br_uint_16 depth_value2, br_uint_16 depth_value3, br_uint_16 depth_value, br_actor *my_view,
                      br_boolean bCollisionDetect, int stardraw, int light_tag)
 {
-    br_uint_16 *SysCols;
+    br_uint_32 *SysCols;
 
     switch(colour_buffer->type) {
         case BR_PMT_INDEX_8:
@@ -976,6 +1094,10 @@ void Add_Screen_Info(br_pixelmap *colour_buffer, br_pixelmap *screen, br_uint_16
 
         case BR_PMT_RGB_565:
             SysCols = SysCols16;
+            break;
+
+        default:
+            SysCols = SysCols32;
             break;
     }
 
@@ -1010,7 +1132,7 @@ void Add_Screen_Info(br_pixelmap *colour_buffer, br_pixelmap *screen, br_uint_16
 
 void Show_Help(br_pixelmap *colour_buffer)
 {
-    br_uint_16 *SysCols;
+    br_uint_32 *SysCols;
 
     switch(colour_buffer->type) {
         case BR_PMT_INDEX_8:
@@ -1023,6 +1145,10 @@ void Show_Help(br_pixelmap *colour_buffer)
 
         case BR_PMT_RGB_565:
             SysCols = SysCols16;
+            break;
+
+        default:
+            SysCols = SysCols32;
             break;
     }
 
@@ -1201,7 +1327,7 @@ void Init_Light(br_actor *parent, br_actor **light, br_scalar atten)
     *light = pLight;
 }
 
-br_pixelmap *BR_CALLBACK LoadMapFFHook(char *name)
+br_pixelmap *BR_CALLBACK LoadMapFFHook(const char *name)
 {
     br_pixelmap *pm;
 
@@ -1267,7 +1393,7 @@ void Animate_box(br_actor *box, br_actor *argo_null, br_actor *argo_blu, br_acto
     BrActorToBounds(((br_bounds *)argo_null->type_data), argo_null);
 }
 
-int Animate_wall_texture(char *material_name, int angle)
+br_angle Animate_wall_texture(char *material_name, br_angle angle)
 {
     br_material *pMaterial;
 
@@ -1378,10 +1504,22 @@ void RiseDoors(br_actor *first_door, br_actor *second_door)
     BrMatrix34PostTranslate(&second_door->t.t.mat, BR_SCALAR(0.0), BR_SCALAR(-0.1), BR_SCALAR(0.0));
 }
 
-br_error BrDemo_OnResize()
+void SpaceRigOnResize(br_demo *demo, br_uint_16 width, br_uint_16 height)
 {
+    /*
+     * The demo keeps its own cameras and leaves demo->camera unset, so the
+     * framework's BrDemoDefaultOnResize() cannot reach them - track the window
+     * here the same way it would.
+     */
+    const br_scalar aspect = BR_DIV(BR_SCALAR(width), BR_SCALAR(height));
 
-    BrDemo_Refresh_Pointers(&screen, &colour_buffer, &depth_buffer);
+    ((br_camera *)camera->type_data)->aspect       = aspect;
+    ((br_camera *)camera_rear->type_data)->aspect  = aspect;
+    ((br_camera *)camera_probe->type_data)->aspect = aspect;
+
+    screen        = demo->_screen;
+    colour_buffer = demo->colour_buffer;
+    depth_buffer  = demo->depth_buffer;
 
     screen->origin_x        = 0; // screen->width/2;
     screen->origin_y        = 0; // screen->height/2;
@@ -1400,16 +1538,14 @@ br_error BrDemo_OnResize()
     Collision_Detect_Y[1] = (colour_buffer->height) * 0.5;
     Collision_Detect_X[2] = ((screen_scale * window_dx) / 2) + (curr_width * 0.95);
     Collision_Detect_Y[2] = (colour_buffer->height) * 0.5;
-
-    return BRE_OK;
 }
 
 const static br_demo_dispatch dispatch = {
     .init          = SpaceRigInit,
-    .process_event = BrDemoDefaultProcessEvent,
+    .process_event = SpaceRigProcessEvent,
     .update        = SpaceRigUpdate,
-    .render        = BrDemoDefaultRender,
-    .on_resize     = BrDemoDefaultOnResize,
+    .render        = SpaceRigRender,
+    .on_resize     = SpaceRigOnResize,
     .destroy       = BrDemoDefaultDestroy,
 };
 

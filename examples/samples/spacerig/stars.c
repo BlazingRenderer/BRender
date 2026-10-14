@@ -1,7 +1,7 @@
 // #include "brender.h"
 // #include "dosio.h"
 #include <stdlib.h>
-#include "..\misc\br_demo.h"
+#include <brdemo.h>
 #include "stars.h"
 
 #ifdef RAND_MAX
@@ -15,7 +15,7 @@
 // extern __cdecl SafeFixedMac2Div(int,int,int,int,int);
 
 // extern __cdecl BrFixedMac2Div(int,int,int,int,int);
-extern br_fixed_ls __cdecl BrFixedMac2Div(br_fixed_ls, br_fixed_ls, br_fixed_ls, br_fixed_ls, br_fixed_ls);
+extern br_fixed_ls BrFixedMac2Div(br_fixed_ls, br_fixed_ls, br_fixed_ls, br_fixed_ls, br_fixed_ls);
 
 STAR starfield[2001] = {
     /* 101.287500 -16.716667 */
@@ -4091,12 +4091,12 @@ void StarfieldDraw(br_pixelmap *window, br_actor *world, br_actor *camera, br_pi
 #if 1
 
     // For each star in the field
-    now = DOSClockRead();
+    now = (int)SDL_GetTicks();
 
     if(then == -1)
         then = now;
 
-    theta += BR_ANGLE_DEG(5 * (float)(now - then) / BR_DOS_CLOCK_RATE);
+    theta += BR_ANGLE_DEG(5 * (float)(now - then) / 1000.0f);
     then = now;
 
     BrMatrix34RotateZ(&rotation, theta);

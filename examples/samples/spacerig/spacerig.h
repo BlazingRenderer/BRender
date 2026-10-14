@@ -17,6 +17,44 @@
 //
 //////////////////////////////////////////////////////////////////////
 
+#include <SDL3/SDL.h>
+
+/*
+ * The demo's original DOS scancodes, mapped onto SDL3 scancodes. SC_EXTENDED
+ * is kept at 0 so the original SC_C_* + SC_EXTENDED expressions still name
+ * the cursor keys.
+ */
+#define SC_EXTENDED            0
+#define SC_SPACE               SDL_SCANCODE_SPACE
+#define SC_C_UP                SDL_SCANCODE_UP
+#define SC_C_DOWN              SDL_SCANCODE_DOWN
+#define SC_C_LEFT              SDL_SCANCODE_LEFT
+#define SC_C_RIGHT             SDL_SCANCODE_RIGHT
+#define SC_COMMA               SDL_SCANCODE_COMMA
+#define SC_DOT                 SDL_SCANCODE_PERIOD
+#define SC_8                   SDL_SCANCODE_8
+#define SC_F1                  SDL_SCANCODE_F1
+#define SC_ESC                 SDL_SCANCODE_ESCAPE
+#define SC_PG_UP               SDL_SCANCODE_PAGEUP
+#define SC_PG_DOWN             SDL_SCANCODE_PAGEDOWN
+#define SC_INSERT              SDL_SCANCODE_INSERT
+#define SC_TAB                 SDL_SCANCODE_TAB
+#define SC_HOME                SDL_SCANCODE_HOME
+#define SC_LSHIFT              SDL_SCANCODE_LSHIFT
+#define SC_RSHIFT              SDL_SCANCODE_RSHIFT
+#define SC_A                   SDL_SCANCODE_A
+#define SC_C                   SDL_SCANCODE_C
+#define SC_I                   SDL_SCANCODE_I
+#define SC_L                   SDL_SCANCODE_L
+#define SC_N                   SDL_SCANCODE_N
+#define SC_P                   SDL_SCANCODE_P
+#define SC_Q                   SDL_SCANCODE_Q
+#define SC_R                   SDL_SCANCODE_R
+#define SC_X                   SDL_SCANCODE_X
+#define SC_Z                   SDL_SCANCODE_Z
+
+#define REPT_FIRST_DOWN        1
+
 #define WHITE                  0
 #define BLUE                   1
 #define GREEN                  2
@@ -65,7 +103,7 @@ void Init_Light(br_actor *parent, br_actor **light, br_scalar atten);
 
 void Quit();
 
-br_pixelmap *BR_CALLBACK LoadMapFFHook(char *name);
+br_pixelmap *BR_CALLBACK LoadMapFFHook(const char *name);
 
 br_scalar DimLight(br_pixelmap *colour_buffer, br_actor *light1, br_scalar atten);
 
@@ -78,7 +116,7 @@ br_uint_16 EnlargeScreen(br_pixelmap *colour_buffer, br_pixelmap *window, br_uin
 
 void Animate_box(br_actor *box, br_actor *argo_null, br_actor *argo_blu, br_actor *argo_grn, br_actor *argo_yel, br_actor *argo_red);
 
-int Animate_wall_texture(char *material_name, int angle);
+br_angle Animate_wall_texture(char *material_name, br_angle angle);
 
 int ChangeTVimage(int count, br_material *change);
 
