@@ -375,8 +375,14 @@ void BrSetupLights(br_actor *world, br_matrix34 *world_to_view, br_int_32 w2vt)
         tvp->v.s = light->attenuation_q;
         tvp++;
 
+        /*
+         * Hardcode to BRT_VIEW for compatibility with older drivers that may
+         * still expect this token.
+         *
+         * Model-space lighting isn't supported anymore.
+         */
         tvp->t   = BRT_SPACE_T;
-        tvp->v.t = (light->type & BR_LIGHT_VIEW) ? BRT_VIEW : BRT_MODEL;
+        tvp->v.t = BRT_VIEW;
         tvp++;
 
         tvp->t = BRT_TYPE_T;
