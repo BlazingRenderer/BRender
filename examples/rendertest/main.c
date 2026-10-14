@@ -1060,8 +1060,8 @@ typedef struct rt_relation {
 
 /*
  * The lighting fixtures. Each pair differs by one property of one light -
- * whether it hits, how far it reaches, whether it is directional, ambient-only
- * or view-space - so a light path that stops applying one fails here rather
+ * whether it hits, how far it reaches, whether it is directional or
+ * ambient-only - so a light path that stops applying one fails here rather
  * than only moving a checksum.
  *
  * The type is RT_ANY_TYPE and the mode RT_ANY_MODE, and both have to be spelled
@@ -1087,6 +1087,8 @@ static const rt_relation rt_relations[] = {
     {.a = "scene-scale-spot",     .b = "scene-scale-spot-off",   .equal = BR_FALSE, .pm_type = RT_ANY_TYPE, .mode = RT_ANY_MODE},
     /* The negative control: an unlit material ignores lights entirely. */
     {.a = "scene-unlit",          .b = "scene-unlit-plain",      .equal = BR_TRUE,  .pm_type = RT_ANY_TYPE, .mode = RT_ANY_MODE},
+    /* BR_LIGHT_VIEW selects no path, so the flag is a no-op on the same rig. */
+    {.a = "scene-view-space",     .b = "scene-spot-hit",         .equal = BR_TRUE,  .pm_type = RT_ANY_TYPE, .mode = RT_ANY_MODE},
 
     /*
      * The cutoff volume is the only difference between the volume scenes and

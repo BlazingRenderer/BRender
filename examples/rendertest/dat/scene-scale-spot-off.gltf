@@ -114,7 +114,7 @@
   ],
   "materials": [
     {
-      "name": "scene-material",
+      "name": "scene-scale-spot-material",
       "pbrMetallicRoughness": {
         "metallicFactor": 0,
         "baseColorFactor": [0.577580512, 0.577580512, 0.577580512, 1]
@@ -222,8 +222,9 @@
     "BR_materials": {
       "materials": [
         {
-          "identifier": "scene-material",
+          "identifier": "scene-scale-spot-material",
           "colour": [0.784313738, 0.784313738, 0.784313738],
+          "flags": 5,
           "map_transform": [1, 0, 0, 1, 0, 0]
         }
       ]
