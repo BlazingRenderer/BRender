@@ -31,9 +31,11 @@
 # have, and it does not compile. (The require_accel change was the first one to
 # do that.)
 #
-# The sync is written to the worktree and staged, not committed. The blessing
-# run reads the working tree, so nothing has to land in the branch's history;
-# reset the worktree before the next sync.
+# The sync is committed as `meta: sync oracle from <sha>`, so the worktree is
+# left clean and the branch is a self-consistent oracle. The blessing run reads
+# the working tree either way. It refuses to run when the worktree carries
+# changes outside the synced paths, so a sync cannot be mixed into an
+# in-progress cherry-pick or a hand-applied patch.
 
 set -u
 
@@ -75,6 +77,31 @@ fi
 
 paths=(examples/rendertest examples/brdemo examples/mkres resources/gltf-reference)
 
+# Refuse to run over changes outside the synced paths. The commit below is
+# path-limited, so it cannot sweep them in, but a sync has no business sharing
+# a tree with an in-progress cherry-pick or a hand-applied softrend patch.
+unrelated=()
+while IFS= read -r line; do
+    f=${line:3}
+    f=${f##* -> }
+
+    keep=
+    for p in "${paths[@]}"; do
+        case "$f" in "$p" | "$p"/*) keep=1 ;; esac
+    done
+
+    [ -n "$keep" ] || unrelated+=("$f")
+done < <(git -C "$worktree" status --porcelain)
+
+if [ "${#unrelated[@]}" -gt 0 ]; then
+    echo "error: the worktree has changes outside the synced paths:" >&2
+    printf '  %s\n' "${unrelated[@]}" >&2
+    echo "       commit or stash them first" >&2
+    exit 2
+fi
+
+sha=$(git -C "$worktree" rev-parse --short "$from") || exit 2
+
 if ! git -C "$worktree" checkout "$from" -- "${paths[@]}"; then
     echo "error: could not sync from $from" >&2
     exit 1
@@ -84,6 +111,20 @@ printf '\nsynced from %s into %s\n' "$from" "$worktree"
 for p in "${paths[@]}"; do
     printf '  %s\n' "$p"
 done
+
+if git -C "$worktree" diff --cached --quiet -- "${paths[@]}"; then
+    printf '\nalready current at %s; nothing to commit\n' "$sha"
+else
+    git -C "$worktree" commit -q \
+        -m "meta: sync oracle from $sha" \
+        -m "Brings examples/rendertest, examples/brdemo, examples/mkres and resources/gltf-reference forward from $from." \
+        -- "${paths[@]}" || {
+        echo "error: could not commit the sync" >&2
+        exit 1
+    }
+
+    printf '\ncommitted meta: sync oracle from %s\n' "$sha"
+fi
 
 printf '\nbuild it in the linux32 shell, then bless the x87 half against this tree:\n'
 printf '  nix develop .#brender-samples-linux32 --command bash -c \\\n'
