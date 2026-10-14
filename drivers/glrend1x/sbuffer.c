@@ -106,8 +106,16 @@ static br_error updateMemory(br_buffer_stored *self, br_pixelmap *pm)
         return berr;
     }
 
+    /*
+     * An indexed source carries the key in its alpha already: index_8_read()
+     * gives index 0 alpha 0 and every other index 255. The colour key is
+     * matched on the resolved colour, so asking for it too would discard any
+     * palette entry that happens to resolve to black, whatever its index - the
+     * software rasterisers key the raw index only. An unindexed source has no
+     * alpha of its own, so it still wants the key.
+     */
     const br_pixelmap_convert_options opts = {
-        .enable_colour_key = BR_TRUE,
+        .enable_colour_key = fmt->indexed ? BR_FALSE : BR_TRUE,
     };
     if((berr = DeviceGL1xPixelmapToExistingGLTextureConvert(gl, self->gl_tex_keyed, pm, &opts)) != BRE_OK) {
         return berr;
