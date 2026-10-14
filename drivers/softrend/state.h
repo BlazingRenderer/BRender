@@ -71,7 +71,6 @@ enum {
  */
 struct state_cull {
     br_token type;
-    br_token space;
 
     br_timestamp timestamp;
 };

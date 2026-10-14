@@ -51,8 +51,7 @@
 #define P(f) ((br_uintptr_t)(&(f)))
 
 static const br_tv_template_entry partCullTemplateEntries[] = {
-    {BRT(TYPE_T),  F(cull.type),  Q | S | A, BRTV_CONV_COPY, 0, TM_PART | TM_INVALID_CC},
-    {BRT(SPACE_T), F(cull.space), Q | S | A, BRTV_CONV_COPY, 0, TM_PART | TM_INVALID_CC},
+    {BRT(TYPE_T), F(cull.type), Q | S | A, BRTV_CONV_COPY, 0, TM_PART | TM_INVALID_CC},
 };
 
 /**************************************************************************
@@ -215,8 +214,7 @@ static const br_tv_template_entry partBoundsTemplateEntries[] = {
  ** Default values
  **/
 static const struct state_cull partCullDefault = {
-    .type  = BRT_NONE,
-    .space = BRT_MODEL,
+    .type = BRT_NONE,
 };
 
 static const struct state_surface partSurfaceDefault = {
