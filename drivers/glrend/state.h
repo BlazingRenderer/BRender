@@ -133,7 +133,6 @@ typedef struct state_light_volume_desc {
 
 typedef struct state_light {
     br_token type;
-    br_token lighting_space;
 
     br_vector3_f position;
     br_vector3_f direction;

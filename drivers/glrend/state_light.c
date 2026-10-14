@@ -24,7 +24,6 @@ static const struct br_tv_custom customLightingVolumeConv = {
 // clang-format off
 static br_tv_template_entry template_entries[] = {
     {BRT(TYPE_T),          F(light[0].type),           Q | S | A,  BRTV_CONV_COPY,            0, TM_PART | TM_INDEX | TM_INVALID_PS | TM_INVALID_PM},
-    {BRT(SPACE_T),         F(light[0].lighting_space), Q | S | A,  BRTV_CONV_COPY,            0, TM_PART | TM_INDEX | TM_INVALID_PS | TM_INVALID_PM},
     {BRT(POSITION_V3_X),   F(light[0].position),       Q | S | AX, BRTV_CONV_V3_FIXED_SCALAR, 0, TM_PART | TM_INDEX | TM_INVALID_PS | TM_INVALID_PM},
     {BRT(POSITION_V3_F),   F(light[0].position),       Q | S | AF, BRTV_CONV_V3_FLOAT_SCALAR, 0, TM_PART | TM_INDEX | TM_INVALID_PS | TM_INVALID_PM},
     {BRT(DIRECTION_V3_X),  F(light[0].direction),      Q | S | AX, BRTV_CONV_V3_FIXED_SCALAR, 0, TM_PART | TM_INDEX | TM_INVALID_PS | TM_INVALID_PM},
@@ -62,7 +61,6 @@ static br_tv_template_entry template_entries[] = {
 
 static const state_light default_state = {
     .type             = BRT_NONE,
-    .lighting_space   = BRT_MODEL,
     .position         = BR_VECTOR3(0, 0, 0),
     .direction        = BR_VECTOR3(0, 0, 0),
     .colour           = BR_COLOUR_RGB(255, 255, 255),
