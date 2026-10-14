@@ -12,6 +12,7 @@ typedef struct br_gl_line_data {
 
 typedef struct br_gl_line_shader {
     GLuint program;
+    GLuint program_int;
     GLuint block_index_line_data;
     GLuint block_binding_line_data;
 

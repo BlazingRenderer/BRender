@@ -135,6 +135,13 @@ compile_shader(
         VARNAME     "g_LineFragmentShader"
 )
 
+compile_shader(
+        SOURCE      "${CMAKE_CURRENT_SOURCE_DIR}/line_int.frag.glsl"
+        DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/line_int.frag.glsl.h"
+        STAGE       "frag"
+        VARNAME     "g_LineIntFragmentShader"
+)
+
 set(GLAD_FILES
         glad/src/gl.c
         glad/include/glad/gl.h
@@ -244,6 +251,7 @@ add_library(glrend
 
         "${CMAKE_CURRENT_BINARY_DIR}/line.vert.glsl.h"
         "${CMAKE_CURRENT_BINARY_DIR}/line.frag.glsl.h"
+        "${CMAKE_CURRENT_BINARY_DIR}/line_int.frag.glsl.h"
         )
 
 get_target_property(target_type glrend TYPE)

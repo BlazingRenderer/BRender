@@ -168,6 +168,21 @@ static void BR_CMETHOD_DECL(br_renderer_gl, sceneBegin)(br_renderer *self)
     }
 
     /*
+     * An indexed colour pixelmap is a GL_R8UI integer attachment, and the
+     * scene shader writes a vec4, so a scene cannot be drawn into one - it is
+     * a 2D destination only. Refuse it explicitly rather than let the draw be
+     * an invalid framebuffer/output combination that silently produces
+     * nothing.
+     */
+    if(colour_target != NULL) {
+        const br_pixelmap_gl_fmt *colour_fmt = DeviceGLGetFormatDetails(colour_target->pm_type);
+
+        if(colour_fmt != NULL && colour_fmt->indexed) {
+            BR_ERROR0("Can't render a scene to an indexed colour pixelmap");
+        }
+    }
+
+    /*
      * TODO: Consider if we want to handle depth-only renders.
      */
     if(colour_target == NULL) {

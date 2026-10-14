@@ -90,7 +90,13 @@ static br_error recreate_renderbuffers(br_device_pixelmap *self, const GladGLCon
         if(self->msaa_samples) {
             gl->TexImage2DMultisample(binding_point, self->msaa_samples, fmt->internal_format, self->pm_width, self->pm_height, GL_TRUE);
         } else {
+            /*
+             * Both filters must be NEAREST: an indexed (GL_R8UI) texture is
+             * non-filterable, and a LINEAR magnification filter would leave it
+             * incomplete and sample as zero when used as a copy source.
+             */
             gl->TexParameteri(binding_point, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+            gl->TexParameteri(binding_point, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
             gl->TexImage2D(binding_point, 0, fmt->internal_format, self->pm_width, self->pm_height, 0, fmt->format, fmt->type, NULL);
         }
 
@@ -322,10 +328,12 @@ br_error BR_CMETHOD_DECL(br_device_pixelmap_gl, match)(br_device_pixelmap *self,
         return BRE_FAIL;
 
     /*
-     * Refuse creation of indexed pixelmaps.
+     * A multisampled integer texture need not be supported, and an indexed
+     * device pixelmap is not rendered to through the colour pipeline anyway,
+     * so never request one for an indexed format.
      */
     if(fmt->indexed)
-        return BRE_FAIL;
+        mt.msaa_samples = 0;
 
     if(mt.msaa_samples < 0)
         mt.msaa_samples = 0;
@@ -379,6 +387,120 @@ br_error BR_CMETHOD_DECL(br_device_pixelmap_gl, match)(br_device_pixelmap *self,
     return BRE_OK;
 }
 
+/*
+ * Draw a source texture region into this offscreen through the rect shader.
+ *
+ * This is the only path for an indexed (GL_R8UI) source into a colour
+ * destination: a blit cannot convert between an integer and a colour
+ * attachment, and the shader resolves each index through the palette.
+ *
+ * src_is_fbo distinguishes a source held in a framebuffer texture, which like
+ * this destination is bottom-up, from a host upload, which is top-down; the two
+ * need opposite vertical flips.
+ */
+static void DevicePixelmapGLRectDrawTexture(br_device_pixelmap *self, const GladGLContext *gl, br_gl_context_state *ctx,
+                                            br_rectangle *drect, br_rectangle *srect, br_int_32 src_w, br_int_32 src_h, GLuint tex,
+                                            GLuint clut, br_boolean indexed, br_boolean src_is_fbo)
+{
+    br_gl_rect_data rect_data = {
+        .mvp           = {},
+        .src_rect      = BR_VECTOR4((float)srect->x / (float)src_w, (float)srect->y / (float)src_h, (float)srect->w / (float)src_w,
+                                    (float)srect->h / (float)src_h),
+        .dst_rect      = BR_VECTOR4((float)drect->x / (float)self->pm_width, (float)drect->y / (float)self->pm_height,
+                                    (float)drect->w / (float)self->pm_width, (float)drect->h / (float)self->pm_height),
+        .vertical_flip = src_is_fbo ? 0.0f : 1.0f,
+        .indexed       = indexed ? 1.0f : 0.0f,
+    };
+
+    BrMatrix4Orthographic(&rect_data.mvp, 0.0f, 1.0f, 0.0f, 1.0f, -1.0f, 1.0f);
+
+    gl->BindFramebuffer(GL_FRAMEBUFFER, self->asBack.glFbo);
+    gl->Viewport(0, 0, self->pm_width, self->pm_height);
+
+    if(indexed)
+        ShaderGLRectDrawCLUT(&ctx->rect_shader, gl, &rect_data, tex, clut);
+    else
+        ShaderGLRectDraw(&ctx->rect_shader, gl, &rect_data, tex);
+
+    gl->BindFramebuffer(GL_FRAMEBUFFER, 0);
+}
+
+/*
+ * Upload an indexed host source into an indexed (GL_R8UI) destination.
+ *
+ * An indexed destination holds CLUT indices, and a colour source cannot be
+ * mapped back to them, so only an indexed source is served here. The rows are
+ * staged top-down and written upside down because a framebuffer texture is
+ * bottom-up, matching rectangleCopyFrom()'s readback flip. A nearest-neighbour
+ * scale is applied when the rectangles differ in size.
+ */
+static br_error DevicePixelmapGLUploadIndexed(br_device_pixelmap *self, const GladGLContext *gl, br_rectangle *drect,
+                                              br_device_pixelmap *src, br_rectangle *srect)
+{
+    const br_pixelmap *srcpm = (const br_pixelmap *)src;
+    br_pixelmap       *tmp   = NULL;
+    const br_uint_8   *src_pixels;
+    br_int_32          src_stride;
+    br_int_32          src_br_x, src_br_y;
+    br_uint_8         *buffer;
+
+    if(srcpm->pixels == NULL || (srcpm->flags & BR_PMF_NO_ACCESS))
+        return BRE_UNSUPPORTED;
+
+    /*
+     * DevicePixelmapGLRectangleClip() flipped the source rectangle into GL
+     * coordinates; convert its top row back to the top-down row host pixels
+     * use.
+     */
+    src_br_x = srect->x;
+    src_br_y = (br_int_32)srcpm->height - srect->h - srect->y;
+
+    if((srcpm->flags & (BR_PMF_LINEAR | BR_PMF_ROW_WHOLEPIXELS)) == (BR_PMF_LINEAR | BR_PMF_ROW_WHOLEPIXELS) && srcpm->row_bytes > 0) {
+        src_pixels = (const br_uint_8 *)srcpm->pixels;
+        src_stride = srcpm->row_bytes;
+    } else {
+        /*
+         * Non-linear or right-to-left storage is rare; stage a normal copy
+         * rather than hand-rolling the row arithmetic for every case.
+         */
+        tmp = BrPixelmapAllocate(srcpm->type, srect->w, srect->h, NULL, BR_PMAF_NORMAL);
+        if(tmp == NULL)
+            return BRE_FAIL;
+
+        BrPixelmapRectangleCopy(tmp, 0, 0, (br_pixelmap *)srcpm, src_br_x, src_br_y, srect->w, srect->h);
+
+        src_pixels = (const br_uint_8 *)tmp->pixels;
+        src_stride = tmp->row_bytes;
+        src_br_x   = 0;
+        src_br_y   = 0;
+    }
+
+    buffer = BrScratchAllocate((br_size_t)drect->w * (br_size_t)drect->h);
+
+    for(br_int_32 j = 0; j < drect->h; ++j) {
+        br_int_32 sy = src_br_y + (br_int_32)(((br_uint_32)(drect->h - 1 - j) * (br_uint_32)srect->h) / (br_uint_32)drect->h);
+
+        for(br_int_32 i = 0; i < drect->w; ++i) {
+            br_int_32 sx = src_br_x + (br_int_32)(((br_uint_32)i * (br_uint_32)srect->w) / (br_uint_32)drect->w);
+
+            buffer[j * drect->w + i] = src_pixels[sy * src_stride + sx];
+        }
+    }
+
+    if(tmp != NULL)
+        BrPixelmapFree(tmp);
+
+    gl->BindTexture(GL_TEXTURE_2D, self->asBack.glTex);
+    gl->PixelStorei(GL_UNPACK_ALIGNMENT, 1);
+    gl->TexSubImage2D(GL_TEXTURE_2D, 0, drect->x, drect->y, drect->w, drect->h, GL_RED_INTEGER, GL_UNSIGNED_BYTE, buffer);
+    gl->PixelStorei(GL_UNPACK_ALIGNMENT, 4);
+    gl->BindTexture(GL_TEXTURE_2D, 0);
+
+    BrScratchFree(buffer);
+
+    return BRE_OK;
+}
+
 static br_error BR_CMETHOD_DECL(br_device_pixelmap_gl, rectangleStretchCopy)(br_device_pixelmap *self, br_rectangle *d,
                                                                              br_device_pixelmap *src, br_rectangle *s)
 {
@@ -426,6 +548,34 @@ static br_error BR_CMETHOD_DECL(br_device_pixelmap_gl, rectangleStretchCopy)(br_
     if(self == src)
         return BRE_OK;
 
+    if(self->use_type == BRT_OFFSCREEN) {
+        const br_pixelmap_gl_fmt *src_fmt = DeviceGLGetFormatDetails(src->pm_type);
+        const br_pixelmap_gl_fmt *dst_fmt = DeviceGLGetFormatDetails(self->pm_type);
+
+        if(src_fmt == NULL || dst_fmt == NULL)
+            return BRE_FAIL;
+
+        /*
+         * An indexed source into a colour destination is resolved through its
+         * palette by the rect shader, as a blit cannot convert an integer
+         * attachment to a colour one. The reverse has no meaning - colours do
+         * not map back to indices - and stays unsupported.
+         */
+        if(src_fmt->indexed != dst_fmt->indexed) {
+            br_gl_context_state *ctx;
+            GLuint               clut;
+
+            if(!src_fmt->indexed)
+                return BRE_UNSUPPORTED;
+
+            ctx = GLContextState(gl);
+            clut = src->asBack.clut->gl_tex ? src->asBack.clut->gl_tex : (self->asBack.clut->gl_tex ? self->asBack.clut->gl_tex : ctx->tex_white);
+
+            DevicePixelmapGLRectDrawTexture(self, gl, ctx, &drect, &srect, src->pm_width, src->pm_height, src->asBack.glTex, clut, BR_TRUE, BR_TRUE);
+            return BRE_OK;
+        }
+    }
+
     gl->BindFramebuffer(GL_READ_FRAMEBUFFER, srcFbo);
     gl->BindFramebuffer(GL_DRAW_FRAMEBUFFER, dstFbo);
 
@@ -466,11 +616,34 @@ static br_error BR_CMETHOD_DECL(br_device_pixelmap_gl, rectangleFill)(br_device_
         return BRE_OK;
 
     if(self->use_type == BRT_OFFSCREEN) {
-        br_uint_8 r8 = 0, g8 = 0, b8 = 0, a8 = 255;
-        BrColourUnpack(colour, self->pm_type, &r8, &g8, &b8, &a8);
+        const br_pixelmap_gl_fmt *fmt = DeviceGLGetFormatDetails(self->pm_type);
+        br_uint_8                 r8 = 0, g8 = 0, b8 = 0, a8 = 255;
 
         fbo  = self->asBack.glFbo;
         mask = GL_COLOR_BUFFER_BIT;
+
+        /*
+         * An indexed pixelmap is a GL_R8UI texture holding CLUT indices. A
+         * float glClearColor() clear is not defined to convert to an integer
+         * buffer, so the rectangle is cleared with the integer clear instead;
+         * the index is the colour argument itself, as BrColourUnpack() refuses
+         * the indexed types. glClearBufferuiv() honours the scissor test, so a
+         * sub-rectangle is the same call with the scissor set.
+         */
+        if(fmt->indexed) {
+            const GLuint value[4] = {colour & 0xffu, 0, 0, 0};
+
+            gl->BindFramebuffer(GL_FRAMEBUFFER, fbo);
+            gl->ColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
+            gl->Enable(GL_SCISSOR_TEST);
+            gl->Scissor(drect.x, drect.y, drect.w, drect.h);
+            gl->ClearBufferuiv(GL_COLOR, 0, value);
+            gl->Disable(GL_SCISSOR_TEST);
+            gl->BindFramebuffer(GL_FRAMEBUFFER, 0);
+            return BRE_OK;
+        }
+
+        BrColourUnpack(colour, self->pm_type, &r8, &g8, &b8, &a8);
 
         gl->ColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
         gl->ClearColor((float)r8 / 255.0f, (float)g8 / 255.0f, (float)b8 / 255.0f, (float)a8 / 255.0f);
@@ -524,6 +697,21 @@ static br_error BR_CMETHOD(br_device_pixelmap_gl, rectangleStretchCopyTo)(br_dev
     if(DevicePixelmapGLRectangleClip(&drect, d, (const br_pixelmap *)self) == BR_CLIP_REJECT)
         return BRE_OK;
 
+    /*
+     * An indexed destination holds CLUT indices and is a GL_R8UI integer
+     * texture, which the rect shader cannot write (it outputs a colour) and a
+     * colour source cannot be mapped back to. Only an indexed source is served,
+     * by uploading its index bytes directly.
+     */
+    if(DeviceGLGetFormatDetails(self->pm_type)->indexed) {
+        const br_pixelmap_gl_fmt *src_fmt = DeviceGLGetFormatDetails(src->type);
+
+        if(src_fmt == NULL || !src_fmt->indexed)
+            return BRE_UNSUPPORTED;
+
+        return DevicePixelmapGLUploadIndexed(self, gl, &drect, _src, &srect);
+    }
+
     if(stored != NULL && ObjectDevice(stored) == self->device) {
         tex = BufferStoredGLGetTexture(stored);
         fmt = stored->fmt;
@@ -553,26 +741,7 @@ static br_error BR_CMETHOD(br_device_pixelmap_gl, rectangleStretchCopyTo)(br_dev
         return BRE_FAIL;
     }
 
-    br_gl_rect_data rect_data = {
-        .mvp      = {},
-        .src_rect = BR_VECTOR4((float)srect.x / (float)src->width, (float)srect.y / (float)src->height, (float)srect.w / (float)src->width,
-                               (float)srect.h / (float)src->height),
-        .dst_rect = BR_VECTOR4((float)drect.x / (float)self->pm_width, (float)drect.y / (float)self->pm_height,
-                               (float)drect.w / (float)self->pm_width, (float)drect.h / (float)self->pm_height),
-        .vertical_flip = 1,
-        .indexed       = (float)fmt->indexed,
-    };
-
-    BrMatrix4Orthographic(&rect_data.mvp, 0.0f, 1.0f, 0.0f, 1.0f, -1.0f, 1.0f);
-
-    gl->BindFramebuffer(GL_FRAMEBUFFER, self->asBack.glFbo);
-    gl->Viewport(0, 0, self->pm_width, self->pm_height);
-
-    if(fmt->indexed) {
-        ShaderGLRectDrawCLUT(&ctx->rect_shader, gl, &rect_data, tex, clut);
-    } else {
-        ShaderGLRectDraw(&ctx->rect_shader, gl, &rect_data, tex);
-    }
+    DevicePixelmapGLRectDrawTexture(self, gl, ctx, &drect, &srect, src->width, src->height, tex, clut, fmt->indexed, BR_FALSE);
 
     if(tex_tmp)
         gl->DeleteTextures(1, &tex);
@@ -580,7 +749,6 @@ static br_error BR_CMETHOD(br_device_pixelmap_gl, rectangleStretchCopyTo)(br_dev
     if(clut_tmp)
         gl->DeleteTextures(1, &clut);
 
-    gl->BindFramebuffer(GL_FRAMEBUFFER, 0);
     return BRE_OK;
 }
 
@@ -658,18 +826,28 @@ static br_error BR_CMETHOD_DECL(br_device_pixelmap_gl, rectangleCopyFrom)(br_dev
 static br_error BR_CMETHOD(br_device_pixelmap_gl, text)(br_device_pixelmap *self, br_point *point, br_font *font, const char *text, br_uint_32 colour)
 {
 
-    size_t                 len = strlen(text);
-    br_point               pp;
-    const br_gl_text_font *gl_font;
-    const GladGLContext   *gl  = DevicePixelmapGLGetGLContext(self);
-    br_gl_context_state   *ctx = GLContextState(gl);
-    br_gl_text_data       *text_data;
-    br_uint_8              r8 = 0, g8 = 0, b8 = 0, a8 = 255;
+    size_t                    len = strlen(text);
+    br_point                  pp;
+    const br_gl_text_font    *gl_font;
+    const GladGLContext      *gl  = DevicePixelmapGLGetGLContext(self);
+    br_gl_context_state      *ctx = GLContextState(gl);
+    br_gl_text_data          *text_data;
+    const br_pixelmap_gl_fmt *fmt = DeviceGLGetFormatDetails(self->pm_type);
+    br_uint_8                 r8 = 0, g8 = 0, b8 = 0, a8 = 255;
 
     /*
      * Make sure we're an offscreen pixelmap.
      */
     if(self->use_type != BRT_OFFSCREEN)
+        return BRE_UNSUPPORTED;
+
+    /*
+     * An indexed pixelmap is a GL_R8UI integer texture, which the text shader -
+     * a float vec4 output - cannot write, and a glyph writes a colour rather
+     * than an index. Refusing beats an invalid draw that leaves pixels
+     * untouched or corrupt.
+     */
+    if(fmt != NULL && fmt->indexed)
         return BRE_UNSUPPORTED;
 
     /*
@@ -771,25 +949,38 @@ static br_error BR_CMETHOD(br_device_pixelmap_gl, text)(br_device_pixelmap *self
 
 static br_error BR_CMETHOD_DECL(br_device_pixelmap_gl, line)(br_device_pixelmap *self, br_point *s, br_point *e, br_uint_32 colour)
 {
-    br_point             spoint, epoint;
-    br_uint_8            r8 = 0, g8 = 0, b8 = 0, a8 = 255;
-    br_gl_line_data      line_data;
-    const GladGLContext *gl  = DevicePixelmapGLGetGLContext(self);
-    br_gl_context_state *ctx = GLContextState(gl);
+    br_point                  spoint, epoint;
+    br_uint_8                 r8 = 0, g8 = 0, b8 = 0, a8 = 255;
+    br_gl_line_data           line_data;
+    const br_pixelmap_gl_fmt *fmt = DeviceGLGetFormatDetails(self->pm_type);
+    const GladGLContext      *gl  = DevicePixelmapGLGetGLContext(self);
+    br_gl_context_state      *ctx = GLContextState(gl);
 
     if(PixelmapLineClip(&spoint, &epoint, s, e, (br_pixelmap *)self) == BR_CLIP_REJECT)
         return BRE_OK;
 
-    BrColourUnpack(colour, self->pm_type, &r8, &g8, &b8, &a8);
+    /*
+     * An indexed pixelmap is a GL_R8UI integer texture. Its line is drawn with
+     * the integer-output program and the colour is the CLUT index itself, as
+     * BrColourUnpack() refuses the indexed types.
+     */
+    if(fmt != NULL && fmt->indexed) {
+        line_data.colour = (br_vector4)BR_VECTOR4((float)(colour & 0xff), 0.0f, 0.0f, 0.0f);
+    } else {
+        BrColourUnpack(colour, self->pm_type, &r8, &g8, &b8, &a8);
+        line_data.colour = (br_vector4)BR_VECTOR4(r8 / 255.0f, g8 / 255.0f, b8 / 255.0f, a8 / 255.0f);
+    }
 
     BrMatrix4Orthographic(&line_data.mvp, 0.0f, 1.0f, 0.0f, 1.0f, -1.0f, 1.0f);
-    line_data.start  = (br_vector2)BR_VECTOR2((float)spoint.x / (float)self->pm_width, 1.0f - ((float)spoint.y / (float)self->pm_height));
-    line_data.end    = (br_vector2)BR_VECTOR2((float)epoint.x / (float)self->pm_width, 1.0f - ((float)epoint.y / (float)self->pm_height));
-    line_data.colour = (br_vector4)BR_VECTOR4(r8 / 255.0f, g8 / 255.0f, b8 / 255.0f, a8 / 255.0f);
+    line_data.start = (br_vector2)BR_VECTOR2((float)spoint.x / (float)self->pm_width, 1.0f - ((float)spoint.y / (float)self->pm_height));
+    line_data.end   = (br_vector2)BR_VECTOR2((float)epoint.x / (float)self->pm_width, 1.0f - ((float)epoint.y / (float)self->pm_height));
 
     gl->BindFramebuffer(GL_FRAMEBUFFER, self->asBack.glFbo);
     gl->Viewport(0, 0, self->pm_width, self->pm_height);
-    ShaderGLLineDraw(&ctx->line_shader, gl, &line_data, GL_LINES, 2);
+    if(fmt != NULL && fmt->indexed)
+        ShaderGLLineDrawIndexed(&ctx->line_shader, gl, &line_data, GL_LINES, 2);
+    else
+        ShaderGLLineDraw(&ctx->line_shader, gl, &line_data, GL_LINES, 2);
     gl->BindFramebuffer(GL_FRAMEBUFFER, 0);
 
     return BRE_OK;
@@ -797,30 +988,38 @@ static br_error BR_CMETHOD_DECL(br_device_pixelmap_gl, line)(br_device_pixelmap 
 
 static br_error BR_CMETHOD_DECL(br_device_pixelmap_gl, pixelSet)(br_device_pixelmap *self, br_point *p, br_uint_32 colour)
 {
-    br_point             point;
-    br_uint_8            r8 = 0, g8 = 0, b8 = 0, a8 = 255;
-    br_gl_line_data      line_data;
-    const GladGLContext *gl  = DevicePixelmapGLGetGLContext(self);
-    br_gl_context_state *ctx = GLContextState(gl);
+    br_point                  point;
+    br_uint_8                 r8 = 0, g8 = 0, b8 = 0, a8 = 255;
+    br_gl_line_data           line_data;
+    const br_pixelmap_gl_fmt *fmt = DeviceGLGetFormatDetails(self->pm_type);
+    const GladGLContext      *gl  = DevicePixelmapGLGetGLContext(self);
+    br_gl_context_state      *ctx = GLContextState(gl);
 
     if(PixelmapPointClip(&point, p, (br_pixelmap *)self) == BR_CLIP_REJECT)
         return BRE_OK;
 
-    BrColourUnpack(colour, self->pm_type, &r8, &g8, &b8, &a8);
+    if(fmt != NULL && fmt->indexed) {
+        line_data.colour = (br_vector4)BR_VECTOR4((float)(colour & 0xff), 0.0f, 0.0f, 0.0f);
+    } else {
+        BrColourUnpack(colour, self->pm_type, &r8, &g8, &b8, &a8);
+        line_data.colour = (br_vector4)BR_VECTOR4(r8 / 255.0f, g8 / 255.0f, b8 / 255.0f, a8 / 255.0f);
+    }
 
     /*
      * FIXME: For some reason I cbf figuring out now, when rendering a point, both components need a -1.
      */
     BrMatrix4Orthographic(&line_data.mvp, 0.0f, 1.0f, 0.0f, 1.0f, -1.0f, 1.0f);
     line_data.start = (br_vector2)BR_VECTOR2((float)(point.x - 1) / (float)self->pm_width, 1.0f - ((float)(point.y - 1) / (float)self->pm_height));
-    line_data.colour = (br_vector4)BR_VECTOR4(r8 / 255.0f, g8 / 255.0f, b8 / 255.0f, a8 / 255.0f);
 
     /*
      * What is a point, but half a line?
      */
     gl->BindFramebuffer(GL_FRAMEBUFFER, self->asBack.glFbo);
     gl->Viewport(0, 0, self->pm_width, self->pm_height);
-    ShaderGLLineDraw(&ctx->line_shader, gl, &line_data, GL_POINTS, 1);
+    if(fmt != NULL && fmt->indexed)
+        ShaderGLLineDrawIndexed(&ctx->line_shader, gl, &line_data, GL_POINTS, 1);
+    else
+        ShaderGLLineDraw(&ctx->line_shader, gl, &line_data, GL_POINTS, 1);
     gl->BindFramebuffer(GL_FRAMEBUFFER, 0);
 
     return BRE_OK;

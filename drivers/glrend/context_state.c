@@ -219,6 +219,7 @@ void ContextStateGLFini(br_gl_context_state *self)
     gl->DeleteBuffers(1, &self->rect_shader.ubo);
 
     gl->DeleteProgram(self->line_shader.program);
+    gl->DeleteProgram(self->line_shader.program_int);
     gl->DeleteVertexArrays(1, &self->line_shader.vao);
     gl->DeleteBuffers(1, &self->line_shader.ubo);
 

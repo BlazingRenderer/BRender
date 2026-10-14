@@ -15,6 +15,7 @@ extern "C" {
  */
 br_boolean ShaderGLLineCompile(br_gl_line_shader *self, const GladGLContext *gl);
 void       ShaderGLLineDraw(br_gl_line_shader *self, const GladGLContext *gl, const br_gl_line_data *data, GLenum mode, GLsizei count);
+void ShaderGLLineDrawIndexed(br_gl_line_shader *self, const GladGLContext *gl, const br_gl_line_data *data, GLenum mode, GLsizei count);
 /*
  * shader_rect.c
  */
