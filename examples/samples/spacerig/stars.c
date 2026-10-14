@@ -4070,7 +4070,25 @@ void SetupStarfield()
 
 // Function to draw the starfield in the appropriate viewing window
 
-void StarfieldDraw(br_pixelmap *window, br_actor *world, br_actor *camera, br_pixelmap *shade, br_pixelmap *sprite, int names)
+/*
+ * The starfield's colours are palette indices: the demo was written to draw the
+ * stars into an indexed window, where an index selects a winpal.pal entry. On an
+ * RGB window that index is a br_colour with alpha 0 and almost no colour, so
+ * resolve it through the palette and hand back an opaque RGB colour.
+ */
+static br_colour StarColour(br_pixelmap *window, br_pixelmap *palette, br_uint_32 index)
+{
+    br_colour c;
+
+    if(window->type == BR_PMT_INDEX_8 || palette == NULL || index >= (br_uint_32)palette->height)
+        return index;
+
+    c = ((br_colour *)palette->pixels)[index];
+
+    return BR_COLOUR_RGB(BR_RED(c), BR_GRN(c), BR_BLU(c));
+}
+
+void StarfieldDraw(br_pixelmap *window, br_actor *world, br_actor *camera, br_pixelmap *shade, br_pixelmap *sprite, int names, br_pixelmap *palette)
 {
     int             star;
     static int      then = -1;
@@ -4117,17 +4135,18 @@ void StarfieldDraw(br_pixelmap *window, br_actor *world, br_actor *camera, br_pi
         screen.v[0] = x_scale + BR_MAC2DIV(x_scale, viewedpoint.v[0], 0, 0, viewedpoint.v[3]);
 
         screen.v[1] = y_scale - BR_MAC2DIV(y_scale, viewedpoint.v[1], 0, 0, viewedpoint.v[3]);
-        BrPixelmapPlot(window, screen.v[0], screen.v[1], starfield[star].colour);
+        BrPixelmapPlot(window, screen.v[0], screen.v[1], StarColour(window, palette, starfield[star].colour));
 
         if(star == NUM_STARS - 1) {
             BrPixelmapRectangleCopy(window, screen.v[0], screen.v[1], sprite, 0, 0, sprite->width, sprite->height);
             if(names)
-                BrPixelmapTextF(window, screen.v[0] + 36, screen.v[1] + 16, 63, BrFontFixed3x5, "%s", "SOL");
+                BrPixelmapTextF(window, screen.v[0] + 36, screen.v[1] + 16, StarColour(window, palette, 63), BrFontFixed3x5, "%s", "SOL");
         }
 
         if(names) {
             if(star < 400)
-                BrPixelmapTextF(window, screen.v[0] + 3, screen.v[1], 63, BrFontFixed3x5, "%s", starfield[star].name + 3);
+                BrPixelmapTextF(window, screen.v[0] + 3, screen.v[1], StarColour(window, palette, 63), BrFontFixed3x5, "%s",
+                                starfield[star].name + 3);
         }
     }
 }

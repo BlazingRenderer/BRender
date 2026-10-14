@@ -6,6 +6,6 @@ typedef struct {
     char      *name;
 } STAR, *STARPTR;
 
-void StarfieldDraw(br_pixelmap *window, br_actor *world, br_actor *camera, br_pixelmap *shade, br_pixelmap *sprite, int names);
+void StarfieldDraw(br_pixelmap *window, br_actor *world, br_actor *camera, br_pixelmap *shade, br_pixelmap *sprite, int names, br_pixelmap *palette);
 
 void SetupStarfield();

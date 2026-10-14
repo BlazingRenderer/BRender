@@ -1159,7 +1159,7 @@ static void SpaceRigRender(br_demo *demo)
     // Draw the starfield in the current viewing window
 
     if(stardraw)
-        StarfieldDraw(colour_buffer, world, camera, pShade, star_pm, names);
+        StarfieldDraw(colour_buffer, world, camera, pShade, star_pm, names, palette);
 
     if(camera_probe_flag == 0)
         BrZbSceneRender(world, camera, colour_buffer, depth_buffer);
