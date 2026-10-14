@@ -62,10 +62,8 @@ static void nullRender(br_actor *actor, br_model *model, br_material *material, 
  * appropriate vertex values to represent a bounding box
  *
  * Another way to do this is to use a cube model, and prepend a scale+xform
- * that matches it to the bounds - this has the disadvantage of making
- * the lighting do funny things unless BR_LIGHT_VIEW is used. I would prefer
- * that the user only has to do this when they themselves have created
- * a funny transform.
+ * that matches it to the bounds. I would prefer that the user only has to do
+ * this when they themselves have created a funny transform.
  */
 
 /*

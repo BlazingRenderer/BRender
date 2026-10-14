@@ -20,7 +20,8 @@ enum {
     BR_LIGHT_AMBIENT = 0x0003,
 
     /*
-     * Flag indicating that calculations are done in view space
+     * Retained for compatibility; all lighting is in view space, so this flag
+     * has no effect.
      */
     BR_LIGHT_VIEW = 0x0004,
 
@@ -74,10 +75,9 @@ typedef struct br_light {
      *     cone of illumination and shines along the negative z axis of the light actor.
      *
      * The `type` member also encodes a flag value `BR_LIGHT_VIEW` which can be combined with any of the
-     * three light types using the 'inclusive-or' operation. When the flag is present, lighting
-     * calculations are performed in view space rather than model space. This is slower, but prevents
-     * odd anomalies if non-uniform scalings are used on models. The bit mask value `BR_LIGHT_TYPE` can
-     * be used to extract the light type using the 'and' operation.
+     * three light types using the 'inclusive-or' operation. Lighting calculations are always performed
+     * in view space now, so the flag is retained for compatibility and has no effect. The bit mask
+     * value `BR_LIGHT_TYPE` can be used to extract the light type using the 'and' operation.
      */
     br_uint_8 type;
 
