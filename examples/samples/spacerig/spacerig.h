@@ -92,16 +92,12 @@ void TextureMapLoad();
 
 void CalcBezierBasis(br_scalar t, br_matrix4 *probe_path, br_vector4 *probe_centre, br_vector4 *v_t);
 
-br_pixelmap *Load_Intro_Screen(br_pixelmap *screen);
-
 void Init_Actor(br_actor *parent, br_actor **new_actor, char *modelname, char *material, br_boolean load_flag, br_boolean material_flag,
                 float X_axis_rotation, float X_translation, float Y_translation, float Z_translation);
 
 void Init_Camera(br_actor *parent, br_actor **new_observer);
 
 void Init_Light(br_actor *parent, br_actor **light, br_scalar atten);
-
-void Quit();
 
 br_pixelmap *BR_CALLBACK LoadMapFFHook(const char *name);
 
@@ -110,9 +106,6 @@ br_scalar DimLight(br_pixelmap *colour_buffer, br_actor *light1, br_scalar atten
 br_scalar BrightenLight(br_pixelmap *colour_buffer, br_actor *light1, br_scalar atten);
 
 int Light_on_off(br_actor *light1, int light_tag, int present_level);
-
-br_uint_16 EnlargeScreen(br_pixelmap *colour_buffer, br_pixelmap *window, br_uint_16 screen_scale, br_uint_16 curr_width, br_uint_16 curr_height,
-                         br_uint_16 window_dx, br_uint_16 window_dy, br_uint_16 *Collision_Detect_X, br_uint_16 *Collision_Detect_Y);
 
 void Animate_box(br_actor *box, br_actor *argo_null, br_actor *argo_blu, br_actor *argo_grn, br_actor *argo_yel, br_actor *argo_red);
 

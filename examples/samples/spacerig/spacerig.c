@@ -108,9 +108,7 @@ float shift      = 0.0F;
 float mouse_move = 0.0F;
 
 br_scalar  collision_distance1, collision_distance2, collision_distance3, collision_distance;
-br_uint_16 window_dx, window_dy, curr_width, curr_height;
 br_uint_16 Collision_Detect_X[3], Collision_Detect_Y[3];
-br_uint_16 screen_scale = 0;
 
 br_scalar atten = BR_SCALAR(0.8);
 br_scalar t     = BR_SCALAR(0.0);
@@ -272,20 +270,14 @@ static br_error SpaceRigInit(br_demo *demo)
     colour_buffer->origin_x = screen->origin_x;
     colour_buffer->origin_y = screen->origin_y;
     depth_buffer->origin_x = depth_buffer->origin_y = 0;
-    // Variables set to current screen height/width used for screen reduction
-
-    curr_width  = colour_buffer->width;
-    curr_height = colour_buffer->height;
-    window_dx   = (br_uint_16)(colour_buffer->width * 0.2);
-    window_dy   = (br_uint_16)(colour_buffer->height * 0.2);
 
     // Determine z-buffering sampling positions of window
 
-    Collision_Detect_X[0] = (br_uint_16)(((screen_scale * window_dx) / 2) + (curr_width * 0.05));
+    Collision_Detect_X[0] = (br_uint_16)((colour_buffer->width) * 0.05);
     Collision_Detect_Y[0] = (br_uint_16)((colour_buffer->height) * 0.5);
     Collision_Detect_X[1] = (br_uint_16)((colour_buffer->width) * 0.5);
     Collision_Detect_Y[1] = (br_uint_16)((colour_buffer->height) * 0.5);
-    Collision_Detect_X[2] = (br_uint_16)(((screen_scale * window_dx) / 2) + (curr_width * 0.95));
+    Collision_Detect_X[2] = (br_uint_16)((colour_buffer->width) * 0.95);
     Collision_Detect_Y[2] = (br_uint_16)((colour_buffer->height) * 0.5);
 
     /*
@@ -495,7 +487,7 @@ static br_error SpaceRigInit(br_demo *demo)
 
     return BRE_OK;
 
-} // End BrDemo_InitApp()
+} // End SpaceRigInit()
 
 void Open_Airlock_Doors()
 {
@@ -1148,11 +1140,7 @@ static void SpaceRigRender(br_demo *demo)
 
     BrRendererFrameBegin();
 
-    if(info || menu)
-        BrPixelmapFill(colour_buffer, 0x0);
-    else
-        BrPixelmapRectangleFill(colour_buffer, (screen_scale * window_dx) / 2, (screen_scale * window_dy) / 2, (colour_buffer->width),
-                                (colour_buffer->height), 0x0);
+    BrPixelmapFill(colour_buffer, 0x0);
 
     BrPixelmapFill(depth_buffer, 0xffffffff);
 
@@ -1667,16 +1655,11 @@ void SpaceRigOnResize(br_demo *demo, br_uint_16 width, br_uint_16 height)
     colour_buffer->origin_y = screen->origin_y;
     depth_buffer->origin_x = depth_buffer->origin_y = 0;
 
-    curr_width  = colour_buffer->width;
-    curr_height = colour_buffer->height;
-    window_dx   = (colour_buffer->width * 0.2);
-    window_dy   = (colour_buffer->height * 0.2);
-
-    Collision_Detect_X[0] = ((screen_scale * window_dx) / 2) + (curr_width * 0.05);
+    Collision_Detect_X[0] = (colour_buffer->width) * 0.05;
     Collision_Detect_Y[0] = (colour_buffer->height) * 0.5;
     Collision_Detect_X[1] = (colour_buffer->width) * 0.5;
     Collision_Detect_Y[1] = (colour_buffer->height) * 0.5;
-    Collision_Detect_X[2] = ((screen_scale * window_dx) / 2) + (curr_width * 0.95);
+    Collision_Detect_X[2] = (colour_buffer->width) * 0.95;
     Collision_Detect_Y[2] = (colour_buffer->height) * 0.5;
 }
 
