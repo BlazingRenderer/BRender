@@ -37,7 +37,7 @@ br_error BR_PUBLIC_ENTRY BrBegin(void)
 
 br_error BR_PUBLIC_ENTRY BrEnd(void)
 {
-    br_device *dev;
+    int i;
 
     if(!active)
         return BRE_NOT_ACTIVE;
@@ -47,11 +47,14 @@ br_error BR_PUBLIC_ENTRY BrEnd(void)
     active = BR_FALSE;
 
     /*
-     * Close down loaded devices
+     * Close down loaded devices, most recently loaded first. A device added
+     * later may depend on a resource (e.g. a loaded library) provided by one
+     * added earlier, so teardown has to run against the loading order. Slots
+     * are filled in ascending order, hence the reverse scan.
      */
-    while(BrDevFind(&dev, NULL) == BRE_OK)
-        if(dev)
-            BrDevRemove(dev);
+    for(i = fw.ndev_slots - 1; i >= 0; i--)
+        if(fw.dev_slots[i].dev)
+            BrDevRemove(fw.dev_slots[i].dev);
 
     BrPixelmapEnd();
     HostEnd();
