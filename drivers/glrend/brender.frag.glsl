@@ -143,7 +143,15 @@ void main()
 
     vec4 texColour = getTexColour(mappedUV);
 
-    if(!disable_colour_key && texColour.rgb == vec3(0.0, 0.0, 0.0))
+    /*
+     * The colour key is tested on the raw source texel, before the palette or
+     * shade lookup: palette index 0 for an indexed map, black for an RGB one.
+     * See resources/aidocs/pixelmap-colour-keying.md.
+     */
+    bool keyed = (texture_mode == TEXTURE_MODE_NORMAL) ? (texColour.rgb == vec3(0.0, 0.0, 0.0))
+                                                       : (texture(index_texture, mappedUV).r == 0u);
+
+    if(!disable_colour_key && keyed)
         discard;
 
     vec3 lightA = vertexLighting[0];
