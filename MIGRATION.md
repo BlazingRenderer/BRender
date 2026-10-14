@@ -170,3 +170,14 @@ implementations were `#if 0`'d.
 
 Colour keying should be done with alpha channels, or via the default
 black-key behaviour controlled by `BR_MATF_DISABLE_COLOUR_KEY`.
+
+### `BR_LIGHT_VIEW` is a no-op
+
+Lighting is always performed in view space now; the model-space path the flag
+used to select was removed. The flag is retained in `br_light::type` for
+compatibility but has no effect, and can be dropped from anything that sets it.
+
+The core still sends `BRT_SPACE_T` to a driver's light state, always as
+`BRT_VIEW`, so a driver that consults it does not fall back to a model-space
+default. The in-tree drivers no longer accept `BRT_SPACE_T` on their light or
+cull state; the DDI is not a public interface.
