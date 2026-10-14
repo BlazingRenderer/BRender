@@ -24,8 +24,29 @@
 #include "spacerig.h"
 #include "math.h"
 
-#define DEPTH_LOW_VALUE  40000
-#define DEPTH_HIGH_VALUE 54000
+/*
+ * Movement is gated on the distance to the nearest scene geometry along the
+ * collision rays. The original demo instead sampled the 16-bit z-buffer and
+ * required the value to exceed DEPTH_LOW_VALUE (or DEPTH_HIGH_VALUE), i.e.
+ * that the nearest surface was further away than a fixed distance. The
+ * renderers map a view distance d to the depth value
+ *
+ *     32767 * (yon_z + hither_z) / (yon_z - hither_z) + 32768
+ *         - 32767 * 2 * yon_z * hither_z / ((yon_z - hither_z) * d)
+ *
+ * so with this demo's camera (hither 0.3, yon 25) the old thresholds of 40000
+ * and 54000 correspond to distances of about 0.76 and 1.61 world units. Those
+ * two distances are the gates used below.
+ */
+#define COLLISION_LOW_DISTANCE  BR_SCALAR(0.76)
+#define COLLISION_HIGH_DISTANCE BR_SCALAR(1.61)
+
+/*
+ * Sentinel "nearest distance" for a collision ray that hits nothing. It only
+ * has to exceed the gates above, and unlike BR_SCALAR_MAX it is short enough to
+ * print in the scene info overlay.
+ */
+#define COLLISION_NO_HIT BR_SCALAR(1000.0)
 // Global variables
 
 // Hierarchy structure
@@ -54,7 +75,7 @@ br_actor *corridor_1;
 
 br_pixelmap *depth_buffer, *palette;
 br_pixelmap *colour_buffer, *screen, *backdrop_pm;
-br_pixelmap *rear_pm, *rear_depth, *feedback_pm, *feedback_depth;
+br_pixelmap *feedback_pm, *feedback_depth;
 br_pixelmap *star_pm;
 br_material *mats[150];
 br_material *pulse_wave, *flick, *dark;
@@ -86,7 +107,7 @@ float move       = 0.0F;
 float shift      = 0.0F;
 float mouse_move = 0.0F;
 
-br_uint_16 depth_value1, depth_value2, depth_value3, depth_value4, depth_value;
+br_scalar  collision_distance1, collision_distance2, collision_distance3, collision_distance;
 br_uint_16 window_dx, window_dy, curr_width, curr_height;
 br_uint_16 Collision_Detect_X[3], Collision_Detect_Y[3];
 br_uint_16 screen_scale = 0;
@@ -118,8 +139,21 @@ br_uint_32 SysCols32[7] = {
     BR_COLOUR_RGBA(255, 255, 0, 255),
 };
 
+/*
+ * The collision test picks against the scene through BrScenePick2D() and
+ * BrModelPick2D(), which read model->faces; BrModelUpdate() frees those unless
+ * the original data is retained, so keep it on every model the demo registers.
+ */
+static void RetainModelOriginals(br_model **models, int count)
+{
+    int i;
+
+    for(i = 0; i < count; i++)
+        models[i]->flags |= BR_MODF_KEEP_ORIGINAL;
+}
+
 void Init_Actor(br_actor *parent, br_actor **new_actor, char *modelname, char *material, br_boolean load_flag, br_boolean material_flag,
-                float X_axis_rotation, float X_translation, float Y_translation, float Z_translation, br_boolean keep_flag)
+                float X_axis_rotation, float X_translation, float Y_translation, float Z_translation)
 
 {
 
@@ -136,8 +170,7 @@ void Init_Actor(br_actor *parent, br_actor **new_actor, char *modelname, char *m
         BR_ERROR1("Cannot open %s\n", modelname);
     }
 
-    if(keep_flag)
-        pActor->model->flags |= BR_MODF_KEEP_ORIGINAL;
+    pActor->model->flags |= BR_MODF_KEEP_ORIGINAL;
 
     if(load_flag)
         BrModelAdd(pActor->model);
@@ -255,15 +288,6 @@ static br_error SpaceRigInit(br_demo *demo)
     Collision_Detect_X[2] = (br_uint_16)(((screen_scale * window_dx) / 2) + (curr_width * 0.95));
     Collision_Detect_Y[2] = (br_uint_16)((colour_buffer->height) * 0.5);
 
-    // Set pixelmaps for camera_rear used in collision detection
-
-    rear_pm = BrPixelmapMatchSized(colour_buffer, BR_PMMATCH_HIDDEN_BUFFER, 4, 4);
-
-    if(rear_pm)
-        rear_depth = BrPixelmapMatch(rear_pm, BR_PMMATCH_DEPTH_16);
-    else
-        rear_depth = NULL;
-
     /*
      * The brdemo framework has already begun the renderer
      * (BrRendererBegin()), so the old BrZbBegin() compatibility entry point
@@ -328,12 +352,15 @@ static br_error SpaceRigInit(br_demo *demo)
     // Load models (multiple model files)
 
     m = BrModelLoadMany("room.dat", mods, BR_ASIZE(mods));
+    RetainModelOriginals(mods, m);
     BrModelAddMany(mods, m);
 
     m1 = BrModelLoadMany("argohead.dat", mod1s, BR_ASIZE(mod1s));
+    RetainModelOriginals(mod1s, m1);
     BrModelAddMany(mod1s, m1);
 
     m2 = BrModelLoadMany("spotlite.dat", mod2s, BR_ASIZE(mod2s));
+    RetainModelOriginals(mod2s, m2);
     BrModelAddMany(mod2s, m2);
 
     world = demo->world;
@@ -346,37 +373,37 @@ static br_error SpaceRigInit(br_demo *demo)
 
     // Build rest of world
 
-    Init_Actor(lift_area, &elev_front, "elev_front", default_name, BR_FALSE, BR_FALSE, -180.0F, 0.0F, 0.0F, 0.0F, BR_FALSE);
+    Init_Actor(lift_area, &elev_front, "elev_front", default_name, BR_FALSE, BR_FALSE, -180.0F, 0.0F, 0.0F, 0.0F);
 
-    Init_Actor(lift_area, &door_1_lft, "door_1_lft", default_name, BR_FALSE, BR_FALSE, -180.0F, 0.1F, 0.0F, 0.0F, BR_FALSE);
+    Init_Actor(lift_area, &door_1_lft, "door_1_lft", default_name, BR_FALSE, BR_FALSE, -180.0F, 0.1F, 0.0F, 0.0F);
 
-    Init_Actor(lift_area, &door_1_rgt, "door_1_rgt", default_name, BR_FALSE, BR_FALSE, -180.0F, 0.1F, 0.0F, 0.0F, BR_FALSE);
+    Init_Actor(lift_area, &door_1_rgt, "door_1_rgt", default_name, BR_FALSE, BR_FALSE, -180.0F, 0.1F, 0.0F, 0.0F);
 
-    Init_Actor(lift_area, &b_door_lft, "b_door_lft", default_name, BR_FALSE, BR_FALSE, -180.0F, -0.1F, 0.0F, 0.0F, BR_FALSE);
+    Init_Actor(lift_area, &b_door_lft, "b_door_lft", default_name, BR_FALSE, BR_FALSE, -180.0F, -0.1F, 0.0F, 0.0F);
 
-    Init_Actor(lift_area, &b_door_rgt, "b_door_rgt", default_name, BR_FALSE, BR_FALSE, -180.0F, -0.1F, 0.0F, 0.0F, BR_FALSE);
+    Init_Actor(lift_area, &b_door_rgt, "b_door_rgt", default_name, BR_FALSE, BR_FALSE, -180.0F, -0.1F, 0.0F, 0.0F);
 
-    Init_Actor(lift_area, &liftflor, "liftflor.dat", "red plstc", BR_TRUE, BR_TRUE, -180.0F, 0.0F, 0.2F, 0.0F, BR_FALSE);
+    Init_Actor(lift_area, &liftflor, "liftflor.dat", "red plstc", BR_TRUE, BR_TRUE, -180.0F, 0.0F, 0.2F, 0.0F);
 
-    Init_Actor(maze_area, &corridor_1, "corridor_1", default_name, BR_FALSE, BR_FALSE, -180.0F, 0.0F, 0.0F, 0.0F, BR_FALSE);
+    Init_Actor(maze_area, &corridor_1, "corridor_1", default_name, BR_FALSE, BR_FALSE, -180.0F, 0.0F, 0.0F, 0.0F);
 
-    Init_Actor(upper_area, &level_1bot, "level_1bot", default_name, BR_FALSE, BR_FALSE, -180.0F, 0.0F, 0.0F, 0.0F, BR_FALSE);
+    Init_Actor(upper_area, &level_1bot, "level_1bot", default_name, BR_FALSE, BR_FALSE, -180.0F, 0.0F, 0.0F, 0.0F);
 
-    Init_Actor(world, &hull_up, "hull_up.dat", default_name, BR_TRUE, BR_FALSE, -180.0F, 0.0F, 0.0F, 0.0F, BR_FALSE);
+    Init_Actor(world, &hull_up, "hull_up.dat", default_name, BR_TRUE, BR_FALSE, -180.0F, 0.0F, 0.0F, 0.0F);
 
-    Init_Actor(upper_area, &box, "cube.dat", "MATERIAL 23", BR_TRUE, BR_TRUE, -180.0F, 10.0F, 4.6F, -13.5F, BR_FALSE);
+    Init_Actor(upper_area, &box, "cube.dat", "MATERIAL 23", BR_TRUE, BR_TRUE, -180.0F, 10.0F, 4.6F, -13.5F);
 
     // Load logo model items
 
-    Init_Actor(argo_null, &argo_blu, "argo_blu", "blue_flat", BR_FALSE, BR_TRUE, -90.0F, 17.95F, 4.16F, -14.5F, BR_FALSE);
+    Init_Actor(argo_null, &argo_blu, "argo_blu", "blue_flat", BR_FALSE, BR_TRUE, -90.0F, 17.95F, 4.16F, -14.5F);
 
-    Init_Actor(argo_null, &argo_grn, "argo_grn", "green_flat", BR_FALSE, BR_TRUE, -90.0F, 17.95F, 4.15F, -14.5F, BR_FALSE);
+    Init_Actor(argo_null, &argo_grn, "argo_grn", "green_flat", BR_FALSE, BR_TRUE, -90.0F, 17.95F, 4.15F, -14.5F);
 
-    Init_Actor(argo_null, &argo_yel, "argo_yel", "yellow_flat", BR_FALSE, BR_TRUE, -90.0F, 17.95F, 4.13F, -14.5F, BR_FALSE);
+    Init_Actor(argo_null, &argo_yel, "argo_yel", "yellow_flat", BR_FALSE, BR_TRUE, -90.0F, 17.95F, 4.13F, -14.5F);
 
-    Init_Actor(argo_null, &argo_red, "argo_red", "red_flat", BR_FALSE, BR_TRUE, -90.0F, 18.0F, 4.11F, -14.5F, BR_FALSE);
+    Init_Actor(argo_null, &argo_red, "argo_red", "red_flat", BR_FALSE, BR_TRUE, -90.0F, 18.0F, 4.11F, -14.5F);
 
-    Init_Actor(upper_area, &probe, "probe.dat", default_name, BR_TRUE, BR_FALSE, 0.0F, 0.0F, 0.0F, 0.0F, BR_FALSE);
+    Init_Actor(upper_area, &probe, "probe.dat", default_name, BR_TRUE, BR_FALSE, 0.0F, 0.0F, 0.0F, 0.0F);
     probe->t.type = BR_TRANSFORM_LOOK_UP;
 
     BrVector3Set(&probe->t.t.look_up.up, BR_SCALAR(0.0), BR_SCALAR(1.0), BR_SCALAR(0.0));
@@ -385,7 +412,7 @@ static br_error SpaceRigInit(br_demo *demo)
 
     BrMatrix34PostTranslate(&camera_probe->t.t.mat, BR_SCALAR(0.0), BR_SCALAR(0.0), BR_SCALAR(-1.0));
 
-    Init_Actor(upper_area, &table, "table.dat", "MATERIAL 24", BR_TRUE, BR_TRUE, 0.0F, 18.0F, 3.2F, -6.5F, BR_TRUE);
+    Init_Actor(upper_area, &table, "table.dat", "MATERIAL 24", BR_TRUE, BR_TRUE, 0.0F, 18.0F, 3.2F, -6.5F);
 
     BrMaterialUpdate(table->material, BR_MATU_ALL);
 
@@ -399,17 +426,17 @@ static br_error SpaceRigInit(br_demo *demo)
 
     BrModelUpdate(table->model, BR_MODU_ALL);
 
-    Init_Actor(upper_area, &tv, "tv.dat", "red_flat", BR_TRUE, BR_TRUE, 0.0F, 17.58F, 4.7F, -5.38F, BR_FALSE);
+    Init_Actor(upper_area, &tv, "tv.dat", "red_flat", BR_TRUE, BR_TRUE, 0.0F, 17.58F, 4.7F, -5.38F);
 
-    Init_Actor(lower_area, &basefloor, "basefloor", default_name, BR_FALSE, BR_FALSE, -180.0F, 0.0F, 0.0F, 0.0F, BR_FALSE);
+    Init_Actor(lower_area, &basefloor, "basefloor", default_name, BR_FALSE, BR_FALSE, -180.0F, 0.0F, 0.0F, 0.0F);
 
-    Init_Actor(world, &hull, "hull.dat", default_name, BR_TRUE, BR_FALSE, -180.0F, 0.0F, 0.0F, 0.0F, BR_FALSE);
+    Init_Actor(world, &hull, "hull.dat", default_name, BR_TRUE, BR_FALSE, -180.0F, 0.0F, 0.0F, 0.0F);
 
-    Init_Actor(lower_area, &power_core, "powerrod.dat", default_name, BR_TRUE, BR_FALSE, -180.0F, 0.0F, 0.0F, 0.0F, BR_FALSE);
+    Init_Actor(lower_area, &power_core, "powerrod.dat", default_name, BR_TRUE, BR_FALSE, -180.0F, 0.0F, 0.0F, 0.0F);
 
-    Init_Actor(world, &airlock_02, "airlock_02", default_name, BR_FALSE, BR_FALSE, -180.0F, 0.0F, 0.0F, 0.0F, BR_FALSE);
+    Init_Actor(world, &airlock_02, "airlock_02", default_name, BR_FALSE, BR_FALSE, -180.0F, 0.0F, 0.0F, 0.0F);
 
-    Init_Actor(world, &airlock_01, "airlock_01", default_name, BR_FALSE, BR_FALSE, -180.0F, 0.0F, 0.0F, 0.0F, BR_FALSE);
+    Init_Actor(world, &airlock_01, "airlock_01", default_name, BR_FALSE, BR_FALSE, -180.0F, 0.0F, 0.0F, 0.0F);
 
     // Establish Actor Bounds
 
@@ -597,12 +624,89 @@ void Do_Camera_Probe_Stuff()
     BrZbSceneRender(world, camera, colour_buffer, depth_buffer);
 }
 
+/*
+ * Collision picking.
+ *
+ * A per-frame z-buffer readback is impossible on a hardware pixelmap and
+ * wasteful in principle, so the collision test asks the scene geometry the
+ * same question the depth samples answered: what is the nearest surface along
+ * each collision ray. BrScenePick2D() casts the ray through the viewport pixel
+ * and invokes the callback for each model actor whose bounds it meets;
+ * BrModelPick2D() then refines each candidate to its nearest intersecting
+ * face. The face hit is a genuine model-space distance from the eye
+ * (p = ray_pos + t * ray_dir), and the demo's actor transforms are rigid, so
+ * that is a world distance.
+ */
+struct collision_pick {
+    br_scalar nearest;
+};
+
+/*
+ * BR_RSTYLE_NONE hides an actor and its whole subtree, so geometry it covers
+ * never reached the old depth buffer and must not block movement here either.
+ */
+static br_boolean CollisionPickVisible(br_actor *a)
+{
+    for(; a != NULL; a = a->parent)
+        if(a->render_style == BR_RSTYLE_NONE)
+            return BR_FALSE;
+
+    return BR_TRUE;
+}
+
+/* BrModelPick2D() callback: keep the nearest face hit along the ray. */
+static int BR_CALLBACK CollisionFacePick(br_model *model, br_material *material, br_vector3 *ray_pos, br_vector3 *ray_dir, br_scalar t,
+                                         int face, int edge, int vertex, br_vector3 *p, br_vector2 *map, void *arg)
+{
+    struct collision_pick *pick = arg;
+    br_scalar              distance;
+
+    (void)model;
+    (void)material;
+    (void)ray_pos;
+    (void)face;
+    (void)edge;
+    (void)vertex;
+    (void)p;
+    (void)map;
+
+    distance = BR_MUL(t, BrVector3Length(ray_dir));
+
+    if(distance < pick->nearest)
+        pick->nearest = distance;
+
+    return 0;
+}
+
+/* BrScenePick2D() callback: refine a candidate model down to its faces. */
+static int BR_CALLBACK CollisionRayPick(br_actor *a, br_model *model, br_material *material, br_vector3 *ray_pos, br_vector3 *ray_dir,
+                                        br_scalar t_near, br_scalar t_far, void *arg)
+{
+    if(!CollisionPickVisible(a))
+        return 0;
+
+    BrModelPick2D(model, material, ray_pos, ray_dir, t_near, t_far, CollisionFacePick, arg);
+    return 0;
+}
+
+/* Nearest geometry distance along the view ray through a viewport pixel. */
+static br_scalar CollisionRayDistance(br_actor *cam, int x, int y)
+{
+    struct collision_pick pick;
+
+    pick.nearest = COLLISION_NO_HIT;
+
+    BrScenePick2D(world, cam, colour_buffer, x, y, CollisionRayPick, &pick);
+
+    return pick.nearest;
+}
+
 void Check_Collision()
 {
-    depth_value1 = BrPixelmapPixelGet(depth_buffer, Collision_Detect_X[0], Collision_Detect_Y[0]);
-    depth_value2 = BrPixelmapPixelGet(depth_buffer, Collision_Detect_X[1], Collision_Detect_Y[1]);
-    depth_value3 = BrPixelmapPixelGet(depth_buffer, Collision_Detect_X[2], Collision_Detect_Y[2]);
-    depth_value  = MIN(depth_value1, MIN(depth_value2, depth_value3));
+    collision_distance1 = CollisionRayDistance(camera, Collision_Detect_X[0], Collision_Detect_Y[0]);
+    collision_distance2 = CollisionRayDistance(camera, Collision_Detect_X[1], Collision_Detect_Y[1]);
+    collision_distance3 = CollisionRayDistance(camera, Collision_Detect_X[2], Collision_Detect_Y[2]);
+    collision_distance  = MIN(collision_distance1, MIN(collision_distance2, collision_distance3));
 }
 
 void Close_Doors_Upper()
@@ -825,37 +929,30 @@ void SpaceRigUpdate(br_demo *demo, br_scalar dt)
 
         if(bCollisionDetect) {
 
-            if((mouse_buttons & SDL_BUTTON_RMASK) && depth_value > DEPTH_LOW_VALUE) {
+            if((mouse_buttons & SDL_BUTTON_RMASK) && collision_distance > COLLISION_LOW_DISTANCE) {
                 if(mouse_y > 0)
                     mouse_move = BR_SCALAR(-0.3);
 
                 BrMatrix34PreTranslate(&my_view->t.t.mat, 0, 0, mouse_move);
             }
 
-            if((mouse_buttons & SDL_BUTTON_RMASK) && depth_value > DEPTH_HIGH_VALUE) {
+            if((mouse_buttons & SDL_BUTTON_RMASK) && collision_distance > COLLISION_HIGH_DISTANCE) {
                 if(mouse_y > 0)
                     mouse_move = BR_SCALAR(-0.2);
 
                 BrMatrix34PreTranslate(&my_view->t.t.mat, 0, 0, mouse_move);
             }
 
-            if((KeyTest(SC_C_UP + SC_EXTENDED, 0)) && (depth_value > DEPTH_LOW_VALUE))
+            if((KeyTest(SC_C_UP + SC_EXTENDED, 0)) && (collision_distance > COLLISION_LOW_DISTANCE))
                 BrMatrix34PreTranslate(&my_view->t.t.mat, 0, 0, BR_SCALAR(-0.2));
 
             if(KeyTest(SC_C_DOWN + SC_EXTENDED, 0)) {
-                if(rear_pm) {
-                    BrPixelmapFill(rear_depth, 0xffffffff);
-                    BrPixelmapFill(rear_pm, 0x0);
-                    BrZbSceneRender(world, camera_rear, rear_pm, rear_depth);
-                    depth_value4 = BrPixelmapPixelGet(rear_depth, 2, 2);
-
-                    /*  if moving backwards do an additional rendering and sample z-buffer
-                     *  for distance if greater than 40000 (chosen by experimentation) then
-                     *  allow movement
-                     */
-                    if(depth_value4 > DEPTH_LOW_VALUE)
-                        BrMatrix34PreTranslate(&my_view->t.t.mat, 0, 0, BR_SCALAR(0.2));
-                }
+                /*
+                 * Backwards movement looks behind the view, as the old rear-camera
+                 * render did; the rear camera always existed for this test.
+                 */
+                if(CollisionRayDistance(camera_rear, Collision_Detect_X[1], Collision_Detect_Y[1]) > COLLISION_LOW_DISTANCE)
+                    BrMatrix34PreTranslate(&my_view->t.t.mat, 0, 0, BR_SCALAR(0.2));
             }
         }
 
@@ -1076,8 +1173,8 @@ static void SpaceRigRender(br_demo *demo)
         BrZbSceneRender(world, camera_probe, colour_buffer, depth_buffer);
 
     if(info) {
-        Add_Screen_Info(colour_buffer, screen, Collision_Detect_X, Collision_Detect_Y, depth_value1, depth_value2, depth_value3,
-                        depth_value, my_view, bCollisionDetect, stardraw, light_tag);
+        Add_Screen_Info(colour_buffer, screen, Collision_Detect_X, Collision_Detect_Y, collision_distance1, collision_distance2,
+                        collision_distance3, collision_distance, my_view, bCollisionDetect, stardraw, light_tag);
     }
 
     Add_Camera_Probe_Info(colour_buffer, camera_probe_flag);
@@ -1121,8 +1218,8 @@ void Add_Camera_Probe_Info(br_pixelmap *colour_buffer, int flag)
 }
 
 void Add_Screen_Info(br_pixelmap *colour_buffer, br_pixelmap *screen, br_uint_16 *Collision_Detect_X, br_uint_16 *Collision_Detect_Y,
-                     br_uint_16 depth_value1, br_uint_16 depth_value2, br_uint_16 depth_value3, br_uint_16 depth_value, br_actor *my_view,
-                     br_boolean bCollisionDetect, int stardraw, int light_tag)
+                     br_scalar collision_distance1, br_scalar collision_distance2, br_scalar collision_distance3,
+                     br_scalar collision_distance, br_actor *my_view, br_boolean bCollisionDetect, int stardraw, int light_tag)
 {
     br_uint_32 *SysCols;
 
@@ -1149,7 +1246,7 @@ void Add_Screen_Info(br_pixelmap *colour_buffer, br_pixelmap *screen, br_uint_16
     BrPixelmapTextF(colour_buffer, Collision_Detect_X[2], Collision_Detect_Y[2], SysCols[YELLOW], BrFontFixed3x5, "+");
 
     BrPixelmapTextF(colour_buffer, (colour_buffer->width) * 0.5, (colour_buffer->height) * 0.9, SysCols[YELLOW], BrFontFixed3x5,
-                    "z-buffer vals. %d %d %d %d", depth_value1, depth_value2, depth_value3, depth_value);
+                    "collision dists. %5.2f %5.2f %5.2f %5.2f", collision_distance1, collision_distance2, collision_distance3, collision_distance);
 
     // CODE TO READ POSITION OF MY_VIEW FROM 3D WORLD SPACE
 

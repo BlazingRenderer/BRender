@@ -83,8 +83,8 @@ void Show_Help(br_pixelmap *colour_buffer);
 void Add_Camera_Probe_Info(br_pixelmap *colour_buffer, int flag);
 
 void Add_Screen_Info(br_pixelmap *colour_buffer, br_pixelmap *screen, br_uint_16 *Collision_Detect_X, br_uint_16 *Collision_Detect_Y,
-                     br_uint_16 depth_value1, br_uint_16 depth_value2, br_uint_16 depth_value3, br_uint_16 depth_value, br_actor *my_view,
-                     br_boolean collision, int stardraw, int light_tag);
+                     br_scalar collision_distance1, br_scalar collision_distance2, br_scalar collision_distance3,
+                     br_scalar collision_distance, br_actor *my_view, br_boolean collision, int stardraw, int light_tag);
 
 void Init_World_Bounds(br_actor *parent, br_actor **new_actor);
 
@@ -95,7 +95,7 @@ void CalcBezierBasis(br_scalar t, br_matrix4 *probe_path, br_vector4 *probe_cent
 br_pixelmap *Load_Intro_Screen(br_pixelmap *screen);
 
 void Init_Actor(br_actor *parent, br_actor **new_actor, char *modelname, char *material, br_boolean load_flag, br_boolean material_flag,
-                float X_axis_rotation, float X_translation, float Y_translation, float Z_translation, br_boolean keep_flag);
+                float X_axis_rotation, float X_translation, float Y_translation, float Z_translation);
 
 void Init_Camera(br_actor *parent, br_actor **new_observer);
 
