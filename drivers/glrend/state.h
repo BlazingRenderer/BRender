@@ -75,7 +75,6 @@ typedef struct state_matrix {
 
 typedef struct state_cull {
     br_token type;
-    br_token space;
 } state_cull;
 
 typedef struct state_surface {

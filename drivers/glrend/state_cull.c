@@ -10,13 +10,11 @@
 #define F(f) offsetof(state_stack, f)
 
 static br_tv_template_entry template_entries[] = {
-    {BRT(TYPE_T),  F(cull.type),  Q | S | A, BRTV_CONV_COPY, 0, TM_PART | TM_INVALID_CC},
-    {BRT(SPACE_T), F(cull.space), Q | S | A, BRTV_CONV_COPY, 0, TM_PART | TM_INVALID_CC},
+    {BRT(TYPE_T), F(cull.type), Q | S | A, BRTV_CONV_COPY, 0, TM_PART | TM_INVALID_CC},
 };
 
 static const state_cull default_state = {
-    .type  = BRT_NONE,
-    .space = BRT_MODEL,
+    .type = BRT_NONE,
 };
 
 void StateGLInitCull(state_all *state)
