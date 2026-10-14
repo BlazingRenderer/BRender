@@ -717,10 +717,334 @@ void Door_Stuff()
         Close_Airlock_Doors();
 }
 
+/*
+ * The demo's design frame rate. The original ran on DOS and its rate is not
+ * known, so this is a guess intended to be tuned by eye - the starfield's
+ * rotation is wall-clock 5 degrees per second and is the reference to judge it
+ * against.
+ */
+#define SPF (1.0f / 30.0f)
+
+/*
+ * Most steps one displayed frame may run to catch up after a stall. A stall
+ * longer than a few steps is not worth replaying in full, so the backlog is
+ * capped there instead of being worked off over the following frames.
+ */
+#define MAX_STEPS 5
+
+/* Time left over from the previous displayed frame. Seeded with one step so the first frame runs. */
+static br_scalar accum = SPF;
+
 void SpaceRigUpdate(br_demo *demo, br_scalar dt)
 {
+    int steps;
+
     (void)demo;
-    (void)dt;
+
+    if(!colour_buffer)
+        return;
+
+    /*
+     * dt is the real frame delta and follows the display refresh, but the
+     * demo's per-frame increments assume its own fixed rate, so accumulate the
+     * delta and run the logic in whole steps.
+     */
+    accum += dt;
+
+    if(accum > SPF * MAX_STEPS)
+        accum = SPF * MAX_STEPS;
+
+    for(steps = 0; (steps < MAX_STEPS) && (accum >= SPF); steps++) {
+
+        accum -= SPF;
+
+        // Upper level animation in scene
+
+        if(present_level)
+            Upper_Level_Animation();
+
+        if(present_level == 0)
+            count = ChangeMaps(count, flick, swap, pulse_wave);
+
+        if((camera_probe_flag == 0) && (bCollisionDetect == 1))
+            Check_Collision();
+
+        Door_Stuff();
+
+        /********************USER INTERACTION MOUSE & KEYBOARD*********************/
+
+        // Routine for airlock switching
+
+        if((KeyTest(SC_SPACE, 0)) && ((BrScalarToFloat(my_view->t.t.mat.m[3][Z]) > 3.00) && (BrScalarToFloat(my_view->t.t.mat.m[3][Z]) < 11.2))) {
+            if(airlock_doors == 0) {
+                airlock_doors           = 1;
+                maze_area->render_style = BR_RSTYLE_DEFAULT;
+
+                /* Set render style of models outside corridor to be default
+                 * when airlock doors are open must be able to see both corridor
+                 * and lower room interior
+                 */
+
+                lower_area->render_style = BR_RSTYLE_DEFAULT;
+                upper_area->render_style = BR_RSTYLE_DEFAULT;
+                lift_area->render_style  = BR_RSTYLE_DEFAULT;
+                hull->render_style       = BR_RSTYLE_DEFAULT;
+                hull_up->render_style    = BR_RSTYLE_DEFAULT;
+
+                shift = 0.0F;
+            }
+        }
+
+        /*  Routine for elevator switching */
+
+        if((KeyTest(SC_SPACE, 0)) && ((BrScalarToFloat(my_view->t.t.mat.m[3][X]) < 5.80) && (BrScalarToFloat(my_view->t.t.mat.m[3][X]) > 3.26))) {
+            if(present_level == 0)
+                elevator = 1;
+            if(present_level == 1)
+                elevator = -1;
+        }
+
+        // Allow user to move the system around
+        // (mouse state is accumulated by SpaceRigProcessEvent)
+
+        // Allow swivel control of monitor
+
+        if((Rotate == 1) && (mouse_buttons & SDL_BUTTON_LMASK)) {
+            BrMatrix34RollingBall(&rotation, mouse_x, -mouse_y, 800);
+            BrMatrix34Pre(&tv->t.t.mat, &rotation);
+        }
+
+        // Allow mouse movement (Rotation) control
+
+        if((Rotate != 1) && (mouse_buttons & SDL_BUTTON_LMASK)) {
+            BrMatrix34RollingBall(&rotation, -mouse_x, 0, 800);
+            BrMatrix34Pre(&my_view->t.t.mat, &rotation);
+        }
+
+        // Routine for fist person movement with/without collison detection
+
+        if(bCollisionDetect) {
+
+            if((mouse_buttons & SDL_BUTTON_RMASK) && depth_value > DEPTH_LOW_VALUE) {
+                if(mouse_y > 0)
+                    mouse_move = BR_SCALAR(-0.3);
+
+                BrMatrix34PreTranslate(&my_view->t.t.mat, 0, 0, mouse_move);
+            }
+
+            if((mouse_buttons & SDL_BUTTON_RMASK) && depth_value > DEPTH_HIGH_VALUE) {
+                if(mouse_y > 0)
+                    mouse_move = BR_SCALAR(-0.2);
+
+                BrMatrix34PreTranslate(&my_view->t.t.mat, 0, 0, mouse_move);
+            }
+
+            if((KeyTest(SC_C_UP + SC_EXTENDED, 0)) && (depth_value > DEPTH_LOW_VALUE))
+                BrMatrix34PreTranslate(&my_view->t.t.mat, 0, 0, BR_SCALAR(-0.2));
+
+            if(KeyTest(SC_C_DOWN + SC_EXTENDED, 0)) {
+                if(rear_pm) {
+                    BrPixelmapFill(rear_depth, 0xffffffff);
+                    BrPixelmapFill(rear_pm, 0x0);
+                    BrZbSceneRender(world, camera_rear, rear_pm, rear_depth);
+                    depth_value4 = BrPixelmapPixelGet(rear_depth, 2, 2);
+
+                    /*  if moving backwards do an additional rendering and sample z-buffer
+                     *  for distance if greater than 40000 (chosen by experimentation) then
+                     *  allow movement
+                     */
+                    if(depth_value4 > DEPTH_LOW_VALUE)
+                        BrMatrix34PreTranslate(&my_view->t.t.mat, 0, 0, BR_SCALAR(0.2));
+                }
+            }
+        }
+
+        /*  End of bCollisionDetect==1 */
+
+        if(bCollisionDetect == 0) {
+            if(mouse_buttons & SDL_BUTTON_RMASK)
+                BrMatrix34PreTranslate(&my_view->t.t.mat, 0, 0, BR_MUL(BR_SCALAR(mouse_y), BR_SCALAR(0.01)));
+
+            if(KeyTest(SC_C_UP + SC_EXTENDED, 0))
+                BrMatrix34PreTranslate(&my_view->t.t.mat, 0, 0, BR_SCALAR(-0.2));
+
+            if((KeyTest(SC_C_UP + SC_EXTENDED, 0)) && ((KeyTest(SC_LSHIFT, 0)) || (KeyTest(SC_RSHIFT, 0))))
+                BrMatrix34PreTranslate(&my_view->t.t.mat, 0, 0, BR_SCALAR(-0.6));
+
+            if(KeyTest(SC_C_DOWN + SC_EXTENDED, 0))
+                BrMatrix34PreTranslate(&my_view->t.t.mat, 0, 0, BR_SCALAR(0.2));
+        }
+
+        // End of collsion==0
+
+        if(KeyTest(SC_C_RIGHT + SC_EXTENDED, 0))
+            BrMatrix34PreRotateY(&my_view->t.t.mat, BR_ANGLE_DEG(-5.0));
+
+        if(KeyTest(SC_C_LEFT + SC_EXTENDED, 0))
+            BrMatrix34PreRotateY(&my_view->t.t.mat, BR_ANGLE_DEG(+5.0));
+
+        // SpaceBar Opening of Doors
+
+        if(KeyTest(SC_SPACE, 0)) {
+            if((BrScalarToFloat(my_view->t.t.mat.m[3][Z]) < -1.00) && (elev_flag == 0)) {
+
+                // Add elev_shaft and upper level doors actors when door first opens
+
+                BrActorAdd(lift_area, door_1_rgt);
+                BrActorAdd(lift_area, door_1_lft);
+                BrActorAdd(lift_area, elev_front);
+                BrActorAdd(lift_area, liftflor);
+                BrActorAdd(world, hull);
+                BrActorAdd(world, hull_up);
+                elev_flag = 1;
+                // close doors flag
+            }
+
+            if(elev_flag == 4)
+                // doors are open flag
+                elev_flag = 5;
+            // flag to close doors
+
+            if(elev_flag == 6) {
+
+                // Add models outside of upper level when upper level doors are re-open
+
+                BrActorAdd(lift_area, b_door_rgt);
+                BrActorAdd(lift_area, b_door_lft);
+                BrActorAdd(lift_area, elev_front);
+                BrActorAdd(lift_area, liftflor);
+                BrActorAdd(world, hull);
+
+                // flag to open doors
+                elev_flag = 3;
+            }
+        }
+
+        // End of SpaceBar Opening of Doors
+
+        // Monitor Display
+
+        if(KeyTest(SC_PG_UP, REPT_FIRST_DOWN)) {
+            if(camera_probe_flag == 0 && present_level == 1) {
+                camera_probe_flag = 1;
+                feedback_pm       = BrPixelmapAllocate(BR_PMT_INDEX_8, 256, 256, NULL, 0);
+                BrMapAdd(feedback_pm);
+                feedback_depth = BrPixelmapMatch(feedback_pm, BR_PMMATCH_DEPTH_16);
+
+                // Close elevator doors when viewing on monitor to prevent transparency
+
+                if(elev_flag != 6)
+                    elev_flag = 5;
+            } else if(camera_probe_flag == 1) {
+                camera_probe_flag = 0;
+                BrPixelmapFree(feedback_pm);
+                BrPixelmapFree(feedback_depth);
+                change->colour_map = BrMapFind("page_0");
+                BrMaterialUpdate(change, BR_MATU_ALL);
+                count = 0;
+            }
+        }
+
+        /*  End of monitor display */
+
+        if(KeyTest(SC_PG_DOWN, REPT_FIRST_DOWN)) {
+            if(camera_probe_flag == 0 && present_level == 1) {
+                camera_probe_flag = 2;
+
+                /*  An actor of a man is linked to my_view, when using the camera probe
+                 *  switch rendering style on so a man can be displayed in position of
+                 *  my_view
+                 *
+                 *         man->render_style=BR_RSTYLE_DEFAULT;
+                 */
+            } else {
+                camera_probe_flag = 0;
+                /* similarly when returning to first person view switch off rendering style
+                 *
+                 *         man->render_style=BR_RSTYLE_NONE;
+                 */
+            }
+        }
+
+        if(KeyTest(SC_INSERT, REPT_FIRST_DOWN))
+            if(Rotate == 0 && present_level == 1)
+                Rotate ^= 1;
+            else
+                Rotate = 0;
+
+        if(KeyTest(SC_TAB, REPT_FIRST_DOWN))
+            bCollisionDetect ^= 1;
+
+        if(KeyTest(SC_I, REPT_FIRST_DOWN))
+            info ^= 1;
+
+        if(KeyTest(SC_HOME, 0))
+            BrMatrix34Identity(&camera->t.t.mat);
+
+        if(KeyTest(SC_R, 0)) {
+            BrMatrix34Identity(&tv->t.t.mat);
+            BrMatrix34PostTranslate(&tv->t.t.mat, BR_SCALAR(17.58), BR_SCALAR(4.7), BR_SCALAR(-5.38));
+        }
+
+        if(KeyTest(SC_A, 0))
+            BrMatrix34PreRotateX(&camera->t.t.mat, BR_ANGLE_DEG(5.0));
+
+        if(KeyTest(SC_Z, 0))
+            BrMatrix34PreRotateX(&camera->t.t.mat, BR_ANGLE_DEG(-5.0));
+
+        if(KeyTest(SC_X, 0)) {
+            (box->material->map_transform.m[0][0]) = (box->material->map_transform.m[0][0]) * (2.0);
+            (box->material->map_transform.m[1][1]) = (box->material->map_transform.m[1][1]) * (2.0);
+        }
+
+        if(KeyTest(SC_C, 0)) {
+            (box->material->map_transform.m[0][0]) = (box->material->map_transform.m[0][0]) / (2.0);
+            (box->material->map_transform.m[1][1]) = (box->material->map_transform.m[1][1]) / (2.0);
+        }
+
+        if(KeyTest(SC_P, 0)) {
+            BrPixelmapSave("scrn_dmp.pix", colour_buffer);
+
+            BrPixelmapTextF(colour_buffer, (screen->width) * 0.5, (screen->height) * 0.5, RED, BrFontFixed3x5, "Screen Dumped");
+        }
+
+        if(KeyTest(SC_L, REPT_FIRST_DOWN))
+            light_tag = Light_on_off(light1, light_tag, present_level);
+
+        if(KeyTest(SC_COMMA, REPT_FIRST_DOWN))
+            atten = BrightenLight(colour_buffer, light1, atten);
+
+        if(KeyTest(SC_DOT, REPT_FIRST_DOWN))
+            atten = DimLight(colour_buffer, light1, atten);
+
+        if(KeyTest(SC_8, REPT_FIRST_DOWN))
+            stardraw ^= 1;
+
+        if(KeyTest(SC_N, REPT_FIRST_DOWN))
+            names ^= 1;
+
+        if(KeyTest(SC_Q, REPT_FIRST_DOWN) || KeyTest(SC_ESC, REPT_FIRST_DOWN))
+            SDL_PushEvent(&(SDL_Event){.type = SDL_EVENT_QUIT});
+
+        if(KeyTest(SC_F1, REPT_FIRST_DOWN))
+            bShowHelp ^= 1;
+
+        // Reset the per-step input state
+
+        mouse_x = mouse_y = 0;
+        SDL_memset(key_first_down, 0, sizeof(key_first_down));
+    }
+} // End SpaceRigUpdate()
+
+/*
+ * The demo's drawing: the clear, starfield, scene and HUD, in that order. It
+ * keeps its own cameras and leaves demo->camera unset, so it cannot use the
+ * framework's default render, which clears the colour buffer and only renders
+ * when demo->camera is set.
+ */
+static void SpaceRigRender(br_demo *demo)
+{
+    (void)demo;
 
     if(!colour_buffer)
         return;
@@ -734,14 +1058,6 @@ void SpaceRigUpdate(br_demo *demo, br_scalar dt)
                                 (colour_buffer->height), 0x0);
 
     BrPixelmapFill(depth_buffer, 0xffffffff);
-
-    // Upper level animation in scene
-
-    if(present_level)
-        Upper_Level_Animation();
-
-    if(present_level == 0)
-        count = ChangeMaps(count, flick, swap, pulse_wave);
 
     // Draw the starfield in the current viewing window
 
@@ -759,269 +1075,6 @@ void SpaceRigUpdate(br_demo *demo, br_scalar dt)
     if(camera_probe_flag == 2)
         BrZbSceneRender(world, camera_probe, colour_buffer, depth_buffer);
 
-    if((camera_probe_flag == 0) && (bCollisionDetect == 1))
-        Check_Collision();
-
-    Door_Stuff();
-
-    /********************USER INTERACTION MOUSE & KEYBOARD*********************/
-
-    // Routine for airlock switching
-
-    if((KeyTest(SC_SPACE, 0)) && ((BrScalarToFloat(my_view->t.t.mat.m[3][Z]) > 3.00) && (BrScalarToFloat(my_view->t.t.mat.m[3][Z]) < 11.2))) {
-        if(airlock_doors == 0) {
-            airlock_doors           = 1;
-            maze_area->render_style = BR_RSTYLE_DEFAULT;
-
-            /* Set render style of models outside corridor to be default
-             * when airlock doors are open must be able to see both corridor
-             * and lower room interior
-             */
-
-            lower_area->render_style = BR_RSTYLE_DEFAULT;
-            upper_area->render_style = BR_RSTYLE_DEFAULT;
-            lift_area->render_style  = BR_RSTYLE_DEFAULT;
-            hull->render_style       = BR_RSTYLE_DEFAULT;
-            hull_up->render_style    = BR_RSTYLE_DEFAULT;
-
-            shift = 0.0F;
-        }
-    }
-
-    /*  Routine for elevator switching */
-
-    if((KeyTest(SC_SPACE, 0)) && ((BrScalarToFloat(my_view->t.t.mat.m[3][X]) < 5.80) && (BrScalarToFloat(my_view->t.t.mat.m[3][X]) > 3.26))) {
-        if(present_level == 0)
-            elevator = 1;
-        if(present_level == 1)
-            elevator = -1;
-    }
-
-    // Allow user to move the system around
-    // (mouse state is accumulated by SpaceRigProcessEvent)
-
-    // Allow swivel control of monitor
-
-    if((Rotate == 1) && (mouse_buttons & SDL_BUTTON_LMASK)) {
-        BrMatrix34RollingBall(&rotation, mouse_x, -mouse_y, 800);
-        BrMatrix34Pre(&tv->t.t.mat, &rotation);
-    }
-
-    // Allow mouse movement (Rotation) control
-
-    if((Rotate != 1) && (mouse_buttons & SDL_BUTTON_LMASK)) {
-        BrMatrix34RollingBall(&rotation, -mouse_x, 0, 800);
-        BrMatrix34Pre(&my_view->t.t.mat, &rotation);
-    }
-
-    // Routine for fist person movement with/without collison detection
-
-    if(bCollisionDetect) {
-
-        if((mouse_buttons & SDL_BUTTON_RMASK) && depth_value > DEPTH_LOW_VALUE) {
-            if(mouse_y > 0)
-                mouse_move = BR_SCALAR(-0.3);
-
-            BrMatrix34PreTranslate(&my_view->t.t.mat, 0, 0, mouse_move);
-        }
-
-        if((mouse_buttons & SDL_BUTTON_RMASK) && depth_value > DEPTH_HIGH_VALUE) {
-            if(mouse_y > 0)
-                mouse_move = BR_SCALAR(-0.2);
-
-            BrMatrix34PreTranslate(&my_view->t.t.mat, 0, 0, mouse_move);
-        }
-
-        if((KeyTest(SC_C_UP + SC_EXTENDED, 0)) && (depth_value > DEPTH_LOW_VALUE))
-            BrMatrix34PreTranslate(&my_view->t.t.mat, 0, 0, BR_SCALAR(-0.2));
-
-        if(KeyTest(SC_C_DOWN + SC_EXTENDED, 0)) {
-            if(rear_pm) {
-                BrPixelmapFill(rear_depth, 0xffffffff);
-                BrPixelmapFill(rear_pm, 0x0);
-                BrZbSceneRender(world, camera_rear, rear_pm, rear_depth);
-                depth_value4 = BrPixelmapPixelGet(rear_depth, 2, 2);
-
-                /*  if moving backwards do an additional rendering and sample z-buffer
-                 *  for distance if greater than 40000 (chosen by experimentation) then
-                 *  allow movement
-                 */
-                if(depth_value4 > DEPTH_LOW_VALUE)
-                    BrMatrix34PreTranslate(&my_view->t.t.mat, 0, 0, BR_SCALAR(0.2));
-            }
-        }
-    }
-
-    /*  End of bCollisionDetect==1 */
-
-    if(bCollisionDetect == 0) {
-        if(mouse_buttons & SDL_BUTTON_RMASK)
-            BrMatrix34PreTranslate(&my_view->t.t.mat, 0, 0, BR_MUL(BR_SCALAR(mouse_y), BR_SCALAR(0.01)));
-
-        if(KeyTest(SC_C_UP + SC_EXTENDED, 0))
-            BrMatrix34PreTranslate(&my_view->t.t.mat, 0, 0, BR_SCALAR(-0.2));
-
-        if((KeyTest(SC_C_UP + SC_EXTENDED, 0)) && ((KeyTest(SC_LSHIFT, 0)) || (KeyTest(SC_RSHIFT, 0))))
-            BrMatrix34PreTranslate(&my_view->t.t.mat, 0, 0, BR_SCALAR(-0.6));
-
-        if(KeyTest(SC_C_DOWN + SC_EXTENDED, 0))
-            BrMatrix34PreTranslate(&my_view->t.t.mat, 0, 0, BR_SCALAR(0.2));
-    }
-
-    // End of collsion==0
-
-    if(KeyTest(SC_C_RIGHT + SC_EXTENDED, 0))
-        BrMatrix34PreRotateY(&my_view->t.t.mat, BR_ANGLE_DEG(-5.0));
-
-    if(KeyTest(SC_C_LEFT + SC_EXTENDED, 0))
-        BrMatrix34PreRotateY(&my_view->t.t.mat, BR_ANGLE_DEG(+5.0));
-
-    // SpaceBar Opening of Doors
-
-    if(KeyTest(SC_SPACE, 0)) {
-        if((BrScalarToFloat(my_view->t.t.mat.m[3][Z]) < -1.00) && (elev_flag == 0)) {
-
-            // Add elev_shaft and upper level doors actors when door first opens
-
-            BrActorAdd(lift_area, door_1_rgt);
-            BrActorAdd(lift_area, door_1_lft);
-            BrActorAdd(lift_area, elev_front);
-            BrActorAdd(lift_area, liftflor);
-            BrActorAdd(world, hull);
-            BrActorAdd(world, hull_up);
-            elev_flag = 1;
-            // close doors flag
-        }
-
-        if(elev_flag == 4)
-            // doors are open flag
-            elev_flag = 5;
-        // flag to close doors
-
-        if(elev_flag == 6) {
-
-            // Add models outside of upper level when upper level doors are re-open
-
-            BrActorAdd(lift_area, b_door_rgt);
-            BrActorAdd(lift_area, b_door_lft);
-            BrActorAdd(lift_area, elev_front);
-            BrActorAdd(lift_area, liftflor);
-            BrActorAdd(world, hull);
-
-            // flag to open doors
-            elev_flag = 3;
-        }
-    }
-
-    // End of SpaceBar Opening of Doors
-
-    // Monitor Display
-
-    if(KeyTest(SC_PG_UP, REPT_FIRST_DOWN)) {
-        if(camera_probe_flag == 0 && present_level == 1) {
-            camera_probe_flag = 1;
-            feedback_pm       = BrPixelmapAllocate(BR_PMT_INDEX_8, 256, 256, NULL, 0);
-            BrMapAdd(feedback_pm);
-            feedback_depth = BrPixelmapMatch(feedback_pm, BR_PMMATCH_DEPTH_16);
-
-            // Close elevator doors when viewing on monitor to prevent transparency
-
-            if(elev_flag != 6)
-                elev_flag = 5;
-        } else if(camera_probe_flag == 1) {
-            camera_probe_flag = 0;
-            BrPixelmapFree(feedback_pm);
-            BrPixelmapFree(feedback_depth);
-            change->colour_map = BrMapFind("page_0");
-            BrMaterialUpdate(change, BR_MATU_ALL);
-            count = 0;
-        }
-    }
-
-    /*  End of monitor display */
-
-    if(KeyTest(SC_PG_DOWN, REPT_FIRST_DOWN)) {
-        if(camera_probe_flag == 0 && present_level == 1) {
-            camera_probe_flag = 2;
-
-            /*  An actor of a man is linked to my_view, when using the camera probe
-             *  switch rendering style on so a man can be displayed in position of
-             *  my_view
-             *
-             *         man->render_style=BR_RSTYLE_DEFAULT;
-             */
-        } else {
-            camera_probe_flag = 0;
-            /* similarly when returning to first person view switch off rendering style
-             *
-             *         man->render_style=BR_RSTYLE_NONE;
-             */
-        }
-    }
-
-    if(KeyTest(SC_INSERT, REPT_FIRST_DOWN))
-        if(Rotate == 0 && present_level == 1)
-            Rotate ^= 1;
-        else
-            Rotate = 0;
-
-    if(KeyTest(SC_TAB, REPT_FIRST_DOWN))
-        bCollisionDetect ^= 1;
-
-    if(KeyTest(SC_I, REPT_FIRST_DOWN))
-        info ^= 1;
-
-    if(KeyTest(SC_HOME, 0))
-        BrMatrix34Identity(&camera->t.t.mat);
-
-    if(KeyTest(SC_R, 0)) {
-        BrMatrix34Identity(&tv->t.t.mat);
-        BrMatrix34PostTranslate(&tv->t.t.mat, BR_SCALAR(17.58), BR_SCALAR(4.7), BR_SCALAR(-5.38));
-    }
-
-    if(KeyTest(SC_A, 0))
-        BrMatrix34PreRotateX(&camera->t.t.mat, BR_ANGLE_DEG(5.0));
-
-    if(KeyTest(SC_Z, 0))
-        BrMatrix34PreRotateX(&camera->t.t.mat, BR_ANGLE_DEG(-5.0));
-
-    if(KeyTest(SC_X, 0)) {
-        (box->material->map_transform.m[0][0]) = (box->material->map_transform.m[0][0]) * (2.0);
-        (box->material->map_transform.m[1][1]) = (box->material->map_transform.m[1][1]) * (2.0);
-    }
-
-    if(KeyTest(SC_C, 0)) {
-        (box->material->map_transform.m[0][0]) = (box->material->map_transform.m[0][0]) / (2.0);
-        (box->material->map_transform.m[1][1]) = (box->material->map_transform.m[1][1]) / (2.0);
-    }
-
-    if(KeyTest(SC_P, 0)) {
-        BrPixelmapSave("scrn_dmp.pix", colour_buffer);
-
-        BrPixelmapTextF(colour_buffer, (screen->width) * 0.5, (screen->height) * 0.5, RED, BrFontFixed3x5, "Screen Dumped");
-    }
-
-    if(KeyTest(SC_L, REPT_FIRST_DOWN))
-        light_tag = Light_on_off(light1, light_tag, present_level);
-
-    if(KeyTest(SC_COMMA, REPT_FIRST_DOWN))
-        atten = BrightenLight(colour_buffer, light1, atten);
-
-    if(KeyTest(SC_DOT, REPT_FIRST_DOWN))
-        atten = DimLight(colour_buffer, light1, atten);
-
-    if(KeyTest(SC_8, REPT_FIRST_DOWN))
-        stardraw ^= 1;
-
-    if(KeyTest(SC_N, REPT_FIRST_DOWN))
-        names ^= 1;
-
-    if(KeyTest(SC_Q, REPT_FIRST_DOWN) || KeyTest(SC_ESC, REPT_FIRST_DOWN))
-        SDL_PushEvent(&(SDL_Event){.type = SDL_EVENT_QUIT});
-
-    if(KeyTest(SC_F1, REPT_FIRST_DOWN))
-        bShowHelp ^= 1;
-
     if(info) {
         Add_Screen_Info(colour_buffer, screen, Collision_Detect_X, Collision_Detect_Y, depth_value1, depth_value2, depth_value3,
                         depth_value, my_view, bCollisionDetect, stardraw, light_tag);
@@ -1033,24 +1086,7 @@ void SpaceRigUpdate(br_demo *demo, br_scalar dt)
         Show_Help(colour_buffer);
     }
 
-    // Reset the per-frame input state
-
-    mouse_x = mouse_y = 0;
-    SDL_memset(key_first_down, 0, sizeof(key_first_down));
-
     BrRendererFrameEnd();
-} // End SpaceRigUpdate()
-
-/*
- * The demo draws its whole frame in SpaceRigUpdate, the way its original loop
- * did, and leaves demo->camera unset. The framework's default render clears the
- * colour buffer before drawing and only renders when demo->camera is set, so it
- * would wipe the frame; this exists so the dispatch has a render callback that
- * draws nothing.
- */
-static void SpaceRigRender(br_demo *demo)
-{
-    (void)demo;
 }
 
 void Add_Camera_Probe_Info(br_pixelmap *colour_buffer, int flag)
