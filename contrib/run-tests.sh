@@ -184,18 +184,25 @@ if [ "$bless" = 1 ]; then
         type=${rest%%-*}
         mode=${rest#*-}
 
+        # Two name grammars, both split the same way above. A device whose
+        # colour buffer honours a requested type names its tests
+        # `<device>-<bpp>-<mode>` and takes `--bpp <bpp>`; one that does not
+        # (glrend1x, whose window framebuffer is RGBA whatever is asked for)
+        # names them `<device>-<mode>`, leaving the mode in `type` and no bpp to
+        # pass. The non-corpus tests (`refscenes-*`, `fixtures`, `gltf-loads`,
+        # `envw-*`) do not start with a device token and are skipped above.
+        bpp=""
+        if [ "$type" = zb ] || [ "$type" = zs ]; then
+            mode=$type
+        else
+            bpp="--bpp $type"
+        fi
+
         if [ "$mode" = zs ]; then depth="--no-depth"; else depth=""; fi
 
-        # The name grammar differs by device. A software rasteriser's name is
-        # `<device>-<type>-<mode>`; a GL device's is `<device>-<mode>`, because
-        # it has no bpp axis - --bpp is inert there, the pixel type in the key
-        # being the colour buffer's type, which the driver chooses. The device
-        # is the first field either way and the mode the last, so the split
-        # above parses both; only the `--bpp' the softrend command is built
-        # from is absent, and both GL devices still take the mode's depth flag.
         case "$device" in
-            softrend)        out=$("$rendertest" --device softrend --bpp "$type" $depth --bless 2>&1) ;;
-            glrend|glrend1x) out=$(LIBGL_ALWAYS_SOFTWARE=true "$rendertest" --device "$device" $depth --bless 2>&1) ;;
+            softrend)        out=$("$rendertest" --device softrend $bpp $depth --bless 2>&1) ;;
+            glrend|glrend1x) out=$(LIBGL_ALWAYS_SOFTWARE=true "$rendertest" --device "$device" $bpp $depth --bless 2>&1) ;;
             *)               continue ;;
         esac
 

@@ -102,10 +102,11 @@ if (BUILD_TESTING)
     endforeach ()
 
     #
-    # The same nine scenes through the GL devices. No bpp axis - --bpp is inert
-    # on a GL device - and the same one test per (mode, scene) shape, so a
-    # failure names the scene. The entries are llvmpipe's, as the fixture ones
-    # are, so a run on real hardware reports NO-REFERENCE.
+    # The same nine scenes through the GL devices, at the driver's own colour
+    # buffer: these pass no --bpp, so glrend keys type 8 and glrend1x type 7.
+    # One test per (mode, scene) shape, so a failure names the scene. The
+    # entries are llvmpipe's, as the fixture ones are, so a run on real
+    # hardware reports NO-REFERENCE.
     #
     foreach (mode IN ITEMS zb zs)
         if (mode STREQUAL "zs")
@@ -126,41 +127,52 @@ if (BUILD_TESTING)
         endforeach ()
     endforeach ()
 
-    # The stored glrend reference is llvmpipe's, so ask for software GL.
+    # The GL fixture corpus. On glrend the colour buffer's pixel type is an axis
+    # here as it is for softrend, so its name is `<device>-<bpp>-<mode>` and the
+    # key records the type. --bpp 32 is RGBA_8888, glrend's own colour buffer,
+    # and reproduces the stored keys; 15/16/24 are new coverage. --bpp 8 is
+    # refused on a GL device, the indexed colour buffer being a GL_R8UI integer
+    # attachment the scene's vec4 shader output cannot write.
     #
-    # There is no bpp axis and the name carries none: --bpp is inert on a GL
-    # device, because the pixel type a key is built from is the colour
-    # buffer's, which the driver chooses, not the flag.
+    # glrend1x has no type axis. Its colour buffer is the window framebuffer,
+    # which is RGBA whatever type the token asks for - GL 1.2 has no FBOs, so
+    # the driver cannot honour a requested type and all five of its per-type
+    # keys were the same picture. Its name is `<device>-<mode>` and it passes no
+    # --bpp, keying its own RGBX_888 (7) as the refscenes-glrend1x-* tests below
+    # already do.
     #
-    # Both depth modes are registered. 15 of the 102 fixtures place a different
+    # The stored reference is llvmpipe's, so ask for software GL.
+    #
+    # Both depth modes are registered. 15 of the 106 fixtures place a different
     # frame under --no-depth than under the depth buffer - the same 15 in each
-    # fp class - so the z-sorted half is coverage, not a duplicate of the
-    # z-buffered one.
-    add_test(NAME "glrend-zb" COMMAND rendertest --device glrend)
-    set_tests_properties("glrend-zb" PROPERTIES
-                         ENVIRONMENT "SDL_VIDEODRIVER=offscreen;LIBGL_ALWAYS_SOFTWARE=true")
-
-    add_test(NAME "glrend-zs" COMMAND rendertest --device glrend --no-depth)
-    set_tests_properties("glrend-zs" PROPERTIES
-                         ENVIRONMENT "SDL_VIDEODRIVER=offscreen;LIBGL_ALWAYS_SOFTWARE=true")
-
+    # fp class for glrend, where the T&L is in the shader - so the z-sorted half
+    # is coverage, not a duplicate of the z-buffered one.
     #
-    # glrend1x is softrend's transform-and-lighting over glrend's rasteriser. It
-    # is a GL device too, so it shares the bpp-less name and the software-GL
-    # environment, but not the reference: its pixel type is 7 against glrend's
-    # 8, and 15 of the 102 fixtures put a different frame under --no-depth - a
-    # different 15 from glrend's, so this is coverage and not a copy.
+    # Unlike glrend, glrend1x's fp class is not inert: the T&L runs in this
+    # binary, so the key records it, and scene-blendfog-p2 and
+    # scene-blend-p2-persp differ between x87 and declared. Its z-sorted half is
+    # likewise coverage: 15 of the 106 fixtures differ under --no-depth, a
+    # different 15 from glrend's.
     #
-    # Unlike glrend, the fp class is not inert here: the T&L runs in this
-    # binary, so the key records it, and scene-blend-p2-persp differs between
-    # x87 and declared where the other 101 fixtures agree.
-    add_test(NAME "glrend1x-zb" COMMAND rendertest --device glrend1x)
-    set_tests_properties("glrend1x-zb" PROPERTIES
-                         ENVIRONMENT "SDL_VIDEODRIVER=offscreen;LIBGL_ALWAYS_SOFTWARE=true")
+    foreach (mode IN ITEMS zb zs)
+        if (mode STREQUAL "zs")
+            set(gl_depth --no-depth)
+        else ()
+            set(gl_depth)
+        endif ()
 
-    add_test(NAME "glrend1x-zs" COMMAND rendertest --device glrend1x --no-depth)
-    set_tests_properties("glrend1x-zs" PROPERTIES
-                         ENVIRONMENT "SDL_VIDEODRIVER=offscreen;LIBGL_ALWAYS_SOFTWARE=true")
+        foreach (bpp IN ITEMS 15 16 24 32)
+            add_test(NAME "glrend-${bpp}-${mode}"
+                     COMMAND rendertest --device glrend --bpp ${bpp} ${gl_depth})
+            set_tests_properties("glrend-${bpp}-${mode}" PROPERTIES
+                                 ENVIRONMENT "SDL_VIDEODRIVER=offscreen;LIBGL_ALWAYS_SOFTWARE=true")
+        endforeach ()
+
+        add_test(NAME "glrend1x-${mode}"
+                 COMMAND rendertest --device glrend1x ${gl_depth})
+        set_tests_properties("glrend1x-${mode}" PROPERTIES
+                             ENVIRONMENT "SDL_VIDEODRIVER=offscreen;LIBGL_ALWAYS_SOFTWARE=true")
+    endforeach ()
 
     add_test(NAME "fixtures"
              COMMAND ${CMAKE_COMMAND}

@@ -53,10 +53,13 @@ typedef const unsigned char *(*rt_pfn_GetString)(unsigned int);
  *
  * The key names the device, the driver, the floating-point class, the pixel
  * type, the depth mode and the fixture, so a configuration costs one entry per
- * fixture in each class. 4096 holds every configuration the harness can key
- * across 128 fixtures in both classes, with room for the fixture set to grow;
- * 512 could not take the next blessing round. One file is what --reference,
- * --bless and the merge in rt_write_reference() are written against.
+ * fixture in each class. 512 could not take the blessing round that added the
+ * depth mode and the RGB software types; 4096 could not take the round that
+ * gave the GL devices the same colour-type axis as softrend, which keys a
+ * fixture once per type on each device. 8192 holds every configuration the
+ * harness can key across 128 fixtures in both classes, with room for the
+ * fixture set to grow. One file is what --reference, --bless and the merge in
+ * rt_write_reference() are written against.
  *
  * RT_MAX_SCENES is the same problem one step out: 64 left no room for the
  * fixture set to grow. 256 is the room the cap was raised to.
@@ -65,7 +68,7 @@ typedef const unsigned char *(*rt_pfn_GetString)(unsigned int);
  * that would not fit is refused rather than truncated.
  */
 #define RT_MAX_SCENES  256
-#define RT_MAX_ENTRIES 4096
+#define RT_MAX_ENTRIES 8192
 #define RT_MAX_KEY     192
 #define RT_MAX_LINE    1024
 
