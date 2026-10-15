@@ -100,6 +100,8 @@ static int         rt_cfg_warmup       = 2;
 static int         rt_cfg_no_depth     = 0;
 static int         rt_cfg_bless        = 0;
 static int         rt_cfg_verbose      = 0;
+static int         rt_cfg_env_witness  = 0;
+static int         rt_env_witness_done = 0;
 static const char *rt_cfg_reference    = RT_REFERENCE_DEFAULT;
 static const char *rt_cfg_ref_driver   = NULL; /* reference driver token; NULL: this binary's own */
 static const char *rt_cfg_scene_dir    = RT_SCENE_DIR_DEFAULT;
@@ -1557,6 +1559,380 @@ static void rt_check_compared(rt_state *st)
 }
 
 /* ------------------------------------------------------------------ */
+/* Environment-map witness.                                           */
+/* ------------------------------------------------------------------ */
+
+/*
+ * The environment-map witness, device-agnostic so it can be run under any
+ * device.
+ *
+ * A material with BR_MATF_ENVIRONMENT_I or _L makes the core publish
+ * BRT_ENVIRONMENT_INFINITE or _LOCAL as its mapping source
+ * (core/v1db/prepmatl.c), and a renderer then samples a sphere map built from
+ * the eye and the surface normal rather than the vertex's map coordinate. The
+ * map below is 16x16 with a distinct colour per texel that names it - texel
+ * (tx, ty) is RGB(tx * 8 + 1, ty * 8 + 2, 0x40) - so the bytes read back say
+ * which texel a reflection fetched, whatever the driver's channel order. The
+ * model is one flat triangle whose constant custom normal is (1, 1, 1)/sqrt(3),
+ * so the infinite eye reflects into the same texel everywhere and there is no
+ * per-vertex-versus-per-fragment interpolation difference to confound the
+ * result; the environment anchor is rotated ENVW_ROT_DEG about Y, so a renderer
+ * that dropped the environment matrix samples a different texel.
+ *
+ * The expected texel is softrend's sphere map, computed here from the same
+ * inputs (drivers/softrend/mapping.c, SurfaceMapEnvironment): the incident
+ * vector points from the eye to the fragment, r = 2N(N.E) - E, and
+ *
+ *     cu = atan2(r.x, -r.z) / (2*PI)        cv = 0.5 - r.y/2
+ *
+ * with no 0.5 offset on cu. The 16x16 NEAREST fetch is texel (floor(cu*16),
+ * floor(cv*16)).
+ *
+ * A host colour map is a top-down GL upload; a device offscreen colour map is a
+ * bottom-up framebuffer texture. The two sample opposite V axes, so the witness
+ * renders the same scene with both and asserts both against the oracle: a
+ * renderer that matched only one of the two fails here. It is its own mode -
+ * rendertest --env-witness - rather than a fixture, because a device offscreen
+ * cannot be carried through a .gltf.
+ */
+#define ENVW_MAP_SIZE 16
+#define ENVW_SIZE     512
+#define ENVW_ROT_DEG  BR_SCALAR(60.0)
+#define ENVW_CAM_DIST BR_SCALAR(8.0)
+#define ENVW_READ_X   BR_SCALAR(1.035)
+
+typedef struct envw_state {
+    br_pixelmap *offscreen;
+    br_pixelmap *depth;
+    br_pixelmap *host_map;
+    br_pixelmap *device_map;
+    br_actor    *world;
+    br_actor    *camera;
+    br_actor    *actor;
+    br_actor    *env_anchor;
+    br_camera   *camera_data;
+    br_material *material;
+    br_model    *model;
+} envw_state;
+
+/*
+ * softrend's sphere map texel for the surface the read pixel sits on. `pixels`
+ * is the cot(fov/2)-derived scale per world unit, and the anchor's
+ * view_to_environment is the transpose of its ENVW_ROT_DEG Y rotation.
+ */
+static void envw_oracle(br_scalar pixels, br_int_32 origin_x, br_int_32 origin_y, br_int_32 x, br_int_32 y, br_boolean infinite,
+                        br_int_32 *out_tx, br_int_32 *out_ty)
+{
+    const br_scalar angle = BR_ANGLE_DEG(ENVW_ROT_DEG);
+    const br_scalar c     = BR_COS(angle);
+    const br_scalar s     = BR_SIN(angle);
+    br_vector3      normal, incident, r, wr;
+    br_scalar       len, d, u, v;
+    br_int_32       tx, ty;
+
+    BrVector3Set(&normal, BR_SCALAR(1.0), BR_SCALAR(1.0), BR_SCALAR(1.0));
+    BrVector3Normalise(&normal, &normal);
+
+    if(infinite) {
+        /* The camera is at +z, so the fragment-to-eye direction is +z; incident is -E. */
+        BrVector3Set(&incident, BR_SCALAR(0.0), BR_SCALAR(0.0), BR_SCALAR(-1.0));
+    } else {
+        BrVector3Set(&incident, BR_DIV(BR_SUB(BR_ADD(BR_SCALAR(x), BR_SCALAR(0.5)), BR_SCALAR(origin_x)), pixels),
+                     BR_NEG(BR_DIV(BR_SUB(BR_ADD(BR_SCALAR(y), BR_SCALAR(0.5)), BR_SCALAR(origin_y)), pixels)), BR_NEG(ENVW_CAM_DIST));
+        BrVector3Normalise(&incident, &incident);
+    }
+
+    /* reflect(incident, normal) = incident - 2 * dot(normal, incident) * normal. */
+    d = BR_MAC3(normal.v[0], incident.v[0], normal.v[1], incident.v[1], normal.v[2], incident.v[2]);
+    BrVector3Set(&r, BR_SUB(incident.v[0], BR_MUL(BR_MUL(BR_SCALAR(2.0), d), normal.v[0])),
+                 BR_SUB(incident.v[1], BR_MUL(BR_MUL(BR_SCALAR(2.0), d), normal.v[1])),
+                 BR_SUB(incident.v[2], BR_MUL(BR_MUL(BR_SCALAR(2.0), d), normal.v[2])));
+
+    BrVector3Set(&wr, BR_SUB(BR_MUL(c, r.v[0]), BR_MUL(s, r.v[2])), r.v[1], BR_ADD(BR_MUL(s, r.v[0]), BR_MUL(c, r.v[2])));
+    BrVector3Normalise(&wr, &wr);
+
+    len = BR_ATAN2(wr.v[0], BR_NEG(wr.v[2]));
+    u   = len;
+    v   = BR_SUB(BR_SCALAR(0.5), BR_MUL(BR_SCALAR(0.5), wr.v[1]));
+
+    tx      = (br_int_32)BR_MUL(u, BR_SCALAR(ENVW_MAP_SIZE));
+    ty      = (br_int_32)BR_MUL(v, BR_SCALAR(ENVW_MAP_SIZE));
+    *out_tx = ((tx % ENVW_MAP_SIZE) + ENVW_MAP_SIZE) % ENVW_MAP_SIZE;
+    *out_ty = ((ty % ENVW_MAP_SIZE) + ENVW_MAP_SIZE) % ENVW_MAP_SIZE;
+}
+
+/* The texel-naming colour of texel (tx, ty): blue 0x40, red (v & 7) == 1, green (v & 7) == 2. */
+static br_colour envw_texel_colour(br_int_32 tx, br_int_32 ty)
+{
+    return BR_COLOUR_RGB((br_uint_8)(tx * 8 + 1), (br_uint_8)(ty * 8 + 2), 0x40);
+}
+
+static void envw_decode(const br_uint_8 px[4], br_int_32 *out_tx, br_int_32 *out_ty)
+{
+    *out_tx = -1;
+    *out_ty = -1;
+
+    for(int i = 0; i < 4; ++i) {
+        if(px[i] == 0x40)
+            continue;
+
+        if((px[i] & 7) == 1)
+            *out_tx = px[i] / 8;
+        else if((px[i] & 7) == 2)
+            *out_ty = px[i] / 8;
+    }
+}
+
+static br_error envw_make_host_map(envw_state *st)
+{
+    br_pixelmap *pm = BrPixelmapAllocate(BR_PMT_RGBA_8888, ENVW_MAP_SIZE, ENVW_MAP_SIZE, NULL, BR_PMAF_NORMAL);
+
+    if(pm == NULL)
+        return BRE_FAIL;
+
+    for(br_int_32 ty = 0; ty < ENVW_MAP_SIZE; ++ty)
+        for(br_int_32 tx = 0; tx < ENVW_MAP_SIZE; ++tx)
+            BrPixelmapPixelSet(pm, tx, ty, envw_texel_colour(tx, ty));
+
+    BrMapUpdate(pm, BR_MAPU_ALL);
+    st->host_map = pm;
+    return BRE_OK;
+}
+
+static br_error envw_make_device_map(envw_state *st, br_pixelmap *screen)
+{
+    br_pixelmap *pm = BrPixelmapMatchTypedSized(screen, BR_PMMATCH_OFFSCREEN, BR_PMT_RGBA_8888, ENVW_MAP_SIZE, ENVW_MAP_SIZE);
+
+    if(pm == NULL) {
+        BrLogError("RT", "environment witness: could not match a %dx%d RGBA_8888 offscreen for the device map.", ENVW_MAP_SIZE, ENVW_MAP_SIZE);
+        return BRE_FAIL;
+    }
+
+    pm->origin_x = pm->origin_y = 0;
+
+    for(br_int_32 ty = 0; ty < ENVW_MAP_SIZE; ++ty) {
+        for(br_int_32 tx = 0; tx < ENVW_MAP_SIZE; ++tx) {
+            br_rectangle cell = {.x = (br_int_16)tx, .y = (br_int_16)ty, .w = 1, .h = 1};
+
+            if(DevicePixelmapRectangleFill(pm, &cell, envw_texel_colour(tx, ty)) != BRE_OK) {
+                BrLogError("RT", "environment witness: could not fill the device map texel (%d,%d).", tx, ty);
+                return BRE_FAIL;
+            }
+        }
+    }
+
+    BrMapUpdate(pm, BR_MAPU_ALL);
+    st->device_map = pm;
+    return BRE_OK;
+}
+
+static br_error envw_build(envw_state *st, br_pixelmap *screen)
+{
+    static char primitive_heap[256 * 1024];
+    br_vector3  normal;
+
+    st->offscreen = BrPixelmapMatchTypedSized(screen, BR_PMMATCH_OFFSCREEN, BR_PMT_RGBA_8888, ENVW_SIZE, ENVW_SIZE);
+    if(st->offscreen == NULL) {
+        BrLogError("RT", "environment witness: could not match a %dx%d RGBA_8888 offscreen.", ENVW_SIZE, ENVW_SIZE);
+        return BRE_FAIL;
+    }
+
+    st->offscreen->origin_x = st->offscreen->origin_y = (br_int_16)(ENVW_SIZE / 2);
+
+    if((st->depth = BrPixelmapMatch(st->offscreen, BR_PMMATCH_DEPTH_16)) == NULL) {
+        BrLogError("RT", "environment witness: could not match a depth buffer for the offscreen.");
+        return BRE_FAIL;
+    }
+
+    /*
+     * The witness gets a renderer of its own, bound to the RGBA_8888 offscreen
+     * it reads back from: the material's stored state is built against the
+     * renderer's output, so it has to be this one and not the demo's.
+     */
+    BrRendererBegin(st->offscreen, NULL, NULL, primitive_heap, sizeof(primitive_heap));
+
+    if(envw_make_host_map(st) != BRE_OK)
+        return BRE_FAIL;
+
+    if(envw_make_device_map(st, screen) != BRE_OK)
+        return BRE_FAIL;
+
+    st->material = BrMaterialAllocate("rendertest-env-witness");
+    st->model    = BrModelAllocate("rendertest-env-witness", 3, 1);
+    if(st->material == NULL || st->model == NULL) {
+        BrLogError("RT", "environment witness: could not allocate the material or model.");
+        return BRE_FAIL;
+    }
+
+    st->material->colour     = BR_COLOUR_RGB(255, 255, 255);
+    st->material->opacity    = 255;
+    st->material->colour_map = st->host_map;
+    st->material->flags &= ~BR_MATF_LIGHT;
+    BrMatrix23Identity(&st->material->map_transform);
+
+    BrVector3Set(&st->model->vertices[0].p, BR_SCALAR(-3.0), BR_SCALAR(-2.0), BR_SCALAR(0.0));
+    BrVector3Set(&st->model->vertices[1].p, BR_SCALAR(3.0), BR_SCALAR(-2.0), BR_SCALAR(0.0));
+    BrVector3Set(&st->model->vertices[2].p, BR_SCALAR(0.0), BR_SCALAR(4.0), BR_SCALAR(0.0));
+
+    st->model->flags |= BR_MODF_CUSTOM_NORMALS;
+    BrVector3Set(&normal, BR_SCALAR(1.0), BR_SCALAR(1.0), BR_SCALAR(1.0));
+    BrVector3Normalise(&normal, &normal);
+    for(int i = 0; i < 3; ++i) {
+        st->model->vertices[i].n.v[0] = BrScalarToFraction(normal.v[0]);
+        st->model->vertices[i].n.v[1] = BrScalarToFraction(normal.v[1]);
+        st->model->vertices[i].n.v[2] = BrScalarToFraction(normal.v[2]);
+    }
+
+    st->model->faces[0].vertices[0] = 0;
+    st->model->faces[0].vertices[1] = 1;
+    st->model->faces[0].vertices[2] = 2;
+    st->model->faces[0].material    = st->material;
+
+    BrMaterialUpdate(st->material, BR_MATU_ALL);
+    BrModelUpdate(st->model, BR_MODU_ALL);
+
+    st->world          = BrActorAllocate(BR_ACTOR_NONE, NULL);
+    st->camera         = BrActorAdd(st->world, BrActorAllocate(BR_ACTOR_CAMERA, NULL));
+    st->camera->t.type = BR_TRANSFORM_MATRIX34;
+    BrMatrix34Translate(&st->camera->t.t.mat, BR_SCALAR(0.0), BR_SCALAR(0.0), ENVW_CAM_DIST);
+    st->camera_data         = st->camera->type_data;
+    st->camera_data->aspect = BR_SCALAR(1.0);
+
+    st->actor           = BrActorAdd(st->world, BrActorAllocate(BR_ACTOR_MODEL, NULL));
+    st->actor->t.type   = BR_TRANSFORM_IDENTITY;
+    st->actor->model    = st->model;
+    st->actor->material = st->material;
+
+    st->env_anchor         = BrActorAdd(st->world, BrActorAllocate(BR_ACTOR_NONE, NULL));
+    st->env_anchor->t.type = BR_TRANSFORM_MATRIX34;
+    BrMatrix34RotateY(&st->env_anchor->t.t.mat, BR_ANGLE_DEG(ENVW_ROT_DEG));
+    BrEnvironmentSet(st->env_anchor);
+
+    return BRE_OK;
+}
+
+/* Render the environment scene with `map` and assert the read texel against softrend's. */
+static br_error envw_check(envw_state *st, br_pixelmap *map, br_uint_32 flag, br_boolean infinite, const char *label)
+{
+    br_rectangle whole = {.x = -st->offscreen->origin_x, .y = -st->offscreen->origin_y, .w = st->offscreen->width, .h = st->offscreen->height};
+    br_pixelmap     *readback;
+    const br_uint_8 *px;
+    br_int_32        cx = st->offscreen->width / 2;
+    br_int_32        cy = st->offscreen->height / 2;
+    br_scalar        pixels, fov;
+    br_int_32        rx, want_tx, want_ty, got_tx, got_ty;
+
+    fov = st->camera_data->field_of_view;
+    pixels = BR_DIV(BR_MUL(BR_DIV(BR_COS(fov / 2), BR_SIN(fov / 2)), BR_SCALAR(st->offscreen->height)), BR_MUL(BR_SCALAR(2.0), ENVW_CAM_DIST));
+    rx = cx + (br_int_32)BR_MUL(ENVW_READ_X, pixels);
+
+    if(rx <= cx || rx >= st->offscreen->width) {
+        BrLogError("RT", "environment witness: the read pixel %d is outside the offscreen %dx%d.", rx, st->offscreen->width, st->offscreen->height);
+        return BRE_FAIL;
+    }
+
+    envw_oracle(pixels, st->offscreen->origin_x, st->offscreen->origin_y, rx, cy, infinite, &want_tx, &want_ty);
+
+    st->material->flags &= ~(BR_MATF_ENVIRONMENT_I | BR_MATF_ENVIRONMENT_L);
+    st->material->flags |= flag;
+    st->material->colour_map = map;
+    BrMaterialUpdate(st->material, BR_MATU_ALL);
+
+    if(DevicePixelmapRectangleFill(st->offscreen, &whole, BR_COLOUR_RGB(0, 0, 0)) != BRE_OK)
+        return BRE_FAIL;
+
+    BrPixelmapFill(st->depth, 0xffffffff);
+    BrZbSceneRender(st->world, st->camera, st->offscreen, st->depth);
+
+    readback = BrPixelmapAllocate(BR_PMT_RGBA_8888, st->offscreen->width, st->offscreen->height, NULL, BR_PMAF_NORMAL);
+    {
+        br_rectangle src = whole;
+        br_point     dst = {0, 0};
+
+        if(readback == NULL ||
+           DevicePixelmapRectangleCopyFrom((br_device_pixelmap *)st->offscreen, &dst, (br_device_pixelmap *)readback, &src) != BRE_OK) {
+            BrPixelmapFree(readback);
+            return BRE_FAIL;
+        }
+    }
+
+    px = (const br_uint_8 *)readback->pixels + cy * readback->row_bytes + rx * 4;
+    envw_decode(px, &got_tx, &got_ty);
+
+    if(got_tx != want_tx || got_ty != want_ty) {
+        BrLogError("RT", "environment witness: %s (%s) sampled the map texel (%d,%d), but softrend's sphere map names (%d,%d) [read back %02x %02x %02x %02x].",
+                   label, infinite ? "infinite eye" : "local eye", got_tx, got_ty, want_tx, want_ty, px[0], px[1], px[2], px[3]);
+        BrPixelmapFree(readback);
+        return BRE_FAIL;
+    }
+
+    BrLogInfo("RT", "environment witness: %s (%s) sampled texel (%d,%d) as softrend does.", label, infinite ? "infinite eye" : "local eye",
+              got_tx, got_ty);
+    BrPixelmapFree(readback);
+    return BRE_OK;
+}
+
+static void envw_fini(envw_state *st)
+{
+    BrEnvironmentSet(NULL);
+    BrRendererEnd();
+
+    if(st->host_map != NULL)
+        BrPixelmapFree(st->host_map);
+
+    if(st->device_map != NULL)
+        BrPixelmapFree(st->device_map);
+
+    if(st->depth != NULL)
+        BrPixelmapFree(st->depth);
+
+    if(st->offscreen != NULL)
+        BrPixelmapFree(st->offscreen);
+
+    if(st->material != NULL)
+        BrMaterialFree(st->material);
+
+    if(st->model != NULL)
+        BrModelFree(st->model);
+
+    if(st->world != NULL)
+        BrActorFree(st->world);
+
+    memset(st, 0, sizeof(*st));
+}
+
+static br_error rt_env_witness_run(br_demo *demo)
+{
+    envw_state state = {0};
+    br_error   r     = BRE_FAIL;
+
+    if(envw_build(&state, demo->_screen) != BRE_OK) {
+        BrLogError("RT", "environment witness: could not build the scene (does the device allow a %dx%d RGBA_8888 offscreen?).", ENVW_SIZE,
+                   ENVW_SIZE);
+        goto out;
+    }
+
+    if(envw_check(&state, state.host_map, BR_MATF_ENVIRONMENT_I, BR_TRUE, "host map") != BRE_OK)
+        goto out;
+
+    if(envw_check(&state, state.host_map, BR_MATF_ENVIRONMENT_L, BR_FALSE, "host map") != BRE_OK)
+        goto out;
+
+    if(envw_check(&state, state.device_map, BR_MATF_ENVIRONMENT_I, BR_TRUE, "device offscreen map") != BRE_OK)
+        goto out;
+
+    if(envw_check(&state, state.device_map, BR_MATF_ENVIRONMENT_L, BR_FALSE, "device offscreen map") != BRE_OK)
+        goto out;
+
+    BrLogInfo("RT", "environment witness passed (host and device offscreen maps sample softrend's sphere-map texels for both eyes).");
+    r = BRE_OK;
+
+out:
+    envw_fini(&state);
+    return r;
+}
+
+/* ------------------------------------------------------------------ */
 /* Demo callbacks.                                                    */
 /* ------------------------------------------------------------------ */
 
@@ -1694,6 +2070,14 @@ static br_error rt_init(br_demo *demo)
             st->env_ok = 1; /* the driver token above keys the reference */
     }
 
+    /*
+     * --env-witness is a run of its own: no reference and no fixture. The
+     * witness builds its scene and asserts it against softrend's sphere map
+     * rather than against a stored checksum; see rt_env_witness_run().
+     */
+    if(rt_cfg_env_witness)
+        return BRE_OK;
+
     if(st->env_ok && rt_load_reference(st) != BRE_OK)
         return BRE_FAIL;
 
@@ -1706,6 +2090,28 @@ static br_error rt_init(br_demo *demo)
 static void rt_render(br_demo *demo)
 {
     rt_state *st = demo->user;
+
+    if(rt_cfg_env_witness) {
+        if(!rt_env_witness_done) {
+            rt_env_witness_done = 1;
+
+            /*
+             * brdemo begins a renderer on the colour buffer before calling
+             * init; the witness needs a renderer of its own, on its own
+             * offscreen, so end that one first. Nothing renders through it
+             * again - this mode quits on the first frame.
+             */
+            BrRendererEnd();
+
+            if(rt_env_witness_run(demo) != BRE_OK)
+                g_failed = 1;
+
+            printf("RT result=%s failures=%d\n", g_failed ? "FAIL" : "PASS", g_failed ? 1 : 0);
+        }
+
+        SDL_PushEvent(&(SDL_Event){.type = SDL_EVENT_QUIT});
+        return;
+    }
 
     BrRendererFrameBegin();
 
@@ -1971,6 +2377,7 @@ static void rt_usage(const char *argv0)
             "                     --bless still records this binary's own driver\n"
             "  --ppm-dir <dir>    write each frame as <dir>/<scene>.ppm\n"
             "  --bless            write the reference instead of comparing\n"
+            "  --env-witness      run the environment-map orientation witness and exit\n"
             "  -v, --verbose      log more\n"
             "  -l, --list         list the scenes and exit\n"
             "  --list-scene-dir <dir>\n"
@@ -2013,6 +2420,8 @@ int main(int argc, char **argv)
             snprintf(rt_cfg_ppm_dir, sizeof(rt_cfg_ppm_dir), "%s", argv[++i]);
         } else if(strcmp(a, "--bless") == 0) {
             rt_cfg_bless = 1;
+        } else if(strcmp(a, "--env-witness") == 0) {
+            rt_cfg_env_witness = 1;
         } else if(strcmp(a, "-v") == 0 || strcmp(a, "--verbose") == 0) {
             ++rt_cfg_verbose;
         } else if(strcmp(a, "-l") == 0 || strcmp(a, "--list") == 0) {

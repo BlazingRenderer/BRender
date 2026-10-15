@@ -178,4 +178,23 @@ if (BUILD_TESTING)
     set_tests_properties("gltf-loads" PROPERTIES
                          ENVIRONMENT "SDL_VIDEODRIVER=offscreen;GLTFVIEW_BENCH_FRAMES=5;GLTFVIEW_BENCH_NOVSYNC=1"
                          TIMEOUT 900)
+
+    #
+    # The environment-map orientation witness (main.c --env-witness). It is not
+    # a fixture: a device offscreen texture cannot be carried through a .gltf,
+    # so the witness builds the host and the device map at runtime and asserts
+    # the sampled texel against softrend's sphere map. It is a self-check, not a
+    # stored checksum, so it has nothing to bless.
+    #
+    # glrend only. It is the device whose shader projects the environment map,
+    # and so the only one that reads the host/device distinction at all:
+    # glrend1x's map coordinates come from softrend's transform-and-lighting,
+    # which does not use glrend's shader. glrend1x also cannot run the witness -
+    # GL 1.x has no FBOs, so its device allows exactly one offscreen and the
+    # witness needs two - and softrend cannot render to the RGBA_8888 offscreen
+    # the texel readback needs, its RGB rasterisers being 555/565/888 only.
+    #
+    add_test(NAME "envw-glrend" COMMAND rendertest --env-witness --device glrend)
+    set_tests_properties("envw-glrend" PROPERTIES
+                         ENVIRONMENT "SDL_VIDEODRIVER=offscreen;LIBGL_ALWAYS_SOFTWARE=true")
 endif ()
