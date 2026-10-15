@@ -22,6 +22,7 @@
 #include <brsdl3dev.h>
 
 #include "brdemo.h"
+#include "vkwitness.h"
 
 /* ------------------------------------------------------------------ */
 /* GL entry points; SDL hands us the addresses, we don't use glad.     */
@@ -106,6 +107,9 @@ static int         rt_cfg_bless        = 0;
 static int         rt_cfg_verbose      = 0;
 static int         rt_cfg_env_witness  = 0;
 static int         rt_env_witness_done = 0;
+static int         rt_cfg_vulkan       = 0;
+static int         rt_cfg_vk_witness   = 0;
+static int         rt_vk_witness_done  = 0;
 static const char *rt_cfg_reference    = RT_REFERENCE_DEFAULT;
 static const char *rt_cfg_ref_driver   = NULL; /* reference driver token; NULL: this binary's own */
 static const char *rt_cfg_scene_dir    = RT_SCENE_DIR_DEFAULT;
@@ -1945,6 +1949,14 @@ static br_error rt_init(br_demo *demo)
     rt_state *st = BrResAllocate(demo, sizeof(rt_state), BR_MEMORY_APPLICATION);
     demo->user   = st;
 
+    /*
+     * --vk-witness runs on a vkrend front screen, which owns no GL context, so
+     * the hardware checksum readback below has nothing to bind to. The witness
+     * builds its own scene, so there is nothing here to prepare either.
+     */
+    if(rt_cfg_vk_witness)
+        return BRE_OK;
+
     if(demo->hw_accel) {
         st->window = BrSDL3UtilGetWindow(demo->_screen);
 
@@ -2094,6 +2106,28 @@ static br_error rt_init(br_demo *demo)
 static void rt_render(br_demo *demo)
 {
     rt_state *st = demo->user;
+
+    if(rt_cfg_vk_witness) {
+        if(!rt_vk_witness_done) {
+            rt_vk_witness_done = 1;
+
+            /*
+             * As with --env-witness: brdemo begins a renderer on the colour buffer
+             * before init, but the witness's renderer case begins its own renderer
+             * on its own offscreen, so end that one first. This mode quits on the
+             * first frame, so nothing renders through it again.
+             */
+            BrRendererEnd();
+
+            if(rt_vk_witness_run(demo) != BRE_OK)
+                g_failed = 1;
+
+            printf("RT result=%s failures=%d\n", g_failed ? "FAIL" : "PASS", g_failed ? 1 : 0);
+        }
+
+        SDL_PushEvent(&(SDL_Event){.type = SDL_EVENT_QUIT});
+        return;
+    }
 
     if(rt_cfg_env_witness) {
         if(!rt_env_witness_done) {
@@ -2385,6 +2419,8 @@ static void rt_usage(const char *argv0)
             "  --ppm-dir <dir>    write each frame as <dir>/<scene>.ppm\n"
             "  --bless            write the reference instead of comparing\n"
             "  --env-witness      run the environment-map orientation witness and exit\n"
+            "  --vulkan           bring up a vkrend front screen (with --vk-witness)\n"
+            "  --vk-witness       run the vkrend witness and exit\n"
             "  -v, --verbose      log more\n"
             "  -l, --list         list the scenes and exit\n"
             "  --list-scene-dir <dir>\n"
@@ -2430,6 +2466,10 @@ int main(int argc, char **argv)
             rt_cfg_bless = 1;
         } else if(strcmp(a, "--env-witness") == 0) {
             rt_cfg_env_witness = 1;
+        } else if(strcmp(a, "--vulkan") == 0) {
+            rt_cfg_vulkan = 1;
+        } else if(strcmp(a, "--vk-witness") == 0) {
+            rt_cfg_vk_witness = 1;
         } else if(strcmp(a, "-v") == 0 || strcmp(a, "--verbose") == 0) {
             ++rt_cfg_verbose;
         } else if(strcmp(a, "-l") == 0 || strcmp(a, "--list") == 0) {
@@ -2465,6 +2505,19 @@ int main(int argc, char **argv)
             rt_cfg_scenes[rt_cfg_nscenes++] = rt_default_scenes[k];
     }
 
+    /*
+     * The vkrend witness needs the front screen brdemo only builds for --vulkan,
+     * so --vk-witness implies it. --vulkan on its own would put the fixture
+     * corpus on a front screen that cannot render it, so that pairing is refused
+     * rather than run into a failure that names nothing.
+     */
+    if(rt_cfg_vk_witness) {
+        rt_cfg_vulkan = 1;
+    } else if(rt_cfg_vulkan) {
+        fprintf(stderr, "--vulkan needs --vk-witness: the fixture corpus cannot run on a Vulkan front screen\n");
+        return 2;
+    }
+
     if(strcmp(rt_cfg_device, "glrend") != 0 && strcmp(rt_cfg_device, "glrend1x") != 0 && strcmp(rt_cfg_device, "softrend") != 0) {
         fprintf(stderr, "Unknown device: %s\n", rt_cfg_device);
         return 2;
@@ -2475,6 +2528,7 @@ int main(int argc, char **argv)
     args.height   = rt_cfg_height;
     args.no_stats = 1;
     args.verbose  = rt_cfg_verbose;
+    args.vulkan   = rt_cfg_vulkan;
 
     if(strcmp(rt_cfg_device, "softrend") == 0) {
         args.force_software = 1;

@@ -2,6 +2,8 @@ project(rendertest)
 
 add_executable(rendertest
         main.c
+        vkwitness.c
+        vkwitness.h
 )
 
 target_link_libraries(rendertest PRIVATE BRender::Full BRender::DDI brdemo)
@@ -209,4 +211,17 @@ if (BUILD_TESTING)
     add_test(NAME "envw-glrend" COMMAND rendertest --env-witness --device glrend)
     set_tests_properties("envw-glrend" PROPERTIES
                          ENVIRONMENT "SDL_VIDEODRIVER=offscreen;LIBGL_ALWAYS_SOFTWARE=true")
+
+    #
+    # The vkrend witness (--vk-witness), the second device witness. It is not a
+    # fixture either: it drives a vkrend front screen (the one brdemo's --vulkan
+    # path builds) and asserts the offscreen pixelmap path and the renderer scene
+    # path step by step, so there is no stored checksum to bless.
+    #
+    # --vk-witness implies --vulkan; both are given to name the front screen
+    # explicitly. The witness owns no GL context, so it does not need llvmpipe.
+    #
+    add_test(NAME "vkwitness" COMMAND rendertest --vulkan --vk-witness)
+    set_tests_properties("vkwitness" PROPERTIES
+                         ENVIRONMENT "SDL_VIDEODRIVER=offscreen")
 endif ()
