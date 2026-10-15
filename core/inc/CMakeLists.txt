@@ -43,6 +43,7 @@ source_group("DDI" FILES ${DDI_FILES})
 set(INC_FILES
         actor.h
         angles.h
+        animation.h
         assoca_p.h
         assocarr.h
         brdiag.h
