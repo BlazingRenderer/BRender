@@ -6,7 +6,7 @@ target_include_directories(brender-inc INTERFACE
         )
 target_include_directories(brender-inc-ddi INTERFACE
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/ddi>
-        $<INSTALL_INTERFACE:ddi>
+        $<INSTALL_INTERFACE:include/brender/ddi>
         )
 
 set(DDI_FILES
