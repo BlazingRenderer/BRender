@@ -47,8 +47,9 @@ void DeviceGLExtractPrimitiveState(const state_stack *state, br_primitive_state_
     if(prim->colour_map != NULL) {
         const br_buffer_stored *stored = prim->colour_map;
 
-        info->is_indexed = stored->fmt->indexed;
-        info->colour_map = BufferStoredGLGetTexture(stored);
+        info->is_indexed           = stored->fmt->indexed;
+        info->colour_map           = BufferStoredGLGetTexture(stored);
+        info->colour_map_bottom_up = BufferStoredGLGetTextureIsBottomUp(stored);
 
         if(info->is_indexed) {
             info->colour_palette = BufferStoredGLGetCLUTTexture(stored, NULL, tex_white);
@@ -312,6 +313,13 @@ static void apply_stored_properties(const GladGLContext *gl, br_renderer *render
     {
         br_primitive_state_info_gl info;
         DeviceGLExtractPrimitiveState(state, &info, tex_default);
+
+        /*
+         * The environment map is the primitive's colour map, and the shader
+         * needs its V axis to know whether the sampler sees a top-down host
+         * upload or a bottom-up framebuffer texture.
+         */
+        model->environment_bottom_up = info.colour_map_bottom_up;
 
         switch(info.shading_mode) {
             case BRT_FLAT:

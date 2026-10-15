@@ -97,6 +97,13 @@ layout(std140, binding=1) uniform br_model_state
     int shading_mode;
 
     /*
+     * Whether the colour map - which is the environment map when one is bound -
+     * came from a bottom-up framebuffer texture rather than a top-down host
+     * upload. Only SurfaceMapEnvironment() reads it.
+     */
+    bool environment_bottom_up;
+
+    /*
      * The lights for this draw, packed by type. These are the same names the
      * light functions have always used - they simply live in the per-draw block
      * now, so a draw only carries the lights it can actually see.

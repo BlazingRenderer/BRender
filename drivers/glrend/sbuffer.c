@@ -212,6 +212,23 @@ GLuint BufferStoredGLGetTexture(const br_buffer_stored *self)
     return self->gl_tex;
 }
 
+/*
+ * Whether the texture BufferStoredGLGetTexture() returns is a framebuffer
+ * texture, which is stored bottom-up (v = 0 is the image's last row), unlike a
+ * host upload, which is top-down. The fragment shader's environment-map V axis
+ * has to know which of the two it is sampling - see SurfaceMapEnvironment().
+ */
+br_boolean BufferStoredGLGetTextureIsBottomUp(const br_buffer_stored *self)
+{
+    if(self->source == NULL)
+        return BR_FALSE;
+
+    if(ObjectDevice(self->source) != self->device)
+        return BR_FALSE;
+
+    return ((br_device_pixelmap *)self->source)->use_type == BRT_OFFSCREEN;
+}
+
 GLuint BufferStoredGLGetCLUTTexture(const br_buffer_stored *self, br_device_pixelmap *target, GLuint fallback)
 {
     GLuint clut;

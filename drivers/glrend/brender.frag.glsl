@@ -32,7 +32,7 @@ vec4 applyFog(in vec4 inColour, in float dist)
 
 vec2 SurfaceMapEnvironment(in vec3 eye, in vec3 normal, in mat4 model_to_environment) {
     vec3 r;
-    float d, cu, cv;
+    float cu, cv;
 
     /*
      * Generate reflected vector
@@ -46,12 +46,20 @@ vec2 SurfaceMapEnvironment(in vec3 eye, in vec3 normal, in mat4 model_to_environ
     vec3 wr2 = normalize(mat3(model_to_environment) * r);
 
     /*
-     * Convert vector to environment coordinates
+     * Convert vector to environment coordinates.
+     *
+     * wr2 is the antipode of softrend's reflected vector
+     * (drivers/softrend/mapping.c, SurfaceMapEnvironment), so it adds half a
+     * turn to cu and mirrors cv: the +0.5 on cu cancels the half turn, but
+     * nothing cancels the mirror, leaving V = 1 - V_softrend. A framebuffer
+     * texture is stored bottom-up, so the sampler flips V back and V_softrend
+     * comes out; a top-down host upload does not, so it needs V_softrend
+     * directly.
      */
     cu = atan(wr2.x, -wr2.z) * 0.159154943091895; /* 1/(2*PI) */
     cv = -wr2.y * 0.5;
 
-    return 0.5 + vec2(cu, cv);
+    return 0.5 + vec2(cu, environment_bottom_up ? cv : -cv);
 }
 
 vec2 SurfaceMap(in vec3 position, in vec3 normal, in vec2 uv)

@@ -38,6 +38,7 @@ typedef struct br_state_info_gl {
         br_uint_8 write_colour : 1;
         br_uint_8 write_depth : 1;
         br_uint_8 fog : 1;
+        br_uint_8 colour_map_bottom_up : 1;
     };
     GLenum depth_func;
 

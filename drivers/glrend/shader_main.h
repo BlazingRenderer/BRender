@@ -134,6 +134,13 @@ typedef struct br_gl_main_data_model {
     alignas(4) uint32_t shading_mode;
 
     /*
+     * Whether the colour map (which is the environment map) came from a
+     * bottom-up framebuffer texture rather than a top-down host upload. Only
+     * the environment-map V axis reads it.
+     */
+    alignas(4) uint32_t environment_bottom_up;
+
+    /*
      * The lights for this draw. The shader's loops are identical to a per-frame
      * light set; light_start/light_end just describe a smaller, repacked one.
      */
