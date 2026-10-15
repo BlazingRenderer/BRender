@@ -150,21 +150,36 @@ static br_error resize_buffers(br_demo *demo, const br_demo_run_args *args)
         height = demo->_screen->height;
 
     if(!demo->hw_accel) {
-        const br_token_value tv[] = {
-            {.t = BRT_WIDTH_I32,      .v = {.i32 = width}                },
-            {.t = BRT_HEIGHT_I32,     .v = {.i32 = height}               },
-            {.t = BRT_PIXEL_TYPE_U8,  .v = {.u8 = args->software_pm_type}},
-            {.t = BRT_PIXEL_BITS_I32, .v = {.i32 = 16}                   },
-            {.t = BR_NULL_TOKEN,      .v = {}                            },
+        const br_uint_8      software_type = (args->pm_type == BR_PMT_MAX) ? BR_PMT_INDEX_8 : args->pm_type;
+        const br_token_value tv[]          = {
+            {.t = BRT_WIDTH_I32,      .v = {.i32 = width}       },
+            {.t = BRT_HEIGHT_I32,     .v = {.i32 = height}      },
+            {.t = BRT_PIXEL_TYPE_U8,  .v = {.u8 = software_type}},
+            {.t = BRT_PIXEL_BITS_I32, .v = {.i32 = 16}          },
+            {.t = BR_NULL_TOKEN,      .v = {}                   },
         };
         return BrPixelmapResizeBuffersTV(demo->_screen, &demo->colour_buffer, &demo->depth_buffer, tv);
     }
 
-    const br_token_value tv[] = {
-        {.t = BRT_WIDTH_I32,  .v = {.i32 = width} },
-        {.t = BRT_HEIGHT_I32, .v = {.i32 = height}},
-        {.t = BR_NULL_TOKEN,  .v = {}             },
-    };
+    /*
+     * The hardware colour buffer type is the driver's own unless the caller
+     * asked for one; passing BR_PMT_MAX would name no type at all.
+     */
+    br_token_value tv[4];
+    int            n = 0;
+
+    tv[n].t       = BRT_WIDTH_I32;
+    tv[n++].v.i32 = width;
+    tv[n].t       = BRT_HEIGHT_I32;
+    tv[n++].v.i32 = height;
+
+    if(args->pm_type != BR_PMT_MAX) {
+        tv[n].t      = BRT_PIXEL_TYPE_U8;
+        tv[n++].v.u8 = args->pm_type;
+    }
+
+    tv[n].t = BR_NULL_TOKEN;
+
     return BrPixelmapResizeBuffersTV(demo->_screen, &demo->colour_buffer, &demo->depth_buffer, tv);
 }
 
@@ -417,7 +432,7 @@ cleanup:
 #define ARGDEF_VERBOSE            'v'
 #define ARGDEF_HELP               301
 #define ARGDEF_FORCE_SOFTWARE     302
-#define ARGDEF_SOFTWARE_BPP       303
+#define ARGDEF_BPP                303
 #define ARGDEF_BACKBUFFER_WIDTH   304
 #define ARGDEF_BACKBUFFER_HEIGHT  305
 #define ARGDEF_OPENGL_DEVICE_NAME 306
@@ -430,7 +445,7 @@ const static struct parg_option argdefs[] = {
     {.name = "verbose",            .has_arg = PARG_NOARG,  .flag = NULL, .val = ARGDEF_VERBOSE           },
     {.name = "help",               .has_arg = PARG_NOARG,  .flag = NULL, .val = ARGDEF_HELP              },
     {.name = "force-software",     .has_arg = PARG_NOARG,  .flag = NULL, .val = ARGDEF_FORCE_SOFTWARE    },
-    {.name = "software-bpp",       .has_arg = PARG_REQARG, .flag = NULL, .val = ARGDEF_SOFTWARE_BPP      },
+    {.name = "bpp",                .has_arg = PARG_REQARG, .flag = NULL, .val = ARGDEF_BPP               },
     {.name = "backbuffer-width",   .has_arg = PARG_REQARG, .flag = NULL, .val = ARGDEF_BACKBUFFER_WIDTH  },
     {.name = "backbuffer-height",  .has_arg = PARG_REQARG, .flag = NULL, .val = ARGDEF_BACKBUFFER_HEIGHT },
     {.name = "opengl-device-name", .has_arg = PARG_REQARG, .flag = NULL, .val = ARGDEF_OPENGL_DEVICE_NAME},
@@ -443,7 +458,7 @@ static int parse_args(int argc, char *const argv[], br_demo_run_args *args)
 {
     struct parg_state ps;
     parg_init(&ps);
-    int software_bpp = 8;
+    int bpp = 0;
     int optend;
 
     /*
@@ -475,8 +490,8 @@ static int parse_args(int argc, char *const argv[], br_demo_run_args *args)
                 ++args->force_software;
                 break;
 
-            case ARGDEF_SOFTWARE_BPP:
-                software_bpp = BrAToI(ps.optarg);
+            case ARGDEF_BPP:
+                bpp = BrAToI(ps.optarg);
                 break;
 
             case ARGDEF_BACKBUFFER_WIDTH:
@@ -513,20 +528,25 @@ static int parse_args(int argc, char *const argv[], br_demo_run_args *args)
     if(args->height < 0)
         return 2;
 
-    switch(software_bpp) {
-        case 16:
-            args->software_pm_type = BR_PMT_RGB_565;
-            break;
-        case 15:
-            args->software_pm_type = BR_PMT_RGB_555;
-            break;
-        case 24:
-            args->software_pm_type = BR_PMT_RGB_888;
-            break;
-        default:
-        case 8:
-            args->software_pm_type = BR_PMT_INDEX_8;
-            break;
+    if(bpp != 0) {
+        switch(bpp) {
+            case 16:
+                args->pm_type = BR_PMT_RGB_565;
+                break;
+            case 15:
+                args->pm_type = BR_PMT_RGB_555;
+                break;
+            case 24:
+                args->pm_type = BR_PMT_RGB_888;
+                break;
+            case 32:
+                args->pm_type = BR_PMT_RGBA_8888;
+                break;
+            default:
+            case 8:
+                args->pm_type = BR_PMT_INDEX_8;
+                break;
+        }
     }
 
     if(args->backbuffer_width < 0)
@@ -559,7 +579,7 @@ static const char *usage_options =
     "  -h, --height         Set the initial window height (default: 720).\n"
     "  -v, --verbose        Increase verbosity level. May be given multiple times.\n"
     "  --force-software     Force use of the software renderer. Only valid on x86.\n"
-    "  --software-bpp       Software renderer bit depth. Valid options: 8 (default), 15, 16.\n"
+    "  --bpp                Colour buffer pixel type. Valid options: 8, 15, 16, 24, 32 (unset leaves the renderer's own).\n"
     "  --backbuffer-width   Width of the backbuffer, defaults to the same as the screen.\n"
     "  --backbuffer-height  Height of the backbuffer, defaults to the same as the screen.\n"
     "  --opengl-device-name Name of the OpenGL device driver to use. Valid options: glrend (default), glrend1x\n"
@@ -579,7 +599,7 @@ void BrDemoDefaultArgs(br_demo_run_args *args)
         .verbose            = BR_LOG_INFO,
         .force_software     = 0,
         .require_accel      = 0,
-        .software_pm_type   = BR_PMT_INDEX_8,
+        .pm_type            = BR_PMT_MAX,
         .opengl_device_name = "glrend",
         .backbuffer_width   = 0,
         .backbuffer_height  = 0,

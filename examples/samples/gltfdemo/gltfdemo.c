@@ -388,7 +388,7 @@ static const br_demo_dispatch gltfview_dispatch = {
 #define ARGDEF_VERBOSE           'v'
 #define ARGDEF_HELP              301
 #define ARGDEF_FORCE_SOFTWARE    302
-#define ARGDEF_SOFTWARE_BPP      303
+#define ARGDEF_BPP               303
 #define ARGDEF_BACKBUFFER_WIDTH  304
 #define ARGDEF_BACKBUFFER_HEIGHT 305
 
@@ -411,7 +411,7 @@ const static struct parg_option argdefs[] = {
     {.name = "verbose",           .has_arg = PARG_NOARG,  .flag = NULL, .val = ARGDEF_VERBOSE          },
     {.name = "help",              .has_arg = PARG_NOARG,  .flag = NULL, .val = ARGDEF_HELP             },
     {.name = "force-software",    .has_arg = PARG_NOARG,  .flag = NULL, .val = ARGDEF_FORCE_SOFTWARE   },
-    {.name = "software-bpp",      .has_arg = PARG_REQARG, .flag = NULL, .val = ARGDEF_SOFTWARE_BPP     },
+    {.name = "bpp",               .has_arg = PARG_REQARG, .flag = NULL, .val = ARGDEF_BPP              },
     {.name = "backbuffer-width",  .has_arg = PARG_REQARG, .flag = NULL, .val = ARGDEF_BACKBUFFER_WIDTH },
     {.name = "backbuffer-height", .has_arg = PARG_REQARG, .flag = NULL, .val = ARGDEF_BACKBUFFER_HEIGHT},
 
@@ -438,7 +438,7 @@ static int parse_args(int argc, char *const argv[], br_gltfdemo_args *args)
 {
     struct parg_state ps;
     parg_init(&ps);
-    int software_bpp = 8;
+    int bpp = 0;
 
     for(int c; (c = parg_getopt_long(&ps, argc, argv, "w:h:v", argdefs, NULL)) != -1;) {
         switch(c) {
@@ -458,8 +458,8 @@ static int parse_args(int argc, char *const argv[], br_gltfdemo_args *args)
                 ++args->args.force_software;
                 break;
 
-            case ARGDEF_SOFTWARE_BPP:
-                software_bpp = BrAToI(ps.optarg);
+            case ARGDEF_BPP:
+                bpp = BrAToI(ps.optarg);
                 break;
 
             case ARGDEF_BACKBUFFER_WIDTH:
@@ -544,20 +544,25 @@ static int parse_args(int argc, char *const argv[], br_gltfdemo_args *args)
     if(args->model_path == NULL || args->model_path[0] == '\0')
         return 2;
 
-    switch(software_bpp) {
-        case 16:
-            args->args.software_pm_type = BR_PMT_RGB_565;
-            break;
-        case 15:
-            args->args.software_pm_type = BR_PMT_RGB_555;
-            break;
-        case 24:
-            args->args.software_pm_type = BR_PMT_RGB_888;
-            break;
-        default:
-        case 8:
-            args->args.software_pm_type = BR_PMT_INDEX_8;
-            break;
+    if(bpp != 0) {
+        switch(bpp) {
+            case 16:
+                args->args.pm_type = BR_PMT_RGB_565;
+                break;
+            case 15:
+                args->args.pm_type = BR_PMT_RGB_555;
+                break;
+            case 24:
+                args->args.pm_type = BR_PMT_RGB_888;
+                break;
+            case 32:
+                args->args.pm_type = BR_PMT_RGBA_8888;
+                break;
+            default:
+            case 8:
+                args->args.pm_type = BR_PMT_INDEX_8;
+                break;
+        }
     }
 
     if(args->args.backbuffer_width < 0)
@@ -581,7 +586,7 @@ static const char *usage_options =
     "  -h, --height         Set the initial window height (default: 720).\n"
     "  -v, --verbose        Increase verbosity level. May be given multiple times.\n"
     "  --force-software     Force use of the software renderer. Only valid on x86.\n"
-    "  --software-bpp       Software renderer bit depth. Valid options: 8 (default), 15, 16.\n"
+    "  --bpp                Colour buffer pixel type. Valid options: 8, 15, 16, 24, 32 (unset leaves the renderer's own).\n"
     "  --backbuffer-width   Width of the backbuffer, defaults to the same as the screen.\n"
     "  --backbuffer-height  Height of the backbuffer, defaults to the same as the screen.\n"
     "  --help               Display this message.\n"

@@ -5,7 +5,7 @@
  * investigated and confirmed by the owner, and they are recorded here so they
  * are not refiled as defects - the notes they used to live in were untracked.
  *
- * 1. At --software-bpp 8 the *frame* is correct, but the PPM/PNG this writes is
+ * 1. At --bpp 8 the *frame* is correct, but the PPM/PNG this writes is
  *    presented through a palette built from the scene's own pixelmaps
  *    (build_clut() below). A frame whose indices come from a lookup-table band
  *    rather than a texture is outside what that palette can describe, so every

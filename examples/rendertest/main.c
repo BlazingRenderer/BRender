@@ -94,6 +94,7 @@ typedef const unsigned char *(*rt_pfn_GetString)(unsigned int);
 /* Filled in by main() before the demo runs. */
 static const char *rt_cfg_device       = "glrend";
 static br_uint_8   rt_cfg_pm_type      = BR_PMT_INDEX_8;
+static int         rt_cfg_bpp_set      = 0;
 static int         rt_cfg_width        = 320;
 static int         rt_cfg_height       = 240;
 static int         rt_cfg_warmup       = 2;
@@ -2306,6 +2307,8 @@ static br_uint_8 rt_bpp_to_type(int bpp)
             return BR_PMT_RGB_565;
         case 24:
             return BR_PMT_RGB_888;
+        case 32:
+            return BR_PMT_RGBA_8888;
         default:
         case 8:
             return BR_PMT_INDEX_8;
@@ -2364,7 +2367,8 @@ static void rt_usage(const char *argv0)
             "Usage: %s [options] [scene ...]\n"
             "\n"
             "  --device <name>    glrend (default), glrend1x or softrend\n"
-            "  --bpp <n>          software bit depth: 8 (default), 15, 16, 24\n"
+            "  --bpp <n>          colour buffer pixel type: 8, 15, 16, 24, 32\n"
+            "                     (unset: the renderer's own; 8 is refused on a GL device)\n"
             "  -w, --width <n>    render width (default 320)\n"
             "  -h, --height <n>   render height (default 240)\n"
             "  --warmup <n>       frames to render before checksumming (default 2)\n"
@@ -2402,6 +2406,7 @@ int main(int argc, char **argv)
             rt_cfg_device = argv[++i];
         } else if(strcmp(a, "--bpp") == 0 && v != NULL) {
             rt_cfg_pm_type = rt_bpp_to_type(BrAToI(argv[++i]));
+            rt_cfg_bpp_set = 1;
         } else if((strcmp(a, "-w") == 0 || strcmp(a, "--width") == 0) && v != NULL) {
             rt_cfg_width = BrAToI(argv[++i]);
         } else if((strcmp(a, "-h") == 0 || strcmp(a, "--height") == 0) && v != NULL) {
@@ -2469,12 +2474,28 @@ int main(int argc, char **argv)
     args.verbose  = rt_cfg_verbose;
 
     if(strcmp(rt_cfg_device, "softrend") == 0) {
-        args.force_software   = 1;
-        args.software_pm_type = rt_cfg_pm_type;
+        args.force_software = 1;
+        args.pm_type        = rt_cfg_pm_type;
     } else {
         args.force_software     = 0;
         args.opengl_device_name = rt_cfg_device;
         args.require_accel      = 1;
+
+        /*
+         * BR_PMT_INDEX_8 is a GL_R8UI integer attachment and the scene shader
+         * writes `out vec4', so it is not a colour buffer a GL device can
+         * render a scene into; refuse it rather than let the driver reject the
+         * type with something opaque. Unset leaves the driver's own type.
+         */
+        if(rt_cfg_bpp_set) {
+            if(rt_cfg_pm_type == BR_PMT_INDEX_8) {
+                fprintf(stderr, "--bpp 8 is not a scene target on a GL device (an integer attachment cannot take the scene's vec4 output); "
+                                "use 15, 16, 24 or 32\n");
+                return 2;
+            }
+
+            args.pm_type = rt_cfg_pm_type;
+        }
     }
 
     /*

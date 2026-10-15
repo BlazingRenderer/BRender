@@ -27,7 +27,7 @@ endif()
 set(failures 0)
 foreach(f IN LISTS files)
     execute_process(
-        COMMAND "${GLTFVIEW}" --force-software --software-bpp 8 -w 320 -h 240 --no-stats "${f}"
+        COMMAND "${GLTFVIEW}" --force-software --bpp 8 -w 320 -h 240 --no-stats "${f}"
         RESULT_VARIABLE rc
         OUTPUT_QUIET
         ERROR_QUIET
