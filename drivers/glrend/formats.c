@@ -22,18 +22,29 @@
 #   define GL_RGBN GL_RGB
 #endif
 
+/*
+ * The internal format decides what an FBO attachment is allocated as. An
+ * unsized GL_RGB/GL_RGBA lets the driver derive it from the format/type pair,
+ * and that collapses 555, 888 and 8888 to the same RGBA8 target, so the
+ * requested colour buffer type never reaches the framebuffer. The sized
+ * GL_RGB5_A1/GL_RGB8/GL_RGBA8 pin the layout down and make --bpp real.
+ *
+ * 565 stays unsized on purpose: glad declares only up to GL 3.3, which has no
+ * GL_RGB565, and GL_UNSIGNED_SHORT_5_6_5 already produces a real RGB565 target,
+ * so here the format/type pair is the format.
+ */
 const static br_pixelmap_gl_fmt br2gl[BR_PMT_MAX] = {
     BRPM_TO_GL(BR_PMT_INDEX_8,       GL_R8UI, GL_RED_INTEGER, GL_UNSIGNED_BYTE,              1, BR_FALSE, BR_TRUE,  RED, ZERO, ZERO,    ONE),
     BRPM_TO_GL(BR_PMT_RGB_332,       GL_RGB,  GL_RGB,         GL_UNSIGNED_BYTE_3_3_2,        1, BR_FALSE, BR_FALSE, RED, GREEN, BLUE,   ONE),
-    BRPM_TO_GL(BR_PMT_RGB_555,       GL_RGB,  GL_RGBA,        GL_UNSIGNED_SHORT_1_5_5_5_REV, 2, BR_FALSE, BR_FALSE, BLUE, GREEN, RED,   ONE),
+    BRPM_TO_GL(BR_PMT_RGB_555,       GL_RGB5_A1, GL_RGBA,     GL_UNSIGNED_SHORT_1_5_5_5_REV, 2, BR_FALSE, BR_FALSE, BLUE, GREEN, RED,   ONE),
     BRPM_TO_GL(BR_PMT_BGR_555,       GL_RGB,  GL_RGBA,        GL_UNSIGNED_SHORT_1_5_5_5_REV, 2, BR_FALSE, BR_FALSE, RED, GREEN, BLUE,   ONE),
     BRPM_TO_GL(BR_PMT_RGB_565,       GL_RGB,  GL_RGB,         GL_UNSIGNED_SHORT_5_6_5,       2, BR_FALSE, BR_FALSE, RED, GREEN, BLUE,   ONE),
     BRPM_TO_GL(BR_PMT_BGR_565,       GL_RGB,  GL_RGB,         GL_UNSIGNED_SHORT_5_6_5,       2, BR_FALSE, BR_FALSE, BLUE, GREEN, RED,   ONE),
     BRPM_TO_GL(BR_PMT_RGBA_4444,     GL_RGBA, GL_RGBA,        GL_UNSIGNED_SHORT_4_4_4_4,     2, BR_TRUE,  BR_FALSE, RED, GREEN, BLUE, ALPHA),
     BRPM_TO_GL(BR_PMT_ARGB_4444,     GL_RGBA, GL_RGBA,        GL_UNSIGNED_SHORT_4_4_4_4,     2, BR_TRUE,  BR_FALSE, GREEN, BLUE, ALPHA, RED),
-    BRPM_TO_GL(BR_PMT_RGB_888,       GL_RGB,  GL_RGBN,        GL_UNSIGNED_BYTE,              3, BR_FALSE, BR_FALSE, RED, GREEN, BLUE,   ONE),
+    BRPM_TO_GL(BR_PMT_RGB_888,       GL_RGB8, GL_RGBN,        GL_UNSIGNED_BYTE,              3, BR_FALSE, BR_FALSE, RED, GREEN, BLUE,   ONE),
     BRPM_TO_GL(BR_PMT_RGBX_888,      GL_RGB,  GL_RGBA,        GL_UNSIGNED_INT_8_8_8_8_REV,   3, BR_FALSE, BR_FALSE, BLUE, GREEN, RED,   ONE),
-    BRPM_TO_GL(BR_PMT_RGBA_8888,     GL_RGBA, GL_RGBA,        GL_UNSIGNED_INT_8_8_8_8_REV,   4, BR_TRUE,  BR_FALSE, BLUE, GREEN, RED, ALPHA),
+    BRPM_TO_GL(BR_PMT_RGBA_8888,     GL_RGBA8, GL_RGBA,       GL_UNSIGNED_INT_8_8_8_8_REV,   4, BR_TRUE,  BR_FALSE, BLUE, GREEN, RED, ALPHA),
     BRPM_TO_GL(BR_PMT_RGBA_8888_ARR, GL_RGBA, GL_RGBA,        GL_UNSIGNED_BYTE,              4, BR_TRUE,  BR_FALSE, RED, GREEN, BLUE, ALPHA),
     BRPM_TO_GL(BR_PMT_R8G8B8A8,      GL_RGBA, GL_RGBA,        GL_UNSIGNED_INT_8_8_8_8,       4, BR_TRUE,  BR_FALSE, RED, GREEN, BLUE, ALPHA),
     BRPM_TO_GL(BR_PMT_DEPTH_16,      GL_DEPTH_COMPONENT16,    GL_DEPTH_COMPONENT, 0,         2, BR_FALSE, BR_FALSE, RED, GREEN, BLUE, ALPHA), /* mandatory */
