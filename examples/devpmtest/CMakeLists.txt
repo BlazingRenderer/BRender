@@ -2,6 +2,8 @@ project(devpmtest)
 
 add_executable(devpmtest
         main.c
+        bench.c
+        bench.h
 )
 target_link_libraries(devpmtest PRIVATE BRender::Full BRender::DDI)
 set_property(TARGET devpmtest PROPERTY VS_DEBUGGER_WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/../dat")

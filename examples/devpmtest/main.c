@@ -5,6 +5,8 @@
 #include <brddi.h> /* To poke the device's CLUT. */
 #include <brglrend.h>
 
+#include "bench.h"
+
 #if USE_SDL3
 
 #include <SDL3/SDL.h>
@@ -1401,8 +1403,8 @@ static void indexed_copy_fini(void *user)
     if(state->pal_dst != NULL)
         BrPixelmapFree(state->pal_dst);
 
-    state->src = NULL;
-    state->dst = NULL;
+    state->src     = NULL;
+    state->dst     = NULL;
     state->pal_src = NULL;
     state->pal_dst = NULL;
 }
@@ -1413,8 +1415,8 @@ static br_error indexed_copy_init(void *user, br_pixelmap *screen, br_pixelmap *
     br_pixelmap        *lock;
     br_int_32           bad = 0;
 
-    state->src = BrPixelmapMatchTypedSized(screen, BR_PMMATCH_OFFSCREEN, BR_PMT_INDEX_8, INDEXED_COPY_WIDTH, INDEXED_COPY_HEIGHT);
-    state->dst = BrPixelmapMatchTypedSized(screen, BR_PMMATCH_OFFSCREEN, BR_PMT_INDEX_8, INDEXED_COPY_WIDTH, INDEXED_COPY_HEIGHT);
+    state->src     = BrPixelmapMatchTypedSized(screen, BR_PMMATCH_OFFSCREEN, BR_PMT_INDEX_8, INDEXED_COPY_WIDTH, INDEXED_COPY_HEIGHT);
+    state->dst     = BrPixelmapMatchTypedSized(screen, BR_PMMATCH_OFFSCREEN, BR_PMT_INDEX_8, INDEXED_COPY_WIDTH, INDEXED_COPY_HEIGHT);
     state->pal_src = indexed_copy_palette(BR_FALSE);
     state->pal_dst = indexed_copy_palette(BR_TRUE);
 
@@ -1633,48 +1635,134 @@ void BR_CALLBACK _BrEndHook(void)
 {
 }
 
+static void init_test(br_drawtest *test, void *anchor, br_pixelmap *screen, br_pixelmap *colour_buffer)
+{
+    br_error r;
+
+    test->_failed = BR_FALSE;
+    test->_user   = BrResAllocate(anchor, test->user_size, BR_MEMORY_APPLICATION);
+
+    r = BRE_OK;
+    if(test->init != NULL)
+        r = test->init(test->_user, screen, colour_buffer, test->arg);
+
+    if(r != BRE_OK) {
+        test->_failed = BR_TRUE;
+        BrLogError("APP", "Error initialising test %s", test->name);
+    }
+}
+
+static void fini_test(br_drawtest *test)
+{
+    if(test->fini != NULL && !test->_failed)
+        test->fini(test->_user);
+
+    if(test->_user != NULL)
+        memset(test->_user, 0, test->user_size);
+
+    test->_failed = BR_FALSE;
+}
+
 static void init_tests(void *anchor, br_pixelmap *screen, br_pixelmap *colour_buffer)
 {
-    for(size_t i = 0; i < BR_ASIZE(tests); ++i) {
-        br_drawtest *test = tests + i;
-        br_error     r;
-
-        test->_user = BrResAllocate(anchor, test->user_size, BR_MEMORY_APPLICATION);
-
-        r = BRE_OK;
-        if(test->init != NULL)
-            r = test->init(test->_user, screen, colour_buffer, test->arg);
-
-        if(r != BRE_OK) {
-            test->_failed = BR_TRUE;
-            BrLogError("APP", "Error initialising test %s", test->name);
-        }
-    }
+    for(size_t i = 0; i < BR_ASIZE(tests); ++i)
+        init_test(tests + i, anchor, screen, colour_buffer);
 }
 
 static void cleanup_tests(void)
 {
-    for(size_t i = 0; i < BR_ASIZE(tests); ++i) {
-        br_drawtest *test = tests + i;
-        if(test->fini != NULL && !test->_failed)
-            test->fini(test->_user);
+    for(size_t i = 0; i < BR_ASIZE(tests); ++i)
+        fini_test(tests + i);
+}
 
-        if(test->_user != NULL)
-            memset(test->_user, 0, test->user_size);
+/*
+ * The headless capture run: initialise each selected test on its own, render a
+ * fixed number of frames with a fixed delta, write the frame out, then tear the
+ * test down. No usage overlay is drawn and nothing is presented.
+ */
+static int capture_tests(devpmtest_bench *bench, br_pixelmap *screen, br_pixelmap *colour_buffer, void *anchor)
+{
+    const br_boolean run_all  = DevpmTestBenchRunAll(bench);
+    const br_uint_32 frames   = DevpmTestBenchFrames(bench);
+    const float      dt       = (float)(DevpmTestBenchDeltaMs(bench) / 1000.0);
+    const br_boolean checksum = DevpmTestBenchChecksum(bench);
+    const int        first    = run_all ? 0 : (int)DevpmTestBenchTestIndex(bench);
+    const int        count    = run_all ? (int)BR_ASIZE(tests) : 1;
+    int              captured = 0;
 
-        test->_failed = BR_FALSE;
+    for(int i = 0; i < count; ++i) {
+        const int    index = first + i;
+        br_drawtest *test;
+        char         path[512];
+        const char  *png = NULL;
+
+        if(index < 0 || index >= (int)BR_ASIZE(tests)) {
+            BrLogError("APP", "Test index %d is out of range (0..%d).", index, (int)BR_ASIZE(tests) - 1);
+            return 1;
+        }
+
+        test = tests + index;
+
+        if(run_all)
+            png = DevpmTestBenchAllPath(bench, test->name, index, path, sizeof(path));
+        else
+            png = DevpmTestBenchDumpPath(bench);
+
+        init_test(test, anchor, screen, colour_buffer);
+        if(test->_failed) {
+            BrLogError("APP", "Test %d (%s) failed to initialise; skipping it.", index, test->name);
+            continue;
+        }
+
+        BrLogInfo("APP", "Capturing test %d (%s): %u frame(s), dt=%.3f ms.", index, test->name, (unsigned)frames,
+                  (double)DevpmTestBenchDeltaMs(bench));
+
+        for(br_uint_32 f = 0; f < frames; ++f) {
+            BrPixelmapFill(colour_buffer, BR_COLOUR_RGBA(0, 0, 0, 0xFF));
+            test->draw(colour_buffer, dt, test->_user);
+
+            if(test->post != NULL)
+                test->post(screen, colour_buffer, test->_user);
+        }
+
+        DevpmTestBenchCapture(colour_buffer, png, checksum);
+
+        fini_test(test);
+        ++captured;
     }
+
+    if(captured == 0) {
+        BrLogError("APP", "No test was captured.");
+        return 1;
+    }
+
+    return 0;
 }
 
 int main(int argc, char **argv)
 {
-    br_pixelmap *screen = NULL, *colour_buffer = NULL;
-    int          width = 1280, height = 720;
-    int          ret = -1;
-    br_error     r;
-    br_uint_64   ticks_last, ticks_now;
-    int          want_screenshot;
-    int          test_index = 0; /* BR_ASIZE(tests) - 1; */
+    devpmtest_bench       *bench  = NULL;
+    devpmtest_bench_parse  parsed = DevpmTestBenchParse(argc, argv, &bench);
+    br_pixelmap           *screen = NULL, *colour_buffer = NULL;
+    int                    width = 1280, height = 720;
+    int                    ret = -1;
+    br_error               r;
+    br_uint_64             ticks_last, ticks_now;
+    int                    want_screenshot;
+    int                    test_index = 0; /* BR_ASIZE(tests) - 1; */
+    br_boolean             capture;
+    devpmtest_front_screen front_screen;
+    br_token_value         tv[8];
+    int                    n;
+
+    if(parsed == DEVPMTEST_BENCH_HELP)
+        return 0;
+
+    if(parsed == DEVPMTEST_BENCH_ERROR)
+        return 2;
+
+    capture      = parsed == DEVPMTEST_BENCH_CAPTURE;
+    front_screen = DevpmTestBenchFrontScreen(bench);
 
     BrBegin();
 
@@ -1683,19 +1771,30 @@ int main(int argc, char **argv)
     void *anchor = BrResAllocate(NULL, 0, BR_MEMORY_ANCHOR);
 
     // clang-format off
-    r = BrDevBeginVar(&screen, DEVICE_NAME,
-                      BRT_WIDTH_I32,      (br_int_32)width,
-                      BRT_HEIGHT_I32,     (br_int_32)height,
-                      BRT_HIDPI_B,        BR_TRUE,
-                      /* Set these if you dare... */
-                      BRT_RESIZABLE_B,    BR_TRUE,
-                      BRT_OPENGL_B,       BR_FALSE,
-                      BR_NULL_TOKEN);
+    n = 0;
+    tv[n++] = (br_token_value){.t = BRT_WIDTH_I32,     .v = {.i32 = (br_int_32)width}};
+    tv[n++] = (br_token_value){.t = BRT_HEIGHT_I32,    .v = {.i32 = (br_int_32)height}};
+    tv[n++] = (br_token_value){.t = BRT_HIDPI_B,       .v = {.i32 = BR_TRUE}};
+    /* Set these if you dare... */
+    tv[n++] = (br_token_value){.t = BRT_RESIZABLE_B,   .v = {.i32 = BR_TRUE}};
+
+    switch(front_screen) {
+        case DEVPMTEST_FRONT_GL:
+            tv[n++] = (br_token_value){.t = BRT_OPENGL_B,  .v = {.i32 = BR_TRUE}};
+            break;
+        case DEVPMTEST_FRONT_SOFT:
+        default:
+            break;
+    }
+
+    tv[n++] = (br_token_value){.t = BR_NULL_TOKEN,     .v = {.u32 = 0}};
     // clang-format on
 
+    r = BrDevBeginTV(&screen, DEVICE_NAME, tv);
+
     if(r != BRE_OK) {
-        BrLogError("APP", "BrDevBeginVar() failed.");
-        goto screen_creation_failed;
+        BrLogError("APP", "BrDevBeginTV() failed.");
+        goto teardown;
     }
 
     width  = screen->width;
@@ -1704,7 +1803,7 @@ int main(int argc, char **argv)
 #if 0 /* Set 1 to use a memory pixelmap as the backbuffer. */
     if((colour_buffer = BrPixelmapAllocate(screen->type, screen->width, screen->height, NULL, BR_PMAF_NORMAL)) == NULL) {
         BrLogError("APP", "BrPixelmapMatchTypedSized() failed.");
-        goto screen_creation_failed;
+        goto teardown;
     }
 #else
     /*
@@ -1717,13 +1816,18 @@ int main(int argc, char **argv)
      */
     if((colour_buffer = BrPixelmapMatchTypedSized(screen, BR_PMMATCH_OFFSCREEN, BR_PMT_RGBX_888, width, height)) == NULL) {
         BrLogError("APP", "BrPixelmapMatchTypedSized() failed.");
-        goto screen_creation_failed;
+        goto teardown;
     }
 #endif
     screen->origin_x = colour_buffer->origin_x = (br_int_16)(width / 2);
     screen->origin_y = colour_buffer->origin_y = (br_int_16)(height / 2);
 
     ticks_last = SDL_GetTicksNS();
+
+    if(capture) {
+        ret = capture_tests(bench, screen, colour_buffer, anchor) == 0 ? 0 : 1;
+        goto teardown;
+    }
 
     init_tests(anchor, screen, colour_buffer);
 
@@ -1891,7 +1995,7 @@ done:
 
     cleanup_tests();
 
-screen_creation_failed:
+teardown:
     if(colour_buffer != NULL)
         BrPixelmapFree(colour_buffer);
 
