@@ -143,6 +143,25 @@ If the pixelmap alpha is fully opaque, **clear** `BR_MATF_BLEND`.
 *(Drivers still choose the **blend equation/mode** via `BR_MATM_BLEND_MODE_*`; but **blend enable** comes from the table
 above.)*
 
+### The Vulkan output driver (`vkrend`)
+
+A new output driver and renderer over Vulkan, landing at parity with `glrend`
+for the colour and indexed paths: the device-pixelmap operations (fills, blits,
+the GPU rect draw, lines, text, sub-pixelmaps, indexed output through a device
+CLUT, and device->host readback) and a renderer covering Z-sorted and
+Z-buffered scene draws, Gouraud and Phong lighting, texture sampling with
+mipmaps and filtering, environment maps, linear fog, light cutoff volumes,
+front-face winding, culling, blending and clip planes.
+
+Known divergence: flat shading takes the provoking vertex's normal rather
+than the face plane equation, so a flat-shaded curved surface differs from
+`softrend`/`glrend`. It is tracked on the issue tracker.
+
+Known limitation: a 24-bit `BR_PMT_RGB_888` or `BR_PMT_DEPTH_24` device
+pixelmap is unsupported on a driver that offers no optimal-tiling image format
+for it (RADV offers none), because every vkrend image is created with optimal
+tiling; use a 32-bit pixel type instead.
+
 
 ---
 
