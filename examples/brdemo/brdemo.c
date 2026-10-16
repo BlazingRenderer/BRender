@@ -18,10 +18,7 @@ void _BrBeginHook(void) // NOLINT(*-reserved-identifier)
     BrDevAddStatic(NULL, BrDrv1SDL3Begin, NULL);
     BrDevAddStatic(NULL, BrDrv1GLBegin, NULL);
     BrDevAddStatic(NULL, BrDrv1GL1xBegin, NULL);
-
-#if HAVE_SOFTPRIM
     BrDevAddStatic(NULL, BrDrv1SoftPrimBegin, NULL);
-#endif
     BrDevAddStatic(NULL, BrDrv1SoftRendBegin, NULL);
 }
 
