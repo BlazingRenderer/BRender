@@ -4,6 +4,7 @@
 #include <brender.h>
 #include <brddi.h> /* To poke the device's CLUT. */
 #include <brglrend.h>
+#include <brvkrend.h>
 
 #include "bench.h"
 
@@ -1636,8 +1637,15 @@ static br_drawtest tests[] = {
 
 void BR_CALLBACK _BrBeginHook(void)
 {
-    BrDevAddStatic(NULL, DEVICE_FACTORY, NULL);
+    struct br_device *sdl = NULL;
+    BrDevAddStatic(&sdl, DEVICE_FACTORY, NULL);
     BrDevAddStatic(NULL, BrDrv1GLBegin, NULL);
+
+    if(sdl != NULL) {
+        char buf[48];
+        BrSprintfN(buf, sizeof(buf), "VKREND_INIT_DEVICE=%" PRIuPTR, (br_uintptr_t)sdl);
+        BrDevAddStatic(NULL, BrDrv1VkBegin, buf);
+    }
 }
 
 void BR_CALLBACK _BrEndHook(void)
@@ -1790,6 +1798,9 @@ int main(int argc, char **argv)
     switch(front_screen) {
         case DEVPMTEST_FRONT_GL:
             tv[n++] = (br_token_value){.t = BRT_OPENGL_B,  .v = {.i32 = BR_TRUE}};
+            break;
+        case DEVPMTEST_FRONT_VULKAN:
+            tv[n++] = (br_token_value){.t = BRT_VULKAN_B,  .v = {.i32 = BR_TRUE}};
             break;
         case DEVPMTEST_FRONT_SOFT:
         default:

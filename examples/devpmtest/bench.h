@@ -7,11 +7,12 @@ typedef struct devpmtest_bench devpmtest_bench;
 
 /*
  * The front screen the SDL3 device is asked for. SOFT passes neither accelerator
- * token, so it needs no GL driver and is the default.
+ * token, so it needs no GL or Vulkan driver and is the default.
  */
 typedef enum devpmtest_front_screen {
     DEVPMTEST_FRONT_SOFT = 0,
     DEVPMTEST_FRONT_GL,
+    DEVPMTEST_FRONT_VULKAN,
 } devpmtest_front_screen;
 
 typedef enum devpmtest_bench_parse {

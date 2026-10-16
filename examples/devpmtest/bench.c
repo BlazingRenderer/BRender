@@ -39,7 +39,7 @@ static void bench_usage(FILE *out)
                  "\n"
                  "  --run-test N        Render only tests[N] headlessly and exit.\n"
                  "  --run-all           Render every test headlessly and exit.\n"
-                 "  --front-screen STR  Front screen: soft (default) or gl.\n"
+                 "  --front-screen STR  Front screen: soft (default), gl or vulkan.\n"
                  "  --frames N          Frames to render per test before capture (default 1).\n"
                  "  --dt-ms MS          Fixed per-frame delta in ms (default 1000/60).\n"
                  "  --dump PATH         With --run-test, save the captured frame to PATH as PNG.\n"
@@ -95,8 +95,10 @@ devpmtest_bench_parse DevpmTestBenchParse(int argc, char **argv, devpmtest_bench
                 b->front_screen = DEVPMTEST_FRONT_SOFT;
             else if(strcmp(val, "gl") == 0)
                 b->front_screen = DEVPMTEST_FRONT_GL;
+            else if(strcmp(val, "vulkan") == 0)
+                b->front_screen = DEVPMTEST_FRONT_VULKAN;
             else {
-                fprintf(stderr, "devpmtest: unknown front screen \"%s\" (want soft or gl).\n", val);
+                fprintf(stderr, "devpmtest: unknown front screen \"%s\" (want soft, gl or vulkan).\n", val);
                 goto bad;
             }
 
@@ -146,8 +148,8 @@ devpmtest_bench_parse DevpmTestBenchParse(int argc, char **argv, devpmtest_bench
         }
 
         /*
-         * Keep the argument-less interactive launch on the front screen it used
-         * before the capture mode existed: SOFT, with no accelerator token.
+         * Keep the argument-less interactive launch on the soft front screen, with
+         * no accelerator token, as master does.
          */
         if(!front_set)
             b->front_screen = DEVPMTEST_FRONT_SOFT;
