@@ -70,6 +70,15 @@ static br_colour rgb_555_read(const br_uint_8 *pixels, const br_pixelmap *pm, co
     g = BR_GRN_555(*((br_uint_16 *)pixels));
     b = BR_BLU_555(*((br_uint_16 *)pixels));
 
+    /*
+     * The macros return the 5-bit component already shifted up by three;
+     * replicate it into the low bits so full scale reads back as full scale,
+     * as rgb_565_read() does.
+     */
+    r = (br_uint_8)(r | (r >> 5));
+    g = (br_uint_8)(g | (g >> 5));
+    b = (br_uint_8)(b | (b >> 5));
+
     return BR_COLOUR_RGBA(r, g, b, 255);
 }
 
@@ -238,6 +247,15 @@ static br_colour bgr_555_read(const br_uint_8 *pixels, const br_pixelmap *pm, co
     r = BR_BLU_555(*((br_uint_16 *)pixels));
     g = BR_GRN_555(*((br_uint_16 *)pixels));
     b = BR_RED_555(*((br_uint_16 *)pixels));
+
+    /*
+     * The macros return the 5-bit component already shifted up by three;
+     * replicate it into the low bits so full scale reads back as full scale,
+     * as bgr_565_read() does.
+     */
+    r = (br_uint_8)(r | (r >> 5));
+    g = (br_uint_8)(g | (g >> 5));
+    b = (br_uint_8)(b | (b >> 5));
 
     return BR_COLOUR_RGBA(r, g, b, 255);
 }

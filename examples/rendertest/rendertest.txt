@@ -1783,7 +1783,7 @@ glrend1x/llvmpipe/declared/zb/7/320x240/scene-lines-map-gouraud 23a702c1a0495611
 glrend1x/llvmpipe/declared/zb/7/320x240/scene-lines-map-unlit 426a29ac1b5eaa17
 glrend1x/llvmpipe/declared/zb/7/320x240/scene-lines-plain 56e7c4dbb0295d8c
 glrend1x/llvmpipe/declared/zb/7/320x240/scene-lines-plain-unlit 9c0b823cb39559fb
-glrend1x/llvmpipe/declared/zb/7/320x240/scene-lines-rgb555 e775791e16e8e07f
+glrend1x/llvmpipe/declared/zb/7/320x240/scene-lines-rgb555 078fffa0affaf2cb
 glrend1x/llvmpipe/declared/zb/7/320x240/scene-lines-rgb565 6f7df5b918fa31fb
 glrend1x/llvmpipe/declared/zb/7/320x240/scene-mmx-rgb-dither-flat 9dba86571f7abb04
 glrend1x/llvmpipe/declared/zb/7/320x240/scene-mmx-rgb-dither-smooth 3e723666e8ec3dd9
@@ -1838,8 +1838,8 @@ glrend1x/llvmpipe/declared/zb/7/320x240/scene-spot-hit-miss fb3aadec5d39a803
 glrend1x/llvmpipe/declared/zb/7/320x240/scene-spot-miss 3c7aebcbbe428e03
 glrend1x/llvmpipe/declared/zb/7/320x240/scene-tex-32 92df3674db260a4a
 glrend1x/llvmpipe/declared/zb/7/320x240/scene-tex-arb 3084684b54916030
-glrend1x/llvmpipe/declared/zb/7/320x240/scene-tex-rgb555 4f89a483253e9c01
-glrend1x/llvmpipe/declared/zb/7/320x240/scene-tex-rgb555-affine 8ec783682c31d01d
+glrend1x/llvmpipe/declared/zb/7/320x240/scene-tex-rgb555 7dd5d369504f877f
+glrend1x/llvmpipe/declared/zb/7/320x240/scene-tex-rgb555-affine b45ccb5aaf312c93
 glrend1x/llvmpipe/declared/zb/7/320x240/scene-tex-rgb565 551b288110c2a49a
 glrend1x/llvmpipe/declared/zb/7/320x240/scene-tex-rgb565-affine 3d48d5d230e3a4a2
 glrend1x/llvmpipe/declared/zb/7/320x240/scene-textured 508f99ad2867c975
@@ -1898,7 +1898,7 @@ glrend1x/llvmpipe/declared/zs/7/320x240/scene-lines-map-gouraud ce3213d17f9bf609
 glrend1x/llvmpipe/declared/zs/7/320x240/scene-lines-map-unlit 50d695e6bc18892f
 glrend1x/llvmpipe/declared/zs/7/320x240/scene-lines-plain 324abfccbc0f0917
 glrend1x/llvmpipe/declared/zs/7/320x240/scene-lines-plain-unlit 9c0b823cb39559fb
-glrend1x/llvmpipe/declared/zs/7/320x240/scene-lines-rgb555 e23eed783f8e4967
+glrend1x/llvmpipe/declared/zs/7/320x240/scene-lines-rgb555 8b99b5d53bbf7f9b
 glrend1x/llvmpipe/declared/zs/7/320x240/scene-lines-rgb565 7fd733ac3bd91e3b
 glrend1x/llvmpipe/declared/zs/7/320x240/scene-mmx-rgb-dither-flat 9dba86571f7abb04
 glrend1x/llvmpipe/declared/zs/7/320x240/scene-mmx-rgb-dither-smooth 3e723666e8ec3dd9
@@ -1953,8 +1953,8 @@ glrend1x/llvmpipe/declared/zs/7/320x240/scene-spot-hit-miss fb3aadec5d39a803
 glrend1x/llvmpipe/declared/zs/7/320x240/scene-spot-miss 3c7aebcbbe428e03
 glrend1x/llvmpipe/declared/zs/7/320x240/scene-tex-32 92df3674db260a4a
 glrend1x/llvmpipe/declared/zs/7/320x240/scene-tex-arb 3084684b54916030
-glrend1x/llvmpipe/declared/zs/7/320x240/scene-tex-rgb555 4f89a483253e9c01
-glrend1x/llvmpipe/declared/zs/7/320x240/scene-tex-rgb555-affine 8ec783682c31d01d
+glrend1x/llvmpipe/declared/zs/7/320x240/scene-tex-rgb555 7dd5d369504f877f
+glrend1x/llvmpipe/declared/zs/7/320x240/scene-tex-rgb555-affine b45ccb5aaf312c93
 glrend1x/llvmpipe/declared/zs/7/320x240/scene-tex-rgb565 551b288110c2a49a
 glrend1x/llvmpipe/declared/zs/7/320x240/scene-tex-rgb565-affine 3d48d5d230e3a4a2
 glrend1x/llvmpipe/declared/zs/7/320x240/scene-textured 508f99ad2867c975
@@ -2013,7 +2013,7 @@ glrend1x/llvmpipe/x87/zb/7/320x240/scene-lines-map-gouraud 23a702c1a0495611
 glrend1x/llvmpipe/x87/zb/7/320x240/scene-lines-map-unlit 426a29ac1b5eaa17
 glrend1x/llvmpipe/x87/zb/7/320x240/scene-lines-plain 56e7c4dbb0295d8c
 glrend1x/llvmpipe/x87/zb/7/320x240/scene-lines-plain-unlit 9c0b823cb39559fb
-glrend1x/llvmpipe/x87/zb/7/320x240/scene-lines-rgb555 e775791e16e8e07f
+glrend1x/llvmpipe/x87/zb/7/320x240/scene-lines-rgb555 078fffa0affaf2cb
 glrend1x/llvmpipe/x87/zb/7/320x240/scene-lines-rgb565 6f7df5b918fa31fb
 glrend1x/llvmpipe/x87/zb/7/320x240/scene-mmx-rgb-dither-flat 9dba86571f7abb04
 glrend1x/llvmpipe/x87/zb/7/320x240/scene-mmx-rgb-dither-smooth 3e723666e8ec3dd9
@@ -2068,8 +2068,8 @@ glrend1x/llvmpipe/x87/zb/7/320x240/scene-spot-hit-miss fb3aadec5d39a803
 glrend1x/llvmpipe/x87/zb/7/320x240/scene-spot-miss 3c7aebcbbe428e03
 glrend1x/llvmpipe/x87/zb/7/320x240/scene-tex-32 92df3674db260a4a
 glrend1x/llvmpipe/x87/zb/7/320x240/scene-tex-arb 3084684b54916030
-glrend1x/llvmpipe/x87/zb/7/320x240/scene-tex-rgb555 4f89a483253e9c01
-glrend1x/llvmpipe/x87/zb/7/320x240/scene-tex-rgb555-affine 8ec783682c31d01d
+glrend1x/llvmpipe/x87/zb/7/320x240/scene-tex-rgb555 7dd5d369504f877f
+glrend1x/llvmpipe/x87/zb/7/320x240/scene-tex-rgb555-affine b45ccb5aaf312c93
 glrend1x/llvmpipe/x87/zb/7/320x240/scene-tex-rgb565 551b288110c2a49a
 glrend1x/llvmpipe/x87/zb/7/320x240/scene-tex-rgb565-affine 3d48d5d230e3a4a2
 glrend1x/llvmpipe/x87/zb/7/320x240/scene-textured 508f99ad2867c975
@@ -2128,7 +2128,7 @@ glrend1x/llvmpipe/x87/zs/7/320x240/scene-lines-map-gouraud ce3213d17f9bf609
 glrend1x/llvmpipe/x87/zs/7/320x240/scene-lines-map-unlit 50d695e6bc18892f
 glrend1x/llvmpipe/x87/zs/7/320x240/scene-lines-plain 324abfccbc0f0917
 glrend1x/llvmpipe/x87/zs/7/320x240/scene-lines-plain-unlit 9c0b823cb39559fb
-glrend1x/llvmpipe/x87/zs/7/320x240/scene-lines-rgb555 e23eed783f8e4967
+glrend1x/llvmpipe/x87/zs/7/320x240/scene-lines-rgb555 8b99b5d53bbf7f9b
 glrend1x/llvmpipe/x87/zs/7/320x240/scene-lines-rgb565 7fd733ac3bd91e3b
 glrend1x/llvmpipe/x87/zs/7/320x240/scene-mmx-rgb-dither-flat 9dba86571f7abb04
 glrend1x/llvmpipe/x87/zs/7/320x240/scene-mmx-rgb-dither-smooth 3e723666e8ec3dd9
@@ -2183,8 +2183,8 @@ glrend1x/llvmpipe/x87/zs/7/320x240/scene-spot-hit-miss fb3aadec5d39a803
 glrend1x/llvmpipe/x87/zs/7/320x240/scene-spot-miss 3c7aebcbbe428e03
 glrend1x/llvmpipe/x87/zs/7/320x240/scene-tex-32 92df3674db260a4a
 glrend1x/llvmpipe/x87/zs/7/320x240/scene-tex-arb 3084684b54916030
-glrend1x/llvmpipe/x87/zs/7/320x240/scene-tex-rgb555 4f89a483253e9c01
-glrend1x/llvmpipe/x87/zs/7/320x240/scene-tex-rgb555-affine 8ec783682c31d01d
+glrend1x/llvmpipe/x87/zs/7/320x240/scene-tex-rgb555 7dd5d369504f877f
+glrend1x/llvmpipe/x87/zs/7/320x240/scene-tex-rgb555-affine b45ccb5aaf312c93
 glrend1x/llvmpipe/x87/zs/7/320x240/scene-tex-rgb565 551b288110c2a49a
 glrend1x/llvmpipe/x87/zs/7/320x240/scene-tex-rgb565-affine 3d48d5d230e3a4a2
 glrend1x/llvmpipe/x87/zs/7/320x240/scene-textured 508f99ad2867c975
