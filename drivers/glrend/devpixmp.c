@@ -974,9 +974,18 @@ static br_error BR_CMETHOD_DECL(br_device_pixelmap_gl, line)(br_device_pixelmap 
         line_data.colour = (br_vector4)BR_VECTOR4(r8 / 255.0f, g8 / 255.0f, b8 / 255.0f, a8 / 255.0f);
     }
 
+    /*
+     * Place the endpoints on the pixel centre, (p + 0.5), like the vkrend line
+     * shader and the CPU memory pixelmap: an integer pixel covers [p, p+1), and
+     * its representative sample is the centre. Mapping the integer straight to
+     * [0,1] puts the vertex on the pixel corner and shifts the whole line up and
+     * left by one.
+     */
     BrMatrix4Orthographic(&line_data.mvp, 0.0f, 1.0f, 0.0f, 1.0f, -1.0f, 1.0f);
-    line_data.start = (br_vector2)BR_VECTOR2((float)spoint.x / (float)self->pm_width, 1.0f - ((float)spoint.y / (float)self->pm_height));
-    line_data.end   = (br_vector2)BR_VECTOR2((float)epoint.x / (float)self->pm_width, 1.0f - ((float)epoint.y / (float)self->pm_height));
+    line_data.start = (br_vector2)BR_VECTOR2(((float)spoint.x + 0.5f) / (float)self->pm_width,
+                                             1.0f - (((float)spoint.y + 0.5f) / (float)self->pm_height));
+    line_data.end   = (br_vector2)BR_VECTOR2(((float)epoint.x + 0.5f) / (float)self->pm_width,
+                                             1.0f - (((float)epoint.y + 0.5f) / (float)self->pm_height));
 
     gl->BindFramebuffer(GL_FRAMEBUFFER, self->asBack.glFbo);
     gl->Viewport(0, 0, self->pm_width, self->pm_height);
@@ -1009,10 +1018,11 @@ static br_error BR_CMETHOD_DECL(br_device_pixelmap_gl, pixelSet)(br_device_pixel
     }
 
     /*
-     * FIXME: For some reason I cbf figuring out now, when rendering a point, both components need a -1.
+     * Place the point on the pixel centre, (p + 0.5), matching the line path.
      */
     BrMatrix4Orthographic(&line_data.mvp, 0.0f, 1.0f, 0.0f, 1.0f, -1.0f, 1.0f);
-    line_data.start = (br_vector2)BR_VECTOR2((float)(point.x - 1) / (float)self->pm_width, 1.0f - ((float)(point.y - 1) / (float)self->pm_height));
+    line_data.start = (br_vector2)BR_VECTOR2(((float)point.x + 0.5f) / (float)self->pm_width,
+                                             1.0f - (((float)point.y + 0.5f) / (float)self->pm_height));
 
     /*
      * What is a point, but half a line?
