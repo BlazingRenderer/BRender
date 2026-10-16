@@ -1707,7 +1707,15 @@ int main(int argc, char **argv)
         goto screen_creation_failed;
     }
 #else
-    if((colour_buffer = BrPixelmapMatch(screen, BR_PMMATCH_OFFSCREEN)) == NULL) {
+    /*
+     * The colour buffer is only ever presented, never sampled, so it asks for
+     * an X format: its alpha is otherwise whatever the platform front's format
+     * happens to carry - undefined on a mirror of the front (e.g. RGBA_8888 on
+     * a Linux GL front), and 0 through glrend's copies where the software paths
+     * write 255. Asking for RGBX_888 makes it opaque on every front screen
+     * without changing the front's own platform-given format.
+     */
+    if((colour_buffer = BrPixelmapMatchTypedSized(screen, BR_PMMATCH_OFFSCREEN, BR_PMT_RGBX_888, width, height)) == NULL) {
         BrLogError("APP", "BrPixelmapMatchTypedSized() failed.");
         goto screen_creation_failed;
     }
