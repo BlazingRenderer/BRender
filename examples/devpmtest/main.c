@@ -1241,6 +1241,7 @@ static br_error clone_init(void *user, br_pixelmap *screen, br_pixelmap *backbuf
     state->earth16_device = BrPixelmapCloneTyped(state->earth8_device, BR_PMT_RGB_565);
     if(state->earth16_device == NULL) {
         BrLogError("APP", "Error creating device BR_PMT_RGB_565 version of earth8.pix");
+        clone_fini(user);
         return BRE_FAIL;
     }
     BrResAdd(state->res, state->earth16_device);
@@ -1248,6 +1249,7 @@ static br_error clone_init(void *user, br_pixelmap *screen, br_pixelmap *backbuf
     state->earth32_device = BrPixelmapCloneTyped(state->earth8_device, BR_PMT_RGBA_8888);
     if(state->earth32_device == NULL) {
         BrLogError("APP", "Error creating device BR_PMT_RGBA_8888 version of earth8.pix");
+        clone_fini(user);
         return BRE_FAIL;
     }
     BrResAdd(state->res, state->earth32_device);
@@ -1255,6 +1257,7 @@ static br_error clone_init(void *user, br_pixelmap *screen, br_pixelmap *backbuf
     state->earth_backto8_device = BrPixelmapCloneTyped(state->earth32_device, BR_PMT_INDEX_8);
     if(state->earth_backto8_device == NULL) {
         BrLogError("APP", "Error creating device BR_PMT_INDEX_8 version of earth8.pix");
+        clone_fini(user);
         return BRE_FAIL;
     }
     BrResAdd(state->res, state->earth_backto8_device);
