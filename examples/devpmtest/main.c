@@ -746,7 +746,7 @@ static void pixelquery_fini(void *user)
     pixelquery_state *state = user;
 
     br_pixelmap **const pms[] = {
-        &state->tex32, &state->tex32m, &state->tex24, &state->tex24, &state->tex16, &state->tex16m, &state->tex8, &state->tex8m,
+        &state->tex32, &state->tex32m, &state->tex24, &state->tex24m, &state->tex16, &state->tex16m, &state->tex8, &state->tex8m,
     };
 
     for(size_t i = 0; i < BR_ASIZE(pms); ++i) {
@@ -926,6 +926,10 @@ static void xbpp_fini(void *user)
     if(state->src != NULL)
         BrPixelmapFree(state->src);
     state->src = NULL;
+
+    if(state->dst != NULL)
+        BrPixelmapFree(state->dst);
+    state->dst = NULL;
 }
 
 static br_error xbpp_init(void *user, br_pixelmap *screen, br_pixelmap *buffer, void *arg)
