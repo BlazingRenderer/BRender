@@ -777,14 +777,13 @@ static br_error BR_CMETHOD_DECL(br_device_pixelmap_gl, rectangleCopyTo)(br_devic
 static br_error BR_CMETHOD_DECL(br_device_pixelmap_gl, rectangleCopyFrom)(br_device_pixelmap *self, br_point *p, br_device_pixelmap *dest,
                                                                           br_rectangle *r)
 {
-    br_error                  err;
-    void                     *row_temp;
-    const br_pixelmap_gl_fmt *fmt;
-    br_rectangle              srect;
-    br_point                  dpoint;
-    br_uint_16                bytes_per_pixel;
-    void                     *dst_pixels;
-    const GladGLContext      *gl = DevicePixelmapGLGetGLContext(self);
+    br_error             err;
+    br_rectangle         srect;
+    br_point             dpoint;
+    br_uint_16           bytes_per_pixel;
+    br_pixelmap         *readback  = NULL;
+    br_pixelmap         *converted = NULL;
+    const GladGLContext *gl        = DevicePixelmapGLGetGLContext(self);
 
     /*
      * Need contig pixels and whole rows.
@@ -795,31 +794,55 @@ static br_error BR_CMETHOD_DECL(br_device_pixelmap_gl, rectangleCopyFrom)(br_dev
     if(PixelmapRectangleClipTwo(&srect, &dpoint, r, p, (br_pixelmap *)dest, (br_pixelmap *)self) == BR_CLIP_REJECT)
         return BRE_OK;
 
-    if((fmt = DeviceGLGetFormatDetails(dest->pm_type)) == NULL)
-        return BRE_FAIL;
-
     if((err = DevicePixelmapGLBindFramebuffer(gl, GL_READ_FRAMEBUFFER, self)) != BRE_OK)
         return err;
 
-    bytes_per_pixel = BrPixelmapPixelSize((br_pixelmap *)dest) >> 3;
-    dst_pixels      = DevicePixelmapMemAddress(dest, dpoint.x, dpoint.y, bytes_per_pixel);
+    /*
+     * glReadPixels() does not apply the texture swizzle, so the destination's
+     * upload format/type pair does not describe BRender memory order here. Read
+     * the clipped region back in GL_RGBA/GL_UNSIGNED_BYTE - R,G,B,A bytes in
+     * that order whatever the host endianness - into a temporary BR_PMT_RGBA_8888_ARR
+     * pixelmap, then let BrPixelmapConvert() produce the destination type.
+     * Readback is not a hot path, so the temporary allocations are acceptable.
+     */
+    if((readback = BrPixelmapAllocate(BR_PMT_RGBA_8888_ARR, srect.w, srect.h, NULL, BR_PMAF_NORMAL)) == NULL)
+        return BRE_FAIL;
 
     gl->PixelStorei(GL_PACK_ROW_LENGTH, srect.w);
-    gl->ReadPixels(srect.x, self->pm_height - srect.y - srect.h, srect.w, srect.h, fmt->format, fmt->type, dst_pixels);
+    gl->ReadPixels(srect.x, self->pm_height - srect.y - srect.h, srect.w, srect.h, GL_RGBA, GL_UNSIGNED_BYTE, readback->pixels);
+    gl->PixelStorei(GL_PACK_ROW_LENGTH, 0);
 
-    size_t bytes_per_subrow = srect.w * bytes_per_pixel;
-    row_temp                = BrScratchAllocate(bytes_per_subrow);
+    /*
+     * GL reads bottom-up; flip the temporary into BRender's top-down row order.
+     */
+    size_t bytes_per_subrow = (size_t)srect.w * 4;
+    void  *row_temp         = BrScratchAllocate(bytes_per_subrow);
     for(br_uint_16 j = 0; j < srect.h / 2; ++j) {
-        void *top = DevicePixelmapMemAddress(dest, dpoint.x, dpoint.y + j, bytes_per_pixel);
-        void *bot = DevicePixelmapMemAddress(dest, dpoint.x, dpoint.y + srect.h - j - 1, bytes_per_pixel);
+        void *top = (char *)readback->pixels + (size_t)j * readback->row_bytes;
+        void *bot = (char *)readback->pixels + (size_t)(srect.h - j - 1) * readback->row_bytes;
 
         memcpy(row_temp, top, bytes_per_subrow);
         memcpy(top, bot, bytes_per_subrow);
         memcpy(bot, row_temp, bytes_per_subrow);
     }
-
-    /* TODO: If on little-endian systems, swap the byte order. */
     BrScratchFree(row_temp);
+
+    if((converted = BrPixelmapConvert(readback, dest->pm_type, NULL)) == NULL) {
+        BrLogError("GLREND", "Cannot convert the readback to destination pixel type %u.", (unsigned)dest->pm_type);
+        BrPixelmapFree(readback);
+        return BRE_FAIL;
+    }
+
+    bytes_per_pixel = BrPixelmapPixelSize((br_pixelmap *)dest) >> 3;
+    for(br_uint_16 j = 0; j < srect.h; ++j) {
+        void *dst = DevicePixelmapMemAddress(dest, dpoint.x, dpoint.y + j, bytes_per_pixel);
+        void *src = DevicePixelmapMemAddress(converted, 0, j, bytes_per_pixel);
+
+        memcpy(dst, src, (size_t)srect.w * bytes_per_pixel);
+    }
+
+    BrPixelmapFree(converted);
+    BrPixelmapFree(readback);
     return BRE_OK;
 }
 
