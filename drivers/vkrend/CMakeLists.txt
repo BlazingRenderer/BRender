@@ -39,7 +39,8 @@ add_library(BRender::Drivers::VKRend::Headers ALIAS vkrend-headers)
 #
 find_program(GLSLANG_EXECUTABLE glslang)
 if (NOT GLSLANG_EXECUTABLE)
-    message(FATAL_ERROR "glslang not found, required to build the vkrend rect pipeline shaders.")
+    message(STATUS "glslang not found, not building vkrend.")
+    return()
 endif ()
 
 function(compile_shader_spv shader varname stage destination)
