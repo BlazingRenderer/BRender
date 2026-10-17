@@ -917,49 +917,6 @@ void RegenerateFaceNormals(struct v11model *v11m)
     }
 }
 
-void RegenerateVertexNormals(struct v11model *v11m)
-{
-    int g, v, f;
-    //	struct v11face *fp;
-    br_vector3_u16 *vertex_numbers;
-    br_vector4     *eqn;
-
-    //	struct fmt_vertex *vp;
-    br_vector3 *normal;
-    br_vector3 *normals;
-
-    for(g = 0; g < v11m->ngroups; g++) {
-
-        /*
-         * Build a scratch workspace for accumulated normals
-         */
-        normals = BrScratchAllocate(sizeof(*normals) * v11m->groups[g].nvertices);
-        BrMemSet(normals, 0, sizeof(*normals) * v11m->groups[g].nvertices);
-
-        /*
-         * Accumulate normals from each face
-         */
-        //		fp=v11m->groups[g].faces;
-        vertex_numbers = v11m->groups[g].vertex_numbers;
-        eqn            = v11m->groups[g].eqn;
-
-        for(f = 0; f < v11m->groups[g].nfaces; f++, vertex_numbers++, eqn++) {
-            BrVector3Accumulate(normals + vertex_numbers->v[0], (br_vector3 *)eqn);
-            BrVector3Accumulate(normals + vertex_numbers->v[1], (br_vector3 *)eqn);
-            BrVector3Accumulate(normals + vertex_numbers->v[2], (br_vector3 *)eqn);
-        }
-
-        /*
-         * Normalise accumulated normals into vertices
-         */
-        normal = v11m->groups[g].normal;
-        for(v = 0; v < v11m->groups[g].nvertices; v++, normal++)
-            BrVector3Normalise(normal, normals + v);
-
-        BrScratchFree(normals);
-    }
-}
-
 static void GenerateStoredModel(br_model *model)
 {
     br_error                   r;
@@ -1080,6 +1037,15 @@ void BR_PUBLIC_ENTRY BrModelUpdate(br_model *model, br_uint_16 flags)
     }
 
     /*
+     * A position update needs a full prepare. The prepared vertex set is derived
+     * from the positions and the normals - the welding compares positions
+     * (TVCompare_XYZ) and the vertex deduplication keys on the normal
+     * (TVCompare_MVN) - so moving vertices can invalidate the structure itself,
+     * not just the normal values.
+     */
+    br_boolean positions_reprepare = (flags & BR_MODU_VERTEX_POSITIONS) && !(model->flags & BR_MODF_CUSTOM_NORMALS);
+
+    /*
      * Catch internal update - just look up new material stored pointers
      */
     if(flags & _BR_MODU_RESERVED && !(model->flags & BR_MODF_USED_PREPARED_USER)) {
@@ -1098,7 +1064,8 @@ void BR_PUBLIC_ENTRY BrModelUpdate(br_model *model, br_uint_16 flags)
         /*
          * See if the only thing needed is to copy new parts over
          */
-    } else if(model->prepared && !(flags & ~(MODU_VERTEX_COPY_FLAGS | MODU_FACE_COPY_FLAGS)) && !(model->flags & BR_MODF_USED_PREPARED_USER)) {
+    } else if(model->prepared && !positions_reprepare && !(flags & ~(MODU_VERTEX_COPY_FLAGS | MODU_FACE_COPY_FLAGS)) &&
+              !(model->flags & BR_MODF_USED_PREPARED_USER)) {
 
         v11m = model->prepared;
 
@@ -1163,12 +1130,6 @@ void BR_PUBLIC_ENTRY BrModelUpdate(br_model *model, br_uint_16 flags)
         }
 
         if(flags & BR_MODU_VERTEX_POSITIONS) {
-
-#if !BRENDER_BUILD_FOR_CROC // Disabled for Croc - it doesn't work right anyhow!
-            if(!(model->flags & BR_MODF_CUSTOM_NORMALS))
-                RegenerateVertexNormals(v11m);
-#endif
-
             if(!(model->flags & BR_MODF_CUSTOM_EQUATIONS))
                 RegenerateFaceNormals(v11m);
         }
