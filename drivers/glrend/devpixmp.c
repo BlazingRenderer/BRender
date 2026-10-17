@@ -108,6 +108,23 @@ static br_error recreate_renderbuffers(br_device_pixelmap *self, const GladGLCon
         gl->BindFramebuffer(GL_FRAMEBUFFER, fbo);
         gl->FramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, binding_point, self->asBack.glTex, 0);
         gl->DrawBuffers(1, draw_buffers);
+
+        /*
+         * TexImage2D(..., NULL) leaves the new storage undefined, and a new or resized
+         * offscreen is displayed before anything has filled it, so a driver that recycles
+         * texture memory shows its old contents. Give the attachment a defined clear: an
+         * indexed (GL_R8UI) target takes the integer clear - a float glClearColor() is not
+         * defined to convert to an integer attachment - and a colour target is cleared
+         * opaque, so an unused alpha reads as the X-means-opaque rule expects.
+         */
+        if(fmt->indexed) {
+            const GLuint value[4] = {0, 0, 0, 0};
+
+            gl->ClearBufferuiv(GL_COLOR, 0, value);
+        } else {
+            gl->ClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+            gl->Clear(GL_COLOR_BUFFER_BIT);
+        }
     } else if(self->use_type == BRT_DEPTH) {
         fbo = self->asDepth.backbuffer->asBack.glFbo;
         UASSERT(fbo != 0);
