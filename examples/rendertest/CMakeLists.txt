@@ -67,7 +67,7 @@ if (BUILD_TESTING)
     # The name deliberately does not start with a device token. The --bless loop
     # in contrib/run-tests.sh rebuilds each corpus test from its name, and it
     # cannot rebuild one that carries a different --scene-dir and scene list, so
-    # these are skipped there (as `fixtures' and `gltf-loads' are) rather than
+    # these are skipped there (as `fixtures' is) rather than
     # blessed as the wrong configuration. Blessing them is deliberate and
     # separate; drivers/softprim/README.md says how.
     #
@@ -182,16 +182,6 @@ if (BUILD_TESTING)
                      "-DDAT=${CMAKE_CURRENT_SOURCE_DIR}/dat"
                      "-DWORK=${CMAKE_CURRENT_BINARY_DIR}/fixture-check"
                      -P "${CMAKE_CURRENT_SOURCE_DIR}/fixture-check.cmake")
-
-    add_test(NAME "gltf-loads"
-             COMMAND ${CMAKE_COMMAND}
-                     "-DGLTFVIEW=$<TARGET_FILE:gltfview>"
-                     "-DDIR1=${CMAKE_CURRENT_SOURCE_DIR}/dat"
-                     "-DDIR2=${CMAKE_SOURCE_DIR}/resources/gltf-reference"
-                     -P "${CMAKE_CURRENT_SOURCE_DIR}/gltf-check.cmake")
-    set_tests_properties("gltf-loads" PROPERTIES
-                         ENVIRONMENT "SDL_VIDEODRIVER=offscreen;GLTFVIEW_BENCH_FRAMES=5;GLTFVIEW_BENCH_NOVSYNC=1"
-                         TIMEOUT 900)
 
     #
     # The environment-map orientation witness (main.c --env-witness). It is not

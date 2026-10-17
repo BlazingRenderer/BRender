@@ -189,7 +189,7 @@ if [ "$bless" = 1 ]; then
         # `<device>-<bpp>-<mode>` and takes `--bpp <bpp>`; one that does not
         # (glrend1x, whose window framebuffer is RGBA whatever is asked for)
         # names them `<device>-<mode>`, leaving the mode in `type` and no bpp to
-        # pass. The non-corpus tests (`refscenes-*`, `fixtures`, `gltf-loads`,
+        # pass. The non-corpus tests (`refscenes-*`, `fixtures`,
         # `envw-*`) do not start with a device token and are skipped above.
         bpp=""
         if [ "$type" = zb ] || [ "$type" = zs ]; then
