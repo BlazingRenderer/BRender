@@ -39,10 +39,23 @@ br_device_clut *DeviceClutSDL3Allocate(br_device_pixelmap *pm, const char *ident
     self->dispatch   = &deviceClutDispatch;
     self->device     = pm->device;
     self->identifier = BrResStrDup(self, identifier);
-    self->pal        = SDL_GetSurfacePalette(pm->surface);
-    self->owned      = BR_FALSE;
 
-    UASSERT(self->pal != NULL);
+    /*
+     * An indexed surface owns the palette, so the CLUT borrows it. A colour
+     * surface has none, and the CLUT owns one instead: it is still the palette
+     * an indexed source is resolved through when copied into this pixelmap.
+     */
+    self->pal   = SDL_GetSurfacePalette(pm->surface);
+    self->owned = BR_FALSE;
+
+    if(self->pal == NULL) {
+        if((self->pal = SDL_CreatePalette(MAX_CLUT_ENTRIES)) == NULL) {
+            BrResFreeNoCallback(self);
+            return NULL;
+        }
+
+        self->owned = BR_TRUE;
+    }
 
     ObjectContainerAddFront(pm->device, (br_object *)self);
     return self;

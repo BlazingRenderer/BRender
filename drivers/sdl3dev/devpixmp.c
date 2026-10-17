@@ -189,11 +189,9 @@ br_device_pixelmap *DevicePixelmapSDL3Allocate(br_device *dev, br_output_facilit
         ObjectContainerAddFront(outfcty, (br_object *)self);
     }
 
-    if(self->pm_type == BR_PMT_INDEX_8) {
-        if((self->clut = DeviceClutSDL3Allocate(self, "CLUT")) == NULL) {
-            BrResFreeNoCallback(self);
-            return NULL;
-        }
+    if((self->clut = DeviceClutSDL3Allocate(self, "CLUT")) == NULL) {
+        BrResFreeNoCallback(self);
+        return NULL;
     }
 
     return self;
@@ -796,9 +794,11 @@ br_error BR_CMETHOD_DECL(br_device_pixelmap_sdl3, match)(br_device_pixelmap *sel
     pm->pm_origin_y = self->pm_origin_y;
 
     /*
-     * If both pixelmaps have a CLUT, copy it over.
+     * If both pixelmaps have a CLUT, copy it over. Only an indexed source has a
+     * meaningful palette; a colour one carries a CLUT solely as the fallback
+     * an indexed source is resolved through, so it is not carried onto a clone.
      */
-    if(self->clut != NULL && pm->clut != NULL) {
+    if(self->clut != NULL && pm->clut != NULL && self->pm_type == BR_PMT_INDEX_8) {
         DeviceSDL3SetPaletteFromCLUT(pm->clut->pal, self->clut);
     }
 
