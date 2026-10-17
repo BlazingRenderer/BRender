@@ -391,21 +391,11 @@ static void Smoothing(br_model *model, br_scalar crease_limit, struct prep_verte
     struct prep_vertex **outer, **inner;
 
     for(outer = start; outer < end; outer++) {
-
-#if BRENDER_BUILD_FOR_CROC // Kludging flat shading for Croc
-        /*
-         * Kludge normals on all flat shaded faces
-         */
-        br_material *croc_mat = model->faces[(*outer)->f].material;
-        if(croc_mat != NULL && !(croc_mat->flags & BR_MATF_SMOOTH) && ((croc_mat->mode & BR_MATM_SHADING_MODE_MASK) == BR_MATM_SHADING_MODE_FLAT)) {
-            BrVector3CopyF(&(*outer)->n, &model->faces[(*outer)->f].n);
-        } else
-#endif
-            for(inner = start; inner < end; inner++) {
-                if((inner == outer) || (model->faces[(*outer)->f].smoothing & model->faces[(*inner)->f].smoothing)) {
-                    BrVector3AccumulateF(&(*outer)->n, &model->faces[(*inner)->f].n);
-                }
+        for(inner = start; inner < end; inner++) {
+            if((inner == outer) || (model->faces[(*outer)->f].smoothing & model->faces[(*inner)->f].smoothing)) {
+                BrVector3AccumulateF(&(*outer)->n, &model->faces[(*inner)->f].n);
             }
+        }
     }
 }
 
