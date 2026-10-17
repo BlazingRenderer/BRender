@@ -162,19 +162,24 @@ static void linepoint_draw(br_pixelmap *dest, float dt, void *user)
      */
     col = hsl2rgb(1.0f - state->h, state->s, state->l);
 
+    /*
+     * As in the indexed test, the grid closes on the last fill pixel rather
+     * than one past it, and the lines stop at that pixel too, so the box is
+     * the same size as the fill and matches the indexed test's clipped grid.
+     */
     for(int i = 0; i < nrows + 1; ++i) {
         int x1 = base_x;
-        int x2 = x1 + width;
-        int y1 = base_y + (i * 8);
-        int y2 = base_y + (i * 8);
+        int x2 = x1 + width - 1;
+        int y1 = base_y + ((i == nrows) ? width - 1 : i * 8);
+        int y2 = y1;
         BrPixelmapLine(dest, x1, y1, x2, y2, col);
     }
 
     for(int i = 0; i < ncols + 1; ++i) {
-        int x1 = base_x + (i * 8);
-        int x2 = base_x + (i * 8);
+        int x1 = base_x + ((i == ncols) ? width - 1 : i * 8);
+        int x2 = x1;
         int y1 = base_y;
-        int y2 = y1 + width;
+        int y2 = y1 + width - 1;
         BrPixelmapLine(dest, x1, y1, x2, y2, col);
     }
 
