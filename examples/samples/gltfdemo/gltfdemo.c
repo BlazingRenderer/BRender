@@ -381,251 +381,147 @@ static const br_demo_dispatch gltfview_dispatch = {
     .destroy       = BrDemoDefaultDestroy,
 };
 
-#include "../brdemo/parg.h"
+/*
+ * The application's own options, which BrDemoParseArgs() merges with the
+ * demo's set.
+ *
+ * The values live in app_args and the apply callbacks write straight into it,
+ * so each option's type and default stay with the tool rather than the
+ * framework. BrDemoParseArgs() hands the callbacks the ctx it is given, which
+ * is what lets the table stay static and app_args stay local to main().
+ */
 
-#define ARGDEF_WIDTH             'w'
-#define ARGDEF_HEIGHT            'h'
-#define ARGDEF_VERBOSE           'v'
-#define ARGDEF_HELP              301
-#define ARGDEF_FORCE_SOFTWARE    302
-#define ARGDEF_BPP               303
-#define ARGDEF_BACKBUFFER_WIDTH  304
-#define ARGDEF_BACKBUFFER_HEIGHT 305
-
-#define ARGDEF_DIST_MUL          401
-#define ARGDEF_DIST              402
-#define ARGDEF_ANGLE             403
-#define ARGDEF_ELEVATION         404
-#define ARGDEF_ORBIT_SPEED       405
-#define ARGDEF_CENTER            406
-#define ARGDEF_ANIMSPEED         407
-#define ARGDEF_SCREENSHOT        408
-#define ARGDEF_FRAME             409
-#define ARGDEF_FRAMES            410
-#define ARGDEF_TIMEOUT           411
-#define ARGDEF_BRIGHTNESS        412
-
-const static struct parg_option argdefs[] = {
-    {.name = "width",             .has_arg = PARG_REQARG, .flag = NULL, .val = ARGDEF_WIDTH            },
-    {.name = "height",            .has_arg = PARG_REQARG, .flag = NULL, .val = ARGDEF_HEIGHT           },
-    {.name = "verbose",           .has_arg = PARG_NOARG,  .flag = NULL, .val = ARGDEF_VERBOSE          },
-    {.name = "help",              .has_arg = PARG_NOARG,  .flag = NULL, .val = ARGDEF_HELP             },
-    {.name = "force-software",    .has_arg = PARG_NOARG,  .flag = NULL, .val = ARGDEF_FORCE_SOFTWARE   },
-    {.name = "bpp",               .has_arg = PARG_REQARG, .flag = NULL, .val = ARGDEF_BPP              },
-    {.name = "backbuffer-width",  .has_arg = PARG_REQARG, .flag = NULL, .val = ARGDEF_BACKBUFFER_WIDTH },
-    {.name = "backbuffer-height", .has_arg = PARG_REQARG, .flag = NULL, .val = ARGDEF_BACKBUFFER_HEIGHT},
-
-    {.name = "dist-mul",          .has_arg = PARG_REQARG, .flag = NULL, .val = ARGDEF_DIST_MUL         },
-    {.name = "dist",              .has_arg = PARG_REQARG, .flag = NULL, .val = ARGDEF_DIST             },
-    {.name = "angle",             .has_arg = PARG_REQARG, .flag = NULL, .val = ARGDEF_ANGLE            },
-    {.name = "elevation",         .has_arg = PARG_REQARG, .flag = NULL, .val = ARGDEF_ELEVATION        },
-    {.name = "orbit-speed",       .has_arg = PARG_REQARG, .flag = NULL, .val = ARGDEF_ORBIT_SPEED      },
-    {.name = "center",            .has_arg = PARG_REQARG, .flag = NULL, .val = ARGDEF_CENTER           },
-
-    {.name = "animspeed",         .has_arg = PARG_REQARG, .flag = NULL, .val = ARGDEF_ANIMSPEED        },
-
-    {.name = "screenshot",        .has_arg = PARG_REQARG, .flag = NULL, .val = ARGDEF_SCREENSHOT       },
-    {.name = "frame",             .has_arg = PARG_REQARG, .flag = NULL, .val = ARGDEF_FRAME            },
-    {.name = "frames",            .has_arg = PARG_REQARG, .flag = NULL, .val = ARGDEF_FRAMES           },
-    {.name = "timeout",           .has_arg = PARG_REQARG, .flag = NULL, .val = ARGDEF_TIMEOUT          },
-
-    {.name = "brightness",        .has_arg = PARG_REQARG, .flag = NULL, .val = ARGDEF_BRIGHTNESS       },
-
-    {.name = NULL,                .has_arg = 0,           .flag = NULL, .val = 0                       },
-};
-
-static int parse_args(int argc, char *const argv[], br_gltfdemo_args *args)
+static int gltfdemo_opt_dist_mul(void *ctx, const char *value)
 {
-    struct parg_state ps;
-    parg_init(&ps);
-    int bpp = 0;
+    br_gltfdemo_args *args = ctx;
 
-    for(int c; (c = parg_getopt_long(&ps, argc, argv, "w:h:v", argdefs, NULL)) != -1;) {
-        switch(c) {
-            case ARGDEF_WIDTH:
-                args->args.width = BrAToI(ps.optarg);
-                break;
+    args->init_dist_mul = BrAToF(value);
 
-            case ARGDEF_HEIGHT:
-                args->args.height = BrAToI(ps.optarg);
-                break;
+    return 0;
+}
 
-            case ARGDEF_VERBOSE:
-                ++args->args.verbose;
-                break;
+static int gltfdemo_opt_dist(void *ctx, const char *value)
+{
+    br_gltfdemo_args *args = ctx;
 
-            case ARGDEF_FORCE_SOFTWARE:
-                ++args->args.force_software;
-                break;
+    args->init_dist_abs = BrAToF(value);
 
-            case ARGDEF_BPP:
-                bpp = BrAToI(ps.optarg);
-                break;
+    return 0;
+}
 
-            case ARGDEF_BACKBUFFER_WIDTH:
-                args->args.backbuffer_width = BrAToI(ps.optarg);
-                break;
+static int gltfdemo_opt_angle(void *ctx, const char *value)
+{
+    br_gltfdemo_args *args = ctx;
 
-            case ARGDEF_BACKBUFFER_HEIGHT:
-                args->args.backbuffer_height = BrAToI(ps.optarg);
-                break;
+    args->init_angle = BrAToF(value);
 
-            case ARGDEF_SCREENSHOT:
-                args->screenshot_path = ps.optarg;
-                break;
+    return 0;
+}
 
-            case ARGDEF_FRAME:
-                args->screenshot_frame = BrAToI(ps.optarg);
-                break;
+static int gltfdemo_opt_elevation(void *ctx, const char *value)
+{
+    br_gltfdemo_args *args = ctx;
 
-            case ARGDEF_FRAMES:
-                args->max_frames = BrAToI(ps.optarg);
-                break;
+    args->init_elevation = BrAToF(value);
 
-            case ARGDEF_TIMEOUT:
-                args->timeout = BrAToF(ps.optarg);
-                break;
+    return 0;
+}
 
-            case ARGDEF_ANIMSPEED:
-                args->anim_speed = BrAToF(ps.optarg);
-                break;
+static int gltfdemo_opt_orbit_speed(void *ctx, const char *value)
+{
+    br_gltfdemo_args *args = ctx;
 
-            case ARGDEF_BRIGHTNESS:
-                args->brightness = BrAToF(ps.optarg);
-                break;
+    args->orbit_speed = BrAToF(value);
 
-            case ARGDEF_DIST_MUL:
-                args->init_dist_mul = BrAToF(ps.optarg);
-                break;
+    return 0;
+}
 
-            case ARGDEF_DIST:
-                args->init_dist_abs = BrAToF(ps.optarg);
-                break;
+static int gltfdemo_opt_center(void *ctx, const char *value)
+{
+    br_gltfdemo_args *args = ctx;
 
-            case ARGDEF_ANGLE:
-                args->init_angle = BrAToF(ps.optarg);
-                break;
+    args->center_override = 1;
 
-            case ARGDEF_ELEVATION:
-                args->init_elevation = BrAToF(ps.optarg);
-                break;
+    if(BrSScanf(value, "%f,%f,%f", &args->center_x, &args->center_y, &args->center_z) < 3)
+        return 1;
 
-            case ARGDEF_ORBIT_SPEED:
-                args->orbit_speed = BrAToF(ps.optarg);
-                break;
+    return 0;
+}
 
-            case ARGDEF_CENTER:
-                args->center_override = 1;
-                if(BrSScanf(ps.optarg, "%f,%f,%f", &args->center_x, &args->center_y, &args->center_z) < 3)
-                    return 2;
-                break;
+static int gltfdemo_opt_animspeed(void *ctx, const char *value)
+{
+    br_gltfdemo_args *args = ctx;
 
-            case 1:
-                if(args->model_path != NULL)
-                    return 2;
+    args->anim_speed = BrAToF(value);
 
-                args->model_path = ps.optarg;
-                break;
+    return 0;
+}
 
-            case ARGDEF_HELP:
-            case ':':
-            case '?':
-            default:
-                return 2;
-        }
-    }
+static int gltfdemo_opt_screenshot(void *ctx, const char *value)
+{
+    br_gltfdemo_args *args = ctx;
 
-    if(args->args.width < 0)
-        return 2;
+    args->screenshot_path = value;
 
-    if(args->args.height < 0)
-        return 2;
+    return 0;
+}
 
-    if(args->model_path == NULL || args->model_path[0] == '\0')
-        return 2;
+static int gltfdemo_opt_frame(void *ctx, const char *value)
+{
+    br_gltfdemo_args *args = ctx;
 
-    if(bpp != 0) {
-        switch(bpp) {
-            case 16:
-                args->args.pm_type = BR_PMT_RGB_565;
-                break;
-            case 15:
-                args->args.pm_type = BR_PMT_RGB_555;
-                break;
-            case 24:
-                args->args.pm_type = BR_PMT_RGB_888;
-                break;
-            case 32:
-                args->args.pm_type = BR_PMT_RGBA_8888;
-                break;
-            default:
-            case 8:
-                args->args.pm_type = BR_PMT_INDEX_8;
-                break;
-        }
-    }
+    args->screenshot_frame = BrAToI(value);
 
-    if(args->args.backbuffer_width < 0)
-        args->args.backbuffer_width = 0;
+    return 0;
+}
 
-    if(args->args.backbuffer_height < 0)
-        args->args.backbuffer_height = 0;
+static int gltfdemo_opt_frames(void *ctx, const char *value)
+{
+    br_gltfdemo_args *args = ctx;
 
-    if(args->args.title == NULL || args->args.title[0] == '\0')
-        args->args.title = "BRender Application";
+    args->max_frames = BrAToI(value);
+
+    return 0;
+}
+
+static int gltfdemo_opt_timeout(void *ctx, const char *value)
+{
+    br_gltfdemo_args *args = ctx;
+
+    args->timeout = BrAToF(value);
+
+    return 0;
+}
+
+static int gltfdemo_opt_brightness(void *ctx, const char *value)
+{
+    br_gltfdemo_args *args = ctx;
+
+    args->brightness = BrAToF(value);
 
     return 0;
 }
 
 // clang-format off
-static const char *usage_options =
-    "Usage: gltfdemo [options] model.glb\n"
-    "\n"
-    "Framework:\n"
-    "  -w, --width          Set the initial window width (default: 1280).\n"
-    "  -h, --height         Set the initial window height (default: 720).\n"
-    "  -v, --verbose        Increase verbosity level. May be given multiple times.\n"
-    "  --force-software     Force use of the software renderer. Only valid on x86.\n"
-    "  --bpp                Colour buffer pixel type. Valid options: 8, 15, 16, 24, 32 (unset leaves the renderer's own).\n"
-    "  --backbuffer-width   Width of the backbuffer, defaults to the same as the screen.\n"
-    "  --backbuffer-height  Height of the backbuffer, defaults to the same as the screen.\n"
-    "  --help               Display this message.\n"
-    "\n"
-    "Camera:\n"
-    "  --dist-mul F         orbit distance as multiplier of scene radius (default 2.5)\n"
-    "  --dist F             absolute orbit distance (overrides --dist-mul)\n"
-    "  --angle F            starting orbit angle in degrees (default 0)\n"
-    "  --elevation F        camera elevation in radians (default 0.15)\n"
-    "  --orbit-speed F      orbit rotation speed in deg/sec (default 60, 0 = static)\n"
-    "  --center X,Y,Z       override scene look-at point\n"
-    "\n"
-    "Animation:\n"
-    "  --animspeed F        animation playback speed multiplier (default 1.0)\n"
-    "\n"
-    "Capture:\n"
-    "  --screenshot P       save PNG screenshot to path P\n"
-    "  --frame N            capture screenshot on frame N (default 10)\n"
-    "  --frames N           render N frames then exit (0 = unlimited)\n"
-    "  --timeout S          exit after S seconds (0 = unlimited)\n"
-    "\n"
-    "Display:\n"
-    "  --brightness F       material ambient brightness (default 0.60)\n"
-    "\n"
-    "Interactive:\n"
-    "  Space                pause/resume\n"
-    "  A                    cycle animation clip\n"
-    "  Left/Right           orbit camera\n"
-    "  Up/Down              adjust elevation\n"
-    "  0/1                  zoom out/in\n"
-    "\n"
-;
+static const br_demo_option gltfdemo_options[] = {
+    {.name = "dist-mul",    .short_name = 0, .has_arg = BR_DEMO_ARG_REQUIRED, .metavar = "F",     .help = "Orbit distance as a multiple of the scene radius (default 2.5).",      .apply = gltfdemo_opt_dist_mul    },
+    {.name = "dist",        .short_name = 0, .has_arg = BR_DEMO_ARG_REQUIRED, .metavar = "F",     .help = "Absolute orbit distance, overriding --dist-mul.",                      .apply = gltfdemo_opt_dist        },
+    {.name = "angle",       .short_name = 0, .has_arg = BR_DEMO_ARG_REQUIRED, .metavar = "F",     .help = "Starting orbit angle in degrees (default 0).",                         .apply = gltfdemo_opt_angle       },
+    {.name = "elevation",   .short_name = 0, .has_arg = BR_DEMO_ARG_REQUIRED, .metavar = "F",     .help = "Camera elevation in radians (default 0.15).",                          .apply = gltfdemo_opt_elevation   },
+    {.name = "orbit-speed", .short_name = 0, .has_arg = BR_DEMO_ARG_REQUIRED, .metavar = "F",     .help = "Orbit rotation speed in degrees per second (default 60, 0 = static).", .apply = gltfdemo_opt_orbit_speed },
+    {.name = "center",      .short_name = 0, .has_arg = BR_DEMO_ARG_REQUIRED, .metavar = "X,Y,Z", .help = "Override the scene look-at point.",                                    .apply = gltfdemo_opt_center      },
+    {.name = "animspeed",   .short_name = 0, .has_arg = BR_DEMO_ARG_REQUIRED, .metavar = "F",     .help = "Animation playback speed multiplier (default 1.0).",                   .apply = gltfdemo_opt_animspeed   },
+    {.name = "screenshot",  .short_name = 0, .has_arg = BR_DEMO_ARG_REQUIRED, .metavar = "P",     .help = "Save a PNG screenshot to path P.",                                     .apply = gltfdemo_opt_screenshot  },
+    {.name = "frame",       .short_name = 0, .has_arg = BR_DEMO_ARG_REQUIRED, .metavar = "N",     .help = "Capture the screenshot on frame N (default 10).",                      .apply = gltfdemo_opt_frame       },
+    {.name = "frames",      .short_name = 0, .has_arg = BR_DEMO_ARG_REQUIRED, .metavar = "N",     .help = "Render N frames then exit (0 = unlimited).",                           .apply = gltfdemo_opt_frames      },
+    {.name = "timeout",     .short_name = 0, .has_arg = BR_DEMO_ARG_REQUIRED, .metavar = "S",     .help = "Exit after S seconds (0 = unlimited).",                                .apply = gltfdemo_opt_timeout     },
+    {.name = "brightness",  .short_name = 0, .has_arg = BR_DEMO_ARG_REQUIRED, .metavar = "F",     .help = "Material ambient brightness (default 0.60).",                          .apply = gltfdemo_opt_brightness  },
+};
 // clang-format on
 
 int main(int argc, char **argv)
 {
-    int r;
-
-    br_gltfdemo_args args = {
+    br_gltfdemo_args app_args = (br_gltfdemo_args){
         .args             = {},
         .model_path       = NULL,
         .screenshot_path  = NULL,
@@ -645,15 +541,32 @@ int main(int argc, char **argv)
         .center_z         = 0.0f,
     };
 
-    BrDemoDefaultArgs(&args.args);
-    args.args.title = "glTF Viewer";
+    BrDemoDefaultArgs(&app_args.args);
+    app_args.args.title = "glTF Viewer";
 
-    struct parg_state ps;
-    parg_init(&ps);
-    if((r = parse_args(argc, argv, &args)) != 0) {
-        fprintf(stderr, "%s\n", usage_options);
-        return r;
+    switch(BrDemoParseArgs(&app_args.args, argc, argv, gltfdemo_options, BR_ASIZE(gltfdemo_options), &app_args, NULL)) {
+        case BR_DEMO_PARSE_HELP:
+            BrDemoUsage(stdout, argv[0], gltfdemo_options, BR_ASIZE(gltfdemo_options));
+            return 0;
+
+        case BR_DEMO_PARSE_ERROR:
+            BrDemoUsage(stderr, argv[0], gltfdemo_options, BR_ASIZE(gltfdemo_options));
+            return 2;
+
+        case BR_DEMO_PARSE_OK:
+            break;
     }
 
-    return BrDemoRunArg(&gltfview_dispatch, &args.args);
+    /*
+     * BrDemoParseArgs() collects the positional arguments; this tool takes
+     * exactly one, the scene to load.
+     */
+    app_args.model_path = (app_args.args.pos_argc == 1) ? app_args.args.pos_argv[0] : NULL;
+
+    if(app_args.model_path == NULL || app_args.model_path[0] == '\0') {
+        BrDemoUsage(stderr, argv[0], gltfdemo_options, BR_ASIZE(gltfdemo_options));
+        return 2;
+    }
+
+    return BrDemoRunArg(&gltfview_dispatch, &app_args.args);
 }
