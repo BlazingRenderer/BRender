@@ -246,17 +246,21 @@ static void linepoint8_draw(br_pixelmap *dest, float dt, void *user)
      * Draw a grid over the rainbow rect using the opposite hue.
      */
 
+    /*
+     * The final grid boundary closes on the last pixel, not one past it: at i == nrows
+     * it would otherwise land at width, outside the pixelmap, and be clipped away.
+     */
     for(int i = 0; i < nrows + 1; ++i) {
         int x1 = base_x;
         int x2 = x1 + width;
-        int y1 = base_y + (i * 8);
-        int y2 = base_y + (i * 8);
+        int y1 = base_y + ((i == nrows) ? width - 1 : i * 8);
+        int y2 = y1;
         BrPixelmapLine(state->pm, x1, y1, x2, y2, 256 - state->index);
     }
 
     for(int i = 0; i < ncols + 1; ++i) {
-        int x1 = base_x + (i * 8);
-        int x2 = base_x + (i * 8);
+        int x1 = base_x + ((i == ncols) ? width - 1 : i * 8);
+        int x2 = x1;
         int y1 = base_y;
         int y2 = y1 + width;
         BrPixelmapLine(state->pm, x1, y1, x2, y2, 256 - state->index);
