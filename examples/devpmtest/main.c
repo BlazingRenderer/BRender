@@ -1,6 +1,7 @@
 /*
  * BRender Device Pixelmap Testing Tool
  */
+#include <inttypes.h>
 #include <brender.h>
 #include <brddi.h> /* To poke the device's CLUT. */
 #include <brglrend.h>
