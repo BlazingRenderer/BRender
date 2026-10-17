@@ -5,6 +5,7 @@
 #include <brender.h>
 #include <brddi.h> /* To poke the device's CLUT. */
 #include <brglrend.h>
+#include <brglrend1x.h>
 #include <brvkrend.h>
 
 #include "bench.h"
@@ -1641,6 +1642,7 @@ void BR_CALLBACK _BrBeginHook(void)
     struct br_device *sdl = NULL;
     BrDevAddStatic(&sdl, DEVICE_FACTORY, NULL);
     BrDevAddStatic(NULL, BrDrv1GLBegin, NULL);
+    BrDevAddStatic(NULL, BrDrv1GL1xBegin, NULL);
 
     if(sdl != NULL) {
         char buf[48];
@@ -1770,6 +1772,7 @@ int main(int argc, char **argv)
     int                    test_index = 0; /* BR_ASIZE(tests) - 1; */
     br_boolean             capture;
     devpmtest_front_screen front_screen;
+    const char            *opengl_device_name;
     br_token_value         tv[8];
     int                    n;
 
@@ -1779,8 +1782,9 @@ int main(int argc, char **argv)
     if(parsed == DEVPMTEST_BENCH_ERROR)
         return 2;
 
-    capture      = parsed == DEVPMTEST_BENCH_CAPTURE;
-    front_screen = DevpmTestBenchFrontScreen(bench);
+    capture            = parsed == DEVPMTEST_BENCH_CAPTURE;
+    front_screen       = DevpmTestBenchFrontScreen(bench);
+    opengl_device_name = DevpmTestBenchOpenGLDeviceName(bench);
 
     BrBegin();
 
@@ -1799,6 +1803,8 @@ int main(int argc, char **argv)
     switch(front_screen) {
         case DEVPMTEST_FRONT_GL:
             tv[n++] = (br_token_value){.t = BRT_OPENGL_B,  .v = {.i32 = BR_TRUE}};
+            if(opengl_device_name != NULL)
+                tv[n++] = (br_token_value){.t = BRT_OPENGL_DEVICE_NAME_CSTR, .v = {.cstr = opengl_device_name}};
             break;
         case DEVPMTEST_FRONT_VULKAN:
             tv[n++] = (br_token_value){.t = BRT_VULKAN_B,  .v = {.i32 = BR_TRUE}};

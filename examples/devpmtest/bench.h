@@ -36,6 +36,13 @@ devpmtest_bench_parse DevpmTestBenchParse(int argc, char **argv, devpmtest_bench
 /* The run's front screen; valid in both modes. */
 devpmtest_front_screen DevpmTestBenchFrontScreen(const devpmtest_bench *bench);
 
+/*
+ * The OpenGL device driver named by --opengl-device-name, or NULL for the SDL3
+ * device's default. Valid in both modes, and only meaningful for the GL front
+ * screen.
+ */
+const char *DevpmTestBenchOpenGLDeviceName(const devpmtest_bench *bench);
+
 /* The capture options below are only meaningful for DEVPMTEST_BENCH_CAPTURE. */
 br_boolean  DevpmTestBenchRunAll(const devpmtest_bench *bench);
 br_int_32   DevpmTestBenchTestIndex(const devpmtest_bench *bench);

@@ -18,6 +18,7 @@
 
 struct devpmtest_bench {
     devpmtest_front_screen front_screen;
+    const char            *opengl_device_name;
     br_boolean             run_all;
     br_boolean             have_run;
     br_int_32              test_index;
@@ -40,6 +41,9 @@ static void bench_usage(FILE *out)
                  "  --run-test N        Render only tests[N] headlessly and exit.\n"
                  "  --run-all           Render every test headlessly and exit.\n"
                  "  --front-screen STR  Front screen: soft (default), gl or vulkan.\n"
+                 "  --opengl-device-name NAME\n"
+                 "                      OpenGL device driver for --front-screen gl (default\n"
+                 "                      glrend; glrend1x is the legacy GL 1.2 one).\n"
                  "  --frames N          Frames to render per test before capture (default 1).\n"
                  "  --dt-ms MS          Fixed per-frame delta in ms (default 1000/60).\n"
                  "  --dump PATH         With --run-test, save the captured frame to PATH as PNG.\n"
@@ -103,6 +107,11 @@ devpmtest_bench_parse DevpmTestBenchParse(int argc, char **argv, devpmtest_bench
             }
 
             front_set = BR_TRUE;
+        } else if(strcmp(opt, "--opengl-device-name") == 0) {
+            if((val = bench_arg_value(argc, argv, &i, opt)) == NULL)
+                goto bad;
+
+            b->opengl_device_name = val;
         } else if(strcmp(opt, "--frames") == 0) {
             if((val = bench_arg_value(argc, argv, &i, opt)) == NULL)
                 goto bad;
@@ -177,6 +186,11 @@ bad:
 devpmtest_front_screen DevpmTestBenchFrontScreen(const devpmtest_bench *bench)
 {
     return bench->front_screen;
+}
+
+const char *DevpmTestBenchOpenGLDeviceName(const devpmtest_bench *bench)
+{
+    return bench->opengl_device_name;
 }
 
 br_boolean DevpmTestBenchRunAll(const devpmtest_bench *bench)
