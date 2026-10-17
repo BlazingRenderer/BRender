@@ -49,7 +49,9 @@ stdenv.mkDerivation(finalAttrs: {
     sdl3
   ] ++ lib.optionals withExamples [
     glfw
-  ] ++ lib.optionals glRuntime [
+  ];
+
+  checkInputs = lib.optionals glRuntime [
     mesa
     libglvnd
   ];
