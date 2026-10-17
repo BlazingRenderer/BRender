@@ -1020,12 +1020,34 @@ static br_error BR_CMETHOD_DECL(br_device_pixelmap_gl, line)(br_device_pixelmap 
      * its representative sample is the centre. Mapping the integer straight to
      * [0,1] puts the vertex on the pixel corner and shifts the whole line up and
      * left by one.
+     *
+     * The end is pushed half a pixel further along the segment, which the start
+     * is not. GL's diamond-exit rule is half-open: the start point's diamond
+     * always produces a fragment, while the end point's produces one only if the
+     * line leaves it. Both endpoints sit on pixel centres, so the end is a
+     * diamond's centre and that last pixel is dropped - the pixel the CPU paths
+     * plot, since they include both endpoints. Half a pixel is as far as a diamond
+     * reaches from its centre, so this always leaves the end diamond and never
+     * reaches the one past it. A zero-length line has no direction to extend
+     * along, and its start diamond already covers the pixel.
      */
     BrMatrix4Orthographic(&line_data.mvp, 0.0f, 1.0f, 0.0f, 1.0f, -1.0f, 1.0f);
     line_data.start = (br_vector2)BR_VECTOR2(((float)spoint.x + 0.5f) / (float)self->pm_width,
                                              1.0f - (((float)spoint.y + 0.5f) / (float)self->pm_height));
-    line_data.end   = (br_vector2)BR_VECTOR2(((float)epoint.x + 0.5f) / (float)self->pm_width,
-                                             1.0f - (((float)epoint.y + 0.5f) / (float)self->pm_height));
+    {
+        float ex  = (float)epoint.x;
+        float ey  = (float)epoint.y;
+        float dx  = (float)epoint.x - (float)spoint.x;
+        float dy  = (float)epoint.y - (float)spoint.y;
+        float len = sqrtf(dx * dx + dy * dy);
+
+        if(len > 0.0f) {
+            ex += 0.5f * dx / len;
+            ey += 0.5f * dy / len;
+        }
+
+        line_data.end = (br_vector2)BR_VECTOR2((ex + 0.5f) / (float)self->pm_width, 1.0f - ((ey + 0.5f) / (float)self->pm_height));
+    }
 
     gl->BindFramebuffer(GL_FRAMEBUFFER, self->asBack.glFbo);
     gl->Viewport(0, 0, self->pm_width, self->pm_height);
