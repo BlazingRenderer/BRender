@@ -454,6 +454,9 @@ cleanup:
 #define ARGDEF_NO_DEPTH           308
 #define ARGDEF_VULKAN             309
 
+/* Application options are numbered from here, in table order. */
+#define BR_DEMO_OPT_EXTRA 1000
+
 const static struct parg_option argdefs[] = {
     {.name = "width",              .has_arg = PARG_REQARG, .flag = NULL, .val = ARGDEF_WIDTH             },
     {.name = "height",             .has_arg = PARG_REQARG, .flag = NULL, .val = ARGDEF_HEIGHT            },
@@ -470,7 +473,8 @@ const static struct parg_option argdefs[] = {
     {.name = NULL,                 .has_arg = 0,           .flag = NULL, .val = 0                        },
 };
 
-static int parse_args(int argc, char *const argv[], br_demo_run_args *args)
+static br_demo_parse parse_args(int argc, char *const argv[], br_demo_run_args *args, const br_demo_option *extra, br_size_t nextra,
+                                void *ctx, int *first_positional)
 {
     struct parg_state ps;
     parg_init(&ps);
@@ -478,16 +482,75 @@ static int parse_args(int argc, char *const argv[], br_demo_run_args *args)
     int optend;
 
     /*
-     * NB: Yes, alloca() is dangerous, but realistically not an issue here.
+     * The demo's options and the application's are parsed as one table: parg
+     * needs each option's arity to know whether to consume the next argument, so
+     * a table holding only half of them would misparse the other half.
+     *
+     * NB: Yes, alloca() is dangerous, but realistically not an issue here. Nothing
+     * in here allocates, which is what lets it run before BrBegin().
      */
-    char **tmp_argv = alloca(sizeof(char *) * (argc + 1));
+    br_size_t           nopts     = BR_ASIZE(argdefs) + nextra;
+    struct parg_option *opts      = alloca(sizeof(*opts) * nopts);
+    char               *optstring = alloca(6 + nextra * 3);
+    char              **tmp_argv  = alloca(sizeof(char *) * (argc + 1));
+    br_size_t           olen      = 0;
+
+    BrMemCpy(opts, argdefs, sizeof(*opts) * (BR_ASIZE(argdefs) - 1));
+
+    optstring[olen++] = 'w';
+    optstring[olen++] = ':';
+    optstring[olen++] = 'h';
+    optstring[olen++] = ':';
+    optstring[olen++] = 'v';
+
+    for(br_size_t i = 0; i < nextra; ++i) {
+        const br_demo_option *e = extra + i;
+
+        if(e->name == NULL || e->apply == NULL)
+            return BR_DEMO_PARSE_ERROR;
+
+        /*
+         * Refuse a name collision rather than shadow one of the demo's own.
+         */
+        for(const struct parg_option *a = argdefs; a->name != NULL; ++a) {
+            if(BrStrCmp(a->name, e->name) == 0)
+                return BR_DEMO_PARSE_ERROR;
+        }
+
+        opts[BR_ASIZE(argdefs) - 1 + i] = (struct parg_option){
+            .name    = e->name,
+            .has_arg = e->has_arg == BR_DEMO_ARG_REQUIRED ? PARG_REQARG : PARG_NOARG,
+            .flag    = NULL,
+            .val     = BR_DEMO_OPT_EXTRA + (int)i,
+        };
+
+        if(e->short_name != 0) {
+            optstring[olen++] = e->short_name;
+            if(e->has_arg == BR_DEMO_ARG_REQUIRED)
+                optstring[olen++] = ':';
+        }
+    }
+
+    optstring[olen] = '\0';
+    opts[nopts - 1] = (struct parg_option){.name = NULL, .has_arg = 0, .flag = NULL, .val = 0};
+
     BrMemCpy(tmp_argv, argv, argc * sizeof(char *));
     tmp_argv[argc] = NULL;
 
-    if((optend = parg_reorder(argc, tmp_argv, "w:h:v", argdefs)) < 0)
-        return 2;
+    if((optend = parg_reorder(argc, tmp_argv, optstring, opts)) < 0)
+        return BR_DEMO_PARSE_ERROR;
 
-    for(int c; (c = parg_getopt_long(&ps, optend, tmp_argv, "w:h:v", argdefs, NULL)) != -1;) {
+    for(int c; (c = parg_getopt_long(&ps, optend, tmp_argv, optstring, opts, NULL)) != -1;) {
+
+        if(c >= BR_DEMO_OPT_EXTRA) {
+            const br_demo_option *e = extra + (c - BR_DEMO_OPT_EXTRA);
+
+            if(e->apply(ctx, ps.optarg) != 0)
+                return BR_DEMO_PARSE_ERROR;
+
+            continue;
+        }
+
         switch(c) {
 
             case ARGDEF_WIDTH:
@@ -535,18 +598,20 @@ static int parse_args(int argc, char *const argv[], br_demo_run_args *args)
                 break;
 
             case ARGDEF_HELP:
+                return BR_DEMO_PARSE_HELP;
+
             case '?':
             case ':':
             default:
-                return 2;
+                return BR_DEMO_PARSE_ERROR;
         }
     }
 
     if(args->width < 0)
-        return 2;
+        return BR_DEMO_PARSE_ERROR;
 
     if(args->height < 0)
-        return 2;
+        return BR_DEMO_PARSE_ERROR;
 
     if(bpp != 0) {
         switch(bpp) {
@@ -579,7 +644,7 @@ static int parse_args(int argc, char *const argv[], br_demo_run_args *args)
         args->opengl_device_name = "glrend";
 
     if(BrStrCmp("glrend", args->opengl_device_name) != 0 && BrStrCmp("glrend1x", args->opengl_device_name) != 0)
-        return 2;
+        return BR_DEMO_PARSE_ERROR;
 
     if(args->title == NULL || args->title[0] == '\0')
         args->title = "BRender Application";
@@ -590,7 +655,11 @@ static int parse_args(int argc, char *const argv[], br_demo_run_args *args)
     }
 
     memcpy(args->pos_argv, tmp_argv + optend, args->pos_argc * sizeof(char *));
-    return 0;
+
+    if(first_positional != NULL)
+        *first_positional = optend;
+
+    return BR_DEMO_PARSE_OK;
 }
 
 // clang-format off
@@ -630,18 +699,32 @@ void BrDemoDefaultArgs(br_demo_run_args *args)
     };
 }
 
-int BrDemoParseArgs(br_demo_run_args *args, int argc, char *const *argv)
+br_demo_parse BrDemoParseArgs(br_demo_run_args *args, int argc, char *const *argv, const br_demo_option *extra, br_size_t nextra, void *ctx,
+                              int *first_positional)
 {
-    int               r;
-    struct parg_state ps;
-    parg_init(&ps);
+    return parse_args(argc, argv, args, extra, nextra, ctx, first_positional);
+}
 
-    if((r = parse_args(argc, argv, args)) != 0) {
-        fprintf(stderr, "Usage: %s \nOptions:\n%s", argv[0], usage_options);
-        return r;
+void BrDemoUsage(FILE *out, const char *argv0, const br_demo_option *extra, br_size_t nextra)
+{
+    fprintf(out, "Usage: %s \nOptions:\n%s", argv0, usage_options);
+
+    if(nextra == 0)
+        return;
+
+    fprintf(out, "Application options:\n");
+
+    for(br_size_t i = 0; i < nextra; ++i) {
+        const br_demo_option *e = extra + i;
+        char                  left[80];
+
+        if(e->metavar != NULL)
+            snprintf(left, sizeof(left), "--%s %s", e->name, e->metavar);
+        else
+            snprintf(left, sizeof(left), "--%s", e->name);
+
+        fprintf(out, "  %-24s %s\n", left, e->help != NULL ? e->help : "");
     }
-
-    return 0;
 }
 
 int BrDemoRunArgv(const char *title, const br_demo_dispatch *dispatch, int argc, char *const *argv)
@@ -652,8 +735,14 @@ int BrDemoRunArgv(const char *title, const br_demo_dispatch *dispatch, int argc,
     BrDemoDefaultArgs(&args);
     args.title = title;
 
-    if((r = BrDemoParseArgs(&args, argc, argv)) != 0) {
-        return r;
+    switch(BrDemoParseArgs(&args, argc, argv, NULL, 0, NULL, NULL)) {
+        case BR_DEMO_PARSE_HELP:
+        case BR_DEMO_PARSE_ERROR:
+            BrDemoUsage(stderr, argv[0], NULL, 0);
+            return 2;
+
+        case BR_DEMO_PARSE_OK:
+            break;
     }
 
     BrLogSetLevel(args.verbose);

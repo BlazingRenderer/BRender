@@ -5,6 +5,8 @@
 extern "C" {
 #endif
 
+#include <stdio.h>
+
 #include <SDL3/SDL.h>
 #include <brender.h>
 
@@ -128,16 +130,76 @@ typedef struct br_demo {
 void BrDemoDefaultArgs(br_demo_run_args *args);
 
 /**
- * \brief Parse the default set of arguments for a BrDemo* application.
+ * \brief Result of BrDemoParseArgs().
  *
- * \param args A non-NULL pointer to the target br_demo_run_args structure.
- * \param argc argc as passed to main().
- * \param argv argv as passed to main().
- *
- * \returns If argument parsing fails, returns <0 and prints the usage to stderr.
- *          If argument parsing succeeds, returns 0.
+ * The parse prints nothing, so a tool can show help on whichever stream and
+ * exit with whichever code it treats as success; --help is a successful
+ * invocation for some tools and an error for others.
  */
-int BrDemoParseArgs(br_demo_run_args *args, int argc, char *const *argv);
+typedef enum br_demo_parse {
+    BR_DEMO_PARSE_OK = 0,
+    BR_DEMO_PARSE_HELP,  /* --help was given. */
+    BR_DEMO_PARSE_ERROR, /* Bad option, bad value, missing or unknown argument. */
+} br_demo_parse;
+
+/** Whether an application option takes a value. */
+typedef enum br_demo_arg {
+    BR_DEMO_ARG_NONE = 0,
+    BR_DEMO_ARG_REQUIRED,
+} br_demo_arg;
+
+/**
+ * \brief Handle one application option as it is parsed.
+ *
+ * \param ctx   The value passed as BrDemoParseArgs()'s ctx.
+ * \param value The option's argument, or NULL for BR_DEMO_ARG_NONE.
+ *
+ * \returns 0 on success, non-zero to fail the parse.
+ */
+typedef int br_demo_opt_fn(void *ctx, const char *value);
+
+/**
+ * \brief An application-specific option, added to the demo's own set.
+ */
+typedef struct br_demo_option {
+    const char     *name;       /* Long name, without the leading "--". */
+    char            short_name; /* 0 for none. */
+    br_demo_arg     has_arg;
+    const char     *metavar; /* Value name in the usage text, e.g. "DIR". */
+    const char     *help;    /* One line of usage text. */
+    br_demo_opt_fn *apply;   /* Non-NULL. */
+} br_demo_option;
+
+/**
+ * \brief Parse the arguments for a BrDemo* application, with the application's
+ *        own options added to the demo's.
+ *
+ * The two sets are parsed together. An application option whose name collides
+ * with one of the demo's is rejected rather than silently shadowing it.
+ *
+ * \param args      A non-NULL pointer to the target br_demo_run_args structure.
+ * \param argc      argc as passed to main().
+ * \param argv      argv as passed to main().
+ * \param extra     The application's own options, or NULL.
+ * \param nextra    The number of entries in extra.
+ * \param ctx       Passed to every application option's apply callback, so the
+ *                  table can stay static and the values stay the caller's.
+ * \param first_positional If non-NULL, receives the index of the first
+ *                  non-option argument in argv, for applications that take
+ *                  more positional arguments than br_demo_run_args carries.
+ *
+ * \returns BR_DEMO_PARSE_OK on success, BR_DEMO_PARSE_HELP if --help was given,
+ *          BR_DEMO_PARSE_ERROR otherwise. Nothing is printed.
+ */
+br_demo_parse BrDemoParseArgs(br_demo_run_args *args, int argc, char *const *argv, const br_demo_option *extra, br_size_t nextra, void *ctx,
+                              int *first_positional);
+
+/**
+ * \brief Print the usage text for a BrDemo* application.
+ *
+ * Prints the demo's options followed by the application's, when it has any.
+ */
+void BrDemoUsage(FILE *out, const char *argv0, const br_demo_option *extra, br_size_t nextra);
 
 /**
  * \brief Execute a BrDemo*() application.
