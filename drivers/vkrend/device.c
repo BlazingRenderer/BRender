@@ -327,7 +327,7 @@ static GLADapiproc gladloader(void *userptr, const char *name)
 
     if(self->vk_device) {
         GLADapiproc proc;
-        if((proc = self->context.GetDeviceProcAddr(self->vk_device, name)) != NULL)
+        if((proc = (GLADapiproc)self->context.GetDeviceProcAddr(self->vk_device, name)) != NULL)
             return proc;
     }
 
@@ -338,9 +338,9 @@ static GLADapiproc gladloader(void *userptr, const char *name)
      *
      * Try it with fallback.
      */
-    GLADapiproc res = self->getInstanceProcAddr(self->vulkan, name);
+    GLADapiproc res = (GLADapiproc)self->getInstanceProcAddr(self->vulkan, name);
     if(res == NULL)
-        res = self->getInstanceProcAddr(NULL, name);
+        res = (GLADapiproc)self->getInstanceProcAddr(NULL, name);
 
     return res;
 }
