@@ -100,7 +100,7 @@ static br_tv_template *BR_CMETHOD_DECL(br_device_pixelmap_sub_gl, templateQuery)
 {
     br_device_pixelmap *self = (br_device_pixelmap *)_self;
 
-    if(self->device->templates.devicePixelmapTemplate == NULL)
+    if(self->device->templates.devicePixelmapSubTemplate == NULL)
         self->device->templates.devicePixelmapSubTemplate = BrTVTemplateAllocate(self->device, devicePixelmapSubTemplateEntries,
                                                                                  BR_ASIZE(devicePixelmapSubTemplateEntries));
 
