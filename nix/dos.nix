@@ -7,6 +7,7 @@
 , cmake
 , perl
 , clang-tools
+, vulkan-loader # Only for passthrough
 }:
 stdenvNoCC.mkDerivation {
   inherit version;
@@ -18,6 +19,8 @@ stdenvNoCC.mkDerivation {
   passthru.devTools = [
     clang-tools
   ];
+
+  passthru.vulkan-loader = vulkan-loader;
 
   nativeBuildInputs = [
     djgpp
