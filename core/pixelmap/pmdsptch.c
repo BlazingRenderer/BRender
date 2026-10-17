@@ -685,8 +685,14 @@ void BR_PUBLIC_ENTRY BrPixelmapPixelSet(br_pixelmap *dst, br_int_32 x, br_int_32
 
 br_uint_32 BR_PUBLIC_ENTRY BrPixelmapPixelGet(br_pixelmap *dst, br_int_32 x, br_int_32 y)
 {
-    br_point   p;
-    br_uint_32 colour;
+    br_point p;
+    /*
+     * A driver that does not implement pixelQuery (the device fail stubs do not)
+     * leaves *pcolour untouched, and the error is discarded here for the public
+     * signature's sake, so start from black rather than returning uninitialised
+     * memory.
+     */
+    br_uint_32 colour = 0;
 
     CheckDispatch(dst);
 
