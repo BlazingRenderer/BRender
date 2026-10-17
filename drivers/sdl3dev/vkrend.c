@@ -1,4 +1,5 @@
 #include "drv.h"
+#include <inttypes.h>
 #include <SDL3/SDL_vulkan.h>
 #include <brvkrend.h>
 #include <brassert.h>
