@@ -11,6 +11,8 @@ core/fw/xxhash.h
 core/pixelmap/fnt*.c
 examples/brdemo/parg.c
 examples/brdemo/parg.h
+tools/parg/parg.c
+tools/parg/parg.h
 drivers/glrend/*.glsl
 
 drivers/glrend1x/glad
