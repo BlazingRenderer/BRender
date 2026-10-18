@@ -6,15 +6,15 @@
  * pixelmaps do not support that, while rendertest is already a non-interactive,
  * multi-mode render-test binary with a device witness of its own (--env-witness).
  *
- * The front screen comes from brdemo's --vulkan path: the SDL3 device hands out a
- * vkrend front screen when BRT_VULKAN_B is set, so the invocation is
- * `rendertest --vulkan --vk-witness`. rt_vk_witness_run() drives the two cases
+ * The front screen comes from --vulkan: the SDL3 device hands out a vkrend front
+ * screen when BRT_VULKAN_B is set, so the invocation is `rendertest --vulkan
+ * --vk-witness`. rt_vk_witness_run() drives the two cases
  * below against that screen and returns their combined result.
  */
 #include <brender.h>
 #include <brddi.h>
 
-#include "brdemo.h"
+#include "rt_demo.h"
 #include "vkwitness.h"
 
 /*
@@ -4600,9 +4600,9 @@ static br_error vkrend_renderer_init(void *user, br_pixelmap *screen, br_pixelma
         goto fail;
 
     /*
-     * Step 15: the window-resize path, driven the way brdemo drives it. On a window
-     * resize brdemo calls BrPixelmapResizeBuffersTV(), which resizes the colour and depth
-     * buffers to match the screen. A vkrend depth pixelmap is a BRT_DEPTH use_type, so its
+     * Step 15: the window-resize path, driven the way rendertest's own loop does it. On
+     * a window resize it calls BrPixelmapResizeBuffersTV(), which resizes the colour and
+     * depth buffers to match the screen. A vkrend depth pixelmap is a BRT_DEPTH use_type, so its
      * resize has to work in place; when it is rejected the fallback frees the colour and
      * depth, presents the half-built buffer and recreates both from tokens, changing the
      * depth format to the caller's default in the process. Render the Zb scene at the
@@ -4648,7 +4648,7 @@ static br_error vkrend_renderer_init(void *user, br_pixelmap *screen, br_pixelma
         state->screen->origin_y = (br_int_16)(state->screen->height / 2);
 
         /*
-         * The same call brdemo's resize_buffers() makes, with the size the window settled
+         * The same call rendertest's rt_resize_buffers() makes, with the size the window settled
          * on rather than a requested one, so a platform that clamps the resize still gets
          * buffers that match the screen.
          */
@@ -4852,7 +4852,7 @@ fail:
     return BRE_FAIL;
 }
 
-br_error rt_vk_witness_run(br_demo *demo)
+br_error rt_vk_witness_run(rt_demo *demo)
 {
     /*
      * The witness steps report through their init(), which frees what it built

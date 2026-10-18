@@ -6,7 +6,7 @@ add_executable(rendertest
         vkwitness.h
 )
 
-target_link_libraries(rendertest PRIVATE BRender::Full BRender::DDI brdemo)
+target_link_libraries(rendertest PRIVATE BRender::Full BRender::DDI parg brcapture)
 
 target_compile_definitions(rendertest PRIVATE
         RT_REFERENCE_DEFAULT="${CMAKE_CURRENT_SOURCE_DIR}/rendertest.txt"
@@ -225,7 +225,15 @@ if (BUILD_TESTING)
     # --vk-witness implies --vulkan; both are given to name the front screen
     # explicitly. The witness owns no GL context, so it does not need llvmpipe.
     #
-    add_test(NAME "vkwitness" COMMAND rendertest --vulkan --vk-witness)
-    set_tests_properties("vkwitness" PROPERTIES
-                         ENVIRONMENT "SDL_VIDEODRIVER=offscreen")
+    # vkrend is optional - without a shader compiler it is not built - and the
+    # witness cannot drive a front screen that is not there. Without the driver
+    # the front screen fails to load and the run reports "Vulkan window
+    # requested, but driver can't be loaded", so the test is only registered
+    # when the driver is.
+    #
+    if (TARGET BRender::Drivers::VKRend)
+        add_test(NAME "vkwitness" COMMAND rendertest --vulkan --vk-witness)
+        set_tests_properties("vkwitness" PROPERTIES
+                             ENVIRONMENT "SDL_VIDEODRIVER=offscreen")
+    endif ()
 endif ()

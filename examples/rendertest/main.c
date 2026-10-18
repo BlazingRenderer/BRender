@@ -12,6 +12,7 @@
  * that the two agree pixel for pixel.
  */
 #include <errno.h>
+#include <inttypes.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -19,28 +20,32 @@
 #include <SDL3/SDL.h>
 #include <brender.h>
 #include <brddi.h>
+#include <brglrend.h>
+#include <brglrend1x.h>
 #include <brsdl3dev.h>
+#include <brvkrend.h>
 
-#include "brdemo.h"
+#if defined(_MSC_VER) || defined(__MINGW32__)
+#include <malloc.h> /* alloca() */
+#else
+#include <alloca.h>
+#endif
+
+#include <brcapture.h>
+#include <parg.h>
+#include "rt_demo.h"
 #include "vkwitness.h"
 
 /* ------------------------------------------------------------------ */
-/* GL entry points; SDL hands us the addresses, we don't use glad.     */
+/* GL entry points; SDL hands us the addresses, we don't use glad.    */
+/*                                                                    */
+/* glGetString stays here rather than in brcapture: the driver        */
+/* token below is this harness's, not the checksum's.                 */
 /* ------------------------------------------------------------------ */
 
-typedef void (*rt_pfn_ReadPixels)(int, int, int, int, unsigned int, unsigned int, void *);
-typedef void (*rt_pfn_ReadBuffer)(unsigned int);
-typedef void (*rt_pfn_BindTexture)(unsigned int, unsigned int);
-typedef void (*rt_pfn_GetTexImage)(unsigned int, int, unsigned int, unsigned int, void *);
-typedef void (*rt_pfn_PixelStorei)(unsigned int, int);
 typedef const unsigned char *(*rt_pfn_GetString)(unsigned int);
 
-#define RT_GL_BACK           0x0405u
-#define RT_GL_PACK_ALIGNMENT 0x0CF5u
-#define RT_GL_RGBA           0x1908u
-#define RT_GL_TEXTURE_2D     0x0DE1u
-#define RT_GL_UNSIGNED_BYTE  0x1401u
-#define RT_GL_RENDERER       0x1F01u
+#define RT_GL_RENDERER 0x1F01u
 
 /* ------------------------------------------------------------------ */
 /* Configuration and results.                                         */
@@ -68,7 +73,15 @@ typedef const unsigned char *(*rt_pfn_GetString)(unsigned int);
  * RT_MAX_KEY bounds a reference key and the rt_expect that holds one. A key
  * that would not fit is refused rather than truncated.
  */
-#define RT_MAX_SCENES  256
+#define RT_MAX_SCENES 256
+
+/*
+ * The frame every stored entry was rendered at. --width and --height are the
+ * demo parser's options; rendertest overrides them, because a reference key
+ * names its size and there is only one.
+ */
+#define RT_WIDTH       320
+#define RT_HEIGHT      240
 #define RT_MAX_ENTRIES 8192
 #define RT_MAX_KEY     192
 #define RT_MAX_LINE    1024
@@ -95,19 +108,20 @@ typedef const unsigned char *(*rt_pfn_GetString)(unsigned int);
 #define RT_FP_CLASS "declared"
 #endif
 
-/* Filled in by main() before the demo runs. */
+/*
+ * Filled in by main(), through rt_parse_args() below, before the run starts.
+ * The frame size is not here: every stored entry is RT_WIDTHxRT_HEIGHT and the
+ * keys name their size, so there is only one.
+ */
 static const char *rt_cfg_device       = "glrend";
-static br_uint_8   rt_cfg_pm_type      = BR_PMT_INDEX_8;
+static br_uint_8   rt_cfg_pm_type      = BR_PMT_MAX; /* BR_PMT_MAX: none asked for */
 static int         rt_cfg_bpp_set      = 0;
-static int         rt_cfg_width        = 320;
-static int         rt_cfg_height       = 240;
-static int         rt_cfg_warmup       = 2;
+static int         rt_cfg_vulkan       = 0;
 static int         rt_cfg_no_depth     = 0;
+static int         rt_cfg_warmup       = 2;
 static int         rt_cfg_bless        = 0;
-static int         rt_cfg_verbose      = 0;
 static int         rt_cfg_env_witness  = 0;
 static int         rt_env_witness_done = 0;
-static int         rt_cfg_vulkan       = 0;
 static int         rt_cfg_vk_witness   = 0;
 static int         rt_vk_witness_done  = 0;
 static const char *rt_cfg_reference    = RT_REFERENCE_DEFAULT;
@@ -116,6 +130,15 @@ static const char *rt_cfg_scene_dir    = RT_SCENE_DIR_DEFAULT;
 static char        rt_cfg_ppm_dir[512] = "";
 static const char *rt_cfg_scenes[RT_MAX_SCENES];
 static int         rt_cfg_nscenes = 0;
+
+/*
+ * --list and --list-scene-dir are answered after BrDemoParseArgs() returns:
+ * each is a question about the fixture set rather than a run, and a callback
+ * has no way to end the parse successfully. Whichever comes first on the
+ * command line wins, as it did when main() read them in order.
+ */
+static int         rt_cfg_list     = 0;
+static const char *rt_cfg_list_dir = NULL;
 
 typedef struct rt_scene {
     char name[64];
@@ -143,7 +166,6 @@ typedef struct rt_state {
     int         warmup;
     int         no_depth;
     int         bless;
-    int         verbose;
 
     char reference[512];
     char ppm_dir[512];          /* empty: don't export */
@@ -172,13 +194,9 @@ typedef struct rt_state {
     rt_expect *expects;
     int        nexpects;
 
-    SDL_Window        *window;
-    rt_pfn_ReadPixels  ReadPixels;
-    rt_pfn_ReadBuffer  ReadBuffer;
-    rt_pfn_BindTexture BindTexture;
-    rt_pfn_GetTexImage GetTexImage;
-    rt_pfn_PixelStorei PixelStorei;
-    rt_pfn_GetString   GetString;
+    SDL_Window      *window;
+    br_capture_gl    gl;
+    rt_pfn_GetString GetString;
 
     int env_ok;
     int failures;
@@ -190,96 +208,7 @@ static int g_failed;
 /* Checksum: identical to gltfview's benchmark.                       */
 /* ------------------------------------------------------------------ */
 
-static br_uint_32 rt_pixel_value(const br_uint_8 *row, br_int_32 x, br_uint_32 bits)
-{
-    if(bits >= 8) {
-        const br_uint_8 *p = row + (br_size_t)x * (bits / 8);
-        br_uint_32       v = 0;
-
-        for(br_uint_32 c = 0; c < bits / 8; ++c)
-            v |= (br_uint_32)p[c] << (8 * c);
-
-        return v;
-    }
-
-    switch(bits) {
-        case 4:
-            return (row[x / 2] >> (4 * (1 - (x % 2)))) & 0xf;
-        case 2:
-            return (row[x / 4] >> (2 * (3 - (x % 4)))) & 0x3;
-        case 1:
-            return (row[x / 8] >> (7 - (x % 8))) & 0x1;
-        default:
-            return 0;
-    }
-}
-
-/*
- * BrPixelmapPixelSize() is in *bits*; a row is not width * pixel size bytes.
- * See gltfview/bench.c for the story of getting this wrong.
- */
-static br_uint_64 rt_hash_pixelmap(br_uint_64 hash, br_pixelmap *pm, br_uint_32 *covered)
-{
-    br_uint_32 bits      = BrPixelmapPixelSize(pm);
-    br_int_32  row_bytes = (br_int_32)(((br_uint_64)pm->width * bits + 7) / 8);
-    br_int_32  stride    = pm->row_bytes != 0 ? pm->row_bytes : row_bytes;
-
-    for(br_int_32 y = 0; y < pm->height; ++y) {
-        const br_uint_8 *row = (const br_uint_8 *)pm->pixels + (br_size_t)y * stride;
-
-        for(br_int_32 i = 0; i < row_bytes; ++i) {
-            hash ^= row[i];
-            hash *= 1099511628211ull;
-        }
-
-        if(covered == NULL)
-            continue;
-
-        for(br_int_32 x = 0; x < pm->width; ++x) {
-            if(rt_pixel_value(row, x, bits) != 0)
-                ++*covered;
-        }
-    }
-
-    return hash;
-}
-
-/*
- * Read the rendered frame back into px as tightly-packed RGBA8, bottom row
- * first, which is the order glReadPixels and glGetTexImage both return.
- *
- * glrend renders into the colour buffer's own FBO and only blits it to the
- * window at swap time, which is after this runs, so on glrend the FBO texture
- * is the only correct source - reading GL_BACK there gives whatever the swap
- * left behind, i.e. undefined. glrend1x is GL 1.x with no FBOs: it renders
- * straight into the default framebuffer and exposes no texture token, so fall
- * back to the window back buffer, which is exactly right for it.
- */
-static int rt_readback_gl(rt_state *st, br_demo *demo, int w, int h, br_uint_8 *px)
-{
-    br_uint_32 tex = 0;
-
-    if(st->PixelStorei != NULL)
-        st->PixelStorei(RT_GL_PACK_ALIGNMENT, 1);
-
-    if(st->BindTexture != NULL && st->GetTexImage != NULL && ObjectQuery(demo->colour_buffer, &tex, BRT_OPENGL_TEXTURE_U32) == BRE_OK && tex != 0) {
-        st->BindTexture(RT_GL_TEXTURE_2D, tex);
-        st->GetTexImage(RT_GL_TEXTURE_2D, 0, RT_GL_RGBA, RT_GL_UNSIGNED_BYTE, px);
-        return 1;
-    }
-
-    if(st->ReadPixels == NULL)
-        return 0;
-
-    if(st->ReadBuffer != NULL)
-        st->ReadBuffer(RT_GL_BACK);
-
-    st->ReadPixels(0, 0, w, h, RT_GL_RGBA, RT_GL_UNSIGNED_BYTE, px);
-
-    return 1;
-}
-
-static void rt_checksum_gl(rt_state *st, br_demo *demo, br_uint_64 *out_hash, br_uint_32 *out_covered, br_uint_32 *out_total)
+static void rt_checksum_gl(rt_state *st, rt_demo *demo, br_uint_64 *out_hash, br_uint_32 *out_covered, br_uint_32 *out_total)
 {
     int        w = 0, h = 0;
     br_uint_8 *px;
@@ -296,7 +225,7 @@ static void rt_checksum_gl(rt_state *st, br_demo *demo, br_uint_64 *out_hash, br
 
     px = BrResAllocate(NULL, (br_size_t)w * h * 4, BR_MEMORY_APPLICATION);
 
-    if(!rt_readback_gl(st, demo, w, h, px)) {
+    if(!BrCaptureReadbackGL(&st->gl, demo->colour_buffer, w, h, px)) {
         BrResFree(px);
         *out_hash    = hash;
         *out_covered = *out_total = 0;
@@ -322,7 +251,7 @@ static void rt_checksum_gl(rt_state *st, br_demo *demo, br_uint_64 *out_hash, br
     *out_total   = (br_uint_32)w * (br_uint_32)h;
 }
 
-static void rt_checksum_software(rt_state *st, br_demo *demo, br_uint_64 *out_hash, br_uint_32 *out_covered, br_uint_32 *out_total)
+static void rt_checksum_software(rt_state *st, rt_demo *demo, br_uint_64 *out_hash, br_uint_32 *out_covered, br_uint_32 *out_total)
 {
     br_pixelmap *pm      = demo->colour_buffer;
     br_pixelmap *pal     = NULL;
@@ -335,10 +264,10 @@ static void rt_checksum_software(rt_state *st, br_demo *demo, br_uint_64 *out_ha
         return;
     }
 
-    hash = rt_hash_pixelmap(hash, pm, &covered);
+    hash = BrCaptureHashPixelmap(hash, pm, &covered);
 
     if((pal = pm->map) != NULL && pal->pixels != NULL && pal->width != 0 && pal->height != 0 && BrPixelmapPixelSize(pal) != 0)
-        hash = rt_hash_pixelmap(hash, pal, NULL);
+        hash = BrCaptureHashPixelmap(hash, pal, NULL);
 
     *out_hash    = hash;
     *out_covered = covered;
@@ -486,7 +415,7 @@ static br_pixelmap *rt_build_shade_palette(br_material *const *mats, size_t nmat
     return pal;
 }
 
-static br_error rt_load_scene(rt_state *st, br_demo *demo, int index)
+static br_error rt_load_scene(rt_state *st, rt_demo *demo, int index)
 {
     const rt_scene *s = &st->scenes[index];
     br_fmt_results *results;
@@ -601,7 +530,7 @@ static br_error rt_load_scene(rt_state *st, br_demo *demo, int index)
     return BRE_OK;
 }
 
-static void rt_unload_scene(rt_state *st, br_demo *demo)
+static void rt_unload_scene(rt_state *st, rt_demo *demo)
 {
     if(st->shade_palette != NULL) {
         BrPixelmapFree(st->shade_palette);
@@ -636,7 +565,8 @@ static void rt_unload_scene(rt_state *st, br_demo *demo)
 static br_error rt_make_key(char *dst, size_t n, rt_state *st, const char *driver, const char *scene)
 {
     const char *mode = st->no_depth ? "zs" : "zb";
-    int len = snprintf(dst, n, "%s/%s/%s/%s/%u/%dx%d/%s", st->device, driver, RT_FP_CLASS, mode, (unsigned)st->pm_type, st->width, st->height, scene);
+    int         len  = snprintf(dst, n, "%s/%s/%s/%s/%u/%dx%d/%s", st->device, driver, RT_FP_CLASS, mode, (unsigned)st->pm_type, st->width,
+                                st->height, scene);
 
     if(len < 0 || (size_t)len >= n) {
         BrLogError("RT",
@@ -871,7 +801,7 @@ static void rt_write_reference(rt_state *st)
  * buffer directly and lets it normalise whatever pixel type that is; the GL
  * path has to build one, because the frame lives in the framebuffer.
  */
-static void rt_export_ppm(rt_state *st, br_demo *demo)
+static void rt_export_ppm(rt_state *st, rt_demo *demo)
 {
     char path[600];
 
@@ -901,53 +831,25 @@ static void rt_export_ppm(rt_state *st, br_demo *demo)
     }
 
     {
-        int          w = 0, h = 0;
-        br_uint_8   *px;
-        br_pixelmap *pm;
+        int        w = 0, h = 0;
+        br_uint_8 *px;
 
         SDL_GetWindowSizeInPixels(st->window, &w, &h);
 
         if(w <= 0 || h <= 0)
             return;
 
-        if((pm = BrPixelmapAllocate(BR_PMT_RGBA_8888, w, h, NULL, BR_PMAF_NORMAL)) == NULL)
+        if((px = BrResAllocate(NULL, (br_size_t)w * h * 4, BR_MEMORY_APPLICATION)) == NULL)
             return;
 
-        if((px = BrResAllocate(NULL, (br_size_t)w * h * 4, BR_MEMORY_APPLICATION)) == NULL) {
-            BrPixelmapFree(pm);
-            return;
-        }
-
-        if(!rt_readback_gl(st, demo, w, h, px)) {
-            BrResFree(px);
-            BrPixelmapFree(pm);
-            return;
-        }
-
-        /*
-         * The readback is bottom-up and PPM is top-down. BR_PMT_RGBA_8888 is
-         * ARGB-on-the-wire: its bytes are b,g,r,a, while the readback hands
-         * back r,g,b,a, so swap red and blue.
-         */
-        for(int y = 0; y < h; ++y) {
-            const br_uint_8 *src = px + (br_size_t)(h - 1 - y) * w * 4;
-            br_uint_8       *dst = (br_uint_8 *)pm->pixels + (br_size_t)y * pm->row_bytes;
-
-            for(int x = 0; x < w; ++x) {
-                dst[x * 4 + 0] = src[x * 4 + 2];
-                dst[x * 4 + 1] = src[x * 4 + 1];
-                dst[x * 4 + 2] = src[x * 4 + 0];
-                dst[x * 4 + 3] = src[x * 4 + 3];
-            }
-        }
+        if(BrCaptureReadbackGL(&st->gl, demo->colour_buffer, w, h, px))
+            BrCaptureExportPPM(path, px, w, h);
 
         BrResFree(px);
-        BrFmtImageSave(path, pm, BR_FMT_IMAGE_PPM);
-        BrPixelmapFree(pm);
     }
 }
 
-static void rt_finish_scene(rt_state *st, br_demo *demo)
+static void rt_finish_scene(rt_state *st, rt_demo *demo)
 {
     br_uint_64  hash    = 0;
     br_uint_32  covered = 0, total = 0;
@@ -1909,7 +1811,7 @@ static void envw_fini(envw_state *st)
     memset(st, 0, sizeof(*st));
 }
 
-static br_error rt_env_witness_run(br_demo *demo)
+static br_error rt_env_witness_run(rt_demo *demo)
 {
     envw_state state = {0};
     br_error   r     = BRE_FAIL;
@@ -1944,9 +1846,13 @@ out:
 /* Demo callbacks.                                                    */
 /* ------------------------------------------------------------------ */
 
-static br_error rt_init(br_demo *demo)
+static br_error rt_app_init(rt_demo *demo)
 {
-    rt_state *st = BrResAllocate(demo, sizeof(rt_state), BR_MEMORY_APPLICATION);
+    /*
+     * No parent: the demo context is this application's own, not a BRender
+     * resource, so the state is freed by rt_app_fini().
+     */
+    rt_state *st = BrResAllocate(NULL, sizeof(rt_state), BR_MEMORY_APPLICATION);
     demo->user   = st;
 
     /*
@@ -1960,14 +1866,14 @@ static br_error rt_init(br_demo *demo)
     if(demo->hw_accel) {
         st->window = BrSDL3UtilGetWindow(demo->_screen);
 
-        st->ReadPixels  = (rt_pfn_ReadPixels)SDL_GL_GetProcAddress("glReadPixels");
-        st->ReadBuffer  = (rt_pfn_ReadBuffer)SDL_GL_GetProcAddress("glReadBuffer");
-        st->BindTexture = (rt_pfn_BindTexture)SDL_GL_GetProcAddress("glBindTexture");
-        st->GetTexImage = (rt_pfn_GetTexImage)SDL_GL_GetProcAddress("glGetTexImage");
-        st->PixelStorei = (rt_pfn_PixelStorei)SDL_GL_GetProcAddress("glPixelStorei");
-        st->GetString   = (rt_pfn_GetString)SDL_GL_GetProcAddress("glGetString");
+        st->gl.ReadPixels  = (br_capture_pfn_ReadPixels)SDL_GL_GetProcAddress("glReadPixels");
+        st->gl.ReadBuffer  = (br_capture_pfn_ReadBuffer)SDL_GL_GetProcAddress("glReadBuffer");
+        st->gl.BindTexture = (br_capture_pfn_BindTexture)SDL_GL_GetProcAddress("glBindTexture");
+        st->gl.GetTexImage = (br_capture_pfn_GetTexImage)SDL_GL_GetProcAddress("glGetTexImage");
+        st->gl.PixelStorei = (br_capture_pfn_PixelStorei)SDL_GL_GetProcAddress("glPixelStorei");
+        st->GetString      = (rt_pfn_GetString)SDL_GL_GetProcAddress("glGetString");
 
-        if(st->ReadPixels == NULL && st->GetTexImage == NULL) {
+        if(st->gl.ReadPixels == NULL && st->gl.GetTexImage == NULL) {
             BrLogError("RT", "No glReadPixels or glGetTexImage; hardware checksum unavailable");
             return BRE_FAIL;
         }
@@ -2014,17 +1920,19 @@ static br_error rt_init(br_demo *demo)
 
     /*
      * The configuration was parsed in main(); the demo owns the lifecycle, so
-     * copy it into the state that will live for the run.
+     * copy it into the state that will live for the run. The frame size and the
+     * depth mode are the run args' own, which main() seeded and the parse may
+     * have overridden; the key is built from them, so they have to be the size
+     * the frame was actually rendered at.
      */
     {
         st->device   = rt_cfg_device;
         st->pm_type  = demo->colour_buffer->type;
-        st->width    = rt_cfg_width;
-        st->height   = rt_cfg_height;
+        st->width    = RT_WIDTH;
+        st->height   = RT_HEIGHT;
         st->warmup   = rt_cfg_warmup;
         st->no_depth = rt_cfg_no_depth;
         st->bless    = rt_cfg_bless;
-        st->verbose  = rt_cfg_verbose;
         st->env_ok   = 1;
         st->scenes   = BrResAllocate(st, sizeof(rt_scene) * RT_MAX_SCENES, BR_MEMORY_APPLICATION);
         st->results  = BrResAllocate(st, sizeof(rt_result) * RT_MAX_SCENES, BR_MEMORY_APPLICATION);
@@ -2103,54 +2011,11 @@ static br_error rt_init(br_demo *demo)
     return BRE_OK;
 }
 
-static void rt_render(br_demo *demo)
+/*
+ * One frame of a scene; the world, camera and order table are already set up.
+ */
+static void rt_render_frame(rt_state *st, rt_demo *demo)
 {
-    rt_state *st = demo->user;
-
-    if(rt_cfg_vk_witness) {
-        if(!rt_vk_witness_done) {
-            rt_vk_witness_done = 1;
-
-            /*
-             * As with --env-witness: brdemo begins a renderer on the colour buffer
-             * before init, but the witness's renderer case begins its own renderer
-             * on its own offscreen, so end that one first. This mode quits on the
-             * first frame, so nothing renders through it again.
-             */
-            BrRendererEnd();
-
-            if(rt_vk_witness_run(demo) != BRE_OK)
-                g_failed = 1;
-
-            printf("RT result=%s failures=%d\n", g_failed ? "FAIL" : "PASS", g_failed ? 1 : 0);
-        }
-
-        SDL_PushEvent(&(SDL_Event){.type = SDL_EVENT_QUIT});
-        return;
-    }
-
-    if(rt_cfg_env_witness) {
-        if(!rt_env_witness_done) {
-            rt_env_witness_done = 1;
-
-            /*
-             * brdemo begins a renderer on the colour buffer before calling
-             * init; the witness needs a renderer of its own, on its own
-             * offscreen, so end that one first. Nothing renders through it
-             * again - this mode quits on the first frame.
-             */
-            BrRendererEnd();
-
-            if(rt_env_witness_run(demo) != BRE_OK)
-                g_failed = 1;
-
-            printf("RT result=%s failures=%d\n", g_failed ? "FAIL" : "PASS", g_failed ? 1 : 0);
-        }
-
-        SDL_PushEvent(&(SDL_Event){.type = SDL_EVENT_QUIT});
-        return;
-    }
-
     BrRendererFrameBegin();
 
     BrPixelmapFill(demo->colour_buffer, demo->clear_colour);
@@ -2168,64 +2033,224 @@ static void rt_render(br_demo *demo)
     }
 
     BrRendererFrameEnd();
-
-    if(st->frame_index < st->warmup) {
-        ++st->frame_index;
-        return;
-    }
-
-    rt_finish_scene(st, demo);
-
-    ++st->scene_index;
-
-    if(st->scene_index >= st->nscenes) {
-        rt_check_drawn(st);
-        rt_check_relations(st);
-        rt_check_compared(st);
-
-        if(st->bless)
-            rt_write_reference(st);
-
-        if(st->failures != 0)
-            g_failed = 1;
-
-        printf("RT result=%s failures=%d\n", st->failures == 0 ? "PASS" : "FAIL", st->failures);
-        SDL_PushEvent(&(SDL_Event){.type = SDL_EVENT_QUIT});
-        return;
-    }
-
-    rt_unload_scene(st, demo);
-
-    if(rt_load_scene(st, demo, st->scene_index) != BRE_OK) {
-        g_failed = 1;
-        SDL_PushEvent(&(SDL_Event){.type = SDL_EVENT_QUIT});
-    }
 }
 
-static void rt_destroy(br_demo *demo)
+/*
+ * The whole run. The two witnesses are one-shot modes; otherwise every scene is
+ * rendered in turn, warmup frames first and the captured frame last.
+ */
+static int rt_run(rt_demo *demo)
 {
     rt_state *st = demo->user;
 
-    if(st != NULL && st->shade_palette != NULL) {
-        BrPixelmapFree(st->shade_palette);
-        st->shade_palette = NULL;
+    /*
+     * Both witnesses begin a renderer of their own, on their own offscreen, so
+     * the one begun on the colour buffer is ended first.
+     */
+    if(rt_cfg_vk_witness) {
+        BrRendererEnd();
+
+        if(rt_vk_witness_run(demo) != BRE_OK)
+            g_failed = 1;
+
+        printf("RT result=%s failures=%d\n", g_failed ? "FAIL" : "PASS", g_failed ? 1 : 0);
+        return g_failed;
     }
 
-    BrDemoDefaultDestroy(demo);
+    if(rt_cfg_env_witness) {
+        BrRendererEnd();
+
+        if(rt_env_witness_run(demo) != BRE_OK)
+            g_failed = 1;
+
+        printf("RT result=%s failures=%d\n", g_failed ? "FAIL" : "PASS", g_failed ? 1 : 0);
+        return g_failed;
+    }
+
+    for(;;) {
+        for(int i = 0; i <= st->warmup; ++i)
+            rt_render_frame(st, demo);
+
+        rt_finish_scene(st, demo);
+        ++st->scene_index;
+
+        if(st->scene_index >= st->nscenes) {
+            rt_check_drawn(st);
+            rt_check_relations(st);
+            rt_check_compared(st);
+
+            if(st->bless)
+                rt_write_reference(st);
+
+            if(st->failures != 0)
+                g_failed = 1;
+
+            printf("RT result=%s failures=%d\n", st->failures == 0 ? "PASS" : "FAIL", st->failures);
+            break;
+        }
+
+        rt_unload_scene(st, demo);
+
+        if(rt_load_scene(st, demo, st->scene_index) != BRE_OK) {
+            g_failed = 1;
+            break;
+        }
+    }
+
+    return g_failed;
 }
 
-static const br_demo_dispatch rt_dispatch = {
-    .init          = rt_init,
-    .process_event = BrDemoDefaultProcessEvent,
-    .update        = BrDemoDefaultUpdate,
-    .render        = rt_render,
-    .on_resize     = BrDemoDefaultOnResize,
-    .destroy       = rt_destroy,
-};
+/*
+ * The grey shade ramp is the only thing the state owns that the resource chain
+ * does not.
+ */
+static void rt_app_fini(rt_demo *demo)
+{
+    rt_state *st = demo->user;
+
+    if(st == NULL)
+        return;
+
+    if(st->shade_palette != NULL)
+        BrPixelmapFree(st->shade_palette);
+
+    BrResFree(st);
+    demo->user = NULL;
+}
 
 /* ------------------------------------------------------------------ */
-/* Argument parsing.                                                  */
+/* The application: its own loop, no demo framework.                  */
 /* ------------------------------------------------------------------ */
+
+/*
+ * Primitive heap - used by the z-buffered renderer to defer drawing of blended
+ * primitives. The same size brdemo uses: the driver takes it as one flat block.
+ */
+static uint8_t rt_primitive_heap[8192 * 1024];
+
+struct br_device *BR_EXPORT BrDrv1SoftPrimBegin(const char *arguments);
+struct br_device *BR_EXPORT BrDrv1SoftRendBegin(const char *arguments);
+
+void _BrBeginHook(void) // NOLINT(*-reserved-identifier)
+{
+    struct br_device *sdl = NULL;
+
+    BrDevAddStatic(&sdl, BrDrv1SDL3Begin, NULL);
+    BrDevAddStatic(NULL, BrDrv1GLBegin, NULL);
+    BrDevAddStatic(NULL, BrDrv1GL1xBegin, NULL);
+    BrDevAddStatic(NULL, BrDrv1SoftPrimBegin, NULL);
+    BrDevAddStatic(NULL, BrDrv1SoftRendBegin, NULL);
+
+    if(sdl != NULL) {
+        char buf[48];
+        BrSprintfN(buf, sizeof(buf), "VKREND_INIT_DEVICE=%" PRIuPTR, (br_uintptr_t)sdl);
+        BrDevAddStatic(NULL, BrDrv1VkBegin, buf);
+    }
+}
+
+void _BrEndHook(void) // NOLINT(*-reserved-identifier)
+{
+}
+
+/*
+ * The screen. The hardware one first unless the software device was asked for;
+ * no fallback when the run requires hardware, because its reference keys name a
+ * GL driver.
+ */
+/*
+ * The screen. The hardware one first unless the software device was asked for;
+ * no fallback when the run requires hardware, because its reference keys name a
+ * GL driver.
+ */
+static br_error rt_create_window(rt_demo *demo)
+{
+    br_error   err;
+    br_boolean software = strcmp(rt_cfg_device, "softrend") == 0;
+
+    if(software)
+        goto try_software;
+
+    // clang-format off
+    err = BrDevBeginVar(&demo->_screen,              "SDL3",
+                        BRT_WIDTH_I32,               RT_WIDTH,
+                        BRT_HEIGHT_I32,              RT_HEIGHT,
+                        BRT_WINDOW_NAME_CSTR,        "BRender render test",
+                        BRT_HIDPI_B,                 BR_TRUE,
+                        BRT_RESIZABLE_B,             BR_TRUE,
+                        BRT_OPENGL_B,                rt_cfg_vulkan ? BR_FALSE : BR_TRUE,
+                        BRT_VULKAN_B,                rt_cfg_vulkan ? BR_TRUE : BR_FALSE,
+                        BRT_OPENGL_DEVICE_NAME_CSTR, rt_cfg_device,
+                        BR_NULL_TOKEN);
+    // clang-format on
+
+    if(err == BRE_OK) {
+        /*
+         * Only the OpenGL path owns a GL context to set a swap interval on.
+         */
+        if(!rt_cfg_vulkan)
+            SDL_GL_SetSwapInterval(1);
+
+        demo->hw_accel = BR_TRUE;
+        return err;
+    }
+
+    BrLogError("RT", "Unable to create a hardware-accelerated window for device `%s', and this run requires one.", rt_cfg_device);
+    return err;
+
+try_software:
+    // clang-format off
+    err = BrDevBeginVar(&demo->_screen,       "SDL3",
+                        BRT_WIDTH_I32,        RT_WIDTH,
+                        BRT_HEIGHT_I32,       RT_HEIGHT,
+                        BRT_WINDOW_NAME_CSTR, "BRender render test",
+                        BRT_HIDPI_B,          BR_FALSE,
+                        BRT_RESIZABLE_B,      BR_TRUE,
+                        BRT_OPENGL_B,         BR_FALSE,
+                        BR_NULL_TOKEN);
+    // clang-format on
+    if(err != BRE_OK)
+        BrLogError("RT", "Unable to create window.");
+
+    demo->hw_accel = BR_FALSE;
+    return err;
+}
+
+/*
+ * The colour and depth buffers. The software colour type is INDEX_8 unless
+ * --bpp named one, which is what every stored softrend entry is; the hardware
+ * type is the driver's own unless --bpp named one.
+ */
+static br_error rt_resize_buffers(rt_demo *demo)
+{
+    if(!demo->hw_accel) {
+        const br_uint_8      software_type = (rt_cfg_pm_type == BR_PMT_MAX) ? BR_PMT_INDEX_8 : rt_cfg_pm_type;
+        const br_token_value tv[]          = {
+            {.t = BRT_WIDTH_I32,      .v = {.i32 = RT_WIDTH}    },
+            {.t = BRT_HEIGHT_I32,     .v = {.i32 = RT_HEIGHT}   },
+            {.t = BRT_PIXEL_TYPE_U8,  .v = {.u8 = software_type}},
+            {.t = BRT_PIXEL_BITS_I32, .v = {.i32 = 16}          },
+            {.t = BR_NULL_TOKEN,      .v = {}                   },
+        };
+        return BrPixelmapResizeBuffersTV(demo->_screen, &demo->colour_buffer, &demo->depth_buffer, tv);
+    }
+
+    br_token_value tv[4];
+    int            n = 0;
+
+    tv[n].t       = BRT_WIDTH_I32;
+    tv[n++].v.i32 = RT_WIDTH;
+    tv[n].t       = BRT_HEIGHT_I32;
+    tv[n++].v.i32 = RT_HEIGHT;
+
+    if(rt_cfg_pm_type != BR_PMT_MAX) {
+        tv[n].t      = BRT_PIXEL_TYPE_U8;
+        tv[n++].v.u8 = rt_cfg_pm_type;
+    }
+
+    tv[n].t = BR_NULL_TOKEN;
+
+    return BrPixelmapResizeBuffersTV(demo->_screen, &demo->colour_buffer, &demo->depth_buffer, tv);
+}
 
 /* Laid out as a grid so the set reads as one list; held out of clang-format, which would put one name per line. */
 // clang-format off
@@ -2335,29 +2360,12 @@ static const char *const rt_default_scenes[] = {
 /* The default set has to fit: rt_init() copies it into an RT_MAX_SCENES array. */
 BR_STATIC_ASSERT(BR_ASIZE(rt_default_scenes) <= RT_MAX_SCENES, "the default fixture set does not fit in RT_MAX_SCENES");
 
-static br_uint_8 rt_bpp_to_type(int bpp)
-{
-    switch(bpp) {
-        case 15:
-            return BR_PMT_RGB_555;
-        case 16:
-            return BR_PMT_RGB_565;
-        case 24:
-            return BR_PMT_RGB_888;
-        case 32:
-            return BR_PMT_RGBA_8888;
-        default:
-        case 8:
-            return BR_PMT_INDEX_8;
-    }
-}
-
 /*
  * List the scenes a directory holds: every .gltf file in it, as the name a run
  * takes on the command line (the file name without its extension), sorted.
  *
  * A scene directory is the one place that says which reference scenes exist.
- * The ctest entries (examples/rendertest/CMakeLists.txt) and the census corpus
+ * The ctest entries (tools/rendertest/CMakeLists.txt) and the census corpus
  * (contrib/census/run_corpus.sh) both derive the set from there - the latter
  * through this flag - rather than carrying a list that can disagree with it.
  */
@@ -2398,107 +2406,252 @@ static int rt_list_scene_dir(const char *dir)
     return 0;
 }
 
-static void rt_usage(const char *argv0)
+/* ------------------------------------------------------------------ */
+/* The command line.                                                  */
+/* ------------------------------------------------------------------ */
+
+#define ARGDEF_DEVICE           301
+#define ARGDEF_BPP              302
+#define ARGDEF_NO_DEPTH         303
+#define ARGDEF_VULKAN           304
+#define ARGDEF_WARMUP           305
+#define ARGDEF_SCENE_DIR        306
+#define ARGDEF_REFERENCE        307
+#define ARGDEF_REFERENCE_DRIVER 308
+#define ARGDEF_PPM_DIR          309
+#define ARGDEF_BLESS            310
+#define ARGDEF_ENV_WITNESS      311
+#define ARGDEF_VK_WITNESS       312
+#define ARGDEF_LIST             313
+#define ARGDEF_LIST_SCENE_DIR   314
+#define ARGDEF_HELP             315
+
+/* Laid out as a grid so the set reads as one list; held out of clang-format. */
+// clang-format off
+static const struct parg_option rt_argdefs[] = {
+    {.name = "device",           .has_arg = PARG_REQARG, .flag = NULL, .val = ARGDEF_DEVICE          },
+    {.name = "bpp",              .has_arg = PARG_REQARG, .flag = NULL, .val = ARGDEF_BPP             },
+    {.name = "no-depth",         .has_arg = PARG_NOARG,  .flag = NULL, .val = ARGDEF_NO_DEPTH        },
+    {.name = "vulkan",           .has_arg = PARG_NOARG,  .flag = NULL, .val = ARGDEF_VULKAN          },
+    {.name = "warmup",           .has_arg = PARG_REQARG, .flag = NULL, .val = ARGDEF_WARMUP          },
+    {.name = "scene-dir",        .has_arg = PARG_REQARG, .flag = NULL, .val = ARGDEF_SCENE_DIR       },
+    {.name = "reference",        .has_arg = PARG_REQARG, .flag = NULL, .val = ARGDEF_REFERENCE       },
+    {.name = "reference-driver", .has_arg = PARG_REQARG, .flag = NULL, .val = ARGDEF_REFERENCE_DRIVER},
+    {.name = "ppm-dir",          .has_arg = PARG_REQARG, .flag = NULL, .val = ARGDEF_PPM_DIR         },
+    {.name = "bless",            .has_arg = PARG_NOARG,  .flag = NULL, .val = ARGDEF_BLESS           },
+    {.name = "env-witness",      .has_arg = PARG_NOARG,  .flag = NULL, .val = ARGDEF_ENV_WITNESS     },
+    {.name = "vk-witness",       .has_arg = PARG_NOARG,  .flag = NULL, .val = ARGDEF_VK_WITNESS      },
+    {.name = "list",             .has_arg = PARG_NOARG,  .flag = NULL, .val = ARGDEF_LIST            },
+    {.name = "list-scene-dir",   .has_arg = PARG_REQARG, .flag = NULL, .val = ARGDEF_LIST_SCENE_DIR  },
+    {.name = "help",             .has_arg = PARG_NOARG,  .flag = NULL, .val = ARGDEF_HELP            },
+    {.name = NULL,               .has_arg = 0,           .flag = NULL, .val = 0                       },
+};
+// clang-format on
+
+typedef enum rt_parse {
+    RT_PARSE_OK = 0,
+    RT_PARSE_HELP,
+    RT_PARSE_ERROR,
+} rt_parse;
+
+static rt_parse rt_parse_args(int argc, char *const *argv)
 {
-    fprintf(stderr,
+    struct parg_state ps;
+    char            **opt_argv;
+    int               optend, c;
+
+    parg_init(&ps);
+
+    /*
+     * parg_reorder() permutes the array it is given to put the options first,
+     * so it gets a copy and the caller's argv is left as it arrived. Nothing
+     * here allocates, which is what lets it run before BrBegin().
+     */
+    opt_argv = alloca(sizeof(*opt_argv) * (size_t)(argc + 1));
+    BrMemCpy(opt_argv, argv, (br_size_t)argc * sizeof(*opt_argv));
+    opt_argv[argc] = NULL;
+
+    if((optend = parg_reorder(argc, opt_argv, "l", rt_argdefs)) < 0)
+        return RT_PARSE_ERROR;
+
+    while((c = parg_getopt_long(&ps, optend, opt_argv, "l", rt_argdefs, NULL)) != -1) {
+        switch(c) {
+
+            case 'l':
+            case ARGDEF_LIST:
+                /*
+                 * Whichever list option is given first wins, as it did when
+                 * main() read them in order.
+                 */
+                if(rt_cfg_list_dir == NULL)
+                    rt_cfg_list = 1;
+                break;
+
+            case ARGDEF_DEVICE:
+                rt_cfg_device = ps.optarg;
+                break;
+
+            case ARGDEF_BPP:
+                switch(BrAToI(ps.optarg)) {
+                    case 8:
+                        rt_cfg_pm_type = BR_PMT_INDEX_8;
+                        break;
+                    case 15:
+                        rt_cfg_pm_type = BR_PMT_RGB_555;
+                        break;
+                    case 16:
+                        rt_cfg_pm_type = BR_PMT_RGB_565;
+                        break;
+                    case 24:
+                        rt_cfg_pm_type = BR_PMT_RGB_888;
+                        break;
+                    case 32:
+                        rt_cfg_pm_type = BR_PMT_RGBA_8888;
+                        break;
+                    default:
+                        fprintf(stderr, "--bpp takes 8, 15, 16, 24 or 32\n");
+                        return RT_PARSE_ERROR;
+                }
+
+                rt_cfg_bpp_set = 1;
+                break;
+
+            case ARGDEF_NO_DEPTH:
+                rt_cfg_no_depth = 1;
+                break;
+
+            case ARGDEF_VULKAN:
+                rt_cfg_vulkan = 1;
+                break;
+
+            case ARGDEF_WARMUP:
+                rt_cfg_warmup = BrAToI(ps.optarg);
+                break;
+
+            case ARGDEF_SCENE_DIR:
+                rt_cfg_scene_dir = ps.optarg;
+                break;
+
+            case ARGDEF_REFERENCE:
+                rt_cfg_reference = ps.optarg;
+                break;
+
+            case ARGDEF_REFERENCE_DRIVER:
+                rt_cfg_ref_driver = ps.optarg;
+                break;
+
+            case ARGDEF_PPM_DIR:
+                snprintf(rt_cfg_ppm_dir, sizeof(rt_cfg_ppm_dir), "%s", ps.optarg);
+                break;
+
+            case ARGDEF_BLESS:
+                rt_cfg_bless = 1;
+                break;
+
+            case ARGDEF_ENV_WITNESS:
+                rt_cfg_env_witness = 1;
+                break;
+
+            case ARGDEF_VK_WITNESS:
+                rt_cfg_vk_witness = 1;
+                break;
+
+            case ARGDEF_LIST_SCENE_DIR:
+                if(!rt_cfg_list)
+                    rt_cfg_list_dir = ps.optarg;
+                break;
+
+            case ARGDEF_HELP:
+                return RT_PARSE_HELP;
+
+            case '?':
+            case ':':
+            default:
+                return RT_PARSE_ERROR;
+        }
+    }
+
+    /*
+     * Refuse rather than drop: a scene the run quietly leaves out is a fixture
+     * with no result, and so nothing asserted about it at all.
+     */
+    for(int i = optend; i < argc; ++i) {
+        if(rt_cfg_nscenes >= RT_MAX_SCENES) {
+            fprintf(stderr, "More than RT_MAX_SCENES (%d) scenes named; raise it rather than run a short set\n", RT_MAX_SCENES);
+            return RT_PARSE_ERROR;
+        }
+
+        rt_cfg_scenes[rt_cfg_nscenes++] = opt_argv[i];
+    }
+
+    return RT_PARSE_OK;
+}
+
+static void rt_usage(FILE *out, const char *argv0)
+{
+    fprintf(out,
             "Usage: %s [options] [scene ...]\n"
             "\n"
             "  --device <name>    glrend (default), glrend1x or softrend\n"
             "  --bpp <n>          colour buffer pixel type: 8, 15, 16, 24, 32\n"
             "                     (unset: the renderer's own; 8 is refused on a GL device)\n"
-            "  -w, --width <n>    render width (default 320)\n"
-            "  -h, --height <n>   render height (default 240)\n"
             "  --warmup <n>       frames to render before checksumming (default 2)\n"
             "  --no-depth         render with Z-sort and no depth buffer\n"
             "  --scene-dir <dir>  where the scenes live\n"
             "  --reference <file> reference file to compare against\n"
             "  --reference-driver <token>\n"
-            "                     score against another driver's entries (e.g.\n"
-            "                     'software' to read another rasteriser's entries);\n"
-            "                     --bless still records this binary's own driver\n"
+            "                     score against another driver's entries; --bless records\n"
+            "                     this binary's own\n"
             "  --ppm-dir <dir>    write each frame as <dir>/<scene>.ppm\n"
             "  --bless            write the reference instead of comparing\n"
             "  --env-witness      run the environment-map orientation witness and exit\n"
             "  --vulkan           bring up a vkrend front screen (with --vk-witness)\n"
             "  --vk-witness       run the vkrend witness and exit\n"
-            "  -v, --verbose      log more\n"
             "  -l, --list         list the scenes and exit\n"
             "  --list-scene-dir <dir>\n"
             "                     list the .gltf scenes in <dir> and exit\n"
+            "  --help             display this message\n"
             "\n"
-            "With no scene arguments the default fixture set is used. glrend can be\n"
-            "forced onto llvmpipe with LIBGL_ALWAYS_SOFTWARE=true.\n",
+            "With no scene arguments the default fixture set is used. Every frame is 320x240,\n"
+            "which is what the reference keys name. glrend can be forced onto llvmpipe with\n"
+            "LIBGL_ALWAYS_SOFTWARE=true.\n",
             argv0);
 }
 
 int main(int argc, char **argv)
 {
-    br_demo_run_args args;
+    rt_demo demo = {0};
 
-    BrDemoDefaultArgs(&args);
-
-    for(int i = 1; i < argc; ++i) {
-        const char *a = argv[i];
-        const char *v = (i + 1 < argc) ? argv[i + 1] : NULL;
-
-        if(strcmp(a, "--device") == 0 && v != NULL) {
-            rt_cfg_device = argv[++i];
-        } else if(strcmp(a, "--bpp") == 0 && v != NULL) {
-            rt_cfg_pm_type = rt_bpp_to_type(BrAToI(argv[++i]));
-            rt_cfg_bpp_set = 1;
-        } else if((strcmp(a, "-w") == 0 || strcmp(a, "--width") == 0) && v != NULL) {
-            rt_cfg_width = BrAToI(argv[++i]);
-        } else if((strcmp(a, "-h") == 0 || strcmp(a, "--height") == 0) && v != NULL) {
-            rt_cfg_height = BrAToI(argv[++i]);
-        } else if(strcmp(a, "--warmup") == 0 && v != NULL) {
-            rt_cfg_warmup = BrAToI(argv[++i]);
-        } else if(strcmp(a, "--no-depth") == 0) {
-            rt_cfg_no_depth = 1;
-        } else if(strcmp(a, "--scene-dir") == 0 && v != NULL) {
-            rt_cfg_scene_dir = argv[++i];
-        } else if(strcmp(a, "--reference") == 0 && v != NULL) {
-            rt_cfg_reference = argv[++i];
-        } else if(strcmp(a, "--reference-driver") == 0 && v != NULL) {
-            rt_cfg_ref_driver = argv[++i];
-        } else if(strcmp(a, "--ppm-dir") == 0 && v != NULL) {
-            snprintf(rt_cfg_ppm_dir, sizeof(rt_cfg_ppm_dir), "%s", argv[++i]);
-        } else if(strcmp(a, "--bless") == 0) {
-            rt_cfg_bless = 1;
-        } else if(strcmp(a, "--env-witness") == 0) {
-            rt_cfg_env_witness = 1;
-        } else if(strcmp(a, "--vulkan") == 0) {
-            rt_cfg_vulkan = 1;
-        } else if(strcmp(a, "--vk-witness") == 0) {
-            rt_cfg_vk_witness = 1;
-        } else if(strcmp(a, "-v") == 0 || strcmp(a, "--verbose") == 0) {
-            ++rt_cfg_verbose;
-        } else if(strcmp(a, "-l") == 0 || strcmp(a, "--list") == 0) {
-            for(size_t k = 0; k < BR_ASIZE(rt_default_scenes); ++k)
-                printf("%s\n", rt_default_scenes[k]);
-
+    switch(rt_parse_args(argc, argv)) {
+        case RT_PARSE_HELP:
+            rt_usage(stdout, argv[0]);
             return 0;
-        } else if(strcmp(a, "--list-scene-dir") == 0 && v != NULL) {
-            return rt_list_scene_dir(argv[++i]);
-        } else if(strcmp(a, "--help") == 0) {
-            rt_usage(argv[0]);
-            return 0;
-        } else if(a[0] == '-') {
-            fprintf(stderr, "Unknown option: %s\n", a);
-            rt_usage(argv[0]);
-            return 2;
-        } else {
+
+        case RT_PARSE_ERROR:
             /*
-             * Refuse rather than drop: a scene the run quietly leaves out is a
-             * fixture with no result, and so nothing asserted about it at all.
+             * The parse prints nothing, not even which option it refused; the
+             * usage text is what says what was expected.
              */
-            if(rt_cfg_nscenes >= RT_MAX_SCENES) {
-                fprintf(stderr, "More than RT_MAX_SCENES (%d) scenes named; raise it rather than run a short set\n", RT_MAX_SCENES);
-                return 2;
-            }
+            rt_usage(stderr, argv[0]);
+            return 2;
 
-            rt_cfg_scenes[rt_cfg_nscenes++] = a;
-        }
+        case RT_PARSE_OK:
+            break;
     }
+
+    /*
+     * --list and --list-scene-dir are questions about the fixture set, not runs:
+     * each prints and exits 0 before anything is loaded.
+     */
+    if(rt_cfg_list) {
+        for(size_t k = 0; k < BR_ASIZE(rt_default_scenes); ++k)
+            printf("%s\n", rt_default_scenes[k]);
+
+        return 0;
+    }
+
+    if(rt_cfg_list_dir != NULL)
+        return rt_list_scene_dir(rt_cfg_list_dir);
 
     if(rt_cfg_nscenes == 0) {
         for(size_t k = 0; k < BR_ASIZE(rt_default_scenes); ++k)
@@ -2506,9 +2659,9 @@ int main(int argc, char **argv)
     }
 
     /*
-     * The vkrend witness needs the front screen brdemo only builds for --vulkan,
-     * so --vk-witness implies it. --vulkan on its own would put the fixture
-     * corpus on a front screen that cannot render it, so that pairing is refused
+     * The vkrend witness needs a front screen, which only --vulkan builds, so
+     * --vk-witness implies it. --vulkan on its own would put the fixture corpus
+     * on a front screen that cannot render it, so that pairing is refused
      * rather than run into a failure that names nothing.
      */
     if(rt_cfg_vk_witness) {
@@ -2523,44 +2676,80 @@ int main(int argc, char **argv)
         return 2;
     }
 
-    args.title    = "BRender render test";
-    args.width    = rt_cfg_width;
-    args.height   = rt_cfg_height;
-    args.no_stats = 1;
-    args.verbose  = rt_cfg_verbose;
-    args.vulkan   = rt_cfg_vulkan;
-
     if(strcmp(rt_cfg_device, "softrend") == 0) {
-        args.force_software = 1;
-        args.pm_type        = rt_cfg_pm_type;
-    } else {
-        args.force_software     = 0;
-        args.opengl_device_name = rt_cfg_device;
-        args.require_accel      = 1;
-
+        /*
+         * BR_PMT_MAX is "no type asked for"; the software renderer's own colour
+         * buffer is INDEX_8, which is what every stored softrend entry is.
+         */
+        if(!rt_cfg_bpp_set)
+            rt_cfg_pm_type = BR_PMT_INDEX_8;
+    } else if(rt_cfg_bpp_set && rt_cfg_pm_type == BR_PMT_INDEX_8) {
         /*
          * BR_PMT_INDEX_8 is a GL_R8UI integer attachment and the scene shader
          * writes `out vec4', so it is not a colour buffer a GL device can
          * render a scene into; refuse it rather than let the driver reject the
-         * type with something opaque. Unset leaves the driver's own type.
+         * type with something opaque. BR_PMT_MAX means none was asked for, and
+         * leaves the driver's own type.
          */
-        if(rt_cfg_bpp_set) {
-            if(rt_cfg_pm_type == BR_PMT_INDEX_8) {
-                fprintf(stderr, "--bpp 8 is not a scene target on a GL device (an integer attachment cannot take the scene's vec4 output); "
-                                "use 15, 16, 24 or 32\n");
-                return 2;
-            }
-
-            args.pm_type = rt_cfg_pm_type;
-        }
+        fprintf(stderr, "--bpp 8 is not a scene target on a GL device (an integer attachment cannot take the scene's vec4 output); "
+                        "use 15, 16, 24 or 32\n");
+        return 2;
     }
+
+    BrBegin();
+
+    if(rt_create_window(&demo) != BRE_OK) {
+        BrEnd();
+        return 1;
+    }
+
+    demo._screen->origin_x = (br_int_16)(demo._screen->width >> 1);
+    demo._screen->origin_y = (br_int_16)(demo._screen->height >> 1);
+
+    if(rt_resize_buffers(&demo) != BRE_OK) {
+        BrLogError("RT", "Error allocating the colour and depth buffers.");
+        BrEnd();
+        return 1;
+    }
+
+    switch(demo.colour_buffer->type) {
+        case BR_PMT_INDEX_8:
+            demo.clear_colour = 0;
+            break;
+        case BR_PMT_RGB_555:
+            demo.clear_colour = BR_COLOUR_RGB_555(0, 0, 0);
+            break;
+        case BR_PMT_RGB_565:
+            demo.clear_colour = BR_COLOUR_RGB_565(0, 0, 0);
+            break;
+        default:
+            demo.clear_colour = BR_COLOUR_RGBA(0, 0, 0, 255);
+            break;
+    }
+
+    BrRendererBegin(demo.colour_buffer, NULL, NULL, rt_primitive_heap, sizeof(rt_primitive_heap));
+
+    demo.order_table = BrZsOrderTableAllocate(1024, BR_ORDER_TABLE_LEAVE_BOUNDS | BR_ORDER_TABLE_BUCKET_SORT, BR_SORT_AVERAGE);
+    demo.world       = BrActorAllocate(BR_ACTOR_NONE, NULL);
+    BrZsActorOrderTableSet(demo.world, demo.order_table);
 
     /*
      * An init failure - a scene that will not load, or a reference that does not
      * fit - is a failed run, not a quiet one.
      */
-    if(BrDemoRunArg(&rt_dispatch, &args) != 0)
+    if(rt_app_init(&demo) != BRE_OK || rt_run(&demo) != 0)
         g_failed = 1;
+
+    rt_app_fini(&demo);
+
+    if(BrV1dbRendererQuery() != NULL)
+        BrRendererEnd();
+
+    BrPixelmapFree(demo.depth_buffer);
+    BrPixelmapFree(demo.colour_buffer);
+    BrPixelmapFree(demo._screen);
+    BrActorFree(demo.world);
+    BrEnd();
 
     return g_failed ? 1 : 0;
 }
