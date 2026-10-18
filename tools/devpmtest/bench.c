@@ -2,7 +2,15 @@
 #include <stdio.h>
 #include <string.h>
 
+#if defined(_MSC_VER) || defined(__MINGW32__)
+#include <malloc.h> /* alloca() */
+#else
+#include <alloca.h>
+#endif
+
 #include <brender.h>
+#include <brcapture.h>
+#include <parg.h>
 
 #include "bench.h"
 
@@ -12,9 +20,37 @@
  * front screens to be compared.
  */
 
-/* FNV-1a, the same constants gltfview's benchmark hashes its frames with. */
+/* FNV-1a's offset basis, the hash gltfview's benchmark starts its frames from. */
 #define DEVPMTEST_FNV_OFFSET 1469598103934665603ull
-#define DEVPMTEST_FNV_PRIME  1099511628211ull
+
+/*
+ * The long options. Values are arbitrary so long as they are positive and
+ * distinct, and the table is walked to turn one back into a name.
+ */
+#define DEVPMTEST_OPT_RUN_TEST           301
+#define DEVPMTEST_OPT_RUN_ALL            302
+#define DEVPMTEST_OPT_FRONT_SCREEN       303
+#define DEVPMTEST_OPT_OPENGL_DEVICE_NAME 304
+#define DEVPMTEST_OPT_FRAMES             305
+#define DEVPMTEST_OPT_DT_MS              306
+#define DEVPMTEST_OPT_DUMP               307
+#define DEVPMTEST_OPT_DUMP_DIR           308
+#define DEVPMTEST_OPT_CHECKSUM           309
+#define DEVPMTEST_OPT_HELP               310
+
+static const struct parg_option bench_options[] = {
+    {.name = "run-test",           .has_arg = PARG_REQARG, .flag = NULL, .val = DEVPMTEST_OPT_RUN_TEST          },
+    {.name = "run-all",            .has_arg = PARG_NOARG,  .flag = NULL, .val = DEVPMTEST_OPT_RUN_ALL           },
+    {.name = "front-screen",       .has_arg = PARG_REQARG, .flag = NULL, .val = DEVPMTEST_OPT_FRONT_SCREEN      },
+    {.name = "opengl-device-name", .has_arg = PARG_REQARG, .flag = NULL, .val = DEVPMTEST_OPT_OPENGL_DEVICE_NAME},
+    {.name = "frames",             .has_arg = PARG_REQARG, .flag = NULL, .val = DEVPMTEST_OPT_FRAMES            },
+    {.name = "dt-ms",              .has_arg = PARG_REQARG, .flag = NULL, .val = DEVPMTEST_OPT_DT_MS             },
+    {.name = "dump",               .has_arg = PARG_REQARG, .flag = NULL, .val = DEVPMTEST_OPT_DUMP              },
+    {.name = "dump-dir",           .has_arg = PARG_REQARG, .flag = NULL, .val = DEVPMTEST_OPT_DUMP_DIR          },
+    {.name = "checksum",           .has_arg = PARG_NOARG,  .flag = NULL, .val = DEVPMTEST_OPT_CHECKSUM          },
+    {.name = "help",               .has_arg = PARG_NOARG,  .flag = NULL, .val = DEVPMTEST_OPT_HELP              },
+    {.name = NULL,                 .has_arg = 0,           .flag = NULL, .val = 0                               },
+};
 
 struct devpmtest_bench {
     devpmtest_front_screen front_screen;
@@ -52,14 +88,15 @@ static void bench_usage(FILE *out)
                  "  --help              Display this message.\n");
 }
 
-static const char *bench_arg_value(int argc, char **argv, int *i, const char *opt)
+/* The row of bench_options[] a value belongs to, for a message parg cannot spell. */
+static const struct parg_option *bench_option_for_value(int val)
 {
-    if(*i + 1 >= argc) {
-        fprintf(stderr, "devpmtest: option %s requires an argument.\n", opt);
-        return NULL;
+    for(const struct parg_option *o = bench_options; o->name != NULL; ++o) {
+        if(o->val == val)
+            return o;
     }
 
-    return argv[++*i];
+    return NULL;
 }
 
 devpmtest_bench_parse DevpmTestBenchParse(int argc, char **argv, devpmtest_bench **bench)
@@ -68,86 +105,137 @@ devpmtest_bench_parse DevpmTestBenchParse(int argc, char **argv, devpmtest_bench
     br_boolean              front_set           = BR_FALSE;
     br_boolean              used_capture_option = BR_FALSE;
     br_boolean              run_test_set        = BR_FALSE;
+    struct parg_state       ps;
+    char                  **tmp_argv;
+    int                     optend;
 
     *bench = NULL;
     BrMemSet(b, 0, sizeof(*b));
     b->frames   = 1;
     b->delta_ms = 1000.0f / 60.0f;
 
-    for(int i = 1; i < argc; ++i) {
-        const char *opt = argv[i];
-        const char *val;
+    /*
+     * parg_reorder() permutes the array it is given, so parse a copy and leave
+     * the caller's argv alone. A command line is small and this runs before
+     * BrBegin(), so alloca() is enough; nothing here allocates.
+     */
+    tmp_argv = alloca(sizeof(char *) * (argc + 1));
+    BrMemCpy(tmp_argv, argv, argc * sizeof(char *));
+    tmp_argv[argc] = NULL;
 
-        if(strcmp(opt, "--help") == 0) {
-            bench_usage(stdout);
-            return DEVPMTEST_BENCH_HELP;
-        } else if(strcmp(opt, "--run-test") == 0) {
-            if((val = bench_arg_value(argc, argv, &i, opt)) == NULL)
-                goto bad;
+    parg_init(&ps);
 
-            b->test_index = BrAToI(val);
-            b->have_run   = BR_TRUE;
-            run_test_set  = BR_TRUE;
-        } else if(strcmp(opt, "--run-all") == 0) {
-            b->run_all  = BR_TRUE;
-            b->have_run = BR_TRUE;
-        } else if(strcmp(opt, "--front-screen") == 0) {
-            if((val = bench_arg_value(argc, argv, &i, opt)) == NULL)
-                goto bad;
+    if((optend = parg_reorder(argc, tmp_argv, ":", bench_options)) < 0)
+        goto bad;
 
-            if(strcmp(val, "soft") == 0)
-                b->front_screen = DEVPMTEST_FRONT_SOFT;
-            else if(strcmp(val, "gl") == 0)
-                b->front_screen = DEVPMTEST_FRONT_GL;
-            else if(strcmp(val, "vulkan") == 0)
-                b->front_screen = DEVPMTEST_FRONT_VULKAN;
-            else {
-                fprintf(stderr, "devpmtest: unknown front screen \"%s\" (want soft, gl or vulkan).\n", val);
+    /*
+     * parg_reorder() leaves a "--" at the end of the option region, where the
+     * parse then stops. This tool has never accepted one, so put it back among
+     * the stray arguments below rather than let it end the options silently.
+     */
+    if(optend > 1 && strcmp(tmp_argv[optend - 1], "--") == 0)
+        --optend;
+
+    for(int c; (c = parg_getopt_long(&ps, optend, tmp_argv, ":", bench_options, NULL)) != -1;) {
+        switch(c) {
+            case DEVPMTEST_OPT_HELP:
+                bench_usage(stdout);
+                return DEVPMTEST_BENCH_HELP;
+
+            case DEVPMTEST_OPT_RUN_TEST:
+                b->test_index = BrAToI(ps.optarg);
+                b->have_run   = BR_TRUE;
+                run_test_set  = BR_TRUE;
+                break;
+
+            case DEVPMTEST_OPT_RUN_ALL:
+                b->run_all  = BR_TRUE;
+                b->have_run = BR_TRUE;
+                break;
+
+            case DEVPMTEST_OPT_FRONT_SCREEN:
+                if(strcmp(ps.optarg, "soft") == 0)
+                    b->front_screen = DEVPMTEST_FRONT_SOFT;
+                else if(strcmp(ps.optarg, "gl") == 0)
+                    b->front_screen = DEVPMTEST_FRONT_GL;
+                else if(strcmp(ps.optarg, "vulkan") == 0)
+                    b->front_screen = DEVPMTEST_FRONT_VULKAN;
+                else {
+                    fprintf(stderr, "devpmtest: unknown front screen \"%s\" (want soft, gl or vulkan).\n", ps.optarg);
+                    goto bad;
+                }
+
+                front_set = BR_TRUE;
+                break;
+
+            case DEVPMTEST_OPT_OPENGL_DEVICE_NAME:
+                b->opengl_device_name = ps.optarg;
+                break;
+
+            case DEVPMTEST_OPT_FRAMES:
+                b->frames = (br_uint_32)BrAToI(ps.optarg);
+                if(b->frames == 0) {
+                    fprintf(stderr, "devpmtest: --frames must be at least 1.\n");
+                    goto bad;
+                }
+
+                used_capture_option = BR_TRUE;
+                break;
+
+            case DEVPMTEST_OPT_DT_MS:
+                b->delta_ms         = BrAToF(ps.optarg);
+                used_capture_option = BR_TRUE;
+                break;
+
+            case DEVPMTEST_OPT_DUMP:
+                b->dump_path        = ps.optarg;
+                used_capture_option = BR_TRUE;
+                break;
+
+            case DEVPMTEST_OPT_DUMP_DIR:
+                b->dump_dir         = ps.optarg;
+                used_capture_option = BR_TRUE;
+                break;
+
+            case DEVPMTEST_OPT_CHECKSUM:
+                b->checksum         = BR_TRUE;
+                used_capture_option = BR_TRUE;
+                break;
+
+            case ':': {
+                /*
+                 * parg reports an option missing its required argument and an
+                 * option given an argument it does not take the same way; the
+                 * table says which this was, and only one has a message of its
+                 * own.
+                 */
+                const struct parg_option *opt = bench_option_for_value(ps.optopt);
+
+                if(opt != NULL && opt->has_arg == PARG_REQARG)
+                    fprintf(stderr, "devpmtest: option --%s requires an argument.\n", opt->name);
+                else
+                    fprintf(stderr, "devpmtest: unknown option \"%s\".\n", tmp_argv[ps.optind - 1]);
                 goto bad;
             }
 
-            front_set = BR_TRUE;
-        } else if(strcmp(opt, "--opengl-device-name") == 0) {
-            if((val = bench_arg_value(argc, argv, &i, opt)) == NULL)
+            case 1:
+            case '?':
+            default:
+                /*
+                 * '?' is an option parg could not match, and for it optarg is
+                 * NULL while optind has already stepped past the token; 1 is
+                 * an element that is not an option at all, and optarg points
+                 * at it. This tool has no argument either way.
+                 */
+                fprintf(stderr, "devpmtest: unknown option \"%s\".\n", ps.optarg != NULL ? ps.optarg : tmp_argv[ps.optind - 1]);
                 goto bad;
-
-            b->opengl_device_name = val;
-        } else if(strcmp(opt, "--frames") == 0) {
-            if((val = bench_arg_value(argc, argv, &i, opt)) == NULL)
-                goto bad;
-
-            b->frames = (br_uint_32)BrAToI(val);
-            if(b->frames == 0) {
-                fprintf(stderr, "devpmtest: --frames must be at least 1.\n");
-                goto bad;
-            }
-
-            used_capture_option = BR_TRUE;
-        } else if(strcmp(opt, "--dt-ms") == 0) {
-            if((val = bench_arg_value(argc, argv, &i, opt)) == NULL)
-                goto bad;
-
-            b->delta_ms         = BrAToF(val);
-            used_capture_option = BR_TRUE;
-        } else if(strcmp(opt, "--dump") == 0) {
-            if((val = bench_arg_value(argc, argv, &i, opt)) == NULL)
-                goto bad;
-
-            b->dump_path        = val;
-            used_capture_option = BR_TRUE;
-        } else if(strcmp(opt, "--dump-dir") == 0) {
-            if((val = bench_arg_value(argc, argv, &i, opt)) == NULL)
-                goto bad;
-
-            b->dump_dir         = val;
-            used_capture_option = BR_TRUE;
-        } else if(strcmp(opt, "--checksum") == 0) {
-            b->checksum         = BR_TRUE;
-            used_capture_option = BR_TRUE;
-        } else {
-            fprintf(stderr, "devpmtest: unknown option \"%s\".\n", opt);
-            goto bad;
         }
+    }
+
+    /* Arguments rather than options are just as unknown as they ever were. */
+    if(optend < argc) {
+        fprintf(stderr, "devpmtest: unknown option \"%s\".\n", tmp_argv[optend]);
+        goto bad;
     }
 
     if(!b->have_run) {
@@ -270,58 +358,27 @@ const char *DevpmTestBenchAllPath(const devpmtest_bench *bench, const char *name
 }
 
 /*
- * Hash a pixelmap and count the pixels that are not the clear colour. The
- * captured buffer is converted to the RGBA byte-array layout the PNG writer
- * consumes, so the same frame hashes the same way whatever type and channel
- * order the front screen read it back in.
+ * Hash a pixelmap and count the pixels that are not the clear colour. brcapture
+ * hashes it as RGBA8, the layout the PNG writer consumes, so the same frame
+ * hashes the same way whatever type and channel order the front screen read it
+ * back in.
  */
 static void bench_capture_checksum(br_pixelmap *pm)
 {
-    br_pixelmap *rgba    = pm;
-    br_pixelmap *conv    = NULL;
-    br_uint_64   hash    = DEVPMTEST_FNV_OFFSET;
-    br_uint_32   covered = 0;
-    br_uint_32   total;
-    br_uint_32   bytes;
+    br_uint_64 hash    = DEVPMTEST_FNV_OFFSET;
+    br_uint_32 covered = 0;
+    br_uint_32 total;
 
     if(BrPixelmapPixelSize(pm) == 0) {
         BrLogWarn("DEVPMTEST", "Unknown captured pixel type %u; no checksum.", (unsigned)pm->type);
         return;
     }
 
-    if(pm->type != BR_PMT_RGBA_8888_ARR) {
-        if((conv = BrPixelmapCloneTyped(pm, BR_PMT_RGBA_8888_ARR)) == NULL) {
-            BrLogWarn("DEVPMTEST", "Could not convert the captured type %u to RGBA_8888_ARR; no checksum.", (unsigned)pm->type);
-            return;
-        }
-
-        rgba = conv;
-    }
-
-    bytes = BrPixelmapPixelSize(rgba) / 8;
-    total = (br_uint_32)rgba->width * (br_uint_32)rgba->height;
-
-    for(br_int_32 y = 0; y < rgba->height; ++y) {
-        const br_uint_8 *row = (const br_uint_8 *)rgba->pixels + (br_size_t)y * rgba->row_bytes;
-
-        for(br_int_32 x = 0; x < rgba->width; ++x) {
-            const br_uint_8 *p = row + (br_size_t)x * bytes;
-
-            for(br_uint_32 c = 0; c < bytes; ++c) {
-                hash ^= p[c];
-                hash *= DEVPMTEST_FNV_PRIME;
-            }
-
-            if(p[0] || p[1] || p[2])
-                ++covered;
-        }
-    }
+    hash  = BrCaptureHashPixelmapRGBA(hash, pm, &covered);
+    total = (br_uint_32)pm->width * (br_uint_32)pm->height;
 
     printf("DEVPMTEST checksum=%016llx coverage=%.2f%% (%u/%u px at %dx%d, capture type=%u)\n", (unsigned long long)hash,
            100.0 * (double)covered / (double)total, covered, total, (int)pm->width, (int)pm->height, (unsigned)pm->type);
-
-    if(conv != NULL)
-        BrPixelmapFree(conv);
 }
 
 void DevpmTestBenchCapture(br_pixelmap *colour_buffer, const char *png_path, br_boolean checksum)

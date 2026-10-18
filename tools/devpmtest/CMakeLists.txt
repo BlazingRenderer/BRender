@@ -5,7 +5,7 @@ add_executable(devpmtest
         bench.c
         bench.h
 )
-target_link_libraries(devpmtest PRIVATE BRender::Full BRender::DDI)
+target_link_libraries(devpmtest PRIVATE BRender::Full BRender::DDI parg brcapture)
 set_property(TARGET devpmtest PROPERTY VS_DEBUGGER_WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}/examples/dat")
 set_property(TARGET devpmtest PROPERTY FOLDER "BRender/Tools")
 
