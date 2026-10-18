@@ -2,8 +2,6 @@ project(gltfview)
 
 add_executable(gltfview
         main.c
-        bench.c
-        bench.h
         ../../contrib/editorcam/editorcam.c
         ../../contrib/editorcam/editorcam.h
         ../../contrib/editorcam/editorcam_p.h

@@ -5,15 +5,14 @@
  * investigated and confirmed by the owner, and they are recorded here so they
  * are not refiled as defects - the notes they used to live in were untracked.
  *
- * 1. At --bpp 8 the *frame* is correct, but the PPM/PNG this writes is
- *    presented through a palette built from the scene's own pixelmaps
- *    (build_clut() below). A frame whose indices come from a lookup-table band
- *    rather than a texture is outside what that palette can describe, so every
- *    index resolves to black. It is bpp8-only, not lookup-table-specific - it
- *    hits fixtures with no textures at all - and the frame is byte-identical to
- *    rendertest's from the same scene. `rendertest --ppm-dir` presents through
- *    the harness's palette and is the way to look at what the reference
- *    compares.
+ * 1. At --bpp 8 the *frame* is correct, but it is presented through a
+ *    palette built from the scene's own pixelmaps (build_clut() below). A
+ *    frame whose indices come from a lookup-table band rather than a texture
+ *    is outside what that palette can describe, so every index resolves to
+ *    black. It is bpp8-only, not lookup-table-specific - it hits fixtures with
+ *    no textures at all - and the frame is byte-identical to rendertest's from
+ *    the same scene. `rendertest --ppm-dir` presents through the harness's
+ *    palette and is the way to look at what the reference compares.
  *
  * 2. The software path renders with editorcam's 0.01..1000 depth range
  *    (contrib/editorcam/editorcam.c) rather than the scene camera's
@@ -22,18 +21,15 @@
  *    there is no way to drive its own from the scene. Scenes whose camera range
  *    matters therefore differ from rendertest's checksum.
  *
- * The window path and the bench's dump resolve the same palette as (1)
- * (examples/gltfview/bench.c, drivers/sdl3dev/surface.c).
+ * The window path resolves the same palette as (1) (drivers/sdl3dev/surface.c).
  */
 #include <SDL3/SDL.h>
 #include <brender.h>
 #include <brdemo.h>
 #include "editorcam.h"
-#include "bench.h"
 
 typedef struct br_gltfview_state {
     br_editor_camera *editorcam;
-    gltfview_bench   *bench;
     br_boolean        z_sort;
 } br_gltfview_state;
 
@@ -295,12 +291,6 @@ static br_error GLTFInit(br_demo *demo)
     br_pixelmap *clut = build_clut(results->pixelmaps, results->npixelmaps);
     BrPixelmapPaletteSet(demo->colour_buffer, clut);
 
-    /*
-     * The colour buffer resolves its palette through the device CLUT and leaves
-     * pm->map NULL; publish it so the bench dump can de-CLUT the frame.
-     */
-    demo->palette = clut;
-
     for(size_t i = 0; i < results->npixelmaps; ++i) {
         br_pixelmap *pm = results->pixelmaps[i];
 
@@ -359,8 +349,6 @@ static br_error GLTFInit(br_demo *demo)
 
     FocusCamOnSceneCamera(state->editorcam, demo->world);
 
-    state->bench = GLTFViewBenchAllocate(demo);
-
     return BRE_OK;
 }
 
@@ -388,12 +376,8 @@ static void GLTFRender(br_demo *demo)
 
     BrRendererFrameBegin();
 
-    GLTFViewBenchBeginStage(state->bench, BENCH_STAGE_CLEAR);
     BrPixelmapFill(demo->colour_buffer, demo->clear_colour);
     BrPixelmapFill(demo->depth_buffer, 0xFFFFFFFF);
-    GLTFViewBenchEndStage(state->bench, BENCH_STAGE_CLEAR);
-
-    GLTFViewBenchBeginStage(state->bench, BENCH_STAGE_SCENE);
 
     /*
      * The Z-sorted path binds no depth buffer, so the fill above is left
@@ -404,27 +388,11 @@ static void GLTFRender(br_demo *demo)
     else
         BrZbSceneRender(demo->world, demo->camera, demo->colour_buffer, demo->depth_buffer);
 
-    GLTFViewBenchEndStage(state->bench, BENCH_STAGE_SCENE);
-
     BrRendererFrameEnd();
-
-    /*
-     * NB: This measures up to here, so the demo's text overlay and the present
-     * are accounted for in the *following* frame's interval. That is deliberate:
-     * it keeps the measured period to a whole frame including the swap.
-     */
-    GLTFViewBenchEndFrame(state->bench);
-
-    if(GLTFViewBenchShouldQuit(state->bench))
-        SDL_PushEvent(&(SDL_Event){.type = SDL_EVENT_QUIT});
 }
 
 static void GLTFDestroy(br_demo *demo)
 {
-    br_gltfview_state *state = demo->user;
-
-    GLTFViewBenchReport(state->bench);
-
     BrDemoDefaultDestroy(demo);
 }
 
