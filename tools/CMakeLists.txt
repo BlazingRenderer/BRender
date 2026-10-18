@@ -25,6 +25,9 @@ if(TARGET BRender::Drivers::SDL3Dev AND TARGET BRender::Drivers::GLRend)
 		set_property(TARGET ${target} PROPERTY FOLDER "BRender/Tools")
 	endforeach()
 
+	# The headless glTF scene benchmark; a tool, not a demo.
+	add_subdirectory(gltfbench)
+
 	# rendertest is the CI corpus: it covers the GL devices and the vkrend
 	# witness, so it wants everything CI has. A tree without vkrend is not one
 	# it is meant to run in, and it is not built there rather than registered in
