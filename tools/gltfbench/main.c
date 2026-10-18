@@ -57,6 +57,7 @@ typedef struct gltfbench_args {
     float       angle;
     float       elevation;
     br_boolean  checksum;
+    br_boolean  finish;
     const char *ppm_path;
     const char *csv_path;
 } gltfbench_args;
@@ -79,6 +80,7 @@ typedef struct gltfbench {
 
     SDL_Window   *window;
     br_capture_gl gl;
+    void (*gl_finish)(void);
 } gltfbench;
 
 void _BrBeginHook(void) // NOLINT(*-reserved-identifier)
@@ -109,6 +111,7 @@ enum {
     GLTFBENCH_OPT_ANGLE,
     GLTFBENCH_OPT_ELEVATION,
     GLTFBENCH_OPT_CHECKSUM,
+    GLTFBENCH_OPT_FINISH,
     GLTFBENCH_OPT_PPM,
     GLTFBENCH_OPT_CSV,
     GLTFBENCH_OPT_HELP,
@@ -124,6 +127,7 @@ static const struct parg_option gltfbench_options[] = {
     {.name = "angle", .has_arg = PARG_REQARG, .val = GLTFBENCH_OPT_ANGLE},
     {.name = "elevation", .has_arg = PARG_REQARG, .val = GLTFBENCH_OPT_ELEVATION},
     {.name = "checksum", .has_arg = PARG_NOARG, .val = GLTFBENCH_OPT_CHECKSUM},
+    {.name = "finish", .has_arg = PARG_NOARG, .val = GLTFBENCH_OPT_FINISH},
     {.name = "ppm", .has_arg = PARG_REQARG, .val = GLTFBENCH_OPT_PPM},
     {.name = "csv", .has_arg = PARG_REQARG, .val = GLTFBENCH_OPT_CSV},
     {.name = "help", .has_arg = PARG_NOARG, .val = GLTFBENCH_OPT_HELP},
@@ -146,6 +150,7 @@ static void gltfbench_usage(FILE *fp, const char *argv0)
             "  --angle F       camera orbit angle in degrees (default %.1f)\n"
             "  --elevation F   camera elevation in radians (default %.2f)\n"
             "  --checksum      print the last frame's checksum and coverage\n"
+            "  --finish        wait for the GPU to finish each frame before timing it\n"
             "  --ppm PATH      write the last measured frame to PATH as a binary PPM\n"
             "  --csv PATH      write one line per measured frame: milliseconds\n"
             "  --help          show this help and exit\n",
@@ -175,6 +180,7 @@ static int gltfbench_parse_args(int argc, char **argv, gltfbench_args *args)
         .angle     = GLTFBENCH_DEFAULT_ANGLE,
         .elevation = GLTFBENCH_DEFAULT_ELEVATION,
         .checksum  = BR_FALSE,
+        .finish    = BR_FALSE,
         .ppm_path  = NULL,
         .csv_path  = NULL,
     };
@@ -226,6 +232,10 @@ static int gltfbench_parse_args(int argc, char **argv, gltfbench_args *args)
 
             case GLTFBENCH_OPT_CHECKSUM:
                 args->checksum = BR_TRUE;
+                break;
+
+            case GLTFBENCH_OPT_FINISH:
+                args->finish = BR_TRUE;
                 break;
 
             case GLTFBENCH_OPT_PPM:
@@ -651,6 +661,7 @@ static br_error gltfbench_setup_camera(gltfbench *bench)
  */
 static void gltfbench_load_gl(gltfbench *bench)
 {
+    bench->gl_finish      = (void (*)(void))SDL_GL_GetProcAddress("glFinish");
     bench->gl.ReadPixels  = (br_capture_pfn_ReadPixels)SDL_GL_GetProcAddress("glReadPixels");
     bench->gl.ReadBuffer  = (br_capture_pfn_ReadBuffer)SDL_GL_GetProcAddress("glReadBuffer");
     bench->gl.BindTexture = (br_capture_pfn_BindTexture)SDL_GL_GetProcAddress("glBindTexture");
@@ -811,6 +822,9 @@ static br_error gltfbench_run(gltfbench *bench, FILE *csv)
             return BRE_FAIL;
 
         BrPixelmapDoubleBuffer(bench->screen, bench->colour_buffer);
+
+        if(args->finish && bench->gl_finish != NULL)
+            bench->gl_finish();
 
         if(measured && csv != NULL) {
             double ms = (double)(SDL_GetTicksNS() - start_ns) / 1e6;
