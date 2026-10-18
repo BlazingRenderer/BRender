@@ -138,8 +138,8 @@ int BR_RESIDENT_ENTRY BrHashMapSetLoadFactor(br_hashmap *hm, uint16_t min_num, u
      * - and - = ----- and -----
      * b     d   b * d     d * b
      */
-    numa = min_num * max_den;
-    numb = max_num * min_den;
+    numa = (uint32_t)min_num * max_den;
+    numb = (uint32_t)max_num * min_den;
 
     if(numa > numb)
         return BRE_INVALID;
