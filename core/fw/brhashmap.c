@@ -202,7 +202,8 @@ static br_hashmap_bucket *add_or_replace_bucket(br_hashmap *hm, br_hashmap_bucke
 
 int BR_RESIDENT_ENTRY BrHashMapResize(br_hashmap *hm, size_t nelem)
 {
-    br_hashmap_bucket *bkts, *tmpbkts;
+    br_hashmap_bucket *oldbkts, *newbkts;
+    size_t             oldn;
 
     validate(hm);
 
@@ -210,69 +211,54 @@ int BR_RESIDENT_ENTRY BrHashMapResize(br_hashmap *hm, size_t nelem)
         return BRE_INVALID;
 
     /* Nothing to do. */
-    if(nelem == hm->size)
+    if(nelem == hm->num_buckets)
         return 0;
 
-    /* Make sure the realloc() size won't overflow. */
+    /* Make sure the allocation size won't overflow. */
     if(nelem >= (SIZE_MAX / sizeof(br_hashmap_bucket)))
         return BRE_RANGE;
 
-    /* Reallocate the buckets. */
-    bkts = BrMemReallocate(hm->buckets, sizeof(br_hashmap_bucket) * nelem, BR_MEMORY_APPLICATION);
-    if(bkts == NULL)
+    newbkts = BrMemCalloc(nelem, sizeof(br_hashmap_bucket), BR_MEMORY_APPLICATION);
+    if(newbkts == NULL)
         return BRE_NO_MEMORY;
 
-    hm->buckets = bkts;
-
-    for(size_t i = hm->num_buckets; i < nelem; ++i)
-        reset_bucket(hm->buckets + i);
-
-    /* Shortcut - no items. no problem! */
-    if(hm->size == 0) {
-        hm->num_buckets = nelem;
-        return 0;
-    }
+    /* BR_INVALID_HASH is ~0, so calloc() alone isn't enough. */
+    for(size_t i = 0; i < nelem; ++i)
+        reset_bucket(newbkts + i);
 
     /*
-     * Allocate a temp bucket list (hue) to work with. Note that this
-     * needs to be done after the hm->buckets alloc to play nice to linear
-     * allocators.
+     * Rebuild the table before releasing the old one. Reallocating first
+     * would drop every entry sitting at an index beyond the new size,
+     * which is why shrinking must rehash from the old buckets.
      */
-    tmpbkts = BrMemCalloc(nelem, sizeof(br_hashmap_bucket), BR_MEMORY_APPLICATION);
-    if(tmpbkts == NULL) {
+    oldbkts = hm->buckets;
+    oldn    = hm->num_buckets;
 
-        /*
-         * This is a bit of a sticky situation - allocation has failed,
-         * and now we have more buckets that we can't redistribute in to.
-         * This also means it's not safe to rely on another realloc to shrink
-         * it again.
-         *
-         * Our only safe option is to waste the new memory :(
-         */
-        return BRE_NO_MEMORY;
-    }
-
+    /*
+     * Everything below rehashes against the new size, so publish it first:
+     * add_or_replace_bucket() (via LOOP_BUCKETS) takes the modulus from
+     * hm->num_buckets.
+     */
     hm->num_buckets = nelem;
 
-    for(size_t i = 0; i < nelem; ++i)
-        reset_bucket(tmpbkts + i);
-
     /* Now redistribute everything. */
-    for(size_t i = 0; i < nelem; ++i) {
+    for(size_t i = 0; i < oldn; ++i) {
         int                added;
-        br_hashmap_bucket *bkt = hm->buckets + i;
-        if(bkt->hash == BR_INVALID_HASH)
+        br_hashmap_bucket *bkt;
+
+        if(oldbkts[i].hash == BR_INVALID_HASH)
             continue;
 
         added = 0;
-        bkt   = add_or_replace_bucket(hm, tmpbkts, nelem, hm->buckets + i, &added);
+        bkt   = add_or_replace_bucket(hm, newbkts, nelem, oldbkts + i, &added);
         ASSERT(bkt != NULL);
     }
 
-    BrMemCpy(hm->buckets, tmpbkts, sizeof(br_hashmap_bucket) * nelem);
-    BrMemFree(tmpbkts);
+    hm->buckets = newbkts;
 
-    // fprintf(stderr, "Resizing to %zu\n", hm->num_buckets);
+    if(oldbkts != NULL)
+        BrMemFree(oldbkts);
+
     return 0;
 }
 
