@@ -259,12 +259,17 @@ add_library(vkrend
 
         vk_mem_alloc.cpp
         vk_mem_alloc.h
+        vk_mem_alloc_user.hpp
 )
 
 get_target_property(target_type vkrend TYPE)
 if (target_type STREQUAL SHARED_LIBRARY)
     target_compile_definitions(vkrend PRIVATE -DDEFINE_BR_ENTRY_POINT)
 endif ()
+
+target_compile_definitions(vkrend PRIVATE
+        "VMA_CONFIGURATION_USER_INCLUDES_H=\"vk_mem_alloc_user.hpp\""
+)
 
 target_include_directories(vkrend PRIVATE ${CMAKE_CURRENT_BINARY_DIR} glad/include)
 
