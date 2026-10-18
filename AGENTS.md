@@ -92,8 +92,8 @@ contrib/editorcam: fix camera offset after pan mode, add orbit mode
 There is no unit-test suite, and none should be added. `ctest` runs the render corpus with one test per configuration, and CI runs it for
 both floating-point classes. `contrib/run-tests.sh [build-dir]` is the human-facing gate and adds the checks that do not belong in a
 build - the build step itself and the `--history` commit walk. The corpus itself is:
-- `examples/rendertest` renders the fixtures in `examples/rendertest/dat/` under one device and diffs each frame against the checked-in
-  reference, `examples/rendertest/rendertest.txt`. Run it (`--device <glrend|glrend1x|softrend> [--bpp n] [-w W -h H] [--no-depth]`) after
+- `tools/rendertest` renders the fixtures in `tools/rendertest/dat/` under one device and diffs each frame against the checked-in
+  reference, `tools/rendertest/rendertest.txt`. Run it (`--device <glrend|glrend1x|softrend> [--bpp n] [-w W -h H] [--no-depth]`) after
   any change that can move pixels; `result=PASS failures=0` is the pass condition.
 - The reference key is `<device>/<driver>/<fp-class>/<zb|zs>/<pixel-type>/<WxH>/<scene>`. `<fp-class>` is the width `float` and `double`
   expressions are evaluated at - `x87` (80-bit intermediates, `FLT_EVAL_METHOD` 2) or `declared` (each operation rounded at its type's
@@ -106,7 +106,7 @@ build - the build step itself and the `--history` commit walk. The corpus itself
 - The run also asserts relations between fixtures (e.g. `scene-unlit == scene-unlit-plain`), so a path that silently stops firing fails
   rather than only moving a checksum. `--ppm-dir <dir>` writes each frame as `<dir>/<scene>.ppm` when a checksum cannot show how a render changed.
 - softrend is the software rasteriser path; `--no-depth` renders through
-  `BrZsSceneRender()` and covers the Z-sort path. The fixtures come from `mkres scenes` (`examples/mkres/scene.c`), which writes them to
+  `BrZsSceneRender()` and covers the Z-sort path. The fixtures come from `mkres scenes` (`tools/mkres/scene.c`), which writes them to
   the current directory.
 
 ## Common Patterns

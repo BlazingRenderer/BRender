@@ -3,7 +3,7 @@
 # Bring the pentprim oracle worktree's corpus and rendertest harness forward
 # from a master ref.
 #
-# The x87 half of examples/rendertest/rendertest.txt is pentprim's output, and
+# The x87 half of tools/rendertest/rendertest.txt is pentprim's output, and
 # pentprim only exists on dev/pentprim-verification - a snapshot of the tree
 # from before the portable rasteriser replaced it. Its corpus, harness and
 # reference therefore drift behind master, and every blessing run has to bring
@@ -21,11 +21,11 @@
 #
 # A softrend change is not synced here: it is carried by cherry-picking its
 # commit onto the worktree, which is clean because the softrend change is a
-# commit of its own. examples/rendertest includes the reference table, so a
+# commit of its own. tools/rendertest includes the reference table, so a
 # cherry-pick that also carries a table change finds it already current and
 # resolves to this sync's.
 #
-# examples/brdemo is synced with examples/rendertest because rendertest is
+# examples/brdemo is synced with tools/rendertest because rendertest is
 # built from the two together: a harness change that reaches one and not the
 # other leaves the worktree's rendertest using a brdemo API the branch does not
 # have, and it does not compile. (The require_accel change was the first one to
@@ -75,7 +75,12 @@ if ! git -C "$worktree" rev-parse --verify --quiet "$from^{commit}" >/dev/null; 
     exit 2
 fi
 
-paths=(examples/rendertest examples/brdemo examples/mkres resources/gltf-reference)
+# rendertest, brcapture, devpmtest and mkres live in tools/; the two CMakeLists
+# files come with them because the worktree predates the move and would
+# otherwise keep adding the old examples/ paths. Its examples/{rendertest,mkres}
+# directories are left behind and are inert once examples/CMakeLists.txt no
+# longer names them.
+paths=(tools/rendertest tools/brcapture tools/devpmtest tools/mkres examples/brdemo examples/CMakeLists.txt tools/CMakeLists.txt resources/gltf-reference)
 
 # Refuse to run over changes outside the synced paths. The commit below is
 # path-limited, so it cannot sweep them in, but a sync has no business sharing
@@ -117,7 +122,7 @@ if git -C "$worktree" diff --cached --quiet -- "${paths[@]}"; then
 else
     git -C "$worktree" commit -q \
         -m "meta: sync oracle from $sha" \
-        -m "Brings examples/rendertest, examples/brdemo, examples/mkres and resources/gltf-reference forward from $from." \
+        -m "Brings tools/rendertest, tools/brcapture, tools/devpmtest, tools/mkres, examples/brdemo and resources/gltf-reference forward from $from." \
         -- "${paths[@]}" || {
         echo "error: could not commit the sync" >&2
         exit 1

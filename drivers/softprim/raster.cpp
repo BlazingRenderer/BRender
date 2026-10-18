@@ -2414,7 +2414,7 @@ inline br_int_32 PizDecV(br_int_32 a, br_int_32 size) noexcept
  * middle of the chain that stops the optimiser keeping these values in
  * registers. The store is what the x87 build needs, and the volatile is the
  * portable way to ask for it; this is the same class test as RT_FP_CLASS in
- * examples/rendertest/main.c.
+ * tools/rendertest/main.c.
  */
 #if (defined(__FLT_EVAL_METHOD__) && __FLT_EVAL_METHOD__ == 2) || (defined(_M_IX86_FP) && _M_IX86_FP == 0)
 inline float PizRounded(long double v) noexcept

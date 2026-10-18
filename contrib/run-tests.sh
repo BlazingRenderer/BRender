@@ -4,7 +4,7 @@
 #
 # There is no unit-test suite and none is wanted; the checks are:
 #   1. the tree builds
-#   2. `mkres scenes` reproduces examples/rendertest/dat/ byte-for-byte
+#   2. `mkres scenes` reproduces tools/rendertest/dat/ byte-for-byte
 #   3. every scene the harness names has a fixture
 #   4. the render regression corpus passes at every device/bpp/depth
 #
@@ -91,19 +91,32 @@ fi
 # ------------------------------------------------- scene/fixture invariant
 
 # The working-tree half of this invariant is the `scenes-have-fixtures' ctest
-# test (examples/rendertest/scene-check.cmake), which asks the tool for its
+# test (tools/rendertest/scene-check.cmake), which asks the tool for its
 # scene list and compares it with dat/. This script adds the part a
 # working-tree check cannot do: that it held at every commit in a range.
 # Twelve commits in the history of this repository named scenes they did not
 # have, all invisible at the tip because the tip was consistent - a bisect
 # through one of them silently skipped a scene.
 
-rt_main=examples/rendertest/main.c
-rt_dat=examples/rendertest/dat
+# The harness lives in tools/rendertest now and lived in examples/rendertest
+# before that, so the path is asked of the revision rather than carried here: a
+# hardcoded one would silently check nothing on the wrong half of history.
+rt_main_at() { # $1 = revision
+    git ls-tree -r --name-only "$1" 2>/dev/null | grep -E '/rendertest/main\.c$' | head -1
+}
 
 # $1 = revision. Prints nothing when consistent, and one name per line when not.
-read_main() { git show "$1:$rt_main" 2>/dev/null; }
-read_dat() { git ls-tree --name-only "$1" "$rt_dat/" 2>/dev/null; }
+read_main() { # $1 = revision
+    local main
+    main=$(rt_main_at "$1")
+    [ -n "$main" ] && git show "$1:$main" 2>/dev/null
+}
+read_dat() { # $1 = revision
+    local main
+    main=$(rt_main_at "$1")
+    [ -n "$main" ] || return 0
+    git ls-tree --name-only "$1" "$(dirname "$main")/dat/" 2>/dev/null
+}
 read_names() { # $1 = revision
     read_main "$1" | awk '/rt_default_scenes\[\] *= *\{/,/^};/' | grep -oE '"scene-[a-z0-9_-]+"' | tr -d '"' | sort -u
 }
@@ -135,8 +148,8 @@ fi
 
 # ---------------------------------------------------------------- binaries
 
-rendertest="$build/examples/rendertest/rendertest"
-mkres="$build/examples/mkres/mkres"
+rendertest="$build/tools/rendertest/rendertest"
+mkres="$build/tools/mkres/mkres"
 
 if [ ! -x "$rendertest" ]; then
     echo; echo "no rendertest binary at $rendertest - cannot continue" >&2
@@ -148,7 +161,7 @@ export SDL_VIDEODRIVER=offscreen
 # ------------------------------------------------------------- the checks
 
 # The corpus and the fixture reproduction are registered as tests by the
-# build (examples/rendertest/CMakeLists.txt), so they are written once. This
+# build (tools/rendertest/CMakeLists.txt), so they are written once. This
 # script used to carry a second copy of the corpus loop, and the two drifted: a
 # run that finished and failed was reported here as one that had produced no
 # result at all.

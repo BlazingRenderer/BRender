@@ -29,7 +29,7 @@ make
 The software renderer (`drivers/softprim/`) is portable C/C++ and is built with
 the other drivers on every architecture. It reproduces the output of the x86
 assembly rasteriser it replaced, whose frames are the checked-in reference for
-`examples/rendertest`.
+`tools/rendertest`.
 
 ### macOS (Apple Silicon)
 

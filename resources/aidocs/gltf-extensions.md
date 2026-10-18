@@ -81,7 +81,7 @@ all can still be the thing that changes the style of the actors under it.
 }
 ```
 
-Abridged from `examples/rendertest/dat/scene-edges.gltf`.
+Abridged from `tools/rendertest/dat/scene-edges.gltf`.
 
 ### Fields
 
@@ -172,7 +172,7 @@ name the same entry.
 }
 ```
 
-Abridged from `examples/rendertest/dat/scene-edges.gltf`: every property not listed there is equal to its
+Abridged from `tools/rendertest/dat/scene-edges.gltf`: every property not listed there is equal to its
 default and was therefore omitted.
 
 ### Fields

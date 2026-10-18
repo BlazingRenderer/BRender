@@ -22,7 +22,7 @@ bits then rounding once lands on a different `float` than rounding at every
 step. That difference reaches the frame through softrend's setup *and* through
 core's scene setup, so softprim and glrend alike produce different pixels from
 the same scene — which is why every entry carries the class rather than only
-the software ones. Rendertest derives its own class (`examples/rendertest/main.c`);
+the software ones. Rendertest derives its own class (`tools/rendertest/main.c`);
 nothing chooses it by hand.
 
 The `x87` half is pentprim's output, and it is the bit-exactness oracle for the
@@ -45,7 +45,7 @@ CI runs this for both classes: `brender-samples` (declared) and
 A `fixtures` failure is almost always a stale `mkres` binary rather than a
 divergent generator: rebuild the `mkres` target — and `rendertest` — in every
 build directory in use before believing it. Each build generates its own `mkres`
-from `examples/mkres/scene.c`, and one left behind by an earlier commit keeps
+from `tools/mkres/scene.c`, and one left behind by an earlier commit keeps
 writing the fixtures that commit generated.
 
 `contrib/run-tests.sh [build-dir] [--no-build] [--history <range>]` is the
@@ -108,7 +108,7 @@ softrend change is carried onto it by cherry-pick, not by that sync.
 
 2. Bring its corpus, harness and reference forward from the ref you are
    blessing. `contrib/sync-oracle.sh --from <ref>` checks out that ref's
-   `examples/rendertest`, `examples/brdemo`, `examples/mkres` and
+   `tools/rendertest`, `examples/brdemo`, `tools/mkres` and
    `resources/gltf-reference` into the worktree and commits them as
    `meta: sync oracle from <sha>`; it refuses a worktree that is dirty outside
    those paths. It finds the worktree on the branch or the sibling `<repo>-pent`
@@ -145,10 +145,10 @@ softrend change is carried onto it by cherry-pick, not by that sync.
    oracle=<the oracle worktree>
    for cfg in "8 zb" "8 zs" "15 zb" "15 zs" "16 zb" "16 zs" "24 zb" "24 zs"; do
        set -- $cfg; [ "$2" = zs ] && d=--no-depth || d=
-       "$oracle/cmake-build-32-pent2/examples/rendertest/rendertest" \
+       "$oracle/cmake-build-32-pent2/tools/rendertest/rendertest" \
            --device softrend --bpp "$1" $d \
-           --scene-dir examples/rendertest/dat \
-           --reference examples/rendertest/rendertest.txt --bless
+           --scene-dir tools/rendertest/dat \
+           --reference tools/rendertest/rendertest.txt --bless
    done
    ```
 
@@ -177,9 +177,9 @@ softrend change is carried onto it by cherry-pick, not by that sync.
        [ "$cfg" = zs ] && d=--no-depth || d=
        for dev in glrend glrend1x; do
            SDL_VIDEODRIVER=offscreen LIBGL_ALWAYS_SOFTWARE=true \
-               cmake-build-32/examples/rendertest/rendertest --device "$dev" $d \
-                   --scene-dir examples/rendertest/dat \
-                   --reference examples/rendertest/rendertest.txt --bless
+               cmake-build-32/tools/rendertest/rendertest --device "$dev" $d \
+                   --scene-dir tools/rendertest/dat \
+                   --reference tools/rendertest/rendertest.txt --bless
        done
    done
    ```

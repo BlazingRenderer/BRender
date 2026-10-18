@@ -20,7 +20,7 @@ if (BUILD_SHARED_LIBS)
 endif ()
 
 # Defines BUILD_TESTING (on by default) and enables testing; the corpus is
-# registered in examples/rendertest.
+# registered in tools/rendertest.
 include(CTest)
 
 option(BRENDER_USE_SDL2 "Use SDL2" OFF)

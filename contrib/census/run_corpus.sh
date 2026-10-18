@@ -35,8 +35,8 @@ BUILD=${1:?usage: run_corpus.sh <build-dir> <out-dir>}
 OUT=${2:?usage: run_corpus.sh <build-dir> <out-dir>}
 
 ROOT=$(cd "$(dirname "$0")/../.." && pwd)
-RT=$BUILD/examples/rendertest/rendertest
-DAT=${CENSUS_DAT:-$ROOT/examples/rendertest/dat}
+RT=$BUILD/tools/rendertest/rendertest
+DAT=${CENSUS_DAT:-$ROOT/tools/rendertest/dat}
 REF=${CENSUS_REFERENCE:-}
 LOGS=$OUT/logs
 
@@ -47,7 +47,7 @@ rm -f "$LOGS"/*.log "$LOGS"/*.txt
 mapfile -t FIXTURES < <("$RT" --list)
 
 # The reference scenes are whatever resources/gltf-reference holds: the same
-# set examples/rendertest/CMakeLists.txt registers as the refscenes-* tests.
+# set tools/rendertest/CMakeLists.txt registers as the refscenes-* tests.
 # The directory is the one place that says which they are.
 REFDIR=$ROOT/resources/gltf-reference
 mapfile -t REFSCENES < <("$RT" --list-scene-dir "$REFDIR")

@@ -13,12 +13,26 @@ endif()
 add_subdirectory(parg)
 set_property(TARGET parg PROPERTY FOLDER "BRender/Tools")
 
-# The capture library the harnesses share. It reads a frame back through GL and
-# asks a device for its colour buffer, so it follows the drivers.
-if(TARGET BRender::Drivers::SDL3Dev AND TARGET BRender::Drivers::GLRend)
-	add_subdirectory(brcapture)
-	set_property(TARGET brcapture PROPERTY FOLDER "BRender/Tools")
-endif()
+# mkres generates the render-test fixtures and needs only core.
+add_subdirectory(mkres)
+set_property(TARGET mkres PROPERTY FOLDER "BRender/Tools")
 
+# The harnesses and the capture library they share. devpmtest needs a device, so
+# it follows the drivers rather than core alone.
+if(TARGET BRender::Drivers::SDL3Dev AND TARGET BRender::Drivers::GLRend)
+	foreach(target brcapture devpmtest)
+		add_subdirectory(${target})
+		set_property(TARGET ${target} PROPERTY FOLDER "BRender/Tools")
+	endforeach()
+
+	# rendertest is the CI corpus: it covers the GL devices and the vkrend
+	# witness, so it wants everything CI has. A tree without vkrend is not one
+	# it is meant to run in, and it is not built there rather than registered in
+	# part.
+	if(TARGET BRender::Drivers::VKRend)
+		add_subdirectory(rendertest)
+		set_property(TARGET rendertest PROPERTY FOLDER "BRender/Tools")
+	endif()
+endif()
 # Debug tools - enable/disable them as required.
 # add_subdirectory(mathtest)

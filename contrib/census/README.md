@@ -102,7 +102,7 @@ making a refusal fail loudly rather than truncate a model in silence.
 ## What the tool cannot see
 
 - The nine `resources/gltf-reference` scenes are scored now: they have entries in
-  `examples/rendertest/rendertest.txt` in both floating-point classes at
+  `tools/rendertest/rendertest.txt` in both floating-point classes at
   8/15/16/24bpp × {z-buffered, z-sorted}, and their own `refscenes-*` ctest
   tests, so with `CENSUS_REFERENCE` naming this tree's table their runs report
   MATCH like any fixture and their verdict is no longer something to ignore. What

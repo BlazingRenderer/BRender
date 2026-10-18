@@ -16,7 +16,7 @@ primitive-library identifiers (`SOFTPRMF`, `Default-Primitives-Float`) and insta
 (`softprmf`) pentprim did, so nothing outside `drivers/softprim/` changed. Frames are keyed
 by the `softprmf` driver token, so a run scores directly against the checked-in references.
 
-pentprim's pixels are the oracle, and they are frozen: `examples/rendertest/rendertest.txt`
+pentprim's pixels are the oracle, and they are frozen: `tools/rendertest/rendertest.txt`
 holds the `softrend/softprmf/x87` keys - fixtures and reference scenes alike - and with
 pentprim gone they are the only record of its output.
 
@@ -88,7 +88,7 @@ still writes `dat/` byte-for-byte. Bless from pentprim only: a softprim `--bless
 and the comparison stops meaning anything. Bless the reference scenes the same way and one
 scene per process - `rendertest --device softrend --bpp <bpp> [--no-depth] --scene-dir
 resources/gltf-reference --bless <scene>` - adding `--reference
-examples/rendertest/rendertest.txt` when the bless runs from another tree, whose own
+tools/rendertest/rendertest.txt` when the bless runs from another tree, whose own
 default reference is not this one.
 
 ## What is implemented
@@ -153,9 +153,9 @@ toggle and does not reproduce the general path.
 Both instruments score softprim against **pentprim's frozen pixels**, never against its own
 output.
 
-- **The fixture corpus.** `examples/rendertest` renders 102 fixtures at four pixel formats
+- **The fixture corpus.** `tools/rendertest` renders 102 fixtures at four pixel formats
   (8/15/16/24bpp) x {z-buffered, z-sorted} and compares each against
-  `examples/rendertest/rendertest.txt`, whose 888 `softrend/softprmf/x87` keys are
+  `tools/rendertest/rendertest.txt`, whose 888 `softrend/softprmf/x87` keys are
   pentprim's. Measured: `PASS failures=0`, 102 comparisons, in all eight configurations.
 - **Nine reference scenes.** `resources/gltf-reference`, rendered by the same harness with
   `--scene-dir resources/gltf-reference` and scored against the same table: 9 scenes x

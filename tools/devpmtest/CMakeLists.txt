@@ -6,8 +6,8 @@ add_executable(devpmtest
         bench.h
 )
 target_link_libraries(devpmtest PRIVATE BRender::Full BRender::DDI)
-set_property(TARGET devpmtest PROPERTY VS_DEBUGGER_WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/../dat")
-set_property(TARGET devpmtest PROPERTY FOLDER "BRender/Examples")
+set_property(TARGET devpmtest PROPERTY VS_DEBUGGER_WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}/examples/dat")
+set_property(TARGET devpmtest PROPERTY FOLDER "BRender/Tools")
 
 if(TARGET SDL3::SDL3)
     target_compile_options(devpmtest PRIVATE -DUSE_SDL2=0 -DUSE_SDL3=1)

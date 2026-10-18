@@ -68,7 +68,7 @@ differing from `scene-directional-miss` is a lighting difference, not a cull.
 `radius_cull` needs two things rather than one: the light has to be of a kind
 that has a position and a radius at all (`BR_LIGHT_POINT`, `BR_LIGHT_SPOT`, a
 volume region, or `BR_LIGHT_LINEAR_FALLOFF`), and then `radius_outer` has to be
-non-zero. `examples/mkres/scene.c:155-160` sets the falloff bit whenever it is
+non-zero. `tools/mkres/scene.c:155-160` sets the falloff bit whenever it is
 given a radius for exactly that reason - a fixture that set one without the other
 would test nothing.
 

@@ -1,7 +1,7 @@
 /*
  * gltfview - a fly-around viewer for glTF scenes, built on brdemo.
  *
- * Two divergences from examples/rendertest are deliberate. Both were
+ * Two divergences from tools/rendertest are deliberate. Both were
  * investigated and confirmed by the owner, and they are recorded here so they
  * are not refiled as defects - the notes they used to live in were untracked.
  *
