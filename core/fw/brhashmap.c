@@ -49,7 +49,7 @@ static inline void validate(const br_hashmap *hm)
     ASSERT(hm->load_min.num < hm->load_min.den);
     ASSERT(hm->load_max.den > 0);
     ASSERT(hm->load_max.num < hm->load_max.den);
-    ASSERT(hm->load_min.num * hm->load_max.den <= hm->load_max.num * hm->load_max.den);
+    ASSERT((uint32_t)hm->load_min.num * hm->load_max.den <= (uint32_t)hm->load_max.num * hm->load_min.den);
 }
 
 static inline br_hashmap_bucket *reset_bucket(br_hashmap_bucket *bkt)
