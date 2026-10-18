@@ -53,8 +53,8 @@ typedef struct br_demo_run_args {
     int         vulkan;
     int         no_stats;
     int         no_depth;
-    int         pos_argc;
-    char       *pos_argv[4]; /* If you need more than 4 positional args, tough. */
+    int         pos_argc;    /* Number of positional arguments found, even if only pos_argv[0..3] could be stored. */
+    char       *pos_argv[4]; /* Positional arguments; BrDemoParseArgs() can store more in caller-supplied memory. */
 } br_demo_run_args;
 
 /**
@@ -175,7 +175,9 @@ typedef struct br_demo_option {
  *        own options added to the demo's.
  *
  * The two sets are parsed together. An application option whose name collides
- * with one of the demo's is rejected rather than silently shadowing it.
+ * with one of the demo's is rejected rather than silently shadowing it. An
+ * application short name that collides with the demo's own (w, h, v) or with
+ * another application option's short name is likewise an error.
  *
  * \param args      A non-NULL pointer to the target br_demo_run_args structure.
  * \param argc      argc as passed to main().
@@ -184,15 +186,22 @@ typedef struct br_demo_option {
  * \param nextra    The number of entries in extra.
  * \param ctx       Passed to every application option's apply callback, so the
  *                  table can stay static and the values stay the caller's.
- * \param first_positional If non-NULL, receives the index of the first
- *                  non-option argument in argv, for applications that take
- *                  more positional arguments than br_demo_run_args carries.
+ * \param pos_argv  Where to store the positional (non-option) arguments, in
+ *                  order, or NULL to store them in args->pos_argv instead.
+ * \param pos_cap   The number of entries pos_argv can hold. Ignored when
+ *                  pos_argv is NULL, where args->pos_argv's four entries are
+ *                  filled as they always have been.
+ *
+ * args->pos_argc always receives the true number of positional arguments
+ * found, not the number stored, so a caller that supplies a small array can
+ * compare the two and refuse rather than silently lose arguments. The stored
+ * pointers point into the caller's argv; they are not copies.
  *
  * \returns BR_DEMO_PARSE_OK on success, BR_DEMO_PARSE_HELP if --help was given,
  *          BR_DEMO_PARSE_ERROR otherwise. Nothing is printed.
  */
 br_demo_parse BrDemoParseArgs(br_demo_run_args *args, int argc, char *const *argv, const br_demo_option *extra, br_size_t nextra, void *ctx,
-                              int *first_positional);
+                              char **pos_argv, br_size_t pos_cap);
 
 /**
  * \brief Print the usage text for a BrDemo* application.

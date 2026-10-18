@@ -474,7 +474,7 @@ const static struct parg_option argdefs[] = {
 };
 
 static br_demo_parse parse_args(int argc, char *const argv[], br_demo_run_args *args, const br_demo_option *extra, br_size_t nextra,
-                                void *ctx, int *first_positional)
+                                void *ctx, char **pos_argv, br_size_t pos_cap)
 {
     struct parg_state ps;
     parg_init(&ps);
@@ -493,9 +493,17 @@ static br_demo_parse parse_args(int argc, char *const argv[], br_demo_run_args *
     struct parg_option *opts      = alloca(sizeof(*opts) * nopts);
     char               *optstring = alloca(6 + nextra * 3);
     char              **tmp_argv  = alloca(sizeof(char *) * (argc + 1));
-    br_size_t           olen      = 0;
+    int                 short_index[256];
+    br_size_t           olen = 0;
 
     BrMemCpy(opts, argdefs, sizeof(*opts) * (BR_ASIZE(argdefs) - 1));
+
+    /*
+     * parg matches a short option by its character alone and returns that
+     * character, so the character needs mapping back to the row it came from.
+     */
+    for(br_size_t i = 0; i < BR_ASIZE(short_index); ++i)
+        short_index[i] = -1;
 
     optstring[olen++] = 'w';
     optstring[olen++] = ':';
@@ -525,6 +533,19 @@ static br_demo_parse parse_args(int argc, char *const argv[], br_demo_run_args *
         };
 
         if(e->short_name != 0) {
+            const unsigned char sc = (unsigned char)e->short_name;
+
+            /*
+             * Refuse any short name that would make the character-to-row map
+             * ambiguous instead of silently shadowing the demo's own option or
+             * another application row. ':' and '?' are parg's own separators
+             * and error return.
+             */
+            if(sc == ':' || sc == '?' || sc == ARGDEF_WIDTH || sc == ARGDEF_HEIGHT || sc == ARGDEF_VERBOSE || short_index[sc] >= 0)
+                return BR_DEMO_PARSE_ERROR;
+
+            short_index[sc] = (int)i;
+
             optstring[olen++] = e->short_name;
             if(e->has_arg == BR_DEMO_ARG_REQUIRED)
                 optstring[olen++] = ':';
@@ -541,9 +562,15 @@ static br_demo_parse parse_args(int argc, char *const argv[], br_demo_run_args *
         return BR_DEMO_PARSE_ERROR;
 
     for(int c; (c = parg_getopt_long(&ps, optend, tmp_argv, optstring, opts, NULL)) != -1;) {
+        int eidx = -1;
 
-        if(c >= BR_DEMO_OPT_EXTRA) {
-            const br_demo_option *e = extra + (c - BR_DEMO_OPT_EXTRA);
+        if(c >= BR_DEMO_OPT_EXTRA)
+            eidx = c - BR_DEMO_OPT_EXTRA;
+        else if(c >= 0)
+            eidx = short_index[(unsigned char)c];
+
+        if(eidx >= 0) {
+            const br_demo_option *e = extra + eidx;
 
             if(e->apply(ctx, ps.optarg) != 0)
                 return BR_DEMO_PARSE_ERROR;
@@ -649,15 +676,30 @@ static br_demo_parse parse_args(int argc, char *const argv[], br_demo_run_args *
     if(args->title == NULL || args->title[0] == '\0')
         args->title = "BRender Application";
 
+    /*
+     * pos_argc is the true count, not the number stored: a caller that supplies
+     * a small array can compare the two and refuse rather than silently lose
+     * arguments. The stored pointers point at the caller's own argv strings.
+     */
     args->pos_argc = argc - optend;
-    if(args->pos_argc > BR_ASIZE(args->pos_argv)) {
-        args->pos_argc = BR_ASIZE(args->pos_argv);
+
+    if(pos_argv != NULL) {
+        br_size_t n = (br_size_t)args->pos_argc;
+
+        if(n > pos_cap)
+            n = pos_cap;
+
+        if(n > 0)
+            memcpy(pos_argv, tmp_argv + optend, n * sizeof(*pos_argv));
+    } else {
+        br_size_t n = (br_size_t)args->pos_argc;
+
+        if(n > BR_ASIZE(args->pos_argv))
+            n = BR_ASIZE(args->pos_argv);
+
+        if(n > 0)
+            memcpy(args->pos_argv, tmp_argv + optend, n * sizeof(*args->pos_argv));
     }
-
-    memcpy(args->pos_argv, tmp_argv + optend, args->pos_argc * sizeof(char *));
-
-    if(first_positional != NULL)
-        *first_positional = optend;
 
     return BR_DEMO_PARSE_OK;
 }
@@ -700,9 +742,9 @@ void BrDemoDefaultArgs(br_demo_run_args *args)
 }
 
 br_demo_parse BrDemoParseArgs(br_demo_run_args *args, int argc, char *const *argv, const br_demo_option *extra, br_size_t nextra, void *ctx,
-                              int *first_positional)
+                              char **pos_argv, br_size_t pos_cap)
 {
-    return parse_args(argc, argv, args, extra, nextra, ctx, first_positional);
+    return parse_args(argc, argv, args, extra, nextra, ctx, pos_argv, pos_cap);
 }
 
 void BrDemoUsage(FILE *out, const char *argv0, const br_demo_option *extra, br_size_t nextra)
@@ -735,7 +777,7 @@ int BrDemoRunArgv(const char *title, const br_demo_dispatch *dispatch, int argc,
     BrDemoDefaultArgs(&args);
     args.title = title;
 
-    switch(BrDemoParseArgs(&args, argc, argv, NULL, 0, NULL, NULL)) {
+    switch(BrDemoParseArgs(&args, argc, argv, NULL, 0, NULL, NULL, 0)) {
         case BR_DEMO_PARSE_HELP:
         case BR_DEMO_PARSE_ERROR:
             BrDemoUsage(stderr, argv[0], NULL, 0);

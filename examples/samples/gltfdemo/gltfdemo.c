@@ -544,7 +544,7 @@ int main(int argc, char **argv)
     BrDemoDefaultArgs(&app_args.args);
     app_args.args.title = "glTF Viewer";
 
-    switch(BrDemoParseArgs(&app_args.args, argc, argv, gltfdemo_options, BR_ASIZE(gltfdemo_options), &app_args, NULL)) {
+    switch(BrDemoParseArgs(&app_args.args, argc, argv, gltfdemo_options, BR_ASIZE(gltfdemo_options), &app_args, NULL, 0)) {
         case BR_DEMO_PARSE_HELP:
             BrDemoUsage(stdout, argv[0], gltfdemo_options, BR_ASIZE(gltfdemo_options));
             return 0;
