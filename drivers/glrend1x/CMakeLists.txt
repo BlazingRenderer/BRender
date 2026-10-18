@@ -25,6 +25,13 @@ set_target_properties(glrend1x-headers PROPERTIES
 
 add_library(BRender::Drivers::GLRend1x::Headers ALIAS glrend1x-headers)
 
+# A GPU renderer, so it follows the same switch, although it has no shaders and
+# so none of the build tools. softrend/softprim are not gated: they are the
+# portable path.
+if (NOT BRENDER_BUILD_GPU_DRIVERS)
+    return()
+endif()
+
 set(GLAD_FILES
         glad/src/gl.c
         glad/include/glad/gl.h

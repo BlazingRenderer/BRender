@@ -29,21 +29,21 @@ add_library(BRender::Drivers::GLRend::Headers ALIAS glrend-headers)
 # find_package(glslang CONFIG REQUIRED)
 # set(GLSLANG_EXECUTABLE "$<TARGET_FILE:glslang::glslang-standalone>")
 
-find_program(GLSLANG_EXECUTABLE glslang)
-if (NOT GLSLANG_EXECUTABLE)
-    message(STATUS "glslang not found, not building glrend.")
+if (NOT BRENDER_BUILD_GPU_DRIVERS)
     return()
 endif()
 
-message(STATUS "Found glslang: ${GLSLANG_EXECUTABLE}")
+# Both are host build tools: they compile the shaders into C arrays, so a cross
+# build needs them on the build machine, not on the target.
+find_program(GLSLANG_EXECUTABLE glslang)
+if (NOT GLSLANG_EXECUTABLE)
+    message(FATAL_ERROR "glslang is needed to build glrend's shaders. Install it, or configure with -DBRENDER_BUILD_GPU_DRIVERS=OFF.")
+endif()
 
 find_program(SPIRV_CROSS_EXECUTABLE spirv-cross)
 if (NOT SPIRV_CROSS_EXECUTABLE)
-    message(STATUS "spirv-cross not found, not building glrend.")
-    return()
+    message(FATAL_ERROR "spirv-cross is needed to build glrend's shaders. Install it, or configure with -DBRENDER_BUILD_GPU_DRIVERS=OFF.")
 endif()
-
-message(STATUS "Found spirv-cross: ${SPIRV_CROSS_EXECUTABLE}")
 
 function(compile_shader)
     set(shaderpp    "${CMAKE_CURRENT_SOURCE_DIR}/shaderpp.pl")

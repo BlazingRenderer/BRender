@@ -31,16 +31,18 @@ set_target_properties(vkrend-headers PROPERTIES
 )
 add_library(BRender::Drivers::VKRend::Headers ALIAS vkrend-headers)
 
+if (NOT BRENDER_BUILD_GPU_DRIVERS)
+    return()
+endif()
+
 #
 # The rect draw pipeline's shaders. glslang compiles GLSL to SPIR-V, embedspv.pl turns
 # the binary into a C array (see drivers/glrend for the same shape of build). Both are
-# build tools, so a build without them is a configuration error rather than a silently
-# reduced driver.
+# host build tools, so a cross build needs them on the build machine, not the target.
 #
 find_program(GLSLANG_EXECUTABLE glslang)
 if (NOT GLSLANG_EXECUTABLE)
-    message(STATUS "glslang not found, not building vkrend.")
-    return()
+    message(FATAL_ERROR "glslang is needed to build vkrend's shaders. Install it, or configure with -DBRENDER_BUILD_GPU_DRIVERS=OFF.")
 endif ()
 
 function(compile_shader_spv shader varname stage destination)

@@ -231,7 +231,7 @@ if (BUILD_TESTING)
     # requested, but driver can't be loaded", so the test is only registered
     # when the driver is.
     #
-    if (TARGET BRender::Drivers::VKRend)
+    if (BRENDER_HAVE_VK)
         add_test(NAME "vkwitness" COMMAND rendertest --vulkan --vk-witness)
         set_tests_properties("vkwitness" PROPERTIES
                              ENVIRONMENT "SDL_VIDEODRIVER=offscreen")

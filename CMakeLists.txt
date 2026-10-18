@@ -64,6 +64,8 @@ endfunction()
 find_sdl()
 
 option(BRENDER_BUILD_DRIVERS "Build Drivers" ON)
+option(BRENDER_BUILD_GPU_DRIVERS
+       "Build the GPU renderers (glrend, glrend1x, vkrend); glrend and vkrend need glslang and spirv-cross at build time" ON)
 
 option(BRENDER_BUILD_FOR_CROC "Build for Croc" OFF)
 message(STATUS "Building for Croc: ${BRENDER_BUILD_FOR_CROC}")
@@ -100,6 +102,31 @@ add_library(BRender::Full ALIAS brender-full)
 # Core BRender, no drivers, with DDI.
 ##
 add_library(BRender::DDI ALIAS brender-ddi)
+
+##
+# What the rest of the tree may rely on.
+#
+# Every driver either builds or is explicitly off (BRENDER_BUILD_GPU_DRIVERS);
+# none is present or absent because of what happens to be in PATH. Examples and
+# tools gate on these, so the policy is written once rather than re-derived.
+##
+set(BRENDER_HAVE_GL       FALSE)
+set(BRENDER_HAVE_VK       FALSE)
+set(BRENDER_HAVE_SDL3     FALSE)
+set(BRENDER_HAVE_MCGA     FALSE)
+
+if(TARGET BRender::Drivers::GLRend)
+    set(BRENDER_HAVE_GL TRUE)
+endif()
+if(TARGET BRender::Drivers::VKRend)
+    set(BRENDER_HAVE_VK TRUE)
+endif()
+if(TARGET BRender::Drivers::SDL3Dev)
+    set(BRENDER_HAVE_SDL3 TRUE)
+endif()
+if(TARGET BRender::Drivers::MCGA)
+    set(BRENDER_HAVE_MCGA TRUE)
+endif()
 
 
 option(BRENDER_BUILD_TOOLS "Build Tools" ON)

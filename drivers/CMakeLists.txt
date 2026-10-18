@@ -7,7 +7,9 @@ if (TARGET glrend)
 endif()
 
 add_subdirectory(glrend1x)
-target_link_libraries(brender-full INTERFACE glrend1x)
+if (TARGET glrend1x)
+    target_link_libraries(brender-full INTERFACE glrend1x)
+endif()
 
 
 add_subdirectory(vkrend)

@@ -1,4 +1,4 @@
-if(TARGET BRender::Drivers::SDL3Dev AND TARGET BRender::Drivers::GLRend)
+if(BRENDER_HAVE_SDL3 AND BRENDER_HAVE_GL)
     add_subdirectory(brdemo)
 
     add_subdirectory(brintro)
@@ -10,15 +10,15 @@ if(TARGET BRender::Drivers::SDL3Dev AND TARGET BRender::Drivers::GLRend)
 
 endif()
 
-if(TARGET BRender::Drivers::SDL3Dev AND TARGET BRender::Drivers::SoftPrim)
+if(BRENDER_HAVE_SDL3)
     add_subdirectory(softcube)
 endif()
 
-if(TARGET BRender::Drivers::MCGA AND TARGET BRender::Drivers::SoftPrim)
+if(BRENDER_HAVE_MCGA)
     add_subdirectory(doscube)
 endif()
 
-if(BRENDER_BUILD_GLFW_EXAMPLE AND TARGET BRender::Drivers::GLRend)
+if(BRENDER_BUILD_GLFW_EXAMPLE AND BRENDER_HAVE_GL)
     find_package(glfw3 3)
     if(TARGET glfw)
         add_subdirectory(glfw3-opengl)

@@ -40,6 +40,10 @@ stdenvNoCC.mkDerivation {
 
     (lib.cmakeBool "BRENDER_BUILD_TOOLS" false)
     (lib.cmakeBool "BRENDER_BUILD_EXAMPLES" true)
+    # DOS has no GL or Vulkan to drive, and never built these. glrend and
+    # vkrend additionally need glslang, spirv-cross and vk_mem_alloc's C++
+    # threading, none of which the djgpp toolchain provides yet.
+    (lib.cmakeBool "BRENDER_BUILD_GPU_DRIVERS" false)
     (lib.cmakeBool "BRENDER_DISABLE_INSTALL" true)
     (lib.cmakeBool "BRENDER_DISABLE_FINDSDL" true)
   ];
