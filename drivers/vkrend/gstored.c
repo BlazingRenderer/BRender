@@ -297,16 +297,13 @@ static int get_render_mode(const state_stack *state)
  *
  * | Type        | Buckets   | DT | Order |
  * |-------------|-----------|----|-------|
+ * Each forced bucket takes ceil(5%) of the table at its own end, the transparent bucket
+ * takes ceil(10%) and the opaque bucket takes the rest.
+ *
  * | Force back  | ceil(5%)  |    | BtF   |
- * | Opaque      | ceil(10%) | X  | FtB   |
- * | (unused)    | remainder |    |       |
+ * | Opaque      | remainder | X  | FtB   |
  * | Transparent | ceil(10%) | X  | BtF   |
  * | Force front | ceil(5%)  |    | BtF   |
- *
- * The three counts below do not allocate that layout: count_trans is the table less its
- * forced ends and less ceil(10%), and count_opaque comes out as ceil(10%) again, so the
- * opaque bucket sits after the unused remainder and selects among 10% of the table rather
- * than 80%. The remainder is never written; this is a defect.
  *
  * DT  = Depth Tested
  * BtF = Back-to-front
@@ -380,7 +377,7 @@ static br_uint_16 calculate_bucket(const br_order_table *ot, const state_stack *
 
     ot_size      = BR_SCALAR(ot->size);
     count_forced = (br_uint_16)ceilf(ot_size * ratio_force_frontback);
-    count_trans  = (br_uint_16)((float)(ot->size - (count_forced << 1)) - ceilf(ot_size * ratio_transparent));
+    count_trans  = (br_uint_16)ceilf(ot_size * ratio_transparent);
     count_opaque = ot->size - count_trans - (count_forced << 1);
 
     ASSERT(count_forced + count_opaque + count_trans + count_forced == ot->size);
@@ -393,7 +390,7 @@ static br_uint_16 calculate_bucket(const br_order_table *ot, const state_stack *
             break;
         case RM_TRANS:
             base  = count_forced;
-            count = count_opaque;
+            count = count_trans;
             break;
         case RM_OPAQUE:
         default:
