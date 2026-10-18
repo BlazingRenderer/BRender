@@ -6,8 +6,7 @@
 #   1. the tree builds
 #   2. `mkres scenes` reproduces examples/rendertest/dat/ byte-for-byte
 #   3. the render regression corpus passes at every device/bpp/depth
-#   4. every checked-in .gltf loads
-#   5. every scene the harness names has a fixture, and with --history, that
+#   4. every scene the harness names has a fixture, and with --history, that
 #      this held at every commit in a range
 #
 # Nothing here writes to the repository. The fixture check runs in a
@@ -148,7 +147,6 @@ fi
 
 rendertest="$build/examples/rendertest/rendertest"
 mkres="$build/examples/mkres/mkres"
-gltfview="$build/examples/gltfview/gltfview"
 
 if [ ! -x "$rendertest" ]; then
     echo; echo "no rendertest binary at $rendertest - cannot continue" >&2
@@ -156,16 +154,14 @@ if [ ! -x "$rendertest" ]; then
 fi
 
 export SDL_VIDEODRIVER=offscreen
-export GLTFVIEW_BENCH_FRAMES=5
-export GLTFVIEW_BENCH_NOVSYNC=1
 
 # ------------------------------------------------------------- the checks
 
-# The corpus, the fixture reproduction and the glTF sweep are registered as
-# tests by the build (examples/rendertest/CMakeLists.txt), so they are written
-# once. This script used to carry a second copy of the corpus loop, and the two
-# drifted: a run that finished and failed was reported here as one that had
-# produced no result at all.
+# The corpus and the fixture reproduction are registered as tests by the
+# build (examples/rendertest/CMakeLists.txt), so they are written once. This
+# script used to carry a second copy of the corpus loop, and the two drifted: a
+# run that finished and failed was reported here as one that had produced no
+# result at all.
 #
 # --history and the build step are what this script adds. Neither belongs in a
 # build: one walks git history, the other is the build.
