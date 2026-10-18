@@ -230,8 +230,10 @@ uint mappingSource()
  * the eye direction E itself, not -E, and so turns the ray through the origin; its
  * `0.5 + vec2(cu, cv)` compensates the pi that adds to cu (the antipode shifts the angle
  * by pi, i.e. 0.5 turn) and leaves V mirrored. vkrend reflects -E, like softrend, so it
- * must NOT carry that +0.5: doing so lands the sample half a turn around the sphere map,
- * which is the difference the environment step in tools/devpmtest witnesses.
+ * must NOT carry that +0.5: doing so lands the sample half a turn around the sphere map.
+ * The vkrend witness's environment step (tools/rendertest/vkwitness.c) reads the texel the
+ * fragment stage fetched, with the anchor rotated 60 degrees, so a half turn lands it in a
+ * different one.
  *
  * The result then goes through the surface's map transform, which is what the vertex stage
  * applied to the plain map coordinate.
