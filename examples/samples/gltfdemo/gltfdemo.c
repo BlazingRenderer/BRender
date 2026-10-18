@@ -546,11 +546,11 @@ int main(int argc, char **argv)
 
     switch(BrDemoParseArgs(&app_args.args, argc, argv, gltfdemo_options, BR_ASIZE(gltfdemo_options), &app_args, NULL, 0)) {
         case BR_DEMO_PARSE_HELP:
-            BrDemoUsage(stdout, argv[0], gltfdemo_options, BR_ASIZE(gltfdemo_options));
+            BrDemoUsage(stdout, argv[0], NULL, &app_args.args, gltfdemo_options, BR_ASIZE(gltfdemo_options));
             return 0;
 
         case BR_DEMO_PARSE_ERROR:
-            BrDemoUsage(stderr, argv[0], gltfdemo_options, BR_ASIZE(gltfdemo_options));
+            BrDemoUsage(stderr, argv[0], NULL, &app_args.args, gltfdemo_options, BR_ASIZE(gltfdemo_options));
             return 2;
 
         case BR_DEMO_PARSE_OK:
@@ -564,7 +564,7 @@ int main(int argc, char **argv)
     app_args.model_path = (app_args.args.pos_argc == 1) ? app_args.args.pos_argv[0] : NULL;
 
     if(app_args.model_path == NULL || app_args.model_path[0] == '\0') {
-        BrDemoUsage(stderr, argv[0], gltfdemo_options, BR_ASIZE(gltfdemo_options));
+        BrDemoUsage(stderr, argv[0], NULL, &app_args.args, gltfdemo_options, BR_ASIZE(gltfdemo_options));
         return 2;
     }
 

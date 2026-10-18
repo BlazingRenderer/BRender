@@ -207,8 +207,20 @@ br_demo_parse BrDemoParseArgs(br_demo_run_args *args, int argc, char *const *arg
  * \brief Print the usage text for a BrDemo* application.
  *
  * Prints the demo's options followed by the application's, when it has any.
+ * The demo's own defaults are stated from \p args, so an application that
+ * seeds its own - a corpus with fixed-size fixtures, say - describes itself
+ * rather than the framework.
+ *
+ * \param out      Stream to write to.
+ * \param argv0    argv[0], for the usage line.
+ * \param synopsis The arguments after the program name, e.g.
+ *                 "[options] [scene ...]"; NULL for "[options]".
+ * \param args     A non-NULL pointer to the arguments the run will use, whose
+ *                 defaults the demo's options are described with.
+ * \param extra    The application's own options, or NULL.
+ * \param nextra   The number of entries in extra.
  */
-void BrDemoUsage(FILE *out, const char *argv0, const br_demo_option *extra, br_size_t nextra);
+void BrDemoUsage(FILE *out, const char *argv0, const char *synopsis, const br_demo_run_args *args, const br_demo_option *extra, br_size_t nextra);
 
 /**
  * \brief Execute a BrDemo*() application.

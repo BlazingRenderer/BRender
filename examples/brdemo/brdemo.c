@@ -705,9 +705,7 @@ static br_demo_parse parse_args(int argc, char *const argv[], br_demo_run_args *
 }
 
 // clang-format off
-static const char *usage_options =
-    "  -w, --width          Set the initial window width (default: 1280).\n"
-    "  -h, --height         Set the initial window height (default: 720).\n"
+static const char *usage_options_1 =
     "  -v, --verbose        Increase verbosity level. May be given multiple times.\n"
     "  --force-software     Force use of the software renderer. Only valid on x86.\n"
     "  --bpp                Colour buffer pixel type. Valid options: 8, 15, 16, 24, 32 (unset leaves the renderer's own).\n"
@@ -747,9 +745,15 @@ br_demo_parse BrDemoParseArgs(br_demo_run_args *args, int argc, char *const *arg
     return parse_args(argc, argv, args, extra, nextra, ctx, pos_argv, pos_cap);
 }
 
-void BrDemoUsage(FILE *out, const char *argv0, const br_demo_option *extra, br_size_t nextra)
+void BrDemoUsage(FILE *out, const char *argv0, const char *synopsis, const br_demo_run_args *args, const br_demo_option *extra, br_size_t nextra)
 {
-    fprintf(out, "Usage: %s \nOptions:\n%s", argv0, usage_options);
+    if(synopsis == NULL)
+        synopsis = "[options]";
+
+    fprintf(out, "Usage: %s %s\nOptions:\n", argv0, synopsis);
+    fprintf(out, "  -w, --width          Set the initial window width (default: %" PRId32 ").\n", args->width);
+    fprintf(out, "  -h, --height         Set the initial window height (default: %" PRId32 ").\n", args->height);
+    fputs(usage_options_1, out);
 
     if(nextra == 0)
         return;
@@ -760,10 +764,16 @@ void BrDemoUsage(FILE *out, const char *argv0, const br_demo_option *extra, br_s
         const br_demo_option *e = extra + i;
         char                  left[80];
 
-        if(e->metavar != NULL)
+        if(e->short_name != 0) {
+            if(e->metavar != NULL)
+                snprintf(left, sizeof(left), "-%c, --%s %s", e->short_name, e->name, e->metavar);
+            else
+                snprintf(left, sizeof(left), "-%c, --%s", e->short_name, e->name);
+        } else if(e->metavar != NULL) {
             snprintf(left, sizeof(left), "--%s %s", e->name, e->metavar);
-        else
+        } else {
             snprintf(left, sizeof(left), "--%s", e->name);
+        }
 
         fprintf(out, "  %-24s %s\n", left, e->help != NULL ? e->help : "");
     }
@@ -780,7 +790,7 @@ int BrDemoRunArgv(const char *title, const br_demo_dispatch *dispatch, int argc,
     switch(BrDemoParseArgs(&args, argc, argv, NULL, 0, NULL, NULL, 0)) {
         case BR_DEMO_PARSE_HELP:
         case BR_DEMO_PARSE_ERROR:
-            BrDemoUsage(stderr, argv[0], NULL, 0);
+            BrDemoUsage(stderr, argv[0], NULL, &args, NULL, 0);
             return 2;
 
         case BR_DEMO_PARSE_OK:
