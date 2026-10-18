@@ -267,16 +267,27 @@ static int get_render_mode(const state_stack *state)
  * Determine which bucket to dump things into. At least four are needed
  * for the various render types.
  *
- * | Type        | Ratio | DT | Order |
- * |-------------|-------|----|-------|
- * | Force back  |  5%   |    | BtF   |
- * | Opaque      | 80%   | X  | FtB   |
- * | Transparent | 10%   | X  | BtF   |
- * | Force front |  5%   |    | BtF   |
+ * The rows are in draw order, which is the reverse of the bucket order:
+ * render() walks the table from the last bucket to the first, and bucket 0 is
+ * the force-front one.
+ *
+ * | Type        | Buckets   | DT | Order |
+ * |-------------|-----------|----|-------|
+ * | Force back  | ceil(5%)  |    | BtF   |
+ * | Opaque      | ceil(10%) | X  | FtB   |
+ * | (unused)    | remainder |    |       |
+ * | Transparent | ceil(10%) | X  | BtF   |
+ * | Force front | ceil(5%)  |    | BtF   |
+ *
+ * The three counts below do not allocate that layout: count_trans is the
+ * table less its forced ends and less ceil(10%), and count_opaque comes out
+ * as ceil(10%) again, so the opaque bucket sits after the unused remainder
+ * and selects among 10% of the table rather than 80%. The remainder is never
+ * written; this is a defect.
  *
  * DT  = Depth Tested
  * BtF = Back-to-front
- * TtB = Front-to-back
+ * FtB = Front-to-back
  */
 static br_uint_16 calculate_bucket(const br_order_table *ot, const state_stack *state, br_scalar *depth)
 {
