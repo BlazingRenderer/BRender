@@ -473,19 +473,29 @@ void *BR_RESIDENT_ENTRY BrHashMapRemove(br_hashmap *hm, const void *key)
     val = bkt->value;
     reset_bucket(bkt);
 
-    /* Search through the remaining buckets, to see if we can fill the gap. */
+    /*
+     * Search forward from the hole for any key whose probe chain passes
+     * over it, and shift that key back.
+     *
+     * The chain wraps, so the test is circular: move the key at `cidx`
+     * only if the hole lies on the path from its home bucket to `cidx`,
+     * i.e. if the hole is no further from home than `cidx` is.
+     */
     LOOP_BUCKETS(hm, cidx, index + 1)
     {
-        size_t             nidx;
+        size_t             nidx, dist_hole, dist_cidx;
         br_hashmap_bucket *bkt2 = hm->buckets + cidx;
 
         /* Have an empty bucket, we're done here! */
         if(bkt2->hash == BR_INVALID_HASH)
             break;
 
+        nidx      = bkt2->hash % hm->num_buckets;
+        dist_hole = (index + hm->num_buckets - nidx) % hm->num_buckets;
+        dist_cidx = (cidx + hm->num_buckets - nidx) % hm->num_buckets;
+
         /* If our hash can be moved back, do it. */
-        nidx = bkt2->hash % hm->num_buckets;
-        if(nidx <= index) {
+        if(dist_hole <= dist_cidx) {
             *bkt = *bkt2;
             reset_bucket(bkt2);
             index = cidx;
