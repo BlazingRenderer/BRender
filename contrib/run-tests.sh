@@ -5,9 +5,12 @@
 # There is no unit-test suite and none is wanted; the checks are:
 #   1. the tree builds
 #   2. `mkres scenes` reproduces examples/rendertest/dat/ byte-for-byte
-#   3. the render regression corpus passes at every device/bpp/depth
-#   4. every scene the harness names has a fixture, and with --history, that
-#      this held at every commit in a range
+#   3. every scene the harness names has a fixture
+#   4. the render regression corpus passes at every device/bpp/depth
+#
+# 2-4 are registered as tests by the build, so ctest runs them. --history adds
+# the one thing a working-tree check cannot: that (3) held at every commit in a
+# range.
 #
 # Nothing here writes to the repository. The fixture check runs in a
 # temporary directory; rendertest compares unless --bless is passed.
@@ -87,43 +90,30 @@ fi
 
 # ------------------------------------------------- scene/fixture invariant
 
-# Every scene the harness names must exist as a fixture. A name that does
-# not resolve is a dangling reference: rendertest reports NO-REFERENCE for
-# it, so the run looks merely unverified rather than broken.
-#
-# This is also worth checking across history, which no working-tree check
-# can do. Twelve commits in the history of this repository named scenes
-# they did not have, all invisible at the tip because the tip was
-# consistent - a bisect through one of them silently skipped a scene.
-
-hdr "references: every scene the harness names has a fixture"
+# The working-tree half of this invariant is the `scenes-have-fixtures' ctest
+# test (examples/rendertest/scene-check.cmake), which asks the tool for its
+# scene list and compares it with dat/. This script adds the part a
+# working-tree check cannot do: that it held at every commit in a range.
+# Twelve commits in the history of this repository named scenes they did not
+# have, all invisible at the tip because the tip was consistent - a bisect
+# through one of them silently skipped a scene.
 
 rt_main=examples/rendertest/main.c
 rt_dat=examples/rendertest/dat
 
-# Empty argument = the working tree; otherwise a revision. Prints nothing
-# when consistent, and one name per line when not.
-read_main() {
-    if [ -n "$1" ]; then git show "$1:$rt_main" 2>/dev/null; else cat "$rt_main" 2>/dev/null; fi
+# $1 = revision. Prints nothing when consistent, and one name per line when not.
+read_main() { git show "$1:$rt_main" 2>/dev/null; }
+read_dat() { git ls-tree --name-only "$1" "$rt_dat/" 2>/dev/null; }
+read_names() { # $1 = revision
+    read_main "$1" | awk '/rt_default_scenes\[\] *= *\{/,/^};/' | grep -oE '"scene-[a-z0-9_-]+"' | tr -d '"' | sort -u
 }
-read_dat() {
-    if [ -n "$1" ]; then git ls-tree --name-only "$1" "$rt_dat/" 2>/dev/null; else ls "$rt_dat" 2>/dev/null; fi
-}
-dangling() { # $1 = revision, or empty for the working tree
-    names=$(read_main "$1" | grep -oE '"scene-[a-z0-9_-]+"' | tr -d '"' | sort -u)
+dangling() { # $1 = revision
+    names=$(read_names "$1")
     present=$(read_dat "$1" | sed 's|.*/||;s|\.gltf$||' | sort -u)
     for x in $names; do
         printf '%s\n' "$present" | grep -qx "$x" || echo "$x"
     done
 }
-
-missing=$(dangling "")
-if [ -z "$missing" ]; then
-    ok "$(read_main "" | grep -oE '"scene-[a-z0-9_-]+"' | sort -u | wc -l) scene names, all with fixtures"
-else
-    bad "$rt_main names scenes with no fixture under $rt_dat/"
-    printf '%s\n' "$missing" | head -5 | sed 's/^/        /'
-fi
 
 if [ -n "$history" ]; then
     hdr "references: the same check at every commit in $history"

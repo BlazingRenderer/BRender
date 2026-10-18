@@ -184,6 +184,20 @@ if (BUILD_TESTING)
                      -P "${CMAKE_CURRENT_SOURCE_DIR}/fixture-check.cmake")
 
     #
+    # The scene/fixture invariant, checked through the tool rather than by
+    # reading main.c: the default set is whatever --list prints, and the
+    # fixtures are what dat/ holds. A name with no file renders nothing and
+    # reports NO-REFERENCE; a file with no name is never rendered at all.
+    #
+    add_test(NAME "scenes-have-fixtures"
+             COMMAND ${CMAKE_COMMAND}
+                     "-DRENDERTEST=$<TARGET_FILE:rendertest>"
+                     "-DDAT=${CMAKE_CURRENT_SOURCE_DIR}/dat"
+                     -P "${CMAKE_CURRENT_SOURCE_DIR}/scene-check.cmake")
+    set_tests_properties("scenes-have-fixtures" PROPERTIES
+                         ENVIRONMENT "SDL_VIDEODRIVER=offscreen")
+
+    #
     # The environment-map orientation witness (main.c --env-witness). It is not
     # a fixture: a device offscreen texture cannot be carried through a .gltf,
     # so the witness builds the host and the device map at runtime and asserts
