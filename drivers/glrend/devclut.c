@@ -13,7 +13,7 @@
 static const struct br_device_clut_dispatch deviceClutDispatch;
 
 /*
- * Renderer info. template
+ * Device CLUT info. template
  */
 #define F(f) offsetof(struct br_device_clut, f)
 
