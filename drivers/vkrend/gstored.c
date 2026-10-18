@@ -295,16 +295,18 @@ static int get_render_mode(const state_stack *state)
  * needed for the various render types. Bucket 0 is the force-front one and the last is
  * force-back; render() walks the table from the last bucket to the first.
  *
- * | Type        | Ratio | DT | Order |
- * |-------------|-------|----|-------|
- * | Force front |  5%   |    | BtF   |
- * | Transparent | ~80%  | X  | BtF   |
- * | Opaque      | 10%   | X  | FtB   |
- * | Force back  |  5%   |    | BtF   |
+ * | Type        | Buckets   | DT | Order |
+ * |-------------|-----------|----|-------|
+ * | Force back  | ceil(5%)  |    | BtF   |
+ * | Opaque      | ceil(10%) | X  | FtB   |
+ * | (unused)    | remainder |    |       |
+ * | Transparent | ceil(10%) | X  | BtF   |
+ * | Force front | ceil(5%)  |    | BtF   |
  *
- * The ratios are the ones calculate_bucket() allocates below: each forced bucket takes
- * ceil(5%) of the table, opaque takes ceil(10%) and the transparent bucket takes whatever
- * is left, which is ~80% at any size.
+ * The three counts below do not allocate that layout: count_trans is the table less its
+ * forced ends and less ceil(10%), and count_opaque comes out as ceil(10%) again, so the
+ * opaque bucket sits after the unused remainder and selects among 10% of the table rather
+ * than 80%. The remainder is never written; this is a defect.
  *
  * DT  = Depth Tested
  * BtF = Back-to-front
