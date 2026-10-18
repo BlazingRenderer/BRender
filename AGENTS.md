@@ -96,8 +96,8 @@ There is no unit-test suite, and none should be added. `ctest` runs the render c
 both floating-point classes. `contrib/run-tests.sh [build-dir]` is the human-facing gate and adds the checks that do not belong in a
 build - the build step itself and the `--history` commit walk. The corpus itself is:
 - `tools/rendertest` renders the fixtures in `tools/rendertest/dat/` under one device and diffs each frame against the checked-in
-  reference, `tools/rendertest/rendertest.txt`. Run it (`--device <glrend|glrend1x|softrend> [--bpp n] [-w W -h H] [--no-depth]`) after
-  any change that can move pixels; `result=PASS failures=0` is the pass condition.
+  reference, `tools/rendertest/rendertest.txt`. Run it (`--device <glrend|glrend1x|softrend> [--bpp n] [--no-depth]`) after
+  any change that can move pixels; `result=PASS failures=0` is the pass condition. The frame is fixed at 320x240.
 - The reference key is `<device>/<driver>/<fp-class>/<zb|zs>/<pixel-type>/<WxH>/<scene>`. `<fp-class>` is the width `float` and `double`
   expressions are evaluated at - `x87` (80-bit intermediates, `FLT_EVAL_METHOD` 2) or `declared` (each operation rounded at its type's
   width, `FLT_EVAL_METHOD` 0) - and it reaches the frame through the renderer and through core's scene setup, so every entry is keyed by
