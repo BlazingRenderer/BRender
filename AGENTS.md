@@ -21,23 +21,26 @@ BRender is a 3D rendering engine with multiple renderer backends:
   glrend1x exposes a `BRT_PRIMITIVE_LIBRARY_O` that softrend's search then finds (`drivers/glrend1x/devpmglf.c`).
 
 ## Benchmarking
-- `examples/gltfview/bench.c` is the benchmark harness, driven by `GLTFVIEW_BENCH_*` environment variables: `FRAMES` (frames to render;
-  0 or unset disables it), `WARMUP` (frames to discard, default 10), `NOVSYNC` (`1` to disable vsync), `FINISH` (`1` to `glFinish()`
-  each frame), `CSV` (path to write per-frame samples to), `PPM` (path to write the final frame to as a PPM - GL path only) and
-  `SOFT_PNG` (path to write the software colour buffer as a PNG, via `BrFmtImageSave`, for softrend and the software drivers).
-- **An unset `FRAMES` means the demo never exits**, with one exception: under `SDL_VIDEODRIVER=offscreen` `gltfview` renders five frames
-  and exits, because a missing frame count there is always an accident. Elsewhere it renders in an endless loop rather than returning,
-  so a run without it either hangs or has to be killed - and inside `gdb` that looks like a dump that produced nothing. Always set it:
-  `SDL_VIDEODRIVER=offscreen GLTFVIEW_BENCH_FRAMES=5 GLTFVIEW_BENCH_NOVSYNC=1`. Bound anything that could spin with
-  `timeout -s KILL` and never a plain `timeout`, because these programs install a SIGTERM handler and a plain `timeout` leaves the
-  process running. The timeout is a backstop, not a mechanism: if it is the thing ending a run, the invocation is wrong.
-- Every demo built on `examples/brdemo/brdemo.c` is useless as an instrument: it hardcodes vsync on (`SDL_GL_SetSwapInterval(1)`)
-  and draws the frame time into the colour buffer, so it reports the refresh period (~16.7ms on a 60Hz display) whatever it rendered.
-- Always measure with `--no-stats` (`examples/brdemo/brdemo.c`, inherited by `gltfview`). Without it the overlay writes frame time
-  into the colour buffer, so runs differ and the checksum is worthless.
-- GPU timings come from GL timer queries and need a GL context; without one they are reported as 0 rather than crashing. Softrend has
-  no GL context of its own - run it over `glrend1x` (see Building) to get GPU timings for the software path. The end-of-run checksum is
-  taken from the window-sized framebuffer, so it is only comparable between runs with identical `-w`/`-h`.
+- `tools/gltfbench` is the benchmark: a headless glTF scene renderer with no demo framework, no editor camera and no input, so a frame
+  means the same thing to it as it does to `rendertest`. It renders through `BrZbSceneRender()` and takes `--device glrend|glrend1x|softrend`,
+  `--width`/`--height` (default 1280x720), `--warmup N` (default 10), `--frames N` (default 1), the camera knobs
+  `--dist`/`--angle`/`--elevation`, and `--checksum`, `--ppm PATH`, `--csv PATH` (one millisecond line per measured frame) and `--finish`.
+- **`--finish` is what makes a CSV line a frame time.** It calls `glFinish()` after the swap, so a line runs from the frame's start until its
+  GPU work has completed, rather than until its commands were submitted. Offscreen has no presentation, so without it the CPU runs ahead of
+  the GPU and the samples barely move with resolution. It serialises the CPU and the GPU: absolute times are worse than a pipelined game
+  achieves, and that is the price of the number being about one frame.
+- **Run it under `SDL_VIDEODRIVER=offscreen`.** That gives a real GL context on the real GPU, and keeps the swap from pinning every frame to
+  the refresh: `gltfbench` never sets the swap interval and SDL defaults it to 1, so a windowed run reports the refresh period whatever it
+  rendered.
+- **`examples/gltfview` is a viewer, not an instrument.** It builds on `brdemo`, which hardcodes vsync on (`SDL_GL_SetSwapInterval(1)`) and
+  draws the frame time into the colour buffer; every demo built on `brdemo.c` inherits both. Pass `--no-stats` if you run one anyway, or the
+  overlay makes runs differ and the checksum worthless.
+- **A `brdemo` program never exits on its own**, `gltfview` included: `BrDemoRunArg()` loops until `SDL_EVENT_QUIT`, and offscreen has no
+  quit to send it. `gltfbench` defaults to one measured frame and always returns. Bound anything that might spin with `timeout -s KILL` and
+  never a plain `timeout`, because these programs install a SIGTERM handler and a plain `timeout` leaves the process running. The timeout is
+  a backstop, not a mechanism: if it is the thing ending a run, the invocation is wrong.
+- The checksum and the PPM come from the window-sized framebuffer, so they are only comparable between runs with identical
+  `--width`/`--height`. There are no GPU timer queries; `--finish` is the only GPU-side number.
 - Protocol: build each variant to its own binary, warm every binary, and run variants interleaved (ABBA). Report min and median and
   require them to agree; use n>=6 for anything under ~5%. Absolute times drift badly across sessions - only same-session interleaved
   ratios mean anything.
