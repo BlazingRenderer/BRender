@@ -439,7 +439,7 @@ static void VkRenderPackSceneClipPlanes(br_renderer *self, br_vk_scene_state *sc
  * per-draw push constants: BRT_DONT_CARE means no environment is enabled, and the reference
  * renderers leave the frame at identity then, while BRT_NONE (or any other hint) means the
  * core set the matrix. The shader only uses the linear part, so the last row is the identity
- * row glrend's BrMatrix4Copy34 writes.
+ * row BrMatrix4Copy34() writes.
  */
 static void VkRenderPackSceneEnvironment(br_renderer *self, br_vk_scene_state *scene)
 {
@@ -453,8 +453,13 @@ static void VkRenderPackSceneEnvironment(br_renderer *self, br_vk_scene_state *s
     if(state->matrix.view_to_environment_hint == BRT_DONT_CARE)
         return;
 
+    /*
+     * A matrix34 has three columns, not four: the fourth is the identity
+     * column BrMatrix4Copy34() writes, which the loop above has already put
+     * there. Reading m[r][3] runs off the end of the row into the next one.
+     */
     for(int r = 0; r < 3; ++r) {
-        for(int c = 0; c < 4; ++c)
+        for(int c = 0; c < 3; ++c)
             scene->environment[r * 4 + c] = (float)state->matrix.view_to_environment.m[r][c];
     }
 }
