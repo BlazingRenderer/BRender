@@ -2306,6 +2306,13 @@ static const char *const rt_default_scenes[] = {
     "scene-blend-off",
 
     /*
+     * The alpha-blended sprite: a BR_PMT_RGBA_8888 colour map whose fourth byte
+     * is the fragment's blend. It is the only scene that binds such a map, so it
+     * is the whole of softprim's RGBA_8888 family's witness; see scene.c.
+     */
+    "scene-rgba-blend",
+
+    /*
      * The RGB-output arbitrary-width shade-table fixtures and the affine twins
      * of the two RGB-typed colour maps; see scene.c. The first three carry
      * one cube per output format, so each is the witness at its own --bpp.

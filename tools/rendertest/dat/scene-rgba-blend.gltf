@@ -1,0 +1,229 @@
+{
+  "accessors": [
+    {
+      "bufferView": 0,
+      "componentType": 5126,
+      "type": "VEC3",
+      "count": 4,
+      "min": [-0.5, -0.5, -0],
+      "max": [0.5, 0.5, -0]
+    },
+    {
+      "bufferView": 1,
+      "componentType": 5126,
+      "type": "VEC3",
+      "count": 4
+    },
+    {
+      "bufferView": 2,
+      "componentType": 5126,
+      "type": "VEC2",
+      "count": 4
+    },
+    {
+      "bufferView": 3,
+      "componentType": 5126,
+      "type": "VEC3",
+      "count": 4
+    },
+    {
+      "bufferView": 4,
+      "componentType": 5123,
+      "type": "SCALAR",
+      "count": 6
+    }
+  ],
+  "asset": {
+    "generator": "BRender 1.4.0 (DDI 2.0.0)",
+    "version": "2.0"
+  },
+  "bufferViews": [
+    {
+      "name": "group 0 positions",
+      "buffer": 0,
+      "byteLength": 48,
+      "target": 34962
+    },
+    {
+      "name": "group 0 normals",
+      "buffer": 1,
+      "byteLength": 48,
+      "target": 34962
+    },
+    {
+      "name": "group 0 uvs",
+      "buffer": 2,
+      "byteLength": 32,
+      "target": 34962
+    },
+    {
+      "name": "group 0 colours",
+      "buffer": 3,
+      "byteLength": 48,
+      "target": 34962
+    },
+    {
+      "name": "group 0 indices",
+      "buffer": 4,
+      "byteLength": 12,
+      "target": 34963
+    }
+  ],
+  "buffers": [
+    {
+      "name": "group 0 positions",
+      "uri": "data:application/octet-stream;base64,AAAAvwAAAL8AAACAAAAAvwAAAD8AAACAAAAAPwAAAL8AAACAAAAAPwAAAD8AAACA",
+      "byteLength": 48
+    },
+    {
+      "name": "group 0 normals",
+      "uri": "data:application/octet-stream;base64,AAAAAAAAAAAAAIA/AAAAAAAAAAAAAIA/AAAAAAAAAAAAAIA/AAAAAAAAAAAAAIA/",
+      "byteLength": 48
+    },
+    {
+      "name": "group 0 uvs",
+      "uri": "data:application/octet-stream;base64,AAAAAAAAAAAAAAAAAACAPwAAgD8AAAAAAACAPwAAgD8=",
+      "byteLength": 32
+    },
+    {
+      "name": "group 0 colours",
+      "uri": "data:application/octet-stream;base64,AACAPwAAgD8AAIA/AACAPwAAgD8AAIA/AACAPwAAgD8AAIA/AACAPwAAgD8AAIA/",
+      "byteLength": 48
+    },
+    {
+      "name": "group 0 indices",
+      "uri": "data:application/octet-stream;base64,AwABAAAAAgADAAAA",
+      "byteLength": 12
+    }
+  ],
+  "images": [
+    {
+      "name": "scene-rgba-blend-map",
+      "uri": "data:application/vnd.brender.pix;base64,AAAAEgAAAAgAAAACAAAAAgAAAD0AAAAiCAGAAGAAMAAAAAAAAHNjZW5lLXJnYmEtYmxlbmQtbWFwAAAAACEAAEgIAAASAAAAAAT//yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yCWICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP9g////YP///2D///9g////YP///2D///9g////YP///2D///9g////YP///2D///9g////YP///2D///9g////YP///2D///9g////YP///2D///9g////YP///2D//////yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yCWICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP9g////YP///2D///9g////YP///2D///9g////YP///2D///9g////YP///2D///9g////YP///2D///9g////YP///2D///9g////YP///2D///9g////YP///2D//////yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yCWICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP9g////YP///2D///9g////YP///2D///9g////YP///2D///9g////YP///2D///9g////YP///2D///9g////YP///2D///9g////YP///2D///9g////YP///2D//////yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yCWICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP9g////YP///2D///9g////YP///2D///9g////YP///2D///9g////YP///2D///9g////YP///2D///9g////YP///2D///9g////YP///2D///9g////YP///2D//////yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yCWICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP9g////YP///2D///9g////YP///2D///9g////YP///2D///9g////YP///2D///9g////YP///2D///9g////YP///2D///9g////YP///2D///9g////YP///2D//////yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yCWICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP9g////YP///2D///9g////YP///2D///9g////YP///2D///9g////YP///2D///9g////YP///2D///9g////YP///2D///9g////YP///2D///9g////YP///2D//////yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yCWICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP9g////YP///2D///9g////YP///2D///9g////YP///2D///9g////YP///2D///9g////YP///2D///9g////YP///2D///9g////YP///2D///9g////YP///2D//////yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yCWICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP9g////YP///2D///9g////YP///2D///9g////YP///2D///9g////YP///2D///9g////YP///2D///9g////YP///2D///9g////YP///2D///9g////YP///2D//////yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yCWICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP9g////YP///2D///9g////YP///2D///9g////YP///2D///9g////YP///2D///9g////YP///2D///9g////YP///2D///9g////YP///2D///9g////YP///2D//////yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yCWICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP9g////YP///2D///9g////YP///2D///9g////YP///2D///9g////YP///2D///9g////YP///2D///9g////YP///2D///9g////YP///2D///9g////YP///2D//////yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yCWICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP9g////YP///2D///9g////YP///2D///9g////YP///2D///9g////YP///2D///9g////YP///2D///9g////YP///2D///9g////YP///2D///9g////YP///2D//////yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yCWICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP9g////YP///2D///9g////YP///2D///9g////YP///2D///9g////YP///2D///9g////YP///2D///9g////YP///2D///9g////YP///2D///9g////YP///2D//////yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yCWICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP9g////YP///2D///9g////YP///2D///9g////YP///2D///9g////YP///2D///9g////YP///2D///9g////YP///2D///9g////YP///2D///9g////YP///2D//////yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yCWICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP9g////YP///2D///9g////YP///2D///9g////YP///2D///9g////YP///2D///9g////YP///2D///9g////YP///2D///9g////YP///2D///9g////YP///2D//////yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yCWICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP9g////YP///2D///9g////YP///2D///9g////YP///2D///9g////YP///2D///9g////YP///2D///9g////YP///2D///9g////YP///2D///9g////YP///2D//////yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yCWICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP9g////YP///2D///9g////YP///2D///9g////YP///2D///9g////YP///2D///9g////YP///2D///9g////YP///2D///9g////YP///2D///9g////YP///2D//////yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yCWICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP9g////YP///2D///9g////YP///2D///9g////YP///2D///9g////YP///2D///9g////YP///2D///9g////YP///2D///9g////YP///2D///9g////YP///2D//////yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yCWICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP9g////YP///2D///9g////YP///2D///9g////YP///2D///9g////YP///2D///9g////YP///2D///9g////YP///2D///9g////YP///2D///9g////YP///2D//////yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yCWICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP9g////YP///2D///9g////YP///2D///9g////YP///2D///9g////YP///2D///9g////YP///2D///9g////YP///2D///9g////YP///2D///9g////YP///2D//////yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yCWICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP9g////YP///2D///9g////YP///2D///9g////YP///2D///9g////YP///2D///9g////YP///2D///9g////YP///2D///9g////YP///2D///9g////YP///2D//////yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yCWICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP9g////YP///2D///9g////YP///2D///9g////YP///2D///9g////YP///2D///9g////YP///2D///9g////YP///2D///9g////YP///2D///9g////YP///2D//////yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yCWICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP9g////YP///2D///9g////YP///2D///9g////YP///2D///9g////YP///2D///9g////YP///2D///9g////YP///2D///9g////YP///2D///9g////YP///2D//////yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yCWICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP9g////YP///2D///9g////YP///2D///9g////YP///2D///9g////YP///2D///9g////YP///2D///9g////YP///2D///9g////YP///2D///9g////YP///2D//////yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yCWICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP9g////YP///2D///9g////YP///2D///9g////YP///2D///9g////YP///2D///9g////YP///2D///9g////YP///2D///9g////YP///2D///9g////YP///2D//////yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yCWICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP9g////YP///2D///9g////YP///2D///9g////YP///2D///9g////YP///2D///9g////YP///2D///9g////YP///2D///9g////YP///2D///9g////YP///2D//////yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yCWICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP9g////YP///2D///9g////YP///2D///9g////YP///2D///9g////YP///2D///9g////YP///2D///9g////YP///2D///9g////YP///2D///9g////YP///2D//////yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yCWICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP9g////YP///2D///9g////YP///2D///9g////YP///2D///9g////YP///2D///9g////YP///2D///9g////YP///2D///9g////YP///2D///9g////YP///2D//////yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yCWICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP9g////YP///2D///9g////YP///2D///9g////YP///2D///9g////YP///2D///9g////YP///2D///9g////YP///2D///9g////YP///2D///9g////YP///2D//////yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yCWICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP9g////YP///2D///9g////YP///2D///9g////YP///2D///9g////YP///2D///9g////YP///2D///9g////YP///2D///9g////YP///2D///9g////YP///2D//////yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yCWICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP9g////YP///2D///9g////YP///2D///9g////YP///2D///9g////YP///2D///9g////YP///2D///9g////YP///2D///9g////YP///2D///9g////YP///2D//////yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yCWICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP9g////YP///2D///9g////YP///2D///9g////YP///2D///9g////YP///2D///9g////YP///2D///9g////YP///2D///9g////YP///2D///9g////YP///2D//////yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yCWICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP9g////YP///2D///9g////YP///2D///9g////YP///2D///9g////YP///2D///9g////YP///2D///9g////YP///2D///9g////YP///2D///9g////YP///2D//////yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yCWICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP9g////YP///2D///9g////YP///2D///9g////YP///2D///9g////YP///2D///9g////YP///2D///9g////YP///2D///9g////YP///2D///9g////YP///2D//////yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yCWICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP9g////YP///2D///9g////YP///2D///9g////YP///2D///9g////YP///2D///9g////YP///2D///9g////YP///2D///9g////YP///2D///9g////YP///2D//////yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yCWICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP9g////YP///2D///9g////YP///2D///9g////YP///2D///9g////YP///2D///9g////YP///2D///9g////YP///2D///9g////YP///2D///9g////YP///2D//////yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yCWICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP9g////YP///2D///9g////YP///2D///9g////YP///2D///9g////YP///2D///9g////YP///2D///9g////YP///2D///9g////YP///2D///9g////YP///2D//////yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yCWICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP9g////YP///2D///9g////YP///2D///9g////YP///2D///9g////YP///2D///9g////YP///2D///9g////YP///2D///9g////YP///2D///9g////YP///2D//////yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yCWICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP9g////YP///2D///9g////YP///2D///9g////YP///2D///9g////YP///2D///9g////YP///2D///9g////YP///2D///9g////YP///2D///9g////YP///2D//////yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yCWICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP9g////YP///2D///9g////YP///2D///9g////YP///2D///9g////YP///2D///9g////YP///2D///9g////YP///2D///9g////YP///2D///9g////YP///2D//////yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yCWICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP9g////YP///2D///9g////YP///2D///9g////YP///2D///9g////YP///2D///9g////YP///2D///9g////YP///2D///9g////YP///2D///9g////YP///2D//////yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yCWICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP9g////YP///2D///9g////YP///2D///9g////YP///2D///9g////YP///2D///9g////YP///2D///9g////YP///2D///9g////YP///2D///9g////YP///2D//////yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yCWICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP9g////YP///2D///9g////YP///2D///9g////YP///2D///9g////YP///2D///9g////YP///2D///9g////YP///2D///9g////YP///2D///9g////YP///2D//////yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yCWICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP9g////YP///2D///9g////YP///2D///9g////YP///2D///9g////YP///2D///9g////YP///2D///9g////YP///2D///9g////YP///2D///9g////YP///2D//////yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yCWICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP9g////YP///2D///9g////YP///2D///9g////YP///2D///9g////YP///2D///9g////YP///2D///9g////YP///2D///9g////YP///2D///9g////YP///2D//////yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yCWICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP9g////YP///2D///9g////YP///2D///9g////YP///2D///9g////YP///2D///9g////YP///2D///9g////YP///2D///9g////YP///2D///9g////YP///2D//////yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yCWICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP9g////YP///2D///9g////YP///2D///9g////YP///2D///9g////YP///2D///9g////YP///2D///9g////YP///2D///9g////YP///2D///9g////YP///2D//////yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yCWICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP9g////YP///2D///9g////YP///2D///9g////YP///2D///9g////YP///2D///9g////YP///2D///9g////YP///2D///9g////YP///2D///9g////YP///2D//////yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICD//yAg//8gIP//ICDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yDIIP8gyCD/IMgg/yCWICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP+WICD/liAg/5YgIP9g////YP///2D///9g////YP///2D///9g////YP///2D///9g////YP///2D///9g////YP///2D///9g////YP///2D///9g////YP///2D///9g////YP///2D///8AAAAAAAAAAA=="
+    }
+  ],
+  "meshes": [
+    {
+      "name": "scene-rgba-blend-quad",
+      "primitives": [
+        {
+          "indices": 4,
+          "attributes": {
+            "POSITION": 0,
+            "NORMAL": 1,
+            "TEXCOORD_0": 2,
+            "COLOR_0": 3
+          }
+        }
+      ]
+    }
+  ],
+  "materials": [
+    {
+      "name": "scene-rgba-blend-material",
+      "pbrMetallicRoughness": {
+        "baseColorTexture": {
+          "index": 0
+        },
+        "metallicFactor": 0,
+        "baseColorFactor": [1, 1, 1, 0.501960814]
+      },
+      "alphaMode": "BLEND"
+    }
+  ],
+  "nodes": [
+    {
+      "children": [ 1, 2, 3 ],
+      "name": "world"
+    },
+    {
+      "name": "ambient",
+      "extensions": {
+        "BR_lights": {
+          "light": 0
+        }
+      }
+    },
+    {
+      "name": "camera",
+      "matrix": [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 6, 1],
+      "camera": 0
+    },
+    {
+      "mesh": 0,
+      "name": "quad",
+      "matrix": [4, 0, 0, 0, 0, 4, 0, 0, 0, 0, 4, 0, 0, 0, 0, 1],
+      "extensions": {
+        "BR_materials": {
+          "material": 0
+        }
+      }
+    }
+  ],
+  "samplers": [
+    {
+      "magFilter": 9728,
+      "minFilter": 9728
+    }
+  ],
+  "scene": 0,
+  "scenes": [
+    {
+      "nodes": [ 0 ]
+    }
+  ],
+  "textures": [
+    {
+      "name": "scene-rgba-blend-material",
+      "source": 0,
+      "sampler": 0
+    }
+  ],
+  "cameras": [
+    {
+      "type": "perspective",
+      "perspective": {
+        "aspectRatio": 1,
+        "yfov": 0.785398185,
+        "zfar": 100,
+        "znear": 0.100000001
+      }
+    }
+  ],
+  "extensions": {
+    "KHR_lights_punctual": {
+      "lights": [
+        {
+          "type": "point",
+          "intensity": 0,
+          "range": 1
+        }
+      ]
+    },
+    "BR_lights": {
+      "lights": [
+        {
+          "identifier": "ambient",
+          "type": "ambient",
+          "colour": [0.188235298, 0.188235298, 0.188235298]
+        }
+      ]
+    },
+    "BR_materials": {
+      "materials": [
+        {
+          "identifier": "scene-rgba-blend-material",
+          "opacity": 0.501960814,
+          "flags": 0,
+          "map_transform": [1, 0, 0, 1, 0, 0],
+          "colour_map": 0
+        }
+      ]
+    }
+  },
+  "extensionsUsed": [
+    "KHR_lights_punctual",
+    "BR_lights",
+    "BR_materials"
+  ]
+}

@@ -32,6 +32,9 @@
 /* cube.c */
 br_model *mkres_make_cube(const char *name);
 
+/* quad.c */
+br_model *mkres_make_quad(const char *name);
+
 /*
  * Bounding radius of the cube built by mkres_make_cube(): 1x1x1 about the origin.
  */
@@ -1488,6 +1491,121 @@ static br_error scene_add_backdrop(br_actor *world, br_model *cube, const char *
 
 /*
  * ------------------------------------------------------------------
+ * The alpha-blended sprite fixture.
+ *
+ * softprim carries six blocks pentprim never had (drivers/softprim/tables/
+ * soft_t24.ifg): a BR_PMT_RGBA_8888 colour map sampled per texel, its fourth
+ * byte the fragment's own alpha, blended over the destination. The state they
+ * select on is a bound RGBA_8888 colour map plus the primitive's BLEND flag,
+ * and nothing in the corpus could bind such a map before: the glTF loader
+ * converts every ordinary image to the output format, so an RGBA map arrives
+ * as a 555/565/888 one and no block samples it. The brender=rgba8888 marker
+ * and BR_GLTF_SAVE_PRESERVE_MAP_TYPES are what let this fixture author one.
+ *
+ * The block is the unlit, arbitrary-width, affine one, so the material is
+ * held to exactly that:
+ *
+ *  - unlit: no BR_MATF_LIGHT and no BR_MATF_PRELIT. Lighting would make the
+ *    frame a lit surface rather than the texel itself, and the block's
+ *    shading axis is SP_SHADE_NONE.
+ *  - affine: no BR_MATF_PERSPECTIVE. softprim implements the family only as
+ *    SP_PERSP_AFFINE (raster.cpp asserts it).
+ *  - opacity 128: the one thing that sets the primitive's BLEND flag, which
+ *    the block requires and is also what the kernel reads as the vertex alpha.
+ *
+ * The texture is the arbitrary-width family's shape (96x48, not a power of
+ * two) in four vertical bands. Each band carries its own hue and its own
+ * alpha, so the frame is four strengths of one blend and a channel-order or
+ * channel-drop failure reads as a moved band rather than a grey shift: the
+ * map's fourth byte is what the blend is, and a fixture of one alpha would not
+ * say whether the byte had been read. The quad is scaled to fill most of the
+ * frame, so every band is hundreds of pixels and none of them can be lost in
+ * rounding.
+ */
+#define SCENE_RGBA_CELLS 4
+#define SCENE_RGBA_SCALE BR_SCALAR(4.0)
+
+static br_pixelmap *scene_rgba_texture(const char *name)
+{
+    /* R, G, B, A per band. */
+    static const br_uint_8 bands[SCENE_RGBA_CELLS][4] = {
+        {255, 32,  32,  255},
+        {32,  255, 32,  200},
+        {32,  32,  255, 150},
+        {255, 255, 255, 96 },
+    };
+    br_pixelmap *pm;
+    br_uint_8   *pixels;
+    const int    cell_w = SCENE_ARB_WIDTH / SCENE_RGBA_CELLS;
+
+    if((pm = BrPixelmapAllocate(BR_PMT_RGBA_8888, SCENE_ARB_WIDTH, SCENE_ARB_HEIGHT, NULL, BR_PMAF_NORMAL)) == NULL)
+        return NULL;
+
+    pm->identifier = BrResStrDup(pm, name);
+    pixels         = pm->pixels;
+
+    for(int y = 0; y < SCENE_ARB_HEIGHT; ++y)
+        for(int x = 0; x < SCENE_ARB_WIDTH; ++x) {
+            const br_uint_8 *band = bands[(x / cell_w) % SCENE_RGBA_CELLS];
+
+            /* BR_PMT_RGBA_8888's bytes in memory run B,G,R,A. */
+            br_uint_8 *texel = pixels + (br_size_t)y * pm->row_bytes + (br_size_t)x * 4;
+
+            texel[0] = band[2];
+            texel[1] = band[1];
+            texel[2] = band[0];
+            texel[3] = band[3];
+        }
+
+    BrMapAdd(pm);
+
+    return pm;
+}
+
+static br_error scene_make_rgba_blend_fixture(br_model *quad)
+{
+    br_material *mat;
+    br_pixelmap                      *map;
+    br_actor                         *world, *a;
+    br_matrix34                       m;
+
+    if((map = scene_rgba_texture("scene-rgba-blend-map")) == NULL) {
+        fprintf(stderr, "failed to allocate the rgba blend fixture map\n");
+        return BRE_FAIL;
+    }
+
+    if((mat = scene_material_ex("scene-rgba-blend-material", BR_COLOUR_RGB(255, 255, 255), 0, BR_SCALAR(0.1), BR_SCALAR(0.7),
+                                BR_SCALAR(0.0), BR_SCALAR(20.0))) == NULL)
+        return BRE_FAIL;
+
+    mat->colour_map = map;
+    mat->opacity    = 128;
+
+    if((world = scene_world(quad, mat, BR_SCALAR(1.0))) == NULL)
+        return BRE_FAIL;
+
+    for(a = world->children; a != NULL; a = a->next)
+        if(a->type == BR_ACTOR_MODEL)
+            break;
+
+    if(a != NULL) {
+        /*
+         * A uniform scale, and an identifier that does not call a quad a cube:
+         * scene_world() makes a cube actor, and the glTF node's name is what a
+         * reader of the fixture sees.
+         */
+        BrMatrix34Scale(&m, SCENE_RGBA_SCALE, SCENE_RGBA_SCALE, SCENE_RGBA_SCALE);
+
+        a->identifier = BrResStrDup(a, "quad");
+        a->t.type     = BR_TRANSFORM_MATRIX34;
+        a->t.t.mat    = m;
+    }
+
+    return scene_save("scene-rgba-blend.gltf", world);
+}
+
+/*
+ * ------------------------------------------------------------------
  * The RGB-output arbitrary-width shade-table fixtures.
  *
  * prim_t24's RGB-typed shade-table blocks - out = shade[(intensity << 8) |
@@ -2837,6 +2955,24 @@ br_error mkres_make_scenes(void)
 
     if(scene_make_mmx_fixtures(cube) != BRE_OK)
         r = BRE_FAIL;
+
+    /*
+     * The RGBA sprite fixture needs a model of its own: the cube is what every
+     * other fixture draws, and this one is a flat quad so that the whole frame
+     * is the sprite. mkres_make_quad() flips the shared vertex array in place,
+     * so it must be built exactly once.
+     */
+    {
+        br_model *quad;
+
+        if((quad = mkres_make_quad("scene-rgba-blend-quad")) == NULL) {
+            fprintf(stderr, "failed to allocate quad model\n");
+            return BRE_FAIL;
+        }
+
+        if(scene_make_rgba_blend_fixture(quad) != BRE_OK)
+            r = BRE_FAIL;
+    }
 
     return r;
 }
