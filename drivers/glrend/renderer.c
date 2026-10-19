@@ -51,7 +51,7 @@ static void RendererGLInitImm(br_renderer *self, br_gl_main_shader *shader)
     if(shader->attributes.aColour >= 0) {
         gl->EnableVertexAttribArray(shader->attributes.aColour);
         gl->VertexAttribPointer(shader->attributes.aColour, 4, GL_UNSIGNED_BYTE, GL_TRUE, sizeof(br_immvert_gl),
-                                (void *)offsetof(br_immvert_gl, colour));
+                                (void *)offsetof(br_immvert_gl, c));
     }
 
     gl->BindVertexArray(0);
@@ -801,6 +801,14 @@ void RendererGLUnrefState(br_renderer *self, state_stack *state)
         BrPoolBlockFree(self->state_pool, state);
 }
 
+static void ImmVertGLColour(br_uint_8 c[4], br_colour colour)
+{
+    c[0] = BR_RED(colour);
+    c[1] = BR_GRN(colour);
+    c[2] = BR_BLU(colour);
+    c[3] = BR_ALPHA(colour);
+}
+
 br_int_32 RendererGLNextImmTri(br_renderer *self, struct v11group *group, br_vector3_u16 fp)
 {
     br_size_t base = self->trans.next;
@@ -816,22 +824,22 @@ br_int_32 RendererGLNextImmTri(br_renderer *self, struct v11group *group, br_vec
         .position = group->position[fp.v[0]],
         .normal   = group->normal[fp.v[0]],
         .map      = group->map[fp.v[0]],
-        .colour   = group->vertex_colours[fp.v[0]],
     };
+    ImmVertGLColour(v0->c, group->vertex_colours[fp.v[0]]);
 
     *v1 = (br_immvert_gl){
         .position = group->position[fp.v[1]],
         .normal   = group->normal[fp.v[1]],
         .map      = group->map[fp.v[1]],
-        .colour   = group->vertex_colours[fp.v[1]],
     };
+    ImmVertGLColour(v1->c, group->vertex_colours[fp.v[1]]);
 
     *v2 = (br_immvert_gl){
         .position = group->position[fp.v[2]],
         .normal   = group->normal[fp.v[2]],
         .map      = group->map[fp.v[2]],
-        .colour   = group->vertex_colours[fp.v[2]],
     };
+    ImmVertGLColour(v2->c, group->vertex_colours[fp.v[2]]);
 
     return (br_int_32)base;
 }

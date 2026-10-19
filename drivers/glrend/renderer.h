@@ -13,7 +13,7 @@ typedef struct br_immvert_gl {
     br_vector3 position;
     br_vector3 normal;
     br_vector2 map;
-    br_colour  colour;
+    br_uint_8  c[4];
 } br_immvert_gl;
 #pragma pack(pop)
 
