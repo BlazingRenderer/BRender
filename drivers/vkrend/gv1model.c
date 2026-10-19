@@ -118,29 +118,41 @@ static br_error BR_CMETHOD_DECL(br_geometry_v1_model_vk, storedNew)(struct br_ge
 }
 
 /*
- * Immediate-mode rendering needs a vertex pool and per-triangle submission that this
- * renderer does not have. Like glrend, warn once and fail; the stored path is the one the
- * core uses because the format advertises BRT_STORED_ONLY_B.
+ * Immediate mode: draw a v11model the caller prepared, rather than one this renderer
+ * stored earlier. The format keeps advertising BRT_STORED_ONLY_B, so the core's model
+ * renderer still stores every model once; this is only reached by a caller that hands in a
+ * model directly.
  */
 static br_error BR_CMETHOD_DECL(br_geometry_v1_model_vk, render)(struct br_geometry_v1_model *self, struct br_renderer *renderer,
                                                                  struct v11model *model, struct br_renderer_state_stored *default_state,
                                                                  br_token type)
 {
-    static br_boolean warned_imm = BR_FALSE;
+    br_geometry_stored *sg;
+    br_error            err;
 
-    (void)self;
-    (void)renderer;
-    (void)model;
-    (void)default_state;
-    (void)type;
+    if(type != BRT_TRIANGLE)
+        return BRE_FAIL;
 
-    if(warned_imm != BR_TRUE) {
-        BrLogWarn("VKREND", "Immediate-mode rendering is not supported.");
-        BrLogWarn("VKREND", "This message will not be shown again.");
-        warned_imm = BR_TRUE;
+    if((sg = GeometryStoredVkAllocate(self, "immediate", renderer, model)) == NULL)
+        return BRE_FAIL;
+
+    /*
+     * A group with no stored state of its own falls back to default_state; restoring it
+     * into the current state is what V1Model_RenderStored()'s per-group copy does.
+     */
+    if(default_state != NULL) {
+        RendererStatePush(renderer, MASK_STATE_STORED);
+        RendererStateRestore(renderer, default_state, MASK_STATE_STORED);
     }
 
-    return BRE_FAIL;
+    err = GeometryStoredRender(sg, renderer, type);
+
+    if(default_state != NULL)
+        RendererStatePop(renderer, MASK_STATE_STORED);
+
+    ObjectFree(sg);
+
+    return err;
 }
 
 /*
