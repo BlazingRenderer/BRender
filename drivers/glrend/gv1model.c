@@ -104,18 +104,41 @@ static br_error BR_CMETHOD_DECL(br_geometry_v1_model_gl, storedNew)(struct br_ge
     return BRE_OK;
 }
 
+/*
+ * Immediate mode: draw a v11model the caller prepared, rather than one this renderer
+ * stored earlier. The format keeps advertising BRT_STORED_ONLY_B, so the core's model
+ * renderer still stores every model once; this is only reached by a caller that hands in a
+ * model directly.
+ */
 br_error BR_CMETHOD_DECL(br_geometry_v1_model_gl, render)(struct br_geometry_v1_model *self, struct br_renderer *renderer,
                                                           struct v11model *model, struct br_renderer_state_stored *default_state, br_token type)
 {
-    static br_boolean warned_imm = BR_FALSE;
+    br_geometry_stored *sg;
+    br_error            err;
 
-    if(warned_imm != BR_TRUE) {
-        BrLogWarn("GLREND", "Immediate-mode rendering is not supported.");
-        BrLogWarn("GLREND", "This message will not be shown again.");
-        warned_imm = BR_TRUE;
+    if(type != BRT_TRIANGLE)
+        return BRE_FAIL;
+
+    if((sg = GeometryStoredGLAllocate(self, "immediate", renderer, model)) == NULL)
+        return BRE_FAIL;
+
+    /*
+     * A group with no stored state of its own falls back to default_state; restoring it
+     * into the current state is what V1Model_RenderStored()'s per-group copy does.
+     */
+    if(default_state != NULL) {
+        RendererStatePush(renderer, MASK_STATE_STORED);
+        RendererStateRestore(renderer, default_state, MASK_STATE_STORED);
     }
 
-    return BRE_FAIL;
+    err = GeometryStoredRender(sg, renderer, type);
+
+    if(default_state != NULL)
+        RendererStatePop(renderer, MASK_STATE_STORED);
+
+    ObjectFree(sg);
+
+    return err;
 }
 
 /*

@@ -121,7 +121,7 @@ br_geometry_stored *GeometryStoredGLAllocate(br_geometry_v1_model *gv1model, con
     self->model  = model;
     self->shared = BR_TRUE;
 
-    self->groups = BrResAllocate(gv1model, sizeof(gl_groupinfo) * model->ngroups, BR_MEMORY_OBJECT_DATA);
+    self->groups = BrResAllocate(self, sizeof(gl_groupinfo) * model->ngroups, BR_MEMORY_OBJECT_DATA);
 
     total_vertices = 0;
     total_faces    = 0;
