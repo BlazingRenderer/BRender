@@ -19,8 +19,13 @@ extern "C" {
 /*
  * Create the font atlas as a br_pixelmap and register it with ImGui. Needs a
  * current ImGui context.
+ *
+ * \param palette The palette to draw an INDEX_8 destination through, which the
+ *                application prepares and sets on the destination itself; the
+ *                atlas is converted against it and index 0 is transparent.
+ *                NULL draws in colour, through the atlas's own RGBA map.
  */
-bool ImGui_ImplBrender_Init(void);
+bool ImGui_ImplBrender_Init(br_pixelmap *palette);
 
 /* Release the atlas. */
 void ImGui_ImplBrender_Shutdown(void);

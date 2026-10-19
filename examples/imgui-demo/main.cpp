@@ -24,11 +24,64 @@
 #include "imgui_impl_sdl3.h"
 
 typedef struct br_imgui_demo {
-    SDL_Window *window;
-    br_scalar   dt;
-    bool        sdl3_ready;
-    bool        brender_ready;
+    SDL_Window  *window;
+    br_pixelmap *palette;
+    br_scalar    dt;
+    br_boolean   sdl3_ready;
+    br_boolean   brender_ready;
 } br_imgui_demo;
+
+/*
+ * The palette an INDEX_8 destination draws through. An indexed batch has no colour
+ * to interpolate - it writes index values - so the colours have to be chosen ahead
+ * of time: index 0 is the transparent key the indexed kernels mask on, a grey ramp
+ * carries the glyph antialiasing the font atlas supplies as alpha, and the rest is
+ * ImGui's own style colours plus a coarse cube for anything else it asks for.
+ */
+#define UI_GREYS 32
+
+static br_pixelmap *build_ui_palette()
+{
+    br_pixelmap      *palette;
+    br_colour        *entry;
+    const ImGuiStyle& style = ImGui::GetStyle();
+    int               n     = 1;
+
+    if((palette = BrPixelmapAllocate(BR_PMT_RGBX_888, 1, 256, nullptr, BR_PMAF_NORMAL)) == nullptr)
+        return nullptr;
+
+    entry = static_cast<br_colour *>(palette->pixels);
+
+    /* Wipe first: only some of the 256 entries end up filled. */
+    BrMemSet(entry, 0, 256 * sizeof(*entry));
+
+    for(int i = 0; i < UI_GREYS && n < 256; ++i, ++n) {
+        const br_uint_8 grey = static_cast<br_uint_8>((i * 255 + (UI_GREYS - 1) / 2) / (UI_GREYS - 1));
+
+        entry[n] = BR_COLOUR_RGB(grey, grey, grey);
+    }
+
+    for(int i = 0; i < ImGuiCol_COUNT && n < 256; ++i, ++n) {
+        const ImVec4& c = style.Colors[i];
+
+        entry[n] = BR_COLOUR_RGB(static_cast<br_uint_8>(c.x * 255.0f), static_cast<br_uint_8>(c.y * 255.0f), static_cast<br_uint_8>(c.z * 255.0f));
+    }
+
+    /* The rest of the palette is a uniform cube, for whatever colour ImGui mixes. */
+    for(int b = 0; b < 6 && n < 256; ++b) {
+        for(int g = 0; g < 4 && n < 256; ++g) {
+            for(int r = 0; r < 7 && n < 256; ++r, ++n) {
+                const br_uint_8 red   = static_cast<br_uint_8>(r * 255 / 6);
+                const br_uint_8 green = static_cast<br_uint_8>(g * 255 / 3);
+                const br_uint_8 blue  = static_cast<br_uint_8>(b * 255 / 5);
+
+                entry[n] = BR_COLOUR_RGB(red, green, blue);
+            }
+        }
+    }
+
+    return palette;
+}
 
 static br_error demo_init(br_demo *demo)
 {
@@ -49,6 +102,21 @@ static br_error demo_init(br_demo *demo)
 
     ImGuiIO& io = ImGui::GetIO();
 
+    /*
+     * The palette is built from ImGui's style, so it has to come after the context
+     * exists; an INDEX_8 destination draws through it, and so does the front screen.
+     */
+    if(demo->colour_buffer->type == BR_PMT_INDEX_8) {
+        if((state->palette = build_ui_palette()) == nullptr) {
+            BrLogError("IMGUI", "Could not build the UI palette.");
+            return BRE_FAIL;
+        }
+
+        /* The front screen resolves its palette from the buffer it presents. */
+        BrPixelmapPaletteSet(demo->colour_buffer, state->palette);
+        demo->clear_colour = 0;
+    }
+
     /* An example should not write imgui.ini (or a log) into the working directory. */
     io.IniFilename = nullptr;
     io.LogFilename = nullptr;
@@ -60,7 +128,7 @@ static br_error demo_init(br_demo *demo)
     if(!(state->sdl3_ready = ImGui_ImplSDL3_InitForOther(state->window)))
         return BRE_FAIL;
 
-    if(!(state->brender_ready = ImGui_ImplBrender_Init()))
+    if(!(state->brender_ready = ImGui_ImplBrender_Init(state->palette)))
         return BRE_FAIL;
 
     return BRE_OK;
@@ -115,6 +183,9 @@ static void demo_destroy(br_demo *demo)
 
     if(ImGui::GetCurrentContext() != nullptr)
         ImGui::DestroyContext();
+
+    BrPixelmapFree(state->palette);
+    state->palette = nullptr;
 }
 
 static constexpr br_demo_dispatch dispatch = {
