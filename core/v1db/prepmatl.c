@@ -48,26 +48,6 @@ void BR_PUBLIC_ENTRY BrMaterialUpdate(br_material *mat, br_uint_16 flags)
     if(flags & BR_MATU_RENDERING) {
         tvp = tva;
 
-        tvp->t   = BRT_COLOUR_SOURCE_T;
-        tvp->v.t = mat->flags & (BR_MATF_LIGHT | BR_MATF_PRELIT) ? BRT_VERTEX : BRT_PRIMITIVE;
-        tvp++;
-
-        tvp->t     = BRT_COLOUR_RGB;
-        tvp->v.rgb = mat->colour;
-        tvp++;
-
-        tvp->t   = BRT_OPACITY_SOURCE_T;
-        tvp->v.t = mat->flags & BR_MATF_PREALPHA ? BRT_VERTEX : BRT_PRIMITIVE;
-        tvp++;
-
-        tvp->t   = BRT_AS_SCALAR(OPACITY);
-        tvp->v.s = BR_DIV(BrIntToScalar(mat->opacity), BR_SCALAR(255.0));
-        tvp++;
-
-        tvp->t   = BRT_SEPARATE_SPECULAR_B;
-        tvp->v.b = (mat->flags & BR_MATF_LIGHT) && mat->ks && (mat->flags & BR_MATF_SEPARATE_SPECULAR);
-        tvp++;
-
         tvp->t   = BRT_MODULATE_B;
         tvp->v.b = !!(mat->flags & (BR_MATF_LIGHT | BR_MATF_PRELIT)) || mat->colour != BR_COLOUR_RGB(255, 255, 255);
         tvp++;
@@ -296,6 +276,24 @@ void BR_PUBLIC_ENTRY BrMaterialUpdate(br_material *mat, br_uint_16 flags)
 
         tvp = tva;
 
+        /*
+         * Where the colour and the opacity come from follows the flags, so the update
+         * that reports a flag change is the one that derives it. These are surface
+         * tokens, and the batch above is addressed to the primitive part, where the
+         * template drops them - a flag change therefore never reached them. The
+         * surface functions implement two sources: SURFACE, the material's own colour
+         * and opacity, and GEOMETRY, the model's per-vertex colours. BRT_VERTEX and
+         * BRT_PRIMITIVE, which this used to write, are not sources any driver
+         * implements.
+         */
+        tvp->t   = BRT_COLOUR_SOURCE_T;
+        tvp->v.t = (mat->flags & BR_MATF_PRELIT) ? ((mat->flags & BR_MATF_LIGHT) ? BRT_SURFACE : BRT_GEOMETRY) : BRT_SURFACE;
+        tvp++;
+
+        tvp->t   = BRT_OPACITY_SOURCE_T;
+        tvp->v.t = (mat->flags & BR_MATF_PREALPHA) ? BRT_GEOMETRY : BRT_SURFACE;
+        tvp++;
+
         tvp->t   = BRT_FORCE_FRONT_B;
         tvp->v.b = !!(mat->flags & BR_MATF_FORCE_FRONT);
         tvp++;
@@ -356,17 +354,6 @@ void BR_PUBLIC_ENTRY BrMaterialUpdate(br_material *mat, br_uint_16 flags)
 
         tvp->t   = BRT_PRELIGHTING_B;
         tvp->v.b = mat->flags & BR_MATF_PRELIT && mat->flags & BR_MATF_LIGHT;
-        tvp++;
-
-        tvp->t = BRT_COLOUR_SOURCE_T;
-        if(mat->flags & BR_MATF_PRELIT)
-            tvp->v.t = mat->flags & BR_MATF_LIGHT ? BRT_SURFACE : BRT_GEOMETRY;
-        else
-            tvp->v.t = BRT_SURFACE;
-        tvp++;
-
-        tvp->t   = BRT_OPACITY_SOURCE_T;
-        tvp->v.t = (mat->flags & BR_MATF_PREALPHA) ? BRT_GEOMETRY : BRT_SURFACE;
         tvp++;
 
         tvp->t   = BRT_MAPPING_SOURCE_T;
