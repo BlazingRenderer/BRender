@@ -13,6 +13,17 @@ examples/brdemo/parg.c
 examples/brdemo/parg.h
 tools/parg/parg.c
 tools/parg/parg.h
+examples/imgui-demo/imconfig.h
+examples/imgui-demo/imgui.cpp
+examples/imgui-demo/imgui.h
+examples/imgui-demo/imgui_demo.cpp
+examples/imgui-demo/imgui_draw.cpp
+examples/imgui-demo/imgui_internal.h
+examples/imgui-demo/imgui_tables.cpp
+examples/imgui-demo/imgui_widgets.cpp
+examples/imgui-demo/imgui_impl_sdl3.cpp
+examples/imgui-demo/imgui_impl_sdl3.h
+examples/imgui-demo/imstb_*.h
 drivers/glrend/*.glsl
 
 drivers/glrend1x/glad
