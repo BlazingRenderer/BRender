@@ -172,6 +172,7 @@ static struct v11group bounds_face_groups[] = {
         .map            = bounds_map,
         .normal         = bounds_normal,
         .vertex_colours = bounds_colours,
+        .vertex_index   = NULL,
         .vertex_user    = NULL,
         .nfaces         = 12,
         .nvertices      =  8,

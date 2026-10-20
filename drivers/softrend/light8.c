@@ -27,8 +27,12 @@ void SURFACE_CALL SurfaceIndexZero(br_renderer *self, br_vector3 *p, br_vector2 
  */
 void SURFACE_CALL SurfaceIndexUnlit(br_renderer *self, br_vector3 *p, br_vector2 *map, br_vector3 *n, br_colour colour, br_scalar *comp)
 {
-    comp[C_I] = BR_MUL(self->state.cache.comp_scales[C_I], BR_CONST_DIV(BrIntToScalar(BR_ALPHA(colour)), 256)) +
-                self->state.cache.comp_offsets[C_I];
+    /*
+     * The pre-light index has its own channel; the colour's fourth byte is alpha.
+     */
+    const br_uint_32 index = rend.vertex_index != NULL ? rend.vertex_index[rend.current_index] : 0;
+
+    comp[C_I] = BR_MUL(self->state.cache.comp_scales[C_I], BR_CONST_DIV(BrIntToScalar(index), 256)) + self->state.cache.comp_offsets[C_I];
 }
 
 /*

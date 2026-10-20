@@ -105,6 +105,11 @@ typedef struct rend_block {
      */
     br_colour *prelit_colours;
 
+    /*
+     * Per-vertex pre-light lighting index, indexed by current_index
+     */
+    const br_uint_8 *vertex_index;
+
     br_vector3 eye_l;
 
     brp_block *block;

@@ -71,6 +71,7 @@ struct v11group {
     br_vector2 *map;
     br_vector3 *normal;
     br_colour  *vertex_colours; /* Colour for geometry				    */
+    br_uint_8  *vertex_index;   /* Pre-light lighting index, per vertex */
     br_uint_16 *vertex_user;    /* Per vertex user data                 */
 
     br_uint_16 nfaces;    /* Number of faces in this group		*/

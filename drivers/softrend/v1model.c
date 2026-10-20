@@ -757,6 +757,7 @@ static br_error V1Model_Render(br_geometry *self, br_renderer *renderer, struct 
 #endif
         rend.face_colours   = model->groups[g].face_colours;
         rend.vertex_colours = model->groups[g].vertex_colours;
+        rend.vertex_index   = model->groups[g].vertex_index;
         rend.face_flags     = model->groups[g].face_flags;
         rend.nfaces         = model->groups[g].nfaces;
         rend.nvertices      = model->groups[g].nvertices;

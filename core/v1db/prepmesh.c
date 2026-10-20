@@ -434,7 +434,14 @@ static void CopyVertex(struct v11group *group, int v, struct prep_vertex *src, b
 
     BrVector3Normalise(&group->normal[v], &src->n);
 
-    group->vertex_colours[v] = BR_COLOUR_RGBA(srcv->red, srcv->grn, srcv->blu, srcv->index);
+    /*
+     * The light result is four bytes: red, green, blue and the pre-light lighting
+     * index. They travel in separate channels here - the colour's fourth byte is
+     * alpha, which a prepared model does not have and which the geometry formats
+     * read as one - so the index gets its own array.
+     */
+    group->vertex_colours[v] = BR_COLOUR_RGBA(srcv->red, srcv->grn, srcv->blu, 255);
+    group->vertex_index[v]   = srcv->index;
 
     group->vertex_user[v] = src->v;
 }
@@ -487,6 +494,7 @@ static void PrepareGroups(br_model *model)
     br_fvector3 last_n;
 
     br_colour       *v11fcolours, *v11vcolours;
+    br_uint_8       *v11vindex;
     br_uint_16      *v11fuser, *v11vuser;
     br_uint_8       *v11fflags;
     struct br_face **sorted_faces;
@@ -527,8 +535,7 @@ static void PrepareGroups(br_model *model)
      */
     ntemps = model->nfaces * 3;
 
-    block_size = ntemps * (sizeof(*temp_verts) + sizeof(*sorted_vertices)) +
-                 model->nfaces * (sizeof(*sorted_faces) + sizeof(*face_group_key));
+    block_size = ntemps * (sizeof(*temp_verts) + sizeof(*sorted_vertices)) + model->nfaces * (sizeof(*sorted_faces) + sizeof(*face_group_key));
     temp_verts = BrScratchAllocate(block_size);
 
     BrMemSet(temp_verts, 0, block_size);
@@ -647,8 +654,8 @@ static void PrepareGroups(br_model *model)
 
                  PREP_ALIGN(nv * sizeof(*v11g->position)) + PREP_ALIGN(nv * sizeof(*v11g->map)) + PREP_ALIGN(nv * sizeof(*v11g->normal)) +
 
-                 PREP_ALIGN(nf * sizeof(br_colour)) + PREP_ALIGN(nv * sizeof(br_colour)) + PREP_ALIGN(nf * sizeof(br_uint_8)) +
-                 nv * sizeof(br_int_16) + nf * sizeof(br_int_16);
+                 PREP_ALIGN(nf * sizeof(br_colour)) + PREP_ALIGN(nv * sizeof(br_colour)) + PREP_ALIGN(nv * sizeof(br_uint_8)) +
+                 PREP_ALIGN(nf * sizeof(br_uint_8)) + nv * sizeof(br_int_16) + nf * sizeof(br_int_16);
 
     if(model->prepared && block_size > ((struct v11model *)(model->prepared))->size) {
         BrResFree(model->prepared);
@@ -685,6 +692,8 @@ static void PrepareGroups(br_model *model)
 
     v11vcolours = (void *)cp;
     cp += PREP_ALIGN(nv * sizeof(br_colour));
+    v11vindex = (void *)cp;
+    cp += PREP_ALIGN(nv * sizeof(br_uint_8));
     v11fcolours = (void *)cp;
     cp += PREP_ALIGN(nf * sizeof(br_colour));
 
@@ -752,6 +761,7 @@ static void PrepareGroups(br_model *model)
     v11g[0].normal   = normal;
 
     v11g[0].vertex_colours = v11vcolours;
+    v11g[0].vertex_index   = v11vindex;
     v11g[0].vertex_user    = v11vuser;
 
     v11g[0].nvertices = 1;
@@ -776,6 +786,7 @@ static void PrepareGroups(br_model *model)
             v11g[g].normal   = normal + count + 1;
 
             v11g[g].vertex_colours = v11vcolours + count + 1;
+            v11g[g].vertex_index   = v11vindex + count + 1;
             v11g[g].vertex_user    = v11vuser + count + 1;
             v11g[g].nvertices      = 0;
         }
@@ -1089,8 +1100,10 @@ void BR_PUBLIC_ENTRY BrModelUpdate(br_model *model, br_uint_16 flags)
                         position->v[2] = vp->p.v[2] - model->pivot.v[2];
                     }
 
-                    if(flags & BR_MODU_VERTEX_COLOURS)
-                        v11m->groups[g].vertex_colours[v] = BR_COLOUR_RGBA(vp->red, vp->grn, vp->blu, vp->index);
+                    if(flags & BR_MODU_VERTEX_COLOURS) {
+                        v11m->groups[g].vertex_colours[v] = BR_COLOUR_RGBA(vp->red, vp->grn, vp->blu, 255);
+                        v11m->groups[g].vertex_index[v]   = vp->index;
+                    }
 
                     if(flags & BR_MODU_VERTEX_MAPPING)
                         *map = vp->map;
