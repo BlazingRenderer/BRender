@@ -73,6 +73,12 @@ br_int_32 RendererGLNextImmTri(br_renderer *self, struct v11group *group, br_vec
 GLuint RendererGLGetSampler(br_renderer *self, const br_sampler_info_gl *info);
 
 /*
+ * vertex.c
+ */
+void VertexGLSetColour(br_vertex_gl *v, br_colour colour);
+void VertexGLSetAttribs(const GladGLContext *gl, const br_gl_main_shader *shader);
+
+/*
  * devpixmp.c
  */
 br_error BR_CMETHOD_DECL(br_device_pixelmap_gl, match)(br_device_pixelmap *self, br_device_pixelmap **newpm, br_token_value *tv);
@@ -199,7 +205,7 @@ void DeviceGLObjectLabelF(const GladGLContext *gl, GLenum identifier, GLuint nam
 br_boolean  DeviceGLCheckErrors(const GladGLContext *gl);
 const char *DeviceGLStrError(GLenum err);
 
-br_vector3 DeviceGLTriangleCentroid(const br_vector3 *v1, const br_vector3 *v2, const br_vector3 *v3);
+br_vector3 DeviceGLTriangleCentroid(const br_vector3_f *v1, const br_vector3_f *v2, const br_vector3_f *v3);
 
 br_clip_result DevicePixelmapGLRectangleClip(br_rectangle *restrict out, const br_rectangle *restrict r, const br_pixelmap *pm);
 

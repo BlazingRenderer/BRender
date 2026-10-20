@@ -8,15 +8,6 @@
 extern "C" {
 #endif
 
-#pragma pack(push, 4)
-typedef struct br_immvert_gl {
-    br_vector3 position;
-    br_vector3 normal;
-    br_vector2 map;
-    br_uint_8  c[4];
-} br_immvert_gl;
-#pragma pack(pop)
-
 typedef struct br_sampler_info_gl {
     GLint filter_min;
     GLint filter_mag;
@@ -102,10 +93,10 @@ typedef struct br_renderer {
     br_pool *state_pool;
 
     struct {
-        br_immvert_gl pool[4096 * 3];
-        br_size_t     next;
-        GLuint        vao;
-        GLuint        vbo;
+        br_vertex_gl pool[4096 * 3];
+        br_size_t    next;
+        GLuint       vao;
+        GLuint       vbo;
     } trans;
 
     state_all state;

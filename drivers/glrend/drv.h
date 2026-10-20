@@ -84,6 +84,7 @@ typedef struct br_pixelmap_gl_fmt {
 #include "devclut.h"
 #include "devpixmp.h"
 #include "rendfcty.h"
+#include "vertex.h"
 #include "renderer.h"
 #include "sstate.h"
 #include "sbuffer.h"

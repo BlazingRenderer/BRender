@@ -8,28 +8,6 @@
 extern "C" {
 #endif
 
-typedef struct gl_vertex_f {
-    /*
-     * Position
-     */
-    br_vector3_f p;
-
-    /*
-     * Mapping coordinates
-     */
-    br_vector2_f map;
-
-    /*
-     * Surface normal at vertex
-     */
-    br_vector3_f n;
-
-    /*
-     * Colour
-     */
-    br_uint_8 c[4];
-} gl_vertex_f;
-
 typedef struct gl_groupinfo {
     /*
      * Count for glDrawElements(). Use GL_TRIANGLES.

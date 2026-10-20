@@ -463,7 +463,7 @@ void RendererGLRenderGroup(br_renderer *self, br_geometry_stored *stored, const 
 
     switch(self->state.current->render_type) {
         case BRT_POINT:
-            gl->DrawArrays(GL_POINTS, (GLint)(groupinfo->vertex_offset / sizeof(gl_vertex_f)), groupinfo->group->nvertices);
+            gl->DrawArrays(GL_POINTS, (GLint)(groupinfo->vertex_offset / sizeof(br_vertex_gl)), groupinfo->group->nvertices);
             break;
 
         case BRT_TRIANGLE:

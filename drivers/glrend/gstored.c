@@ -32,25 +32,7 @@ static GLuint create_vao(const GladGLContext *gl, const br_gl_main_shader *shade
 
     gl->BindBuffer(GL_ARRAY_BUFFER, vbo);
 
-    if(shader->attributes.aPosition >= 0) {
-        gl->EnableVertexAttribArray(shader->attributes.aPosition);
-        gl->VertexAttribPointer(shader->attributes.aPosition, 3, GL_FLOAT, GL_FALSE, sizeof(gl_vertex_f), (void *)offsetof(gl_vertex_f, p));
-    }
-
-    if(shader->attributes.aUV >= 0) {
-        gl->EnableVertexAttribArray(shader->attributes.aUV);
-        gl->VertexAttribPointer(shader->attributes.aUV, 2, GL_FLOAT, GL_FALSE, sizeof(gl_vertex_f), (void *)offsetof(gl_vertex_f, map));
-    }
-
-    if(shader->attributes.aNormal >= 0) {
-        gl->EnableVertexAttribArray(shader->attributes.aNormal);
-        gl->VertexAttribPointer(shader->attributes.aNormal, 3, GL_FLOAT, GL_FALSE, sizeof(gl_vertex_f), (void *)offsetof(gl_vertex_f, n));
-    }
-
-    if(shader->attributes.aColour >= 0) {
-        gl->EnableVertexAttribArray(shader->attributes.aColour);
-        gl->VertexAttribPointer(shader->attributes.aColour, 4, GL_UNSIGNED_BYTE, GL_TRUE, sizeof(gl_vertex_f), (void *)offsetof(gl_vertex_f, c));
-    }
+    VertexGLSetAttribs(gl, shader);
 
     gl->BindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
     gl->BindVertexArray(0);
@@ -60,10 +42,10 @@ static GLuint create_vao(const GladGLContext *gl, const br_gl_main_shader *shade
 static GLuint build_vbo(const GladGLContext *gl, const struct v11model *model, size_t total_vertices, gl_groupinfo *groups)
 {
     /* Collate and upload the vertex data. */
-    gl_vertex_f *vtx      = (gl_vertex_f *)BrScratchAllocate(total_vertices * sizeof(gl_vertex_f));
-    gl_vertex_f *nextVtx  = vtx;
-    GLsizei      v_offset = 0;
-    GLuint       buf;
+    br_vertex_gl *vtx      = (br_vertex_gl *)BrScratchAllocate(total_vertices * sizeof(br_vertex_gl));
+    br_vertex_gl *nextVtx  = vtx;
+    GLsizei       v_offset = 0;
+    GLuint        buf;
 
     for(br_uint_16 i = 0; i < model->ngroups; ++i) {
         const struct v11group *gp = model->groups + i;
@@ -80,12 +62,12 @@ static GLuint build_vbo(const GladGLContext *gl, const struct v11model *model, s
             nextVtx->c[3] = 255;
         }
 
-        v_offset += (GLsizei)(gp->nvertices * sizeof(gl_vertex_f));
+        v_offset += (GLsizei)(gp->nvertices * sizeof(br_vertex_gl));
     }
 
     gl->GenBuffers(1, &buf);
     gl->BindBuffer(GL_ARRAY_BUFFER, buf);
-    gl->BufferData(GL_ARRAY_BUFFER, (GLsizeiptr)(total_vertices * sizeof(gl_vertex_f)), vtx, GL_STATIC_DRAW);
+    gl->BufferData(GL_ARRAY_BUFFER, (GLsizeiptr)(total_vertices * sizeof(br_vertex_gl)), vtx, GL_STATIC_DRAW);
     BrScratchFree(vtx);
     return buf;
 }
@@ -486,8 +468,8 @@ static br_error V1Model_RenderStored(br_geometry_stored *self, br_renderer *rend
                 prim->v[1]   = tmpstate;
                 prim->v[2]   = groupinfo;
 
-                centroid = DeviceGLTriangleCentroid(&renderer->trans.pool[base + 0].position, &renderer->trans.pool[base + 1].position,
-                                                    &renderer->trans.pool[base + 2].position);
+                centroid = DeviceGLTriangleCentroid(&renderer->trans.pool[base + 0].p, &renderer->trans.pool[base + 1].p,
+                                                    &renderer->trans.pool[base + 2].p);
                 BrMatrix34ApplyP(&centroid_view, &centroid, &state.matrix.model_to_view);
 
                 prim->depth = -BrVector3Length(&centroid_view);

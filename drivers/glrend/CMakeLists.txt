@@ -198,6 +198,8 @@ source_group("Renderer" FILES ${RENDERER_FILES})
 set(GLREND_FILES
         drv.h
         drv_ip.h
+        vertex.h
+        vertex.c
 
         driver.c
 
