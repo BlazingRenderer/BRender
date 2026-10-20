@@ -1044,7 +1044,7 @@ static void DumpObject(br_object *h, const char *prefix, const char *info, br_pu
         if(h_ident == NULL)
             h_ident = "<NULL>";
 
-        BrSprintf(value, "%s%s%08x %s:%s  %s", prefix, info, h, dev_ident, h_ident, BrTokenIdentifier(ObjectType(h)));
+        BrSprintf(value, "%s%s%08" PRIxPTR " %s:%s  %s", prefix, info, (br_uintptr_t)h, dev_ident, h_ident, BrTokenIdentifier(ObjectType(h)));
     }
 
     putline(value, arg);
@@ -1058,7 +1058,8 @@ void BR_RESIDENT_ENTRY BrTokenValueDump(br_token_value *tv, const char *prefix, 
 {
 #if BR_DEBUG
     char       *id;
-    char        value[128], tmp[128], info_0[64], *info_n, *pvalue;
+    char        value[128], tmp[128], info_0[64], *info_n;
+    const char *pvalue;
     int         n, i;
     br_object **pph;
     void      **ppp;
@@ -1075,7 +1076,7 @@ void BR_RESIDENT_ENTRY BrTokenValueDump(br_token_value *tv, const char *prefix, 
          * catch unknown tokens
          */
         if(id == NULL) {
-            BrSprintf(tmp, "%s  %5d:  ??? (%08x) %08x", prefix, n, tv[0], tv[1]);
+            BrSprintf(tmp, "%s  %5d:  ??? (%08x) %08x", prefix, n, (unsigned)tv[0].t, (unsigned)tv[1].t);
             putline(tmp, arg);
             continue;
         }
