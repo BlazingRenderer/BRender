@@ -53,13 +53,10 @@ static GLuint build_vbo(const GladGLContext *gl, const struct v11model *model, s
         groups[i].vertex_offset = v_offset;
 
         for(br_uint_16 v = 0; v < gp->nvertices; ++v, ++nextVtx) {
-            nextVtx->p    = *(br_vector3_f *)(gp->position + v);
-            nextVtx->map  = *(br_vector2_f *)(gp->map + v);
-            nextVtx->n    = *(br_vector3_f *)(gp->normal + v);
-            nextVtx->c[0] = BR_RED(gp->vertex_colours[v]);
-            nextVtx->c[1] = BR_GRN(gp->vertex_colours[v]);
-            nextVtx->c[2] = BR_BLU(gp->vertex_colours[v]);
-            nextVtx->c[3] = 255;
+            nextVtx->p   = *(br_vector3_f *)(gp->position + v);
+            nextVtx->map = *(br_vector2_f *)(gp->map + v);
+            nextVtx->n   = *(br_vector3_f *)(gp->normal + v);
+            VertexGLSetColour(nextVtx, gp->vertex_colours[v]);
         }
 
         v_offset += (GLsizei)(gp->nvertices * sizeof(br_vertex_gl));
