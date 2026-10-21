@@ -38,6 +38,9 @@ When migrating an existing project to **BRender v1.4.0+**, review and update the
 * **Search for:** `BR_MATF_ZTRANSPARENCY`.
 * **Remove:** entirely; the enum slot is reserved.
 
+* **Search for:** `BR_MATF_SEPARATE_SPECULAR`
+* **Remove:** entirely; the enum slot is reserved.
+
 ### 5. Removed pixelmap colour keying
 
 * **Search for:** `BR_PMF_KEYED_TRANSPARENCY`, `br_pixelmap::pm_key`.
@@ -171,6 +174,12 @@ tiling; use a 32-bit pixel type instead.
 
 This flag was unused and is replaced with `BR_MATF_RESERVED_0`.
 The value is reserved and shall not be reused.
+
+### Removal of `BR_MATF_SEPARATE_SPECULAR`
+
+This flag was unused and is replaced with `BR_MATF_RESERVED_1`.
+The value is reserved and shall not be reused.
+For convenience, this is aliased to 0.
 
 ### Removal of `BR_PMF_KEYED_TRANSPARENCY` and `pm_key`
 
