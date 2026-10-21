@@ -49,6 +49,7 @@ set(DDI_FILES
         ddi/brddi_p.h
         ddi/brhton.h
         ddi/brimage.h
+        ddi/brmemfs.h
         ddi/datafile.h
         ddi/dataf_p.h
         ddi/formats.h
@@ -90,6 +91,7 @@ set(FW_FILES
         file.c
         fwsetup.c
         genfile.c
+        memfs.c
         image.c
         lexer.c
         log.c
