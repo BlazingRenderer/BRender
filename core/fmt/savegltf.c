@@ -156,9 +156,10 @@ static void cgltf_free_br(void *user, void *ptr)
 
 static cgltf_result cgltf_write_brfile(void *res, const cgltf_options *options, const char *path, const cgltf_data *data)
 {
-    cgltf_size expected, actual;
-    char      *buffer;
-    void      *fp;
+    cgltf_size   expected, actual;
+    char        *buffer;
+    void        *fp;
+    cgltf_result result = cgltf_result_success;
 
     /*
      * We only support GLTF.
@@ -171,24 +172,26 @@ static cgltf_result cgltf_write_brfile(void *res, const cgltf_options *options, 
     actual   = cgltf_write(options, buffer, expected, data);
 
     if(expected != actual) {
-        BrResFree(buffer);
-        return cgltf_result_data_too_short;
+        result = cgltf_result_data_too_short;
+        goto out;
     }
 
     if((fp = BrFileOpenWrite(path, 0)) == NULL) {
-        BrResFree(buffer);
-        return cgltf_result_file_not_found;
+        result = cgltf_result_file_not_found;
+        goto out;
     }
 
     if(BrFileWrite(buffer, actual - 1, 1, fp) != 1) {
-        BrResFree(buffer);
+        result = cgltf_result_io_error;
         BrFileClose(fp);
-        return cgltf_result_io_error;
+        goto out;
     }
 
-    BrResFree(buffer);
     BrFileClose(fp);
-    return cgltf_result_success;
+
+out:
+    BrResFree(buffer);
+    return result;
 }
 
 #pragma clang diagnostic push
