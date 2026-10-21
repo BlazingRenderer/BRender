@@ -2,9 +2,9 @@
 
 This document specifies the three `BR_`-prefixed glTF 2.0 extensions the BRender glTF reader and writer in
 this repository carry - `BR_actors`, `BR_lights` and `BR_materials` (`BrFmtGLTFActorLoadMany()` in
-`core/fmt/loadgltf.c`, `BrFmtGLTFActorSaveMany()` in `core/fmt/savegltf.c`) - together with the marker the
-writer puts into an image's data URI (`brender=index8|rgb555|rgb565|rgb888`). `BR_actors` and the URI marker
-are this fork's; `BR_lights` and `BR_materials` come from the glTF work that predates it, and are in
+`core/fmt/loadgltf.c`, `BrFmtGLTFActorSaveMany()` in `core/fmt/savegltf.c`) - together with the pixelmap
+payload the writer puts into an image's data URI (`data:application/vnd.brender.pix;base64,`). `BR_actors` and
+the payload are this fork's; `BR_lights` and `BR_materials` come from the glTF work that predates it, and are in
 upstream too. **None of the three is submitted to, proposed to, or registered with the Khronos glTF registry,
 and no other glTF implementation is expected to understand any of it**: what follows is normative for the
 implementation in this repository and nothing else, which is why the extensions are `BR_`-prefixed rather
@@ -16,7 +16,7 @@ Where this document and the code disagree, the code is what ships.
 
 | piece | file |
 | --- | --- |
-| the extension structs and the URI markers | `core/fmt/cgltf_brender.h` |
+| the extension structs and the payload's URI | `core/fmt/cgltf_brender.h` |
 | parsing (`BR_*` object properties, and the defaults for absent ones) | `core/fmt/cgltf_brender_impl.h` |
 | the extension-name dispatch on nodes, primitives and the root | `core/fmt/cgltf.h` |
 | writing the property values | `core/fmt/cgltf_write_brender.h` |
@@ -245,8 +245,8 @@ through glTF's own `materials` array gets its flags and mode invented by the con
   only for a face group that has a material of its own (`fill_mesh_materials()`, `core/fmt/savegltf.c`).
   A group whose faces carry no material must be written with no reference at all: naming one would put that
   material on the whole model on the way back in.
-* Textures are referenced as `images` indices, and the `brender=` marker on those images is what makes a
-  lookup table survive - see the marker section below.
+* Textures are referenced as `images` indices, and the pixelmap payload on those images is what makes a
+  lookup table survive - see the payload section below.
 
 ### What it deliberately does not carry
 
@@ -373,48 +373,42 @@ them; the core transforms them to view space when the light is set up (`core/inc
   alone.
 * The RGB alpha byte, as for `BR_materials`.
 
-## The `brender=` image URI marker
+## The pixelmap payload
 
 This one is **not a glTF extension**: there is no `extensions` object and no `extensionsUsed` entry. It is a
-parameter in the media type of a base64 data URI, so a reader meets it wherever it meets an image. It is
-documented here because it exists for `BR_materials`: a material's lookup tables are pixelmaps the
-rasterisers index directly, and glTF has no way to say "these bytes are not colour".
+media type on a base64 data URI, so a reader meets it wherever it meets an image. glTF has no way to say what
+pixel type an image is, and BRender needs to say it: a material's lookup tables are pixelmaps the rasterisers
+index directly, and a colour map's samples are not the same thing as PNG colour.
+
+So the payload is a whole BRender pixelmap - the engine's own `.pix` stream, byte for byte:
 
 ```
 "images": [
-  { "name": "scene-tex-rgb565-map",
-    "uri": "data:image/png;brender=rgb565;base64,iVBORw0KGgoAAAANSUhEUgA..." }
+  { "name": "scene-tex-rgb888-map",
+    "uri": "data:application/vnd.brender.pix;base64,AAAAFAAAA..." }
 ]
 ```
 
-| marker | PNG channels | pixelmap type on load | samples |
-| --- | --- | --- | --- |
-| `brender=index8` | 1 | `BR_PMT_INDEX_8` | one byte per sample, an index |
-| `brender=rgb555` | 2 | `BR_PMT_RGB_555` | one output word per sample |
-| `brender=rgb565` | 2 | `BR_PMT_RGB_565` | one output word per sample |
-| `brender=rgb888` | 3 | `BR_PMT_RGB_888` | one output pixel per sample |
-
-The marker names the type rather than leaving it to be inferred, because `BR_PMT_RGB_555` and
-`BR_PMT_RGB_565` are both two bytes per sample: one marker for both would put a 565 table into a 555
-output's material. A shade table's type must equal the output's.
-
-* **Writer**: a pixelmap with **no palette** (`pm->map == NULL`) and one of those four types is written as a
-  palette-less PNG whose channels *are* the pixelmap's samples, marked with its type
-  (`fill_pixelmap()`, `core/fmt/savegltf.c`). The trigger is the pixelmap, not its slot, so a
-  palette-less colour map is carried this way too - which is the only faithful thing to do, since there is no
-  palette to expand it through. The marker is only ever put on a base64 data URI, and the PNG codec is
-  lossless, so the samples come back byte for byte.
-* **Reader**: the marker is recognised on a base64 data URI only, and the image is rebuilt as the marked
-  pixelmap type with the samples in their own channels and **no palette**, whatever slot it is referenced
-  from (`load_table_type()` and `load_pixelmap()`, `core/fmt/loadgltf.c`). It is not converted to
-  `br_gltf_options::pm_type`, unlike an ordinary image. The PNG is decoded at its own channel count and the
-  marker's count is checked against it: an image whose channels disagree with its marker is refused rather
-  than converted, because stbi converts silently and the conversion would rebuild a table of the wrong bytes
-  (`image_marker_mismatch()`, `core/fmt/loadgltf.c`).
-* **Absent marker, or a pixelmap that has a palette**: the PNG is colour. The reader decodes it and converts
-  it to `br_gltf_options::pm_type`; the writer expands it through its palette and writes an ordinary PNG. A
-  reader that does not know the marker decodes the marked PNG as an image and gets the samples interpreted as
-  grey/colour - wrong pixels, but no error, which is the reason the marker exists rather than a convention.
+* **Writer**: with `BR_GLTF_SAVE_PRESERVE_MAP_TYPES` set in `br_gltf_save_options`, every pixelmap the format
+  can carry is written this way, through `BrPixelmapSaveMany()` with the memory filesystem installed
+  (`build_pix_uri()`, `core/fmt/savegltf.c`). Without it a pixelmap is written as colour, as it always was -
+  except one the colour route cannot carry. A palette-less indexed map is that case: it has no palette to
+  expand through and `BrPixelmapCloneTyped()` refuses it, so it falls back to the payload rather than emitting
+  a URI that decodes to nothing.
+* **Reader**: a payload is rebuilt with `BrPixelmapLoadMany()` and returned **as it was saved** - type,
+  samples, identifier and palette - and is not converted to `br_gltf_options::pm_type`, unlike an ordinary
+  image (`load_pix_payload()`, `core/fmt/loadgltf.c`). An image that is not a payload is a colour PNG and is
+  converted as before.
+* **The `.pix` writer cannot carry everything.** `BR_PMT_INDEX_1`, `INDEX_2`, `INDEX_4` and `ALPHA_4` are
+  below eight bits per sample, and the format counts whole pixels, so those four types have never had a
+  `.pix` writer at all. They have no colour converter either, so such a map cannot be written by any route:
+  the image object is written with **no payload at all** - neither `uri` nor `bufferView` - and the save
+  logs an error. This reader treats such an image as absent, so the scene loads without it; a data URI that
+  decodes to nothing would be worse, because the reader refuses the whole file for it. (glTF 2.0 requires an
+  image to carry exactly one of the two, so a file written this way is not conformant - it is the lesser evil
+  for a map no route can write.)
+* **The payload is readable only by BRender.** That is the point - it is a debug interchange, not a viewable
+  image - and it is why an ordinary glTF viewer shows nothing useful for one.
 * The URI must be a base64 data URI: the reader only decodes a URI that carries `;base64,` before the comma
   (`unbuild_data_url()`, `core/fmt/loadgltf.c`), and otherwise treats the whole URI as a path relative
   to `br_gltf_options::base_path`.
@@ -422,8 +416,8 @@ output's material. A shade table's type must equal the output's.
   a file that is not there, or one it cannot read - is left as a NULL entry in `results->pixelmaps`, and the
   material that referenced it keeps no map, so the scene loads untextured (see *Hard failures* for the
   images that refuse the load instead).
-* 41 corpus fixtures carry at least one marked image - 37 an index8 one, 7 rgb555, 7 rgb565 and 4 rgb888 -
-  referenced from `colour_map`, `index_shade`, `index_blend` and `index_fog`.
+* Every corpus fixture is saved with the flag and carries its pixelmaps this way; `scene-textured-shade-converted`
+  is the one exception, saved without it, and is what exercises the colour route.
 
 ## Hard failures
 
@@ -444,7 +438,7 @@ and the index range check and the image decode run once the buffers are in.
 | a `primitive.material` index past the `BR_materials` root array, in a file that carries one | the file is refused, naming the mesh, the primitive, the index and the table length. Such an index is read as an index into the `BR_materials`-derived table, so it would otherwise be an unchecked read past the table. |
 | a buffer view, or an accessor under one, that reaches past the end of its buffer | the file is refused, naming the buffer view and its offset, size and buffer, or the accessor and the range it reaches. `cgltf_buffer_view_data()` returns `buffer->data + view->offset` and does no bounds check, and every read this loader makes through a view starts there: the image path hands `view->size` bytes to `stbi_load_from_memory()`, and the geometry, index and animation paths read accessors through it. A view whose offset or offset-plus-size runs past its buffer, or an accessor whose offset and stride do, would read whatever follows the allocation. |
 | an external buffer file shorter than the `byteLength` it declares | the file is refused, naming the file and both lengths. `cgltf_load_buffer_file()` reads the file and never writes the length it read back to `data->buffers[i].size`, so `buffer->size` stays the declared `byteLength` while the allocation is only what was read; a view inside the declared range is therefore past the end of the allocation, and the view and accessor checks above, which compare against the declared size, cannot see it. `cgltf_load_brfile()` measures the file as it loads it, the one place the loaded length is known. |
-| an image that is present but could not be decoded, or a marked lookup table whose PNG does not carry the channels its marker names | the file is refused, naming the image's index and URI, or its index, name and marker. A malformed base64 data URI, a zero-byte or truncated file, and a buffer view with no data are all the image being there and broken, which is a bug in the asset; a marker whose channel count disagrees with the PNG is the same, because stbi would convert between the two and silently rebuild the wrong table instead. This is deliberately not the same as a *missing* image - one the loader could not obtain, such as a URI naming a file that is not there or that it cannot read - which is left as a NULL entry because an image is optional (see the marker section above). |
+| an image that is present but could not be decoded, or a pixelmap payload that does not yield one map with a usable sample buffer | the file is refused, naming the image's index and URI. A malformed base64 data URI, a zero-byte or truncated file, and a buffer view with no data are all the image being there and broken, which is a bug in the asset; so is a payload whose `.pix` stream does not parse, or that yields a map - or a palette - with no sample buffer, a zero stride, a zero dimension, or a sample allocation that does not cover its rows. The test is the allocation the reader made against `row_bytes * height`, because the reader takes the geometry from the header and only the sample block from the file. This is deliberately not the same as a *missing* image - one the loader could not obtain, such as a URI naming a file that is not there or that it cannot read - which is left as a NULL entry because an image is optional (see the payload section above). |
 
 The four primitive checks are `check_primitive_attributes()`, `check_primitive_attribute_counts()`,
 `check_primitive_counts()` and `check_primitive_index_ranges()` (`core/fmt/loadgltf.c`), and every one of
