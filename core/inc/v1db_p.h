@@ -3010,6 +3010,47 @@ br_error BR_PUBLIC_ENTRY BrPrimitiveLibraryEnum(br_pixelmap *destination, br_pri
 void BR_PUBLIC_ENTRY BrAnimationInstanceUpdate(br_animation_instance *inst, br_scalar time);
 void BR_PUBLIC_ENTRY BrAnimationInstanceDetach(br_animation_instance *inst);
 
+/*
+ * 2D drawing
+ */
+/**
+ * \brief Begin a 2D batch: a destination, a material and a clip rectangle.
+ *
+ * The renderer state is saved and replaced with the 2D one - the destination as
+ * the output, no depth buffer, pixel-space projection, no hidden-surface
+ * deferral, no clip planes - and restored by Br2DEnd(). The batch needs nothing
+ * of the renderer beforehand: what it draws into is its argument, not whatever a
+ * scene left set.
+ *
+ * The material supplies the surface: the colour map, how its texels are filtered
+ * and addressed, the colour and opacity sources and so whether the batch's own
+ * vertex colours are used, blending and its mode, culling, and the shading mode.
+ * A material that carries per-vertex colour is the usual one - BR_MATF_PRELIT and
+ * BR_MATF_PREALPHA rather than BR_MATF_LIGHT - and one that must not be culled
+ * wants BR_MATF_ALWAYS_VISIBLE.
+ *
+ * \param destination The colour buffer to draw into.
+ * \param material    The material to draw with. It must be prepared for the
+ *                    current renderer, which BrMaterialAdd() does; see
+ *                    BrMaterialUpdate().
+ * \param clip        The scissor rectangle in the same pixel space as the
+ *                    vertices, or NULL for the whole destination.
+ */
+void BR_PUBLIC_ENTRY Br2DBegin(br_pixelmap *destination, br_material *material, const br_rectangle *clip);
+
+/**
+ * \brief Submit triangles to the current batch.
+ *
+ * \param vertices  Three vertices per triangle, in Br2DBegin()'s pixel space.
+ * \param nvertices Vertex count; must be a multiple of three.
+ */
+void BR_PUBLIC_ENTRY Br2DVertices(const br_vertex_2d *vertices, br_int_32 nvertices);
+
+/**
+ * \brief Draw the batch and restore the renderer state.
+ */
+void BR_PUBLIC_ENTRY Br2DEnd(void);
+
 #ifdef __cplusplus
 };
 #endif

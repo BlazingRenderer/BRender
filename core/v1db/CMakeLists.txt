@@ -40,6 +40,7 @@ set(V1DB_FILES
         preptab.c
         regsupt.c
         render.c
+        2d.c
         v1dbfile.c
 
         v1db.h

@@ -54,6 +54,7 @@ set(INC_FILES
         brlimits.h
         brlog.h
         brmem.h
+        br2d.h
         brv1db.h
         brvector.h
         camera.h

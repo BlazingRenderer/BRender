@@ -34,6 +34,10 @@
 #include "fmt.h"
 #endif
 
+#ifndef _BR2D_H_
+#include "br2d.h"
+#endif
+
 #ifndef _NO_PROTOTYPES
 #ifndef _V1DB_P_H_
 #include "v1db_p.h"
