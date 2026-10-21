@@ -5,6 +5,7 @@ if(BRENDER_HAVE_SDL3 AND BRENDER_HAVE_GL)
     add_subdirectory(robot)
     add_subdirectory(cube)
     add_subdirectory(gltfview)
+    add_subdirectory(imgui-demo)
     add_subdirectory(tutorials)
     add_subdirectory(samples)
 
