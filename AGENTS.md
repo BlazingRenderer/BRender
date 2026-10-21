@@ -8,6 +8,10 @@ BRender is a 3D rendering engine with multiple renderer backends:
 - `drivers/glrend/` - OpenGL renderer
 - `contrib/` - Contributed utilities (e.g., editorcam)
 
+The tree descends from the BRender version shipped with Croc, with features from the
+Argonaut 1.3.2 release backported; `MIGRATION.md` lists the differences from
+Argonaut-official versions.
+
 ## Building
 - Uses CMake.
 - The software rasterizer (`drivers/softprim/`) is portable C/C++ and is built with the drivers on every architecture. It presents
@@ -19,6 +23,11 @@ BRender is a 3D rendering engine with multiple renderer backends:
   it with `--opengl-device-name=glrend1x` (`examples/brdemo/brdemo.c`); that flag is brdemo-level, not engine API - the engine receives
   the name as the `BRT_OPENGL_DEVICE_NAME_CSTR` token, which the SDL device uses to load the named driver (`drivers/sdl3dev/glrend.c`).
   glrend1x exposes a `BRT_PRIMITIVE_LIBRARY_O` that softrend's search then finds (`drivers/glrend1x/devpmglf.c`).
+
+Local probes live under `scratch/`, which is git-excluded, and are wired into the build by an uncommitted block at the end of
+`tools/CMakeLists.txt`. That block is never committed, and any history rewrite (`git reset --hard`, `git checkout -b`, a hand-rebuilt
+series) discards it silently — re-add it afterwards instead of assuming it survived. It also makes `git worktree add` unusable from tools
+that demand a clean tree.
 
 ## Benchmarking
 - `tools/gltfbench` is the benchmark: a headless glTF scene renderer with no demo framework, no editor camera and no input, so a frame
@@ -45,13 +54,6 @@ BRender is a 3D rendering engine with multiple renderer backends:
   require them to agree; use n>=6 for anything under ~5%. Absolute times drift badly across sessions - only same-session interleaved
   ratios mean anything.
 
-## Contributing
-- This is a fork of the BRender version shipped with Croc,
-  with features from the official Argonaut 1.3.2 release backported.
-  Major differences from prior Argonaut-official versions are outlined in `MIGRATION.md`.
-- All PRs should be rebased against current master.
-- Merge commits are not accepted except at maintainer discretion (e.g. octopus merges, or cases where preserving branch history has clear value). When in doubt, rebase.
-
 ## Coding Conventions
 - C codebase with `br_*` prefix for public structs, `Br*` prefix for public functions.
 - Run `clang-format` before committing (project has `.clang-format` configuration).
@@ -60,36 +62,14 @@ BRender is a 3D rendering engine with multiple renderer backends:
   internal linkage). Do not omit these on applicable functions.
 
 ## Commit Style
-We use a similar commit style to open source projects like the Linux Kernel and FFmpeg.
-**Do not use Conventional Commits** (e.g., `chore:`, `feat:`, `fix:`, `docs:`, `style:`, `refactor:`, `test:`, `ci:`).
-See the [Commit messages](https://ffmpeg.org/developer.html#toc-Patches_002fCommitting) section of the FFmpeg developer guide.
+The commit conventions are the project's and are stated once, in
+[CONTRIBUTING.md](CONTRIBUTING.md), so that this file and it cannot drift. Read it
+before committing, and before sending a change.
 
-Format:
-```
-component: short description
-
-More detailed description if necessary.
-```
-
-Each commit should be a single logical unit, though larger commits are acceptable when the change is nontrivial and cannot be cleanly decoupled.
-
-Examples:
-
-```
-gitignore: ignore /build-*/
-```
-
-```
-core/v1db: fix RegenerateVertexNormals to respect smoothing groups
-```
-
-```
-contrib/editorcam: fix camera offset after pan mode, add orbit mode
-
-- Pan mode now applies translations to actor (world position) rather
-  than camera (orientation), fixing offset after switching modes
-- Add orbit mode (Alt+LMB drag) with azimuth/elevation rotation
-```
+What is specific to working in this tree with an agent, and is not a contributor
+rule: commits are made unsigned and are never pushed — the maintainer rebases,
+re-signs and pushes them, and every hash in this tree may change overnight.
+`git commit --fixup` is how a follow-up is recorded; see the global conventions.
 
 ## Testing
 There is no unit-test suite, and none should be added. `ctest` runs the render corpus with one test per configuration, and CI runs it for
@@ -101,9 +81,7 @@ build - the build step itself and the `--history` commit walk. The corpus itself
 - The reference key is `<device>/<driver>/<fp-class>/<zb|zs>/<pixel-type>/<WxH>/<scene>`. `<fp-class>` is the width `float` and `double`
   expressions are evaluated at - `x87` (80-bit intermediates, `FLT_EVAL_METHOD` 2) or `declared` (each operation rounded at its type's
   width, `FLT_EVAL_METHOD` 0) - and it reaches the frame through the renderer and through core's scene setup, so every entry is keyed by
-  it and a build looks up its own class. `--bless` rewrites entries; only do so to accept a deliberate change. The `x87` entries are
-  pentprim's output and are the bit-exactness oracle for softprim, and only an x87 build reproduces them; `resources/aidocs/recipes.md`
-  has the recipe for regenerating them.
+  it and a build looks up its own class.
 - The stored `glrend` entries are llvmpipe's, so a real-GPU run reports `NO-REFERENCE` for every scene - force it onto llvmpipe with
   `LIBGL_ALWAYS_SOFTWARE=true` to compare against them.
 - The run also asserts relations between fixtures (e.g. `scene-unlit == scene-unlit-plain`), so a path that silently stops firing fails
@@ -111,6 +89,17 @@ build - the build step itself and the `--history` commit walk. The corpus itself
 - softrend is the software rasteriser path; `--no-depth` renders through
   `BrZsSceneRender()` and covers the Z-sort path. The fixtures come from `mkres scenes` (`tools/mkres/scene.c`), which writes them to
   the current directory.
+The reference table is generated data, and blessing it is the one deliberate act:
+- `tools/rendertest/dat/` and `tools/rendertest/rendertest.txt` are generated, so the commit that moves pixels or adds a fixture
+  regenerates and re-blesses them; a change is not finished until it has.
+- `--bless` rewrites every configuration the build registers for its floating-point class. Run it only to accept a deliberate change,
+  then `git diff` the table and check the keys that moved are the ones you meant to move.
+- The `x87` entries are **pentprim's**, not this build's, and are the bit-exactness oracle for softprim: bless them in the oracle
+  worktree (`../<repo>-pent`), splice the entries in, and show 32-bit softprim reproduces them by running it *without* `--bless`.
+  Blessing `x87` here records softprim's own output and the comparison stops meaning anything. `resources/aidocs/recipes.md` has the
+  recipe. `declared` is this build's own bless and has nothing to reproduce.
+- Bless once, when the tree that generates the fixtures is final: blessing against fixtures that are still moving costs a second bless
+  and a second verification.
 
 ## Common Patterns
 
