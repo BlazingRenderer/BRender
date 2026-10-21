@@ -182,6 +182,21 @@ void *BrRegistryRemoveStatic(br_registry *reg, void *item);
 br_pixelmap *BrDevLastBeginQuery(void);
 void         BrDevLastBeginSet(br_pixelmap *pm);
 
+/*
+ * modrend.c
+ *
+ * The immediate entry for a driver that reaches the stored path for it. A driver whose
+ * storedNew() takes the model points its geometry format's render/renderOnScreen at these;
+ * see renderImmediate() for what they do.
+ */
+br_error BR_RESIDENT_ENTRY BR_CMETHOD_DECL(br_geometry_v1_model_gen, render)(struct br_geometry_v1_model *self,
+                                                                             struct br_renderer *renderer, struct v11model *model,
+                                                                             struct br_renderer_state_stored *default_state, br_token type);
+br_error BR_RESIDENT_ENTRY BR_CMETHOD_DECL(br_geometry_v1_model_gen, renderOnScreen)(struct br_geometry_v1_model *self,
+                                                                                     struct br_renderer *renderer, struct v11model *model,
+                                                                                     struct br_renderer_state_stored *default_state,
+                                                                                     br_token                         type);
+
 #ifdef __cplusplus
 };
 #endif

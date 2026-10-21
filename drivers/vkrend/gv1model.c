@@ -1,9 +1,10 @@
 /*
  * Geometry format for version 1 models.
  *
- * vkrend only handles the stored path: a model's prepared groups are uploaded to a GPU
- * vertex/index buffer pair when BrModelUpdate() calls storedNew(), and drawing goes through
- * the bucket order table. Immediate BRT_TRIANGLE rendering is not implemented.
+ * vkrend uploads a model's prepared groups to a GPU vertex/index buffer pair when
+ * BrModelUpdate() calls storedNew(), and draws through the bucket order table. The immediate
+ * BRT_TRIANGLE entry is the core's stored-backed one, so a caller that hands in a model
+ * directly uploads and draws through the same path.
  */
 #include "drv.h"
 #include "brassert.h"
@@ -118,44 +119,6 @@ static br_error BR_CMETHOD_DECL(br_geometry_v1_model_vk, storedNew)(struct br_ge
 }
 
 /*
- * Immediate mode: draw a v11model the caller prepared, rather than one this renderer
- * stored earlier. The format keeps advertising BRT_STORED_ONLY_B, so the core's model
- * renderer still stores every model once; this is only reached by a caller that hands in a
- * model directly.
- */
-static br_error BR_CMETHOD_DECL(br_geometry_v1_model_vk, render)(struct br_geometry_v1_model *self, struct br_renderer *renderer,
-                                                                 struct v11model *model, struct br_renderer_state_stored *default_state,
-                                                                 br_token type)
-{
-    br_geometry_stored *sg;
-    br_error            err;
-
-    if(type != BRT_TRIANGLE)
-        return BRE_FAIL;
-
-    if((sg = GeometryStoredVkAllocate(self, "immediate", renderer, model)) == NULL)
-        return BRE_FAIL;
-
-    /*
-     * A group with no stored state of its own falls back to default_state; restoring it
-     * into the current state is what V1Model_RenderStored()'s per-group copy does.
-     */
-    if(default_state != NULL) {
-        RendererStatePush(renderer, BR_STATE_STORED_PARTS_MASK);
-        RendererStateRestore(renderer, default_state, BR_STATE_STORED_PARTS_MASK);
-    }
-
-    err = GeometryStoredRender(sg, renderer, type);
-
-    if(default_state != NULL)
-        RendererStatePop(renderer, BR_STATE_STORED_PARTS_MASK);
-
-    ObjectFree(sg);
-
-    return err;
-}
-
-/*
  * Default dispatch table for geometry type
  */
 static const struct br_geometry_v1_model_dispatch geometryV1ModelDispatch = {
@@ -178,8 +141,8 @@ static const struct br_geometry_v1_model_dispatch geometryV1ModelDispatch = {
     ._queryAll      = BR_CMETHOD_REF(br_object, queryAll),
     ._queryAllSize  = BR_CMETHOD_REF(br_object, queryAllSize),
 
-    ._render         = BR_CMETHOD_REF(br_geometry_v1_model_vk, render),
-    ._renderOnScreen = BR_CMETHOD_REF(br_geometry_v1_model_vk, render),
+    ._render         = BR_CMETHOD_REF(br_geometry_v1_model_gen, render),
+    ._renderOnScreen = BR_CMETHOD_REF(br_geometry_v1_model_gen, renderOnScreen),
     ._storedNew      = BR_CMETHOD_REF(br_geometry_v1_model_vk, storedNew),
 
     ._storedAvail = BR_CMETHOD_REF(br_geometry_v1_model_vk, storedAvail),

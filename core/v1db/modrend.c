@@ -58,6 +58,82 @@ static void nullRender(br_actor *actor, br_model *model, br_material *material, 
 }
 
 /*
+ * The immediate entry for a v1model format whose driver has no immediate path of its own:
+ * store the model the caller prepared, draw it through the stored path, drop the store
+ * again. glrend and vkrend advertise BRT_STORED_ONLY_B and implement it this way, so their
+ * store and their stored draw are the only driver-specific parts; softrend keeps a real
+ * immediate path of its own.
+ *
+ * The store goes through the object's own storedNew() rather than a driver-specific
+ * allocate, which is what leaves the set of storable models to the driver: a store that
+ * hands back nothing is a type the driver does not take.
+ */
+static br_error renderImmediate(br_geometry_v1_model *self, br_renderer *renderer, struct v11model *model,
+                                br_renderer_state_stored *default_state, br_token type, br_boolean on_screen)
+{
+    br_geometry_stored *sg = NULL;
+    br_error            err;
+    br_boolean          pushed = BR_FALSE;
+    br_boolean          forced = BR_FALSE;
+    br_value            hidden = {0};
+
+    err = GeometryV1ModelStoredNew(self, renderer, &sg, model, type, NULL);
+
+    if(err != BRE_OK || sg == NULL) {
+        BrLogWarn("V1DB", "immediate geometry: the driver did not store this model (%d); nothing was drawn", (int)type);
+        return BRE_FAIL;
+    }
+
+    /*
+     * A group with no stored state of its own falls back to default_state; restoring it
+     * into the current state is what the stored path's per-group copy does. A push that
+     * fails has nothing to restore, so there is nothing to pop either.
+     */
+    if(default_state != NULL) {
+        if(RendererStatePush(renderer, BR_STATE_STORED_PARTS_MASK) == BRE_OK) {
+            RendererStateRestore(renderer, default_state, BR_STATE_STORED_PARTS_MASK);
+            pushed = BR_TRUE;
+        }
+    }
+
+    /*
+     * Immediate means now. A renderer under bucket-sort does not draw the store below, it
+     * puts it in an order table and draws it when the scene flushes - by which time this
+     * call has freed it. A scene leaves the hidden-surface part sorted, so it is turned off
+     * around the draw and put back afterwards.
+     */
+    if(RendererPartQuery(renderer, BRT_HIDDEN_SURFACE, 0, &hidden, BRT_TYPE_T) == BRE_OK && hidden.t != BRT_NONE) {
+        RendererPartSet(renderer, BRT_HIDDEN_SURFACE, 0, BRT_TYPE_T, (br_value){.t = BRT_NONE});
+        forced = BR_TRUE;
+    }
+
+    err = on_screen ? GeometryStoredRenderOnScreen(sg, renderer, type) : GeometryStoredRender(sg, renderer, type);
+
+    if(forced)
+        RendererPartSet(renderer, BRT_HIDDEN_SURFACE, 0, BRT_TYPE_T, hidden);
+
+    if(pushed)
+        RendererStatePop(renderer, BR_STATE_STORED_PARTS_MASK);
+
+    ObjectFree(sg);
+
+    return err;
+}
+
+br_error BR_CMETHOD_DECL(br_geometry_v1_model_gen, render)(struct br_geometry_v1_model *self, struct br_renderer *renderer,
+                                                           struct v11model *model, struct br_renderer_state_stored *default_state, br_token type)
+{
+    return renderImmediate(self, renderer, model, default_state, type, BR_FALSE);
+}
+
+br_error BR_CMETHOD_DECL(br_geometry_v1_model_gen, renderOnScreen)(struct br_geometry_v1_model *self, struct br_renderer *renderer,
+                                                                   struct v11model *model, struct br_renderer_state_stored *default_state,
+                                                                   br_token type)
+{
+    return renderImmediate(self, renderer, model, default_state, type, BR_TRUE);
+}
+
+/*
  * A pre-preocessed static cuboid model that we can fill in with
  * appropriate vertex values to represent a bounding box
  *
