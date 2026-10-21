@@ -149,6 +149,11 @@ br_error ContextStateGLInit(void *vparent, br_gl_context_state *self, const Glad
     }
 
     /*
+     * Save a copy of the context flags.
+     */
+    gl->GetIntegerv(GL_CONTEXT_FLAGS, &self->context_flags);
+
+    /*
      * Get a copy of the extension list.
      * NULL-terminate so we can expose it as a BRT_POINTER_LIST.
      */

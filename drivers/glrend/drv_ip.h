@@ -202,6 +202,12 @@ br_uint_8 DeviceGLTypeOrBits(br_uint_8 pixel_type, br_int_32 pixel_bits);
 void DeviceGLObjectLabel(const GladGLContext *gl, GLenum identifier, GLuint name, const char *s);
 void DeviceGLObjectLabelF(const GladGLContext *gl, GLenum identifier, GLuint name, const char *fmt, ...);
 
+/*
+ * Point a context's ObjectLabel at a no-op. A name is only read through the debug output, so a
+ * context that was not asked for it does not pay for naming.
+ */
+void DeviceGLObjectLabelDisable(GladGLContext *gl);
+
 br_boolean  DeviceGLCheckErrors(const GladGLContext *gl);
 const char *DeviceGLStrError(GLenum err);
 

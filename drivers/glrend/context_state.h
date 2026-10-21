@@ -31,6 +31,8 @@ typedef struct br_gl_context_state {
         GLfloat max_anisotropy;
     } limits;
 
+    GLint context_flags;
+
     GLuint tex_white;
     GLuint tex_checkerboard;
 

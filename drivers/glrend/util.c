@@ -123,9 +123,22 @@ GLuint DeviceGLPixelmapToGLTexture(const GladGLContext *gl, br_pixelmap *pm)
     return tex;
 }
 
+static void GLAD_API_PTR DeviceGLObjectLabelNone(GLenum identifier, GLuint name, GLsizei length, const GLchar *label)
+{
+    (void)identifier;
+    (void)name;
+    (void)length;
+    (void)label;
+}
+
+void DeviceGLObjectLabelDisable(GladGLContext *gl)
+{
+    gl->ObjectLabel = DeviceGLObjectLabelNone;
+}
+
 void DeviceGLObjectLabel(const GladGLContext *gl, GLenum identifier, GLuint name, const char *s)
 {
-    if(gl->KHR_debug == 0)
+    if(gl->KHR_debug == 0 || gl->ObjectLabel == DeviceGLObjectLabelNone)
         return;
 
     while(gl->GetError() != GL_NO_ERROR)
@@ -144,7 +157,7 @@ void DeviceGLObjectLabelF(const GladGLContext *gl, GLenum identifier, GLuint nam
     char   *s   = BrScratchString();
     size_t  len = BrScratchStringSize();
 
-    if(gl->KHR_debug == 0)
+    if(gl->KHR_debug == 0 || gl->ObjectLabel == DeviceGLObjectLabelNone)
         return;
 
     va_start(ap, fmt);

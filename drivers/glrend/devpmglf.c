@@ -177,6 +177,13 @@ br_device_pixelmap *DevicePixelmapGLAllocateFront(br_device *dev, br_output_faci
     }
 
     /*
+     * If we're not a debug context, disable object labels. They're slooowww.
+     */
+    if((ctx->context_flags & GL_CONTEXT_FLAG_DEBUG_BIT) == 0) {
+        DeviceGLObjectLabelDisable(&self->asFront.glad_gl_context);
+    }
+
+    /*
      * Try to figure out the actual format we got.
      * This isn't a big deal if we don't know what it is - we can only be written to by a doubleBuffer().
      */
