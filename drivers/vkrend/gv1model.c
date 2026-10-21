@@ -141,14 +141,14 @@ static br_error BR_CMETHOD_DECL(br_geometry_v1_model_vk, render)(struct br_geome
      * into the current state is what V1Model_RenderStored()'s per-group copy does.
      */
     if(default_state != NULL) {
-        RendererStatePush(renderer, MASK_STATE_STORED);
-        RendererStateRestore(renderer, default_state, MASK_STATE_STORED);
+        RendererStatePush(renderer, BR_STATE_STORED_PARTS_MASK);
+        RendererStateRestore(renderer, default_state, BR_STATE_STORED_PARTS_MASK);
     }
 
     err = GeometryStoredRender(sg, renderer, type);
 
     if(default_state != NULL)
-        RendererStatePop(renderer, MASK_STATE_STORED);
+        RendererStatePop(renderer, BR_STATE_STORED_PARTS_MASK);
 
     ObjectFree(sg);
 

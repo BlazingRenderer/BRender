@@ -421,7 +421,7 @@ static br_boolean apply_state(br_renderer *renderer, const GladGLContext *gl)
     /* NB: Flag is never set */
     // int model_lit = self->model->flags & V11MODF_LIT;
 
-    apply_stored_properties(gl, renderer, renderer->state.current, MASK_STATE_STORED | MASK_STATE_OUTPUT, &model, ctx->tex_white);
+    apply_stored_properties(gl, renderer, renderer->state.current, BR_STATE_STORED_PARTS_MASK | MASK_STATE_OUTPUT, &model, ctx->tex_white);
 
     switch(renderer->state.current->render_type) {
         case BRT_POINT:

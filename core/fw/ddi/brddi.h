@@ -53,6 +53,13 @@ struct fmt_vertex;
 #endif
 
 /*
+ * The parts of renderer state that a stored state carries: what a material maps
+ * itself onto, and what a driver's own stored-state mask copies. softrend's adds
+ * BR_STATE_CACHE to it because its cache is derived from those parts.
+ */
+#define BR_STATE_STORED_PARTS_MASK (BR_STATE_SURFACE | BR_STATE_PRIMITIVE | BR_STATE_CULL)
+
+/*
  * Pull in DDI prototypes
  */
 #ifndef _NO_PROTOTYPES

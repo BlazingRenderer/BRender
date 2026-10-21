@@ -9,11 +9,6 @@
  */
 #include "v1db.h"
 
-/*
- * Mask of renderer state parts that materials are mapped to
- */
-#define PARTS_MASK (BR_STATE_SURFACE | BR_STATE_PRIMITIVE | BR_STATE_CULL)
-
 void BR_PUBLIC_ENTRY BrMaterialUpdate(br_material *mat, br_uint_16 flags)
 {
     br_token_value tva[64], *tvp;
@@ -29,14 +24,14 @@ void BR_PUBLIC_ENTRY BrMaterialUpdate(br_material *mat, br_uint_16 flags)
     /*
      * Save current state and setup default
      */
-    RendererStatePush(v1db.renderer, (br_uint_32)PARTS_MASK);
-    RendererStateDefault(v1db.renderer, (br_uint_32)PARTS_MASK);
+    RendererStatePush(v1db.renderer, (br_uint_32)BR_STATE_STORED_PARTS_MASK);
+    RendererStateDefault(v1db.renderer, (br_uint_32)BR_STATE_STORED_PARTS_MASK);
 
     /*
      * If there is an existing state, restore it into renderer
      */
     if(mat->stored)
-        RendererStateRestore(v1db.renderer, mat->stored, (br_uint_32)PARTS_MASK);
+        RendererStateRestore(v1db.renderer, mat->stored, (br_uint_32)BR_STATE_STORED_PARTS_MASK);
 
     /*
      * Translate material into state
@@ -418,14 +413,14 @@ void BR_PUBLIC_ENTRY BrMaterialUpdate(br_material *mat, br_uint_16 flags)
      * If there was no previous state, create new one, otherwise, update existing state
      */
     if(mat->stored)
-        RendererStateSave(v1db.renderer, mat->stored, (br_uint_32)PARTS_MASK);
+        RendererStateSave(v1db.renderer, mat->stored, (br_uint_32)BR_STATE_STORED_PARTS_MASK);
     else
-        RendererStateStoredNew(v1db.renderer, (br_renderer_state_stored **)&mat->stored, (br_uint_32)PARTS_MASK, NULL);
+        RendererStateStoredNew(v1db.renderer, (br_renderer_state_stored **)&mat->stored, (br_uint_32)BR_STATE_STORED_PARTS_MASK, NULL);
 
     /*
      * Restore previous state
      */
-    RendererStatePop(v1db.renderer, (br_uint_32)PARTS_MASK);
+    RendererStatePop(v1db.renderer, (br_uint_32)BR_STATE_STORED_PARTS_MASK);
 }
 
 void BrMaterialClear(br_material *mat)
