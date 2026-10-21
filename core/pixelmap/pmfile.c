@@ -144,6 +144,15 @@ static int FopRead_PIXELMAP(br_datafile *df, br_uint_32 id, br_uint_32 length, b
     df->prims->struct_read(df, &br_pixelmap_F, pp);
     df->res = NULL;
 
+    /*
+     * The type is a byte out of the file, and everything below indexes pmTypeInfo[] with it.
+     */
+    if(pp->type >= BR_PMT_MAX) {
+        BrLogWarn("PM", "pixelmap type %u is not one of the %d types", (unsigned)pp->type, (int)BR_PMT_MAX);
+        BrPixelmapFree(pp);
+        return -1;
+    }
+
     pp->row_bytes = pp->width * DevicePixelmapPixelBytes(pp);
 
     /*
@@ -196,14 +205,45 @@ static int FopRead_PIXELS(br_datafile *df, br_uint_32 id, br_uint_32 length, br_
     int          icount;
     br_pixelmap *pp;
     int          size;
+    br_int_32    file_bytes;
+    br_size_t    need;
 
-    pp   = DfTop(DFST_PIXELMAP, 0);
-    size = DevicePixelmapFileBytes(pp);
+    pp         = DfTop(DFST_PIXELMAP, 0);
+    size       = DevicePixelmapFileBytes(pp);
+    file_bytes = pp->row_bytes < 0 ? -(br_int_32)pp->row_bytes : pp->row_bytes;
+
+    /*
+     * The chunk has to hold the map's samples: a short one leaves a map with a stride
+     * and nothing behind it. A bottom-up map's row_bytes is negative and its samples are
+     * still row_bytes * height of them. A mipmapped map's block covers every level, so it
+     * is left alone.
+     */
+    need = pp->mip_offset != 0 ? 0 : (br_size_t)file_bytes * (br_size_t)pp->height;
+
+    if(length < (br_uint_32)need) {
+        BrLogWarn("PM", "pixel chunk is %u bytes, %d x %d at %d bytes per row needs %lu", (unsigned)length, pp->width, pp->height,
+                  pp->row_bytes, (unsigned long)need);
+        return -1;
+    }
 
     df->res    = pp;
     pp->pixels = df->prims->block_read(df, NULL, &icount, size, BR_MEMORY_PIXELS);
+    df->res    = NULL;
+
+    /*
+     * The block carries its own length, and that is the one the reader allocates from - a
+     * chunk header that agrees with the map proves nothing. The allocation is the only
+     * quantity that settles it, so it is checked once it exists.
+     */
+    if(pp->pixels != NULL && need != 0 && BrResSize(pp->pixels) < need) {
+        BrLogWarn("PM", "pixel block is %lu bytes, %d x %d at %d bytes per row needs %lu", (unsigned long)BrResSize(pp->pixels), pp->width,
+                  pp->height, pp->row_bytes, (unsigned long)need);
+        BrResFree(pp->pixels);
+        pp->pixels = NULL;
+        return -1;
+    }
+
     pp->flags |= BR_PMF_LINEAR;
-    df->res = NULL;
 
     return 0;
 }

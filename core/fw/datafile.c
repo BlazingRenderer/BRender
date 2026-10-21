@@ -1840,8 +1840,22 @@ static void *DfBlockReadBinary(br_datafile *df, void *base, int *count, int size
     BrFileRead(&s, sizeof(s), 1, df->h);
     s = BrHtoNL(s);
 
-    if(s != size)
-        BR_ERROR0("block size mismatch");
+    /*
+     * A block that disagrees with what the reader is allocating for, or that holds nothing,
+     * is a broken stream. It is reported and left unread rather than aborting the process:
+     * these blocks are read straight out of a resource file, and a library that exits on a
+     * malformed one is a library that cannot be pointed at untrusted data.
+     */
+    if(s != size) {
+        BrLogWarn("DATAFILE", "block size mismatch: %d where %d was expected", s, size);
+        *count = 0;
+        return NULL;
+    }
+
+    if(l == 0) {
+        *count = 0;
+        return NULL;
+    }
 
     if(base == NULL) {
         /*
