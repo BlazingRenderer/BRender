@@ -74,17 +74,23 @@ add_library(softprim
 # are in the spec for the same reason and with the same rule: the z-sorted
 # arbitrary-width triangle is emitted and the rest of the shapes that sample a
 # 555/565 map are refused. See infogen.pl's softprim_implemented().
+#
+# SP_TEX_RGBA8888 and SP_BLEND_ALPHA_TEX are softprim's alpha-blended sprite
+# family, which pentprim never had. Only tables/soft_t24.ifg carries them, so
+# naming them admits nothing else. That table is listed first, so its rows are
+# walked before every pentprim block; see the file for why that cannot move an
+# existing selection.
 ##
-set(SP_TABLES prim_t8 mmx_t15 prm_t15 mmx_t16 prm_t16 prim_t24 prim_l8 prim_p8 prim_l15 prim_p15 prim_l16 prim_p16 prim_l24 prim_p24)
+set(SP_TABLES soft_t24 prim_t8 mmx_t15 prm_t15 mmx_t16 prm_t16 prim_t24 prim_l8 prim_p8 prim_l15 prim_p15 prim_l16 prim_p16 prim_l24 prim_p24)
 
 set(SP_SPEC "softprim_implemented=")
 string(APPEND SP_SPEC "SP_FMT_I8,SP_FMT_555,SP_FMT_565,SP_FMT_888,SP_TOP_TRI,SP_TOP_LINE,SP_TOP_POINT,")
 string(APPEND SP_SPEC "SP_DEPTH_NONE,SP_DEPTH_ZW,")
 string(APPEND SP_SPEC "SP_SHADE_NONE,SP_SHADE_CONST_I,SP_SHADE_INTERP_I,SP_SHADE_CONST_I_TABLE,SP_SHADE_INTERP_I_TABLE,SP_SHADE_CONST_RGB,SP_SHADE_INTERP_RGB,")
 string(APPEND SP_SPEC "SP_SHADE_CONST_I_RGB,SP_SHADE_INTERP_I_RGB,")
-string(APPEND SP_SPEC "SP_TEX_NONE,SP_TEX_I8,SP_TEX_555,SP_TEX_565,SP_TEX_RGB888,SP_ADDR_NONE,SP_ADDR_SHIFT,SP_ADDR_DIVIDE,")
+string(APPEND SP_SPEC "SP_TEX_NONE,SP_TEX_I8,SP_TEX_555,SP_TEX_565,SP_TEX_RGB888,SP_TEX_RGBA8888,SP_ADDR_NONE,SP_ADDR_SHIFT,SP_ADDR_DIVIDE,")
 string(APPEND SP_SPEC "SP_PERSP_AFFINE,SP_PERSP_CORRECT,")
-string(APPEND SP_SPEC "SP_BLEND_NONE,SP_BLEND_INDEX,SP_BLEND_DECAL,SP_BLEND_SCREENDOOR,SP_BLEND_ALPHA,SP_FOG_NONE,SP_FOG_INDEX,SP_DITH_NONE,SP_DITH_MAP,SP_DITH_COLOUR")
+string(APPEND SP_SPEC "SP_BLEND_NONE,SP_BLEND_INDEX,SP_BLEND_DECAL,SP_BLEND_SCREENDOOR,SP_BLEND_ALPHA,SP_BLEND_ALPHA_TEX,SP_FOG_NONE,SP_FOG_INDEX,SP_DITH_NONE,SP_DITH_MAP,SP_DITH_COLOUR")
 
 set(SP_GENERATED)
 foreach (tbl ${SP_TABLES})

@@ -2529,7 +2529,7 @@ constexpr br_int_32 PIZ_BAYER[4][4] = {
  * handed perspz.c. */
 struct PizVert {
     br_int_32 x, y, z, u, v, w, i;
-    br_int_32 r, g, b;
+    br_int_32 r, g, b, a;
     br_int_32 sy; /* comp_x[C_SY], the sort key */
 };
 
@@ -3682,6 +3682,10 @@ struct RgbAwtWalk {
     PizParam pz; /* depth, 16.16, remapped unsigned */
     PizParam pi; /* intensity, 16.16; only the shade-table variant reads it */
 
+    /* The vertex colour, 16.16 with 256 * channel in the integer part; only the
+     * RGBA sprite arm reads it, where it modulates the texel. */
+    PizParam pr, pg, pb, pa;
+
     br_int_32 direction; /* 1: the per-pixel u/v step runs with the gradient */
 
     br_int_32 start, end, zstart;
@@ -3698,7 +3702,7 @@ struct RgbAwtWalk {
  * vertices and returns false for a triangle the setup cannot process.
  */
 inline bool RgbAwtSetup(RgbAwtWalk& w, const PizVert vx[3], const softprim_buffer& colour, const softprim_buffer& texture, br_int_32 sbpp,
-                        bool light) noexcept
+                        bool light, bool modulate) noexcept
 {
     const br_int_32 sxa = vx[0].x >> 16, sya = vx[0].y >> 16;
     const br_int_32 sxb = vx[1].x >> 16, syb = vx[1].y >> 16;
@@ -3741,7 +3745,7 @@ inline bool RgbAwtSetup(RgbAwtWalk& w, const PizVert vx[3], const softprim_buffe
         p.d_carry   = (br_int_32)((br_uint_32)p.d_nocarry + (br_uint_32)p.grad_x);
     };
 
-    PizParam par_u, par_v, par_z, par_i{};
+    PizParam par_u, par_v, par_z, par_i{}, par_r{}, par_g{}, par_b{}, par_a{};
 
     ParamSetup(par_u, vx[0].u, vx[1].u, vx[2].u, false);
     ParamSetup(par_v, vx[0].v, vx[1].v, vx[2].v, false);
@@ -3750,8 +3754,19 @@ inline bool RgbAwtSetup(RgbAwtWalk& w, const PizVert vx[3], const softprim_buffe
     if(light)
         ParamSetup(par_i, vx[0].i, vx[1].i, vx[2].i, false);
 
+    if(modulate) {
+        ParamSetup(par_r, vx[0].r, vx[1].r, vx[2].r, false);
+        ParamSetup(par_g, vx[0].g, vx[1].g, vx[2].g, false);
+        ParamSetup(par_b, vx[0].b, vx[1].b, vx[2].b, false);
+        ParamSetup(par_a, vx[0].a, vx[1].a, vx[2].a, false);
+    }
+
     w.pz = par_z;
     w.pi = par_i;
+    w.pr = par_r;
+    w.pg = par_g;
+    w.pb = par_b;
+    w.pa = par_a;
 
     RgbAwt& t = w.tex;
 
@@ -3852,6 +3867,40 @@ inline void RgbAwtStep(const RgbAwt& t, br_uint_32& ua, br_uint_32& vc, br_int_3
 }
 
 /*
+ * One channel of the per-texel alpha blend: dst = src*a + dst*(1-a), with a in
+ * 0..255 and the quotient rounded to nearest. Both ends are exact - a == 0 and
+ * a == 255 return the destination and the source themselves - which is what
+ * makes a fully transparent texel a no-op and a fully opaque one the map's own
+ * colour. The 15/16bpp outputs expand the destination channel to 8 bits, blend
+ * there and let RgbStore truncate back, so the arithmetic is one formula for
+ * every output format rather than a per-depth copy.
+ */
+inline br_uint_8 AlphaBlend(br_uint_8 src, br_uint_8 dst, br_uint_8 a) noexcept
+{
+    return (br_uint_8)(((br_uint_32)src * a + (br_uint_32)dst * (255u - a) + 127u) / 255u);
+}
+
+/* One 8-bit channel of a modulated texel, x * y / 255 rounded to nearest: both
+ * ends are exact, so a white vertex colour leaves the texel and a zero one
+ * clears the channel. */
+inline br_uint_8 Mul255(br_uint_8 x, br_uint_8 y) noexcept
+{
+    return (br_uint_8)(((br_uint_32)x * y + 127u) / 255u);
+}
+
+/*
+ * The 8-bit channel a vertex colour component interpolates to. softrend hands
+ * the rasteriser the colour as 16.16 with 256 * channel in the integer part
+ * (SurfaceColourUnlit divides the byte by 256 and the unlit ranges leave the
+ * scale at 1), so the byte is one 8-bit shift away rather than the >> 16 a
+ * shaded block's offset-1/scale-254 range would need.
+ */
+inline br_uint_8 ChannelByte(br_int_32 v) noexcept
+{
+    return (br_uint_8)((br_uint_32)v >> 8);
+}
+
+/*
  * The fragment of one drawn pixel: t_piza.asm's SBPP/DBPP/LIGHT arms. The texel
  * is transparent when all three of its bytes (SBPP=3), its two bytes (SBPP=2)
  * or its one byte (SBPP=1) are zero, and the depth test draws while the new
@@ -3862,10 +3911,15 @@ inline void RgbAwtStep(const RgbAwt& t, br_uint_32& ua, br_uint_32& vc, br_int_3
  * pixel's type, so the fragment is the two bytes copied - t_pia.asm's
  * `mov cl,[esi] / mov ch,1[esi] / mov [edi],cl / mov 1[edi],ch`. The byte order
  * is the map's, which for both word types is the native one.
+ *
+ * SBPP=4 is softprim's own arm, with no asm behind it: the texel is modulated by
+ * the interpolated vertex colour and its fourth byte is the alpha of the
+ * per-texel blend, scaled by the vertex alpha, so a zero product alpha leaves
+ * the pixel (and the depth) alone. See AlphaBlend for the arithmetic.
  */
 template <sp_fmt F, sp_tex X, sp_depth D>
 inline void RgbAwtPixel(const RgbAwtWalk& w, const br_uint_8 *tex, br_size_t tex_size, br_int_32 sp, br_int_32 src, br_int_32 zp,
-                        br_int_32 pzp, br_int_32 pip) noexcept
+                        br_int_32 pzp, br_int_32 pip, br_int_32 pr, br_int_32 pg, br_int_32 pb, br_int_32 pa) noexcept
 {
     const softprim_buffer& colour = *w.colour;
     const softprim_buffer& dbuf   = *w.depth;
@@ -3880,7 +3934,8 @@ inline void RgbAwtPixel(const RgbAwtWalk& w, const br_uint_8 *tex, br_size_t tex
     if(src < 0)
         return;
 
-    bool transparent;
+    bool     transparent;
+    br_uint_8 alpha = 0; /* the RGBA arm's product alpha */
 
     if(X == SP_TEX_RGB888) {
         if((br_size_t)src + 3 > tex_size)
@@ -3896,6 +3951,12 @@ inline void RgbAwtPixel(const RgbAwtWalk& w, const br_uint_8 *tex, br_size_t tex
         const br_uint_8 *tp = tex + src;
 
         transparent = (tp[0] | tp[1]) == 0;
+    } else if(X == SP_TEX_RGBA8888) {
+        if((br_size_t)src + 4 > tex_size)
+            return;
+
+        alpha       = Mul255(tex[src + 3], ChannelByte(pa));
+        transparent = alpha == 0;
     } else {
         if((br_size_t)src >= tex_size)
             return;
@@ -3926,6 +3987,61 @@ inline void RgbAwtPixel(const RgbAwtWalk& w, const br_uint_8 *tex, br_size_t tex
 
         colour.base[sp + 0] = tp[0];
         colour.base[sp + 1] = tp[1];
+    } else if(X == SP_TEX_RGBA8888) {
+        /*
+         * SP_BLEND_ALPHA_TEX. The map is BR_PMT_RGBA_8888, whose bytes in
+         * memory are B,G,R,A (pixelmap.h), and RgbStore writes B,G,R for
+         * RGB_888 and the packed word for 555/565, so both ends of the blend
+         * are taken in RGB order and the store puts them back.
+         *
+         * The fragment is the texel modulated by the interpolated vertex
+         * colour - the unlit surface writes the colour there - and the blend
+         * alpha is the product of the two alphas, so a vertex colour that is
+         * half transparent lets half the destination through a fully opaque
+         * texel and a transparent vertex colour draws nothing.
+         */
+        const br_uint_8 *tp = tex + src;
+        br_uint_8       *dp = colour.base + sp;
+        const br_uint_8  a  = alpha;
+
+        br_uint_8 sr, sg, sb, dr, dg, db;
+
+        if constexpr(F == SP_FMT_888) {
+            sr = Mul255(tp[2], ChannelByte(pr));
+            sg = Mul255(tp[1], ChannelByte(pg));
+            sb = Mul255(tp[0], ChannelByte(pb));
+            dr = dp[2];
+            dg = dp[1];
+            db = dp[0];
+        } else {
+            const br_uint_16 dv = (br_uint_16)((br_uint_16)dp[0] | ((br_uint_16)dp[1] << 8));
+
+            if constexpr(F == SP_FMT_555) {
+                const br_uint_8 r5 = (br_uint_8)((dv >> 10) & 0x1f);
+                const br_uint_8 g5 = (br_uint_8)((dv >> 5) & 0x1f);
+                const br_uint_8 b5 = (br_uint_8)(dv & 0x1f);
+
+                sr = Mul255(tp[2], ChannelByte(pr));
+                sg = Mul255(tp[1], ChannelByte(pg));
+                sb = Mul255(tp[0], ChannelByte(pb));
+                dr = (br_uint_8)((r5 << 3) | (r5 >> 2));
+                dg = (br_uint_8)((g5 << 3) | (g5 >> 2));
+                db = (br_uint_8)((b5 << 3) | (b5 >> 2));
+            } else {
+                const br_uint_8 r5 = (br_uint_8)((dv >> 11) & 0x1f);
+                const br_uint_8 g6 = (br_uint_8)((dv >> 5) & 0x3f);
+                const br_uint_8 b5 = (br_uint_8)(dv & 0x1f);
+
+                sr = Mul255(tp[2], ChannelByte(pr));
+                sg = Mul255(tp[1], ChannelByte(pg));
+                sb = Mul255(tp[0], ChannelByte(pb));
+                dr = (br_uint_8)((r5 << 3) | (r5 >> 2));
+                dg = (br_uint_8)((g6 << 2) | (g6 >> 4));
+                db = (br_uint_8)((b5 << 3) | (b5 >> 2));
+            }
+        }
+
+        RgbStore<F>(dp, AlphaBlend(sr, dr, a), AlphaBlend(sg, dg, a), AlphaBlend(sb, db, a));
     } else {
         /*
          * The shade-table arm: the index-8 texel is the column and the
@@ -3983,18 +4099,29 @@ void RgbAwtTrapezium(RgbAwtWalk& w, AwtEdge& edge) noexcept
         br_uint_32      vc  = w.tex.v_current;
         br_int_32       pzp = w.pz.current;
         br_int_32       pip = w.pi.current;
+        br_int_32       prr = w.pr.current;
+        br_int_32       pgg = w.pg.current;
+        br_int_32       pbb = w.pb.current;
+        br_int_32       paa = w.pa.current;
 
         if(sp < end) {
             for(;;) {
                 if(sp >= end)
                     break;
 
-                RgbAwtPixel<F, X, D>(w, tex, tex_size, sp, src, zp, pzp, pip);
+                RgbAwtPixel<F, X, D>(w, tex, tex_size, sp, src, zp, pzp, pip, prr, pgg, pbb, paa);
 
                 pzp += w.pz.grad_x;
 
                 if(X == SP_TEX_I8)
                     pip += w.pi.grad_x;
+
+                if(X == SP_TEX_RGBA8888) {
+                    prr += w.pr.grad_x;
+                    pgg += w.pg.grad_x;
+                    pbb += w.pb.grad_x;
+                    paa += w.pa.grad_x;
+                }
 
                 zp += 2;
                 sp += dbpp;
@@ -4011,12 +4138,19 @@ void RgbAwtTrapezium(RgbAwtWalk& w, AwtEdge& edge) noexcept
                 if(X == SP_TEX_I8)
                     pip -= w.pi.grad_x;
 
+                if(X == SP_TEX_RGBA8888) {
+                    prr -= w.pr.grad_x;
+                    pgg -= w.pg.grad_x;
+                    pbb -= w.pb.grad_x;
+                    paa -= w.pa.grad_x;
+                }
+
                 RgbAwtStep(w.tex, ua, vc, src);
 
                 zp -= 2;
                 sp -= dbpp;
 
-                RgbAwtPixel<F, X, D>(w, tex, tex_size, sp, src, zp, pzp, pip);
+                RgbAwtPixel<F, X, D>(w, tex, tex_size, sp, src, zp, pzp, pip, prr, pgg, pbb, paa);
             }
         }
 
@@ -4042,6 +4176,18 @@ void RgbAwtTrapezium(RgbAwtWalk& w, AwtEdge& edge) noexcept
          */
         if(X == SP_TEX_I8)
             w.pi.current += mcarry ? w.pi.d_carry : w.pi.d_nocarry;
+
+        /*
+         * The vertex colour walks down a scanline the same way, and only the
+         * RGBA sprite arm reads it; every other arm's colour parameters are
+         * zero and were never set up.
+         */
+        if(X == SP_TEX_RGBA8888) {
+            w.pr.current += mcarry ? w.pr.d_carry : w.pr.d_nocarry;
+            w.pg.current += mcarry ? w.pg.d_carry : w.pg.d_nocarry;
+            w.pb.current += mcarry ? w.pb.d_carry : w.pb.d_nocarry;
+            w.pa.current += mcarry ? w.pa.d_carry : w.pa.d_nocarry;
+        }
 
         {
             const br_uint_32 du_ = mcarry ? w.tex.du_carry : w.tex.du_nocarry;
@@ -4091,8 +4237,16 @@ void RgbAwtTrapezium(RgbAwtWalk& w, AwtEdge& edge) noexcept
  * z-buffered shapes are taken by the MMX table (the MMX blocks are tried first
  * and one of their untextured rows always matches). The colour slot carries an
  * intensity rather than a colour for both, which is what SP_SHADE_*_I_RGB says.
+ *
+ * The RGBA arm is softprim's own (tables/soft_t24.ifg): an RGBA_8888 map
+ * sampled at SBPP=4, with B=SP_BLEND_ALPHA_TEX reading the texel's fourth byte
+ * and blending it over the destination. It has no pentprim original and no
+ * reference pixels; the map's alpha is the blend, so there is no shade or blend
+ * table in the fragment. The addressing, the setup and the trapezium are the
+ * same code as the pentprim arms, which is why it lives here rather than in a
+ * fourth copy of awtmi.h.
  */
-template <sp_fmt F, sp_depth D, sp_tex X, sp_shade S>
+template <sp_fmt F, sp_depth D, sp_tex X, sp_shade S, sp_blend B>
 void RgbAwtTriangle(brp_block *block, brp_vertex *v0, brp_vertex *v1, brp_vertex *v2) noexcept
 {
     (void)block;
@@ -4123,6 +4277,9 @@ void RgbAwtTriangle(brp_block *block, brp_vertex *v0, brp_vertex *v1, brp_vertex
     if(X == SP_TEX_I8 && (texture.type != BR_PMT_INDEX_8 || shade.base == NULL))
         return;
 
+    if(X == SP_TEX_RGBA8888 && (texture.type != BR_PMT_RGBA_8888 || B != SP_BLEND_ALPHA_TEX))
+        return;
+
     brp_vertex *src[3] = {v0, v1, v2};
     PizVert     pv[3];
 
@@ -4137,6 +4294,17 @@ void RgbAwtTriangle(brp_block *block, brp_vertex *v0, brp_vertex *v1, brp_vertex
         pv[k].v  = BrFloatToFixed(src[k]->comp[C_V]);
         pv[k].i  = BrFloatToFixed(src[k]->comp[C_I]);
         pv[k].sy = pv[k].y;
+
+        /*
+         * Only the sprite blocks declare the colour components, so only they
+         * have anything in the slots; every other arm leaves them alone.
+         */
+        if(X == SP_TEX_RGBA8888) {
+            pv[k].r = BrFloatToFixed(src[k]->comp[C_R]);
+            pv[k].g = BrFloatToFixed(src[k]->comp[C_G]);
+            pv[k].b = BrFloatToFixed(src[k]->comp[C_B]);
+            pv[k].a = BrFloatToFixed(src[k]->comp[C_A]);
+        }
     }
 
     /*
@@ -4185,9 +4353,9 @@ void RgbAwtTriangle(brp_block *block, brp_vertex *v0, brp_vertex *v1, brp_vertex
     w.texture = &texture;
     w.shade   = &shade;
 
-    const br_int_32 sbpp = (X == SP_TEX_RGB888) ? 3 : (X == SP_TEX_I8) ? 1 : 2;
+    const br_int_32 sbpp = (X == SP_TEX_RGB888) ? 3 : (X == SP_TEX_RGBA8888) ? 4 : (X == SP_TEX_I8) ? 1 : 2;
 
-    if(!RgbAwtSetup(w, pv, colour, texture, sbpp, X == SP_TEX_I8))
+    if(!RgbAwtSetup(w, pv, colour, texture, sbpp, X == SP_TEX_I8, X == SP_TEX_RGBA8888))
         return;
 
     RgbAwtTrapezium<F, X, D>(w, w.top);
@@ -5837,13 +6005,15 @@ static void SoftPrimRender(brp_block *block, brp_vertex *v0, brp_vertex *v1, brp
                       S == SP_SHADE_INTERP_I_TABLE || S == SP_SHADE_CONST_RGB || S == SP_SHADE_INTERP_RGB || S == SP_SHADE_CONST_I_RGB ||
                       S == SP_SHADE_INTERP_I_RGB,
                   "softprim: no kernel for this shading mode");
-    static_assert(X == SP_TEX_NONE || X == SP_TEX_I8 || X == SP_TEX_555 || X == SP_TEX_565 || X == SP_TEX_RGB888,
+    static_assert(X == SP_TEX_NONE || X == SP_TEX_I8 || X == SP_TEX_555 || X == SP_TEX_565 || X == SP_TEX_RGB888 ||
+                      X == SP_TEX_RGBA8888,
                   "softprim: no kernel for this texture mode");
     static_assert(A == SP_ADDR_NONE || A == SP_ADDR_SHIFT || A == SP_ADDR_DIVIDE, "softprim: no kernel for this texture addressing mode");
     static_assert(X != SP_TEX_NONE || A == SP_ADDR_NONE, "softprim: texture addressing mode without a texture");
     static_assert(X != SP_TEX_RGB888 || F == SP_FMT_888, "softprim: an RGB_888 texture is only implemented for RGB_888 output");
     static_assert(X != SP_TEX_555 || F == SP_FMT_555, "softprim: an RGB_555 texture is only implemented for RGB_555 output");
     static_assert(X != SP_TEX_565 || F == SP_FMT_565, "softprim: an RGB_565 texture is only implemented for RGB_565 output");
+    static_assert(X != SP_TEX_RGBA8888 || F != SP_FMT_I8, "softprim: an RGBA_8888 texture is only implemented for an RGB output");
     static_assert(P == SP_PERSP_AFFINE || P == SP_PERSP_CORRECT, "softprim: no kernel for this perspective mode");
     static_assert((S != SP_SHADE_CONST_I && S != SP_SHADE_INTERP_I && S != SP_SHADE_CONST_I_TABLE && S != SP_SHADE_INTERP_I_TABLE) || F == SP_FMT_I8,
                   "softprim: intensity shading is INDEX_8 only");
@@ -5851,8 +6021,13 @@ static void SoftPrimRender(brp_block *block, brp_vertex *v0, brp_vertex *v1, brp
     static_assert(P == SP_PERSP_AFFINE || X != SP_TEX_NONE, "softprim: an untextured kernel cannot be perspective-correct");
     static_assert(B == SP_BLEND_NONE || B == SP_BLEND_INDEX || B == SP_BLEND_DECAL || B == SP_BLEND_SCREENDOOR ||
                       (B == SP_BLEND_ALPHA && X == SP_TEX_I8 && A == SP_ADDR_SHIFT &&
-                       (S == SP_SHADE_CONST_I_RGB || S == SP_SHADE_INTERP_I_RGB)),
+                       (S == SP_SHADE_CONST_I_RGB || S == SP_SHADE_INTERP_I_RGB)) ||
+                      (B == SP_BLEND_ALPHA_TEX && X == SP_TEX_RGBA8888 && S == SP_SHADE_NONE && A == SP_ADDR_DIVIDE &&
+                       P == SP_PERSP_AFFINE),
                   "softprim: no kernel for this blend mode");
+    static_assert(X != SP_TEX_RGBA8888 ||
+                      (B == SP_BLEND_ALPHA_TEX && S == SP_SHADE_NONE && A == SP_ADDR_DIVIDE && P == SP_PERSP_AFFINE),
+                  "softprim: an RGBA_8888 texture is only implemented as the unlit arbitrary-width affine alpha blend");
     static_assert(H == SP_DITH_NONE || H == SP_DITH_MAP || H == SP_DITH_COLOUR, "softprim: no kernel for this dithering mode");
     static_assert(H != SP_DITH_MAP || (F == SP_FMT_I8 && S == SP_SHADE_NONE && X == SP_TEX_I8 && A == SP_ADDR_SHIFT &&
                                        P == SP_PERSP_CORRECT && B == SP_BLEND_NONE && G == SP_FOG_NONE),
@@ -5895,7 +6070,8 @@ static void SoftPrimRender(brp_block *block, brp_vertex *v0, brp_vertex *v1, brp
 
         PizShadeTriangle<F, S, B>(block, v0, v1, v2);
     } else if(X != SP_TEX_NONE && A == SP_ADDR_DIVIDE &&
-              (F == SP_FMT_888 || X == SP_TEX_555 || X == SP_TEX_565 || S == SP_SHADE_CONST_I_RGB || S == SP_SHADE_INTERP_I_RGB)) {
+              (F == SP_FMT_888 || X == SP_TEX_555 || X == SP_TEX_565 || X == SP_TEX_RGBA8888 || S == SP_SHADE_CONST_I_RGB ||
+               S == SP_SHADE_INTERP_I_RGB)) {
         /*
          * awtmi.h's arbitrary-width family, which has its own setup and its own
          * addressing (see RgbAwtTriangle). Three shapes reach it: the RGB_888
@@ -5906,15 +6082,23 @@ static void SoftPrimRender(brp_block *block, brp_vertex *v0, brp_vertex *v1, brp
          * own texel word copied - the same code with SBPP=2 rather than 3. The
          * power-of-two 15/16bpp shapes, the z-buffered 555/565 ones and the
          * line/point ones the generator refuses, so they never reach here.
+         *
+         * The RGBA_8888 arm is softprim's per-texel alpha blend, which has no
+         * pentprim original and is not one of the three: same setup and
+         * trapezium, SBPP=4, and the fragment blends instead of copying. It is
+         * in the predicate for every RGB output, because it is the one arm that
+         * accepts the 15/16bpp outputs at both depths.
          */
         if(X == SP_TEX_I8)
-            RgbAwtTriangle<F, D, SP_TEX_I8, S>(block, v0, v1, v2);
+            RgbAwtTriangle<F, D, SP_TEX_I8, S, B>(block, v0, v1, v2);
         else if(X == SP_TEX_555)
-            RgbAwtTriangle<F, D, SP_TEX_555, S>(block, v0, v1, v2);
+            RgbAwtTriangle<F, D, SP_TEX_555, S, B>(block, v0, v1, v2);
         else if(X == SP_TEX_565)
-            RgbAwtTriangle<F, D, SP_TEX_565, S>(block, v0, v1, v2);
+            RgbAwtTriangle<F, D, SP_TEX_565, S, B>(block, v0, v1, v2);
+        else if(X == SP_TEX_RGBA8888)
+            RgbAwtTriangle<F, D, SP_TEX_RGBA8888, S, B>(block, v0, v1, v2);
         else
-            RgbAwtTriangle<F, D, SP_TEX_RGB888, S>(block, v0, v1, v2);
+            RgbAwtTriangle<F, D, SP_TEX_RGB888, S, B>(block, v0, v1, v2);
     } else if(X == SP_TEX_NONE && (F == SP_FMT_888 || D == SP_DEPTH_NONE)) {
         /*
          * The untextured perfect-scan blocks, not the SETUP_FLOAT geometry and
@@ -5947,21 +6131,22 @@ static void SoftPrimRender(brp_block *block, brp_vertex *v0, brp_vertex *v1, brp
          * through this kernel. Everything the arbitrary-width clause above
          * routes has to be excluded here, or the two disagree and the routed
          * tuple trips the guard instead of running: that is the colour-map
-         * (SP_TEX_555/565) and shade-table shapes at SP_ADDR_DIVIDE, and the
-         * exclusion mirrors the routing predicate rather than the shapes the
-         * generator happens to emit today. The power-of-two RGB shade-table cells
-         * are routed to PizShadeTriangle above and are excluded here too, by the
-         * second clause.
+         * (SP_TEX_555/565) and shade-table shapes at SP_ADDR_DIVIDE, the RGBA
+         * sprite shape, and the exclusion mirrors the routing predicate rather
+         * than the shapes the generator happens to emit today. The power-of-two
+         * RGB shade-table cells are routed to PizShadeTriangle above and are
+         * excluded here too, by the second clause.
          * What remains in the region - the power-of-two 555/565 colour-map shapes
          * and the MMX/perfect-scan mappers - the generator refuses, so the guard
          * is silent until SP_SPEC (or an .ifg block) is widened into them, then
          * the build stops here.
          */
         static_assert(!((F == SP_FMT_555 || F == SP_FMT_565) && D == SP_DEPTH_NONE && X != SP_TEX_NONE &&
-                        !(A == SP_ADDR_DIVIDE && (X == SP_TEX_555 || X == SP_TEX_565 || S == SP_SHADE_CONST_I_RGB || S == SP_SHADE_INTERP_I_RGB)) &&
+                        !(A == SP_ADDR_DIVIDE && (X == SP_TEX_555 || X == SP_TEX_565 || X == SP_TEX_RGBA8888 ||
+                                                  S == SP_SHADE_CONST_I_RGB || S == SP_SHADE_INTERP_I_RGB)) &&
                         !(A == SP_ADDR_SHIFT && X == SP_TEX_I8 && (S == SP_SHADE_CONST_I_RGB || S == SP_SHADE_INTERP_I_RGB))),
                       "softprim: no kernel for a z-sorted RGB_555/565 texture that is not the arbitrary-width "
-                      "colour-map or shade-table shape, nor the 256x256 shade-table cell");
+                      "colour-map, RGBA-sprite or shade-table shape, nor the 256x256 shade-table cell");
         static_assert(!(F == SP_FMT_888 && X != SP_TEX_NONE && A != SP_ADDR_DIVIDE),
                       "softprim: no kernel for an RGB_888 texture that is not arbitrary-width - SP_TEX_I8/SP_TEX_RGB888 "
                       "with SP_ADDR_NONE/SP_ADDR_SHIFT would fall through to the general SETUP_FLOAT RGB path");

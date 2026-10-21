@@ -1,0 +1,36 @@
+# softprim's alpha-blended sprite and text blocks.
+#
+# This is not a pentprim table: pentprim never sampled an RGBA colour map and
+# had no per-texel alpha blend, so these blocks have no frozen pixels to
+# reproduce. They exist because the engine needs alpha-blended sprites and text
+# in software (an ImGui renderer drawn over an RGB framebuffer), and they are
+# described in an .ifg so the block set stays generated: the axis tuple, the
+# matcher's requirements and the kernel instantiation all come from this file
+# the way they do for pentprim's own tables.
+#
+# The table is listed first in SP_TABLES (drivers/softprim/CMakeLists.txt), so
+# its entries are walked before every pentprim block. That cannot move an
+# existing primitive's selection: the only state that reaches these rows is one
+# with a BR_PMT_RGBA_8888 colour map bound and the primitive's blend flag set,
+# and no pentprim block samples that map type - every textured row that would
+# otherwise take the state fails its texture-type requirement and the walk
+# falls through, the same fall-through that draws a map no textured row accepts
+# untextured today.
+#
+# One entry per output format and depth mode. The z-buffered entry of a format
+# must precede its z-sorted twin, because a z-sorted entry carries no depth
+# requirement and would otherwise take a z-buffered primitive as well.
+#
+# The output is RGB, the shading unlit, the address arbitrary-width, the
+# projection affine (the 2D case), and the blend the map's own per-texel alpha,
+# scaled by the vertex alpha, over the destination. The texel is modulated by the
+# vertex colour: the block declares CM_R|CM_G|CM_B|CM_A (match.c spFillBlock) and
+# the kernel scales the texel's channels and its own alpha by the interpolated
+# colour, so an unlit surface can tint one texture across a whole triangle.
+[texture_stride_positive]
+softtz:TriangleRenderPIZ2TA24RGBA = [z_buffered, triangle, rgb888, texture_rgba8888, blend_rgba]
+softtz:TriangleRenderPIZ2TA15RGBA = [z_buffered, triangle, rgb555, texture_rgba8888, blend_rgba]
+softtz:TriangleRenderPIZ2TA16RGBA = [z_buffered, triangle, rgb565, texture_rgba8888, blend_rgba]
+softt:TriangleRenderPITA24RGBA = [triangle, rgb888, texture_rgba8888, blend_rgba]
+softt:TriangleRenderPITA15RGBA = [triangle, rgb555, texture_rgba8888, blend_rgba]
+softt:TriangleRenderPITA16RGBA = [triangle, rgb565, texture_rgba8888, blend_rgba]

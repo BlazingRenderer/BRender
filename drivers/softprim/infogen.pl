@@ -125,6 +125,7 @@ while (<STDIN>) {
 		&property_texture_rgb555 if $properties{"texture_rgb555"};
 		&property_texture_rgb565 if $properties{"texture_rgb565"};
 		&property_texture_rgbx888 if $properties{"texture_rgbx888"};
+		&property_texture_rgba8888 if $properties{"texture_rgba8888"};
    		&property_texture_power2 if $properties{"texture_power2"};
 		&property_texture_stride_positive if $properties{"texture_stride_positive"};
 		&property_texture_no_skip if $properties{"texture_no_skip"};
@@ -147,6 +148,7 @@ while (<STDIN>) {
 		&property_blend_table if $properties{"blend_table"};
 
         &property_blendrgb if $properties{"blendrgb"};
+        &property_blend_rgba if $properties{"blend_rgba"};
         &property_screendoor if $properties{"screendoor"};
 
         &property_fog if $properties{"fog"};
@@ -431,7 +433,7 @@ sub softprim_tuple {
 	# type (infogen.pl:623), so an unindexed 24-bit output samples an RGB_888 map.
 	my %tex = ("BR_PMT_INDEX_8" => "SP_TEX_I8", "BR_PMT_RGB_555" => "SP_TEX_555",
 	           "BR_PMT_RGB_565" => "SP_TEX_565", "BR_PMT_RGBX_888" => "SP_TEX_RGBX888",
-	           "BR_PMT_RGB_888" => "SP_TEX_RGB888");
+	           "BR_PMT_RGB_888" => "SP_TEX_RGB888", "BR_PMT_RGBA_8888" => "SP_TEX_RGBA8888");
 	my $texture = "SP_TEX_NONE";
 	if($texture_type && $texture_type ne "PMT_NONE") {
 		die "softprim: unknown texture type '$texture_type'\n" unless $tex{$texture_type};
@@ -464,7 +466,12 @@ sub softprim_tuple {
 	# .ifg's own name for the variant, and the axis value names the kernel, so a
 	# variant that only differs from its twin by a match flag has to be projected
 	# from the flag's source rather than from the flag.
-	push(@t, ($properties{"screendoor"} || ($screendoor_type && $screendoor_type ne "PMT_NONE"))
+	#
+	# property_blend_rgba is softprim's per-texel alpha blend, a different span
+	# from property_blendrgb's 50/50 shade-table cell, so it projects to its own
+	# axis value (SP_BLEND_ALPHA_TEX).
+	push(@t, $properties{"blend_rgba"}                   ? "SP_BLEND_ALPHA_TEX"
+	       : ($properties{"screendoor"} || ($screendoor_type && $screendoor_type ne "PMT_NONE"))
 	                                                     ? "SP_BLEND_SCREENDOOR"
 	       : $properties{"blendrgb"}                     ? "SP_BLEND_ALPHA"
 	       : ($blend_type eq "BR_PMT_INDEX_8")           ? "SP_BLEND_INDEX"
@@ -962,6 +969,21 @@ sub property_texture_rgbx888
 	$texture_type = "BR_PMT_RGBX_888";
 }
 
+# softprim's RGBA sprite texture. Unlike property_texture it does not take the
+# type from the output format: the map is 32-bit RGBA whatever the destination
+# is, and the alpha is sampled per texel. It is the bare `texture` shape - no
+# map dimensions, so the arbitrary-width divide family - with U/V and the
+# texture buffer; no MODULATE, because the block is unlit.
+sub property_texture_rgba8888
+{
+	$identifier .=  "Textured RGBA 8888, ";
+	$texture_width = 0;
+	$texture_height = 0;
+	push(@vertex_components,("U","V"));
+	push(@use_buffers,("TEXTURE"));
+	$texture_type = "BR_PMT_RGBA_8888";
+}
+
 sub property_unscaled_texture_coords
 {
 	$identifier .=  "Unscaled_texture_coords, ";
@@ -1003,6 +1025,17 @@ sub property_blend
 sub property_blendrgb
 {
     $identifier .=  "RGB blended, ";
+    push(@match_flags_set,("BLEND"));
+    push(@prim_flags,("BLENDED"));
+}
+
+# softprim's per-texel alpha blend. The alpha is the sampled RGBA texel's own
+# fourth byte, so no alpha component, blend table or 50/50 table row is
+# involved; the BLEND match flag is the primitive's own "blend me" state, which
+# the block requires just as the 50/50 cells do.
+sub property_blend_rgba
+{
+    $identifier .=  "RGBA alpha blended, ";
     push(@match_flags_set,("BLEND"));
     push(@prim_flags,("BLENDED"));
 }

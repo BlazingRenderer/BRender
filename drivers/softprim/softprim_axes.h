@@ -91,7 +91,11 @@ typedef enum sp_tex {
     SP_TEX_555,
     SP_TEX_565,
     SP_TEX_RGBX888,
-    SP_TEX_RGB888
+    SP_TEX_RGB888,
+    /* 32-bit RGBA with 8 bits per channel, alpha in the fourth byte. A
+     * softprim-only type: no pentprim block sampled one, so the only kernel
+     * that decodes it is the alpha-blended sprite family (RgbAwtTriangle). */
+    SP_TEX_RGBA8888
 } sp_tex;
 
 /* Texture coordinate addressing: shift and mask for a power-of-two map, or a
@@ -111,13 +115,25 @@ typedef enum sp_persp {
     SP_PERSP_CORRECT
 } sp_persp;
 
-/* How the fragment is combined with the destination. */
+/*
+ * How the fragment is combined with the destination.
+ *
+ * SP_BLEND_ALPHA is the RGB 50/50 destination blend the 256x256 indexed/RGB
+ * shade-table cells carry (persp.c PITIPB256 over a blend table).
+ * SP_BLEND_ALPHA_TEX is the general per-texel blend of the RGBA sprite family:
+ * the texel is modulated by the interpolated vertex colour, the alpha is the
+ * product of the sampled texel's fourth byte and the vertex alpha, and the
+ * fragment is dst = src*a + dst*(1-a) on each colour channel. They are different
+ * per-pixel sequences on different texture types, so they are different axis
+ * values.
+ */
 typedef enum sp_blend {
     SP_BLEND_NONE,
     SP_BLEND_INDEX,
     SP_BLEND_ALPHA,
     SP_BLEND_SCREENDOOR,
-    SP_BLEND_DECAL
+    SP_BLEND_DECAL,
+    SP_BLEND_ALPHA_TEX
 } sp_blend;
 
 /* Fog. Indexed output only; pentprim has no fogged RGB block at all. */

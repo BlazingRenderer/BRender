@@ -22,9 +22,11 @@ pentprim gone they are the only record of its output.
 
 ## The block table, and what a kernel is allowed to be
 
-- `SP_TABLES` (`CMakeLists.txt`) names the 14 `.ifg` block descriptions in `tables/`.
-  These are pentprim's own, carried here because they are the specification both
-  rasterisers implement; the generator `infogen.pl` is theirs too.
+- `SP_TABLES` (`CMakeLists.txt`) names the `.ifg` block descriptions in `tables/`.
+  Fourteen are pentprim's own, carried here because they are the specification both
+  rasterisers implement; the generator `infogen.pl` is theirs too. The fifteenth,
+  `soft_t24.ifg`, is softprim's alpha-blended RGBA sprite family, which pentprim never
+  had (see *What is implemented*).
 - `infogen.pl` in its `softprim` mode projects each block onto the axis vocabulary in
   `softprim_axes.h` and emits one line per block carrying the axis tuple (which names the
   kernel) plus the metadata pentprim's matcher tests.
@@ -100,6 +102,20 @@ implemented set includes the `INDEX_8` ROPs (indexed blend, fog, decal, dithered
 shade-table family including the 256x256 RGB cells, the MMX 15/16bpp family including
 screendoor and colour dither and its packed 20.12 texture addressing, the arbitrary-width
 and perfect-scan RGB paths, and lines and points.
+
+The one block family pentprim never had is `tables/soft_t24.ifg`: RGB output, unlit, a
+`BR_PMT_RGBA_8888` colour map sampled with arbitrary-width addressing, affine, z-sorted or
+z-buffered, the texel modulated by the vertex colour and composited as
+`dst = texel.rgb*vertex.rgb * a + dst * (1-a)` per channel, with `a` the product of the
+texel's own alpha and the vertex alpha.
+It is six blocks - one per output format (888/555/565) and depth mode - and six tuples, and
+the counts above, which are pentprim's, do not include it. Its table is first in `SP_TABLES`
+because the only state that reaches it is one with an RGBA map bound; every pentprim
+textured row fails its texture-type requirement and falls through, and no pentprim block
+requires that map type, so no existing state's selection moves. The family has no pentprim
+original and no frozen pixels, so the reference corpus cannot see it at all - the corpus is
+green because it never binds an RGBA map to this family's formats. `scratch/` has the
+harness that does.
 
 Two families were refused for a different reason and are implemented now, because pentprim
 itself was corrected first:

@@ -258,6 +258,16 @@ static void spFillBlock(struct sp_match *e)
     if(e->axes.tex != SP_TEX_NONE)
         vertex_components |= CM_U | CM_V;
 
+    /*
+     * The RGBA sprite family modulates its texel by the vertex colour: the
+     * unlit surface writes the geometry's colour there, and the kernel scales
+     * the texel's channels and its own alpha by the interpolated one. Without
+     * these in the mask softrend generates no surface function to fill them in
+     * and the kernel would read stale slots.
+     */
+    if(e->axes.tex == SP_TEX_RGBA8888)
+        vertex_components |= CM_R | CM_G | CM_B | CM_A;
+
     if(e->axes.persp == SP_PERSP_CORRECT)
         vertex_components |= CM_W;
 
@@ -336,8 +346,13 @@ static void spFillBlock(struct sp_match *e)
      * reads whatever happens to be in the buffer, which is a different frame
      * whenever two blended models overlap. Decal is not a blend: it neither
      * reads the destination nor carries the flag.
+     *
+     * SP_BLEND_ALPHA_TEX is the RGBA sprite family's per-texel blend: it reads
+     * the destination as well, and its .ifg block declares BR_PRIMF_BLENDED
+     * too (property_blend_rgba), so the three table blends and it are one case.
      */
-    if(e->axes.blend == SP_BLEND_INDEX || e->axes.blend == SP_BLEND_ALPHA || e->axes.blend == SP_BLEND_SCREENDOOR)
+    if(e->axes.blend == SP_BLEND_INDEX || e->axes.blend == SP_BLEND_ALPHA || e->axes.blend == SP_BLEND_SCREENDOOR ||
+       e->axes.blend == SP_BLEND_ALPHA_TEX)
         e->block.flags |= BR_PRIMF_BLENDED;
 
     /*
