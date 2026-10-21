@@ -61,6 +61,22 @@ that demand a clean tree.
   functions that cross library boundaries internally but are not part of the public API (i.e., non-static
   internal linkage). Do not omit these on applicable functions.
 
+### Header names
+
+A header's suffix says what it holds, and `_p` is **public**, not private:
+
+- `name.h` — structures, and nothing another module has to link against. `br2d.h` carries
+  `br_vertex_2d` and no prototypes.
+- `name_p.h` — prototypes for the module's public entry points: the ones `brender.h` reaches,
+  and the ones a driver may call through the DDI. `v1db_p.h`, `fw_p.h`, `pm_p.h`,
+  `brddi_p.h`.
+- `name_ip.h` — prototypes for internal linkage: callable inside the module, never exported.
+  `v1db_ip.h`.
+
+So a function's prototype goes in the `_p`/`_ip` header for its linkage, never beside a
+structure in the plain `.h`, even when the two describe the same feature. A driver repeats the
+split for its own private headers (`drv.h` for structures, `drv_ip.h` for prototypes).
+
 ## Commit Style
 The commit conventions are the project's and are stated once, in
 [CONTRIBUTING.md](CONTRIBUTING.md), so that this file and it cannot drift. Read it
