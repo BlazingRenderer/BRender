@@ -530,6 +530,17 @@ br_pixelmap *BR_PUBLIC_ENTRY BrPixelmapConvert(br_pixelmap *src, br_uint_8 type,
     dst_converter = &br_pixelmap_converters[type];
 
     /*
+     * A pixelmap with no pixel buffer is legal to hold - BrPixelmapAllocate()
+     * takes BR_PMAF_NO_PIXELS - and every converter below reads the buffer rather
+     * than checking it, so it has to be refused here, where the other
+     * unsupported-source cases are, rather than faulting inside a read.
+     */
+    if(src->pixels == NULL) {
+        BrLogError("PM", "Source pixelmap \"%s\" has no pixel buffer.", src->identifier);
+        return NULL;
+    }
+
+    /*
      * check if we've implemented the source conversion facilities
      */
     if(src_converter->read == NULL || src_converter->write == NULL) {
@@ -551,6 +562,11 @@ br_pixelmap *BR_PUBLIC_ENTRY BrPixelmapConvert(br_pixelmap *src, br_uint_8 type,
     if(src->type == BR_PMT_INDEX_8) {
         if(src->map == NULL) {
             BrLogError("PM", "Source pixelmap \"%s\" is BR_PMT_INDEX_8, but has no palette.", src->identifier);
+            return NULL;
+        }
+
+        if(src->map->pixels == NULL) {
+            BrLogError("PM", "Source pixelmap \"%s\" has a palette with no pixel buffer.", src->identifier);
             return NULL;
         }
 
