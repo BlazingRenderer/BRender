@@ -35,6 +35,7 @@
 #include <parg.h>
 #include "rt_demo.h"
 #include "vkwitness.h"
+#include "b2dwitness.h"
 
 /* ------------------------------------------------------------------ */
 /* GL entry points; SDL hands us the addresses, we don't use glad.    */
@@ -121,6 +122,7 @@ static int         rt_cfg_no_depth     = 0;
 static int         rt_cfg_warmup       = 2;
 static int         rt_cfg_bless        = 0;
 static int         rt_cfg_env_witness  = 0;
+static int         rt_cfg_2d_witness   = 0;
 static int         rt_env_witness_done = 0;
 static int         rt_cfg_vk_witness   = 0;
 static int         rt_vk_witness_done  = 0;
@@ -976,9 +978,9 @@ typedef struct rt_relation {
  * reaches the frame at 8, 15 and 16bpp and not at 888, where no block declares
  * an INDEX_8 texture. See the render-feature relation block for the measurement.
  */
-#define RT_MAPPED_NE(a_, b_, mode_)                                                                             \
-    {.a = a_, .b = b_, .equal = BR_FALSE, .pm_type = BR_PMT_INDEX_8, .mode = mode_, .device = "softrend"},      \
-        {.a = a_, .b = b_, .equal = BR_FALSE, .pm_type = BR_PMT_RGB_555, .mode = mode_, .device = "softrend"},  \
+#define RT_MAPPED_NE(a_, b_, mode_)                                                                            \
+    {.a = a_, .b = b_, .equal = BR_FALSE, .pm_type = BR_PMT_INDEX_8, .mode = mode_, .device = "softrend"},     \
+        {.a = a_, .b = b_, .equal = BR_FALSE, .pm_type = BR_PMT_RGB_555, .mode = mode_, .device = "softrend"}, \
         {.a = a_, .b = b_, .equal = BR_FALSE, .pm_type = BR_PMT_RGB_565, .mode = mode_, .device = "softrend"}
 
 /*
@@ -2086,6 +2088,16 @@ static int rt_run(rt_demo *demo)
         return g_failed;
     }
 
+    if(rt_cfg_2d_witness) {
+        BrRendererEnd();
+
+        if(rt_2d_witness_run(demo) != BRE_OK)
+            g_failed = 1;
+
+        printf("RT result=%s failures=%d\n", g_failed ? "FAIL" : "PASS", g_failed ? 1 : 0);
+        return g_failed;
+    }
+
     if(rt_cfg_env_witness) {
         BrRendererEnd();
 
@@ -2461,6 +2473,7 @@ static int rt_list_scene_dir(const char *dir)
 #define ARGDEF_LIST             313
 #define ARGDEF_LIST_SCENE_DIR   314
 #define ARGDEF_HELP             315
+#define ARGDEF_2D_WITNESS       316
 
 /* Laid out as a grid so the set reads as one list; held out of clang-format. */
 // clang-format off
@@ -2476,6 +2489,7 @@ static const struct parg_option rt_argdefs[] = {
     {.name = "ppm-dir",          .has_arg = PARG_REQARG, .flag = NULL, .val = ARGDEF_PPM_DIR         },
     {.name = "bless",            .has_arg = PARG_NOARG,  .flag = NULL, .val = ARGDEF_BLESS           },
     {.name = "env-witness",      .has_arg = PARG_NOARG,  .flag = NULL, .val = ARGDEF_ENV_WITNESS     },
+    {.name = "2d-witness",       .has_arg = PARG_NOARG,  .flag = NULL, .val = ARGDEF_2D_WITNESS      },
     {.name = "vk-witness",       .has_arg = PARG_NOARG,  .flag = NULL, .val = ARGDEF_VK_WITNESS      },
     {.name = "list",             .has_arg = PARG_NOARG,  .flag = NULL, .val = ARGDEF_LIST            },
     {.name = "list-scene-dir",   .has_arg = PARG_REQARG, .flag = NULL, .val = ARGDEF_LIST_SCENE_DIR  },
@@ -2588,6 +2602,10 @@ static rt_parse rt_parse_args(int argc, char *const *argv)
                 rt_cfg_env_witness = 1;
                 break;
 
+            case ARGDEF_2D_WITNESS:
+                rt_cfg_2d_witness = 1;
+                break;
+
             case ARGDEF_VK_WITNESS:
                 rt_cfg_vk_witness = 1;
                 break;
@@ -2641,6 +2659,7 @@ static void rt_usage(FILE *out, const char *argv0)
             "  --ppm-dir <dir>    write each frame as <dir>/<scene>.ppm\n"
             "  --bless            write the reference instead of comparing\n"
             "  --env-witness      run the environment-map orientation witness and exit\n"
+            "  --2d-witness       run the Br2D immediate-path witness and exit\n"
             "  --vulkan           bring up a vkrend front screen (with --vk-witness)\n"
             "  --vk-witness       run the vkrend witness and exit\n"
             "  -l, --list         list the scenes and exit\n"

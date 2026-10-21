@@ -2,6 +2,8 @@ project(rendertest)
 
 add_executable(rendertest
         main.c
+        b2dwitness.c
+        b2dwitness.h
         vkwitness.c
         vkwitness.h
 )
@@ -196,6 +198,31 @@ if (BUILD_TESTING)
                      -P "${CMAKE_CURRENT_SOURCE_DIR}/scene-check.cmake")
     set_tests_properties("scenes-have-fixtures" PROPERTIES
                          ENVIRONMENT "SDL_VIDEODRIVER=offscreen")
+
+    #
+    # The 2D witness (main.c --2d-witness). Br2D*() reaches the renderer
+    # through br_geometry_v1_model::render(), the immediate geometry path the
+    # corpus does not otherwise take: the fixtures all go through the scene
+    # renderers, and Br2D's only other caller is examples/imgui-demo, which CI
+    # does not run. glrend implements that method by storing the caller's model
+    # and running the stored draw, so a device that stubs it out - returns OK
+    # and lands nothing - fails no other test. The witness drives it and asserts
+    # what arrived, so it is a self-check with nothing to bless.
+    #
+    # All three devices are registered. Unlike the environment witness below it
+    # matches a single offscreen, so glrend1x's one-offscreen limit does not
+    # apply: there the immediate render is softrend's and glrend1x supplies the
+    # rasteriser, giving that rasteriser the 2D path no fixture reaches.
+    #
+    add_test(NAME "b2dw-softrend" COMMAND rendertest --2d-witness --device softrend)
+    set_tests_properties("b2dw-softrend" PROPERTIES
+                         ENVIRONMENT "SDL_VIDEODRIVER=offscreen")
+
+    foreach (dev IN ITEMS glrend glrend1x)
+        add_test(NAME "b2dw-${dev}" COMMAND rendertest --2d-witness --device ${dev})
+        set_tests_properties("b2dw-${dev}" PROPERTIES
+                             ENVIRONMENT "SDL_VIDEODRIVER=offscreen;LIBGL_ALWAYS_SOFTWARE=true")
+    endforeach ()
 
     #
     # The environment-map orientation witness (main.c --env-witness). It is not
