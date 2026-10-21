@@ -1270,6 +1270,7 @@ static br_error scene_make_mmx_fixtures(br_model *cube)
  *   scene-lines-map-unlit     unlit white, indexed map
  *   scene-lines-rgb555        unlit white, 555-typed map - the TEX_555 witness
  *   scene-lines-rgb565        unlit white, 565-typed map - the TEX_565 witness
+ *   scene-lines-rgb888        unlit white, 888-typed map - the TEX_RGB888 witness
  *
  * Two properties decide whether these draw the block they name:
  *
@@ -1284,9 +1285,11 @@ static br_error scene_make_mmx_fixtures(br_model *cube)
  * The map is scene-tex-arb's shape, an indexed checkerboard of arbitrary width
  * (96x48): the line and point family has no power-of-two blocks, so every one
  * of these states is an ADDR_DIVIDE tuple and a power-of-two map would reach
- * nothing. At 888 the map is not sampled at all - the 888 textured entry wants
- * an RGB_888 map and the entry's texture type must equal the bound map's - so
- * these fixtures texture at 8, 15 and 16bpp and draw untextured there.
+ * nothing. The shape is scene-tex-arb's indexed checkerboard for all of the
+ * indexed maps; scene-lines-rgb888 carries an RGB_888 one instead, because the
+ * 888 textured entry wants that type, and the entry's texture type must equal the
+ * bound map's. At 888 the indexed map here is not sampled at all, for that
+ * reason.
  *
  * The indexed shade table is bound only where a tree entry requires one: the
  * line/point INTERP_I/TEX_I8 and CONST_I/TEX_I8 blocks declare shade_type
@@ -1376,8 +1379,9 @@ static br_error scene_make_line_fixtures(br_model *cube)
     {
         br_pixelmap *map555 = scene_texture_rgb("scene-lines-rgb555-map", BR_PMT_RGB_555, SCENE_ARB_WIDTH, SCENE_ARB_HEIGHT, SCENE_ARB_CELLS);
         br_pixelmap *map565 = scene_texture_rgb("scene-lines-rgb565-map", BR_PMT_RGB_565, SCENE_ARB_WIDTH, SCENE_ARB_HEIGHT, SCENE_ARB_CELLS);
+        br_pixelmap *map888 = scene_texture_rgb("scene-lines-rgb888-map", BR_PMT_RGB_888, SCENE_ARB_WIDTH, SCENE_ARB_HEIGHT, SCENE_ARB_CELLS);
 
-        if(map555 == NULL || map565 == NULL)
+        if(map555 == NULL || map565 == NULL || map888 == NULL)
             return BRE_FAIL;
 
         if(scene_save("scene-lines-rgb555.gltf",
@@ -1388,6 +1392,11 @@ static br_error scene_make_line_fixtures(br_model *cube)
         if(scene_save("scene-lines-rgb565.gltf",
                       scene_fx_world_topologies(cube, scene_lines_material("scene-lines-rgb565-material", BR_COLOUR_RGB(255, 255, 255), 0,
                                                                            map565, NULL))) != BRE_OK)
+            r = BRE_FAIL;
+
+        if(scene_save("scene-lines-rgb888.gltf",
+                      scene_fx_world_topologies(cube, scene_lines_material("scene-lines-rgb888-material", BR_COLOUR_RGB(255, 255, 255), 0,
+                                                                           map888, NULL))) != BRE_OK)
             r = BRE_FAIL;
     }
 
@@ -2084,6 +2093,25 @@ static br_error scene_make_feature_fixtures(br_model *cube)
     }
 
     /*
+     * The same rig saved WITHOUT BR_GLTF_SAVE_PRESERVE_MAP_TYPES, which is the
+     * only fixture that exercises the writer's default path any more - every
+     * other one asks for preserved types. It is here because that path lost its
+     * witness when the type markers went, and it broke: the indexed colour map
+     * converts to colour as before, but the shade table has no palette to expand
+     * through, BrPixelmapCloneTyped() refuses it, and the writer has to fall back
+     * to the payload rather than emit a data URI that decodes to nothing.
+     */
+    {
+        br_material *mat = scene_fx_material("scene-textured-shade-converted-material", BR_MATF_LIGHT | BR_MATF_SMOOTH);
+
+        mat->colour_map  = tex64;
+        mat->index_shade = shade;
+
+        if(scene_save_opts("scene-textured-shade-converted.gltf", scene_fx_world(cube, mat), NULL) != BRE_OK)
+            r = BRE_FAIL;
+    }
+
+    /*
      * The perspective-correct texture path. None of the checked-in scenes reach
      * it: their materials are perspective, but they only ever match the *unlit*
      * perspective block, because the intensity blocks require a shade table to
@@ -2366,8 +2394,9 @@ static br_error scene_make_feature_fixtures(br_model *cube)
     {
         br_pixelmap *tex555 = scene_texture_rgb("scene-tex-rgb555-map", BR_PMT_RGB_555, SCENE_ARB_WIDTH, SCENE_ARB_HEIGHT, SCENE_ARB_CELLS);
         br_pixelmap *tex565 = scene_texture_rgb("scene-tex-rgb565-map", BR_PMT_RGB_565, SCENE_ARB_WIDTH, SCENE_ARB_HEIGHT, SCENE_ARB_CELLS);
+        br_pixelmap *tex888 = scene_texture_rgb("scene-tex-rgb888-map", BR_PMT_RGB_888, SCENE_ARB_WIDTH, SCENE_ARB_HEIGHT, SCENE_ARB_CELLS);
 
-        if(tex555 == NULL || tex565 == NULL)
+        if(tex555 == NULL || tex565 == NULL || tex888 == NULL)
             return BRE_FAIL;
 
         {
@@ -2411,6 +2440,31 @@ static br_error scene_make_feature_fixtures(br_model *cube)
             mat->colour_map = tex565;
 
             if(scene_save("scene-tex-rgb565-affine.gltf", scene_fx_world(cube, mat)) != BRE_OK)
+                r = BRE_FAIL;
+        }
+
+        /*
+         * The 888 member and its affine twin. A block's texture type is its
+         * output type, so this is the only pairing that samples a colour map at
+         * an 888 output - and with the glTF writer preserving map types, it is
+         * the only way a 24bpp textured primitive reaches a block at all. Both
+         * depth modes reach it: an 888 output has no MMX table to intercept it.
+         */
+        {
+            br_material *mat = scene_fx_material("scene-tex-rgb888-material", BR_MATF_LIGHT | BR_MATF_SMOOTH | BR_MATF_PERSPECTIVE);
+
+            mat->colour_map = tex888;
+
+            if(scene_save("scene-tex-rgb888.gltf", scene_fx_world(cube, mat)) != BRE_OK)
+                r = BRE_FAIL;
+        }
+
+        {
+            br_material *mat = scene_fx_material("scene-tex-rgb888-affine-material", BR_MATF_LIGHT | BR_MATF_SMOOTH);
+
+            mat->colour_map = tex888;
+
+            if(scene_save("scene-tex-rgb888-affine.gltf", scene_fx_world(cube, mat)) != BRE_OK)
                 r = BRE_FAIL;
         }
     }

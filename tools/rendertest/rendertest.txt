@@ -44,6 +44,7 @@ glrend/llvmpipe/declared/zb/4/320x240/scene-lines-plain d149d8cd906dfe14
 glrend/llvmpipe/declared/zb/4/320x240/scene-lines-plain-unlit ddeea195bda31483
 glrend/llvmpipe/declared/zb/4/320x240/scene-lines-rgb555 81e489cacad8ad33
 glrend/llvmpipe/declared/zb/4/320x240/scene-lines-rgb565 81e489cacad8ad33
+glrend/llvmpipe/declared/zb/4/320x240/scene-lines-rgb888 81e489cacad8ad33
 glrend/llvmpipe/declared/zb/4/320x240/scene-mmx-rgb-dither-flat 53d1cde3f3e1d71b
 glrend/llvmpipe/declared/zb/4/320x240/scene-mmx-rgb-dither-smooth 53d1cde3f3e1d71b
 glrend/llvmpipe/declared/zb/4/320x240/scene-mmx-rgb-ditherscreen-flat cbb9b4619961111c
@@ -101,8 +102,11 @@ glrend/llvmpipe/declared/zb/4/320x240/scene-tex-rgb555 32d67c6959cb3794
 glrend/llvmpipe/declared/zb/4/320x240/scene-tex-rgb555-affine 32d67c6959cb3794
 glrend/llvmpipe/declared/zb/4/320x240/scene-tex-rgb565 e5f200aaab1b5a37
 glrend/llvmpipe/declared/zb/4/320x240/scene-tex-rgb565-affine e5f200aaab1b5a37
+glrend/llvmpipe/declared/zb/4/320x240/scene-tex-rgb888 c5f41e768f19a8e0
+glrend/llvmpipe/declared/zb/4/320x240/scene-tex-rgb888-affine c5f41e768f19a8e0
 glrend/llvmpipe/declared/zb/4/320x240/scene-textured 3e32403c6a3a9494
 glrend/llvmpipe/declared/zb/4/320x240/scene-textured-shade 3e32403c6a3a9494
+glrend/llvmpipe/declared/zb/4/320x240/scene-textured-shade-converted 3e32403c6a3a9494
 glrend/llvmpipe/declared/zb/4/320x240/scene-unlit fc95c27a85d6a643
 glrend/llvmpipe/declared/zb/4/320x240/scene-unlit-plain fc95c27a85d6a643
 glrend/llvmpipe/declared/zb/4/320x240/scene-view-space aae7ee4b620d3803
@@ -150,6 +154,7 @@ glrend/llvmpipe/declared/zb/5/320x240/scene-lines-plain 11fc6b37b03e6223
 glrend/llvmpipe/declared/zb/5/320x240/scene-lines-plain-unlit ddeea195bda31483
 glrend/llvmpipe/declared/zb/5/320x240/scene-lines-rgb555 04b49df767e647f3
 glrend/llvmpipe/declared/zb/5/320x240/scene-lines-rgb565 04b49df767e647f3
+glrend/llvmpipe/declared/zb/5/320x240/scene-lines-rgb888 04b49df767e647f3
 glrend/llvmpipe/declared/zb/5/320x240/scene-mmx-rgb-dither-flat 8316a8b32e414a03
 glrend/llvmpipe/declared/zb/5/320x240/scene-mmx-rgb-dither-smooth 8316a8b32e414a03
 glrend/llvmpipe/declared/zb/5/320x240/scene-mmx-rgb-ditherscreen-flat 94a587ff81c726cf
@@ -207,8 +212,11 @@ glrend/llvmpipe/declared/zb/5/320x240/scene-tex-rgb555 c75c0cf72b477f0b
 glrend/llvmpipe/declared/zb/5/320x240/scene-tex-rgb555-affine c75c0cf72b477f0b
 glrend/llvmpipe/declared/zb/5/320x240/scene-tex-rgb565 a056bbf1b7657603
 glrend/llvmpipe/declared/zb/5/320x240/scene-tex-rgb565-affine a056bbf1b7657603
+glrend/llvmpipe/declared/zb/5/320x240/scene-tex-rgb888 a6c161c8aba798a7
+glrend/llvmpipe/declared/zb/5/320x240/scene-tex-rgb888-affine a6c161c8aba798a7
 glrend/llvmpipe/declared/zb/5/320x240/scene-textured a3ddf5b6d5a74877
 glrend/llvmpipe/declared/zb/5/320x240/scene-textured-shade a3ddf5b6d5a74877
+glrend/llvmpipe/declared/zb/5/320x240/scene-textured-shade-converted a3ddf5b6d5a74877
 glrend/llvmpipe/declared/zb/5/320x240/scene-unlit 6e115ddeac31bd03
 glrend/llvmpipe/declared/zb/5/320x240/scene-unlit-plain 6e115ddeac31bd03
 glrend/llvmpipe/declared/zb/5/320x240/scene-view-space 0d14d57f958dcdc3
@@ -256,6 +264,7 @@ glrend/llvmpipe/declared/zb/6/320x240/scene-lines-plain de06572e804847fa
 glrend/llvmpipe/declared/zb/6/320x240/scene-lines-plain-unlit ddeea195bda31483
 glrend/llvmpipe/declared/zb/6/320x240/scene-lines-rgb555 81e489cacad8ad33
 glrend/llvmpipe/declared/zb/6/320x240/scene-lines-rgb565 04b49df767e647f3
+glrend/llvmpipe/declared/zb/6/320x240/scene-lines-rgb888 bd434eeb53344163
 glrend/llvmpipe/declared/zb/6/320x240/scene-mmx-rgb-dither-flat af697abd5d845f33
 glrend/llvmpipe/declared/zb/6/320x240/scene-mmx-rgb-dither-smooth af697abd5d845f33
 glrend/llvmpipe/declared/zb/6/320x240/scene-mmx-rgb-ditherscreen-flat 4a1541fa728ff057
@@ -313,8 +322,11 @@ glrend/llvmpipe/declared/zb/6/320x240/scene-tex-rgb555 53530e3058f536d3
 glrend/llvmpipe/declared/zb/6/320x240/scene-tex-rgb555-affine 53530e3058f536d3
 glrend/llvmpipe/declared/zb/6/320x240/scene-tex-rgb565 7a71dbf17050b40f
 glrend/llvmpipe/declared/zb/6/320x240/scene-tex-rgb565-affine 7a71dbf17050b40f
+glrend/llvmpipe/declared/zb/6/320x240/scene-tex-rgb888 5d18580b59c07a0a
+glrend/llvmpipe/declared/zb/6/320x240/scene-tex-rgb888-affine 5d18580b59c07a0a
 glrend/llvmpipe/declared/zb/6/320x240/scene-textured 7fa52ddbb743a6dd
 glrend/llvmpipe/declared/zb/6/320x240/scene-textured-shade 7fa52ddbb743a6dd
+glrend/llvmpipe/declared/zb/6/320x240/scene-textured-shade-converted 7fa52ddbb743a6dd
 glrend/llvmpipe/declared/zb/6/320x240/scene-unlit 4ccfb65e7135b083
 glrend/llvmpipe/declared/zb/6/320x240/scene-unlit-plain 4ccfb65e7135b083
 glrend/llvmpipe/declared/zb/6/320x240/scene-view-space cbc23a402efbea43
@@ -371,6 +383,7 @@ glrend/llvmpipe/declared/zb/8/320x240/scene-lines-plain de06572e804847fa
 glrend/llvmpipe/declared/zb/8/320x240/scene-lines-plain-unlit ddeea195bda31483
 glrend/llvmpipe/declared/zb/8/320x240/scene-lines-rgb555 81e489cacad8ad33
 glrend/llvmpipe/declared/zb/8/320x240/scene-lines-rgb565 04b49df767e647f3
+glrend/llvmpipe/declared/zb/8/320x240/scene-lines-rgb888 bd434eeb53344163
 glrend/llvmpipe/declared/zb/8/320x240/scene-mmx-rgb-dither-flat af697abd5d845f33
 glrend/llvmpipe/declared/zb/8/320x240/scene-mmx-rgb-dither-smooth af697abd5d845f33
 glrend/llvmpipe/declared/zb/8/320x240/scene-mmx-rgb-ditherscreen-flat bdfea37e13933637
@@ -428,8 +441,11 @@ glrend/llvmpipe/declared/zb/8/320x240/scene-tex-rgb555 53530e3058f536d3
 glrend/llvmpipe/declared/zb/8/320x240/scene-tex-rgb555-affine 53530e3058f536d3
 glrend/llvmpipe/declared/zb/8/320x240/scene-tex-rgb565 7a71dbf17050b40f
 glrend/llvmpipe/declared/zb/8/320x240/scene-tex-rgb565-affine 7a71dbf17050b40f
+glrend/llvmpipe/declared/zb/8/320x240/scene-tex-rgb888 5d18580b59c07a0a
+glrend/llvmpipe/declared/zb/8/320x240/scene-tex-rgb888-affine 5d18580b59c07a0a
 glrend/llvmpipe/declared/zb/8/320x240/scene-textured 7fa52ddbb743a6dd
 glrend/llvmpipe/declared/zb/8/320x240/scene-textured-shade 7fa52ddbb743a6dd
+glrend/llvmpipe/declared/zb/8/320x240/scene-textured-shade-converted 7fa52ddbb743a6dd
 glrend/llvmpipe/declared/zb/8/320x240/scene-unlit 4ccfb65e7135b083
 glrend/llvmpipe/declared/zb/8/320x240/scene-unlit-plain 4ccfb65e7135b083
 glrend/llvmpipe/declared/zb/8/320x240/scene-view-space cbc23a402efbea43
@@ -477,6 +493,7 @@ glrend/llvmpipe/declared/zs/4/320x240/scene-lines-plain 112698fe7bc74d6b
 glrend/llvmpipe/declared/zs/4/320x240/scene-lines-plain-unlit 021b8b66f760c9ee
 glrend/llvmpipe/declared/zs/4/320x240/scene-lines-rgb555 c164887817a9afd1
 glrend/llvmpipe/declared/zs/4/320x240/scene-lines-rgb565 c164887817a9afd1
+glrend/llvmpipe/declared/zs/4/320x240/scene-lines-rgb888 c164887817a9afd1
 glrend/llvmpipe/declared/zs/4/320x240/scene-mmx-rgb-dither-flat 53d1cde3f3e1d71b
 glrend/llvmpipe/declared/zs/4/320x240/scene-mmx-rgb-dither-smooth 53d1cde3f3e1d71b
 glrend/llvmpipe/declared/zs/4/320x240/scene-mmx-rgb-ditherscreen-flat cbb9b4619961111c
@@ -534,8 +551,11 @@ glrend/llvmpipe/declared/zs/4/320x240/scene-tex-rgb555 32d67c6959cb3794
 glrend/llvmpipe/declared/zs/4/320x240/scene-tex-rgb555-affine 32d67c6959cb3794
 glrend/llvmpipe/declared/zs/4/320x240/scene-tex-rgb565 e5f200aaab1b5a37
 glrend/llvmpipe/declared/zs/4/320x240/scene-tex-rgb565-affine e5f200aaab1b5a37
+glrend/llvmpipe/declared/zs/4/320x240/scene-tex-rgb888 c5f41e768f19a8e0
+glrend/llvmpipe/declared/zs/4/320x240/scene-tex-rgb888-affine c5f41e768f19a8e0
 glrend/llvmpipe/declared/zs/4/320x240/scene-textured 3e32403c6a3a9494
 glrend/llvmpipe/declared/zs/4/320x240/scene-textured-shade 3e32403c6a3a9494
+glrend/llvmpipe/declared/zs/4/320x240/scene-textured-shade-converted 3e32403c6a3a9494
 glrend/llvmpipe/declared/zs/4/320x240/scene-unlit fc95c27a85d6a643
 glrend/llvmpipe/declared/zs/4/320x240/scene-unlit-plain fc95c27a85d6a643
 glrend/llvmpipe/declared/zs/4/320x240/scene-view-space aae7ee4b620d3803
@@ -583,6 +603,7 @@ glrend/llvmpipe/declared/zs/5/320x240/scene-lines-plain 99117456453b04df
 glrend/llvmpipe/declared/zs/5/320x240/scene-lines-plain-unlit 021b8b66f760c9ee
 glrend/llvmpipe/declared/zs/5/320x240/scene-lines-rgb555 124ad7873a07704b
 glrend/llvmpipe/declared/zs/5/320x240/scene-lines-rgb565 124ad7873a07704b
+glrend/llvmpipe/declared/zs/5/320x240/scene-lines-rgb888 124ad7873a07704b
 glrend/llvmpipe/declared/zs/5/320x240/scene-mmx-rgb-dither-flat 8316a8b32e414a03
 glrend/llvmpipe/declared/zs/5/320x240/scene-mmx-rgb-dither-smooth 8316a8b32e414a03
 glrend/llvmpipe/declared/zs/5/320x240/scene-mmx-rgb-ditherscreen-flat 94a587ff81c726cf
@@ -640,8 +661,11 @@ glrend/llvmpipe/declared/zs/5/320x240/scene-tex-rgb555 c75c0cf72b477f0b
 glrend/llvmpipe/declared/zs/5/320x240/scene-tex-rgb555-affine c75c0cf72b477f0b
 glrend/llvmpipe/declared/zs/5/320x240/scene-tex-rgb565 a056bbf1b7657603
 glrend/llvmpipe/declared/zs/5/320x240/scene-tex-rgb565-affine a056bbf1b7657603
+glrend/llvmpipe/declared/zs/5/320x240/scene-tex-rgb888 a6c161c8aba798a7
+glrend/llvmpipe/declared/zs/5/320x240/scene-tex-rgb888-affine a6c161c8aba798a7
 glrend/llvmpipe/declared/zs/5/320x240/scene-textured a3ddf5b6d5a74877
 glrend/llvmpipe/declared/zs/5/320x240/scene-textured-shade a3ddf5b6d5a74877
+glrend/llvmpipe/declared/zs/5/320x240/scene-textured-shade-converted a3ddf5b6d5a74877
 glrend/llvmpipe/declared/zs/5/320x240/scene-unlit 6e115ddeac31bd03
 glrend/llvmpipe/declared/zs/5/320x240/scene-unlit-plain 6e115ddeac31bd03
 glrend/llvmpipe/declared/zs/5/320x240/scene-view-space 0d14d57f958dcdc3
@@ -689,6 +713,7 @@ glrend/llvmpipe/declared/zs/6/320x240/scene-lines-plain abac58745ad4466e
 glrend/llvmpipe/declared/zs/6/320x240/scene-lines-plain-unlit 021b8b66f760c9ee
 glrend/llvmpipe/declared/zs/6/320x240/scene-lines-rgb555 c164887817a9afd1
 glrend/llvmpipe/declared/zs/6/320x240/scene-lines-rgb565 124ad7873a07704b
+glrend/llvmpipe/declared/zs/6/320x240/scene-lines-rgb888 316549f803dd4f47
 glrend/llvmpipe/declared/zs/6/320x240/scene-mmx-rgb-dither-flat af697abd5d845f33
 glrend/llvmpipe/declared/zs/6/320x240/scene-mmx-rgb-dither-smooth af697abd5d845f33
 glrend/llvmpipe/declared/zs/6/320x240/scene-mmx-rgb-ditherscreen-flat 4a1541fa728ff057
@@ -746,8 +771,11 @@ glrend/llvmpipe/declared/zs/6/320x240/scene-tex-rgb555 53530e3058f536d3
 glrend/llvmpipe/declared/zs/6/320x240/scene-tex-rgb555-affine 53530e3058f536d3
 glrend/llvmpipe/declared/zs/6/320x240/scene-tex-rgb565 7a71dbf17050b40f
 glrend/llvmpipe/declared/zs/6/320x240/scene-tex-rgb565-affine 7a71dbf17050b40f
+glrend/llvmpipe/declared/zs/6/320x240/scene-tex-rgb888 5d18580b59c07a0a
+glrend/llvmpipe/declared/zs/6/320x240/scene-tex-rgb888-affine 5d18580b59c07a0a
 glrend/llvmpipe/declared/zs/6/320x240/scene-textured 7fa52ddbb743a6dd
 glrend/llvmpipe/declared/zs/6/320x240/scene-textured-shade 7fa52ddbb743a6dd
+glrend/llvmpipe/declared/zs/6/320x240/scene-textured-shade-converted 7fa52ddbb743a6dd
 glrend/llvmpipe/declared/zs/6/320x240/scene-unlit 4ccfb65e7135b083
 glrend/llvmpipe/declared/zs/6/320x240/scene-unlit-plain 4ccfb65e7135b083
 glrend/llvmpipe/declared/zs/6/320x240/scene-view-space cbc23a402efbea43
@@ -804,6 +832,7 @@ glrend/llvmpipe/declared/zs/8/320x240/scene-lines-plain abac58745ad4466e
 glrend/llvmpipe/declared/zs/8/320x240/scene-lines-plain-unlit 021b8b66f760c9ee
 glrend/llvmpipe/declared/zs/8/320x240/scene-lines-rgb555 c164887817a9afd1
 glrend/llvmpipe/declared/zs/8/320x240/scene-lines-rgb565 124ad7873a07704b
+glrend/llvmpipe/declared/zs/8/320x240/scene-lines-rgb888 316549f803dd4f47
 glrend/llvmpipe/declared/zs/8/320x240/scene-mmx-rgb-dither-flat af697abd5d845f33
 glrend/llvmpipe/declared/zs/8/320x240/scene-mmx-rgb-dither-smooth af697abd5d845f33
 glrend/llvmpipe/declared/zs/8/320x240/scene-mmx-rgb-ditherscreen-flat bdfea37e13933637
@@ -861,8 +890,11 @@ glrend/llvmpipe/declared/zs/8/320x240/scene-tex-rgb555 53530e3058f536d3
 glrend/llvmpipe/declared/zs/8/320x240/scene-tex-rgb555-affine 53530e3058f536d3
 glrend/llvmpipe/declared/zs/8/320x240/scene-tex-rgb565 7a71dbf17050b40f
 glrend/llvmpipe/declared/zs/8/320x240/scene-tex-rgb565-affine 7a71dbf17050b40f
+glrend/llvmpipe/declared/zs/8/320x240/scene-tex-rgb888 5d18580b59c07a0a
+glrend/llvmpipe/declared/zs/8/320x240/scene-tex-rgb888-affine 5d18580b59c07a0a
 glrend/llvmpipe/declared/zs/8/320x240/scene-textured 7fa52ddbb743a6dd
 glrend/llvmpipe/declared/zs/8/320x240/scene-textured-shade 7fa52ddbb743a6dd
+glrend/llvmpipe/declared/zs/8/320x240/scene-textured-shade-converted 7fa52ddbb743a6dd
 glrend/llvmpipe/declared/zs/8/320x240/scene-unlit 4ccfb65e7135b083
 glrend/llvmpipe/declared/zs/8/320x240/scene-unlit-plain 4ccfb65e7135b083
 glrend/llvmpipe/declared/zs/8/320x240/scene-view-space cbc23a402efbea43
@@ -910,6 +942,7 @@ glrend/llvmpipe/x87/zb/4/320x240/scene-lines-plain d149d8cd906dfe14
 glrend/llvmpipe/x87/zb/4/320x240/scene-lines-plain-unlit ddeea195bda31483
 glrend/llvmpipe/x87/zb/4/320x240/scene-lines-rgb555 81e489cacad8ad33
 glrend/llvmpipe/x87/zb/4/320x240/scene-lines-rgb565 81e489cacad8ad33
+glrend/llvmpipe/x87/zb/4/320x240/scene-lines-rgb888 81e489cacad8ad33
 glrend/llvmpipe/x87/zb/4/320x240/scene-mmx-rgb-dither-flat 53d1cde3f3e1d71b
 glrend/llvmpipe/x87/zb/4/320x240/scene-mmx-rgb-dither-smooth 53d1cde3f3e1d71b
 glrend/llvmpipe/x87/zb/4/320x240/scene-mmx-rgb-ditherscreen-flat cbb9b4619961111c
@@ -967,8 +1000,11 @@ glrend/llvmpipe/x87/zb/4/320x240/scene-tex-rgb555 32d67c6959cb3794
 glrend/llvmpipe/x87/zb/4/320x240/scene-tex-rgb555-affine 32d67c6959cb3794
 glrend/llvmpipe/x87/zb/4/320x240/scene-tex-rgb565 e5f200aaab1b5a37
 glrend/llvmpipe/x87/zb/4/320x240/scene-tex-rgb565-affine e5f200aaab1b5a37
+glrend/llvmpipe/x87/zb/4/320x240/scene-tex-rgb888 c5f41e768f19a8e0
+glrend/llvmpipe/x87/zb/4/320x240/scene-tex-rgb888-affine c5f41e768f19a8e0
 glrend/llvmpipe/x87/zb/4/320x240/scene-textured 3e32403c6a3a9494
 glrend/llvmpipe/x87/zb/4/320x240/scene-textured-shade 3e32403c6a3a9494
+glrend/llvmpipe/x87/zb/4/320x240/scene-textured-shade-converted 3e32403c6a3a9494
 glrend/llvmpipe/x87/zb/4/320x240/scene-unlit fc95c27a85d6a643
 glrend/llvmpipe/x87/zb/4/320x240/scene-unlit-plain fc95c27a85d6a643
 glrend/llvmpipe/x87/zb/4/320x240/scene-view-space aae7ee4b620d3803
@@ -1016,6 +1052,7 @@ glrend/llvmpipe/x87/zb/5/320x240/scene-lines-plain 11fc6b37b03e6223
 glrend/llvmpipe/x87/zb/5/320x240/scene-lines-plain-unlit ddeea195bda31483
 glrend/llvmpipe/x87/zb/5/320x240/scene-lines-rgb555 04b49df767e647f3
 glrend/llvmpipe/x87/zb/5/320x240/scene-lines-rgb565 04b49df767e647f3
+glrend/llvmpipe/x87/zb/5/320x240/scene-lines-rgb888 04b49df767e647f3
 glrend/llvmpipe/x87/zb/5/320x240/scene-mmx-rgb-dither-flat 8316a8b32e414a03
 glrend/llvmpipe/x87/zb/5/320x240/scene-mmx-rgb-dither-smooth 8316a8b32e414a03
 glrend/llvmpipe/x87/zb/5/320x240/scene-mmx-rgb-ditherscreen-flat 94a587ff81c726cf
@@ -1073,8 +1110,11 @@ glrend/llvmpipe/x87/zb/5/320x240/scene-tex-rgb555 c75c0cf72b477f0b
 glrend/llvmpipe/x87/zb/5/320x240/scene-tex-rgb555-affine c75c0cf72b477f0b
 glrend/llvmpipe/x87/zb/5/320x240/scene-tex-rgb565 a056bbf1b7657603
 glrend/llvmpipe/x87/zb/5/320x240/scene-tex-rgb565-affine a056bbf1b7657603
+glrend/llvmpipe/x87/zb/5/320x240/scene-tex-rgb888 a6c161c8aba798a7
+glrend/llvmpipe/x87/zb/5/320x240/scene-tex-rgb888-affine a6c161c8aba798a7
 glrend/llvmpipe/x87/zb/5/320x240/scene-textured a3ddf5b6d5a74877
 glrend/llvmpipe/x87/zb/5/320x240/scene-textured-shade a3ddf5b6d5a74877
+glrend/llvmpipe/x87/zb/5/320x240/scene-textured-shade-converted a3ddf5b6d5a74877
 glrend/llvmpipe/x87/zb/5/320x240/scene-unlit 6e115ddeac31bd03
 glrend/llvmpipe/x87/zb/5/320x240/scene-unlit-plain 6e115ddeac31bd03
 glrend/llvmpipe/x87/zb/5/320x240/scene-view-space 0d14d57f958dcdc3
@@ -1122,6 +1162,7 @@ glrend/llvmpipe/x87/zb/6/320x240/scene-lines-plain de06572e804847fa
 glrend/llvmpipe/x87/zb/6/320x240/scene-lines-plain-unlit ddeea195bda31483
 glrend/llvmpipe/x87/zb/6/320x240/scene-lines-rgb555 81e489cacad8ad33
 glrend/llvmpipe/x87/zb/6/320x240/scene-lines-rgb565 04b49df767e647f3
+glrend/llvmpipe/x87/zb/6/320x240/scene-lines-rgb888 bd434eeb53344163
 glrend/llvmpipe/x87/zb/6/320x240/scene-mmx-rgb-dither-flat af697abd5d845f33
 glrend/llvmpipe/x87/zb/6/320x240/scene-mmx-rgb-dither-smooth af697abd5d845f33
 glrend/llvmpipe/x87/zb/6/320x240/scene-mmx-rgb-ditherscreen-flat 4a1541fa728ff057
@@ -1179,8 +1220,11 @@ glrend/llvmpipe/x87/zb/6/320x240/scene-tex-rgb555 53530e3058f536d3
 glrend/llvmpipe/x87/zb/6/320x240/scene-tex-rgb555-affine 53530e3058f536d3
 glrend/llvmpipe/x87/zb/6/320x240/scene-tex-rgb565 7a71dbf17050b40f
 glrend/llvmpipe/x87/zb/6/320x240/scene-tex-rgb565-affine 7a71dbf17050b40f
+glrend/llvmpipe/x87/zb/6/320x240/scene-tex-rgb888 5d18580b59c07a0a
+glrend/llvmpipe/x87/zb/6/320x240/scene-tex-rgb888-affine 5d18580b59c07a0a
 glrend/llvmpipe/x87/zb/6/320x240/scene-textured 7fa52ddbb743a6dd
 glrend/llvmpipe/x87/zb/6/320x240/scene-textured-shade 7fa52ddbb743a6dd
+glrend/llvmpipe/x87/zb/6/320x240/scene-textured-shade-converted 7fa52ddbb743a6dd
 glrend/llvmpipe/x87/zb/6/320x240/scene-unlit 4ccfb65e7135b083
 glrend/llvmpipe/x87/zb/6/320x240/scene-unlit-plain 4ccfb65e7135b083
 glrend/llvmpipe/x87/zb/6/320x240/scene-view-space cbc23a402efbea43
@@ -1237,6 +1281,7 @@ glrend/llvmpipe/x87/zb/8/320x240/scene-lines-plain de06572e804847fa
 glrend/llvmpipe/x87/zb/8/320x240/scene-lines-plain-unlit ddeea195bda31483
 glrend/llvmpipe/x87/zb/8/320x240/scene-lines-rgb555 81e489cacad8ad33
 glrend/llvmpipe/x87/zb/8/320x240/scene-lines-rgb565 04b49df767e647f3
+glrend/llvmpipe/x87/zb/8/320x240/scene-lines-rgb888 bd434eeb53344163
 glrend/llvmpipe/x87/zb/8/320x240/scene-mmx-rgb-dither-flat af697abd5d845f33
 glrend/llvmpipe/x87/zb/8/320x240/scene-mmx-rgb-dither-smooth af697abd5d845f33
 glrend/llvmpipe/x87/zb/8/320x240/scene-mmx-rgb-ditherscreen-flat bdfea37e13933637
@@ -1294,8 +1339,11 @@ glrend/llvmpipe/x87/zb/8/320x240/scene-tex-rgb555 53530e3058f536d3
 glrend/llvmpipe/x87/zb/8/320x240/scene-tex-rgb555-affine 53530e3058f536d3
 glrend/llvmpipe/x87/zb/8/320x240/scene-tex-rgb565 7a71dbf17050b40f
 glrend/llvmpipe/x87/zb/8/320x240/scene-tex-rgb565-affine 7a71dbf17050b40f
+glrend/llvmpipe/x87/zb/8/320x240/scene-tex-rgb888 5d18580b59c07a0a
+glrend/llvmpipe/x87/zb/8/320x240/scene-tex-rgb888-affine 5d18580b59c07a0a
 glrend/llvmpipe/x87/zb/8/320x240/scene-textured 7fa52ddbb743a6dd
 glrend/llvmpipe/x87/zb/8/320x240/scene-textured-shade 7fa52ddbb743a6dd
+glrend/llvmpipe/x87/zb/8/320x240/scene-textured-shade-converted 7fa52ddbb743a6dd
 glrend/llvmpipe/x87/zb/8/320x240/scene-unlit 4ccfb65e7135b083
 glrend/llvmpipe/x87/zb/8/320x240/scene-unlit-plain 4ccfb65e7135b083
 glrend/llvmpipe/x87/zb/8/320x240/scene-view-space cbc23a402efbea43
@@ -1343,6 +1391,7 @@ glrend/llvmpipe/x87/zs/4/320x240/scene-lines-plain 112698fe7bc74d6b
 glrend/llvmpipe/x87/zs/4/320x240/scene-lines-plain-unlit 021b8b66f760c9ee
 glrend/llvmpipe/x87/zs/4/320x240/scene-lines-rgb555 c164887817a9afd1
 glrend/llvmpipe/x87/zs/4/320x240/scene-lines-rgb565 c164887817a9afd1
+glrend/llvmpipe/x87/zs/4/320x240/scene-lines-rgb888 c164887817a9afd1
 glrend/llvmpipe/x87/zs/4/320x240/scene-mmx-rgb-dither-flat 53d1cde3f3e1d71b
 glrend/llvmpipe/x87/zs/4/320x240/scene-mmx-rgb-dither-smooth 53d1cde3f3e1d71b
 glrend/llvmpipe/x87/zs/4/320x240/scene-mmx-rgb-ditherscreen-flat cbb9b4619961111c
@@ -1400,8 +1449,11 @@ glrend/llvmpipe/x87/zs/4/320x240/scene-tex-rgb555 32d67c6959cb3794
 glrend/llvmpipe/x87/zs/4/320x240/scene-tex-rgb555-affine 32d67c6959cb3794
 glrend/llvmpipe/x87/zs/4/320x240/scene-tex-rgb565 e5f200aaab1b5a37
 glrend/llvmpipe/x87/zs/4/320x240/scene-tex-rgb565-affine e5f200aaab1b5a37
+glrend/llvmpipe/x87/zs/4/320x240/scene-tex-rgb888 c5f41e768f19a8e0
+glrend/llvmpipe/x87/zs/4/320x240/scene-tex-rgb888-affine c5f41e768f19a8e0
 glrend/llvmpipe/x87/zs/4/320x240/scene-textured 3e32403c6a3a9494
 glrend/llvmpipe/x87/zs/4/320x240/scene-textured-shade 3e32403c6a3a9494
+glrend/llvmpipe/x87/zs/4/320x240/scene-textured-shade-converted 3e32403c6a3a9494
 glrend/llvmpipe/x87/zs/4/320x240/scene-unlit fc95c27a85d6a643
 glrend/llvmpipe/x87/zs/4/320x240/scene-unlit-plain fc95c27a85d6a643
 glrend/llvmpipe/x87/zs/4/320x240/scene-view-space aae7ee4b620d3803
@@ -1449,6 +1501,7 @@ glrend/llvmpipe/x87/zs/5/320x240/scene-lines-plain 99117456453b04df
 glrend/llvmpipe/x87/zs/5/320x240/scene-lines-plain-unlit 021b8b66f760c9ee
 glrend/llvmpipe/x87/zs/5/320x240/scene-lines-rgb555 124ad7873a07704b
 glrend/llvmpipe/x87/zs/5/320x240/scene-lines-rgb565 124ad7873a07704b
+glrend/llvmpipe/x87/zs/5/320x240/scene-lines-rgb888 124ad7873a07704b
 glrend/llvmpipe/x87/zs/5/320x240/scene-mmx-rgb-dither-flat 8316a8b32e414a03
 glrend/llvmpipe/x87/zs/5/320x240/scene-mmx-rgb-dither-smooth 8316a8b32e414a03
 glrend/llvmpipe/x87/zs/5/320x240/scene-mmx-rgb-ditherscreen-flat 94a587ff81c726cf
@@ -1506,8 +1559,11 @@ glrend/llvmpipe/x87/zs/5/320x240/scene-tex-rgb555 c75c0cf72b477f0b
 glrend/llvmpipe/x87/zs/5/320x240/scene-tex-rgb555-affine c75c0cf72b477f0b
 glrend/llvmpipe/x87/zs/5/320x240/scene-tex-rgb565 a056bbf1b7657603
 glrend/llvmpipe/x87/zs/5/320x240/scene-tex-rgb565-affine a056bbf1b7657603
+glrend/llvmpipe/x87/zs/5/320x240/scene-tex-rgb888 a6c161c8aba798a7
+glrend/llvmpipe/x87/zs/5/320x240/scene-tex-rgb888-affine a6c161c8aba798a7
 glrend/llvmpipe/x87/zs/5/320x240/scene-textured a3ddf5b6d5a74877
 glrend/llvmpipe/x87/zs/5/320x240/scene-textured-shade a3ddf5b6d5a74877
+glrend/llvmpipe/x87/zs/5/320x240/scene-textured-shade-converted a3ddf5b6d5a74877
 glrend/llvmpipe/x87/zs/5/320x240/scene-unlit 6e115ddeac31bd03
 glrend/llvmpipe/x87/zs/5/320x240/scene-unlit-plain 6e115ddeac31bd03
 glrend/llvmpipe/x87/zs/5/320x240/scene-view-space 0d14d57f958dcdc3
@@ -1555,6 +1611,7 @@ glrend/llvmpipe/x87/zs/6/320x240/scene-lines-plain abac58745ad4466e
 glrend/llvmpipe/x87/zs/6/320x240/scene-lines-plain-unlit 021b8b66f760c9ee
 glrend/llvmpipe/x87/zs/6/320x240/scene-lines-rgb555 c164887817a9afd1
 glrend/llvmpipe/x87/zs/6/320x240/scene-lines-rgb565 124ad7873a07704b
+glrend/llvmpipe/x87/zs/6/320x240/scene-lines-rgb888 316549f803dd4f47
 glrend/llvmpipe/x87/zs/6/320x240/scene-mmx-rgb-dither-flat af697abd5d845f33
 glrend/llvmpipe/x87/zs/6/320x240/scene-mmx-rgb-dither-smooth af697abd5d845f33
 glrend/llvmpipe/x87/zs/6/320x240/scene-mmx-rgb-ditherscreen-flat 4a1541fa728ff057
@@ -1612,8 +1669,11 @@ glrend/llvmpipe/x87/zs/6/320x240/scene-tex-rgb555 53530e3058f536d3
 glrend/llvmpipe/x87/zs/6/320x240/scene-tex-rgb555-affine 53530e3058f536d3
 glrend/llvmpipe/x87/zs/6/320x240/scene-tex-rgb565 7a71dbf17050b40f
 glrend/llvmpipe/x87/zs/6/320x240/scene-tex-rgb565-affine 7a71dbf17050b40f
+glrend/llvmpipe/x87/zs/6/320x240/scene-tex-rgb888 5d18580b59c07a0a
+glrend/llvmpipe/x87/zs/6/320x240/scene-tex-rgb888-affine 5d18580b59c07a0a
 glrend/llvmpipe/x87/zs/6/320x240/scene-textured 7fa52ddbb743a6dd
 glrend/llvmpipe/x87/zs/6/320x240/scene-textured-shade 7fa52ddbb743a6dd
+glrend/llvmpipe/x87/zs/6/320x240/scene-textured-shade-converted 7fa52ddbb743a6dd
 glrend/llvmpipe/x87/zs/6/320x240/scene-unlit 4ccfb65e7135b083
 glrend/llvmpipe/x87/zs/6/320x240/scene-unlit-plain 4ccfb65e7135b083
 glrend/llvmpipe/x87/zs/6/320x240/scene-view-space cbc23a402efbea43
@@ -1670,6 +1730,7 @@ glrend/llvmpipe/x87/zs/8/320x240/scene-lines-plain abac58745ad4466e
 glrend/llvmpipe/x87/zs/8/320x240/scene-lines-plain-unlit 021b8b66f760c9ee
 glrend/llvmpipe/x87/zs/8/320x240/scene-lines-rgb555 c164887817a9afd1
 glrend/llvmpipe/x87/zs/8/320x240/scene-lines-rgb565 124ad7873a07704b
+glrend/llvmpipe/x87/zs/8/320x240/scene-lines-rgb888 316549f803dd4f47
 glrend/llvmpipe/x87/zs/8/320x240/scene-mmx-rgb-dither-flat af697abd5d845f33
 glrend/llvmpipe/x87/zs/8/320x240/scene-mmx-rgb-dither-smooth af697abd5d845f33
 glrend/llvmpipe/x87/zs/8/320x240/scene-mmx-rgb-ditherscreen-flat bdfea37e13933637
@@ -1727,8 +1788,11 @@ glrend/llvmpipe/x87/zs/8/320x240/scene-tex-rgb555 53530e3058f536d3
 glrend/llvmpipe/x87/zs/8/320x240/scene-tex-rgb555-affine 53530e3058f536d3
 glrend/llvmpipe/x87/zs/8/320x240/scene-tex-rgb565 7a71dbf17050b40f
 glrend/llvmpipe/x87/zs/8/320x240/scene-tex-rgb565-affine 7a71dbf17050b40f
+glrend/llvmpipe/x87/zs/8/320x240/scene-tex-rgb888 5d18580b59c07a0a
+glrend/llvmpipe/x87/zs/8/320x240/scene-tex-rgb888-affine 5d18580b59c07a0a
 glrend/llvmpipe/x87/zs/8/320x240/scene-textured 7fa52ddbb743a6dd
 glrend/llvmpipe/x87/zs/8/320x240/scene-textured-shade 7fa52ddbb743a6dd
+glrend/llvmpipe/x87/zs/8/320x240/scene-textured-shade-converted 7fa52ddbb743a6dd
 glrend/llvmpipe/x87/zs/8/320x240/scene-unlit 4ccfb65e7135b083
 glrend/llvmpipe/x87/zs/8/320x240/scene-unlit-plain 4ccfb65e7135b083
 glrend/llvmpipe/x87/zs/8/320x240/scene-view-space cbc23a402efbea43
@@ -1785,6 +1849,7 @@ glrend1x/llvmpipe/declared/zb/7/320x240/scene-lines-plain 56e7c4dbb0295d8c
 glrend1x/llvmpipe/declared/zb/7/320x240/scene-lines-plain-unlit 9c0b823cb39559fb
 glrend1x/llvmpipe/declared/zb/7/320x240/scene-lines-rgb555 078fffa0affaf2cb
 glrend1x/llvmpipe/declared/zb/7/320x240/scene-lines-rgb565 6f7df5b918fa31fb
+glrend1x/llvmpipe/declared/zb/7/320x240/scene-lines-rgb888 426a29ac1b5eaa17
 glrend1x/llvmpipe/declared/zb/7/320x240/scene-mmx-rgb-dither-flat 9dba86571f7abb04
 glrend1x/llvmpipe/declared/zb/7/320x240/scene-mmx-rgb-dither-smooth 3e723666e8ec3dd9
 glrend1x/llvmpipe/declared/zb/7/320x240/scene-mmx-rgb-ditherscreen-flat 2da56c76ea69e940
@@ -1842,8 +1907,11 @@ glrend1x/llvmpipe/declared/zb/7/320x240/scene-tex-rgb555 7dd5d369504f877f
 glrend1x/llvmpipe/declared/zb/7/320x240/scene-tex-rgb555-affine b45ccb5aaf312c93
 glrend1x/llvmpipe/declared/zb/7/320x240/scene-tex-rgb565 551b288110c2a49a
 glrend1x/llvmpipe/declared/zb/7/320x240/scene-tex-rgb565-affine 3d48d5d230e3a4a2
+glrend1x/llvmpipe/declared/zb/7/320x240/scene-tex-rgb888 3084684b54916030
+glrend1x/llvmpipe/declared/zb/7/320x240/scene-tex-rgb888-affine a3d7fd48c9782c9b
 glrend1x/llvmpipe/declared/zb/7/320x240/scene-textured 508f99ad2867c975
 glrend1x/llvmpipe/declared/zb/7/320x240/scene-textured-shade 508f99ad2867c975
+glrend1x/llvmpipe/declared/zb/7/320x240/scene-textured-shade-converted 508f99ad2867c975
 glrend1x/llvmpipe/declared/zb/7/320x240/scene-unlit 41fb9300d4b0afc3
 glrend1x/llvmpipe/declared/zb/7/320x240/scene-unlit-plain 41fb9300d4b0afc3
 glrend1x/llvmpipe/declared/zb/7/320x240/scene-view-space fb3aadec5d39a803
@@ -1900,6 +1968,7 @@ glrend1x/llvmpipe/declared/zs/7/320x240/scene-lines-plain 324abfccbc0f0917
 glrend1x/llvmpipe/declared/zs/7/320x240/scene-lines-plain-unlit 9c0b823cb39559fb
 glrend1x/llvmpipe/declared/zs/7/320x240/scene-lines-rgb555 8b99b5d53bbf7f9b
 glrend1x/llvmpipe/declared/zs/7/320x240/scene-lines-rgb565 7fd733ac3bd91e3b
+glrend1x/llvmpipe/declared/zs/7/320x240/scene-lines-rgb888 50d695e6bc18892f
 glrend1x/llvmpipe/declared/zs/7/320x240/scene-mmx-rgb-dither-flat 9dba86571f7abb04
 glrend1x/llvmpipe/declared/zs/7/320x240/scene-mmx-rgb-dither-smooth 3e723666e8ec3dd9
 glrend1x/llvmpipe/declared/zs/7/320x240/scene-mmx-rgb-ditherscreen-flat 2da56c76ea69e940
@@ -1957,8 +2026,11 @@ glrend1x/llvmpipe/declared/zs/7/320x240/scene-tex-rgb555 7dd5d369504f877f
 glrend1x/llvmpipe/declared/zs/7/320x240/scene-tex-rgb555-affine b45ccb5aaf312c93
 glrend1x/llvmpipe/declared/zs/7/320x240/scene-tex-rgb565 551b288110c2a49a
 glrend1x/llvmpipe/declared/zs/7/320x240/scene-tex-rgb565-affine 3d48d5d230e3a4a2
+glrend1x/llvmpipe/declared/zs/7/320x240/scene-tex-rgb888 3084684b54916030
+glrend1x/llvmpipe/declared/zs/7/320x240/scene-tex-rgb888-affine a3d7fd48c9782c9b
 glrend1x/llvmpipe/declared/zs/7/320x240/scene-textured 508f99ad2867c975
 glrend1x/llvmpipe/declared/zs/7/320x240/scene-textured-shade 508f99ad2867c975
+glrend1x/llvmpipe/declared/zs/7/320x240/scene-textured-shade-converted 508f99ad2867c975
 glrend1x/llvmpipe/declared/zs/7/320x240/scene-unlit 41fb9300d4b0afc3
 glrend1x/llvmpipe/declared/zs/7/320x240/scene-unlit-plain 41fb9300d4b0afc3
 glrend1x/llvmpipe/declared/zs/7/320x240/scene-view-space fb3aadec5d39a803
@@ -2015,6 +2087,7 @@ glrend1x/llvmpipe/x87/zb/7/320x240/scene-lines-plain 56e7c4dbb0295d8c
 glrend1x/llvmpipe/x87/zb/7/320x240/scene-lines-plain-unlit 9c0b823cb39559fb
 glrend1x/llvmpipe/x87/zb/7/320x240/scene-lines-rgb555 078fffa0affaf2cb
 glrend1x/llvmpipe/x87/zb/7/320x240/scene-lines-rgb565 6f7df5b918fa31fb
+glrend1x/llvmpipe/x87/zb/7/320x240/scene-lines-rgb888 426a29ac1b5eaa17
 glrend1x/llvmpipe/x87/zb/7/320x240/scene-mmx-rgb-dither-flat 9dba86571f7abb04
 glrend1x/llvmpipe/x87/zb/7/320x240/scene-mmx-rgb-dither-smooth 3e723666e8ec3dd9
 glrend1x/llvmpipe/x87/zb/7/320x240/scene-mmx-rgb-ditherscreen-flat 2da56c76ea69e940
@@ -2072,8 +2145,11 @@ glrend1x/llvmpipe/x87/zb/7/320x240/scene-tex-rgb555 7dd5d369504f877f
 glrend1x/llvmpipe/x87/zb/7/320x240/scene-tex-rgb555-affine b45ccb5aaf312c93
 glrend1x/llvmpipe/x87/zb/7/320x240/scene-tex-rgb565 551b288110c2a49a
 glrend1x/llvmpipe/x87/zb/7/320x240/scene-tex-rgb565-affine 3d48d5d230e3a4a2
+glrend1x/llvmpipe/x87/zb/7/320x240/scene-tex-rgb888 3084684b54916030
+glrend1x/llvmpipe/x87/zb/7/320x240/scene-tex-rgb888-affine a3d7fd48c9782c9b
 glrend1x/llvmpipe/x87/zb/7/320x240/scene-textured 508f99ad2867c975
 glrend1x/llvmpipe/x87/zb/7/320x240/scene-textured-shade 508f99ad2867c975
+glrend1x/llvmpipe/x87/zb/7/320x240/scene-textured-shade-converted 508f99ad2867c975
 glrend1x/llvmpipe/x87/zb/7/320x240/scene-unlit 41fb9300d4b0afc3
 glrend1x/llvmpipe/x87/zb/7/320x240/scene-unlit-plain 41fb9300d4b0afc3
 glrend1x/llvmpipe/x87/zb/7/320x240/scene-view-space fb3aadec5d39a803
@@ -2130,6 +2206,7 @@ glrend1x/llvmpipe/x87/zs/7/320x240/scene-lines-plain 324abfccbc0f0917
 glrend1x/llvmpipe/x87/zs/7/320x240/scene-lines-plain-unlit 9c0b823cb39559fb
 glrend1x/llvmpipe/x87/zs/7/320x240/scene-lines-rgb555 8b99b5d53bbf7f9b
 glrend1x/llvmpipe/x87/zs/7/320x240/scene-lines-rgb565 7fd733ac3bd91e3b
+glrend1x/llvmpipe/x87/zs/7/320x240/scene-lines-rgb888 50d695e6bc18892f
 glrend1x/llvmpipe/x87/zs/7/320x240/scene-mmx-rgb-dither-flat 9dba86571f7abb04
 glrend1x/llvmpipe/x87/zs/7/320x240/scene-mmx-rgb-dither-smooth 3e723666e8ec3dd9
 glrend1x/llvmpipe/x87/zs/7/320x240/scene-mmx-rgb-ditherscreen-flat 2da56c76ea69e940
@@ -2187,8 +2264,11 @@ glrend1x/llvmpipe/x87/zs/7/320x240/scene-tex-rgb555 7dd5d369504f877f
 glrend1x/llvmpipe/x87/zs/7/320x240/scene-tex-rgb555-affine b45ccb5aaf312c93
 glrend1x/llvmpipe/x87/zs/7/320x240/scene-tex-rgb565 551b288110c2a49a
 glrend1x/llvmpipe/x87/zs/7/320x240/scene-tex-rgb565-affine 3d48d5d230e3a4a2
+glrend1x/llvmpipe/x87/zs/7/320x240/scene-tex-rgb888 3084684b54916030
+glrend1x/llvmpipe/x87/zs/7/320x240/scene-tex-rgb888-affine a3d7fd48c9782c9b
 glrend1x/llvmpipe/x87/zs/7/320x240/scene-textured 508f99ad2867c975
 glrend1x/llvmpipe/x87/zs/7/320x240/scene-textured-shade 508f99ad2867c975
+glrend1x/llvmpipe/x87/zs/7/320x240/scene-textured-shade-converted 508f99ad2867c975
 glrend1x/llvmpipe/x87/zs/7/320x240/scene-unlit 41fb9300d4b0afc3
 glrend1x/llvmpipe/x87/zs/7/320x240/scene-unlit-plain 41fb9300d4b0afc3
 glrend1x/llvmpipe/x87/zs/7/320x240/scene-view-space fb3aadec5d39a803
@@ -2245,6 +2325,7 @@ softrend/softprmf/declared/zb/3/320x240/scene-lines-plain d85c7974924eb8be
 softrend/softprmf/declared/zb/3/320x240/scene-lines-plain-unlit 759975c253e489e3
 softrend/softprmf/declared/zb/3/320x240/scene-lines-rgb555 53b19a66312a505b
 softrend/softprmf/declared/zb/3/320x240/scene-lines-rgb565 9b9f961e928b7d87
+softrend/softprmf/declared/zb/3/320x240/scene-lines-rgb888 3336b04313c18c99
 softrend/softprmf/declared/zb/3/320x240/scene-mmx-rgb-dither-flat 9556dc4dbe3d2cb6
 softrend/softprmf/declared/zb/3/320x240/scene-mmx-rgb-dither-smooth 3faff33fa8926dda
 softrend/softprmf/declared/zb/3/320x240/scene-mmx-rgb-ditherscreen-flat 9556dc4dbe3d2cb6
@@ -2302,8 +2383,11 @@ softrend/softprmf/declared/zb/3/320x240/scene-tex-rgb555 8c7325bcfd859fdb
 softrend/softprmf/declared/zb/3/320x240/scene-tex-rgb555-affine 27f346d488460c5b
 softrend/softprmf/declared/zb/3/320x240/scene-tex-rgb565 a3c053b835750bdb
 softrend/softprmf/declared/zb/3/320x240/scene-tex-rgb565-affine 74a5d3d69cfc6ab3
+softrend/softprmf/declared/zb/3/320x240/scene-tex-rgb888 2faba32fbf006e75
+softrend/softprmf/declared/zb/3/320x240/scene-tex-rgb888-affine ed19568d6646c835
 softrend/softprmf/declared/zb/3/320x240/scene-textured cd9065a035c5847c
 softrend/softprmf/declared/zb/3/320x240/scene-textured-shade 3d6a687caffdb850
+softrend/softprmf/declared/zb/3/320x240/scene-textured-shade-converted 2c80ed28ed4513d0
 softrend/softprmf/declared/zb/3/320x240/scene-unlit 15de493775a00743
 softrend/softprmf/declared/zb/3/320x240/scene-unlit-plain 15de493775a00743
 softrend/softprmf/declared/zb/3/320x240/scene-view-space 37f141e90648b2c3
@@ -2360,6 +2444,7 @@ softrend/softprmf/declared/zb/4/320x240/scene-lines-plain bff4d773a7d30064
 softrend/softprmf/declared/zb/4/320x240/scene-lines-plain-unlit cd4191a42c8dffc7
 softrend/softprmf/declared/zb/4/320x240/scene-lines-rgb555 8252d14074b2933f
 softrend/softprmf/declared/zb/4/320x240/scene-lines-rgb565 cd4191a42c8dffc7
+softrend/softprmf/declared/zb/4/320x240/scene-lines-rgb888 cd4191a42c8dffc7
 softrend/softprmf/declared/zb/4/320x240/scene-mmx-rgb-dither-flat 8ed7df7b1886cc98
 softrend/softprmf/declared/zb/4/320x240/scene-mmx-rgb-dither-smooth 241f2fecb8899093
 softrend/softprmf/declared/zb/4/320x240/scene-mmx-rgb-ditherscreen-flat 42eac71539a30a38
@@ -2417,8 +2502,11 @@ softrend/softprmf/declared/zb/4/320x240/scene-tex-rgb555 cfc55ea2b2a09db8
 softrend/softprmf/declared/zb/4/320x240/scene-tex-rgb555-affine cfc55ea2b2a09db8
 softrend/softprmf/declared/zb/4/320x240/scene-tex-rgb565 cfc55ea2b2a09db8
 softrend/softprmf/declared/zb/4/320x240/scene-tex-rgb565-affine cfc55ea2b2a09db8
+softrend/softprmf/declared/zb/4/320x240/scene-tex-rgb888 cfc55ea2b2a09db8
+softrend/softprmf/declared/zb/4/320x240/scene-tex-rgb888-affine cfc55ea2b2a09db8
 softrend/softprmf/declared/zb/4/320x240/scene-textured e5a8a1ca0e0de849
 softrend/softprmf/declared/zb/4/320x240/scene-textured-shade e5a8a1ca0e0de849
+softrend/softprmf/declared/zb/4/320x240/scene-textured-shade-converted e5a8a1ca0e0de849
 softrend/softprmf/declared/zb/4/320x240/scene-unlit 20e452838b5d1543
 softrend/softprmf/declared/zb/4/320x240/scene-unlit-plain 20e452838b5d1543
 softrend/softprmf/declared/zb/4/320x240/scene-view-space 9c31a8ff5e7d6b23
@@ -2475,6 +2563,7 @@ softrend/softprmf/declared/zb/5/320x240/scene-lines-plain 201434a1cc2b8875
 softrend/softprmf/declared/zb/5/320x240/scene-lines-plain-unlit 6c4857ccc80f0107
 softrend/softprmf/declared/zb/5/320x240/scene-lines-rgb555 6c4857ccc80f0107
 softrend/softprmf/declared/zb/5/320x240/scene-lines-rgb565 1fa17f054176e16f
+softrend/softprmf/declared/zb/5/320x240/scene-lines-rgb888 6c4857ccc80f0107
 softrend/softprmf/declared/zb/5/320x240/scene-mmx-rgb-dither-flat 800fd8d23e0f29d8
 softrend/softprmf/declared/zb/5/320x240/scene-mmx-rgb-dither-smooth cf296b892156f5f5
 softrend/softprmf/declared/zb/5/320x240/scene-mmx-rgb-ditherscreen-flat 8d0fae6c567d6565
@@ -2532,8 +2621,11 @@ softrend/softprmf/declared/zb/5/320x240/scene-tex-rgb555 16212f5f9ec73123
 softrend/softprmf/declared/zb/5/320x240/scene-tex-rgb555-affine 16212f5f9ec73123
 softrend/softprmf/declared/zb/5/320x240/scene-tex-rgb565 16212f5f9ec73123
 softrend/softprmf/declared/zb/5/320x240/scene-tex-rgb565-affine 16212f5f9ec73123
+softrend/softprmf/declared/zb/5/320x240/scene-tex-rgb888 16212f5f9ec73123
+softrend/softprmf/declared/zb/5/320x240/scene-tex-rgb888-affine 16212f5f9ec73123
 softrend/softprmf/declared/zb/5/320x240/scene-textured e72f576c90706c61
 softrend/softprmf/declared/zb/5/320x240/scene-textured-shade e72f576c90706c61
+softrend/softprmf/declared/zb/5/320x240/scene-textured-shade-converted e72f576c90706c61
 softrend/softprmf/declared/zb/5/320x240/scene-unlit 370a091e2aa72783
 softrend/softprmf/declared/zb/5/320x240/scene-unlit-plain 370a091e2aa72783
 softrend/softprmf/declared/zb/5/320x240/scene-view-space 76d4f72e73e30283
@@ -2590,6 +2682,7 @@ softrend/softprmf/declared/zb/6/320x240/scene-lines-plain 05fcd5be713ad1e9
 softrend/softprmf/declared/zb/6/320x240/scene-lines-plain-unlit 329d2b3ab2c8d783
 softrend/softprmf/declared/zb/6/320x240/scene-lines-rgb555 329d2b3ab2c8d783
 softrend/softprmf/declared/zb/6/320x240/scene-lines-rgb565 329d2b3ab2c8d783
+softrend/softprmf/declared/zb/6/320x240/scene-lines-rgb888 4bb50e353cad7d33
 softrend/softprmf/declared/zb/6/320x240/scene-mmx-rgb-dither-flat 57dd7fc89f94ee7c
 softrend/softprmf/declared/zb/6/320x240/scene-mmx-rgb-dither-smooth 77952f9a1cf28b82
 softrend/softprmf/declared/zb/6/320x240/scene-mmx-rgb-ditherscreen-flat 57dd7fc89f94ee7c
@@ -2647,8 +2740,11 @@ softrend/softprmf/declared/zb/6/320x240/scene-tex-rgb555 77952f9a1cf28b82
 softrend/softprmf/declared/zb/6/320x240/scene-tex-rgb555-affine 77952f9a1cf28b82
 softrend/softprmf/declared/zb/6/320x240/scene-tex-rgb565 77952f9a1cf28b82
 softrend/softprmf/declared/zb/6/320x240/scene-tex-rgb565-affine 77952f9a1cf28b82
+softrend/softprmf/declared/zb/6/320x240/scene-tex-rgb888 4f18fe75beb67223
+softrend/softprmf/declared/zb/6/320x240/scene-tex-rgb888-affine 64ec49dc42e4af67
 softrend/softprmf/declared/zb/6/320x240/scene-textured 77952f9a1cf28b82
 softrend/softprmf/declared/zb/6/320x240/scene-textured-shade 77952f9a1cf28b82
+softrend/softprmf/declared/zb/6/320x240/scene-textured-shade-converted 7f2255d13547467b
 softrend/softprmf/declared/zb/6/320x240/scene-unlit f1d9eb8480e70033
 softrend/softprmf/declared/zb/6/320x240/scene-unlit-plain f1d9eb8480e70033
 softrend/softprmf/declared/zb/6/320x240/scene-view-space 4e11433c1c71f133
@@ -2705,6 +2801,7 @@ softrend/softprmf/declared/zs/3/320x240/scene-lines-plain d85c7974924eb8be
 softrend/softprmf/declared/zs/3/320x240/scene-lines-plain-unlit 759975c253e489e3
 softrend/softprmf/declared/zs/3/320x240/scene-lines-rgb555 1bcc03ef30f0a0c3
 softrend/softprmf/declared/zs/3/320x240/scene-lines-rgb565 dcf827b6b178d5a9
+softrend/softprmf/declared/zs/3/320x240/scene-lines-rgb888 414f4d1bfa79dfb3
 softrend/softprmf/declared/zs/3/320x240/scene-mmx-rgb-dither-flat 9556dc4dbe3d2cb6
 softrend/softprmf/declared/zs/3/320x240/scene-mmx-rgb-dither-smooth 3faff33fa8926dda
 softrend/softprmf/declared/zs/3/320x240/scene-mmx-rgb-ditherscreen-flat 9556dc4dbe3d2cb6
@@ -2762,8 +2859,11 @@ softrend/softprmf/declared/zs/3/320x240/scene-tex-rgb555 8c7325bcfd859fdb
 softrend/softprmf/declared/zs/3/320x240/scene-tex-rgb555-affine 27f346d488460c5b
 softrend/softprmf/declared/zs/3/320x240/scene-tex-rgb565 a3c053b835750bdb
 softrend/softprmf/declared/zs/3/320x240/scene-tex-rgb565-affine 74a5d3d69cfc6ab3
+softrend/softprmf/declared/zs/3/320x240/scene-tex-rgb888 2faba32fbf006e75
+softrend/softprmf/declared/zs/3/320x240/scene-tex-rgb888-affine ed19568d6646c835
 softrend/softprmf/declared/zs/3/320x240/scene-textured cd9065a035c5847c
 softrend/softprmf/declared/zs/3/320x240/scene-textured-shade cd9065a035c5847c
+softrend/softprmf/declared/zs/3/320x240/scene-textured-shade-converted 8c51e779ca64e9d6
 softrend/softprmf/declared/zs/3/320x240/scene-unlit 15de493775a00743
 softrend/softprmf/declared/zs/3/320x240/scene-unlit-plain 15de493775a00743
 softrend/softprmf/declared/zs/3/320x240/scene-view-space 37f141e90648b2c3
@@ -2820,6 +2920,7 @@ softrend/softprmf/declared/zs/4/320x240/scene-lines-plain bff4d773a7d30064
 softrend/softprmf/declared/zs/4/320x240/scene-lines-plain-unlit cd4191a42c8dffc7
 softrend/softprmf/declared/zs/4/320x240/scene-lines-rgb555 c9a425ac6e6c0027
 softrend/softprmf/declared/zs/4/320x240/scene-lines-rgb565 cd4191a42c8dffc7
+softrend/softprmf/declared/zs/4/320x240/scene-lines-rgb888 cd4191a42c8dffc7
 softrend/softprmf/declared/zs/4/320x240/scene-mmx-rgb-dither-flat a53d2a4bf6ac862e
 softrend/softprmf/declared/zs/4/320x240/scene-mmx-rgb-dither-smooth 2239011b5ac1197f
 softrend/softprmf/declared/zs/4/320x240/scene-mmx-rgb-ditherscreen-flat a53d2a4bf6ac862e
@@ -2877,8 +2978,11 @@ softrend/softprmf/declared/zs/4/320x240/scene-tex-rgb555 14791c44525237db
 softrend/softprmf/declared/zs/4/320x240/scene-tex-rgb555-affine fd30809d72f66b78
 softrend/softprmf/declared/zs/4/320x240/scene-tex-rgb565 2239011b5ac1197f
 softrend/softprmf/declared/zs/4/320x240/scene-tex-rgb565-affine 2239011b5ac1197f
+softrend/softprmf/declared/zs/4/320x240/scene-tex-rgb888 2239011b5ac1197f
+softrend/softprmf/declared/zs/4/320x240/scene-tex-rgb888-affine 2239011b5ac1197f
 softrend/softprmf/declared/zs/4/320x240/scene-textured 2239011b5ac1197f
 softrend/softprmf/declared/zs/4/320x240/scene-textured-shade 2239011b5ac1197f
+softrend/softprmf/declared/zs/4/320x240/scene-textured-shade-converted 2239011b5ac1197f
 softrend/softprmf/declared/zs/4/320x240/scene-unlit 20e452838b5d1543
 softrend/softprmf/declared/zs/4/320x240/scene-unlit-plain 20e452838b5d1543
 softrend/softprmf/declared/zs/4/320x240/scene-view-space 9c31a8ff5e7d6b23
@@ -2935,6 +3039,7 @@ softrend/softprmf/declared/zs/5/320x240/scene-lines-plain 201434a1cc2b8875
 softrend/softprmf/declared/zs/5/320x240/scene-lines-plain-unlit 6c4857ccc80f0107
 softrend/softprmf/declared/zs/5/320x240/scene-lines-rgb555 6c4857ccc80f0107
 softrend/softprmf/declared/zs/5/320x240/scene-lines-rgb565 84361b9a75ff01f3
+softrend/softprmf/declared/zs/5/320x240/scene-lines-rgb888 6c4857ccc80f0107
 softrend/softprmf/declared/zs/5/320x240/scene-mmx-rgb-dither-flat a0fb70fe62974a7a
 softrend/softprmf/declared/zs/5/320x240/scene-mmx-rgb-dither-smooth 0a3046780ff28910
 softrend/softprmf/declared/zs/5/320x240/scene-mmx-rgb-ditherscreen-flat a0fb70fe62974a7a
@@ -2992,8 +3097,11 @@ softrend/softprmf/declared/zs/5/320x240/scene-tex-rgb555 0a3046780ff28910
 softrend/softprmf/declared/zs/5/320x240/scene-tex-rgb555-affine 0a3046780ff28910
 softrend/softprmf/declared/zs/5/320x240/scene-tex-rgb565 a602041ee3269b2f
 softrend/softprmf/declared/zs/5/320x240/scene-tex-rgb565-affine 22776305c6b922f6
+softrend/softprmf/declared/zs/5/320x240/scene-tex-rgb888 0a3046780ff28910
+softrend/softprmf/declared/zs/5/320x240/scene-tex-rgb888-affine 0a3046780ff28910
 softrend/softprmf/declared/zs/5/320x240/scene-textured 0a3046780ff28910
 softrend/softprmf/declared/zs/5/320x240/scene-textured-shade 0a3046780ff28910
+softrend/softprmf/declared/zs/5/320x240/scene-textured-shade-converted 0a3046780ff28910
 softrend/softprmf/declared/zs/5/320x240/scene-unlit 370a091e2aa72783
 softrend/softprmf/declared/zs/5/320x240/scene-unlit-plain 370a091e2aa72783
 softrend/softprmf/declared/zs/5/320x240/scene-view-space 76d4f72e73e30283
@@ -3050,6 +3158,7 @@ softrend/softprmf/declared/zs/6/320x240/scene-lines-plain 05fcd5be713ad1e9
 softrend/softprmf/declared/zs/6/320x240/scene-lines-plain-unlit 329d2b3ab2c8d783
 softrend/softprmf/declared/zs/6/320x240/scene-lines-rgb555 329d2b3ab2c8d783
 softrend/softprmf/declared/zs/6/320x240/scene-lines-rgb565 329d2b3ab2c8d783
+softrend/softprmf/declared/zs/6/320x240/scene-lines-rgb888 e30f3bef2800ce7b
 softrend/softprmf/declared/zs/6/320x240/scene-mmx-rgb-dither-flat 57dd7fc89f94ee7c
 softrend/softprmf/declared/zs/6/320x240/scene-mmx-rgb-dither-smooth 77952f9a1cf28b82
 softrend/softprmf/declared/zs/6/320x240/scene-mmx-rgb-ditherscreen-flat 57dd7fc89f94ee7c
@@ -3107,8 +3216,11 @@ softrend/softprmf/declared/zs/6/320x240/scene-tex-rgb555 77952f9a1cf28b82
 softrend/softprmf/declared/zs/6/320x240/scene-tex-rgb555-affine 77952f9a1cf28b82
 softrend/softprmf/declared/zs/6/320x240/scene-tex-rgb565 77952f9a1cf28b82
 softrend/softprmf/declared/zs/6/320x240/scene-tex-rgb565-affine 77952f9a1cf28b82
+softrend/softprmf/declared/zs/6/320x240/scene-tex-rgb888 4f18fe75beb67223
+softrend/softprmf/declared/zs/6/320x240/scene-tex-rgb888-affine 64ec49dc42e4af67
 softrend/softprmf/declared/zs/6/320x240/scene-textured 77952f9a1cf28b82
 softrend/softprmf/declared/zs/6/320x240/scene-textured-shade 77952f9a1cf28b82
+softrend/softprmf/declared/zs/6/320x240/scene-textured-shade-converted 7f2255d13547467b
 softrend/softprmf/declared/zs/6/320x240/scene-unlit f1d9eb8480e70033
 softrend/softprmf/declared/zs/6/320x240/scene-unlit-plain f1d9eb8480e70033
 softrend/softprmf/declared/zs/6/320x240/scene-view-space 4e11433c1c71f133
@@ -3165,6 +3277,7 @@ softrend/softprmf/x87/zb/3/320x240/scene-lines-plain d85c7974924eb8be
 softrend/softprmf/x87/zb/3/320x240/scene-lines-plain-unlit 759975c253e489e3
 softrend/softprmf/x87/zb/3/320x240/scene-lines-rgb555 53b19a66312a505b
 softrend/softprmf/x87/zb/3/320x240/scene-lines-rgb565 9b9f961e928b7d87
+softrend/softprmf/x87/zb/3/320x240/scene-lines-rgb888 3336b04313c18c99
 softrend/softprmf/x87/zb/3/320x240/scene-mmx-rgb-dither-flat 9556dc4dbe3d2cb6
 softrend/softprmf/x87/zb/3/320x240/scene-mmx-rgb-dither-smooth 3faff33fa8926dda
 softrend/softprmf/x87/zb/3/320x240/scene-mmx-rgb-ditherscreen-flat 9556dc4dbe3d2cb6
@@ -3222,8 +3335,11 @@ softrend/softprmf/x87/zb/3/320x240/scene-tex-rgb555 8c7325bcfd859fdb
 softrend/softprmf/x87/zb/3/320x240/scene-tex-rgb555-affine 27f346d488460c5b
 softrend/softprmf/x87/zb/3/320x240/scene-tex-rgb565 a3c053b835750bdb
 softrend/softprmf/x87/zb/3/320x240/scene-tex-rgb565-affine 74a5d3d69cfc6ab3
+softrend/softprmf/x87/zb/3/320x240/scene-tex-rgb888 2faba32fbf006e75
+softrend/softprmf/x87/zb/3/320x240/scene-tex-rgb888-affine ed19568d6646c835
 softrend/softprmf/x87/zb/3/320x240/scene-textured cd9065a035c5847c
 softrend/softprmf/x87/zb/3/320x240/scene-textured-shade 3d6a687caffdb850
+softrend/softprmf/x87/zb/3/320x240/scene-textured-shade-converted 2c80ed28ed4513d0
 softrend/softprmf/x87/zb/3/320x240/scene-unlit 15de493775a00743
 softrend/softprmf/x87/zb/3/320x240/scene-unlit-plain 15de493775a00743
 softrend/softprmf/x87/zb/3/320x240/scene-view-space 37f141e90648b2c3
@@ -3280,6 +3396,7 @@ softrend/softprmf/x87/zb/4/320x240/scene-lines-plain bff4d773a7d30064
 softrend/softprmf/x87/zb/4/320x240/scene-lines-plain-unlit cd4191a42c8dffc7
 softrend/softprmf/x87/zb/4/320x240/scene-lines-rgb555 8252d14074b2933f
 softrend/softprmf/x87/zb/4/320x240/scene-lines-rgb565 cd4191a42c8dffc7
+softrend/softprmf/x87/zb/4/320x240/scene-lines-rgb888 cd4191a42c8dffc7
 softrend/softprmf/x87/zb/4/320x240/scene-mmx-rgb-dither-flat 8ed7df7b1886cc98
 softrend/softprmf/x87/zb/4/320x240/scene-mmx-rgb-dither-smooth 241f2fecb8899093
 softrend/softprmf/x87/zb/4/320x240/scene-mmx-rgb-ditherscreen-flat 42eac71539a30a38
@@ -3337,8 +3454,11 @@ softrend/softprmf/x87/zb/4/320x240/scene-tex-rgb555 cfc55ea2b2a09db8
 softrend/softprmf/x87/zb/4/320x240/scene-tex-rgb555-affine cfc55ea2b2a09db8
 softrend/softprmf/x87/zb/4/320x240/scene-tex-rgb565 cfc55ea2b2a09db8
 softrend/softprmf/x87/zb/4/320x240/scene-tex-rgb565-affine cfc55ea2b2a09db8
+softrend/softprmf/x87/zb/4/320x240/scene-tex-rgb888 cfc55ea2b2a09db8
+softrend/softprmf/x87/zb/4/320x240/scene-tex-rgb888-affine cfc55ea2b2a09db8
 softrend/softprmf/x87/zb/4/320x240/scene-textured e5a8a1ca0e0de849
 softrend/softprmf/x87/zb/4/320x240/scene-textured-shade e5a8a1ca0e0de849
+softrend/softprmf/x87/zb/4/320x240/scene-textured-shade-converted e5a8a1ca0e0de849
 softrend/softprmf/x87/zb/4/320x240/scene-unlit 20e452838b5d1543
 softrend/softprmf/x87/zb/4/320x240/scene-unlit-plain 20e452838b5d1543
 softrend/softprmf/x87/zb/4/320x240/scene-view-space 9c31a8ff5e7d6b23
@@ -3395,6 +3515,7 @@ softrend/softprmf/x87/zb/5/320x240/scene-lines-plain 201434a1cc2b8875
 softrend/softprmf/x87/zb/5/320x240/scene-lines-plain-unlit 6c4857ccc80f0107
 softrend/softprmf/x87/zb/5/320x240/scene-lines-rgb555 6c4857ccc80f0107
 softrend/softprmf/x87/zb/5/320x240/scene-lines-rgb565 1fa17f054176e16f
+softrend/softprmf/x87/zb/5/320x240/scene-lines-rgb888 6c4857ccc80f0107
 softrend/softprmf/x87/zb/5/320x240/scene-mmx-rgb-dither-flat 800fd8d23e0f29d8
 softrend/softprmf/x87/zb/5/320x240/scene-mmx-rgb-dither-smooth cf296b892156f5f5
 softrend/softprmf/x87/zb/5/320x240/scene-mmx-rgb-ditherscreen-flat 8d0fae6c567d6565
@@ -3452,8 +3573,11 @@ softrend/softprmf/x87/zb/5/320x240/scene-tex-rgb555 16212f5f9ec73123
 softrend/softprmf/x87/zb/5/320x240/scene-tex-rgb555-affine 16212f5f9ec73123
 softrend/softprmf/x87/zb/5/320x240/scene-tex-rgb565 16212f5f9ec73123
 softrend/softprmf/x87/zb/5/320x240/scene-tex-rgb565-affine 16212f5f9ec73123
+softrend/softprmf/x87/zb/5/320x240/scene-tex-rgb888 16212f5f9ec73123
+softrend/softprmf/x87/zb/5/320x240/scene-tex-rgb888-affine 16212f5f9ec73123
 softrend/softprmf/x87/zb/5/320x240/scene-textured e72f576c90706c61
 softrend/softprmf/x87/zb/5/320x240/scene-textured-shade e72f576c90706c61
+softrend/softprmf/x87/zb/5/320x240/scene-textured-shade-converted e72f576c90706c61
 softrend/softprmf/x87/zb/5/320x240/scene-unlit 370a091e2aa72783
 softrend/softprmf/x87/zb/5/320x240/scene-unlit-plain 370a091e2aa72783
 softrend/softprmf/x87/zb/5/320x240/scene-view-space 76d4f72e73e30283
@@ -3510,6 +3634,7 @@ softrend/softprmf/x87/zb/6/320x240/scene-lines-plain 05fcd5be713ad1e9
 softrend/softprmf/x87/zb/6/320x240/scene-lines-plain-unlit 329d2b3ab2c8d783
 softrend/softprmf/x87/zb/6/320x240/scene-lines-rgb555 329d2b3ab2c8d783
 softrend/softprmf/x87/zb/6/320x240/scene-lines-rgb565 329d2b3ab2c8d783
+softrend/softprmf/x87/zb/6/320x240/scene-lines-rgb888 4bb50e353cad7d33
 softrend/softprmf/x87/zb/6/320x240/scene-mmx-rgb-dither-flat 57dd7fc89f94ee7c
 softrend/softprmf/x87/zb/6/320x240/scene-mmx-rgb-dither-smooth 77952f9a1cf28b82
 softrend/softprmf/x87/zb/6/320x240/scene-mmx-rgb-ditherscreen-flat 57dd7fc89f94ee7c
@@ -3567,8 +3692,11 @@ softrend/softprmf/x87/zb/6/320x240/scene-tex-rgb555 77952f9a1cf28b82
 softrend/softprmf/x87/zb/6/320x240/scene-tex-rgb555-affine 77952f9a1cf28b82
 softrend/softprmf/x87/zb/6/320x240/scene-tex-rgb565 77952f9a1cf28b82
 softrend/softprmf/x87/zb/6/320x240/scene-tex-rgb565-affine 77952f9a1cf28b82
+softrend/softprmf/x87/zb/6/320x240/scene-tex-rgb888 4f18fe75beb67223
+softrend/softprmf/x87/zb/6/320x240/scene-tex-rgb888-affine 64ec49dc42e4af67
 softrend/softprmf/x87/zb/6/320x240/scene-textured 77952f9a1cf28b82
 softrend/softprmf/x87/zb/6/320x240/scene-textured-shade 77952f9a1cf28b82
+softrend/softprmf/x87/zb/6/320x240/scene-textured-shade-converted 7f2255d13547467b
 softrend/softprmf/x87/zb/6/320x240/scene-unlit f1d9eb8480e70033
 softrend/softprmf/x87/zb/6/320x240/scene-unlit-plain f1d9eb8480e70033
 softrend/softprmf/x87/zb/6/320x240/scene-view-space 4e11433c1c71f133
@@ -3625,6 +3753,7 @@ softrend/softprmf/x87/zs/3/320x240/scene-lines-plain d85c7974924eb8be
 softrend/softprmf/x87/zs/3/320x240/scene-lines-plain-unlit 759975c253e489e3
 softrend/softprmf/x87/zs/3/320x240/scene-lines-rgb555 1bcc03ef30f0a0c3
 softrend/softprmf/x87/zs/3/320x240/scene-lines-rgb565 dcf827b6b178d5a9
+softrend/softprmf/x87/zs/3/320x240/scene-lines-rgb888 414f4d1bfa79dfb3
 softrend/softprmf/x87/zs/3/320x240/scene-mmx-rgb-dither-flat 9556dc4dbe3d2cb6
 softrend/softprmf/x87/zs/3/320x240/scene-mmx-rgb-dither-smooth 3faff33fa8926dda
 softrend/softprmf/x87/zs/3/320x240/scene-mmx-rgb-ditherscreen-flat 9556dc4dbe3d2cb6
@@ -3682,8 +3811,11 @@ softrend/softprmf/x87/zs/3/320x240/scene-tex-rgb555 8c7325bcfd859fdb
 softrend/softprmf/x87/zs/3/320x240/scene-tex-rgb555-affine 27f346d488460c5b
 softrend/softprmf/x87/zs/3/320x240/scene-tex-rgb565 a3c053b835750bdb
 softrend/softprmf/x87/zs/3/320x240/scene-tex-rgb565-affine 74a5d3d69cfc6ab3
+softrend/softprmf/x87/zs/3/320x240/scene-tex-rgb888 2faba32fbf006e75
+softrend/softprmf/x87/zs/3/320x240/scene-tex-rgb888-affine ed19568d6646c835
 softrend/softprmf/x87/zs/3/320x240/scene-textured cd9065a035c5847c
 softrend/softprmf/x87/zs/3/320x240/scene-textured-shade cd9065a035c5847c
+softrend/softprmf/x87/zs/3/320x240/scene-textured-shade-converted 8c51e779ca64e9d6
 softrend/softprmf/x87/zs/3/320x240/scene-unlit 15de493775a00743
 softrend/softprmf/x87/zs/3/320x240/scene-unlit-plain 15de493775a00743
 softrend/softprmf/x87/zs/3/320x240/scene-view-space 37f141e90648b2c3
@@ -3740,6 +3872,7 @@ softrend/softprmf/x87/zs/4/320x240/scene-lines-plain bff4d773a7d30064
 softrend/softprmf/x87/zs/4/320x240/scene-lines-plain-unlit cd4191a42c8dffc7
 softrend/softprmf/x87/zs/4/320x240/scene-lines-rgb555 c9a425ac6e6c0027
 softrend/softprmf/x87/zs/4/320x240/scene-lines-rgb565 cd4191a42c8dffc7
+softrend/softprmf/x87/zs/4/320x240/scene-lines-rgb888 cd4191a42c8dffc7
 softrend/softprmf/x87/zs/4/320x240/scene-mmx-rgb-dither-flat a53d2a4bf6ac862e
 softrend/softprmf/x87/zs/4/320x240/scene-mmx-rgb-dither-smooth 2239011b5ac1197f
 softrend/softprmf/x87/zs/4/320x240/scene-mmx-rgb-ditherscreen-flat a53d2a4bf6ac862e
@@ -3797,8 +3930,11 @@ softrend/softprmf/x87/zs/4/320x240/scene-tex-rgb555 14791c44525237db
 softrend/softprmf/x87/zs/4/320x240/scene-tex-rgb555-affine fd30809d72f66b78
 softrend/softprmf/x87/zs/4/320x240/scene-tex-rgb565 2239011b5ac1197f
 softrend/softprmf/x87/zs/4/320x240/scene-tex-rgb565-affine 2239011b5ac1197f
+softrend/softprmf/x87/zs/4/320x240/scene-tex-rgb888 2239011b5ac1197f
+softrend/softprmf/x87/zs/4/320x240/scene-tex-rgb888-affine 2239011b5ac1197f
 softrend/softprmf/x87/zs/4/320x240/scene-textured 2239011b5ac1197f
 softrend/softprmf/x87/zs/4/320x240/scene-textured-shade 2239011b5ac1197f
+softrend/softprmf/x87/zs/4/320x240/scene-textured-shade-converted 2239011b5ac1197f
 softrend/softprmf/x87/zs/4/320x240/scene-unlit 20e452838b5d1543
 softrend/softprmf/x87/zs/4/320x240/scene-unlit-plain 20e452838b5d1543
 softrend/softprmf/x87/zs/4/320x240/scene-view-space 9c31a8ff5e7d6b23
@@ -3855,6 +3991,7 @@ softrend/softprmf/x87/zs/5/320x240/scene-lines-plain 201434a1cc2b8875
 softrend/softprmf/x87/zs/5/320x240/scene-lines-plain-unlit 6c4857ccc80f0107
 softrend/softprmf/x87/zs/5/320x240/scene-lines-rgb555 6c4857ccc80f0107
 softrend/softprmf/x87/zs/5/320x240/scene-lines-rgb565 84361b9a75ff01f3
+softrend/softprmf/x87/zs/5/320x240/scene-lines-rgb888 6c4857ccc80f0107
 softrend/softprmf/x87/zs/5/320x240/scene-mmx-rgb-dither-flat a0fb70fe62974a7a
 softrend/softprmf/x87/zs/5/320x240/scene-mmx-rgb-dither-smooth 0a3046780ff28910
 softrend/softprmf/x87/zs/5/320x240/scene-mmx-rgb-ditherscreen-flat a0fb70fe62974a7a
@@ -3912,8 +4049,11 @@ softrend/softprmf/x87/zs/5/320x240/scene-tex-rgb555 0a3046780ff28910
 softrend/softprmf/x87/zs/5/320x240/scene-tex-rgb555-affine 0a3046780ff28910
 softrend/softprmf/x87/zs/5/320x240/scene-tex-rgb565 a602041ee3269b2f
 softrend/softprmf/x87/zs/5/320x240/scene-tex-rgb565-affine 22776305c6b922f6
+softrend/softprmf/x87/zs/5/320x240/scene-tex-rgb888 0a3046780ff28910
+softrend/softprmf/x87/zs/5/320x240/scene-tex-rgb888-affine 0a3046780ff28910
 softrend/softprmf/x87/zs/5/320x240/scene-textured 0a3046780ff28910
 softrend/softprmf/x87/zs/5/320x240/scene-textured-shade 0a3046780ff28910
+softrend/softprmf/x87/zs/5/320x240/scene-textured-shade-converted 0a3046780ff28910
 softrend/softprmf/x87/zs/5/320x240/scene-unlit 370a091e2aa72783
 softrend/softprmf/x87/zs/5/320x240/scene-unlit-plain 370a091e2aa72783
 softrend/softprmf/x87/zs/5/320x240/scene-view-space 76d4f72e73e30283
@@ -3970,6 +4110,7 @@ softrend/softprmf/x87/zs/6/320x240/scene-lines-plain 05fcd5be713ad1e9
 softrend/softprmf/x87/zs/6/320x240/scene-lines-plain-unlit 329d2b3ab2c8d783
 softrend/softprmf/x87/zs/6/320x240/scene-lines-rgb555 329d2b3ab2c8d783
 softrend/softprmf/x87/zs/6/320x240/scene-lines-rgb565 329d2b3ab2c8d783
+softrend/softprmf/x87/zs/6/320x240/scene-lines-rgb888 e30f3bef2800ce7b
 softrend/softprmf/x87/zs/6/320x240/scene-mmx-rgb-dither-flat 57dd7fc89f94ee7c
 softrend/softprmf/x87/zs/6/320x240/scene-mmx-rgb-dither-smooth 77952f9a1cf28b82
 softrend/softprmf/x87/zs/6/320x240/scene-mmx-rgb-ditherscreen-flat 57dd7fc89f94ee7c
@@ -4027,8 +4168,11 @@ softrend/softprmf/x87/zs/6/320x240/scene-tex-rgb555 77952f9a1cf28b82
 softrend/softprmf/x87/zs/6/320x240/scene-tex-rgb555-affine 77952f9a1cf28b82
 softrend/softprmf/x87/zs/6/320x240/scene-tex-rgb565 77952f9a1cf28b82
 softrend/softprmf/x87/zs/6/320x240/scene-tex-rgb565-affine 77952f9a1cf28b82
+softrend/softprmf/x87/zs/6/320x240/scene-tex-rgb888 4f18fe75beb67223
+softrend/softprmf/x87/zs/6/320x240/scene-tex-rgb888-affine 64ec49dc42e4af67
 softrend/softprmf/x87/zs/6/320x240/scene-textured 77952f9a1cf28b82
 softrend/softprmf/x87/zs/6/320x240/scene-textured-shade 77952f9a1cf28b82
+softrend/softprmf/x87/zs/6/320x240/scene-textured-shade-converted 7f2255d13547467b
 softrend/softprmf/x87/zs/6/320x240/scene-unlit f1d9eb8480e70033
 softrend/softprmf/x87/zs/6/320x240/scene-unlit-plain f1d9eb8480e70033
 softrend/softprmf/x87/zs/6/320x240/scene-view-space 4e11433c1c71f133

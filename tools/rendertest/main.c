@@ -1163,9 +1163,10 @@ static const rt_relation rt_relations[] = {
      * textured entry wants an RGB_888 map. At each of those the relation's two
      * sides are the same untextured frame.
      *
-     * Which leaves the 888 textured line block with no witness in the corpus: to
-     * reach it a fixture has to bind an RGB_888 map, and none does. That is a
-     * fixture gap, not a relation to write.
+     * scene-lines-rgb888 binds one, and is the witness for that block: its
+     * control is scene-lines-plain-unlit, the untextured frame its own unlit
+     * white material produces, because scene-lines-plain is the lit grey one and
+     * comparing against it would pass whether the map was sampled or dropped.
      *
      * The gouraud pair is asserted at 8bpp alone for the same reason, and its
      * 888 twin went with the others: the 888 textured line block carries no
@@ -1183,6 +1184,13 @@ static const rt_relation rt_relations[] = {
     {.a = "scene-lines-map-gouraud", .b = "scene-lines-gouraud",       .equal = BR_FALSE, .pm_type = BR_PMT_INDEX_8, .mode = RT_ANY_MODE,
      .device = "softrend"},
     {.a = "scene-lines-map-unlit",   .b = "scene-lines-plain-unlit",   .equal = BR_FALSE, .pm_type = BR_PMT_INDEX_8, .mode = RT_ANY_MODE,
+     .device = "softrend"},
+    /*
+     * The 888 textured line block. It wants an RGB_888 map, so scene-lines-map
+     * cannot reach it whatever the loader does with the map; scene-lines-rgb888
+     * binds one, which makes this the entry that witnesses the block.
+     */
+    {.a = "scene-lines-rgb888",      .b = "scene-lines-plain-unlit",   .equal = BR_FALSE, .pm_type = BR_PMT_RGB_888, .mode = RT_ANY_MODE,
      .device = "softrend"},
 
     /*
@@ -1209,6 +1217,9 @@ static const rt_relation rt_relations[] = {
     {.a = "scene-shade-arb-smooth-persp", .b = "scene-shade-arb-flat-persp", .equal = BR_FALSE, .pm_type = BR_PMT_RGB_888, .mode = RT_ANY_MODE,
      .device = "softrend"},
     {.a = "scene-tex-rgb555-affine",      .b = "scene-tex-rgb555",      .equal = BR_FALSE, .pm_type = BR_PMT_RGB_555, .mode = RT_MODE_ZS,
+     .device = "softrend"},
+    {.a = "scene-tex-rgb888",             .b = "scene-textured",        .equal = BR_FALSE, .pm_type = BR_PMT_RGB_888, .mode = RT_ANY_MODE},
+    {.a = "scene-tex-rgb888-affine",      .b = "scene-tex-rgb888",      .equal = BR_FALSE, .pm_type = BR_PMT_RGB_888, .mode = RT_ANY_MODE,
      .device = "softrend"},
     {.a = "scene-tex-rgb565-affine",      .b = "scene-tex-rgb565",      .equal = BR_FALSE, .pm_type = BR_PMT_RGB_565, .mode = RT_MODE_ZS,
      .device = "softrend"},
@@ -2291,7 +2302,7 @@ static const char *const rt_default_scenes[] = {
     "scene-tex-arb",    "scene-tex-32",     "scene-shade",          "scene-decal",       "scene-fog",             "scene-blend",
     "scene-dither",     "scene-alpha",
     "scene-shade-rgb555", "scene-shade-rgb555-flat", "scene-shade-rgb565", "scene-shade-rgb565-flat",
-    "scene-shade-rgb888", "scene-tex-rgb555", "scene-tex-rgb565",
+    "scene-shade-rgb888", "scene-tex-rgb555", "scene-tex-rgb565", "scene-tex-rgb888", "scene-textured-shade-converted",
     "scene-blend-off",
 
     /*
@@ -2300,7 +2311,7 @@ static const char *const rt_default_scenes[] = {
      * one cube per output format, so each is the witness at its own --bpp.
      */
     "scene-shade-arb-flat", "scene-shade-arb-flat-persp", "scene-shade-arb-smooth-persp",
-    "scene-tex-rgb555-affine", "scene-tex-rgb565-affine",
+    "scene-tex-rgb555-affine", "scene-tex-rgb565-affine", "scene-tex-rgb888-affine",
 
     /*
      * The z-sorted INDEX_8 intensity-step fixture; see scene.c. Its shade table
@@ -2333,7 +2344,7 @@ static const char *const rt_default_scenes[] = {
      * are one knob away from.
      */
     "scene-lines-plain",       "scene-lines-gouraud", "scene-lines-map", "scene-lines-map-gouraud", "scene-lines-plain-unlit",
-    "scene-lines-map-unlit",   "scene-lines-rgb555", "scene-lines-rgb565",
+    "scene-lines-map-unlit",   "scene-lines-rgb555", "scene-lines-rgb565", "scene-lines-rgb888",
 
     /*
      * The MMX 555/565 family. pentprim walks the MMX table before the general
