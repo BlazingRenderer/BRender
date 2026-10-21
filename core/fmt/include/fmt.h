@@ -143,6 +143,35 @@ typedef struct br_gltf_options {
 } br_gltf_options;
 
 /*
+ * Options structure passed to GLTF format writer
+ */
+typedef struct br_gltf_save_options {
+
+    /*
+     * Flags determining how pixelmaps are written.
+     */
+    br_uint_32 flags;
+
+} br_gltf_save_options;
+
+/*
+ * GLTF save flags
+ */
+enum {
+    /*
+     * Write a pixelmap as a raw BRender pixelmap - the engine's own .pix
+     * stream, base64'd into the image's URI - rather than converting it to
+     * colour. The type, the samples, the identifier and the palette all survive,
+     * and a new pixel type needs no change here.
+     *
+     * This is a debug interchange: the images are readable only by BRender. A
+     * lookup table is carried this way with or without the flag, because a
+     * conversion to colour would lose the only thing it holds.
+     */
+    BR_GLTF_SAVE_PRESERVE_MAP_TYPES = 0x00000001,
+};
+
+/*
  * VUE format structures
  */
 

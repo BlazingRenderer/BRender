@@ -287,7 +287,15 @@ static void scene_set_camera_range(br_actor *world, br_scalar hither, br_scalar 
     }
 }
 
-static br_error scene_save(const char *name, br_actor *world)
+/*
+ * Save a scene, and release its world. `options` selects how pixelmaps are
+ * written; NULL is the writer's default, which converts every map to colour.
+ *
+ * Every fixture is written with BR_GLTF_SAVE_PRESERVE_MAP_TYPES: a scene binds
+ * lookup tables as well as colour maps, and a table's samples are not colour, so
+ * there is no other way for one to survive the file.
+ */
+static br_error scene_save_opts(const char *name, br_actor *world, const br_gltf_save_options *options)
 {
     br_actor *actors[1];
     br_error  r;
@@ -299,7 +307,7 @@ static br_error scene_save(const char *name, br_actor *world)
 
     actors[0] = world;
 
-    r = BrFmtGLTFActorSaveMany(name, actors, 1);
+    r = BrFmtGLTFActorSaveMany(name, actors, 1, options);
 
     BrActorFree(world);
 
@@ -307,6 +315,13 @@ static br_error scene_save(const char *name, br_actor *world)
         fprintf(stderr, "failed to save %s\n", name);
 
     return r;
+}
+
+static const br_gltf_save_options scene_save_preserve = {.flags = BR_GLTF_SAVE_PRESERVE_MAP_TYPES};
+
+static br_error scene_save(const char *name, br_actor *world)
+{
+    return scene_save_opts(name, world, &scene_save_preserve);
 }
 
 static br_material *scene_material(const char *name)
@@ -1269,8 +1284,9 @@ static br_error scene_make_mmx_fixtures(br_model *cube)
  * The map is scene-tex-arb's shape, an indexed checkerboard of arbitrary width
  * (96x48): the line and point family has no power-of-two blocks, so every one
  * of these states is an ADDR_DIVIDE tuple and a power-of-two map would reach
- * nothing. The palette carries it through the 24bpp run, where the loader
- * re-types an indexed map as an RGB_888 one.
+ * nothing. At 888 the map is not sampled at all - the 888 textured entry wants
+ * an RGB_888 map and the entry's texture type must equal the bound map's - so
+ * these fixtures texture at 8, 15 and 16bpp and draw untextured there.
  *
  * The indexed shade table is bound only where a tree entry requires one: the
  * line/point INTERP_I/TEX_I8 and CONST_I/TEX_I8 blocks declare shade_type
@@ -1489,8 +1505,8 @@ static br_error scene_add_backdrop(br_actor *world, br_model *cube, const char *
  *
  * The map is an INDEX_8 map with no palette, the shape scene-shade-rgb888
  * already uses. It has to stay INDEX_8 at every output: the blocks all require
- * texture type INDEX_8, and the loader re-types an indexed map that carries a
- * palette - so a palette here would leave the 24bpp run on the untextured
+ * texture type INDEX_8, and a map that carries a palette is a colour map rather
+ * than a table - so a palette here would leave the 24bpp run on the untextured
  * block. DIVIDE is then forced rather than chosen: the arbitrary-width family
  * is the only one of these cells the tables emit for 555/565 at all, and 888
  * has no SHIFT variant of any of them.
@@ -2330,8 +2346,8 @@ static br_error scene_make_feature_fixtures(br_model *cube)
      * textured, unshaded 15bpp primitive with a BR_PMT_RGB_555 map selects
      * TriangleRenderPITA15 and nothing else. No
      * fixture could reach it before, because the only colour maps in the tree
-     * were INDEX_8; the brender=rgb555/rgb565 glTF markers are what let one be
-     * authored and read back as itself.
+     * were INDEX_8; a save that preserves map types is what lets one be authored
+     * and read back as itself.
      *
      * Reachable only in the Z-sort mode, and that is a property of the block set
      * rather than of the fixture: with a depth buffer the MMX table is walked

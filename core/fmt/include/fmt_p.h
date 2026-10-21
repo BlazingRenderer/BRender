@@ -213,12 +213,14 @@ br_pixelmap *BR_PUBLIC_ENTRY BrFmtPCXLoad(const char *name, br_uint_32 flags);
  * Every model these actors reference must already be prepared -
  * BrModelUpdate(model, BR_MODU_ALL) - because the writer reads the prepared
  * v11model. An unprepared one is asserted against, not dereferenced.
+ *
+ * `options` may be NULL, which writes the file the way this writer always has.
  */
-br_error BR_PUBLIC_ENTRY BrFmtGLTFActorSaveMany(const char *name, br_actor **actors, br_size_t num);
-br_error BR_PUBLIC_ENTRY BrFmtGLTFActorSave(const char *name, br_actor *actor);
+br_error BR_PUBLIC_ENTRY BrFmtGLTFActorSaveMany(const char *name, br_actor **actors, br_size_t num, const br_gltf_save_options *options);
+br_error BR_PUBLIC_ENTRY BrFmtGLTFActorSave(const char *name, br_actor *actor, const br_gltf_save_options *options);
 
-br_error BR_PUBLIC_ENTRY BrFmtGLTFModelSaveMany(const char *name, br_model **models, br_size_t num);
-br_error BR_PUBLIC_ENTRY BrFmtGLTFModelSave(const char *name, br_model *model);
+br_error BR_PUBLIC_ENTRY BrFmtGLTFModelSaveMany(const char *name, br_model **models, br_size_t num, const br_gltf_save_options *options);
+br_error BR_PUBLIC_ENTRY BrFmtGLTFModelSave(const char *name, br_model *model, const br_gltf_save_options *options);
 
 br_fmt_results *BR_PUBLIC_ENTRY BrFmtGLTFActorLoadMany(const char *name, const br_gltf_options *options);
 

@@ -8,6 +8,8 @@
 #include "brstb.h"
 #include "cgltf.h"
 
+#include "brmemfs.h"
+
 /* Defined in animgltf.c */
 br_animation_set      *BrFmtGLTFAnimBuildSet(const cgltf_data *data, br_uint_32 nnodes, void *res_parent);
 br_animation_instance *BrFmtGLTFAnimBuildInstance(br_animation_set *set, br_actor **all_actors, br_uint_32 nnodes, void *res_parent);
@@ -135,47 +137,6 @@ void *unbuild_data_url(void *res, const char *uri, size_t *size)
 }
 
 /*
- * A lookup table's samples are carried raw in a marked data URI (see
- * cgltf_brender.h). Return the pixel type the marker names, set *components to
- * the PNG channel count it was written with and *marker to the marker itself,
- * or return 0 for an ordinary colour image. The marker names the type rather
- * than the loader inferring it: BR_PMT_RGB_555 and BR_PMT_RGB_565 are both two
- * bytes per sample, and a shade table's type must equal the output, so guessing
- * would collapse them. The marker is returned as well so that a PNG which
- * disagrees with it can be named without printing the whole data URI.
- */
-static br_uint_8 load_table_type(const char *uri, int *components, const char **marker)
-{
-    if(BrStrNCmp(uri, CGLTF_BR_INDEX_8_PNG_URI, BR_ASIZE(CGLTF_BR_INDEX_8_PNG_URI) - 1) == 0) {
-        *components = 1;
-        *marker     = "index8";
-        return BR_PMT_INDEX_8;
-    }
-
-    if(BrStrNCmp(uri, CGLTF_BR_RGB_555_PNG_URI, BR_ASIZE(CGLTF_BR_RGB_555_PNG_URI) - 1) == 0) {
-        *components = 2;
-        *marker     = "rgb555";
-        return BR_PMT_RGB_555;
-    }
-
-    if(BrStrNCmp(uri, CGLTF_BR_RGB_565_PNG_URI, BR_ASIZE(CGLTF_BR_RGB_565_PNG_URI) - 1) == 0) {
-        *components = 2;
-        *marker     = "rgb565";
-        return BR_PMT_RGB_565;
-    }
-
-    if(BrStrNCmp(uri, CGLTF_BR_RGB_888_PNG_URI, BR_ASIZE(CGLTF_BR_RGB_888_PNG_URI) - 1) == 0) {
-        *components = 3;
-        *marker     = "rgb888";
-        return BR_PMT_RGB_888;
-    }
-
-    *components = 0;
-    *marker     = NULL;
-    return 0;
-}
-
-/*
  * Refuse the file for an image whose payload is present but could not be
  * turned into a pixelmap. A missing image leaves a NULL entry and the scene
  * loads without it; an image that is there and broken is a defect in the asset
@@ -191,21 +152,62 @@ static br_error image_not_decodable(br_size_t image_index, const cgltf_image *im
 }
 
 /*
- * Refuse the file for a marked lookup table whose PNG does not carry the number
- * of channels the marker names. stbi converts silently when asked for a count
- * the PNG does not have, so a hand-edited or third-party image whose channels
- * disagree with its marker would be rebuilt as a table made of converted
- * samples rather than refused - and a lookup table's contents are the one thing
- * nothing else checks. The image is named by index and name, and the marker is
- * named too, since the URI it lives in is not readable at a glance.
+ * Does this map's sample allocation actually hold the rows its header claims?
+ * The .pix reader allocates whatever the PIXELS chunk holds and takes the rest of
+ * the geometry from the header, so a chunk of zero length, or one shorter than
+ * width x height, leaves a map with a width, a height and a stride but too little
+ * behind them. BrResSize() is the allocation, so it is the quantity to compare.
+ * A map's stride cannot be the thing that is wrong: the reader recomputes
+ * row_bytes from the width, so a payload cannot deliver a mis-strided one.
  */
-static br_error image_marker_mismatch(br_size_t image_index, const cgltf_image *image, const char *marker, int marker_channels, int png_channels)
+static br_boolean map_whole(const br_pixelmap *pm)
 {
-    BrLogError("GLTF",
-               "image %lu (\"%s\") is marked brender=%s, which names %d channels, but its PNG has %d; a table's samples are its "
-               "channels, so decoding between them would rebuild the wrong table",
-               (unsigned long)image_index, image->name != NULL ? image->name : "<unnamed>", marker, marker_channels, png_channels);
-    return BRE_FAIL;
+    if(pm->pixels == NULL || pm->width <= 0 || pm->height <= 0 || pm->row_bytes <= 0)
+        return BR_FALSE;
+
+    if(BrResSize(pm->pixels) < (br_size_t)pm->row_bytes * (br_size_t)pm->height)
+        return BR_FALSE;
+
+    return pm->map == NULL || map_whole(pm->map);
+}
+
+/*
+ * The map as it was saved, deliberately not converted to the output type the way
+ * an ordinary image is: preserving it is the only reason the payload exists.
+ */
+static br_error load_pix_payload(br_gltf_load_state *state, br_size_t image_index, const cgltf_image *image, br_pixelmap **out)
+{
+    memfile_store  store     = {0};
+    br_filesystem *previous;
+    br_pixelmap   *loaded[1] = {0};
+    br_uint_32     n;
+    void          *raw;
+    size_t         size;
+
+    if((raw = unbuild_data_url(state, image->uri, &size)) == NULL)
+        return image_not_decodable(image_index, image);
+
+    store.data = raw;
+    store.size = size;
+
+    previous = BrMemFileInstall(&store);
+    n        = BrPixelmapLoadMany("memory.pix", loaded, 1);
+    BrMemFileRestore(previous);
+
+    BrResFree(raw);
+
+    /*
+     * A map whose sample buffer is NULL is a broken stream, not a map: the
+     * identifier and the pixel chunk are what a truncated or desynchronised
+     * payload loses first, and handing the material a map with a width and a
+     * height but no pixels defers the failure to the rasteriser.
+     */
+    if(n != 1 || loaded[0] == NULL || !map_whole(loaded[0]))
+        return image_not_decodable(image_index, image);
+
+    *out = loaded[0];
+
+    return BRE_OK;
 }
 
 /*
@@ -225,11 +227,8 @@ static br_error load_pixelmap(br_gltf_load_state *state, br_size_t image_index, 
     void        *raw_data, *pixels;
     br_pixelmap *pixelmap, *tmp;
     size_t       size;
-    int          x, y, c;
-    int          owns_raw     = 0;
-    br_uint_8    table_type   = 0;
-    int          table_comp   = 0;
-    const char  *table_marker = NULL;
+    int          x, y;
+    int          owns_raw = 0;
 
     *out = NULL;
 
@@ -243,12 +242,8 @@ static br_error load_pixelmap(br_gltf_load_state *state, br_size_t image_index, 
         if(raw_data == NULL)
             return image_not_decodable(image_index, image);
     } else if(image->uri != NULL) {
-        /*
-         * A lookup table: its payload is the pixelmap's raw samples, not colour,
-         * and the marker names the type so the table comes back as the exact
-         * pixelmap the renderer needs (see cgltf_brender.h).
-         */
-        table_type = load_table_type(image->uri, &table_comp, &table_marker);
+        if(BrStrNCmp(image->uri, CGLTF_BR_PIX_URI, BR_ASIZE(CGLTF_BR_PIX_URI) - 1) == 0)
+            return load_pix_payload(state, image_index, image, out);
 
         if(is_base64_data_uri(image->uri)) {
             /*
@@ -307,13 +302,7 @@ static br_error load_pixelmap(br_gltf_load_state *state, br_size_t image_index, 
         return image_not_decodable(image_index, image);
     }
 
-    /*
-     * A marked table is decoded at the PNG's own channel count, so that an image
-     * whose channels disagree with its marker comes out as that disagreement
-     * rather than a conversion. An ordinary image is decoded as RGBA and
-     * converted to the output type below.
-     */
-    if((pixels = stbi_load_from_memory(raw_data, (int)size, &x, &y, &c, table_type ? 0 : 4)) == NULL) {
+    if((pixels = stbi_load_from_memory(raw_data, (int)size, &x, &y, NULL, 4)) == NULL) {
         if(owns_raw)
             BrResFree(raw_data);
         return image_not_decodable(image_index, image);
@@ -321,40 +310,6 @@ static br_error load_pixelmap(br_gltf_load_state *state, br_size_t image_index, 
 
     if(owns_raw)
         BrResFree(raw_data);
-
-    if(table_type != 0 && c != table_comp) {
-        BrMemFree(pixels);
-        return image_marker_mismatch(image_index, image, table_marker, table_comp, c);
-    }
-
-    if(table_type) {
-        /*
-         * Rebuild the lookup table as it was: the marked type, the samples in
-         * their own channels, and deliberately no palette. The PNG only carries
-         * the samples, so the rows are copied into the row_bytes the engine
-         * would have allocated itself.
-         */
-        size_t row_bytes = (size_t)x * (size_t)table_comp;
-
-        pixelmap = BrPixelmapAllocate(table_type, x, y, NULL, BR_PMAF_NORMAL);
-
-        if(pixelmap != NULL) {
-            if(row_bytes > (size_t)pixelmap->row_bytes)
-                row_bytes = (size_t)pixelmap->row_bytes;
-
-            for(int row = 0; row < pixelmap->height; ++row) {
-                BrMemCpy((br_uint_8 *)pixelmap->pixels + (row * pixelmap->row_bytes),
-                         (const br_uint_8 *)pixels + ((size_t)row * x * (size_t)table_comp), row_bytes);
-            }
-
-            if(image->name != NULL)
-                pixelmap->identifier = BrResStrDup(pixelmap, image->name);
-        }
-
-        BrMemFree(pixels);
-        *out = pixelmap;
-        return BRE_OK;
-    }
 
     tmp             = BrPixelmapAllocate(BR_PMT_RGBA_8888_ARR, x, y, pixels, BR_PMAF_NORMAL);
     tmp->identifier = (char *)image->name; /* NB: This is safe, the clone below will copy it. */

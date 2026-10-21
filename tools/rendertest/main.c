@@ -971,6 +971,17 @@ typedef struct rt_relation {
         {.a = a_, .b = b_, .equal = BR_FALSE, .pm_type = BR_PMT_RGB_565, .mode = RT_MODE_ZB, .device = "softrend"}
 
 /*
+ * A relation that holds only where the bound colour map is sampled. The
+ * matcher's texture axis is the output format, so an INDEX_8 map with a palette
+ * reaches the frame at 8, 15 and 16bpp and not at 888, where no block declares
+ * an INDEX_8 texture. See the render-feature relation block for the measurement.
+ */
+#define RT_MAPPED_NE(a_, b_, mode_)                                                                             \
+    {.a = a_, .b = b_, .equal = BR_FALSE, .pm_type = BR_PMT_INDEX_8, .mode = mode_, .device = "softrend"},      \
+        {.a = a_, .b = b_, .equal = BR_FALSE, .pm_type = BR_PMT_RGB_555, .mode = mode_, .device = "softrend"},  \
+        {.a = a_, .b = b_, .equal = BR_FALSE, .pm_type = BR_PMT_RGB_565, .mode = mode_, .device = "softrend"}
+
+/*
  * The lighting fixtures. Each pair differs by one property of one light -
  * whether it hits, how far it reaches, whether it is directional or
  * ambient-only - so a light path that stops applying one fails here rather
@@ -1045,10 +1056,19 @@ static const rt_relation rt_relations[] = {
     {.a = "scene-smooth",         .b = "scene-flat",             .equal = BR_FALSE, .pm_type = RT_ANY_TYPE, .mode = RT_ANY_MODE,
      .device = "softrend"},
     {.a = "scene-textured-shade", .b = "scene-textured",         .equal = BR_FALSE, .pm_type = BR_PMT_INDEX_8, .mode = RT_MODE_ZB},
-    {.a = "scene-persp",          .b = "scene-textured",         .equal = BR_FALSE, .pm_type = RT_ANY_TYPE, .mode = RT_MODE_ZB,
-     .device = "softrend"},
+    /*
+     * The perspective and arbitrary-UV flags, asserted where the bound map is
+     * sampled. scene-textured binds an INDEX_8 map with a palette, and the
+     * matcher's texture axis is the output format: the indexed kernels take that
+     * map at 8bpp and the MMX family's textured rows require exactly it at 555
+     * and 565, but no block at 888 declares an INDEX_8 texture - so at that type
+     * the map is dropped and both frames are the same untextured cube. That is
+     * measured in both rasterisers, and asserting either pair at 888 would be
+     * asserting the opposite of what they do.
+     */
+    RT_MAPPED_NE("scene-persp", "scene-textured", RT_MODE_ZB),
     {.a = "scene-persp-shade",    .b = "scene-persp",            .equal = BR_FALSE, .pm_type = BR_PMT_INDEX_8, .mode = RT_MODE_ZB},
-    {.a = "scene-tex-arb",        .b = "scene-textured",         .equal = BR_FALSE, .pm_type = RT_ANY_TYPE, .mode = RT_MODE_ZB},
+    RT_MAPPED_NE("scene-tex-arb", "scene-textured", RT_MODE_ZB),
     /*
      * The 32x32 map in the Z-sort mode: the mode is where pentprim's
      * TriangleRender_PT_I8_32 packs the base texel from the wrong width, and
@@ -1134,19 +1154,23 @@ static const rt_relation rt_relations[] = {
      * is one actor short cannot stand in, which is why each fixture's control
      * is another two-actor scene rather than scene-edges or scene-points.
      *
-     * The textured fixtures are asserted at INDEX_8 and RGB_888 only, and that
-     * is a measurement: neither the 555 nor the 565 line/point table has a
-     * textured entry at all, so at those types the map is dropped and both
-     * sides of the relation draw the same untextured frame. Asserting it there
-     * would be asserting a property the renderer does not have.
+     * The textured fixtures are asserted at INDEX_8 alone, and that is a
+     * measurement. Every line and point table carries exactly one textured entry
+     * per output format, keyed to that format's texture type - `SP_FMT_I8` wants
+     * an INDEX_8 map, `SP_FMT_555` a 555, `SP_FMT_888` an RGB_888 - and
+     * scene-lines-map binds an INDEX_8 one. So the map is dropped at 555 and
+     * 565, which have no textured entry for it at all, and again at 888, whose
+     * textured entry wants an RGB_888 map. At each of those the relation's two
+     * sides are the same untextured frame.
      *
-     * At 24bpp the loader re-types the indexed map as RGB_888 and the general
-     * 888 table does have a textured entry, so a relation against a fixture
-     * without a map holds in both depth modes. It does not hold between
-     * scene-lines-map-gouraud and scene-lines-map: the 888 textured line block
-     * carries no shading at all, so both select the same unshaded cell there and
-     * the frames are equal - measured, and why that pair is asserted at 8bpp
-     * alone while the map/no-map pairs are asserted at both.
+     * Which leaves the 888 textured line block with no witness in the corpus: to
+     * reach it a fixture has to bind an RGB_888 map, and none does. That is a
+     * fixture gap, not a relation to write.
+     *
+     * The gouraud pair is asserted at 8bpp alone for the same reason, and its
+     * 888 twin went with the others: the 888 textured line block carries no
+     * shading, so a version of that pair at 888 would compare two frames that
+     * select the same unshaded cell.
      *
      * Both fields are spelled out; see the note on RT_ANY_TYPE above.
      */
@@ -1154,17 +1178,11 @@ static const rt_relation rt_relations[] = {
      .device = "softrend"},
     {.a = "scene-lines-map",         .b = "scene-lines-plain",         .equal = BR_FALSE, .pm_type = BR_PMT_INDEX_8, .mode = RT_ANY_MODE,
      .device = "softrend"},
-    {.a = "scene-lines-map",         .b = "scene-lines-plain",         .equal = BR_FALSE, .pm_type = BR_PMT_RGB_888, .mode = RT_ANY_MODE,
-     .device = "softrend"},
     {.a = "scene-lines-map-gouraud", .b = "scene-lines-map",           .equal = BR_FALSE, .pm_type = BR_PMT_INDEX_8, .mode = RT_ANY_MODE,
      .device = "softrend"},
     {.a = "scene-lines-map-gouraud", .b = "scene-lines-gouraud",       .equal = BR_FALSE, .pm_type = BR_PMT_INDEX_8, .mode = RT_ANY_MODE,
      .device = "softrend"},
-    {.a = "scene-lines-map-gouraud", .b = "scene-lines-gouraud",       .equal = BR_FALSE, .pm_type = BR_PMT_RGB_888, .mode = RT_ANY_MODE,
-     .device = "softrend"},
     {.a = "scene-lines-map-unlit",   .b = "scene-lines-plain-unlit",   .equal = BR_FALSE, .pm_type = BR_PMT_INDEX_8, .mode = RT_ANY_MODE,
-     .device = "softrend"},
-    {.a = "scene-lines-map-unlit",   .b = "scene-lines-plain-unlit",   .equal = BR_FALSE, .pm_type = BR_PMT_RGB_888, .mode = RT_ANY_MODE,
      .device = "softrend"},
 
     /*

@@ -41,24 +41,13 @@ typedef struct cgltf_brender_actor {
 } cgltf_brender_actor;
 
 /*
- * Data URI prefixes for an image whose PNG channels are the raw samples of a
- * lookup table, rather than colour.
- *
- * A material's lookup table (index_shade, index_blend, index_fog or screendoor)
- * is a pixelmap with no palette that the rasterisers index directly. For the
- * indexed output it is BR_PMT_INDEX_8 and the samples are indices; but a shade
- * table's type must equal the output format, so an RGB output needs an RGB-typed
- * table whose samples are the output words. Either way there is no palette to
- * expand through and any conversion to colour would lose the only thing that
- * matters: the sample bytes. The marker names the type so the loader rebuilds the
- * exact pixelmap the renderer needs - a three-channel PNG is not enough, because
- * BR_PMT_RGB_555 and BR_PMT_RGB_565 are both two bytes per sample and sharing one
- * marker would collapse them onto whichever the loader guessed.
+ * A whole BRender pixelmap, as the engine's own .pix serialiser writes it. glTF
+ * has no notion of a pixel type, so this is how one survives a save and a load:
+ * the type, the samples, the identifier and the palette, with nothing here to
+ * keep in step when a pixel type is added. Only BRender can read it - a debug
+ * interchange, not a viewable image.
  */
-#define CGLTF_BR_INDEX_8_PNG_URI "data:image/png;brender=index8;base64,"
-#define CGLTF_BR_RGB_555_PNG_URI "data:image/png;brender=rgb555;base64,"
-#define CGLTF_BR_RGB_565_PNG_URI "data:image/png;brender=rgb565;base64,"
-#define CGLTF_BR_RGB_888_PNG_URI "data:image/png;brender=rgb888;base64,"
+#define CGLTF_BR_PIX_URI "data:application/vnd.brender.pix;base64,"
 
 typedef struct cgltf_brender_material {
     char        *identifier;

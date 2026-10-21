@@ -5,6 +5,8 @@
 
 #include "formats.h"
 
+#include "brmemfs.h"
+
 #include "cbase64.h"
 #include "brstb.h"
 #include "cgltf_write.h"
@@ -29,13 +31,14 @@ static int compare_sampler_key(const void *a, const void *b)
 }
 
 typedef struct br_gltf_save_state {
-    cgltf_data *data;
-    br_hashmap *actor_map;    /**< br_actor                 -> cgltf_node     */
-    br_hashmap *model_map;    /**< br_model                 -> cgltf_mesh     */
-    br_hashmap *material_map; /**< br_material              -> cgltf_material */
-    br_hashmap *stored_map;   /**< br_material::stored      -> br_material    */
-    br_hashmap *pixelmap_map; /**< br_pixelmap              -> cgltf_image    */
-    br_hashmap *sampler_map;  /**< br_gltf_save_sampler_key -> cgltf_sampler  */
+    cgltf_data                 *data;
+    const br_gltf_save_options *options;      /**< May be NULL; see fmt_p.h      */
+    br_hashmap                 *actor_map;    /**< br_actor                 -> cgltf_node     */
+    br_hashmap                 *model_map;    /**< br_model                 -> cgltf_mesh     */
+    br_hashmap                 *material_map; /**< br_material              -> cgltf_material */
+    br_hashmap                 *stored_map;   /**< br_material::stored      -> br_material    */
+    br_hashmap                 *pixelmap_map; /**< br_pixelmap              -> cgltf_image    */
+    br_hashmap                 *sampler_map;  /**< br_gltf_save_sampler_key -> cgltf_sampler  */
 
     br_size_t next_node;
     br_size_t next_camera;
@@ -89,7 +92,7 @@ static char *build_buffer_uri(const cgltf_buffer *buffer, void *res)
     return code_out;
 }
 
-static char *build_png_uri(const char *prefix, void *data, br_size_t size, void *res)
+static char *build_data_uri(const char *prefix, void *data, br_size_t size, void *res)
 {
     const br_size_t     prefix_len = BrStrLen(prefix);
     const unsigned int  len        = cbase64_calc_encoded_length((unsigned int)size);
@@ -109,6 +112,32 @@ static char *build_png_uri(const char *prefix, void *data, br_size_t size, void 
     *code_out_end = '\0';
 
     return code_out;
+}
+
+/*
+ * The file layer reads fw.fsys on every character rather than only when it opens,
+ * so the memory filesystem has to be installed across the whole save and put back
+ * afterwards. Returns NULL if the engine could not write the map at all.
+ */
+static char *build_pix_uri(const br_pixelmap *pm, void *res)
+{
+    memfile_store  store = {0};
+    br_filesystem *previous;
+    br_pixelmap   *map  = (br_pixelmap *)pm;
+    char          *uri  = NULL;
+
+    previous = BrMemFileInstall(&store);
+    BrPixelmapSaveMany("memory.pix", &map, 1);
+    BrMemFileRestore(previous);
+
+    if(store.data != NULL) {
+        uri = build_data_uri(CGLTF_BR_PIX_URI, store.data, store.size, res);
+
+        /* The store reserves from the resource anchor, so it outlives the save. */
+        BrResFree(store.data);
+    }
+
+    return uri;
 }
 
 static void *cgltf_alloc_br(void *user, cgltf_size size)
@@ -686,6 +715,77 @@ static br_gltf_save_stbi *build_png(const void *pixels, int width, int height, i
     return sstate;
 }
 
+/*
+ * The caller's save flags, or none when it passed no options at all - NULL is
+ * the writer's historical behaviour, not a third mode.
+ */
+static br_uint_32 save_option_flags(const br_gltf_save_state *state)
+{
+    return state->options != NULL ? state->options->flags : 0;
+}
+
+/*
+ * Is this map's sample data actually there? A map with a NULL buffer for itself
+ * or for its palette is legal to hold - BrPixelmapAllocate(BR_PMAF_NO_PIXELS)
+ * exists - but no route can write it: BrPixelmapConvert() refuses it, and the
+ * .pix writer asserts when it is handed one, so neither is attempted. A zero
+ * dimension is the same: a 0x0 PNG is not an image.
+ */
+static br_boolean map_readable(const br_pixelmap *pm)
+{
+    if(pm->pixels == NULL || pm->width <= 0 || pm->height <= 0 || pm->row_bytes == 0)
+        return BR_FALSE;
+
+    return pm->map == NULL || map_readable(pm->map);
+}
+
+/*
+ * Can the colour route read this type? The four below eight bits per sample have
+ * no source converter at all, so neither a map of one of those types nor a map
+ * that indexes through a palette of one of them can be expanded to RGBA.
+ */
+static br_boolean map_convertible(const br_pixelmap *pm)
+{
+    switch(pm->type) {
+        case BR_PMT_INDEX_1:
+        case BR_PMT_INDEX_2:
+        case BR_PMT_INDEX_4:
+        case BR_PMT_ALPHA_4:
+            return BR_FALSE;
+        default:
+            return pm->map == NULL || map_convertible(pm->map);
+    }
+}
+
+/*
+ * Can the .pix writer carry this map?
+ *
+ * It counts whole pixels - block_count = (width * pixel_bytes) / size - and for a
+ * type below eight bits per sample pixel_bytes is zero, so BlockWriteSetup()
+ * returns NULL and the block writer asserts. Those four types have never had a
+ * .pix writer (the memfs sweep refuses them too). It also asserts on a
+ * non-contiguous mipmap and on a map with no pixel buffer, both of which a caller
+ * may hold perfectly legally, so neither goes near it.
+ */
+static br_boolean pix_writable(const br_pixelmap *pm)
+{
+    if(pm->pixels == NULL || pm->mip_offset != 0)
+        return BR_FALSE;
+
+    switch(pm->type) {
+        case BR_PMT_INDEX_1:
+        case BR_PMT_INDEX_2:
+        case BR_PMT_INDEX_4:
+        case BR_PMT_ALPHA_4:
+            return BR_FALSE;
+        default:
+            break;
+    }
+
+    /* WritePixelmap() recurses into the palette and writes it the same way. */
+    return pm->map == NULL || pix_writable(pm->map);
+}
+
 static int fill_pixelmap(const void *key, void *value, br_hash hash, void *user)
 {
     const br_pixelmap  *pm     = key;
@@ -693,60 +793,71 @@ static int fill_pixelmap(const void *key, void *value, br_hash hash, void *user)
     br_gltf_save_state *state  = user;
     br_gltf_save_stbi  *sstate = NULL;
     br_pixelmap        *pm2;
-    const char         *prefix;
-    int                 channels;
 
     (void)hash;
 
     image->name = pm->identifier;
 
-    if(pm->map == NULL && (pm->type == BR_PMT_INDEX_8 || pm->type == BR_PMT_RGB_555 || pm->type == BR_PMT_RGB_565 || pm->type == BR_PMT_RGB_888)) {
-        /*
-         * A lookup table: its samples are what the rasterisers read and there is
-         * no palette to expand them through. INDEX_8 is one byte per sample; the
-         * RGB-typed tables an RGB output needs are the output's own words. Carry
-         * the sample bytes in the PNG's channels and mark the type, so the loader
-         * rebuilds the same pixelmap instead of treating the image as colour. The
-         * PNG codec is lossless, so the bytes survive exactly. A colour map that
-         * does have a palette still expands through it as before.
-         */
-        switch(pm->type) {
-            case BR_PMT_RGB_555:
-                channels = 2;
-                prefix   = CGLTF_BR_RGB_555_PNG_URI;
-                break;
-            case BR_PMT_RGB_565:
-                channels = 2;
-                prefix   = CGLTF_BR_RGB_565_PNG_URI;
-                break;
-            case BR_PMT_RGB_888:
-                channels = 3;
-                prefix   = CGLTF_BR_RGB_888_PNG_URI;
-                break;
-            default:
-                channels = 1;
-                prefix   = CGLTF_BR_INDEX_8_PNG_URI;
-                break;
-        }
+    br_boolean tried_pix = BR_FALSE;
+    br_boolean wrote     = BR_FALSE;
 
-        sstate = build_png(pm->pixels, pm->width, pm->height, channels, pm->row_bytes, state);
-    } else if((pm2 = BrPixelmapCloneTyped((br_pixelmap *)pm, BR_PMT_RGBA_8888_ARR)) != NULL) {
+    if(!map_readable(pm) || !map_convertible(pm)) {
         /*
-         * This code is cursed.
+         * Neither route can read this map - its own samples, its palette's, or a
+         * type with no converter - so it goes no further than here. The reader
+         * treats an image with no payload as absent and loads the scene without
+         * it, which is recoverable; two of these states would otherwise crash the
+         * save and one would write a file the reader refuses.
          */
-        sstate = build_png(pm2->pixels, pm2->width, pm2->height, 4, pm2->row_bytes, state);
-        prefix = "data:image/png;base64,";
-
-        BrPixelmapFree(pm2);
-    } else {
-        /*
-         * FIXME: what do here?
-         */
-        image->uri = "data:image/png;base64,";
+        BrLogError("GLTF", "pixelmap \"%s\" (type %d) cannot be read by either route; writing it with no payload",
+                   pm->identifier != NULL ? pm->identifier : "<unnamed>", (int)pm->type);
         return 0;
     }
 
-    image->uri = build_png_uri(prefix, sstate->data, sstate->size, state->data);
+    if((save_option_flags(state) & BR_GLTF_SAVE_PRESERVE_MAP_TYPES) != 0 && pix_writable(pm)) {
+        tried_pix = BR_TRUE;
+
+        if((image->uri = build_pix_uri(pm, state->data)) != NULL)
+            return 0;
+
+        /*
+         * Fall through and write the map as colour, which at least keeps the
+         * file loadable. Never return non-zero: fill_pixelmap() is a hashmap
+         * enumerate callback, and a non-zero return silently ends the walk.
+         */
+        BrLogError("GLTF", "pixelmap \"%s\" could not be written as a pix payload; writing it as colour",
+                   pm->identifier != NULL ? pm->identifier : "<unnamed>");
+    }
+
+    if((pm2 = BrPixelmapCloneTyped((br_pixelmap *)pm, BR_PMT_RGBA_8888_ARR)) != NULL) {
+        sstate = build_png(pm2->pixels, pm2->width, pm2->height, 4, pm2->row_bytes, state);
+
+        BrPixelmapFree(pm2);
+        wrote = BR_TRUE;
+    } else if(!tried_pix && pix_writable(pm) && (image->uri = build_pix_uri(pm, state->data)) != NULL) {
+        /*
+         * The map cannot be converted to colour, so the payload is the only
+         * route left. A lookup table is the case that matters: it has no palette,
+         * and BrPixelmapCloneTyped() refuses an indexed map without one, so the
+         * conversion path this branch is a fallback for does not exist for it.
+         */
+        return 0;
+    }
+
+    if(!wrote) {
+        /*
+         * Neither route can carry this map - the four types below eight bits per
+         * sample have no source converter either. Leave the image with no payload
+         * at all: the reader treats an image with neither a URI nor a buffer view
+         * as absent and loads the scene without it, which is recoverable, where a
+         * data URI that decodes to nothing makes it refuse the whole file.
+         */
+        BrLogError("GLTF", "pixelmap \"%s\" (type %d) can be written neither as colour nor as a pix payload; writing it with no payload",
+                   pm->identifier != NULL ? pm->identifier : "<unnamed>", (int)pm->type);
+        return 0;
+    }
+
+    image->uri = build_data_uri("data:image/png;base64,", sstate->data, sstate->size, state->data);
 
     BrResFree(sstate);
 
@@ -1395,12 +1506,12 @@ static int fill_mesh_materials(const void *key, void *value, br_hash hash, void 
     return 0;
 }
 
-br_error BR_PUBLIC_ENTRY BrFmtGLTFActorSave(const char *name, br_actor *actor)
+br_error BR_PUBLIC_ENTRY BrFmtGLTFActorSave(const char *name, br_actor *actor, const br_gltf_save_options *options)
 {
-    return BrFmtGLTFActorSaveMany(name, &actor, 1);
+    return BrFmtGLTFActorSaveMany(name, &actor, 1, options);
 }
 
-br_error BR_PUBLIC_ENTRY BrFmtGLTFActorSaveMany(const char *name, br_actor **actors, br_size_t num)
+br_error BR_PUBLIC_ENTRY BrFmtGLTFActorSaveMany(const char *name, br_actor **actors, br_size_t num, const br_gltf_save_options *options)
 {
     cgltf_data         *data;
     br_gltf_save_state *state;
@@ -1417,6 +1528,8 @@ br_error BR_PUBLIC_ENTRY BrFmtGLTFActorSaveMany(const char *name, br_actor **act
 
     state = BrResAllocate(NULL, sizeof(br_gltf_save_state), BR_MEMORY_SCRATCH);
     BrMemSet(state, 0, sizeof(br_gltf_save_state));
+
+    state->options = options;
 
     opts.memory.user_data = state;
 
@@ -1683,7 +1796,7 @@ br_error BR_PUBLIC_ENTRY BrFmtGLTFActorSaveMany(const char *name, br_actor **act
     return BRE_OK;
 }
 
-br_error BR_PUBLIC_ENTRY BrFmtGLTFModelSaveMany(const char *name, br_model **models, br_size_t num)
+br_error BR_PUBLIC_ENTRY BrFmtGLTFModelSaveMany(const char *name, br_model **models, br_size_t num, const br_gltf_save_options *options)
 {
     br_actor **actors;
     br_error   r;
@@ -1699,7 +1812,7 @@ br_error BR_PUBLIC_ENTRY BrFmtGLTFModelSaveMany(const char *name, br_model **mod
         a->model      = models[i];
     }
 
-    r = BrFmtGLTFActorSaveMany(name, actors, num);
+    r = BrFmtGLTFActorSaveMany(name, actors, num, options);
 
     for(br_size_t i = 0; i < num; ++i) {
         BrActorFree(actors[i]);
@@ -1710,7 +1823,7 @@ br_error BR_PUBLIC_ENTRY BrFmtGLTFModelSaveMany(const char *name, br_model **mod
     return r;
 }
 
-br_error BR_PUBLIC_ENTRY BrFmtGLTFModelSave(const char *name, br_model *model)
+br_error BR_PUBLIC_ENTRY BrFmtGLTFModelSave(const char *name, br_model *model, const br_gltf_save_options *options)
 {
-    return BrFmtGLTFModelSaveMany(name, &model, 1);
+    return BrFmtGLTFModelSaveMany(name, &model, 1, options);
 }
