@@ -202,8 +202,18 @@ static br_error load_pix_payload(br_gltf_load_state *state, br_size_t image_inde
      * payload loses first, and handing the material a map with a width and a
      * height but no pixels defers the failure to the rasteriser.
      */
-    if(n != 1 || loaded[0] == NULL || !map_whole(loaded[0]))
+    if(n != 1 || loaded[0] == NULL || !map_whole(loaded[0])) {
+        if(loaded[0] != NULL)
+            BrPixelmapFree(loaded[0]);
+
         return image_not_decodable(image_index, image);
+    }
+
+    /*
+     * BrPixelmapLoadMany() hands back a root; anchor it to the load like the clone below, so
+     * a failure later takes it with everything else.
+     */
+    BrResAdd(state, loaded[0]);
 
     *out = loaded[0];
 
@@ -318,6 +328,15 @@ static br_error load_pixelmap(br_gltf_load_state *state, br_size_t image_index, 
 
     BrPixelmapFree(tmp);
     BrMemFree(pixels);
+
+    /*
+     * The clone is a root resource; anchor it to the load so that a failure later in the
+     * load takes it away with everything else. BrFmtGLTFActorLoadMany() moves it to the
+     * result once the load has succeeded.
+     */
+    if(pixelmap != NULL)
+        BrResAdd(state, pixelmap);
+
     *out = pixelmap;
     return BRE_OK;
 }
@@ -1568,10 +1587,8 @@ br_fmt_results *BR_PUBLIC_ENTRY BrFmtGLTFActorLoadMany(const char *name, const b
 
     opts.memory.user_data = state;
 
-    if(cgltf_parse_file(&opts, name, &data) != cgltf_result_success) {
-        BrResFree(state);
-        return NULL;
-    }
+    if(cgltf_parse_file(&opts, name, &data) != cgltf_result_success)
+        goto fail;
 
     state->data    = data;
     state->options = options;
@@ -1585,23 +1602,17 @@ br_fmt_results *BR_PUBLIC_ENTRY BrFmtGLTFActorLoadMany(const char *name, const b
      */
     if(check_extensions(data) != BRE_OK || check_primitive_modes(data) != BRE_OK || check_primitive_attributes(data) != BRE_OK ||
        check_primitive_attribute_counts(data) != BRE_OK || check_primitive_counts(data) != BRE_OK || check_material_references(data) != BRE_OK ||
-       check_actor_styles(data) != BRE_OK || check_buffer_views(data) != BRE_OK || check_accessor_ranges(data) != BRE_OK) {
-        BrResFree(state);
-        return NULL;
-    }
+       check_actor_styles(data) != BRE_OK || check_buffer_views(data) != BRE_OK || check_accessor_ranges(data) != BRE_OK)
+        goto fail;
 
-    if(cgltf_load_buffers(&opts, data, base_path) != cgltf_result_success) {
-        BrResFree(state);
-        return NULL;
-    }
+    if(cgltf_load_buffers(&opts, data, base_path) != cgltf_result_success)
+        goto fail;
 
     /*
      * The check that reads the index values, and so can only run now.
      */
-    if(check_primitive_index_ranges(data) != BRE_OK) {
-        BrResFree(state);
-        return NULL;
-    }
+    if(check_primitive_index_ranges(data) != BRE_OK)
+        goto fail;
 
     /*
      * Allocate things.
@@ -1647,20 +1658,17 @@ br_fmt_results *BR_PUBLIC_ENTRY BrFmtGLTFActorLoadMany(const char *name, const b
      * Post: state->results->pixelmaps is filled.
      */
     for(br_size_t i = 0; i < data->images_count; ++i) {
-        if(load_pixelmap(state, i, data->images + i, &results->pixelmaps[i]) != BRE_OK) {
-            /*
-             * The pixelmaps built so far are not children of state - they are
-             * handed back detached, as materials and models are - so free them
-             * before the half-built result goes away.
-             */
-            for(br_size_t j = 0; j < i; ++j) {
-                if(results->pixelmaps[j] != NULL)
-                    BrPixelmapFree(results->pixelmaps[j]);
-            }
+        if(load_pixelmap(state, i, data->images + i, &results->pixelmaps[i]) != BRE_OK)
+            goto fail;
+    }
 
-            BrResFree(state);
-            return NULL;
-        }
+    /*
+     * The pixelmaps were built onto state so that a failure would take them with it; they
+     * are the result's now.
+     */
+    for(br_size_t i = 0; i < results->npixelmaps; ++i) {
+        if(results->pixelmaps[i] != NULL)
+            BrResAdd(results, BrResRemove(results->pixelmaps[i]));
     }
 
     /*
@@ -1805,4 +1813,12 @@ br_fmt_results *BR_PUBLIC_ENTRY BrFmtGLTFActorLoadMany(const char *name, const b
     BrResRemove(results);
     BrResFree(state);
     return results;
+
+fail:
+    /*
+     * Everything built so far is anchored to state, the pixelmaps included, so this frees
+     * the lot.
+     */
+    BrResFree(state);
+    return NULL;
 }
