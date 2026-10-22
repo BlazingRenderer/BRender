@@ -328,6 +328,20 @@ MODULATE						boolean
 MODULATE_ALPHA						boolean
 COLOUR_KEY						boolean
 
+SHADING_MODE token
+  FLAT    none
+  GOURAUD none
+  PHONG   none
+
+# Support for alpha blending modes.
+BLEND_MODE					token
+BLEND_MODE					token_list
+	BLEND_STANDARD				none
+	BLEND_SUMMED				none
+	BLEND_DIMMED				none
+	BLEND_PREMULTIPLIED			none
+	BLEND_CONSTANT				none
+
 PERSPECTIVE						boolean
 PERSPECTIVE						token
 PERSPECTIVE						token_list
@@ -436,6 +450,8 @@ FOG								token_list
 	BEST_QUALITY					none
 
 FOG								colour_rgb
+FOG								boolean
+FOG_SCALE						uint_8
 FOG_MIN							float
 FOG_MIN							fixed
 FOG_MAX							float
@@ -516,11 +532,6 @@ SPACE							token
 	DEFAULT							none
 	BEST_SPEED						none
 	BEST_QUALITY					none
-
-SHADING_MODE token
-  FLAT    none
-  GOURAUD none
-  PHONG   none
 
 # Tokens used for surface state (handled by renderer)
 #
@@ -914,15 +925,6 @@ INTEL_486						none
 INTEL_PENTIUM 					none
 INTEL_PENTIUM_PRO				none
 
-# Support for alpha blending modes.
-BLEND_MODE					token
-BLEND_MODE					token_list
-	BLEND_STANDARD				none
-	BLEND_SUMMED				none
-	BLEND_DIMMED				none
-	BLEND_PREMULTIPLIED			none
-	BLEND_CONSTANT				none
-
 # Depth buffer extensions
 D_15						none
 D_31						none
@@ -966,7 +968,6 @@ MAP_WIDTH_LIMIT_1				token
 COLOUR_MAP_1					object
 TEXTURE_1					object
 DOUBLE_TEXTURE					boolean
-FOG_SCALE					uint_8
 USE_CONSTANT_ALPHA				boolean
 USE_BACKGROUND_ALPHA				boolean
 MIP_MODIFIER					int_8
@@ -974,4 +975,3 @@ MIP_MIN						uint_8
 MIP_MAX						uint_8
 MIP_MOD_ABSOLUTE				boolean
 
-FOG						boolean
