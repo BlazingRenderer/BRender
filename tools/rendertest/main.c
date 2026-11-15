@@ -36,6 +36,7 @@
 #include "rt_demo.h"
 #include "vkwitness.h"
 #include "b2dwitness.h"
+#include "pmwitness.h"
 
 /* ------------------------------------------------------------------ */
 /* GL entry points; SDL hands us the addresses, we don't use glad.    */
@@ -123,6 +124,7 @@ static int         rt_cfg_warmup       = 2;
 static int         rt_cfg_bless        = 0;
 static int         rt_cfg_env_witness  = 0;
 static int         rt_cfg_2d_witness   = 0;
+static int         rt_cfg_pm_witness   = 0;
 static int         rt_env_witness_done = 0;
 static int         rt_cfg_vk_witness   = 0;
 static int         rt_vk_witness_done  = 0;
@@ -2088,6 +2090,16 @@ static int rt_run(rt_demo *demo)
         return g_failed;
     }
 
+    if(rt_cfg_pm_witness) {
+        BrRendererEnd();
+
+        if(rt_pm_witness_run(demo) != BRE_OK)
+            g_failed = 1;
+
+        printf("RT result=%s failures=%d\n", g_failed ? "FAIL" : "PASS", g_failed ? 1 : 0);
+        return g_failed;
+    }
+
     if(rt_cfg_2d_witness) {
         BrRendererEnd();
 
@@ -2475,6 +2487,8 @@ static int rt_list_scene_dir(const char *dir)
 #define ARGDEF_HELP             315
 #define ARGDEF_2D_WITNESS       316
 
+#define ARGDEF_PM_WITNESS       317
+
 /* Laid out as a grid so the set reads as one list; held out of clang-format. */
 // clang-format off
 static const struct parg_option rt_argdefs[] = {
@@ -2490,6 +2504,7 @@ static const struct parg_option rt_argdefs[] = {
     {.name = "bless",            .has_arg = PARG_NOARG,  .flag = NULL, .val = ARGDEF_BLESS           },
     {.name = "env-witness",      .has_arg = PARG_NOARG,  .flag = NULL, .val = ARGDEF_ENV_WITNESS     },
     {.name = "2d-witness",       .has_arg = PARG_NOARG,  .flag = NULL, .val = ARGDEF_2D_WITNESS      },
+    {.name = "pm-witness",       .has_arg = PARG_NOARG,  .flag = NULL, .val = ARGDEF_PM_WITNESS      },
     {.name = "vk-witness",       .has_arg = PARG_NOARG,  .flag = NULL, .val = ARGDEF_VK_WITNESS      },
     {.name = "list",             .has_arg = PARG_NOARG,  .flag = NULL, .val = ARGDEF_LIST            },
     {.name = "list-scene-dir",   .has_arg = PARG_REQARG, .flag = NULL, .val = ARGDEF_LIST_SCENE_DIR  },
@@ -2600,6 +2615,10 @@ static rt_parse rt_parse_args(int argc, char *const *argv)
 
             case ARGDEF_ENV_WITNESS:
                 rt_cfg_env_witness = 1;
+                break;
+
+            case ARGDEF_PM_WITNESS:
+                rt_cfg_pm_witness = 1;
                 break;
 
             case ARGDEF_2D_WITNESS:

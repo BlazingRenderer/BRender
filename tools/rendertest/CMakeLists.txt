@@ -4,6 +4,8 @@ add_executable(rendertest
         main.c
         b2dwitness.c
         b2dwitness.h
+        pmwitness.c
+        pmwitness.h
         vkwitness.c
         vkwitness.h
 )
@@ -223,6 +225,15 @@ if (BUILD_TESTING)
         set_tests_properties("b2dw-${dev}" PROPERTIES
                              ENVIRONMENT "SDL_VIDEODRIVER=offscreen;LIBGL_ALWAYS_SOFTWARE=true")
     endforeach ()
+
+    #
+    # The pixelmap witness (main.c --pm-witness). Host pixelmap writes are not something the
+    # corpus can see - it clears to grey and builds its fixtures a pixel at a time - so every
+    # writer of a 24-bit pixel is asserted against the others. No device is involved.
+    #
+    add_test(NAME "pmw" COMMAND rendertest --pm-witness --device softrend)
+    set_tests_properties("pmw" PROPERTIES
+                         ENVIRONMENT "SDL_VIDEODRIVER=offscreen")
 
     #
     # The environment-map orientation witness (main.c --env-witness). It is not
