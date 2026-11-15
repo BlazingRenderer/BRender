@@ -62,9 +62,9 @@ static void MemFill24(void *dst, br_uint_32 val, br_size_t num)
         BrMemSet(d, r, num * 3);
     } else {
         for(br_uint_32 i = 0; i < num; ++i) {
-            *d++ = r;
-            *d++ = g;
             *d++ = b;
+            *d++ = g;
+            *d++ = r;
         }
     }
 }
