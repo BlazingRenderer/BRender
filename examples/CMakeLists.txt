@@ -1,4 +1,11 @@
 if(BRENDER_HAVE_SDL3 AND BRENDER_HAVE_GL)
+    # Dear ImGui lives in contrib, but its only users are the examples and
+    # BRENDER_BUILD_CONTRIB is off by default, so it is instantiated here
+    # unless contrib has already done so.
+    if(NOT TARGET brender-imgui)
+        add_subdirectory(${PROJECT_SOURCE_DIR}/contrib/imgui ${CMAKE_CURRENT_BINARY_DIR}/imgui)
+    endif()
+
     add_subdirectory(brdemo)
 
     add_subdirectory(brintro)
