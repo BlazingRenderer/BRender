@@ -461,15 +461,7 @@ void RendererGLRenderGroup(br_renderer *self, br_geometry_stored *stored, const 
 
     gl->BindVertexArray(stored->gl_vao);
 
-    switch(self->state.current->render_type) {
-        case BRT_POINT:
-            gl->DrawArrays(GL_POINTS, (GLint)(groupinfo->vertex_offset / sizeof(br_vertex_gl)), groupinfo->group->nvertices);
-            break;
-
-        case BRT_TRIANGLE:
-        default:
-            gl->DrawElements(GL_TRIANGLES, groupinfo->count, GL_UNSIGNED_SHORT, groupinfo->offset);
-    }
+    gl->DrawElements(GL_TRIANGLES, groupinfo->count, GL_UNSIGNED_SHORT, groupinfo->offset);
 
     self->stats.face_group_count++;
     self->stats.triangles_rendered_count += groupinfo->group->nfaces;
