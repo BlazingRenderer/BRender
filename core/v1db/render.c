@@ -44,6 +44,7 @@ void BR_PUBLIC_ENTRY BrDbModelRender(br_actor *actor, br_model *model, br_materi
     UASSERT(model != NULL);
     UASSERT(material != NULL);
     UASSERT(actor != NULL);
+    UASSERT(style < BR_RSTYLE_MAX && RenderStyleCalls[style] != NULL);
 
     /*
      * Per-model light cull. Done here rather than in actorRender() so that
