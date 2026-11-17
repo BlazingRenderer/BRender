@@ -1446,19 +1446,9 @@ static br_error check_actor_styles(const cgltf_data *data)
 
         style = node->brender_actor.render_style;
 
-        /*
-         * render_style indexes RenderStyleCalls[] with no bounds check
-         *, and that table only has entries up to
-         * BR_RSTYLE_BOUNDING_FACES - the two
-         * antialiased styles have no entry. A file that named one would be a
-         * call through a NULL or out-of-range pointer, so the value is checked
-         * here rather than trusted.
-         */
-        if(style < BR_RSTYLE_DEFAULT || style > BR_RSTYLE_BOUNDING_FACES) {
-            BrLogError("GLTF",
-                       "node \"%s\" has BR_actors.render_style %d, outside the range the renderer dispatches "
-                       "(BR_RSTYLE_DEFAULT..BR_RSTYLE_BOUNDING_FACES, %d..%d)",
-                       node->name != NULL ? node->name : "<unnamed>", (int)style, (int)BR_RSTYLE_DEFAULT, (int)BR_RSTYLE_BOUNDING_FACES);
+        if(style < BR_RSTYLE_DEFAULT || style >= BR_RSTYLE_MAX) {
+            BrLogError("GLTF", "node \"%s\" has BR_actors.render_style %d, which is not a render style",
+                       node->name != NULL ? node->name : "<unnamed>", (int)style);
             return BRE_FAIL;
         }
     }

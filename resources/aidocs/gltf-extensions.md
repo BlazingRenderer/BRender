@@ -99,10 +99,12 @@ Abridged from `tools/rendertest/dat/scene-edges.gltf`.
 | 5 | `BOUNDING_POINTS` | vertices of the model's bounding box |
 | 6 | `BOUNDING_EDGES` | edges of the bounding box |
 | 7 | `BOUNDING_FACES` | faces of the bounding box |
+| 8 | `ANTIALIASED_LINES` | as `EDGES`; antialiasing is not implemented |
+| 9 | `ANTIALIASED_FACES` | as `FACES`; antialiasing is not implemented |
 
-`BR_RSTYLE_ANTIALIASED_LINES` (8) and `BR_RSTYLE_ANTIALIASED_FACES` (9) are declared by the enum but have no
-entry in the engine's dispatch table, so a reader must refuse them - see below. They are not legal values in
-a file.
+Values 8 and 9 name styles the engine has no antialiased implementation of: it draws their non-antialiased
+equivalents (`RenderStyleCalls[]`, `core/v1db/modrend.c`). They are legal values in a file all the same,
+because the file carries what the scene graph says and not what a particular build can draw.
 
 ### Reader obligations
 
@@ -111,11 +113,13 @@ a file.
   present (`fill_actor()`, `core/fmt/loadgltf.c`), so it keeps the zero that `BrActorAllocate()`
   left in it - the actor's memory is zeroed on allocation and nothing sets `render_style`
   (`core/v1db/actsupt.c`).
-* **Refuse `render_style` outside 0..7.** The value reaches `RenderStyleCalls[style]` with no bounds check
-  (`core/v1db/render.c`) and that table has no entries above `BR_RSTYLE_BOUNDING_FACES`
-  (`core/v1db/modrend.c`), so an unchecked value is a call through an out-of-range pointer. The reader
+* **Refuse a `render_style` the enum does not name.** The value indexes `RenderStyleCalls[style]`
+  (`core/v1db/render.c`), so a value `BR_RSTYLE_*` does not name has no meaning to any reader; the reader
   fails the whole file with a message naming the node and the value (`check_actor_styles()`,
   `core/fmt/loadgltf.c`); it does not clamp, and it does not treat the file as loadable-minus-style.
+  Whether this build draws a style it does name is not the reader's question - the dispatch table is total
+  over the enum, and a style the build has no antialiased implementation of is drawn as its non-antialiased
+  equivalent.
 * The value is stored in the `br_uint_8` field after the check, so the check is what keeps the field honest.
 
 ### Writer obligations
@@ -123,11 +127,11 @@ a file.
 * **Write the extension only when the style is not `BR_RSTYLE_DEFAULT`** (`fill_actor_render_style_actual()`,
   `core/fmt/savegltf.c`). Writing the default would put a node extension on every actor in every file
   to say nothing.
-* A writer must not emit 8 or 9. This writer refuses the save instead: it checks every actor before writing
-  anything and fails with a message naming the actor and the value (`check_actor_render_styles()`,
-  `core/fmt/savegltf.c`), because a file it wrote would be refused by its own reader
-  (`check_actor_styles()`) and neither clamping to `BR_RSTYLE_BOUNDING_FACES` nor omitting the extension
-  would mean the same thing as the value the actor carries.
+* **A writer must not emit a `render_style` the enum does not name.** This writer refuses the save instead:
+  it checks every actor before writing anything and fails with a message naming the actor and the value
+  (`check_actor_render_styles()`, `core/fmt/savegltf.c`), because a file it wrote would be refused by its
+  own reader (`check_actor_styles()`) and no clamping or omission would mean the same thing as the value
+  the actor carries. What the writer's own build can draw is again not its concern.
 
 ### What it deliberately does not carry
 
@@ -434,7 +438,7 @@ and the index range check and the image decode run once the buffers are in.
 | a primitive whose attributes do not all have the same element count | the file is refused, naming the mesh, the primitive, the attribute and both counts. Every attribute is read once per vertex, up to the first attribute's count, so a shorter one is read past its own end. |
 | a primitive whose index or vertex count does not fit its mode | the file is refused, naming the mesh, the primitive and the count. A TRIANGLES primitive is sized for count/3 faces and filled three indices at a time, so a count that is not a positive multiple of three is filled with one face more than was allocated; a strip or a fan with fewer than three derives a face count from a subtraction that underflows. |
 | an index that names a vertex the primitive does not have | the file is refused, naming the mesh, the primitive, the index and the number of vertices. Such a model is one BRender's own preparation refuses ("face references invalid vertex"), which would abort the caller from inside the renderer instead of failing to load. |
-| a `BR_actors.render_style` outside `BR_RSTYLE_DEFAULT..BR_RSTYLE_BOUNDING_FACES` | the file is refused, naming the node and the value. |
+| a `BR_actors.render_style` that no `BR_RSTYLE_*` value names | the file is refused, naming the node and the value. |
 | a `primitive.material` index past the `BR_materials` root array, in a file that carries one | the file is refused, naming the mesh, the primitive, the index and the table length. Such an index is read as an index into the `BR_materials`-derived table, so it would otherwise be an unchecked read past the table. |
 | a buffer view, or an accessor under one, that reaches past the end of its buffer | the file is refused, naming the buffer view and its offset, size and buffer, or the accessor and the range it reaches. `cgltf_buffer_view_data()` returns `buffer->data + view->offset` and does no bounds check, and every read this loader makes through a view starts there: the image path hands `view->size` bytes to `stbi_load_from_memory()`, and the geometry, index and animation paths read accessors through it. A view whose offset or offset-plus-size runs past its buffer, or an accessor whose offset and stride do, would read whatever follows the allocation. |
 | an external buffer file shorter than the `byteLength` it declares | the file is refused, naming the file and both lengths. `cgltf_load_buffer_file()` reads the file and never writes the length it read back to `data->buffers[i].size`, so `buffer->size` stays the declared `byteLength` while the allocation is only what was read; a view inside the declared range is therefore past the end of the allocation, and the view and accessor checks above, which compare against the declared size, cannot see it. `cgltf_load_brfile()` measures the file as it loads it, the one place the loaded length is known. |

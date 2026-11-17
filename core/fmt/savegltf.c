@@ -964,11 +964,9 @@ static int fill_actor_name(const void *key, void *value, br_hash hash, void *use
  */
 
 /*
- * BR_RSTYLE_ANTIALIASED_LINES and BR_RSTYLE_ANTIALIASED_FACES are declared by
- * the enum but have no entry in RenderStyleCalls[], so the reader refuses a
- * file that names one (check_actor_styles()). Writing one would produce a file
- * this writer's own reader refuses, and there is no value to clamp to that
- * means the same thing, so the save is refused instead.
+ * A value the enum does not name is refused rather than written: the file format's
+ * domain is the enum, and its reader refuses what nothing downstream can interpret.
+ * What this build can draw is not the writer's concern.
  */
 static int check_actor_render_styles(const void *key, void *value, br_hash hash, void *user)
 {
@@ -977,14 +975,12 @@ static int check_actor_render_styles(const void *key, void *value, br_hash hash,
     (void)hash;
     (void)user;
 
-    if(actor->render_style <= BR_RSTYLE_BOUNDING_FACES)
+    if(actor->render_style < BR_RSTYLE_MAX)
         return 0;
 
     BrLogError("GLTF",
-               "actor \"%s\" has render_style %d, outside BR_RSTYLE_DEFAULT..BR_RSTYLE_BOUNDING_FACES (%d..%d), which the renderer "
-               "cannot dispatch and this writer's own reader refuses; not writing a file that would not load back",
-               actor->identifier != NULL ? actor->identifier : "<unnamed>", (int)actor->render_style, (int)BR_RSTYLE_DEFAULT,
-               (int)BR_RSTYLE_BOUNDING_FACES);
+               "actor \"%s\" has render_style %d, which is not a render style; not writing a file that would not load back",
+               actor->identifier != NULL ? actor->identifier : "<unnamed>", (int)actor->render_style);
     return 1;
 }
 
