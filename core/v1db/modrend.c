@@ -346,12 +346,14 @@ static void boundingBoxRenderFaces(br_actor *actor, br_model *model, br_material
  * Table of rendering functions indexed by style
  */
 br_render_style_call_fn *const RenderStyleCalls[] = {
-    [BR_RSTYLE_DEFAULT]         = renderFaces,
-    [BR_RSTYLE_NONE]            = nullRender,
-    [BR_RSTYLE_POINTS]          = renderPoints,
-    [BR_RSTYLE_EDGES]           = renderEdges,
-    [BR_RSTYLE_FACES]           = renderFaces,
-    [BR_RSTYLE_BOUNDING_POINTS] = boundingBoxRenderPoints,
-    [BR_RSTYLE_BOUNDING_EDGES]  = boundingBoxRenderEdges,
-    [BR_RSTYLE_BOUNDING_FACES]  = boundingBoxRenderFaces,
+    [BR_RSTYLE_DEFAULT]           = renderFaces,
+    [BR_RSTYLE_NONE]              = nullRender,
+    [BR_RSTYLE_POINTS]            = renderPoints,
+    [BR_RSTYLE_EDGES]             = renderEdges,
+    [BR_RSTYLE_FACES]             = renderFaces,
+    [BR_RSTYLE_BOUNDING_POINTS]   = boundingBoxRenderPoints,
+    [BR_RSTYLE_BOUNDING_EDGES]    = boundingBoxRenderEdges,
+    [BR_RSTYLE_BOUNDING_FACES]    = boundingBoxRenderFaces,
+    [BR_RSTYLE_ANTIALIASED_LINES] = renderEdges,
+    [BR_RSTYLE_ANTIALIASED_FACES] = renderFaces,
 };

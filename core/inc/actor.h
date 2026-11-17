@@ -215,6 +215,8 @@ typedef struct br_actor {
      *     using the actor's material
      * \li BR_RSTYLE_BOUNDING_FACES — Renders the faces of the model's bounding box using the actor's
      *     material
+     * \li BR_RSTYLE_ANTIALIASED_LINES — Renders as BR_RSTYLE_EDGES; antialiasing is not implemented
+     * \li BR_RSTYLE_ANTIALIASED_FACES — Renders as BR_RSTYLE_FACES; antialiasing is not implemented
      */
     br_uint_8 render_style;
 
