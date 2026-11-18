@@ -526,9 +526,17 @@ br_device *DeviceVkAllocate(const char *identifier, const char *arguments)
              * ClipDistance built-in is invalid to even create.
              */
             self->shader_clip_distance = features2.features.shaderClipDistance != VK_FALSE ? BR_TRUE : BR_FALSE;
+
+            /*
+             * Unlike GL's polygon mode, VK_POLYGON_MODE_LINE needs a feature bit. It is
+             * optional in Vulkan, so a device without it draws no wireframe rather than a
+             * filled one.
+             */
+            self->fill_mode_non_solid = features2.features.fillModeNonSolid != VK_FALSE ? BR_TRUE : BR_FALSE;
         }
 
         feat.shaderClipDistance = self->shader_clip_distance != BR_FALSE ? VK_TRUE : VK_FALSE;
+        feat.fillModeNonSolid   = self->fill_mode_non_solid != BR_FALSE ? VK_TRUE : VK_FALSE;
 
         self->dynamic_rendering = dynamic_rendering.dynamicRendering != VK_FALSE ? BR_TRUE : BR_FALSE;
         self->push_descriptor   = push_descriptor.pushDescriptor != VK_FALSE ? BR_TRUE : BR_FALSE;

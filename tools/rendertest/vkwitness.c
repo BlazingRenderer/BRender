@@ -3202,6 +3202,97 @@ out:
  * pair differ, so a renderer that ignored the mirror (drawing the identity geometry both
  * times) also fails.
  */
+/*
+ * The point witness.
+ *
+ * BR_RSTYLE_POINTS is the same triangle list drawn with VK_POLYGON_MODE_POINT, which needs the
+ * VkPhysicalDeviceFeatures::fillModeNonSolid the wireframe step also relies on. Before this,
+ * the points style reached the pipeline as a plain triangle list and drew the filled triangle,
+ * so what is asserted is the difference from that: three vertices, not 1682 texels of fill and
+ * not the 172 texels of the wireframe's outline. The fill's bounds are measured in the same
+ * run, so the point draw has to land the three corners of the same silhouette.
+ */
+static br_error vkrend_renderer_point_step(vkrend_renderer_state *state, br_actor *camera, br_actor *actor)
+{
+    vkrend_renderer_bounds  faces, points;
+    br_pixelmap            *readback = NULL;
+    const br_int_32         cx       = state->offscreen->width / 2;
+    const br_int_32         cy       = state->offscreen->height / 2;
+    br_error                result   = BRE_FAIL;
+
+    actor->render_style = BR_RSTYLE_FACES;
+
+    if(vkrend_renderer_fill_clear(state->offscreen) != BRE_OK)
+        goto out;
+
+    BrZsSceneRender(state->world, camera, state->offscreen);
+
+    if((readback = vkrend_renderer_read(state->offscreen)) == NULL)
+        goto out;
+
+    vkrend_renderer_bounds_find(readback, vkrend_renderer_surface, &faces);
+    BrPixelmapFree(readback);
+    readback = NULL;
+
+    actor->render_style = BR_RSTYLE_POINTS;
+
+    if(vkrend_renderer_fill_clear(state->offscreen) != BRE_OK)
+        goto out;
+
+    BrZsSceneRender(state->world, camera, state->offscreen);
+
+    if((readback = vkrend_renderer_read(state->offscreen)) == NULL)
+        goto out;
+
+    vkrend_renderer_bounds_find(readback, vkrend_renderer_surface, &points);
+
+    if(points.count == 0) {
+        BrLogError("RT", "vkrend: BR_RSTYLE_POINTS drew nothing; the device reports no fillModeNonSolid, so the draw was skipped.");
+        goto out;
+    }
+
+    /*
+     * Three vertices: one fragment each, and no more than a couple of texels of slack for a
+     * vertex landing on a pixel boundary. A filled triangle, or the edge list the wireframe
+     * draws, is orders of magnitude past this.
+     */
+    if(points.count > 8 || points.count * 10 >= faces.count) {
+        BrLogError("RT", "vkrend: BR_RSTYLE_POINTS covered %d texels against the filled triangle's %d; that is not three vertices.",
+                   points.count, faces.count);
+        goto out;
+    }
+
+    if(vkrend_renderer_assert_near(points.min_x, faces.min_x, 1, "the points' left bound") != BRE_OK ||
+       vkrend_renderer_assert_near(points.max_x, faces.max_x, 1, "the points' right bound") != BRE_OK ||
+       vkrend_renderer_assert_near(points.min_y, faces.min_y, 1, "the points' top bound") != BRE_OK ||
+       vkrend_renderer_assert_near(points.max_y, faces.max_y, 1, "the points' bottom bound") != BRE_OK)
+        goto out;
+
+    /* The triangle's middle is neither a vertex nor drawn. */
+    if(vkrend_renderer_pixel_is(readback, cx, cy, vkrend_renderer_surface)) {
+        BrLogError("RT", "vkrend: BR_RSTYLE_POINTS filled its triangle's interior at (%d,%d).", cx, cy);
+        goto out;
+    }
+
+    /* The middle of the base edge is on the outline but is not a vertex either. */
+    if(vkrend_renderer_pixel_is(readback, (points.min_x + points.max_x) / 2, points.max_y, vkrend_renderer_surface) &&
+       vkrend_renderer_pixel_is(readback, (points.min_x + points.max_x) / 2, points.max_y - 1, vkrend_renderer_surface)) {
+        BrLogError("RT", "vkrend: BR_RSTYLE_POINTS drew the middle of the base edge, which no vertex is on.");
+        goto out;
+    }
+
+    BrLogInfo("RT", "vkrend: point witness passed (%d texels against the filled triangle's %d, bounds %d..%d x %d..%d, interior clear).",
+              points.count, faces.count, points.min_x, points.max_x, points.min_y, points.max_y);
+
+    result = BRE_OK;
+
+out:
+    if(readback != NULL)
+        BrPixelmapFree(readback);
+    actor->render_style = BR_RSTYLE_DEFAULT;
+    return result;
+}
+
 static br_error vkrend_renderer_winding_step(vkrend_renderer_state *state, br_actor *camera, br_actor *actor, br_camera *camera_data)
 {
     br_material *material;
@@ -3507,6 +3598,9 @@ static br_error vkrend_renderer_init(void *user, br_pixelmap *screen, br_pixelma
 
     vkrend_renderer_bounds_find(readback, vkrend_renderer_surface, &identity_bounds);
     BrPixelmapFree(readback);
+
+    if(vkrend_renderer_point_step(state, camera, actor) != BRE_OK)
+        goto fail;
 
     /*
      * Step 1b: the sub-pixelmap scene destination, Croc's shape. The renderer was begun on

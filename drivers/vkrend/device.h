@@ -310,6 +310,13 @@ typedef struct br_device {
      */
     br_boolean shader_clip_distance;
 
+    /**
+     * \brief Whether VkPhysicalDeviceFeatures::fillModeNonSolid was enabled on the logical
+     * device. A wireframe draws with VK_POLYGON_MODE_LINE, which is only legal with it; where
+     * it is absent the style's draws are skipped (see VkV1ModelRenderIndexed()).
+     */
+    br_boolean fill_mode_non_solid;
+
     /*
      * Pixelmap -> device rect draw. Device-scoped and brought up on first use; a pipeline
      * needs no surface and rectangleCopyTo() runs with no renderer.

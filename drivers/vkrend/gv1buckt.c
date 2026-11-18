@@ -793,11 +793,25 @@ static br_boolean VkV1ModelRenderIndexed(br_geometry_stored *geom, br_renderer *
     cull = cull_mode_for(state);
 
     /*
-     * The draw has a polygon mode, which is what a render style turns into on the way to the
-     * rasteriser. Every style fills the triangle list today; the modes that do not are added
-     * with the styles that need them.
+     * The style is a polygon mode over the model's triangle list. A mode other than fill
+     * needs VkPhysicalDeviceFeatures::fillModeNonSolid; without it there is no such mode to
+     * ask for, and drawing the faces would be a different picture rather than a worse one,
+     * so the draw is skipped instead.
      */
-    polygon_mode = VK_POLYGON_MODE_FILL;
+    switch(state->render_style) {
+        case BRT_POINT:
+            polygon_mode = VK_POLYGON_MODE_POINT;
+            break;
+        default:
+            polygon_mode = VK_POLYGON_MODE_FILL;
+            break;
+    }
+
+    if(polygon_mode != VK_POLYGON_MODE_FILL && dev->fill_mode_non_solid == BR_FALSE) {
+        BrLogWarn("VKREND", "This device does not support fillModeNonSolid; the %s style's draw is skipped.",
+                  BrTokenIdentifier(state->render_style));
+        return BR_FALSE;
+    }
 
     /*
      * The front face is chosen from this draw's model-view, so a mirrored actor selects
