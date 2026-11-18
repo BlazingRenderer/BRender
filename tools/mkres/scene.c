@@ -2658,6 +2658,13 @@ static br_error scene_make_feature_fixtures(br_model *cube)
             r = BRE_FAIL;
     }
 
+    {
+        br_material *mat = scene_fx_material("scene-wireframe-material", BR_MATF_LIGHT);
+
+        if(scene_save("scene-wireframe.gltf", scene_fx_world_topology(cube, mat, BR_RSTYLE_WIREFRAME)) != BRE_OK)
+            r = BRE_FAIL;
+    }
+
     return r;
 }
 

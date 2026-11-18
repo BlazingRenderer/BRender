@@ -111,6 +111,7 @@ glrend/llvmpipe/declared/zb/4/320x240/scene-textured-shade-converted 3e32403c6a3
 glrend/llvmpipe/declared/zb/4/320x240/scene-unlit fc95c27a85d6a643
 glrend/llvmpipe/declared/zb/4/320x240/scene-unlit-plain fc95c27a85d6a643
 glrend/llvmpipe/declared/zb/4/320x240/scene-view-space aae7ee4b620d3803
+glrend/llvmpipe/declared/zb/4/320x240/scene-wireframe 94c5d5d357ccad09
 glrend/llvmpipe/declared/zb/5/320x240/scene-alpha d2a9c09b5ef4cfaf
 glrend/llvmpipe/declared/zb/5/320x240/scene-blend 1c633d6ba98d6054
 glrend/llvmpipe/declared/zb/5/320x240/scene-blend-arb a26b2fbe44d52875
@@ -222,6 +223,7 @@ glrend/llvmpipe/declared/zb/5/320x240/scene-textured-shade-converted a3ddf5b6d5a
 glrend/llvmpipe/declared/zb/5/320x240/scene-unlit 6e115ddeac31bd03
 glrend/llvmpipe/declared/zb/5/320x240/scene-unlit-plain 6e115ddeac31bd03
 glrend/llvmpipe/declared/zb/5/320x240/scene-view-space 0d14d57f958dcdc3
+glrend/llvmpipe/declared/zb/5/320x240/scene-wireframe 3e3124d270ca9c24
 glrend/llvmpipe/declared/zb/6/320x240/scene-alpha 8dcfe9b89dfa964e
 glrend/llvmpipe/declared/zb/6/320x240/scene-blend e421fb9c26ebcd9e
 glrend/llvmpipe/declared/zb/6/320x240/scene-blend-arb b7a5265b1baa3df7
@@ -333,6 +335,7 @@ glrend/llvmpipe/declared/zb/6/320x240/scene-textured-shade-converted 7fa52ddbb74
 glrend/llvmpipe/declared/zb/6/320x240/scene-unlit 4ccfb65e7135b083
 glrend/llvmpipe/declared/zb/6/320x240/scene-unlit-plain 4ccfb65e7135b083
 glrend/llvmpipe/declared/zb/6/320x240/scene-view-space cbc23a402efbea43
+glrend/llvmpipe/declared/zb/6/320x240/scene-wireframe 62f67997a8f8052a
 glrend/llvmpipe/declared/zb/8/320x240/croc-island-forest 33448e208e8546a7
 glrend/llvmpipe/declared/zb/8/320x240/croc-mp001-00 6127ca1513dde34e
 glrend/llvmpipe/declared/zb/8/320x240/croc-mp001-00-nose 9a70235160899ac5
@@ -453,6 +456,7 @@ glrend/llvmpipe/declared/zb/8/320x240/scene-textured-shade-converted 7fa52ddbb74
 glrend/llvmpipe/declared/zb/8/320x240/scene-unlit 4ccfb65e7135b083
 glrend/llvmpipe/declared/zb/8/320x240/scene-unlit-plain 4ccfb65e7135b083
 glrend/llvmpipe/declared/zb/8/320x240/scene-view-space cbc23a402efbea43
+glrend/llvmpipe/declared/zb/8/320x240/scene-wireframe 62f67997a8f8052a
 glrend/llvmpipe/declared/zs/4/320x240/scene-alpha 3d4d9628200ea773
 glrend/llvmpipe/declared/zs/4/320x240/scene-blend 3b8fc8cfa0b7ae28
 glrend/llvmpipe/declared/zs/4/320x240/scene-blend-arb 1dd796084e97a585
@@ -564,6 +568,7 @@ glrend/llvmpipe/declared/zs/4/320x240/scene-textured-shade-converted 3e32403c6a3
 glrend/llvmpipe/declared/zs/4/320x240/scene-unlit fc95c27a85d6a643
 glrend/llvmpipe/declared/zs/4/320x240/scene-unlit-plain fc95c27a85d6a643
 glrend/llvmpipe/declared/zs/4/320x240/scene-view-space aae7ee4b620d3803
+glrend/llvmpipe/declared/zs/4/320x240/scene-wireframe b5639c0156dc8c41
 glrend/llvmpipe/declared/zs/5/320x240/scene-alpha d2a9c09b5ef4cfaf
 glrend/llvmpipe/declared/zs/5/320x240/scene-blend 1c633d6ba98d6054
 glrend/llvmpipe/declared/zs/5/320x240/scene-blend-arb a26b2fbe44d52875
@@ -675,6 +680,7 @@ glrend/llvmpipe/declared/zs/5/320x240/scene-textured-shade-converted a3ddf5b6d5a
 glrend/llvmpipe/declared/zs/5/320x240/scene-unlit 6e115ddeac31bd03
 glrend/llvmpipe/declared/zs/5/320x240/scene-unlit-plain 6e115ddeac31bd03
 glrend/llvmpipe/declared/zs/5/320x240/scene-view-space 0d14d57f958dcdc3
+glrend/llvmpipe/declared/zs/5/320x240/scene-wireframe a199718c7f8500ac
 glrend/llvmpipe/declared/zs/6/320x240/scene-alpha 8dcfe9b89dfa964e
 glrend/llvmpipe/declared/zs/6/320x240/scene-blend e421fb9c26ebcd9e
 glrend/llvmpipe/declared/zs/6/320x240/scene-blend-arb b7a5265b1baa3df7
@@ -786,6 +792,7 @@ glrend/llvmpipe/declared/zs/6/320x240/scene-textured-shade-converted 7fa52ddbb74
 glrend/llvmpipe/declared/zs/6/320x240/scene-unlit 4ccfb65e7135b083
 glrend/llvmpipe/declared/zs/6/320x240/scene-unlit-plain 4ccfb65e7135b083
 glrend/llvmpipe/declared/zs/6/320x240/scene-view-space cbc23a402efbea43
+glrend/llvmpipe/declared/zs/6/320x240/scene-wireframe c094d549bae44a1b
 glrend/llvmpipe/declared/zs/8/320x240/croc-island-forest 7fc9053edd4bf9d2
 glrend/llvmpipe/declared/zs/8/320x240/croc-mp001-00 ffc91e7c460fbc81
 glrend/llvmpipe/declared/zs/8/320x240/croc-mp001-00-nose 240e8a5196678256
@@ -906,6 +913,7 @@ glrend/llvmpipe/declared/zs/8/320x240/scene-textured-shade-converted 7fa52ddbb74
 glrend/llvmpipe/declared/zs/8/320x240/scene-unlit 4ccfb65e7135b083
 glrend/llvmpipe/declared/zs/8/320x240/scene-unlit-plain 4ccfb65e7135b083
 glrend/llvmpipe/declared/zs/8/320x240/scene-view-space cbc23a402efbea43
+glrend/llvmpipe/declared/zs/8/320x240/scene-wireframe c094d549bae44a1b
 glrend/llvmpipe/x87/zb/4/320x240/scene-alpha 3d4d9628200ea773
 glrend/llvmpipe/x87/zb/4/320x240/scene-blend 3b8fc8cfa0b7ae28
 glrend/llvmpipe/x87/zb/4/320x240/scene-blend-arb 1dd796084e97a585
@@ -1017,6 +1025,7 @@ glrend/llvmpipe/x87/zb/4/320x240/scene-textured-shade-converted 3e32403c6a3a9494
 glrend/llvmpipe/x87/zb/4/320x240/scene-unlit fc95c27a85d6a643
 glrend/llvmpipe/x87/zb/4/320x240/scene-unlit-plain fc95c27a85d6a643
 glrend/llvmpipe/x87/zb/4/320x240/scene-view-space aae7ee4b620d3803
+glrend/llvmpipe/x87/zb/4/320x240/scene-wireframe 94c5d5d357ccad09
 glrend/llvmpipe/x87/zb/5/320x240/scene-alpha d2a9c09b5ef4cfaf
 glrend/llvmpipe/x87/zb/5/320x240/scene-blend 1c633d6ba98d6054
 glrend/llvmpipe/x87/zb/5/320x240/scene-blend-arb a26b2fbe44d52875
@@ -1128,6 +1137,7 @@ glrend/llvmpipe/x87/zb/5/320x240/scene-textured-shade-converted a3ddf5b6d5a74877
 glrend/llvmpipe/x87/zb/5/320x240/scene-unlit 6e115ddeac31bd03
 glrend/llvmpipe/x87/zb/5/320x240/scene-unlit-plain 6e115ddeac31bd03
 glrend/llvmpipe/x87/zb/5/320x240/scene-view-space 0d14d57f958dcdc3
+glrend/llvmpipe/x87/zb/5/320x240/scene-wireframe 3e3124d270ca9c24
 glrend/llvmpipe/x87/zb/6/320x240/scene-alpha 8dcfe9b89dfa964e
 glrend/llvmpipe/x87/zb/6/320x240/scene-blend e421fb9c26ebcd9e
 glrend/llvmpipe/x87/zb/6/320x240/scene-blend-arb b7a5265b1baa3df7
@@ -1239,6 +1249,7 @@ glrend/llvmpipe/x87/zb/6/320x240/scene-textured-shade-converted 7fa52ddbb743a6dd
 glrend/llvmpipe/x87/zb/6/320x240/scene-unlit 4ccfb65e7135b083
 glrend/llvmpipe/x87/zb/6/320x240/scene-unlit-plain 4ccfb65e7135b083
 glrend/llvmpipe/x87/zb/6/320x240/scene-view-space cbc23a402efbea43
+glrend/llvmpipe/x87/zb/6/320x240/scene-wireframe 62f67997a8f8052a
 glrend/llvmpipe/x87/zb/8/320x240/croc-island-forest bea23e5583728aec
 glrend/llvmpipe/x87/zb/8/320x240/croc-mp001-00 3685caf55e6d2bb0
 glrend/llvmpipe/x87/zb/8/320x240/croc-mp001-00-nose 96abe925e5f62c83
@@ -1359,6 +1370,7 @@ glrend/llvmpipe/x87/zb/8/320x240/scene-textured-shade-converted 7fa52ddbb743a6dd
 glrend/llvmpipe/x87/zb/8/320x240/scene-unlit 4ccfb65e7135b083
 glrend/llvmpipe/x87/zb/8/320x240/scene-unlit-plain 4ccfb65e7135b083
 glrend/llvmpipe/x87/zb/8/320x240/scene-view-space cbc23a402efbea43
+glrend/llvmpipe/x87/zb/8/320x240/scene-wireframe 62f67997a8f8052a
 glrend/llvmpipe/x87/zs/4/320x240/scene-alpha 3d4d9628200ea773
 glrend/llvmpipe/x87/zs/4/320x240/scene-blend 3b8fc8cfa0b7ae28
 glrend/llvmpipe/x87/zs/4/320x240/scene-blend-arb 1dd796084e97a585
@@ -1470,6 +1482,7 @@ glrend/llvmpipe/x87/zs/4/320x240/scene-textured-shade-converted 3e32403c6a3a9494
 glrend/llvmpipe/x87/zs/4/320x240/scene-unlit fc95c27a85d6a643
 glrend/llvmpipe/x87/zs/4/320x240/scene-unlit-plain fc95c27a85d6a643
 glrend/llvmpipe/x87/zs/4/320x240/scene-view-space aae7ee4b620d3803
+glrend/llvmpipe/x87/zs/4/320x240/scene-wireframe b5639c0156dc8c41
 glrend/llvmpipe/x87/zs/5/320x240/scene-alpha d2a9c09b5ef4cfaf
 glrend/llvmpipe/x87/zs/5/320x240/scene-blend 1c633d6ba98d6054
 glrend/llvmpipe/x87/zs/5/320x240/scene-blend-arb a26b2fbe44d52875
@@ -1581,6 +1594,7 @@ glrend/llvmpipe/x87/zs/5/320x240/scene-textured-shade-converted a3ddf5b6d5a74877
 glrend/llvmpipe/x87/zs/5/320x240/scene-unlit 6e115ddeac31bd03
 glrend/llvmpipe/x87/zs/5/320x240/scene-unlit-plain 6e115ddeac31bd03
 glrend/llvmpipe/x87/zs/5/320x240/scene-view-space 0d14d57f958dcdc3
+glrend/llvmpipe/x87/zs/5/320x240/scene-wireframe a199718c7f8500ac
 glrend/llvmpipe/x87/zs/6/320x240/scene-alpha 8dcfe9b89dfa964e
 glrend/llvmpipe/x87/zs/6/320x240/scene-blend e421fb9c26ebcd9e
 glrend/llvmpipe/x87/zs/6/320x240/scene-blend-arb b7a5265b1baa3df7
@@ -1692,6 +1706,7 @@ glrend/llvmpipe/x87/zs/6/320x240/scene-textured-shade-converted 7fa52ddbb743a6dd
 glrend/llvmpipe/x87/zs/6/320x240/scene-unlit 4ccfb65e7135b083
 glrend/llvmpipe/x87/zs/6/320x240/scene-unlit-plain 4ccfb65e7135b083
 glrend/llvmpipe/x87/zs/6/320x240/scene-view-space cbc23a402efbea43
+glrend/llvmpipe/x87/zs/6/320x240/scene-wireframe c094d549bae44a1b
 glrend/llvmpipe/x87/zs/8/320x240/croc-island-forest 3d5c929ff06ede25
 glrend/llvmpipe/x87/zs/8/320x240/croc-mp001-00 4c35fd6ca97c6287
 glrend/llvmpipe/x87/zs/8/320x240/croc-mp001-00-nose caefe329061fd3b2
@@ -1812,6 +1827,7 @@ glrend/llvmpipe/x87/zs/8/320x240/scene-textured-shade-converted 7fa52ddbb743a6dd
 glrend/llvmpipe/x87/zs/8/320x240/scene-unlit 4ccfb65e7135b083
 glrend/llvmpipe/x87/zs/8/320x240/scene-unlit-plain 4ccfb65e7135b083
 glrend/llvmpipe/x87/zs/8/320x240/scene-view-space cbc23a402efbea43
+glrend/llvmpipe/x87/zs/8/320x240/scene-wireframe c094d549bae44a1b
 glrend1x/llvmpipe/declared/zb/7/320x240/croc-island-forest 52bcba93b03c49de
 glrend1x/llvmpipe/declared/zb/7/320x240/croc-mp001-00 74f3d6ef535dc867
 glrend1x/llvmpipe/declared/zb/7/320x240/croc-mp001-00-nose a52dee8265f65fbb
@@ -1932,6 +1948,7 @@ glrend1x/llvmpipe/declared/zb/7/320x240/scene-textured-shade-converted 508f99ad2
 glrend1x/llvmpipe/declared/zb/7/320x240/scene-unlit 41fb9300d4b0afc3
 glrend1x/llvmpipe/declared/zb/7/320x240/scene-unlit-plain 41fb9300d4b0afc3
 glrend1x/llvmpipe/declared/zb/7/320x240/scene-view-space fb3aadec5d39a803
+glrend1x/llvmpipe/declared/zb/7/320x240/scene-wireframe ca0647d5f39d8ef3
 glrend1x/llvmpipe/declared/zs/7/320x240/croc-island-forest a2bf45e4c87349eb
 glrend1x/llvmpipe/declared/zs/7/320x240/croc-mp001-00 b097ae2edac55a8c
 glrend1x/llvmpipe/declared/zs/7/320x240/croc-mp001-00-nose a66d1e6bfbc363e9
@@ -2052,6 +2069,7 @@ glrend1x/llvmpipe/declared/zs/7/320x240/scene-textured-shade-converted 508f99ad2
 glrend1x/llvmpipe/declared/zs/7/320x240/scene-unlit 41fb9300d4b0afc3
 glrend1x/llvmpipe/declared/zs/7/320x240/scene-unlit-plain 41fb9300d4b0afc3
 glrend1x/llvmpipe/declared/zs/7/320x240/scene-view-space fb3aadec5d39a803
+glrend1x/llvmpipe/declared/zs/7/320x240/scene-wireframe bf53101fddb8bc31
 glrend1x/llvmpipe/x87/zb/7/320x240/croc-island-forest 713344b772568ced
 glrend1x/llvmpipe/x87/zb/7/320x240/croc-mp001-00 479835b2074c6bfc
 glrend1x/llvmpipe/x87/zb/7/320x240/croc-mp001-00-nose 5ef61c881aafdb77
@@ -2172,6 +2190,7 @@ glrend1x/llvmpipe/x87/zb/7/320x240/scene-textured-shade-converted 508f99ad2867c9
 glrend1x/llvmpipe/x87/zb/7/320x240/scene-unlit 41fb9300d4b0afc3
 glrend1x/llvmpipe/x87/zb/7/320x240/scene-unlit-plain 41fb9300d4b0afc3
 glrend1x/llvmpipe/x87/zb/7/320x240/scene-view-space fb3aadec5d39a803
+glrend1x/llvmpipe/x87/zb/7/320x240/scene-wireframe ca0647d5f39d8ef3
 glrend1x/llvmpipe/x87/zs/7/320x240/croc-island-forest b0cbd1af8240993b
 glrend1x/llvmpipe/x87/zs/7/320x240/croc-mp001-00 6db5d8a4359ea02a
 glrend1x/llvmpipe/x87/zs/7/320x240/croc-mp001-00-nose 738edc60a5a7fb45
@@ -2292,6 +2311,7 @@ glrend1x/llvmpipe/x87/zs/7/320x240/scene-textured-shade-converted 508f99ad2867c9
 glrend1x/llvmpipe/x87/zs/7/320x240/scene-unlit 41fb9300d4b0afc3
 glrend1x/llvmpipe/x87/zs/7/320x240/scene-unlit-plain 41fb9300d4b0afc3
 glrend1x/llvmpipe/x87/zs/7/320x240/scene-view-space fb3aadec5d39a803
+glrend1x/llvmpipe/x87/zs/7/320x240/scene-wireframe bf53101fddb8bc31
 softrend/softprmf/declared/zb/3/320x240/croc-island-forest 17bd188d9332432b
 softrend/softprmf/declared/zb/3/320x240/croc-mp001-00 2d63fb98ea02e43f
 softrend/softprmf/declared/zb/3/320x240/croc-mp001-00-nose 9108593cf6e94175
@@ -2412,6 +2432,7 @@ softrend/softprmf/declared/zb/3/320x240/scene-textured-shade-converted 2c80ed28e
 softrend/softprmf/declared/zb/3/320x240/scene-unlit 15de493775a00743
 softrend/softprmf/declared/zb/3/320x240/scene-unlit-plain 15de493775a00743
 softrend/softprmf/declared/zb/3/320x240/scene-view-space 37f141e90648b2c3
+softrend/softprmf/declared/zb/3/320x240/scene-wireframe 163999dcda1e4877
 softrend/softprmf/declared/zb/4/320x240/croc-island-forest b212c8183e14861f
 softrend/softprmf/declared/zb/4/320x240/croc-mp001-00 76fc4a72266baf89
 softrend/softprmf/declared/zb/4/320x240/croc-mp001-00-nose ab5ad26daeaba924
@@ -2532,6 +2553,7 @@ softrend/softprmf/declared/zb/4/320x240/scene-textured-shade-converted e5a8a1ca0
 softrend/softprmf/declared/zb/4/320x240/scene-unlit 20e452838b5d1543
 softrend/softprmf/declared/zb/4/320x240/scene-unlit-plain 20e452838b5d1543
 softrend/softprmf/declared/zb/4/320x240/scene-view-space 9c31a8ff5e7d6b23
+softrend/softprmf/declared/zb/4/320x240/scene-wireframe bff4d773a7d30064
 softrend/softprmf/declared/zb/5/320x240/croc-island-forest 7e008c3024ad111c
 softrend/softprmf/declared/zb/5/320x240/croc-mp001-00 b86166e8c8a6e041
 softrend/softprmf/declared/zb/5/320x240/croc-mp001-00-nose b84875ac1cea743f
@@ -2652,6 +2674,7 @@ softrend/softprmf/declared/zb/5/320x240/scene-textured-shade-converted e72f576c9
 softrend/softprmf/declared/zb/5/320x240/scene-unlit 370a091e2aa72783
 softrend/softprmf/declared/zb/5/320x240/scene-unlit-plain 370a091e2aa72783
 softrend/softprmf/declared/zb/5/320x240/scene-view-space 76d4f72e73e30283
+softrend/softprmf/declared/zb/5/320x240/scene-wireframe 201434a1cc2b8875
 softrend/softprmf/declared/zb/6/320x240/croc-island-forest e0ea123d2c4a5f4c
 softrend/softprmf/declared/zb/6/320x240/croc-mp001-00 cebd617db7110884
 softrend/softprmf/declared/zb/6/320x240/croc-mp001-00-nose 079939d508d36335
@@ -2772,6 +2795,7 @@ softrend/softprmf/declared/zb/6/320x240/scene-textured-shade-converted 7f2255d13
 softrend/softprmf/declared/zb/6/320x240/scene-unlit f1d9eb8480e70033
 softrend/softprmf/declared/zb/6/320x240/scene-unlit-plain f1d9eb8480e70033
 softrend/softprmf/declared/zb/6/320x240/scene-view-space 4e11433c1c71f133
+softrend/softprmf/declared/zb/6/320x240/scene-wireframe 05fcd5be713ad1e9
 softrend/softprmf/declared/zs/3/320x240/croc-island-forest 7a829cb3e9e64434
 softrend/softprmf/declared/zs/3/320x240/croc-mp001-00 83b7983a7bc39b97
 softrend/softprmf/declared/zs/3/320x240/croc-mp001-00-nose 21f20440b583ec1f
@@ -2892,6 +2916,7 @@ softrend/softprmf/declared/zs/3/320x240/scene-textured-shade-converted 8c51e779c
 softrend/softprmf/declared/zs/3/320x240/scene-unlit 15de493775a00743
 softrend/softprmf/declared/zs/3/320x240/scene-unlit-plain 15de493775a00743
 softrend/softprmf/declared/zs/3/320x240/scene-view-space 37f141e90648b2c3
+softrend/softprmf/declared/zs/3/320x240/scene-wireframe 163999dcda1e4877
 softrend/softprmf/declared/zs/4/320x240/croc-island-forest 01d3329401efde7d
 softrend/softprmf/declared/zs/4/320x240/croc-mp001-00 a676337cb5f3c8d3
 softrend/softprmf/declared/zs/4/320x240/croc-mp001-00-nose 5ba95d0a1543f0cf
@@ -3012,6 +3037,7 @@ softrend/softprmf/declared/zs/4/320x240/scene-textured-shade-converted 2239011b5
 softrend/softprmf/declared/zs/4/320x240/scene-unlit 20e452838b5d1543
 softrend/softprmf/declared/zs/4/320x240/scene-unlit-plain 20e452838b5d1543
 softrend/softprmf/declared/zs/4/320x240/scene-view-space 9c31a8ff5e7d6b23
+softrend/softprmf/declared/zs/4/320x240/scene-wireframe bff4d773a7d30064
 softrend/softprmf/declared/zs/5/320x240/croc-island-forest a56418f6ca6c3399
 softrend/softprmf/declared/zs/5/320x240/croc-mp001-00 4b52999a94edb791
 softrend/softprmf/declared/zs/5/320x240/croc-mp001-00-nose a0e980aaab6769c0
@@ -3132,6 +3158,7 @@ softrend/softprmf/declared/zs/5/320x240/scene-textured-shade-converted 0a3046780
 softrend/softprmf/declared/zs/5/320x240/scene-unlit 370a091e2aa72783
 softrend/softprmf/declared/zs/5/320x240/scene-unlit-plain 370a091e2aa72783
 softrend/softprmf/declared/zs/5/320x240/scene-view-space 76d4f72e73e30283
+softrend/softprmf/declared/zs/5/320x240/scene-wireframe 201434a1cc2b8875
 softrend/softprmf/declared/zs/6/320x240/croc-island-forest 2d3c27f7d13b8711
 softrend/softprmf/declared/zs/6/320x240/croc-mp001-00 ee42c78ca6f13b86
 softrend/softprmf/declared/zs/6/320x240/croc-mp001-00-nose aecea23a74f5bca3
@@ -3252,6 +3279,7 @@ softrend/softprmf/declared/zs/6/320x240/scene-textured-shade-converted 7f2255d13
 softrend/softprmf/declared/zs/6/320x240/scene-unlit f1d9eb8480e70033
 softrend/softprmf/declared/zs/6/320x240/scene-unlit-plain f1d9eb8480e70033
 softrend/softprmf/declared/zs/6/320x240/scene-view-space 4e11433c1c71f133
+softrend/softprmf/declared/zs/6/320x240/scene-wireframe 05fcd5be713ad1e9
 softrend/softprmf/x87/zb/3/320x240/croc-island-forest 1bdafd1a1ed03025
 softrend/softprmf/x87/zb/3/320x240/croc-mp001-00 841285f835d92056
 softrend/softprmf/x87/zb/3/320x240/croc-mp001-00-nose 2744fab908415c32
@@ -3372,6 +3400,7 @@ softrend/softprmf/x87/zb/3/320x240/scene-textured-shade-converted 2c80ed28ed4513
 softrend/softprmf/x87/zb/3/320x240/scene-unlit 15de493775a00743
 softrend/softprmf/x87/zb/3/320x240/scene-unlit-plain 15de493775a00743
 softrend/softprmf/x87/zb/3/320x240/scene-view-space 37f141e90648b2c3
+softrend/softprmf/x87/zb/3/320x240/scene-wireframe 163999dcda1e4877
 softrend/softprmf/x87/zb/4/320x240/croc-island-forest 83eedf65d3ec813b
 softrend/softprmf/x87/zb/4/320x240/croc-mp001-00 d52d8b71f1c14d2a
 softrend/softprmf/x87/zb/4/320x240/croc-mp001-00-nose 5c6d1928f923d6b8
@@ -3492,6 +3521,7 @@ softrend/softprmf/x87/zb/4/320x240/scene-textured-shade-converted e5a8a1ca0e0de8
 softrend/softprmf/x87/zb/4/320x240/scene-unlit 20e452838b5d1543
 softrend/softprmf/x87/zb/4/320x240/scene-unlit-plain 20e452838b5d1543
 softrend/softprmf/x87/zb/4/320x240/scene-view-space 9c31a8ff5e7d6b23
+softrend/softprmf/x87/zb/4/320x240/scene-wireframe bff4d773a7d30064
 softrend/softprmf/x87/zb/5/320x240/croc-island-forest 39245e3be61167ff
 softrend/softprmf/x87/zb/5/320x240/croc-mp001-00 257c076c4f71efd2
 softrend/softprmf/x87/zb/5/320x240/croc-mp001-00-nose cb47de9c96801607
@@ -3612,6 +3642,7 @@ softrend/softprmf/x87/zb/5/320x240/scene-textured-shade-converted e72f576c90706c
 softrend/softprmf/x87/zb/5/320x240/scene-unlit 370a091e2aa72783
 softrend/softprmf/x87/zb/5/320x240/scene-unlit-plain 370a091e2aa72783
 softrend/softprmf/x87/zb/5/320x240/scene-view-space 76d4f72e73e30283
+softrend/softprmf/x87/zb/5/320x240/scene-wireframe 201434a1cc2b8875
 softrend/softprmf/x87/zb/6/320x240/croc-island-forest 1f4c9fb98160ed17
 softrend/softprmf/x87/zb/6/320x240/croc-mp001-00 cebd617db7110884
 softrend/softprmf/x87/zb/6/320x240/croc-mp001-00-nose 079939d508d36335
@@ -3732,6 +3763,7 @@ softrend/softprmf/x87/zb/6/320x240/scene-textured-shade-converted 7f2255d1354746
 softrend/softprmf/x87/zb/6/320x240/scene-unlit f1d9eb8480e70033
 softrend/softprmf/x87/zb/6/320x240/scene-unlit-plain f1d9eb8480e70033
 softrend/softprmf/x87/zb/6/320x240/scene-view-space 4e11433c1c71f133
+softrend/softprmf/x87/zb/6/320x240/scene-wireframe 05fcd5be713ad1e9
 softrend/softprmf/x87/zs/3/320x240/croc-island-forest d55161a9a7c907d7
 softrend/softprmf/x87/zs/3/320x240/croc-mp001-00 6451b4fe8f75396e
 softrend/softprmf/x87/zs/3/320x240/croc-mp001-00-nose 7d7a59a9d2829a74
@@ -3852,6 +3884,7 @@ softrend/softprmf/x87/zs/3/320x240/scene-textured-shade-converted 8c51e779ca64e9
 softrend/softprmf/x87/zs/3/320x240/scene-unlit 15de493775a00743
 softrend/softprmf/x87/zs/3/320x240/scene-unlit-plain 15de493775a00743
 softrend/softprmf/x87/zs/3/320x240/scene-view-space 37f141e90648b2c3
+softrend/softprmf/x87/zs/3/320x240/scene-wireframe 163999dcda1e4877
 softrend/softprmf/x87/zs/4/320x240/croc-island-forest 01d3329401efde7d
 softrend/softprmf/x87/zs/4/320x240/croc-mp001-00 a676337cb5f3c8d3
 softrend/softprmf/x87/zs/4/320x240/croc-mp001-00-nose 5ba95d0a1543f0cf
@@ -3972,6 +4005,7 @@ softrend/softprmf/x87/zs/4/320x240/scene-textured-shade-converted 2239011b5ac119
 softrend/softprmf/x87/zs/4/320x240/scene-unlit 20e452838b5d1543
 softrend/softprmf/x87/zs/4/320x240/scene-unlit-plain 20e452838b5d1543
 softrend/softprmf/x87/zs/4/320x240/scene-view-space 9c31a8ff5e7d6b23
+softrend/softprmf/x87/zs/4/320x240/scene-wireframe bff4d773a7d30064
 softrend/softprmf/x87/zs/5/320x240/croc-island-forest a56418f6ca6c3399
 softrend/softprmf/x87/zs/5/320x240/croc-mp001-00 4b52999a94edb791
 softrend/softprmf/x87/zs/5/320x240/croc-mp001-00-nose a0e980aaab6769c0
@@ -4092,6 +4126,7 @@ softrend/softprmf/x87/zs/5/320x240/scene-textured-shade-converted 0a3046780ff289
 softrend/softprmf/x87/zs/5/320x240/scene-unlit 370a091e2aa72783
 softrend/softprmf/x87/zs/5/320x240/scene-unlit-plain 370a091e2aa72783
 softrend/softprmf/x87/zs/5/320x240/scene-view-space 76d4f72e73e30283
+softrend/softprmf/x87/zs/5/320x240/scene-wireframe 201434a1cc2b8875
 softrend/softprmf/x87/zs/6/320x240/croc-island-forest 6ddac77db366ef00
 softrend/softprmf/x87/zs/6/320x240/croc-mp001-00 ee42c78ca6f13b86
 softrend/softprmf/x87/zs/6/320x240/croc-mp001-00-nose aecea23a74f5bca3
@@ -4212,3 +4247,4 @@ softrend/softprmf/x87/zs/6/320x240/scene-textured-shade-converted 7f2255d1354746
 softrend/softprmf/x87/zs/6/320x240/scene-unlit f1d9eb8480e70033
 softrend/softprmf/x87/zs/6/320x240/scene-unlit-plain f1d9eb8480e70033
 softrend/softprmf/x87/zs/6/320x240/scene-view-space 4e11433c1c71f133
+softrend/softprmf/x87/zs/6/320x240/scene-wireframe 05fcd5be713ad1e9

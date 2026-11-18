@@ -2367,6 +2367,7 @@ static const char *const rt_default_scenes[] = {
      */
     "scene-edges",
     "scene-points",
+    "scene-wireframe",
 
     /*
      * The line and point material states; see scene.c. Each scene carries an
