@@ -8,6 +8,8 @@ add_executable(rendertest
         pmwitness.h
         vkwitness.c
         vkwitness.h
+        wfwitness.c
+        wfwitness.h
 )
 
 target_link_libraries(rendertest PRIVATE BRender::Full BRender::DDI parg brcapture)
@@ -234,6 +236,16 @@ if (BUILD_TESTING)
     add_test(NAME "pmw" COMMAND rendertest --pm-witness --device softrend)
     set_tests_properties("pmw" PROPERTIES
                          ENVIRONMENT "SDL_VIDEODRIVER=offscreen")
+
+    #
+    # The wireframe witness (main.c --wireframe-witness). The corpus cannot tell
+    # BR_RSTYLE_WIREFRAME from BR_RSTYLE_EDGES - its fixtures are glTF files, and no glTF
+    # path carries br_face::flags, so both styles draw the same edges there - and the choice
+    # between softrend's two triangle-to-edge conversions is made when the geometry-function
+    # chain is built rather than per draw. It uses host pixelmaps and the software renderer,
+    # so no device is involved and it runs in both floating-point classes.
+    #
+    add_test(NAME "wfw" COMMAND rendertest --wireframe-witness --device softrend)
 
     #
     # The environment-map orientation witness (main.c --env-witness). It is not
