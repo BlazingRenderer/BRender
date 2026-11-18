@@ -272,7 +272,7 @@ typedef struct state_stack {
     /*
      * Render type (BRT_POINT, BRT_LINE, BRT_TRIANGLE).
      */
-    br_token render_type;
+    br_token render_style;
 
     /*
      * Only for use when in the pool.

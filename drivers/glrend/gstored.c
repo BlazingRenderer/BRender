@@ -397,7 +397,7 @@ static br_boolean want_defer(const state_hidden *hidden)
     return hidden->order_table != NULL && hidden->heap != NULL;
 }
 
-static br_error V1Model_RenderStored(br_geometry_stored *self, br_renderer *renderer, br_boolean type, br_boolean on_screen)
+static br_error V1Model_RenderStored(br_geometry_stored *self, br_renderer *renderer, br_token style, br_boolean on_screen)
 {
     br_primitive *prim;
     br_vector3    pos;
@@ -426,7 +426,7 @@ static br_error V1Model_RenderStored(br_geometry_stored *self, br_renderer *rend
         /*
          * If there's a stored state (i.e. a material), apply it to our current state.
          */
-        renderer->state.current->render_type = type;
+        renderer->state.current->render_style = style;
         state                                = *renderer->state.current;
         if(stored != NULL) {
             StateGLCopy(&state, &stored->state, BR_STATE_STORED_PARTS_MASK);
@@ -508,20 +508,20 @@ static br_error V1Model_RenderStored(br_geometry_stored *self, br_renderer *rend
     return BRE_OK;
 }
 
-static br_error BR_CMETHOD(br_geometry_stored_gl, render)(br_geometry_stored *self, br_renderer *renderer, br_token type)
+static br_error BR_CMETHOD(br_geometry_stored_gl, render)(br_geometry_stored *self, br_renderer *renderer, br_token style)
 {
-    if(type != BRT_TRIANGLE && type != BRT_POINT)
+    if(style != BRT_TRIANGLE && style != BRT_POINT)
         return BRE_FAIL;
 
-    return V1Model_RenderStored(self, renderer, type, BR_FALSE);
+    return V1Model_RenderStored(self, renderer, style, BR_FALSE);
 }
 
-static br_error BR_CMETHOD(br_geometry_stored_gl, renderOnScreen)(br_geometry_stored *self, br_renderer *renderer, br_token type)
+static br_error BR_CMETHOD(br_geometry_stored_gl, renderOnScreen)(br_geometry_stored *self, br_renderer *renderer, br_token style)
 {
-    if(type != BRT_TRIANGLE && type != BRT_POINT)
+    if(style != BRT_TRIANGLE && style != BRT_POINT)
         return BRE_FAIL;
 
-    return V1Model_RenderStored(self, renderer, type, BR_TRUE);
+    return V1Model_RenderStored(self, renderer, style, BR_TRUE);
 }
 
 static const struct br_geometry_stored_dispatch geometryStoredDispatch = {

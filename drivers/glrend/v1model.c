@@ -423,7 +423,7 @@ static br_boolean apply_state(br_renderer *renderer, const GladGLContext *gl)
 
     apply_stored_properties(gl, renderer, renderer->state.current, BR_STATE_STORED_PARTS_MASK | MASK_STATE_OUTPUT, &model, ctx->tex_white);
 
-    switch(renderer->state.current->render_type) {
+    switch(renderer->state.current->render_style) {
         case BRT_POINT:
             gl->PolygonMode(GL_FRONT_AND_BACK, GL_POINT);
             break;

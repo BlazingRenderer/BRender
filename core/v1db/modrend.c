@@ -10,20 +10,22 @@
 #include "shortcut.h"
 #include "formats.h"
 
-static void renderAll(br_model *model, br_material *material, br_token type, int on_screen)
+static void renderAll(br_model *model, br_material *material, br_token style, int on_screen)
 {
     if(model->stored) {
         if(on_screen == BRT_ACCEPT)
-            GeometryStoredRenderOnScreen(model->stored, v1db.renderer, type);
+            GeometryStoredRenderOnScreen(model->stored, v1db.renderer, style);
         else
-            GeometryStoredRender(model->stored, v1db.renderer, type);
+            GeometryStoredRender(model->stored, v1db.renderer, style);
 
     } else if(model->prepared) {
         if(on_screen == BRT_ACCEPT)
-            GeometryV1ModelRenderOnScreen(v1db.format_model, v1db.renderer, model->prepared, material->stored, type);
+            GeometryV1ModelRenderOnScreen(v1db.format_model, v1db.renderer, model->prepared, material->stored, style);
         else
-            GeometryV1ModelRender(v1db.format_model, v1db.renderer, model->prepared, material->stored, type);
+            GeometryV1ModelRender(v1db.format_model, v1db.renderer, model->prepared, material->stored, style);
     }
+
+
 }
 
 /*
@@ -69,7 +71,7 @@ static void nullRender(br_actor *actor, br_model *model, br_material *material, 
  * hands back nothing is a type the driver does not take.
  */
 static br_error renderImmediate(br_geometry_v1_model *self, br_renderer *renderer, struct v11model *model,
-                                br_renderer_state_stored *default_state, br_token type, br_boolean on_screen)
+                                br_renderer_state_stored *default_state, br_token style, br_boolean on_screen)
 {
     br_geometry_stored *sg = NULL;
     br_error            err;
@@ -77,10 +79,10 @@ static br_error renderImmediate(br_geometry_v1_model *self, br_renderer *rendere
     br_boolean          forced = BR_FALSE;
     br_value            hidden = {0};
 
-    err = GeometryV1ModelStoredNew(self, renderer, &sg, model, type, NULL);
+    err = GeometryV1ModelStoredNew(self, renderer, &sg, model, style, NULL);
 
     if(err != BRE_OK || sg == NULL) {
-        BrLogWarn("V1DB", "immediate geometry: the driver did not store this model (%d); nothing was drawn", (int)type);
+        BrLogWarn("V1DB", "immediate geometry: the driver did not store this model (%d); nothing was drawn", (int)style);
         return BRE_FAIL;
     }
 
@@ -107,7 +109,7 @@ static br_error renderImmediate(br_geometry_v1_model *self, br_renderer *rendere
         forced = BR_TRUE;
     }
 
-    err = on_screen ? GeometryStoredRenderOnScreen(sg, renderer, type) : GeometryStoredRender(sg, renderer, type);
+    err = on_screen ? GeometryStoredRenderOnScreen(sg, renderer, style) : GeometryStoredRender(sg, renderer, style);
 
     if(forced)
         RendererPartSet(renderer, BRT_HIDDEN_SURFACE, 0, BRT_TYPE_T, hidden);
@@ -121,16 +123,16 @@ static br_error renderImmediate(br_geometry_v1_model *self, br_renderer *rendere
 }
 
 br_error BR_CMETHOD_DECL(br_geometry_v1_model_gen, render)(struct br_geometry_v1_model *self, struct br_renderer *renderer,
-                                                           struct v11model *model, struct br_renderer_state_stored *default_state, br_token type)
+                                                           struct v11model *model, struct br_renderer_state_stored *default_state, br_token style)
 {
-    return renderImmediate(self, renderer, model, default_state, type, BR_FALSE);
+    return renderImmediate(self, renderer, model, default_state, style, BR_FALSE);
 }
 
 br_error BR_CMETHOD_DECL(br_geometry_v1_model_gen, renderOnScreen)(struct br_geometry_v1_model *self, struct br_renderer *renderer,
                                                                    struct v11model *model, struct br_renderer_state_stored *default_state,
-                                                                   br_token type)
+                                                                   br_token style)
 {
-    return renderImmediate(self, renderer, model, default_state, type, BR_TRUE);
+    return renderImmediate(self, renderer, model, default_state, style, BR_TRUE);
 }
 
 /*

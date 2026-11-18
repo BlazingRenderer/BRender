@@ -104,12 +104,12 @@ static br_error BR_CMETHOD_DECL(br_geometry_v1_model_vk, storedAvail)(struct br_
 }
 
 static br_error BR_CMETHOD_DECL(br_geometry_v1_model_vk, storedNew)(struct br_geometry_v1_model *self, struct br_renderer *renderer,
-                                                                    struct br_geometry_stored **psg, struct v11model *model, br_token type,
+                                                                    struct br_geometry_stored **psg, struct v11model *model, br_token topology,
                                                                     br_token_value *tv)
 {
     (void)tv;
 
-    if(type != BRT_TRIANGLE)
+    if(topology != BRT_TRIANGLE)
         return BRE_FAIL;
 
     if((*psg = GeometryStoredVkAllocate(self, "model", renderer, model)) == NULL)

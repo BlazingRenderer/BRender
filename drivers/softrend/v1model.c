@@ -699,7 +699,7 @@ static void GEOMETRY_CALL V1Faces_GeometryFnsUpdate(br_geometry *self, br_render
 }
 
 static br_error V1Model_Render(br_geometry *self, br_renderer *renderer, struct v11model *model, br_renderer_state_stored *default_state,
-                               br_token type, br_boolean on_screen)
+                               br_token style, br_boolean on_screen)
 {
     int                       i, g;
     br_renderer_state_stored *state;
@@ -781,7 +781,7 @@ static br_error V1Model_Render(br_geometry *self, br_renderer *renderer, struct 
         z_sort_blended = (renderer->state.hidden.type == BRT_BUCKET_SORT && renderer->state.hidden.divert == BRT_BLENDED &&
                           renderer->state.hidden.order_table != NULL && scache.valid_primitive_heap);
 
-        r = PrimitiveStateRenderBegin(renderer->state.pstate, &rend.block, &rend.block_changed, &rend.range_changed, z_sort, type);
+        r = PrimitiveStateRenderBegin(renderer->state.pstate, &rend.block, &rend.block_changed, &rend.range_changed, z_sort, style);
 
         if(r != BRE_OK)
             return r;
@@ -881,21 +881,21 @@ static br_error V1Model_Render(br_geometry *self, br_renderer *renderer, struct 
 }
 
 br_error BR_CMETHOD_DECL(br_geometry_v1_model_soft, render)(br_geometry_v1_model *self, br_renderer *renderer, struct v11model *model,
-                                                            br_renderer_state_stored *default_state, br_token type)
+                                                            br_renderer_state_stored *default_state, br_token style)
 {
     br_error r;
 
-    r = V1Model_Render((br_geometry *)self, renderer, model, default_state, type, BR_FALSE);
+    r = V1Model_Render((br_geometry *)self, renderer, model, default_state, style, BR_FALSE);
 
     return r;
 }
 
 br_error BR_CMETHOD_DECL(br_geometry_v1_model_soft, renderOnScreen)(br_geometry_v1_model *self, br_renderer *renderer, struct v11model *model,
-                                                                    br_renderer_state_stored *default_state, br_token type)
+                                                                    br_renderer_state_stored *default_state, br_token style)
 {
     br_error r;
 
-    r = V1Model_Render((br_geometry *)self, renderer, model, default_state, type, BR_TRUE);
+    r = V1Model_Render((br_geometry *)self, renderer, model, default_state, style, BR_TRUE);
 
     return r;
 }
