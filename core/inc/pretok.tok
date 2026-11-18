@@ -748,14 +748,15 @@ V1INSERT_ARG2					pointer
 V1INSERT_ARG3					pointer
 STORED_STATE					object
 
-# Currently known primtive types
+# Mesh Topologies
 #
-SPRITE							none
-POINT							none
-LINE							none
-TRIANGLE						none
-QUAD							none
-STATE_RESTORE					none
+POINT                 none
+LINE                  none
+TRIANGLE              none
+QUAD                  none
+
+SPRITE                none
+STATE_RESTORE         none
 
 # Geometry formats
 #
