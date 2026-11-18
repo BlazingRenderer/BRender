@@ -97,9 +97,9 @@ static br_error BR_CMETHOD_DECL(br_geometry_v1_model_gl, storedNew)(struct br_ge
                                                                     struct br_geometry_stored **psg, struct v11model *model, br_token topology,
                                                                     br_token_value *tv)
 {
+    (void)tv;
+
     ASSERT(topology == BRT_TRIANGLE);
-    if(topology != BRT_TRIANGLE)
-        return BRE_FAIL;
 
     if((*psg = GeometryStoredGLAllocate(self, "model", renderer, model)) == NULL)
         return BRE_FAIL;
