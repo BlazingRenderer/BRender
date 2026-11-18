@@ -755,6 +755,7 @@ EDGE                    none
 FACE                    none
 ANTIALIASED_EDGE        none
 ANTIALIASED_FACE        none
+WIREFRAME               none
 
 # Mesh Topologies
 #

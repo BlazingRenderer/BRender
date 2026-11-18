@@ -57,6 +57,14 @@ static void renderAntialiasedEdges(br_actor *actor, br_model *model, br_material
 }
 
 /*
+ * Render every triangle's three edges, including the ones BR_RSTYLE_EDGES leaves out
+ */
+static void renderWireframe(br_actor *actor, br_model *model, br_material *material, void *render_data, br_uint_8 style, int on_screen)
+{
+    renderAll(model, material, BRT_WIREFRAME, on_screen);
+}
+
+/*
  * Render model points
  */
 static void renderPoints(br_actor *actor, br_model *model, br_material *material, void *render_data, br_uint_8 style, int on_screen)
@@ -374,4 +382,5 @@ br_render_style_call_fn *const RenderStyleCalls[] = {
     [BR_RSTYLE_BOUNDING_FACES]    = boundingBoxRenderFaces,
     [BR_RSTYLE_ANTIALIASED_LINES] = renderAntialiasedEdges,
     [BR_RSTYLE_ANTIALIASED_FACES] = renderAntialiasedFaces,
+    [BR_RSTYLE_WIREFRAME]         = renderWireframe,
 };

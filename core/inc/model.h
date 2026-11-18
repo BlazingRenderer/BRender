@@ -101,8 +101,8 @@ typedef struct br_face {
     br_uint_8 blu;
 
     /**
-     * \brief Face flags, indicating whether the edges of the face abut co-planar faces, and thus do not
-     *        need to be drawn in the wire-frame render style BR_RSTYLE_EDGES.
+     * \brief Face flags, indicating whether the edges of the face abut co-planar faces, and thus are
+     *        not drawn by BR_RSTYLE_EDGES.
      *
      * The following table describes each flag.
      *

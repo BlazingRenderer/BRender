@@ -46,6 +46,7 @@ enum {
     BR_RSTYLE_BOUNDING_FACES,
     BR_RSTYLE_ANTIALIASED_LINES,
     BR_RSTYLE_ANTIALIASED_FACES,
+    BR_RSTYLE_WIREFRAME,
     BR_RSTYLE_MAX
 };
 
@@ -217,6 +218,8 @@ typedef struct br_actor {
      *     material
      * \li BR_RSTYLE_ANTIALIASED_LINES — Renders as BR_RSTYLE_EDGES; antialiasing is not implemented
      * \li BR_RSTYLE_ANTIALIASED_FACES — Renders as BR_RSTYLE_FACES; antialiasing is not implemented
+     * \li BR_RSTYLE_WIREFRAME — Renders the three edges of every face, including an edge shared with a
+     *     co-planar face, which BR_RSTYLE_EDGES leaves out (see br_face flags)
      */
     br_uint_8 render_style;
 

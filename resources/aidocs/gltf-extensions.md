@@ -54,7 +54,7 @@ does. Re-apply both when the vendored files are updated.
 ### What it annotates
 
 A **node**, in place. It carries `br_actor::render_style` - the topology the renderer draws from the actor's
-model: points, edges or faces, or one of the bounding-box styles.
+model: points, edges, faces or wireframe, or one of the bounding-box styles.
 
 It is not glTF's primitive `mode`. `mode` says what the indices in the file describe; `render_style` says
 what BRender draws over the triangle list the file holds, and BRender draws a point or edge topology over a
@@ -101,6 +101,7 @@ Abridged from `tools/rendertest/dat/scene-edges.gltf`.
 | 7 | `BOUNDING_FACES` | faces of the bounding box |
 | 8 | `ANTIALIASED_LINES` | as `EDGES`; antialiasing is not implemented |
 | 9 | `ANTIALIASED_FACES` | as `FACES`; antialiasing is not implemented |
+| 10 | `WIREFRAME` | the three edges of every face, including an edge shared with a co-planar face |
 
 Values 8 and 9 name antialiased styles, which are their own render styles rather than another spelling of
 `EDGES` and `FACES`: the style reaches the renderer as `BRT_ANTIALIASED_EDGES` or `BRT_ANTIALIASED_FACES`

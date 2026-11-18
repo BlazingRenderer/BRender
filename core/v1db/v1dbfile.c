@@ -1181,6 +1181,7 @@ static br_file_enum_member render_style_FM[] = {
     _ENUM_MEMBER(BR_RSTYLE_BOUNDING_POINTS),
     _ENUM_MEMBER(BR_RSTYLE_BOUNDING_EDGES),
     _ENUM_MEMBER(BR_RSTYLE_BOUNDING_FACES),
+    _ENUM_MEMBER(BR_RSTYLE_WIREFRAME),
 };
 
 static _FILE_ENUM(render_style);
