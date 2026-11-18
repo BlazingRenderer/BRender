@@ -510,7 +510,7 @@ static br_error V1Model_RenderStored(br_geometry_stored *self, br_renderer *rend
 
 static br_boolean style_drawable(br_token style)
 {
-    return style == BRT_POINT || style == BRT_FACE || style == BRT_ANTIALIASED_FACE;
+    return style == BRT_POINT || style == BRT_FACE || style == BRT_ANTIALIASED_FACE || style == BRT_WIREFRAME;
 }
 
 static br_error BR_CMETHOD(br_geometry_stored_gl, render)(br_geometry_stored *self, br_renderer *renderer, br_token style)

@@ -432,6 +432,10 @@ static br_boolean apply_state(br_renderer *renderer, const GladGLContext *gl)
             gl->PolygonMode(GL_FRONT_AND_BACK, GL_POINT);
             break;
 
+        case BRT_WIREFRAME:
+            gl->PolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+            break;
+
         case BRT_ANTIALIASED_FACE:
         case BRT_FACE:
         default:
