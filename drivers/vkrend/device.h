@@ -190,8 +190,9 @@ typedef struct br_device_vk_render_sampler {
  * distinct. The winding split is the eighth: a model-view whose upper 3x3 determinant is
  * negative reflects, reversing the screen winding of a BRender front face, so the front
  * face the pipeline names flips with it (front_face_for() in gv1buckt.c) and the two
- * windings get their own pipelines. One is built lazily per destination format and
- * destroyed with the device.
+ * windings get their own pipelines. The polygon split is the ninth: a BR_RSTYLE_WIREFRAME
+ * draw rasterises the triangle list with VK_POLYGON_MODE_LINE instead of FILL. One is built
+ * lazily per destination format and destroyed with the device.
  */
 typedef struct br_device_vk_render_pipeline {
     VkFormat              format;
@@ -208,6 +209,7 @@ typedef struct br_device_vk_render_pipeline {
     br_boolean            depth_test;
     br_boolean            depth_write;
     VkCompareOp           depth_compare;
+    VkPolygonMode         polygon_mode;
     VkPipeline            pipeline;
 } br_device_vk_render_pipeline;
 

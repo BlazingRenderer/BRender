@@ -9,7 +9,7 @@
  *
  * The pipeline is specialised, like the rect and line pipelines, because dynamic rendering
  * has no VkRenderPass to derive the attachment formats from, so
- * VkPipelineRenderingCreateInfo names them. The key is the eight splits device.h lists for
+ * VkPipelineRenderingCreateInfo names them. The key is the nine splits device.h lists for
  * br_device_vk_render_pipeline - lighting, texture and index shape, cull, blend, depth,
  * shading mode and front-face winding - on top of the destination format and sample count.
  * It is device-scoped and built on first use.
@@ -358,7 +358,7 @@ static void blend_factors_for(br_token blend_mode, VkBlendFactor *src, VkBlendFa
 VkPipeline DeviceVkRenderGetPipeline(br_device *dev, VkFormat format, VkSampleCountFlagBits samples, br_boolean lit, br_boolean textured,
                                      br_boolean indexed, br_token shading_mode, VkCullModeFlags cull, VkFrontFace front_face,
                                      br_boolean blended, br_token blend_mode, br_boolean depth_test, br_boolean depth_write,
-                                     VkCompareOp depth_compare, VkFormat depth_format)
+                                     VkCompareOp depth_compare, VkFormat depth_format, VkPolygonMode polygon_mode)
 {
     const GladVulkanContext *vk = &dev->context;
     VkShaderModule           frag;
@@ -370,7 +370,8 @@ VkPipeline DeviceVkRenderGetPipeline(br_device *dev, VkFormat format, VkSampleCo
            dev->render_pipelines[i].cull == cull && dev->render_pipelines[i].front_face == front_face &&
            dev->render_pipelines[i].blended == blended && dev->render_pipelines[i].blend_mode == blend_mode &&
            dev->render_pipelines[i].depth_format == depth_format && dev->render_pipelines[i].depth_test == depth_test &&
-           dev->render_pipelines[i].depth_write == depth_write && dev->render_pipelines[i].depth_compare == depth_compare)
+           dev->render_pipelines[i].depth_write == depth_write && dev->render_pipelines[i].depth_compare == depth_compare &&
+           dev->render_pipelines[i].polygon_mode == polygon_mode)
             return dev->render_pipelines[i].pipeline;
     }
 
@@ -451,7 +452,7 @@ VkPipeline DeviceVkRenderGetPipeline(br_device *dev, VkFormat format, VkSampleCo
 
     const VkPipelineRasterizationStateCreateInfo raster = {
         .sType       = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO,
-        .polygonMode = VK_POLYGON_MODE_FILL,
+        .polygonMode = polygon_mode,
         .cullMode    = cull,
         .frontFace   = front_face,
         .lineWidth   = 1.0f,
@@ -556,6 +557,7 @@ VkPipeline DeviceVkRenderGetPipeline(br_device *dev, VkFormat format, VkSampleCo
     entry->depth_test                   = depth_test;
     entry->depth_write                  = depth_write;
     entry->depth_compare                = depth_compare;
+    entry->polygon_mode                 = polygon_mode;
     entry->pipeline                     = pipeline;
 
     return pipeline;
@@ -730,6 +732,7 @@ static br_boolean VkV1ModelRenderIndexed(br_geometry_stored *geom, br_renderer *
     VkFrontFace               front_face;
     br_boolean                blended;
     br_token                  blend_mode;
+    VkPolygonMode             polygon_mode;
     VkFormat                  depth_format  = VK_FORMAT_UNDEFINED;
     br_boolean                depth_test    = BR_FALSE;
     br_boolean                depth_write   = BR_FALSE;
@@ -790,6 +793,13 @@ static br_boolean VkV1ModelRenderIndexed(br_geometry_stored *geom, br_renderer *
     cull = cull_mode_for(state);
 
     /*
+     * The draw has a polygon mode, which is what a render style turns into on the way to the
+     * rasteriser. Every style fills the triangle list today; the modes that do not are added
+     * with the styles that need them.
+     */
+    polygon_mode = VK_POLYGON_MODE_FILL;
+
+    /*
      * The front face is chosen from this draw's model-view, so a mirrored actor selects
      * the other winding's pipeline (the two are separate entries in the pipeline cache).
      */
@@ -835,7 +845,7 @@ static br_boolean VkV1ModelRenderIndexed(br_geometry_stored *geom, br_renderer *
     }
 
     if((pipeline = DeviceVkRenderGetPipeline(dev, dst_fmt->format, VK_SAMPLE_COUNT_1_BIT, lit, textured, indexed, shading_mode, cull, front_face,
-                                             blended, blend_mode, depth_test, depth_write, depth_compare, depth_format)) == VK_NULL_HANDLE)
+                                             blended, blend_mode, depth_test, depth_write, depth_compare, depth_format, polygon_mode)) == VK_NULL_HANDLE)
         return BR_FALSE;
 
     for(int r = 0; r < 4; ++r) {

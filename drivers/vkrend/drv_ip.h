@@ -74,7 +74,7 @@ void                    DeviceVkRenderFini(br_device *dev);
 VkPipeline DeviceVkRenderGetPipeline(br_device *dev, VkFormat format, VkSampleCountFlagBits samples, br_boolean lit, br_boolean textured,
                                      br_boolean indexed, br_token shading_mode, VkCullModeFlags cull, VkFrontFace front_face,
                                      br_boolean blended, br_token blend_mode, br_boolean depth_test, br_boolean depth_write,
-                                     VkCompareOp depth_compare, VkFormat depth_format);
+                                     VkCompareOp depth_compare, VkFormat depth_format, VkPolygonMode polygon_mode);
 VkSampler  DeviceVkRenderGetSampler(br_device *dev, br_token filter, br_token mip_filter, br_token wrap_s, br_token wrap_t);
 void       VkV1ModelRenderGroup(br_geometry_stored *geom, br_renderer *renderer, const br_geometry_stored_group *group);
 void       VkV1ModelRenderFace(br_geometry_stored *geom, br_renderer *renderer, br_uint_32 first_index);
