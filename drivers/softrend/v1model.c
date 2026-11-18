@@ -628,7 +628,10 @@ static void GEOMETRY_CALL V1Faces_GeometryFnsUpdate(br_geometry *self, br_render
         case BRT_LINE:
 
             PrimBlockAdd(renderer, (brp_render_fn *)OpLineClip);
-            PrimBlockAddBoth(renderer, (brp_render_fn *)OpTriangleToLines);
+            if(rend.wireframe)
+                PrimBlockAddBoth(renderer, (brp_render_fn *)OpTriangleToWireframe);
+            else
+                PrimBlockAddBoth(renderer, (brp_render_fn *)OpTriangleToLines);
 
             if(renderer->state.cache.nconstant_fns) {
                 AddReplicateConstant(self, renderer);
@@ -718,6 +721,7 @@ static br_error V1Model_Render(br_geometry *self, br_renderer *renderer, struct 
     rend.renderer = renderer;
 
     rend.v11model = model;
+    rend.wireframe = style == BRT_WIREFRAME;
 
     /*
      * The style says how the model's triangles are drawn; the primitive library is only
@@ -731,6 +735,7 @@ static br_error V1Model_Render(br_geometry *self, br_renderer *renderer, struct 
             break;
         case BRT_EDGE:
         case BRT_ANTIALIASED_EDGE:
+        case BRT_WIREFRAME:
             topology = BRT_LINE;
             break;
         case BRT_FACE:

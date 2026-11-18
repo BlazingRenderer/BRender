@@ -247,6 +247,18 @@ void BR_ASM_CALL OpTriangleToLines(brp_block *block, brp_vertex *v0, brp_vertex 
 }
 
 /*
+ * Convert a triangle to a wireframe.
+ * This is the same as OpTriangleToLines() without edge culling.
+ */
+void BR_ASM_CALL OpTriangleToWireframe(brp_block *block, brp_vertex *v0, brp_vertex *v1, brp_vertex *v2, br_uint_16 (*fp_vertices)[3],
+                                       br_uint_16 (*fp_edges)[3])
+{
+    brp_render2(block->chain, v0, v1);
+    brp_render2(block->chain, v1, v2);
+    brp_render2(block->chain, v2, v0);
+}
+
+/*
  * Copy constant components from vertex 0 to all other vertices (used prior to breaking
  * point into lines and points, or to use interpolated renderers for constant settings)
  */

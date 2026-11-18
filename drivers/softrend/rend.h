@@ -132,6 +132,11 @@ typedef struct rend_block {
      * Current subdivion limit
      */
     br_scalar subdivide_threshold;
+
+    /*
+     * Set when the model is drawn as a wireframe: every face's three edges, no edge table.
+     */
+    br_boolean wireframe;
 } _rend;
 
 /*

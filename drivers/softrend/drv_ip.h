@@ -121,10 +121,10 @@ br_geometry_lighting *GeometryLightingAllocate(br_renderer_facility *type, const
  * v1model.c
  */
 br_error BR_CMETHOD_DECL(br_geometry_v1_model_soft, render)(br_geometry_v1_model *self, br_renderer *renderer, struct v11model *model,
-                                                            br_renderer_state_stored *default_state, br_token style);
+                                                            br_renderer_state_stored *default_state, br_token type);
 
 br_error BR_CMETHOD_DECL(br_geometry_v1_model_soft, renderOnScreen)(br_geometry_v1_model *self, br_renderer *renderer, struct v11model *model,
-                                                                    br_renderer_state_stored *default_state, br_token style);
+                                                                    br_renderer_state_stored *default_state, br_token type);
 
 /*
  * convert.c
@@ -245,6 +245,8 @@ void BR_ASM_CALL OpTriangleRelightTwoSided(brp_block *block, brp_vertex *v0, brp
                                            br_uint_16 (*fp_edges)[3], br_vector4 *fp_eqn, struct temp_face *tfp);
 
 void BR_ASM_CALL OpTriangleToLines(brp_block *block, brp_vertex *v0, brp_vertex *v1, brp_vertex *v2, br_uint_16 (*fp_vertices)[3],
+                                   br_uint_16 (*fp_edges)[3]);
+void BR_ASM_CALL OpTriangleToWireframe(brp_block *block, brp_vertex *v0, brp_vertex *v1, brp_vertex *v2, br_uint_16 (*fp_vertices)[3],
                                    br_uint_16 (*fp_edges)[3]);
 void BR_ASM_CALL OpTriangleReplicateConstant(brp_block *block, brp_vertex *v0, brp_vertex *v1, brp_vertex *v2, br_uint_16 (*fp_vertices)[3],
                                              br_uint_16 (*fp_edges)[3]);
