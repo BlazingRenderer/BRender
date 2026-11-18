@@ -802,6 +802,9 @@ static br_boolean VkV1ModelRenderIndexed(br_geometry_stored *geom, br_renderer *
         case BRT_POINT:
             polygon_mode = VK_POLYGON_MODE_POINT;
             break;
+        case BRT_WIREFRAME:
+            polygon_mode = VK_POLYGON_MODE_LINE;
+            break;
         default:
             polygon_mode = VK_POLYGON_MODE_FILL;
             break;

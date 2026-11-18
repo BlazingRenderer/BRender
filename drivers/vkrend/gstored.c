@@ -432,7 +432,7 @@ static br_boolean want_defer(const state_hidden *hidden)
  */
 static br_boolean style_drawable(br_token style)
 {
-    return style == BRT_POINT || style == BRT_FACE || style == BRT_ANTIALIASED_FACE;
+    return style == BRT_POINT || style == BRT_FACE || style == BRT_ANTIALIASED_FACE || style == BRT_WIREFRAME;
 }
 
 static br_error V1Model_RenderStored(br_geometry_stored *self, br_renderer *renderer, br_token style, br_boolean on_screen)

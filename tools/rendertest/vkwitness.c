@@ -3293,6 +3293,132 @@ out:
     return result;
 }
 
+/*
+ * The wireframe witness.
+ *
+ * BR_RSTYLE_WIREFRAME is the triangle list drawn with VK_POLYGON_MODE_LINE, which needs
+ * VkPhysicalDeviceFeatures::fillModeNonSolid. The same triangle is drawn as faces and then
+ * as a wireframe, and the two frames are compared by shape rather than by checksum: the
+ * wireframe must draw something, must cover far less than the filled triangle, must occupy
+ * the same bounds (the same geometry, not a shifted or different draw), must leave the
+ * triangle's interior clear, and must draw the middle of the filled triangle's widest row -
+ * its base edge. A renderer that ignored the type draws the same frame twice and fails on
+ * the count; one that drew nothing fails on the count; one that drew lines elsewhere fails
+ * on the bounds or on the base row. The base row is taken from the filled frame rather than
+ * from a projection, so the check does not depend on which way this witness's y axis runs.
+ */
+static br_error vkrend_renderer_wireframe_step(vkrend_renderer_state *state, br_actor *camera, br_actor *actor)
+{
+    vkrend_renderer_bounds  faces, wire;
+    br_pixelmap            *readback = NULL;
+    br_int_32               base_y = -1, base_count = 0, base_x = 0;
+    const br_int_32         cx = state->offscreen->width / 2;
+    const br_int_32         cy = state->offscreen->height / 2;
+    br_error                result = BRE_FAIL;
+
+    /* Faces first: the widest row of the filled triangle is the edge the wireframe must draw. */
+    actor->render_style = BR_RSTYLE_FACES;
+
+    if(vkrend_renderer_fill_clear(state->offscreen) != BRE_OK)
+        goto out;
+
+    BrZsSceneRender(state->world, camera, state->offscreen);
+
+    if((readback = vkrend_renderer_read(state->offscreen)) == NULL)
+        goto out;
+
+    vkrend_renderer_bounds_find(readback, vkrend_renderer_surface, &faces);
+
+    for(br_int_32 y = 0; y < readback->height; ++y) {
+        br_int_32 count = 0, min_x = readback->width, max_x = -1;
+
+        for(br_int_32 x = 0; x < readback->width; ++x) {
+            if(!vkrend_renderer_pixel_is(readback, x, y, vkrend_renderer_surface))
+                continue;
+
+            if(x < min_x)
+                min_x = x;
+            if(x > max_x)
+                max_x = x;
+            count++;
+        }
+
+        if(count > base_count) {
+            base_count = count;
+            base_y     = y;
+            base_x     = (min_x + max_x) / 2;
+        }
+    }
+
+    BrPixelmapFree(readback);
+    readback = NULL;
+
+    if(base_count == 0) {
+        BrLogError("RT", "vkrend: the filled triangle produced no row to find a base edge on.");
+        goto out;
+    }
+
+    /* Now the wireframe. */
+    actor->render_style = BR_RSTYLE_WIREFRAME;
+
+    if(vkrend_renderer_fill_clear(state->offscreen) != BRE_OK)
+        goto out;
+
+    BrZsSceneRender(state->world, camera, state->offscreen);
+
+    if((readback = vkrend_renderer_read(state->offscreen)) == NULL)
+        goto out;
+
+    vkrend_renderer_bounds_find(readback, vkrend_renderer_surface, &wire);
+
+    if(wire.count == 0) {
+        BrLogError("RT", "vkrend: the wireframe drew nothing; the device reports no fillModeNonSolid, so the draw was skipped.");
+        goto out;
+    }
+
+    /*
+     * The outline of the triangle, not its fill. The triangle covers 2 * pixels^2 texels and
+     * its perimeter 8.5 * pixels, so a quarter of the fill is a wide margin either side of
+     * the ratio a wireframe actually lands on.
+     */
+    if(wire.count * 4 >= faces.count) {
+        BrLogError("RT", "vkrend: the wireframe covered %d texels against the filled triangle's %d; that is a fill, not an outline.",
+                   wire.count, faces.count);
+        goto out;
+    }
+
+    if(vkrend_renderer_assert_near(wire.min_x, faces.min_x, 1, "the wireframe's left bound") != BRE_OK ||
+       vkrend_renderer_assert_near(wire.max_x, faces.max_x, 1, "the wireframe's right bound") != BRE_OK ||
+       vkrend_renderer_assert_near(wire.min_y, faces.min_y, 1, "the wireframe's top bound") != BRE_OK ||
+       vkrend_renderer_assert_near(wire.max_y, faces.max_y, 1, "the wireframe's bottom bound") != BRE_OK)
+        goto out;
+
+    if(vkrend_renderer_pixel_is(readback, cx, cy, vkrend_renderer_surface)) {
+        BrLogError("RT", "vkrend: the wireframe filled its triangle's interior at (%d,%d).", cx, cy);
+        goto out;
+    }
+
+    if(!vkrend_renderer_pixel_is(readback, base_x, base_y, vkrend_renderer_surface)) {
+        BrLogError("RT", "vkrend: the wireframe did not draw the base edge's middle at (%d,%d), the middle of the filled triangle's widest "
+                         "row.",
+                   base_x, base_y);
+        goto out;
+    }
+
+    BrLogInfo("RT",
+              "vkrend: wireframe witness passed (%d texels against the filled triangle's %d, bounds %d..%d x %d..%d, interior clear, base "
+              "edge drawn at (%d,%d) where the fill's widest row is %d texels).",
+              wire.count, faces.count, wire.min_x, wire.max_x, wire.min_y, wire.max_y, base_x, base_y, base_count);
+
+    result = BRE_OK;
+
+out:
+    if(readback != NULL)
+        BrPixelmapFree(readback);
+    actor->render_style = BR_RSTYLE_DEFAULT;
+    return result;
+}
+
 static br_error vkrend_renderer_winding_step(vkrend_renderer_state *state, br_actor *camera, br_actor *actor, br_camera *camera_data)
 {
     br_material *material;
@@ -3600,6 +3726,9 @@ static br_error vkrend_renderer_init(void *user, br_pixelmap *screen, br_pixelma
     BrPixelmapFree(readback);
 
     if(vkrend_renderer_point_step(state, camera, actor) != BRE_OK)
+        goto fail;
+
+    if(vkrend_renderer_wireframe_step(state, camera, actor) != BRE_OK)
         goto fail;
 
     /*
