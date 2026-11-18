@@ -748,6 +748,14 @@ V1INSERT_ARG2					pointer
 V1INSERT_ARG3					pointer
 STORED_STATE					object
 
+# Render Styles
+#
+POINT                   none
+EDGE                    none
+FACE                    none
+ANTIALIASED_EDGE        none
+ANTIALIASED_FACE        none
+
 # Mesh Topologies
 #
 POINT                 none
