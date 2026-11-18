@@ -109,8 +109,7 @@ static br_error BR_CMETHOD_DECL(br_geometry_v1_model_vk, storedNew)(struct br_ge
 {
     (void)tv;
 
-    if(topology != BRT_TRIANGLE)
-        return BRE_FAIL;
+    ASSERT(topology == BRT_TRIANGLE);
 
     if((*psg = GeometryStoredVkAllocate(self, "model", renderer, model)) == NULL)
         return BRE_FAIL;
