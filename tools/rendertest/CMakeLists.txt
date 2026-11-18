@@ -246,6 +246,8 @@ if (BUILD_TESTING)
     # so no device is involved and it runs in both floating-point classes.
     #
     add_test(NAME "wfw" COMMAND rendertest --wireframe-witness --device softrend)
+    set_tests_properties("wfw" PROPERTIES
+                         ENVIRONMENT "SDL_VIDEODRIVER=offscreen")
 
     #
     # The environment-map orientation witness (main.c --env-witness). It is not
