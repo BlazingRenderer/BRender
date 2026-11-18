@@ -425,6 +425,16 @@ static br_boolean want_defer(const state_hidden *hidden)
     return hidden->order_table != NULL && hidden->heap != NULL;
 }
 
+/*
+ * The styles this driver can draw. The line styles need the model's edge list, which the
+ * retained path has no representation for; the rest are the triangle list, which is what it
+ * draws whatever the style asks (points included, until the pipeline grows a polygon mode).
+ */
+static br_boolean style_drawable(br_token style)
+{
+    return style == BRT_POINT || style == BRT_FACE || style == BRT_ANTIALIASED_FACE;
+}
+
 static br_error V1Model_RenderStored(br_geometry_stored *self, br_renderer *renderer, br_token style, br_boolean on_screen)
 {
     br_primitive *prim;
@@ -435,7 +445,7 @@ static br_error V1Model_RenderStored(br_geometry_stored *self, br_renderer *rend
 
     (void)on_screen;
 
-    if(style != BRT_TRIANGLE && style != BRT_POINT)
+    if(!style_drawable(style))
         return BRE_FAIL;
 
     pos.v[0] = renderer->state.current->matrix.model_to_view.m[3][0];

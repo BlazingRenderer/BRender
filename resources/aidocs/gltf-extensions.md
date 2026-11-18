@@ -102,9 +102,11 @@ Abridged from `tools/rendertest/dat/scene-edges.gltf`.
 | 8 | `ANTIALIASED_LINES` | as `EDGES`; antialiasing is not implemented |
 | 9 | `ANTIALIASED_FACES` | as `FACES`; antialiasing is not implemented |
 
-Values 8 and 9 name styles the engine has no antialiased implementation of: it draws their non-antialiased
-equivalents (`RenderStyleCalls[]`, `core/v1db/modrend.c`). They are legal values in a file all the same,
-because the file carries what the scene graph says and not what a particular build can draw.
+Values 8 and 9 name antialiased styles, which are their own render styles rather than another spelling of
+`EDGES` and `FACES`: the style reaches the renderer as `BRT_ANTIALIASED_EDGES` or `BRT_ANTIALIASED_FACES`
+(`RenderStyleCalls[]`, `core/v1db/modrend.c`). No renderer antialiases today - each draws the style as the
+edges or faces it names - and they are legal values in a file all the same, because the file carries what
+the scene graph says and not what a particular build can draw.
 
 ### Reader obligations
 
@@ -118,8 +120,7 @@ because the file carries what the scene graph says and not what a particular bui
   fails the whole file with a message naming the node and the value (`check_actor_styles()`,
   `core/fmt/loadgltf.c`); it does not clamp, and it does not treat the file as loadable-minus-style.
   Whether this build draws a style it does name is not the reader's question - the dispatch table is total
-  over the enum, and a style the build has no antialiased implementation of is drawn as its non-antialiased
-  equivalent.
+  over the enum, and an antialiased style is drawn as the edges or faces it names.
 * The value is stored in the `br_uint_8` field after the check, so the check is what keeps the field honest.
 
 ### Writer obligations

@@ -382,7 +382,7 @@ static void draw_batch(void)
     BrVector3Set(&model.centre, BR_SCALAR(0), BR_SCALAR(0), BR_SCALAR(0));
     model.centred_radius = BR_SCALAR(0);
 
-    GeometryV1ModelRender(v1db.format_model, v1db.renderer, &model, NULL, BRT_TRIANGLE);
+    GeometryV1ModelRender(v1db.format_model, v1db.renderer, &model, NULL, BRT_FACE);
 }
 
 

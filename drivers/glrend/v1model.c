@@ -423,12 +423,17 @@ static br_boolean apply_state(br_renderer *renderer, const GladGLContext *gl)
 
     apply_stored_properties(gl, renderer, renderer->state.current, BR_STATE_STORED_PARTS_MASK | MASK_STATE_OUTPUT, &model, ctx->tex_white);
 
+    /*
+     * The style is a polygon mode over the model's triangle list.
+     * We can't antialias easily, so just draw them as regular faces.
+     */
     switch(renderer->state.current->render_style) {
         case BRT_POINT:
             gl->PolygonMode(GL_FRONT_AND_BACK, GL_POINT);
             break;
 
-        case BRT_TRIANGLE:
+        case BRT_ANTIALIASED_FACE:
+        case BRT_FACE:
         default:
             gl->PolygonMode(GL_FRONT_AND_BACK, GL_FILL);
             break;

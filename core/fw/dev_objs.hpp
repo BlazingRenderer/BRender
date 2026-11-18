@@ -373,6 +373,9 @@ class br_geometry_stored : public br_geometry {
 
 // Predefined geometry formats
 
+// render() and renderOnScreen() take a render style - how a model's triangles are drawn - and
+// storedNew() takes the topology, which for a v1model is always BRT_TRIANGLE.
+
 class br_geometry_v1_model : public br_geometry {
 	public:
 		virtual br_error BR_METHOD render(class br_renderer *r, struct v11model *model,

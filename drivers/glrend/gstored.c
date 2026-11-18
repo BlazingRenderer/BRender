@@ -508,9 +508,14 @@ static br_error V1Model_RenderStored(br_geometry_stored *self, br_renderer *rend
     return BRE_OK;
 }
 
+static br_boolean style_drawable(br_token style)
+{
+    return style == BRT_POINT || style == BRT_FACE || style == BRT_ANTIALIASED_FACE;
+}
+
 static br_error BR_CMETHOD(br_geometry_stored_gl, render)(br_geometry_stored *self, br_renderer *renderer, br_token style)
 {
-    if(style != BRT_TRIANGLE && style != BRT_POINT)
+    if(!style_drawable(style))
         return BRE_FAIL;
 
     return V1Model_RenderStored(self, renderer, style, BR_FALSE);
@@ -518,7 +523,7 @@ static br_error BR_CMETHOD(br_geometry_stored_gl, render)(br_geometry_stored *se
 
 static br_error BR_CMETHOD(br_geometry_stored_gl, renderOnScreen)(br_geometry_stored *self, br_renderer *renderer, br_token style)
 {
-    if(style != BRT_TRIANGLE && style != BRT_POINT)
+    if(!style_drawable(style))
         return BRE_FAIL;
 
     return V1Model_RenderStored(self, renderer, style, BR_TRUE);

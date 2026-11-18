@@ -705,6 +705,7 @@ static br_error V1Model_Render(br_geometry *self, br_renderer *renderer, struct 
     br_renderer_state_stored *state;
     br_error                  r;
     br_boolean                z_sort, z_sort_blended, divert;
+    br_token                  topology;
 
     /*
      */
@@ -717,6 +718,27 @@ static br_error V1Model_Render(br_geometry *self, br_renderer *renderer, struct 
     rend.renderer = renderer;
 
     rend.v11model = model;
+
+    /*
+     * The style says how the model's triangles are drawn; the primitive library is only
+     * ever told which primitive to draw, so the two conversions that are not triangles -
+     * points, and the line topology an edge or wireframe draw is built on - are chosen
+     * here. A style with no conversion of its own draws faces, as BRT_TRIANGLE always has.
+     */
+    switch(style) {
+        case BRT_POINT:
+            topology = BRT_POINT;
+            break;
+        case BRT_EDGE:
+        case BRT_ANTIALIASED_EDGE:
+            topology = BRT_LINE;
+            break;
+        case BRT_FACE:
+        case BRT_ANTIALIASED_FACE:
+        default:
+            topology = BRT_TRIANGLE;
+            break;
+    }
 
     /*
      * Make local copy of bounds
@@ -781,7 +803,8 @@ static br_error V1Model_Render(br_geometry *self, br_renderer *renderer, struct 
         z_sort_blended = (renderer->state.hidden.type == BRT_BUCKET_SORT && renderer->state.hidden.divert == BRT_BLENDED &&
                           renderer->state.hidden.order_table != NULL && scache.valid_primitive_heap);
 
-        r = PrimitiveStateRenderBegin(renderer->state.pstate, &rend.block, &rend.block_changed, &rend.range_changed, z_sort, style);
+        r = PrimitiveStateRenderBegin(renderer->state.pstate, &rend.block, &rend.block_changed, &rend.range_changed, z_sort,
+                                      topology);
 
         if(r != BRE_OK)
             return r;

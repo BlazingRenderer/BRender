@@ -33,7 +33,13 @@ static void renderAll(br_model *model, br_material *material, br_token style, in
  */
 static void renderFaces(br_actor *actor, br_model *model, br_material *material, void *render_data, br_uint_8 style, int on_screen)
 {
-    renderAll(model, material, BRT_TRIANGLE, on_screen);
+    renderAll(model, material, BRT_FACE, on_screen);
+}
+
+static void renderAntialiasedFaces(br_actor *actor, br_model *model, br_material *material, void *render_data, br_uint_8 style,
+                                   int on_screen)
+{
+    renderAll(model, material, BRT_ANTIALIASED_FACE, on_screen);
 }
 
 /*
@@ -41,7 +47,13 @@ static void renderFaces(br_actor *actor, br_model *model, br_material *material,
  */
 static void renderEdges(br_actor *actor, br_model *model, br_material *material, void *render_data, br_uint_8 style, int on_screen)
 {
-    renderAll(model, material, BRT_LINE, on_screen);
+    renderAll(model, material, BRT_EDGE, on_screen);
+}
+
+static void renderAntialiasedEdges(br_actor *actor, br_model *model, br_material *material, void *render_data, br_uint_8 style,
+                                   int on_screen)
+{
+    renderAll(model, material, BRT_ANTIALIASED_EDGE, on_screen);
 }
 
 /*
@@ -79,10 +91,14 @@ static br_error renderImmediate(br_geometry_v1_model *self, br_renderer *rendere
     br_boolean          forced = BR_FALSE;
     br_value            hidden = {0};
 
-    err = GeometryV1ModelStoredNew(self, renderer, &sg, model, style, NULL);
+    /*
+     * The store is always triangles - that is the topology of a v1model - and the style is
+     * only how the store is drawn below.
+     */
+    err = GeometryV1ModelStoredNew(self, renderer, &sg, model, BRT_TRIANGLE, NULL);
 
     if(err != BRE_OK || sg == NULL) {
-        BrLogWarn("V1DB", "immediate geometry: the driver did not store this model (%d); nothing was drawn", (int)style);
+        BrLogWarn("V1DB", "immediate geometry: the driver did not store this model; the style %d was not drawn", (int)style);
         return BRE_FAIL;
     }
 
@@ -333,7 +349,7 @@ static void boundingBoxRenderPoints(br_actor *actor, br_model *model, br_materia
  */
 static void boundingBoxRenderEdges(br_actor *actor, br_model *model, br_material *material, void *render_data, br_uint_8 style, int on_screen)
 {
-    renderAll(makeMeshFromBounds(&model->bounds), material, BRT_LINE, on_screen);
+    renderAll(makeMeshFromBounds(&model->bounds), material, BRT_EDGE, on_screen);
 }
 
 /*
@@ -341,7 +357,7 @@ static void boundingBoxRenderEdges(br_actor *actor, br_model *model, br_material
  */
 static void boundingBoxRenderFaces(br_actor *actor, br_model *model, br_material *material, void *render_data, br_uint_8 style, int on_screen)
 {
-    renderAll(makeMeshFromBounds(&model->bounds), material, BRT_TRIANGLE, on_screen);
+    renderAll(makeMeshFromBounds(&model->bounds), material, BRT_FACE, on_screen);
 }
 
 /*
@@ -356,6 +372,6 @@ br_render_style_call_fn *const RenderStyleCalls[] = {
     [BR_RSTYLE_BOUNDING_POINTS]   = boundingBoxRenderPoints,
     [BR_RSTYLE_BOUNDING_EDGES]    = boundingBoxRenderEdges,
     [BR_RSTYLE_BOUNDING_FACES]    = boundingBoxRenderFaces,
-    [BR_RSTYLE_ANTIALIASED_LINES] = renderEdges,
-    [BR_RSTYLE_ANTIALIASED_FACES] = renderFaces,
+    [BR_RSTYLE_ANTIALIASED_LINES] = renderAntialiasedEdges,
+    [BR_RSTYLE_ANTIALIASED_FACES] = renderAntialiasedFaces,
 };
