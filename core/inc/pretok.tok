@@ -44,7 +44,6 @@ $constant_string				_CSTR		cstr
 $object_list					_OL			ol
 $token_list						_TL			tl
 $pointer_list					_PL			pl
-$token_value_list               _TVL		tvl
 
 ## General tokens
 ##
@@ -135,13 +134,8 @@ MODE							uint_32
 
 # Tokens for 2d pixelmap querying
 #
-MATCH                           token_value_list
-COPY_SOURCE                     token_value_list
-COPY_DESTINATION                token_value_list
 COPY                            fixed
 COPY                            float
-STRETCH_COPY_SOURCE             token_value_list
-STRETCH_COPY_DESTINATION        token_value_list
 STRETCH_COPY                    token
 STRETCH_COPY                    token_list
 STRETCH_COPY                    fixed
@@ -505,15 +499,6 @@ SCREEN_DOOR						object
 INDEX_LIGHT						object
 BUMP							object
 INDEX_FOG                       object
-
-TEXTURE                         token_value_list
-COLOUR_MAP                      token_value_list
-INDEX_SHADE                     token_value_list
-INDEX_BLEND                     token_value_list
-SCREEN_DOOR                     token_value_list
-INDEX_LIGHT                     token_value_list
-BUMP                            token_value_list
-INDEX_FOG                       token_value_list
 
 # Unknown buffer use
 #

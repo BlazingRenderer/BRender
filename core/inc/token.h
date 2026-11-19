@@ -97,7 +97,6 @@ typedef union br_value_tag {
     struct br_object     **ol;
     br_token              *tl;
     void                 **pl;
-    struct br_token_value *tvl;
 } br_value;
 
 /*

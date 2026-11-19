@@ -1230,16 +1230,6 @@ void BR_RESIDENT_ENTRY BrTokenValueDump(br_token_value *tv, const char *prefix, 
 
                 continue;
 
-            case BRT_TOKEN_VALUE_LIST:
-                if(tv->v.tvl == NULL) {
-                    pvalue = "NULL";
-                    break;
-                }
-
-                BrTokenValueDump(tv->v.tvl, prefix, putline, arg);
-
-                continue;
-
             case BRT_POINTER_LIST:
                 if(tv->v.pl == NULL) {
                     pvalue = "NULL";
@@ -2145,8 +2135,6 @@ br_value BR_RESIDENT_ENTRY BrTokenValueVaArg(br_token token, va_list *ap)
             return (br_value){.tl = va_arg(*ap, br_token *)};
         case BRT_POINTER_LIST:
             return (br_value){.pl = va_arg(*ap, void *)};
-        case BRT_TOKEN_VALUE_LIST:
-            return (br_value){.tvl = va_arg(*ap, struct br_token_value *)};
     }
 
     return (br_value){0};
