@@ -2055,9 +2055,9 @@ static br_chunks_table_entry ModelLoadEntries[] = {
     {FID_PIVOT,              0, FopRead_PIVOT             },
 };
 
-static br_chunks_table ModelLoadTable = {
-    BR_ASIZE(ModelLoadEntries),
-    ModelLoadEntries,
+static const br_chunks_table ModelLoadTable = {
+    .nentries = BR_ASIZE(ModelLoadEntries),
+    .entries  = ModelLoadEntries,
 };
 
 br_uint_32 BR_PUBLIC_ENTRY BrModelLoadMany(const char *filename, br_model **models, br_uint_16 num)
@@ -2304,9 +2304,9 @@ static br_chunks_table_entry ActorLoadEntries[] = {
     {FID_PLANE,                 0, FopRead_PLANE           },
 };
 
-static br_chunks_table ActorLoadTable = {
-    BR_ASIZE(ActorLoadEntries),
-    ActorLoadEntries,
+static const br_chunks_table ActorLoadTable = {
+    .nentries = BR_ASIZE(ActorLoadEntries),
+    .entries  = ActorLoadEntries,
 };
 
 br_uint_32 BR_PUBLIC_ENTRY BrActorLoadMany(const char *filename, br_actor **actors, br_uint_16 num)
@@ -2470,9 +2470,9 @@ static br_chunks_table_entry MaterialLoadEntries[] = {
     {FID_MATERIAL_V3,     0, FopRead_MATERIAL_V3 },
 };
 
-static br_chunks_table MaterialLoadTable = {
-    BR_ASIZE(MaterialLoadEntries),
-    MaterialLoadEntries,
+static const br_chunks_table MaterialLoadTable = {
+    .nentries = BR_ASIZE(MaterialLoadEntries),
+    .entries  = MaterialLoadEntries,
 };
 
 br_uint_32 BR_PUBLIC_ENTRY BrMaterialLoadMany(const char *filename, br_material **materials, br_uint_16 num)
