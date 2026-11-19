@@ -329,7 +329,7 @@ static br_uint_16 scalarTypeConvert(br_datafile *df, br_uint_16 t)
  * Write a structure to a binary file using the given template
  *
  */
-static br_uint_32 DfStructWriteBinary(br_datafile *df, br_file_struct *str, void *base)
+static br_uint_32 DfStructWriteBinary(br_datafile *df, const br_file_struct *str, void *base)
 {
     unsigned int           m;
     int                    i, n;
@@ -528,7 +528,7 @@ put_float_fvector:
  * Read a structure from a binary file using the given template
  *
  */
-static br_uint_32 DfStructReadBinary(br_datafile *df, br_file_struct *str, void *base)
+static br_uint_32 DfStructReadBinary(br_datafile *df, const br_file_struct *str, void *base)
 {
     char                   tmp_string[TEXTF_MAX_LINE];
     unsigned int           m;
@@ -755,7 +755,7 @@ get_float_fvector:
  *
  * If the structure instance is NULL, then ignore variable sized memebers
  */
-static br_uint_32 DfStructSizeBinary(br_datafile *df, br_file_struct *str, void *base)
+static br_uint_32 DfStructSizeBinary(br_datafile *df, const br_file_struct *str, void *base)
 {
     unsigned char         *mp;
     unsigned int           m;
@@ -875,9 +875,9 @@ static char *EnumToString(br_file_enum *e, int num)
  * Write a structure to a text file using the given template
  *
  */
-static br_uint_32 StructWriteTextSub(br_datafile *df, br_file_struct *str, void *base, int indent);
+static br_uint_32 StructWriteTextSub(br_datafile *df, const br_file_struct *str, void *base, int indent);
 
-static br_uint_32 DfStructWriteText(br_datafile *df, br_file_struct *str, void *base)
+static br_uint_32 DfStructWriteText(br_datafile *df, const br_file_struct *str, void *base)
 {
     BrFilePrintf(df->h, "  struct    %s\n", str->name);
 
@@ -886,7 +886,7 @@ static br_uint_32 DfStructWriteText(br_datafile *df, br_file_struct *str, void *
     return 1;
 }
 
-static br_uint_32 StructWriteTextSub(br_datafile *df, br_file_struct *str, void *base, int indent)
+static br_uint_32 StructWriteTextSub(br_datafile *df, const br_file_struct *str, void *base, int indent)
 {
     unsigned int           m;
     int                    i, w, add_comment;
@@ -1095,9 +1095,9 @@ static br_uint_32 StructWriteTextSub(br_datafile *df, br_file_struct *str, void 
     return 1;
 }
 
-static br_uint_32 StructReadTextSub(br_datafile *df, br_file_struct *str, void *base);
+static br_uint_32 StructReadTextSub(br_datafile *df, const br_file_struct *str, void *base);
 
-static br_uint_32 DfStructReadText(br_datafile *df, br_file_struct *str, void *base)
+static br_uint_32 DfStructReadText(br_datafile *df, const br_file_struct *str, void *base)
 {
     char *id, *data;
 
@@ -1117,7 +1117,7 @@ static br_uint_32 DfStructReadText(br_datafile *df, br_file_struct *str, void *b
     return 1;
 }
 
-static br_uint_32 StructReadTextSub(br_datafile *df, br_file_struct *str, void *base)
+static br_uint_32 StructReadTextSub(br_datafile *df, const br_file_struct *str, void *base)
 {
     unsigned int           m, r, g, b, a;
     int                    i, n;
@@ -1375,7 +1375,7 @@ get_float_fvector:
  * Find the number of lines a structure would occupy when written to a
  * text file
  */
-static br_uint_32 DfStructSizeText(br_datafile *df, br_file_struct *str, void *base)
+static br_uint_32 DfStructSizeText(br_datafile *df, const br_file_struct *str, void *base)
 {
     unsigned int           m;
     br_file_struct_member *sm;
@@ -1398,7 +1398,7 @@ static br_uint_32 DfStructSizeText(br_datafile *df, br_file_struct *str, void *b
 /*
  * Write an array of structures to the current file as a chunk
  */
-br_uint_32 DfStructWriteArray(br_datafile *df, br_file_struct *str, void *base, int n)
+br_uint_32 DfStructWriteArray(br_datafile *df, const br_file_struct *str, void *base, int n)
 {
     char *cp = base;
     int   i;
@@ -1412,7 +1412,7 @@ br_uint_32 DfStructWriteArray(br_datafile *df, br_file_struct *str, void *base, 
 /*
  * Read a number of structures from a file
  */
-br_uint_32 DfStructReadArray(br_datafile *df, br_file_struct *str, void *base, int n)
+br_uint_32 DfStructReadArray(br_datafile *df, const br_file_struct *str, void *base, int n)
 {
     char *cp = base;
     int   i;
@@ -2003,7 +2003,7 @@ static int DfSkipBinary(br_datafile *df, br_uint_32 length)
  * Interpret a stream of chunks from a file by calling
  * routines looked up from a given table
  */
-int DfChunksInterpret(br_datafile *df, br_chunks_table *table)
+int DfChunksInterpret(br_datafile *df, const br_chunks_table *table)
 {
     br_uint_32 length, count;
     br_uint_32 id;
@@ -2105,19 +2105,19 @@ static br_size_t BrNullCountSize(br_datafile *df)
     return 0;
 }
 
-static br_uint_32 BrNullStructWrite(br_datafile *df, br_file_struct *str, void *base)
+static br_uint_32 BrNullStructWrite(br_datafile *df, const br_file_struct *str, void *base)
 {
     BR_FATAL0("Invald file primitive call");
     return 0;
 }
 
-static br_uint_32 BrNullStructRead(br_datafile *df, br_file_struct *str, void *base)
+static br_uint_32 BrNullStructRead(br_datafile *df, const br_file_struct *str, void *base)
 {
     BR_FATAL0("Invald file primitive call");
     return 0;
 }
 
-static br_uint_32 BrNullStructSize(br_datafile *df, br_file_struct *str, void *base)
+static br_uint_32 BrNullStructSize(br_datafile *df, const br_file_struct *str, void *base)
 {
     BR_FATAL0("Invald file primitive call");
     return 0;

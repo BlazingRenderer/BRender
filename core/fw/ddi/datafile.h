@@ -451,9 +451,9 @@ typedef struct br_file_primitives {
     br_uint_32 (*count_read)(br_datafile *df);
     br_size_t (*count_size)(br_datafile *df);
 
-    br_uint_32 (*struct_write)(br_datafile *df, br_file_struct *str, void *base);
-    br_uint_32 (*struct_read)(br_datafile *df, br_file_struct *str, void *base);
-    br_uint_32 (*struct_size)(br_datafile *df, br_file_struct *str, void *base);
+    br_uint_32 (*struct_write)(br_datafile *df, const br_file_struct *str, void *base);
+    br_uint_32 (*struct_read)(br_datafile *df, const br_file_struct *str, void *base);
+    br_uint_32 (*struct_size)(br_datafile *df, const br_file_struct *str, void *base);
 
     int (*block_write)(br_datafile *df, void *base, int block_size, int block_stride, int block_count, int size);
     void *(*block_read)(br_datafile *df, void *base, int *pcount, int size, int mtype);
