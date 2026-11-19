@@ -956,7 +956,7 @@ static int FopRead_PIVOT(br_datafile *df, br_uint_32 id, br_uint_32 length, br_u
  **/
 // clang-format off
 #define _STRUCT_NAME struct br_material
-static br_file_struct_member br_material_oldest_FM[] = {
+static br_file_struct_member br_material_v1_FM[] = {
     _COLOUR(colour),
     _UINT_8(opacity),
     _UFRACTION(ka),
@@ -972,11 +972,11 @@ static br_file_struct_member br_material_oldest_FM[] = {
     _ASCIZ(identifier),
 };
 
-static _FILE_STRUCT(br_material_oldest);
+static _FILE_STRUCTN(br_material_v1, "br_material_oldest");
 #undef _STRUCT_NAME
 
 #define _STRUCT_NAME struct br_material
-static br_file_struct_member br_material_old_FM[] = {
+static br_file_struct_member br_material_v2_FM[] = {
     _COLOUR(colour),
     _UINT_8(opacity),
     _UFRACTION(ka),
@@ -996,11 +996,11 @@ static br_file_struct_member br_material_old_FM[] = {
     _ASCIZ(identifier),
 };
 
-static _FILE_STRUCT(br_material_old);
+static _FILE_STRUCTN(br_material_v2, "br_material_old");
 #undef _STRUCT_NAME
 
 #define _STRUCT_NAME struct br_material
-static br_file_struct_member br_material_FM[] = {
+static br_file_struct_member br_material_v3_FM[] = {
     _COLOUR(colour),
     _UINT_8(opacity),
     _UFRACTION(ka),
@@ -1021,11 +1021,11 @@ static br_file_struct_member br_material_FM[] = {
     _ASCIZ(identifier),
 };
 
-static _FILE_STRUCT(br_material);
+static _FILE_STRUCTN(br_material_v3, "br_material");
 #undef _STRUCT_NAME
 // clang-format off
 
-static int FopRead_MATERIAL_OLDEST(br_datafile *df, br_uint_32 id, br_uint_32 length, br_uint_32 count)
+static int FopRead_MATERIAL_V1(br_datafile *df, br_uint_32 id, br_uint_32 length, br_uint_32 count)
 {
     br_material *mp;
 
@@ -1034,7 +1034,7 @@ static int FopRead_MATERIAL_OLDEST(br_datafile *df, br_uint_32 id, br_uint_32 le
      */
     mp      = BrMaterialAllocate(NULL);
     df->res = mp;
-    df->prims->struct_read(df, &br_material_oldest_F, mp);
+    df->prims->struct_read(df, &br_material_v1_F, mp);
     df->res = NULL;
 
     /*
@@ -1045,7 +1045,7 @@ static int FopRead_MATERIAL_OLDEST(br_datafile *df, br_uint_32 id, br_uint_32 le
     return 0;
 }
 
-static int FopRead_MATERIAL_OLD(br_datafile *df, br_uint_32 id, br_uint_32 length, br_uint_32 count)
+static int FopRead_MATERIAL_V2(br_datafile *df, br_uint_32 id, br_uint_32 length, br_uint_32 count)
 {
     br_material *mp;
 
@@ -1054,7 +1054,7 @@ static int FopRead_MATERIAL_OLD(br_datafile *df, br_uint_32 id, br_uint_32 lengt
      */
     mp      = BrMaterialAllocate(NULL);
     df->res = mp;
-    df->prims->struct_read(df, &br_material_old_F, mp);
+    df->prims->struct_read(df, &br_material_v2_F, mp);
     df->res = NULL;
 
     /*
@@ -1065,7 +1065,7 @@ static int FopRead_MATERIAL_OLD(br_datafile *df, br_uint_32 id, br_uint_32 lengt
     return 0;
 }
 
-static int FopRead_MATERIAL(br_datafile *df, br_uint_32 id, br_uint_32 length, br_uint_32 count)
+static int FopRead_MATERIAL_V3(br_datafile *df, br_uint_32 id, br_uint_32 length, br_uint_32 count)
 {
     br_material *mp;
 
@@ -1074,7 +1074,7 @@ static int FopRead_MATERIAL(br_datafile *df, br_uint_32 id, br_uint_32 length, b
      */
     mp      = BrMaterialAllocate(NULL);
     df->res = mp;
-    df->prims->struct_read(df, &br_material_F, mp);
+    df->prims->struct_read(df, &br_material_v3_F, mp);
     df->res = NULL;
 
     /*
@@ -1087,8 +1087,8 @@ static int FopRead_MATERIAL(br_datafile *df, br_uint_32 id, br_uint_32 length, b
 
 static int FopWrite_MATERIAL(br_datafile *df, br_material *mp)
 {
-    df->prims->chunk_write(df, FID_MATERIAL, df->prims->struct_size(df, &br_material_F, mp));
-    df->prims->struct_write(df, &br_material_F, mp);
+    df->prims->chunk_write(df, FID_MATERIAL_V3, df->prims->struct_size(df, &br_material_v3_F, mp));
+    df->prims->struct_write(df, &br_material_v3_F, mp);
 
     return 0;
 }
@@ -2459,15 +2459,15 @@ br_uint_32 BR_PUBLIC_ENTRY BrActorSaveMany(const char *filename, br_actor **acto
  * Load a group of materials from a file
  */
 static br_chunks_table_entry MaterialLoadEntries[] = {
-    {FID_END,             0, FopRead_END            },
-    {FID_MATERIAL_OLDEST, 0, FopRead_MATERIAL_OLDEST},
-    {FID_COLOUR_MAP_REF,  0, FopRead_PIXELMAP_REF   },
-    {FID_INDEX_BLEND_REF, 0, FopRead_PIXELMAP_REF   },
-    {FID_INDEX_SHADE_REF, 0, FopRead_PIXELMAP_REF   },
-    {FID_SCREENDOOR_REF,  0, FopRead_PIXELMAP_REF   },
-    {FID_INDEX_FOG_REF,   0, FopRead_PIXELMAP_REF   },
-    {FID_MATERIAL_OLD,    0, FopRead_MATERIAL_OLD   },
-    {FID_MATERIAL,        0, FopRead_MATERIAL       },
+    {FID_END,             0, FopRead_END         },
+    {FID_MATERIAL_V1,     0, FopRead_MATERIAL_V1 },
+    {FID_COLOUR_MAP_REF,  0, FopRead_PIXELMAP_REF},
+    {FID_INDEX_BLEND_REF, 0, FopRead_PIXELMAP_REF},
+    {FID_INDEX_SHADE_REF, 0, FopRead_PIXELMAP_REF},
+    {FID_SCREENDOOR_REF,  0, FopRead_PIXELMAP_REF},
+    {FID_INDEX_FOG_REF,   0, FopRead_PIXELMAP_REF},
+    {FID_MATERIAL_V2,     0, FopRead_MATERIAL_V2 },
+    {FID_MATERIAL_V3,     0, FopRead_MATERIAL_V3 },
 };
 
 static br_chunks_table MaterialLoadTable = {
