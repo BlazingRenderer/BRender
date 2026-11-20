@@ -34,6 +34,8 @@ set(FMT_FILES
         loadstb.c
         loadtga.c
         loadvue.c
+        matflag.c
+        matflag.h
         savescr.c
         savestb.c
         savegltf.c

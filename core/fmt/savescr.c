@@ -8,43 +8,12 @@
  */
 #include "brender.h"
 #include "fmt.h"
+#include "matflag.h"
 
 /*
  * The default material used to load a script
  */
 extern const br_material _DefaultScriptMaterial;
-
-static const struct {
-    const char *name;
-    int         value;
-} MaterialFlagNames[] = {
-    {"light",               BR_MATF_LIGHT              },
-    {"prelit",              BR_MATF_PRELIT             },
-    {"environment",         BR_MATF_ENVIRONMENT_I      },
-    {"environment_local",   BR_MATF_ENVIRONMENT_L      },
-    {"perspective",         BR_MATF_PERSPECTIVE        },
-    {"decal",               BR_MATF_DECAL              },
-    {"i_from_u",            BR_MATF_I_FROM_U           },
-    {"i_from_v",            BR_MATF_I_FROM_V           },
-    {"u_from_i",            BR_MATF_U_FROM_I           },
-    {"v_from_i",            BR_MATF_V_FROM_I           },
-    {"always_visible",      BR_MATF_ALWAYS_VISIBLE     },
-    {"two_sided",           BR_MATF_TWO_SIDED          },
-    {"force_front",         BR_MATF_FORCE_FRONT        },
-    {"dither",              BR_MATF_DITHER             },
-    {"map_antialiasing",    BR_MATF_MAP_ANTIALIASING   },
-    {"map_interpolation",   BR_MATF_MAP_INTERPOLATION  },
-    {"mip_interpolation",   BR_MATF_MIP_INTERPOLATION  },
-    {"fog_local",           BR_MATF_FOG_LOCAL          },
-    {"subdivide",           BR_MATF_SUBDIVIDE          },
-    {"quad_mapping",        BR_MATF_QUAD_MAPPING       },
-    {"force_back",          BR_MATF_FORCE_BACK         },
-    {"inhibit_depth_write", BR_MATF_INHIBIT_DEPTH_WRITE},
-    {"prealpha",            BR_MATF_PREALPHA           },
-    {"disable_colour_key",  BR_MATF_DISABLE_COLOUR_KEY },
-    {"smooth_alpha",        BR_MATF_SMOOTH_ALPHA       },
-    {"blend",               BR_MATF_BLEND              },
-};
 
 static const struct {
     const char *name;
@@ -99,7 +68,8 @@ static const struct {
 
 static void WriteScriptMaterial(br_material *mat, void *df)
 {
-    int i, j;
+    const br_material_flag *f;
+    int                     i, j;
 
     BrFilePrintf(df, "\nmaterial = [\n");
 
@@ -112,9 +82,9 @@ static void WriteScriptMaterial(br_material *mat, void *df)
     if(mat->flags != _DefaultScriptMaterial.flags) {
         BrFilePrintf(df, "    flags = [");
 
-        for(i = 0, j = 0; i < BR_ASIZE(MaterialFlagNames); i++)
-            if(mat->flags & MaterialFlagNames[i].value) {
-                BrFilePrintf(df, "%s%s", j ? ", " : "", MaterialFlagNames[i].name);
+        for(j = 0, f = MaterialFlagNames; f->name; f++)
+            if(f->canonical && (mat->flags & f->value)) {
+                BrFilePrintf(df, "%s%s", j ? ", " : "", f->name);
                 j++;
             }
 
