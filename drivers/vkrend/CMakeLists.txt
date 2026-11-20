@@ -136,6 +136,15 @@ compile_shader_spv(
 )
 
 compile_shader_spv(
+        "${CMAKE_CURRENT_SOURCE_DIR}/shaders/render.indexed.frag.glsl"
+        "vkrend_render_indexed_frag_spv"
+        "frag"
+        "${CMAKE_CURRENT_BINARY_DIR}/render.indexed.frag.spv.h"
+        "${CMAKE_CURRENT_SOURCE_DIR}/shaders/render.common.glsl"
+        "${CMAKE_CURRENT_SOURCE_DIR}/shaders/render.indexed.glsl"
+)
+
+compile_shader_spv(
         "${CMAKE_CURRENT_SOURCE_DIR}/shaders/render.lit.frag.glsl"
         "vkrend_render_lit_frag_spv"
         "frag"
@@ -145,36 +154,10 @@ compile_shader_spv(
 )
 
 compile_shader_spv(
-        "${CMAKE_CURRENT_SOURCE_DIR}/shaders/render.textured.frag.glsl"
-        "vkrend_render_textured_frag_spv"
+        "${CMAKE_CURRENT_SOURCE_DIR}/shaders/render.lit.indexed.frag.glsl"
+        "vkrend_render_lit_indexed_frag_spv"
         "frag"
-        "${CMAKE_CURRENT_BINARY_DIR}/render.textured.frag.spv.h"
-        "${CMAKE_CURRENT_SOURCE_DIR}/shaders/render.common.glsl"
-)
-
-compile_shader_spv(
-        "${CMAKE_CURRENT_SOURCE_DIR}/shaders/render.lit.textured.frag.glsl"
-        "vkrend_render_lit_textured_frag_spv"
-        "frag"
-        "${CMAKE_CURRENT_BINARY_DIR}/render.lit.textured.frag.spv.h"
-        "${CMAKE_CURRENT_SOURCE_DIR}/shaders/render.common.glsl"
-        "${CMAKE_CURRENT_SOURCE_DIR}/shaders/render.lighting.glsl"
-)
-
-compile_shader_spv(
-        "${CMAKE_CURRENT_SOURCE_DIR}/shaders/render.textured.indexed.frag.glsl"
-        "vkrend_render_textured_indexed_frag_spv"
-        "frag"
-        "${CMAKE_CURRENT_BINARY_DIR}/render.textured.indexed.frag.spv.h"
-        "${CMAKE_CURRENT_SOURCE_DIR}/shaders/render.common.glsl"
-        "${CMAKE_CURRENT_SOURCE_DIR}/shaders/render.indexed.glsl"
-)
-
-compile_shader_spv(
-        "${CMAKE_CURRENT_SOURCE_DIR}/shaders/render.lit.textured.indexed.frag.glsl"
-        "vkrend_render_lit_textured_indexed_frag_spv"
-        "frag"
-        "${CMAKE_CURRENT_BINARY_DIR}/render.lit.textured.indexed.frag.spv.h"
+        "${CMAKE_CURRENT_BINARY_DIR}/render.lit.indexed.frag.spv.h"
         "${CMAKE_CURRENT_SOURCE_DIR}/shaders/render.common.glsl"
         "${CMAKE_CURRENT_SOURCE_DIR}/shaders/render.lighting.glsl"
         "${CMAKE_CURRENT_SOURCE_DIR}/shaders/render.indexed.glsl"
@@ -242,11 +225,10 @@ add_library(vkrend
 
         "${CMAKE_CURRENT_BINARY_DIR}/render.vert.spv.h"
         "${CMAKE_CURRENT_BINARY_DIR}/render.frag.spv.h"
+        "${CMAKE_CURRENT_BINARY_DIR}/render.frag.spv.h"
+        "${CMAKE_CURRENT_BINARY_DIR}/render.indexed.frag.spv.h"
         "${CMAKE_CURRENT_BINARY_DIR}/render.lit.frag.spv.h"
-        "${CMAKE_CURRENT_BINARY_DIR}/render.textured.frag.spv.h"
-        "${CMAKE_CURRENT_BINARY_DIR}/render.textured.indexed.frag.spv.h"
-        "${CMAKE_CURRENT_BINARY_DIR}/render.lit.textured.frag.spv.h"
-        "${CMAKE_CURRENT_BINARY_DIR}/render.lit.textured.indexed.frag.spv.h"
+        "${CMAKE_CURRENT_BINARY_DIR}/render.lit.indexed.frag.spv.h"
 
         select.c
 

@@ -400,9 +400,12 @@ br_device *DeviceVkAllocate(const char *identifier, const char *arguments)
     self->render_state           = BR_VK_RENDER_UNINITIALISED;
     self->render_vert            = VK_NULL_HANDLE;
     self->render_frag            = VK_NULL_HANDLE;
+    self->render_indexed         = VK_NULL_HANDLE;
     self->render_lit             = VK_NULL_HANDLE;
-    self->render_textured        = VK_NULL_HANDLE;
-    self->render_lit_textured    = VK_NULL_HANDLE;
+    self->render_lit_indexed     = VK_NULL_HANDLE;
+    self->render_white_image     = VK_NULL_HANDLE;
+    self->render_white_view      = VK_NULL_HANDLE;
+    self->render_white_allocation = NULL;
     self->render_set_layout      = VK_NULL_HANDLE;
     self->render_pipeline_layout = VK_NULL_HANDLE;
     self->render_pipeline_count  = 0;

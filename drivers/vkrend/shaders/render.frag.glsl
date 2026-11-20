@@ -5,21 +5,55 @@
 #include "render.common.glsl"
 
 /*
- * Fragment shader for an unlit br_renderer surface: the surface colour, or the
- * interpolated vertex colour when the surface's colour source is the geometry (a pre-lit
- * material with no BR_MATF_LIGHT). A surface with BRT_LIGHTING_B clear draws with this
- * pipeline; the lit pipeline uses render.lit.frag.glsl. The renderer keys its pipeline
- * cache on that split.
+ * Fragment shader for an unlit br_renderer surface. The sampled texel modulates the surface
+ * colour, exactly as glrend's `surfaceColour * texColour` does for a surface with no lighting
+ * and no prelighting; a surface with BRT_LIGHTING_B clear draws with this pipeline and the
+ * lit one is render.lit.frag.glsl.
+ *
+ * A material with no colour map binds a 1x1 white image in this slot, as glrend binds its
+ * white texture, so the texel is 1 and the surface colour passes through unchanged. That is
+ * what lets one shader cover both cases.
+ *
+ * The colour map is fetched at the UV the vertex stage transformed by the surface's map
+ * transform, and a black texel discards the fragment when the primitive's colour-key bit is
+ * set. The surface colour - pc.colour, or the interpolated vertex colour when the colour
+ * source is the geometry - modulates the texel.
+ *
+ * An environment-mapped surface replaces that UV with the sphere-map coordinate the
+ * reflection from the eye and the surface normal gives (render.common.glsl,
+ * surfaceMapEnvironment()); the map transform is then applied to it, as the vertex stage
+ * applies it to the plain coordinate, and the colour key is tested on the fetched texel
+ * either way.
  */
 
 layout(location = 0) in vec3 vViewPosition;
+layout(location = 1) in vec3 vNormal;
+layout(location = 2) flat in vec3 vFlatNormal;
+
 layout(location = 4) in vec4 vColour;
+
+layout(location = 3) in vec2 vUV;
 
 layout(location = 0) out vec4 outColour;
 
+layout(set = 0, binding = 1) uniform sampler2D colour_map;
+
 void main()
 {
-    vec4 fragColour = vertexColourSource() ? vColour : pc.colour;
+    uint source    = mappingSource();
+    vec2 mappedUV  = vUV;
+
+    if(source != MAPPING_SOURCE_NONE)
+        mappedUV = surfaceMapEnvironment(vViewPosition, flatShading() ? vFlatNormal : vNormal, source);
+
+    vec4 texel = texture(colour_map, mappedUV);
+
+    if(colourKeyEnabled() && texel.rgb == vec3(0.0))
+        discard;
+
+    vec4 surfaceColour = vertexColourSource() ? vColour : pc.colour;
+
+    vec4 fragColour = surfaceColour * texel;
 
     if(fogEnabled())
         fragColour = applyFog(fragColour, -vViewPosition.z);

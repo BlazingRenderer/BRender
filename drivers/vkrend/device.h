@@ -162,7 +162,7 @@ typedef struct br_device_vk_render_sampler {
 
 /**
  * \brief A scene-draw pipeline, specialised by the destination format, sample count, whether
- * the surface is lit, and whether it has a colour map.
+ * the surface is lit, and whether its colour map is indexed.
  *
  * The br_renderer draws a model's triangles into the destination named by its OUTPUT
  * state. Like the rect, line and text pipelines the colour attachment format is named
@@ -170,11 +170,11 @@ typedef struct br_device_vk_render_sampler {
  * derive it from, so a pipeline only matches a destination image of the same format and
  * sample count. The lighting split is the other half of the key: a BRT_LIGHTING_B surface
  * shades through render.lit.frag.glsl, an unlit one through render.frag.glsl, and neither
- * should pay for the other's fragment work. The textured split keeps the untextured
- * shaders free of the sampler: a colour map draws through render.textured.frag.glsl or
- * render.lit.textured.frag.glsl, which sample and modulate. An INDEX_8 colour map takes a
- * second texture - its palette - and so the indexed variant of each textured shader, which
- * is the indexed half of the key. The cull split is the fourth:
+ * should pay for the other's fragment work. Nothing splits on whether the primitive has a
+ * colour map: its slot is always bound, white when the material has none, so the same shader
+ * samples and modulates either way. An INDEX_8 colour map takes a second texture - its
+ * palette - and so the indexed variant of each shader, which is the indexed half of the
+ * key. The cull split is the fourth:
  * a one-sided material culls back faces, a two-sided one culls nothing. The blend split is
  * the fifth: a PRIMF_BLEND primitive's blend_mode selects the fixed-function factors, a
  * non-blended one draws opaque. The depth split is the sixth: a Zb scene attaches a depth
@@ -198,7 +198,6 @@ typedef struct br_device_vk_render_pipeline {
     VkFormat              format;
     VkSampleCountFlagBits samples;
     br_boolean            lit;
-    br_boolean            textured;
     br_boolean            indexed;
     br_token              shading_mode;
     VkCullModeFlags       cull;
@@ -216,11 +215,10 @@ typedef struct br_device_vk_render_pipeline {
 /**
  * \brief Largest number of destination formats a device can have scene pipelines for.
  *
- * Each format can hold lit/unlit, untextured/textured/indexed-textured,
- * culled/unculled and front/back-winding variants, times the three shading modes
- * (BRT_FLAT, BRT_GOURAUD and BRT_PHONG), times the five blend states (no blending, and the
- * four blend_mode tokens of which BRT_NONE and the default share one), times the depth
- * states a scene uses.
+ * Each format can hold lit/unlit, plain/indexed, culled/unculled and front/back-winding
+ * variants, times the three shading modes (BRT_FLAT, BRT_GOURAUD and BRT_PHONG), times the
+ * five blend states (no blending, and the four blend_mode tokens of which BRT_NONE and the
+ * default share one), times the depth states a scene uses.
  */
 #define BR_VKREND_MAX_RENDER_PIPELINES (BR_PMT_MAX * 720)
 
@@ -369,11 +367,17 @@ typedef struct br_device {
     br_vk_render_state           render_state;
     VkShaderModule               render_vert;
     VkShaderModule               render_frag;
+    VkShaderModule               render_indexed;
     VkShaderModule               render_lit;
-    VkShaderModule               render_textured;
-    VkShaderModule               render_textured_indexed;
-    VkShaderModule               render_lit_textured;
-    VkShaderModule               render_lit_textured_indexed;
+    VkShaderModule               render_lit_indexed;
+    /*
+     * A 1x1 white image, bound in the colour map's slot when the material has none so that
+     * one fragment shader covers both cases: the texel is 1 and the surface colour passes
+     * through unchanged.
+     */
+    VkImage                      render_white_image;
+    VkImageView                  render_white_view;
+    VmaAllocation                render_white_allocation;
     VkDescriptorSetLayout        render_set_layout;
     VkPipelineLayout             render_pipeline_layout;
     br_device_vk_render_pipeline render_pipelines[BR_VKREND_MAX_RENDER_PIPELINES];

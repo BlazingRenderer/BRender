@@ -23,11 +23,9 @@
 
 #include "render.vert.spv.h"
 #include "render.frag.spv.h"
+#include "render.indexed.frag.spv.h"
 #include "render.lit.frag.spv.h"
-#include "render.textured.frag.spv.h"
-#include "render.textured.indexed.frag.spv.h"
-#include "render.lit.textured.frag.spv.h"
-#include "render.lit.textured.indexed.frag.spv.h"
+#include "render.lit.indexed.frag.spv.h"
 
 /*
  * Geometry format info. template
@@ -87,25 +85,27 @@ void DeviceVkRenderFini(br_device *dev)
             vk->DestroyShaderModule(dev->vk_device, dev->render_vert, NULL);
         if(dev->render_frag != VK_NULL_HANDLE)
             vk->DestroyShaderModule(dev->vk_device, dev->render_frag, NULL);
+        if(dev->render_indexed != VK_NULL_HANDLE)
+            vk->DestroyShaderModule(dev->vk_device, dev->render_indexed, NULL);
         if(dev->render_lit != VK_NULL_HANDLE)
             vk->DestroyShaderModule(dev->vk_device, dev->render_lit, NULL);
-        if(dev->render_textured != VK_NULL_HANDLE)
-            vk->DestroyShaderModule(dev->vk_device, dev->render_textured, NULL);
-        if(dev->render_textured_indexed != VK_NULL_HANDLE)
-            vk->DestroyShaderModule(dev->vk_device, dev->render_textured_indexed, NULL);
-        if(dev->render_lit_textured != VK_NULL_HANDLE)
-            vk->DestroyShaderModule(dev->vk_device, dev->render_lit_textured, NULL);
-        if(dev->render_lit_textured_indexed != VK_NULL_HANDLE)
-            vk->DestroyShaderModule(dev->vk_device, dev->render_lit_textured_indexed, NULL);
+        if(dev->render_lit_indexed != VK_NULL_HANDLE)
+            vk->DestroyShaderModule(dev->vk_device, dev->render_lit_indexed, NULL);
+
+        if(dev->render_white_view != VK_NULL_HANDLE)
+            vk->DestroyImageView(dev->vk_device, dev->render_white_view, NULL);
+        if(dev->render_white_image != VK_NULL_HANDLE)
+            vmaDestroyImage(dev->vma_allocator, dev->render_white_image, dev->render_white_allocation);
     }
 
     dev->render_vert                 = VK_NULL_HANDLE;
     dev->render_frag                 = VK_NULL_HANDLE;
+    dev->render_indexed              = VK_NULL_HANDLE;
     dev->render_lit                  = VK_NULL_HANDLE;
-    dev->render_textured             = VK_NULL_HANDLE;
-    dev->render_textured_indexed     = VK_NULL_HANDLE;
-    dev->render_lit_textured         = VK_NULL_HANDLE;
-    dev->render_lit_textured_indexed = VK_NULL_HANDLE;
+    dev->render_lit_indexed          = VK_NULL_HANDLE;
+    dev->render_white_image          = VK_NULL_HANDLE;
+    dev->render_white_view           = VK_NULL_HANDLE;
+    dev->render_white_allocation     = NULL;
     dev->render_set_layout           = VK_NULL_HANDLE;
     dev->render_pipeline_layout      = VK_NULL_HANDLE;
     dev->render_pipeline_count       = 0;
@@ -165,6 +165,16 @@ br_vk_render_state DeviceVkRenderEnsureInit(br_device *dev)
         goto fail;
     }
 
+    const VkShaderModuleCreateInfo indexed_info = {
+        .sType    = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO,
+        .codeSize = sizeof(vkrend_render_indexed_frag_spv),
+        .pCode    = (const uint32_t *)vkrend_render_indexed_frag_spv,
+    };
+    if((res = vk->CreateShaderModule(dev->vk_device, &indexed_info, NULL, &dev->render_indexed)) != VK_SUCCESS) {
+        BrLogError("VKREND", "Failed to create the indexed scene fragment shader module: VkResult = %d", res);
+        goto fail;
+    }
+
     const VkShaderModuleCreateInfo lit_info = {
         .sType    = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO,
         .codeSize = sizeof(vkrend_render_lit_frag_spv),
@@ -175,55 +185,35 @@ br_vk_render_state DeviceVkRenderEnsureInit(br_device *dev)
         goto fail;
     }
 
-    const VkShaderModuleCreateInfo textured_info = {
+    const VkShaderModuleCreateInfo lit_indexed_info = {
         .sType    = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO,
-        .codeSize = sizeof(vkrend_render_textured_frag_spv),
-        .pCode    = (const uint32_t *)vkrend_render_textured_frag_spv,
+        .codeSize = sizeof(vkrend_render_lit_indexed_frag_spv),
+        .pCode    = (const uint32_t *)vkrend_render_lit_indexed_frag_spv,
     };
-    if((res = vk->CreateShaderModule(dev->vk_device, &textured_info, NULL, &dev->render_textured)) != VK_SUCCESS) {
-        BrLogError("VKREND", "Failed to create the textured scene fragment shader module: VkResult = %d", res);
+    if((res = vk->CreateShaderModule(dev->vk_device, &lit_indexed_info, NULL, &dev->render_lit_indexed)) != VK_SUCCESS) {
+        BrLogError("VKREND", "Failed to create the indexed lit scene fragment shader module: VkResult = %d", res);
         goto fail;
     }
 
-    const VkShaderModuleCreateInfo lit_textured_info = {
-        .sType    = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO,
-        .codeSize = sizeof(vkrend_render_lit_textured_frag_spv),
-        .pCode    = (const uint32_t *)vkrend_render_lit_textured_frag_spv,
-    };
-    if((res = vk->CreateShaderModule(dev->vk_device, &lit_textured_info, NULL, &dev->render_lit_textured)) != VK_SUCCESS) {
-        BrLogError("VKREND", "Failed to create the lit textured scene fragment shader module: VkResult = %d", res);
-        goto fail;
-    }
-
-    const VkShaderModuleCreateInfo textured_indexed_info = {
-        .sType    = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO,
-        .codeSize = sizeof(vkrend_render_textured_indexed_frag_spv),
-        .pCode    = (const uint32_t *)vkrend_render_textured_indexed_frag_spv,
-    };
-    if((res = vk->CreateShaderModule(dev->vk_device, &textured_indexed_info, NULL, &dev->render_textured_indexed)) != VK_SUCCESS) {
-        BrLogError("VKREND", "Failed to create the indexed textured scene fragment shader module: VkResult = %d", res);
-        goto fail;
-    }
-
-    const VkShaderModuleCreateInfo lit_textured_indexed_info = {
-        .sType    = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO,
-        .codeSize = sizeof(vkrend_render_lit_textured_indexed_frag_spv),
-        .pCode    = (const uint32_t *)vkrend_render_lit_textured_indexed_frag_spv,
-    };
-    if((res = vk->CreateShaderModule(dev->vk_device, &lit_textured_indexed_info, NULL, &dev->render_lit_textured_indexed)) != VK_SUCCESS) {
-        BrLogError("VKREND", "Failed to create the indexed lit textured scene fragment shader module: VkResult = %d", res);
+    /*
+     * The colour map's slot is always bound: a material with no map gets this 1x1 white one, so
+     * the unlit and lit fragment shaders cover both cases and no pipeline is specialised on
+     * whether a map is present.
+     */
+    if(BufferStoredVkCreateWhite(dev, &dev->render_white_image, &dev->render_white_view, &dev->render_white_allocation) != BRE_OK) {
+        BrLogError("VKREND", "Failed to create the white colour map.");
         goto fail;
     }
 
     /*
      * Binding 0 is the scene block, which the vertex stage reads the projection from and the
      * lit fragment stage reads the packed lights from, so both stages name it. Binding 1 is
-     * the colour map, which only the textured fragment shaders statically use, and binding 2
-     * is its palette, which only the indexed textured shaders use. Binding 3 is the
-     * per-draw material block (fog for now), which every fragment shader reads for its fog
-     * state, so only the fragment stage names it. A push descriptor that is not used can be
-     * left undefined, so an untextured draw pushes bindings 0 and 3 and a plain textured
-     * draw pushes 1 as well.
+     * the colour map, which every fragment shader samples - the device binds a 1x1 white image
+     * there when the material has no map - and binding 2 is its palette, which only the indexed
+     * shaders use. Binding 3 is the per-draw material block (fog for now), which every fragment
+     * shader reads for its fog state, so only the fragment stage names it. A push descriptor
+     * that is not used can be left undefined, so a draw without an indexed map pushes 0, 1 and
+     * 3 and an indexed one pushes 2 as well.
      */
     const VkDescriptorSetLayoutBinding scene_bindings[4] = {
         {
@@ -351,11 +341,11 @@ static void blend_factors_for(br_token blend_mode, VkBlendFactor *src, VkBlendFa
 
 /**
  * \brief Get (building on first use) the scene pipeline for a destination format, sample
- * count, lighting state, colour-map state, cull state, front-face winding and blend state.
+ * count, lighting state, indexed state, cull state, front-face winding and blend state.
  *
  * \return the pipeline, or VK_NULL_HANDLE if one could not be built.
  */
-VkPipeline DeviceVkRenderGetPipeline(br_device *dev, VkFormat format, VkSampleCountFlagBits samples, br_boolean lit, br_boolean textured,
+VkPipeline DeviceVkRenderGetPipeline(br_device *dev, VkFormat format, VkSampleCountFlagBits samples, br_boolean lit,
                                      br_boolean indexed, br_token shading_mode, VkCullModeFlags cull, VkFrontFace front_face,
                                      br_boolean blended, br_token blend_mode, br_boolean depth_test, br_boolean depth_write,
                                      VkCompareOp depth_compare, VkFormat depth_format, VkPolygonMode polygon_mode)
@@ -365,8 +355,8 @@ VkPipeline DeviceVkRenderGetPipeline(br_device *dev, VkFormat format, VkSampleCo
 
     for(br_uint_32 i = 0; i < dev->render_pipeline_count; ++i) {
         if(dev->render_pipelines[i].format == format && dev->render_pipelines[i].samples == samples &&
-           dev->render_pipelines[i].lit == lit && dev->render_pipelines[i].textured == textured &&
-           dev->render_pipelines[i].indexed == indexed && dev->render_pipelines[i].shading_mode == shading_mode &&
+           dev->render_pipelines[i].lit == lit && dev->render_pipelines[i].indexed == indexed &&
+           dev->render_pipelines[i].shading_mode == shading_mode &&
            dev->render_pipelines[i].cull == cull && dev->render_pipelines[i].front_face == front_face &&
            dev->render_pipelines[i].blended == blended && dev->render_pipelines[i].blend_mode == blend_mode &&
            dev->render_pipelines[i].depth_format == depth_format && dev->render_pipelines[i].depth_test == depth_test &&
@@ -381,9 +371,9 @@ VkPipeline DeviceVkRenderGetPipeline(br_device *dev, VkFormat format, VkSampleCo
     }
 
     if(lit)
-        frag = textured ? (indexed ? dev->render_lit_textured_indexed : dev->render_lit_textured) : dev->render_lit;
+        frag = indexed ? dev->render_lit_indexed : dev->render_lit;
     else
-        frag = textured ? (indexed ? dev->render_textured_indexed : dev->render_textured) : dev->render_frag;
+        frag = indexed ? dev->render_indexed : dev->render_frag;
 
     const VkPipelineShaderStageCreateInfo stages[2] = {
         {
@@ -546,7 +536,6 @@ VkPipeline DeviceVkRenderGetPipeline(br_device *dev, VkFormat format, VkSampleCo
     entry->format                       = format;
     entry->samples                      = samples;
     entry->lit                          = lit;
-    entry->textured                     = textured;
     entry->indexed                      = indexed;
     entry->shading_mode                 = shading_mode;
     entry->cull                         = cull;
@@ -713,9 +702,10 @@ static VkFrontFace front_face_for(const br_matrix34 *model_to_view)
  * Copy the current scene and per-draw state into the push constants and bind the geometry
  * buffers. The rendering scope, viewport and scene light block were set by sceneBegin().
  *
- * A colour map, when the primitive state carries one, is bound as a push descriptor and
- * selects the textured pipeline variant: the texel modulates the surface colour. The map's
- * transform was folded into the UV by the vertex shader.
+ * The colour map's slot is bound on every draw, as a push descriptor: the material's map when
+ * the primitive state carries one, and the device's 1x1 white image when it does not, so no
+ * pipeline is specialised on whether a map is present and the texel is 1 when there is none.
+ * The map's transform was folded into the UV by the vertex shader.
  *
  * One index range is drawn: the whole group at its IBO offset, or one face's three
  * vertices at its own. Returns whether anything was drawn, so the caller can count the
@@ -739,7 +729,6 @@ static br_boolean VkV1ModelRenderIndexed(br_geometry_stored *geom, br_renderer *
     VkCompareOp               depth_compare = VK_COMPARE_OP_LESS;
     VkCommandBuffer           cmd;
     br_boolean                lit;
-    br_boolean                textured;
     br_boolean                indexed;
     br_token                  shading_mode;
     br_buffer_stored         *colour_map;
@@ -780,7 +769,6 @@ static br_boolean VkV1ModelRenderIndexed(br_geometry_stored *geom, br_renderer *
 
     colour_map = ((state->valid & MASK_STATE_PRIMITIVE) && BufferStoredVkGetView(state->prim.colour_map) != VK_NULL_HANDLE) ? state->prim.colour_map
                                                                                                                             : NULL;
-    textured = colour_map != NULL;
 
     /*
      * An INDEX_8 colour map draws through the indexed fragment shaders, which bind the
@@ -788,7 +776,7 @@ static br_boolean VkV1ModelRenderIndexed(br_geometry_stored *geom, br_renderer *
      * cannot filter, so an indexed draw takes the sampler's filter as NEAREST regardless of
      * the primitive's.
      */
-    indexed = textured && BufferStoredVkIsIndexed(colour_map);
+    indexed = colour_map != NULL && BufferStoredVkIsIndexed(colour_map);
 
     cull = cull_mode_for(state);
 
@@ -861,7 +849,7 @@ static br_boolean VkV1ModelRenderIndexed(br_geometry_stored *geom, br_renderer *
             depth_write = BR_FALSE;
     }
 
-    if((pipeline = DeviceVkRenderGetPipeline(dev, dst_fmt->format, VK_SAMPLE_COUNT_1_BIT, lit, textured, indexed, shading_mode, cull, front_face,
+    if((pipeline = DeviceVkRenderGetPipeline(dev, dst_fmt->format, VK_SAMPLE_COUNT_1_BIT, lit, indexed, shading_mode, cull, front_face,
                                              blended, blend_mode, depth_test, depth_write, depth_compare, depth_format, polygon_mode)) == VK_NULL_HANDLE)
         return BR_FALSE;
 
@@ -1046,65 +1034,68 @@ static br_boolean VkV1ModelRenderIndexed(br_geometry_stored *geom, br_renderer *
     };
     vk->CmdPushDescriptorSet(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, dev->render_pipeline_layout, 0, 1, &material_write);
 
-    if(textured) {
-        /*
-         * A device colour map is sampled where its image lies, in the layout the source
-         * pixelmap records; the scene draw cannot transition it, because it records inside a
-         * dynamic rendering scope (see BufferStoredVkGetViewLayout()). A source in no layout
-         * this draw can sample is declined, rather than bound with a layout it is not in.
-         */
-        VkImageLayout colour_map_layout = BufferStoredVkGetViewLayout(colour_map);
+    /*
+     * The colour map's slot is always bound. A material with no map binds the device's 1x1
+     * white image, which is what lets one fragment shader cover both cases: the texel is 1
+     * and the surface colour passes through unchanged.
+     *
+     * A device colour map is sampled where its image lies, in the layout the source pixelmap
+     * records; the scene draw cannot transition it, because it records inside a dynamic
+     * rendering scope (see BufferStoredVkGetViewLayout()). A source in no layout this draw
+     * can sample is declined, rather than bound with a layout it is not in.
+     */
+    const VkImageView   colour_map_view   = colour_map != NULL ? BufferStoredVkGetView(colour_map) : dev->render_white_view;
+    const VkImageLayout colour_map_layout = colour_map != NULL ? BufferStoredVkGetViewLayout(colour_map) : VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 
-        if(colour_map_layout == VK_IMAGE_LAYOUT_UNDEFINED)
-            return BR_FALSE;
+    if(colour_map_view == VK_NULL_HANDLE || colour_map_layout == VK_IMAGE_LAYOUT_UNDEFINED)
+        return BR_FALSE;
 
-        /*
-         * The index plane is an integer texture, so the sampler cannot filter it and the
-         * index map has no mip chain: an indexed draw takes NEAREST/NEAREST with level 0
-         * fixed, whatever the primitive asked for, while a plain colour map keeps the
-         * primitive's filter and mip filter. glrend overrides an indexed colour map the
-         * same way (drivers/glrend/v1model.c).
-         */
-        VkSampler sampler = DeviceVkRenderGetSampler(dev, indexed ? BRT_NEAREST : state->prim.filter, indexed ? BRT_NONE : state->prim.mip_filter,
-                                                     state->prim.map_width_limit, state->prim.map_height_limit);
+    /*
+     * The index plane is an integer texture, so the sampler cannot filter it and the index map
+     * has no mip chain: an indexed draw takes NEAREST/NEAREST with level 0 fixed, whatever the
+     * primitive asked for, while a plain colour map keeps the primitive's filter and mip
+     * filter. glrend overrides an indexed colour map the same way (drivers/glrend/v1model.c).
+     */
+    const VkSampler sampler = DeviceVkRenderGetSampler(dev, indexed ? BRT_NEAREST : state->prim.filter,
+                                                       indexed ? BRT_NONE : state->prim.mip_filter, state->prim.map_width_limit,
+                                                       state->prim.map_height_limit);
 
-        if(sampler == VK_NULL_HANDLE)
-            return BR_FALSE;
+    if(sampler == VK_NULL_HANDLE)
+        return BR_FALSE;
 
-        const VkDescriptorImageInfo texture_info = {
+    const VkDescriptorImageInfo texture_info = {
+        .sampler     = sampler,
+        .imageView   = colour_map_view,
+        .imageLayout = colour_map_layout,
+    };
+    const VkWriteDescriptorSet texture_write = {
+        .sType           = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
+        .dstBinding      = 1,
+        .descriptorCount = 1,
+        .descriptorType  = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
+        .pImageInfo      = &texture_info,
+    };
+    vk->CmdPushDescriptorSet(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, dev->render_pipeline_layout, 0, 1, &texture_write);
+
+    /*
+     * An INDEX_8 map binds its palette as binding 2. Its sampler is the primitive's: the
+     * palette is a colour format the sampler can filter, and a palette of fewer than 256 rows
+     * is clamped by the shader's texelFetch, not the sampler's wrap mode.
+     */
+    if(indexed) {
+        const VkDescriptorImageInfo clut_info = {
             .sampler     = sampler,
-            .imageView   = BufferStoredVkGetView(colour_map),
-            .imageLayout = colour_map_layout,
+            .imageView   = BufferStoredVkGetClutView(colour_map),
+            .imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
         };
-        const VkWriteDescriptorSet texture_write = {
+        const VkWriteDescriptorSet clut_write = {
             .sType           = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
-            .dstBinding      = 1,
+            .dstBinding      = 2,
             .descriptorCount = 1,
             .descriptorType  = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
-            .pImageInfo      = &texture_info,
+            .pImageInfo      = &clut_info,
         };
-        vk->CmdPushDescriptorSet(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, dev->render_pipeline_layout, 0, 1, &texture_write);
-
-        /*
-         * An INDEX_8 map binds its palette as binding 2. Its sampler is the primitive's:
-         * the palette is a colour format the sampler can filter, and a palette of fewer
-         * than 256 rows is clamped by the shader's texelFetch, not the sampler's wrap mode.
-         */
-        if(indexed) {
-            const VkDescriptorImageInfo clut_info = {
-                .sampler     = sampler,
-                .imageView   = BufferStoredVkGetClutView(colour_map),
-                .imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
-            };
-            const VkWriteDescriptorSet clut_write = {
-                .sType           = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
-                .dstBinding      = 2,
-                .descriptorCount = 1,
-                .descriptorType  = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
-                .pImageInfo      = &clut_info,
-            };
-            vk->CmdPushDescriptorSet(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, dev->render_pipeline_layout, 0, 1, &clut_write);
-        }
+        vk->CmdPushDescriptorSet(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, dev->render_pipeline_layout, 0, 1, &clut_write);
     }
 
     vk->CmdPushConstants(cmd, dev->render_pipeline_layout, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, 0, sizeof(data), &data);

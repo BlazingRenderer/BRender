@@ -553,6 +553,23 @@ struct br_buffer_stored *BufferStoredVkAllocate(br_renderer *renderer, br_token 
 }
 
 /*
+ * The 1x1 white image the scene draw binds where a material has no colour map, so that one
+ * fragment shader covers both cases: sampling it gives 1 and the surface colour passes
+ * through unchanged. glrend keeps the same texture for the same reason
+ * (drivers/glrend/context_state.c).
+ */
+br_error BufferStoredVkCreateWhite(br_device *dev, VkImage *out_image, VkImageView *out_view, VmaAllocation *out_allocation)
+{
+    static const br_uint_8    white[4] = {0xFF, 0xFF, 0xFF, 0xFF};
+    const br_pixelmap_vk_fmt *fmt      = DeviceVkGetFormatDetails(BR_PMT_RGBA_8888);
+
+    if(fmt == NULL || fmt->format == VK_FORMAT_UNDEFINED)
+        return BRE_FAIL;
+
+    return BufferStoredVkUploadPlane(dev, fmt, white, 4, 1, 1, BR_FALSE, out_image, out_view, out_allocation);
+}
+
+/*
  * The image view a scene draw binds as the colour map, or VK_NULL_HANDLE if this buffer
  * holds no upload. For an INDEX_8 source this is the index plane (the palette is
  * BufferStoredVkGetClutView()); for a device source it is a transient view of the source

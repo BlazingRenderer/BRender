@@ -4208,6 +4208,33 @@ static br_error vkrend_renderer_init(void *user, br_pixelmap *screen, br_pixelma
         BrMaterialUpdate(state->texture_material, BR_MATU_ALL);
 
         /*
+         * The colour key with no colour map at all. A material's key is on by default
+         * (core/v1db/prepmatl.c sets BRT_COLOUR_KEY_B from BR_MATF_DISABLE_COLOUR_KEY), and the
+         * colour map's slot is bound white when the material has no map, so the key test sees a
+         * texel of 1 rather than black and nothing is discarded. While the slot was only bound
+         * when a map was present, this draw took the untextured shader, which had no key test in
+         * it; the assertion is what holds the two paths to the same picture.
+         */
+        state->texture_material->colour_map = NULL;
+        BrMaterialUpdate(state->texture_material, BR_MATU_ALL);
+
+        if(vkrend_renderer_fill_clear(state->offscreen) != BRE_OK)
+            goto fail;
+
+        BrZsSceneRender(state->world, camera, state->offscreen);
+
+        {
+            const br_uint_8 untextured_white[4] = {0xff, 0xff, 0xff, 0xff};
+
+            if(vkrend_renderer_assert_pixel(state->offscreen, cx, cy, untextured_white,
+                                            "the colour-keyed surface with no colour map") != BRE_OK)
+                goto fail;
+        }
+
+        state->texture_material->colour_map = state->texture;
+        BrMaterialUpdate(state->texture_material, BR_MATU_ALL);
+
+        /*
          * The lit textured pipeline. The same quad, lit by the ambient and the +z directional
          * light from step 4, must show `(ka * ambient + dot(N, L) * kd) * texel` per channel:
          * dot is 1, so a white surface would be 0xbf and each texel channel scales from there.
