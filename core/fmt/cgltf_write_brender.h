@@ -76,6 +76,33 @@ static void cgltf_write_brender_light(cgltf_write_context *context, const cgltf_
     cgltf_write_line(context, "}");
 }
 
+/*
+ * cgltf_write_intprop() but doesn't exclude the default value.
+ */
+static void cgltf_write_brender_intprop(cgltf_write_context *context, const char *label, int val)
+{
+    cgltf_write_indent(context);
+    CGLTF_SPRINTF("\"%s\": %d", label, val);
+    context->needs_comma = 1;
+}
+
+/*
+ * cgltf_write_floatprop() but doesn't exclude the default value.
+ */
+static void cgltf_write_brender_floatprop(cgltf_write_context *context, const char *label, float val)
+{
+    cgltf_write_indent(context);
+    CGLTF_SPRINTF("\"%s\": %.*g", label, CGLTF_DECIMAL_DIG, val);
+    context->needs_comma = 1;
+
+    if(context->cursor) {
+        char *decimal_comma = strchr(context->cursor - context->tmp, ',');
+
+        if(decimal_comma)
+            *decimal_comma = '.';
+    }
+}
+
 static void cgltf_write_brender_material(cgltf_write_context *context, const cgltf_brender_material *br_material)
 {
     context->extension_flags |= CGLTF_EXTENSION_FLAG_BR_MATERIALS;
@@ -84,24 +111,22 @@ static void cgltf_write_brender_material(cgltf_write_context *context, const cgl
 
     cgltf_write_strprop(context, "identifier", br_material->identifier);
 
-    if(cgltf_check_floatarray(br_material->colour, 3, 1.0f)) {
-        cgltf_write_floatarrayprop(context, "colour", br_material->colour, 3);
-    }
+    cgltf_write_floatarrayprop(context, "colour", br_material->colour, 3);
 
-    cgltf_write_floatprop(context, "opacity", br_material->opacity, 1.0f);
+    cgltf_write_brender_floatprop(context, "opacity", br_material->opacity);
 
-    cgltf_write_floatprop(context, "ka", br_material->ka, 0.1f);
-    cgltf_write_floatprop(context, "kd", br_material->kd, 0.7f);
-    cgltf_write_floatprop(context, "ks", br_material->ks, 0.0f);
-    cgltf_write_floatprop(context, "power", br_material->power, 20.0f);
+    cgltf_write_brender_floatprop(context, "ka", br_material->ka);
+    cgltf_write_brender_floatprop(context, "kd", br_material->kd);
+    cgltf_write_brender_floatprop(context, "ks", br_material->ks);
+    cgltf_write_brender_floatprop(context, "power", br_material->power);
 
-    cgltf_write_intprop(context, "flags", br_material->flags, 1);
-    cgltf_write_intprop(context, "mode", br_material->mode, 4);
+    cgltf_write_brender_intprop(context, "flags", br_material->flags);
+    cgltf_write_brender_intprop(context, "mode", br_material->mode);
 
     cgltf_write_floatarrayprop(context, "map_transform", br_material->map_transform, 6);
 
-    cgltf_write_intprop(context, "index_base", br_material->index_base, 10);
-    cgltf_write_intprop(context, "index_range", br_material->index_range, 31);
+    cgltf_write_brender_intprop(context, "index_base", br_material->index_base);
+    cgltf_write_brender_intprop(context, "index_range", br_material->index_range);
 
     if(br_material->colour_map) {
         CGLTF_WRITE_IDXPROP("colour_map", br_material->colour_map, context->data->images);
@@ -123,16 +148,14 @@ static void cgltf_write_brender_material(cgltf_write_context *context, const cgl
         CGLTF_WRITE_IDXPROP("index_fog", br_material->index_fog, context->data->images);
     }
 
-    cgltf_write_floatprop(context, "fog_min", br_material->fog_min, 0.0f);
-    cgltf_write_floatprop(context, "fog_max", br_material->fog_max, 0.0f);
+    cgltf_write_brender_floatprop(context, "fog_min", br_material->fog_min);
+    cgltf_write_brender_floatprop(context, "fog_max", br_material->fog_max);
 
-    if(cgltf_check_floatarray(br_material->fog_colour, 3, 0.0f)) {
-        cgltf_write_floatarrayprop(context, "fog_colour", br_material->fog_colour, 3);
-    }
+    cgltf_write_floatarrayprop(context, "fog_colour", br_material->fog_colour, 3);
 
-    cgltf_write_intprop(context, "subdivide_tolerance", br_material->subdivide_tolerance, 0);
+    cgltf_write_brender_intprop(context, "subdivide_tolerance", br_material->subdivide_tolerance);
 
-    cgltf_write_floatprop(context, "depth_bias", br_material->depth_bias, 0.0f);
+    cgltf_write_brender_floatprop(context, "depth_bias", br_material->depth_bias);
 
     cgltf_write_line(context, "}");
 }

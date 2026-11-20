@@ -294,17 +294,34 @@
         {
           "identifier": "scene-fog-arb-tex-material",
           "colour": [0.784313738, 0.784313738, 0.784313738],
+          "opacity": 1,
+          "ka": 0.100000001,
+          "kd": 0.699999988,
+          "ks": 0,
+          "power": 20,
+          "flags": 1,
+          "mode": 4,
           "map_transform": [1, 0, 0, 1, 0, 0],
           "index_base": 0,
           "index_range": 255,
           "colour_map": 0,
           "index_fog": 1,
           "fog_min": 4,
-          "fog_max": 8
+          "fog_max": 8,
+          "fog_colour": [0, 0, 0],
+          "subdivide_tolerance": 0,
+          "depth_bias": 0
         },
         {
           "identifier": "scene-fog-arb-flat-material",
           "colour": [0.784313738, 0.784313738, 0.784313738],
+          "opacity": 1,
+          "ka": 0.100000001,
+          "kd": 0.699999988,
+          "ks": 0,
+          "power": 20,
+          "flags": 1,
+          "mode": 4,
           "map_transform": [1, 0, 0, 1, 0, 0],
           "index_base": 0,
           "index_range": 255,
@@ -312,12 +329,21 @@
           "index_shade": 2,
           "index_fog": 1,
           "fog_min": 4,
-          "fog_max": 8
+          "fog_max": 8,
+          "fog_colour": [0, 0, 0],
+          "subdivide_tolerance": 0,
+          "depth_bias": 0
         },
         {
           "identifier": "scene-fog-arb-smooth-material",
           "colour": [0.784313738, 0.784313738, 0.784313738],
+          "opacity": 1,
+          "ka": 0.100000001,
+          "kd": 0.699999988,
+          "ks": 0,
+          "power": 20,
           "flags": 5,
+          "mode": 4,
           "map_transform": [1, 0, 0, 1, 0, 0],
           "index_base": 0,
           "index_range": 255,
@@ -325,7 +351,10 @@
           "index_shade": 2,
           "index_fog": 1,
           "fog_min": 4,
-          "fog_max": 8
+          "fog_max": 8,
+          "fog_colour": [0, 0, 0],
+          "subdivide_tolerance": 0,
+          "depth_bias": 0
         }
       ]
     }

@@ -272,39 +272,63 @@ static int cgltf_parse_json_brender_lights(cgltf_options *options, jsmntok_t con
     return i;
 }
 
+static int cgltf_brender_material_defaults(cgltf_brender_material *defaults)
+{
+    br_material *mat;
+
+    *defaults = (cgltf_brender_material){0};
+
+    /*
+     * FIXME: Figure out to not need this.
+     */
+    if((mat = BrMaterialAllocate(NULL)) == NULL)
+        return CGLTF_ERROR_NOMEM;
+
+    defaults->colour[0] = BR_RED(mat->colour) / 255.0f;
+    defaults->colour[1] = BR_GRN(mat->colour) / 255.0f;
+    defaults->colour[2] = BR_BLU(mat->colour) / 255.0f;
+
+    defaults->opacity = (float)mat->opacity / 255.0f;
+
+    defaults->ka    = BrScalarToFloat(mat->ka);
+    defaults->kd    = BrScalarToFloat(mat->kd);
+    defaults->ks    = BrScalarToFloat(mat->ks);
+    defaults->power = BrScalarToFloat(mat->power);
+
+    defaults->flags = mat->flags;
+    defaults->mode  = mat->mode;
+
+    defaults->map_transform[0] = BrScalarToFloat(mat->map_transform.m[0][0]);
+    defaults->map_transform[1] = BrScalarToFloat(mat->map_transform.m[0][1]);
+    defaults->map_transform[2] = BrScalarToFloat(mat->map_transform.m[1][0]);
+    defaults->map_transform[3] = BrScalarToFloat(mat->map_transform.m[1][1]);
+    defaults->map_transform[4] = BrScalarToFloat(mat->map_transform.m[2][0]);
+    defaults->map_transform[5] = BrScalarToFloat(mat->map_transform.m[2][1]);
+
+    defaults->index_base  = mat->index_base;
+    defaults->index_range = mat->index_range;
+
+    defaults->fog_min = BrScalarToFloat(mat->fog_min);
+    defaults->fog_max = BrScalarToFloat(mat->fog_max);
+
+    defaults->fog_colour[0] = BR_RED(mat->fog_colour) / 255.0f;
+    defaults->fog_colour[1] = BR_GRN(mat->fog_colour) / 255.0f;
+    defaults->fog_colour[2] = BR_BLU(mat->fog_colour) / 255.0f;
+
+    defaults->subdivide_tolerance = mat->subdivide_tolerance;
+    defaults->depth_bias          = BrScalarToFloat(mat->depth_bias);
+
+    BrMaterialFree(mat);
+
+    return 0;
+}
+
 static int cgltf_parse_json_brender_material(cgltf_options *options, jsmntok_t const *tokens, int i, const uint8_t *json_chunk,
-                                             cgltf_brender_material *out_material)
+                                             const cgltf_brender_material *defaults, cgltf_brender_material *out_material)
 {
     CGLTF_CHECK_TOKTYPE(tokens[i], JSMN_OBJECT);
 
-    out_material->colour[0] = 1.0f;
-    out_material->colour[1] = 1.0f;
-    out_material->colour[2] = 1.0f;
-
-    out_material->opacity = 1.0f;
-    out_material->ka      = 0.1f;
-    out_material->kd      = 0.7f;
-    out_material->ks      = 0.0f;
-    out_material->power   = 20.0f;
-
-    out_material->flags = 1;
-    out_material->mode  = 4;
-
-    out_material->map_transform[0] = 1.0f;
-    out_material->map_transform[3] = 1.0f;
-
-    out_material->index_base  = 10;
-    out_material->index_range = 31;
-
-    out_material->fog_min = 0.0f;
-    out_material->fog_max = 0.0f;
-
-    out_material->fog_colour[0] = 0.0f;
-    out_material->fog_colour[1] = 0.0f;
-    out_material->fog_colour[2] = 0.0f;
-
-    out_material->subdivide_tolerance = 0;
-    out_material->depth_bias          = 0.0f;
+    *out_material = *defaults;
 
     int size = tokens[i].size;
     ++i;
@@ -406,14 +430,23 @@ static int cgltf_parse_json_brender_material(cgltf_options *options, jsmntok_t c
 
 static int cgltf_parse_json_brender_materials(cgltf_options *options, jsmntok_t const *tokens, int i, const uint8_t *json_chunk, cgltf_data *out_data)
 {
+    cgltf_brender_material defaults;
+    int                    r;
+
     i = cgltf_parse_json_array(options, tokens, i, json_chunk, sizeof(cgltf_brender_material), (void **)&out_data->brender_materials,
                                &out_data->brender_materials_count);
     if(i < 0) {
         return i;
     }
 
+    if(out_data->brender_materials_count == 0)
+        return i;
+
+    if((r = cgltf_brender_material_defaults(&defaults)) < 0)
+        return r;
+
     for(cgltf_size j = 0; j < out_data->brender_materials_count; ++j) {
-        i = cgltf_parse_json_brender_material(options, tokens, i, json_chunk, &out_data->brender_materials[j]);
+        i = cgltf_parse_json_brender_material(options, tokens, i, json_chunk, &defaults, &out_data->brender_materials[j]);
         if(i < 0) {
             return i;
         }

@@ -240,14 +240,23 @@
         {
           "identifier": "scene-shade-i8-material",
           "colour": [0.784313738, 0.784313738, 0.784313738],
+          "opacity": 1,
           "ka": 0.300000012,
           "kd": 0.00490000006,
+          "ks": 0,
+          "power": 20,
           "flags": 37,
+          "mode": 4,
           "map_transform": [1, 0, 0, 1, 0, 0],
           "index_base": 0,
           "index_range": 255,
           "colour_map": 0,
-          "index_shade": 1
+          "index_shade": 1,
+          "fog_min": 0,
+          "fog_max": 0,
+          "fog_colour": [0, 0, 0],
+          "subdivide_tolerance": 0,
+          "depth_bias": 0
         }
       ]
     }

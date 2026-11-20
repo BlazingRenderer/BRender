@@ -315,14 +315,32 @@
         {
           "identifier": "scene-blendfog-arb-persp-backdrop-material",
           "colour": [1, 0, 0],
+          "opacity": 1,
+          "ka": 0.100000001,
+          "kd": 0.699999988,
+          "ks": 0,
+          "power": 20,
           "flags": 0,
+          "mode": 4,
           "map_transform": [1, 0, 0, 1, 0, 0],
-          "index_base": 224
+          "index_base": 224,
+          "index_range": 31,
+          "fog_min": 0,
+          "fog_max": 0,
+          "fog_colour": [0, 0, 0],
+          "subdivide_tolerance": 0,
+          "depth_bias": 0
         },
         {
           "identifier": "scene-blendfog-arb-persp-tex-material",
           "colour": [0.784313738, 0.784313738, 0.784313738],
+          "opacity": 1,
+          "ka": 0.100000001,
+          "kd": 0.699999988,
+          "ks": 0,
+          "power": 20,
           "flags": 33,
+          "mode": 4,
           "map_transform": [1, 0, 0, 1, 0, 0],
           "index_base": 0,
           "index_range": 255,
@@ -330,12 +348,21 @@
           "index_blend": 1,
           "index_fog": 2,
           "fog_min": 4,
-          "fog_max": 8
+          "fog_max": 8,
+          "fog_colour": [0, 0, 0],
+          "subdivide_tolerance": 0,
+          "depth_bias": 0
         },
         {
           "identifier": "scene-blendfog-arb-persp-flat-material",
           "colour": [0.784313738, 0.784313738, 0.784313738],
+          "opacity": 1,
+          "ka": 0.100000001,
+          "kd": 0.699999988,
+          "ks": 0,
+          "power": 20,
           "flags": 33,
+          "mode": 4,
           "map_transform": [1, 0, 0, 1, 0, 0],
           "index_base": 0,
           "index_range": 255,
@@ -344,12 +371,21 @@
           "index_blend": 1,
           "index_fog": 2,
           "fog_min": 4,
-          "fog_max": 8
+          "fog_max": 8,
+          "fog_colour": [0, 0, 0],
+          "subdivide_tolerance": 0,
+          "depth_bias": 0
         },
         {
           "identifier": "scene-blendfog-arb-persp-smooth-material",
           "colour": [0.784313738, 0.784313738, 0.784313738],
+          "opacity": 1,
+          "ka": 0.100000001,
+          "kd": 0.699999988,
+          "ks": 0,
+          "power": 20,
           "flags": 37,
+          "mode": 4,
           "map_transform": [1, 0, 0, 1, 0, 0],
           "index_base": 0,
           "index_range": 255,
@@ -358,7 +394,10 @@
           "index_blend": 1,
           "index_fog": 2,
           "fog_min": 4,
-          "fog_max": 8
+          "fog_max": 8,
+          "fog_colour": [0, 0, 0],
+          "subdivide_tolerance": 0,
+          "depth_bias": 0
         }
       ]
     }

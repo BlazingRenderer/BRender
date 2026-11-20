@@ -220,7 +220,21 @@
         {
           "identifier": "scene-material",
           "colour": [0.784313738, 0.784313738, 0.784313738],
-          "map_transform": [1, 0, 0, 1, 0, 0]
+          "opacity": 1,
+          "ka": 0.100000001,
+          "kd": 0.699999988,
+          "ks": 0,
+          "power": 20,
+          "flags": 1,
+          "mode": 4,
+          "map_transform": [1, 0, 0, 1, 0, 0],
+          "index_base": 10,
+          "index_range": 31,
+          "fog_min": 0,
+          "fog_max": 0,
+          "fog_colour": [0, 0, 0],
+          "subdivide_tolerance": 0,
+          "depth_bias": 0
         }
       ]
     }

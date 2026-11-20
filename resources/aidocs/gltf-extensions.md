@@ -33,9 +33,15 @@ does. Re-apply both when the vendored files are updated.
 
 * **Every property is optional.** An absent property reads as the default in the field table, and the
   defaults are the same on the reading and the writing side, so a property that is omitted reads back as what
-  was written. The writer omits any property whose value *is* the default (`cgltf_write_intprop()`,
-  `cgltf_write_floatprop()`, `cgltf_write_boolprop_optional()` and `cgltf_check_floatarray()` in
-  `core/fmt/cgltf_write.h`), which is what makes an "absent means default" table sufficient.
+  was written. `BR_actors` and `BR_lights` also leave out a scalar or boolean property whose value *is* the
+  default (`cgltf_write_intprop()`, `cgltf_write_floatprop()` and `cgltf_write_boolprop_optional()` in
+  `core/fmt/cgltf_write.h`). Neither leaves out a vector: `cgltf_write_floatarrayprop()` always writes, so a
+  light's `colour` is in the file whether or not it is `[1, 1, 1]`. `BR_materials` is the opposite: apart
+  from a NULL `identifier` and an image reference with no image, it writes every field at its value - the
+  scalars through `cgltf_write_brender_intprop()` and `cgltf_write_brender_floatprop()`
+  (`core/fmt/cgltf_write_brender.h`), which are glTF's own writers with the skip-if-default removed, and the
+  vectors through `cgltf_write_floatarrayprop()`, which never skipped one - so a material reads the same
+  against any default table, and not only this repository's.
 * **A root extension object holds an array; a node or primitive names an entry by index.** The index is into
   that extension's own root array (`extensions.BR_materials.materials`, `extensions.BR_lights.lights`), not
   into glTF's `materials` array or `KHR_lights_punctual`'s `lights` array.
@@ -178,8 +184,10 @@ name the same entry.
 }
 ```
 
-Abridged from `tools/rendertest/dat/scene-edges.gltf`: every property not listed there is equal to its
-default and was therefore omitted.
+Abridged from `tools/rendertest/dat/scene-edges.gltf`: the listing keeps the fields that differ from their
+default and drops the rest, which the file on disk still carries - `opacity`, `ka`, `kd`, `ks`, `power`,
+`flags`, `mode`, `fog_min`, `fog_max`, `fog_colour`, `subdivide_tolerance` and `depth_bias` are all there, at
+the values in the field table below.
 
 ### Fields
 
