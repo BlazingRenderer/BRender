@@ -31,5 +31,18 @@ const br_material_flag MaterialFlagNames[] = {
     {.name = "disable_colour_key",  .value = BR_MATF_DISABLE_COLOUR_KEY,  .canonical = BR_TRUE },
     {.name = "smooth_alpha",        .value = BR_MATF_SMOOTH_ALPHA,        .canonical = BR_TRUE },
     {.name = "blend",               .value = BR_MATF_BLEND,               .canonical = BR_TRUE },
+    {.name = "smooth",              .value = BR_MATF_SMOOTH,              .canonical = BR_TRUE },
+    {.name = "modulate_alpha",      .value = BR_MATF_MODULATE_ALPHA,      .canonical = BR_TRUE },
+    {.name = "reserved_0",          .value = BR_MATF_RESERVED_0,          .canonical = BR_TRUE },
+    {.name = "reserved_1",          .value = BR_MATF_RESERVED_1,          .canonical = BR_TRUE },
+
+    /*
+     * Alternative spellings allowed by loaders.
+     */
+    {.name = "environment_i",       .value = BR_MATF_ENVIRONMENT_I,       .canonical = BR_FALSE},
+    {.name = "environment_l",       .value = BR_MATF_ENVIRONMENT_L,       .canonical = BR_FALSE},
+    {.name = "gouraud",             .value = BR_MATF_SMOOTH,              .canonical = BR_FALSE},
+    {.name = "force_z_0",           .value = BR_MATF_FORCE_FRONT,         .canonical = BR_FALSE},
+
     {.name = NULL,                  .value = 0,                           .canonical = BR_FALSE},
 };

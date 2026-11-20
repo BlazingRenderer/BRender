@@ -108,6 +108,9 @@ enum {
     T_DISABLE_COLOUR_KEY,
     T_SMOOTH_ALPHA,
     T_BLEND,
+    T_MODULATE_ALPHA,
+    T_RESERVED_0,
+    T_RESERVED_1,
 
     /*
      * Depth test modes
@@ -209,6 +212,9 @@ static const br_lexer_keyword keywords[] = {
     {"prealpha",            T_PREALPHA           },
     {"disable_colour_key",  T_DISABLE_COLOUR_KEY },
     {"smooth_alpha",        T_SMOOTH_ALPHA       },
+    {"modulate_alpha",      T_MODULATE_ALPHA     },
+    {"reserved_0",          T_RESERVED_0         },
+    {"reserved_1",          T_RESERVED_1         },
     {"gt",                  T_GT                 },
     {"ge",                  T_GE                 },
     {"eq",                  T_EQ                 },
@@ -290,6 +296,9 @@ static br_uint_32 ParseMatFlags(br_lexer *l)
         case T_DISABLE_COLOUR_KEY:      f |= BR_MATF_DISABLE_COLOUR_KEY;        break;
         case T_SMOOTH_ALPHA:            f |= BR_MATF_SMOOTH_ALPHA;              break;
         case T_BLEND:                   f |= BR_MATF_BLEND;                     break;
+        case T_MODULATE_ALPHA:          f |= BR_MATF_MODULATE_ALPHA;            break;
+        case T_RESERVED_0:              f |= BR_MATF_RESERVED_0;                break;
+        case T_RESERVED_1:              f |= BR_MATF_RESERVED_1;                break;
         default:
             BrLexerError(l, "Unknown material flag");
         }
