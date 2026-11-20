@@ -10,6 +10,9 @@
 
 /*
  * Default material fields
+ *
+ * Deliberately not pulling the ones from the default material as we need to
+ * maintain legacy compatibility (i.e. index_base+index_range are different).
  */
 const br_material _DefaultScriptMaterial = {
     ._reserved  = 0,
