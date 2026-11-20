@@ -132,7 +132,7 @@ unsigned long BR_PUBLIC_ENTRY BrStrToUL(const char *nptr, char **endptr, int bas
 
 unsigned long long BR_PUBLIC_ENTRY BrStrToULL(const char *nptr, char **endptr, int base)
 {
-    return strtoul(nptr, endptr, base);
+    return strtoull(nptr, endptr, base);
 }
 
 int BR_PUBLIC_ENTRY BrAToI(const char *nptr)
