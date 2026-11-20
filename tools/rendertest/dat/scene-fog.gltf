@@ -231,7 +231,7 @@
           "kd": 0.699999988,
           "ks": 0,
           "power": 20,
-          "flags": 524293,
+          "flags": ["light", "fog_local", "smooth"],
           "mode": 4,
           "map_transform": [1, 0, 0, 1, 0, 0],
           "index_base": 0,

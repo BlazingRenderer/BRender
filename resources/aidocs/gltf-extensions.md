@@ -200,7 +200,7 @@ the values in the field table below.
 | `kd` | number | `0.7` | `kd` |
 | `ks` | number | `0` | `ks` |
 | `power` | number | `20` | `power` |
-| `flags` | integer | `1` (`BR_MATF_LIGHT`) | `flags`, verbatim |
+| `flags` | string[] | `["light"]` (`BR_MATF_LIGHT`) | `flags`, by name through the material flag table |
 | `mode` | integer | `4` (`BR_MATM_DEPTH_TEST_LE`) | `mode`, verbatim |
 | `map_transform` | number[6] | `[1, 0, 0, 1, 0, 0]` | `map_transform`, row-major `[m00 m01 m10 m11 m20 m21]` |
 | `index_base` | integer | `10` | `index_base` |
@@ -223,10 +223,11 @@ identity `map_transform`, `index_base = 10` and `index_range = 31`, and leaves t
 A material object in a file is therefore the exact state of the material, and an absent property is not a
 loss.
 
-`flags` and `mode` are the raw BRender words, not a mapping from anything in glTF - that is the point of the
-extension: a material loaded through it keeps the flags and mode it was written with, while a material loaded
-through glTF's own `materials` array gets its flags and mode invented by the conversion
-(`fill_material()`, `core/fmt/loadgltf.c`).
+`mode` is the raw BRender word, not a mapping from anything in glTF - that is the point of the extension: a
+material loaded through it keeps the mode it was written with, while a material loaded through glTF's own
+`materials` array gets its mode invented by the conversion (`fill_material()`, `core/fmt/loadgltf.c`).
+`flags` is the same engine word, but spelled as names from the table in `core/fmt/matflag.c` rather than as a
+number, so that a file reads as the flags it means.
 
 ### Reader obligations
 
@@ -248,6 +249,11 @@ through glTF's own `materials` array gets its flags and mode invented by the con
   actor's when the renderer draws it.
 * **The index is taken as given, but it is range-checked.** A reference outside the table is a file error
   rather than a value to clamp, because the alternative is reading whatever follows the table.
+* **`flags` is an array of names, matched through the material flag table.** Every name is looked up in
+  `MaterialFlagNames` (`core/fmt/matflag.c`), so an older spelling the table still carries
+  (`environment_i`, `gouraud`, ...) resolves to the same bit as its canonical name. A name this engine does
+  not know is a warning and is skipped: a file from a newer engine is not corrupt, and the flags that do
+  resolve still describe the material. A bare number is accepted as the older numeric form of the same word.
 
 ### Writer obligations
 
@@ -261,6 +267,12 @@ through glTF's own `materials` array gets its flags and mode invented by the con
   material on the whole model on the way back in.
 * Textures are referenced as `images` indices, and the pixelmap payload on those images is what makes a
   lookup table survive - see the payload section below.
+* **Write `flags` only as canonical names.** `cgltf_write_brender_material_flags()`
+  (`core/fmt/cgltf_write_brender.h`) walks `MaterialFlagNames` and writes only rows marked canonical, so an
+  alias is accepted on read but never emitted, and the field is written even when the word is the default
+  `BR_MATF_LIGHT` alone. A set bit that no row names has no spelling: the writer warns with the whole word
+  and the unnamed bits, and the file carries only the names. The bit does not reach the file; the warning is
+  the only record of it.
 
 ### What it deliberately does not carry
 
@@ -269,9 +281,9 @@ through glTF's own `materials` array gets its flags and mode invented by the con
 * `br_material::stored` (renderer-private prepared state) and `br_material::user` (the application's).
 * The alpha byte of `colour` and `fog_colour`: both are RGB triples, with opacity carried once, in `opacity`.
 * **A field that is written is not necessarily a field that is read straightforwardly: every field in the
-  table above is both read and written, but `index_base`, `index_range`, `flags` and `mode` are stored in
-  narrower `br_material` fields (`br_uint_8`, `br_uint_8`, `br_uint_32`, `br_uint_16`) than the JSON integer,
-  and the assignment truncates rather than refusing.** Only `BR_actors.render_style` is range-checked.
+  table above is both read and written, but `index_base`, `index_range` and `mode` are stored in narrower
+  `br_material` fields (`br_uint_8`, `br_uint_8`, `br_uint_16`) than the JSON integer, and the assignment
+  truncates rather than refusing.** Only `BR_actors.render_style` is range-checked.
 
 ## `BR_lights`
 

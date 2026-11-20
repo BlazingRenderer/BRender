@@ -221,7 +221,7 @@
           "kd": 0.699999988,
           "ks": 0,
           "power": 20,
-          "flags": 0,
+          "flags": [],
           "mode": 4,
           "map_transform": [1, 0, 0, 1, 0, 0],
           "index_base": 10,

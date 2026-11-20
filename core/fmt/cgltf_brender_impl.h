@@ -10,6 +10,8 @@
 #error This must only be included from cgltf.h
 #endif
 
+#include "matflag.h"
+
 static int cgltf_parse_json_brender_light_mappings(cgltf_options *options, jsmntok_t const *tokens, int i, const uint8_t *json_chunk,
                                                    cgltf_brender_light **out_light)
 {
@@ -323,6 +325,41 @@ static int cgltf_brender_material_defaults(cgltf_brender_material *defaults)
     return 0;
 }
 
+static int cgltf_parse_json_brender_material_flags(jsmntok_t const *tokens, int i, const uint8_t *json_chunk, cgltf_brender_material *out_material)
+{
+    if(tokens[i].type == JSMN_PRIMITIVE) {
+        out_material->flags = cgltf_json_to_int(tokens + i, json_chunk);
+        return i + 1;
+    }
+
+    CGLTF_CHECK_TOKTYPE(tokens[i], JSMN_ARRAY);
+
+    int size = tokens[i].size;
+    ++i;
+
+    out_material->flags = 0;
+
+    for(int j = 0; j < size; ++j) {
+        const br_material_flag *flag;
+
+        CGLTF_CHECK_TOKTYPE(tokens[i], JSMN_STRING);
+
+        for(flag = MaterialFlagNames; flag->name; flag++)
+            if(cgltf_json_strcmp(tokens + i, json_chunk, flag->name) == 0) {
+                out_material->flags |= flag->value;
+                break;
+            }
+
+        if(flag->name == NULL)
+            BrLogWarn("GLTF", "material flag \"%.*s\" is not one this engine knows; skipped", (int)(tokens[i].end - tokens[i].start),
+                      (const char *)(json_chunk + tokens[i].start));
+
+        ++i;
+    }
+
+    return i;
+}
+
 static int cgltf_parse_json_brender_material(cgltf_options *options, jsmntok_t const *tokens, int i, const uint8_t *json_chunk,
                                              const cgltf_brender_material *defaults, cgltf_brender_material *out_material)
 {
@@ -361,9 +398,7 @@ static int cgltf_parse_json_brender_material(cgltf_options *options, jsmntok_t c
             out_material->power = cgltf_json_to_float(tokens + i, json_chunk);
             ++i;
         } else if(cgltf_json_strcmp(tokens + i, json_chunk, "flags") == 0) {
-            ++i;
-            out_material->flags = cgltf_json_to_int(tokens + i, json_chunk);
-            ++i;
+            i = cgltf_parse_json_brender_material_flags(tokens, i + 1, json_chunk, out_material);
         } else if(cgltf_json_strcmp(tokens + i, json_chunk, "mode") == 0) {
             ++i;
             out_material->mode = cgltf_json_to_int(tokens + i, json_chunk);

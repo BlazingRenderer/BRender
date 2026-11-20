@@ -242,7 +242,7 @@
           "kd": 0.699999988,
           "ks": 0,
           "power": 20,
-          "flags": 16421,
+          "flags": ["light", "perspective", "dither", "smooth"],
           "mode": 4,
           "map_transform": [1, 0, 0, 1, 0, 0],
           "index_base": 0,

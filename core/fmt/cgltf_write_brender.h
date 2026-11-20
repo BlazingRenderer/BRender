@@ -5,6 +5,8 @@
 #error This must only be included from cgltf_write.h
 #endif
 
+#include "matflag.h"
+
 static const char *cgltf_str_from_brender_light_type(cgltf_brender_light_type light_type)
 {
     switch(light_type) {
@@ -103,6 +105,36 @@ static void cgltf_write_brender_floatprop(cgltf_write_context *context, const ch
     }
 }
 
+static void cgltf_write_brender_material_flags(cgltf_write_context *context, br_uint_64 flags)
+{
+    const br_material_flag *flag;
+    br_uint_64              named   = 0;
+    int                     written = 0;
+
+    cgltf_write_indent(context);
+    CGLTF_SPRINTF("\"flags\": [");
+
+    for(flag = MaterialFlagNames; flag->name; flag++) {
+        if(!flag->canonical || !(flags & flag->value))
+            continue;
+
+        CGLTF_SPRINTF("%s\"%s\"", written++ ? ", " : "", flag->name);
+        named |= flag->value;
+    }
+
+    CGLTF_SPRINTF("]");
+    context->needs_comma = 1;
+
+    /*
+     * A bit that no row names has no spelling to write. Say so: a flag the
+     * engine acts on and this file does not carry is not a rounding error, and
+     * it is the one thing a name cannot express that the old number could.
+     */
+    if(flags & ~named)
+        BrLogWarn("GLTF", "material flags %#llx: the bits %#llx have no name and are not written", (unsigned long long)flags,
+                  (unsigned long long)(flags & ~named));
+}
+
 static void cgltf_write_brender_material(cgltf_write_context *context, const cgltf_brender_material *br_material)
 {
     context->extension_flags |= CGLTF_EXTENSION_FLAG_BR_MATERIALS;
@@ -120,7 +152,7 @@ static void cgltf_write_brender_material(cgltf_write_context *context, const cgl
     cgltf_write_brender_floatprop(context, "ks", br_material->ks);
     cgltf_write_brender_floatprop(context, "power", br_material->power);
 
-    cgltf_write_brender_intprop(context, "flags", br_material->flags);
+    cgltf_write_brender_material_flags(context, br_material->flags);
     cgltf_write_brender_intprop(context, "mode", br_material->mode);
 
     cgltf_write_floatarrayprop(context, "map_transform", br_material->map_transform, 6);
