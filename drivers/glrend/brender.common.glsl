@@ -96,6 +96,14 @@ layout(std140, binding=1) uniform br_model_state
     float fog_scale;
     int shading_mode;
 
+    /* A tangent-space normal map, how far it displaces the normal and the co-ordinate. */
+    bool bump_enabled;
+    float bump_scale;
+    float bump_depth;
+
+    /* The bump map's own mapping, applied before map_transform. */
+    mat4 bump_map_transform;
+
     /*
      * Whether the colour map - which is the environment map when one is bound -
      * came from a bottom-up framebuffer texture rather than a top-down host

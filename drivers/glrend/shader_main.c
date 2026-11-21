@@ -15,6 +15,7 @@ static void get_shader_variables(br_gl_main_shader *self, const GladGLContext *g
     self->attributes.aColour     = gl->GetAttribLocation(self->program, "aColour");
     self->uniforms.main_texture  = gl->GetUniformLocation(self->program, "main_texture");
     self->uniforms.index_texture = gl->GetUniformLocation(self->program, "index_texture");
+    self->uniforms.bump_texture  = gl->GetUniformLocation(self->program, "bump_texture");
     gl->BindFragDataLocation(self->program, 0, "mainColour");
 }
 
@@ -25,6 +26,7 @@ br_boolean ShaderGLMainCompile(br_gl_main_shader *self, const GladGLContext *gl,
 
     self->main_texture_binding  = 0;
     self->index_texture_binding = 1;
+    self->bump_texture_binding  = 2;
     self->block_binding_scene   = 1;
     self->block_binding_model   = 2;
 

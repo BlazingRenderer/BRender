@@ -62,6 +62,34 @@ void DeviceGLExtractPrimitiveState(const state_stack *state, br_primitive_state_
         info->colour_palette = 0;
     }
 
+    /*
+     * A bump map is bound on its own unit and is sampled at the colour map's
+     * co-ordinates, so it needs nothing from the palette path above.
+     */
+    /*
+     * An indexed map is an index plane and a palette, and the bump sampler takes a height
+     * field. Binding one samples the indices as heights, which is not a thing that can be
+     * interpreted - an index is a palette row, not a measurement - so it is refused rather
+     * than converted.
+     */
+    const br_boolean bump_indexed = prim->bump != NULL && prim->bump->source != NULL && prim->bump->source->type == BR_PMT_INDEX_8;
+
+    if(bump_indexed)
+        BrLogError("GLREND", "an indexed bump map is not supported; \"%s\" is an index plane, and the bump sampler reads a height field.",
+                   prim->bump->identifier != NULL ? prim->bump->identifier : "pixelmap");
+
+    if(prim->bump != NULL && !bump_indexed) {
+        info->has_bump           = BR_TRUE;
+        info->bump_map           = BufferStoredGLGetTexture(prim->bump);
+        info->bump_scale         = prim->bump_scale;
+        info->bump_map_transform = prim->bump_map_transform;
+        info->bump_depth         = prim->bump_depth;
+    } else {
+        info->has_bump   = BR_FALSE;
+        info->bump_map   = tex_white;
+        info->bump_scale = 0;
+    }
+
     /* Don't depth write with transparent primitives. */
     info->write_depth = !info->is_blended && info->write_depth;
 
@@ -361,6 +389,16 @@ static void apply_stored_properties(const GladGLContext *gl, br_renderer *render
             model->texture_mode = 0;
         }
 
+        /*
+         * The bump map takes the primitive's sampler like the colour map: the stored-texture
+         * path generates a mip chain on upload and on update so a material that asks for mip
+         * filtering gets one here too.
+         */
+        gl->BindSampler(2, RendererGLGetSampler(renderer, &info.sampler));
+
+        gl->ActiveTexture(GL_TEXTURE2);
+        gl->BindTexture(GL_TEXTURE_2D, info.bump_map);
+
         if(info.is_blended) {
             gl->Enable(GL_BLEND);
             apply_blend_mode(state, gl);
@@ -371,6 +409,10 @@ static void apply_stored_properties(const GladGLContext *gl, br_renderer *render
         gl->DepthFunc(info.depth_func);
         gl->DepthMask(info.write_depth ? GL_TRUE : GL_FALSE);
 
+        model->bump_enabled = info.has_bump;
+        model->bump_scale   = info.bump_scale;
+        model->bump_depth   = (float)BrScalarToFloat(info.bump_depth);
+        BrMatrix4Copy23(&model->bump_map_transform, &info.bump_map_transform);
         model->enable_fog = info.fog;
         model->fog_colour = info.fog_colour;
         model->fog_scale  = info.fog_scale;

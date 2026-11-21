@@ -20,6 +20,7 @@ typedef struct br_state_info_gl {
 
     GLuint colour_map;
     GLuint colour_palette;
+    GLuint bump_map;
 
     struct {
         br_uint_8 is_blended : 1;
@@ -30,8 +31,12 @@ typedef struct br_state_info_gl {
         br_uint_8 write_depth : 1;
         br_uint_8 fog : 1;
         br_uint_8 colour_map_bottom_up : 1;
+        br_uint_8 has_bump : 1;
     };
-    GLenum depth_func;
+    br_scalar   bump_scale;
+    br_matrix23 bump_map_transform;
+    br_scalar   bump_depth;
+    GLenum      depth_func;
 
     br_vector4 fog_colour;
     br_scalar  fog_min;

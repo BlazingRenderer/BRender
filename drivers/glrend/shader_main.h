@@ -18,6 +18,7 @@ typedef struct br_gl_main_shader {
     struct {
         GLint main_texture;  /* sampler2D */
         GLint index_texture; /* usampler2D */
+        GLint bump_texture;  /* sampler2D */
     } uniforms;
 
     GLuint block_index_scene;
@@ -28,6 +29,7 @@ typedef struct br_gl_main_shader {
 
     GLint main_texture_binding;
     GLint index_texture_binding;
+    GLint bump_texture_binding;
 } br_gl_main_shader;
 
 #pragma pack(push, 16)
@@ -132,6 +134,12 @@ typedef struct br_gl_main_data_model {
     alignas(4) uint32_t enable_fog;
     alignas(4) br_scalar fog_scale;
     alignas(4) uint32_t shading_mode;
+    alignas(4) uint32_t bump_enabled;
+    alignas(4) float bump_scale;
+    alignas(4) float bump_depth;
+
+    /* The bump map's own mapping, before map_transform above. */
+    alignas(16) br_matrix4 bump_map_transform;
 
     /*
      * Whether the colour map (which is the environment map) came from a

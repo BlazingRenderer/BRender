@@ -182,6 +182,7 @@ static void BR_CMETHOD_DECL(br_renderer_gl, sceneBegin)(br_renderer *self)
     gl->UseProgram(shader->program);
     gl->Uniform1i(shader->uniforms.main_texture, shader->main_texture_binding);
     gl->Uniform1i(shader->uniforms.index_texture, shader->index_texture_binding);
+    gl->Uniform1i(shader->uniforms.bump_texture, shader->bump_texture_binding);
 
     gl->BindFramebuffer(GL_FRAMEBUFFER, self->state.cache.fbo);
 

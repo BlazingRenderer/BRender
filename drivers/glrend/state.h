@@ -236,6 +236,13 @@ typedef struct state_primitive {
     struct br_buffer_stored *lighting;
     struct br_buffer_stored *bump;
 
+    /* How far bump->bump_map displaces the normal. */
+    br_scalar bump_scale;
+
+    /* The bump map's own mapping, and how far its height displaces the co-ordinate. */
+    br_matrix23 bump_map_transform;
+    br_scalar   bump_depth;
+
     /* Texture filtering. BRT_NONE or BRT_LINEAR */
     br_token filter;
 
