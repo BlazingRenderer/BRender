@@ -2797,6 +2797,177 @@ static br_error vkrend_renderer_aspect_measure(br_pixelmap *colour, vkrend_rende
 }
 
 /* Render the sphere into `colour`/`depth` at offscreen's aspect and measure its silhouette. */
+/*
+ * The parallax offset's direction, which nothing else asserts on this device.
+ *
+ * The scene is one quad whose albedo carries its own coordinate in two channels, so the
+ * sampled u is readable from the pixel whatever the colour buffer's byte order; its bump map
+ * is a flat normal with a constant height in alpha, so the only thing the map can do is move
+ * that coordinate. The eye sits at +x, as it does in glrend's parallax witness, so a raised
+ * texel must be sampled towards the eye and the pixel's u must *rise* with bump_depth.
+ *
+ * The lighting is left as the scene has it: both readings are scaled by the same constant
+ * modulation (the normal is flat, so it does not vary across the quad), so the comparison is
+ * a direction, not an absolute.
+ */
+static br_error vkrend_renderer_parallax_step(vkrend_renderer_state *state, br_actor *camera, br_camera *camera_data)
+{
+    enum {
+        SIZE         = 256,
+        DEPTH_TEXELS = 3
+    };
+    br_pixelmap      *albedo = NULL, *bump = NULL, *model = NULL;
+    br_model         *quad              = NULL;
+    br_material      *material          = NULL;
+    br_actor         *actor             = NULL;
+    const br_matrix34 saved_camera      = camera->t.t.mat;
+    const br_camera   saved_camera_data = *camera_data;
+    const br_int_32   off_axis_x        = state->offscreen->width * 7 / 10;
+    const br_int_32   centre_y          = state->offscreen->height / 2;
+    br_angle          angle             = BR_ANGLE_DEG(BR_SCALAR(30.0));
+    br_uint_8         low[4], high[4];
+    br_error          result = BRE_FAIL;
+    br_int_32         before, after;
+
+    if((albedo = BrPixelmapAllocate(BR_PMT_RGBA_8888, SIZE, SIZE, NULL, BR_PMAF_NORMAL)) == NULL ||
+       (bump = BrPixelmapAllocate(BR_PMT_RGBA_8888, SIZE, SIZE, NULL, BR_PMAF_NORMAL)) == NULL) {
+        BrLogError("RT", "vkrend: could not allocate the parallax witness maps.");
+        goto out;
+    }
+
+    for(br_int_32 y = 0; y < SIZE; ++y) {
+        for(br_int_32 x = 0; x < SIZE; ++x) {
+            const br_uint_8 u = (br_uint_8)(x * 255 / (SIZE - 1));
+
+            /* u in two channels: the decode then does not depend on the readback's order. */
+            BrPixelmapPixelSet(albedo, x, y, BR_COLOUR_RGB(u, u, 0));
+            /* A flat tangent-space normal and a constant height, written through the accessor. */
+            BrPixelmapPixelSet(bump, x, y, BR_COLOUR_RGBA(128, 128, 255, 200));
+        }
+    }
+
+    BrMapUpdate(albedo, BR_MAPU_ALL);
+    BrMapUpdate(bump, BR_MAPU_ALL);
+
+    if(albedo->stored == NULL || bump->stored == NULL) {
+        BrLogError("RT", "vkrend: the parallax witness maps produced no stored buffer.");
+        goto out;
+    }
+
+    if((material = BrMaterialAllocate("vkrend-renderer-parallax")) == NULL) {
+        BrLogError("RT", "vkrend: could not allocate the parallax material.");
+        goto out;
+    }
+
+    material->colour     = BR_COLOUR_RGB(255, 255, 255);
+    material->opacity    = 255;
+    material->colour_map = albedo;
+    material->bump_map   = bump;
+    material->bump_scale = BR_SCALAR(1.0);
+    material->bump_depth = BR_FRACTION(0.0);
+    material->flags      = BR_MATF_LIGHT | BR_MATF_SMOOTH | BR_MATF_PERSPECTIVE;
+    material->mode       = (material->mode & ~BR_MATM_SHADING_MODE_MASK) | BR_MATM_SHADING_MODE_PHONG;
+    BrMatrix23Identity(&material->map_transform);
+    BrMatrix23Identity(&material->bump_map_transform);
+    BrMaterialUpdate(material, BR_MATU_ALL);
+
+    if(vkrend_renderer_build_textured_quad("vkrend-renderer-parallax", material, &quad) != BRE_OK)
+        goto out;
+
+    if((actor = BrActorAdd(state->world, BrActorAllocate(BR_ACTOR_MODEL, NULL))) == NULL) {
+        BrLogError("RT", "vkrend: could not allocate the parallax actor.");
+        goto out;
+    }
+
+    actor->model    = quad;
+    actor->material = material;
+    actor->t.type   = BR_TRANSFORM_IDENTITY;
+
+    /* The eye at +x, as glrend's witness puts it: sin(theta), 0, cos(theta) at the distance. */
+    BrMatrix34RotateY(&camera->t.t.mat, angle);
+    camera->t.t.mat.m[3][0] = BR_MUL(BR_SIN(angle), VKREND_RENDERER_CAMERA_DISTANCE);
+    camera->t.t.mat.m[3][1] = BR_SCALAR(0.0);
+    camera->t.t.mat.m[3][2] = BR_MUL(BR_COS(angle), VKREND_RENDERER_CAMERA_DISTANCE);
+    camera->t.t.mat.m[3][3] = BR_SCALAR(1.0);
+    camera_data->aspect     = BR_DIV(BR_SCALAR(state->offscreen->width), BR_SCALAR(state->offscreen->height));
+
+    BrZsSceneRender(state->world, camera, state->offscreen);
+    if(vkrend_renderer_read_pixel(state->offscreen, state->offscreen->width / 2, state->offscreen->height / 2, low) != BRE_OK)
+        goto out;
+
+    material->bump_depth = BR_FRACTION(0.2);
+    BrMaterialUpdate(material, BR_MATU_BUMPMAP);
+
+    BrZsSceneRender(state->world, camera, state->offscreen);
+    if(vkrend_renderer_read_pixel(state->offscreen, state->offscreen->width / 2, state->offscreen->height / 2, high) != BRE_OK)
+        goto out;
+
+    /* The value the two channels agree on, which is the sampled u whatever the byte order. */
+    before = (low[0] == low[1] || low[0] == low[2]) ? low[0] : low[1];
+    after  = (high[0] == high[1] || high[0] == high[2]) ? high[0] : high[1];
+
+    if(after - before < DEPTH_TEXELS || after - before > 40) {
+        BrLogError("RT",
+                   "vkrend: bump_depth 0.2 at 30 degrees moved the sampled u from %d to %d, so the offset is not the "
+                   "one the geometry names (the eye is at +x, so it must rise).",
+                   before, after);
+        goto out;
+    }
+
+    BrLogInfo("RT", "vkrend: the parallax offset at 30 degrees moved the sampled u from %d to %d, towards the eye.", before, after);
+
+    /* A face-on parallel camera has no lateral ray component, even off-axis. */
+    BrMatrix34Translate(&camera->t.t.mat, BR_SCALAR(0.0), BR_SCALAR(0.0), VKREND_RENDERER_CAMERA_DISTANCE);
+    camera_data->type    = BR_CAMERA_PARALLEL;
+    camera_data->width   = BR_SCALAR(3.0);
+    camera_data->height  = BR_SCALAR(3.0);
+    material->bump_depth = BR_FRACTION(0.0);
+    BrMaterialUpdate(material, BR_MATU_BUMPMAP);
+
+    BrZsSceneRender(state->world, camera, state->offscreen);
+    if(vkrend_renderer_read_pixel(state->offscreen, off_axis_x, centre_y, low) != BRE_OK)
+        goto out;
+
+    material->bump_depth = BR_FRACTION(0.2);
+    BrMaterialUpdate(material, BR_MATU_BUMPMAP);
+
+    BrZsSceneRender(state->world, camera, state->offscreen);
+    if(vkrend_renderer_read_pixel(state->offscreen, off_axis_x, centre_y, high) != BRE_OK)
+        goto out;
+
+    before = (low[0] == low[1] || low[0] == low[2]) ? low[0] : low[1];
+    after  = (high[0] == high[1] || high[0] == high[2]) ? high[0] : high[1];
+    BrLogInfo("RT", "vkrend: face-on parallel camera, off-axis u at depths 0 and 0.2: %d, %d.", before, after);
+    if(before == 0 || before != after) {
+        BrLogError("RT", "vkrend: depth 0.2 changed the face-on parallel probe or the probe did not hit the quad.");
+        goto out;
+    }
+
+    result = BRE_OK;
+
+out:
+    camera->t.t.mat = saved_camera;
+    *camera_data    = saved_camera_data;
+
+    /* The quad must leave the world, or every later step renders it over its own scene. */
+    if(actor != NULL) {
+        BrActorRemove(actor);
+        BrActorFree(actor);
+    }
+
+    if(quad != NULL)
+        BrModelFree(quad);
+    if(material != NULL)
+        BrMaterialFree(material);
+    if(albedo != NULL)
+        BrPixelmapFree(albedo);
+    if(bump != NULL)
+        BrPixelmapFree(bump);
+    if(model != NULL)
+        BrPixelmapFree(model);
+    return result;
+}
+
 static br_error vkrend_renderer_aspect_render(vkrend_renderer_state *state, br_actor *camera, br_actor *actor, br_camera *camera_data,
                                               br_pixelmap *colour, br_pixelmap *depth, const char *what, vkrend_renderer_aspect_metric *metric)
 {
@@ -3722,6 +3893,9 @@ static br_error vkrend_renderer_init(void *user, br_pixelmap *screen, br_pixelma
 
     vkrend_renderer_bounds_find(readback, vkrend_renderer_surface, &identity_bounds);
     BrPixelmapFree(readback);
+
+    if(vkrend_renderer_parallax_step(state, camera, camera_data) != BRE_OK)
+        goto fail;
 
     if(vkrend_renderer_point_step(state, camera, actor) != BRE_OK)
         goto fail;
