@@ -31,11 +31,8 @@ layout(location = 0) out vec4 outColour;
 
 void main()
 {
-    uint source   = mappingSource();
-    vec2 mappedUV = vUV;
-
-    if(source != MAPPING_SOURCE_NONE)
-        mappedUV = surfaceMapEnvironment(vViewPosition, flatShading() ? vFlatNormal : vNormal, source);
+    const uint source   = mappingSource();
+    const vec2 mappedUV = mappedSurfaceUV(vUV, vViewPosition, flatShading() ? vFlatNormal : vNormal, source);
 
     uint index;
     vec4 texel = indexedColourMap(mappedUV, index);

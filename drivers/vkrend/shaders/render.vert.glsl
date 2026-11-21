@@ -35,12 +35,10 @@
  * becomes w, the Vulkan convention the depth test's compare ops assume; mapping row 0 to
  * the top matches the rect draw and the readback.
  *
- * The model's map coordinate is transformed by the surface's map transform and passed on
- * as a varying. The transform is affine, so transforming here and interpolating is the
- * same as interpolating and transforming per fragment, and it leaves the fragment shaders
- * with a plain texture fetch. The BRender row-vector convention (softrend/mapping.c) is
- * `u' = m00*u + m10*v + m20`, `v' = m01*u + m11*v + m21`; map_linear holds m00, m01, m10,
- * m11 and map_translate holds m20, m21.
+ * The model's map co-ordinate is passed on as a varying untransformed. The fragment stage
+ * applies the surface's map transform there (applyMapTransform() in render.common.glsl), in
+ * one place for the plain co-ordinate and the generated environment one; the transform is
+ * affine, so per-fragment costs a few operations and no accuracy.
  *
  * The model's per-vertex colour is passed interpolated to the fragment stage. A surface
  * whose colour_source is the geometry draws with it instead of the surface colour, and a
@@ -94,8 +92,7 @@ void main()
     if(gouraudShading())
         accumulateSceneLights(view_position.xyz, normalize(normal), vLightAmbient, vLightDiffuse, vLightSpecular);
 
-    vUV = vec2(pc.map_linear.x * aMap.x + pc.map_linear.z * aMap.y + pc.map_translate.x,
-               pc.map_linear.y * aMap.x + pc.map_linear.w * aMap.y + pc.map_translate.y);
+    vUV = aMap;
 
     gl_Position = scene.projection * view_position;
 

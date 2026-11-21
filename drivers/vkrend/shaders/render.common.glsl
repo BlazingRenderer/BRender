@@ -210,6 +210,17 @@ uint mappingSource()
 }
 
 /*
+ * The surface's map transform, in BRender's row-vector convention (softrend/mapping.c):
+ * `u' = m00*u + m10*v + m20`, `v' = m01*u + m11*v + m21`. map_linear holds m00, m01, m10, m11
+ * and map_translate holds m20, m21.
+ */
+vec2 applyMapTransform(vec2 uv)
+{
+    return vec2(pc.map_linear.x * uv.x + pc.map_linear.z * uv.y + pc.map_translate.x,
+                pc.map_linear.y * uv.x + pc.map_linear.w * uv.y + pc.map_translate.y);
+}
+
+/*
  * Sphere-map U,V for an environment-mapped surface, from softrend's SurfaceMapEnvironment()
  * (drivers/softrend/mapping.c). softrend builds the reflected vector r = 2N(N.E) - E from
  * the fragment-to-eye vector E, which is GLSL's reflect(-E, N), rotates it into the
@@ -235,8 +246,8 @@ uint mappingSource()
  * fragment stage fetched, with the anchor rotated 60 degrees, so a half turn lands it in a
  * different one.
  *
- * The result then goes through the surface's map transform, which is what the vertex stage
- * applied to the plain map coordinate.
+ * The result then goes through the surface's map transform, as the plain map co-ordinate does
+ * in mappedSurfaceUV().
  */
 vec2 surfaceMapEnvironment(vec3 view_position, vec3 normal, uint source)
 {
@@ -250,6 +261,15 @@ vec2 surfaceMapEnvironment(vec3 view_position, vec3 normal, uint source)
 
     vec2 uv = vec2(atan(wr.x, -wr.z) * 0.159154943091895, 0.5 - wr.y * 0.5);
 
-    return vec2(pc.map_linear.x * uv.x + pc.map_linear.z * uv.y + pc.map_translate.x,
-                pc.map_linear.y * uv.x + pc.map_linear.w * uv.y + pc.map_translate.y);
+    return applyMapTransform(uv);
+}
+
+/*
+ * The co-ordinate the surface's maps are sampled at: the vertex's own map co-ordinate through
+ * the surface's transform, or the generated one for an environment-mapped surface, which is
+ * transformed inside surfaceMapEnvironment() because it has no pre-fragment existence.
+ */
+vec2 mappedSurfaceUV(vec2 uv, vec3 view_position, vec3 normal, uint source)
+{
+    return (source == MAPPING_SOURCE_NONE) ? applyMapTransform(uv) : surfaceMapEnvironment(view_position, normal, source);
 }

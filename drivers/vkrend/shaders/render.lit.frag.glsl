@@ -22,9 +22,8 @@
  *
  * An environment-mapped surface replaces that UV with the sphere-map coordinate the
  * reflection from the eye and the surface normal gives (render.common.glsl,
- * surfaceMapEnvironment()); the map transform is then applied to it, as the vertex stage
- * applies it to the plain coordinate, and the colour key is tested on the fetched texel
- * either way.
+ * surfaceMapEnvironment()); mappedSurfaceUV() applies the map transform to either, and the
+ * colour key is tested on the fetched texel either way.
  *
  * The surface colour is pc.colour, or the interpolated vertex colour when the colour
  * source is the geometry; a pre-lit surface adds its vertex colour on top, glrend's
@@ -48,11 +47,8 @@ layout(set = 0, binding = 1) uniform sampler2D colour_map;
 
 void main()
 {
-    uint source   = mappingSource();
-    vec2 mappedUV = vUV;
-
-    if(source != MAPPING_SOURCE_NONE)
-        mappedUV = surfaceMapEnvironment(vViewPosition, flatShading() ? vFlatNormal : vNormal, source);
+    const uint source   = mappingSource();
+    const vec2 mappedUV = mappedSurfaceUV(vUV, vViewPosition, flatShading() ? vFlatNormal : vNormal, source);
 
     vec4 texel = texture(colour_map, mappedUV);
 
