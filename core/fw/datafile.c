@@ -1503,6 +1503,8 @@ static char *ChunkNames[] = {
     [FID_VERTEX_NORMAL]         = "VERTEX_NORMAL",
     [FID_FACE_COLOUR]           = "FACE_COLOUR",
     [FID_FACE_EQUATION]         = "FACE_EQUATION",
+    [FID_MATERIAL_V4]           = "MATERIAL_V4",
+    [FID_BUMP_MAP_REF]          = "BUMP_MAP_REF",
 };
 
 /*

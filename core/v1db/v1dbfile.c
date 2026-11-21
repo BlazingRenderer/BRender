@@ -1023,6 +1023,36 @@ static br_file_struct_member br_material_v3_FM[] = {
 
 static _FILE_STRUCTN(br_material_v3, "br_material");
 #undef _STRUCT_NAME
+
+#define _STRUCT_NAME struct br_material
+static br_file_struct_member br_material_v4_FM[] = {
+    _COLOUR(colour),
+    _UINT_8(opacity),
+    _UFRACTION(ka),
+    _UFRACTION(kd),
+    _UFRACTION(ks),
+    _SCALAR(power),
+    _SCALAR(bump_scale),
+    _VECTOR2(bump_map_transform.m[0]),
+    _VECTOR2(bump_map_transform.m[1]),
+    _VECTOR2(bump_map_transform.m[2]),
+    _FRACTION(bump_depth),
+    _UINT_32(flags),
+    _VECTOR2(map_transform.m[0]),
+    _VECTOR2(map_transform.m[1]),
+    _VECTOR2(map_transform.m[2]),
+    _UINT_16(mode),
+    _UINT_8(index_base),
+    _UINT_8(index_range),
+    _SCALAR(fog_min),
+    _SCALAR(fog_max),
+    _COLOUR(fog_colour),
+    _INT_32(subdivide_tolerance),
+    _ASCIZ(identifier),
+};
+
+static _FILE_STRUCTN(br_material_v4, "br_material");
+#undef _STRUCT_NAME
 // clang-format off
 
 static int FopRead_MATERIAL_V1(br_datafile *df, br_uint_32 id, br_uint_32 length, br_uint_32 count)
@@ -1085,10 +1115,30 @@ static int FopRead_MATERIAL_V3(br_datafile *df, br_uint_32 id, br_uint_32 length
     return 0;
 }
 
+static int FopRead_MATERIAL_V4(br_datafile *df, br_uint_32 id, br_uint_32 length, br_uint_32 count)
+{
+    br_material *mp;
+
+    /*
+     * Allocate and read in material structure
+     */
+    mp      = BrMaterialAllocate(NULL);
+    df->res = mp;
+    df->prims->struct_read(df, &br_material_v4_F, mp);
+    df->res = NULL;
+
+    /*
+     * Leave material on stack
+     */
+    DfPush(DFST_MATERIAL, mp, 1);
+
+    return 0;
+}
+
 static int FopWrite_MATERIAL(br_datafile *df, br_material *mp)
 {
-    df->prims->chunk_write(df, FID_MATERIAL_V3, df->prims->struct_size(df, &br_material_v3_F, mp));
-    df->prims->struct_write(df, &br_material_v3_F, mp);
+    df->prims->chunk_write(df, FID_MATERIAL_V4, df->prims->struct_size(df, &br_material_v4_F, mp));
+    df->prims->struct_write(df, &br_material_v4_F, mp);
 
     return 0;
 }
@@ -1106,6 +1156,7 @@ static struct {
     int        table;
 } MaterialMaps[] = {
     {FID_COLOUR_MAP_REF,  offsetof(struct br_material, colour_map),  0},
+    {FID_BUMP_MAP_REF,    offsetof(struct br_material, bump_map),    0},
     {FID_INDEX_BLEND_REF, offsetof(struct br_material, index_blend), 1},
     {FID_INDEX_SHADE_REF, offsetof(struct br_material, index_shade), 1},
     {FID_SCREENDOOR_REF,  offsetof(struct br_material, screendoor),  1},
@@ -2462,12 +2513,14 @@ static br_chunks_table_entry MaterialLoadEntries[] = {
     {FID_END,             0, FopRead_END         },
     {FID_MATERIAL_V1,     0, FopRead_MATERIAL_V1 },
     {FID_COLOUR_MAP_REF,  0, FopRead_PIXELMAP_REF},
+    {FID_BUMP_MAP_REF,    0, FopRead_PIXELMAP_REF},
     {FID_INDEX_BLEND_REF, 0, FopRead_PIXELMAP_REF},
     {FID_INDEX_SHADE_REF, 0, FopRead_PIXELMAP_REF},
     {FID_SCREENDOOR_REF,  0, FopRead_PIXELMAP_REF},
     {FID_INDEX_FOG_REF,   0, FopRead_PIXELMAP_REF},
     {FID_MATERIAL_V2,     0, FopRead_MATERIAL_V2 },
     {FID_MATERIAL_V3,     0, FopRead_MATERIAL_V3 },
+    {FID_MATERIAL_V4,     0, FopRead_MATERIAL_V4 },
 };
 
 static const br_chunks_table MaterialLoadTable = {
@@ -2519,6 +2572,9 @@ static br_uint_32 BR_CALLBACK WriteMaterial(br_material *mp, br_datafile *df)
 
     if(mp->colour_map)
         FopWrite_PIXELMAP_REF(df, FID_COLOUR_MAP_REF, mp->colour_map);
+
+    if(mp->bump_map)
+        FopWrite_PIXELMAP_REF(df, FID_BUMP_MAP_REF, mp->bump_map);
 
     if(mp->index_shade)
         FopWrite_PIXELMAP_REF(df, FID_INDEX_SHADE_REF, mp->index_shade);

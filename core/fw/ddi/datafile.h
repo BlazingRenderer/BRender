@@ -125,6 +125,9 @@ enum {
     FID_LIGHT_V3,
     FID_CAMERA_V2,
     FID_TRANSFORM_EULER_V2,
+
+    FID_MATERIAL_V4,
+    FID_BUMP_MAP_REF,
 };
 
 /*
