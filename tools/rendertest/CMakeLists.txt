@@ -8,6 +8,8 @@ add_executable(rendertest
         mipwitness.h
         pmwitness.c
         pmwitness.h
+        parallaxwitness.c
+        parallaxwitness.h
         vkwitness.c
         vkwitness.h
         wfwitness.c
@@ -238,6 +240,23 @@ if (BUILD_TESTING)
     add_test(NAME "pmw" COMMAND rendertest --pm-witness --device softrend)
     set_tests_properties("pmw" PROPERTIES
                          ENVIRONMENT "SDL_VIDEODRIVER=offscreen")
+
+    #
+    # The parallax witness (--parallax-witness). The corpus can say that the parallax pair
+    # differs from the depth-0 pair, which an offset of the wrong sign, size or axis also does;
+    # it cannot say that the offset is the one the geometry names. This scene encodes its own
+    # coordinate in the albedo, so the sampled coordinate is read back from the pixel and
+    # compared with the value the camera's angle, the map's height and the material's depth
+    # predict.
+    #
+    # glrend only, for now, and for a reason rather than for want of a scene: softrend cannot
+    # shade a bump map at all - the software path has no per-fragment normal - and glrend1x
+    # borrows softrend's transform and lighting, so neither has an offset to measure. A scene
+    # for them would assert the absence of the feature, which the corpus pairs already do.
+    #
+    add_test(NAME "pxw-glrend" COMMAND rendertest --parallax-witness --device glrend)
+    set_tests_properties("pxw-glrend" PROPERTIES
+                         ENVIRONMENT "SDL_VIDEODRIVER=offscreen;LIBGL_ALWAYS_SOFTWARE=true")
 
     #
     # The wireframe witness (main.c --wireframe-witness). The corpus cannot tell
