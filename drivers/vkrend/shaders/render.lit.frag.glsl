@@ -2,7 +2,7 @@
 
 #extension GL_GOOGLE_include_directive : require
 
-#include "render.lighting.glsl"
+#include "render.bump.glsl"
 
 /*
  * Fragment shader for a lit br_renderer surface: the lit model, with the sampled texel
@@ -47,8 +47,12 @@ layout(set = 0, binding = 1) uniform sampler2D colour_map;
 
 void main()
 {
-    const uint source   = mappingSource();
-    const vec2 mappedUV = mappedSurfaceUV(vUV, vViewPosition, flatShading() ? vFlatNormal : vNormal, source);
+    const uint source    = mappingSource();
+    vec3       n         = normalize(flatShading() ? vFlatNormal : vNormal);
+    const vec2 surfaceUV = surfaceMapUV(vUV, vViewPosition, n, source);
+    vec2       mappedUV  = applyMapTransform(surfaceUV);
+
+    applyBump(vViewPosition, surfaceUV, n);
 
     vec4 texel = texture(colour_map, mappedUV);
 
@@ -59,11 +63,8 @@ void main()
     vec3 diffuse  = vLightDiffuse;
     vec3 specular = vLightSpecular;
 
-    if(!gouraudShading()) {
-        vec3 n = normalize(flatShading() ? vFlatNormal : vNormal);
-
+    if(!gouraudShading())
         accumulateSceneLights(vViewPosition, n, ambient, diffuse, specular);
-    }
 
     vec4 surfaceColour = vertexColourSource() ? vColour : pc.colour;
 

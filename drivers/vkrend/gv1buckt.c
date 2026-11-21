@@ -809,7 +809,20 @@ static br_boolean VkV1ModelRenderIndexed(br_geometry_stored *geom, br_renderer *
      * slot is bound white when the material carries no map, so one does not have to be
      * present for the frame to exist.
      */
-    bump_map = ((state->valid & MASK_STATE_PRIMITIVE) && state->prim.bump != NULL && BufferStoredVkGetView(state->prim.bump) != VK_NULL_HANDLE)
+    /*
+     * An indexed map is an index plane and a palette, and the bump sampler takes a height
+     * field - binding one samples the indices as heights. Refused rather than converted: an
+     * index is a palette row, not a measurement, so there is nothing to convert it to.
+     */
+    const br_boolean bump_indexed = (state->valid & MASK_STATE_PRIMITIVE) && state->prim.bump != NULL && state->prim.bump->source != NULL &&
+                                    state->prim.bump->source->type == BR_PMT_INDEX_8;
+
+    if(bump_indexed)
+        BrLogError("VKREND", "an indexed bump map is not supported; \"%s\" is an index plane, and the bump sampler reads a height field.",
+                   state->prim.bump->identifier != NULL ? state->prim.bump->identifier : "pixelmap");
+
+    bump_map = ((state->valid & MASK_STATE_PRIMITIVE) && state->prim.bump != NULL && !bump_indexed &&
+                BufferStoredVkGetView(state->prim.bump) != VK_NULL_HANDLE)
                    ? state->prim.bump
                    : NULL;
 
@@ -1103,16 +1116,27 @@ static br_boolean VkV1ModelRenderIndexed(br_geometry_stored *geom, br_renderer *
     };
     vk->CmdPushDescriptorSet(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, dev->render_pipeline_layout, 0, 1, &texture_write);
 
-    /* The same primitive governs both maps' sampler; non-indexed stored maps have a mip chain. */
-    if(bump_map != NULL) {
-        const VkImageLayout bump_layout = BufferStoredVkGetViewLayout(bump_map);
+    /*
+     * Binding 4 is the bump map. It takes the colour map's sampler: the same primitive governs
+     * both, and both have a full mip chain (drivers/vkrend/sbuffer.c builds one for every
+     * non-indexed stored map).
+     */
+    {
+        /*
+         * Binding 4 is written on every draw, map or no map. The lit fragment shaders statically
+         * use it - rendering a scene with no bump map at all would otherwise leave a descriptor
+         * the pipeline reads unset, which validation rejects (VUID-vkCmdDrawIndexed-None-08114).
+         * A white one-texel view stands in, as glrend binds a 1x1 white texture for the same
+         * reason.
+         */
+        const VkImageLayout bump_layout = bump_map != NULL ? BufferStoredVkGetViewLayout(bump_map) : VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 
-        if(bump_layout == VK_IMAGE_LAYOUT_UNDEFINED)
+        if(bump_map != NULL && bump_layout == VK_IMAGE_LAYOUT_UNDEFINED)
             return BR_FALSE;
 
         const VkDescriptorImageInfo bump_info = {
             .sampler     = sampler,
-            .imageView   = BufferStoredVkGetView(bump_map),
+            .imageView   = bump_map != NULL ? BufferStoredVkGetView(bump_map) : dev->render_white_view,
             .imageLayout = bump_layout,
         };
         const VkWriteDescriptorSet bump_write = {

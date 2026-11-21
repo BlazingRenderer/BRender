@@ -2,7 +2,7 @@
 
 #extension GL_GOOGLE_include_directive : require
 
-#include "render.lighting.glsl"
+#include "render.bump.glsl"
 #include "render.indexed.glsl"
 
 /*
@@ -32,8 +32,12 @@ layout(location = 0) out vec4 outColour;
 
 void main()
 {
-    const uint source   = mappingSource();
-    const vec2 mappedUV = mappedSurfaceUV(vUV, vViewPosition, flatShading() ? vFlatNormal : vNormal, source);
+    const uint source    = mappingSource();
+    vec3       n         = normalize(flatShading() ? vFlatNormal : vNormal);
+    const vec2 surfaceUV = surfaceMapUV(vUV, vViewPosition, n, source);
+    vec2       mappedUV  = applyMapTransform(surfaceUV);
+
+    applyBump(vViewPosition, surfaceUV, n);
 
     uint index;
     vec4 texel = indexedColourMap(mappedUV, index);
@@ -45,11 +49,8 @@ void main()
     vec3 diffuse  = vLightDiffuse;
     vec3 specular = vLightSpecular;
 
-    if(!gouraudShading()) {
-        vec3 n = normalize(flatShading() ? vFlatNormal : vNormal);
-
+    if(!gouraudShading())
         accumulateSceneLights(vViewPosition, n, ambient, diffuse, specular);
-    }
 
     vec4 surfaceColour = vertexColourSource() ? vColour : pc.colour;
 

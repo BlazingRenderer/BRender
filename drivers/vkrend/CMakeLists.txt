@@ -151,6 +151,7 @@ compile_shader_spv(
         "${CMAKE_CURRENT_BINARY_DIR}/render.lit.frag.spv.h"
         "${CMAKE_CURRENT_SOURCE_DIR}/shaders/render.common.glsl"
         "${CMAKE_CURRENT_SOURCE_DIR}/shaders/render.lighting.glsl"
+        "${CMAKE_CURRENT_SOURCE_DIR}/shaders/render.bump.glsl"
 )
 
 compile_shader_spv(
@@ -160,6 +161,7 @@ compile_shader_spv(
         "${CMAKE_CURRENT_BINARY_DIR}/render.lit.indexed.frag.spv.h"
         "${CMAKE_CURRENT_SOURCE_DIR}/shaders/render.common.glsl"
         "${CMAKE_CURRENT_SOURCE_DIR}/shaders/render.lighting.glsl"
+        "${CMAKE_CURRENT_SOURCE_DIR}/shaders/render.bump.glsl"
         "${CMAKE_CURRENT_SOURCE_DIR}/shaders/render.indexed.glsl"
 )
 
