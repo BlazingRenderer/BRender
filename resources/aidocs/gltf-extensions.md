@@ -206,6 +206,7 @@ the values in the field table below.
 | `index_base` | integer | `10` | `index_base` |
 | `index_range` | integer | `31` | `index_range` |
 | `colour_map` | integer, index into `images` | absent | `colour_map` |
+| `bump_map` | integer, index into `images` | absent | `bump_map` |
 | `screendoor` | integer, index into `images` | absent | `screendoor` |
 | `index_shade` | integer, index into `images` | absent | `index_shade` |
 | `index_blend` | integer, index into `images` | absent | `index_blend` |
@@ -215,11 +216,15 @@ the values in the field table below.
 | `fog_colour` | number[3], 0..1 | `[0, 0, 0]` | `fog_colour`, RGB; alpha 255 |
 | `subdivide_tolerance` | integer | `0` | `subdivide_tolerance` |
 | `depth_bias` | number | `0` | `depth_bias` |
+| `bump_scale` | number | `1` | `bump_scale` |
+| `bump_map_transform` | number[6] | `[1, 0, 0, 1, 0, 0]` | `bump_map_transform`, row-major `[m00 m01 m10 m11 m20 m21]` |
+| `bump_depth` | number, -1..1 | `0` | `bump_depth` |
 
 The defaults are the ones `BrMaterialAllocate()` leaves in a material - it copies
 `SetupDefaultMaterial()` (`core/v1db/def_mat.c`), which sets `ka = 0.10`, `kd = 0.70`, `ks = 0`, `power = 20`,
 `flags = BR_MATF_LIGHT`, `mode = BR_MATM_DEPTH_TEST_LE | BR_MATM_BLEND_MODE_STANDARD | wrap in both axes`, an
-identity `map_transform`, `index_base = 10` and `index_range = 31`, and leaves the rest of the struct zeroed.
+identity `map_transform`, an identity `bump_map_transform`, `bump_scale = 1`, `index_base = 10` and
+`index_range = 31`, and leaves the rest of the struct zeroed.
 A material object in a file is therefore the exact state of the material, and an absent property is not a
 loss.
 
@@ -229,6 +234,32 @@ material loaded through it keeps the mode it was written with, while a material 
 `flags` is the same engine word, but spelled as names from the table in `core/fmt/matflag.c` rather than as a
 number, so that a file reads as the flags it means.
 
+`bump_map` and `bump_scale` carry the tangent-space normal map and its strength (0 leaves the shading normal
+unchanged, 1 uses the map as authored). The standard material also references the image as `normalTexture`
+and copies the strength to `normalTexture.scale`. When reading a `BR_materials` file, the extension's map
+and scale override the standard values if present, and its mapping fields remain authoritative.
+
+`bump_map_transform` is a modifier on the co-ordinate the bump map is sampled at, applied before
+`map_transform`, so the identity gives the bump map the surface's own mapping.
+
+`bump_depth` scales the parallax height from the map's alpha; 0 leaves it a plain normal map. On a flat
+surface with a constant normal, the displacement follows the eye ray to a plane lifted by
+`alpha * bump_depth / max(length(grad u), length(grad v))`, using the gradients of the fully transformed
+bump UVs. At grazing angles the ray slope is capped. **Alpha 1 is the outermost point and 0 the innermost**:
+a raised texel is sampled towards the eye.
+A depth-authored map, where 1 is furthest away, passes a *negative* depth. There is no separate flag.
+
+**Full fidelity requires a reader that understands `BR_materials`.** The standard `normalTexture` is only a
+fallback: the writer leaves the image's green channel as authored and emits neither a texture transform nor
+parallax depth in the standard material. A viewer that ignores the extension can use the PNG fallback image,
+but it samples the default UVs, assumes glTF's green-channel convention, and applies no parallax. The extension
+preserves both affine transforms and `bump_depth`. `KHR_texture_transform` supports offset,
+rotation, and scale, but cannot encode arbitrary shear in the composed mapping. With
+`BR_GLTF_SAVE_PRESERVE_MAP_TYPES`, the image may instead be a BRender-only [pixelmap payload](#the-pixelmap-payload).
+
+The exporter writes the bump map even for an unlit material so it can round-trip. At render time BRender
+only binds the bump map when the material's `light` flag is set.
+
 ### Reader obligations
 
 * **The root `BR_materials` array replaces the material table, it does not supplement it.** If
@@ -237,7 +268,12 @@ number, so that a file reads as the flags it means.
   (`core/fmt/loadgltf.c`). A file that carries both arrays is read as a
   `BR_materials` file.
 * **Absent, the material table comes from glTF's `materials` array** through `fill_material()`, and the
-  `BR_materials` references are not looked for. That is the path for a file from any other tool.
+  `BR_materials` references are not looked for. The loader uses the UV set of `baseColorTexture`, or of
+  `normalTexture` if there is no base texture, honouring `KHR_texture_transform.texCoord` over `texCoord`.
+  The two texture transforms are independent. A normal map is skipped with a warning if it names a set
+  different from the base colour map's, a primitive using the material lacks the normal UV set, or the
+  base transform cannot be inverted. If a malformed primitive lacks the requested UV set, its base colour
+  still falls back to the lowest available set.
 * **A `material` reference that goes through glTF's own property is read as an index into the same table.**
   When the root array is present, `primitive.material` (not just `primitive.extensions.BR_materials.material`)
   indexes the `BR_materials`-derived table (`create_model()`, `core/fmt/loadgltf.c`). That works in
