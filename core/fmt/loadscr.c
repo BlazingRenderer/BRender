@@ -35,6 +35,14 @@ const br_material _DefaultScriptMaterial = {
     .mode        = BR_MATM_DEPTH_TEST_LE | BR_MATM_BLEND_MODE_STANDARD | BR_MATM_MAP_WIDTH_LIMIT_WRAP | BR_MATM_MAP_HEIGHT_LIMIT_WRAP,
     .index_base  = 0,
     .index_range = 63,
+
+    .bump_scale         = BR_SCALAR(1),
+    .bump_depth         = BR_FRACTION(0),
+    .bump_map_transform = {{
+        BR_VECTOR2(1, 0),
+        BR_VECTOR2(0, 1),
+        BR_VECTOR2(0, 0),
+    }},
 };
 
 enum {
@@ -62,6 +70,10 @@ enum {
     T_INDEX_BASE,
     T_INDEX_RANGE,
     T_COLOUR_MAP,
+    T_BUMP_MAP,
+    T_BUMP_SCALE,
+    T_BUMP_MAP_TRANSFORM,
+    T_BUMP_DEPTH,
     T_SCREEN_DOOR,
     T_INDEX_SHADE,
     T_INDEX_BLEND,
@@ -168,6 +180,10 @@ static const br_lexer_keyword keywords[] = {
     {"index_base",          T_INDEX_BASE         },
     {"index_range",         T_INDEX_RANGE        },
     {"colour_map",          T_COLOUR_MAP         },
+    {"bump_map",            T_BUMP_MAP           },
+    {"bump_scale",          T_BUMP_SCALE         },
+    {"bump_map_transform",  T_BUMP_MAP_TRANSFORM },
+    {"bump_depth",          T_BUMP_DEPTH         },
     {"screen_door",         T_SCREEN_DOOR        },
     {"index_shade",         T_INDEX_SHADE        },
     {"index_blend",         T_INDEX_BLEND        },
@@ -545,6 +561,32 @@ static br_material *ParseMaterial(br_lexer *l)
                 BrLexerCheck(l, T_STRING);
                 mat->colour_map = BrMapFind(BrLexerString(l));
                 BrLexerAdvance(l);
+                break;
+
+            case T_BUMP_MAP:
+                BrLexerAdvance(l);
+                BrLexerExpect(l, T_EQUAL);
+                BrLexerCheck(l, T_STRING);
+                mat->bump_map = BrMapFind(BrLexerString(l));
+                BrLexerAdvance(l);
+                break;
+
+            case T_BUMP_SCALE:
+                BrLexerAdvance(l);
+                BrLexerExpect(l, T_EQUAL);
+                mat->bump_scale = BrParseScalar(l);
+                break;
+
+            case T_BUMP_MAP_TRANSFORM:
+                BrLexerAdvance(l);
+                BrLexerExpect(l, T_EQUAL);
+                BrParseMatrix(l, &mat->bump_map_transform.m[0][0], 2, 3);
+                break;
+
+            case T_BUMP_DEPTH:
+                BrLexerAdvance(l);
+                BrLexerExpect(l, T_EQUAL);
+                mat->bump_depth = BrScalarToFraction(BrParseScalar(l));
                 break;
 
             case T_SCREEN_DOOR:

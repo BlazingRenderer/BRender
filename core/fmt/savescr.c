@@ -137,6 +137,29 @@ static void WriteScriptMaterial(br_material *mat, void *df)
         BrFilePrintf(df, "                    ];\n");
     }
 
+    if(mat->bump_scale != _DefaultScriptMaterial.bump_scale)
+        BrFilePrintf(df, "    bump_scale = %f;\n", BrScalarToFloat(mat->bump_scale));
+
+    /*
+     * Bump Map Transform
+     */
+    for(i = 0; i < 3; i++) {
+        if(mat->bump_map_transform.m[i][0] != _DefaultScriptMaterial.bump_map_transform.m[i][0] ||
+           mat->bump_map_transform.m[i][1] != _DefaultScriptMaterial.bump_map_transform.m[i][1])
+            break;
+    }
+
+    if(i < 3) {
+        BrFilePrintf(df, "    bump_map_transform = [\n");
+        for(i = 0; i < 3; i++)
+            BrFilePrintf(df, "                          [%f,%f]%s\n", BrScalarToFloat(mat->bump_map_transform.m[i][0]),
+                         BrScalarToFloat(mat->bump_map_transform.m[i][1]), i != 2 ? "," : "");
+        BrFilePrintf(df, "                         ];\n");
+    }
+
+    if(mat->bump_depth != _DefaultScriptMaterial.bump_depth)
+        BrFilePrintf(df, "    bump_depth = %f;\n", BrScalarToFloat(BrFractionToScalar(mat->bump_depth)));
+
     if((mat->mode & BR_MATM_DEPTH_TEST_MASK) != (_DefaultScriptMaterial.mode & BR_MATM_DEPTH_TEST_MASK))
         for(i = 0; i < BR_ASIZE(DepthTestNames); i++)
             if((mat->mode & BR_MATM_DEPTH_TEST_MASK) == DepthTestNames[i].value) {
@@ -186,6 +209,9 @@ static void WriteScriptMaterial(br_material *mat, void *df)
      */
     if(mat->colour_map && mat->colour_map->identifier)
         BrFilePrintf(df, "    colour_map = \"%s\";\n", mat->colour_map->identifier);
+
+    if(mat->bump_map && mat->bump_map->identifier)
+        BrFilePrintf(df, "    bump_map = \"%s\";\n", mat->bump_map->identifier);
 
     if(mat->screendoor && mat->screendoor->identifier)
         BrFilePrintf(df, "    screendoor = \"%s\";\n", mat->screendoor->identifier);
