@@ -98,8 +98,11 @@ build - the build step itself and the `--history` commit walk. The corpus itself
   expressions are evaluated at - `x87` (80-bit intermediates, `FLT_EVAL_METHOD` 2) or `declared` (each operation rounded at its type's
   width, `FLT_EVAL_METHOD` 0) - and it reaches the frame through the renderer and through core's scene setup, so every entry is keyed by
   it and a build looks up its own class.
-- The stored `glrend` entries are llvmpipe's, so a real-GPU run reports `NO-REFERENCE` for every scene - force it onto llvmpipe with
-  `LIBGL_ALWAYS_SOFTWARE=true` to compare against them.
+- The stored `glrend` **and `glrend1x`** entries are llvmpipe's, so a real-GPU run reports `NO-REFERENCE` for every scene and the result
+  line still reads `PASS` - force both onto llvmpipe with `LIBGL_ALWAYS_SOFTWARE=true` to compare against them:
+  `LIBGL_ALWAYS_SOFTWARE=true SDL_VIDEODRIVER=offscreen ./tools/rendertest/rendertest --device glrend1x`. The result line carries
+  `noreference=<count>` for exactly this: `noreference=0` means every scene was scored against a stored entry, and a count equal to the
+  fixture count means nothing was.
 - The run also asserts relations between fixtures (e.g. `scene-unlit == scene-unlit-plain`), so a path that silently stops firing fails
   rather than only moving a checksum. `--ppm-dir <dir>` writes each frame as `<dir>/<scene>.ppm` when a checksum cannot show how a render changed.
 - softrend is the software rasteriser path; `--no-depth` renders through

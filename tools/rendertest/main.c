@@ -195,7 +195,8 @@ typedef struct rt_state {
     /* Output. */
     rt_result *results;
     int        nresults;
-    int        compared; /* results scored against a stored entry, not NO-REFERENCE */
+    int        compared;    /* results scored against a stored entry, not NO-REFERENCE */
+    int        noreference; /* results with no stored entry to score against at all    */
 
     rt_expect *expects;
     int        nexpects;
@@ -898,8 +899,10 @@ static void rt_finish_scene(rt_state *st, rt_demo *demo)
         status = "BLESS";
     } else if(!st->env_ok) {
         status = "NO-REFERENCE";
+        ++st->noreference;
     } else if((e = rt_find_expect(st, key)) == NULL) {
         status = "NO-REFERENCE";
+        ++st->noreference;
     } else if(e->hash == hash) {
         status = "MATCH";
         ++st->compared;
@@ -1484,23 +1487,32 @@ static void rt_check_relations(rt_state *st)
  * legitimate - a new fixture, or a first --bless - so the check is on the
  * total, and only a run that compared against nothing anywhere is refused.
  *
- * Only softrend is checked. A glrend run on a real GPU legitimately has no
- * stored reference for any key - the glrend entries are llvmpipe's - so the
- * same rule would refuse a valid run.
+ * softrend can never be in that position by accident, so an all-NO-REFERENCE
+ * softrend run is refused. A glrend or glrend1x run on a real GPU is another
+ * matter: the stored entries are llvmpipe's, so *every* such run is all
+ * NO-REFERENCE and refusing it would refuse a valid run. It is left as a
+ * warning, and the result line carries `noreference=` either way, so a run that
+ * compared against nothing is visible even where it is not a failure.
  */
 static void rt_check_compared(rt_state *st)
 {
-    if(st->bless || strcmp(st->device, "softrend") != 0)
+    if(st->bless || st->compared != 0)
         return;
 
-    if(st->compared != 0)
+    if(strcmp(st->device, "softrend") == 0) {
+        BrLogError("RT",
+                   "softrend compared against none of the %d fixtures' stored entries: every one is NO-REFERENCE, so PASS asserts nothing "
+                   "about the reference. Check that --reference-driver names a token the reference holds (this run looked up `%s').",
+                   st->nresults, rt_lookup_driver(st));
+        ++st->failures;
         return;
+    }
 
-    BrLogError("RT",
-               "softrend compared against none of the %d fixtures' stored entries: every one is NO-REFERENCE, so PASS asserts nothing "
-               "about the reference. Check that --reference-driver names a token the reference holds (this run looked up `%s').",
-               st->nresults, rt_lookup_driver(st));
-    ++st->failures;
+    BrLogWarn("RT",
+              "%s compared against none of the %d fixtures' stored entries, so PASS asserts nothing about the reference: they are "
+              "llvmpipe's. A gate run needs the device the reference was blessed on, which for this one is "
+              "LIBGL_ALWAYS_SOFTWARE=true.",
+              st->device, st->nresults);
 }
 
 /* ------------------------------------------------------------------ */
@@ -2150,7 +2162,7 @@ static int rt_run(rt_demo *demo)
             if(st->failures != 0)
                 g_failed = 1;
 
-            printf("RT result=%s failures=%d\n", st->failures == 0 ? "PASS" : "FAIL", st->failures);
+            printf("RT result=%s failures=%d noreference=%d\n", st->failures == 0 ? "PASS" : "FAIL", st->failures, st->noreference);
             break;
         }
 
