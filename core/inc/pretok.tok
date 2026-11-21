@@ -498,6 +498,12 @@ INDEX_BLEND						object
 SCREEN_DOOR						object
 INDEX_LIGHT						object
 BUMP							object
+BUMP_SCALE			fixed
+BUMP_SCALE			float
+BUMP_MAP_MATRIX			matrix23_float
+BUMP_MAP_MATRIX			matrix23_fixed
+BUMP_DEPTH			fixed
+BUMP_DEPTH			float
 INDEX_FOG                       object
 
 # Unknown buffer use

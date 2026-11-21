@@ -393,6 +393,37 @@ void BR_PUBLIC_ENTRY BrMaterialUpdate(br_material *mat, br_uint_16 flags)
         RendererPartSetMany(v1db.renderer, BRT_PRIMITIVE, 0, tva, &c);
     }
 
+    /*
+     * Republished under BR_MATU_LIGHTING as well as BR_MATU_BUMPMAP: whether the map is
+     * published at all depends on BR_MATF_LIGHT, so a caller that clears that flag and
+     * republishes with the mask it already uses must not leave the map bound.
+     */
+    if(flags & (BR_MATU_BUMPMAP | BR_MATU_LIGHTING)) {
+        tvp = tva;
+
+        /*
+         * A bump map only makes sense if we're lit.
+         */
+        tvp->t   = BRT_BUMP_O;
+        tvp->v.o = (mat->bump_map != NULL && (mat->flags & BR_MATF_LIGHT)) ? mat->bump_map->stored : NULL;
+        tvp++;
+
+        tvp->t   = BRT_AS_SCALAR(BUMP_SCALE);
+        tvp->v.s = mat->bump_scale;
+        tvp++;
+
+        tvp->t     = BRT_AS_MATRIX23_SCALAR(BUMP_MAP_MATRIX);
+        tvp->v.m23 = &mat->bump_map_transform;
+        tvp++;
+
+        tvp->t   = BRT_AS_SCALAR(BUMP_DEPTH);
+        tvp->v.s = BrFractionToScalar(mat->bump_depth);
+        tvp++;
+
+        tvp->t = BR_NULL_TOKEN;
+        RendererPartSetMany(v1db.renderer, BRT_PRIMITIVE, 0, tva, &c);
+    }
+
     if(flags & BR_MATU_SCREENDOOR) {
         tvp      = tva;
         tvp->t   = BRT_SCREEN_DOOR_O;

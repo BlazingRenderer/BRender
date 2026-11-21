@@ -188,6 +188,49 @@ typedef struct br_material {
      */
     br_pixelmap *colour_map;
 
+    /**
+     * \brief A tangent-space normal map, sampled at the same co-ordinates as `colour_map`.
+     *
+     * Red and green hold the surface normal's X and Y in the surface's tangent frame, blue its
+     * Z. In 8 bits the unperturbed surface is (128,128,255). Green is +Y, the OpenGL convention;
+     * a map authored for the opposite convention must have its green channel inverted offline.
+     * The frame is derived per-fragment from the mapping's own derivatives, so the perturbation
+     * needs per-fragment lighting.
+     */
+    br_pixelmap *bump_map;
+
+    /**
+     * \brief How far `bump_map` displaces the surface normal, as a multiplier on the sampled XY.
+     *
+     * 0 leaves the shading normal unchanged, without disabling height displacement. 1 uses the
+     * map as authored.
+     */
+    br_scalar bump_scale;
+
+    /**
+     * \brief A modifier on the co-ordinates `bump_map` is sampled at, applied before `map_transform`.
+     *
+     * Identity gives the map the same mapping as `colour_map`, which is the only mapping a material
+     * with one texture wants. A map that tiles at a different frequency to the albedo - a detail
+     * normal over a stretched base map - sets this instead of splitting the mapping in two.
+     */
+    br_matrix23 bump_map_transform;
+
+    /**
+     * \brief Parallax height multiplier for the height in `bump_map`'s alpha.
+     *
+     * On a plane with affine UVs and a constant normal, depth 1 at alpha 1 lifts the sample
+     * by 1/max(length(grad u), length(grad v)) in world units. The gradients are of the bump
+     * UVs after both map transforms, so the height is scaled by the shorter of the two tile
+     * spacings. The view ray through that lifted plane gives the UV offset, with the slope
+     * capped at grazing angles.
+     *
+     * Zero leaves the map a normal map only. Positive values offset the sample toward the eye.
+     *
+     * \remark Negative values describe a depth-authored map.
+     */
+    br_fraction bump_depth;
+
     /*
      * Pointers to tables
      */
@@ -380,6 +423,7 @@ enum {
     BR_MATU_SCREENDOOR    = 0x0010,
     BR_MATU_EXTRA_SURF    = 0x0020,
     BR_MATU_EXTRA_PRIM    = 0x0040,
+    BR_MATU_BUMPMAP       = 0x0080,
     BR_MATU_ALL           = 0x7fff
 };
 

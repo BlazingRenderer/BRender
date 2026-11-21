@@ -35,12 +35,14 @@ br_material *SetupDefaultMaterial()
     default_mat->kd         = BR_UFRACTION(0.70);
     default_mat->ks         = BR_UFRACTION(0.0);
     default_mat->power      = BR_SCALAR(20);
+    default_mat->bump_scale = BR_SCALAR(1);
     default_mat->flags      = BR_MATF_LIGHT;
     default_mat->mode = BR_MATM_DEPTH_TEST_LE | BR_MATM_BLEND_MODE_STANDARD | BR_MATM_MAP_WIDTH_LIMIT_WRAP | BR_MATM_MAP_HEIGHT_LIMIT_WRAP;
 
     // Set map transform default
 
     BrMatrix23Identity(&default_mat->map_transform);
+    BrMatrix23Identity(&default_mat->bump_map_transform);
 
     default_mat->index_base  = 10;
     default_mat->index_range = 31;
