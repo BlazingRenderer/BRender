@@ -54,6 +54,27 @@ vec4 bumpTexel(in vec2 uv, in vec2 ddx, in vec2 ddy)
     return textureGrad(bump_map, uv, ddx, ddy);
 }
 
+/*
+ * The distance the sampled height asks a bump-map co-ordinate to move, in that
+ * co-ordinate's own UV units: the view direction in the frame the bump map's
+ * derivatives give, normalised by its depth so a grazing angle cannot smear the whole
+ * map across the surface.
+ */
+vec2 bumpOffset(in vec3 p, in mat3 frame, in float height)
+{
+    /* Parallel projection has no view-space Z term in clip W. */
+    vec3 viewDir = scene.projection[2][3] == 0.0 ? scene.eye_view.xyz : normalize(-p);
+    /* The tangent columns are scaled UV gradients, not an orthonormal basis to invert. */
+    vec3 vTS = transpose(frame) * viewDir;
+
+    return (vTS.xy / max(vTS.z, 0.1)) * (height * pc.material.bump_depth);
+}
+
+/*
+ * The shading normal, from a texel sampled at the displaced co-ordinate and the frame at
+ * the unoffset one: single-step parallax, where the frame is not moved with the offset it
+ * produces.
+ */
 vec3 bumpNormal(in mat3 frame, in vec3 sampledNormal)
 {
     vec3 sampled = sampledNormal * 2.0 - 1.0;
@@ -73,19 +94,20 @@ bool bumpTransformInvertible(mat2 transform)
     float det = abs(determinant(transform));
     float normSquared = dot(transform[0], transform[0]) + dot(transform[1], transform[1]);
 
+    /* inverse() may reciprocate the determinant before multiplying the adjugate. */
     return det >= 1.17549435e-38 && !isinf(det) && det > 1e-4 * normSquared;
 }
 
-void applyBump(in vec3 p, in vec2 surfaceUV, inout vec3 n)
+void applyBump(in vec3 p, in vec2 surfaceUV, inout vec2 mappedUV, inout vec3 n)
 {
-    if(pc.material.bump_enabled == 0u || gouraudShading() || pc.material.bump_scale == 0.0)
+    if(pc.material.bump_enabled == 0u)
         return;
 
     vec4 bumpLinear = bumpMapLinear();
     if(!bumpTransformInvertible(mat2(pc.map_linear.xy, pc.map_linear.zw)) || !bumpTransformInvertible(mat2(bumpLinear.xy, bumpLinear.zw)))
         return;
 
-    /* Take derivatives before the colour key's discard. */
+    /* Derivatives of the unoffset UV, before the colour key's discard. */
     vec2 bumpUV  = applyMapTransform(applyBumpMapTransform(surfaceUV));
     vec2 bumpDDX = dFdx(bumpUV);
     vec2 bumpDDY = dFdy(bumpUV);
@@ -94,5 +116,16 @@ void applyBump(in vec3 p, in vec2 surfaceUV, inout vec3 n)
     if(!cotangentFrame(p, bumpDDX, bumpDDY, normalize(n), frame))
         return;
 
-    n = bumpNormal(frame, bumpTexel(bumpUV, bumpDDX, bumpDDY).xyz);
+    /* Depth controls only the height offset, not the normal perturbation. */
+    if(pc.material.bump_depth != 0.0) {
+        vec2 offset = bumpOffset(p, frame, bumpTexel(bumpUV, bumpDDX, bumpDDY).a);
+        vec2 mappedOffset = bumpOffsetToSurfaceUV(offset);
+        if(any(isnan(mappedOffset)) || any(isinf(mappedOffset)))
+            return;
+        bumpUV   += offset;
+        mappedUV += mappedOffset;
+    }
+
+    if(!gouraudShading() && pc.material.bump_scale != 0.0)
+        n = bumpNormal(frame, bumpTexel(bumpUV, bumpDDX, bumpDDY).xyz);
 }

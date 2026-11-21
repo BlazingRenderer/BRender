@@ -52,7 +52,7 @@ void main()
     const vec2 surfaceUV = surfaceMapUV(vUV, vViewPosition, n, source);
     vec2       mappedUV  = applyMapTransform(surfaceUV);
 
-    applyBump(vViewPosition, surfaceUV, n);
+    applyBump(vViewPosition, surfaceUV, mappedUV, n);
 
     vec4 texel = texture(colour_map, mappedUV);
 
