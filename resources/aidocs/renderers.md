@@ -123,7 +123,12 @@ Colour is `GL_UNSIGNED_BYTE, GL_TRUE` (normalized to [0,1] by GPU).
 - Indexed textures expanded to RGBA at upload time (`util.c`).
 - `BRT_CLUT_O` palette override supported.
 - Texture filtering set after bind in `renderBegin` (not before, to avoid operating on wrong texture).
-- Mipmap variants dropped (no mipmap generation, incomplete textures render black).
+- `BR_MATF_MIP_INTERPOLATION` is ignored: level 0 is uploaded and level 0 is sampled. Mipmap
+  *filtering* is GL 1.0 (`glTexImage2D()` per level plus a mipmap min filter), so this is a
+  decision rather than a limit — only automatic generation (`glGenerateMipmap`) is newer, and
+  the chain `core` builds needs nothing newer. Nothing on this device enables the flag; a
+  chain built from the colour-keyed RGBA conversion would also average alpha 0 into the lower
+  levels and eat keyed silhouettes under `GL_ALPHA_TEST`. See `pixelmap-mips.md`.
 
 ### Blend / Transparency
 - `PRIMF_DECAL` removed — all primitives use `GL_MODULATE`. glrend also ignores DECAL.
