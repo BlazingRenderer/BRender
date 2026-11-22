@@ -2,7 +2,7 @@
 #include <brassert.h>
 #include "pmmem.h"
 
-br_size_t BrPixelmapMipMemorySize(int dimension, br_uint_8 type)
+br_size_t PixelmapMipMemorySize(int dimension, br_uint_8 type)
 {
     br_size_t mipSize = 0, mipLevelSize;
     br_size_t pixelSize;
@@ -64,7 +64,7 @@ br_pixelmap *BR_PUBLIC_ENTRY BrPixelmapMakeMipMap(br_pixelmap *source, br_uint_3
 
     // Perform Allocations
 
-    destPtr     = BrResAllocate(NULL, BrPixelmapMipMemorySize(source->width, destinationType), BR_MEMORY_PIXELS);
+    destPtr     = BrResAllocate(NULL, PixelmapMipMemorySize(source->width, destinationType), BR_MEMORY_PIXELS);
     destination = BrPixelmapAllocate(destinationType, source->width, source->height, destPtr, BR_PMAF_NORMAL);
     BrResAdd(destination, destPtr);
     agregateMap             = BrMemAllocate(SQ(source->width) * 3 * sizeof(*agregateMap), BR_MEMORY_SCRATCH);

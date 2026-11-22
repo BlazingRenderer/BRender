@@ -275,7 +275,7 @@ br_error DispatchRectangleStretchCopy(struct br_device_pixelmap *self, struct br
 /*
  * mipsupt.c
  */
-br_size_t BrPixelmapMipMemorySize(int dimension, br_uint_8 type);
+br_size_t BR_RESIDENT_ENTRY PixelmapMipMemorySize(int dimension, br_uint_8 type);
 
 /*
  * pmsetup.c
