@@ -275,7 +275,27 @@ br_error DispatchRectangleStretchCopy(struct br_device_pixelmap *self, struct br
 /*
  * mipsupt.c
  */
-br_size_t BR_RESIDENT_ENTRY PixelmapMipMemorySize(int dimension, br_uint_8 type);
+br_size_t BR_RESIDENT_ENTRY PixelmapMipMemorySize(br_int_32 width, br_int_32 height, br_uint_8 type);
+
+/*
+ * One level of a chain: its extent, the stride its rows have and where it begins relative to
+ * the map's first pixel. Every level below 0 is tightly packed - its row is width * bytes,
+ * whatever alignment the type would otherwise get - and every level but 0 has an offset that
+ * follows the level above it.
+ */
+typedef struct br_pixelmap_mip_level {
+    br_int_32 width;
+    br_int_32 height;
+    br_int_32 row_bytes;
+    br_size_t offset;
+} br_pixelmap_mip_level;
+
+/*
+ * Fails past the last level, and for a map that cannot be described: no pixel buffer, a
+ * type narrower than a byte, or a bottom-up map that claims a chain. A bottom-up map with no
+ * chain is level 0 alone, whose stride is negative.
+ */
+br_error BR_RESIDENT_ENTRY PixelmapMipLevelGeometry(br_pixelmap *pm, br_uint_32 level, br_pixelmap_mip_level *out);
 
 /*
  * pmsetup.c

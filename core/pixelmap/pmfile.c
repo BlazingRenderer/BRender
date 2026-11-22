@@ -176,15 +176,12 @@ static int FopWrite_PIXELS(br_datafile *df, br_pixelmap *pixelmap)
     pixels = (char *)(pixelmap->pixels) + pixelmap->base_y * pixelmap->row_bytes + (pixelmap->base_x * bytes);
 
     if(pixelmap->mip_offset) {
-        int mipSize = 0;
-        int currentMipSize;
-        UASSERT_MESSAGE("File system currently only supports contiguos mipmaps with no padding that are powers of two "
-                        "in size.",
-                        (pixelmap->width == pixelmap->height) && (pixelmap->row_bytes == pixelmap->width * bytes) &&
-                            (!(pixelmap->width & (pixelmap->width - 1))));
+        br_size_t mipSize;
 
-        for(currentMipSize = pixelmap->width; currentMipSize; currentMipSize >>= 1)
-            mipSize += currentMipSize * currentMipSize * bytes;
+        UASSERT_MESSAGE("A mipmapped pixelmap is written as one contiguous block of tightly packed rows.",
+                        (pixelmap->row_bytes == pixelmap->width * bytes));
+
+        mipSize = PixelmapMipMemorySize(pixelmap->width, pixelmap->height, pixelmap->type);
 
         df->prims->chunk_write(df, FID_PIXELS, df->prims->block_size(df, pixels, mipSize / size, mipSize, 1, size));
 

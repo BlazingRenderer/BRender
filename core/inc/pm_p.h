@@ -481,12 +481,65 @@ void BR_PUBLIC_ENTRY BrQuantPrepareMapping(int base, int num_entries, br_pixelma
  */
 void BR_PUBLIC_ENTRY BrQuantMapColours(int base, br_uint_8 *colours, br_uint_8 *mapped_colours, int size);
 
-/*
- * Produce a pixelmap containing mip levels from a pixelmap.
+/**
+ * \brief Produce a pixelmap containing mip levels from a pixelmap.
+ *
+ * The result is one pixelmap holding every level: level 0 is the source converted to
+ * \p destinationType, and each level below it is the box filter of the four texels above,
+ * rounded half up and carried in one allocation. The chain is complete, down to 1x1, and
+ * each axis halves and clamps on its own, so the source may be any size.
+ *
+ * \param source             The pixelmap to build from. It must have a pixel buffer and a
+ *                           type the pixelmap converters can read.
+ * \param destinationType    The type of every level, level 0 included.
+ *                           One of the BR_PMT_* constants.
+ * \param palette            The colour map an indexed destination indexes into, and only
+ *                           then: \ref BR_PMT_INDEX_8 requires one, every other type ignores it.
+ * \param base               The first palette entry an indexed destination may map to.
+ * \param range              How many entries from base are searched; base plus range may not
+ *                           exceed 256.
+ * \param quantizationMethod \ref BR_QUANTIZE_RGB or \ref BR_QUANTIZE_YIQ, the metric
+ *                           the nearest-entry search uses. An indexed destination only.
+ *
+ * \return The new chain, which the caller releases with BrPixelmapFree(), or NULL when the
+ *         source has no pixel buffer, either type has no converter, an indexed destination
+ *         has no palette, base and range run past the palette, or the source is large enough
+ *         that the 32-bit sums would overflow.
+ *
+ * \remark A chain's levels are tightly packed, not aligned as BrPixelmapAllocate() would
+ *         align them: a level's row is its width times the type's bytes per pixel. The
+ *         result's mip_offset is a row count, and level 1 begins that many level-0 rows into
+ *         the buffer.
  */
-
 br_pixelmap *BR_PUBLIC_ENTRY BrPixelmapMakeMipMap(br_pixelmap *source, br_uint_32 destinationType, br_pixelmap *palette, br_uint_32 base,
                                                   br_uint_32 range, br_uint_32 quantizationMethod);
+
+/**
+ * \brief Get the number of levels in a pixelmap's mip chain.
+ *
+ * \param pm A pointer to the pixelmap.
+ *
+ * \return The level count, which is 1 for a pixelmap with no chain.
+ *
+ * \remark Nothing stores a level count: a chain runs down to 1x1, so the count follows from
+ *         the pixelmap's larger dimension.
+ */
+br_uint_32 BR_PUBLIC_ENTRY BrPixelmapMipLevelCount(br_pixelmap *pm);
+
+/**
+ * \brief Get a pixelmap over one level of another's mip chain.
+ *
+ * \param pm    A pointer to the pixel map whose chain is read.
+ * \param level The level to return, counting from 0 for the pixelmap itself.
+ *
+ * \return A header over the level, or NULL past the last level.
+ *
+ * \remark The pixels and the palette are the chain's and are borrowed: \ref BrPixelmapFree()
+ *         releases the structure alone. Level 0's header carries the pixelmap's own extent,
+ *         stride and flags and is not the pixelmap itself; a level below it carries the
+ *         tight stride the chain packs it with.
+ */
+br_pixelmap *BR_PUBLIC_ENTRY BrPixelmapMipLevel(br_pixelmap *pm, br_uint_32 level);
 
 br_error BR_PUBLIC_ENTRY BrPixelmapGetControls(br_pixelmap *pm, br_display_controls *controls);
 br_error BR_PUBLIC_ENTRY BrPixelmapSetControls(br_pixelmap *pm, br_display_controls *controls);

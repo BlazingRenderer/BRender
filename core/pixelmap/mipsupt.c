@@ -1,291 +1,375 @@
 #include <brender.h>
 #include <brassert.h>
+
+#define BR_DEVICE_PIXELMAP_PRIVATE
+
+#include "pm.h"
 #include "pmmem.h"
+#include "pmclone.h"
 
-br_size_t PixelmapMipMemorySize(int dimension, br_uint_8 type)
+static br_uint_32 mip_level_count(br_int_32 width, br_int_32 height)
 {
-    br_size_t mipSize = 0, mipLevelSize;
-    br_size_t pixelSize;
+    br_uint_32 levels  = 1;
+    br_int_32  longest = (width > height) ? width : height;
 
-    switch(type) {
-        case BR_PMT_RGB_888:
-            pixelSize = 3;
-            break;
-        case BR_PMT_RGB_555:
-        case BR_PMT_RGB_565:
-            pixelSize = 2;
-            break;
-        default:
-            pixelSize = 1;
+    while(longest > 1) {
+        longest >>= 1;
+        ++levels;
     }
 
-    for(mipLevelSize = dimension; mipLevelSize; mipLevelSize >>= 1)
-        mipSize += mipLevelSize * mipLevelSize;
-    return mipSize * pixelSize;
+    return levels;
 }
 
+br_error BR_RESIDENT_ENTRY PixelmapMipLevelGeometry(br_pixelmap *pm, br_uint_32 level, br_pixelmap_mip_level *out)
+{
+    const br_uint_16 bytes = pmTypeInfo[pm->type].bits >> 3;
+    br_size_t        at    = 0;
+    br_int_32        w     = pm->width;
+    br_int_32        h     = pm->height;
+
+    if(out == NULL || bytes == 0 || pm->row_bytes == 0 || level >= BrPixelmapMipLevelCount(pm))
+        return BRE_FAIL;
+
+    /*
+     * A bottom-up map has a negative stride, which no packed-against-level-0 chain can
+     * describe - so it is a single level or nothing. The count above has already answered 1
+     * for a map with no chain; a map that claims one is refused.
+     */
+    if(pm->row_bytes < 0 && pm->mip_offset != 0)
+        return BRE_FAIL;
+
+    for(br_uint_32 i = 1; i <= level; ++i) {
+        if(i == 1)
+            at = (br_size_t)pm->mip_offset * pm->row_bytes;
+        else
+            at += (br_size_t)w * h * bytes;
+
+        w = (w > 1) ? (w >> 1) : 1;
+        h = (h > 1) ? (h >> 1) : 1;
+    }
+
+    out->width     = w;
+    out->height    = h;
+    out->row_bytes = (level == 0) ? pm->row_bytes : w * bytes;
+    out->offset    = at;
+
+    return BRE_OK;
+}
+
+br_size_t BR_RESIDENT_ENTRY PixelmapMipMemorySize(br_int_32 width, br_int_32 height, br_uint_8 type)
+{
+    const br_uint_16 bytes = pmTypeInfo[type].bits >> 3;
+    br_size_t        total = 0;
+
+    if(width < 1 || height < 1)
+        return 0;
+
+    for(;;) {
+        total += (br_size_t)width * height * bytes;
+
+        if(width == 1 && height == 1)
+            break;
+
+        width  = (width > 1) ? (width >> 1) : 1;
+        height = (height > 1) ? (height >> 1) : 1;
+    }
+
+    return total;
+}
+
+br_uint_32 BR_PUBLIC_ENTRY BrPixelmapMipLevelCount(br_pixelmap *pm)
+{
+    if(pm == NULL || pm->mip_offset <= 0)
+        return 1;
+
+    return mip_level_count(pm->width, pm->height);
+}
+
+br_pixelmap *BR_PUBLIC_ENTRY BrPixelmapMipLevel(br_pixelmap *pm, br_uint_32 level)
+{
+    br_pixelmap_mip_level geometry;
+    br_pixelmap          *view;
+
+    if(pm == NULL || PixelmapMipLevelGeometry(pm, level, &geometry) != BRE_OK)
+        return NULL;
+
+    if((view = BrPixelmapAllocate(pm->type, geometry.width, geometry.height, (br_uint_8 *)pm->pixels + geometry.offset, BR_PMAF_NORMAL)) == NULL)
+        return NULL;
+
+    /*
+     * A level below 0 is tightly packed, which is not what BrPixelmapAllocate() computes for
+     * a type whose rows are aligned, so the flags that describe the stride are set here.
+     */
+    view->row_bytes = geometry.row_bytes;
+    view->flags     = (level == 0) ? pm->flags : ((pm->flags & BR_PMF_NO_ACCESS) | BR_PMF_LINEAR | BR_PMF_ROW_WHOLEPIXELS);
+
+    view->mip_offset = 0;
+    view->map        = pm->map;
+
+    if(pm->identifier != NULL)
+        view->identifier = BrResStrDup(view, pm->identifier);
+
+    return view;
+}
 #define SQ(a) ((a) * (a))
+
+/* The palette's entries in the caller's metric, and the nearest-entry search over them. */
+typedef struct mip_index {
+    br_uint_32 base;
+    br_uint_32 range;
+    br_uint_32 method;
+    double     r[256];
+    double     g[256];
+    double     b[256];
+} mip_index;
+
+static void mip_index_prepare(mip_index *ix, br_pixelmap *palette, br_uint_32 base, br_uint_32 range, br_uint_32 method)
+{
+    ix->base   = base;
+    ix->range  = range;
+    ix->method = method;
+
+    for(br_uint_32 entry = 0; entry < 256; ++entry) {
+        const br_colour colour = BrPixelmapPixelGet(palette, 0, (br_int_32)entry);
+        const double    red    = BR_RED(colour);
+        const double    green  = BR_GRN(colour);
+        const double    blue   = BR_BLU(colour);
+
+        if(method == BR_QUANTIZE_YIQ) {
+            ix->r[entry] = 0.299 * red + 0.587 * green + 0.114 * blue;
+            ix->g[entry] = 0.596 * red - 0.275 * green - 0.321 * blue;
+            ix->b[entry] = 0.212 * red - 0.523 * green + 0.311 * blue;
+        } else {
+            ix->r[entry] = red;
+            ix->g[entry] = green;
+            ix->b[entry] = blue;
+        }
+    }
+}
+
+static br_uint_8 mip_index_nearest(const mip_index *ix, br_colour colour)
+{
+    const double red     = BR_RED(colour);
+    const double green   = BR_GRN(colour);
+    const double blue    = BR_BLU(colour);
+    double       r       = red;
+    double       g       = green;
+    double       b       = blue;
+    double       nearest = 0.0;
+    br_uint_8    entry   = (br_uint_8)ix->base;
+
+    if(ix->method == BR_QUANTIZE_YIQ) {
+        r = 0.299 * red + 0.587 * green + 0.114 * blue;
+        g = 0.596 * red - 0.275 * green - 0.321 * blue;
+        b = 0.212 * red - 0.523 * green + 0.311 * blue;
+    }
+
+    for(br_uint_32 i = 0; i < ix->range; ++i) {
+        const br_uint_32 candidate = ix->base + i;
+        const double     distance  = SQ(r - ix->r[candidate]) + SQ(g - ix->g[candidate]) + SQ(b - ix->b[candidate]);
+
+        if(i == 0 || distance < nearest) {
+            nearest = distance;
+            entry   = (br_uint_8)candidate;
+        }
+    }
+
+    return entry;
+}
+
+/* The converter table's reader decodes a type; the memory accessor hands back the raw bytes. */
+static br_colour mip_source_colour(const br_pixelmap_converter *converter, br_pixelmap *source, br_int_32 x, br_int_32 y)
+{
+    static const br_pixelmap_convert_options opts = {
+        .index_alpha_threshold = 127,
+    };
+
+    const br_uint_8 *pixel = (const br_uint_8 *)DevicePixelmapMemAddress(source, x, y, pmTypeInfo[source->type].bits >> 3);
+
+    return converter->read(pixel, source, &opts);
+}
+
+static void mip_write(const br_pixelmap_converter *converter, br_uint_8 *pixels, br_colour colour, const mip_index *ix)
+{
+    static const br_pixelmap_convert_options opts = {
+        .index_alpha_threshold = 127,
+    };
+
+    if(ix != NULL)
+        *pixels = mip_index_nearest(ix, colour);
+    else
+        converter->write(pixels, colour, &opts);
+}
+
 br_pixelmap *BR_PUBLIC_ENTRY BrPixelmapMakeMipMap(br_pixelmap *source, br_uint_32 destinationType, br_pixelmap *palette, br_uint_32 base,
                                                   br_uint_32 range, br_uint_32 quantizationMethod)
 {
-    br_pixelmap *destination;
-    int          dimension;
-    br_colour    colour;
-    void        *destPtr;
-    double       r[256], g[256], b[256], red, green, blue, y, i, q; // r=y g=i b=q for yiq quantization
-    unsigned     row, col;
-    int          area;
-    unsigned     lowest;
-    double       lowestValue, value;
-    int         *agregateMap, *agregateSourcePtr, *agregateDestinationPtr;
-    unsigned     paletteEntry;
-    unsigned     pixelSize;
+    const br_pixelmap_converter *converter, *src_converter;
+    const mip_index             *ix = NULL;
+    mip_index                    index;
+    br_pixelmap                 *destination;
+    br_uint_8                   *pixels, *level;
+    br_int_32                   *aggregate;
+    br_int_32                    width, height, area, row, col, channel, sx, sy;
+    br_uint_32                   dst_bytes;
+    br_size_t                    size;
 
-    switch(destinationType) {
-        case BR_PMT_RGB_888:
-            pixelSize = 3;
-            break;
-        case BR_PMT_RGB_555:
-        case BR_PMT_RGB_565:
-            pixelSize = 2;
-            break;
-        default:
-            pixelSize = 1;
+    if(source == NULL || source->pixels == NULL) {
+        BrLogError("PM", "BrPixelmapMakeMipMap(): the source has no pixel buffer.");
+        return NULL;
     }
 
-    UASSERT(source);
-    UASSERT(destinationType < BR_PMT_MAX);
-    UASSERT(quantizationMethod < BR_QUANTIZE_MAX);
-    UASSERT(destinationType == BR_PMT_INDEX_8 ? !!palette : BR_TRUE);
-    UASSERT((base < 256) && (range <= 256));
+    if(source->type >= BR_PMT_MAX || destinationType >= BR_PMT_MAX || quantizationMethod >= BR_QUANTIZE_MAX) {
+        BrLogError("PM", "BrPixelmapMakeMipMap(): invalid pixelmap type or quantization method.");
+        return NULL;
+    }
 
-    UASSERT_MESSAGE("This function currently only supports square pixelmaps,with power of 2 dimensions.",
-                    (source->width == source->height) && (!(source->width & (source->width - 1))));
+    if(base > 256 || range > 256 || base + range > 256) {
+        BrLogError("PM", "BrPixelmapMakeMipMap(): base %u and range %u run past the palette.", base, range);
+        return NULL;
+    }
 
-    // Perform Allocations
+    if(destinationType == BR_PMT_INDEX_8 && palette == NULL) {
+        BrLogError("PM", "BrPixelmapMakeMipMap(): an indexed destination needs a palette.");
+        return NULL;
+    }
 
-    destPtr     = BrResAllocate(NULL, PixelmapMipMemorySize(source->width, destinationType), BR_MEMORY_PIXELS);
-    destination = BrPixelmapAllocate(destinationType, source->width, source->height, destPtr, BR_PMAF_NORMAL);
-    BrResAdd(destination, destPtr);
-    agregateMap             = BrMemAllocate(SQ(source->width) * 3 * sizeof(*agregateMap), BR_MEMORY_SCRATCH);
-    destination->row_bytes  = destination->width * pixelSize;
-    destination->mip_offset = source->height;
+    if(source->width < 1 || source->height < 1) {
+        BrLogError("PM", "BrPixelmapMakeMipMap(): \"%s\" is %dx%d.", source->identifier != NULL ? source->identifier : "pixelmap",
+                   source->width, source->height);
+        return NULL;
+    }
+
+    if((br_int_64)source->width * (br_int_64)source->height * 255 > (br_int_64)0x7fffffff) {
+        BrLogError("PM", "BrPixelmapMakeMipMap(): a %dx%d source overflows the 32-bit sums the filter accumulates.", source->width, source->height);
+        return NULL;
+    }
+
+    converter     = br_pixelmap_converters + destinationType;
+    src_converter = br_pixelmap_converters + source->type;
+    dst_bytes     = pmTypeInfo[destinationType].bits >> 3;
+
+    if(src_converter->read == NULL) {
+        BrLogError("PM", "BrPixelmapMakeMipMap(): \"%s\" is not a supported mipmap source.", src_converter->name);
+        return NULL;
+    }
+
+    if(converter->write == NULL || dst_bytes == 0) {
+        BrLogError("PM", "BrPixelmapMakeMipMap(): \"%s\" is not a supported mipmap destination.", converter->name);
+        return NULL;
+    }
+
+    if((size = PixelmapMipMemorySize(source->width, source->height, (br_uint_8)destinationType)) == 0) {
+        BrLogError("PM", "BrPixelmapMakeMipMap(): the chain's size overflows.");
+        return NULL;
+    }
+
+    if((pixels = BrResAllocate(NULL, size, BR_MEMORY_PIXELS)) == NULL)
+        return NULL;
+
+    if((destination = BrPixelmapAllocate((br_uint_8)destinationType, source->width, source->height, pixels, BR_PMAF_NORMAL)) == NULL) {
+        BrResFree(pixels);
+        return NULL;
+    }
+
+    BrResAdd(destination, pixels);
+
+    /* A chain level's row is tight, not what BrPixelmapAllocate() gives a type with aligned rows. */
+    destination->row_bytes  = (br_int_16)(destination->width * dst_bytes);
+    destination->mip_offset = (br_int_16)source->height;
     destination->origin_x   = source->origin_x;
     destination->origin_y   = source->origin_y;
-    destination->identifier = BrResStrDup(destination, source->identifier);
+    destination->map        = palette;
+    destination->flags |= BR_PMF_LINEAR | BR_PMF_ROW_WHOLEPIXELS;
 
-    // Build representation of palette in form appropriate for quantization.
+    if(source->identifier != NULL)
+        destination->identifier = BrResStrDup(destination, source->identifier);
 
     if(destinationType == BR_PMT_INDEX_8) {
-        switch(quantizationMethod) {
-
-            case BR_QUANTIZE_YIQ:
-                for(col = 0; col < 256; col++) {
-                    colour = BrPixelmapPixelGet(palette, 0, col);
-                    red    = BR_RED(colour);
-                    green  = BR_GRN(colour);
-                    blue   = BR_BLU(colour);
-                    r[col] = 0.299 * red + 0.587 * green + 0.114 * blue;
-                    g[col] = 0.596 * red - 0.275 * green - 0.321 * blue;
-                    b[col] = 0.212 * red - 0.523 * green + 0.311 * blue;
-                }
-                break;
-
-            default: // BR_QUANTTIZE_RGB
-                for(col = 0; col < 256; col++) {
-                    colour = BrPixelmapPixelGet(palette, 0, col);
-                    r[col] = BR_RED(colour);
-                    g[col] = BR_GRN(colour);
-                    b[col] = BR_BLU(colour);
-                }
-        }
+        mip_index_prepare(&index, palette, base, range, quantizationMethod);
+        ix = &index;
     }
 
-    // Build first level of agregate map
-
-    agregateDestinationPtr = agregateMap;
-
-    for(row = 0; row < source->height; row++) {
-        for(col = 0; col < source->width; col++) {
-            colour = BrPixelmapPixelGet(source, col, row);
-            switch(source->type) {
-
-                case BR_PMT_RGB_555:
-                    red   = (colour >> 7) & 0xff;
-                    green = (colour >> 2) & 0xff;
-                    blue  = (colour << 3) & 0xff;
-                    break;
-                case BR_PMT_RGB_565:
-                    red   = (colour >> 8) & 0xff;
-                    green = (colour >> 3) & 0xff;
-                    blue  = (colour << 3) & 0xff;
-                    break;
-                case BR_PMT_INDEX_8:
-                    colour = BrPixelmapPixelGet(palette, 0, colour);
-                default:
-                    red   = BR_RED(colour);
-                    green = BR_GRN(colour);
-                    blue  = BR_BLU(colour);
-            }
-            agregateDestinationPtr[0] = (int)red;
-            agregateDestinationPtr[1] = (int)green;
-            agregateDestinationPtr[2] = (int)blue;
-            agregateDestinationPtr += 3;
-        }
-    }
-
-    // Build first mip level (a simple conversion)
-
-    if(destination->type == source->type) {
+    if(source->type == destinationType) {
         BrPixelmapCopy(destination, source);
-        destPtr = (char *)destPtr + SQ(destination->width) * pixelSize;
     } else {
-        agregateSourcePtr = agregateMap;
+        for(row = 0; row < source->height; ++row) {
+            br_uint_8 *pixel = (br_uint_8 *)destination->pixels + (br_size_t)row * destination->row_bytes;
 
-        for(col = 0; col < (unsigned)SQ(destination->width); col++) {
-            red   = agregateSourcePtr[0];
-            green = agregateSourcePtr[1];
-            blue  = agregateSourcePtr[2];
-
-            colour = BR_COLOUR_RGBA(red + 0.5, green + 0.5, blue + 0.5, 0);
-
-            switch(destination->type) {
-
-                case BR_PMT_RGB_555:
-                    *((short *)destPtr) = (short)(((BR_RED(colour) >> 3) << 10) | ((BR_GRN(colour) >> 3) << 5) | (BR_BLU(colour) >> 3));
-                    break;
-
-                case BR_PMT_RGB_565:
-                    *((short *)destPtr) = (short)(((BR_RED(colour) >> 3) << 11) | ((BR_GRN(colour) >> 2) << 5) | (BR_BLU(colour) >> 3));
-                    break;
-
-                case BR_PMT_RGB_888:
-                    *((br_colour *)destPtr) = colour;
-                    break;
-                default:
-
-                    lowest      = base;
-                    lowestValue = 1000000000.0; // large value
-
-                    switch(quantizationMethod) {
-
-                        case BR_QUANTIZE_YIQ:
-                            red   = BR_RED(colour);
-                            green = BR_GRN(colour);
-                            blue  = BR_BLU(colour);
-
-                            y = 0.299 * red + 0.587 * green + 0.114 * blue;
-                            i = 0.596 * red - 0.275 * green - 0.321 * blue;
-                            q = 0.212 * red - 0.523 * green + 0.311 * blue;
-
-                            for(paletteEntry = base; paletteEntry < base + range; paletteEntry++) {
-                                value = SQ(y - r[paletteEntry]) + SQ(i - g[paletteEntry]) + SQ(q - b[paletteEntry]);
-                                if(value < lowestValue) {
-                                    lowestValue = value;
-                                    lowest      = paletteEntry;
-                                }
-                            }
-
-                            break;
-                        default:
-                            red   = BR_RED(colour);
-                            green = BR_GRN(colour);
-                            blue  = BR_BLU(colour);
-                            for(paletteEntry = base; paletteEntry < base + range; paletteEntry++) {
-                                value = SQ(red - r[paletteEntry]) + SQ(green - g[paletteEntry]) + SQ(blue - b[paletteEntry]);
-                                if(value < lowestValue) {
-                                    lowestValue = value;
-                                    lowest      = paletteEntry;
-                                }
-                            }
-                    }
-
-                    *((char *)destPtr) = lowest;
-            }
-
-            destPtr = (char *)destPtr + pixelSize;
-            agregateSourcePtr += 3;
+            for(col = 0; col < source->width; ++col, pixel += dst_bytes)
+                mip_write(converter, pixel, mip_source_colour(src_converter, source, col, row), ix);
         }
     }
 
-    // Build subsequent levels
+    /*
+     * Levels accumulate exact sums of the source's 8-bit channels and divide once per level, so
+     * a level is round(sum / count) rather than a re-average of the quantised level above it.
+     */
+    if((aggregate = BrMemAllocate((br_size_t)source->width * source->height * 4 * sizeof(*aggregate), BR_MEMORY_SCRATCH)) == NULL) {
+        BrPixelmapFree(destination);
+        return NULL;
+    }
 
-    area = 4;
+    for(row = 0; row < source->height; ++row) {
+        for(col = 0; col < source->width; ++col) {
+            const br_colour colour = mip_source_colour(src_converter, source, col, row);
+            br_int_32      *sample = aggregate + ((br_size_t)row * source->width + col) * 4;
 
-    for(dimension = source->width >> 1; dimension; dimension >>= 1) {
-        agregateSourcePtr = agregateDestinationPtr = agregateMap;
-        for(row = 0; row < (unsigned)dimension; row++, agregateSourcePtr += 3 * dimension << 1) {
-            for(col = 0; col < (unsigned)dimension; col++, agregateSourcePtr += 6, agregateDestinationPtr += 3) {
-                agregateDestinationPtr[0] = agregateSourcePtr[0] + agregateSourcePtr[3] + agregateSourcePtr[0 + 3 * (dimension << 1)] +
-                                            agregateSourcePtr[3 + 3 * (dimension << 1)];
-                agregateDestinationPtr[1] = agregateSourcePtr[1] + agregateSourcePtr[4] + agregateSourcePtr[1 + 3 * (dimension << 1)] +
-                                            agregateSourcePtr[4 + 3 * (dimension << 1)];
-                agregateDestinationPtr[2] = agregateSourcePtr[2] + agregateSourcePtr[5] + agregateSourcePtr[2 + 3 * (dimension << 1)] +
-                                            agregateSourcePtr[5 + 3 * (dimension << 1)];
+            sample[0] = BR_RED(colour);
+            sample[1] = BR_GRN(colour);
+            sample[2] = BR_BLU(colour);
+            sample[3] = BR_ALPHA(colour);
+        }
+    }
 
-                red   = agregateDestinationPtr[0];
-                green = agregateDestinationPtr[1];
-                blue  = agregateDestinationPtr[2];
+    level  = (br_uint_8 *)destination->pixels + (br_size_t)destination->mip_offset * destination->row_bytes;
+    width  = source->width;
+    height = source->height;
+    area   = 1;
 
-                colour = BR_COLOUR_RGBA(red / area + 0.5, green / area + 0.5, blue / area + 0.5, 0);
+    while(width > 1 || height > 1) {
+        const br_int_32 block_w = (width > 1) ? 2 : 1;
+        const br_int_32 block_h = (height > 1) ? 2 : 1;
+        const br_int_32 next_w  = (width > 1) ? (width >> 1) : 1;
+        const br_int_32 next_h  = (height > 1) ? (height >> 1) : 1;
+        br_uint_8      *pixel   = level;
+        br_int_32      *dst;
 
-                switch(destination->type) {
+        area *= block_w * block_h;
 
-                    case BR_PMT_RGB_555:
-                        *((short *)destPtr) = (short)(((BR_RED(colour) >> 3) << 10) | ((BR_GRN(colour) >> 3) << 5) | (BR_BLU(colour) >> 3));
-                        break;
+        for(row = 0; row < next_h; ++row) {
+            for(col = 0; col < next_w; ++col, pixel += dst_bytes) {
+                const br_int_32 *src    = aggregate + (row * block_h * width + col * block_w) * 4;
+                br_int_32        sum[4] = {0, 0, 0, 0};
 
-                    case BR_PMT_RGB_565:
-                        *((short *)destPtr) = (short)(((BR_RED(colour) >> 3) << 11) | ((BR_GRN(colour) >> 2) << 5) | (BR_BLU(colour) >> 3));
-                        break;
+                /*
+                 * Read the sums before writing the destination: the halving is in place, so the
+                 * first output pixel's destination is the first input pixel itself.
+                 */
+                for(sy = 0; sy < block_h; ++sy)
+                    for(sx = 0; sx < block_w; ++sx)
+                        for(channel = 0; channel < 4; ++channel)
+                            sum[channel] += src[sy * 4 * width + sx * 4 + channel];
 
-                    case BR_PMT_RGB_888:
-                        *((br_colour *)destPtr) = colour;
-                        break;
-                    default:
+                dst    = aggregate + (row * next_w + col) * 4;
+                dst[0] = sum[0];
+                dst[1] = sum[1];
+                dst[2] = sum[2];
+                dst[3] = sum[3];
 
-                        lowest      = base;
-                        lowestValue = 1000000000.0; // large value
-
-                        switch(quantizationMethod) {
-
-                            case BR_QUANTIZE_YIQ:
-                                red   = BR_RED(colour);
-                                green = BR_GRN(colour);
-                                blue  = BR_BLU(colour);
-
-                                y = 0.299 * red + 0.587 * green + 0.114 * blue;
-                                i = 0.596 * red - 0.275 * green - 0.321 * blue;
-                                q = 0.212 * red - 0.523 * green + 0.311 * blue;
-
-                                for(paletteEntry = base; paletteEntry < base + range; paletteEntry++) {
-                                    value = SQ(y - r[paletteEntry]) + SQ(i - g[paletteEntry]) + SQ(q - b[paletteEntry]);
-                                    if(value < lowestValue) {
-                                        lowestValue = value;
-                                        lowest      = paletteEntry;
-                                    }
-                                }
-
-                                break;
-                            default:
-                                red   = BR_RED(colour);
-                                green = BR_GRN(colour);
-                                blue  = BR_BLU(colour);
-                                for(paletteEntry = base; paletteEntry < base + range; paletteEntry++) {
-                                    value = SQ(red - r[paletteEntry]) + SQ(green - g[paletteEntry]) + SQ(blue - b[paletteEntry]);
-                                    if(value < lowestValue) {
-                                        lowestValue = value;
-                                        lowest      = paletteEntry;
-                                    }
-                                }
-                        }
-                        *((char *)destPtr) = lowest;
-                }
-                destPtr = (char *)destPtr + pixelSize;
+                mip_write(converter, pixel,
+                          BR_COLOUR_RGBA(dst[0] / (double)area + 0.5, dst[1] / (double)area + 0.5, dst[2] / (double)area + 0.5,
+                                         dst[3] / (double)area + 0.5),
+                          ix);
             }
         }
-        area *= 4;
+
+        level += (br_size_t)next_w * next_h * dst_bytes;
+        width  = next_w;
+        height = next_h;
     }
-    BrMemFree(agregateMap);
+
+    BrMemFree(aggregate);
+
     return destination;
 }
