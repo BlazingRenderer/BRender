@@ -44,6 +44,37 @@ br_uint_8 DeviceGLTypeOrBits(br_uint_8 pixel_type, br_int_32 pixel_bits)
     return BR_PMT_MAX;
 }
 
+static br_error DeviceGLUploadMapLevel0(const GladGLContext *gl, const br_pixelmap_gl_fmt *fmt, br_pixelmap *pm)
+{
+    br_pixelmap *tmp;
+
+    /*
+     * glTexImage2D() reads tight rows from the buffer's first byte, so a map that is padded,
+     * or inverted (pm->pixels points at its last row), has to go via an intermediate.
+     */
+    if((pm->flags & (BR_PMF_LINEAR | BR_PMF_ROW_WHOLEPIXELS)) == (BR_PMF_LINEAR | BR_PMF_ROW_WHOLEPIXELS) && pm->row_bytes > 0) {
+        gl->TexImage2D(GL_TEXTURE_2D, 0, fmt->internal_format, pm->width, pm->height, 0, fmt->format, fmt->type, pm->pixels);
+        return BRE_OK;
+    }
+
+    if((tmp = BrPixelmapAllocate(pm->type, pm->width, pm->height, NULL, BR_PMAF_NORMAL)) == NULL)
+        return BRE_FAIL;
+
+    for(br_int_32 row = 0; row < pm->height; ++row) {
+        BrPixelmapRectangleCopy(tmp,                                  /* dst    */
+                                -tmp->origin_x, -tmp->origin_y + row, /* dx, dy */
+                                pm,                                   /* src    */
+                                -pm->origin_x, -pm->origin_y + row,   /* sx, sy */
+                                pm->width, 1                          /* w, h   */
+        );
+    }
+
+    gl->TexImage2D(GL_TEXTURE_2D, 0, fmt->internal_format, pm->width, pm->height, 0, fmt->format, fmt->type, tmp->pixels);
+    BrPixelmapFree(tmp);
+
+    return BRE_OK;
+}
+
 br_error DeviceGLPixelmapToExistingGLTexture(const GladGLContext *gl, GLuint tex, br_pixelmap *pm)
 {
     GLenum                    err;
@@ -57,39 +88,96 @@ br_error DeviceGLPixelmapToExistingGLTexture(const GladGLContext *gl, GLuint tex
 
     gl->BindTexture(GL_TEXTURE_2D, tex);
 
-    /*
-     * If the texture isn't linear, or is inverted (i.e. pm->pixels points to the end),
-     * we need to go via an intermediate.
-     */
-    if((pm->flags & (BR_PMF_LINEAR | BR_PMF_ROW_WHOLEPIXELS)) != (BR_PMF_LINEAR | BR_PMF_ROW_WHOLEPIXELS) || pm->row_bytes < 0) {
-        br_pixelmap *tmp = BrPixelmapAllocate(pm->type, pm->width, pm->height, NULL, BR_PMAF_NORMAL);
-        for(br_int_32 row = 0; row < pm->height; ++row) {
-            BrPixelmapRectangleCopy(tmp,                                  /* dst    */
-                                    -tmp->origin_x, -tmp->origin_y + row, /* dx, dy */
-                                    pm,                                   /* src    */
-                                    -pm->origin_x, -pm->origin_y + row,   /* sx, sy */
-                                    pm->width, 1                          /* w, h   */
-            );
-            /*
-             * To flip, set sy to:
-             *   pm->height - (-pm->origin_y + row) - 1
-             */
+    if(fmt->pm_type == BR_PMT_INDEX_8) {
+        /*
+         * An index plane is fetched through the palette rather than filtered, so it keeps its
+         * one level.
+         */
+        if(DeviceGLUploadMapLevel0(gl, fmt, pm) != BRE_OK) {
+            gl->BindTexture(GL_TEXTURE_2D, 0);
+            return BRE_FAIL;
         }
 
-        gl->TexImage2D(GL_TEXTURE_2D, 0, fmt->internal_format, pm->width, pm->height, 0, fmt->format, fmt->type, tmp->pixels);
-        BrPixelmapFree(tmp);
+        if((err = gl->GetError()) != 0) {
+            BrLogError("GLREND", "glTexImage2D() failed with %s", DeviceGLStrError(err));
+            gl->BindTexture(GL_TEXTURE_2D, 0);
+            return BRE_FAIL;
+        }
     } else {
-        gl->TexImage2D(GL_TEXTURE_2D, 0, fmt->internal_format, pm->width, pm->height, 0, fmt->format, fmt->type, pm->pixels);
-    }
+        /*
+         * The map's own chain is used when it has one; otherwise one is built here.
+         * glGenerateMipmap() would be cheaper, but its filter is implementation-defined, and the
+         * drivers have to hold the same texels for a witness to be able to name one.
+         */
+        br_pixelmap *chain;
 
-    if((err = gl->GetError()) != 0) {
-        BrLogError("GLREND", "glTexImage2D() failed with %s", DeviceGLStrError(err));
-        gl->BindTexture(GL_TEXTURE_2D, 0);
-        return BRE_FAIL;
-    }
+        if(pm->mip_offset != 0 && (pm->flags & (BR_PMF_LINEAR | BR_PMF_ROW_WHOLEPIXELS)) == (BR_PMF_LINEAR | BR_PMF_ROW_WHOLEPIXELS) &&
+           pm->row_bytes > 0) {
+            chain = pm;
+        } else {
+            if(pm->mip_offset != 0)
+                BrLogInfo("GLREND", "\"%s\" carries a mip chain whose level 0 is not tightly packed and top-down; building one from the map instead.",
+                          pm->identifier != NULL ? pm->identifier : "pixelmap");
 
-    if(fmt->pm_type != BR_PMT_INDEX_8)
-        gl->GenerateMipmap(GL_TEXTURE_2D);
+            chain = BrPixelmapMakeMipMap(pm, pm->type, pm->map, 0, 256, BR_QUANTIZE_YIQ);
+        }
+
+        if(chain == NULL) {
+            /*
+             * The format table gives some types a GL format that the converter table cannot
+             * read, so the builder refused. One level with a non-mipmap sampler beats no texture.
+             */
+            BrLogInfo("GLREND", "\"%s\" cannot take a mip chain - its type has no converter - so it is uploaded at one level.",
+                      pm->identifier != NULL ? pm->identifier : "pixelmap");
+
+            if(DeviceGLUploadMapLevel0(gl, fmt, pm) != BRE_OK) {
+                gl->BindTexture(GL_TEXTURE_2D, 0);
+                return BRE_FAIL;
+            }
+
+            if((err = gl->GetError()) != 0) {
+                BrLogError("GLREND", "glTexImage2D() failed with %s", DeviceGLStrError(err));
+                gl->BindTexture(GL_TEXTURE_2D, 0);
+                return BRE_FAIL;
+            }
+        } else {
+            br_uint_32 levels    = BrPixelmapMipLevelCount(chain);
+            br_boolean bad_level = BR_FALSE;
+
+            /* GL's default unpack alignment of 4 misreads a level whose row is not a multiple of 4. */
+            gl->PixelStorei(GL_UNPACK_ALIGNMENT, 1);
+
+            for(br_uint_32 level = 0; level < levels; ++level) {
+                br_pixelmap_mip_level geometry;
+
+                if(PixelmapMipLevelGeometry(chain, level, &geometry) != BRE_OK) {
+                    BrLogError("GLREND", "could not reach mip level %u of \"%s\".", level,
+                               chain->identifier != NULL ? chain->identifier : "pixelmap");
+                    bad_level = BR_TRUE;
+                    break;
+                }
+
+                gl->TexImage2D(GL_TEXTURE_2D, (GLint)level, fmt->internal_format, geometry.width, geometry.height, 0, fmt->format,
+                               fmt->type, (br_uint_8 *)chain->pixels + geometry.offset);
+            }
+
+            gl->PixelStorei(GL_UNPACK_ALIGNMENT, 4);
+
+            if(chain != pm)
+                BrPixelmapFree(chain);
+
+            if(bad_level) {
+                gl->BindTexture(GL_TEXTURE_2D, 0);
+                return BRE_FAIL;
+            }
+
+            if((err = gl->GetError()) != 0) {
+                BrLogError("GLREND", "glTexImage2D() failed with %s", DeviceGLStrError(err));
+                gl->BindTexture(GL_TEXTURE_2D, 0);
+                return BRE_FAIL;
+            }
+        }
+    }
 
     gl->TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     gl->TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
