@@ -199,6 +199,24 @@ implementations were `#if 0`'d.
 Colour keying should be done with alpha channels, or via the default
 black-key behaviour controlled by `BR_MATF_DISABLE_COLOUR_KEY`.
 
+### 8. Mip chains
+
+* **New API:** `BrPixelmapMipLevelCount()` and `BrPixelmapMipLevel()` read a chain's levels,
+  which have no `br_pixelmap` of their own. The header returned borrows the chain's pixels, so
+  `BrPixelmapFree()` releases the header alone.
+* **Behaviour:** `BrPixelmapMakeMipMap()` decodes and writes each type through the converter
+  table. `RGB_888` output is unchanged; every other type's was wrong - the 555/565 fields
+  leaked between channels, the size switch only knew four types and its default assumed one
+  byte per pixel, and the destination never carried its palette. Its levels also filter alpha
+  now, where they used to write a constant.
+* **Behaviour:** a chain may be any size. `.pix` no longer requires a square power of two; it
+  requires tight level rows, which it always did.
+* **Behaviour:** an unsupported type, a source with no pixel buffer, an indexed destination
+  with no palette, and `base + range` past 256 are logged refusals rather than assertions.
+* **Driver behaviour:** `glrend` uploads the chain instead of calling `glGenerateMipmap()`, so
+  a mip level is one LSB from what the GL implementation produced where it rounded a half
+  down; `vkrend` uploads the chain instead of blitting one.
+
 ### `BR_LIGHT_VIEW` is a no-op
 
 Lighting is always performed in view space now; the model-space path the flag
