@@ -2332,6 +2332,11 @@ static br_boolean vkrend_renderer_is_red_or_green_texel(const br_uint_8 pixel[4]
  * - reads a hard texel instead. That difference is what this half exists to catch. Setting
  * both flags keeps purple, the mipmap mode's linear blend between two already-average levels.
  *
+ * The chain is BrPixelmapMakeMipMap()'s - the driver uploads it, where it used to blit one
+ * with VK_FILTER_LINEAR - so the mix is exact and the comparison is to the byte: 0x80 per
+ * chroma channel, where a filter that truncated would write 0x7f. glrend's --mip-witness
+ * asserts the same byte, and the two together are the whole of the cross-driver claim.
+ *
  * The filter half uses a 2x2 red/green map (both rows identical), magnified and sampled
  * across its column boundary: BR_MATF_MAP_INTERPOLATION must blend the two columns to
  * (0x00, 0x80, 0x80), while the default nearest filtering must read one hard red or green
@@ -2383,7 +2388,7 @@ static br_error vkrend_renderer_mipmap_step(vkrend_renderer_state *state, br_act
 
     BrZsSceneRender(state->world, camera, state->offscreen);
 
-    if(vkrend_renderer_assert_pixel_near(state->offscreen, cx, cy, purple, 6, "the mip-filtered minified sample") != BRE_OK)
+    if(vkrend_renderer_assert_pixel_near(state->offscreen, cx, cy, purple, 0, "the mip-filtered minified sample") != BRE_OK)
         return BRE_FAIL;
 
     /* (filter BRT_LINEAR, mip_filter BRT_LINEAR): the mipmap mode blends two average levels, still purple. */
@@ -2395,7 +2400,7 @@ static br_error vkrend_renderer_mipmap_step(vkrend_renderer_state *state, br_act
 
     BrZsSceneRender(state->world, camera, state->offscreen);
 
-    if(vkrend_renderer_assert_pixel_near(state->offscreen, cx, cy, purple, 6, "the trilinear minified sample") != BRE_OK)
+    if(vkrend_renderer_assert_pixel_near(state->offscreen, cx, cy, purple, 0, "the trilinear minified sample") != BRE_OK)
         return BRE_FAIL;
 
     /*
