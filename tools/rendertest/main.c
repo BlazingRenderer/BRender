@@ -1097,6 +1097,19 @@ static const rt_relation rt_relations[] = {
     {.a = "scene-dither",         .b = "scene-persp",            .equal = BR_FALSE, .pm_type = BR_PMT_INDEX_8, .mode = RT_ANY_MODE},
 
     /*
+     * The mip pair: glrend samples a chain, so the frames differ; glrend1x maps only
+     * BRT_FILTER, and softrend samples per fragment but never a level, so on both the flag is
+     * invisible and the frames must match. That is the reach of the feature, which the witness
+     * cannot state - it refuses every device but glrend.
+     */
+    {.a = "scene-mip",            .b = "scene-mip-off",          .equal = BR_FALSE, .pm_type = RT_ANY_TYPE, .mode = RT_ANY_MODE,
+     .device = "glrend"},
+    {.a = "scene-mip",            .b = "scene-mip-off",          .equal = BR_TRUE,  .pm_type = RT_ANY_TYPE, .mode = RT_ANY_MODE,
+     .device = "glrend1x"},
+    {.a = "scene-mip",            .b = "scene-mip-off",          .equal = BR_TRUE,  .pm_type = RT_ANY_TYPE, .mode = RT_ANY_MODE,
+     .device = "softrend"},
+
+    /*
      * The RGB-output shade-table witness. The shape is only reachable at the
      * z-sorted 555/565 paths: a z-buffered textured primitive matches an MMX
      * block first, and an 888 output has no such kernel. scene-textured-shade
@@ -2361,6 +2374,7 @@ static const char *const rt_default_scenes[] = {
     "scene-flat",       "scene-smooth",    "scene-textured",       "scene-textured-shade", "scene-persp",        "scene-persp-shade",
     "scene-tex-arb",    "scene-tex-32",     "scene-shade",          "scene-decal",       "scene-fog",             "scene-blend",
     "scene-dither",     "scene-alpha",
+    "scene-mip",        "scene-mip-off",
     "scene-shade-rgb555", "scene-shade-rgb555-flat", "scene-shade-rgb565", "scene-shade-rgb565-flat",
     "scene-shade-rgb888", "scene-tex-rgb555", "scene-tex-rgb565", "scene-tex-rgb888", "scene-textured-shade-converted",
     "scene-blend-off",

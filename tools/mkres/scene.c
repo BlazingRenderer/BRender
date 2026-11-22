@@ -2213,6 +2213,41 @@ static br_error scene_make_feature_fixtures(br_model *cube)
     }
 
     /*
+     * The mip pair: one cube, one tiled map, and the only knob is
+     * BR_MATF_MIP_INTERPOLATION. The map is 32x8 and the modifier tiles it forty-eight times,
+     * so the texture is minified and the LOD leaves level 0. It is deliberately not square, so
+     * a chain built with the width used for both axes cannot pass either relation.
+     *
+     * The map is RGB_555 rather than 888 because softprim has no lit RGB_888 colour-map block:
+     * an 888 map draws unlit there (see scene-tex-rgb888), which would leave the softrend leg
+     * of the relation asserting a fallback rather than a lighting path.
+     *
+     * They carry their own lit constants rather than the shared rig's because minifying averages
+     * the bright texels away, which leaves this pair the darkest frames in the set.
+     */
+    {
+        br_pixelmap *map = scene_texture_rgb("scene-mip-map", BR_PMT_RGB_555, 32, 8, 4);
+
+        for(int i = 0; i < 2; ++i) {
+            br_material *mat = scene_material_ex(i ? "scene-mip-off-material" : "scene-mip-material", BR_COLOUR_RGB(255, 255, 255),
+                                                 BR_MATF_LIGHT | BR_MATF_SMOOTH | BR_MATF_MAP_INTERPOLATION | (i ? 0 : BR_MATF_MIP_INTERPOLATION),
+                                                 BR_SCALAR(0.8), BR_SCALAR(1.5), BR_SCALAR(0.0), BR_SCALAR(20.0));
+
+            if(mat == NULL)
+                return BRE_FAIL;
+
+            mat->index_base            = SCENE_FX_BASE;
+            mat->index_range           = SCENE_FX_RANGE;
+            mat->colour_map            = map;
+            mat->map_transform.m[0][0] = BR_SCALAR(48.0);
+            mat->map_transform.m[1][1] = BR_SCALAR(48.0);
+
+            if(scene_save(i ? "scene-mip-off.gltf" : "scene-mip.gltf", scene_fx_world(cube, mat)) != BRE_OK)
+                r = BRE_FAIL;
+        }
+    }
+
+    /*
      * The same rig saved WITHOUT BR_GLTF_SAVE_PRESERVE_MAP_TYPES, which is the
      * only fixture that exercises the writer's default path any more - every
      * other one asks for preserved types. It is here because that path lost its
