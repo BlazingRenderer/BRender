@@ -110,6 +110,23 @@ static void BufferStoredVkRecordTransition(const GladVulkanContext *vk, VkComman
     vk->CmdPipelineBarrier(cmd, src_stage, dst_stage, 0, 0, NULL, 0, NULL, 1, &barrier);
 }
 
+/* The staging buffer holds every level tight, so this is not level 0's own stride. */
+static br_size_t BufferStoredVkPlaneBytes(br_pixelmap *pm, const br_pixelmap_vk_fmt *fmt, br_uint_32 levels)
+{
+    br_size_t total = 0;
+
+    for(br_uint_32 level = 0; level < levels; ++level) {
+        br_pixelmap_mip_level geometry;
+
+        if(PixelmapMipLevelGeometry(pm, level, &geometry) != BRE_OK)
+            return 0;
+
+        total += (br_size_t)geometry.width * geometry.height * fmt->bytes_per_pixel;
+    }
+
+    return total;
+}
+
 /*
  * Upload a host pixelmap's pixels raw into a new sampled image and leave it, all mip levels
  * included, in SHADER_READ_ONLY_OPTIMAL.
@@ -120,16 +137,14 @@ static void BufferStoredVkRecordTransition(const GladVulkanContext *vk, VkComman
  * buffer submitted and waited for on the device queue, so the image is ready before any
  * draw that references it and needs no frame retire.
  *
- * When `mipmap` is set and the format can blit both ways with linear filtering, the image is
- * created with a full chain, floor(log2(max(w, h))) + 1 levels, and each lower level is the
- * VK_FILTER_LINEAR blit of the one above it. This is not glGenerateMipmap's box filter: it
- * is the closest the transfer engine offers and bit-identity is not attempted, only the
- * level count and reachability glrend has. A format that cannot blit keeps one level, and
- * the sampler's maxLod clamp then makes that behave exactly as mip_filter == BRT_NONE.
+ * When `mipmap` is set the image carries the map's own chain, or one built by
+ * BrPixelmapMakeMipMap(), and every level is copied from it. vkrend then holds the same texels
+ * glrend uploads, which is what lets a witness name one. An indexed plane is a lookup rather
+ * than a filtered surface, so its caller passes BR_FALSE and the sampler's maxLod clamp keeps
+ * it on level 0.
  */
-static br_error BufferStoredVkUploadPlane(br_device *dev, const br_pixelmap_vk_fmt *fmt, const br_uint_8 *pixels, br_int_32 row_bytes,
-                                          br_uint_32 width, br_uint_32 height, br_boolean mipmap, VkImage *out_image, VkImageView *out_view,
-                                          VmaAllocation *out_allocation)
+static br_error BufferStoredVkUploadPlane(br_device *dev, const br_pixelmap_vk_fmt *fmt, br_pixelmap *pm, br_boolean mipmap,
+                                          VkImage *out_image, VkImageView *out_view, VmaAllocation *out_allocation)
 {
     const GladVulkanContext *vk = &dev->context;
     VkFormatProperties       props;
@@ -137,6 +152,10 @@ static br_error BufferStoredVkUploadPlane(br_device *dev, const br_pixelmap_vk_f
     VmaAllocation            staging_allocation;
     VkCommandBuffer          cmd;
     VkResult                 res;
+    br_pixelmap             *chain   = pm;
+    br_pixelmap             *built   = NULL;
+    VkBufferImageCopy       *regions = NULL;
+    br_uint_32               levels  = 1;
 
     *out_image      = VK_NULL_HANDLE;
     *out_view       = VK_NULL_HANDLE;
@@ -147,27 +166,23 @@ static br_error BufferStoredVkUploadPlane(br_device *dev, const br_pixelmap_vk_f
        (VK_FORMAT_FEATURE_TRANSFER_DST_BIT | VK_FORMAT_FEATURE_SAMPLED_IMAGE_BIT))
         return BRE_FAIL;
 
-    /*
-     * Building the chain needs the format to be a blit source and destination and, for the
-     * linear blit, to support linear filtering. A format that offers none of that keeps its
-     * one level rather than losing the upload; the 1-texel dimensions have nothing to build.
-     */
-    const VkFormatFeatureFlags mip_features = VK_FORMAT_FEATURE_BLIT_SRC_BIT | VK_FORMAT_FEATURE_BLIT_DST_BIT |
-                                              VK_FORMAT_FEATURE_SAMPLED_IMAGE_FILTER_LINEAR_BIT;
-    const br_boolean mipmaps = mipmap && width > 1 && height > 1 && (props.optimalTilingFeatures & mip_features) == mip_features;
+    if(mipmap && (pm->width > 1 || pm->height > 1)) {
+        if(pm->mip_offset == 0 && (built = BrPixelmapMakeMipMap(pm, pm->type, pm->map, 0, 256, BR_QUANTIZE_YIQ)) == NULL)
+            return BRE_FAIL;
 
-    br_uint_32 levels = 1;
-    for(br_uint_32 s = (width > height) ? width : height; mipmaps && s > 1; s >>= 1)
-        ++levels;
+        if(built != NULL)
+            chain = built;
 
-    const VkImageUsageFlags image_usage = VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT |
-                                          ((levels > 1) ? VK_IMAGE_USAGE_TRANSFER_SRC_BIT : 0);
+        levels = BrPixelmapMipLevelCount(chain);
+    }
+
+    const VkImageUsageFlags image_usage = VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
 
     const VkImageCreateInfo image_info = {
         .sType         = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO,
         .imageType     = VK_IMAGE_TYPE_2D,
         .format        = fmt->format,
-        .extent        = {width, height, 1},
+        .extent        = {(br_uint_32)pm->width, (br_uint_32)pm->height, 1},
         .mipLevels     = levels,
         .arrayLayers   = 1,
         .samples       = VK_SAMPLE_COUNT_1_BIT,
@@ -211,8 +226,14 @@ static br_error BufferStoredVkUploadPlane(br_device *dev, const br_pixelmap_vk_f
         goto fail;
     }
 
-    const br_uint_32 packed_row_bytes = width * fmt->bytes_per_pixel;
-    const br_uint_32 buffer_size      = packed_row_bytes * height;
+    const br_size_t buffer_size  = BufferStoredVkPlaneBytes(chain, fmt, levels);
+    br_size_t       level_offset = 0;
+
+    if(buffer_size == 0) {
+        BrLogError("VKREND", "could not measure the staging buffer for \"%s\".", pm->identifier != NULL ? pm->identifier : "pixelmap");
+        goto fail;
+    }
+
     {
         const VkBufferCreateInfo buffer_info = {
             .sType       = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO,
@@ -225,6 +246,11 @@ static br_error BufferStoredVkUploadPlane(br_device *dev, const br_pixelmap_vk_f
             .usage = VMA_MEMORY_USAGE_CPU_TO_GPU,
         };
 
+        if((regions = BrMemAllocate((br_size_t)levels * sizeof(*regions), BR_MEMORY_SCRATCH)) == NULL)
+            goto fail;
+
+        BrMemSet(regions, 0, (br_size_t)levels * sizeof(*regions));
+
         if((res = vmaCreateBuffer(dev->vma_allocator, &buffer_info, &buffer_alloc_info, &staging, &staging_allocation, NULL)) != VK_SUCCESS) {
             BrLogError("VKREND", "Failed to create a colour map staging buffer: VkResult = %d", res);
             goto fail;
@@ -235,8 +261,34 @@ static br_error BufferStoredVkUploadPlane(br_device *dev, const br_pixelmap_vk_f
 
         br_uint_8 *mapped = (br_uint_8 *)alloc_info.pMappedData;
 
-        for(br_uint_32 y = 0; y < height; ++y)
-            BrMemCpy(mapped + y * packed_row_bytes, pixels + y * row_bytes, packed_row_bytes);
+        /*
+         * A chain's rows are already tight; a single-level upload of a padded or bottom-up map
+         * is repacked onto the way in.
+         */
+        for(br_uint_32 level = 0; level < levels; ++level) {
+            br_pixelmap_mip_level geometry;
+            br_uint_32            row;
+
+            if(PixelmapMipLevelGeometry(chain, level, &geometry) != BRE_OK) {
+                BrLogError("VKREND", "could not reach mip level %u of \"%s\".", level, chain->identifier != NULL ? chain->identifier : "pixelmap");
+                vmaDestroyBuffer(dev->vma_allocator, staging, staging_allocation);
+                goto fail;
+            }
+
+            row = (br_uint_32)geometry.width * fmt->bytes_per_pixel;
+
+            for(br_uint_32 y = 0; y < (br_uint_32)geometry.height; ++y) {
+                const br_int_64 src_at = (br_int_64)geometry.offset + (br_int_64)y * geometry.row_bytes;
+
+                BrMemCpy(mapped + level_offset + y * row, (const br_uint_8 *)chain->pixels + src_at, row);
+            }
+
+            regions[level].bufferOffset     = (VkDeviceSize)level_offset;
+            regions[level].imageSubresource = (VkImageSubresourceLayers){VK_IMAGE_ASPECT_COLOR_BIT, level, 0, 1};
+            regions[level].imageExtent      = (VkExtent3D){(br_uint_32)geometry.width, (br_uint_32)geometry.height, 1};
+
+            level_offset += (br_size_t)row * (br_uint_32)geometry.height;
+        }
 
         vmaFlushAllocation(dev->vma_allocator, staging_allocation, 0, buffer_size);
     }
@@ -261,58 +313,17 @@ static br_error BufferStoredVkUploadPlane(br_device *dev, const br_pixelmap_vk_f
         vk->BeginCommandBuffer(cmd, &begin_info);
 
         /*
-         * Every level starts in TRANSFER_DST_OPTIMAL, so a blit's destination is already in
-         * the layout it needs. Level 0 is copied from the staging buffer; each lower level
-         * is the linear blit of the one above it. A source level moves to
-         * TRANSFER_SRC_OPTIMAL for its blit and never moves back, so after the loop levels
-         * 0..levels-2 are transfer sources and the last level is still a transfer
-         * destination; each is then moved to SHADER_READ_ONLY_OPTIMAL for the draws.
+         * Every level arrives from the staging buffer, so the image is a transfer destination
+         * for all of them and then a shader read; nothing blits.
          */
         BufferStoredVkRecordTransition(vk, cmd, *out_image, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 0,
                                        VK_ACCESS_TRANSFER_WRITE_BIT, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, VK_PIPELINE_STAGE_TRANSFER_BIT, 0, levels);
 
-        const VkBufferImageCopy copy_region = {
-            .bufferOffset      = 0,
-            .bufferRowLength   = 0,
-            .bufferImageHeight = 0,
-            .imageSubresource  = {VK_IMAGE_ASPECT_COLOR_BIT, 0, 0, 1},
-            .imageOffset       = {0, 0, 0},
-            .imageExtent       = {width, height, 1},
-        };
-        vk->CmdCopyBufferToImage(cmd, staging, *out_image, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &copy_region);
+        vk->CmdCopyBufferToImage(cmd, staging, *out_image, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, levels, regions);
 
-        for(br_uint_32 level = 1; level < levels; ++level) {
-            const br_uint_32 src_w = (width >> (level - 1)) ? (width >> (level - 1)) : 1;
-            const br_uint_32 src_h = (height >> (level - 1)) ? (height >> (level - 1)) : 1;
-            const br_uint_32 dst_w = (width >> level) ? (width >> level) : 1;
-            const br_uint_32 dst_h = (height >> level) ? (height >> level) : 1;
-
-            BufferStoredVkRecordTransition(vk, cmd, *out_image, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
-                                           VK_ACCESS_TRANSFER_WRITE_BIT, VK_ACCESS_TRANSFER_READ_BIT, VK_PIPELINE_STAGE_TRANSFER_BIT,
-                                           VK_PIPELINE_STAGE_TRANSFER_BIT, level - 1, 1);
-
-            const VkImageBlit blit = {
-                .srcSubresource = {VK_IMAGE_ASPECT_COLOR_BIT, level - 1, 0, 1},
-                .dstSubresource = {VK_IMAGE_ASPECT_COLOR_BIT, level, 0, 1},
-                .srcOffsets     = {{0, 0, 0}, {(br_int_32)src_w, (br_int_32)src_h, 1}},
-                .dstOffsets     = {{0, 0, 0}, {(br_int_32)dst_w, (br_int_32)dst_h, 1}},
-            };
-            vk->CmdBlitImage(cmd, *out_image, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, *out_image, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1,
-                             &blit, VK_FILTER_LINEAR);
-        }
-
-        if(levels > 1) {
-            BufferStoredVkRecordTransition(vk, cmd, *out_image, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
-                                           VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, VK_ACCESS_TRANSFER_READ_BIT, VK_ACCESS_SHADER_READ_BIT,
-                                           VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT, 0, levels - 1);
-            BufferStoredVkRecordTransition(vk, cmd, *out_image, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
-                                           VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, VK_ACCESS_TRANSFER_WRITE_BIT, VK_ACCESS_SHADER_READ_BIT,
-                                           VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT, levels - 1, 1);
-        } else {
-            BufferStoredVkRecordTransition(vk, cmd, *out_image, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
-                                           VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, VK_ACCESS_TRANSFER_WRITE_BIT, VK_ACCESS_SHADER_READ_BIT,
-                                           VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT, 0, 1);
-        }
+        BufferStoredVkRecordTransition(vk, cmd, *out_image, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
+                                       VK_ACCESS_TRANSFER_WRITE_BIT, VK_ACCESS_SHADER_READ_BIT, VK_PIPELINE_STAGE_TRANSFER_BIT,
+                                       VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT, 0, levels);
 
         vk->EndCommandBuffer(cmd);
 
@@ -328,9 +339,19 @@ static br_error BufferStoredVkUploadPlane(br_device *dev, const br_pixelmap_vk_f
         vmaDestroyBuffer(dev->vma_allocator, staging, staging_allocation);
     }
 
+    BrMemFree(regions);
+
+    if(built != NULL)
+        BrPixelmapFree(built);
+
     return BRE_OK;
 
 fail:
+    BrMemFree(regions);
+
+    if(built != NULL)
+        BrPixelmapFree(built);
+
     BufferStoredVkReleasePlane(dev, out_image, out_view, out_allocation);
     return BRE_FAIL;
 }
@@ -374,19 +395,18 @@ static br_error BufferStoredVkUpdateImage(br_buffer_stored *self, br_pixelmap *p
     }
 
     /*
-     * A non-indexed colour map gets a mip chain, as glGenerateMipmap gives it in glrend; the
-     * index plane and the palette do not - an INDEX_8 map is a lookup whose index plane the
-     * sample clamps to level 0, exactly the mip_filter == BRT_NONE behaviour.
+     * A non-indexed colour map gets a mip chain; the index plane and the palette do not - an
+     * INDEX_8 map is a lookup whose index plane the sample clamps to level 0, exactly the
+     * mip_filter == BRT_NONE behaviour.
      */
-    if(BufferStoredVkUploadPlane(self->device, self->fmt, (const br_uint_8 *)pm->pixels, pm->row_bytes, (br_uint_32)pm->width,
-                                 (br_uint_32)pm->height, !self->indexed, &self->image, &self->view, &self->allocation) != BRE_OK) {
+    if(BufferStoredVkUploadPlane(self->device, self->fmt, pm, !self->indexed, &self->image, &self->view, &self->allocation) != BRE_OK) {
         BufferStoredVkDestroyImage(self);
         return BRE_FAIL;
     }
 
     if(clut != NULL) {
-        if(BufferStoredVkUploadPlane(self->device, self->clut_fmt, (const br_uint_8 *)clut->pixels, clut->row_bytes, (br_uint_32)clut->width,
-                                     (br_uint_32)clut->height, BR_FALSE, &self->clut_image, &self->clut_view, &self->clut_allocation) != BRE_OK) {
+        if(BufferStoredVkUploadPlane(self->device, self->clut_fmt, (br_pixelmap *)clut, BR_FALSE, &self->clut_image, &self->clut_view,
+                                     &self->clut_allocation) != BRE_OK) {
             BufferStoredVkDestroyImage(self);
             return BRE_FAIL;
         }
@@ -562,11 +582,20 @@ br_error BufferStoredVkCreateWhite(br_device *dev, VkImage *out_image, VkImageVi
 {
     static const br_uint_8    white[4] = {0xFF, 0xFF, 0xFF, 0xFF};
     const br_pixelmap_vk_fmt *fmt      = DeviceVkGetFormatDetails(BR_PMT_RGBA_8888);
+    br_pixelmap              *pm;
+    br_error                  result;
 
     if(fmt == NULL || fmt->format == VK_FORMAT_UNDEFINED)
         return BRE_FAIL;
 
-    return BufferStoredVkUploadPlane(dev, fmt, white, 4, 1, 1, BR_FALSE, out_image, out_view, out_allocation);
+    /* The upload takes a pixelmap; a one-texel one over the constant borrows its pixels. */
+    if((pm = BrPixelmapAllocate(BR_PMT_RGBA_8888, 1, 1, (void *)white, BR_PMAF_NORMAL)) == NULL)
+        return BRE_FAIL;
+
+    result = BufferStoredVkUploadPlane(dev, fmt, pm, BR_FALSE, out_image, out_view, out_allocation);
+    BrPixelmapFree(pm);
+
+    return result;
 }
 
 /*
