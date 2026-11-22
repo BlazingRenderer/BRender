@@ -19,8 +19,11 @@ module rather than the directory holding it: `core/fmt/gltf:` for the glTF forma
 layer, never `core/fmt:`, which is every format in the engine. Likewise
 `core/v1db:`, `drivers/softprim:`, `contrib/editorcam:`. Name the component, not
 the set of files it happened to touch — the wiring and callers a change drags
-along don't broaden it. Keep the subject under 72 characters and wrap the body at
-72.
+along don't broaden it. Several files under one tree — a tool and the fixtures it
+generates, say — are one logical change and take a braced prefix that still
+expands to one path per file: `tools/{mkres,rendertest}:`. A change that cannot be
+compiled in pieces, and so fits no single component, takes `treewide:` and names
+the affected packages in the body.
 
 Each commit is a single logical unit, and each one should stand on its own:
 split work across commits when it touches independent subsystems, and prefer a
@@ -35,12 +38,18 @@ added, renamed or removed — a symbol, an endpoint, a config key — rather tha
 area it lives in or the abstraction it implements: `add a package-level Submit()`,
 `split into /livez and /readyz, drop /health`.
 
+72 characters is a guideline, not a limit. A subject slightly over it that names
+the thing beats a shorter one that does not, and a body written only to shorten a
+subject is worse than the long subject. Wrap the body at 72.
+
 ### The body
 
 The default is no body. Add one only when a reader with the subject and the diff
-would be missing something: a changed contract, a format, something forbidden, why
-the obvious alternative is wrong, what a refusal protects against. A load-bearing
-reason that would read equally well as a code comment belongs in the code.
+would be missing something, and that is one of exactly three things: a foreign
+system's behaviour and why it forces this shape; the contract with a caller — what
+it must supply, what it may assume; or why the obvious alternative was rejected. A
+load-bearing reason that would read equally well as a code comment belongs in the
+code.
 
 Length is earned by reference, not by story. One or two sentences is the default;
 a long body is right when it carries what the diff cannot — another system's
@@ -89,3 +98,5 @@ contrib/editorcam: fix camera offset after pan mode, add orbit mode
 - Run `clang-format` with the tree's `.clang-format` before you send it.
 - Merge commits are not accepted, except at maintainer discretion — octopus merges, or a case where preserving branch history has clear
   value. When in doubt, rebase.
+- Each commit should stand on its own once the series is finished. How the
+  follow-ups within a series are recorded and squashed is in `AGENTS.md`.
