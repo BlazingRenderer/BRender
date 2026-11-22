@@ -252,6 +252,11 @@ void BR_PUBLIC_ENTRY       BrPixelmapPixelSet(br_pixelmap *dst, br_int_32 x, br_
  *
  * \return The pixel value. If the point is off-screen, zero will be returned.
  *
+ * \remark The value is the pixel's own encoding, not a decoded colour, e.g. an index for an
+ *         indexed type, and the packed word for a 16-bit type.
+ *         It is the value \ref BrPixelmapPixelSet takes.
+ *         A type narrower than a byte reads as zero.
+ *
  * \remark Some device oriented pixel maps may not support read operations.
  */
 br_uint_32 BR_PUBLIC_ENTRY BrPixelmapPixelGet(br_pixelmap *dst, br_int_32 x, br_int_32 y);
