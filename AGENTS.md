@@ -85,7 +85,36 @@ before committing, and before sending a change.
 What is specific to working in this tree with an agent, and is not a contributor
 rule: commits are made unsigned and are never pushed — the maintainer rebases,
 re-signs and pushes them, and every hash in this tree may change overnight.
-`git commit --fixup` is how a follow-up is recorded; see the global conventions.
+
+`git commit --fixup` is how a follow-up is recorded, so that the end result has it
+squashed into the commit it corrects:
+
+```sh
+git commit --fixup <target>            # content
+git commit --fixup=amend:<target>      # content, and replace the message
+git commit --fixup=reword:<target>     # message only
+```
+
+`amend:` and `reword:` open an editor, so they need `GIT_EDITOR` set to a command
+that writes the message and exits — otherwise the session sits waiting on an
+editor nobody will touch. The first line has to stay `amend! <the target's
+subject>`, with the new message below it.
+
+A fixup applies at the commit whose version of the file its context matches —
+which, for a line that later commits rewrite, is the rewriting commit and not the
+one that introduced the symbol. Rename late in a series, or make the rename its own
+commit after everything that touches the symbol. Three rebases here have been
+aborted learning that.
+
+Squash with both editors set, so that nothing can stop and wait:
+
+```sh
+GIT_SEQUENCE_EDITOR=true GIT_EDITOR=true git rebase -i --autosquash <base>
+```
+
+A conflict is a stop-and-think point rather than a hazard, and `git rebase --abort`
+is free. After a rewrite, prove it was history-only: `git diff <old-tip> HEAD`
+should be empty.
 
 ## Testing
 There is no unit-test suite, and none should be added. `ctest` runs the render corpus with one test per configuration, and CI runs it for
