@@ -4,6 +4,8 @@ add_executable(rendertest
         main.c
         b2dwitness.c
         b2dwitness.h
+        mipwitness.c
+        mipwitness.h
         pmwitness.c
         pmwitness.h
         vkwitness.c
@@ -264,6 +266,10 @@ if (BUILD_TESTING)
     # witness needs two - and softrend cannot render to the RGBA_8888 offscreen
     # the texel readback needs, its RGB rasterisers being 555/565/888 only.
     #
+    add_test(NAME "mipw-glrend" COMMAND rendertest --mip-witness --device glrend)
+    set_tests_properties("mipw-glrend" PROPERTIES
+                         ENVIRONMENT "SDL_VIDEODRIVER=offscreen;LIBGL_ALWAYS_SOFTWARE=true")
+
     add_test(NAME "envw-glrend" COMMAND rendertest --env-witness --device glrend)
     set_tests_properties("envw-glrend" PROPERTIES
                          ENVIRONMENT "SDL_VIDEODRIVER=offscreen;LIBGL_ALWAYS_SOFTWARE=true")

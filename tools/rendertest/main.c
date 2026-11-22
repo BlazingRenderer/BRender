@@ -36,6 +36,7 @@
 #include "rt_demo.h"
 #include "vkwitness.h"
 #include "b2dwitness.h"
+#include "mipwitness.h"
 #include "pmwitness.h"
 #include "wfwitness.h"
 
@@ -124,6 +125,7 @@ static int         rt_cfg_no_depth     = 0;
 static int         rt_cfg_warmup       = 2;
 static int         rt_cfg_bless        = 0;
 static int         rt_cfg_env_witness  = 0;
+static int         rt_cfg_mip_witness  = 0;
 static int         rt_cfg_2d_witness   = 0;
 static int         rt_cfg_pm_witness   = 0;
 static int         rt_cfg_wf_witness   = 0;
@@ -2046,7 +2048,7 @@ static br_error rt_app_init(rt_demo *demo)
      * witness builds its scene and asserts it against softrend's sphere map
      * rather than against a stored checksum; see rt_env_witness_run().
      */
-    if(rt_cfg_env_witness)
+    if(rt_cfg_env_witness || rt_cfg_mip_witness)
         return BRE_OK;
 
     if(st->env_ok && rt_load_reference(st) != BRE_OK)
@@ -2138,6 +2140,16 @@ static int rt_run(rt_demo *demo)
         BrRendererEnd();
 
         if(rt_env_witness_run(demo) != BRE_OK)
+            g_failed = 1;
+
+        printf("RT result=%s failures=%d\n", g_failed ? "FAIL" : "PASS", g_failed ? 1 : 0);
+        return g_failed;
+    }
+
+    if(rt_cfg_mip_witness) {
+        BrRendererEnd();
+
+        if(rt_mip_witness_run(demo, rt_cfg_device) != BRE_OK)
             g_failed = 1;
 
         printf("RT result=%s failures=%d\n", g_failed ? "FAIL" : "PASS", g_failed ? 1 : 0);
@@ -2514,6 +2526,7 @@ static int rt_list_scene_dir(const char *dir)
 
 #define ARGDEF_PM_WITNESS       317
 #define ARGDEF_WF_WITNESS       318
+#define ARGDEF_MIP_WITNESS      319
 
 /* Laid out as a grid so the set reads as one list; held out of clang-format. */
 // clang-format off
@@ -2532,6 +2545,7 @@ static const struct parg_option rt_argdefs[] = {
     {.name = "2d-witness",       .has_arg = PARG_NOARG,  .flag = NULL, .val = ARGDEF_2D_WITNESS      },
     {.name = "pm-witness",       .has_arg = PARG_NOARG,  .flag = NULL, .val = ARGDEF_PM_WITNESS      },
     {.name = "wireframe-witness", .has_arg = PARG_NOARG, .flag = NULL, .val = ARGDEF_WF_WITNESS      },
+    {.name = "mip-witness",      .has_arg = PARG_NOARG,  .flag = NULL, .val = ARGDEF_MIP_WITNESS     },
     {.name = "vk-witness",       .has_arg = PARG_NOARG,  .flag = NULL, .val = ARGDEF_VK_WITNESS      },
     {.name = "list",             .has_arg = PARG_NOARG,  .flag = NULL, .val = ARGDEF_LIST            },
     {.name = "list-scene-dir",   .has_arg = PARG_REQARG, .flag = NULL, .val = ARGDEF_LIST_SCENE_DIR  },
@@ -2652,6 +2666,10 @@ static rt_parse rt_parse_args(int argc, char *const *argv)
                 rt_cfg_wf_witness = 1;
                 break;
 
+            case ARGDEF_MIP_WITNESS:
+                rt_cfg_mip_witness = 1;
+                break;
+
             case ARGDEF_2D_WITNESS:
                 rt_cfg_2d_witness = 1;
                 break;
@@ -2709,6 +2727,7 @@ static void rt_usage(FILE *out, const char *argv0)
             "  --ppm-dir <dir>    write each frame as <dir>/<scene>.ppm\n"
             "  --bless            write the reference instead of comparing\n"
             "  --env-witness      run the environment-map orientation witness and exit\n"
+            "  --mip-witness      run the mip-chain witness and exit\n"
             "  --2d-witness       run the Br2D immediate-path witness and exit\n"
             "  --wireframe-witness\n"
             "                     run the wireframe witness and exit\n"
