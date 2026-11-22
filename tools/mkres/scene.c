@@ -369,7 +369,9 @@ static br_material *scene_material_ex(const char *name, br_colour colour, br_uin
  * a single point, so the fade would not show across it.
  */
 static br_vector4       light_volume_planes[1]  = {{{BR_SCALAR(1.0), BR_SCALAR(0.0), BR_SCALAR(0.0), BR_SCALAR(0.0)}}};
-static br_convex_region light_volume_regions[1] = {{light_volume_planes, 1}};
+static br_convex_region light_volume_regions[1] = {
+    {light_volume_planes, 1}
+};
 
 static br_actor *scene_add_volume_light(br_actor *world, br_scalar falloff_distance)
 {
@@ -390,8 +392,8 @@ static br_actor *scene_add_volume_light(br_actor *world, br_scalar falloff_dista
 
 static br_material *scene_light_volume_material(void)
 {
-    return scene_material_ex("scene-light-volume-material", BR_COLOUR_RGB(200, 200, 200), BR_MATF_LIGHT | BR_MATF_SMOOTH,
-                             BR_SCALAR(0.1), BR_SCALAR(0.7), BR_SCALAR(0.0), BR_SCALAR(20.0));
+    return scene_material_ex("scene-light-volume-material", BR_COLOUR_RGB(200, 200, 200), BR_MATF_LIGHT | BR_MATF_SMOOTH, BR_SCALAR(0.1),
+                             BR_SCALAR(0.7), BR_SCALAR(0.0), BR_SCALAR(20.0));
 }
 
 /*
@@ -402,8 +404,8 @@ static br_material *scene_light_volume_material(void)
  */
 static br_material *scene_scale_spot_material(void)
 {
-    return scene_material_ex("scene-scale-spot-material", BR_COLOUR_RGB(200, 200, 200), BR_MATF_LIGHT | BR_MATF_SMOOTH,
-                             BR_SCALAR(0.1), BR_SCALAR(0.7), BR_SCALAR(0.0), BR_SCALAR(20.0));
+    return scene_material_ex("scene-scale-spot-material", BR_COLOUR_RGB(200, 200, 200), BR_MATF_LIGHT | BR_MATF_SMOOTH, BR_SCALAR(0.1),
+                             BR_SCALAR(0.7), BR_SCALAR(0.0), BR_SCALAR(20.0));
 }
 
 /*
@@ -1565,9 +1567,9 @@ static br_pixelmap *scene_rgba_texture(const char *name)
 static br_error scene_make_rgba_blend_fixture(br_model *quad)
 {
     br_material *mat;
-    br_pixelmap                      *map;
-    br_actor                         *world, *a;
-    br_matrix34                       m;
+    br_pixelmap *map;
+    br_actor    *world, *a;
+    br_matrix34  m;
 
     if((map = scene_rgba_texture("scene-rgba-blend-map")) == NULL) {
         fprintf(stderr, "failed to allocate the rgba blend fixture map\n");
