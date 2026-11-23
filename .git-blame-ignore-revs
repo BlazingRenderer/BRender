@@ -45,3 +45,6 @@ e65cae067da593347f8828fcff3e7d25b18e95ce
 
 # treewide: reformat
 740ff457705dd06be0e6827925aba09ae83e99a1
+
+# treewide: clang-format
+c080809a804208c9262ab8a140a4211d947d0bc1
