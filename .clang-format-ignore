@@ -26,7 +26,7 @@ examples/imgui-demo/imgui_impl_sdl3.h
 examples/imgui-demo/imstb_*.h
 drivers/glrend/*.glsl
 
-drivers/glrend1x/glad
+drivers/glrend1x/glad/**
 
 drivers/vkrend/vk_mem_alloc.h
 drivers/vkrend/vk_mem_alloc.cpp
