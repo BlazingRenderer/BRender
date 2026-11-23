@@ -1097,9 +1097,11 @@ br_matrix34 *BR_PUBLIC_ENTRY BrMatrix34FromTRS(br_matrix34 *mat, const br_vector
  */
 br_scalar BR_PUBLIC_ENTRY BrMatrix34Determinant3(const br_matrix34 *m)
 {
+    // clang-format off
     return BR_MAC3(
         m->m[0][0], BR_MAC2(m->m[1][1], m->m[2][2], -m->m[1][2], m->m[2][1]),
        -m->m[0][1], BR_MAC2(m->m[1][0], m->m[2][2], -m->m[1][2], m->m[2][0]),
         m->m[0][2], BR_MAC2(m->m[1][0], m->m[2][1], -m->m[1][1], m->m[2][0])
     );
+    // clang-format on
 }
