@@ -73,6 +73,21 @@
       };
     }));
 
+    # `nix flake check` builds these, and CI runs it, so formatting is gated where
+    # the rest of the tree's checks already are. clang-tools comes from the flake's
+    # own nixpkgs, so a formatter upgrade reformats the tree in one visible change
+    # instead of reddening an unrelated diff.
+    checks = forAllSystems (pkgs: {
+      format = pkgs.runCommandLocal "format" {
+        nativeBuildInputs = [ pkgs.clang-tools ];
+      } ''
+        cd ${self}
+        find core drivers tools examples contrib \
+          \( -name '*.h' -o -name '*.c' -o -name '*.cpp' -o -name '*.hpp' \) -print0 \
+          | xargs -0 -r clang-format --dry-run --Werror > $out
+      '';
+    });
+
     devShells.x86_64-linux   = mkShells self.packages.x86_64-linux;
     devShells.aarch64-linux  = mkShells self.packages.aarch64-linux;
     devShells.aarch64-darwin = mkShells self.packages.aarch64-darwin;
