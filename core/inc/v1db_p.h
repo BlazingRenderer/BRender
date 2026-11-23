@@ -127,8 +127,9 @@ typedef void BR_CALLBACK br_renderbounds_cbfn(br_actor *actor, br_model *model, 
  *     BrZsOrderTablePrimitiveInsert(), BrZsPrimitiveBucketSelect()
  *
  * \par Example
+ * The following code demonstrates a primitive call-back function that performs the equivalent of BRender's normal primitive insertion, and
+ * so can be used for collection of statistics, say.
  * \code{.c}
- * The following code demonstrates a primitive call-back function that performs the equivalent of BRender's normal primitive insertion, and so can be used for collection of statistics, say.
  *     void BR_CALLBACK CBFnPrimitive(br_primitive* primitive, br_actor*
  *       actor, const br_model* model, const br_material* material,
  *       br_order_table* order_table, const br_scalar* z)
