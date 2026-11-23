@@ -13,12 +13,21 @@
           "aarch64-darwin"
         ] (system: function nixpkgs.legacyPackages.${system});
 
-    mkShells = packages: builtins.mapAttrs (k: v: v.overrideAttrs(old: {
-      hardeningDisable = [ "all" ];
-      nativeBuildInputs = old.nativeBuildInputs ++ v.devTools;
+    mkShells = let
+      mapPkgs = builtins.mapAttrs (k: v: v.overrideAttrs(old: {
+        hardeningDisable = [ "all" ];
+        nativeBuildInputs = old.nativeBuildInputs ++ v.devTools;
 
-      env.LD_LIBRARY_PATH = self.inputs.nixpkgs.lib.makeLibraryPath [ v.vulkan-loader ];
-    })) packages;
+        env.LD_LIBRARY_PATH = self.inputs.nixpkgs.lib.makeLibraryPath [ v.vulkan-loader ];
+      }));
+    in packages: (
+      (mapPkgs packages) //
+      (lib.optionalAttrs packages.brender.stdenv.hostPlatform.isLinux ({
+        rendertest = packages.brender.override {
+          withTools = true;
+          useGlRuntime = true;
+        };
+      })));
   in {
     packages = forAllSystems(pkgs: (rec {
       brender = pkgs.callPackage ./nix/brender.nix {

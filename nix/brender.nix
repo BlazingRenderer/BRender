@@ -15,19 +15,33 @@
 , vulkan-validation-layers
 , withTools ? true
 , withExamples ? false
+, useGlRuntime ? null
 }: let
   binExtension = stdenv.hostPlatform.extensions.executable;
 
-  runTests = withExamples && stdenv.buildPlatform.canExecute stdenv.hostPlatform;
+  runTests = withTools && stdenv.buildPlatform.canExecute stdenv.hostPlatform;
 
-  # The GL tests ask SDL for an OpenGL window. A sandbox has no GPU and, unlike
-  # a devshell, no system EGL vendor config, so SDL's EGL cannot find a device
-  # and the demo falls back to the software renderer while still labelling the
-  # run `device=glrend`. On Linux, mesa + libglvnd supply llvmpipe for it; on
-  # darwin and the other platforms GL comes from the system and no vendoring is
-  # needed.
-  glRuntime = withExamples && stdenv.hostPlatform.isLinux;
+  # The corpus and the witnesses create a GL or Vulkan device. On Linux with no GPU
+  # that needs mesa's llvmpipe and lavapipe named, because the loader looks for them
+  # under /run/opengl-driver, which neither a build sandbox nor a CI runner provides;
+  # darwin takes GL from the system. So the environment follows the checks rather
+  # than being a second opt-in beside them: `useGlRuntime` overrides it, and null
+  # means "wherever the checks run", which is the case that has to work.
+  glRuntime = if useGlRuntime != null then useGlRuntime else runTests && stdenv.hostPlatform.isLinux;
+
+  glRuntimeEnv = lib.optionalString glRuntime ''
+    export LIBGL_ALWAYS_SOFTWARE=1
+    export GALLIUM_DRIVER=llvmpipe
+    export LIBGL_DRIVERS_PATH=${mesa}/lib/dri
+    export __EGL_VENDOR_LIBRARY_FILENAMES=${mesa}/share/glvnd/egl_vendor.d/50_mesa.json
+    export LD_LIBRARY_PATH=${libglvnd}/lib:${mesa}/lib''${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}
+
+    export VK_DRIVER_FILES=$(echo ${mesa}/share/vulkan/icd.d/lvp_icd.*.json)
+    export VK_LAYER_PATH=${vulkan-validation-layers}/share/vulkan/explicit_layer.d
+    export LD_LIBRARY_PATH=${vulkan-loader}/lib:${vulkan-validation-layers}/lib:$LD_LIBRARY_PATH
+  '';
 in
+assert glRuntime -> runTests && stdenv.hostPlatform.isLinux;
 stdenv.mkDerivation(finalAttrs: {
   inherit version;
 
@@ -49,40 +63,24 @@ stdenv.mkDerivation(finalAttrs: {
 
   passthru.vulkan-loader = vulkan-loader;
 
+  passthru.glRuntimeEnv = glRuntimeEnv;
+
   buildInputs = [
     sdl3
   ] ++ lib.optionals withExamples [
     glfw
   ];
 
-  checkInputs = lib.optionals glRuntime [
+  checkInputs = lib.optionals runTests [
     mesa
     libglvnd
     vulkan-loader
     vulkan-validation-layers
   ];
 
-  # Point the GL tests at llvmpipe. SDL dlopens libEGL by soname and the mesa
-  # EGL vendor lives in the mesa store path, so the loader needs both on the
-  # search path; the vendor JSON names the vendor library explicitly. The
-  # per-test LIBGL_ALWAYS_SOFTWARE the corpus sets is not enough on its own -
-  # without a device to initialise, EGL never reaches the software driver.
-  #
-  # The Vulkan witness needs the same: on a NixOS host the loader finds its ICD
-  # under /run/opengl-driver, which the sandbox does not mount, so name mesa's
-  # lavapipe manifest explicitly. mesa ships the manifest for the host platform's
-  # word size, so this covers the 32-bit package as well.
-  preCheck = lib.optionalString glRuntime ''
-    export LIBGL_ALWAYS_SOFTWARE=1
-    export GALLIUM_DRIVER=llvmpipe
-    export LIBGL_DRIVERS_PATH=${mesa}/lib/dri
-    export __EGL_VENDOR_LIBRARY_FILENAMES=${mesa}/share/glvnd/egl_vendor.d/50_mesa.json
-    export LD_LIBRARY_PATH=${libglvnd}/lib:${mesa}/lib''${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}
+  preCheck = glRuntimeEnv;
 
-    export VK_DRIVER_FILES=$(echo ${mesa}/share/vulkan/icd.d/lvp_icd.*.json)
-    export VK_LAYER_PATH=${vulkan-validation-layers}/share/vulkan/explicit_layer.d
-    export LD_LIBRARY_PATH=${vulkan-loader}/lib:${vulkan-validation-layers}/lib:$LD_LIBRARY_PATH
-  '';
+  doCheck = runTests;
 
   cmakeFlags = [
     (lib.cmakeBool "BRENDER_BUILD_TOOLS" withTools)
@@ -132,9 +130,11 @@ stdenv.mkDerivation(finalAttrs: {
     done
   '';
 
-  doCheck = runTests;
-
   outputs = [ "bin" "lib" "dev" "out" ] ++ (lib.optionals withExamples [
     "data"
   ]);
+
+  # The checks are not the devshell: only the rendertest shell asks for this on
+  # entry, so it follows `useGlRuntime` and not `glRuntime`.
+  shellHook = lib.optionalString (useGlRuntime == true) glRuntimeEnv;
 })
