@@ -154,22 +154,27 @@ static void MemCpyToken(br_token t, void *dst, const void *src)
     BrMemCpy(dst, src, s);
 }
 
-/*
- * Fetch one value according to template information
- *
- * Returns:
- * 	BRE_OK 		if conversion suceeded
- *  BRE_UNKNOWN	if conversion type was not recognised
- *	BRE_OVERFLOW if extra buffer space was exhausted
- */
 #define MEM(t)   (*(t *)(mem))
 #define MEM_P(t) ((t *)(mem))
 
-static br_error ValueQuery(br_token_value *tv,                  /* Destination for value					*/
-                           void          **pextra,              /* Buffer for additional value data			*/
-                           br_size_t *pextra_size, void *block, /* Base of block associated with template	*/
-                           const br_tv_template_entry *tep,     /* Template entry to use for conversion		*/
-                           void *context)                       /* Object whose state is being queried		*/
+/**
+ * \brief Fetch one value according to template information.
+ *
+ * \param tv          Where the token and the value are written.
+ * \param pextra      A pointer to the caller's buffer pointer for the converted data; the
+ *                    conversions that change layout write through it and advance it.
+ * \param pextra_size On entry the space available in that buffer, in bytes; the conversion
+ *                    subtracts what it consumes.
+ * \param block       The block the entry's offset is applied to. A BRTV_ABS entry keeps its
+ *                    value in the entry itself, so \p block is unused for one.
+ * \param tep         The template entry that says how to convert the value.
+ * \param context     The object whose state is being queried.
+ * \return \ref BRE_OK, \ref BRE_UNKNOWN for a conversion this function does not implement,
+ *         \ref BRE_OVERFLOW when \p pextra or \p pextra_size is NULL, or \p pextra_size is
+ *         too small for the converted data, or whatever a \ref BRTV_CONV_CUSTOM entry's
+ *         handler returns.
+ */
+static br_error ValueQuery(br_token_value *tv, void **pextra, br_size_t *pextra_size, void *block, const br_tv_template_entry *tep, void *context)
 {
     void         *mem;
     br_uintptr_t *lp;
