@@ -80,8 +80,7 @@ void T_OutputPixelmap(char *filename, br_uint_32 type)
             /*
              * save image without palette
              */
-            cbfn_command->map_table = BrResAllocate(cbfn_command, sizeof(*cbfn_command->map_table) * cbfn_command->nmaps,
-                                                    BR_MEMORY_APPLICATION);
+            cbfn_command->map_table = BrResAllocate(cbfn_command, sizeof(*cbfn_command->map_table) * cbfn_command->nmaps, BR_MEMORY_APPLICATION);
 
             cbfn_command->count = 0;
             cbfn_command->type  = T_CBFN_GENERATE_IMAGE_TABLE;
@@ -107,8 +106,7 @@ void T_OutputPixelmap(char *filename, br_uint_32 type)
              */
             BrMapEnum(NULL, T_PixelmapCbfn, cbfn_command);
 
-            cbfn_command->map_table = BrResAllocate(cbfn_command, sizeof(*cbfn_command->map_table) * cbfn_command->npals,
-                                                    BR_MEMORY_APPLICATION);
+            cbfn_command->map_table = BrResAllocate(cbfn_command, sizeof(*cbfn_command->map_table) * cbfn_command->npals, BR_MEMORY_APPLICATION);
 
             cbfn_command->type  = T_CBFN_GENERATE_PALETTE_TABLE;
             cbfn_command->count = 0;

@@ -84,7 +84,7 @@ br_error BR_PUBLIC_ENTRY BrFwEnd(void);
  * \remark Remember, that rclass must point to a resource class structure that will remain valid
  *         until the class is removed.
  */
-br_resource_class *BR_PUBLIC_ENTRY     BrResClassAdd(br_resource_class *pixelmap);
+br_resource_class *BR_PUBLIC_ENTRY BrResClassAdd(br_resource_class *pixelmap);
 /**
  * \brief Remove a resource class from use.
  *
@@ -95,7 +95,7 @@ br_resource_class *BR_PUBLIC_ENTRY     BrResClassAdd(br_resource_class *pixelmap
  *
  * \return Returns a pointer to the removed resource class.
  */
-br_resource_class *BR_PUBLIC_ENTRY     BrResClassRemove(br_resource_class *pixelmap);
+br_resource_class *BR_PUBLIC_ENTRY BrResClassRemove(br_resource_class *pixelmap);
 /**
  * \brief Find a resource class in the registry by name.
  *
@@ -107,7 +107,7 @@ br_resource_class *BR_PUBLIC_ENTRY     BrResClassRemove(br_resource_class *pixel
  * \return Returns a pointer to the resource class if found, otherwise NULL. If a call-back exists
  *         and is called, the call-back's return value is returned.
  */
-br_resource_class *BR_PUBLIC_ENTRY     BrResClassFind(const char *pattern);
+br_resource_class *BR_PUBLIC_ENTRY BrResClassFind(const char *pattern);
 /**
  * \brief An application defined call-back function used when BrResClassFind() or
  *        BrResClassFindMany() fail.
@@ -173,7 +173,7 @@ br_resclass_find_cbfn *BR_PUBLIC_ENTRY BrResClassFindHook(br_resclass_find_cbfn 
  *
  * \remark Remember, that each resource class structures must remain valid until it is removed.
  */
-br_uint_32 BR_PUBLIC_ENTRY             BrResClassAddMany(br_resource_class **items, int n);
+br_uint_32 BR_PUBLIC_ENTRY BrResClassAddMany(br_resource_class **items, int n);
 /**
  * \brief Remove a number of resource classes from use.
  *
@@ -185,7 +185,7 @@ br_uint_32 BR_PUBLIC_ENTRY             BrResClassAddMany(br_resource_class **ite
  *
  * \return Returns the number of resource classes successfully removed from use.
  */
-br_uint_32 BR_PUBLIC_ENTRY             BrResClassRemoveMany(br_resource_class **items, int n);
+br_uint_32 BR_PUBLIC_ENTRY BrResClassRemoveMany(br_resource_class **items, int n);
 /**
  * \brief Find a number of resource classes in the registry by name.
  *
@@ -198,7 +198,7 @@ br_uint_32 BR_PUBLIC_ENTRY             BrResClassRemoveMany(br_resource_class **
  * \return Returns the number of resource classes found. The pointer array is filled with pointers
  *         to the resource classes.
  */
-br_uint_32 BR_PUBLIC_ENTRY             BrResClassFindMany(const char *pattern, br_resource_class **items, int max);
+br_uint_32 BR_PUBLIC_ENTRY BrResClassFindMany(const char *pattern, br_resource_class **items, int max);
 /**
  * \brief Count the number of resource classes in the registry whose names match a given search
  *        pattern.
@@ -209,7 +209,7 @@ br_uint_32 BR_PUBLIC_ENTRY             BrResClassFindMany(const char *pattern, b
  *
  * \return Returns the number of resource classes matching the search string.
  */
-br_uint_32 BR_PUBLIC_ENTRY             BrResClassCount(const char *pattern);
+br_uint_32 BR_PUBLIC_ENTRY BrResClassCount(const char *pattern);
 
 /**
  * \brief An application defined call-back function accepting a resource class and an application
@@ -287,7 +287,7 @@ br_pool *BR_PUBLIC_ENTRY BrPoolAllocate(int block_size, int chunk_size, br_uint_
  *
  * \param pool A pointer to the pool to be deallocated.
  */
-void BR_PUBLIC_ENTRY     BrPoolFree(br_pool *pool);
+void BR_PUBLIC_ENTRY BrPoolFree(br_pool *pool);
 
 /**
  * \brief Allocate a block from a pool.
@@ -305,7 +305,7 @@ void *BR_PUBLIC_ENTRY BrPoolBlockAllocate(struct br_pool *pool);
  * \param pool  A pointer to the relevant pool.
  * \param block A pointer to the block to deallocate.
  */
-void BR_PUBLIC_ENTRY  BrPoolBlockFree(struct br_pool *pool, void *block);
+void BR_PUBLIC_ENTRY BrPoolBlockFree(struct br_pool *pool, void *block);
 
 /**
  * \brief Mark all blocks in a pool as unused.
@@ -370,7 +370,7 @@ br_diaghandler *BR_PUBLIC_ENTRY BrDiagHandlerSet(br_diaghandler *newdh);
  *
  * \return Returns a pointer to the old br_filesystem structure.
  */
-br_filesystem *BR_PUBLIC_ENTRY  BrFilesystemSet(br_filesystem *newfs);
+br_filesystem *BR_PUBLIC_ENTRY BrFilesystemSet(br_filesystem *newfs);
 /**
  * \brief Install a new set of memory allocation/deallocation functions.
  *
@@ -378,8 +378,8 @@ br_filesystem *BR_PUBLIC_ENTRY  BrFilesystemSet(br_filesystem *newfs);
  *
  * \return Returns a pointer to the old br_allocator structure.
  */
-br_allocator *BR_PUBLIC_ENTRY   BrAllocatorSet(br_allocator *newal);
-br_loghandler *BR_PUBLIC_ENTRY  BrLogHandlerSet(br_loghandler *newlh);
+br_allocator *BR_PUBLIC_ENTRY  BrAllocatorSet(br_allocator *newal);
+br_loghandler *BR_PUBLIC_ENTRY BrLogHandlerSet(br_loghandler *newlh);
 
 /*
  * Backwards compatibility
@@ -431,7 +431,7 @@ br_uint_32 BR_PUBLIC_ENTRY BrFileAttributes(void);
  *
  * \sa Consult your Standard C library documentation.
  */
-void *BR_PUBLIC_ENTRY     BrFileOpenRead(const char *name, br_size_t n_magics, br_mode_test_cbfn *mode_test, int *mode_result);
+void *BR_PUBLIC_ENTRY BrFileOpenRead(const char *name, br_size_t n_magics, br_mode_test_cbfn *mode_test, int *mode_result);
 /**
  * \brief Open a file for writing, over-writing any existing file of the same name.
  *
@@ -452,7 +452,7 @@ void *BR_PUBLIC_ENTRY     BrFileOpenRead(const char *name, br_size_t n_magics, b
  *         Ctrl-J, 0x0A, '\n') characters may be translated to 'carriage return, line feed'
  *         combinations. Consult your Standard C library documentation.
  */
-void *BR_PUBLIC_ENTRY     BrFileOpenWrite(const char *name, int text);
+void *BR_PUBLIC_ENTRY BrFileOpenWrite(const char *name, int text);
 /**
  * \brief Close a previously opened file.
  *
@@ -465,7 +465,7 @@ void *BR_PUBLIC_ENTRY     BrFileOpenWrite(const char *name, int text);
  *
  * \sa Consult your Standard C library documentation.
  */
-void BR_PUBLIC_ENTRY      BrFileClose(void *f);
+void BR_PUBLIC_ENTRY BrFileClose(void *f);
 /**
  * \brief Test a file pointer for end of file.
  *
@@ -483,7 +483,7 @@ void BR_PUBLIC_ENTRY      BrFileClose(void *f);
  *
  * \sa Consult your Standard C library documentation.
  */
-int BR_PUBLIC_ENTRY       BrFileEof(void *f);
+int BR_PUBLIC_ENTRY BrFileEof(void *f);
 /**
  * \brief Read a character from a file.
  *
@@ -503,7 +503,7 @@ int BR_PUBLIC_ENTRY       BrFileEof(void *f);
  *
  * \sa Consult your Standard C library documentation.
  */
-int BR_PUBLIC_ENTRY       BrFileGetChar(void *f);
+int BR_PUBLIC_ENTRY BrFileGetChar(void *f);
 /**
  * \brief Write a single character to a file.
  *
@@ -519,7 +519,7 @@ int BR_PUBLIC_ENTRY       BrFileGetChar(void *f);
  *
  * \sa Consult your Standard C library documentation.
  */
-void BR_PUBLIC_ENTRY      BrFilePutChar(int c, void *f);
+void BR_PUBLIC_ENTRY BrFilePutChar(int c, void *f);
 /**
  * \brief Read a block of data from a file.
  *
@@ -597,7 +597,7 @@ br_size_t BR_PUBLIC_ENTRY BrFileGetLine(char *buf, br_size_t buf_len, void *f);
  *
  * \sa Consult your Standard C library documentation.
  */
-void BR_PUBLIC_ENTRY      BrFilePutLine(const char *buf, void *f);
+void BR_PUBLIC_ENTRY BrFilePutLine(const char *buf, void *f);
 /**
  * \brief Advance the file pointer a number of bytes through a binary stream.
  *
@@ -615,8 +615,8 @@ void BR_PUBLIC_ENTRY      BrFilePutLine(const char *buf, void *f);
  *
  * \sa Consult your Standard C library documentation.
  */
-void BR_PUBLIC_ENTRY      BrFileAdvance(long int count, void *f);
-void *BR_PUBLIC_ENTRY     BrFileLoad(void *res, const char *name, br_size_t *size);
+void BR_PUBLIC_ENTRY  BrFileAdvance(long int count, void *f);
+void *BR_PUBLIC_ENTRY BrFileLoad(void *res, const char *name, br_size_t *size);
 
 /**
  * \brief Write a formatted string to a file.
@@ -675,14 +675,14 @@ int BR_PUBLIC_ENTRY BrWriteModeSet(int text);
  *
  * \return Returns a pointer to the allocated memory, or NULL is unsuccessful.
  */
-void *BR_RESIDENT_ENTRY     BrMemAllocate(br_size_t size, br_uint_8 type);
-void *BR_RESIDENT_ENTRY     BrMemReallocate(void *block, br_size_t size, br_uint_8 type);
+void *BR_RESIDENT_ENTRY BrMemAllocate(br_size_t size, br_uint_8 type);
+void *BR_RESIDENT_ENTRY BrMemReallocate(void *block, br_size_t size, br_uint_8 type);
 /**
  * \brief Deallocate memory.
  *
  * \param block A pointer to the block of memory to deallocate.
  */
-void BR_RESIDENT_ENTRY      BrMemFree(void *block);
+void BR_RESIDENT_ENTRY BrMemFree(void *block);
 /**
  * \brief Find the amount of memory available of a given type.
  *
@@ -761,8 +761,8 @@ void *BR_RESIDENT_ENTRY BrResAllocate(void *vparent, br_size_t size, br_uint_8 r
  * }
  * \endcode
  */
-void BR_RESIDENT_ENTRY  BrResFree(void *vres);
-void BR_RESIDENT_ENTRY  BrResFreeNoCallback(void *vres);
+void BR_RESIDENT_ENTRY BrResFree(void *vres);
+void BR_RESIDENT_ENTRY BrResFreeNoCallback(void *vres);
 /**
  * \brief Duplicate a string.
  *
@@ -792,7 +792,7 @@ char *BR_RESIDENT_ENTRY BrResSprintf(void *vparent, const char *fmt, ...) BR_PRI
  * \remark Once a resource block has been added as a dependant, it can be freed due to its parent
  *         being freed.
  */
-void *BR_RESIDENT_ENTRY       BrResAdd(void *vparent, void *vres);
+void *BR_RESIDENT_ENTRY BrResAdd(void *vparent, void *vres);
 /**
  * \brief Remove a resource block from a parent.
  *
@@ -803,7 +803,7 @@ void *BR_RESIDENT_ENTRY       BrResAdd(void *vparent, void *vres);
  * \remark The resource block will become independent, as though it had been allocated specifying
  *         NULL as its parent.
  */
-void *BR_RESIDENT_ENTRY       BrResRemove(void *vres);
+void *BR_RESIDENT_ENTRY BrResRemove(void *vres);
 /**
  * \brief Determine the class of a given resource block.
  *
@@ -811,7 +811,7 @@ void *BR_RESIDENT_ENTRY       BrResRemove(void *vres);
  *
  * \return Returns the resource class.
  */
-br_uint_8 BR_RESIDENT_ENTRY   BrResClass(void *vres);
+br_uint_8 BR_RESIDENT_ENTRY BrResClass(void *vres);
 /**
  * \brief Determine the size of a given resource block.
  *
@@ -820,8 +820,8 @@ br_uint_8 BR_RESIDENT_ENTRY   BrResClass(void *vres);
  * \return Returns the size of the resource block in bytes (may not necessarily be the same as that
  *         specified upon allocation, but will not be less).
  */
-br_size_t BR_RESIDENT_ENTRY   BrResSize(void *vres);
-br_size_t BR_RESIDENT_ENTRY   BrResSizeTotal(void *vres);
+br_size_t BR_RESIDENT_ENTRY BrResSize(void *vres);
+br_size_t BR_RESIDENT_ENTRY BrResSizeTotal(void *vres);
 /**
  * \brief An application defined call-back function accepting a resource block and an application
  *        supplied argument (as supplied to BrResChildEnum()).
@@ -874,8 +874,8 @@ typedef br_size_t BR_CALLBACK br_resenum_cbfn(void *vres, void *arg);
  * }
  * \endcode
  */
-br_size_t BR_RESIDENT_ENTRY   BrResChildEnum(void *vres, br_resenum_cbfn *callback, void *arg);
-br_boolean BR_RESIDENT_ENTRY  BrResIsChild(void *vparent, void *vchild);
+br_size_t BR_RESIDENT_ENTRY  BrResChildEnum(void *vres, br_resenum_cbfn *callback, void *arg);
+br_boolean BR_RESIDENT_ENTRY BrResIsChild(void *vparent, void *vchild);
 
 /*
  * Block operations (XXX should be made private)

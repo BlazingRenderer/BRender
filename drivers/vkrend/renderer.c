@@ -806,8 +806,8 @@ static void BR_CMETHOD_DECL(br_renderer_vk, sceneBegin)(br_renderer *self)
         return;
 
     if(DeviceVkRenderGetPipeline(self->device, dst_fmt->format, VK_SAMPLE_COUNT_1_BIT, BR_FALSE, BR_FALSE, BRT_FLAT, VK_CULL_MODE_NONE,
-                                 VK_FRONT_FACE_COUNTER_CLOCKWISE, BR_FALSE, BRT_NONE, depth_target != NULL, depth_target != NULL,
-                                 VK_COMPARE_OP_LESS, (depth_target != NULL) ? depth_fmt->format : VK_FORMAT_UNDEFINED, VK_POLYGON_MODE_FILL) == VK_NULL_HANDLE)
+                                 VK_FRONT_FACE_COUNTER_CLOCKWISE, BR_FALSE, BRT_NONE, depth_target != NULL, depth_target != NULL, VK_COMPARE_OP_LESS,
+                                 (depth_target != NULL) ? depth_fmt->format : VK_FORMAT_UNDEFINED, VK_POLYGON_MODE_FILL) == VK_NULL_HANDLE)
         return;
 
     frame = DevicePixelmapVkGetCurrentFrame(colour_target->screen);

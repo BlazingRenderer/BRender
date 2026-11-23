@@ -177,7 +177,7 @@ static br_boolean map_whole(const br_pixelmap *pm)
  */
 static br_error load_pix_payload(br_gltf_load_state *state, br_size_t image_index, const cgltf_image *image, br_pixelmap **out)
 {
-    memfile_store  store     = {0};
+    memfile_store  store = {0};
     br_filesystem *previous;
     br_pixelmap   *loaded[1] = {0};
     br_uint_32     n;
@@ -1022,16 +1022,14 @@ static void fill_light(br_light *light_data, const cgltf_brender_light *light)
     if(light->regions_count > 0) {
         light_data->volume.falloff_distance = BrFloatToScalar(light->falloff_distance);
         light_data->volume.nregions         = light->regions_count;
-        light_data->volume.regions =
-            BrResAllocate(light_data, sizeof(*light_data->volume.regions) * light->regions_count, BR_MEMORY_OBJECT_DATA);
+        light_data->volume.regions = BrResAllocate(light_data, sizeof(*light_data->volume.regions) * light->regions_count, BR_MEMORY_OBJECT_DATA);
 
         for(cgltf_size i = 0; i < light->regions_count; ++i) {
             const cgltf_brender_light_region *region = light->regions + i;
             br_convex_region                 *out    = light_data->volume.regions + i;
 
             out->nplanes = region->planes_count;
-            out->planes =
-                BrResAllocate(light_data->volume.regions, sizeof(*out->planes) * region->planes_count, BR_MEMORY_OBJECT_DATA);
+            out->planes  = BrResAllocate(light_data->volume.regions, sizeof(*out->planes) * region->planes_count, BR_MEMORY_OBJECT_DATA);
 
             for(cgltf_size j = 0; j < region->planes_count; ++j)
                 for(int k = 0; k < 4; ++k)

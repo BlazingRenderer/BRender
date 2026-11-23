@@ -95,18 +95,17 @@ int main(int argc, char **argv)
                      * Usage
                      */
                     case '?':
-                        fprintf(stderr,
-                                "usage: mkshades <palette> [options]\n"
-                                "\n"
-                                "    Generates a shade table to shade indices from a source palette into\n"
-                                "    a destination palette.\n"
-                                "\n"
-                                "        <palette>             Source palette\n"
-                                "        -o <shade-table>      Output shade table pixmap\n"
-                                "        -t <bits>             Generate true-colour shade table of 15,16 or 32 bits\n"
-                                "        [-d <dest-palette>]   Destination palette if different from source\n"
-                                "        [-n <num_shades>]     Number of shades to generate (default = 64)\n"
-                                "        [-r <base>,<size>]    Range in output palette (default = 0,256)\n");
+                        fprintf(stderr, "usage: mkshades <palette> [options]\n"
+                                        "\n"
+                                        "    Generates a shade table to shade indices from a source palette into\n"
+                                        "    a destination palette.\n"
+                                        "\n"
+                                        "        <palette>             Source palette\n"
+                                        "        -o <shade-table>      Output shade table pixmap\n"
+                                        "        -t <bits>             Generate true-colour shade table of 15,16 or 32 bits\n"
+                                        "        [-d <dest-palette>]   Destination palette if different from source\n"
+                                        "        [-n <num_shades>]     Number of shades to generate (default = 64)\n"
+                                        "        [-r <base>,<size>]    Range in output palette (default = 0,256)\n");
                         exit(0);
 
                     /*

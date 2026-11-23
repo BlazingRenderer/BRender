@@ -205,8 +205,7 @@ void BR_CDECL _drip_checkpoint(const char *filename, const char *header, int dum
     /*
      * Print a header
      */
-    fprintf(ofh, "-- %s   %d Blocks (%+d)   %d Bytes (%+d)\n", header, MtBlocks, MtBlocks - MtCheckpointBlocks, MtTotal,
-            MtTotal - MtCheckpointTotal);
+    fprintf(ofh, "-- %s   %d Blocks (%+d)   %d Bytes (%+d)\n", header, MtBlocks, MtBlocks - MtCheckpointBlocks, MtTotal, MtTotal - MtCheckpointTotal);
 
     MtCheckpointBlocks = MtBlocks;
     MtCheckpointTotal  = MtTotal;
@@ -223,8 +222,8 @@ void BR_CDECL _drip_checkpoint(const char *filename, const char *header, int dum
              * Basic information about block
              */
             if(dump_blocks)
-                n = fprintf(ofh, "ALLOCATED %10d (%d %s %s): %08" PRIxPTR " %" PRIuPTR "\n", mtb->id, mtb->tag,
-                            mtb->from, mtb->type, (br_uintptr_t)mtb + 1, (br_uintptr_t)mtb->size);
+                n = fprintf(ofh, "ALLOCATED %10d (%d %s %s): %08" PRIxPTR " %" PRIuPTR "\n", mtb->id, mtb->tag, mtb->from, mtb->type,
+                            (br_uintptr_t)mtb + 1, (br_uintptr_t)mtb->size);
 
             mtb->flags &= ~MT_FLAG_ALLOCED;
         }
@@ -235,8 +234,8 @@ void BR_CDECL _drip_checkpoint(const char *filename, const char *header, int dum
              * Basic information about block
              */
             if(dump_blocks)
-                n = fprintf(ofh, "FREED     %10d (%d %s %s): %08" PRIxPTR " %" PRIuPTR "\n", mtb->id, mtb->tag,
-                            mtb->from, mtb->type, (br_uintptr_t)mtb + 1, (br_uintptr_t)mtb->size);
+                n = fprintf(ofh, "FREED     %10d (%d %s %s): %08" PRIxPTR " %" PRIuPTR "\n", mtb->id, mtb->tag, mtb->from, mtb->type,
+                            (br_uintptr_t)mtb + 1, (br_uintptr_t)mtb->size);
 
             /*
              * Unlink block from list
@@ -284,8 +283,8 @@ void BR_CDECL _drip_dump(const char *filename, const char *header)
         /*
          * Basic information about block
          */
-        n = fprintf(ofh, "%10d (%d %s %s): %08" PRIxPTR " %" PRIuPTR "\n", mtb->id, mtb->tag, mtb->from, mtb->type,
-                    (br_uintptr_t)mtb + 1, (br_uintptr_t)mtb->size);
+        n = fprintf(ofh, "%10d (%d %s %s): %08" PRIxPTR " %" PRIuPTR "\n", mtb->id, mtb->tag, mtb->from, mtb->type, (br_uintptr_t)mtb + 1,
+                    (br_uintptr_t)mtb->size);
     }
 
     if(filename)

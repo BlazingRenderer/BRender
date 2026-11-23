@@ -508,7 +508,7 @@ void UpdateMirror(br_actor *dest, br_actor *src, br_actor *world)
 void BlendPixelmaps(br_pixelmap *dest, br_pixelmap *a, br_pixelmap *b, br_pixelmap *op)
 {
     unsigned char *dp, *ap, *bp;
-    unsigned char(*blend)[256] = (void *)op->pixels;
+    unsigned char (*blend)[256] = (void *)op->pixels;
     int i, c = dest->width * dest->height;
 
     if(!dest->pixels) {

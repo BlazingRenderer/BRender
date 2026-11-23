@@ -109,15 +109,15 @@ typedef struct br_euler {
     /**
      * \brief First angle of rotation.
      */
-    br_angle  a;
+    br_angle a;
     /**
      * \brief Second angle of rotation.
      */
-    br_angle  b;
+    br_angle b;
     /**
      * \brief Third angle of rotation.
      */
-    br_angle  c;
+    br_angle c;
     /**
      * \brief The order in which the angles of rotation are applied.
      *

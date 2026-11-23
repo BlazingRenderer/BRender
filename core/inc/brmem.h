@@ -47,8 +47,8 @@
  * See stdmem.c for examples of memory allocation functions.
  * \endcode
  */
-typedef void *BR_CALLBACK      brmem_allocate_cbfn(br_size_t size, br_uint_8 type);
-typedef void *BR_CALLBACK      brmem_reallocate_cbfn(void *ptr, br_size_t size, br_uint_8 type);
+typedef void *BR_CALLBACK brmem_allocate_cbfn(br_size_t size, br_uint_8 type);
+typedef void *BR_CALLBACK brmem_reallocate_cbfn(void *ptr, br_size_t size, br_uint_8 type);
 /**
  * \brief An application defined call-back function that will reclaim memory previously allocated by
  *        brmem_allocate_cbfn.
@@ -78,7 +78,7 @@ typedef void *BR_CALLBACK      brmem_reallocate_cbfn(void *ptr, br_size_t size, 
  * See stdmem.c for examples of memory deallocation functions.
  * \endcode
  */
-typedef void BR_CALLBACK       brmem_free_cbfn(void *block);
+typedef void BR_CALLBACK brmem_free_cbfn(void *block);
 /**
  * \brief An application defined call-back function providing details of memory availability.
  *
@@ -265,7 +265,7 @@ typedef void BR_CALLBACK br_resourcefree_cbfn(void *res, br_uint_8 res_class, br
  * application defined memory or resource classes to be used.
  */
 typedef struct br_resource_class {
-    br_uintptr_t          reserved;
+    br_uintptr_t reserved;
     /**
      * \brief Pointer to unique, zero terminated, character string (or NULL if not required).
      *
@@ -277,14 +277,14 @@ typedef struct br_resource_class {
      *   my_res_class->identifier=BrResStrDup(my_res_class,"MyClass");
      * \endcode
      */
-    const char           *identifier;
+    const char *identifier;
     /**
      * \brief The memory class of the new resource class.
      *
      * See Memory Classes for a description of possible values. Only values between
      * BR_MEMORY_APPLICATION+1 and BR_MEMORY_MAX-1 (inclusive) should be used.
      */
-    br_uint_8             res_class;
+    br_uint_8 res_class;
     /**
      * \brief This is a pointer to the destructor function (See br_resourcefree_cbfn) it may be NULL if
      *        not required.

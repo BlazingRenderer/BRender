@@ -354,9 +354,8 @@ static bool blit_same_format(SDL_Surface *src, const SDL_Rect *sr, SDL_Surface *
         locked_dst = true;
     }
 
-    ok = SDL_ConvertPixels(s.w, s.h, src->format, (const Uint8 *)src->pixels + s.y * src->pitch + s.x * SDL_BYTESPERPIXEL(src->format),
-                           src->pitch, dst->format, (Uint8 *)dst->pixels + clip.y * dst->pitch + clip.x * SDL_BYTESPERPIXEL(dst->format),
-                           dst->pitch);
+    ok = SDL_ConvertPixels(s.w, s.h, src->format, (const Uint8 *)src->pixels + s.y * src->pitch + s.x * SDL_BYTESPERPIXEL(src->format), src->pitch,
+                           dst->format, (Uint8 *)dst->pixels + clip.y * dst->pitch + clip.x * SDL_BYTESPERPIXEL(dst->format), dst->pitch);
 
 out:
     if(locked_dst)

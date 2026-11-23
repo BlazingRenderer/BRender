@@ -14,17 +14,17 @@ br_pixelmap *BR_PUBLIC_ENTRY BrPixelmapDeCLUT(br_pixelmap *src)
 
 br_error BR_PUBLIC_ENTRY BrPixelmapResizeBuffersTV(br_pixelmap *screen, br_pixelmap **colour, br_pixelmap **depth, const br_token_value *tv)
 {
-    br_pixelmap   *tmp;
-    br_int_32      msaa_samples = -1;
-    br_int_32      target_width;
-    br_int_32      target_height;
-    br_uint_8      target_type;
-    br_int_32      target_depth_bits;
-    size_t         tvidx, tvbase;
-    br_colour      palette[256];
-    br_int_32      palette_entries = 0;
+    br_pixelmap    *tmp;
+    br_int_32       msaa_samples = -1;
+    br_int_32       target_width;
+    br_int_32       target_height;
+    br_uint_8       target_type;
+    br_int_32       target_depth_bits;
+    size_t          tvidx, tvbase;
+    br_colour       palette[256];
+    br_int_32       palette_entries = 0;
     br_device_clut *clut;
-    br_token_value tva[] = {
+    br_token_value  tva[] = {
         {.t = BR_NULL_TOKEN, .v = {}},
         {.t = BR_NULL_TOKEN, .v = {}},
         {.t = BR_NULL_TOKEN, .v = {}},

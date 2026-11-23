@@ -41,11 +41,11 @@
  * outline against the other - rather than measurements of a particular rasteriser, so they
  * are wide around those numbers.
  */
-#define WFW_FILL_MIN          3000 /* a half this far from empty is a drawn cube */
-#define WFW_FILL_RATIO_PCT      90 /* the two halves must agree within 10% */
-#define WFW_EDGES_MIN            50 /* more than a stray pixel */
-#define WFW_OUTLINE_DIVISOR       4 /* an outline is under a quarter of its fill */
-#define WFW_WIREFRAME_OVER_PCT  115 /* the wireframe must beat the edges by 15% */
+#define WFW_FILL_MIN           3000 /* a half this far from empty is a drawn cube */
+#define WFW_FILL_RATIO_PCT     90   /* the two halves must agree within 10% */
+#define WFW_EDGES_MIN          50   /* more than a stray pixel */
+#define WFW_OUTLINE_DIVISOR    4    /* an outline is under a quarter of its fill */
+#define WFW_WIREFRAME_OVER_PCT 115  /* the wireframe must beat the edges by 15% */
 
 typedef struct wfw_counts {
     int count;
@@ -96,22 +96,21 @@ static br_error wfw_check(const wfw_frames *f)
         return BRE_FAIL;
     }
 
-    if(f->fill_left.count * 100 < f->fill_right.count * WFW_FILL_RATIO_PCT ||
-       f->fill_right.count * 100 < f->fill_left.count * WFW_FILL_RATIO_PCT) {
+    if(f->fill_left.count * 100 < f->fill_right.count * WFW_FILL_RATIO_PCT || f->fill_right.count * 100 < f->fill_left.count * WFW_FILL_RATIO_PCT) {
         BrLogError("RT", "wireframe witness: the two halves of the same filled cube cover %d and %d texels, more than 10%% apart.",
                    f->fill_left.count, f->fill_right.count);
         return BRE_FAIL;
     }
 
     if(f->edges_alone.count < WFW_EDGES_MIN || f->wire_alone.count < WFW_EDGES_MIN) {
-        BrLogError("RT", "wireframe witness: BR_RSTYLE_EDGES covered %d texels and BR_RSTYLE_WIREFRAME %d on their own, expected at "
-                         "least %d each.",
+        BrLogError("RT",
+                   "wireframe witness: BR_RSTYLE_EDGES covered %d texels and BR_RSTYLE_WIREFRAME %d on their own, expected at "
+                   "least %d each.",
                    f->edges_alone.count, f->wire_alone.count, WFW_EDGES_MIN);
         return BRE_FAIL;
     }
 
-    if(f->edges_alone.count >= f->fill_left.count / WFW_OUTLINE_DIVISOR ||
-       f->wire_alone.count >= f->fill_right.count / WFW_OUTLINE_DIVISOR) {
+    if(f->edges_alone.count >= f->fill_left.count / WFW_OUTLINE_DIVISOR || f->wire_alone.count >= f->fill_right.count / WFW_OUTLINE_DIVISOR) {
         BrLogError("RT", "wireframe witness: the outlines covered %d and %d texels against fills of %d and %d; that is a fill, not an edge.",
                    f->edges_alone.count, f->wire_alone.count, f->fill_left.count, f->fill_right.count);
         return BRE_FAIL;
@@ -119,8 +118,9 @@ static br_error wfw_check(const wfw_frames *f)
 
     /* The diagonals: the one thing the two styles must not agree on. */
     if(f->wire_alone.count * 100 < f->edges_alone.count * WFW_WIREFRAME_OVER_PCT) {
-        BrLogError("RT", "wireframe witness: BR_RSTYLE_WIREFRAME covered %d texels and BR_RSTYLE_EDGES %d on their own; the wireframe must "
-                         "cover at least %d%% of the edges, or it drew the edge list.",
+        BrLogError("RT",
+                   "wireframe witness: BR_RSTYLE_WIREFRAME covered %d texels and BR_RSTYLE_EDGES %d on their own; the wireframe must "
+                   "cover at least %d%% of the edges, or it drew the edge list.",
                    f->wire_alone.count, f->edges_alone.count, WFW_WIREFRAME_OVER_PCT);
         return BRE_FAIL;
     }
@@ -140,9 +140,8 @@ static br_error wfw_check(const wfw_frames *f)
     BrLogInfo("RT",
               "wireframe witness passed (filled cube %d and %d texels; alone, BR_RSTYLE_EDGES %d texels rows %d..%d and "
               "BR_RSTYLE_WIREFRAME %d texels rows %d..%d, %d%% of the edges; together, %d and %d).",
-              f->fill_left.count, f->fill_right.count, f->edges_alone.count, f->edges_alone.min_y, f->edges_alone.max_y,
-              f->wire_alone.count, f->wire_alone.min_y, f->wire_alone.max_y, f->wire_alone.count * 100 / f->edges_alone.count,
-              f->edges_pair.count, f->wire_pair.count);
+              f->fill_left.count, f->fill_right.count, f->edges_alone.count, f->edges_alone.min_y, f->edges_alone.max_y, f->wire_alone.count,
+              f->wire_alone.min_y, f->wire_alone.max_y, f->wire_alone.count * 100 / f->edges_alone.count, f->edges_pair.count, f->wire_pair.count);
 
     return BRE_OK;
 }
@@ -222,10 +221,10 @@ br_error rt_wf_witness_run(rt_demo *demo)
     BrMatrix34Translate(&left->t.t.mat, BR_SCALAR(-1.6), BR_SCALAR(0), BR_SCALAR(0));
     BrMatrix34Translate(&right->t.t.mat, BR_SCALAR(1.6), BR_SCALAR(0), BR_SCALAR(0));
 
-#define WFW_RENDER()                            \
-    do {                                        \
-        BrPixelmapFill(colour, 0);              \
-        BrPixelmapFill(depth, 0xFFFFFFFF);      \
+#define WFW_RENDER()                                   \
+    do {                                               \
+        BrPixelmapFill(colour, 0);                     \
+        BrPixelmapFill(depth, 0xFFFFFFFF);             \
         BrZbSceneRender(world, camera, colour, depth); \
     } while(0)
 

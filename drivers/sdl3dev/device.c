@@ -75,7 +75,7 @@ br_device *DeviceSDL3Allocate(const char *identifier)
 
 static void BR_CMETHOD_DECL(br_device_sdl3, free)(br_object *_self)
 {
-    br_device *self = (br_device*)_self;
+    br_device *self = (br_device *)_self;
 
     /*
      * Remove attached objects

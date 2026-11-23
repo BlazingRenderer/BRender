@@ -19,7 +19,7 @@ extern "C" {
  * device.c
  */
 br_device *DeviceVESAAllocate(const char *identifier, const char *arguments);
-\
+
 br_boolean DeviceVESALinearAvailable(struct br_device *self, struct vesa_modeinfo *mi);
 
 br_error DeviceVESALinearInitialise(struct br_device *self, struct vesa_modeinfo *mi);

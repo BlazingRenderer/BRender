@@ -237,7 +237,7 @@ Bool_t NextToken(FlagParseState_t *fp_state, char *tok_string)
 #if SHOW_TOKENS
                     BR_FAILURE1("Unannounced argument: '%s'", tok_string);
 #endif
-                    is_ok = ConditionalSetString(&(fp_state->input_filename), tok_string, "Extra input filename %s\n");
+                    is_ok               = ConditionalSetString(&(fp_state->input_filename), tok_string, "Extra input filename %s\n");
                     fp_state->last_flag = cf_none;
                     break;
             }
@@ -246,42 +246,42 @@ Bool_t NextToken(FlagParseState_t *fp_state, char *tok_string)
 #if SHOW_TOKENS
             printf("Mod flag: '%s'\n", tok_string);
 #endif
-            is_ok = ConditionalSetString(&(fp_state->mod_filename), tok_string, "Extra mod file name %s\n");
+            is_ok               = ConditionalSetString(&(fp_state->mod_filename), tok_string, "Extra mod file name %s\n");
             fp_state->last_flag = cf_none;
             break;
         case cf_mat:
 #if SHOW_TOKENS
             printf("Mat flag: '%s'\n", tok_string);
 #endif
-            is_ok = ConditionalSetString(&(fp_state->mat_filename), tok_string, "Extra mat file name %s\n");
+            is_ok               = ConditionalSetString(&(fp_state->mat_filename), tok_string, "Extra mat file name %s\n");
             fp_state->last_flag = cf_none;
             break;
         case cf_scr:
 #if SHOW_TOKENS
             printf("Scr flag: '%s'\n", tok_string);
 #endif
-            is_ok = ConditionalSetString(&(fp_state->scr_filename), tok_string, "Extra scr file name %s\n");
+            is_ok               = ConditionalSetString(&(fp_state->scr_filename), tok_string, "Extra scr file name %s\n");
             fp_state->last_flag = cf_none;
             break;
         case cf_act:
 #if SHOW_TOKENS
             printf("act flag: '%s'\n", tok_string);
 #endif
-            is_ok = ConditionalSetString(&(fp_state->act_filename), tok_string, "Extra act file name %s\n");
+            is_ok               = ConditionalSetString(&(fp_state->act_filename), tok_string, "Extra act file name %s\n");
             fp_state->last_flag = cf_none;
             break;
         case cf_log:
 #if SHOW_TOKENS
             printf("log flag: '%s'\n", tok_string);
 #endif
-            is_ok = ConditionalSetString(&(fp_state->log_filename), tok_string, "Extra log filename option %s\n");
+            is_ok               = ConditionalSetString(&(fp_state->log_filename), tok_string, "Extra log filename option %s\n");
             fp_state->last_flag = cf_none;
             break;
         case cf_hither:
 #if SHOW_TOKENS
             printf("hither flag: '%s'\n", tok_string);
 #endif
-            is_ok = ConditionalSetString(&(fp_state->hither_string), tok_string, "Extra hither option %s\n");
+            is_ok               = ConditionalSetString(&(fp_state->hither_string), tok_string, "Extra hither option %s\n");
             fp_state->last_flag = cf_none;
             break;
         case cf_yon:
@@ -295,7 +295,7 @@ Bool_t NextToken(FlagParseState_t *fp_state, char *tok_string)
 #if SHOW_TOKENS
             printf("scale flag: '%s'\n", tok_string);
 #endif
-            is_ok = ConditionalSetString(&(fp_state->scale_string), tok_string, "Extra scale option %s\n");
+            is_ok               = ConditionalSetString(&(fp_state->scale_string), tok_string, "Extra scale option %s\n");
             fp_state->last_flag = cf_none;
             break;
         default:

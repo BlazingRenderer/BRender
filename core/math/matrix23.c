@@ -277,7 +277,6 @@ void BR_PUBLIC_ENTRY BrMatrix23TApplyV(br_vector2 *A, const br_vector2 *B, const
     A->v[1] = BR_MAC2(B->v[0], C(1, 0), B->v[1], C(1, 1));
 }
 
-
 void BR_PUBLIC_ENTRY BrMatrix23Pre(br_matrix23 *mat, const br_matrix23 *A)
 {
     br_matrix23 mattmp;

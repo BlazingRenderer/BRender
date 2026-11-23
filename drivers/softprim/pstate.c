@@ -302,7 +302,7 @@ static br_tv_template *findTemplate(struct br_primitive_state *self, br_token pa
 }
 
 static br_error BR_CMETHOD_DECL(br_primitive_state_softprim, partSet)(struct br_primitive_state *self, br_token part, br_int_32 index,
-                                                                     br_token t, br_value value)
+                                                                      br_token t, br_value value)
 {
     br_error        r;
     br_tv_template *tp = findTemplate(self, part);
@@ -335,7 +335,7 @@ static br_error BR_CMETHOD_DECL(br_primitive_state_softprim, partSet)(struct br_
 }
 
 static br_error BR_CMETHOD_DECL(br_primitive_state_softprim, partSetMany)(struct br_primitive_state *self, br_token part, br_int_32 index,
-                                                                         br_token_value *tv, br_int_32 *pcount)
+                                                                          br_token_value *tv, br_int_32 *pcount)
 {
     br_error        r;
     br_tv_template *tp = findTemplate(self, part);
@@ -372,7 +372,7 @@ static br_error BR_CMETHOD_DECL(br_primitive_state_softprim, partSetMany)(struct
 }
 
 static br_error BR_CMETHOD_DECL(br_primitive_state_softprim, partQuery)(struct br_primitive_state *self, br_token part, br_int_32 index,
-                                                                       void *pvalue, br_token t)
+                                                                        void *pvalue, br_token t)
 {
     br_tv_template *tp = findTemplate(self, part);
 
@@ -383,7 +383,7 @@ static br_error BR_CMETHOD_DECL(br_primitive_state_softprim, partQuery)(struct b
 }
 
 static br_error BR_CMETHOD_DECL(br_primitive_state_softprim, partQueryBuffer)(struct br_primitive_state *self, br_token part, br_int_32 index,
-                                                                             void *pvalue, void *buffer, br_size_t buffer_size, br_token t)
+                                                                              void *pvalue, void *buffer, br_size_t buffer_size, br_token t)
 {
     br_tv_template *tp = findTemplate(self, part);
 
@@ -394,7 +394,7 @@ static br_error BR_CMETHOD_DECL(br_primitive_state_softprim, partQueryBuffer)(st
 }
 
 static br_error BR_CMETHOD_DECL(br_primitive_state_softprim, partQueryMany)(struct br_primitive_state *self, br_token part, br_int_32 index,
-                                                                           br_token_value *tv, void *extra, br_size_t extra_size, br_int_32 *pcount)
+                                                                            br_token_value *tv, void *extra, br_size_t extra_size, br_int_32 *pcount)
 {
     br_tv_template *tp = findTemplate(self, part);
 
@@ -405,7 +405,7 @@ static br_error BR_CMETHOD_DECL(br_primitive_state_softprim, partQueryMany)(stru
 }
 
 static br_error BR_CMETHOD_DECL(br_primitive_state_softprim, partQueryManySize)(struct br_primitive_state *self, br_token part,
-                                                                               br_int_32 index, br_size_t *pextra_size, br_token_value *tv)
+                                                                                br_int_32 index, br_size_t *pextra_size, br_token_value *tv)
 {
     br_tv_template *tp = findTemplate(self, part);
 
@@ -416,7 +416,7 @@ static br_error BR_CMETHOD_DECL(br_primitive_state_softprim, partQueryManySize)(
 }
 
 static br_error BR_CMETHOD_DECL(br_primitive_state_softprim, partQueryAll)(struct br_primitive_state *self, br_token part, br_int_32 index,
-                                                                          br_token_value *buffer, br_size_t buffer_size)
+                                                                           br_token_value *buffer, br_size_t buffer_size)
 {
     br_tv_template *tp = findTemplate(self, part);
 
@@ -427,7 +427,7 @@ static br_error BR_CMETHOD_DECL(br_primitive_state_softprim, partQueryAll)(struc
 }
 
 static br_error BR_CMETHOD_DECL(br_primitive_state_softprim, partQueryAllSize)(struct br_primitive_state *self, br_token part,
-                                                                              br_int_32 index, br_size_t *psize)
+                                                                               br_int_32 index, br_size_t *psize)
 {
     br_tv_template *tp = findTemplate(self, part);
 
@@ -488,7 +488,7 @@ static br_error BR_CMETHOD_DECL(br_primitive_state_softprim, stateDefault)(struc
 }
 
 static br_error BR_CMETHOD_DECL(br_primitive_state_softprim, stateCopy)(struct br_primitive_state *self, struct br_primitive_state *source,
-                                                                       br_uint_32 mask)
+                                                                        br_uint_32 mask)
 {
     if(mask & (MASK_STATE_PRIMITIVE | MASK_STATE_OUTPUT))
         mask |= MASK_STATE_CACHE;

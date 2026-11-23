@@ -132,7 +132,7 @@ static br_error BR_CMETHOD_DECL(br_primitive_library_softprim, stateNew)(struct 
 }
 
 static br_error BR_CMETHOD_DECL(br_primitive_library_softprim, bufferStoredNew)(struct br_primitive_library *self, struct br_buffer_stored **psm,
-                                                                               br_token use, struct br_device_pixelmap *pm, br_token_value *tv)
+                                                                                br_token use, struct br_device_pixelmap *pm, br_token_value *tv)
 {
     struct br_buffer_stored *sm;
 
@@ -149,7 +149,7 @@ static br_error BR_CMETHOD_DECL(br_primitive_library_softprim, bufferStoredNew)(
 }
 
 static br_error BR_CMETHOD_DECL(br_primitive_library_softprim, bufferStoredAvail)(struct br_primitive_library *self, br_int_32 *space,
-                                                                                 br_token use, br_token_value *tv)
+                                                                                  br_token use, br_token_value *tv)
 {
     /*
      * Stored buffers alias the source pixelmap, so no extra space is needed.
@@ -191,7 +191,7 @@ static br_error BR_CMETHOD_DECL(br_primitive_library_softprim, synchronise)(stru
 }
 
 static br_error BR_CMETHOD_DECL(br_primitive_library_softprim, mask)(struct br_primitive_library *self, br_uint_32 *mask,
-                                                                    const br_token *parts, br_size_t n_parts)
+                                                                     const br_token *parts, br_size_t n_parts)
 {
     br_uint_32 m = 0;
 

@@ -96,8 +96,7 @@ int main(int argc, char **argv)
         cp = palette->pixels;
         cp += base * palette->row_bytes;
         for(n = 0; n < range; n++, cp += palette->row_bytes)
-            *(br_colour *)cp = MakeColour(BR_COLOUR_RGB(ar, ag, ab), BR_COLOUR_RGB(dr, dg, db),
-                                          BR_COLOUR_RGB(sr, sg, sb), cut, n / (float)range);
+            *(br_colour *)cp = MakeColour(BR_COLOUR_RGB(ar, ag, ab), BR_COLOUR_RGB(dr, dg, db), BR_COLOUR_RGB(sr, sg, sb), cut, n / (float)range);
     }
 
     /*

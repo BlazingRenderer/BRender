@@ -397,19 +397,19 @@ br_device *DeviceVkAllocate(const char *identifier, const char *arguments)
     for(br_uint_32 i = 0; i < BR_VKREND_TEXT_FONT_COUNT; ++i)
         self->text_fonts[i] = (br_device_vk_text_font){0};
 
-    self->render_state           = BR_VK_RENDER_UNINITIALISED;
-    self->render_vert            = VK_NULL_HANDLE;
-    self->render_frag            = VK_NULL_HANDLE;
-    self->render_indexed         = VK_NULL_HANDLE;
-    self->render_lit             = VK_NULL_HANDLE;
-    self->render_lit_indexed     = VK_NULL_HANDLE;
-    self->render_white_image     = VK_NULL_HANDLE;
-    self->render_white_view      = VK_NULL_HANDLE;
+    self->render_state            = BR_VK_RENDER_UNINITIALISED;
+    self->render_vert             = VK_NULL_HANDLE;
+    self->render_frag             = VK_NULL_HANDLE;
+    self->render_indexed          = VK_NULL_HANDLE;
+    self->render_lit              = VK_NULL_HANDLE;
+    self->render_lit_indexed      = VK_NULL_HANDLE;
+    self->render_white_image      = VK_NULL_HANDLE;
+    self->render_white_view       = VK_NULL_HANDLE;
     self->render_white_allocation = NULL;
-    self->render_set_layout      = VK_NULL_HANDLE;
-    self->render_pipeline_layout = VK_NULL_HANDLE;
-    self->render_pipeline_count  = 0;
-    self->render_sampler_count   = 0;
+    self->render_set_layout       = VK_NULL_HANDLE;
+    self->render_pipeline_layout  = VK_NULL_HANDLE;
+    self->render_pipeline_count   = 0;
+    self->render_sampler_count    = 0;
 
     self->templates.deviceTemplate = BrTVTemplateAllocate(self, deviceTemplateEntries, BR_ASIZE(deviceTemplateEntries));
 

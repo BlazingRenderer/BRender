@@ -183,7 +183,7 @@ br_token OnScreenCheck(br_renderer *self, br_matrix4 *model_to_screen, br_bounds
 void SURFACE_CALL SurfaceIndexZero(br_renderer *self, br_vector3 *p, br_vector2 *map, br_vector3 *n, br_colour gcolour, br_scalar *comp);
 void SURFACE_CALL SurfaceIndexUnlit(br_renderer *self, br_vector3 *p, br_vector2 *map, br_vector3 *n, br_colour gcolour, br_scalar *comp);
 void SURFACE_CALL SurfaceIndexLit(br_renderer *self, br_vector3 *p, br_vector2 *map, br_vector3 *n, br_colour gcolour, br_scalar *comp);
-void ActiveLightAccumulateIndexSet(struct active_light *alp);
+void              ActiveLightAccumulateIndexSet(struct active_light *alp);
 
 /*
  * light24.c
@@ -247,7 +247,7 @@ void BR_ASM_CALL OpTriangleRelightTwoSided(brp_block *block, brp_vertex *v0, brp
 void BR_ASM_CALL OpTriangleToLines(brp_block *block, brp_vertex *v0, brp_vertex *v1, brp_vertex *v2, br_uint_16 (*fp_vertices)[3],
                                    br_uint_16 (*fp_edges)[3]);
 void BR_ASM_CALL OpTriangleToWireframe(brp_block *block, brp_vertex *v0, brp_vertex *v1, brp_vertex *v2, br_uint_16 (*fp_vertices)[3],
-                                   br_uint_16 (*fp_edges)[3]);
+                                       br_uint_16 (*fp_edges)[3]);
 void BR_ASM_CALL OpTriangleReplicateConstant(brp_block *block, brp_vertex *v0, brp_vertex *v1, brp_vertex *v2, br_uint_16 (*fp_vertices)[3],
                                              br_uint_16 (*fp_edges)[3]);
 void BR_ASM_CALL OpTriangleReplicateConstantI(brp_block *block, brp_vertex *v0, brp_vertex *v1, brp_vertex *v2,

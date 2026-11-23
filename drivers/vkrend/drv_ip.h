@@ -59,7 +59,7 @@ VkImageView              BufferStoredVkGetView(const struct br_buffer_stored *se
 VkImageView              BufferStoredVkGetClutView(const struct br_buffer_stored *self);
 VkImageLayout            BufferStoredVkGetViewLayout(const struct br_buffer_stored *self);
 br_boolean               BufferStoredVkIsIndexed(const struct br_buffer_stored *self);
-br_error                 BufferStoredVkCreateWhite(br_device *dev, VkImage *out_image, VkImageView *out_view, VmaAllocation *out_allocation);
+br_error BufferStoredVkCreateWhite(br_device *dev, VkImage *out_image, VkImageView *out_view, VmaAllocation *out_allocation);
 
 /*
  * gv1model.c
@@ -72,10 +72,10 @@ br_geometry_v1_model *GeometryV1ModelVkAllocate(br_renderer_facility *type, cons
 br_geometry_v1_buckets *GeometryV1BucketsVkAllocate(br_renderer_facility *type, const char *id);
 br_vk_render_state      DeviceVkRenderEnsureInit(br_device *dev);
 void                    DeviceVkRenderFini(br_device *dev);
-VkPipeline DeviceVkRenderGetPipeline(br_device *dev, VkFormat format, VkSampleCountFlagBits samples, br_boolean lit,
-                                     br_boolean indexed, br_token shading_mode, VkCullModeFlags cull, VkFrontFace front_face,
-                                     br_boolean blended, br_token blend_mode, br_boolean depth_test, br_boolean depth_write,
-                                     VkCompareOp depth_compare, VkFormat depth_format, VkPolygonMode polygon_mode);
+VkPipeline DeviceVkRenderGetPipeline(br_device *dev, VkFormat format, VkSampleCountFlagBits samples, br_boolean lit, br_boolean indexed,
+                                     br_token shading_mode, VkCullModeFlags cull, VkFrontFace front_face, br_boolean blended,
+                                     br_token blend_mode, br_boolean depth_test, br_boolean depth_write, VkCompareOp depth_compare,
+                                     VkFormat depth_format, VkPolygonMode polygon_mode);
 VkSampler  DeviceVkRenderGetSampler(br_device *dev, br_token filter, br_token mip_filter, br_token wrap_s, br_token wrap_t);
 void       VkV1ModelRenderGroup(br_geometry_stored *geom, br_renderer *renderer, const br_geometry_stored_group *group);
 void       VkV1ModelRenderFace(br_geometry_stored *geom, br_renderer *renderer, br_uint_32 first_index);

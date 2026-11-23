@@ -73,8 +73,8 @@ typedef struct br_transform {
             /**
              * \brief This member contains the vector representing the rotation components of the transform.
              */
-            br_euler   e;
-            br_scalar  _pad[7];
+            br_euler  e;
+            br_scalar _pad[7];
             /**
              * \brief This member contains the vector representing the translation component of the transform.
              */
@@ -88,8 +88,8 @@ typedef struct br_transform {
             /**
              * \brief This member contains the vector representing the rotation component of the transform.
              */
-            br_quat    q;
-            br_scalar  _pad[5];
+            br_quat   q;
+            br_scalar _pad[5];
             /**
              * \brief This member contains the vector representing the translation component of the transform.
              */
@@ -119,7 +119,7 @@ typedef struct br_transform {
          * Just a translation
          */
         struct {
-            br_scalar  _pad[9];
+            br_scalar _pad[9];
             /**
              * \brief This member only has meaning for this transform type.
              *

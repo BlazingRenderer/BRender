@@ -477,7 +477,7 @@ static br_error V1Model_RenderStored(br_geometry_stored *self, br_renderer *rend
          * the current state, so the immediate path draws with that directly.
          */
         renderer->state.current->render_style = style;
-        state                                = *renderer->state.current;
+        state                                 = *renderer->state.current;
         if(stored != NULL)
             StateVkCopy(&state, &stored->state, BR_STATE_STORED_PARTS_MASK);
 

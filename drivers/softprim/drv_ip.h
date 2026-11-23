@@ -36,18 +36,18 @@ struct br_primitive_state *PrimitiveStateSoftPrimAllocate(struct br_primitive_li
  * sbuffer.c
  */
 struct br_buffer_stored *BufferStoredSoftPrimAllocate(struct br_primitive_library *plib, br_token use, struct br_device_pixelmap *pm,
-                                                     br_token_value *tv);
+                                                      br_token_value *tv);
 
 /*
  * match.c
  */
 br_error BR_CMETHOD_DECL(br_primitive_state_softprim, renderBegin)(struct br_primitive_state *self, struct brp_block **rpb, br_boolean *block_changed,
-                                                                  br_boolean *ranges_changed, br_boolean no_render, br_token prim_type);
+                                                                   br_boolean *ranges_changed, br_boolean no_render, br_token prim_type);
 
 br_error BR_CMETHOD_DECL(br_primitive_state_softprim, renderEnd)(struct br_primitive_state *self, struct brp_block *pb);
 
 br_error BR_CMETHOD_DECL(br_primitive_state_softprim, rangesQuery)(struct br_primitive_state *self, br_scalar *offset, br_scalar *scale,
-                                                                  br_int_32 max_comp);
+                                                                   br_int_32 max_comp);
 
 /*
  * Called by match.c with the current state's output buffers.

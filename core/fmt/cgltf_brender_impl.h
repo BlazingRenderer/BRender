@@ -144,8 +144,8 @@ static int cgltf_parse_json_brender_light_volume(cgltf_options *options, jsmntok
             out_light->falloff_distance = cgltf_json_to_float(tokens + i, json_chunk);
             ++i;
         } else if(cgltf_json_strcmp(tokens + i, json_chunk, "regions") == 0) {
-            i = cgltf_parse_json_array(options, tokens, i + 1, json_chunk, sizeof(cgltf_brender_light_region),
-                                       (void **)&out_light->regions, &out_light->regions_count);
+            i = cgltf_parse_json_array(options, tokens, i + 1, json_chunk, sizeof(cgltf_brender_light_region), (void **)&out_light->regions,
+                                       &out_light->regions_count);
             if(i < 0) {
                 return i;
             }

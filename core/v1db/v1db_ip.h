@@ -64,11 +64,11 @@ typedef void br_order_table_action_fn(br_primitive **buckets, br_int_32 nbuckets
 
 void BR_RESIDENT_ENTRY WalkOrderTableList(br_order_table_action_fn *action);
 void BR_RESIDENT_ENTRY WalkPrimaryOrderTable(br_order_table_action_fn *action);
-void RenderPrimaryOrderTable(void);
-void RenderOrderTableList(void);
-void SetOrderTableRange(br_order_table *order_table);
-void InsertOrderTableList(br_order_table *order_table);
-void SetOrderTableBounds(br_bounds *bounds, br_order_table *order_table);
+void                   RenderPrimaryOrderTable(void);
+void                   RenderOrderTableList(void);
+void                   SetOrderTableRange(br_order_table *order_table);
+void                   InsertOrderTableList(br_order_table *order_table);
+void                   SetOrderTableBounds(br_bounds *bounds, br_order_table *order_table);
 
 #ifdef __cplusplus
 };

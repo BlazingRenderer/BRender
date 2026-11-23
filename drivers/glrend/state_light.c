@@ -12,8 +12,7 @@
 #define F(f) offsetof(state_stack, f)
 #define P(f) ((br_uintptr_t)(&(f)))
 
-static br_error BR_CALLBACK customLightingVolumeSet(void *block, const br_value *pvalue, const struct br_tv_template_entry *tep,
-                                                    void *context);
+static br_error BR_CALLBACK customLightingVolumeSet(void *block, const br_value *pvalue, const struct br_tv_template_entry *tep, void *context);
 
 static const struct br_tv_custom customLightingVolumeConv = {
     .query      = NULL,
@@ -98,8 +97,7 @@ void StateGLInitLight(state_all *state)
     state->default_.valid |= MASK_STATE_LIGHT;
 }
 
-static br_error BR_CALLBACK customLightingVolumeSet(void *block, const br_value *pvalue, const struct br_tv_template_entry *tep,
-                                                    void *context)
+static br_error BR_CALLBACK customLightingVolumeSet(void *block, const br_value *pvalue, const struct br_tv_template_entry *tep, void *context)
 {
     const br_light_volume   *src             = (const br_light_volume *)pvalue->p;
     state_stack             *stack           = (state_stack *)block;

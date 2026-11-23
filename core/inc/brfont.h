@@ -29,39 +29,39 @@ typedef struct br_font {
      * that the spacing between characters is proportional to their widths (`width` is used), otherwise
      * each character is regularly spaced (`glyph_x` is used).
      */
-    br_uint_32        flags;
+    br_uint_32 flags;
     /**
      * \brief The width of characters in fixed pitch fonts.
      *
      * Note that there is an implicit single pixel gap between characters.
      */
-    br_uint_16        glyph_x;
+    br_uint_16 glyph_x;
     /**
      * \brief The height of the font in pixels (the number of pixel rows making up the largest
      *        character).
      */
-    br_uint_16        glyph_y;
+    br_uint_16 glyph_y;
     /**
      * \brief The width in pixels between horizontally adjacent character co-ordinates.
      *
      * This is not currently implemented by BRender, but could be used to determine the spacing between
      * columns of text when interpreting ASCII HTAB say.
      */
-    br_int_16         spacing_x;
+    br_int_16 spacing_x;
     /**
      * \brief The height in pixels between vertically adjacent character co-ordinates.
      *
      * This is not currently implemented by BRender, but could be used to determine the spacing of
      * between rows of text when interpreting ASCII VTAB or CRLF say.
      */
-    br_int_16         spacing_y;
+    br_int_16 spacing_y;
     /**
      * \brief Pointer to an array of 256 widths in pixels of each character (in proportional fonts).
      *
      * Values for ASCII control codes (0-31 & 127) have reserved meanings. Note that there is an
      * implicit single pixel gap between characters.
      */
-    const br_int_8   *width;
+    const br_int_8 *width;
     /**
      * \brief Pointer to an array of 256 offsets to each character's bit map (values for ASCII control
      *        codes (0-31 & 127) have reserved meanings), with a set bit indicating character foreground

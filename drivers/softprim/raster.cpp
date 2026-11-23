@@ -1192,13 +1192,13 @@ void PerspSpan(PerspWalk& w, const softprim_buffer& texture, const softprim_buff
         dv_num -= dden;
     }
 
-    br_int_32  source = (br_int_32)w.source;
+    br_int_32 source = (br_int_32)w.source;
 
     br_uint_8 *c   = w.scan + (br_int_32)(w.main_i & 0xffffu);
     br_uint_8 *end = w.scan + (br_uint_32)(w.minor_i) / 65536u;
     br_uint_8 *z   = w.zscan + (br_int_32)(w.main_i & 0xffffu) * 2;
-    br_int_32  iv     = w.pi.current;
-    br_int_32  zz     = w.pz.current;
+    br_int_32  iv  = w.pi.current;
+    br_int_32  zz  = w.pz.current;
 
     for(;;) {
         br_uint_8  texel = tex[source];
@@ -1342,7 +1342,8 @@ void PerspSpan(PerspWalk& w, const softprim_buffer& texture, const softprim_buff
  * comparisons are the asm's; the backward instantiation flips all of them.
  */
 template <sp_depth D, sp_shade S, sp_blend B, sp_fog G, int DIRN>
-void PerspRunSpan(PerspWalk& w, const softprim_buffer& texture, const softprim_buffer& shade, br_int_32 mask_w, br_int_32 mask_h, br_int_32 vshift) noexcept
+void PerspRunSpan(PerspWalk& w, const softprim_buffer& texture, const softprim_buffer& shade, br_int_32 mask_w, br_int_32 mask_h,
+                  br_int_32 vshift) noexcept
 {
     const br_int_32 pu  = w.pu.grad_x;
     const br_int_32 pv  = w.pv.grad_x;
@@ -1774,7 +1775,7 @@ void TexturedIndexedTriangle(brp_block *block, brp_vertex *v0, brp_vertex *v1, b
     pw.main_i = (br_uint_32)Ror16(ts.walk.xm);
     pw.main_d = (br_uint_32)Ror16(NegAdjust(ts.walk.d_xm));
 
-    pw.dz           = NegAdjust(pw.pz.grad_x);
+    pw.dz = NegAdjust(pw.pz.grad_x);
 
     /*
      * The per-pixel intensity step is the asm's work.tsl._di. The z-sorted
@@ -2882,21 +2883,20 @@ void PizDitherSpan(PizWalk& w, const softprim_buffer& colour, const softprim_buf
  * crosses into its neighbour.
  */
 template <sp_fmt F, sp_blend B>
-void PizShadeSpan(PizWalk& w, const softprim_buffer& colour, const softprim_buffer& texture, const softprim_buffer& shade,
-                  br_int_32 size) noexcept
+void PizShadeSpan(PizWalk& w, const softprim_buffer& colour, const softprim_buffer& texture, const softprim_buffer& shade, br_int_32 size) noexcept
 {
     const br_uint_8 *tex  = texture.base;
     const br_uint_8 *stbl = shade.base;
 
-    br_int_32  u_num  = w.pu_current;
-    br_int_32  v_num  = w.pv_current;
-    br_int_32  du_num = w.pu_grad_x;
-    br_int_32  dv_num = w.pv_grad_x;
-    br_int_32  den    = w.pq_current;
-    br_int_32  intensity = w.pi_current;
-    br_int_32  source = w.source;
-    br_int_32  dest   = w.start;
-    br_int_32  end    = w.end;
+    br_int_32 u_num     = w.pu_current;
+    br_int_32 v_num     = w.pv_current;
+    br_int_32 du_num    = w.pu_grad_x;
+    br_int_32 dv_num    = w.pv_grad_x;
+    br_int_32 den       = w.pq_current;
+    br_int_32 intensity = w.pi_current;
+    br_int_32 source    = w.source;
+    br_int_32 dest      = w.start;
+    br_int_32 end       = w.end;
 
     if(dest == end)
         return;
@@ -3033,8 +3033,7 @@ void PizTriangle(brp_block *block, brp_vertex *v0, brp_vertex *v1, brp_vertex *v
     const softprim_buffer& texture = SoftPrimWork.texture;
     const softprim_buffer& shade   = SoftPrimWork.shade;
 
-    if(colour.type != (F == SP_FMT_I8 ? BR_PMT_INDEX_8 : RgbFormatType(F)) || colour.base == NULL || colour.width_p <= 0 ||
-       colour.height <= 0)
+    if(colour.type != (F == SP_FMT_I8 ? BR_PMT_INDEX_8 : RgbFormatType(F)) || colour.base == NULL || colour.width_p <= 0 || colour.height <= 0)
         return;
 
     if(D == SP_DEPTH_ZW && (dbuf.type != BR_PMT_DEPTH_16 || dbuf.base == NULL))
@@ -3923,7 +3922,7 @@ inline void RgbAwtPixel(const RgbAwtWalk& w, const br_uint_8 *tex, br_size_t tex
 {
     const softprim_buffer& colour = *w.colour;
     const softprim_buffer& dbuf   = *w.depth;
-    constexpr br_int_32   pix_b  = RgbPixelBytes(F);
+    constexpr br_int_32    pix_b  = RgbPixelBytes(F);
 
     if(sp < 0 || (br_size_t)sp + (br_size_t)pix_b > (br_size_t)colour.stride_b * (br_size_t)colour.height)
         return;
@@ -3934,7 +3933,7 @@ inline void RgbAwtPixel(const RgbAwtWalk& w, const br_uint_8 *tex, br_size_t tex
     if(src < 0)
         return;
 
-    bool     transparent;
+    bool      transparent;
     br_uint_8 alpha = 0; /* the RGBA arm's product alpha */
 
     if(X == SP_TEX_RGB888) {
@@ -4059,9 +4058,9 @@ inline void RgbAwtPixel(const RgbAwtWalk& w, const br_uint_8 *tex, br_size_t tex
          * table of another size, which its type check would not catch.
          */
         const softprim_buffer& shade  = *w.shade;
-        const br_uint_32      idx    = ((((br_uint_32)pip >> 16) & 0xffu) << 8) | tex[src];
-        constexpr br_size_t   stride = (F == SP_FMT_888) ? 3u : 2u;
-        const br_size_t       off    = (br_size_t)idx * stride;
+        const br_uint_32       idx    = ((((br_uint_32)pip >> 16) & 0xffu) << 8) | tex[src];
+        constexpr br_size_t    stride = (F == SP_FMT_888) ? 3u : 2u;
+        const br_size_t        off    = (br_size_t)idx * stride;
 
         if(off + (br_size_t)pix_b <= (br_size_t)shade.stride_b * (br_size_t)shade.height) {
             for(br_int_32 k = 0; k < pix_b; k++)
@@ -4084,9 +4083,9 @@ template <sp_fmt F, sp_tex X, sp_depth D>
 void RgbAwtTrapezium(RgbAwtWalk& w, AwtEdge& edge) noexcept
 {
     const softprim_buffer& texture  = *w.texture;
-    const br_uint_8      *tex      = texture.base;
-    const br_size_t       tex_size = (br_size_t)texture.stride_b * (br_size_t)texture.height;
-    const br_int_32       dbpp     = w.pix_b;
+    const br_uint_8       *tex      = texture.base;
+    const br_size_t        tex_size = (br_size_t)texture.stride_b * (br_size_t)texture.height;
+    const br_int_32        dbpp     = w.pix_b;
 
     while(edge.count != 0) {
         edge.count--;
@@ -5403,7 +5402,8 @@ inline br_uint_16 MmxConstantLane(br_uint_32 word, br_int_32 shift) noexcept
  * are gated by the screendoor when there is one.
  */
 template <sp_fmt F, sp_depth D, sp_shade S, sp_tex X, sp_blend B, sp_dith H, int DIRN>
-void MmxScan(MmxWalk& w, const softprim_buffer& dbuf, const softprim_buffer& tex, const br_uint_16 clane[3], const br_uint_16 *sdmask, br_int_32 y) noexcept
+void MmxScan(MmxWalk& w, const softprim_buffer& dbuf, const softprim_buffer& tex, const br_uint_16 clane[3], const br_uint_16 *sdmask,
+             br_int_32 y) noexcept
 {
     const br_int_32 xmaj = w.main_i >> 16;
     const br_int_32 xmin = w.minor_i >> 16;
@@ -5678,7 +5678,7 @@ void MmxTrapezium(MmxWalk& w, const softprim_buffer& dbuf, const softprim_buffer
  */
 struct MmxFrame {
     void (*run)(const MmxFrame&) noexcept;
-    MmxWalk        w;
+    MmxWalk         w;
     softprim_buffer dbuf, tex;
     const br_uint_16 (*sd)[4];
     br_uint_16 clane[3];
@@ -6005,8 +6005,7 @@ static void SoftPrimRender(brp_block *block, brp_vertex *v0, brp_vertex *v1, brp
                       S == SP_SHADE_INTERP_I_TABLE || S == SP_SHADE_CONST_RGB || S == SP_SHADE_INTERP_RGB || S == SP_SHADE_CONST_I_RGB ||
                       S == SP_SHADE_INTERP_I_RGB,
                   "softprim: no kernel for this shading mode");
-    static_assert(X == SP_TEX_NONE || X == SP_TEX_I8 || X == SP_TEX_555 || X == SP_TEX_565 || X == SP_TEX_RGB888 ||
-                      X == SP_TEX_RGBA8888,
+    static_assert(X == SP_TEX_NONE || X == SP_TEX_I8 || X == SP_TEX_555 || X == SP_TEX_565 || X == SP_TEX_RGB888 || X == SP_TEX_RGBA8888,
                   "softprim: no kernel for this texture mode");
     static_assert(A == SP_ADDR_NONE || A == SP_ADDR_SHIFT || A == SP_ADDR_DIVIDE, "softprim: no kernel for this texture addressing mode");
     static_assert(X != SP_TEX_NONE || A == SP_ADDR_NONE, "softprim: texture addressing mode without a texture");
@@ -6020,13 +6019,10 @@ static void SoftPrimRender(brp_block *block, brp_vertex *v0, brp_vertex *v1, brp
     static_assert((S != SP_SHADE_CONST_RGB && S != SP_SHADE_INTERP_RGB) || F != SP_FMT_I8, "softprim: RGB shading is not an INDEX_8 mode");
     static_assert(P == SP_PERSP_AFFINE || X != SP_TEX_NONE, "softprim: an untextured kernel cannot be perspective-correct");
     static_assert(B == SP_BLEND_NONE || B == SP_BLEND_INDEX || B == SP_BLEND_DECAL || B == SP_BLEND_SCREENDOOR ||
-                      (B == SP_BLEND_ALPHA && X == SP_TEX_I8 && A == SP_ADDR_SHIFT &&
-                       (S == SP_SHADE_CONST_I_RGB || S == SP_SHADE_INTERP_I_RGB)) ||
-                      (B == SP_BLEND_ALPHA_TEX && X == SP_TEX_RGBA8888 && S == SP_SHADE_NONE && A == SP_ADDR_DIVIDE &&
-                       P == SP_PERSP_AFFINE),
+                      (B == SP_BLEND_ALPHA && X == SP_TEX_I8 && A == SP_ADDR_SHIFT && (S == SP_SHADE_CONST_I_RGB || S == SP_SHADE_INTERP_I_RGB)) ||
+                      (B == SP_BLEND_ALPHA_TEX && X == SP_TEX_RGBA8888 && S == SP_SHADE_NONE && A == SP_ADDR_DIVIDE && P == SP_PERSP_AFFINE),
                   "softprim: no kernel for this blend mode");
-    static_assert(X != SP_TEX_RGBA8888 ||
-                      (B == SP_BLEND_ALPHA_TEX && S == SP_SHADE_NONE && A == SP_ADDR_DIVIDE && P == SP_PERSP_AFFINE),
+    static_assert(X != SP_TEX_RGBA8888 || (B == SP_BLEND_ALPHA_TEX && S == SP_SHADE_NONE && A == SP_ADDR_DIVIDE && P == SP_PERSP_AFFINE),
                   "softprim: an RGBA_8888 texture is only implemented as the unlit arbitrary-width affine alpha blend");
     static_assert(H == SP_DITH_NONE || H == SP_DITH_MAP || H == SP_DITH_COLOUR, "softprim: no kernel for this dithering mode");
     static_assert(H != SP_DITH_MAP || (F == SP_FMT_I8 && S == SP_SHADE_NONE && X == SP_TEX_I8 && A == SP_ADDR_SHIFT &&
@@ -6048,8 +6044,7 @@ static void SoftPrimRender(brp_block *block, brp_vertex *v0, brp_vertex *v1, brp
                 TexturedIndexedTriangle<D, S, P, B, G>(block, v0, v1, v2);
         } else
             IndexedTriangle<D, S, G>(block, v0, v1, v2);
-    } else if(X == SP_TEX_I8 && A == SP_ADDR_SHIFT && D == SP_DEPTH_NONE &&
-              (S == SP_SHADE_CONST_I_RGB || S == SP_SHADE_INTERP_I_RGB)) {
+    } else if(X == SP_TEX_I8 && A == SP_ADDR_SHIFT && D == SP_DEPTH_NONE && (S == SP_SHADE_CONST_I_RGB || S == SP_SHADE_INTERP_I_RGB)) {
         /*
          * The 256x256 RGB shade-table cells: persp.c's PITIP256/PITIPB256, which
          * are perspi.h at BPP 2, SIZE 256 and LIGHT 1. Their setup, addressing
@@ -6063,8 +6058,7 @@ static void SoftPrimRender(brp_block *block, brp_vertex *v0, brp_vertex *v1, brp
          * so no depth reaches this kernel. The span reads the destination only
          * for the blend, which is the one ROP the cell's blocks carry.
          */
-        static_assert(!(X == SP_TEX_I8 && A == SP_ADDR_SHIFT && D == SP_DEPTH_NONE &&
-                        (S == SP_SHADE_CONST_I_RGB || S == SP_SHADE_INTERP_I_RGB)) ||
+        static_assert(!(X == SP_TEX_I8 && A == SP_ADDR_SHIFT && D == SP_DEPTH_NONE && (S == SP_SHADE_CONST_I_RGB || S == SP_SHADE_INTERP_I_RGB)) ||
                           B == SP_BLEND_NONE || B == SP_BLEND_ALPHA,
                       "softprim: no kernel for this blend mode on the 256x256 RGB shade-table cell");
 
@@ -6142,8 +6136,8 @@ static void SoftPrimRender(brp_block *block, brp_vertex *v0, brp_vertex *v1, brp
          * the build stops here.
          */
         static_assert(!((F == SP_FMT_555 || F == SP_FMT_565) && D == SP_DEPTH_NONE && X != SP_TEX_NONE &&
-                        !(A == SP_ADDR_DIVIDE && (X == SP_TEX_555 || X == SP_TEX_565 || X == SP_TEX_RGBA8888 ||
-                                                  S == SP_SHADE_CONST_I_RGB || S == SP_SHADE_INTERP_I_RGB)) &&
+                        !(A == SP_ADDR_DIVIDE && (X == SP_TEX_555 || X == SP_TEX_565 || X == SP_TEX_RGBA8888 || S == SP_SHADE_CONST_I_RGB ||
+                                                  S == SP_SHADE_INTERP_I_RGB)) &&
                         !(A == SP_ADDR_SHIFT && X == SP_TEX_I8 && (S == SP_SHADE_CONST_I_RGB || S == SP_SHADE_INTERP_I_RGB))),
                       "softprim: no kernel for a z-sorted RGB_555/565 texture that is not the arbitrary-width "
                       "colour-map, RGBA-sprite or shade-table shape, nor the 256x256 shade-table cell");
@@ -6628,21 +6622,21 @@ static void SoftPrimPoint(brp_block *block, brp_vertex *tvp)
         StoreDepth(zptr, pz);
 }
 
-#define SOFTPRIM_BLOCK_TRI(name, colour7bit_f, ...)                                                     \
+#define SOFTPRIM_BLOCK_TRI(name, colour7bit_f, ...)                                                    \
     extern "C" void BR_ASM_CALL name(brp_block *block, brp_vertex *v0, brp_vertex *v1, brp_vertex *v2) \
     {                                                                                                  \
-        SoftPrimRender<__VA_ARGS__, (colour7bit_f) != 0>(block, v0, v1, v2);                            \
+        SoftPrimRender<__VA_ARGS__, (colour7bit_f) != 0>(block, v0, v1, v2);                           \
     }
 
-#define SOFTPRIM_BLOCK_LINE(name, colour7bit_f, F, T, D, S, X, A, P, B, G, H)           \
+#define SOFTPRIM_BLOCK_LINE(name, colour7bit_f, F, T, D, S, X, A, P, B, G, H)          \
     extern "C" void BR_ASM_CALL name(brp_block *block, brp_vertex *v0, brp_vertex *v1) \
     {                                                                                  \
-        SoftPrimLine<F, D, S, X, A>(block, v0, v1);                                     \
+        SoftPrimLine<F, D, S, X, A>(block, v0, v1);                                    \
     }
 
 #define SOFTPRIM_BLOCK_POINT(name, colour7bit_f, F, T, D, S, X, A, P, B, G, H) \
-    extern "C" void BR_ASM_CALL name(brp_block *block, brp_vertex *tvp)       \
-    {                                                                         \
+    extern "C" void BR_ASM_CALL name(brp_block *block, brp_vertex *tvp)        \
+    {                                                                          \
         SoftPrimPoint<F, D, S, X>(block, tvp);                                 \
     }
 

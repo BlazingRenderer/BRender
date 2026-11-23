@@ -13,8 +13,8 @@ extern "C" {
 /*
  * device.c
  */
-br_device              *DeviceNullAllocate(const char *identifier);
-br_geometry_lighting   *GeometryLightingNullAllocate(br_renderer_facility *type, const char *id);
+br_device            *DeviceNullAllocate(const char *identifier);
+br_geometry_lighting *GeometryLightingNullAllocate(br_renderer_facility *type, const char *id);
 
 #ifdef __cplusplus
 };

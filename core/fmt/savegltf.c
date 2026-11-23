@@ -123,8 +123,8 @@ static char *build_pix_uri(const br_pixelmap *pm, void *res)
 {
     memfile_store  store = {0};
     br_filesystem *previous;
-    br_pixelmap   *map  = (br_pixelmap *)pm;
-    char          *uri  = NULL;
+    br_pixelmap   *map = (br_pixelmap *)pm;
+    char          *uri = NULL;
 
     previous = BrMemFileInstall(&store);
     BrPixelmapSaveMany("memory.pix", &map, 1);
@@ -978,8 +978,7 @@ static int check_actor_render_styles(const void *key, void *value, br_hash hash,
     if(actor->render_style < BR_RSTYLE_MAX)
         return 0;
 
-    BrLogError("GLTF",
-               "actor \"%s\" has render_style %d, which is not a render style; not writing a file that would not load back",
+    BrLogError("GLTF", "actor \"%s\" has render_style %d, which is not a render style; not writing a file that would not load back",
                actor->identifier != NULL ? actor->identifier : "<unnamed>", (int)actor->render_style);
     return 1;
 }
@@ -1143,7 +1142,7 @@ static void fill_br_light(const br_light *light_data, cgltf_brender_light *br_li
             const br_convex_region *region = light_data->volume.regions + i;
 
             br_light->regions[i].planes_count = region->nplanes;
-            br_light->regions[i].planes       = BrResAllocate(data, sizeof(*br_light->regions[i].planes) * region->nplanes, BR_MEMORY_SCRATCH);
+            br_light->regions[i].planes = BrResAllocate(data, sizeof(*br_light->regions[i].planes) * region->nplanes, BR_MEMORY_SCRATCH);
 
             for(br_uint_32 j = 0; j < region->nplanes; ++j)
                 for(int k = 0; k < 4; ++k)

@@ -720,7 +720,7 @@ static br_error V1Model_Render(br_geometry *self, br_renderer *renderer, struct 
     rend.geometry = self;
     rend.renderer = renderer;
 
-    rend.v11model = model;
+    rend.v11model  = model;
     rend.wireframe = style == BRT_WIREFRAME;
 
     /*
@@ -808,8 +808,7 @@ static br_error V1Model_Render(br_geometry *self, br_renderer *renderer, struct 
         z_sort_blended = (renderer->state.hidden.type == BRT_BUCKET_SORT && renderer->state.hidden.divert == BRT_BLENDED &&
                           renderer->state.hidden.order_table != NULL && scache.valid_primitive_heap);
 
-        r = PrimitiveStateRenderBegin(renderer->state.pstate, &rend.block, &rend.block_changed, &rend.range_changed, z_sort,
-                                      topology);
+        r = PrimitiveStateRenderBegin(renderer->state.pstate, &rend.block, &rend.block_changed, &rend.range_changed, z_sort, topology);
 
         if(r != BRE_OK)
             return r;

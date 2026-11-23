@@ -188,8 +188,8 @@ void DoQuantize(br_pixelmap **mtable, int nmaps, int base, int range, br_pixelma
      */
     for(i = 0; i < nmaps; i++) {
 #ifdef VERBOSE
-        fprintf(stderr, "Quantizing '%s' to palette '%s' using %d colours from the range %d-%d\n",
-                mtable[i]->identifier, palette->identifier, range, base, base + range - 1);
+        fprintf(stderr, "Quantizing '%s' to palette '%s' using %d colours from the range %d-%d\n", mtable[i]->identifier,
+                palette->identifier, range, base, base + range - 1);
 #endif
         BrQuantAddPixelmap(mtable[i]);
     }

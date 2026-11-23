@@ -106,7 +106,7 @@ void SoftPrimSetupBuffer(softprim_buffer *rb, br_device_pixelmap *pm)
  * Set up a stored buffer object
  */
 struct br_buffer_stored *BufferStoredSoftPrimAllocate(struct br_primitive_library *plib, br_token use, struct br_device_pixelmap *pm,
-                                                     br_token_value *tv)
+                                                      br_token_value *tv)
 {
     struct br_buffer_stored *self;
     char                    *ident;

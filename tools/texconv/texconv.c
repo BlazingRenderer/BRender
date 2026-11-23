@@ -226,8 +226,7 @@ int main(int argc, char **argv)
                         for(i = 0; i < nmaps; i++) {
                             if(mtable[i]->type == (alpha_channel == BR_PMT_RGBX_888) ? BR_PMT_RGBA_8888 : BR_PMT_RGBX_888) {
                                 mtable[i]->type = alpha_channel;
-                                T_Log("'%s' type changed to %s\n", mtable[i]->identifier,
-                                      PixelmapTypes[mtable[i]->type].identifier);
+                                T_Log("'%s' type changed to %s\n", mtable[i]->identifier, PixelmapTypes[mtable[i]->type].identifier);
                             } else if(mtable[i]->type == alpha_channel)
                                 T_Log("'%s' type already %s\n", mtable[i]->identifier, PixelmapTypes[mtable[i]->type].identifier);
                         }
@@ -317,8 +316,7 @@ int main(int argc, char **argv)
                             BrPixelmapFree(cbfn_command->map_table[i]);
                         }
 
-                        T_Log("Current registry data removed (%d pixelmap%s", cbfn_command->nmaps,
-                              (cbfn_command->nmaps == 1) ? ")\n" : "s)\n");
+                        T_Log("Current registry data removed (%d pixelmap%s", cbfn_command->nmaps, (cbfn_command->nmaps == 1) ? ")\n" : "s)\n");
 
                         BrResFree(cbfn_command);
                     } break;
@@ -338,8 +336,7 @@ int main(int argc, char **argv)
                          */
                         for(i = 0; i < cbfn_command->nmaps; i++) {
 
-                            T_Log("'%s' assigned new identifier '%s'\n", cbfn_command->map_table[i]->identifier,
-                                  current_command->command);
+                            T_Log("'%s' assigned new identifier '%s'\n", cbfn_command->map_table[i]->identifier, current_command->command);
 
                             cbfn_command->map_table[i]->identifier = BrMemStrDup(current_command->command);
                         }
@@ -382,8 +379,8 @@ int main(int argc, char **argv)
                          */
                         T_GenerateMapTable(cbfn_command);
 
-                        cbfn_command->convert_table = BrResAllocate(
-                            cbfn_command, sizeof(*cbfn_command->convert_table) * cbfn_command->nmaps, BR_MEMORY_APPLICATION);
+                        cbfn_command->convert_table = BrResAllocate(cbfn_command, sizeof(*cbfn_command->convert_table) * cbfn_command->nmaps,
+                                                                    BR_MEMORY_APPLICATION);
 
                         cbfn_command->new_type  = new_type;
                         cbfn_command->threshold = threshold;
@@ -448,8 +445,8 @@ int main(int argc, char **argv)
                          */
                         T_GenerateMapTable(cbfn_command);
 
-                        cbfn_command->convert_table = BrResAllocate(
-                            cbfn_command, sizeof(*cbfn_command->convert_table) * cbfn_command->nmaps, BR_MEMORY_APPLICATION);
+                        cbfn_command->convert_table = BrResAllocate(cbfn_command, sizeof(*cbfn_command->convert_table) * cbfn_command->nmaps,
+                                                                    BR_MEMORY_APPLICATION);
 
                         cbfn_command->type      = T_CBFN_CONTROL_REMAP;
                         cbfn_command->threshold = alpha_threshold;
@@ -523,8 +520,8 @@ int main(int argc, char **argv)
                          */
                         T_GenerateMapTable(cbfn_command);
 
-                        cbfn_command->convert_table = BrResAllocate(
-                            cbfn_command, sizeof(*cbfn_command->convert_table) * cbfn_command->nmaps, BR_MEMORY_APPLICATION);
+                        cbfn_command->convert_table = BrResAllocate(cbfn_command, sizeof(*cbfn_command->convert_table) * cbfn_command->nmaps,
+                                                                    BR_MEMORY_APPLICATION);
 
                         cbfn_command->type      = T_CBFN_CONTROL_QUANTIZE;
                         cbfn_command->threshold = alpha_threshold;
@@ -586,14 +583,14 @@ int main(int argc, char **argv)
                             /*
                              * raw 768 byte palette
                              */
-                            cbfn_command->current_palette = BrPixelmapAllocate(BR_PMT_RGBX_888, 1, 256, NULL, 0);
+                            cbfn_command->current_palette             = BrPixelmapAllocate(BR_PMT_RGBX_888, 1, 256, NULL, 0);
                             cbfn_command->current_palette->identifier = BrMemStrDup(filename);
 
                             if((fh = BrFileOpenRead(filename, 0, NULL, &open_mode)) == NULL)
                                 BR_ERROR1("Unable to open raw palette file '%s'", filename);
 
-                            for(y = 0, palette_entry = cbfn_command->current_palette->pixels;
-                                y < cbfn_command->current_palette->height; y++, palette_entry++) {
+                            for(y = 0, palette_entry = cbfn_command->current_palette->pixels; y < cbfn_command->current_palette->height;
+                                y++, palette_entry++) {
 
                                 if(BrFileRead(pixel, 1, 3, fh) != 3)
                                     BR_ERROR1("Unable to read raw palette from '%s'", filename);
@@ -613,8 +610,8 @@ int main(int argc, char **argv)
                          */
                         T_GenerateMapTable(cbfn_command);
 
-                        cbfn_command->convert_table = BrResAllocate(
-                            cbfn_command, sizeof(*cbfn_command->convert_table) * cbfn_command->nmaps, BR_MEMORY_APPLICATION);
+                        cbfn_command->convert_table = BrResAllocate(cbfn_command, sizeof(*cbfn_command->convert_table) * cbfn_command->nmaps,
+                                                                    BR_MEMORY_APPLICATION);
 
                         cbfn_command->type  = T_CBFN_ASSIGN_PALETTE;
                         cbfn_command->count = 0;
@@ -678,8 +675,8 @@ int main(int argc, char **argv)
                          */
                         T_GenerateMapTable(cbfn_command);
 
-                        cbfn_command->convert_table = BrResAllocate(
-                            cbfn_command, sizeof(*cbfn_command->convert_table) * cbfn_command->nmaps, BR_MEMORY_APPLICATION);
+                        cbfn_command->convert_table = BrResAllocate(cbfn_command, sizeof(*cbfn_command->convert_table) * cbfn_command->nmaps,
+                                                                    BR_MEMORY_APPLICATION);
 
                         cbfn_command->type  = T_CBFN_SCALE_PIXELMAP;
                         cbfn_command->count = 0;
@@ -734,8 +731,8 @@ int main(int argc, char **argv)
                          */
                         T_GenerateMapTable(cbfn_command);
 
-                        cbfn_command->convert_table = BrResAllocate(
-                            cbfn_command, sizeof(*cbfn_command->convert_table) * cbfn_command->nmaps, BR_MEMORY_APPLICATION);
+                        cbfn_command->convert_table = BrResAllocate(cbfn_command, sizeof(*cbfn_command->convert_table) * cbfn_command->nmaps,
+                                                                    BR_MEMORY_APPLICATION);
 
                         cbfn_command->type  = T_CBFN_SQUARE_PIXELMAP;
                         cbfn_command->count = 0;
@@ -828,8 +825,8 @@ int main(int argc, char **argv)
 
                         T_GenerateMapTable(cbfn_command);
 
-                        cbfn_command->convert_table = BrResAllocate(
-                            cbfn_command, sizeof(*cbfn_command->convert_table) * cbfn_command->nmaps, BR_MEMORY_APPLICATION);
+                        cbfn_command->convert_table = BrResAllocate(cbfn_command, sizeof(*cbfn_command->convert_table) * cbfn_command->nmaps,
+                                                                    BR_MEMORY_APPLICATION);
 
                         cbfn_command->type  = T_CBFN_FLIP_Y_PIXELMAP;
                         cbfn_command->count = 0;
@@ -859,8 +856,8 @@ int main(int argc, char **argv)
 
                         T_GenerateMapTable(cbfn_command);
 
-                        cbfn_command->convert_table = BrResAllocate(
-                            cbfn_command, sizeof(*cbfn_command->convert_table) * cbfn_command->nmaps, BR_MEMORY_APPLICATION);
+                        cbfn_command->convert_table = BrResAllocate(cbfn_command, sizeof(*cbfn_command->convert_table) * cbfn_command->nmaps,
+                                                                    BR_MEMORY_APPLICATION);
 
                         cbfn_command->type  = T_CBFN_FLIP_X_PIXELMAP;
                         cbfn_command->count = 0;
@@ -931,11 +928,11 @@ int main(int argc, char **argv)
                          */
                         T_CountIndexedMaps(cbfn_command);
 
-                        cbfn_command->map_table = BrResAllocate(
-                            cbfn_command, sizeof(*cbfn_command->convert_table) * cbfn_command->nmaps, BR_MEMORY_APPLICATION);
+                        cbfn_command->map_table = BrResAllocate(cbfn_command, sizeof(*cbfn_command->convert_table) * cbfn_command->nmaps,
+                                                                BR_MEMORY_APPLICATION);
 
-                        cbfn_command->convert_table = BrResAllocate(
-                            cbfn_command, sizeof(*cbfn_command->convert_table) * cbfn_command->nmaps, BR_MEMORY_APPLICATION);
+                        cbfn_command->convert_table = BrResAllocate(cbfn_command, sizeof(*cbfn_command->convert_table) * cbfn_command->nmaps,
+                                                                    BR_MEMORY_APPLICATION);
 
                         cbfn_command->type  = T_CBFN_FLIP_HIGH_WIDE_PALETTES;
                         cbfn_command->count = 0;
@@ -1127,11 +1124,11 @@ int main(int argc, char **argv)
                          */
                         T_CountIndexedMaps(cbfn_command);
 
-                        cbfn_command->map_table = BrResAllocate(
-                            cbfn_command, sizeof(*cbfn_command->convert_table) * cbfn_command->nmaps, BR_MEMORY_APPLICATION);
+                        cbfn_command->map_table = BrResAllocate(cbfn_command, sizeof(*cbfn_command->convert_table) * cbfn_command->nmaps,
+                                                                BR_MEMORY_APPLICATION);
 
-                        cbfn_command->convert_table = BrResAllocate(
-                            cbfn_command, sizeof(*cbfn_command->convert_table) * cbfn_command->nmaps, BR_MEMORY_APPLICATION);
+                        cbfn_command->convert_table = BrResAllocate(cbfn_command, sizeof(*cbfn_command->convert_table) * cbfn_command->nmaps,
+                                                                    BR_MEMORY_APPLICATION);
 
                         cbfn_command->type      = T_CBFN_CONTROL_REGEN_PALETTES;
                         cbfn_command->threshold = alpha_threshold;
@@ -1312,8 +1309,8 @@ int main(int argc, char **argv)
              */
             T_Log("Loaded '%s' as %s (%d,%d)\n", pm->identifier, PixelmapTypes[pm->type].identifier, pm->width, pm->height);
             if(pm->map != NULL)
-                T_Log("    Palette '%s' %s (%d, %d)\n", pm->map->identifier, PixelmapTypes[pm->map->type].identifier,
-                      pm->map->width, pm->map->height);
+                T_Log("    Palette '%s' %s (%d, %d)\n", pm->map->identifier, PixelmapTypes[pm->map->type].identifier, pm->map->width,
+                      pm->map->height);
         }
     }
 

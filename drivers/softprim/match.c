@@ -164,40 +164,40 @@ struct sp_match {
  * `render` would replace the `render` in `.render`.
  */
 #define SOFTPRIM_ENTRY(kernel, ident, refuse, fmask, fcmp, subdiv, unscaled_f, offset_y_f, colour7bit_f, cs_r, cs_g, cs_b, msize, dtype, \
-                      ttype, stype, btype, ftype, ...)                                                                                  \
-    {                                                                                                                                   \
-        .flags_mask     = (fmask),                                                                                                      \
-        .flags_cmp      = (fcmp),                                                                                                       \
-        .need_subdivide = (subdiv),                                                                                                     \
-        .unscaled       = (unscaled_f),                                                                                                 \
-        .offset_y       = (offset_y_f),                                                                                                 \
-        .colour7bit     = (colour7bit_f),                                                                                               \
-        .colour_scale   = {cs_r, cs_g, cs_b},                                                                                           \
-        .map_size       = (msize),                                                                                                      \
-        .depth_type     = (dtype),                                                                                                      \
-        .texture_type   = (ttype),                                                                                                      \
-        .shade_type     = (stype),                                                                                                      \
-        .blend_type     = (btype),                                                                                                      \
-        .fog_type       = (ftype),                                                                                                      \
-        .axes           = {__VA_ARGS__},                                                                                                \
-        .refused        = (refuse),                                                                                                     \
-        .block          = {.render              = (brp_render_fn *)(kernel),                                                            \
-                           .chain               = NULL,                                                                                 \
-                           .identifier          = (ident),                                                                              \
-                           ._reserved0          = NULL,                                                                                 \
-                           .type                = 0,                                                                                    \
-                           .flags               = 0,                                                                                    \
-                           .constant_components = 0,                                                                                    \
-                           .vertex_components   = 0,                                                                                    \
-                           .convert_mask_f      = 0,                                                                                    \
-                           .convert_mask_x      = 0,                                                                                    \
-                           .convert_mask_i      = 0,                                                                                    \
-                           .constant_mask       = 0,                                                                                    \
-                           .subdivide_tolerance = 0,                                                                                    \
-                           ._reserved_0         = 0,                                                                                    \
-                           ._reserved_1         = 0,                                                                                    \
-                           ._reserved_2         = 0},                                                                                           \
-        .filled         = BR_FALSE,                                                                                                     \
+                       ttype, stype, btype, ftype, ...)                                                                                  \
+    {                                                                                                                                    \
+        .flags_mask     = (fmask),                                                                                                       \
+        .flags_cmp      = (fcmp),                                                                                                        \
+        .need_subdivide = (subdiv),                                                                                                      \
+        .unscaled       = (unscaled_f),                                                                                                  \
+        .offset_y       = (offset_y_f),                                                                                                  \
+        .colour7bit     = (colour7bit_f),                                                                                                \
+        .colour_scale   = {cs_r, cs_g, cs_b},                                                                                            \
+        .map_size       = (msize),                                                                                                       \
+        .depth_type     = (dtype),                                                                                                       \
+        .texture_type   = (ttype),                                                                                                       \
+        .shade_type     = (stype),                                                                                                       \
+        .blend_type     = (btype),                                                                                                       \
+        .fog_type       = (ftype),                                                                                                       \
+        .axes           = {__VA_ARGS__},                                                                                                 \
+        .refused        = (refuse),                                                                                                      \
+        .block          = {.render              = (brp_render_fn *)(kernel),                                                             \
+                           .chain               = NULL,                                                                                  \
+                           .identifier          = (ident),                                                                               \
+                           ._reserved0          = NULL,                                                                                  \
+                           .type                = 0,                                                                                     \
+                           .flags               = 0,                                                                                     \
+                           .constant_components = 0,                                                                                     \
+                           .vertex_components   = 0,                                                                                     \
+                           .convert_mask_f      = 0,                                                                                     \
+                           .convert_mask_x      = 0,                                                                                     \
+                           .convert_mask_i      = 0,                                                                                     \
+                           .constant_mask       = 0,                                                                                     \
+                           .subdivide_tolerance = 0,                                                                                     \
+                           ._reserved_0         = 0,                                                                                     \
+                           ._reserved_1         = 0,                                                                                     \
+                           ._reserved_2         = 0},                                                                                            \
+        .filled         = BR_FALSE,                                                                                                      \
 },
 
 #define SOFTPRIM_BLOCK_TRI(name, ...)   SOFTPRIM_ENTRY(name, #name, BR_FALSE, __VA_ARGS__)
@@ -351,8 +351,7 @@ static void spFillBlock(struct sp_match *e)
      * the destination as well, and its .ifg block declares BR_PRIMF_BLENDED
      * too (property_blend_rgba), so the three table blends and it are one case.
      */
-    if(e->axes.blend == SP_BLEND_INDEX || e->axes.blend == SP_BLEND_ALPHA || e->axes.blend == SP_BLEND_SCREENDOOR ||
-       e->axes.blend == SP_BLEND_ALPHA_TEX)
+    if(e->axes.blend == SP_BLEND_INDEX || e->axes.blend == SP_BLEND_ALPHA || e->axes.blend == SP_BLEND_SCREENDOOR || e->axes.blend == SP_BLEND_ALPHA_TEX)
         e->block.flags |= BR_PRIMF_BLENDED;
 
     /*
@@ -431,7 +430,7 @@ static br_int_32 spPaletteEntries(br_uint_8 type)
 static br_uint_32 spDeriveFlags(struct br_primitive_state *self)
 {
     const softprim_buffer *t     = &SoftPrimWork.texture;
-    br_uint_32            flags = self->prim.flags;
+    br_uint_32             flags = self->prim.flags;
 
     /*
      * RANGE_ZERO is pentprim's "index_range == 0" flag, tested from the work
@@ -766,7 +765,7 @@ static void updateRanges(struct br_primitive_state *self, const sp_axes *axes, b
 }
 
 br_error BR_CMETHOD_DECL(br_primitive_state_softprim, renderBegin)(struct br_primitive_state *self, struct brp_block **rpb, br_boolean *block_changed,
-                                                                  br_boolean *ranges_changed, br_boolean no_render, br_token prim_type)
+                                                                   br_boolean *ranges_changed, br_boolean no_render, br_token prim_type)
 {
     struct sp_want   want;
     struct sp_match *found = NULL;
@@ -854,7 +853,7 @@ br_error BR_CMETHOD_DECL(br_primitive_state_softprim, renderEnd)(struct br_primi
 }
 
 br_error BR_CMETHOD_DECL(br_primitive_state_softprim, rangesQuery)(struct br_primitive_state *self, br_scalar *offset, br_scalar *scale,
-                                                                  br_int_32 max_comp)
+                                                                   br_int_32 max_comp)
 {
     int i;
 

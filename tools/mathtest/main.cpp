@@ -125,8 +125,7 @@ static int gnuplot3d(const Graph3D *g, FILE *fp)
 
     plot3d(g, fp, x_n, y_n, [](const Graph3D *g, float x, float y) { return g->eval_float(x, y); });
     plot3d(g, fp, x_n, y_n, [](const Graph3D *g, float x, float y) { return g->eval_fixed(x, y); });
-    plot3d(g, fp, x_n, y_n,
-           [](const Graph3D *g, float x, float y) { return fabs(fabs(g->eval_float(x, y)) - fabs(g->eval_fixed(x, y))); });
+    plot3d(g, fp, x_n, y_n, [](const Graph3D *g, float x, float y) { return fabs(fabs(g->eval_float(x, y)) - fabs(g->eval_fixed(x, y))); });
 
     return 0;
 }
@@ -153,7 +152,7 @@ static int gnuplot2d(const Graph *g, FILE *fp)
 int main(int argc, char **argv)
 {
     fprintf(stderr, "Pipe to file and 'load \"file\"' if you want interactive\n");
-    //gnuplot2d(&graph_cos, stdout);
+    // gnuplot2d(&graph_cos, stdout);
     gnuplot3d(&graph3d_atan2, stdout);
     return 0;
 }

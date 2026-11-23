@@ -73,8 +73,8 @@ public:
     }
 };
 
-#define VMA_MUTEX                 VmaMutexDOS
-#define VMA_RW_MUTEX              VmaRWMutexDOS
+#define VMA_MUTEX    VmaMutexDOS
+#define VMA_RW_MUTEX VmaRWMutexDOS
 
 #endif
 

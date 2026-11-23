@@ -48,10 +48,9 @@ void BR_PUBLIC_ENTRY BrSceneModelLight(br_model *model, br_material *default_mat
         else
             RendererStateRestore(v1db.renderer, default_material->stored, BR_STATE_ALL);
 
-        GeometryLightingRender(v1db.format_lighting, v1db.renderer, group->position, group->normal,
-                               group->vertex_colours, (br_colour *)(&model->vertices->index), group->vertex_user, sizeof(*group->position),
-                               sizeof(*group->normal), sizeof(*group->vertex_colours), sizeof(*model->vertices), group->nvertices
-        );
+        GeometryLightingRender(v1db.format_lighting, v1db.renderer, group->position, group->normal, group->vertex_colours,
+                               (br_colour *)(&model->vertices->index), group->vertex_user, sizeof(*group->position), sizeof(*group->normal),
+                               sizeof(*group->vertex_colours), sizeof(*model->vertices), group->nvertices);
     }
 
     /* Restore previous state */

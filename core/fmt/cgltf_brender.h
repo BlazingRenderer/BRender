@@ -77,7 +77,7 @@ typedef struct cgltf_brender_material {
 } cgltf_brender_material;
 
 typedef struct cgltf_brender_light_region {
-    cgltf_size   planes_count;
+    cgltf_size planes_count;
     cgltf_float (*planes)[4];
 } cgltf_brender_light_region;
 

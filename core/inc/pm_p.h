@@ -57,7 +57,7 @@ br_pixelmap *BR_RESIDENT_ENTRY BrPixelmapAllocate(br_uint_8 type, br_int_32 w, b
  *
  * \return The size of each pixel, in bits.
  */
-br_uint_16 BR_RESIDENT_ENTRY   BrPixelmapPixelSize(br_pixelmap *pm);
+br_uint_16 BR_RESIDENT_ENTRY BrPixelmapPixelSize(br_pixelmap *pm);
 /**
  * \brief Find the channels available for a given pixel map.
  *
@@ -66,7 +66,7 @@ br_uint_16 BR_RESIDENT_ENTRY   BrPixelmapPixelSize(br_pixelmap *pm);
  * \return A mask giving the available channels, being a combination of BR_PMCHAN_INDEX,
  *         BR_PMCHAN_RGB, BR_PMCHAN_DEPTH, BR_PMCHAN_ALPHA and BR_PMCHAN_YUV.
  */
-br_uint_16 BR_RESIDENT_ENTRY   BrPixelmapChannels(br_pixelmap *pm);
+br_uint_16 BR_RESIDENT_ENTRY BrPixelmapChannels(br_pixelmap *pm);
 
 /**
  * \brief Allocate a pixel map as part of an existing pixel map.
@@ -242,7 +242,7 @@ void BR_PUBLIC_ENTRY BrPixelmapDirtyRectangleDoubleBuffer(br_pixelmap *dst, br_p
  * \param y      Y co-ordinate of the pixel.
  * \param colour Pixel value.
  */
-void BR_PUBLIC_ENTRY       BrPixelmapPixelSet(br_pixelmap *dst, br_int_32 x, br_int_32 y, br_uint_32 colour);
+void BR_PUBLIC_ENTRY BrPixelmapPixelSet(br_pixelmap *dst, br_int_32 x, br_int_32 y, br_uint_32 colour);
 /**
  * \brief Get the value of a particular pixel.
  *
@@ -275,7 +275,7 @@ br_uint_32 BR_PUBLIC_ENTRY BrPixelmapPixelGet(br_pixelmap *dst, br_int_32 x, br_
  * BrPixelmapCopy(offscreen, backdrop);
  * \endcode
  */
-void BR_PUBLIC_ENTRY       BrPixelmapCopy(br_pixelmap *dst, br_pixelmap *src);
+void BR_PUBLIC_ENTRY BrPixelmapCopy(br_pixelmap *dst, br_pixelmap *src);
 /**
  * \brief Draw a line in a pixel map between (x1,y1) and (x2,y2), clipping it to the edges of the
  *        pixel map if necessary.
@@ -287,7 +287,7 @@ void BR_PUBLIC_ENTRY       BrPixelmapCopy(br_pixelmap *dst, br_pixelmap *src);
  * \param y2     Y co-ordinate of the line's second endpoint.
  * \param colour Value to set each pixel in the line to.
  */
-void BR_PUBLIC_ENTRY       BrPixelmapLine(br_pixelmap *dst, br_int_32 x1, br_int_32 y1, br_int_32 x2, br_int_32 y2, br_uint_32 colour);
+void BR_PUBLIC_ENTRY BrPixelmapLine(br_pixelmap *dst, br_int_32 x1, br_int_32 y1, br_int_32 x2, br_int_32 y2, br_uint_32 colour);
 /**
  * \brief Write a string into a pixel map in a given font.
  *
@@ -308,7 +308,7 @@ void BR_PUBLIC_ENTRY       BrPixelmapLine(br_pixelmap *dst, br_int_32 x1, br_int
  * BrPixelmapText(pmap,0,0,colour,BrFontProp7x9,"Example text...");
  * \endcode
  */
-void BR_PUBLIC_ENTRY       BrPixelmapText(br_pixelmap *dst, br_int_32 x, br_int_32 y, br_uint_32 colour, br_font *font, const char *text);
+void BR_PUBLIC_ENTRY BrPixelmapText(br_pixelmap *dst, br_int_32 x, br_int_32 y, br_uint_32 colour, br_font *font, const char *text);
 /**
  * \brief Write a printf-formatted string into a pixel map in a given font.
  *
@@ -410,7 +410,7 @@ br_pixelmap *BR_PUBLIC_ENTRY BrPixelmapLoad(const char *filename);
  *
  * \return One if the pixel map was saved successfully, zero otherwise.
  */
-br_uint_32 BR_PUBLIC_ENTRY   BrPixelmapSave(const char *filename, br_pixelmap *pixelmap);
+br_uint_32 BR_PUBLIC_ENTRY BrPixelmapSave(const char *filename, br_pixelmap *pixelmap);
 /**
  * \brief Load a number of pixel maps.
  *
@@ -428,7 +428,7 @@ br_uint_32 BR_PUBLIC_ENTRY   BrPixelmapSave(const char *filename, br_pixelmap *p
  *
  * \sa BrPixelmapLoad()
  */
-br_uint_32 BR_PUBLIC_ENTRY   BrPixelmapLoadMany(const char *filename, br_pixelmap **pixelmaps, br_uint_16 num);
+br_uint_32 BR_PUBLIC_ENTRY BrPixelmapLoadMany(const char *filename, br_pixelmap **pixelmaps, br_uint_16 num);
 /**
  * \brief Save a number of pixel maps to a file.
  *
@@ -441,7 +441,7 @@ br_uint_32 BR_PUBLIC_ENTRY   BrPixelmapLoadMany(const char *filename, br_pixelma
  *
  * \return The number of pixel maps saved successfully.
  */
-br_uint_32 BR_PUBLIC_ENTRY   BrPixelmapSaveMany(const char *filename, br_pixelmap **pixelmaps, br_uint_16 num);
+br_uint_32 BR_PUBLIC_ENTRY BrPixelmapSaveMany(const char *filename, br_pixelmap **pixelmaps, br_uint_16 num);
 
 /*
  * Scaling (XXX interface will change)

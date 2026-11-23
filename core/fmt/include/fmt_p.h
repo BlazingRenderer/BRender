@@ -70,7 +70,7 @@ br_model *BR_PUBLIC_ENTRY BrFmtNFFLoad(const char *name);
  * \return Return the number of materials loaded successfully. The pointer array if supplied, is
  *         filled with pointers to the loaded materials.
  */
-br_uint_32 BR_PUBLIC_ENTRY   BrFmtScriptMaterialLoadMany(const char *filename, br_material **materials, br_uint_16 num);
+br_uint_32 BR_PUBLIC_ENTRY BrFmtScriptMaterialLoadMany(const char *filename, br_material **materials, br_uint_16 num);
 /**
  * \brief Load a material from a material script.
  *

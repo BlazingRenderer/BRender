@@ -69,12 +69,12 @@ br_pixelmap *BR_PUBLIC_ENTRY T_LoadPixelmap(const char *filename, br_uint_32 typ
             /*
              * print details of a pixelmap (and palette)
              */
-            T_Log("Loaded '%s' as %s (%d,%d)\n", ppm[i + 1]->identifier, PixelmapTypes[ppm[i + 1]->type].identifier,
-                  ppm[i + 1]->width, ppm[i + 1]->height);
+            T_Log("Loaded '%s' as %s (%d,%d)\n", ppm[i + 1]->identifier, PixelmapTypes[ppm[i + 1]->type].identifier, ppm[i + 1]->width,
+                  ppm[i + 1]->height);
 
             if(ppm[i + 1]->map != NULL)
-                T_Log("    Palette '%s' %s (%d, %d)\n", ppm[i + 1]->map->identifier,
-                      PixelmapTypes[ppm[i + 1]->map->type].identifier, ppm[i + 1]->map->width, ppm[i + 1]->map->height);
+                T_Log("    Palette '%s' %s (%d, %d)\n", ppm[i + 1]->map->identifier, PixelmapTypes[ppm[i + 1]->map->type].identifier,
+                      ppm[i + 1]->map->width, ppm[i + 1]->map->height);
         }
     }
 
@@ -109,8 +109,7 @@ br_pixelmap *T_LoadRawPixelmap(char *filename, t_pixelmap_cbfn_info *cbfn_comman
         for(x = 0; x < pm->width; x++) {
 
             if(BrFileRead(pixel, 1, pixel_size, fh) != pixel_size)
-                BR_ERROR4("Unable to load raw data '%s' as %s (%d,%d)", filename, T_EncodePixelmapType(pm->type),
-                          pm->width, pm->height);
+                BR_ERROR4("Unable to load raw data '%s' as %s (%d,%d)", filename, T_EncodePixelmapType(pm->type), pm->width, pm->height);
 
             for(i = 0; i <= pixel_size; i++)
                 ((char *)pm->pixels)[y * pm->row_bytes + x * pixel_size + (pixel_size - i)] = pixel[i - 1];

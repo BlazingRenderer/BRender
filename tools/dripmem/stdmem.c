@@ -14,7 +14,6 @@
 #include "brender.h"
 #include "dripmem.h"
 
-
 /*
  * Glue functions for malloc()/free()
  */

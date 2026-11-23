@@ -177,7 +177,6 @@ br_scalar BR_PUBLIC_ENTRY BrMatrix4Determinant(const br_matrix4 *mat)
     // clang-format on
 }
 
-
 void BR_PUBLIC_ENTRY BrMatrix4Adjoint(br_matrix4 *A, const br_matrix4 *B)
 {
     br_scalar a1, a2, a3, a4, b1, b2, b3, b4;

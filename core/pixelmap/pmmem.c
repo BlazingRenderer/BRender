@@ -312,11 +312,11 @@ br_error BR_CMETHOD_DECL(br_device_pixelmap_mem, resize)(br_device_pixelmap *sel
  * Structure used to unpack the 'match' tokens/values
  */
 struct match_tokens {
-    br_token   use;
-    br_uint_8  pixel_type;
-    br_int_32  pixel_bits;
-    br_int_32  width;
-    br_int_32  height;
+    br_token  use;
+    br_uint_8 pixel_type;
+    br_int_32 pixel_bits;
+    br_int_32 width;
+    br_int_32 height;
 };
 
 #define F(f) offsetof(struct match_tokens, f)

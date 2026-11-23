@@ -35,7 +35,7 @@ br_pixelmap *mkres_vgapal(void)
 {
     br_pixelmap *pm;
 
-    if((pm = BrPixelmapAllocate(BR_PMT_RGBX_888, 1, 256, (void*)vga_palette, BR_PMAF_NORMAL)) == NULL)
+    if((pm = BrPixelmapAllocate(BR_PMT_RGBX_888, 1, 256, (void *)vga_palette, BR_PMAF_NORMAL)) == NULL)
         return NULL;
 
     pm->identifier = BrResStrDup(pm, "VGA (palette)");

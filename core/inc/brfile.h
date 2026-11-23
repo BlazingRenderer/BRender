@@ -81,7 +81,7 @@ typedef br_uint_32 BR_CALLBACK brfile_attributes_cbfn(void);
  * See stdfile.c for examples of filing system functions.
  * \endcode
  */
-typedef void *BR_CALLBACK      brfile_open_read_cbfn(const char *name, br_size_t n_magics, br_mode_test_cbfn *mode_test, int *mode_result);
+typedef void *BR_CALLBACK brfile_open_read_cbfn(const char *name, br_size_t n_magics, br_mode_test_cbfn *mode_test, int *mode_result);
 /**
  * \brief Open a file for writing, overwriting any existing file of the same name.
  *
@@ -99,7 +99,7 @@ typedef void *BR_CALLBACK      brfile_open_read_cbfn(const char *name, br_size_t
  * See stdfile.c for examples of filing system functions.
  * \endcode
  */
-typedef void *BR_CALLBACK      brfile_open_write_cbfn(const char *name, int text);
+typedef void *BR_CALLBACK brfile_open_write_cbfn(const char *name, int text);
 /**
  * \brief An application defined call-back function closing a previously opened file.
  *
@@ -114,7 +114,7 @@ typedef void *BR_CALLBACK      brfile_open_write_cbfn(const char *name, int text
  * See stdfile.c for examples of filing system functions.
  * \endcode
  */
-typedef void BR_CALLBACK       brfile_close_cbfn(void *f);
+typedef void BR_CALLBACK brfile_close_cbfn(void *f);
 /**
  * \brief An application defined call-back function testing a file pointer for end of file.
  *
@@ -132,7 +132,7 @@ typedef void BR_CALLBACK       brfile_close_cbfn(void *f);
  * See stdfile.c for examples of filing system functions.
  * \endcode
  */
-typedef int BR_CALLBACK        brfile_eof_cbfn(void *f);
+typedef int BR_CALLBACK brfile_eof_cbfn(void *f);
 /**
  * \brief An application defined call-back function reading a character from a file.
  *
@@ -152,7 +152,7 @@ typedef int BR_CALLBACK        brfile_eof_cbfn(void *f);
  * See stdfile.c for examples of filing system functions.
  * \endcode
  */
-typedef int BR_CALLBACK        brfile_getchr_cbfn(void *f);
+typedef int BR_CALLBACK brfile_getchr_cbfn(void *f);
 /**
  * \brief An application defined call-back function writing a single character to file.
  *
@@ -168,7 +168,7 @@ typedef int BR_CALLBACK        brfile_getchr_cbfn(void *f);
  * See stdfile.c for examples of filing system functions.
  * \endcode
  */
-typedef void BR_CALLBACK       brfile_putchr_cbfn(int c, void *f);
+typedef void BR_CALLBACK brfile_putchr_cbfn(int c, void *f);
 /**
  * \brief An application defined call-back function reading a block from a file.
  *
@@ -189,7 +189,7 @@ typedef void BR_CALLBACK       brfile_putchr_cbfn(int c, void *f);
  * See stdfile.c for examples of filing system functions.
  * \endcode
  */
-typedef br_size_t BR_CALLBACK  brfile_read_cbfn(void *buf, br_size_t size, br_size_t nelems, void *f);
+typedef br_size_t BR_CALLBACK brfile_read_cbfn(void *buf, br_size_t size, br_size_t nelems, void *f);
 /**
  * \brief An application defined call-back function writing a block to a file.
  *
@@ -210,7 +210,7 @@ typedef br_size_t BR_CALLBACK  brfile_read_cbfn(void *buf, br_size_t size, br_si
  * See stdfile.c for examples of filing system functions.
  * \endcode
  */
-typedef br_size_t BR_CALLBACK  brfile_write_cbfn(const void *buf, br_size_t size, br_size_t nelems, void *f);
+typedef br_size_t BR_CALLBACK brfile_write_cbfn(const void *buf, br_size_t size, br_size_t nelems, void *f);
 /**
  * \brief An application defined call-back function reading a line of text (excluding terminators)
  *        from a file.
@@ -233,7 +233,7 @@ typedef br_size_t BR_CALLBACK  brfile_write_cbfn(const void *buf, br_size_t size
  * See stdfile.c for examples of filing system functions.
  * \endcode
  */
-typedef br_size_t BR_CALLBACK  brfile_getline_cbfn(char *buf, br_size_t buf_len, void *f);
+typedef br_size_t BR_CALLBACK brfile_getline_cbfn(char *buf, br_size_t buf_len, void *f);
 /**
  * \brief An application defined call-back function writing a line of text to a file, followed by
  *        writing the new-line character ('\n').
@@ -250,7 +250,7 @@ typedef br_size_t BR_CALLBACK  brfile_getline_cbfn(char *buf, br_size_t buf_len,
  * See stdfile.c for examples of filing system functions.
  * \endcode
  */
-typedef void BR_CALLBACK       brfile_putline_cbfn(const char *buf, void *f);
+typedef void BR_CALLBACK brfile_putline_cbfn(const char *buf, void *f);
 /**
  * \brief An application defined call-back function advancing a file pointer a number of bytes
  *        through a binary stream.
@@ -267,8 +267,8 @@ typedef void BR_CALLBACK       brfile_putline_cbfn(const char *buf, void *f);
  * See stdfile.c for examples of filing system functions.
  * \endcode
  */
-typedef void BR_CALLBACK       brfile_advance_cbfn(br_size_t count, void *f);
-typedef void *BR_CALLBACK      brfile_load_cbfn(void *res, const char *name, br_size_t *size);
+typedef void BR_CALLBACK  brfile_advance_cbfn(br_size_t count, void *f);
+typedef void *BR_CALLBACK brfile_load_cbfn(void *res, const char *name, br_size_t *size);
 
 /**
  * \brief BRender routes all filing system calls through an instance of this structure.
@@ -339,7 +339,7 @@ typedef struct br_filesystem {
      *
      * This is called by BrFileRead() (See Filing System Support, page 57).
      */
-    brfile_read_cbfn  *read;
+    brfile_read_cbfn *read;
     /**
      * \brief This is a pointer to the function to write a block (see brfile_write_cbfn).
      *

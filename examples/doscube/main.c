@@ -158,9 +158,9 @@ int main(int argc, char **argv)
 
     cube->material = BrMaterialLoad("checkerboard8.mat");
 
-    cube->material->flags |= BR_MATF_DITHER;      // Dithering.
-    cube->material->flags |= BR_MATF_SMOOTH;      // Makes lighting look _much_ better.
-    cube->material->opacity = 255; // < 255 selects screendoor renderer
+    cube->material->flags |= BR_MATF_DITHER; // Dithering.
+    cube->material->flags |= BR_MATF_SMOOTH; // Makes lighting look _much_ better.
+    cube->material->opacity = 255;           // < 255 selects screendoor renderer
 
     cube->material->index_shade = BrTableFind("shade_table");
     cube->material->index_base  = 0;

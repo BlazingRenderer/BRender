@@ -828,7 +828,7 @@ br_scalar BR_PUBLIC_ENTRY BrMatrix34Inverse(br_matrix34 *out, const br_matrix34 
  *
  * \sa BrMatrix34Inverse().
  */
-void BR_PUBLIC_ENTRY      BrMatrix34LPInverse(br_matrix34 *A, const br_matrix34 *B);
+void BR_PUBLIC_ENTRY BrMatrix34LPInverse(br_matrix34 *A, const br_matrix34 *B);
 /**
  * \brief Normalise a length preserving* matrix.
  *
@@ -844,7 +844,7 @@ void BR_PUBLIC_ENTRY      BrMatrix34LPInverse(br_matrix34 *A, const br_matrix34 
  *         long sequence of operations, to ensure that the final matrix is still truly length
  *         preserving (regardless of rounding errors).
  */
-void BR_PUBLIC_ENTRY      BrMatrix34LPNormalise(br_matrix34 *A, const br_matrix34 *B);
+void BR_PUBLIC_ENTRY BrMatrix34LPNormalise(br_matrix34 *A, const br_matrix34 *B);
 
 /**
  * \brief This function generates a matrix which provides an intuitive way of controlling the
@@ -976,7 +976,7 @@ void BR_PUBLIC_ENTRY BrMatrix4Identity(br_matrix4 *mat);
  */
 void BR_PUBLIC_ENTRY BrMatrix4Scale(br_matrix4 *mat, br_scalar sx, br_scalar sy, br_scalar sz);
 
-void BR_PUBLIC_ENTRY      BrMatrix4Transpose(br_matrix4 *A);
+void BR_PUBLIC_ENTRY BrMatrix4Transpose(br_matrix4 *A);
 /**
  * \brief Compute the inverse of the supplied 3D affine matrix.
  *
@@ -1005,7 +1005,7 @@ br_scalar BR_PUBLIC_ENTRY BrMatrix4Inverse(br_matrix4 *A, const br_matrix4 *B);
  *
  * \sa BrMatrix4Inverse().
  */
-void BR_PUBLIC_ENTRY      BrMatrix4Adjoint(br_matrix4 *A, const br_matrix4 *B);
+void BR_PUBLIC_ENTRY BrMatrix4Adjoint(br_matrix4 *A, const br_matrix4 *B);
 /**
  * \brief Calculate the determinant of a matrix.
  *
@@ -1226,7 +1226,7 @@ void BR_PUBLIC_ENTRY BrMatrix34Copy4(br_matrix34 *A, const br_matrix4 *B);
 /**
  ** 2D Vectors
  **/
-void BR_PUBLIC_ENTRY      BrVector2Copy(br_vector2 *v1, const br_vector2 *v2);
+void BR_PUBLIC_ENTRY BrVector2Copy(br_vector2 *v1, const br_vector2 *v2);
 /**
  * \brief Set a vector with a pair of scalars.
  *
@@ -1241,7 +1241,7 @@ void BR_PUBLIC_ENTRY      BrVector2Copy(br_vector2 *v1, const br_vector2 *v2);
  *  BrVector2Set(va,BR_SCALAR(1.0),BR_SCALAR(-1.0));
  * \endcode
  */
-void BR_PUBLIC_ENTRY      BrVector2Set(br_vector2 *v1, br_scalar s1, br_scalar s2);
+void BR_PUBLIC_ENTRY BrVector2Set(br_vector2 *v1, br_scalar s1, br_scalar s2);
 /**
  * \brief Set a vector from a pair of standard C integers.
  *
@@ -1256,7 +1256,7 @@ void BR_PUBLIC_ENTRY      BrVector2Set(br_vector2 *v1, br_scalar s1, br_scalar s
  *  BrVector2Set(va,1,-1);
  * \endcode
  */
-void BR_PUBLIC_ENTRY      BrVector2SetInt(br_vector2 *v1, int i1, int i2);
+void BR_PUBLIC_ENTRY BrVector2SetInt(br_vector2 *v1, int i1, int i2);
 /**
  * \brief Set a vector from a pair of standard C floating point numbers.
  *
@@ -1271,7 +1271,7 @@ void BR_PUBLIC_ENTRY      BrVector2SetInt(br_vector2 *v1, int i1, int i2);
  *  BrVector2Set(va,1.f,-1.f);
  * \endcode
  */
-void BR_PUBLIC_ENTRY      BrVector2SetFloat(br_vector2 *v1, float f1, float f2);
+void BR_PUBLIC_ENTRY BrVector2SetFloat(br_vector2 *v1, float f1, float f2);
 /**
  * \brief Negate a vector and place the result in a second destination vector.
  *
@@ -1280,7 +1280,7 @@ void BR_PUBLIC_ENTRY      BrVector2SetFloat(br_vector2 *v1, float f1, float f2);
  * \param v1 A pointer to the destination vector (may be same as source).
  * \param v2 A pointer to the source vector.
  */
-void BR_PUBLIC_ENTRY      BrVector2Negate(br_vector2 *v1, const br_vector2 *v2);
+void BR_PUBLIC_ENTRY BrVector2Negate(br_vector2 *v1, const br_vector2 *v2);
 /**
  * \brief Add two vectors and place the result in a third destination vector.
  *
@@ -1290,7 +1290,7 @@ void BR_PUBLIC_ENTRY      BrVector2Negate(br_vector2 *v1, const br_vector2 *v2);
  * \param v2 A pointer to the first vector of the sum.
  * \param v3 A pointer to the second vector of the sum.
  */
-void BR_PUBLIC_ENTRY      BrVector2Add(br_vector2 *v1, const br_vector2 *v2, const br_vector2 *v3);
+void BR_PUBLIC_ENTRY BrVector2Add(br_vector2 *v1, const br_vector2 *v2, const br_vector2 *v3);
 /**
  * \brief Add one vector to another.
  *
@@ -1299,8 +1299,8 @@ void BR_PUBLIC_ENTRY      BrVector2Add(br_vector2 *v1, const br_vector2 *v2, con
  * \param v1 A pointer to the accumulating vector (may be same as v2).
  * \param v2 A pointer to the vector to add.
  */
-void BR_PUBLIC_ENTRY      BrVector2Accumulate(br_vector2 *v1, const br_vector2 *v2);
-void BR_PUBLIC_ENTRY      BrVector2AccumulateScale(br_vector2 *v1, const br_vector2 *v2, br_scalar s);
+void BR_PUBLIC_ENTRY BrVector2Accumulate(br_vector2 *v1, const br_vector2 *v2);
+void BR_PUBLIC_ENTRY BrVector2AccumulateScale(br_vector2 *v1, const br_vector2 *v2, br_scalar s);
 /**
  * \brief Subtract one vector from another and place the result in a third destination vector.
  *
@@ -1310,7 +1310,7 @@ void BR_PUBLIC_ENTRY      BrVector2AccumulateScale(br_vector2 *v1, const br_vect
  * \param v2 A pointer to the additive vector.
  * \param v3 A pointer to the subtractive vector.
  */
-void BR_PUBLIC_ENTRY      BrVector2Sub(br_vector2 *v1, const br_vector2 *v2, const br_vector2 *v3);
+void BR_PUBLIC_ENTRY BrVector2Sub(br_vector2 *v1, const br_vector2 *v2, const br_vector2 *v3);
 /**
  * \brief Scale a vector by a scalar and place the result in a destination vector.
  *
@@ -1320,7 +1320,7 @@ void BR_PUBLIC_ENTRY      BrVector2Sub(br_vector2 *v1, const br_vector2 *v2, con
  * \param v2 A pointer to the source vector.
  * \param s  Scale factor.
  */
-void BR_PUBLIC_ENTRY      BrVector2Scale(br_vector2 *v1, const br_vector2 *v2, br_scalar s);
+void BR_PUBLIC_ENTRY BrVector2Scale(br_vector2 *v1, const br_vector2 *v2, br_scalar s);
 /**
  * \brief Scale a vector by the reciprocal of a scalar and place the result in a destination vector.
  *
@@ -1330,7 +1330,7 @@ void BR_PUBLIC_ENTRY      BrVector2Scale(br_vector2 *v1, const br_vector2 *v2, b
  * \param v2 A pointer to the source vector.
  * \param s  Reciprocal scale factor.
  */
-void BR_PUBLIC_ENTRY      BrVector2InvScale(br_vector2 *v1, const br_vector2 *v2, br_scalar s);
+void BR_PUBLIC_ENTRY BrVector2InvScale(br_vector2 *v1, const br_vector2 *v2, br_scalar s);
 /**
  * \brief Calculate the dot product of two vectors.
  *
@@ -1371,7 +1371,7 @@ void BR_PUBLIC_ENTRY      BrVector2Clamp(br_vector2 *v1, const br_vector2 *v2, b
 /**
  ** 3D VECTORS
  **/
-void BR_PUBLIC_ENTRY      BrVector3Copy(br_vector3 *v1, const br_vector3 *v2);
+void BR_PUBLIC_ENTRY BrVector3Copy(br_vector3 *v1, const br_vector3 *v2);
 /**
  * \brief Set a vector with a triple of scalars.
  *
@@ -1387,7 +1387,7 @@ void BR_PUBLIC_ENTRY      BrVector3Copy(br_vector3 *v1, const br_vector3 *v2);
  *  BrVector3Set(va,BR_SCALAR(1.0),BR_SCALAR(-1.0),BR_SCALAR(2.0));
  * \endcode
  */
-void BR_PUBLIC_ENTRY      BrVector3Set(br_vector3 *v1, br_scalar s1, br_scalar s2, br_scalar s3);
+void BR_PUBLIC_ENTRY BrVector3Set(br_vector3 *v1, br_scalar s1, br_scalar s2, br_scalar s3);
 /**
  * \brief Set a vector from a triple of standard C integers.
  *
@@ -1403,7 +1403,7 @@ void BR_PUBLIC_ENTRY      BrVector3Set(br_vector3 *v1, br_scalar s1, br_scalar s
  *  BrVector3Set(va,1,-1,2);
  * \endcode
  */
-void BR_PUBLIC_ENTRY      BrVector3SetInt(br_vector3 *v1, int i1, int i2, int i3);
+void BR_PUBLIC_ENTRY BrVector3SetInt(br_vector3 *v1, int i1, int i2, int i3);
 /**
  * \brief Set a vector from a triple of standard C floating point numbers.
  *
@@ -1419,7 +1419,7 @@ void BR_PUBLIC_ENTRY      BrVector3SetInt(br_vector3 *v1, int i1, int i2, int i3
  *  BrVector3Set(va,1.f,-1.f,1.5f);
  * \endcode
  */
-void BR_PUBLIC_ENTRY      BrVector3SetFloat(br_vector3 *v1, float f1, float f2, float f3);
+void BR_PUBLIC_ENTRY BrVector3SetFloat(br_vector3 *v1, float f1, float f2, float f3);
 /**
  * \brief Negate a vector and place the result in a second destination vector.
  *
@@ -1428,7 +1428,7 @@ void BR_PUBLIC_ENTRY      BrVector3SetFloat(br_vector3 *v1, float f1, float f2, 
  * \param v1 A pointer to the destination vector (may be same as source).
  * \param v2 A pointer to the source vector.
  */
-void BR_PUBLIC_ENTRY      BrVector3Negate(br_vector3 *v1, const br_vector3 *v2);
+void BR_PUBLIC_ENTRY BrVector3Negate(br_vector3 *v1, const br_vector3 *v2);
 /**
  * \brief Add two vectors and place the result in a third destination vector.
  *
@@ -1438,7 +1438,7 @@ void BR_PUBLIC_ENTRY      BrVector3Negate(br_vector3 *v1, const br_vector3 *v2);
  * \param v2 A pointer to the first vector of the sum.
  * \param v3 A pointer to the second vector of the sum.
  */
-void BR_PUBLIC_ENTRY      BrVector3Add(br_vector3 *v1, const br_vector3 *v2, const br_vector3 *v3);
+void BR_PUBLIC_ENTRY BrVector3Add(br_vector3 *v1, const br_vector3 *v2, const br_vector3 *v3);
 /**
  * \brief Add one vector to another.
  *
@@ -1447,9 +1447,9 @@ void BR_PUBLIC_ENTRY      BrVector3Add(br_vector3 *v1, const br_vector3 *v2, con
  * \param v1 A pointer to the accumulating vector (may be same as v2).
  * \param v2 A pointer to the vector to add.
  */
-void BR_PUBLIC_ENTRY      BrVector3Accumulate(br_vector3 *v1, const br_vector3 *v2);
-void BR_PUBLIC_ENTRY      BrVector3AccumulateF(br_vector3 *v1, const br_fvector3 *v2);
-void BR_PUBLIC_ENTRY      BrVector3AccumulateScale(br_vector3 *v1, const br_vector3 *v2, br_scalar s);
+void BR_PUBLIC_ENTRY BrVector3Accumulate(br_vector3 *v1, const br_vector3 *v2);
+void BR_PUBLIC_ENTRY BrVector3AccumulateF(br_vector3 *v1, const br_fvector3 *v2);
+void BR_PUBLIC_ENTRY BrVector3AccumulateScale(br_vector3 *v1, const br_vector3 *v2, br_scalar s);
 /**
  * \brief Subtract one vector from another and place the result in a third destination vector.
  *
@@ -1459,8 +1459,8 @@ void BR_PUBLIC_ENTRY      BrVector3AccumulateScale(br_vector3 *v1, const br_vect
  * \param v2 A pointer to the additive vector.
  * \param v3 A pointer to the subtractive vector.
  */
-void BR_PUBLIC_ENTRY      BrVector3Sub(br_vector3 *v1, const br_vector3 *v2, const br_vector3 *v3);
-void BR_PUBLIC_ENTRY      BrVector3Mul(br_vector3 *v1, const br_vector3 *v2, const br_vector3 *v3);
+void BR_PUBLIC_ENTRY BrVector3Sub(br_vector3 *v1, const br_vector3 *v2, const br_vector3 *v3);
+void BR_PUBLIC_ENTRY BrVector3Mul(br_vector3 *v1, const br_vector3 *v2, const br_vector3 *v3);
 /**
  * \brief Scale a vector by a scalar and place the result in a destination vector.
  *
@@ -1470,7 +1470,7 @@ void BR_PUBLIC_ENTRY      BrVector3Mul(br_vector3 *v1, const br_vector3 *v2, con
  * \param v2 A pointer to the source vector.
  * \param s  Scale factor.
  */
-void BR_PUBLIC_ENTRY      BrVector3Scale(br_vector3 *v1, const br_vector3 *v2, br_scalar s);
+void BR_PUBLIC_ENTRY BrVector3Scale(br_vector3 *v1, const br_vector3 *v2, br_scalar s);
 /**
  * \brief Scale a vector by the reciprocal of a scalar and place the result in a destination vector.
  *
@@ -1480,7 +1480,7 @@ void BR_PUBLIC_ENTRY      BrVector3Scale(br_vector3 *v1, const br_vector3 *v2, b
  * \param v2 A pointer to the source vector.
  * \param s  Reciprocal scale factor.
  */
-void BR_PUBLIC_ENTRY      BrVector3InvScale(br_vector3 *v1, const br_vector3 *v2, br_scalar s);
+void BR_PUBLIC_ENTRY BrVector3InvScale(br_vector3 *v1, const br_vector3 *v2, br_scalar s);
 /**
  * \brief Calculate the dot product of two vectors.
  *
@@ -1503,7 +1503,7 @@ br_scalar BR_PUBLIC_ENTRY BrVector3Dot(const br_vector3 *v1, const br_vector3 *v
  *
  * \remark The cross product of the two source vectors is equivalent to: \f$(x_2\ y_2\ z_2) \times (x_3\ y_3\ z_3) \equiv (y_2 z_3 - z_2 y_3 \quad z_2 x_3 - x_2 z_3 \quad x_2 y_3 - y_2 x_3)\f$
  */
-void BR_PUBLIC_ENTRY      BrVector3Cross(br_vector3 *v1, const br_vector3 *v2, const br_vector3 *v3);
+void BR_PUBLIC_ENTRY BrVector3Cross(br_vector3 *v1, const br_vector3 *v2, const br_vector3 *v3);
 /**
  * \brief Calculate the length of a vector.
  *
@@ -1542,7 +1542,7 @@ br_boolean BR_PUBLIC_ENTRY BrVector3Normalise0(br_vector3 *v1, const br_vector3 
  *         destination instead. (footnote: * Or, in the fixed point library, too close to zero, i.e.
  *         less than or equal to 2*BR_SCALAR_EPSILON.)
  */
-void BR_PUBLIC_ENTRY       BrVector3Normalise(br_vector3 *v1, const br_vector3 *v2);
+void BR_PUBLIC_ENTRY BrVector3Normalise(br_vector3 *v1, const br_vector3 *v2);
 /**
  * \brief Normalise a vector with non-zero length and place the result in a destination vector.
  *
@@ -1553,7 +1553,7 @@ void BR_PUBLIC_ENTRY       BrVector3Normalise(br_vector3 *v1, const br_vector3 *
  *
  * \remark No check made for zero length, hence quicker.
  */
-void BR_PUBLIC_ENTRY       BrVector3NormaliseQuick(br_vector3 *v1, const br_vector3 *v2);
+void BR_PUBLIC_ENTRY BrVector3NormaliseQuick(br_vector3 *v1, const br_vector3 *v2);
 /**
  * \brief Normalise a vector with non-zero length using low precision* arithmetic and place the
  *        result in a destination vector.
@@ -1567,10 +1567,10 @@ void BR_PUBLIC_ENTRY       BrVector3NormaliseQuick(br_vector3 *v1, const br_vect
  *         reciprocal of length of the vector is zero. (footnote: * Thus LP in the function name –
  *         do not be confused with the use of this mnemonic for 'length preserving'.)
  */
-void BR_PUBLIC_ENTRY       BrVector3NormaliseLP(br_vector3 *v1, const br_vector3 *v2);
-void BR_PUBLIC_ENTRY       BrVector3ColourSet(br_vector3 *v1, br_colour colour);
-void BR_PUBLIC_ENTRY       BrVector3Clamp(br_vector3 *v1, const br_vector3 *v2, br_scalar min, br_scalar max);
-void BR_PUBLIC_ENTRY       BrVector3Lerp(br_vector3 *r, const br_vector3 *a, const br_vector3 *b, br_scalar t);
+void BR_PUBLIC_ENTRY BrVector3NormaliseLP(br_vector3 *v1, const br_vector3 *v2);
+void BR_PUBLIC_ENTRY BrVector3ColourSet(br_vector3 *v1, br_colour colour);
+void BR_PUBLIC_ENTRY BrVector3Clamp(br_vector3 *v1, const br_vector3 *v2, br_scalar min, br_scalar max);
+void BR_PUBLIC_ENTRY BrVector3Lerp(br_vector3 *r, const br_vector3 *a, const br_vector3 *b, br_scalar t);
 
 br_int_32 BR_PUBLIC_ENTRY BrPlaneEquation(br_vector4 *eqn, const br_vector3 *v0, const br_vector3 *v1, const br_vector3 *v2);
 
@@ -1589,13 +1589,13 @@ br_boolean BR_PUBLIC_ENTRY BrVector2Normalise0(br_vector2 *v1, const br_vector2 
  * \remark If the source vector's length is zero* the unit vector along the x axis is stored at the
  *         destination instead.
  */
-void BR_PUBLIC_ENTRY       BrVector2Normalise(br_vector2 *v1, const br_vector2 *v2);
+void BR_PUBLIC_ENTRY BrVector2Normalise(br_vector2 *v1, const br_vector2 *v2);
 
 /**
  ** 4D Vectors
  **/
-void BR_PUBLIC_ENTRY       BrVector4Set(br_vector4 *v1, br_scalar s1, br_scalar s2, br_scalar s3, br_scalar s4);
-void BR_PUBLIC_ENTRY       BrVector4ColourSet(br_vector4 *v1, br_colour colour);
+void BR_PUBLIC_ENTRY BrVector4Set(br_vector4 *v1, br_scalar s1, br_scalar s2, br_scalar s3, br_scalar s4);
+void BR_PUBLIC_ENTRY BrVector4ColourSet(br_vector4 *v1, br_colour colour);
 /**
  * \brief Calculate the dot product of two vectors.
  *
@@ -1606,7 +1606,7 @@ void BR_PUBLIC_ENTRY       BrVector4ColourSet(br_vector4 *v1, br_colour colour);
  *
  * \return Returns the dot product of the two source vectors. Equivalent to: \f$(x_1\ y_1\ z_1\ w_1) \cdot (x_2\ y_2\ z_2\ w_2) \equiv x_1 x_2 + y_1 y_2 + z_1 z_2 + w_1 w_2\f$
  */
-br_scalar BR_PUBLIC_ENTRY  BrVector4Dot(const br_vector4 *v1, const br_vector4 *v2);
+br_scalar BR_PUBLIC_ENTRY BrVector4Dot(const br_vector4 *v1, const br_vector4 *v2);
 /**
  * \brief Copy a vector.
  *
@@ -1650,7 +1650,7 @@ br_matrix34 *BR_PUBLIC_ENTRY BrEulerToMatrix34(br_matrix34 *mat, const br_euler 
  *
  * \remark Translation components of the matrix are lost in conversion.
  */
-br_euler *BR_PUBLIC_ENTRY    BrMatrix34ToEuler(br_euler *euler, const br_matrix34 *mat);
+br_euler *BR_PUBLIC_ENTRY BrMatrix34ToEuler(br_euler *euler, const br_matrix34 *mat);
 
 /**
  * \brief Convert a br_euler to a 3D affine matrix, that would have the same transformational
@@ -1677,7 +1677,7 @@ br_matrix4 *BR_PUBLIC_ENTRY BrEulerToMatrix4(br_matrix4 *mat, const br_euler *sr
  * \remark Translation and projective (fourth column) components of the matrix are lost in
  *         conversion.
  */
-br_euler *BR_PUBLIC_ENTRY   BrMatrix4ToEuler(br_euler *dest, const br_matrix4 *mat);
+br_euler *BR_PUBLIC_ENTRY BrMatrix4ToEuler(br_euler *dest, const br_matrix4 *mat);
 
 /**
  * \brief Convert a br_euler to a quaternion, that would have the same transformational effect.
@@ -1687,7 +1687,7 @@ br_euler *BR_PUBLIC_ENTRY   BrMatrix4ToEuler(br_euler *dest, const br_matrix4 *m
  *
  * \return Returns q for convenience.
  */
-br_quat *BR_PUBLIC_ENTRY  BrEulerToQuat(br_quat *quat, const br_euler *euler);
+br_quat *BR_PUBLIC_ENTRY BrEulerToQuat(br_quat *quat, const br_euler *euler);
 /**
  * \brief Convert a unit quaternion to an Euler angle set, that would have the same transformational
  *        effect.
@@ -1803,7 +1803,7 @@ br_matrix34 *BR_PUBLIC_ENTRY BrQuatToMatrix34(br_matrix34 *mat, const br_quat *q
  *
  * \remark Translation components of the matrix are lost in conversion.
  */
-br_quat *BR_PUBLIC_ENTRY     BrMatrix34ToQuat(br_quat *q, const br_matrix34 *mat);
+br_quat *BR_PUBLIC_ENTRY BrMatrix34ToQuat(br_quat *q, const br_matrix34 *mat);
 
 /**
  * \brief Convert a unit quaternion to a 3D affine matrix, that would have the same transformational
@@ -1828,7 +1828,7 @@ br_matrix4 *BR_PUBLIC_ENTRY BrQuatToMatrix4(br_matrix4 *mat, const br_quat *q);
  * \remark Translation and projective (fourth column) components of the matrix are lost in
  *         conversion.
  */
-br_quat *BR_PUBLIC_ENTRY    BrMatrix4ToQuat(br_quat *q, const br_matrix4 *mat);
+br_quat *BR_PUBLIC_ENTRY BrMatrix4ToQuat(br_quat *q, const br_matrix4 *mat);
 
 /*
  * Transforms
@@ -2409,7 +2409,7 @@ br_scalar BR_PUBLIC_ENTRY BrMatrix23Inverse(br_matrix23 *out, const br_matrix23 
  *
  * \sa BrMatrix23Inverse()
  */
-void BR_PUBLIC_ENTRY      BrMatrix23LPInverse(br_matrix23 *A, const br_matrix23 *B);
+void BR_PUBLIC_ENTRY BrMatrix23LPInverse(br_matrix23 *A, const br_matrix23 *B);
 /**
  * \brief Normalise a length preserving* matrix.
  *
@@ -2425,7 +2425,7 @@ void BR_PUBLIC_ENTRY      BrMatrix23LPInverse(br_matrix23 *A, const br_matrix23 
  *         long sequence of operations, to ensure that the final matrix is still truly
  *         length-preserving.
  */
-void BR_PUBLIC_ENTRY      BrMatrix23LPNormalise(br_matrix23 *A, const br_matrix23 *B);
+void BR_PUBLIC_ENTRY BrMatrix23LPNormalise(br_matrix23 *A, const br_matrix23 *B);
 
 /*
  * Backwards compatibility

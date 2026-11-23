@@ -60,19 +60,19 @@ typedef struct br_pool {
      * ensue. This is typically 4 bytes, but given that pools are intended for larger structures, this
      * is not a significant restriction. See BrPoolAllocate().
      */
-    br_uint_32     block_size;
+    br_uint_32 block_size;
     /**
      * \brief When all the blocks in a pool are allocated (or the pool is empty), the value of this
      *        member determines the number of blocks that will be added to the pool to enable further
      *        block allocations.
      */
-    br_uint_32     chunk_size;
+    br_uint_32 chunk_size;
     /**
      * \brief This is the memory class from which the blocks should be allocated.
      *
      * Any number of pools may exist for a given memory class.
      */
-    int            mem_type;
+    int mem_type;
 #if BR_POOL_DEBUG
     br_uint_32 max_count;
     br_uint_32 count;

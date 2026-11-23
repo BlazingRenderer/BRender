@@ -97,7 +97,6 @@ void BR_PUBLIC_ENTRY BrModelApplyMap(br_model *model, int map_type, br_matrix34 
     }
 }
 
-
 br_matrix34 *BR_PUBLIC_ENTRY BrModelFitMap(br_model *model, int axis_0, int axis_1, br_matrix34 *transform)
 {
     br_vector3 axis_3;

@@ -156,8 +156,8 @@ int main(int argc, char **argv)
 #endif
 
     // cube->material->flags |= BR_MATF_PERSPECTIVE; // Perspective-correct texture mapping. Doesn't actually work. Breaks 8-bit lighting.
-    cube->material->flags |= BR_MATF_DITHER;      // Dithering.
-    cube->material->flags |= BR_MATF_SMOOTH;      // Makes lighting look _much_ better.
+    cube->material->flags |= BR_MATF_DITHER; // Dithering.
+    cube->material->flags |= BR_MATF_SMOOTH; // Makes lighting look _much_ better.
     // cube->material->flags |= BR_MATF_DISABLE_COLOUR_KEY;  // Not supported by software.
     cube->material->opacity = 255; // < 255 selects screendoor renderer
 

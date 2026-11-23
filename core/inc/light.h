@@ -142,7 +142,7 @@ typedef struct br_light {
      * It is initialised to NULL upon allocation (if allocated by BRender), and not accessed by BRender
      * thereafter.
      */
-    void           *user;
+    void *user;
 
 } br_light;
 

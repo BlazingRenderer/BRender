@@ -186,7 +186,7 @@ br_error BR_PUBLIC_ENTRY            BrV1dbRendererEnd(void);
  * \sa BrMaterialUpdate(), BrMaterialAddMany(), BrMaterialLoad(), BrMaterialFind(),
  *     BrMaterialRemove().
  */
-br_material *BR_PUBLIC_ENTRY           BrMaterialAdd(br_material *material);
+br_material *BR_PUBLIC_ENTRY BrMaterialAdd(br_material *material);
 /**
  * \brief Remove a material from the registry.
  *
@@ -196,7 +196,7 @@ br_material *BR_PUBLIC_ENTRY           BrMaterialAdd(br_material *material);
  *
  * \sa BrMaterialAdd()
  */
-br_material *BR_PUBLIC_ENTRY           BrMaterialRemove(br_material *material);
+br_material *BR_PUBLIC_ENTRY BrMaterialRemove(br_material *material);
 /**
  * \brief Find a material in the registry by name.
  *
@@ -210,7 +210,7 @@ br_material *BR_PUBLIC_ENTRY           BrMaterialRemove(br_material *material);
  *
  * \sa BrMaterialFindHook(), BrMaterialFindMany()
  */
-br_material *BR_PUBLIC_ENTRY           BrMaterialFind(const char *pattern);
+br_material *BR_PUBLIC_ENTRY BrMaterialFind(const char *pattern);
 /**
  * \brief An application defined call-back function used when BrMaterialFind() or
  *        BrMaterialFindMany() fail.
@@ -235,7 +235,7 @@ br_material *BR_PUBLIC_ENTRY           BrMaterialFind(const char *pattern);
  *
  * \sa BrMaterialFind(), BrMaterialFindMany(), BrMaterialFindHook(), BrMaterialFindFailedLoad().
  */
-typedef br_material *BR_CALLBACK       br_material_find_cbfn(const char *name);
+typedef br_material *BR_CALLBACK br_material_find_cbfn(const char *name);
 /**
  * \brief Functions to set up a call-back.
  *
@@ -277,7 +277,7 @@ br_material_find_cbfn *BR_PUBLIC_ENTRY BrMaterialFindHook(br_material_find_cbfn 
  *
  * \sa BrMaterialUpdate(), BrMaterialAdd(), BrMaterialRemove(), BrMaterialRemoveMany().
  */
-br_uint_32 BR_PUBLIC_ENTRY             BrMaterialAddMany(br_material **items, int n);
+br_uint_32 BR_PUBLIC_ENTRY BrMaterialAddMany(br_material **items, int n);
 /**
  * \brief Remove a number of materials from the registry.
  *
@@ -288,7 +288,7 @@ br_uint_32 BR_PUBLIC_ENTRY             BrMaterialAddMany(br_material **items, in
  *
  * \sa BrMaterialAddMany()
  */
-br_uint_32 BR_PUBLIC_ENTRY             BrMaterialRemoveMany(br_material **items, int n);
+br_uint_32 BR_PUBLIC_ENTRY BrMaterialRemoveMany(br_material **items, int n);
 /**
  * \brief Find a number of materials in the registry by name.
  *
@@ -303,7 +303,7 @@ br_uint_32 BR_PUBLIC_ENTRY             BrMaterialRemoveMany(br_material **items,
  *
  * \sa BrMaterialFind(), BrMaterialFindHook()
  */
-br_uint_32 BR_PUBLIC_ENTRY             BrMaterialFindMany(const char *pattern, br_material **items, int max);
+br_uint_32 BR_PUBLIC_ENTRY BrMaterialFindMany(const char *pattern, br_material **items, int max);
 /**
  * \brief Count the number of registered materials whose names match a given search pattern.
  *
@@ -315,7 +315,7 @@ br_uint_32 BR_PUBLIC_ENTRY             BrMaterialFindMany(const char *pattern, b
  *
  * \sa BrMaterialEnum(), BrMaterialFind()
  */
-br_uint_32 BR_PUBLIC_ENTRY             BrMaterialCount(const char *pattern);
+br_uint_32 BR_PUBLIC_ENTRY BrMaterialCount(const char *pattern);
 
 /**
  * \brief An application defined call-back function accepting a material and an application supplied
@@ -364,7 +364,7 @@ typedef br_uint_32 BR_CALLBACK br_material_enum_cbfn(br_material *item, void *ar
  * }
  * \endcode
  */
-br_uint_32 BR_PUBLIC_ENTRY     BrMaterialEnum(const char *pattern, br_material_enum_cbfn *callback, void *arg);
+br_uint_32 BR_PUBLIC_ENTRY BrMaterialEnum(const char *pattern, br_material_enum_cbfn *callback, void *arg);
 
 /**
  * \brief Update a material that has changed in some respect since the previous update of this
@@ -399,7 +399,7 @@ br_material *BR_PUBLIC_ENTRY BrMaterialAllocate(const char *name);
  *
  * \param m A pointer to a material.
  */
-void BR_PUBLIC_ENTRY         BrMaterialFree(br_material *m);
+void BR_PUBLIC_ENTRY BrMaterialFree(br_material *m);
 
 /*
  * Model Handling
@@ -415,7 +415,7 @@ void BR_PUBLIC_ENTRY         BrMaterialFree(br_material *m);
  *
  * \sa BrModelUpdate(), BrModelAddMany(), BrModelLoad(), BrModelFind(), BrModelRemove()
  */
-br_model *BR_PUBLIC_ENTRY           BrModelAdd(br_model *model);
+br_model *BR_PUBLIC_ENTRY BrModelAdd(br_model *model);
 /**
  * \brief Remove a model from the registry.
  *
@@ -425,7 +425,7 @@ br_model *BR_PUBLIC_ENTRY           BrModelAdd(br_model *model);
  *
  * \sa BrModelAdd()
  */
-br_model *BR_PUBLIC_ENTRY           BrModelRemove(br_model *model);
+br_model *BR_PUBLIC_ENTRY BrModelRemove(br_model *model);
 /**
  * \brief Find a model in the registry by name.
  *
@@ -439,7 +439,7 @@ br_model *BR_PUBLIC_ENTRY           BrModelRemove(br_model *model);
  *
  * \sa BrModelFindHook(), BrModelFindMany()
  */
-br_model *BR_PUBLIC_ENTRY           BrModelFind(const char *pattern);
+br_model *BR_PUBLIC_ENTRY BrModelFind(const char *pattern);
 /**
  * \brief An application defined call-back function used when BrModelFind() or BrModelFindMany()
  *        fail.
@@ -463,7 +463,7 @@ br_model *BR_PUBLIC_ENTRY           BrModelFind(const char *pattern);
  *
  * \sa BrModelFind(), BrModelFindMany(), BrModelFindHook(), BrModelFindFailedLoad().
  */
-typedef br_model *BR_CALLBACK       br_model_find_cbfn(const char *name);
+typedef br_model *BR_CALLBACK br_model_find_cbfn(const char *name);
 /**
  * \brief Functions to set up a call-back.
  *
@@ -505,7 +505,7 @@ br_model_find_cbfn *BR_PUBLIC_ENTRY BrModelFindHook(br_model_find_cbfn *hook);
  *
  * \sa BrModelUpdate(), BrModelAdd(), BrModelRemove(), BrModelRemoveMany()
  */
-br_uint_32 BR_PUBLIC_ENTRY          BrModelAddMany(br_model **items, int n);
+br_uint_32 BR_PUBLIC_ENTRY BrModelAddMany(br_model **items, int n);
 /**
  * \brief Remove a number of models from the registry.
  *
@@ -516,7 +516,7 @@ br_uint_32 BR_PUBLIC_ENTRY          BrModelAddMany(br_model **items, int n);
  *
  * \sa BrModelAddMany()
  */
-br_uint_32 BR_PUBLIC_ENTRY          BrModelRemoveMany(br_model **items, int n);
+br_uint_32 BR_PUBLIC_ENTRY BrModelRemoveMany(br_model **items, int n);
 /**
  * \brief Find a number of models in the registry by name.
  *
@@ -531,7 +531,7 @@ br_uint_32 BR_PUBLIC_ENTRY          BrModelRemoveMany(br_model **items, int n);
  *
  * \sa BrModelFind(), BrModelFindHook()
  */
-br_uint_32 BR_PUBLIC_ENTRY          BrModelFindMany(const char *pattern, br_model **items, int max);
+br_uint_32 BR_PUBLIC_ENTRY BrModelFindMany(const char *pattern, br_model **items, int max);
 /**
  * \brief Count the number of registered models whose names match a given search pattern.
  *
@@ -543,7 +543,7 @@ br_uint_32 BR_PUBLIC_ENTRY          BrModelFindMany(const char *pattern, br_mode
  *
  * \sa BrModelEnum(), BrModelFind()
  */
-br_uint_32 BR_PUBLIC_ENTRY          BrModelCount(const char *pattern);
+br_uint_32 BR_PUBLIC_ENTRY BrModelCount(const char *pattern);
 
 /**
  * \brief An application defined call-back function accepting a model and an application supplied
@@ -638,7 +638,7 @@ void BR_PUBLIC_ENTRY BrModelUpdate(br_model *model, br_uint_16 flags);
  *
  * \sa BrModelFitMap()
  */
-void BR_PUBLIC_ENTRY         BrModelApplyMap(br_model *model, int map_type, br_matrix34 *xform);
+void BR_PUBLIC_ENTRY BrModelApplyMap(br_model *model, int map_type, br_matrix34 *xform);
 /**
  * \brief Generate a transformation which will map the bounds of a model onto a cube defined by the
  *        corner co-ordinates (-1,-1,-1) and (1,1,1).
@@ -684,7 +684,7 @@ br_model *BR_PUBLIC_ENTRY BrModelAllocate(const char *name, int nvertices, int n
  *
  * \param m A pointer to a model.
  */
-void BR_PUBLIC_ENTRY      BrModelFree(br_model *m);
+void BR_PUBLIC_ENTRY BrModelFree(br_model *m);
 
 /*
  * New primitive handling
@@ -708,7 +708,7 @@ br_uint_32 BR_PUBLIC_ENTRY         BrModelAddPrimitiveList(br_model *model, br_p
  *
  * \sa BrMapUpdate(), BrMapAddMany(), BrPixelmapLoad(), BrMapFind(), BrMapRemove()
  */
-br_pixelmap *BR_PUBLIC_ENTRY      BrMapAdd(br_pixelmap *pixelmap);
+br_pixelmap *BR_PUBLIC_ENTRY BrMapAdd(br_pixelmap *pixelmap);
 /**
  * \brief Remove a texture map from the registry.
  *
@@ -718,7 +718,7 @@ br_pixelmap *BR_PUBLIC_ENTRY      BrMapAdd(br_pixelmap *pixelmap);
  *
  * \sa BrMapAdd()
  */
-br_pixelmap *BR_PUBLIC_ENTRY      BrMapRemove(br_pixelmap *pixelmap);
+br_pixelmap *BR_PUBLIC_ENTRY BrMapRemove(br_pixelmap *pixelmap);
 /**
  * \brief Find a texture map in the registry by name.
  *
@@ -732,7 +732,7 @@ br_pixelmap *BR_PUBLIC_ENTRY      BrMapRemove(br_pixelmap *pixelmap);
  *
  * \sa BrMapFindHook(), BrMapFindMany()
  */
-br_pixelmap *BR_PUBLIC_ENTRY      BrMapFind(const char *pattern);
+br_pixelmap *BR_PUBLIC_ENTRY BrMapFind(const char *pattern);
 /**
  * \brief An application defined call-back function used when BrMapFind() or BrMapFindMany() fail.
  *
@@ -754,7 +754,7 @@ br_pixelmap *BR_PUBLIC_ENTRY      BrMapFind(const char *pattern);
  *
  * \sa BrMapFind(), BrMapFindMany(), BrMapFindHook(), BrMapFindFailedLoad().
  */
-typedef br_pixelmap *BR_CALLBACK  br_map_find_cbfn(const char *name);
+typedef br_pixelmap *BR_CALLBACK br_map_find_cbfn(const char *name);
 /**
  * \brief Set the call-back function used by BrMapFind().
  *
@@ -781,7 +781,7 @@ br_map_find_cbfn *BR_PUBLIC_ENTRY BrMapFindHook(br_map_find_cbfn *hook);
  *
  * \sa BrMapUpdate(), BrMapAdd(), BrMapRemove(), BrMapRemoveMany()
  */
-br_uint_32 BR_PUBLIC_ENTRY        BrMapAddMany(br_pixelmap **items, int n);
+br_uint_32 BR_PUBLIC_ENTRY BrMapAddMany(br_pixelmap **items, int n);
 /**
  * \brief Remove a number of texture maps from the registry.
  *
@@ -792,7 +792,7 @@ br_uint_32 BR_PUBLIC_ENTRY        BrMapAddMany(br_pixelmap **items, int n);
  *
  * \sa BrMapAddMany()
  */
-br_uint_32 BR_PUBLIC_ENTRY        BrMapRemoveMany(br_pixelmap **items, int n);
+br_uint_32 BR_PUBLIC_ENTRY BrMapRemoveMany(br_pixelmap **items, int n);
 /**
  * \brief Find a number of texture maps in the registry by name.
  *
@@ -807,7 +807,7 @@ br_uint_32 BR_PUBLIC_ENTRY        BrMapRemoveMany(br_pixelmap **items, int n);
  *
  * \sa BrMapFind(), BrMapFindHook()
  */
-br_uint_32 BR_PUBLIC_ENTRY        BrMapFindMany(const char *pattern, br_pixelmap **items, int max);
+br_uint_32 BR_PUBLIC_ENTRY BrMapFindMany(const char *pattern, br_pixelmap **items, int max);
 /**
  * \brief Count the number of registered texture maps whose names match a given search pattern.
  *
@@ -819,7 +819,7 @@ br_uint_32 BR_PUBLIC_ENTRY        BrMapFindMany(const char *pattern, br_pixelmap
  *
  * \sa BrMapEnum(), BrMapFind()
  */
-br_uint_32 BR_PUBLIC_ENTRY        BrMapCount(const char *pattern);
+br_uint_32 BR_PUBLIC_ENTRY BrMapCount(const char *pattern);
 
 /**
  * \brief An application defined call-back function accepting a pixel map and an application
@@ -867,7 +867,7 @@ typedef br_uint_32 BR_CALLBACK br_map_enum_cbfn(br_pixelmap *item, void *arg);
  * }
  * \endcode
  */
-br_uint_32 BR_PUBLIC_ENTRY     BrMapEnum(const char *pattern, br_map_enum_cbfn *callback, void *arg);
+br_uint_32 BR_PUBLIC_ENTRY BrMapEnum(const char *pattern, br_map_enum_cbfn *callback, void *arg);
 
 /**
  * \brief Update a texture map.
@@ -893,7 +893,7 @@ void BR_PUBLIC_ENTRY BrMapUpdate(br_pixelmap *item, br_uint_16 flags);
  *
  * \sa BrTableUpdate(), BrTableAddMany(), BrPixelmapLoad(), BrTableFind(), BrTableRemove()
  */
-br_pixelmap *BR_PUBLIC_ENTRY        BrTableAdd(br_pixelmap *pixelmap);
+br_pixelmap *BR_PUBLIC_ENTRY BrTableAdd(br_pixelmap *pixelmap);
 /**
  * \brief Remove a shade table from the registry.
  *
@@ -903,7 +903,7 @@ br_pixelmap *BR_PUBLIC_ENTRY        BrTableAdd(br_pixelmap *pixelmap);
  *
  * \sa BrTableAdd()
  */
-br_pixelmap *BR_PUBLIC_ENTRY        BrTableRemove(br_pixelmap *pixelmap);
+br_pixelmap *BR_PUBLIC_ENTRY BrTableRemove(br_pixelmap *pixelmap);
 /**
  * \brief Find a shade table in the registry by name.
  *
@@ -917,7 +917,7 @@ br_pixelmap *BR_PUBLIC_ENTRY        BrTableRemove(br_pixelmap *pixelmap);
  *
  * \sa BrTableFindHook(), BrTableFindMany()
  */
-br_pixelmap *BR_PUBLIC_ENTRY        BrTableFind(const char *pattern);
+br_pixelmap *BR_PUBLIC_ENTRY BrTableFind(const char *pattern);
 /**
  * \brief An application defined call-back function used when BrTableFind() or BrTableFindMany()
  *        fail.
@@ -941,7 +941,7 @@ br_pixelmap *BR_PUBLIC_ENTRY        BrTableFind(const char *pattern);
  *
  * \sa BrTableFind(), BrTableFindMany(), BrTableFindHook(), BrTableFindFailedLoad().
  */
-typedef br_pixelmap *BR_CALLBACK    br_table_find_cbfn(const char *name);
+typedef br_pixelmap *BR_CALLBACK br_table_find_cbfn(const char *name);
 /**
  * \brief Set the call-back function used by BrTableFind().
  *
@@ -968,7 +968,7 @@ br_table_find_cbfn *BR_PUBLIC_ENTRY BrTableFindHook(br_table_find_cbfn *hook);
  *
  * \sa BrTableUpdate(), BrTableAdd(), BrTableRemove(), BrTableRemoveMany()
  */
-br_uint_32 BR_PUBLIC_ENTRY          BrTableAddMany(br_pixelmap **items, int n);
+br_uint_32 BR_PUBLIC_ENTRY BrTableAddMany(br_pixelmap **items, int n);
 /**
  * \brief Remove a number of shade tables from the registry.
  *
@@ -979,7 +979,7 @@ br_uint_32 BR_PUBLIC_ENTRY          BrTableAddMany(br_pixelmap **items, int n);
  *
  * \sa BrTableAddMany()
  */
-br_uint_32 BR_PUBLIC_ENTRY          BrTableRemoveMany(br_pixelmap **items, int n);
+br_uint_32 BR_PUBLIC_ENTRY BrTableRemoveMany(br_pixelmap **items, int n);
 /**
  * \brief Find a number of shade tables in the registry by name.
  *
@@ -994,7 +994,7 @@ br_uint_32 BR_PUBLIC_ENTRY          BrTableRemoveMany(br_pixelmap **items, int n
  *
  * \sa BrTableFind(), BrTableFindHook()
  */
-br_uint_32 BR_PUBLIC_ENTRY          BrTableFindMany(const char *pattern, br_pixelmap **items, int max);
+br_uint_32 BR_PUBLIC_ENTRY BrTableFindMany(const char *pattern, br_pixelmap **items, int max);
 /**
  * \brief Count the number of registered shade tables whose names match a given search pattern.
  *
@@ -1006,7 +1006,7 @@ br_uint_32 BR_PUBLIC_ENTRY          BrTableFindMany(const char *pattern, br_pixe
  *
  * \sa BrTableEnum(), BrTableFind()
  */
-br_uint_32 BR_PUBLIC_ENTRY          BrTableCount(const char *pattern);
+br_uint_32 BR_PUBLIC_ENTRY BrTableCount(const char *pattern);
 
 /**
  * \brief An application defined call-back function accepting a table and an application supplied
@@ -1123,7 +1123,7 @@ typedef br_uint_32 BR_CALLBACK br_actor_enum_cbfn(br_actor *mat, void *arg);
  * }
  * \endcode
  */
-br_uint_32 BR_PUBLIC_ENTRY     BrActorEnum(br_actor *parent, br_actor_enum_cbfn *callback, void *arg);
+br_uint_32 BR_PUBLIC_ENTRY BrActorEnum(br_actor *parent, br_actor_enum_cbfn *callback, void *arg);
 
 /**
  * \brief Add an actor hierarchy as a child of a given parent.
@@ -1148,8 +1148,8 @@ br_uint_32 BR_PUBLIC_ENTRY     BrActorEnum(br_actor *parent, br_actor_enum_cbfn 
  *
  * \sa BrActorRemove(), BrActorRelink()
  */
-br_actor *BR_PUBLIC_ENTRY  BrActorAdd(br_actor *parent, br_actor *a);
-br_actor *BR_PUBLIC_ENTRY  BrActorAddNoRenumber(br_actor *parent, br_actor *a);
+br_actor *BR_PUBLIC_ENTRY BrActorAdd(br_actor *parent, br_actor *a);
+br_actor *BR_PUBLIC_ENTRY BrActorAddNoRenumber(br_actor *parent, br_actor *a);
 /**
  * \brief Remove an actor hierarchy from its parent.
  *
@@ -1168,8 +1168,8 @@ br_actor *BR_PUBLIC_ENTRY  BrActorAddNoRenumber(br_actor *parent, br_actor *a);
  *
  * \sa BrActorAdd(), BrActorRelink()
  */
-br_actor *BR_PUBLIC_ENTRY  BrActorRemove(br_actor *a);
-br_actor *BR_PUBLIC_ENTRY  BrActorRemoveNoRenumber(br_actor *a);
+br_actor *BR_PUBLIC_ENTRY BrActorRemove(br_actor *a);
+br_actor *BR_PUBLIC_ENTRY BrActorRemoveNoRenumber(br_actor *a);
 /**
  * \brief Move an actor in a hierarchy, but preserve its apparent world transformation by
  *        manipulating its own transformation as necessary.
@@ -1186,7 +1186,7 @@ br_actor *BR_PUBLIC_ENTRY  BrActorRemoveNoRenumber(br_actor *a);
  *
  * \sa BrActorAdd(), BrActorRemove()
  */
-void BR_PUBLIC_ENTRY       BrActorRelink(br_actor *parent, br_actor *actor);
+void BR_PUBLIC_ENTRY BrActorRelink(br_actor *parent, br_actor *actor);
 /**
  * \brief Accumulate the transformations between one actor and another, representing the result as a
  *        matrix.
@@ -1223,7 +1223,7 @@ br_uint_16 BR_PUBLIC_ENTRY BrActorToActorMatrix34(br_matrix34 *m, br_actor *a, b
  *
  * \sa BrMatrix4Perspective().
  */
-void BR_PUBLIC_ENTRY       BrActorToScreenMatrix4(br_matrix4 *m, br_actor *a, br_actor *camera);
+void BR_PUBLIC_ENTRY BrActorToScreenMatrix4(br_matrix4 *m, br_actor *a, br_actor *camera);
 
 /**
  * \brief Allocate a new actor.
@@ -1284,7 +1284,7 @@ br_actor *BR_PUBLIC_ENTRY BrActorAllocate(br_uint_8 actor_type, void *type_data)
  * BrActorFree(t_pActor);
  * \endcode
  */
-void BR_PUBLIC_ENTRY      BrActorFree(br_actor *a);
+void BR_PUBLIC_ENTRY BrActorFree(br_actor *a);
 
 /**
  * \brief Traverse an actor's descendants, searching for actors of a particular generation with a
@@ -1373,7 +1373,7 @@ br_uint_32 BR_PUBLIC_ENTRY BrActorSearchMany(br_actor *root, char *pattern, br_a
  *
  * `*`/ `*son?` would match either `Grand-son1` or `Grand-son2`.
  */
-br_actor *BR_PUBLIC_ENTRY  BrActorSearch(br_actor *root, char *pattern);
+br_actor *BR_PUBLIC_ENTRY BrActorSearch(br_actor *root, char *pattern);
 
 /**
  * \brief Compute an actor hierarchy's bounding box, encompassing the bounding box of all models
@@ -1413,7 +1413,7 @@ br_bounds *BR_PUBLIC_ENTRY BrActorToBounds(br_bounds *b, br_actor *ap);
  *
  * \sa BrModelLoadMany(), BrModelSave(), BrModelAdd()
  */
-br_model *BR_PUBLIC_ENTRY  BrModelLoad(const char *filename);
+br_model *BR_PUBLIC_ENTRY BrModelLoad(const char *filename);
 /**
  * \brief Save a model to a file.
  *
@@ -1474,7 +1474,7 @@ br_uint_32 BR_PUBLIC_ENTRY BrModelSaveMany(const char *filename, br_model **mode
  *
  * \return Returns zero if the file was found (even if it is not a models file), non-zero otherwise.
  */
-br_error BR_PUBLIC_ENTRY   BrModelFileCount(const char *filename, br_uint_16 *num);
+br_error BR_PUBLIC_ENTRY BrModelFileCount(const char *filename, br_uint_16 *num);
 
 /**
  * \brief Load a material.
@@ -1505,7 +1505,7 @@ br_material *BR_PUBLIC_ENTRY BrMaterialLoad(const char *filename);
  *
  * \sa BrWriteModeSet()
  */
-br_uint_32 BR_PUBLIC_ENTRY   BrMaterialSave(const char *filename, br_material *material);
+br_uint_32 BR_PUBLIC_ENTRY BrMaterialSave(const char *filename, br_material *material);
 /**
  * \brief Load a number of materials.
  *
@@ -1523,7 +1523,7 @@ br_uint_32 BR_PUBLIC_ENTRY   BrMaterialSave(const char *filename, br_material *m
  *
  * \sa To determine how many materials are stored in a file see BrMaterialFileCount().
  */
-br_uint_32 BR_PUBLIC_ENTRY   BrMaterialLoadMany(const char *filename, br_material **materials, br_uint_16 num);
+br_uint_32 BR_PUBLIC_ENTRY BrMaterialLoadMany(const char *filename, br_material **materials, br_uint_16 num);
 /**
  * \brief Save a number of materials to a file.
  *
@@ -1540,7 +1540,7 @@ br_uint_32 BR_PUBLIC_ENTRY   BrMaterialLoadMany(const char *filename, br_materia
  *
  * \sa BrWriteModeSet()
  */
-br_uint_32 BR_PUBLIC_ENTRY   BrMaterialSaveMany(const char *filename, br_material **materials, br_uint_16 num);
+br_uint_32 BR_PUBLIC_ENTRY BrMaterialSaveMany(const char *filename, br_material **materials, br_uint_16 num);
 /**
  * \brief Locate a given file and count the number of materials in it.
  *
@@ -1556,7 +1556,7 @@ br_uint_32 BR_PUBLIC_ENTRY   BrMaterialSaveMany(const char *filename, br_materia
  * \return Returns zero if the file was found (even if it is not a materials file), non-zero
  *         otherwise.
  */
-br_error BR_PUBLIC_ENTRY     BrMaterialFileCount(const char *filename, br_uint_16 *num);
+br_error BR_PUBLIC_ENTRY BrMaterialFileCount(const char *filename, br_uint_16 *num);
 
 /**
  * \brief Load a hierarchy of actors from a file.
@@ -1587,7 +1587,7 @@ br_error BR_PUBLIC_ENTRY     BrMaterialFileCount(const char *filename, br_uint_1
  * br_actor* t_pMyScene=BrActorLoad("MyScene");
  * \endcode
  */
-br_actor *BR_PUBLIC_ENTRY  BrActorLoad(const char *filename);
+br_actor *BR_PUBLIC_ENTRY BrActorLoad(const char *filename);
 /**
  * \brief Saves an actor and its descendants as a hierarchy.
  *
@@ -1714,7 +1714,7 @@ br_uint_32 BR_PUBLIC_ENTRY BrActorSaveMany(const char *filename, br_actor **acto
  *
  * \sa BrActorLoad(), BrActorLoadMany().
  */
-br_error BR_PUBLIC_ENTRY   BrActorFileCount(const char *filename, br_uint_16 *num);
+br_error BR_PUBLIC_ENTRY BrActorFileCount(const char *filename, br_uint_16 *num);
 
 /*
  * Lights
@@ -2079,7 +2079,7 @@ br_uint_32 BR_PUBLIC_ENTRY BrOnScreenCheck(br_bounds3 *bounds);
  *
  * \return Returns zero if the point is in front of the eye (the viewing pyramid).
  */
-br_uint_8 BR_PUBLIC_ENTRY  BrOriginToScreenXY(br_vector2 *screen);
+br_uint_8 BR_PUBLIC_ENTRY BrOriginToScreenXY(br_vector2 *screen);
 /**
  * \brief Transform and project the origin in the model's co-ordinate space onto the screen,
  *        generating x, y and z co-ordinates.
@@ -2112,7 +2112,7 @@ br_uint_32 BR_PUBLIC_ENTRY BrOriginToScreenXYZO(br_vector3 *screen);
  *
  * \return Returns zero if the point is in front of the eye (the viewing pyramid).
  */
-br_uint_8 BR_PUBLIC_ENTRY  BrPointToScreenXY(br_vector2 *screen, br_vector3 *point);
+br_uint_8 BR_PUBLIC_ENTRY BrPointToScreenXY(br_vector2 *screen, br_vector3 *point);
 /**
  * \brief Transform and project a point in the model's co-ordinate space onto the screen, generating
  *        x, y and z co-ordinates.
@@ -2220,7 +2220,7 @@ void BR_PUBLIC_ENTRY BrModelToViewQuery(br_matrix34 *dest);
  *
  * \sa BrScreenZToCamera(), BrScreenXYZToCamera()
  */
-br_scalar BR_PUBLIC_ENTRY  BrZbDepthToScreenZ(br_uint_32 depth_z, const br_camera *camera);
+br_scalar BR_PUBLIC_ENTRY BrZbDepthToScreenZ(br_uint_32 depth_z, const br_camera *camera);
 
 /**
  * \brief Convert screen z [-32,768.0, +32,768) to z buffer depth [0, 0xFFFFFFFF].
@@ -2299,8 +2299,8 @@ br_scalar BR_PUBLIC_ENTRY BrScreenZToCamera(const br_actor *camera, br_scalar sz
  *
  * \sa BrPointToScreenXYZO(), BrOriginToScreenXYZO(), BrMatrix4Perspective()
  */
-void BR_PUBLIC_ENTRY      BrScreenXYZToCamera(br_vector3 *point, const br_actor *camera, const br_pixelmap *screen_buffer, br_int_16 x,
-                                              br_int_16 y, br_scalar sz);
+void BR_PUBLIC_ENTRY BrScreenXYZToCamera(br_vector3 *point, const br_actor *camera, const br_pixelmap *screen_buffer, br_int_16 x,
+                                         br_int_16 y, br_scalar sz);
 
 br_error BR_PUBLIC_ENTRY BrLightModelCull(br_actor *light);
 
@@ -2327,7 +2327,7 @@ br_pixelmap *BR_CALLBACK BrTableFindFailedLoad(const char *name);
  * BrModelFindHook(BrModelFindFailedLoad);
  * \endcode
  */
-br_model *BR_CALLBACK    BrModelFindFailedLoad(const char *name);
+br_model *BR_CALLBACK BrModelFindFailedLoad(const char *name);
 /**
  * \brief This function is provided as a suitable function to supply to BrMaterialFindHook().
  *
@@ -2805,7 +2805,7 @@ struct br_order_table *BR_PUBLIC_ENTRY BrZsOrderTableAllocate(br_uint_16 size, b
  *
  * \sa BrZsOrderTableAllocate(), BrResFree().
  */
-void BR_PUBLIC_ENTRY                   BrZsOrderTableFree(br_order_table *order_table);
+void BR_PUBLIC_ENTRY BrZsOrderTableFree(br_order_table *order_table);
 /**
  * \brief Given a model actor, set the order table into which its primitives will be sorted.
  *
@@ -2932,7 +2932,7 @@ br_uint_16 BR_PUBLIC_ENTRY BrZsPrimitiveBucketSelect(br_scalar *z, br_uint_16 ty
  *
  * \sa BrZsOrderTablePrimaryDisable().
  */
-void BR_PUBLIC_ENTRY       BrZsOrderTablePrimaryEnable(struct br_order_table *order_table);
+void BR_PUBLIC_ENTRY BrZsOrderTablePrimaryEnable(struct br_order_table *order_table);
 /**
  * \brief Disable the use of a primary order table.
  *
@@ -2949,7 +2949,7 @@ void BR_PUBLIC_ENTRY       BrZsOrderTablePrimaryEnable(struct br_order_table *or
  *
  * \sa BrZsOrderTablePrimaryEnable().
  */
-void BR_PUBLIC_ENTRY       BrZsOrderTablePrimaryDisable(void);
+void BR_PUBLIC_ENTRY BrZsOrderTablePrimaryDisable(void);
 
 /*
  * Backwards compatibility

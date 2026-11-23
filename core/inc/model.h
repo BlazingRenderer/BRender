@@ -76,14 +76,14 @@ typedef struct br_face {
      * important. The primary, visible side of a face from the viewpoint has its vertices listed in
      * anticlockwise order. See br_model and br_vertex.
      */
-    br_uint_16   vertices[3];
+    br_uint_16 vertices[3];
     /**
      * \brief A 16 bit field in which each bit represents a smoothing group.
      *
      * If, when smooth-shading a surface, two adjacent faces share a smoothing group, the edge between
      * them will be smooth.
      */
-    br_uint_16   smoothing;
+    br_uint_16 smoothing;
     /**
      * \brief Pointer to the material structure associated with this face.
      *
@@ -416,7 +416,7 @@ typedef struct br_model {
      * The faces can be allocated at the same time as the model, otherwise faces should point to a list
      * with a sufficient lifetime (and BR_MODF_KEEP_ORIGINAL must be set).
      */
-    br_face   *faces;
+    br_face *faces;
 
     /**
      * \brief Number of vertices supplied in the list of vertices.

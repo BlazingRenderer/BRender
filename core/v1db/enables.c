@@ -143,8 +143,7 @@ br_error BrLightCullReset(br_model *model)
     if(v1db.enabled_lights.enabled == NULL)
         return BRE_FAIL;
 
-    RendererPartQueryBuffer(v1db.renderer, BRT_MATRIX, 0, &dummy, &model_to_view, sizeof(model_to_view),
-                            BRT_AS_MATRIX34_SCALAR(MODEL_TO_VIEW));
+    RendererPartQueryBuffer(v1db.renderer, BRT_MATRIX, 0, &dummy, &model_to_view, sizeof(model_to_view), BRT_AS_MATRIX34_SCALAR(MODEL_TO_VIEW));
 
     BrVector3CopyMat34Row(&origin, &model_to_view, 3);
 

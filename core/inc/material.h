@@ -243,7 +243,7 @@ typedef struct br_material {
      * shade tables, also need to be added to the registry before use.
      */
     br_pixelmap *index_blend;
-    br_pixelmap *index_fog;   /* Index fogging        */
+    br_pixelmap *index_fog; /* Index fogging        */
 
     br_token_value *extra_surf;
     br_token_value *extra_prim;
@@ -327,9 +327,9 @@ enum {
     /*
      * Backwards compatibility
      */
-    BR_MATF_GOURAUD    = BR_MATF_SMOOTH,
-    BR_MATF_MAP_COLOUR = 0,
-    BR_MATF_FORCE_Z_0  = BR_MATF_FORCE_FRONT,
+    BR_MATF_GOURAUD           = BR_MATF_SMOOTH,
+    BR_MATF_MAP_COLOUR        = 0,
+    BR_MATF_FORCE_Z_0         = BR_MATF_FORCE_FRONT,
     BR_MATF_SEPARATE_SPECULAR = 0,
 };
 

@@ -774,7 +774,7 @@ br_error BR_CMETHOD_DECL(br_device_pixelmap_sdl3, match)(br_device_pixelmap *sel
 
     if(mt.use == BRT_CLONE) {
         SDL_Palette *pal = SDL_GetSurfacePalette(self->surface);
-        surface = SDL_ConvertSurfaceAndColorspace(self->surface, format, pal, SDL_COLORSPACE_SRGB, 0);
+        surface          = SDL_ConvertSurfaceAndColorspace(self->surface, format, pal, SDL_COLORSPACE_SRGB, 0);
     } else {
         surface = DevicePixelmapSDL3CreateSurface(mt.width, mt.height, format);
     }

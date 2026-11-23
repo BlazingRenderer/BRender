@@ -64,7 +64,7 @@ typedef struct br_actor {
      *
      * If the actor has no siblings or is the last sibling actor, next is NULL.
      */
-    struct br_actor  *next;
+    struct br_actor *next;
     /**
      * \brief A pointer to the previous sibling actor's next member in the linked list of sibling actors
      *        (parent's children).

@@ -24,8 +24,6 @@ static void renderAll(br_model *model, br_material *material, br_token style, in
         else
             GeometryV1ModelRender(v1db.format_model, v1db.renderer, model->prepared, material->stored, style);
     }
-
-
 }
 
 /*
@@ -36,8 +34,7 @@ static void renderFaces(br_actor *actor, br_model *model, br_material *material,
     renderAll(model, material, BRT_FACE, on_screen);
 }
 
-static void renderAntialiasedFaces(br_actor *actor, br_model *model, br_material *material, void *render_data, br_uint_8 style,
-                                   int on_screen)
+static void renderAntialiasedFaces(br_actor *actor, br_model *model, br_material *material, void *render_data, br_uint_8 style, int on_screen)
 {
     renderAll(model, material, BRT_ANTIALIASED_FACE, on_screen);
 }
@@ -50,8 +47,7 @@ static void renderEdges(br_actor *actor, br_model *model, br_material *material,
     renderAll(model, material, BRT_EDGE, on_screen);
 }
 
-static void renderAntialiasedEdges(br_actor *actor, br_model *model, br_material *material, void *render_data, br_uint_8 style,
-                                   int on_screen)
+static void renderAntialiasedEdges(br_actor *actor, br_model *model, br_material *material, void *render_data, br_uint_8 style, int on_screen)
 {
     renderAll(model, material, BRT_ANTIALIASED_EDGE, on_screen);
 }

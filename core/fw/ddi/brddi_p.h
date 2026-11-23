@@ -58,11 +58,9 @@ br_error BR_RESIDENT_ENTRY BrTokenValueQuery(void *pvalue, void *extra, br_size_
 br_error BR_RESIDENT_ENTRY BrTokenValueQueryMany(br_token_value *tv, void *extra, br_size_t extra_size, br_int_32 *pcount, void *block,
                                                  br_tv_template *_template, void *context);
 
-br_error BR_RESIDENT_ENTRY BrTokenValueQueryManySize(br_size_t *psize, br_token_value *tv, void *block, br_tv_template *_template,
-                                                     void *context);
+br_error BR_RESIDENT_ENTRY BrTokenValueQueryManySize(br_size_t *psize, br_token_value *tv, void *block, br_tv_template *_template, void *context);
 
-br_error BR_RESIDENT_ENTRY BrTokenValueQueryAll(br_token_value *buffer, br_size_t buffer_size, void *block, br_tv_template *_template,
-                                                void *context);
+br_error BR_RESIDENT_ENTRY BrTokenValueQueryAll(br_token_value *buffer, br_size_t buffer_size, void *block, br_tv_template *_template, void *context);
 
 br_error BR_RESIDENT_ENTRY BrTokenValueQueryAllSize(br_size_t *psize, void *block, br_tv_template *_template, void *context);
 

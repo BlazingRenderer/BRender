@@ -106,8 +106,7 @@ char *T_EncodePixelmapType(br_int_32 type)
 br_uint_32 T_GenerateMapTable(t_pixelmap_cbfn_info *cbfn_command)
 {
     cbfn_command->nmaps     = BrMapCount(NULL);
-    cbfn_command->map_table = BrResAllocate(res_anchor, sizeof(*cbfn_command->map_table) * cbfn_command->nmaps,
-                                            BR_MEMORY_APPLICATION);
+    cbfn_command->map_table = BrResAllocate(res_anchor, sizeof(*cbfn_command->map_table) * cbfn_command->nmaps, BR_MEMORY_APPLICATION);
 
     cbfn_command->count = 0;
     cbfn_command->type  = T_CBFN_GENERATE_MAP_TABLE;
@@ -167,13 +166,12 @@ br_pixelmap *T_Convert(br_pixelmap *item, t_pixelmap_cbfn_info *cbfn_command)
      * check if source and destination are both supported
      */
     if(PixelmapTypes[item->type].read_pixel_fn == NULL)
-        BR_ERROR4("Unable to convert '%s' of type %s to %s. %s source not supported.", item->identifier,
-                  T_EncodePixelmapType(item->type), T_EncodePixelmapType(cbfn_command->new_type),
-                  T_EncodePixelmapType(cbfn_command->new_type));
+        BR_ERROR4("Unable to convert '%s' of type %s to %s. %s source not supported.", item->identifier, T_EncodePixelmapType(item->type),
+                  T_EncodePixelmapType(cbfn_command->new_type), T_EncodePixelmapType(cbfn_command->new_type));
 
     if(PixelmapTypes[cbfn_command->new_type].write_pixel_fn == NULL)
-        BR_ERROR2("Unable to convert to type %s. %s target not supported.",
-                  T_EncodePixelmapType(cbfn_command->new_type), T_EncodePixelmapType(cbfn_command->new_type));
+        BR_ERROR2("Unable to convert to type %s. %s target not supported.", T_EncodePixelmapType(cbfn_command->new_type),
+                  T_EncodePixelmapType(cbfn_command->new_type));
 
     switch(cbfn_command->type) {
 
@@ -337,8 +335,7 @@ br_uint_32 BR_CALLBACK T_PixelmapCbfn(br_pixelmap *item, void *arg)
             item->identifier = BrMemStrDup(_scratch_string);
             T_Log("   Level %d '%s' (%d,%d)\n", level++, item->identifier, item->width, item->height);
 
-            for(width = item->width >> 1, height = item->height >> 1; (width > 0) && (height > 0);
-                width >>= 1, height >>= 1, level++) {
+            for(width = item->width >> 1, height = item->height >> 1; (width > 0) && (height > 0); width >>= 1, height >>= 1, level++) {
                 /*
                  * generate mip level
                  */
@@ -438,12 +435,12 @@ br_uint_32 BR_CALLBACK T_PixelmapCbfn(br_pixelmap *item, void *arg)
 
             cbfn_command->convert_table[cbfn_command->count++] = pm;
 
-            T_Log("Remapped '%s' %s (%d bit) to %s (%d bit)", item->identifier, T_EncodePixelmapType(item->type),
-                  BrPixelmapPixelSize(item), T_EncodePixelmapType(pm->type), BrPixelmapPixelSize(pm));
+            T_Log("Remapped '%s' %s (%d bit) to %s (%d bit)", item->identifier, T_EncodePixelmapType(item->type), BrPixelmapPixelSize(item),
+                  T_EncodePixelmapType(pm->type), BrPixelmapPixelSize(pm));
 
             if(PixelmapTypes[pm->type].needs_palette == 1)
-                T_Log(" with palette type %s (%d bit, %d,%d)", T_EncodePixelmapType(pm->map->type),
-                      BrPixelmapPixelSize(pm->map), cbfn_command->base, cbfn_command->range);
+                T_Log(" with palette type %s (%d bit, %d,%d)", T_EncodePixelmapType(pm->map->type), BrPixelmapPixelSize(pm->map),
+                      cbfn_command->base, cbfn_command->range);
 
             T_Log("\n");
 
@@ -476,8 +473,8 @@ br_uint_32 BR_CALLBACK T_PixelmapCbfn(br_pixelmap *item, void *arg)
                   BrPixelmapPixelSize(item), T_EncodePixelmapType(pm->type), BrPixelmapPixelSize(pm));
 
             if(PixelmapTypes[pm->type].needs_palette == 1)
-                T_Log(" with palette type %s (%d bit, %d,%d)", T_EncodePixelmapType(pm->map->type),
-                      BrPixelmapPixelSize(pm->map), cbfn_command->base, cbfn_command->range);
+                T_Log(" with palette type %s (%d bit, %d,%d)", T_EncodePixelmapType(pm->map->type), BrPixelmapPixelSize(pm->map),
+                      cbfn_command->base, cbfn_command->range);
 
             T_Log("\n");
 
@@ -504,8 +501,7 @@ br_uint_32 BR_CALLBACK T_PixelmapCbfn(br_pixelmap *item, void *arg)
             cbfn_command->convert_table[cbfn_command->count++] = item;
 
             T_Log("Assigned palette '%s' (%s) to '%s'\n", cbfn_command->current_palette->identifier,
-                  T_EncodePixelmapType(cbfn_command->current_palette->type), item->identifier,
-                  T_EncodePixelmapType(item->type));
+                  T_EncodePixelmapType(cbfn_command->current_palette->type), item->identifier, T_EncodePixelmapType(item->type));
 
             break;
 
@@ -606,8 +602,8 @@ br_uint_32 BR_CALLBACK T_PixelmapCbfn(br_pixelmap *item, void *arg)
                 cbfn_command->map_table[cbfn_command->count]       = item;
                 cbfn_command->convert_table[cbfn_command->count++] = pm;
 
-                T_Log("Flipped palette (%s) from '%s' (%s) from %d,%d to %d,%d\n", T_EncodePixelmapType(item->map->type),
-                      item->identifier, T_EncodePixelmapType(item->type), pm->height, pm->width, pm->width, pm->height);
+                T_Log("Flipped palette (%s) from '%s' (%s) from %d,%d to %d,%d\n", T_EncodePixelmapType(item->map->type), item->identifier,
+                      T_EncodePixelmapType(item->type), pm->height, pm->width, pm->width, pm->height);
             }
 
             break;

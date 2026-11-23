@@ -98,19 +98,19 @@ void DeviceVkRenderFini(br_device *dev)
             vmaDestroyImage(dev->vma_allocator, dev->render_white_image, dev->render_white_allocation);
     }
 
-    dev->render_vert                 = VK_NULL_HANDLE;
-    dev->render_frag                 = VK_NULL_HANDLE;
-    dev->render_indexed              = VK_NULL_HANDLE;
-    dev->render_lit                  = VK_NULL_HANDLE;
-    dev->render_lit_indexed          = VK_NULL_HANDLE;
-    dev->render_white_image          = VK_NULL_HANDLE;
-    dev->render_white_view           = VK_NULL_HANDLE;
-    dev->render_white_allocation     = NULL;
-    dev->render_set_layout           = VK_NULL_HANDLE;
-    dev->render_pipeline_layout      = VK_NULL_HANDLE;
-    dev->render_pipeline_count       = 0;
-    dev->render_sampler_count        = 0;
-    dev->render_state                = BR_VK_RENDER_UNAVAILABLE;
+    dev->render_vert             = VK_NULL_HANDLE;
+    dev->render_frag             = VK_NULL_HANDLE;
+    dev->render_indexed          = VK_NULL_HANDLE;
+    dev->render_lit              = VK_NULL_HANDLE;
+    dev->render_lit_indexed      = VK_NULL_HANDLE;
+    dev->render_white_image      = VK_NULL_HANDLE;
+    dev->render_white_view       = VK_NULL_HANDLE;
+    dev->render_white_allocation = NULL;
+    dev->render_set_layout       = VK_NULL_HANDLE;
+    dev->render_pipeline_layout  = VK_NULL_HANDLE;
+    dev->render_pipeline_count   = 0;
+    dev->render_sampler_count    = 0;
+    dev->render_state            = BR_VK_RENDER_UNAVAILABLE;
 }
 
 /**
@@ -345,23 +345,21 @@ static void blend_factors_for(br_token blend_mode, VkBlendFactor *src, VkBlendFa
  *
  * \return the pipeline, or VK_NULL_HANDLE if one could not be built.
  */
-VkPipeline DeviceVkRenderGetPipeline(br_device *dev, VkFormat format, VkSampleCountFlagBits samples, br_boolean lit,
-                                     br_boolean indexed, br_token shading_mode, VkCullModeFlags cull, VkFrontFace front_face,
-                                     br_boolean blended, br_token blend_mode, br_boolean depth_test, br_boolean depth_write,
-                                     VkCompareOp depth_compare, VkFormat depth_format, VkPolygonMode polygon_mode)
+VkPipeline DeviceVkRenderGetPipeline(br_device *dev, VkFormat format, VkSampleCountFlagBits samples, br_boolean lit, br_boolean indexed,
+                                     br_token shading_mode, VkCullModeFlags cull, VkFrontFace front_face, br_boolean blended,
+                                     br_token blend_mode, br_boolean depth_test, br_boolean depth_write, VkCompareOp depth_compare,
+                                     VkFormat depth_format, VkPolygonMode polygon_mode)
 {
     const GladVulkanContext *vk = &dev->context;
     VkShaderModule           frag;
 
     for(br_uint_32 i = 0; i < dev->render_pipeline_count; ++i) {
-        if(dev->render_pipelines[i].format == format && dev->render_pipelines[i].samples == samples &&
-           dev->render_pipelines[i].lit == lit && dev->render_pipelines[i].indexed == indexed &&
-           dev->render_pipelines[i].shading_mode == shading_mode &&
-           dev->render_pipelines[i].cull == cull && dev->render_pipelines[i].front_face == front_face &&
-           dev->render_pipelines[i].blended == blended && dev->render_pipelines[i].blend_mode == blend_mode &&
-           dev->render_pipelines[i].depth_format == depth_format && dev->render_pipelines[i].depth_test == depth_test &&
-           dev->render_pipelines[i].depth_write == depth_write && dev->render_pipelines[i].depth_compare == depth_compare &&
-           dev->render_pipelines[i].polygon_mode == polygon_mode)
+        if(dev->render_pipelines[i].format == format && dev->render_pipelines[i].samples == samples && dev->render_pipelines[i].lit == lit &&
+           dev->render_pipelines[i].indexed == indexed && dev->render_pipelines[i].shading_mode == shading_mode &&
+           dev->render_pipelines[i].cull == cull && dev->render_pipelines[i].front_face == front_face && dev->render_pipelines[i].blended == blended &&
+           dev->render_pipelines[i].blend_mode == blend_mode && dev->render_pipelines[i].depth_format == depth_format &&
+           dev->render_pipelines[i].depth_test == depth_test && dev->render_pipelines[i].depth_write == depth_write &&
+           dev->render_pipelines[i].depth_compare == depth_compare && dev->render_pipelines[i].polygon_mode == polygon_mode)
             return dev->render_pipelines[i].pipeline;
     }
 
@@ -849,8 +847,8 @@ static br_boolean VkV1ModelRenderIndexed(br_geometry_stored *geom, br_renderer *
             depth_write = BR_FALSE;
     }
 
-    if((pipeline = DeviceVkRenderGetPipeline(dev, dst_fmt->format, VK_SAMPLE_COUNT_1_BIT, lit, indexed, shading_mode, cull, front_face,
-                                             blended, blend_mode, depth_test, depth_write, depth_compare, depth_format, polygon_mode)) == VK_NULL_HANDLE)
+    if((pipeline = DeviceVkRenderGetPipeline(dev, dst_fmt->format, VK_SAMPLE_COUNT_1_BIT, lit, indexed, shading_mode, cull, front_face, blended,
+                                             blend_mode, depth_test, depth_write, depth_compare, depth_format, polygon_mode)) == VK_NULL_HANDLE)
         return BR_FALSE;
 
     for(int r = 0; r < 4; ++r) {
@@ -1044,7 +1042,7 @@ static br_boolean VkV1ModelRenderIndexed(br_geometry_stored *geom, br_renderer *
      * rendering scope (see BufferStoredVkGetViewLayout()). A source in no layout this draw
      * can sample is declined, rather than bound with a layout it is not in.
      */
-    const VkImageView   colour_map_view   = colour_map != NULL ? BufferStoredVkGetView(colour_map) : dev->render_white_view;
+    const VkImageView colour_map_view = colour_map != NULL ? BufferStoredVkGetView(colour_map) : dev->render_white_view;
     const VkImageLayout colour_map_layout = colour_map != NULL ? BufferStoredVkGetViewLayout(colour_map) : VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 
     if(colour_map_view == VK_NULL_HANDLE || colour_map_layout == VK_IMAGE_LAYOUT_UNDEFINED)
@@ -1056,9 +1054,8 @@ static br_boolean VkV1ModelRenderIndexed(br_geometry_stored *geom, br_renderer *
      * primitive asked for, while a plain colour map keeps the primitive's filter and mip
      * filter. glrend overrides an indexed colour map the same way (drivers/glrend/v1model.c).
      */
-    const VkSampler sampler = DeviceVkRenderGetSampler(dev, indexed ? BRT_NEAREST : state->prim.filter,
-                                                       indexed ? BRT_NONE : state->prim.mip_filter, state->prim.map_width_limit,
-                                                       state->prim.map_height_limit);
+    const VkSampler sampler = DeviceVkRenderGetSampler(dev, indexed ? BRT_NEAREST : state->prim.filter, indexed ? BRT_NONE : state->prim.mip_filter,
+                                                       state->prim.map_width_limit, state->prim.map_height_limit);
 
     if(sampler == VK_NULL_HANDLE)
         return BR_FALSE;

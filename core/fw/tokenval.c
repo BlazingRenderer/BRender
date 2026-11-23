@@ -393,7 +393,7 @@ static br_error ValueQuery(br_token_value *tv, void **pextra, br_size_t *pextra_
 static br_error ValueSet(void                       *block, /* Destination memeory block				*/
                          const br_token_value       *tv,    /* Source value								*/
                          const br_tv_template_entry *tep,   /* Template entry to use for conversion		*/
-                         void                       *context) /* Object whose state is being set			*/
+                         void                       *context)                     /* Object whose state is being set			*/
 {
     void         *mem;
     int           i, t;
@@ -651,7 +651,7 @@ static br_size_t ValueExtraSize(void *block, const br_tv_template_entry *tep, vo
  * Get the value coresponding to one token
  */
 br_error BR_RESIDENT_ENTRY BrTokenValueQuery(void *pvalue, void *extra, br_size_t extra_size, br_token t, void *block,
-                                            br_tv_template *template, void *context)
+                                             br_tv_template *template, void *context)
 {
     br_int_32                   o;
     const br_tv_template_entry *tep;
@@ -733,8 +733,7 @@ br_error BR_RESIDENT_ENTRY BrTokenValueQueryMany(br_token_value *tv, void *extra
  * Work out how much extra storage would be needed for the values described in the given
  * token/value list
  */
-br_error BR_RESIDENT_ENTRY BrTokenValueQueryManySize(br_size_t *psize, br_token_value *tv, void *block, br_tv_template *template,
-                                                     void *context)
+br_error BR_RESIDENT_ENTRY BrTokenValueQueryManySize(br_size_t *psize, br_token_value *tv, void *block, br_tv_template *template, void *context)
 {
     br_int_32 o;
     br_size_t extra_size = 0;
@@ -766,8 +765,7 @@ br_error BR_RESIDENT_ENTRY BrTokenValueQueryManySize(br_size_t *psize, br_token_
     return BRE_OK;
 }
 
-br_error BR_RESIDENT_ENTRY BrTokenValueQueryAll(br_token_value *buffer, br_size_t buffer_size, void *block, br_tv_template *template,
-                                                void *context)
+br_error BR_RESIDENT_ENTRY BrTokenValueQueryAll(br_token_value *buffer, br_size_t buffer_size, void *block, br_tv_template *template, void *context)
 {
     const br_tv_template_entry *tp;
     int                         n, e;
@@ -881,8 +879,7 @@ br_error BR_RESIDENT_ENTRY BrTokenValueQueryAllSize(br_size_t *psize, void *bloc
     return BRE_OK;
 }
 
-br_error BR_RESIDENT_ENTRY BrTokenValueSet(void *mem, br_uint_32 *pcombined_mask, br_token t, br_value value, br_tv_template *template,
-                                           void *context)
+br_error BR_RESIDENT_ENTRY BrTokenValueSet(void *mem, br_uint_32 *pcombined_mask, br_token t, br_value value, br_tv_template *template, void *context)
 {
     br_int_32            o;
     br_error             r;

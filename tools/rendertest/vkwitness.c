@@ -3219,11 +3219,11 @@ out:
  */
 static br_error vkrend_renderer_point_step(vkrend_renderer_state *state, br_actor *camera, br_actor *actor)
 {
-    vkrend_renderer_bounds  faces, points;
-    br_pixelmap            *readback = NULL;
-    const br_int_32         cx       = state->offscreen->width / 2;
-    const br_int_32         cy       = state->offscreen->height / 2;
-    br_error                result   = BRE_FAIL;
+    vkrend_renderer_bounds faces, points;
+    br_pixelmap           *readback = NULL;
+    const br_int_32        cx       = state->offscreen->width / 2;
+    const br_int_32        cy       = state->offscreen->height / 2;
+    br_error               result   = BRE_FAIL;
 
     actor->render_style = BR_RSTYLE_FACES;
 
@@ -3314,12 +3314,12 @@ out:
  */
 static br_error vkrend_renderer_wireframe_step(vkrend_renderer_state *state, br_actor *camera, br_actor *actor)
 {
-    vkrend_renderer_bounds  faces, wire;
-    br_pixelmap            *readback = NULL;
-    br_int_32               base_y = -1, base_count = 0, base_x = 0;
-    const br_int_32         cx = state->offscreen->width / 2;
-    const br_int_32         cy = state->offscreen->height / 2;
-    br_error                result = BRE_FAIL;
+    vkrend_renderer_bounds faces, wire;
+    br_pixelmap           *readback = NULL;
+    br_int_32              base_y = -1, base_count = 0, base_x = 0;
+    const br_int_32        cx     = state->offscreen->width / 2;
+    const br_int_32        cy     = state->offscreen->height / 2;
+    br_error               result = BRE_FAIL;
 
     /* Faces first: the widest row of the filled triangle is the edge the wireframe must draw. */
     actor->render_style = BR_RSTYLE_FACES;
@@ -3404,8 +3404,9 @@ static br_error vkrend_renderer_wireframe_step(vkrend_renderer_state *state, br_
     }
 
     if(!vkrend_renderer_pixel_is(readback, base_x, base_y, vkrend_renderer_surface)) {
-        BrLogError("RT", "vkrend: the wireframe did not draw the base edge's middle at (%d,%d), the middle of the filled triangle's widest "
-                         "row.",
+        BrLogError("RT",
+                   "vkrend: the wireframe did not draw the base edge's middle at (%d,%d), the middle of the filled triangle's widest "
+                   "row.",
                    base_x, base_y);
         goto out;
     }
@@ -4231,8 +4232,7 @@ static br_error vkrend_renderer_init(void *user, br_pixelmap *screen, br_pixelma
         {
             const br_uint_8 untextured_white[4] = {0xff, 0xff, 0xff, 0xff};
 
-            if(vkrend_renderer_assert_pixel(state->offscreen, cx, cy, untextured_white,
-                                            "the colour-keyed surface with no colour map") != BRE_OK)
+            if(vkrend_renderer_assert_pixel(state->offscreen, cx, cy, untextured_white, "the colour-keyed surface with no colour map") != BRE_OK)
                 goto fail;
         }
 

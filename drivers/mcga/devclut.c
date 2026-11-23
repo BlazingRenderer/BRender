@@ -64,7 +64,6 @@ static br_device *BR_CMETHOD_DECL(br_device_clut_vga, device)(br_object *_self)
     return self->device;
 }
 
-
 static br_token BR_CMETHOD_DECL(br_device_clut_vga, type)(br_object *self)
 {
     return BRT_DEVICE_CLUT;

@@ -151,8 +151,7 @@ static br_vertex_2d lerp_vertex(const br_vertex_2d *a, const br_vertex_2d *b, br
  * survives; the vertex count stays small because a convex polygon gains at most one
  * vertex per plane.
  */
-static br_uint_32 clip_edge(const br_vertex_2d *in, br_uint_32 n, br_vertex_2d *out, int axis, br_scalar bound,
-                            br_boolean keep_greater)
+static br_uint_32 clip_edge(const br_vertex_2d *in, br_uint_32 n, br_vertex_2d *out, int axis, br_scalar bound, br_boolean keep_greater)
 {
     br_uint_32 m = 0;
 
@@ -181,10 +180,10 @@ static br_uint_32 clip_edge(const br_vertex_2d *in, br_uint_32 n, br_vertex_2d *
 
 static void append_triangle(const br_vertex_2d *v0, const br_vertex_2d *v1, const br_vertex_2d *v2)
 {
-    br_vertex_2d a[8], b[8];
-    const br_vertex_2d *in = a;
+    br_vertex_2d        a[8], b[8];
+    const br_vertex_2d *in  = a;
     br_vertex_2d       *out = b;
-    br_uint_32          n = 3;
+    br_uint_32          n   = 3;
 
     if(!br2d_has_clip) {
         append_vertex(v0);
@@ -259,8 +258,7 @@ static void set_2d_state(br_pixelmap *destination)
     BrMatrix34Identity(&identity);
 
     /* y is inverted, so that y = 0 is the top of the screen, as the API says. */
-    BrMatrix4Orthographic(&projection, BR_SCALAR(0), BrIntToScalar(width), BrIntToScalar(height), BR_SCALAR(0), BR_SCALAR(-1),
-                          BR_SCALAR(1));
+    BrMatrix4Orthographic(&projection, BR_SCALAR(0), BrIntToScalar(width), BrIntToScalar(height), BR_SCALAR(0), BR_SCALAR(-1), BR_SCALAR(1));
 
     RendererPartSet(r, BRT_MATRIX, 0, BRT_MODEL_TO_VIEW_M34_F, (br_value){.m34 = &identity});
     RendererPartSet(r, BRT_MATRIX, 0, BRT_VIEW_TO_SCREEN_M4_F, (br_value){.m4 = &projection});
@@ -322,8 +320,7 @@ static void draw_batch(void)
      * a change to what the caller asked for and is not done here.
      */
     if(nvertices > 0xFFFF) {
-        BrLogError("2D", "Br2DEnd(): %u vertices, and a v11group holds %u, so the batch was not drawn.", nvertices,
-                   0xFFFFu);
+        BrLogError("2D", "Br2DEnd(): %u vertices, and a v11group holds %u, so the batch was not drawn.", nvertices, 0xFFFFu);
         return;
     }
 
@@ -346,8 +343,8 @@ static void draw_batch(void)
         position[i].v[1] = v->position.v[1];
         position[i].v[2] = BR_SCALAR(0);
 
-        map[i]       = v->map;
-        colours[i]   = v->colour;
+        map[i]     = v->map;
+        colours[i] = v->colour;
         BrVector3Set(&normal[i], BR_SCALAR(0), BR_SCALAR(0), BR_SCALAR(0));
 
         if(position[i].v[0] < model.bounds.min.v[0])
@@ -374,9 +371,9 @@ static void draw_batch(void)
     group.nvertices      = (br_uint_16)nvertices;
     group.nfaces         = (br_uint_16)nfaces;
 
-    model.size            = sizeof(model);
-    model.ngroups         = 1;
-    model.groups          = &group;
+    model.size    = sizeof(model);
+    model.ngroups = 1;
+    model.groups  = &group;
     BrVector3Set(&model.pivot, BR_SCALAR(0), BR_SCALAR(0), BR_SCALAR(0));
     model.radius = BR_SCALAR(0);
     BrVector3Set(&model.centre, BR_SCALAR(0), BR_SCALAR(0), BR_SCALAR(0));
@@ -384,7 +381,6 @@ static void draw_batch(void)
 
     GeometryV1ModelRender(v1db.format_model, v1db.renderer, &model, NULL, BRT_FACE);
 }
-
 
 void BR_PUBLIC_ENTRY Br2DBegin(br_pixelmap *destination, br_material *material, const br_rectangle *clip)
 {
@@ -399,8 +395,7 @@ void BR_PUBLIC_ENTRY Br2DBegin(br_pixelmap *destination, br_material *material, 
      * building it, as the scene path does. An unprepared material would leave the batch
      * drawing with whatever state the renderer happened to have.
      */
-    UASSERT_MESSAGE("Br2DBegin() needs a prepared material: BrMaterialAdd() or BrMaterialUpdate() it first",
-                    material->stored != NULL);
+    UASSERT_MESSAGE("Br2DBegin() needs a prepared material: BrMaterialAdd() or BrMaterialUpdate() it first", material->stored != NULL);
 
     RendererStatePush(v1db.renderer, BR2D_STATE_MASK);
     RendererStateRestore(v1db.renderer, material->stored, BR_STATE_PRIMITIVE | BR_STATE_SURFACE | BR_STATE_CULL);

@@ -364,12 +364,12 @@ typedef struct br_device {
      * model-view, colour and lighting factors, and its push descriptor binds the per-scene
      * block of packed lights.
      */
-    br_vk_render_state           render_state;
-    VkShaderModule               render_vert;
-    VkShaderModule               render_frag;
-    VkShaderModule               render_indexed;
-    VkShaderModule               render_lit;
-    VkShaderModule               render_lit_indexed;
+    br_vk_render_state render_state;
+    VkShaderModule     render_vert;
+    VkShaderModule     render_frag;
+    VkShaderModule     render_indexed;
+    VkShaderModule     render_lit;
+    VkShaderModule     render_lit_indexed;
     /*
      * A 1x1 white image, bound in the colour map's slot when the material has none so that
      * one fragment shader covers both cases: the texel is 1 and the surface colour passes

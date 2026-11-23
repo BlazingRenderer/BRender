@@ -54,7 +54,7 @@ typedef br_float br_ufraction;
  *
  * \return The value as a br_scalar.
  */
-#define BrFloatToScalar(f)     ((br_scalar)f)
+#define BrFloatToScalar(f) ((br_scalar)f)
 
 /**
  * \brief Convert a scalar to a float.
@@ -63,7 +63,7 @@ typedef br_float br_ufraction;
  *
  * \return The value as a float.
  */
-#define BrScalarToFloat(c)     (c)
+#define BrScalarToFloat(c) (c)
 
 /**
  * \brief Convert any integer type to a scalar.
@@ -72,7 +72,7 @@ typedef br_float br_ufraction;
  *
  * \return The value as a br_scalar.
  */
-#define BrIntToScalar(i)       ((br_scalar)(i))
+#define BrIntToScalar(i) ((br_scalar)(i))
 
 /**
  * \brief Convert a scalar to an int.
@@ -81,7 +81,7 @@ typedef br_float br_ufraction;
  *
  * \return The value as an int.
  */
-#define BrScalarToInt(s)       ((int)(s))
+#define BrScalarToInt(s) ((int)(s))
 
 /**
  * \brief Convert a fixed-point value to a scalar.
@@ -90,7 +90,7 @@ typedef br_float br_ufraction;
  *
  * \return The value as a br_scalar.
  */
-#define BrFixedToScalar(f)     ((br_scalar)((f) / (br_float)BR_ONE_LS))
+#define BrFixedToScalar(f) ((br_scalar)((f) / (br_float)BR_ONE_LS))
 
 /**
  * \brief Convert a scalar to a fixed-point value.
@@ -99,7 +99,7 @@ typedef br_float br_ufraction;
  *
  * \return The value as a br_fixed_ls.
  */
-#define BrScalarToFixed(s)     (br_fixed_ls)((s) * (br_scalar)BR_ONE_LS)
+#define BrScalarToFixed(s) (br_fixed_ls)((s) * (br_scalar)BR_ONE_LS)
 
 /**
  * \brief Convert a fraction to a scalar.
@@ -110,7 +110,7 @@ typedef br_float br_ufraction;
  *
  * \return The value as a br_scalar.
  */
-#define BrFractionToScalar(f)  (f)
+#define BrFractionToScalar(f) (f)
 
 /**
  * \brief Convert a scalar to a fraction.
@@ -121,7 +121,7 @@ typedef br_float br_ufraction;
  *
  * \return The value as a br_fraction.
  */
-#define BrScalarToFraction(s)  (s)
+#define BrScalarToFraction(s) (s)
 
 /**
  * \brief Convert an unsigned fraction to a scalar.

@@ -386,7 +386,7 @@ br_colour T_Read_RGBA_4444(char *pixels, br_float fract)
 
     r = (temp_colour >> 8) & 0xf0;
     g = (temp_colour >> 4) & 0xf0;
-    b = (temp_colour)&0xf0;
+    b = (temp_colour) & 0xf0;
     a = (temp_colour << 4) & 0xf0;
 
     colour = BR_COLOUR_ARGB(a, r, g, b);
@@ -405,7 +405,7 @@ br_colour T_Read_ARGB_4444(char *pixels, br_float fract)
     temp_colour = *((br_uint_16 *)pixels);
 
     r = (temp_colour >> 4) & 0xf0;
-    g = (temp_colour)&0xf0;
+    g = (temp_colour) & 0xf0;
     b = (temp_colour << 4) & 0xf0;
     a = (temp_colour << 8) & 0xf0;
 
@@ -430,8 +430,8 @@ void T_Write_ARGB_4444(char *pixels, br_float fract, br_colour new_pixel)
     /* colour format R G B A R G B A R G B A- 2 bytes per pixel */
     br_uint_16 temp_colour;
 
-    temp_colour = ((BR_ALPHA(new_pixel) >> 4) << 12) | ((BR_RED(new_pixel) >> 4) << 8) |
-                  ((BR_GRN(new_pixel) >> 4) << 4) | ((BR_BLU(new_pixel) >> 4));
+    temp_colour = ((BR_ALPHA(new_pixel) >> 4) << 12) | ((BR_RED(new_pixel) >> 4) << 8) | ((BR_GRN(new_pixel) >> 4) << 4) |
+                  ((BR_BLU(new_pixel) >> 4));
 
     *((br_uint_16 *)pixels) = temp_colour;
 }
@@ -463,7 +463,6 @@ void T_Write_R8G8B8A8(char *pixels, br_float fract, br_colour new_pixel)
 
     *(br_uint_32 *)pixels = (r << 24) | (g << 16) | (b << 8) | (a << 0);
 }
-
 
 /*
  * convert all pixelmaps to new type
@@ -586,8 +585,8 @@ br_pixelmap *T_ConvertDirectPixelmap(br_pixelmap *item, t_pixelmap_cbfn_info *cb
     current_dst = pm;
 
     if(cbfn_command->type == T_CBFN_FLIP_HIGH_WIDE_PALETTES) {
-        for(y = 0, s_fract = s_x_start, d_fract = d_x_start; y < item->height; y++, s_pixels += (int)s_y_step,
-        d_pixels = ((char *)pm->pixels) + (int)d_y_start, d_fract += d_x_step, s_fract = s_x_start) {
+        for(y = 0, s_fract = s_x_start, d_fract      = d_x_start; y < item->height;
+            y++, s_pixels += (int)s_y_step, d_pixels = ((char *)pm->pixels) + (int)d_y_start, d_fract += d_x_step, s_fract = s_x_start) {
             for(x = 0; x < item->width; x++, s_fract += s_x_step, d_pixels += (int)d_y_step) {
                 write_pixel_fn(d_pixels + ((int)d_fract), d_fract - ((int)d_fract),
                                read_pixel_fn(s_pixels + ((int)s_fract), s_fract - ((int)s_fract)));
@@ -634,8 +633,8 @@ br_pixelmap *T_ConvertIndexedPixelmap(br_pixelmap *item, t_pixelmap_cbfn_info *c
          * perform some validation on control data
          */
         if((cbfn_command->base < 0) || (cbfn_command->base > cbfn_command->height - 1))
-            BR_ERROR3("Index base value out of range 0-%d (%d) for type %s", cbfn_command->height - 1,
-                      cbfn_command->base, T_EncodePixelmapType(pm->type));
+            BR_ERROR3("Index base value out of range 0-%d (%d) for type %s", cbfn_command->height - 1, cbfn_command->base,
+                      T_EncodePixelmapType(pm->type));
         if((cbfn_command->range < 1) || (cbfn_command->range > cbfn_command->height))
             BR_ERROR2("Index range value too large (%d) for type %s", cbfn_command->height, T_EncodePixelmapType(pm->type));
         if((cbfn_command->base + cbfn_command->range - 1) > (cbfn_command->height - 1))
@@ -666,8 +665,7 @@ br_pixelmap *T_ConvertIndexedPixelmap(br_pixelmap *item, t_pixelmap_cbfn_info *c
     /*
      * add pixels to quantizer
      */
-    for(y = 0, s_fract = (temp_pm->base_x * s_step); y < temp_pm->height;
-        y++, s_pixels += temp_pm->row_bytes, s_fract = temp_pm->base_x * s_step)
+    for(y = 0, s_fract = (temp_pm->base_x * s_step); y < temp_pm->height; y++, s_pixels += temp_pm->row_bytes, s_fract = temp_pm->base_x * s_step)
         for(x = 0; x < temp_pm->width; x++, s_fract += s_step) {
 
             pixel = PixelmapTypes[temp_pm->type].read_pixel_fn(s_pixels + ((int)s_fract), s_fract - ((int)s_fract));
@@ -706,8 +704,8 @@ br_pixelmap *T_ConvertIndexedPixelmap(br_pixelmap *item, t_pixelmap_cbfn_info *c
     /*
      * generate pixelmap of indicies
      */
-    for(y = 0, s_fract = temp_pm->base_x * s_step, d_fract             = pm->base_x * d_step; y < temp_pm->height; y++,
-    s_pixels += temp_pm->row_bytes, d_pixels += pm->row_bytes, s_fract = temp_pm->base_x * s_step, d_fract = pm->base_x * d_step)
+    for(y = 0, s_fract = temp_pm->base_x * s_step, d_fract = pm->base_x * d_step; y < temp_pm->height;
+        y++, s_pixels += temp_pm->row_bytes, d_pixels += pm->row_bytes, s_fract = temp_pm->base_x * s_step, d_fract = pm->base_x * d_step)
         for(x = 0; x < temp_pm->width; x++, s_fract += s_step, d_fract += d_step) {
 
             pixel = PixelmapTypes[temp_pm->type].read_pixel_fn(s_pixels + ((int)s_fract), s_fract - ((int)s_fract));

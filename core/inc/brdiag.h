@@ -79,7 +79,7 @@ typedef struct br_diaghandler {
      *
      * A string constant is recommended.
      */
-    const char           *identifier;
+    const char *identifier;
     /**
      * \brief This is a pointer to the warning delivery function (See br_diag_warning_cbfn).
      *

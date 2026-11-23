@@ -829,7 +829,6 @@ void BR_PUBLIC_ENTRY BrMatrix34TApplyV(br_vector3 *A, const br_vector3 *B, const
  * BrMatrix34ApplyN()
  */
 
-
 void BR_PUBLIC_ENTRY BrMatrix34Pre(br_matrix34 *mat, const br_matrix34 *A)
 {
     br_matrix34 mattmp;
