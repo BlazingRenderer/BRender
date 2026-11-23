@@ -926,6 +926,8 @@ br_scalar BR_PUBLIC_ENTRY BrMatrix34Determinant3(const br_matrix34 *m);
  * \param B A pointer to the source matrix.
  */
 void BR_PUBLIC_ENTRY BrMatrix4Copy(br_matrix4 *A, const br_matrix4 *B);
+
+// clang-format off
 /**
  * \brief Multiply two matrices together and place the result in a third matrix.
  *
@@ -950,6 +952,8 @@ void BR_PUBLIC_ENTRY BrMatrix4Copy(br_matrix4 *A, const br_matrix4 *B);
  * \sa BrMatrix4Pre34(), BrMatrix4PreTransform()
  */
 void BR_PUBLIC_ENTRY BrMatrix4Mul(br_matrix4 *A, const br_matrix4 *B, const br_matrix4 *C);
+// clang-format on
+
 /**
  * \brief Set the specified matrix to the identity transformation matrix.
  *
@@ -1698,6 +1702,8 @@ br_euler *BR_PUBLIC_ENTRY BrQuatToEuler(br_euler *euler, const br_quat *quat);
 /*
  * Quaternions
  */
+
+// clang-format off
 /**
  * \brief Multiply two quaternions.
  *
@@ -1716,6 +1722,8 @@ br_euler *BR_PUBLIC_ENTRY BrQuatToEuler(br_euler *euler, const br_quat *quat);
  *         that each represents. It is not commutative.
  */
 br_quat *BR_PUBLIC_ENTRY BrQuatMul(br_quat *q, const br_quat *l, const br_quat *r);
+// clang-format on
+
 /**
  * \brief Normalise a quaternion.
  *
@@ -1946,6 +1954,8 @@ void BR_PUBLIC_ENTRY BrMatrix4PreTransform(br_matrix4 *mat, const br_transform *
  * \param b A pointer to the source matrix.
  */
 void BR_PUBLIC_ENTRY BrMatrix23Copy(br_matrix23 *A, const br_matrix23 *b);
+
+// clang-format off
 /**
  * \brief Multiply two matrices together and place the result in a third matrix.
  *
@@ -1965,6 +1975,9 @@ void BR_PUBLIC_ENTRY BrMatrix23Copy(br_matrix23 *A, const br_matrix23 *b);
  * \sa BrMatrix23Pre(), BrMatrix23Post()
  */
 void BR_PUBLIC_ENTRY BrMatrix23Mul(br_matrix23 *A, const br_matrix23 *B, const br_matrix23 *C);
+// clang-format on
+
+// clang-format off
 /**
  * \brief Pre-multiply one matrix by another.
  *
@@ -1983,6 +1996,9 @@ void BR_PUBLIC_ENTRY BrMatrix23Mul(br_matrix23 *A, const br_matrix23 *B, const b
  * \sa BrMatrix23Post(), BrMatrix23Mul()
  */
 void BR_PUBLIC_ENTRY BrMatrix23Pre(br_matrix23 *mat, const br_matrix23 *A);
+// clang-format on
+
+// clang-format off
 /**
  * \brief Post-multiply one matrix by another.
  *
@@ -2001,6 +2017,7 @@ void BR_PUBLIC_ENTRY BrMatrix23Pre(br_matrix23 *mat, const br_matrix23 *A);
  * \sa BrMatrix23Pre(), BrMatrix23Mul()
  */
 void BR_PUBLIC_ENTRY BrMatrix23Post(br_matrix23 *mat, const br_matrix23 *A);
+// clang-format on
 
 /**
  * \brief Set the specified matrix to the identity transformation matrix.
@@ -2013,6 +2030,7 @@ void BR_PUBLIC_ENTRY BrMatrix23Post(br_matrix23 *mat, const br_matrix23 *A);
  */
 void BR_PUBLIC_ENTRY BrMatrix23Identity(br_matrix23 *mat);
 
+// clang-format off
 /**
  * \brief Set the specified matrix to a matrix representing a rotation about the z axis though a
  *        specified angle.
@@ -2025,6 +2043,9 @@ void BR_PUBLIC_ENTRY BrMatrix23Identity(br_matrix23 *mat);
  * \sa BrMatrix23PreRotate(), BrMatrix23PostRotate()
  */
 void BR_PUBLIC_ENTRY BrMatrix23Rotate(br_matrix23 *mat, br_angle rz);
+// clang-format on
+
+// clang-format off
 /**
  * \brief Pre-multiply a matrix by a rotational transform matrix.
  *
@@ -2043,6 +2064,9 @@ void BR_PUBLIC_ENTRY BrMatrix23Rotate(br_matrix23 *mat, br_angle rz);
  * \sa BrMatrix23PostRotate(), BrMatrix23Rotate()
  */
 void BR_PUBLIC_ENTRY BrMatrix23PreRotate(br_matrix23 *mat, br_angle rz);
+// clang-format on
+
+// clang-format off
 /**
  * \brief Post-multiply a matrix by a rotational transform matrix.
  *
@@ -2061,6 +2085,7 @@ void BR_PUBLIC_ENTRY BrMatrix23PreRotate(br_matrix23 *mat, br_angle rz);
  * \sa BrMatrix23PreRotate(), BrMatrix23Rotate()
  */
 void BR_PUBLIC_ENTRY BrMatrix23PostRotate(br_matrix23 *mat, br_angle rz);
+// clang-format on
 
 /**
  * \brief Set the specified matrix to a matrix representing a specific translation.
@@ -2074,6 +2099,8 @@ void BR_PUBLIC_ENTRY BrMatrix23PostRotate(br_matrix23 *mat, br_angle rz);
  * \sa BrMatrix23PreTranslate(), BrMatrix23PostTranslate()
  */
 void BR_PUBLIC_ENTRY BrMatrix23Translate(br_matrix23 *mat, br_scalar x, br_scalar y);
+
+// clang-format off
 /**
  * \brief Pre-multiply a matrix by a translation transform matrix.
  *
@@ -2093,6 +2120,8 @@ void BR_PUBLIC_ENTRY BrMatrix23Translate(br_matrix23 *mat, br_scalar x, br_scala
  * \sa BrMatrix23PostTranslate(), BrMatrix23Translate()
  */
 void BR_PUBLIC_ENTRY BrMatrix23PreTranslate(br_matrix23 *mat, br_scalar x, br_scalar y);
+// clang-format on
+
 /**
  * \brief Post-multiply a matrix by a translation transform matrix.
  *
@@ -2340,6 +2369,7 @@ void BR_PUBLIC_ENTRY BrMatrix23TApplyV(br_vector2 *A, const br_vector2 *B, const
  */
 void BR_PUBLIC_ENTRY BrMatrix23TApplyP(br_vector2 *A, const br_vector2 *B, const br_matrix23 *C);
 
+// clang-format off
 /**
  * \brief Compute the inverse of the supplied matrix.
  *
@@ -2360,6 +2390,8 @@ void BR_PUBLIC_ENTRY BrMatrix23TApplyP(br_vector2 *A, const br_vector2 *B, const
  * \sa BrMatrix23LPInverse()
  */
 br_scalar BR_PUBLIC_ENTRY BrMatrix23Inverse(br_matrix23 *out, const br_matrix23 *in);
+// clang-format on
+
 /**
  * \brief Compute the inverse of the supplied length preserving* transformation matrix.
  *
