@@ -8,7 +8,6 @@
         nixpkgs.lib.genAttrs [
           "x86_64-linux"
           "aarch64-linux"
-          "x86_64-darwin"
           "aarch64-darwin"
         ] (system: function nixpkgs.legacyPackages.${system});
 
@@ -64,7 +63,6 @@
 
     devShells.x86_64-linux   = mkShells self.packages.x86_64-linux;
     devShells.aarch64-linux  = mkShells self.packages.aarch64-linux;
-    devShells.x86_64-darwin  = mkShells self.packages.x86_64-darwin;
     devShells.aarch64-darwin = mkShells self.packages.aarch64-darwin;
   };
 }
