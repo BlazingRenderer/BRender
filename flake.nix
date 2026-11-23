@@ -4,6 +4,8 @@
   inputs.nixpkgs.url = "nixpkgs";
 
   outputs = { self, nixpkgs, ... }: let
+    lib = nixpkgs.lib;
+
     forAllSystems = function:
         nixpkgs.lib.genAttrs [
           "x86_64-linux"
@@ -18,7 +20,7 @@
       env.LD_LIBRARY_PATH = self.inputs.nixpkgs.lib.makeLibraryPath [ v.vulkan-loader ];
     })) packages;
   in {
-    packages = forAllSystems(pkgs: rec {
+    packages = forAllSystems(pkgs: (rec {
       brender = pkgs.callPackage ./nix/brender.nix {
         version = self.lastModifiedDate;
       };
@@ -39,11 +41,6 @@
         withExamples = true;
       };
 
-      brender-samples-linux32 = pkgs.pkgsi686Linux.callPackage ./nix/brender.nix {
-        version = self.lastModifiedDate;
-        withExamples = true;
-      };
-
       brender-dos-i686 = pkgs.callPackage ./nix/dos.nix {
         version = self.lastModifiedDate;
 
@@ -59,7 +56,13 @@
         djgpp = pkgs.djgpp_i586;
         djgppPrefix = "i586-pc-msdosdjgpp-";
       };
-    });
+    }) // (lib.optionalAttrs pkgs.stdenv.hostPlatform.isx86 {
+
+      brender-samples-linux32 = pkgs.pkgsi686Linux.callPackage ./nix/brender.nix {
+       version = self.lastModifiedDate;
+       withExamples = true;
+      };
+    }));
 
     devShells.x86_64-linux   = mkShells self.packages.x86_64-linux;
     devShells.aarch64-linux  = mkShells self.packages.aarch64-linux;
