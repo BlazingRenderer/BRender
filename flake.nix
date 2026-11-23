@@ -29,12 +29,12 @@
 
       default = brender;
 
-      brender-samples-win32 = pkgs.pkgsCross.mingw32.callPackage ./nix/brender.nix {
+      brender-samples-win32 = pkgs.pkgsCross.mingw-msvcrt-i686.callPackage ./nix/brender.nix {
         version = self.lastModifiedDate;
         withExamples = true;
       };
 
-      brender-samples-win64 = pkgs.pkgsCross.mingwW64.callPackage ./nix/brender.nix {
+      brender-samples-win64 = pkgs.pkgsCross.mingw-msvcrt-x86_64.callPackage ./nix/brender.nix {
         version = self.lastModifiedDate;
         withExamples = true;
       };
