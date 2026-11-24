@@ -249,6 +249,16 @@ br_pixelmap *BR_PUBLIC_ENTRY BrPixelmapMakeMipMap(br_pixelmap *source, br_uint_3
     src_converter = br_pixelmap_converters + source->type;
     dst_bytes     = pmTypeInfo[destinationType].bits >> 3;
 
+    /*
+     * Level 0's stride and the chain's offset are 16-bit fields, so a destination whose row does
+     * not fit in one - or a source taller than one - cannot be described at all. Truncating them
+     * puts the level below level 0 before the allocation and the write runs off the end of it.
+     */
+    if((br_int_64)source->width * dst_bytes > 0x7fff || source->height > 0x7fff) {
+        BrLogError("PM", "BrPixelmapMakeMipMap(): a %dx%d source cannot be described by a chain of this type.", source->width, source->height);
+        return NULL;
+    }
+
     if(src_converter->read == NULL) {
         BrLogError("PM", "BrPixelmapMakeMipMap(): \"%s\" is not a supported mipmap source.", src_converter->name);
         return NULL;
