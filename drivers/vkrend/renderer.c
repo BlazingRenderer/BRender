@@ -514,6 +514,21 @@ static VkBuffer VkRenderSceneBufferCreate(br_renderer *self, const br_vk_scene_s
  * The caller retires it against the frame that reads it. Returns BR_FALSE on failure, with
  * the outputs unmodified.
  */
+/*
+ * The stride the material blocks are spaced by. It is not the struct's size: std140 rounds an
+ * array-of-structs stride up to 16, and the device independently requires a descriptor offset to
+ * be a multiple of minUniformBufferOffsetAlignment, which can be larger than that. Only the
+ * spacing is padded - a block's descriptor range and flush stay the struct's own size.
+ */
+static VkDeviceSize RendererVkMaterialStride(const br_device *dev)
+{
+    const VkDeviceSize alignment = dev->physical_device->props2.properties.limits.minUniformBufferOffsetAlignment;
+    const VkDeviceSize step      = alignment > 16 ? alignment : 16;
+    const VkDeviceSize size      = sizeof(br_vk_material_state);
+
+    return (size + step - 1) / step * step;
+}
+
 static br_boolean VkRenderMaterialBufferCreate(br_renderer *self, br_uint_32 capacity, VkBuffer *out_buffer, VmaAllocation *out_allocation,
                                                void **out_mapped)
 {
@@ -523,7 +538,7 @@ static br_boolean VkRenderMaterialBufferCreate(br_renderer *self, br_uint_32 cap
 
     const VkBufferCreateInfo buffer_info = {
         .sType       = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO,
-        .size        = (VkDeviceSize)capacity * sizeof(br_vk_material_state),
+        .size        = (VkDeviceSize)capacity * RendererVkMaterialStride(dev),
         .usage       = VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
         .sharingMode = VK_SHARING_MODE_EXCLUSIVE,
     };
@@ -577,7 +592,7 @@ br_vk_material_state *RendererVkMaterialReserve(br_renderer *self, VkDeviceSize 
         if(!VkRenderMaterialBufferCreate(self, capacity, &buffer, &allocation, &mapped))
             return NULL;
 
-        BrMemCpy(mapped, self->material_mapped, self->material_count * sizeof(br_vk_material_state));
+        BrMemCpy(mapped, self->material_mapped, self->material_count * RendererVkMaterialStride(self->device));
 
         DevicePixelmapVkRetireBuffer(DevicePixelmapVkGetCurrentFrame(self->scene_dst->screen), buffer, allocation);
 
@@ -587,7 +602,7 @@ br_vk_material_state *RendererVkMaterialReserve(br_renderer *self, VkDeviceSize 
         self->material_capacity   = capacity;
     }
 
-    offset = (VkDeviceSize)self->material_count * sizeof(br_vk_material_state);
+    offset = (VkDeviceSize)self->material_count * RendererVkMaterialStride(self->device);
     block  = (br_vk_material_state *)((char *)self->material_mapped + offset);
     self->material_count++;
 
