@@ -95,6 +95,14 @@ br_error DeviceGL1xPixelmapToExistingGLTexture(const GladGLContext *gl, GLuint t
      */
     if((pm->flags & (BR_PMF_LINEAR | BR_PMF_ROW_WHOLEPIXELS)) != (BR_PMF_LINEAR | BR_PMF_ROW_WHOLEPIXELS) || pm->row_bytes < 0) {
         br_pixelmap *tmp = BrPixelmapAllocate(pm->type, pm->width, pm->height, NULL, BR_PMAF_NORMAL);
+
+        if(tmp == NULL) {
+            BrLogError("GLREND1X", "Could not allocate a %ux%u staging pixelmap for \"%s\".", (unsigned)pm->width, (unsigned)pm->height,
+                       pm->identifier != NULL ? pm->identifier : "pixelmap");
+            gl->BindTexture(GL_TEXTURE_2D, 0);
+            return BRE_FAIL;
+        }
+
         for(br_int_32 row = 0; row < pm->height; ++row) {
             BrPixelmapRectangleCopy(tmp,                                  /* dst    */
                                     -tmp->origin_x, -tmp->origin_y + row, /* dx, dy */
