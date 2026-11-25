@@ -321,7 +321,13 @@ static br_error load_pixelmap(br_gltf_load_state *state, br_size_t image_index, 
     if(owns_raw)
         BrResFree(raw_data);
 
-    tmp             = BrPixelmapAllocate(BR_PMT_RGBA_8888_ARR, x, y, pixels, BR_PMAF_NORMAL);
+    if((tmp = BrPixelmapAllocate(BR_PMT_RGBA_8888_ARR, x, y, pixels, BR_PMAF_NORMAL)) == NULL) {
+        BrMemFree(pixels);
+        BrLogError("GLTF", "Pixelmap allocation failed for image %lu (\"%s\").", (unsigned long)image_index,
+                   image->uri != NULL ? image->uri : (image->name != NULL ? image->name : "<unnamed>"));
+        return BRE_FAIL;
+    }
+
     tmp->identifier = (char *)image->name; /* NB: This is safe, the clone below will copy it. */
 
     pixelmap = BrPixelmapCloneTyped(tmp, state->options->pm_type);
