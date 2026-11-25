@@ -2,10 +2,11 @@
 #
 # This is not a pentprim table. It carries, in the order the general table
 # reaches them, the prm_t15 rows that MMX-off pentprim selects for a z-buffered
-# 555 output: the size-specialised native colour-map rows
-# (TriangleRender_ZT_RGB565_D16_*), the arbitrary-width colour-map rows
-# (TriangleRenderPIZ2TA15) and the RGB-555 shade-table rows
-# (TriangleRenderPIZ2TIA_RGB_555). The tuples are the same as prm_t15's, so
+# 555 output: the 256x256 RGB-555 shade-table rows
+# (TriangleRenderPIZ2TIP256_RGB_555 and ...PIZ2TIPB256...), the size-specialised
+# native colour-map rows (TriangleRender_ZT_RGB565_D16_*), the arbitrary-width
+# colour-map rows (TriangleRenderPIZ2TA15) and the arbitrary-width shade-table
+# rows (TriangleRenderPIZ2TIA_RGB_555). The tuples are the same as prm_t15's, so
 # merge_blocks.pl collapses each row onto the same kernel; what differs is the
 # matcher's requirements, which are narrowed to the states this slice restores.
 #
@@ -32,14 +33,23 @@
 #
 # Match contract:
 #
-#   * The size rows are the five textureNxN cells the general table declares,
-#     square only: the address mask wraps both axes at the map's own width,
-#     which is what those rows require (width == height == N) and what their
-#     texture_stride_positive/texture_no_skip group guarantees. Their order and
-#     their size set are prm_t15's, so a map the general table gives a
-#     size-specific cell takes it, and one it does not - 512x512, or 64x32, or
-#     the 96x48 maps the corpus ships - fails all five and falls through to the
-#     arbitrary-width row below, exactly as it does in pentprim.
+#   * The 256x256 shade rows are first, because the general table puts
+#     TriangleRenderPIZ2TIP256_RGB_555 and its blend twin ahead of every other
+#     shaded row. They require the exact size (texture256x256) and the
+#     no-padding flag the general row carries (texture_no_skip), and they
+#     require perspective correction positively: a 256x256 map drawn affinely
+#     fails them and reaches the arbitrary-width shade row below, exactly as it
+#     reaches PIZ2TIA_RGB_555 in pentprim's general walk. Every other size
+#     fails the exact-size test for the same reason.
+#
+#   * The size rows are the five textureNxN cells the general table declares for
+#     native colour maps, square only: the address mask wraps both axes at the
+#     map's own width, which is what those rows require (width == height == N)
+#     and what their texture_stride_positive/texture_no_skip group guarantees.
+#     Their order and their size set are prm_t15's, so a map the general table
+#     gives a size-specific cell takes it, and one it does not - 512x512, or
+#     64x32, or the 96x48 maps the corpus ships - fails all five and falls
+#     through to the arbitrary-width row below, exactly as it does in pentprim.
 #
 #   * The colour-map rows are the arbitrary-width fall-through
 #     (TriangleRenderPIZ2TA15). Listing them after the size rows is the general
@@ -47,16 +57,22 @@
 #     their own: a power-of-two map of a size no row declares reaches them
 #     there, which is what MMX-off pentprim does with it.
 #
-#   * The shade-table rows exclude a 256x256 map (texture_not_size=256). That is
-#     the one size the general table declares a shaded cell for, and
-#     TriangleRenderPIZ2TIP256_RGB_555 is the next slice's kernel. Every other
-#     size - 64x64 and 96x48 in the corpus - is the arbitrary-width row's, as it
-#     is in pentprim's general walk.
+#   * The arbitrary-width shade rows (TriangleRenderPIZ2TIA_RGB_555) are the
+#     fall-back for every size the exact 256x256 rows do not claim, and for an
+#     affine 256x256 map as above. Listing the exact-size rows first is what
+#     makes that precedence explicit; it is the general table's order, and it is
+#     why the arbitrary rows carry no negative-size requirement.
 #
 # The rows here are the z-buffered cells, which is the half the MMX table shadows.
 # The z-sorted ones are emitted from prm_t15 already, and neither table declares
 # a z-sorted size row: a power-of-two map is drawn by its own size row when
 # z-buffered and by the arbitrary-width row when z-sorted, as in pentprim.
+[texture_stride_positive,texture_no_skip,fixed_components]
+softhz:TriangleRenderPIZ2TIPB256_RGB_555 = [triangle, z_buffered, rgb555, interpolated_intensity, perspective, texture256x256, texture_index8, blendrgb]
+softhz:TriangleRenderPIZ2TIPB256_RGB_555 = [triangle, z_buffered, rgb555, constant_intensity, duplicate, perspective, texture256x256, texture_index8, blendrgb]
+softhz:TriangleRenderPIZ2TIP256_RGB_555 = [triangle, z_buffered, rgb555, interpolated_intensity, perspective, texture256x256, texture_index8]
+softhz:TriangleRenderPIZ2TIP256_RGB_555 = [triangle, z_buffered, rgb555, constant_intensity, duplicate, perspective, texture256x256, texture_index8]
+
 [texture_stride_positive,texture_no_skip]
 softhz:TriangleRender_ZT_RGB565_D16_1024 = [z_buffered, triangle, rgb555, texture1024x1024, perspective_subdivide]
 softhz:TriangleRender_ZT_RGB565_D16_256 = [z_buffered, triangle, rgb555, texture256x256, perspective_subdivide]
@@ -66,8 +82,8 @@ softhz:TriangleRender_ZT_RGB565_D16_32 = [z_buffered, triangle, rgb555, texture3
 
 [texture_stride_positive,fixed_components]
 softhz:TriangleRenderPIZ2TA15 = [z_buffered, triangle, rgb555, texture, perspective_subdivide]
-softhz:TriangleRenderPIZ2TIA_RGB_555 = [z_buffered, triangle, rgb555, texture, texture_index8, perspective_subdivide, constant_intensity, duplicate, texture_not_size=256]
-softhz:TriangleRenderPIZ2TIA_RGB_555 = [z_buffered, triangle, rgb555, texture, texture_index8, perspective_subdivide, interpolated_intensity, texture_not_size=256]
+softhz:TriangleRenderPIZ2TIA_RGB_555 = [z_buffered, triangle, rgb555, texture, texture_index8, perspective_subdivide, constant_intensity, duplicate]
+softhz:TriangleRenderPIZ2TIA_RGB_555 = [z_buffered, triangle, rgb555, texture, texture_index8, perspective_subdivide, interpolated_intensity]
 
 # The affine twins, in the general table's order. The affine colour-map row
 # carries no perspective requirement, so it would take a perspective primitive
@@ -82,5 +98,5 @@ softhz:TriangleRender_ZT_RGB565_D16_32 = [z_buffered, triangle, rgb555, texture3
 
 [texture_stride_positive,fixed_components]
 softhz:TriangleRenderPIZ2TA15 = [triangle, z_buffered, rgb555, texture]
-softhz:TriangleRenderPIZ2TIA_RGB_555 = [triangle, z_buffered, rgb555, texture, texture_index8, interpolated_intensity, texture_not_size=256]
-softhz:TriangleRenderPIZ2TIA_RGB_555 = [triangle, z_buffered, rgb555, texture, texture_index8, constant_intensity, duplicate, texture_not_size=256]
+softhz:TriangleRenderPIZ2TIA_RGB_555 = [triangle, z_buffered, rgb555, texture, texture_index8, interpolated_intensity]
+softhz:TriangleRenderPIZ2TIA_RGB_555 = [triangle, z_buffered, rgb555, texture, texture_index8, constant_intensity, duplicate]

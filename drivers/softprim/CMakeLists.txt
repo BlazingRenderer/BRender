@@ -76,12 +76,12 @@ add_library(softprim
 # their requirements are narrowed so a state the MMX table does serve cannot
 # reach them. The files carry the contract.
 #
-# SP_SHADE_CONST_I_RGB/SP_SHADE_INTERP_I_RGB are in the spec, and the
-# arbitrary-width shapes that carry them are emitted: prim_t24's RGB_888 pair
-# and the 15/16bpp pair at both depths, the z-buffered half through
-# soft_t15/soft_t16. infogen.pl still refuses the power-of-two 15/16bpp ones by
-# an explicit rule, because naming an axis value admits every shape that carries
-# it and no kernel exists for those. SP_TEX_555/SP_TEX_565 are in the spec for
+# SP_SHADE_CONST_I_RGB/SP_SHADE_INTERP_I_RGB are in the spec, and every shape
+# that carries them has a kernel: prim_t24's RGB_888 pair and the 15/16bpp pair
+# at both depths, the z-buffered half through soft_t15/soft_t16 and the
+# power-of-two 256x256 cell at both depths as PizShadeTriangle. The rule in
+# infogen.pl still names exactly those shapes, because naming an axis value
+# admits every shape that carries it. SP_TEX_555/SP_TEX_565 are in the spec for
 # the same reason and with the same rule: the arbitrary-width triangle is
 # emitted at both depths, the z-buffered size-specialised triangle through
 # soft_t15/soft_t16, and the rest of the shapes that sample a 555/565 map are

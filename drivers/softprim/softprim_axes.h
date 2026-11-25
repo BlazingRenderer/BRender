@@ -66,11 +66,10 @@ typedef enum sp_depth {
  * index-8 texel is the column (awtmi.h's LIGHT path, t_piza.asm:165-213). They
  * exist so the projection carries the declared CM_I rather than collapsing the
  * gouraud and flat entries onto the unlit tuple, whose kernel decodes the
- * palette and reads no intensity. SP_SPEC names them, but not every shape that
- * carries them has a kernel: the RGB_888 and the z-sorted arbitrary-width
- * 15/16bpp pairs are emitted, and infogen.pl refuses the rest by an explicit
- * rule (the power-of-two 15/16bpp shapes, perspi.h's separate perspective
- * mapper). See RgbAwtTriangle. */
+ * palette and reads no intensity. SP_SPEC names them, and every shape that
+ * carries them has a kernel: the RGB_888 and arbitrary-width 15/16bpp pairs at
+ * both depths (RgbAwtTriangle) and the 256x256 power-of-two perspective cell at
+ * both depths (PizShadeTriangle). See infogen.pl's softprim_implemented(). */
 typedef enum sp_shade {
     SP_SHADE_NONE,
     SP_SHADE_CONST_I,

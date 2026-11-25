@@ -1130,6 +1130,24 @@ static const rt_relation rt_relations[] = {
      .device = "softrend"},
 
     /*
+     * The exact 256x256 shade-table cell. The blend twin is the control: if the
+     * z-buffered 256x256 row stops being selected, the primitive falls through
+     * to the arbitrary-width shaded row, which carries no blend flag, and the
+     * two frames become the same except for the material's own opacity - so a
+     * blend pair that comes back equal names the missing row rather than only
+     * moving a checksum. Pinned to the 555/565 types and the z-buffered mode:
+     * the exact rows exist only there, and the 888 output has no such table.
+     */
+    {.a = "scene-shade-p256-flat-persp",   .b = "scene-shade-p256-flat-persp-blend",   .equal = BR_FALSE, .pm_type = BR_PMT_RGB_555,
+     .mode = RT_MODE_ZB, .device = "softrend"},
+    {.a = "scene-shade-p256-flat-persp",   .b = "scene-shade-p256-flat-persp-blend",   .equal = BR_FALSE, .pm_type = BR_PMT_RGB_565,
+     .mode = RT_MODE_ZB, .device = "softrend"},
+    {.a = "scene-shade-p256-smooth-persp", .b = "scene-shade-p256-smooth-persp-blend", .equal = BR_FALSE, .pm_type = BR_PMT_RGB_555,
+     .mode = RT_MODE_ZB, .device = "softrend"},
+    {.a = "scene-shade-p256-smooth-persp", .b = "scene-shade-p256-smooth-persp-blend", .equal = BR_FALSE, .pm_type = BR_PMT_RGB_565,
+     .mode = RT_MODE_ZB, .device = "softrend"},
+
+    /*
      * The RGB-typed families' witnesses. Each differs from a neighbour that
      * cannot carry the family's defining type, so a fixture that quietly selects
      * a sibling - the failure mode both fixtures exist to rule out - fails here

@@ -127,7 +127,6 @@ while (<STDIN>) {
 		&property_texture_rgbx888 if $properties{"texture_rgbx888"};
 		&property_texture_rgba8888 if $properties{"texture_rgba8888"};
    		&property_texture_power2 if $properties{"texture_power2"};
-		&property_texture_not_size if $properties{"texture_not_size"};
 		&property_texture_stride_positive if $properties{"texture_stride_positive"};
 		&property_texture_no_skip if $properties{"texture_no_skip"};
 		&property_unscaled_texture_coords if $properties{"unscaled_texture_coords"};
@@ -212,7 +211,7 @@ if($global_properties{"softprim"}) {
 	foreach my $b (@softprim_blocks) {
 		my $macro = $b->{refused} ? "SOFTPRIM_REFUSED" : "SOFTPRIM_BLOCK";
 		print "$macro($b->{name}, $b->{flags_mask}, $b->{flags_cmp}, $b->{subdivide}, $b->{unscaled}, $b->{offset_y}, ",
-		      "$b->{colour7bit}, $b->{cscale}, $b->{mapsize}, $b->{mapsize_not}, $b->{depth_type}, $b->{texture_type}, $b->{shade_type}, ",
+		      "$b->{colour7bit}, $b->{cscale}, $b->{mapsize}, $b->{depth_type}, $b->{texture_type}, $b->{shade_type}, ",
 		      "$b->{blend_type}, $b->{fog_type}, ", join(", ", @{$b->{tuple}}), ")\n";
 	}
 	exit 0;
@@ -255,7 +254,6 @@ sub set_default {
 
 	$texture_width = 0;
 	$texture_height = 0;
-	$texture_width_not = 0;
 	$decal_flag = "FALSE";
 
 	$colour_base = "BR_SCALAR(0),BR_SCALAR(0),BR_SCALAR(0)";
@@ -323,14 +321,15 @@ sub softprim_implemented {
 	# listed before the MMX table for the reason given there. The power-of-two
 	# cells are perspi.h's separate perspective mapper, ported as PizShadeTriangle -
 	# the dithered-map cell's perspi.h setup at BPP 2 with t15_pip.asm's
-	# ScanLinePITIP fragment - and only the 256x256 z-sorted form is implemented
-	# here: 256 is the only size the tables declare, and the z-buffered form is
-	# the next slice. See softprim's RgbAwtTriangle, PizShadeTriangle and the
-	# render dispatch.
+	# ScanLinePITIP fragment when z-sorted, and perspz.c's perspzi.h setup with
+	# t15_pizp.asm's ScanLinePIZ2TIP fragment when z-buffered. 256 is the only
+	# size the tables declare, and both depth forms of it are implemented; see
+	# softprim's RgbAwtTriangle, PizShadeTriangle and the render dispatch.
 	if(grep { $_ eq "SP_SHADE_CONST_I_RGB" || $_ eq "SP_SHADE_INTERP_I_RGB" } @tuple) {
 		my %t = map { $_ => 1 } @tuple;
 
-		return 1 if($t{"SP_ADDR_SHIFT"} && $t{"SP_TOP_TRI"} && $t{"SP_DEPTH_NONE"} && ($t{"SP_FMT_555"} || $t{"SP_FMT_565"}));
+		return 1 if($t{"SP_ADDR_SHIFT"} && $t{"SP_TOP_TRI"} && ($t{"SP_DEPTH_NONE"} || $t{"SP_DEPTH_ZW"}) &&
+		            ($t{"SP_FMT_555"} || $t{"SP_FMT_565"}));
 
 		return 0 if(!$t{"SP_TOP_TRI"});
 		return 0 if(!$t{"SP_ADDR_DIVIDE"});
@@ -574,10 +573,6 @@ sub print_entry {
 		# Zero when the block carries no dimension requirement.
 		my $mapsize = $texture_width;
 
-		# A dimension the block must not match, 0 for none; see
-		# property_texture_not_size.
-		my $mapsize_not = $texture_width_not;
-
 		# A type of PMT_NONE is "no requirement". softprim spells that SP_PMT_NONE
 		# rather than pentprim's 255-as-a-type, so a required type never collides
 		# with BR_PMT_INDEX_1, which is zero.
@@ -601,7 +596,7 @@ sub print_entry {
 		push(@softprim_blocks, {name => $name, flags_mask => $flags_mask, flags_cmp => $flags_cmp,
 		                      subdivide => $subdivide, unscaled => $unscaled, offset_y => $offset_y, colour7bit => $colour7bit,
 		                      cscale => "BR_SCALAR($cr),BR_SCALAR($cg),BR_SCALAR($cb)",
-		                      mapsize => $mapsize, mapsize_not => $mapsize_not, depth_type => $dt, texture_type => $tt, shade_type => $st,
+		                      mapsize => $mapsize, depth_type => $dt, texture_type => $tt, shade_type => $st,
 		                      blend_type => $bt, fog_type => $ft, refused => $refused, tuple => [@tuple]});
 
 		return;
@@ -1008,16 +1003,6 @@ sub property_unscaled_texture_coords
 sub property_texture_power2
 {
 	push(@match_flags_set,("POWER2"));
-}
-
-# A map dimension the block must not match. softprim's restored general-path
-# shade-table rows use it to leave a size the general table gives its own cell
-# to that cell: the arbitrary-width row is reached only after every size-specific
-# row has failed, so a table that lists it before those rows excludes the sizes
-# they own.
-sub property_texture_not_size
-{
-	$texture_width_not = $properties{"texture_not_size"};
 }
 
 sub property_texture_stride_positive

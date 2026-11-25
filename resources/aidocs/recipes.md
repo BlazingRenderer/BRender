@@ -87,8 +87,9 @@ references are from pentprim with MMX enabled. For isolated fixtures of the
 restored general kernels, use pentprim with `BRENDER_USE_MMX=0`. For frames
 that mix general and MMX kernels, use i686 softprim: pentprim cannot render
 that combination. In particular the Z-buffered RGB555/RGB565
-`scene-shade-arb-*` rows use softprim. The mixed frame is a regression check;
-verify the restored draw separately against MMX-off pentprim.
+`scene-shade-arb-*` and `scene-shade-p256-*` rows use softprim. The mixed frame
+is a regression check; verify the restored draw separately against MMX-off
+pentprim.
 
 That tree is kept as the `dev/pentprim-verification` branch — the oracle. It is
 built beside the tree it blesses, never merged into it, and its corpus, harness

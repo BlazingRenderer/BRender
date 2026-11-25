@@ -27,7 +27,7 @@ pentprim gone they are the only record of its output.
   rasterisers implement; the generator `infogen.pl` is theirs too. The others are
   softprim's: `soft_t24.ifg` is the alpha-blended RGBA sprite family, which pentprim never
   had, and `soft_t15.ifg`/`soft_t16.ifg` restore the z-buffered native 555/565 triangle rows
-  of the general table (see *What is deliberately not implemented*).
+  of the general table ahead of the MMX table.
 - `infogen.pl` in its `softprim` mode projects each block onto the axis vocabulary in
   `softprim_axes.h` and emits one line per block carrying the axis tuple (which names the
   kernel) plus the metadata pentprim's matcher tests.
@@ -96,14 +96,13 @@ default reference is not this one.
 
 ## What is implemented
 
-All of pentprim's 393 live blocks are in the matcher's walk; 385 are emitted as blocks with
-a kernel and 8 are refused, every one of them a z-buffered 555/565 shade-table shape. Every
-`INDEX_8` and every `RGB_888` shape is implemented. The
-implemented set includes the `INDEX_8` ROPs (indexed blend, fog, decal, dithered map), the
-shade-table family including the 256x256 RGB cells, the MMX 15/16bpp family including
-screendoor and colour dither and its packed 20.12 texture addressing, the arbitrary-width
-and perfect-scan RGB paths, the size-specialised native 555/565 colour-map cells, and lines
-and points.
+All of pentprim's 393 live blocks are in the matcher's walk and every one of them is
+emitted as a block with a kernel; there are no refusals left. Every `INDEX_8` and every
+`RGB_888` shape is implemented. The implemented set includes the `INDEX_8` ROPs (indexed
+blend, fog, decal, dithered map), the shade-table family including the 256x256 RGB cells at
+both depths and both perspective settings, the MMX 15/16bpp family including screendoor and
+colour dither and its packed 20.12 texture addressing, the arbitrary-width and perfect-scan
+RGB paths, the size-specialised native 555/565 colour-map cells, and lines and points.
 
 The one block family pentprim never had is `tables/soft_t24.ifg`: RGB output, unlit, a
 `BR_PMT_RGBA_8888` colour map sampled with arbitrary-width addressing, affine, z-sorted or
@@ -132,25 +131,14 @@ itself was corrected first:
 
 ## What is deliberately not implemented
 
-8 of the 431 entries (8 distinct tuples), all of them in `tables/prm_t15.ifg` and
-`prm_t16.ifg`. Every one of them is refused rather than
-omitted, and the first thing to establish about any of them is whether the matcher can reach
-it at all - which the generated table answers on its own, since
-`contrib/census/reachable.py` walks it the way `spFindMatch` does and stops on a refused
-entry. `contrib/census/witness.py` then says whether *any* state can select the rest. The
-answer now is none: **all 8 are unreachable in softprim's walk**, so there is no reachable
-shape without a kernel and no shape a fixture could ask for that softprim declines to draw.
-The rule is `infogen.pl`'s `softprim_implemented()`, which carries its reasoning in comments,
-plus the guards in `raster.cpp`.
+Nothing. The last gap was the z-buffered 256x256 RGB shade-table cells (8 entries:
+`SP_SHADE_CONST_I_RGB`/`SP_SHADE_INTERP_I_RGB` over `SP_TEX_I8` at `SP_ADDR_SHIFT`, the
+z-buffered `TriangleRenderPIZ2TIP256_RGB_555` and `...PIZ2TIPB256...` cells and their 565
+twins), and they are `PizShadeTriangle` at both depths now. `contrib/census/reachable.py`
+and `witness.py` over the generated table report 0 refused entries, 0 refused tuples, and
+the only dead tuples are the two that predate this family.
 
-**Unreachable in softprim: the z-buffered 256x256 RGB shade-table cells (8 entries).**
-
-`SP_SHADE_CONST_I_RGB`/`SP_SHADE_INTERP_I_RGB` over `SP_TEX_I8` at `SP_ADDR_SHIFT`: 4
-entries per format, the z-buffered `TriangleRenderPIZ2TIP256_RGB_555`/`...PITIPB256...`
-cells and their 565 twins. Their z-sorted forms are implemented (`PizShadeTriangle`); the
-z-buffered kernel is the next slice.
-
-The native 555/565 colour maps are all implemented now, at both depths. The arbitrary-width
+The native 555/565 colour maps are all implemented, at both depths. The arbitrary-width
 cells come from the general table when z-sorted and from `tables/soft_t15.ifg` and
 `soft_t16.ifg` when z-buffered; the size-specialised cells come from the same two soft tables
 (`RgbPow2Triangle`, `zb16p2ul.asm`). Those two are softprim-only tables listed before the
@@ -160,26 +148,24 @@ restore the answer MMX-off pentprim got from the general table for the two state
 table has no kernel to serve: an RGB 555/565 colour map, and an `INDEX_8` map with an RGB
 555/565 shade table. A normal paletted MMX primitive still reaches the MMX textured rows
 first, and an untextured one still reaches the MMX untextured rows. The files carry the
-match contract for the cells they leave to this section: the colour-map rows list the
-general table's five size rows ahead of the arbitrary-width one, so a size-specific cell
-keeps its map and every other map - a 512x512, a 64x32, the 96x48 the corpus ships - falls
-through to the arbitrary-width row exactly as it does in pentprim; and the shade-table rows
-exclude a 256x256 map.
-
-The remaining 8 are the next slice. Their absent kernels do not turn an answer into a
-refusal: the soft rows skip those states and the MMX untextured row takes them exactly as it
-did before. A 256x256 RGB shade table stays on the MMX path until its kernel lands.
+match contract: the colour-map rows list the general table's five size rows ahead of the
+arbitrary-width one, so a size-specific cell keeps its map and every other map - a 512x512,
+a 64x32, the 96x48 the corpus ships - falls through to the arbitrary-width row exactly as
+it does in pentprim; the shade-table rows list the exact 256x256 perspective rows first,
+with a positive `texture256x256`, and the arbitrary-width rows after them. An affine
+256x256 map fails the exact rows' PERSPECTIVE requirement and reaches the arbitrary-width
+row, as it does in the general table.
 
 
 ## How it is verified
 
 Both instruments score softprim against **pentprim's frozen pixels**, never against its own
-output, with the six mixed-walk keys listed below as the explicit exception.
+output, with the fourteen mixed-walk keys listed below as the explicit exception.
 
 - **The fixture corpus.** `tools/rendertest` renders 119 fixtures at four pixel formats
   (8/15/16/24bpp) x {z-buffered, z-sorted} and compares each against
   `tools/rendertest/rendertest.txt`, whose `softrend/softprmf/x87` keys are pentprim's
-  except for the six mixed-walk keys listed below. Measured: `PASS failures=0`, 119
+  except for the fourteen mixed-walk keys listed below. Measured: `PASS failures=0`, 119
   comparisons, in all eight configurations.
 - **Nine reference scenes.** `resources/gltf-reference`, rendered by the same harness with
   `--scene-dir resources/gltf-reference` and scored against the same table: 9 scenes x
@@ -199,7 +185,7 @@ build that rounds every operation at its type's width, and they are softprim's o
 because pentprim was never built for x86-64 - which is why a key names the class that
 produced it.
 
-### The restored cells and the six mixed-walk keys
+### The restored cells and the mixed-walk keys
 
 The z-buffered arbitrary-width 555/565 rows are pentprim's MMX-off answer, and the eight
 single-cell fixtures reproduce it exactly: `scene-tex-rgb555`, its affine twin and the 565
@@ -207,16 +193,31 @@ pair, and `scene-shade-rgb555`, its flat twin and the 565 pair, at their own pix
 z-buffered. Those checksums are the retired tree's i686 build with `BRENDER_USE_MMX=0`, and
 the 32-bit softprim build records the same values.
 
-Six further keys move because their fixture mixes a restored primitive with cubes the
-restoration does not claim: `scene-shade-arb-flat`, `scene-shade-arb-flat-persp` and
-`scene-shade-arb-smooth-persp`, at 15 and 16bpp z-buffered. In each frame the 555/565 cube
+Fourteen further keys move because their fixture mixes a restored primitive with actors the
+restoration does not claim. Six are `scene-shade-arb-flat`, `scene-shade-arb-flat-persp` and
+`scene-shade-arb-smooth-persp`, at 15 and 16bpp z-buffered: in each frame the 555/565 cube
 takes the restored shade-table row and the other two cubes keep the MMX untextured rows they
-selected before. pentprim never produced that mixed frame - it walked one table for a whole
-render, so its MMX-off frame drew all three cubes from the general table - and there is no
-pentprim run to score these six against. They are softprim's own output, recorded from the
-same 32-bit build, and they are the only x87 keys in the table that are not pentprim's. The
-witness log names the three restored matches, and the frame differs from the old one only
-where the restored cube draws.
+selected before. The other eight are the four 256x256 fixtures, `scene-shade-p256-flat-persp`,
+`-smooth-persp`, `-flat-persp-blend` and `-smooth-persp-blend`, at 15 and 16bpp z-buffered:
+the cube whose map and shade table match the output format now takes the restored exact
+256x256 row (the witness names `...SHADE_*_I_RGB_TEX_I8_ADDR_SHIFT_PERSP_CORRECT...`), while
+the two cubes of the other formats and the backdrop keep the MMX untextured rows. pentprim
+never produced either mixed frame - it walked one table for a whole render, so its MMX-off
+frame drew every actor from the general table - and there is no pentprim run to score these
+fourteen against. They are softprim's own output, recorded from the same 32-bit build, and
+they are the only x87 keys in the table that are not pentprim's. The witness logs name the
+restored matches, and the frame differs from the old one only where the restored cube draws
+(for `scene-shade-p256-flat-persp` at 15bpp, every 5-bit-depth difference between the old
+MMX-on frame and the new one lies inside the union of the old and new silhouettes of the
+restored cube).
+
+The restored draw itself is scored against MMX-off pentprim separately, by isolated
+single-cube probes outside the corpus: the eight perspective cells, and for the depth rules
+a front/rear pair that distinguishes a zero texel (writes neither buffer), an opaque texel
+(writes depth, occludes the rear), a 50/50 blend (tests depth, does not write it, so the rear
+still passes) and an equal-depth second draw (admitted); an affine 256x256 map and a
+non-256 power-of-two map reach the arbitrary-width row in both renderers. All of those
+probes' checksums equal the oracle's, in both `fp-class`es.
 
 ### The size-specialised cells
 

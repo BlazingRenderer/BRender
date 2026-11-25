@@ -2872,76 +2872,113 @@ void PizDitherSpan(PizWalk& w, const softprim_buffer& colour, const softprim_buf
  * the walk, and never carries between pixels - only the trapezium's per-row
  * step moves it down.
  *
- * D is deliberately absent: the two cells this serves are z-sorted only
- * (SP_DEPTH_NONE), because a 555/565 output is taken by the MMX table before
- * the general one whenever a depth buffer is present, so the z-buffered
- * PIZ2TIP256 shapes are unreachable and this span has no depth handling.
+ * D selects the cell's depth handling: SP_DEPTH_NONE is persp.c's z-sorted
+ * TriangleRenderPITIP256 and SP_DEPTH_ZW is perspz.c's z-buffered
+ * TriangleRenderPIZ2TIP256, whose span is t15_pizp.asm's ScanLinePIZ2TIP. The
+ * z-buffered asm tests the depth buffer first and only writes it for the opaque
+ * cell: the 50/50 blend still tests depth (a fragment behind the stored value
+ * is dropped) but writes no depth, while a transparent texel writes neither
+ * buffer and a passing opaque fragment writes both.
  *
  * The destination advances two bytes a pixel - this is a BPP 2 cell, not the
  * dither span's one - and the blend is pentprim's destination blend: half of
  * each, through the mask that clears every channel's low bit so no carry
  * crosses into its neighbour.
  */
-template <sp_fmt F, sp_blend B>
-void PizShadeSpan(PizWalk& w, const softprim_buffer& colour, const softprim_buffer& texture, const softprim_buffer& shade, br_int_32 size) noexcept
+template <sp_depth D, sp_fmt F, sp_blend B>
+void PizShadeSpan(PizWalk& w, const softprim_buffer& colour, const softprim_buffer& depth, const softprim_buffer& texture,
+                  const softprim_buffer& shade, br_int_32 size) noexcept
 {
     const br_uint_8 *tex  = texture.base;
     const br_uint_8 *stbl = shade.base;
 
-    br_int_32 u_num     = w.pu_current;
-    br_int_32 v_num     = w.pv_current;
-    br_int_32 du_num    = w.pu_grad_x;
-    br_int_32 dv_num    = w.pv_grad_x;
-    br_int_32 den       = w.pq_current;
-    br_int_32 intensity = w.pi_current;
-    br_int_32 source    = w.source;
-    br_int_32 dest      = w.start;
-    br_int_32 end       = w.end;
+    br_int_32  u_num     = w.pu_current;
+    br_int_32  v_num     = w.pv_current;
+    br_int_32  du_num    = w.pu_grad_x;
+    br_int_32  dv_num    = w.pv_grad_x;
+    br_int_32  den       = w.pq_current;
+    br_int_32  intensity = w.pi_current;
+    br_uint_32 z         = (br_uint_32)w.pz_current;
+    br_int_32  source    = w.source;
+    br_int_32  dest      = w.start;
+    br_int_32  end       = w.end;
+    br_int_32  zdest     = w.zstart;
 
     if(dest == end)
         return;
 
     const bool forward = (dest < end);
 
-    /* Bounds for the destination and for the shade table's flat read. The
-     * destination can sit one pixel outside the visible region for a primitive
-     * clipped hard against an edge, which the asm writes and which is invisible
-     * either way, so it is skipped rather than written into whatever the
-     * pixelmap was allocated with. The table is read at 2*index, the flat
+    /* Bounds for the destination, the depth value and the shade table's flat
+     * read. The destination can sit one pixel outside the visible region for a
+     * primitive clipped hard against an edge, which the asm writes and which is
+     * invisible either way, so it is skipped rather than written into whatever
+     * the pixelmap was allocated with. The table is read at 2*index, the flat
      * offset the asm's `lea ecx,[ecx*2+eax]` forms. */
     const br_size_t limit       = (br_size_t)colour.stride_b * (br_size_t)colour.height;
+    const br_size_t depth_limit = (br_size_t)depth.stride_b * (br_size_t)depth.height;
     const br_size_t shade_limit = (br_size_t)shade.stride_b * (br_size_t)shade.height;
 
     const br_uint_16 mask = (F == SP_FMT_555) ? 0x7bde : 0xf7de;
 
     for(;;) {
-        if(dest >= 0 && (br_size_t)dest + 1 < limit) {
-            const br_uint_8 texel = tex[source];
+        const bool in_colour = (dest >= 0) && ((br_size_t)dest + 1 < limit);
+        const bool in_depth  = (D != SP_DEPTH_ZW) || (zdest >= 0 && (br_size_t)zdest + 1 < depth_limit);
 
-            if(texel != 0) {
-                const br_size_t off = (br_size_t)(((((br_uint_32)intensity >> 16) & 0xffu) << 8) | texel) * 2;
+        if(in_colour && in_depth) {
+            bool draw = true;
 
-                if(off + 2 <= shade_limit) {
-                    br_uint_16 v;
+            br_uint_16 newz = 0;
 
-                    memcpy(&v, stbl + off, sizeof(v));
+            if(D == SP_DEPTH_ZW) {
+                newz = (br_uint_16)(z >> 16);
 
-                    if(B == SP_BLEND_ALPHA) {
-                        br_uint_16 dst;
+                /* t15_pizp.asm:57-70: `ror`/`cmp bx,dx; ja` skips a fragment
+                 * strictly behind the stored value; equal is admitted. */
+                if(newz > LoadDepth(depth.base + zdest))
+                    draw = false;
+            }
 
-                        memcpy(&dst, colour.base + dest, sizeof(dst));
-                        v = (br_uint_16)(((v & mask) >> 1) + ((dst & mask) >> 1));
+            if(draw) {
+                const br_uint_8 texel = tex[source];
+
+                if(texel != 0) {
+                    const br_size_t off = (br_size_t)(((((br_uint_32)intensity >> 16) & 0xffu) << 8) | texel) * 2;
+
+                    if(off + 2 <= shade_limit) {
+                        br_uint_16 v;
+
+                        memcpy(&v, stbl + off, sizeof(v));
+
+                        if(B == SP_BLEND_ALPHA) {
+                            br_uint_16 dst;
+
+                            memcpy(&dst, colour.base + dest, sizeof(dst));
+                            v = (br_uint_16)(((v & mask) >> 1) + ((dst & mask) >> 1));
+                        } else if(D == SP_DEPTH_ZW) {
+                            StoreDepth(depth.base + zdest, newz);
+                        }
+
+                        memcpy(colour.base + dest, &v, sizeof(v));
                     }
-
-                    memcpy(colour.base + dest, &v, sizeof(v));
                 }
             }
         }
 
-        /* t15_pip.asm:99-105: the intensity steps a pixel in the walk's own
-         * direction, and the destination by BPP, before the end test. */
+        /* t15_pizp.asm:99-105: the intensity steps a pixel in the walk's own
+         * direction, the destination by BPP, and the depth value and address
+         * by their own strides, before the end test. */
         intensity += forward ? w.pi_grad_x : -w.pi_grad_x;
         dest += forward ? 2 : -2;
+
+        if(D == SP_DEPTH_ZW) {
+            if(forward)
+                z += (br_uint_32)w.pz_grad_x;
+            else
+                z -= (br_uint_32)w.pz_grad_x;
+
+            zdest += forward ? 2 : -2;
+        }
 
         if(forward ? (dest >= end) : (dest <= end))
             break;
@@ -3000,14 +3037,16 @@ void PizShadeSpan(PizWalk& w, const softprim_buffer& colour, const softprim_buff
 }
 
 /*
- * perspi.h's setup and trapezium walk, shared by the two cells that reach
- * persp.c through it. D and F select the cell: F == SP_FMT_I8 is the dithered
- * INDEX_8 map (BPP 1, no intensity, ScanLinePITPD), and F == SP_FMT_555/565 is
- * the 256x256 RGB shade-table cell (BPP 2, an intensity parameter and the
- * shade table, ScanLinePITIP). S and B are the shade-table cell's own two
- * variants, the intensity source and pentprim's destination blend; the
- * dithered cell takes no intensity and no blend. PizDitherTriangle and
- * PizShadeTriangle below name the two cells and fix those axes.
+ * perspi.h's setup and trapezium walk, shared by the three cells that reach
+ * persp.c/perspz.c through it. D and F select the cell: F == SP_FMT_I8 is the
+ * dithered INDEX_8 map (BPP 1, no intensity, ScanLinePITPD), and F ==
+ * SP_FMT_555/565 is the 256x256 RGB shade-table cell (BPP 2, an intensity
+ * parameter and the shade table, ScanLinePITIP). S and B are the shade-table
+ * cell's own two variants, the intensity source and pentprim's destination
+ * blend; the dithered cell takes no intensity and no blend. D is the depth
+ * mode: the dithered cells are z-buffered or z-sorted, and the shade-table cell
+ * is z-sorted (PITIP256) or z-buffered (PIZ2TIP256). PizDitherTriangle and
+ * PizShadeTriangle below name the cells and fix those axes.
  *
  * The setup works entirely in the fixed components, and the ring of long double
  * values below is the x87: persp.c is a chain of float assignments, evaluated
@@ -3386,7 +3425,7 @@ void PizTriangle(brp_block *block, brp_vertex *v0, brp_vertex *v1, brp_vertex *v
                 PizDivide(w, size);
 
                 if(LIGHT)
-                    PizShadeSpan<F, B>(w, colour, texture, shade, size);
+                    PizShadeSpan<D, F, B>(w, colour, dbuf, texture, shade, size);
                 else
                     PizDitherSpan<D>(w, colour, dbuf, texture, size);
             }
@@ -3445,15 +3484,17 @@ void PizDitherTriangle(brp_block *block, brp_vertex *v0, brp_vertex *v1, brp_ver
 
 /*
  * The 256x256 RGB shade-table cells: persp.c's TriangleRenderPITIP256_RGB_* and
- * TriangleRenderPITIPB256_RGB_* (prm_t15.ifg:33-36, prm_t16.ifg:33-36), which
- * are perspi.h at BPP 2, SIZE 256, LIGHT 1. They are z-sorted only - the
- * z-buffered PIZ2TIP256 twins are taken by the MMX table before the general
- * one, so no depth parameter reaches PizShadeSpan.
+ * TriangleRenderPITIPB256_RGB_* (prm_t15.ifg:33-36, prm_t16.ifg:33-36, z-sorted)
+ * and perspz.c's TriangleRenderPIZ2TIP256_RGB_555 and ...PIZ2TIPB256... twins
+ * (prm_t15.ifg:4-7, prm_t16.ifg:4-7, z-buffered), which are perspi.h/perspzi.h
+ * at BPP 2, SIZE 256, LIGHT 1. D selects the depth mode and therefore the span
+ * body: no depth handling, or the t15_pizp.asm fragment that tests and writes
+ * the depth buffer.
  */
-template <sp_fmt F, sp_shade S, sp_blend B>
+template <sp_depth D, sp_fmt F, sp_shade S, sp_blend B>
 void PizShadeTriangle(brp_block *block, brp_vertex *v0, brp_vertex *v1, brp_vertex *v2) noexcept
 {
-    PizTriangle<SP_DEPTH_NONE, F, S, B>(block, v0, v1, v2);
+    PizTriangle<D, F, S, B>(block, v0, v1, v2);
 }
 
 /*
@@ -6265,27 +6306,31 @@ static void SoftPrimRender(brp_block *block, brp_vertex *v0, brp_vertex *v1, brp
                 TexturedIndexedTriangle<D, S, P, B, G>(block, v0, v1, v2);
         } else
             IndexedTriangle<D, S, G>(block, v0, v1, v2);
-    } else if(X == SP_TEX_I8 && A == SP_ADDR_SHIFT && D == SP_DEPTH_NONE && (S == SP_SHADE_CONST_I_RGB || S == SP_SHADE_INTERP_I_RGB)) {
+    } else if(X == SP_TEX_I8 && A == SP_ADDR_SHIFT && (D == SP_DEPTH_NONE || D == SP_DEPTH_ZW) &&
+              (S == SP_SHADE_CONST_I_RGB || S == SP_SHADE_INTERP_I_RGB)) {
         /*
-         * The 256x256 RGB shade-table cells: persp.c's PITIP256/PITIPB256, which
-         * are perspi.h at BPP 2, SIZE 256 and LIGHT 1. Their setup, addressing
-         * and trapezium walk are the dithered-map cell's (PizTriangle), and their
-         * span is t15_pip.asm's ScanLinePITIP - not the pfpsetup.asm family the
+         * The 256x256 RGB shade-table cells: persp.c's PITIP256/PITIPB256 when
+         * z-sorted and perspz.c's PIZ2TIP256/PIZ2TIPB256 twins when z-buffered,
+         * which are perspi.h/perspzi.h at BPP 2, SIZE 256 and LIGHT 1. Their
+         * setup, addressing and trapezium walk are the dithered-map cell's
+         * (PizTriangle), and their span is t15_pip.asm's ScanLinePITIP or
+         * t15_pizp.asm's ScanLinePIZ2TIP - not the pfpsetup.asm family the
          * indexed texture path above ports. ADDR_SHIFT is the map-size
          * instantiation - the block declares 256x256 and the matcher requires
          * width and height to equal it - which is why a map of any other size
-         * reaches the arbitrary-width cell instead. They are z-sorted only: the
-         * z-buffered PIZ2TIP256 twins are the next slice's kernel, and
-         * soft_t15/soft_t16 leave a 256x256 shade map on the MMX untextured row
-         * (see their match contract), so no depth reaches this kernel. The span
-         * reads the destination only for the blend, which is the one ROP the
-         * cell's blocks carry.
+         * reaches the arbitrary-width cell instead; an affine 256x256 map does
+         * not require PERSPECTIVE and so never reaches the exact rows at all,
+         * falling through to that arbitrary-width fall-back as pentprim's
+         * general table does. The blend reads the destination and, when
+         * z-buffered, tests the depth buffer without writing it; the opaque
+         * cells write both buffers.
          */
-        static_assert(!(X == SP_TEX_I8 && A == SP_ADDR_SHIFT && D == SP_DEPTH_NONE && (S == SP_SHADE_CONST_I_RGB || S == SP_SHADE_INTERP_I_RGB)) ||
+        static_assert(!(X == SP_TEX_I8 && A == SP_ADDR_SHIFT && (D == SP_DEPTH_NONE || D == SP_DEPTH_ZW) &&
+                        (S == SP_SHADE_CONST_I_RGB || S == SP_SHADE_INTERP_I_RGB)) ||
                           B == SP_BLEND_NONE || B == SP_BLEND_ALPHA,
                       "softprim: no kernel for this blend mode on the 256x256 RGB shade-table cell");
 
-        PizShadeTriangle<F, S, B>(block, v0, v1, v2);
+        PizShadeTriangle<D, F, S, B>(block, v0, v1, v2);
     } else if((X == SP_TEX_555 || X == SP_TEX_565) && A == SP_ADDR_SHIFT && D == SP_DEPTH_ZW) {
         /*
          * The size-specialised native colour-map cells, zb16p2ul.asm: the
@@ -6350,13 +6395,13 @@ static void SoftPrimRender(brp_block *block, brp_vertex *v0, brp_vertex *v1, brp
     } else if(F != SP_FMT_888 && D == SP_DEPTH_ZW) {
         /*
          * What is left of the z-buffered 15/16bpp tuples is the MMX family. The
-         * arbitrary-width textures, the RGB shade tables and the
+         * arbitrary-width textures, the RGB shade tables (both the
+         * arbitrary-width and the exact 256x256 power-of-two cells) and the
          * size-specialised native colour-map cells were routed above, so no
          * textured shape reaches this branch; the general table's remaining
-         * z-buffered RGB_555/565 rows (the z-sorted-only cells' twins and the
-         * 256x256 shade cell) are refused, so the matcher never selects them.
-         * The untextured rows describe the same shape the MMX table's Z_RGB
-         * blocks do, which the MMX table is tried first for.
+         * z-buffered RGB_555/565 rows the generator refuses, so the matcher
+         * never selects them. The untextured rows describe the same shape the
+         * MMX table's Z_RGB blocks do, which the MMX table is tried first for.
          * tt15_piz.asm/tt16_piz.asm are therefore never reached.
          */
         MmxTriangle<F, D, S, X, B, H>(block, v0, v1, v2);
