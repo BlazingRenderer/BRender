@@ -66,14 +66,24 @@ add_library(softprim
 # ever reaches the line tables. pentprim has no MMX line or point table - its
 # MMX array points at the general one for those topologies.
 #
+# soft_t15/soft_t16 are listed before mmx_t15/mmx_t16, which pentprim's order
+# would not put there. They are the z-buffered arbitrary-width 555/565 triangle
+# rows that MMX-off pentprim reaches in the general table; in softprim's single
+# walk the MMX table's untextured rows would take those states first and draw
+# them untextured, because they require no texture type. Putting the rows first
+# is how softprim reproduces the general table's answer for a state the MMX
+# table has no kernel to serve, and their requirements are narrowed so a state
+# the MMX table does serve cannot reach them. The files carry the contract.
+#
 # SP_SHADE_CONST_I_RGB/SP_SHADE_INTERP_I_RGB are in the spec, and the
 # arbitrary-width shapes that carry them are emitted: prim_t24's RGB_888 pair
-# and the z-sorted 15/16bpp pair. infogen.pl still refuses the power-of-two
-# 15/16bpp ones by an explicit rule, because naming an axis value admits every
-# shape that carries it and no kernel exists for those. SP_TEX_555/SP_TEX_565
-# are in the spec for the same reason and with the same rule: the z-sorted
-# arbitrary-width triangle is emitted and the rest of the shapes that sample a
-# 555/565 map are refused. See infogen.pl's softprim_implemented().
+# and the 15/16bpp pair at both depths, the z-buffered half through
+# soft_t15/soft_t16. infogen.pl still refuses the power-of-two 15/16bpp ones by
+# an explicit rule, because naming an axis value admits every shape that carries
+# it and no kernel exists for those. SP_TEX_555/SP_TEX_565 are in the spec for
+# the same reason and with the same rule: the arbitrary-width triangle is
+# emitted at both depths and the rest of the shapes that sample a 555/565 map
+# are refused. See infogen.pl's softprim_implemented().
 #
 # SP_TEX_RGBA8888 and SP_BLEND_ALPHA_TEX are softprim's alpha-blended sprite
 # family, which pentprim never had. Only tables/soft_t24.ifg carries them, so
@@ -81,7 +91,7 @@ add_library(softprim
 # walked before every pentprim block; see the file for why that cannot move an
 # existing selection.
 ##
-set(SP_TABLES soft_t24 prim_t8 mmx_t15 prm_t15 mmx_t16 prm_t16 prim_t24 prim_l8 prim_p8 prim_l15 prim_p15 prim_l16 prim_p16 prim_l24 prim_p24)
+set(SP_TABLES soft_t24 soft_t15 soft_t16 prim_t8 mmx_t15 prm_t15 mmx_t16 prm_t16 prim_t24 prim_l8 prim_p8 prim_l15 prim_p15 prim_l16 prim_p16 prim_l24 prim_p24)
 
 set(SP_SPEC "softprim_implemented=")
 string(APPEND SP_SPEC "SP_FMT_I8,SP_FMT_555,SP_FMT_565,SP_FMT_888,SP_TOP_TRI,SP_TOP_LINE,SP_TOP_POINT,")

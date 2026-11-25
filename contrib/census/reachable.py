@@ -104,7 +104,9 @@ def _walk_reachable(walk):
     blend_vals = ["SP_PMT_NONE"] + type_values(3)
     fog_vals = ["SP_PMT_NONE"] + type_values(4)
 
-    named_sizes = sorted({e["msize"] for e in walk if e["msize"]})
+    # Both an exact size and an excluded one have to appear in the pairs, or a
+    # row that excludes the only size another names would be modelled wrong.
+    named_sizes = sorted({e["msize"] for e in walk if e["msize"]} | {e["msize_not"] for e in walk if e["msize_not"]})
     sizes = named_sizes + [OTHER_SIZE]
     # every (w, h) combination the exact-size predicate can distinguish.
     pairs = [(w, h) for w in sizes for h in sizes]
@@ -137,6 +139,8 @@ def _walk_reachable(walk):
                 m &= dim_masks[k][v]
         if e["msize"]:
             m &= size_masks.get(e["msize"], 0)
+        if e["msize_not"]:
+            m &= ~size_masks.get(e["msize_not"], 0)
         return m
 
     tstates = [type_states(e) for e in walk]

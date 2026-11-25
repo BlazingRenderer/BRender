@@ -54,7 +54,8 @@ def parse_inc(path):
             "flags_mask": args[0],
             "flags_cmp": args[1],
             "msize": int(args[9]),
-            "types": args[10:15],
+            "msize_not": int(args[10]),
+            "types": args[11:16],
         })
     return entries
 

@@ -25,8 +25,8 @@ the same scene — which is why every entry carries the class rather than only
 the software ones. Rendertest derives its own class (`tools/rendertest/main.c`);
 nothing chooses it by hand.
 
-The `x87` half is pentprim's output, and it is the bit-exactness oracle for the
-portable rasteriser that replaced it. **Only an x87 build can reproduce it.**
+The `x87` class describes evaluation width, not which renderer produced the
+reference. **Only an x87 build can reproduce those rows.**
 `-mfpmath=387` on x86-64 gets close but not exact, because the x86-64 ABI rounds
 `float` and `double` at call boundaries and no flag undoes that.
 
@@ -82,11 +82,13 @@ rebuilt as well.
 
 ## Regenerating the x87 half of the reference
 
-The `x87` entries come from pentprim, which is in the tree up to `076e6db6`
-("resources/aidocs: specify this fork's glTF extensions") — the commit before
-the portable rasteriser replaced it. They are blessed with the *current*
-harness, so the harness on that tree has to be brought forward: its key format
-and the demo's primitive heap are both newer.
+Use the matching producer for each `softrend` row. The original software
+references are from pentprim with MMX enabled. For isolated fixtures of the
+restored general kernels, use pentprim with `BRENDER_USE_MMX=0`. For frames
+that mix general and MMX kernels, use i686 softprim: pentprim cannot render
+that combination. In particular the Z-buffered RGB555/RGB565
+`scene-shade-arb-*` rows use softprim. The mixed frame is a regression check;
+verify the restored draw separately against MMX-off pentprim.
 
 That tree is kept as the `dev/pentprim-verification` branch — the oracle. It is
 built beside the tree it blesses, never merged into it, and its corpus, harness
@@ -133,24 +135,18 @@ softrend change is carried onto it by cherry-pick, not by that sync.
    cmake --build cmake-build-32-pent2 --target rendertest -j
    ```
 
-4. Bless the **softrend** `x87` half against the *current* fixtures and the
-   *current* table, so the worktree's own copies are not used. Run this from the
-   tree being blessed, with `<oracle>` the worktree from step 1. `--bless` only
-   writes the class the build derives — `x87` from this i686 oracle, `declared`
-   from an x86-64 build — and it merges: entries already present keep their
-   position and only the covered keys are rewritten, so the order these run in
-   does not matter.
+4. Use `ctest --test-dir <build-dir> --show-only=json-v1` to get the current
+   test command for the affected configuration. For an oracle comparison,
+   substitute its i686 executable, pass the scene explicitly, and set
+   `BRENDER_USE_MMX=0` or `BRENDER_USE_MMX=1` for the intended producer. Use
+   the current fixture, or a copy with equivalent material flags if the old
+   loader expects a bitmask instead of flag names. Keep the oracle's output
+   separate using `--reference <copy-of-table>`. **Do not bless all scenes
+   from either oracle mode.** A blanket run will overwrite rows that belong
+   to the other mode or that neither mode can produce.
 
-   ```
-   oracle=<the oracle worktree>
-   for cfg in "8 zb" "8 zs" "15 zb" "15 zs" "16 zb" "16 zs" "24 zb" "24 zs"; do
-       set -- $cfg; [ "$2" = zs ] && d=--no-depth || d=
-       "$oracle/cmake-build-32-pent2/tools/rendertest/rendertest" \
-           --device softrend --bpp "$1" $d \
-           --scene-dir tools/rendertest/dat \
-           --reference tools/rendertest/rendertest.txt --bless
-   done
-   ```
+   Once the intended frames have been checked, bless only those scenes with
+   the corresponding current build, and verify that no other row changed.
 
    **The nine reference scenes under `resources/gltf-reference` are blessed
    separately.** They are a second corpus — a different `--scene-dir` and an
@@ -158,9 +154,8 @@ softrend change is carried onto it by cherry-pick, not by that sync.
    design, because it rebuilds each configuration from its ctest name and a name
    cannot carry either. Bless them one scene per process: a frame there is not a
    function of its scene alone but of the scenes that ran before it, so the nine
-   in one process do not reproduce the stored checksums. Point `--scene-dir` at
-   `resources/gltf-reference` and add `--reference` when the bless runs from
-   another tree; `drivers/softprim/README.md` has the loop.
+   in one process do not reproduce the stored checksums. Use the individual
+   `refscenes-*` CTest commands so each runs with its own scene.
 
    **The GL devices are not blessed here.** This worktree's `glrend` does not
    reproduce the `scene-light-volume{,-cut}` entries — it renders both identical

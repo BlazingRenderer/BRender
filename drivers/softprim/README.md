@@ -24,9 +24,10 @@ pentprim gone they are the only record of its output.
 
 - `SP_TABLES` (`CMakeLists.txt`) names the `.ifg` block descriptions in `tables/`.
   Fourteen are pentprim's own, carried here because they are the specification both
-  rasterisers implement; the generator `infogen.pl` is theirs too. The fifteenth,
-  `soft_t24.ifg`, is softprim's alpha-blended RGBA sprite family, which pentprim never
-  had (see *What is implemented*).
+  rasterisers implement; the generator `infogen.pl` is theirs too. The others are
+  softprim's: `soft_t24.ifg` is the alpha-blended RGBA sprite family, which pentprim never
+  had, and `soft_t15.ifg`/`soft_t16.ifg` restore the z-buffered arbitrary-width 555/565
+  triangle rows of the general table (see *What is deliberately not implemented*).
 - `infogen.pl` in its `softprim` mode projects each block onto the axis vocabulary in
   `softprim_axes.h` and emits one line per block carrying the axis tuple (which names the
   kernel) plus the metadata pentprim's matcher tests.
@@ -130,49 +131,54 @@ itself was corrected first:
 
 ## What is deliberately not implemented
 
-40 of the 393 entries (24 distinct tuples). Every one of them is refused rather than
+28 of the 411 entries (12 distinct tuples). Every one of them is refused rather than
 omitted, and the first thing to establish about any of them is whether the matcher can reach
 it at all - which the generated table answers on its own, since
 `contrib/census/reachable.py` walks it the way `spFindMatch` does and stops on a refused
 entry. `contrib/census/witness.py` then says whether *any* state can select the rest. The
-answer now is none: **all 40 are unreachable in softprim's walk**, so there is no reachable
+answer now is none: **all 28 are unreachable in softprim's walk**, so there is no reachable
 shape without a kernel and no shape a fixture could ask for that softprim declines to draw.
 The rule is `infogen.pl`'s `softprim_implemented()`, which carries its reasoning in comments,
 plus the guards in `raster.cpp`.
 
-**Unreachable in softprim: every z-buffered 555/565 shape, in both families (40 entries).**
+**Unreachable in softprim: the z-buffered 555/565 cells with a size-specific kernel (28
+entries).**
 
-- the 555/565-typed colour maps (`SP_TEX_555`/`SP_TEX_565`): 12 entries per format, all
-  z-buffered.
+- the 555/565-typed colour maps (`SP_TEX_555`/`SP_TEX_565`): 10 entries per format, the
+  32, 64, 128, 256 and 1024 power-of-two cells at both depths.
 - the RGB-output shade-table shapes at 15/16bpp (`SP_SHADE_CONST_I_RGB`/
-  `SP_SHADE_INTERP_I_RGB`): 8 entries per format, all z-buffered.
+  `SP_SHADE_INTERP_I_RGB`): 4 entries per format, the z-buffered 256x256 cells.
 
-The mechanism is one thing: the MMX table is first in softprim's walk for a 555/565 output,
-its textured rows all require an `INDEX_8` map with a palette, and one of its untextured rows
-then takes the primitive - so a 555/565 map is never sampled and the primitive is drawn
-untextured instead. That is measured, not assumed: the corpus's own `scene-tex-rgb555` and
-`scene-tex-rgb565` fixtures draw untextured at 15/16bpp z-buffered.
+Both families' arbitrary-width cells are implemented. The z-sorted ones were already emitted
+from the general table; the z-buffered ones are `tables/soft_t15.ifg` and `soft_t16.ifg`.
+Those two are softprim-only tables listed before the MMX table, because softprim's single
+walk would otherwise let an MMX untextured row - which requires no texture type - take the
+state before the general table was reached. They restore the answer MMX-off pentprim got
+from the general table for the two states the MMX table has no kernel to serve: an RGB
+555/565 colour map, and an `INDEX_8` map with an RGB 555/565 shade table. A normal paletted
+MMX primitive still reaches the MMX textured rows first, and an untextured one still
+reaches the MMX untextured rows. The files carry the match contract for the cells they
+leave to this section: the colour-map rows require `PRIMF_POWER2` to be clear - the
+matcher's flag for a map that is a power of two in both dimensions and no larger than 1024,
+which is the family the size-specific cells belong to - and the shade-table rows exclude a
+256x256 map.
 
-That is a property of softprim, not of pentprim. pentprim walks the MMX table only while MMX
-is in use (`BRENDER_USE_MMX`, or the CPU's own capability); with it off the general table is
-what answers, and those kernels are neither unreachable nor equivalent to their MMX twins -
-measured on `dev/pentprim-verification` with `BRENDER_USE_MMX=0`, 70 of its 96 fixtures
-change at each of 15bpp and 16bpp z-buffered, `scene-flat` alone by 211 of 76800 pixels, and
-the census there counts 8 entries of `prim_t15` and 8 of `prim_t16` that only the general
-configuration selects. **The reference is the MMX configuration** - the one the frozen
-`x87` entries record - and softprim reproduces it on every architecture; it has no MMX
-toggle and does not reproduce the general path.
+The remaining 28 are the next slice. Their absent kernels do not turn an answer into a
+refusal: the soft rows skip those states and the MMX untextured row takes them exactly as it
+did before. A power-of-two 555/565 colour map and a 256x256 RGB shade table stay on the MMX
+path until their kernels land.
 
 
 ## How it is verified
 
 Both instruments score softprim against **pentprim's frozen pixels**, never against its own
-output.
+output, with the six mixed-walk keys listed below as the explicit exception.
 
 - **The fixture corpus.** `tools/rendertest` renders 102 fixtures at four pixel formats
   (8/15/16/24bpp) x {z-buffered, z-sorted} and compares each against
-  `tools/rendertest/rendertest.txt`, whose 888 `softrend/softprmf/x87` keys are
-  pentprim's. Measured: `PASS failures=0`, 102 comparisons, in all eight configurations.
+  `tools/rendertest/rendertest.txt`, whose `softrend/softprmf/x87` keys are pentprim's
+  except for the six mixed-walk keys listed below. Measured: `PASS failures=0`, 102
+  comparisons, in all eight configurations.
 - **Nine reference scenes.** `resources/gltf-reference`, rendered by the same harness with
   `--scene-dir resources/gltf-reference` and scored against the same table: 9 scenes x
   8/15/16/24bpp x {z-buffered, z-sorted}, registered as the
@@ -190,6 +196,25 @@ was built in. softprim is portable and compiles for other targets: the `declared
 build that rounds every operation at its type's width, and they are softprim's own output,
 because pentprim was never built for x86-64 - which is why a key names the class that
 produced it.
+
+### The restored cells and the six mixed-walk keys
+
+The z-buffered arbitrary-width 555/565 rows are pentprim's MMX-off answer, and the eight
+single-cell fixtures reproduce it exactly: `scene-tex-rgb555`, its affine twin and the 565
+pair, and `scene-shade-rgb555`, its flat twin and the 565 pair, at their own pixel type,
+z-buffered. Those checksums are the retired tree's i686 build with `BRENDER_USE_MMX=0`, and
+the 32-bit softprim build records the same values.
+
+Six further keys move because their fixture mixes a restored primitive with cubes the
+restoration does not claim: `scene-shade-arb-flat`, `scene-shade-arb-flat-persp` and
+`scene-shade-arb-smooth-persp`, at 15 and 16bpp z-buffered. In each frame the 555/565 cube
+takes the restored shade-table row and the other two cubes keep the MMX untextured rows they
+selected before. pentprim never produced that mixed frame - it walked one table for a whole
+render, so its MMX-off frame drew all three cubes from the general table - and there is no
+pentprim run to score these six against. They are softprim's own output, recorded from the
+same 32-bit build, and they are the only x87 keys in the table that are not pentprim's. The
+witness log names the three restored matches, and the frame differs from the old one only
+where the restored cube draws.
 
 ### Known limitation: a Debug build is expected to differ
 

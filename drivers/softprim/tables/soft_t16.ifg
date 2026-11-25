@@ -1,0 +1,17 @@
+# softprim's restored z-buffered arbitrary-width RGB 565 triangle family.
+#
+# The 565 twin of soft_t15.ifg, and the same argument applies: it carries the
+# prm_t16 rows MMX-off pentprim selects for a z-buffered 565 output and is
+# listed before mmx_t16 so the MMX untextured rows do not take the state first.
+# See soft_t15.ifg for the match contract, the two shapes that reach these rows
+# (an RGB_565 colour map, or an INDEX_8 map with an RGB_565 shade table), the
+# power-of-two colour-map exclusion and the 256x256 shade-table exclusion.
+[texture_stride_positive,fixed_components]
+softhz:TriangleRenderPIZ2TA16 = [z_buffered, triangle, rgb565, texture, perspective_subdivide, texture_not_power2]
+softhz:TriangleRenderPIZ2TIA_RGB_565 = [z_buffered, triangle, rgb565, texture, texture_index8, perspective_subdivide, constant_intensity, duplicate, texture_not_size=256]
+softhz:TriangleRenderPIZ2TIA_RGB_565 = [z_buffered, triangle, rgb565, texture, texture_index8, perspective_subdivide, interpolated_intensity, texture_not_size=256]
+
+[texture_stride_positive,fixed_components]
+softhz:TriangleRenderPIZ2TA16 = [triangle, z_buffered, rgb565, texture, texture_not_power2]
+softhz:TriangleRenderPIZ2TIA_RGB_565 = [triangle, z_buffered, rgb565, texture, texture_index8, interpolated_intensity, texture_not_size=256]
+softhz:TriangleRenderPIZ2TIA_RGB_565 = [triangle, z_buffered, rgb565, texture, texture_index8, constant_intensity, duplicate, texture_not_size=256]

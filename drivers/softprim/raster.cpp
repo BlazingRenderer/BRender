@@ -3904,7 +3904,10 @@ inline br_uint_8 ChannelByte(br_int_32 v) noexcept
  * is transparent when all three of its bytes (SBPP=3), its two bytes (SBPP=2)
  * or its one byte (SBPP=1) are zero, and the depth test draws while the new
  * 16-bit value is not greater than the stored one, which is the asm's
- * `cmp dl,bl; sbb dh,bh; jb`.
+ * `cmp dl,bl; sbb dh,bh; jb`. The transparency test runs before the depth test
+ * and a transparent texel leaves the depth alone: the asm's `jz failf` skips
+ * the pixel and only advances the depth pointer, so a zero texel never writes
+ * depth even when its z would have passed.
  *
  * SBPP=2 is the 555/565-typed colour map: the texel is already the output
  * pixel's type, so the fragment is the two bytes copied - t_pia.asm's
@@ -4230,12 +4233,14 @@ void RgbAwtTrapezium(RgbAwtWalk& w, AwtEdge& edge) noexcept
  * runtime size, so the 555/565 map is the same addressing as the RGB_888 one
  * with SBPP=2 instead of 3.
  *
- * The I8 arm is the RGB-output shade-table family. Its 888 half is reachable -
- * the general prim_t24 walk reaches it, as there is no MMX table for an 888
- * output - and its 15/16bpp half only in the z-sorted mode: the 555/565
- * z-buffered shapes are taken by the MMX table (the MMX blocks are tried first
- * and one of their untextured rows always matches). The colour slot carries an
- * intensity rather than a colour for both, which is what SP_SHADE_*_I_RGB says.
+ * The I8 arm is the RGB-output shade-table family. Its 888 half is reached by
+ * the general prim_t24 walk, as there is no MMX table for an 888 output. Its
+ * 15/16bpp half is reached in both depth modes: the z-sorted cells from
+ * prm_t15/prm_t16, and the z-buffered ones through tables/soft_t15.ifg and
+ * soft_t16.ifg, which list the general rows before the MMX table so its
+ * untextured rows cannot take the state (see those files for the match
+ * contract). The colour slot carries an intensity rather than a colour for
+ * both, which is what SP_SHADE_*_I_RGB says.
  *
  * The RGBA arm is softprim's own (tables/soft_t24.ifg): an RGBA_8888 map
  * sampled at SBPP=4, with B=SP_BLEND_ALPHA_TEX reading the texel's fourth byte
@@ -6053,10 +6058,12 @@ static void SoftPrimRender(brp_block *block, brp_vertex *v0, brp_vertex *v1, brp
          * indexed texture path above ports. ADDR_SHIFT is the map-size
          * instantiation - the block declares 256x256 and the matcher requires
          * width and height to equal it - which is why a map of any other size
-         * reaches the arbitrary-width cell instead. They are z-sorted only: at
-         * 15/16bpp the MMX table is tried first and takes the z-buffered twins,
-         * so no depth reaches this kernel. The span reads the destination only
-         * for the blend, which is the one ROP the cell's blocks carry.
+         * reaches the arbitrary-width cell instead. They are z-sorted only: the
+         * z-buffered PIZ2TIP256 twins are the next slice's kernel, and
+         * soft_t15/soft_t16 leave a 256x256 shade map on the MMX untextured row
+         * (see their match contract), so no depth reaches this kernel. The span
+         * reads the destination only for the blend, which is the one ROP the
+         * cell's blocks carry.
          */
         static_assert(!(X == SP_TEX_I8 && A == SP_ADDR_SHIFT && D == SP_DEPTH_NONE && (S == SP_SHADE_CONST_I_RGB || S == SP_SHADE_INTERP_I_RGB)) ||
                           B == SP_BLEND_NONE || B == SP_BLEND_ALPHA,
@@ -6070,12 +6077,14 @@ static void SoftPrimRender(brp_block *block, brp_vertex *v0, brp_vertex *v1, brp
          * awtmi.h's arbitrary-width family, which has its own setup and its own
          * addressing (see RgbAwtTriangle). Three shapes reach it: the RGB_888
          * textured blocks, whose sample is the map itself or a shade-table
-         * lookup; the z-sorted RGB_555/565 shade-table blocks, whose fragment is
-         * the same LIGHT lookup into a table typed to the output; and the
-         * z-sorted RGB_555/565 colour-map blocks, whose fragment is the map's
-         * own texel word copied - the same code with SBPP=2 rather than 3. The
-         * power-of-two 15/16bpp shapes, the z-buffered 555/565 ones and the
-         * line/point ones the generator refuses, so they never reach here.
+         * lookup; the RGB_555/565 shade-table blocks, whose fragment is the same
+         * LIGHT lookup into a table typed to the output; and the RGB_555/565
+         * colour-map blocks, whose fragment is the map's own texel word copied -
+         * the same code with SBPP=2 rather than 3. The 15/16bpp cells come from
+         * prm_t15/prm_t16 when z-sorted and from soft_t15/soft_t16 when
+         * z-buffered. The power-of-two 15/16bpp shapes, the z-buffered 256x256
+         * shade cell and the line/point shapes the generator refuses, so they
+         * never reach here.
          *
          * The RGBA_8888 arm is softprim's per-texel alpha blend, which has no
          * pentprim original and is not one of the three: same setup and
@@ -6108,12 +6117,14 @@ static void SoftPrimRender(brp_block *block, brp_vertex *v0, brp_vertex *v1, brp
             RgbPiTriangle<F, D, false>(block, v0, v1, v2);
     } else if(F != SP_FMT_888 && D == SP_DEPTH_ZW) {
         /*
-         * Every 15/16bpp tuple with a depth buffer is the MMX family: the
-         * general tables' z-buffered textured RGB_555/565 blocks carry an
-         * intensity slot and are refused, and their untextured ones describe
-         * the same shape the MMX table's Z_RGB blocks do, which the MMX table
-         * is tried first for. tt15_piz.asm/tt16_piz.asm are therefore never
-         * reached.
+         * What is left of the z-buffered 15/16bpp tuples is the MMX family. The
+         * arbitrary-width textures and RGB shade tables were routed above, and
+         * the general table's remaining z-buffered textured RGB_555/565 rows
+         * (the power-of-two colour maps and the 256x256 shade cell) are refused
+         * for the next slice, so the matcher never selects them. The untextured
+         * rows describe the same shape the MMX table's Z_RGB blocks do, which
+         * the MMX table is tried first for. tt15_piz.asm/tt16_piz.asm are
+         * therefore never reached.
          */
         MmxTriangle<F, D, S, X, B, H>(block, v0, v1, v2);
     } else {

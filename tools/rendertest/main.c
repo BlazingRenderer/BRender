@@ -1110,46 +1110,44 @@ static const rt_relation rt_relations[] = {
      .device = "softrend"},
 
     /*
-     * The RGB-output shade-table witness. The shape is only reachable at the
-     * z-sorted 555/565 paths: a z-buffered textured primitive matches an MMX
-     * block first, and an 888 output has no such kernel. scene-textured-shade
-     * is the control for the smooth pair (the
-     * same rig with an INDEX_8 table, which at these types matches no shaded
-     * block and draws the untextured one instead); scene-flat is the control for
-     * the flat pair, whose constant-intensity cousin it is.
+     * The RGB-output shade-table witness. The shape is reached at the 555/565
+     * paths in both depth modes: the z-sorted cells from prm_t15/prm_t16 and the
+     * z-buffered ones from soft_t15/soft_t16 (which list the general rows before
+     * the MMX table so its untextured rows do not take the state). An 888 output
+     * has no MMX table and reaches its own cell either way.
+     * scene-textured-shade is the control for the smooth pair (the same rig with
+     * an INDEX_8 table, which at these types matches no shaded block and draws
+     * the untextured one instead); scene-flat is the control for the flat pair,
+     * whose constant-intensity cousin it is.
      */
-    {.a = "scene-shade-rgb555",      .b = "scene-textured-shade", .equal = BR_FALSE, .pm_type = BR_PMT_RGB_555, .mode = RT_MODE_ZS,
+    {.a = "scene-shade-rgb555",      .b = "scene-textured-shade", .equal = BR_FALSE, .pm_type = BR_PMT_RGB_555, .mode = RT_ANY_MODE,
      .device = "softrend"},
-    {.a = "scene-shade-rgb565",      .b = "scene-textured-shade", .equal = BR_FALSE, .pm_type = BR_PMT_RGB_565, .mode = RT_MODE_ZS,
+    {.a = "scene-shade-rgb565",      .b = "scene-textured-shade", .equal = BR_FALSE, .pm_type = BR_PMT_RGB_565, .mode = RT_ANY_MODE,
      .device = "softrend"},
-    {.a = "scene-shade-rgb555-flat", .b = "scene-flat",           .equal = BR_FALSE, .pm_type = BR_PMT_RGB_555, .mode = RT_MODE_ZS,
+    {.a = "scene-shade-rgb555-flat", .b = "scene-flat",           .equal = BR_FALSE, .pm_type = BR_PMT_RGB_555, .mode = RT_ANY_MODE,
      .device = "softrend"},
-    {.a = "scene-shade-rgb565-flat", .b = "scene-flat",           .equal = BR_FALSE, .pm_type = BR_PMT_RGB_565, .mode = RT_MODE_ZS,
+    {.a = "scene-shade-rgb565-flat", .b = "scene-flat",           .equal = BR_FALSE, .pm_type = BR_PMT_RGB_565, .mode = RT_ANY_MODE,
      .device = "softrend"},
 
     /*
-     * The two refused families' witnesses. Each differs from a neighbour that
+     * The RGB-typed families' witnesses. Each differs from a neighbour that
      * cannot carry the family's defining type, so a fixture that quietly selects
      * a sibling - the failure mode both fixtures exist to rule out - fails here
      * by name instead of only moving a checksum.
      *
-     * Family A (an RGB-typed colour map) is asserted in the Z-sort mode alone,
-     * because the z-buffered 555/565 textured blocks are unreachable: pentprim
-     * walks the MMX table first, its textured rows all require an INDEX_8 map
-     * with a palette, and its untextured rows match any 555/565 triangle, so a
-     * 555/565 map is drawn untextured and the fixture reaches nothing. Measured
-     * at both types in both modes: the two frames differ in exactly the mode
-     * asserted. scene-textured is the control
-     * - the same rig with an INDEX_8 map.
+     * Family A (an RGB-typed colour map) is reached in both depth modes: the
+     * z-sorted cells at SP_ADDR_DIVIDE from prm_t15/prm_t16, and the z-buffered
+     * ones from soft_t15/soft_t16. scene-textured is the control - the same rig
+     * with an INDEX_8 map.
      *
-     * Family B (a textured primitive with an RGB-typed shade table) is
-     * asserted at 888, where the block is reachable, against
-     * scene-textured-shade - the same rig with an INDEX_8 table, which at 888
-     * matches no shaded block and falls through to the untextured one.
+     * Family B (a textured primitive with an RGB-typed shade table) is asserted
+     * at 888 against scene-textured-shade - the same rig with an INDEX_8 table,
+     * which at 888 matches no shaded block and falls through to the untextured
+     * one.
      */
-    {.a = "scene-tex-rgb555",        .b = "scene-textured",       .equal = BR_FALSE, .pm_type = BR_PMT_RGB_555, .mode = RT_MODE_ZS,
+    {.a = "scene-tex-rgb555",        .b = "scene-textured",       .equal = BR_FALSE, .pm_type = BR_PMT_RGB_555, .mode = RT_ANY_MODE,
      .device = "softrend"},
-    {.a = "scene-tex-rgb565",        .b = "scene-textured",       .equal = BR_FALSE, .pm_type = BR_PMT_RGB_565, .mode = RT_MODE_ZS,
+    {.a = "scene-tex-rgb565",        .b = "scene-textured",       .equal = BR_FALSE, .pm_type = BR_PMT_RGB_565, .mode = RT_ANY_MODE,
      .device = "softrend"},
     {.a = "scene-shade-rgb888",      .b = "scene-textured-shade", .equal = BR_FALSE, .pm_type = BR_PMT_RGB_888, .mode = RT_MODE_ZB,
      .device = "softrend"},
@@ -1219,33 +1217,32 @@ static const rt_relation rt_relations[] = {
 
     /*
      * The RGB-output arbitrary-width shade-table witnesses. The perspective
-     * pairs are asserted at 555 and 565 in the Z-sort mode only: with a depth
-     * buffer the 555/565 walk reaches an untextured block first, and the flag
-     * does not change that frame - the Z-sort tables are where the CORRECT and
-     * AFFINE cells of this family sit at all. At 888 both modes reach them. The
-     * flat/gouraud pair is asserted in the same places for the same reason. The
-     * affine twins of the two RGB-typed colour maps are one flag away from the
-     * perspective fixtures already in the corpus, so the pair is asserted in
-     * the mode those fixtures are witnesses in.
+     * pairs are asserted at 555 and 565 in both depth modes: the z-buffered
+     * cells come from soft_t15/soft_t16 and the z-sorted ones from
+     * prm_t15/prm_t16, and the perspective flag changes the frame in either
+     * mode. At 888 both modes reach the block from prim_t24. The flat/gouraud
+     * pair is asserted in the same places. The affine twins of the two
+     * RGB-typed colour maps are one flag away from the perspective fixtures, so
+     * the pair is asserted wherever those are.
      */
-    {.a = "scene-shade-arb-flat-persp",   .b = "scene-shade-arb-flat",   .equal = BR_FALSE, .pm_type = BR_PMT_RGB_555, .mode = RT_MODE_ZS,
+    {.a = "scene-shade-arb-flat-persp",   .b = "scene-shade-arb-flat",   .equal = BR_FALSE, .pm_type = BR_PMT_RGB_555, .mode = RT_ANY_MODE,
      .device = "softrend"},
-    {.a = "scene-shade-arb-flat-persp",   .b = "scene-shade-arb-flat",   .equal = BR_FALSE, .pm_type = BR_PMT_RGB_565, .mode = RT_MODE_ZS,
+    {.a = "scene-shade-arb-flat-persp",   .b = "scene-shade-arb-flat",   .equal = BR_FALSE, .pm_type = BR_PMT_RGB_565, .mode = RT_ANY_MODE,
      .device = "softrend"},
     {.a = "scene-shade-arb-flat-persp",   .b = "scene-shade-arb-flat",   .equal = BR_FALSE, .pm_type = BR_PMT_RGB_888, .mode = RT_ANY_MODE,
      .device = "softrend"},
-    {.a = "scene-shade-arb-smooth-persp", .b = "scene-shade-arb-flat-persp", .equal = BR_FALSE, .pm_type = BR_PMT_RGB_555, .mode = RT_MODE_ZS,
+    {.a = "scene-shade-arb-smooth-persp", .b = "scene-shade-arb-flat-persp", .equal = BR_FALSE, .pm_type = BR_PMT_RGB_555, .mode = RT_ANY_MODE,
      .device = "softrend"},
-    {.a = "scene-shade-arb-smooth-persp", .b = "scene-shade-arb-flat-persp", .equal = BR_FALSE, .pm_type = BR_PMT_RGB_565, .mode = RT_MODE_ZS,
+    {.a = "scene-shade-arb-smooth-persp", .b = "scene-shade-arb-flat-persp", .equal = BR_FALSE, .pm_type = BR_PMT_RGB_565, .mode = RT_ANY_MODE,
      .device = "softrend"},
     {.a = "scene-shade-arb-smooth-persp", .b = "scene-shade-arb-flat-persp", .equal = BR_FALSE, .pm_type = BR_PMT_RGB_888, .mode = RT_ANY_MODE,
      .device = "softrend"},
-    {.a = "scene-tex-rgb555-affine",      .b = "scene-tex-rgb555",      .equal = BR_FALSE, .pm_type = BR_PMT_RGB_555, .mode = RT_MODE_ZS,
+    {.a = "scene-tex-rgb555-affine",      .b = "scene-tex-rgb555",      .equal = BR_FALSE, .pm_type = BR_PMT_RGB_555, .mode = RT_ANY_MODE,
      .device = "softrend"},
     {.a = "scene-tex-rgb888",             .b = "scene-textured",        .equal = BR_FALSE, .pm_type = BR_PMT_RGB_888, .mode = RT_ANY_MODE},
     {.a = "scene-tex-rgb888-affine",      .b = "scene-tex-rgb888",      .equal = BR_FALSE, .pm_type = BR_PMT_RGB_888, .mode = RT_ANY_MODE,
      .device = "softrend"},
-    {.a = "scene-tex-rgb565-affine",      .b = "scene-tex-rgb565",      .equal = BR_FALSE, .pm_type = BR_PMT_RGB_565, .mode = RT_MODE_ZS,
+    {.a = "scene-tex-rgb565-affine",      .b = "scene-tex-rgb565",      .equal = BR_FALSE, .pm_type = BR_PMT_RGB_565, .mode = RT_ANY_MODE,
      .device = "softrend"},
 
     /*

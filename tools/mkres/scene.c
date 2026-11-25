@@ -2532,13 +2532,15 @@ static br_error scene_make_feature_fixtures(br_model *cube)
      * were INDEX_8; a save that preserves map types is what lets one be authored
      * and read back as itself.
      *
-     * Reachable only in the Z-sort mode, and that is a property of the block set
-     * rather than of the fixture: with a depth buffer the MMX table is walked
-     * first, its textured rows all require an INDEX_8 map with a palette, and
-     * its untextured rows match any 555/565 triangle - so a 555 map is never
-     * sampled at all and the primitive is drawn untextured.
-     * The Z-sort tables have no MMX half, so the general prm_t15 walk reaches
-     * TriangleRenderPITA15 there.
+     * Reached in both depth modes, by different tables. With no depth buffer the
+     * general prm_t15 walk reaches TriangleRenderPITA15 directly. With one,
+     * pentprim's MMX-on walk drew it untextured (the MMX textured rows all
+     * require an INDEX_8 map with a palette, and an MMX untextured row matches
+     * any 555/565 triangle), which is why the z-buffered frame was a property of
+     * the block set rather than of the fixture. softprim reproduces the
+     * MMX-off answer for this state instead: soft_t15 lists the same
+     * arbitrary-width row before the MMX table (see that file's match
+     * contract), and RgbAwtTriangle carries the depth path.
      *
      * The map is the arbitrary-width (96x48) one scene-tex-arb uses, so it does
      * not satisfy any of the power-of-two textureNxN requirements and the walk

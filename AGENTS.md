@@ -140,12 +140,10 @@ build - the build step itself and the `--history` commit walk. The corpus itself
 The reference table is generated data, and blessing it is the one deliberate act:
 - `tools/rendertest/dat/` and `tools/rendertest/rendertest.txt` are generated, so the commit that moves pixels or adds a fixture
   regenerates and re-blesses them; a change is not finished until it has.
-- `--bless` rewrites every configuration the build registers for its floating-point class. Run it only to accept a deliberate change,
-  then `git diff` the table and check the keys that moved are the ones you meant to move.
-- The `x87` entries are **pentprim's**, not this build's, and are the bit-exactness oracle for softprim: bless them in the oracle
-  worktree (`../<repo>-pent`), splice the entries in, and show 32-bit softprim reproduces them by running it *without* `--bless`.
-  Blessing `x87` here records softprim's own output and the comparison stops meaning anything. `resources/aidocs/recipes.md` has the
-  recipe. `declared` is this build's own bless and has nothing to reproduce.
+- Bless only the intended scenes and configurations, then diff the reference table to verify which keys changed.
+- The original `softrend` `x87` references come from pentprim with MMX enabled. Use MMX-off pentprim to verify isolated fixtures for
+  restored general kernels, and i686 softprim for frames that mix restored and MMX paths. Neither oracle mode can regenerate the whole
+  table. See `resources/aidocs/recipes.md` for the per-scene procedure.
 - Bless once, when the tree that generates the fixtures is final: blessing against fixtures that are still moving costs a second bless
   and a second verification.
 

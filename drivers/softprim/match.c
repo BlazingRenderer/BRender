@@ -18,6 +18,13 @@
  * refused too. Both are the explicit "not implemented" behaviour rather than
  * pentprim's fallback to the last table entry, which would draw something no
  * kernel was written for.
+ *
+ * The order is pentprim's, with one exception: the softprim-only tables
+ * (soft_t24, soft_t15, soft_t16) are listed before the pentprim table they
+ * stand in front of. They exist where softprim's single walk has to reproduce
+ * an answer pentprim got from a different table - soft_t15/soft_t16 restore
+ * general-table rows the MMX untextured rows would otherwise shadow - and their
+ * comments carry the contract that keeps them out of every other state.
  */
 #include "drv.h"
 #include "shortcut.h"
@@ -94,8 +101,10 @@ void SoftPrimWorkUpdate(struct br_primitive_state *self)
  * is that symbol name, which is the tuple spelled out, so a frame's provenance
  * can be read off the name. The rest is what pentprim's match_block() tests:
  * the flag predicate and the per-map type and dimension requirements.
- * need_subdivide is the .ifg's RF_NEED_SUBDIVIDE, which the tuple cannot
- * express; renderBegin turns it into the block's BR_PRIMF_SUBDIVIDE flag.
+ * map_size_not is a dimension the block must not match, which a softprim-only
+ * row uses to leave a map another table row owns. need_subdivide is the .ifg's
+ * RF_NEED_SUBDIVIDE, which the tuple cannot express; renderBegin turns it into
+ * the block's BR_PRIMF_SUBDIVIDE flag.
  * unscaled is RF_UNSCALED_TEXTURE_COORDS, and colour7bit is the .ifg property
  * of the same name; both change updateRanges and neither is in the tuple.
  *
@@ -113,6 +122,7 @@ struct sp_match {
     br_uint_32 colour7bit;
     br_scalar  colour_scale[3];
     br_uint_32 map_size;
+    br_uint_32 map_size_not;
     br_uint_8  depth_type;
     br_uint_8  texture_type;
     br_uint_8  shade_type;
@@ -163,41 +173,42 @@ struct sp_match {
  * them is the identifier a struct designator is made of - a parameter called
  * `render` would replace the `render` in `.render`.
  */
-#define SOFTPRIM_ENTRY(kernel, ident, refuse, fmask, fcmp, subdiv, unscaled_f, offset_y_f, colour7bit_f, cs_r, cs_g, cs_b, msize, dtype, \
-                       ttype, stype, btype, ftype, ...)                                                                                  \
-    {                                                                                                                                    \
-        .flags_mask     = (fmask),                                                                                                       \
-        .flags_cmp      = (fcmp),                                                                                                        \
-        .need_subdivide = (subdiv),                                                                                                      \
-        .unscaled       = (unscaled_f),                                                                                                  \
-        .offset_y       = (offset_y_f),                                                                                                  \
-        .colour7bit     = (colour7bit_f),                                                                                                \
-        .colour_scale   = {cs_r, cs_g, cs_b},                                                                                            \
-        .map_size       = (msize),                                                                                                       \
-        .depth_type     = (dtype),                                                                                                       \
-        .texture_type   = (ttype),                                                                                                       \
-        .shade_type     = (stype),                                                                                                       \
-        .blend_type     = (btype),                                                                                                       \
-        .fog_type       = (ftype),                                                                                                       \
-        .axes           = {__VA_ARGS__},                                                                                                 \
-        .refused        = (refuse),                                                                                                      \
-        .block          = {.render              = (brp_render_fn *)(kernel),                                                             \
-                           .chain               = NULL,                                                                                  \
-                           .identifier          = (ident),                                                                               \
-                           ._reserved0          = NULL,                                                                                  \
-                           .type                = 0,                                                                                     \
-                           .flags               = 0,                                                                                     \
-                           .constant_components = 0,                                                                                     \
-                           .vertex_components   = 0,                                                                                     \
-                           .convert_mask_f      = 0,                                                                                     \
-                           .convert_mask_x      = 0,                                                                                     \
-                           .convert_mask_i      = 0,                                                                                     \
-                           .constant_mask       = 0,                                                                                     \
-                           .subdivide_tolerance = 0,                                                                                     \
-                           ._reserved_0         = 0,                                                                                     \
-                           ._reserved_1         = 0,                                                                                     \
-                           ._reserved_2         = 0},                                                                                            \
-        .filled         = BR_FALSE,                                                                                                      \
+#define SOFTPRIM_ENTRY(kernel, ident, refuse, fmask, fcmp, subdiv, unscaled_f, offset_y_f, colour7bit_f, cs_r, cs_g, cs_b, msize, \
+                       msize_not, dtype, ttype, stype, btype, ftype, ...)                                                         \
+    {                                                                                                                             \
+        .flags_mask     = (fmask),                                                                                                \
+        .flags_cmp      = (fcmp),                                                                                                 \
+        .need_subdivide = (subdiv),                                                                                               \
+        .unscaled       = (unscaled_f),                                                                                           \
+        .offset_y       = (offset_y_f),                                                                                           \
+        .colour7bit     = (colour7bit_f),                                                                                         \
+        .colour_scale   = {cs_r, cs_g, cs_b},                                                                                     \
+        .map_size       = (msize),                                                                                                \
+        .map_size_not   = (msize_not),                                                                                            \
+        .depth_type     = (dtype),                                                                                                \
+        .texture_type   = (ttype),                                                                                                \
+        .shade_type     = (stype),                                                                                                \
+        .blend_type     = (btype),                                                                                                \
+        .fog_type       = (ftype),                                                                                                \
+        .axes           = {__VA_ARGS__},                                                                                          \
+        .refused        = (refuse),                                                                                               \
+        .block          = {.render              = (brp_render_fn *)(kernel),                                                      \
+                           .chain               = NULL,                                                                           \
+                           .identifier          = (ident),                                                                        \
+                           ._reserved0          = NULL,                                                                           \
+                           .type                = 0,                                                                              \
+                           .flags               = 0,                                                                              \
+                           .constant_components = 0,                                                                              \
+                           .vertex_components   = 0,                                                                              \
+                           .convert_mask_f      = 0,                                                                              \
+                           .convert_mask_x      = 0,                                                                              \
+                           .convert_mask_i      = 0,                                                                              \
+                           .constant_mask       = 0,                                                                              \
+                           .subdivide_tolerance = 0,                                                                              \
+                           ._reserved_0         = 0,                                                                              \
+                           ._reserved_1         = 0,                                                                              \
+                           ._reserved_2         = 0},                                                                                     \
+        .filled         = BR_FALSE,                                                                                               \
 },
 
 #define SOFTPRIM_BLOCK_TRI(name, ...)   SOFTPRIM_ENTRY(name, #name, BR_FALSE, __VA_ARGS__)
@@ -637,6 +648,17 @@ static struct sp_match *spFindMatch(const struct sp_want *w)
             continue;
 
         if(e->map_size != 0 && (e->map_size != w->map_width || e->map_size != w->map_height))
+            continue;
+
+        /*
+         * A map dimension the block must not match. This is how a softprim table
+         * that lists the general arbitrary-width row before the MMX table keeps
+         * a map the general table gives its own size-specific cell to that cell:
+         * pentprim reaches the arbitrary-width row only after the size-specific
+         * rows have failed, and the softprim rows reproduce that precedence
+         * rather than claiming the map here. See tables/soft_t15.ifg.
+         */
+        if(e->map_size_not != 0 && e->map_size_not == w->map_width && e->map_size_not == w->map_height)
             continue;
 
         if(e->refused) {

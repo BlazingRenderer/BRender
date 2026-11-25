@@ -42,8 +42,10 @@ my @in           = @ARGV or die "usage: merge_blocks.pl KERNELS MATCHERS IN...\n
 
 my (@order, %kernels);
 
-# The fixed fields ahead of the tuple in each generated line.
-my $NFIELDS = 16;
+# The fixed fields ahead of the tuple in each generated line. map_size_not sits
+# beside map_size; it is matcher metadata rather than part of the kernel, so it
+# is not compared when duplicate kernels are collapsed.
+my $NFIELDS = 17;
 
 open(my $om, '>', $out_matchers) or die "$out_matchers: $!";
 
@@ -55,7 +57,7 @@ for my $f (@in) {
         my ($macro, $args) = ($1, $2);
         my @p = split(/,\s*/, $args, $NFIELDS + 1);
         die "$f: short $macro line: $l\n" if @p < $NFIELDS + 1;
-        my ($name, $fmask, $fcmp, $sd, $us, $oy, $c7, $cs0, $cs1, $cs2, $ms, $dt, $tt, $st, $bt, $ft, $tuple) = @p;
+        my ($name, $fmask, $fcmp, $sd, $us, $oy, $c7, $cs0, $cs1, $cs2, $ms, $msn, $dt, $tt, $st, $bt, $ft, $tuple) = @p;
 
         # A kernel's argument list - and therefore the wrapper both consumers
         # define for it - depends on the topology: softrend calls a triangle

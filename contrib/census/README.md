@@ -59,13 +59,10 @@ entry for every state — so they are candidates for deletion, not for a fixture
 Softprim has no cache of the previous match, so every decision is walked and
 logged; the decision count is the whole corpus, not a sample.
 
-**Nothing reachable is left uncovered.** Every one of the 24 refused tuples is
-unreachable under any state, so softprim's "this shape will not be drawn"
-behaviour cannot be exercised by a fixture at all: the `.inc` entry exists
-because pentprim's tables route those shapes to a neighbouring kernel, and
-drawing them there would be a silent wrong draw — so softprim returns no block
-instead. All 24 are z-buffered 555/565 shapes, which the MMX table shadows; see
-`drivers/softprim/README.md`'s "What is deliberately not implemented".
+At that snapshot, no refused tuple was selectable. The remaining refusals
+are Z-buffered 555/565 paths shadowed by the MMX table; see
+`drivers/softprim/README.md` for which paths are now implemented. Use the
+current generated table, not the snapshot above, to count them.
 
 Unreachable *in softprim*, whose walk always carries the MMX table and has no
 toggle. It is not a statement about pentprim: with `BRENDER_USE_MMX=0` the

@@ -127,6 +127,8 @@ while (<STDIN>) {
 		&property_texture_rgbx888 if $properties{"texture_rgbx888"};
 		&property_texture_rgba8888 if $properties{"texture_rgba8888"};
    		&property_texture_power2 if $properties{"texture_power2"};
+		&property_texture_not_power2 if $properties{"texture_not_power2"};
+		&property_texture_not_size if $properties{"texture_not_size"};
 		&property_texture_stride_positive if $properties{"texture_stride_positive"};
 		&property_texture_no_skip if $properties{"texture_no_skip"};
 		&property_unscaled_texture_coords if $properties{"unscaled_texture_coords"};
@@ -211,7 +213,7 @@ if($global_properties{"softprim"}) {
 	foreach my $b (@softprim_blocks) {
 		my $macro = $b->{refused} ? "SOFTPRIM_REFUSED" : "SOFTPRIM_BLOCK";
 		print "$macro($b->{name}, $b->{flags_mask}, $b->{flags_cmp}, $b->{subdivide}, $b->{unscaled}, $b->{offset_y}, ",
-		      "$b->{colour7bit}, $b->{cscale}, $b->{mapsize}, $b->{depth_type}, $b->{texture_type}, $b->{shade_type}, ",
+		      "$b->{colour7bit}, $b->{cscale}, $b->{mapsize}, $b->{mapsize_not}, $b->{depth_type}, $b->{texture_type}, $b->{shade_type}, ",
 		      "$b->{blend_type}, $b->{fog_type}, ", join(", ", @{$b->{tuple}}), ")\n";
 	}
 	exit 0;
@@ -254,6 +256,7 @@ sub set_default {
 
 	$texture_width = 0;
 	$texture_height = 0;
+	$texture_width_not = 0;
 	$decal_flag = "FALSE";
 
 	$colour_base = "BR_SCALAR(0),BR_SCALAR(0),BR_SCALAR(0)";
@@ -315,14 +318,16 @@ sub softprim_implemented {
 	# is three bytes, so the reference's reader is in bounds for every index the
 	# packing produces, and softprim ports that reader (RgbAwtPixel).
 	#
-	# The 15/16bpp shapes have kernels for two of their cells. The arbitrary-width
-	# z-sorted pair is awtmi.h's LIGHT span, ported as RgbAwtTriangle. The
-	# 256x256 power-of-two cells are perspi.h's separate perspective mapper,
-	# ported as PizShadeTriangle - the dithered-map cell's perspi.h setup at BPP 2
-	# with t15_pip.asm's ScanLinePITIP fragment - and 256 is the only size the
-	# tables declare. The z-buffered ones are unreachable (the MMX table is tried
-	# first and one of its untextured rows always matches). See softprim's
-	# RgbAwtTriangle, PizShadeTriangle and the render dispatch.
+	# The 15/16bpp shapes divide by address mode. The arbitrary-width triangle is
+	# awtmi.h's LIGHT span at both depths, ported as RgbAwtTriangle; its z-buffered
+	# cells are reached through tables/soft_t15.ifg and soft_t16.ifg, which are
+	# listed before the MMX table for the reason given there. The power-of-two
+	# cells are perspi.h's separate perspective mapper, ported as PizShadeTriangle -
+	# the dithered-map cell's perspi.h setup at BPP 2 with t15_pip.asm's
+	# ScanLinePITIP fragment - and only the 256x256 z-sorted form is implemented
+	# here: 256 is the only size the tables declare, and the z-buffered form is
+	# the next slice. See softprim's RgbAwtTriangle, PizShadeTriangle and the
+	# render dispatch.
 	if(grep { $_ eq "SP_SHADE_CONST_I_RGB" || $_ eq "SP_SHADE_INTERP_I_RGB" } @tuple) {
 		my %t = map { $_ => 1 } @tuple;
 
@@ -332,30 +337,29 @@ sub softprim_implemented {
 		return 0 if(!$t{"SP_ADDR_DIVIDE"});
 		return 1 if($t{"SP_FMT_888"});
 		return 0 if(!$t{"SP_FMT_555"} && !$t{"SP_FMT_565"});
-		return 0 if(!$t{"SP_DEPTH_NONE"});
+
+		# The 555/565 arbitrary-width triangle is implemented at both depths.
+		return 1;
 	}
 
 	# The 555/565-typed colour maps are in the spec for the same reason, and
-	# naming the value admits every shape that samples one. Two are implemented:
-	# the z-sorted arbitrary-width triangle, which is awtmi.h's span with a
-	# two-byte texel decode instead of the RGB_888 one's three (RgbAwtTriangle),
-	# and the line and point walk, which copies the map's own word the same way
-	# (SoftPrimLine and SoftPrimPoint, with l_pi.c, p_pi.c, l_piz.c and p_piz.c as
-	# the arithmetic).
+	# naming the value admits every shape that samples one. The arbitrary-width
+	# triangle is awtmi.h's span with a two-byte texel decode instead of the
+	# RGB_888 one's three (RgbAwtTriangle), at both depths; its z-buffered cells
+	# are reached through soft_t15.ifg/soft_t16.ifg, which reproduce the general
+	# table's precedence over the MMX untextured rows. The line and point walk
+	# copies the map's own word the same way (SoftPrimLine and SoftPrimPoint,
+	# with l_pi.c, p_pi.c, l_piz.c and p_piz.c as the arithmetic).
 	#
-	# The z-buffered triangles are unreachable - the MMX table is tried first for
-	# a 555/565 output, its textured rows all require an INDEX_8 map with a
-	# palette, and one of its untextured rows always matches, so a 555/565 map is
-	# never sampled and the primitive is drawn untextured. The power-of-two ones
-	# are the MMX and perfect-scan mappers, which pack their own base texel from a
-	# compiled-in width, and the line/point family has no power-of-two form at
-	# all. What is left is refused rather than left to fall through to the
-	# untextured twin.
+	# The power-of-two triangles are the MMX and perfect-scan mappers, which pack
+	# their own base texel from a compiled-in width, and the line/point family has
+	# no power-of-two form at all. What is left is refused rather than left to
+	# fall through to the untextured twin.
 	if(grep { $_ eq "SP_TEX_555" || $_ eq "SP_TEX_565" } @tuple) {
 		my %t = map { $_ => 1 } @tuple;
 
 		return 0 if(!$t{"SP_ADDR_DIVIDE"});
-		return 1 if($t{"SP_TOP_TRI"} && $t{"SP_DEPTH_NONE"});
+		return 1 if($t{"SP_TOP_TRI"});
 		return 1 if($t{"SP_TOP_LINE"} || $t{"SP_TOP_POINT"});
 		return 0;
 	}
@@ -563,6 +567,10 @@ sub print_entry {
 		# Zero when the block carries no dimension requirement.
 		my $mapsize = $texture_width;
 
+		# A dimension the block must not match, 0 for none; see
+		# property_texture_not_size.
+		my $mapsize_not = $texture_width_not;
+
 		# A type of PMT_NONE is "no requirement". softprim spells that SP_PMT_NONE
 		# rather than pentprim's 255-as-a-type, so a required type never collides
 		# with BR_PMT_INDEX_1, which is zero.
@@ -586,7 +594,7 @@ sub print_entry {
 		push(@softprim_blocks, {name => $name, flags_mask => $flags_mask, flags_cmp => $flags_cmp,
 		                      subdivide => $subdivide, unscaled => $unscaled, offset_y => $offset_y, colour7bit => $colour7bit,
 		                      cscale => "BR_SCALAR($cr),BR_SCALAR($cg),BR_SCALAR($cb)",
-		                      mapsize => $mapsize, depth_type => $dt, texture_type => $tt, shade_type => $st,
+		                      mapsize => $mapsize, mapsize_not => $mapsize_not, depth_type => $dt, texture_type => $tt, shade_type => $st,
 		                      blend_type => $bt, fog_type => $ft, refused => $refused, tuple => [@tuple]});
 
 		return;
@@ -993,6 +1001,23 @@ sub property_unscaled_texture_coords
 sub property_texture_power2
 {
 	push(@match_flags_set,("POWER2"));
+}
+
+# The complement, used by softprim's restored general-path table (tables/soft_t15.ifg,
+# soft_t16.ifg): a map that is a power of two in both dimensions belongs to the
+# size-specific native-texture cells, which are not part of this slice.
+sub property_texture_not_power2
+{
+	push(@match_flags_clear,("POWER2"));
+}
+
+# A map dimension the block must not match. softprim's restored general-path rows
+# use it to leave a size the general table gives its own cell to that cell: the
+# arbitrary-width row is reached only after every size-specific row has failed, so
+# a table that lists it before those rows excludes the sizes they own.
+sub property_texture_not_size
+{
+	$texture_width_not = $properties{"texture_not_size"};
 }
 
 sub property_texture_stride_positive
