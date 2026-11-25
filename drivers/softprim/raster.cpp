@@ -3514,12 +3514,7 @@ void PizShadeTriangle(brp_block *block, brp_vertex *v0, brp_vertex *v1, brp_vert
  * flag. So there is no projective divide here - the perspective option only
  * decides whether softrend splits the triangle first.
  *
- * This is the general (non-MMX) path. The 15/16bpp ground truth in
- * scratch/gltfview-baseline.txt is pentprim's MMX family, which is a different
- * textured-RGB implementation with its own packing; softprim's general path
- * draws textured RGB correctly but does not reproduce those checksums, and the
- * MMX family is not yet ported. The MMX variants, when they land, select the
- * same tuples and slot in beside these kernels rather than replacing them.
+ * The MMX kernels use a different packing; see MmxTriangle.
  * ---------------------------------------------------------------------------
  */
 

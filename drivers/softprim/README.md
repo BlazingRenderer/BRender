@@ -10,8 +10,8 @@ pentprim was hand-written 1990s x86 assembly. Building it needed a 32-bit x86 ta
 MASM-compatible assembler (`uasm`, or MSVC's `ml.exe` on Windows), Perl, and a generated
 header (`drv.h` -> `drv.inc`, via `h2inc`, or `H2INC.EXE` under Wine before that).
 
-softprim is portable C/C++ and needs none of it: `-DBRENDER_BUILD_SOFT=ON` builds it on any
-architecture. It presents the same entry point (`BrDrv1SoftPrimBegin`), device and
+softprim is portable C/C++ and builds with the drivers (`BRENDER_BUILD_DRIVERS`). It
+presents the same entry point (`BrDrv1SoftPrimBegin`), device and
 primitive-library identifiers (`SOFTPRMF`, `Default-Primitives-Float`) and install name
 (`softprmf`) pentprim did, so nothing outside `drivers/softprim/` changed. Frames are keyed
 by the `softprmf` driver token, so a run scores directly against the checked-in references.
@@ -113,10 +113,8 @@ It is six blocks - one per output format (888/555/565) and depth mode - and six 
 the counts above, which are pentprim's, do not include it. Its table is first in `SP_TABLES`
 because the only state that reaches it is one with an RGBA map bound; every pentprim
 textured row fails its texture-type requirement and falls through, and no pentprim block
-requires that map type, so no existing state's selection moves. The family has no pentprim
-original and no frozen pixels, so the reference corpus cannot see it at all - the corpus is
-green because it never binds an RGBA map to this family's formats. `scratch/` has the
-harness that does.
+requires that map type, so no existing state's selection moves. `scene-rgba-blend` in
+`tools/rendertest` exercises this family.
 
 Two families were refused for a different reason and are implemented now, because pentprim
 itself was corrected first:
@@ -279,15 +277,6 @@ one process per scene, rather than only run for the states they build.
 
 ## Where the rest of it lives
 
-The working record is in `scratch/` (mostly untracked, so not a lasting reference):
-`witness-gaps.md` and its runner/analyser in `scratch/census/` for which shapes are
-witnessed, unreachable or simply refused; `witness-census.md` for the previous round of the
-same (and a snapshot of an older tree); `mmx-port-plan.md` for the MMX family;
-`raster-buffer-order.md` for pentprim's rasteriser buffer and draw order; and
-`deletion-gate.md` for the dependency set that pentprim's removal had to satisfy.
-
-The design rationale that will outlive `scratch/` is in the sources, deliberately:
-`raster.cpp`'s file and kernel comments (the x87 setup, the packed U/V, the signed
-multiply, the per-block colour scale), `infogen.pl`'s `softprim_implemented()` and
-`softprim_tuple()`, `softprim_axes.h` (what an axis is and is not), `match.c` (the walk and
-the metadata it tests) and `CMakeLists.txt` (the table and spec).
+`raster.cpp` explains the arithmetic. `infogen.pl` and `softprim_axes.h` define the
+vocabulary, `CMakeLists.txt` selects the supported shapes, and `match.c` walks the matcher
+table. `contrib/census` checks which entries that walk can select.
