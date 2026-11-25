@@ -245,6 +245,16 @@ br_pixelmap *BR_PUBLIC_ENTRY BrFmtBMPLoad(const char *name, br_uint_32 flags)
 
     pm = BrPixelmapAllocate(type, bi.biWidth, bi.biHeight, NULL, 0);
 
+    if(pm == NULL) {
+        BR_ERROR1("Pixelmap allocation failed for BMP '%s'", name);
+
+        if(type == BR_PMT_INDEX_8)
+            BrPixelmapFree(palette);
+
+        BrFileClose(fh);
+        return NULL;
+    }
+
     pm->identifier = BrResStrDup(pm, name);
 
     pm->map = (type == BR_PMT_INDEX_8) ? palette : NULL;
