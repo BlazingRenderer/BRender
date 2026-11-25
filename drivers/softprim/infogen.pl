@@ -127,7 +127,6 @@ while (<STDIN>) {
 		&property_texture_rgbx888 if $properties{"texture_rgbx888"};
 		&property_texture_rgba8888 if $properties{"texture_rgba8888"};
    		&property_texture_power2 if $properties{"texture_power2"};
-		&property_texture_not_power2 if $properties{"texture_not_power2"};
 		&property_texture_not_size if $properties{"texture_not_size"};
 		&property_texture_stride_positive if $properties{"texture_stride_positive"};
 		&property_texture_no_skip if $properties{"texture_no_skip"};
@@ -351,12 +350,20 @@ sub softprim_implemented {
 	# copies the map's own word the same way (SoftPrimLine and SoftPrimPoint,
 	# with l_pi.c, p_pi.c, l_piz.c and p_piz.c as the arithmetic).
 	#
-	# The power-of-two triangles are the MMX and perfect-scan mappers, which pack
-	# their own base texel from a compiled-in width, and the line/point family has
-	# no power-of-two form at all. What is left is refused rather than left to
-	# fall through to the untextured twin.
+	# The size-specific triangle is zb16p2ul.asm's
+	# TriangleRender_ZT_RGB565_D16_* (RgbPow2Triangle): the z-buffered,
+	# unshaded, unblended textureNxN rows the general table declares at both
+	# perspective settings, one kernel for both formats because the fragment is
+	# a copied 16-bit texel word either way. It is the only power-of-two shape
+	# here that is implemented - the rest are the MMX and perfect-scan mappers,
+	# which pack their own base texel from a compiled-in width, and the
+	# line/point family has no power-of-two form at all. What is left is refused
+	# rather than left to fall through to the untextured twin.
 	if(grep { $_ eq "SP_TEX_555" || $_ eq "SP_TEX_565" } @tuple) {
 		my %t = map { $_ => 1 } @tuple;
+
+		return 1 if($t{"SP_ADDR_SHIFT"} && $t{"SP_TOP_TRI"} && $t{"SP_DEPTH_ZW"} && $t{"SP_SHADE_NONE"} &&
+		            $t{"SP_BLEND_NONE"} && $t{"SP_FOG_NONE"} && $t{"SP_DITH_NONE"});
 
 		return 0 if(!$t{"SP_ADDR_DIVIDE"});
 		return 1 if($t{"SP_TOP_TRI"});
@@ -1003,18 +1010,11 @@ sub property_texture_power2
 	push(@match_flags_set,("POWER2"));
 }
 
-# The complement, used by softprim's restored general-path table (tables/soft_t15.ifg,
-# soft_t16.ifg): a map that is a power of two in both dimensions belongs to the
-# size-specific native-texture cells, which are not part of this slice.
-sub property_texture_not_power2
-{
-	push(@match_flags_clear,("POWER2"));
-}
-
-# A map dimension the block must not match. softprim's restored general-path rows
-# use it to leave a size the general table gives its own cell to that cell: the
-# arbitrary-width row is reached only after every size-specific row has failed, so
-# a table that lists it before those rows excludes the sizes they own.
+# A map dimension the block must not match. softprim's restored general-path
+# shade-table rows use it to leave a size the general table gives its own cell
+# to that cell: the arbitrary-width row is reached only after every size-specific
+# row has failed, so a table that lists it before those rows excludes the sizes
+# they own.
 sub property_texture_not_size
 {
 	$texture_width_not = $properties{"texture_not_size"};

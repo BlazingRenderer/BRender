@@ -652,11 +652,13 @@ static struct sp_match *spFindMatch(const struct sp_want *w)
 
         /*
          * A map dimension the block must not match. This is how a softprim table
-         * that lists the general arbitrary-width row before the MMX table keeps
-         * a map the general table gives its own size-specific cell to that cell:
-         * pentprim reaches the arbitrary-width row only after the size-specific
-         * rows have failed, and the softprim rows reproduce that precedence
-         * rather than claiming the map here. See tables/soft_t15.ifg.
+         * that lists a general-table row before the MMX table keeps a map the
+         * general table gives its own size-specific cell to that cell: pentprim
+         * reaches the arbitrary-width row only after the size-specific rows have
+         * failed, and the softprim rows reproduce that precedence rather than
+         * claiming the map here. The shade-table rows use it for the 256x256
+         * cell; the colour-map rows get the same precedence from listing the
+         * size rows first. See tables/soft_t15.ifg.
          */
         if(e->map_size_not != 0 && e->map_size_not == w->map_width && e->map_size_not == w->map_height)
             continue;

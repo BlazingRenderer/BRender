@@ -26,8 +26,8 @@ pentprim gone they are the only record of its output.
   Fourteen are pentprim's own, carried here because they are the specification both
   rasterisers implement; the generator `infogen.pl` is theirs too. The others are
   softprim's: `soft_t24.ifg` is the alpha-blended RGBA sprite family, which pentprim never
-  had, and `soft_t15.ifg`/`soft_t16.ifg` restore the z-buffered arbitrary-width 555/565
-  triangle rows of the general table (see *What is deliberately not implemented*).
+  had, and `soft_t15.ifg`/`soft_t16.ifg` restore the z-buffered native 555/565 triangle rows
+  of the general table (see *What is deliberately not implemented*).
 - `infogen.pl` in its `softprim` mode projects each block onto the axis vocabulary in
   `softprim_axes.h` and emits one line per block carrying the axis tuple (which names the
   kernel) plus the metadata pentprim's matcher tests.
@@ -96,13 +96,14 @@ default reference is not this one.
 
 ## What is implemented
 
-All of pentprim's 393 live blocks are in the matcher's walk; 353 are emitted as blocks with
-a kernel (237 distinct tuples after the collapse) and 40 are refused, every one of them a
-z-buffered 555/565 shape. Every `INDEX_8` and every `RGB_888` shape is implemented. The
+All of pentprim's 393 live blocks are in the matcher's walk; 385 are emitted as blocks with
+a kernel and 8 are refused, every one of them a z-buffered 555/565 shade-table shape. Every
+`INDEX_8` and every `RGB_888` shape is implemented. The
 implemented set includes the `INDEX_8` ROPs (indexed blend, fog, decal, dithered map), the
 shade-table family including the 256x256 RGB cells, the MMX 15/16bpp family including
 screendoor and colour dither and its packed 20.12 texture addressing, the arbitrary-width
-and perfect-scan RGB paths, and lines and points.
+and perfect-scan RGB paths, the size-specialised native 555/565 colour-map cells, and lines
+and points.
 
 The one block family pentprim never had is `tables/soft_t24.ifg`: RGB output, unlit, a
 `BR_PMT_RGBA_8888` colour map sampled with arbitrary-width addressing, affine, z-sorted or
@@ -131,42 +132,43 @@ itself was corrected first:
 
 ## What is deliberately not implemented
 
-28 of the 411 entries (12 distinct tuples). Every one of them is refused rather than
+8 of the 431 entries (8 distinct tuples), all of them in `tables/prm_t15.ifg` and
+`prm_t16.ifg`. Every one of them is refused rather than
 omitted, and the first thing to establish about any of them is whether the matcher can reach
 it at all - which the generated table answers on its own, since
 `contrib/census/reachable.py` walks it the way `spFindMatch` does and stops on a refused
 entry. `contrib/census/witness.py` then says whether *any* state can select the rest. The
-answer now is none: **all 28 are unreachable in softprim's walk**, so there is no reachable
+answer now is none: **all 8 are unreachable in softprim's walk**, so there is no reachable
 shape without a kernel and no shape a fixture could ask for that softprim declines to draw.
 The rule is `infogen.pl`'s `softprim_implemented()`, which carries its reasoning in comments,
 plus the guards in `raster.cpp`.
 
-**Unreachable in softprim: the z-buffered 555/565 cells with a size-specific kernel (28
-entries).**
+**Unreachable in softprim: the z-buffered 256x256 RGB shade-table cells (8 entries).**
 
-- the 555/565-typed colour maps (`SP_TEX_555`/`SP_TEX_565`): 10 entries per format, the
-  32, 64, 128, 256 and 1024 power-of-two cells at both depths.
-- the RGB-output shade-table shapes at 15/16bpp (`SP_SHADE_CONST_I_RGB`/
-  `SP_SHADE_INTERP_I_RGB`): 4 entries per format, the z-buffered 256x256 cells.
+`SP_SHADE_CONST_I_RGB`/`SP_SHADE_INTERP_I_RGB` over `SP_TEX_I8` at `SP_ADDR_SHIFT`: 4
+entries per format, the z-buffered `TriangleRenderPIZ2TIP256_RGB_555`/`...PITIPB256...`
+cells and their 565 twins. Their z-sorted forms are implemented (`PizShadeTriangle`); the
+z-buffered kernel is the next slice.
 
-Both families' arbitrary-width cells are implemented. The z-sorted ones were already emitted
-from the general table; the z-buffered ones are `tables/soft_t15.ifg` and `soft_t16.ifg`.
-Those two are softprim-only tables listed before the MMX table, because softprim's single
-walk would otherwise let an MMX untextured row - which requires no texture type - take the
-state before the general table was reached. They restore the answer MMX-off pentprim got
-from the general table for the two states the MMX table has no kernel to serve: an RGB
-555/565 colour map, and an `INDEX_8` map with an RGB 555/565 shade table. A normal paletted
-MMX primitive still reaches the MMX textured rows first, and an untextured one still
-reaches the MMX untextured rows. The files carry the match contract for the cells they
-leave to this section: the colour-map rows require `PRIMF_POWER2` to be clear - the
-matcher's flag for a map that is a power of two in both dimensions and no larger than 1024,
-which is the family the size-specific cells belong to - and the shade-table rows exclude a
-256x256 map.
+The native 555/565 colour maps are all implemented now, at both depths. The arbitrary-width
+cells come from the general table when z-sorted and from `tables/soft_t15.ifg` and
+`soft_t16.ifg` when z-buffered; the size-specialised cells come from the same two soft tables
+(`RgbPow2Triangle`, `zb16p2ul.asm`). Those two are softprim-only tables listed before the
+MMX table, because softprim's single walk would otherwise let an MMX untextured row - which
+requires no texture type - take the state before the general table was reached. They
+restore the answer MMX-off pentprim got from the general table for the two states the MMX
+table has no kernel to serve: an RGB 555/565 colour map, and an `INDEX_8` map with an RGB
+555/565 shade table. A normal paletted MMX primitive still reaches the MMX textured rows
+first, and an untextured one still reaches the MMX untextured rows. The files carry the
+match contract for the cells they leave to this section: the colour-map rows list the
+general table's five size rows ahead of the arbitrary-width one, so a size-specific cell
+keeps its map and every other map - a 512x512, a 64x32, the 96x48 the corpus ships - falls
+through to the arbitrary-width row exactly as it does in pentprim; and the shade-table rows
+exclude a 256x256 map.
 
-The remaining 28 are the next slice. Their absent kernels do not turn an answer into a
+The remaining 8 are the next slice. Their absent kernels do not turn an answer into a
 refusal: the soft rows skip those states and the MMX untextured row takes them exactly as it
-did before. A power-of-two 555/565 colour map and a 256x256 RGB shade table stay on the MMX
-path until their kernels land.
+did before. A 256x256 RGB shade table stays on the MMX path until its kernel lands.
 
 
 ## How it is verified
@@ -174,10 +176,10 @@ path until their kernels land.
 Both instruments score softprim against **pentprim's frozen pixels**, never against its own
 output, with the six mixed-walk keys listed below as the explicit exception.
 
-- **The fixture corpus.** `tools/rendertest` renders 102 fixtures at four pixel formats
+- **The fixture corpus.** `tools/rendertest` renders 119 fixtures at four pixel formats
   (8/15/16/24bpp) x {z-buffered, z-sorted} and compares each against
   `tools/rendertest/rendertest.txt`, whose `softrend/softprmf/x87` keys are pentprim's
-  except for the six mixed-walk keys listed below. Measured: `PASS failures=0`, 102
+  except for the six mixed-walk keys listed below. Measured: `PASS failures=0`, 119
   comparisons, in all eight configurations.
 - **Nine reference scenes.** `resources/gltf-reference`, rendered by the same harness with
   `--scene-dir resources/gltf-reference` and scored against the same table: 9 scenes x
@@ -215,6 +217,33 @@ pentprim run to score these six against. They are softprim's own output, recorde
 same 32-bit build, and they are the only x87 keys in the table that are not pentprim's. The
 witness log names the three restored matches, and the frame differs from the old one only
 where the restored cube draws.
+
+### The size-specialised cells
+
+The five `textureNxN` rows are witnessed by `scene-tex-rgb555-p32`, its affine twin,
+`scene-tex-rgb565-p64`, `scene-tex-rgb555-p512` and `scene-tex-rgb565-64x32` - one size cell
+per format at one perspective setting, plus both shapes no size row takes. Their `x87` keys
+are pentprim's MMX-off output, checked against the i686 oracle's size sweep: all twenty
+size-matrix cells (five sizes x two formats x two perspective settings), the two rectangular
+fall-throughs and the two 512x512 ones reproduce its checksums exactly, in both
+`fp-class`es. Their witnesses name the size row in the tuple
+(`...TEX_555_ADDR_SHIFT...`), which is what separates them from the arbitrary-width
+fall-through (`...ADDR_DIVIDE...`) in the same frame.
+
+Two existing keys move with the removal of the `PRIMF_POWER2`-clear requirement from the
+colour-map rows: `scene-mip` and `scene-mip-off` at 15bpp z-buffered, whose map is 32x8. A
+power-of-two map of a size no row declares now reaches the arbitrary-width row, as it does
+in MMX-off pentprim, instead of staying on the MMX untextured row; measured, the new frame
+is MMX-off pentprim's (`256b45d7bd137b34`, the value its z-sorted twin already carried).
+
+The 512x512 fall-through is the reason the size rows come first rather than the
+arbitrary-width row being told to exclude power-of-two maps: pentprim's own precedence is
+the size rows, and a 512 map belongs on the generic row. There is no `texture512x512` row in
+`prm_t15.ifg`/`prm_t16.ifg` even though `infogen.pl` can emit one.
+
+The fixture corpus scores the textured output. A zero texel leaving depth unchanged
+and an equal-depth draw winning were checked with separate overlap probes; the
+registered fixtures do not test those conditions directly.
 
 ### Known limitation: a Debug build is expected to differ
 

@@ -4373,6 +4373,222 @@ void RgbAwtTriangle(brp_block *block, brp_vertex *v0, brp_vertex *v1, brp_vertex
 
 /*
  * ---------------------------------------------------------------------------
+ * The size-specialised native colour-map family: zb16p2ul.asm.
+ *
+ * TriangleRender_ZT_RGB565_D16_{32,64,128,256,1024} are the five textureNxN
+ * rows prm_t15/prm_t16 declare inside the general table's z-buffered triangle
+ * section, at both perspective settings: one macro instantiated at pow2 5, 6, 7,
+ * 8 and 10. The RGB565 in the symbol name is historical - the fragment copies
+ * one 16-bit texel word into a 16-bit colour buffer, so the same body serves the
+ * 555 and the 565 table, and F only picks which map type the block requires.
+ *
+ * This is fpsetup.asm's based-float family, not perspi.h's and not the
+ * arbitrary-width one: TriangleSetup_ZT (SETUP_FLOAT for the geometry and
+ * SETUP_FLOAT_PARAM at fp_conv_d16 for z, u and v) and a scanline span whose u
+ * and v are 16.16 texel coordinates masked into a square power-of-two map. Its
+ * rows carrying perspective_subdivide are perspective by subdivision, not by a
+ * projective divide: the block's RF_NEED_SUBDIVIDE sets BR_PRIMF_SUBDIVIDE, so
+ * softrend subdivides the triangle before the rasteriser sees it, and the same
+ * asm entry serves those rows and the affine ones unchanged.
+ *
+ * The walk is the affine INDEX_8 family's (AffineDrawSpan, from
+ * zb8p2unl/zb8p2lit.asm), and this is that walk with the one fragment the RGB
+ * output has: two bytes copied from the map, with no intensity and no shade
+ * table. The span's depth test is the asm's `cmp dx,bx / ja noPlot`, which draws
+ * while the new 16-bit depth is not greater than the stored one, and a zero
+ * texel skips both stores, so it writes neither colour nor depth.
+ * ---------------------------------------------------------------------------
+ */
+
+/*
+ * One scanline: DRAW_ZT_RGB565_D16_POW2's pixel loop. u, v and zv are 16.16,
+ * stepping by a constant per pixel; the texel address is rebuilt from the
+ * integer parts of u and v each pixel, and the mask is the map's, so the sample
+ * wraps and the address stays inside it.
+ */
+inline void RgbPow2Span(const softprim_buffer& texture, br_uint_8 *start, br_uint_8 *end, br_uint_8 *z, br_int_32 u, br_int_32 ux,
+                        br_int_32 v, br_int_32 vx, br_int_32 zv, br_int_32 zx, br_uint_32 mask, br_int_32 vshift, bool l2r) noexcept
+{
+    const br_uint_8 *tex = texture.base;
+
+    for(;;) {
+        /*
+         * The macro's `shr eax,15 / and eax,mask shl 1` for u and
+         * `shr esi,16-(pow2+1) / and esi,mask shl (pow2+1)` for v. A texel is
+         * one word, so the column leaves bit 0 clear and the row's shift is the
+         * map's vshift one place higher. The shift counts are the runtime map
+         * size in place of pentprim's compiled-in pow2, which is the one
+         * sanctioned divergence: one kernel, every size.
+         */
+        const br_uint_32 source = (((br_uint_32)v >> (15 - vshift)) & (mask << (vshift + 1))) | (((br_uint_32)u >> 15) & (mask << 1));
+
+        const br_uint_16 newz = (br_uint_16)((br_uint_32)zv >> 16);
+
+        /* The depth test is the asm's, and it runs before the texel is read. */
+        if(LoadDepth(z) >= newz) {
+            const br_uint_8 *tp = tex + source;
+
+            if((tp[0] | tp[1]) != 0) {
+                StoreDepth(z, newz);
+                start[0] = tp[0];
+                start[1] = tp[1];
+            }
+        }
+
+        if(l2r) {
+            if(start >= end)
+                break;
+
+            start += 2;
+            z += 2;
+            u += ux;
+            v += vx;
+            zv += zx;
+        } else {
+            if(start <= end)
+                break;
+
+            start -= 2;
+            z -= 2;
+            u -= ux;
+            v -= vx;
+            zv -= zx;
+        }
+    }
+}
+
+/*
+ * One z-buffered size-specialised triangle. F selects the output and map type;
+ * the map's dimensions are runtime, so one kernel covers the five sizes the
+ * table declares.
+ */
+template <sp_fmt F>
+void RgbPow2Triangle(brp_block *block, brp_vertex *v0, brp_vertex *v1, brp_vertex *v2) noexcept
+{
+    (void)block;
+
+    const softprim_buffer& colour  = SoftPrimWork.colour;
+    const softprim_buffer& dbuf    = SoftPrimWork.depth;
+    const softprim_buffer& texture = SoftPrimWork.texture;
+
+    if(colour.type != RgbFormatType(F) || colour.base == NULL || colour.width_p <= 0 || colour.height <= 0)
+        return;
+
+    if(dbuf.type != BR_PMT_DEPTH_16 || dbuf.base == NULL)
+        return;
+
+    if(texture.base == NULL || texture.width_p <= 0 || texture.height <= 0 || texture.stride_b <= 0)
+        return;
+
+    if(texture.type != (br_uint_8)((F == SP_FMT_555) ? (br_uint_8)BR_PMT_RGB_555 : (br_uint_8)BR_PMT_RGB_565))
+        return;
+
+    /*
+     * The masked index addresses a square power-of-two map with no row skip,
+     * which is what the table's textureNxN rows and their
+     * texture_stride_positive/texture_no_skip group guarantee of a map the walk
+     * hands this kernel. The map is checked here because the shift counts are
+     * derived from it rather than compiled in, and the size is bounded where the
+     * address stops fitting: the row part is mask << (vshift+1) in a 32-bit
+     * offset, which holds while the map is at most 32768 square.
+     */
+    if(texture.width_p != texture.height || (texture.width_p & (texture.width_p - 1)) != 0 || texture.width_p > 32768)
+        return;
+
+    if(texture.stride_b != texture.width_p * 2)
+        return;
+
+    const br_uint_32 mask   = (br_uint_32)texture.width_p - 1;
+    br_int_32        vshift = 0;
+
+    while((1 << vshift) < texture.width_p)
+        vshift++;
+
+    brp_vertex *src[3] = {v0, v1, v2};
+    TexVert     in[3]  = {};
+
+    for(int k = 0; k < 3; k++) {
+        if(!isfinite(src[k]->comp[C_SX]) || !isfinite(src[k]->comp[C_SY]) || !isfinite(src[k]->comp[C_SZ]) ||
+           !isfinite(src[k]->comp[C_U]) || !isfinite(src[k]->comp[C_V]))
+            return;
+
+        in[k].x  = BrFloatToFixed(src[k]->comp[C_SX]);
+        in[k].y  = BrFloatToFixed(src[k]->comp[C_SY]);
+        in[k].z  = BrFloatToFixed(src[k]->comp[C_SZ]);
+        in[k].u  = BrFloatToFixed(src[k]->comp[C_U]);
+        in[k].v  = BrFloatToFixed(src[k]->comp[C_V]);
+        in[k].rx = src[k]->comp[C_SX];
+        in[k].ry = src[k]->comp[C_SY];
+        in[k].rz = src[k]->comp[C_SZ];
+        in[k].ru = src[k]->comp[C_U];
+        in[k].rv = src[k]->comp[C_V];
+    }
+
+    TriSetup ts;
+
+    if(!BuildTriSetup(in, ts))
+        return;
+
+    /* fpsetup.asm TriangleSetup_ZT: z is remapped unsigned, u and v are signed
+     * 16.16 texel coordinates. */
+    TrapParam az, au, av;
+
+    SetupFloatParam(az, ts, ts.orig[0].rz, ts.orig[1].rz, ts.orig[2].rz, ts.v[0].rz, true);
+    SetupFloatParam(au, ts, ts.orig[0].ru, ts.orig[1].ru, ts.orig[2].ru, ts.v[0].ru, false);
+    SetupFloatParam(av, ts, ts.orig[0].rv, ts.orig[1].rv, ts.orig[2].rv, ts.v[0].rv, false);
+
+    const WalkGeom& g = ts.walk;
+
+    /*
+     * The asm's scanAddress/depthAddress: the first scanline's row, one pixel
+     * and one depth word short, so that adding the span's own column offset
+     * lands on a pixel boundary. Both are one *pixel* short here, not one byte:
+     * the macro's `fsub fp_two` on the colour base is the 16-bit fragment's two
+     * bytes, while the INDEX_8 twin subtracts one.
+     */
+    br_uint_8 *row  = colour.base - 2 + (br_size_t)g.yTop * colour.stride_b;
+    br_uint_8 *zrow = dbuf.base - 2 + (br_size_t)g.yTop * dbuf.stride_b;
+
+    br_int_32 xmv = g.xm, xm_f = g.xm_f;
+
+    /* workspace.flip: the sort parity folded with the winding, which
+     * SETUP_FLOAT leaves in place because TriangleSetup_ZT runs no perspective
+     * cheat. The macro skips a row whose major and minor edges have crossed
+     * rather than reversing the span on it, and both directions draw from the
+     * major edge to the minor one inclusive. */
+    const bool l2r = (ts.asm_dir == 0);
+
+    for(int half = 0; half < 2; half++) {
+        br_int_32       minorX = (half == 0) ? g.x1 : g.x2;
+        const br_int_32 dMinor = (half == 0) ? g.d_x1 : g.d_x2;
+        const br_int_32 count  = (half == 0) ? g.topCount : g.bottomCount;
+
+        for(br_int_32 n = count; n >= 0; n--) {
+            const br_int_32 xm_i = xmv >> 16;
+            const br_int_32 mn_i = minorX >> 16;
+
+            if(l2r ? (xm_i <= mn_i) : (xm_i >= mn_i))
+                RgbPow2Span(texture, row + (br_size_t)xm_i * 2, row + (br_size_t)mn_i * 2, zrow + (br_size_t)xm_i * 2, au.current,
+                            au.grad_x, av.current, av.grad_x, az.current, az.grad_x, mask, vshift, l2r);
+
+            xm_f += g.d_xm_f;
+
+            const bool carry = (br_uint_32)xm_f < (br_uint_32)g.d_xm_f;
+
+            au.current += carry ? au.d_carry : au.d_nocarry;
+            av.current += carry ? av.d_carry : av.d_nocarry;
+            az.current += carry ? az.d_carry : az.d_nocarry;
+
+            xmv += g.d_xm;
+            minorX += dMinor;
+            row += colour.stride_b;
+            zrow += dbuf.stride_b;
+        }
+    }
+}
+
+/*
+ * ---------------------------------------------------------------------------
  * The untextured perfect-scan family: tt24_piz.asm and tt15_pi.asm/tt16_pi.asm.
  *
  * TriangleRenderPIZ2_RGB_888 (flat) and TriangleRenderPIZ2I_RGB_888 (Gouraud)
@@ -6070,6 +6286,22 @@ static void SoftPrimRender(brp_block *block, brp_vertex *v0, brp_vertex *v1, brp
                       "softprim: no kernel for this blend mode on the 256x256 RGB shade-table cell");
 
         PizShadeTriangle<F, S, B>(block, v0, v1, v2);
+    } else if((X == SP_TEX_555 || X == SP_TEX_565) && A == SP_ADDR_SHIFT && D == SP_DEPTH_ZW) {
+        /*
+         * The size-specialised native colour-map cells, zb16p2ul.asm: the
+         * textureNxN rows at both perspective settings, which prm_t15/prm_t16
+         * declare inside the z-buffered triangle section. They are reached from
+         * soft_t15/soft_t16 rather than from the general table, for the reason
+         * those files give; the matcher's exact width == height == N is what
+         * makes the map one of the five sizes, and the kernel takes the shift
+         * and mask from the bound map rather than a compiled-in pow2. The rows
+         * carry no ROPs and no shading, so nothing else is claimed here.
+         */
+        static_assert(!((X == SP_TEX_555 || X == SP_TEX_565) && A == SP_ADDR_SHIFT && D == SP_DEPTH_ZW) ||
+                          (S == SP_SHADE_NONE && B == SP_BLEND_NONE && G == SP_FOG_NONE && H == SP_DITH_NONE),
+                      "softprim: the size-specialised native colour-map family is the unshaded, unblended rows only");
+
+        RgbPow2Triangle<F>(block, v0, v1, v2);
     } else if(X != SP_TEX_NONE && A == SP_ADDR_DIVIDE &&
               (F == SP_FMT_888 || X == SP_TEX_555 || X == SP_TEX_565 || X == SP_TEX_RGBA8888 || S == SP_SHADE_CONST_I_RGB ||
                S == SP_SHADE_INTERP_I_RGB)) {
@@ -6118,13 +6350,14 @@ static void SoftPrimRender(brp_block *block, brp_vertex *v0, brp_vertex *v1, brp
     } else if(F != SP_FMT_888 && D == SP_DEPTH_ZW) {
         /*
          * What is left of the z-buffered 15/16bpp tuples is the MMX family. The
-         * arbitrary-width textures and RGB shade tables were routed above, and
-         * the general table's remaining z-buffered textured RGB_555/565 rows
-         * (the power-of-two colour maps and the 256x256 shade cell) are refused
-         * for the next slice, so the matcher never selects them. The untextured
-         * rows describe the same shape the MMX table's Z_RGB blocks do, which
-         * the MMX table is tried first for. tt15_piz.asm/tt16_piz.asm are
-         * therefore never reached.
+         * arbitrary-width textures, the RGB shade tables and the
+         * size-specialised native colour-map cells were routed above, so no
+         * textured shape reaches this branch; the general table's remaining
+         * z-buffered RGB_555/565 rows (the z-sorted-only cells' twins and the
+         * 256x256 shade cell) are refused, so the matcher never selects them.
+         * The untextured rows describe the same shape the MMX table's Z_RGB
+         * blocks do, which the MMX table is tried first for.
+         * tt15_piz.asm/tt16_piz.asm are therefore never reached.
          */
         MmxTriangle<F, D, S, X, B, H>(block, v0, v1, v2);
     } else {
@@ -6140,11 +6373,13 @@ static void SoftPrimRender(brp_block *block, brp_vertex *v0, brp_vertex *v1, brp
          * sprite shape, and the exclusion mirrors the routing predicate rather
          * than the shapes the generator happens to emit today. The power-of-two
          * RGB shade-table cells are routed to PizShadeTriangle above and are
-         * excluded here too, by the second clause.
-         * What remains in the region - the power-of-two 555/565 colour-map shapes
-         * and the MMX/perfect-scan mappers - the generator refuses, so the guard
-         * is silent until SP_SPEC (or an .ifg block) is widened into them, then
-         * the build stops here.
+         * excluded here too, by the second clause; the size-specialised native
+         * colour-map cells are z-buffered only (RgbPow2Triangle, above), so a
+         * z-sorted one has no kernel and trips this guard.
+         * What remains in the region - the z-sorted power-of-two 555/565
+         * colour-map shapes and the MMX/perfect-scan mappers - the generator
+         * refuses, so the guard is silent until SP_SPEC (or an .ifg block) is
+         * widened into them, then the build stops here.
          */
         static_assert(!((F == SP_FMT_555 || F == SP_FMT_565) && D == SP_DEPTH_NONE && X != SP_TEX_NONE &&
                         !(A == SP_ADDR_DIVIDE && (X == SP_TEX_555 || X == SP_TEX_565 || X == SP_TEX_RGBA8888 || S == SP_SHADE_CONST_I_RGB ||

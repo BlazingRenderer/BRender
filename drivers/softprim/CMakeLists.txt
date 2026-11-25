@@ -67,13 +67,14 @@ add_library(softprim
 # MMX array points at the general one for those topologies.
 #
 # soft_t15/soft_t16 are listed before mmx_t15/mmx_t16, which pentprim's order
-# would not put there. They are the z-buffered arbitrary-width 555/565 triangle
-# rows that MMX-off pentprim reaches in the general table; in softprim's single
-# walk the MMX table's untextured rows would take those states first and draw
-# them untextured, because they require no texture type. Putting the rows first
-# is how softprim reproduces the general table's answer for a state the MMX
-# table has no kernel to serve, and their requirements are narrowed so a state
-# the MMX table does serve cannot reach them. The files carry the contract.
+# would not put there. They are the z-buffered native 555/565 triangle rows that
+# MMX-off pentprim reaches in the general table - the size-specialised cells and
+# the arbitrary-width ones; in softprim's single walk the MMX table's untextured
+# rows would take those states first and draw them untextured, because they
+# require no texture type. Putting the rows first is how softprim reproduces the
+# general table's answer for a state the MMX table has no kernel to serve, and
+# their requirements are narrowed so a state the MMX table does serve cannot
+# reach them. The files carry the contract.
 #
 # SP_SHADE_CONST_I_RGB/SP_SHADE_INTERP_I_RGB are in the spec, and the
 # arbitrary-width shapes that carry them are emitted: prim_t24's RGB_888 pair
@@ -82,8 +83,9 @@ add_library(softprim
 # an explicit rule, because naming an axis value admits every shape that carries
 # it and no kernel exists for those. SP_TEX_555/SP_TEX_565 are in the spec for
 # the same reason and with the same rule: the arbitrary-width triangle is
-# emitted at both depths and the rest of the shapes that sample a 555/565 map
-# are refused. See infogen.pl's softprim_implemented().
+# emitted at both depths, the z-buffered size-specialised triangle through
+# soft_t15/soft_t16, and the rest of the shapes that sample a 555/565 map are
+# refused. See infogen.pl's softprim_implemented().
 #
 # SP_TEX_RGBA8888 and SP_BLEND_ALPHA_TEX are softprim's alpha-blended sprite
 # family, which pentprim never had. Only tables/soft_t24.ifg carries them, so

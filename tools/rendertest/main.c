@@ -1153,6 +1153,24 @@ static const rt_relation rt_relations[] = {
      .device = "softrend"},
 
     /*
+     * The size-specialised native colour maps. A 32/64/128/256/1024 square map
+     * takes its own size's textureNxN row; a 512x512 or 64x32 map fails all of
+     * them and reaches the arbitrary-width row. If both maps are ignored,
+     * they draw the same untextured cube. This relation catches that fallback,
+     * not a switch from the size-specific to the arbitrary-width kernel; the
+     * per-scene checksums cover the size-specific output.
+     */
+    {.a = "scene-tex-rgb555-p32",     .b = "scene-tex-rgb555-p512",      .equal = BR_FALSE, .pm_type = BR_PMT_RGB_555, .mode = RT_MODE_ZB,
+     .device = "softrend"},
+    {.a = "scene-tex-rgb565-p64",     .b = "scene-tex-rgb565-64x32",     .equal = BR_FALSE, .pm_type = BR_PMT_RGB_565, .mode = RT_MODE_ZB,
+     .device = "softrend"},
+    /* The perspective flag selects which size row is taken, and the row decides
+     * whether softrend subdivides the triangle, so the pair holds in both modes.
+     */
+    {.a = "scene-tex-rgb555-p32",     .b = "scene-tex-rgb555-p32-affine", .equal = BR_FALSE, .pm_type = BR_PMT_RGB_555, .mode = RT_ANY_MODE,
+     .device = "softrend"},
+
+    /*
      * The topology witnesses. Each is scene-flat's rig with the style changed
      * and nothing else, so a dropped render_style leaves the actor drawing
      * faces and the frame equal to scene-flat's. How the style reaches the
@@ -2390,6 +2408,15 @@ static const char *const rt_default_scenes[] = {
      */
     "scene-shade-arb-flat", "scene-shade-arb-flat-persp", "scene-shade-arb-smooth-persp",
     "scene-tex-rgb555-affine", "scene-tex-rgb565-affine", "scene-tex-rgb888-affine",
+
+    /*
+     * The size-specialised native colour maps; see scene.c. A 32/64/128/256/1024
+     * square map takes its size's textureNxN row, and a 512x512 or 64x32 one
+     * falls through to the arbitrary-width row, so the set is the size table and
+     * the fall-through it sits above.
+     */
+    "scene-tex-rgb555-p32", "scene-tex-rgb555-p32-affine", "scene-tex-rgb555-p512",
+    "scene-tex-rgb565-p64", "scene-tex-rgb565-64x32",
 
     /*
      * The z-sorted INDEX_8 intensity-step fixture; see scene.c. Its shade table

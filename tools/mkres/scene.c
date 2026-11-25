@@ -2601,6 +2601,81 @@ static br_error scene_make_feature_fixtures(br_model *cube)
         }
 
         /*
+         * The size-specialised native colour maps. A map of exactly 32, 64,
+         * 128, 256 or 1024 texels square takes prm_t15/prm_t16's textureNxN row
+         * for its size, which MMX-off pentprim draws from zb16p2ul.asm; any
+         * other map - a 512x512, a 64x32, the 96x48 the fixtures above carry -
+         * fails all five and reaches the arbitrary-width row instead. softprim
+         * reproduces that precedence with the size rows in soft_t15/soft_t16
+         * ahead of the arbitrary-width one, so these five fixtures are what says
+         * the size table is still read: the 32x32 and 512x512 frames are the
+         * same rig with only the map size changed, and they differ, while a
+         * bypass that drew both untextured would make them equal.
+         *
+         * The 32x32 pair is the perspective/affine twin of one size (the
+         * perspective flag decides the row, and the row decides whether softrend
+         * subdivides), the 64x64 map is the other output format, and the 512 and
+         * 64x32 are the two shapes no size row takes. Their pattern is the same
+         * two-colour checkerboard scene_texture_rgb() draws for the fixtures
+         * above, at 4 cells across, which is what the pentprim oracle's size
+         * sweep was generated from.
+         */
+        {
+            br_pixelmap *p32    = scene_texture_rgb("scene-tex-rgb555-p32-map", BR_PMT_RGB_555, 32, 32, 4);
+            br_pixelmap *p512   = scene_texture_rgb("scene-tex-rgb555-p512-map", BR_PMT_RGB_555, 512, 512, 4);
+            br_pixelmap *q64    = scene_texture_rgb("scene-tex-rgb565-p64-map", BR_PMT_RGB_565, 64, 64, 4);
+            br_pixelmap *q64x32 = scene_texture_rgb("scene-tex-rgb565-64x32-map", BR_PMT_RGB_565, 64, 32, 4);
+
+            if(p32 == NULL || p512 == NULL || q64 == NULL || q64x32 == NULL)
+                return BRE_FAIL;
+
+            {
+                br_material *mat = scene_fx_material("scene-tex-rgb555-p32-material", BR_MATF_LIGHT | BR_MATF_SMOOTH | BR_MATF_PERSPECTIVE);
+
+                mat->colour_map = p32;
+
+                if(scene_save("scene-tex-rgb555-p32.gltf", scene_fx_world(cube, mat)) != BRE_OK)
+                    r = BRE_FAIL;
+            }
+
+            {
+                br_material *mat = scene_fx_material("scene-tex-rgb555-p32-affine-material", BR_MATF_LIGHT | BR_MATF_SMOOTH);
+
+                mat->colour_map = p32;
+
+                if(scene_save("scene-tex-rgb555-p32-affine.gltf", scene_fx_world(cube, mat)) != BRE_OK)
+                    r = BRE_FAIL;
+            }
+
+            {
+                br_material *mat = scene_fx_material("scene-tex-rgb555-p512-material", BR_MATF_LIGHT | BR_MATF_SMOOTH | BR_MATF_PERSPECTIVE);
+
+                mat->colour_map = p512;
+
+                if(scene_save("scene-tex-rgb555-p512.gltf", scene_fx_world(cube, mat)) != BRE_OK)
+                    r = BRE_FAIL;
+            }
+
+            {
+                br_material *mat = scene_fx_material("scene-tex-rgb565-p64-material", BR_MATF_LIGHT | BR_MATF_SMOOTH | BR_MATF_PERSPECTIVE);
+
+                mat->colour_map = q64;
+
+                if(scene_save("scene-tex-rgb565-p64.gltf", scene_fx_world(cube, mat)) != BRE_OK)
+                    r = BRE_FAIL;
+            }
+
+            {
+                br_material *mat = scene_fx_material("scene-tex-rgb565-64x32-material", BR_MATF_LIGHT | BR_MATF_SMOOTH | BR_MATF_PERSPECTIVE);
+
+                mat->colour_map = q64x32;
+
+                if(scene_save("scene-tex-rgb565-64x32.gltf", scene_fx_world(cube, mat)) != BRE_OK)
+                    r = BRE_FAIL;
+            }
+        }
+
+        /*
          * The 888 member and its affine twin. A block's texture type is its
          * output type, so this is the only pairing that samples a colour map at
          * an 888 output - and with the glTF writer preserving map types, it is
