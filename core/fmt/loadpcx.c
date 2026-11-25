@@ -68,6 +68,8 @@ br_pixelmap *BR_PUBLIC_ENTRY BrFmtPCXLoad(const char *name, br_uint_32 flags)
     pm = BrPixelmapAllocate(type, w, h, NULL, BR_PMAF_NORMAL);
     if(pm == NULL) {
         BrLogError("FMT", "Failed to allocate pixelmap.");
+        drpcx_free(pixels);
+        BrFileClose(file);
         return NULL;
     }
 
