@@ -625,7 +625,12 @@ br_pixelmap *BR_PUBLIC_ENTRY BrPixelmapConvert(br_pixelmap *src, br_uint_8 type,
             /*
              * create palette pixelmap
              */
-            dst->pm_map = (br_pixelmap *)DevicePixelmapMemAllocate(BR_PMT_RGBX_888, 1, 256, NULL, BR_PMAF_NORMAL);
+            if((dst->pm_map = (br_pixelmap *)DevicePixelmapMemAllocate(BR_PMT_RGBX_888, 1, 256, NULL, BR_PMAF_NORMAL)) == NULL) {
+                BrQuantEnd();
+                BrPixelmapFree((br_pixelmap *)dst);
+                return NULL;
+            }
+
             BrResAdd(dst, dst->pm_map);
 
             /*

@@ -97,14 +97,53 @@ static struct br_tv_template_entry devicePixelmapTemplateEntries[] = {
 // clang-format on
 #undef F
 
-br_device_pixelmap *DevicePixelmapMemAllocate(br_uint_8 type, br_uint_16 w, br_uint_16 h, void *pixels, int flags)
+static br_int_64 DevicePixelmapMemFormatRowBytes(const struct pm_type_info *tip, br_int_32 width)
+{
+    return (br_int_64)tip->bits * tip->align * (((br_int_64)width + tip->align - 1) / tip->align) / 8;
+}
+
+static br_int_64 DevicePixelmapMemTightRowBytes(const struct pm_type_info *tip, br_int_32 width)
+{
+    return ((br_int_64)width * tip->bits + 7) / 8;
+}
+
+static br_uint_16 DevicePixelmapMemRowFlags(const struct pm_type_info *tip, br_int_32 width, br_int_64 row_bytes)
+{
+    br_uint_16 flags = 0;
+
+    if((row_bytes * 8) % tip->bits == 0)
+        flags |= BR_PMF_ROW_WHOLEPIXELS;
+
+    if((br_int_64)width * tip->bits == row_bytes * 8)
+        flags |= BR_PMF_LINEAR;
+
+    return flags;
+}
+
+static br_boolean DevicePixelmapMemGeometryFits(br_int_32 w, br_int_32 h, br_int_64 row_bytes)
+{
+    return w >= 0 && w <= 0xffff && h >= 0 && h <= 0xffff && row_bytes >= 0 && row_bytes <= 0x7fff;
+}
+
+static const struct pm_type_info *DevicePixelmapMemTypeInfo(br_uint_8 type)
+{
+    if(type >= BR_ASIZE(pmTypeInfo) || pmTypeInfo[type].bits == 0 || pmTypeInfo[type].align == 0)
+        return NULL;
+
+    return pmTypeInfo + type;
+}
+
+br_device_pixelmap *DevicePixelmapMemAllocateStrided(br_uint_8 type, br_int_32 w, br_int_32 h, br_int_64 row_bytes, void *pixels, int flags)
 {
     br_device_pixelmap        *pm;
-    const struct pm_type_info *tip = pmTypeInfo + type;
+    const struct pm_type_info *tip;
 
-    pm = BrResAllocate(_pixelmap.res, sizeof(*pm), BR_MEMORY_PIXELMAP);
+    if((tip = DevicePixelmapMemTypeInfo(type)) == NULL || !DevicePixelmapMemGeometryFits(w, h, row_bytes) ||
+       row_bytes < DevicePixelmapMemTightRowBytes(tip, w))
+        return NULL;
 
-    UASSERT(type < BR_ASIZE(pmTypeInfo));
+    if((pm = BrResAllocate(_pixelmap.res, sizeof(*pm), BR_MEMORY_PIXELMAP)) == NULL)
+        return NULL;
 
     /*
      * Fill in base structure
@@ -114,29 +153,21 @@ br_device_pixelmap *DevicePixelmapMemAllocate(br_uint_8 type, br_uint_16 w, br_u
     pm->pm_identifier = NULL;
     pm->pm_type       = type;
     pm->pm_map        = NULL;
+    pm->pm_pixels     = NULL;
     pm->pm_flags      = 0;
     pm->pm_base_x     = 0;
     pm->pm_base_y     = 0;
 
-    pm->pm_width  = w;
-    pm->pm_height = h;
+    pm->pm_mip_offset = 0;
+
+    pm->pm_width  = (br_uint_16)w;
+    pm->pm_height = (br_uint_16)h;
 
     pm->pm_origin_x = 0;
     pm->pm_origin_y = 0;
 
-    /*
-     * Work out size of a row
-     */
-    pm->pm_row_bytes = tip->bits * tip->align * ((w + tip->align - 1) / tip->align) / 8;
-
-    if(((pm->pm_row_bytes * 8) % tip->bits) == 0)
-        pm->pm_flags |= BR_PMF_ROW_WHOLEPIXELS;
-
-    /*
-     * Set linear flag if there's no alignment padding.
-     */
-    if((pm->pm_width * tip->bits) / 8 == pm->pm_row_bytes)
-        pm->pm_flags |= BR_PMF_LINEAR;
+    pm->pm_row_bytes = (br_int_16)row_bytes;
+    pm->pm_flags     = DevicePixelmapMemRowFlags(tip, w, row_bytes);
 
     /*
      * Allocate pixels
@@ -144,19 +175,30 @@ br_device_pixelmap *DevicePixelmapMemAllocate(br_uint_8 type, br_uint_16 w, br_u
     if(!(flags & BR_PMAF_NO_PIXELS)) {
         if(pixels)
             pm->pm_pixels = pixels;
-        else
-            pm->pm_pixels = BrResAllocate(pm, pm->pm_row_bytes * pm->pm_height, BR_MEMORY_PIXELS);
+        else if((pm->pm_pixels = BrResAllocate(pm, (br_size_t)pm->pm_row_bytes * (br_size_t)pm->pm_height, BR_MEMORY_PIXELS)) == NULL) {
+            BrResFree(pm);
+            return NULL;
+        }
     }
 
-    /*
-     * Make it a bottom up bitmap if required
-     */
     if(flags & BR_PMAF_INVERTED) {
-        pm->pm_pixels    = (char *)pm->pm_pixels + pm->pm_row_bytes * (pm->pm_height - 1);
+        if(pm->pm_pixels != NULL && pm->pm_height > 0)
+            pm->pm_pixels = (char *)pm->pm_pixels + (br_ptrdiff_t)pm->pm_row_bytes * (pm->pm_height - 1);
+
         pm->pm_row_bytes = -pm->pm_row_bytes;
     }
 
     return (br_device_pixelmap *)pm;
+}
+
+br_device_pixelmap *DevicePixelmapMemAllocate(br_uint_8 type, br_int_32 w, br_int_32 h, void *pixels, int flags)
+{
+    const struct pm_type_info *tip;
+
+    if((tip = DevicePixelmapMemTypeInfo(type)) == NULL)
+        return NULL;
+
+    return DevicePixelmapMemAllocateStrided(type, w, h, DevicePixelmapMemFormatRowBytes(tip, w), pixels, flags);
 }
 
 /*
@@ -267,41 +309,41 @@ br_error BR_CMETHOD_DECL(br_device_pixelmap_mem, validSource)(br_device_pixelmap
 
 br_error BR_CMETHOD_DECL(br_device_pixelmap_mem, resize)(br_device_pixelmap *self, br_int_32 width, br_int_32 height)
 {
-    char                *pixels;
-    struct pm_type_info *tip = pmTypeInfo + self->pm_type;
-    br_int_16            old_row_bytes;
+    const struct pm_type_info *tip;
+    char                      *pixels, *new_pixels;
+    br_int_16                  old_row_bytes = self->pm_row_bytes;
+    br_int_64                  row_bytes;
 
-    /*
-     * Free up old pixels, if any
-     */
-    pixels = self->pm_pixels;
-    if(self->pm_row_bytes < 0)
-        pixels += self->pm_row_bytes * (self->pm_height - 1);
-    if(BrResIsChild(self, pixels))
-        BrResFree(pixels);
+    if((tip = DevicePixelmapMemTypeInfo(self->pm_type)) == NULL)
+        return BRE_FAIL;
+
+    row_bytes = DevicePixelmapMemFormatRowBytes(tip, width);
+    if(!DevicePixelmapMemGeometryFits(width, height, row_bytes))
+        return BRE_FAIL;
+
+    if((new_pixels = BrResAllocate(self, (br_size_t)row_bytes * (br_size_t)height, BR_MEMORY_PIXELS)) == NULL)
+        return BRE_FAIL;
+
+    if((pixels = self->pm_pixels) != NULL) {
+        if(old_row_bytes < 0 && self->pm_height > 0)
+            pixels += (br_ptrdiff_t)old_row_bytes * (self->pm_height - 1);
+
+        if(BrResIsChild(self, pixels))
+            BrResFree(pixels);
+    }
 
     self->pm_width  = (br_uint_16)width;
     self->pm_height = (br_uint_16)height;
 
-    /*
-     * Work out new size of a row
-     */
-    old_row_bytes      = self->pm_row_bytes;
-    self->pm_row_bytes = tip->bits * tip->align * ((width + tip->align - 1) / tip->align) / 8;
+    self->pm_row_bytes = (br_int_16)row_bytes;
+    self->pm_flags     = (self->pm_flags & ~(BR_PMF_LINEAR | BR_PMF_ROW_WHOLEPIXELS)) | DevicePixelmapMemRowFlags(tip, width, row_bytes);
 
-    if(((self->pm_row_bytes * 8) % tip->bits) == 0)
-        self->pm_flags |= BR_PMF_ROW_WHOLEPIXELS;
+    self->pm_pixels = new_pixels;
 
-    /*
-     * Allocate pixels
-     */
-    self->pm_pixels = BrResAllocate(self, self->pm_row_bytes * self->pm_height, BR_MEMORY_PIXELS);
-
-    /*
-     * Make it a bottom up bitmap if required
-     */
     if(old_row_bytes < 0) {
-        self->pm_pixels    = (char *)self->pm_pixels + self->pm_row_bytes * (self->pm_height - 1);
+        if(self->pm_height > 0)
+            self->pm_pixels = (char *)self->pm_pixels + (br_ptrdiff_t)self->pm_row_bytes * (self->pm_height - 1);
+
         self->pm_row_bytes = -self->pm_row_bytes;
     }
 
@@ -335,7 +377,7 @@ br_error BR_CMETHOD_DECL(br_device_pixelmap_mem, match)(br_device_pixelmap *self
     struct match_tokens mt = {BRT_NONE, 0};
     br_int_32           count;
     br_device_pixelmap *pm;
-    br_int_32           bytes, r;
+    br_int_32           r;
 
     if(_pixelmap.pixelmap_match_template == NULL) {
         _pixelmap.pixelmap_match_template = BrTVTemplateAllocate(_pixelmap.res, matchTemplateEntries, BR_ASIZE(matchTemplateEntries));
@@ -394,40 +436,28 @@ br_error BR_CMETHOD_DECL(br_device_pixelmap_mem, match)(br_device_pixelmap *self
      * XXX - Make strides match, query renderer for it's requirements
      */
     if(mt.use == BRT_DEPTH) {
-        /*
-         * Allocate basic structure, no pixels
-         */
-        pm    = DevicePixelmapMemAllocate(mt.pixel_type, (br_uint_16)mt.width, (br_uint_16)mt.height, NULL,
-                                          ((self->pm_row_bytes < 0) ? BR_PMAF_INVERTED : 0) | BR_PMAF_NO_PIXELS);
-        bytes = DevicePixelmapPixelBytes(self);
+        const struct pm_type_info *src_type = DevicePixelmapMemTypeInfo(self->pm_type);
 
-        /*
-         * Work out a matching stride for depth map
-         */
+        if(src_type == NULL)
+            return BRE_FAIL;
+
         r = self->pm_row_bytes;
         if(r < 0)
             r = -r;
 
-        r                = (r + bytes - 1) / bytes;
-        pm->pm_row_bytes = r * DevicePixelmapPixelBytes(pm);
+        /* Keep the source's pitch in pixels unless a sized match needs more. */
+        r = (r * 8 + src_type->bits - 1) / src_type->bits;
+        if(r < mt.width)
+            r = mt.width;
 
-        pm->pm_pixels = BrResAllocate(pm, pm->pm_row_bytes * pm->pm_height, BR_MEMORY_PIXELS);
-
-        /*
-         * Make sure 'linear' bit is set correctly
-         */
-        if(pm->pm_width * DevicePixelmapPixelBytes(pm) == pm->pm_row_bytes)
-            pm->pm_flags |= BR_PMF_LINEAR;
-        else
-            pm->pm_flags &= ~BR_PMF_LINEAR;
-
-        if(self->pm_row_bytes < 0) {
-            pm->pm_pixels    = (char *)pm->pm_pixels + pm->pm_row_bytes * (pm->pm_height - 1);
-            pm->pm_row_bytes = -pm->pm_row_bytes;
-        }
+        pm = DevicePixelmapMemAllocateStrided(mt.pixel_type, mt.width, mt.height, (br_int_64)r * (pmTypeInfo[mt.pixel_type].bits >> 3),
+                                              NULL, (self->pm_row_bytes < 0) ? BR_PMAF_INVERTED : 0);
+        if(pm == NULL)
+            return BRE_FAIL;
     } else {
-        pm = DevicePixelmapMemAllocate(mt.pixel_type, (br_uint_16)mt.width, (br_uint_16)mt.height, NULL,
-                                       (self->pm_row_bytes < 0) ? BR_PMAF_INVERTED : 0);
+        pm = DevicePixelmapMemAllocate(mt.pixel_type, mt.width, mt.height, NULL, (self->pm_row_bytes < 0) ? BR_PMAF_INVERTED : 0);
+        if(pm == NULL)
+            return BRE_FAIL;
     }
 
     /*

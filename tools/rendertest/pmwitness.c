@@ -131,17 +131,183 @@ out:
     return r;
 }
 
+static br_boolean pmw_layout(const br_pixelmap *pm, int w, int h, int row)
+{
+    return pm != NULL && pm->width == w && pm->height == h && pm->row_bytes == row;
+}
+
+static br_error pmw_check_allocate_bounds(void)
+{
+    static const struct {
+        br_uint_8 type;
+        int       w, h, row;
+    } cases[] = {
+        {BR_PMT_INDEX_8,  0,     0,     0    },
+        {BR_PMT_RGBX_888, 1,     65535, 4    },
+        {BR_PMT_RGBX_888, 8191,  1,     32764},
+        {BR_PMT_INDEX_8,  32764, 1,     32764},
+        {BR_PMT_RGBX_888, 8192,  1,     -1   },
+        {BR_PMT_INDEX_8,  32765, 1,     -1   },
+        {BR_PMT_RGB_888,  10922, 1,     -1   },
+        {BR_PMT_RGBX_888, -1,    1,     -1   },
+        {BR_PMT_RGBX_888, 1,     -1,    -1   },
+        {BR_PMT_RGBX_888, 65536, 1,     -1   },
+        {BR_PMT_RGBX_888, 1,     65536, -1   },
+        {BR_PMT_MAX,      1,     1,     -1   },
+    };
+
+    for(br_size_t i = 0; i < BR_ASIZE(cases); ++i) {
+        br_pixelmap *pm = BrPixelmapAllocate(cases[i].type, cases[i].w, cases[i].h, NULL, BR_PMAF_NO_PIXELS);
+        br_boolean   ok = cases[i].row < 0 ? pm == NULL : pmw_layout(pm, cases[i].w, cases[i].h, cases[i].row) && pm->pixels == NULL;
+
+        if(pm != NULL)
+            BrPixelmapFree(pm);
+        if(!ok) {
+            BrLogError("RT", "pixelmap witness: unexpected layout for %dx%d type %u (expected stride %d, -1 means refusal).", cases[i].w,
+                       cases[i].h, (unsigned)cases[i].type, cases[i].row);
+            return BRE_FAIL;
+        }
+    }
+
+    return BRE_OK;
+}
+
+static br_error pmw_check_resize(void)
+{
+    br_pixelmap *pm   = BrPixelmapAllocate(BR_PMT_RGB_888, 4, 2, NULL, BR_PMAF_INVERTED);
+    br_pixelmap *view = NULL;
+    br_error     r    = BRE_FAIL;
+    br_colour    want = pmw_colour & 0xffffff;
+    void        *pixels;
+    br_uint_16   flags;
+
+    if(!pmw_layout(pm, 4, 2, -12) || !(pm->flags & BR_PMF_LINEAR))
+        goto out;
+    BrPixelmapFill(pm, pmw_colour);
+    pixels = pm->pixels;
+    flags  = pm->flags;
+
+    if(BrPixelmapResize(pm, 10922, 2) != NULL || BrPixelmapResize(pm, 4, -1) != NULL || !pmw_layout(pm, 4, 2, -12) ||
+       pm->pixels != pixels || pm->flags != flags || (BrPixelmapPixelGet(pm, 3, 1) & 0xffffff) != want)
+        goto out;
+
+    if(BrPixelmapResize(pm, 5, 2) == NULL || !pmw_layout(pm, 5, 2, -24) || (pm->flags & BR_PMF_LINEAR))
+        goto out;
+
+    view = BrPixelmapMipLevel(pm, 0);
+    if(!pmw_layout(view, 5, 2, -24) || view->pixels != pm->pixels || view->flags != pm->flags)
+        goto out;
+    BrPixelmapFree(view);
+    view = NULL;
+
+    BrPixelmapFill(pm, pmw_colour);
+    if((BrPixelmapPixelGet(pm, 4, 1) & 0xffffff) == want)
+        r = BRE_OK;
+
+out:
+    if(view != NULL)
+        BrPixelmapFree(view);
+    if(pm != NULL)
+        BrPixelmapFree(pm);
+    if(r != BRE_OK)
+        BrLogError("RT", "pixelmap witness: resize did not preserve rejected geometry or describe the new padded, inverted map.");
+    return r;
+}
+
+static br_pixelmap *pmw_match_depth(br_pixelmap *src, br_int_32 w)
+{
+    br_token_value tokens[] = {
+        {.t = BRT_USE_T,          .v = {.t = BRT_DEPTH}},
+        {.t = BRT_WIDTH_I32,      .v = {.i32 = w}      },
+        {.t = BRT_PIXEL_BITS_I32, .v = {.i32 = 32}     },
+        {.t = BR_NULL_TOKEN,      .v = {0}             },
+    };
+
+    return BrPixelmapMatchTV(src, tokens);
+}
+
+static br_error pmw_check_match(void)
+{
+    br_pixelmap *src = BrPixelmapAllocate(BR_PMT_RGBX_888, 4, 2, NULL, BR_PMAF_INVERTED);
+    br_pixelmap *pm  = NULL;
+    br_error     r   = BRE_FAIL;
+
+    if(src == NULL)
+        goto out;
+    pm = BrPixelmapMatchSized(src, BR_PMMATCH_OFFSCREEN, 8192, 1);
+    if(pm != NULL)
+        goto out;
+    pm = pmw_match_depth(src, 8192);
+    if(pm != NULL)
+        goto out;
+    pm = pmw_match_depth(src, 6);
+    if(!pmw_layout(pm, 6, 2, -24) || pm->type != BR_PMT_DEPTH_32)
+        goto out;
+    BrPixelmapFree(pm);
+    BrPixelmapFree(src);
+    pm = NULL;
+
+    /* The matched pitch fits even though DEPTH_32's usual padded row does not. */
+    src = BrPixelmapAllocate(BR_PMT_RGBX_888, 8189, 1, NULL, BR_PMAF_NO_PIXELS);
+    if(src != NULL) {
+        pm = pmw_match_depth(src, 8189);
+        if(pmw_layout(pm, 8189, 1, 32756) && pm->type == BR_PMT_DEPTH_32)
+            r = BRE_OK;
+    }
+
+out:
+    if(pm != NULL)
+        BrPixelmapFree(pm);
+    if(src != NULL)
+        BrPixelmapFree(src);
+    if(r != BRE_OK)
+        BrLogError("RT", "pixelmap witness: a sized match did not reject or cover its requested row.");
+    return r;
+}
+
+static br_error pmw_check_mip_chain(void)
+{
+    br_pixelmap *src   = BrPixelmapAllocate(BR_PMT_RGB_565, 10922, 1, NULL, BR_PMAF_NORMAL);
+    br_pixelmap *chain = NULL, *level = NULL;
+    br_error     r = BRE_FAIL;
+
+    if(src == NULL)
+        goto out;
+    BrPixelmapFill(src, 0xffff);
+    chain = BrPixelmapMakeMipMap(src, BR_PMT_RGB_888, NULL, 0, 256, BR_QUANTIZE_YIQ);
+    if(!pmw_layout(chain, 10922, 1, 32766) || chain->mip_offset != 1)
+        goto out;
+
+    level = BrPixelmapMipLevel(chain, 0);
+    if(!pmw_layout(level, 10922, 1, 32766) || level->pixels != chain->pixels)
+        goto out;
+    BrPixelmapFree(level);
+
+    level = BrPixelmapMipLevel(chain, 1);
+    if(pmw_layout(level, 5461, 1, 16383) && level->pixels == (char *)chain->pixels + 32766 &&
+       (BrPixelmapPixelGet(chain, 10921, 0) & 0xffffff) == 0xffffff)
+        r = BRE_OK;
+
+out:
+    if(level != NULL)
+        BrPixelmapFree(level);
+    if(chain != NULL)
+        BrPixelmapFree(chain);
+    if(src != NULL)
+        BrPixelmapFree(src);
+    if(r != BRE_OK)
+        BrLogError("RT", "pixelmap witness: a representable tight mip row or its borrowed view was lost.");
+    return r;
+}
+
 br_error rt_pm_witness_run(rt_demo *demo)
 {
     (void)demo;
 
-    if(pmw_check_writers() != BRE_OK)
+    if(pmw_check_writers() != BRE_OK || pmw_check_writers32() != BRE_OK || pmw_check_allocate_bounds() != BRE_OK ||
+       pmw_check_resize() != BRE_OK || pmw_check_match() != BRE_OK || pmw_check_mip_chain() != BRE_OK)
         return BRE_FAIL;
 
-    if(pmw_check_writers32() != BRE_OK)
-        return BRE_FAIL;
-
-    BrLogInfo("RT", "pixelmap witness passed (every writer of a 24-bit pixel agrees with the others).");
-
+    BrLogInfo("RT", "pixelmap witness passed (colour writers and memory layout).");
     return BRE_OK;
 }

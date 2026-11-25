@@ -12,5 +12,5 @@
 
 br_pixelmap *BR_RESIDENT_ENTRY BrPixelmapAllocate(br_uint_8 type, br_int_32 w, br_int_32 h, void *pixels, int flags)
 {
-    return (br_pixelmap *)DevicePixelmapMemAllocate(type, (br_uint_16)w, (br_uint_16)h, pixels, flags);
+    return (br_pixelmap *)DevicePixelmapMemAllocate(type, w, h, pixels, flags);
 }

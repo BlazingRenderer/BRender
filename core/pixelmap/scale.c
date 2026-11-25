@@ -93,6 +93,9 @@ br_pixelmap *BR_PUBLIC_ENTRY BrPixelmapScale(br_pixelmap *src, br_uint_32 new_x,
 
     char *src_pixels, *pm_pixels;
 
+    if(new_x > 0xffff || new_y > 0xffff)
+        return NULL;
+
     if(src->type != BR_PMT_RGB_888)
         BR_ERROR1("'%s' is not a suitable pixelmap to scale", src->identifier);
 
@@ -102,7 +105,11 @@ br_pixelmap *BR_PUBLIC_ENTRY BrPixelmapScale(br_pixelmap *src, br_uint_32 new_x,
     /*
      * Allocate temp pixelmap for horizontal scale
      */
-    temp   = BrPixelmapAllocate(BR_PMT_RGB_888, new_x, src->height, NULL, 0);
+    if((temp = BrPixelmapAllocate(BR_PMT_RGB_888, new_x, src->height, NULL, 0)) == NULL) {
+        BrMemFree(identifier);
+        return NULL;
+    }
+
     xscale = (float)new_x / (float)src->width;
     yscale = (float)new_y / (float)src->height;
 
@@ -193,6 +200,12 @@ br_pixelmap *BR_PUBLIC_ENTRY BrPixelmapScale(br_pixelmap *src, br_uint_32 new_x,
      */
     src  = temp;
     temp = BrPixelmapAllocate(BR_PMT_RGB_888, new_x, new_y, NULL, 0);
+
+    if(temp == NULL) {
+        BrPixelmapFree(src);
+        BrMemFree(identifier);
+        return NULL;
+    }
 
     /*
      * Precalculate filter contributions for a column

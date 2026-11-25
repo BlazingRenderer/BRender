@@ -22,7 +22,12 @@ br_uint_16 BR_RESIDENT_ENTRY BrPixelmapFileSize(br_pixelmap *pm);
 /*
  * pmmem.c
  */
-struct br_device_pixelmap *DevicePixelmapMemAllocate(br_uint_8 type, br_uint_16 w, br_uint_16 h, void *pixels, int flags);
+/* Returns NULL if the dimensions or aligned stride cannot be represented. */
+struct br_device_pixelmap *DevicePixelmapMemAllocate(br_uint_8 type, br_int_32 w, br_int_32 h, void *pixels, int flags);
+
+/* Uses the supplied stride without adding the format's usual row padding.
+ * The stride must cover the row; borrowed storage cannot be widened here. */
+struct br_device_pixelmap *DevicePixelmapMemAllocateStrided(br_uint_8 type, br_int_32 w, br_int_32 h, br_int_64 row_bytes, void *pixels, int flags);
 
 br_error BR_CMETHOD_DECL(br_device_pixelmap_mem, validSource)(struct br_device_pixelmap *self, br_boolean *bp, br_object *h);
 br_error BR_CMETHOD_DECL(br_device_pixelmap_mem, resize)(struct br_device_pixelmap *self, br_int_32 width, br_int_32 height);

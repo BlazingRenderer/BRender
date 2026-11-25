@@ -89,19 +89,35 @@ br_pixelmap *BR_PUBLIC_ENTRY BrPixelmapMipLevel(br_pixelmap *pm, br_uint_32 leve
 {
     br_pixelmap_mip_level geometry;
     br_pixelmap          *view;
+    br_uint_8            *pixels;
+    br_int_32             row_bytes;
+    int                   flags;
 
     if(pm == NULL || PixelmapMipLevelGeometry(pm, level, &geometry) != BRE_OK)
         return NULL;
 
-    if((view = BrPixelmapAllocate(pm->type, geometry.width, geometry.height, (br_uint_8 *)pm->pixels + geometry.offset, BR_PMAF_NORMAL)) == NULL)
+    row_bytes = geometry.row_bytes;
+    pixels    = pm->pixels;
+    flags     = pixels == NULL ? BR_PMAF_NO_PIXELS : BR_PMAF_NORMAL;
+
+    if(pixels != NULL)
+        pixels += geometry.offset;
+
+    if(row_bytes < 0) {
+        /* The allocator takes the physical start, not the first logical row. */
+        if(pixels != NULL && geometry.height > 0)
+            pixels += (br_ptrdiff_t)row_bytes * (geometry.height - 1);
+        row_bytes = -row_bytes;
+        flags |= BR_PMAF_INVERTED;
+    }
+
+    if((view = (br_pixelmap *)DevicePixelmapMemAllocateStrided(pm->type, geometry.width, geometry.height, row_bytes, pixels, flags)) == NULL)
         return NULL;
 
-    /*
-     * A level below 0 is tightly packed, which is not what BrPixelmapAllocate() computes for
-     * a type whose rows are aligned, so the flags that describe the stride are set here.
-     */
-    view->row_bytes = geometry.row_bytes;
-    view->flags     = (level == 0) ? pm->flags : ((pm->flags & BR_PMF_NO_ACCESS) | BR_PMF_LINEAR | BR_PMF_ROW_WHOLEPIXELS);
+    if(level == 0)
+        view->flags = pm->flags;
+    else
+        view->flags |= pm->flags & BR_PMF_NO_ACCESS;
 
     view->mip_offset = 0;
     view->map        = pm->map;
@@ -277,20 +293,18 @@ br_pixelmap *BR_PUBLIC_ENTRY BrPixelmapMakeMipMap(br_pixelmap *source, br_uint_3
     if((pixels = BrResAllocate(NULL, size, BR_MEMORY_PIXELS)) == NULL)
         return NULL;
 
-    if((destination = BrPixelmapAllocate((br_uint_8)destinationType, source->width, source->height, pixels, BR_PMAF_NORMAL)) == NULL) {
+    if((destination = (br_pixelmap *)DevicePixelmapMemAllocateStrided((br_uint_8)destinationType, source->width, source->height,
+                                                                      (br_int_64)source->width * dst_bytes, pixels, BR_PMAF_NORMAL)) == NULL) {
         BrResFree(pixels);
         return NULL;
     }
 
     BrResAdd(destination, pixels);
 
-    /* A chain level's row is tight, not what BrPixelmapAllocate() gives a type with aligned rows. */
-    destination->row_bytes  = (br_int_16)(destination->width * dst_bytes);
     destination->mip_offset = (br_int_16)source->height;
     destination->origin_x   = source->origin_x;
     destination->origin_y   = source->origin_y;
     destination->map        = palette;
-    destination->flags |= BR_PMF_LINEAR | BR_PMF_ROW_WHOLEPIXELS;
 
     if(source->identifier != NULL)
         destination->identifier = BrResStrDup(destination, source->identifier);
