@@ -192,6 +192,12 @@ br_pixelmap *BR_PUBLIC_ENTRY BrFmtTGALoad(const char *name, br_uint_32 flags)
     BrFileAdvance(TGAheader.identsize, fh);
     pm = BrPixelmapAllocate(type, TGAheader.width, TGAheader.depth, NULL, 0);
 
+    if(pm == NULL) {
+        BR_ERROR1("Pixelmap allocation failed for TGA '%s'", name);
+        BrFileClose(fh);
+        return NULL;
+    }
+
     pm->identifier = BrResStrDup(pm, name);
 
     /*
