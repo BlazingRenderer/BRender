@@ -41,7 +41,13 @@ static br_pixelmap *BrFmtSTBLoad(const char *name)
      * pixels isn't a resource so we can't use it directly.
      * Instead, shove it in a temporary pixelmap, then convert it to BR_PMT_RGBA_8888.
      */
-    tmp             = BrPixelmapAllocate(BR_PMT_RGBA_8888_ARR, x, y, pixels, BR_PMAF_NORMAL);
+    tmp = BrPixelmapAllocate(BR_PMT_RGBA_8888_ARR, x, y, pixels, BR_PMAF_NORMAL);
+    if(tmp == NULL) {
+        BrLogError("FMT", "Pixelmap allocation failed for \"%s\".", name);
+        BrMemFree(pixels);
+        return NULL;
+    }
+
     tmp->identifier = (char *)name; /* NB: This is safe, the clone below will copy it. */
 
     pixelmap = BrPixelmapCloneTyped(tmp, BR_PMT_RGBA_8888);
