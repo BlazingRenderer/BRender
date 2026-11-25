@@ -1,8 +1,5 @@
 # Recipes
 
-Procedures that are not obvious from the code. Each was run; where a step is
-order-dependent, it says so.
-
 ## Floating-point evaluation class
 
 The reference key is
@@ -10,25 +7,13 @@ The reference key is
 `<fp-class>` is the width `float` and `double` expressions are evaluated at by
 the build that produced the entry:
 
-- `x87` — evaluated in 80-bit x87 registers and rounded only on a store
-  (`FLT_EVAL_METHOD` 2): i686 with GCC's default `-mfpmath=387`, MSVC's 32-bit
-  target, the DOS build.
-- `declared` — each operation rounds at the width its type declares
-  (`FLT_EVAL_METHOD` 0): x86-64, aarch64, and a 32-bit build with
-  `-mfpmath=sse`.
+- `x87` — evaluated in x87 extended precision (`FLT_EVAL_METHOD` 2), as in
+  the i686 GCC build with `-mfpmath=387`.
+- `declared` — expressions are evaluated at their declared type's width
+  (`FLT_EVAL_METHOD` 0), as in the x86-64 build.
 
-Both are IEEE-754; what differs is the evaluation width, and computing in 80
-bits then rounding once lands on a different `float` than rounding at every
-step. That difference reaches the frame through softrend's setup *and* through
-core's scene setup, so softprim and glrend alike produce different pixels from
-the same scene — which is why every entry carries the class rather than only
-the software ones. Rendertest derives its own class (`tools/rendertest/main.c`);
-nothing chooses it by hand.
-
-The `x87` class describes evaluation width, not which renderer produced the
-reference. **Only an x87 build can reproduce those rows.**
-`-mfpmath=387` on x86-64 gets close but not exact, because the x86-64 ABI rounds
-`float` and `double` at call boundaries and no flag undoes that.
+Intermediate rounding can change pixels before the rasteriser sees the scene.
+Rendertest derives the class from the build rather than choosing it at runtime.
 
 ## Running the corpus
 
@@ -42,162 +27,46 @@ Each configuration is its own test, so a failure names the configuration.
 CI runs this for both classes: `brender-samples` (declared) and
 `brender-samples-linux32` (x87).
 
-A `fixtures` failure is almost always a stale `mkres` binary rather than a
-divergent generator: rebuild the `mkres` target — and `rendertest` — in every
-build directory in use before believing it. Each build generates its own `mkres`
-from `tools/mkres/scene.c`, and one left behind by an earlier commit keeps
-writing the fixtures that commit generated.
+A `fixtures` failure can come from a stale `mkres`: rebuild `mkres` and
+`rendertest` in the directory under test before comparing its output.
 
 `contrib/run-tests.sh [build-dir] [--no-build] [--history <range>]` is the
-human-facing gate. It runs the checks that do not belong in a build — the build
-step itself, the `--history` walk below, and a load of every checked-in
-`.gltf`. `--bless` is never a test argument: accepting current output is a
-deliberate act.
+human-facing gate. It builds, runs CTest, and loads the checked-in glTF files.
+`--history` also checks that every commit in the range carries the fixtures
+its harness names.
 
 ## Checking a series, not only its tip
 
 ```
-contrib/run-tests.sh cmake-build --no-build --history upstream/master..HEAD
+nix develop .#rendertest -c contrib/verify-series.sh upstream/master..HEAD
 ```
 
-At every commit in the range, this checks that each scene the harness names has
-a fixture. It is the only check in `run-tests.sh` that looks at anything other
-than the working tree, and it catches a commit that named a fixture it did not
-have — invisible at the tip, because a tip can be self-consistent while an
-intermediate commit is not.
+The script builds each commit from scratch in a separate worktree and runs the
+current gate against that commit's fixtures and references. The `rendertest`
+shell supplies the software GL and Vulkan runtime used by CI. A tip-only
+build can miss a broken intermediate commit even if a history rewrite leaves
+its final tree unchanged.
 
-`contrib/verify-series.sh <range>` is the heavier check: it builds every commit
-in a range in its own worktree with a fresh configure, then runs the full gate
-against it, so it also catches a commit that does not compile or that moves
-pixels without re-blessing the reference. It has to be run inside
-`nix develop .#brender-samples`: outside that shell the freshly-configured
-builds do not match the reference.
+## Updating render references
 
-The same blindness applies to any history rewrite. A reorder or a squash can
-leave the tip tree correct while an intermediate commit is wrong, so verify by
-scanning a value across *every* commit and not only by diffing trees:
-`git diff <old-tip> <new-tip>` being empty is not sufficient. Squashing two
-commits that rename a token leaves the later one reverting it unless its tree is
-rebuilt as well.
+1. Build the current tree in Release for the class you want to update. Use an
+   i686 `x87` build and an x86-64 `declared` build to update both classes.
+2. List the registered test commands with
+   `ctest --test-dir <build-dir> --show-only=json-v1`. Run the affected corpus
+   commands with their CTest working directories and environments, appending
+   `--bless`. The GL commands use offscreen SDL and llvmpipe. On Linux, use
+   the software runtime for the target architecture; the `rendertest` shell
+   supplies it for native builds, and
+   `nix eval --raw .#brender-samples-linux32.glRuntimeEnv` prints the exports
+   for an i686 shell.
+3. Keep the `refscenes-*` commands separate: each specifies its own scene under
+   `resources/gltf-reference`. Rendering the scenes together can change the
+   checksums. `--reference <file>` lets you bless a copy of the table first.
+4. Diff `tools/rendertest/rendertest.txt` and verify that only the intended keys
+   changed. For pixel changes, use `--ppm-dir <dir>` to inspect affected frames
+   before accepting them. Rerun the registered tests **without** `--bless`;
+   `NO-REFERENCE` means a frame was not compared, even if the test passed.
 
-## Regenerating the x87 half of the reference
-
-Use the matching producer for each `softrend` row. The original software
-references are from pentprim with MMX enabled. For isolated fixtures of the
-restored general kernels, use pentprim with `BRENDER_USE_MMX=0`. For frames
-that mix general and MMX kernels, use i686 softprim: pentprim cannot render
-that combination. In particular the Z-buffered RGB555/RGB565
-`scene-shade-arb-*` and `scene-shade-p256-*` rows use softprim. The mixed frame
-is a regression check; verify the restored draw separately against MMX-off
-pentprim.
-
-That tree is kept as the `dev/pentprim-verification` branch — the oracle. It is
-built beside the tree it blesses, never merged into it, and its corpus, harness
-and reference are brought forward from the blessed tree before each run. A
-softrend change is carried onto it by cherry-pick, not by that sync.
-
-1. Create the oracle worktree. The path is yours to choose; it is `<oracle>`
-   here:
-
-   ```
-   git worktree add <oracle> dev/pentprim-verification
-   ```
-
-   (`brdemo.h` matters because the heap size is a demo constant that the frames
-   depend on once it is too small to hold a scene — see below. The branch's
-   `contrib/census/README.md` has the command that checks this worktree still
-   reproduces the checked-in `x87` entries, which is worth running before
-   trusting anything it produces.)
-
-2. Bring its corpus, harness and reference forward from the ref you are
-   blessing. `contrib/sync-oracle.sh --from <ref>` checks out that ref's
-   `tools/rendertest`, `examples/brdemo`, `tools/mkres` and
-   `resources/gltf-reference` into the worktree and commits them as
-   `meta: sync oracle from <sha>`; it refuses a worktree that is dirty outside
-   those paths. It finds the worktree on the branch or the sibling `<repo>-pent`
-   one, and `--worktree DIR` names it otherwise. It deliberately does not sync
-   `drivers/softrend`: carry a softrend change that moves pixels by
-   cherry-picking its commit onto the worktree, which stays clean because the
-   change is a commit of its own. Reset the worktree before the next sync.
-
-3. Build it with the assembler toolchain. `nix/uasm` and `nix/h2inc.nix` are on
-   that branch, and were dropped from master in `2e8b44e0`; `h2inc` is a public
-   fetch from GitHub. A shell with `uasm` and `h2inc` on `PATH` is enough — the
-   store paths are not worth recording because they are garbage-collected once
-   nothing references them. Each worktree builds in its own directory; the
-   oracle's is `cmake-build-32-pent2`:
-
-   ```
-   nix develop .#brender-samples-linux32          # i686, to match pentprim
-   cmake -S . -B cmake-build-32-pent2 -DCMAKE_BUILD_TYPE=Release \
-         -DBRENDER_BUILD_SOFT=ON \
-         -DBRENDER_H2INC_EXECUTABLE="$(command -v h2inc)" \
-         -DCMAKE_ASM_MASM_COMPILER="$(command -v uasm)"
-   cmake --build cmake-build-32-pent2 --target rendertest -j
-   ```
-
-4. Use `ctest --test-dir <build-dir> --show-only=json-v1` to get the current
-   test command for the affected configuration. For an oracle comparison,
-   substitute its i686 executable, pass the scene explicitly, and set
-   `BRENDER_USE_MMX=0` or `BRENDER_USE_MMX=1` for the intended producer. Use
-   the current fixture, or a copy with equivalent material flags if the old
-   loader expects a bitmask instead of flag names. Keep the oracle's output
-   separate using `--reference <copy-of-table>`. **Do not bless all scenes
-   from either oracle mode.** A blanket run will overwrite rows that belong
-   to the other mode or that neither mode can produce.
-
-   Once the intended frames have been checked, bless only those scenes with
-   the corresponding current build, and verify that no other row changed.
-
-   **The nine reference scenes under `resources/gltf-reference` are blessed
-   separately.** They are a second corpus — a different `--scene-dir` and an
-   explicit scene list — and `contrib/run-tests.sh --bless` skips them by
-   design, because it rebuilds each configuration from its ctest name and a name
-   cannot carry either. Bless them one scene per process: a frame there is not a
-   function of its scene alone but of the scenes that ran before it, so the nine
-   in one process do not reproduce the stored checksums. Use the individual
-   `refscenes-*` CTest commands so each runs with its own scene.
-
-   **The GL devices are not blessed here.** This worktree's `glrend` does not
-   reproduce the `scene-light-volume{,-cut}` entries — it renders both identical
-   to `scene-light-volume-off` — so blessing it here rewrites those keys to the
-   `-off` value; and `glrend1x` does not involve pentprim at all. Bless their
-   `x87` halves from the fork's own i686 build instead (`cmake-build-32`), which
-   reproduces them; their `declared` halves come from an x86-64 build as usual.
-   Bless both depth modes — glrend's `zb` and `zs` differ — and note that
-   glrend's two fp classes agree (its T&L is in the shader) while glrend1x's do
-   not (its T&L is softrend's):
-
-   ```
-   for cfg in zb zs; do
-       [ "$cfg" = zs ] && d=--no-depth || d=
-       for dev in glrend glrend1x; do
-           SDL_VIDEODRIVER=offscreen LIBGL_ALWAYS_SOFTWARE=true \
-               cmake-build-32/tools/rendertest/rendertest --device "$dev" $d \
-                   --scene-dir tools/rendertest/dat \
-                   --reference tools/rendertest/rendertest.txt --bless
-       done
-   done
-   ```
-
-5. Dump a frame and look at it before accepting a bless. A bless records
-   whatever the renderer just produced, so render the changed scene with
-   `--ppm-dir <dir>` (or `GLTFVIEW_BENCH_SOFT_PNG=<file>` through `gltfview`)
-   and open the image. A black render has been blessed into the reference and
-   survived a full gate; a green run is not evidence the pixels are right.
-
-6. Verify by scoring the current tree's x87 build against the new table; it
-   should be 100%. Confirm the checksums of entries you did not expect to move
-   are unchanged — `git diff` on the table is the check.
-
-### The primitive heap is part of the oracle
-
-`brdemo`'s primitive heap is a fixed 8192 KiB, and the reference was blessed
-with whatever fit in it. It was 1500 KiB until recently, which is smaller than
-the z-sort corpus needs (it peaks near 4.97 MiB, and x86-64's larger
-`br_primitive` needs more bytes for the same primitives), so primitives were
-being dropped — and how many dropped depended on the word size, which made
-64-bit frames differ from the reference for reasons that had nothing to do with
-the rasteriser. If a scene grows past the heap, the overflow is reported once at
-the point of failure (`drivers/softrend/heap.c`) rather than silently dropping
-geometry, and the fixtures and reference have to be regenerated together.
+The software reference in both classes is softprim's output. Update the table
+in the commit that introduces a scene or changes its pixels, and explain any
+intentional pixel change there.
