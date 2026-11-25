@@ -75,7 +75,7 @@ br_pixelmap *BR_PUBLIC_ENTRY BrFmtIFFLoad(const char *name, br_uint_32 flags)
 {
     void        *fh;
     int          open_mode = BR_FS_MODE_BINARY;
-    br_pixelmap *pm, *palette;
+    br_pixelmap *pm, *palette = NULL;
 
     char         block[4], *mblock;
     unsigned int block_length;
@@ -144,6 +144,16 @@ br_pixelmap *BR_PUBLIC_ENTRY BrFmtIFFLoad(const char *name, br_uint_32 flags)
                  */
 
                 pm = BrPixelmapAllocate(BR_PMT_INDEX_8, BMHD.w, BMHD.h, NULL, 0);
+
+                if(pm == NULL) {
+                    BR_ERROR1("Pixelmap allocation failed for IFF '%s'", name);
+
+                    if(palette != NULL)
+                        BrPixelmapFree(palette);
+
+                    BrFileClose(fh);
+                    return NULL;
+                }
 
                 pm->identifier = BrResStrDup(pm, name);
 
