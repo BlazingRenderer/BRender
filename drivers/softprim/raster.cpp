@@ -114,20 +114,6 @@ inline int CeilToInt(float v) noexcept
 }
 
 /*
- * fabs for the long doubles the x87 setup carries. djgpp's libm exports no
- * _fabsl, so GCC's builtin is used there; it inlines to the x87 fabs instruction
- * and stays exact. MSVC has no such builtin, but it does have fabsl.
- */
-inline long double FabsL(long double v) noexcept
-{
-#if defined(__GNUC__)
-    return __builtin_fabsl(v);
-#else
-    return fabsl(v);
-#endif
-}
-
-/*
  * Depth is stored natively, so copy the 16 bits in and out rather than aliasing
  * through a different type (which C++ does not allow).
  */
@@ -183,12 +169,6 @@ inline br_uint_8 DepthHighByte(br_uint_32 z) noexcept
  * rasterisers) for the trapezium geometry, and SETUP_FLOAT_PARAM for the
  * interpolated parameters. It is ported once, here, so the kernels cannot drift
  * apart.
- *
- * One thing pentprim splits differently and this port keeps: the x87 runs in
- * 80-bit extended precision. The conversions, the geometry and the parameter
- * gradients are computed in long double to match it, so exactness is specific
- * to targets where long double is 80-bit (see BuildTriSetup, BuildWalkGeom,
- * SetupFloatParam and the perspective setup below).
  * ---------------------------------------------------------------------------
  */
 
@@ -252,42 +232,39 @@ inline br_int_32 NegAdjust(br_int_32 v) noexcept
 }
 
 /*
- * The x87 magic-number conversions pfpsetup.asm performs by adding fp_conv_d16
- * / fp_conv_d and reading the low 32 bits of the stored double
- * (pfpsetup.asm:3133-3142): round to nearest even, the FPU's default mode.
- * The asm keeps the whole setup on the x87 stack in 80-bit extended precision,
- * so the arguments here are long double to match its rounding.
+ * The trapezium walk uses rounded fixed-point coordinates and gradients.
+ * Truncating instead changes which side of an edge supplies a pixel.
  */
-inline br_int_32 Conv16(long double v) noexcept
+inline br_int_32 Conv16(double v) noexcept
 {
-    return (br_int_32)llrintl(v * 65536.0L);
+    return (br_int_32)llrint(v * 65536.0);
 }
 
 /* fp_conv_d24 (pfpsetup.asm:2104): the same trick with 2^24, i.e. 8.24. The
  * arbitrary-width setup needs the fraction as its own quantity, and the macro
  * (ARBITRARY_SETUP below) strips the integer part back off. */
-inline br_int_32 Conv24(long double v) noexcept
+inline br_int_32 Conv24(double v) noexcept
 {
-    return (br_int_32)llrintl(v * 16777216.0L);
+    return (br_int_32)llrint(v * 16777216.0);
 }
 
 /* fp_conv_d12 (setupdat.asm:40): 20.12, the MMX family's texture coordinate.
  * The same magic-number trick at a third fractional width. */
-inline br_int_32 Conv12(long double v) noexcept
+inline br_int_32 Conv12(double v) noexcept
 {
-    return (br_int_32)llrintl(v * 4096.0L);
+    return (br_int_32)llrint(v * 4096.0);
 }
 
-inline br_int_32 ConvInt(long double v) noexcept
+inline br_int_32 ConvInt(double v) noexcept
 {
-    return (br_int_32)llrintl(v);
+    return (br_int_32)llrint(v);
 }
 
 /* SETUP_FLOAT_PARAM's `conv` argument: fp_conv_d16 for z and i, fp_conv_d12 for
  * the MMX family's u/v and fp_conv_d24 for the arbitrary-width u/v and the MMX
  * family's r/g/b. */
 template <int FRAC_BITS>
-inline br_int_32 ConvParam(long double v) noexcept
+inline br_int_32 ConvParam(double v) noexcept
 {
     return (FRAC_BITS == 24) ? Conv24(v) : (FRAC_BITS == 12) ? Conv12(v) : Conv16(v);
 }
@@ -329,25 +306,25 @@ inline WalkGeom BuildWalkGeom(const TexVert *v, br_int_32 scan_dir) noexcept
 {
     WalkGeom g{};
 
-    const long double xt = v[0].rx, yt = v[0].ry;
-    const long double xm_ = v[1].rx, ym = v[1].ry;
-    const long double xb = v[2].rx, yb = v[2].ry;
+    const double xt = v[0].rx, yt = v[0].ry;
+    const double xm_ = v[1].rx, ym = v[1].ry;
+    const double xb = v[2].rx, yb = v[2].ry;
 
     const int yt_i = FloorToInt((float)yt), ym_i = FloorToInt((float)ym), yb_i = FloorToInt((float)yb);
 
-    const long double t_dy = (long double)(yt_i + 1) - yt;
-    const long double m_dy = (long double)(ym_i + 1) - ym;
+    const double t_dy = (double)(yt_i + 1) - yt;
+    const double m_dy = (double)(ym_i + 1) - ym;
 
-    const long double g1 = (ym > yt) ? (xm_ - xt) / (ym - yt) : 0.0L;
-    const long double gm = (yb > yt) ? (xb - xt) / (yb - yt) : 0.0L;
-    const long double g2 = (yb > ym) ? (xb - xm_) / (yb - ym) : 0.0L;
+    const double g1 = (ym > yt) ? (xm_ - xt) / (ym - yt) : 0.0;
+    const double gm = (yb > yt) ? (xb - xt) / (yb - yt) : 0.0;
+    const double g2 = (yb > ym) ? (xb - xm_) / (yb - ym) : 0.0;
 
-    g.xm   = (br_int_32)llrintl((xt + t_dy * gm + (long double)(1 - scan_dir)) * 65536.0L);
-    g.d_xm = (br_int_32)llrintl(gm * 65536.0L);
-    g.x1   = (br_int_32)llrintl((xt + t_dy * g1 + (long double)scan_dir) * 65536.0L);
-    g.d_x1 = (br_int_32)llrintl(g1 * 65536.0L);
-    g.x2   = (br_int_32)llrintl((xm_ + m_dy * g2 + (long double)scan_dir) * 65536.0L);
-    g.d_x2 = (br_int_32)llrintl(g2 * 65536.0L);
+    g.xm   = Conv16(xt + t_dy * gm + (1 - scan_dir));
+    g.d_xm = Conv16(gm);
+    g.x1   = Conv16(xt + t_dy * g1 + scan_dir);
+    g.d_x1 = Conv16(g1);
+    g.x2   = Conv16(xm_ + m_dy * g2 + scan_dir);
+    g.d_x2 = Conv16(g2);
 
     g.xm_f   = g.xm << 16;
     g.d_xm_f = g.d_xm << 16;
@@ -428,26 +405,19 @@ struct TrapParam {
  * `in` carries whatever per-vertex values the kernel needs and is copied to
  * `orig` (the order SETUP_FLOAT_PARAM takes its deltas in) before `v` is sorted
  * in place. Returns false for a triangle the setup cannot process.
- *
- * ia_sorted is the single-precision reciprocal workspace_iarea reloads in
- * SETUP_FLOAT_UV_PERSPECTIVE; odx1a..dy2a are the single-precision spills
- * SETUP_FLOAT makes for SETUP_FLOAT_PARAM. Both are kept apart because the
- * perspective macro rescales the same names from the rounded reciprocal in the
- * sorted order.
  */
 struct TriSetup {
-    TexVert     v[3];
-    TexVert     orig[3];
-    br_int_32   asm_dir;
-    br_int_32   flip;
-    WalkGeom    walk;
-    long double t_dx;
-    long double t_dy;
-    long double xstep_0;
-    long double xstep_1;
-    long double ia_sorted;
-    long double odx1a, ody1a, odx2a, ody2a;
-    long double sdx1a, sdy1a, sdx2a, sdy2a;
+    TexVert   v[3];
+    TexVert   orig[3];
+    br_int_32 asm_dir;
+    br_int_32 flip;
+    WalkGeom  walk;
+    double    t_dx;
+    double    t_dy;
+    double    xstep_0;
+    double    xstep_1;
+    double    odx1a, ody1a, odx2a, ody2a;
+    double    sdx1a, sdy1a, sdx2a, sdy2a;
 };
 
 inline bool BuildTriSetup(const TexVert in[3], TriSetup& s, br_int_32 stride = 1) noexcept
@@ -494,41 +464,24 @@ inline bool BuildTriSetup(const TexVert in[3], TriSetup& s, br_int_32 stride = 1
     if(Sar16(s.v[0].y) == Sar16(s.v[2].y))
         return false;
 
-    const long double ox0 = s.orig[0].rx, oy0 = s.orig[0].ry;
-    const long double ox1 = s.orig[1].rx, oy1 = s.orig[1].ry;
-    const long double ox2 = s.orig[2].rx, oy2 = s.orig[2].ry;
+    const double ox0 = s.orig[0].rx, oy0 = s.orig[0].ry;
+    const double ox1 = s.orig[1].rx, oy1 = s.orig[1].ry;
+    const double ox2 = s.orig[2].rx, oy2 = s.orig[2].ry;
 
-    const long double area_orig = (ox1 - ox0) * (oy2 - oy0) - (ox2 - ox0) * (oy1 - oy0);
+    const double area_orig = (ox1 - ox0) * (oy2 - oy0) - (ox2 - ox0) * (oy1 - oy0);
 
-    if(area_orig == 0.0L)
+    if(area_orig == 0.0)
         return false;
 
-    /*
-     * workspace_iarea is a dword, so 1/(2*area) is rounded to single
-     * precision. SETUP_FLOAT_PARAM runs before SETUP_FLOAT_UV_PERSPECTIVE and
-     * uses the products of the extended reciprocal; the perspective macro then
-     * reloads the rounded reciprocal and rescales the whole set in the sorted
-     * vertex order. The two are kept apart below.
-     */
-    const long double ia_orig = 1.0L / area_orig;
-    const long double iarea_f = (float)ia_orig;
+    const double ia_orig   = 1.0 / area_orig;
+    const double ia_sorted = flip ? -ia_orig : ia_orig;
 
-    s.ia_sorted = flip ? -iarea_f : iarea_f;
+    s.odx1a = (ox1 - ox0) * ia_orig;
+    s.ody1a = (oy1 - oy0) * ia_orig;
+    s.odx2a = (ox2 - ox0) * ia_orig;
+    s.ody2a = (oy2 - oy0) * ia_orig;
 
-    s.odx1a = (float)((ox1 - ox0) * ia_orig);
-    s.ody1a = (float)((oy1 - oy0) * ia_orig);
-    s.odx2a = (float)((ox2 - ox0) * ia_orig);
-    s.ody2a = (float)((oy2 - oy0) * ia_orig);
-
-    /*
-     * The scan-direction flag the asm's trapezium walk runs on
-     * (work.tsl.direction): the sort parity XOR the sign of the original
-     * winding. Every trapezium walk below is driven by this one value.
-     */
-    const float area_orig_f = (s.orig[1].rx - s.orig[0].rx) * (s.orig[2].ry - s.orig[0].ry) -
-                              (s.orig[2].rx - s.orig[0].rx) * (s.orig[1].ry - s.orig[0].ry);
-
-    s.asm_dir = (flip ? 1 : 0) ^ ((area_orig_f < 0.0f) ? 1 : 0);
+    s.asm_dir = flip ^ (area_orig < 0.0);
 
     /*
      * The affine blocks pick the scan direction once for the whole triangle and
@@ -543,30 +496,22 @@ inline bool BuildTriSetup(const TexVert in[3], TriSetup& s, br_int_32 stride = 1
     s.flip = flip ? 1 : 0;
 
     /* SETUP_FLOAT_UV_PERSPECTIVE rescales the deltas in the sorted order. */
-    const long double sx0 = s.v[0].rx, sy0 = s.v[0].ry;
-    const long double sx1 = s.v[1].rx, sy1 = s.v[1].ry;
-    const long double sx2 = s.v[2].rx, sy2 = s.v[2].ry;
+    const double sx0 = s.v[0].rx, sy0 = s.v[0].ry;
+    const double sx1 = s.v[1].rx, sy1 = s.v[1].ry;
+    const double sx2 = s.v[2].rx, sy2 = s.v[2].ry;
 
-    s.sdx1a = (float)((sx1 - sx0) * s.ia_sorted);
-    s.sdy1a = (float)((sy1 - sy0) * s.ia_sorted);
-    s.sdx2a = (float)((sx2 - sx0) * s.ia_sorted);
-    s.sdy2a = (float)((sy2 - sy0) * s.ia_sorted);
+    s.sdx1a = (sx1 - sx0) * ia_sorted;
+    s.sdy1a = (sy1 - sy0) * ia_sorted;
+    s.sdx2a = (sx2 - sx0) * ia_sorted;
+    s.sdy2a = (sy2 - sy0) * ia_sorted;
 
     s.walk = BuildWalkGeom(s.v, s.asm_dir);
 
-    /*
-     * t_dx and t_dy live in dword slots in the asm, so each is rounded to
-     * single precision where it is stored; xstep_0/xstep_1 are the integer part
-     * of the major-edge gradient and are exact. The first sample is the major
-     * edge's rounded integer column, aligned down to the pixel-stride boundary
-     * gsetuptf.asm truncates to (for the MMX family that is the four-pixel word
-     * the parameters are kept per, so t_dx is the origin of the parameter walk,
-     * not the edge itself; for stride 1 it is the edge).
-     */
-    s.t_dy    = (float)((long double)(FloorToInt((float)s.v[0].ry) + 1) - s.v[0].ry);
-    s.t_dx    = (float)((long double)AlignStride(s.walk.xm >> 16, stride) - (long double)s.v[0].rx);
-    s.xstep_0 = (float)(long double)AlignStride(s.walk.d_xm >> 16, stride);
-    s.xstep_1 = (float)(long double)(AlignStride(s.walk.d_xm >> 16, stride) + stride);
+    /* The parameter walk starts at the aligned pixel group, not the edge. */
+    s.t_dy    = (double)(FloorToInt(s.v[0].ry) + 1) - s.v[0].ry;
+    s.t_dx    = (double)AlignStride(s.walk.xm >> 16, stride) - s.v[0].rx;
+    s.xstep_0 = AlignStride(s.walk.d_xm >> 16, stride);
+    s.xstep_1 = s.xstep_0 + stride;
 
     return true;
 }
@@ -584,12 +529,12 @@ inline bool BuildTriSetup(const TexVert in[3], TriSetup& s, br_int_32 stride = 1
  * fp_conv_d24 (8.24); the MMX family's u/v convert with fp_conv_d12 (20.12).
  */
 template <int FRAC_BITS = 16>
-inline void SetupFloatParam(TrapParam& p, const TriSetup& s, long double p0, long double p1, long double p2, long double ptop, bool unsign) noexcept
+inline void SetupFloatParam(TrapParam& p, const TriSetup& s, double p0, double p1, double p2, double ptop, bool unsign) noexcept
 {
-    const long double dp1 = p1 - p0;
-    const long double dp2 = p2 - p0;
-    const long double pdx = dp1 * s.ody2a - dp2 * s.ody1a;
-    const long double pdy = dp2 * s.odx1a - dp1 * s.odx2a;
+    const double dp1 = p1 - p0;
+    const double dp2 = p2 - p0;
+    const double pdx = dp1 * s.ody2a - dp2 * s.ody1a;
+    const double pdy = dp2 * s.odx1a - dp1 * s.odx2a;
 
     p.grad_x    = ConvParam<FRAC_BITS>(pdx);
     p.d_nocarry = ConvParam<FRAC_BITS>(pdy + s.xstep_0 * pdx);
@@ -1061,31 +1006,14 @@ void AffineDrawSpan(const softprim_buffer& texture, const softprim_buffer& shade
     }
 }
 
-/*
- * The asm round-up-to-a-power-of-two normalisation of maxuv
- * (pfpsetup.asm:1163-1183). It is done on the float bit pattern: clear the
- * mantissa and bump the exponent if any mantissa bits are set, then form
- * 2^(28-exponent) by negating the bits and adding the doubled bias plus 28.
- */
-constexpr br_uint_32 PERSP_EXPONENT_BIAS = 127;
-
-inline float PerspMaxuvNorm(float maxuv) noexcept
+/* Divide 2^28 by maxuv rounded up to a power of two, leaving room in the
+ * integer accumulators for the projective walk. */
+inline double PerspMaxuvNorm(double maxuv) noexcept
 {
-    br_uint_32 bits;
-
-    memcpy(&bits, &maxuv, sizeof(bits));
-
-    if((bits & 0x7fffffu) != 0u) {
-        bits &= ~0x7fffffu;
-        bits += 1u << 23;
-    }
-
-    br_uint_32 out = (br_uint_32)(-(br_int_32)bits) + ((PERSP_EXPONENT_BIAS * 2 + 28) << 23);
-    float      result;
-
-    memcpy(&result, &out, sizeof(result));
-
-    return result;
+    int exponent;
+    if(frexp(maxuv, &exponent) == 0.5)
+        --exponent;
+    return ldexp(1.0, 28 - exponent);
 }
 
 /*
@@ -1548,46 +1476,24 @@ void TexturedIndexedTriangle(brp_block *block, brp_vertex *v0, brp_vertex *v1, b
     bool affine = (P == SP_PERSP_AFFINE);
 
     if(P == SP_PERSP_CORRECT) {
-        /*
-         * SETUP_FLOAT_CHECK_PERSPECTIVE_CHEAT (pfpsetup.asm:778) runs on the x87:
-         * the ranges are exact extended differences, srange is kept unrounded
-         * until the product with wrange, and both products are stored as singles
-         * (xr_yr/wr_sr/wmin_4 are dword data) before an unsigned compare.
-         */
-        long double xmin = v[0].rx, xmax = v[0].rx;
-        long double wmin = v[0].rw, wmax = v[0].rw;
+        double xmin = v[0].rx, xmax = v[0].rx;
+        double wmin = v[0].rw, wmax = v[0].rw;
 
         for(int k = 1; k < 3; k++) {
-            if((long double)v[k].rx < xmin)
+            if(v[k].rx < xmin)
                 xmin = v[k].rx;
-            if((long double)v[k].rx > xmax)
+            if(v[k].rx > xmax)
                 xmax = v[k].rx;
-            if((long double)v[k].rw < wmin)
+            if(v[k].rw < wmin)
                 wmin = v[k].rw;
-            if((long double)v[k].rw > wmax)
+            if(v[k].rw > wmax)
                 wmax = v[k].rw;
         }
 
-        const long double yrange = (long double)v[2].ry - (long double)v[0].ry;
-        const long double xrange = xmax - xmin;
-
-        /* `fstp xr_yr` rounds the difference to single; the sign bit selects. */
-        const float xr_yr = (float)(xrange - yrange);
-        br_uint_32  xr_bits;
-
-        memcpy(&xr_bits, &xr_yr, sizeof(xr_bits));
-
-        const long double srange = (xr_bits & 0x80000000u) ? yrange : xrange;
-
-        const float wr_sr  = (float)((wmax - wmin) * srange);
-        const float wmin_4 = (float)(wmin * 4.0f);
-        br_uint_32  wr_bits, wm_bits;
-
-        memcpy(&wr_bits, &wr_sr, sizeof(wr_bits));
-        memcpy(&wm_bits, &wmin_4, sizeof(wm_bits));
-
-        if(wr_bits < wm_bits)
-            affine = true;
+        const double yrange = (double)v[2].ry - v[0].ry;
+        const double xrange = xmax - xmin;
+        const double srange = xrange > yrange ? xrange : yrange;
+        affine              = (wmax - wmin) * srange < 4.0 * wmin;
     }
 
     if(affine) {
@@ -1699,59 +1605,48 @@ void TexturedIndexedTriangle(brp_block *block, brp_vertex *v0, brp_vertex *v1, b
         pw.pi = {0, 0, 0, 0};
 
     /* --- SETUP_FLOAT_UV_PERSPECTIVE: base point and projective set. --- */
-    const long double u0 = v[0].ru, u1 = v[1].ru, u2 = v[2].ru;
-    const long double e0 = v[0].rv, e1 = v[1].rv, e2 = v[2].rv;
-    const long double w0 = v[0].rw, w1 = v[1].rw, w2 = v[2].rw;
+    const double u0 = v[0].ru, u1 = v[1].ru, u2 = v[2].ru;
+    const double e0 = v[0].rv, e1 = v[1].rv, e2 = v[2].rv;
+    const double w0 = v[0].rw, w1 = v[1].rw, w2 = v[2].rw;
 
     /* fistp/fild: the base texel is rounded, not truncated. */
-    const br_int_32 ub = (br_int_32)llrintl(u0);
-    const br_int_32 vb = (br_int_32)llrintl(e0);
+    const br_int_32 ub = (br_int_32)llrint(u0);
+    const br_int_32 vb = (br_int_32)llrint(e0);
 
-    long double au = u0 - ub, bu = u1 - ub, cu = u2 - ub;
-    long double av = e0 - vb, bv = e1 - vb, cv = e2 - vb;
+    double au = u0 - ub, bu = u1 - ub, cu = u2 - ub;
+    double av = e0 - vb, bv = e1 - vb, cv = e2 - vb;
 
-    /*
-     * q'i is the product of the other two vertices' homogeneous w. The asm
-     * keeps the extended product on the x87 stack for the numerator scaling
-     * but also stores it to a dword (q0/q1/q2); the differences that feed the q
-     * gradient use the rounded copies.
-     */
-    const long double aw = w1 * w2, bw = w2 * w0, cw = w1 * w0;
-    const long double q0 = (float)aw, q1 = (float)bw, q2 = (float)cw;
+    const double q0 = w1 * w2, q1 = w2 * w0, q2 = w1 * w0;
+    const double base_magnitude = fabs(q0) + fabs(au) + fabs(av);
 
-    long double maxuv = FabsL(aw) + FabsL(au) + FabsL(av);
+    au *= q0;
+    av *= q0;
+    bu *= q1;
+    bv *= q1;
+    cu *= q2;
+    cv *= q2;
 
-    /* The asm spills maxuv to a float here and reloads it. */
-    maxuv = (long double)(float)maxuv;
+    const double maxuv = base_magnitude + fabs(au) + fabs(av) + fabs(bu) + fabs(bv) + fabs(cu) + fabs(cv);
+    if(!(maxuv > 0.0) || !isfinite(maxuv))
+        return;
+    const double norm = PerspMaxuvNorm(maxuv);
 
-    au *= aw;
-    av *= aw;
-    bu *= bw;
-    bv *= bw;
-    cu *= cw;
-    cv *= cw;
+    const double du1 = bu - au, du2 = cu - au;
+    const double dv1 = bv - av, dv2 = cv - av;
+    const double dq1 = q1 - q0, dq2 = q2 - q0;
 
-    maxuv += FabsL(au) + FabsL(av) + FabsL(bu) + FabsL(bv) + FabsL(cu) + FabsL(cv);
-
-    const float       maxuv_f = (float)maxuv;
-    const long double norm    = (long double)PerspMaxuvNorm(maxuv_f);
-
-    const long double du1 = bu - au, du2 = cu - au;
-    const long double dv1 = bv - av, dv2 = cv - av;
-    const long double dq1 = q1 - q0, dq2 = q2 - q0;
-
-    const long double udx = du1 * ts.sdy2a - du2 * ts.sdy1a;
-    const long double udy = du2 * ts.sdx1a - du1 * ts.sdx2a;
-    const long double vdx = dv1 * ts.sdy2a - dv2 * ts.sdy1a;
-    const long double vdy = dv2 * ts.sdx1a - dv1 * ts.sdx2a;
-    const long double qdx = dq1 * ts.sdy2a - dq2 * ts.sdy1a;
-    const long double qdy = dq2 * ts.sdx1a - dq1 * ts.sdx2a;
+    const double udx = du1 * ts.sdy2a - du2 * ts.sdy1a;
+    const double udy = du2 * ts.sdx1a - du1 * ts.sdx2a;
+    const double vdx = dv1 * ts.sdy2a - dv2 * ts.sdy1a;
+    const double vdy = dv2 * ts.sdx1a - dv1 * ts.sdx2a;
+    const double qdx = dq1 * ts.sdy2a - dq2 * ts.sdy1a;
+    const double qdy = dq2 * ts.sdx1a - dq1 * ts.sdx2a;
 
     /* pstart = p0 + pdx*fdx + pdy*fdy, d_0 = pdy + xstep_0*pdx. */
-    const long double udy0 = udy + ts.xstep_0 * udx;
-    const long double vdy0 = vdy + ts.xstep_0 * vdx;
-    const long double qdy0 = qdy + ts.xstep_0 * qdx;
-    const long double qdy1 = qdy + ts.xstep_1 * qdx;
+    const double udy0 = udy + ts.xstep_0 * udx;
+    const double vdy0 = vdy + ts.xstep_0 * vdx;
+    const double qdy0 = qdy + ts.xstep_0 * qdx;
+    const double qdy1 = qdy + ts.xstep_1 * qdx;
 
     pw.pu.current   = ConvInt((au + udx * ts.t_dx + udy * ts.t_dy) * norm);
     pw.pu.grad_x    = ConvInt(udx * norm);
@@ -2308,16 +2203,16 @@ void DecalTriangle(brp_block *block, brp_vertex *v0, brp_vertex *v1, brp_vertex 
     if(shade.base == NULL || shade.type != BR_PMT_INDEX_8)
         return;
 
-    const long double range_256 = (long double)SoftPrimWork.index_range * 0.00390625L;
-    const long double base_256  = (long double)SoftPrimWork.index_base * 0.00390625L;
-    const long double shade_256 = (long double)shade.height * 0.00390625L;
+    const double range_256 = SoftPrimWork.index_range / 256.0;
+    const double base_256  = SoftPrimWork.index_base / 256.0;
+    const double shade_256 = shade.height / 256.0;
 
     brp_vertex *src[3] = {v0, v1, v2};
     brp_vertex  pass1[3];
     brp_vertex  pass2[3];
 
     for(int k = 0; k < 3; k++) {
-        const long double vi = (long double)(float)src[k]->comp[C_I];
+        const double vi = (double)(float)src[k]->comp[C_I];
 
         pass1[k] = pass2[k] = *src[k];
 
@@ -2395,43 +2290,6 @@ inline br_int_32 PizDecV(br_int_32 a, br_int_32 size) noexcept
 }
 
 /*
- * Force a float assignment to binary32.
- *
- * The setup below is a chain of C float assignments, and the pixels depend on
- * where each one of them rounds. The casts in this file say where that is, but
- * on the i386 x87 build a cast alone does not do it: gcc's default
- * -fexcess-precision=fast lets the x87 carry its extra precision through an
- * assignment, so `(float)x` can stay extended and a value the C rounds is not
- * rounded here. pentprim's values are the C's rounded ones wherever its
- * compiler put them in memory, so an assignment that does not happen moves a
- * sample - measured, not assumed: with these assignments enforced the last two
- * differing pixels of scene-shade-p256-flat-persp at 15bpp z-sorted disappear.
- * The one place the reference does *not* round is the maxuv accumulator, which
- * is why that one is extended here instead (see its note below).
- *
- * Only the x87 class needs the barrier. A `declared' build rounds the cast at
- * float's own width - x86-64 and aarch64 hold a float in an SSE register or a
- * GPR, so it cannot stay extended - and there the volatile is a store in the
- * middle of the chain that stops the optimiser keeping these values in
- * registers. The store is what the x87 build needs, and the volatile is the
- * portable way to ask for it; this is the same class test as RT_FP_CLASS in
- * tools/rendertest/main.c.
- */
-#if (defined(__FLT_EVAL_METHOD__) && __FLT_EVAL_METHOD__ == 2) || (defined(_M_IX86_FP) && _M_IX86_FP == 0)
-inline float PizRounded(long double v) noexcept
-{
-    volatile float f = (float)v;
-
-    return f;
-}
-#else
-inline float PizRounded(long double v) noexcept
-{
-    return (float)v;
-}
-#endif
-
-/*
  * rcp.c's _reciprocal[]: 0x10000/n for n >= 1 (index 0 holds 0x10000), which
  * the table spells out for 2048 entries. Interpreting the table rather than
  * reading it keeps this source free of an 8KB constant, and the values are
@@ -2444,18 +2302,6 @@ inline br_uint_32 PizReciprocal(br_int_32 y) noexcept
         return 0x10000u;
 
     return 0x10000u / (br_uint_32)y;
-}
-
-/*
- * frcp.c's frcp[]: 1/n for n in 1..99, the float reciprocal perspzi.h uses for
- * a small positive divisor instead of dividing. 1.0f/(float)n is correctly
- * rounded here, which is what the initialiser of the table is - and it is a
- * table entry, so the value is a float and not the extended quotient the x87
- * would otherwise carry on with.
- */
-inline float PizFrcp(br_int_32 n) noexcept
-{
-    return PizRounded(1.0L / (long double)n);
 }
 
 /*
@@ -3037,23 +2883,9 @@ void PizShadeSpan(PizWalk& w, const softprim_buffer& colour, const softprim_buff
 }
 
 /*
- * perspi.h's setup and trapezium walk, shared by the three cells that reach
- * persp.c/perspz.c through it. D and F select the cell: F == SP_FMT_I8 is the
- * dithered INDEX_8 map (BPP 1, no intensity, ScanLinePITPD), and F ==
- * SP_FMT_555/565 is the 256x256 RGB shade-table cell (BPP 2, an intensity
- * parameter and the shade table, ScanLinePITIP). S and B are the shade-table
- * cell's own two variants, the intensity source and pentprim's destination
- * blend; the dithered cell takes no intensity and no blend. D is the depth
- * mode: the dithered cells are z-buffered or z-sorted, and the shade-table cell
- * is z-sorted (PITIP256) or z-buffered (PIZ2TIP256). PizDitherTriangle and
- * PizShadeTriangle below name the cells and fix those axes.
- *
- * The setup works entirely in the fixed components, and the ring of long double
- * values below is the x87: persp.c is a chain of float assignments, evaluated
- * on the i386 build in the x87's extended precision and rounded once per
- * assignment, and the results are truncated to integers later, so the roundings
- * are observable. Each assignment here is one extended expression rounded to
- * float, which is that rule.
+ * perspi.h's setup and trapezium walk, shared by the dithered INDEX_8 and
+ * 256x256 RGB shade-table paths. Both can run with or without depth. The
+ * shade-table path also interpolates intensity and can blend the destination.
  */
 template <sp_depth D, sp_fmt F, sp_shade S, sp_blend B>
 void PizTriangle(brp_block *block, brp_vertex *v0, brp_vertex *v1, brp_vertex *v2) noexcept
@@ -3188,9 +3020,7 @@ void PizTriangle(brp_block *block, brp_vertex *v0, brp_vertex *v1, brp_vertex *v
 
     w.direction = (w.divisor >= 0) ? 1 : 0;
 
-    /* Only a small positive divisor takes the table; the second arm of the C's
-     * test is unreachable, since a zero divisor has already been rejected. */
-    const float g_inverse = (w.divisor > 0 && w.divisor < 100) ? PizFrcp(w.divisor) : PizRounded(1.0L / (long double)w.divisor);
+    const double g_inverse = 1.0 / w.divisor;
 
     /* perspzi.h:155-171: the base texel, rounded down to a whole texel with the
      * fraction carried separately. u and v are the C's integer quotients and
@@ -3205,97 +3035,57 @@ void PizTriangle(brp_block *block, brp_vertex *v0, brp_vertex *v1, brp_vertex *v
     const br_int_32 u_int    = (pv[0].u - u_base16) / 0x10000;
     const br_int_32 v_int    = (pv[0].v - v_base16) / 0x10000;
 
-    float au = (float)(long double)(pv[0].u - u_base16) / 65536.0f;
-    float bu = (float)(long double)(pv[1].u - u_base16) / 65536.0f;
-    float cu = (float)(long double)(pv[2].u - u_base16) / 65536.0f;
-    float av = (float)(long double)(pv[0].v - v_base16) / 65536.0f;
-    float bv = (float)(long double)(pv[1].v - v_base16) / 65536.0f;
-    float cv = (float)(long double)(pv[2].v - v_base16) / 65536.0f;
+    double au = ((double)pv[0].u - u_base16) / 65536.0;
+    double bu = ((double)pv[1].u - u_base16) / 65536.0;
+    double cu = ((double)pv[2].u - u_base16) / 65536.0;
+    double av = ((double)pv[0].v - v_base16) / 65536.0;
+    double bv = ((double)pv[1].v - v_base16) / 65536.0;
+    double cv = ((double)pv[2].v - v_base16) / 65536.0;
 
     const br_int_32 u_base = u_base16 / 0x10000;
     const br_int_32 v_base = v_base16 / 0x10000;
 
-    /* perspzi.h:176-178: q'i is the product of the other two vertices' w. The
-     * C converts each fixed component to float first, then multiplies. */
-    const float wf0 = (float)pv[0].w;
-    const float wf1 = (float)pv[1].w;
-    const float wf2 = (float)pv[2].w;
+    const double w0 = pv[0].w, w1 = pv[1].w, w2 = pv[2].w;
+    double       aw = w1 * w2, bw = w2 * w0, cw = w1 * w0;
+    const double base_magnitude = fabs(aw) + fabs(au) + fabs(av);
 
-    float aw = PizRounded((long double)wf1 * (long double)wf2);
-    float bw = PizRounded((long double)wf2 * (long double)wf0);
-    float cw = PizRounded((long double)wf1 * (long double)wf0);
+    au *= aw;
+    av *= aw;
+    bu *= bw;
+    bv *= bw;
+    cu *= cw;
+    cv *= cw;
 
-    /*
-     * perspzi.h:184-215: the maxuv normalisation, accumulated in the order the
-     * C writes it - each product is folded in as it is formed.
-     *
-     * The accumulator itself is extended, not float. The C assigns every `+=`
-     * back to the float variable, but on the i386 x87 build the accumulator
-     * stays in a register for the whole chain and is never rounded until it is
-     * used, and the pixels are that register's: the terms are of order 1e13,
-     * where an f32 ulp is 8, so a float accumulator is one ulp out. That ulp
-     * moves `norm`, then one scaled component, then a gradient by one unit, and
-     * at a texel boundary that is a different texel. Measured against
-     * pentprim's own x87 state on scene-shade-p256-flat-persp: its accumulator
-     * is the exact sum 81280910385152 while the float one is 81280913899520,
-     * and only the exact one reproduces pentprim's pixels. This accumulator is
-     * the one value of this setup the reference keeps in a register; every other
-     * assignment in it is a float it stores, so those are rounded here through
-     * PizRounded above, and the two together are what closes the last differing
-     * pixel of that fixture.
-     */
-    long double maxuv = (aw > 0.0f) ? (long double)aw : (long double)(-aw);
+    const double maxuv = base_magnitude + fabs(au) + fabs(av) + fabs(bu) + fabs(bv) + fabs(cu) + fabs(cv);
+    if(!(maxuv > 0.0) || !isfinite(maxuv))
+        return;
+    const double norm = 268435456.0 / maxuv;
 
-    maxuv += (long double)((au > 0.0f) ? au : -au);
-    maxuv += (long double)((av > 0.0f) ? av : -av);
+    au *= norm;
+    av *= norm;
+    aw *= norm;
+    bu *= norm;
+    bv *= norm;
+    bw *= norm;
+    cu *= norm;
+    cv *= norm;
+    cw *= norm;
 
-    au = PizRounded((long double)au * (long double)aw);
-    maxuv += (long double)((au > 0.0f) ? au : -au);
-    av = PizRounded((long double)av * (long double)aw);
-    maxuv += (long double)((av > 0.0f) ? av : -av);
-    bu = PizRounded((long double)bu * (long double)bw);
-    maxuv += (long double)((bu > 0.0f) ? bu : -bu);
-    bv = PizRounded((long double)bv * (long double)bw);
-    maxuv += (long double)((bv > 0.0f) ? bv : -bv);
-    cu = PizRounded((long double)cu * (long double)cw);
-    maxuv += (long double)((cu > 0.0f) ? cu : -cu);
-    cv = PizRounded((long double)cv * (long double)cw);
-    maxuv += (long double)((cv > 0.0f) ? cv : -cv);
+    const double zmx = w.main_x * g_inverse;
+    const double zmy = w.main_y * g_inverse;
+    const double ztx = w.top_x * g_inverse;
+    const double zty = w.top_y * g_inverse;
 
-    const float norm = PizRounded(268435456.0L / maxuv);
+    const double du1 = bu - au, du2 = cu - au;
+    const double dv1 = bv - av, dv2 = cv - av;
+    const double dq1 = bw - aw, dq2 = cw - aw;
 
-    au = PizRounded((long double)au * (long double)norm);
-    av = PizRounded((long double)av * (long double)norm);
-    aw = PizRounded((long double)aw * (long double)norm);
-    bu = PizRounded((long double)bu * (long double)norm);
-    bv = PizRounded((long double)bv * (long double)norm);
-    bw = PizRounded((long double)bw * (long double)norm);
-    cu = PizRounded((long double)cu * (long double)norm);
-    cv = PizRounded((long double)cv * (long double)norm);
-    cw = PizRounded((long double)cw * (long double)norm);
-
-    /* perspzi.h:218-253: the projective x and y gradients. Every expression
-     * here is one float assignment in the C, so it is one extended-precision
-     * expression rounded once to float, and the final truncation to br_int_32
-     * is the C's cast. */
-    const float zmx = PizRounded((long double)w.main_x * (long double)g_inverse);
-    const float zmy = PizRounded((long double)w.main_y * (long double)g_inverse);
-    const float ztx = PizRounded((long double)w.top_x * (long double)g_inverse);
-    const float zty = PizRounded((long double)w.top_y * (long double)g_inverse);
-
-    const float du1 = PizRounded((long double)bu - (long double)au);
-    const float du2 = PizRounded((long double)cu - (long double)au);
-    const float dv1 = PizRounded((long double)bv - (long double)av);
-    const float dv2 = PizRounded((long double)cv - (long double)av);
-    const float dq1 = PizRounded((long double)bw - (long double)aw);
-    const float dq2 = PizRounded((long double)cw - (long double)aw);
-
-    br_int_32 pu_grad_x = (br_int_32)((long double)du1 * (long double)zmy - (long double)du2 * (long double)zty);
-    br_int_32 pu_grad_y = (br_int_32)((long double)du2 * (long double)ztx - (long double)du1 * (long double)zmx);
-    br_int_32 pv_grad_x = (br_int_32)((long double)dv1 * (long double)zmy - (long double)dv2 * (long double)zty);
-    br_int_32 pv_grad_y = (br_int_32)((long double)dv2 * (long double)ztx - (long double)dv1 * (long double)zmx);
-    br_int_32 pq_grad_x = (br_int_32)((long double)dq1 * (long double)zmy - (long double)dq2 * (long double)zty);
-    br_int_32 pq_grad_y = (br_int_32)((long double)dq2 * (long double)ztx - (long double)dq1 * (long double)zmx);
+    const br_int_32 pu_grad_x = (br_int_32)(du1 * zmy - du2 * zty);
+    const br_int_32 pu_grad_y = (br_int_32)(du2 * ztx - du1 * zmx);
+    const br_int_32 pv_grad_x = (br_int_32)(dv1 * zmy - dv2 * zty);
+    const br_int_32 pv_grad_y = (br_int_32)(dv2 * ztx - dv1 * zmx);
+    const br_int_32 pq_grad_x = (br_int_32)(dq1 * zmy - dq2 * zty);
+    const br_int_32 pq_grad_y = (br_int_32)(dq2 * ztx - dq1 * zmx);
 
     w.pu_current = (br_int_32)au;
     w.pv_current = (br_int_32)av;
@@ -6100,14 +5890,14 @@ void MmxTriangle(brp_block *block, brp_vertex *v0, brp_vertex *v1, brp_vertex *v
     br_uint_16 clane[3] = {0, 0, 0};
 
     if(S == SP_SHADE_CONST_RGB && X == SP_TEX_I8) {
-        cword = ((br_uint_32)(br_uint_8)llrintl((long double)ts.orig[0].rr) << 16) |
-                ((br_uint_32)(br_uint_8)llrintl((long double)ts.orig[0].rg) << 8) | (br_uint_32)(br_uint_8)llrintl((long double)ts.orig[0].rb);
+        cword = ((br_uint_32)(br_uint_8)llrint((double)ts.orig[0].rr) << 16) | ((br_uint_32)(br_uint_8)llrint((double)ts.orig[0].rg) << 8) |
+                (br_uint_32)(br_uint_8)llrint((double)ts.orig[0].rb);
     }
 
     const br_uint_16(*sdtable)[4] = NULL;
 
     if(B == SP_BLEND_SCREENDOOR) {
-        const br_uint_32 alevel = (br_uint_8)llrintl((long double)ts.orig[0].ra * 256.0L);
+        const br_uint_32 alevel = (br_uint_8)llrint((double)ts.orig[0].ra * 256.0);
 
         cword |= (alevel & 0xffu) << 24;
         sdtable = MMX_SCREENDOOR[(alevel >> 4) & 0x0fu];

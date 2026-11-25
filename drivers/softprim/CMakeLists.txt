@@ -150,10 +150,11 @@ add_dependencies(softprim softprim_blocks)
 #
 # The C++ here exists only for type safety; the library exposes a C ABI.
 # Disable the runtime machinery that typing-only C++ does not need.
+# Do not fuse the determinant's products: equal rounded products must cancel.
 #
 if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
     set_source_files_properties(raster.cpp PROPERTIES
-            COMPILE_OPTIONS "-fno-exceptions;-fno-rtti"
+            COMPILE_OPTIONS "-fno-exceptions;-fno-rtti;-ffp-contract=off"
             )
 endif ()
 
