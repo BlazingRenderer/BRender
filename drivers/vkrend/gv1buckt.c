@@ -41,10 +41,13 @@ static br_tv_template_entry geometryV1BucketsTemplateEntries[] = {
 #undef F
 
 typedef struct br_vk_material_state {
-    float    fog_colour[4]; /* (R, G, B, 1): glrend's fog_colour with alpha 1.     */
-    float    fog_range[2];  /* (fog_min, fog_max), in view-space units.           */
-    uint32_t fog_enabled;   /* 1 when the primitive's fog_type is not BRT_NONE.   */
-    uint32_t reserved;      /* Padding to a 16-byte struct; room for more state.  */
+    float    fog_colour[4];         /* (R, G, B, 1): glrend's fog_colour with alpha 1. */
+    float    fog_range[2];          /* (fog_min, fog_max), in view-space units.      */
+    uint32_t fog_enabled;           /* 1 when the primitive's fog_type is not BRT_NONE. */
+    uint32_t bump_enabled;          /* 1 when the primitive has a bump map.           */
+    float    bump_scale;            /* How far it displaces the normal.               */
+    float    bump_depth;            /* How far its height displaces the co-ordinate.  */
+    float    bump_map_transform[6]; /* Its own mapping, before the surface's.  */
 } br_vk_material_state;
 
 /*
@@ -76,9 +79,12 @@ _Static_assert(offsetof(br_vk_render_data, material) == 128, "material offset");
 _Static_assert(offsetof(br_vk_material_state, fog_colour) == 0, "fog_colour offset");
 _Static_assert(offsetof(br_vk_material_state, fog_range) == 16, "fog_range offset");
 _Static_assert(offsetof(br_vk_material_state, fog_enabled) == 24, "fog_enabled offset");
-_Static_assert(offsetof(br_vk_material_state, reserved) == 28, "reserved offset");
-_Static_assert(sizeof(br_vk_material_state) == 32, "material size");
-_Static_assert(sizeof(br_vk_render_data) == 160, "push constant size");
+_Static_assert(offsetof(br_vk_material_state, bump_enabled) == 28, "bump_enabled offset");
+_Static_assert(offsetof(br_vk_material_state, bump_scale) == 32, "bump_scale offset");
+_Static_assert(offsetof(br_vk_material_state, bump_depth) == 36, "bump_depth offset");
+_Static_assert(offsetof(br_vk_material_state, bump_map_transform) == 40, "bump_map_transform offset");
+_Static_assert(sizeof(br_vk_material_state) == 64, "material size");
+_Static_assert(sizeof(br_vk_render_data) == 192, "push constant size");
 
 /**
  * \brief Release the scene-draw machinery's device-scoped resources and mark it unavailable.
@@ -241,10 +247,11 @@ br_vk_render_state DeviceVkRenderEnsureInit(br_device *dev)
      * lit fragment stage reads the packed lights from, so both stages name it. Binding 1 is
      * the colour map, which every fragment shader samples - the device binds a 1x1 white image
      * there when the material has no map - and binding 2 is its palette, which only the indexed
-     * shaders use. A push descriptor that is not used can be left undefined, so a draw
-     * without an indexed map pushes 0 and 1 and an indexed one pushes 2 as well.
+     * shaders use. Binding 4 is the bump map. A push descriptor that is not used can be left
+     * undefined, so a draw without an indexed map pushes 0, 1 and 4 and an indexed one pushes
+     * 2 as well.
      */
-    const VkDescriptorSetLayoutBinding scene_bindings[3] = {
+    const VkDescriptorSetLayoutBinding scene_bindings[4] = {
         {
          .binding         = 0,
          .descriptorType  = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
@@ -259,6 +266,12 @@ br_vk_render_state DeviceVkRenderEnsureInit(br_device *dev)
          },
         {
          .binding         = 2,
+         .descriptorType  = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
+         .descriptorCount = 1,
+         .stageFlags      = VK_SHADER_STAGE_FRAGMENT_BIT,
+         },
+        {
+         .binding         = 4,
          .descriptorType  = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
          .descriptorCount = 1,
          .stageFlags      = VK_SHADER_STAGE_FRAGMENT_BIT,
@@ -753,6 +766,7 @@ static br_boolean VkV1ModelRenderIndexed(br_geometry_stored *geom, br_renderer *
     br_boolean                indexed;
     br_token                  shading_mode;
     br_buffer_stored         *colour_map;
+    br_buffer_stored         *bump_map;
     br_vk_render_data         data     = {0};
     br_vk_material_state     *material = &data.material;
 
@@ -789,6 +803,15 @@ static br_boolean VkV1ModelRenderIndexed(br_geometry_stored *geom, br_renderer *
 
     colour_map = ((state->valid & MASK_STATE_PRIMITIVE) && BufferStoredVkGetView(state->prim.colour_map) != VK_NULL_HANDLE) ? state->prim.colour_map
                                                                                                                             : NULL;
+
+    /*
+     * A bump map is sampled at the colour map's co-ordinates, and every draw has those: the
+     * slot is bound white when the material carries no map, so one does not have to be
+     * present for the frame to exist.
+     */
+    bump_map = ((state->valid & MASK_STATE_PRIMITIVE) && state->prim.bump != NULL && BufferStoredVkGetView(state->prim.bump) != VK_NULL_HANDLE)
+                   ? state->prim.bump
+                   : NULL;
 
     /*
      * An INDEX_8 colour map draws through the indexed fragment shaders, which bind the
@@ -986,10 +1009,25 @@ static br_boolean VkV1ModelRenderIndexed(br_geometry_stored *geom, br_renderer *
      * over 255 with alpha 1, and fog_range is fog_min/fog_max. The primitive's fog_scale is
      * carried in state but glrend never applies it, so it is not packed.
      */
-    material->fog_colour[0] = 1.0f;
-    material->fog_colour[1] = 1.0f;
-    material->fog_colour[2] = 1.0f;
-    material->fog_colour[3] = 1.0f;
+    material->fog_colour[0]         = 1.0f;
+    material->fog_colour[1]         = 1.0f;
+    material->fog_colour[2]         = 1.0f;
+    material->fog_colour[3]         = 1.0f;
+    material->bump_map_transform[0] = 1.0f;
+    material->bump_map_transform[3] = 1.0f;
+
+    if(bump_map != NULL) {
+        material->bump_enabled = 1;
+        material->bump_scale   = (float)state->prim.bump_scale;
+        material->bump_depth   = (float)BrFractionToScalar(state->prim.bump_depth);
+
+        material->bump_map_transform[0] = (float)state->prim.bump_map_transform.m[0][0];
+        material->bump_map_transform[1] = (float)state->prim.bump_map_transform.m[0][1];
+        material->bump_map_transform[2] = (float)state->prim.bump_map_transform.m[1][0];
+        material->bump_map_transform[3] = (float)state->prim.bump_map_transform.m[1][1];
+        material->bump_map_transform[4] = (float)state->prim.bump_map_transform.m[2][0];
+        material->bump_map_transform[5] = (float)state->prim.bump_map_transform.m[2][1];
+    }
 
     if((state->valid & MASK_STATE_PRIMITIVE) && state->prim.fog_type != BRT_NONE) {
         material->fog_colour[0] = BR_RED(state->prim.fog_colour) / 255.0f;
@@ -1064,6 +1102,28 @@ static br_boolean VkV1ModelRenderIndexed(br_geometry_stored *geom, br_renderer *
         .pImageInfo      = &texture_info,
     };
     vk->CmdPushDescriptorSet(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, dev->render_pipeline_layout, 0, 1, &texture_write);
+
+    /* The same primitive governs both maps' sampler; non-indexed stored maps have a mip chain. */
+    if(bump_map != NULL) {
+        const VkImageLayout bump_layout = BufferStoredVkGetViewLayout(bump_map);
+
+        if(bump_layout == VK_IMAGE_LAYOUT_UNDEFINED)
+            return BR_FALSE;
+
+        const VkDescriptorImageInfo bump_info = {
+            .sampler     = sampler,
+            .imageView   = BufferStoredVkGetView(bump_map),
+            .imageLayout = bump_layout,
+        };
+        const VkWriteDescriptorSet bump_write = {
+            .sType           = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
+            .dstBinding      = 4,
+            .descriptorCount = 1,
+            .descriptorType  = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
+            .pImageInfo      = &bump_info,
+        };
+        vk->CmdPushDescriptorSet(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, dev->render_pipeline_layout, 0, 1, &bump_write);
+    }
 
     /*
      * An INDEX_8 map binds its palette as binding 2. Its sampler is the primitive's: the

@@ -9,12 +9,12 @@
  * file's directory.
  *
  * The push constant block holds the per-draw state: the model-view (64) + surface colour
- * (16) + lighting factors (16) + the map transform's linear part (16) + its translation
- * (8) + a packed flag word pair (8) + the material's fog state (32). The model-view, not
- * the combined MVP, is what the lighting model needs - it shades in view space, so it
- * derives the normal matrix from the model-view here rather than carrying a second matrix
- * in the block. The map transform is applied to the model's map coordinates by the vertex
- * stage, so the fragment stage only reads the transformed UV.
+ * (16) + lighting factors (16) + the map transform's linear part (16) + its translation (8)
+ * + a packed flag word pair (8) + the material's fog and bump state (64). The
+ * model-view, not the combined MVP, is what the lighting model needs - it shades in view
+ * space, so it derives the normal matrix from the model-view here rather than carrying a
+ * second matrix in the block. The map transform is applied to the model's map coordinates
+ * by the vertex stage, so the fragment stage only reads the transformed UV.
  *
  * The flags word pair packs seven things into 64 bits: bit 0 of flags.x is flat shading,
  * bit 1 is the colour key, and bits 2..31 of flags.x plus bits 0..17 of flags.y are the
@@ -62,16 +62,16 @@ layout(std140, set = 0, binding = 0) uniform SceneData {
     vec4 light_volume_planes[MAX_LIGHT_VOLUME_PLANES];   /* View-space half-spaces.            */
 } scene;
 
-/*
- * One draw's material state, mirroring br_vk_material_state in gv1buckt.c. The block is
- * std430, so fog_enabled follows fog_range without std140's 16-byte rounding, and the
- * reserved word pads the struct to its 16-byte alignment.
- */
+/* Mirrors br_vk_material_state in gv1buckt.c. */
 struct MaterialData {
     vec4 fog_colour;  /* (R, G, B, 1): glrend's fog_colour with alpha 1.        */
     vec2 fog_range;   /* (fog_min, fog_max), in view-space units.               */
     uint fog_enabled; /* 1 when the primitive's fog_type is not BRT_NONE.       */
-    uint reserved;    /* Padding to a 16-byte struct; room for more state.      */
+    uint bump_enabled;/* 1 when the primitive has a bump map.                   */
+    float bump_scale; /* How far it displaces the normal.                       */
+    float bump_depth; /* How far its height displaces the co-ordinate.          */
+
+    float bump_map_transform[6];
 };
 
 /*
@@ -207,14 +207,38 @@ uint mappingSource()
 }
 
 /*
- * The surface's map transform, in BRender's row-vector convention (softrend/mapping.c):
- * `u' = m00*u + m10*v + m20`, `v' = m01*u + m11*v + m21`. map_linear holds m00, m01, m10, m11
- * and map_translate holds m20, m21.
+ * An affine map in BRender's row-vector convention (softrend/mapping.c):
+ * `u' = m00*u + m10*v + m20`, `v' = m01*u + m11*v + m21`. `linear` holds m00, m01, m10, m11
+ * and `translate` holds m20, m21.
  */
+vec2 affineMapTransform(vec4 linear, vec2 translate, vec2 uv)
+{
+    return vec2(linear.x * uv.x + linear.z * uv.y + translate.x,
+                linear.y * uv.x + linear.w * uv.y + translate.y);
+}
+
+/* The surface's map transform. */
 vec2 applyMapTransform(vec2 uv)
 {
-    return vec2(pc.map_linear.x * uv.x + pc.map_linear.z * uv.y + pc.map_translate.x,
-                pc.map_linear.y * uv.x + pc.map_linear.w * uv.y + pc.map_translate.y);
+    return affineMapTransform(pc.map_linear, pc.map_translate, uv);
+}
+
+/* The bump map's linear part and translation, as affineMapTransform() takes them. */
+vec4 bumpMapLinear()
+{
+    return vec4(pc.material.bump_map_transform[0], pc.material.bump_map_transform[1],
+                pc.material.bump_map_transform[2], pc.material.bump_map_transform[3]);
+}
+
+vec2 bumpMapTranslate()
+{
+    return vec2(pc.material.bump_map_transform[4], pc.material.bump_map_transform[5]);
+}
+
+/* The bump map's modifier, applied before the surface's map transform. */
+vec2 applyBumpMapTransform(vec2 uv)
+{
+    return affineMapTransform(bumpMapLinear(), bumpMapTranslate(), uv);
 }
 
 /*
@@ -243,8 +267,8 @@ vec2 applyMapTransform(vec2 uv)
  * fragment stage fetched, with the anchor rotated 60 degrees, so a half turn lands it in a
  * different one.
  *
- * The result then goes through the surface's map transform, as the plain map co-ordinate does
- * in mappedSurfaceUV().
+ * The result is the raw co-ordinate; surfaceMapUV() returns it for the caller to put through
+ * the surface's map transform, as it does the plain map co-ordinate.
  */
 vec2 surfaceMapEnvironment(vec3 view_position, vec3 normal, uint source)
 {
@@ -256,17 +280,35 @@ vec2 surfaceMapEnvironment(vec3 view_position, vec3 normal, uint source)
 
     vec3 wr = normalize(mat3(scene.environment) * r);
 
-    vec2 uv = vec2(atan(wr.x, -wr.z) * 0.159154943091895, 0.5 - wr.y * 0.5);
-
-    return applyMapTransform(uv);
+    return vec2(atan(wr.x, -wr.z) * 0.159154943091895, 0.5 - wr.y * 0.5);
 }
 
 /*
- * The co-ordinate the surface's maps are sampled at: the vertex's own map co-ordinate through
- * the surface's transform, or the generated one for an environment-mapped surface, which is
- * transformed inside surfaceMapEnvironment() because it has no pre-fragment existence.
+ * The surface's own co-ordinate, before the surface's map transform: the vertex's, or the
+ * generated one for an environment-mapped surface, which has no pre-fragment existence.
  */
+vec2 surfaceMapUV(vec2 uv, vec3 view_position, vec3 normal, uint source)
+{
+    return (source == MAPPING_SOURCE_NONE) ? uv : surfaceMapEnvironment(view_position, normal, source);
+}
+
+/* The co-ordinate the surface's maps are sampled at. */
 vec2 mappedSurfaceUV(vec2 uv, vec3 view_position, vec3 normal, uint source)
 {
-    return (source == MAPPING_SOURCE_NONE) ? applyMapTransform(uv) : surfaceMapEnvironment(view_position, normal, source);
+    return applyMapTransform(surfaceMapUV(uv, view_position, normal, source));
+}
+
+/*
+ * The surface map's share of an offset measured in the bump map's co-ordinates. The bump map
+ * is sampled at mapTransform(bumpMapTransform * surfaceUV) and the surface at mapTransform(
+ * surfaceUV), so the same distance on the surface reaching the colour map is mapTransform *
+ * inverse(bumpMapTransform) * inverse(mapTransform) times the bump offset.
+ */
+vec2 bumpOffsetToSurfaceUV(vec2 offset)
+{
+    mat2 map_linear  = mat2(pc.map_linear.x, pc.map_linear.y, pc.map_linear.z, pc.map_linear.w);
+    mat2 bump_linear = mat2(pc.material.bump_map_transform[0], pc.material.bump_map_transform[1],
+                            pc.material.bump_map_transform[2], pc.material.bump_map_transform[3]);
+
+    return map_linear * inverse(bump_linear) * inverse(map_linear) * offset;
 }
