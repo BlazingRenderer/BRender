@@ -8,6 +8,8 @@ add_executable(rendertest
         mipwitness.h
         pmwitness.c
         pmwitness.h
+        materialwitness.c
+        materialwitness.h
         parallaxwitness.c
         parallaxwitness.h
         vkwitness.c
@@ -237,6 +239,10 @@ if (BUILD_TESTING)
     # corpus can see - it clears to grey and builds its fixtures a pixel at a time - so every
     # writer of a 24-bit pixel is asserted against the others. No device is involved.
     #
+    add_test(NAME "matw" COMMAND rendertest --material-witness --device softrend)
+    set_tests_properties("matw" PROPERTIES
+                         ENVIRONMENT "SDL_VIDEODRIVER=offscreen")
+
     add_test(NAME "pmw" COMMAND rendertest --pm-witness --device softrend)
     set_tests_properties("pmw" PROPERTIES
                          ENVIRONMENT "SDL_VIDEODRIVER=offscreen")
