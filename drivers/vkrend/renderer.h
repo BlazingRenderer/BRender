@@ -37,7 +37,7 @@ typedef struct br_vk_light_state {
 /*
  * The per-scene block the scene draw reads, mirroring SceneData in shaders/render.common.glsl.
  * It is a uniform buffer rather than push constants because a full light array cannot fit in
- * the 128 bytes Vulkan guarantees.
+ * a push constant block.
  */
 typedef struct br_vk_scene_state {
     float             projection[16];                     /* view_to_screen, transposed. */
@@ -57,20 +57,6 @@ typedef struct br_vk_scene_state {
     float light_volume_regions[BR_VKREND_MAX_LIGHT_VOLUME_REGIONS][4];
     float light_volume_planes[BR_VKREND_MAX_LIGHT_VOLUME_PLANES][4];
 } br_vk_scene_state;
-
-/*
- * One draw's material block, mirroring MaterialData in shaders/render.common.glsl. The
- * push constant block is exactly the 128 bytes Vulkan guarantees, so the per-draw material
- * state the fragment stage needs beyond it lives here and is bound as a push descriptor at
- * set 0, binding 3. The trailing reserved word pads the block to a 16-byte multiple so
- * more material state can join the fog fields without moving them.
- */
-typedef struct br_vk_material_state {
-    float    fog_colour[4]; /* (R, G, B, 1): glrend's fog_colour with alpha 1. */
-    float    fog_range[2];  /* (fog_min, fog_max), in view-space units.      */
-    uint32_t fog_enabled;   /* 1 when the primitive's fog_type is not BRT_NONE. */
-    uint32_t reserved;      /* Padding for material state to join later.     */
-} br_vk_material_state;
 
 typedef struct br_renderer {
     /*
@@ -134,19 +120,6 @@ typedef struct br_renderer {
      */
     VkBuffer   scene_buffer;
     br_uint_32 scene_light_count;
-
-    /*
-     * The per-draw material block buffer. The push constant block is full, so each draw
-     * bump-allocates one br_vk_material_state from this buffer and pushes its offset as a
-     * descriptor. The buffer is created per sceneBegin and retired against the frame that
-     * reads it - and replaced on growth, with the old one retired too - so no recorded draw
-     * reads a block a later draw's write overwrote.
-     */
-    VkBuffer      material_buffer;
-    VmaAllocation material_allocation;
-    void         *material_mapped;
-    br_uint_32    material_count;
-    br_uint_32    material_capacity;
 
     /*
      * The light part each packed light came from, so a draw can find that light's

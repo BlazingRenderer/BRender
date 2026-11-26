@@ -28,11 +28,9 @@ br_renderer_facility *RendererFacilityVkAllocate(br_device *dev);
 /*
  * renderer.c
  */
-br_renderer          *RendererVkAllocate(br_device *device, br_renderer_facility *facility, br_device_pixelmap *dest);
-state_stack          *RendererVkAllocState(br_renderer *self, const state_stack *tpl, br_uint_32 refs);
-void                  RendererVkUnrefState(br_renderer *self, state_stack *state);
-br_vk_material_state *RendererVkMaterialReserve(br_renderer *self, VkDeviceSize *out_offset);
-void                  RendererVkMaterialFlush(br_renderer *self, VkDeviceSize offset);
+br_renderer *RendererVkAllocate(br_device *device, br_renderer_facility *facility, br_device_pixelmap *dest);
+state_stack *RendererVkAllocState(br_renderer *self, const state_stack *tpl, br_uint_32 refs);
+void         RendererVkUnrefState(br_renderer *self, state_stack *state);
 
 /*
  * state.c

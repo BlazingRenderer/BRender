@@ -4,20 +4,17 @@
  * The scene block holds the per-scene resources the draw needs: the projection matrix, the
  * environment frame the environment-mapped fragment shaders rotate a reflection into, and
  * the frame's packed lights. It is bound as a push descriptor (set 0, binding 0) and
- * written once per scene, which is why the lights can be a full BR_MAX_LIGHTS array - a
- * push constant block cannot exceed the 128 bytes Vulkan guarantees, and one light alone
- * is most of that. The per-draw material block (fog for now) is a second uniform buffer at
- * set 0, binding 3, for the same reason: the push constant block is exactly the 128 bytes
- * Vulkan guarantees, so anything else the fragment stage needs per draw has to live
- * outside it. glslang resolves the include relative to this file's directory.
+ * written once per scene, which is why the lights can be a full BR_MAX_LIGHTS array - that
+ * cannot fit in a push constant block. glslang resolves the include relative to this
+ * file's directory.
  *
- * The push constant block holds the per-draw state and is laid out to fit the 128 bytes
- * exactly: the model-view (64) + surface colour (16) + lighting factors (16) + the map
- * transform's linear part (16) + its translation (8) + a packed flag word pair (8). The
- * model-view, not the combined MVP, is what the lighting model needs - it shades in view
- * space, so it derives the normal matrix from the model-view here rather than carrying a
- * second matrix in the block. The map transform is applied to the model's map coordinates
- * by the vertex stage, so the fragment stage only reads the transformed UV.
+ * The push constant block holds the per-draw state: the model-view (64) + surface colour
+ * (16) + lighting factors (16) + the map transform's linear part (16) + its translation
+ * (8) + a packed flag word pair (8) + the material's fog state (32). The model-view, not
+ * the combined MVP, is what the lighting model needs - it shades in view space, so it
+ * derives the normal matrix from the model-view here rather than carrying a second matrix
+ * in the block. The map transform is applied to the model's map coordinates by the vertex
+ * stage, so the fragment stage only reads the transformed UV.
  *
  * The flags word pair packs seven things into 64 bits: bit 0 of flags.x is flat shading,
  * bit 1 is the colour key, and bits 2..31 of flags.x plus bits 0..17 of flags.y are the
@@ -66,17 +63,16 @@ layout(std140, set = 0, binding = 0) uniform SceneData {
 } scene;
 
 /*
- * One draw's material state, mirroring br_vk_material_state in renderer.h. The push
- * constant block is full, so this rides in its own uniform buffer bound as a push
- * descriptor at set 0, binding 3. The reserved word keeps the block 16-byte aligned so
- * more material state can join the fog fields without moving them.
+ * One draw's material state, mirroring br_vk_material_state in gv1buckt.c. The block is
+ * std430, so fog_enabled follows fog_range without std140's 16-byte rounding, and the
+ * reserved word pads the struct to its 16-byte alignment.
  */
-layout(std140, set = 0, binding = 3) uniform MaterialData {
+struct MaterialData {
     vec4 fog_colour;  /* (R, G, B, 1): glrend's fog_colour with alpha 1.        */
     vec2 fog_range;   /* (fog_min, fog_max), in view-space units.               */
     uint fog_enabled; /* 1 when the primitive's fog_type is not BRT_NONE.       */
-    uint reserved;    /* 16-byte padding for material state to join later.      */
-} material;
+    uint reserved;    /* Padding to a 16-byte struct; room for more state.      */
+};
 
 /*
  * Whether the core enabled state clip plane i. glrend keys the same decision off
@@ -89,7 +85,7 @@ bool clipPlaneEnabled(int i)
     return (scene.clip_mask.x & (1u << i)) != 0u;
 }
 
-layout(push_constant) uniform RenderData {
+layout(push_constant, std430) uniform RenderData {
     mat4  model_view;
     vec4  colour;         /* (R, G, B, opacity) of the surface.                  */
     vec4  factors;        /* ka, kd, ks, power.                                  */
@@ -99,6 +95,7 @@ layout(push_constant) uniform RenderData {
                              [1] bits 0..17 cull 30..47, bit 18 vertex colour source,
                              bit 19 prelighting, bit 20 GOURAUD, bits 21..22 mapping
                              source.                                                */
+    MaterialData material;
 } pc;
 
 /* Whether the surface is flat shaded, i.e. the normal is taken at the provoking vertex. */
@@ -131,7 +128,7 @@ bool colourKeyEnabled()
  */
 bool fogEnabled()
 {
-    return material.fog_enabled != 0u;
+    return pc.material.fog_enabled != 0u;
 }
 
 /*
@@ -150,11 +147,11 @@ bool fogEnabled()
  */
 vec4 applyFog(in vec4 inColour, in float dist)
 {
-    float fog_min = material.fog_range.x;
-    float fog_max = max(material.fog_range.y + 0.001f, material.fog_range.y);
+    float fog_min = pc.material.fog_range.x;
+    float fog_max = max(pc.material.fog_range.y + 0.001f, pc.material.fog_range.y);
 
     float fog_factor = clamp((fog_max - dist) / (fog_max - fog_min), 0.0, 1.0);
-    return mix(material.fog_colour, inColour, fog_factor);
+    return mix(pc.material.fog_colour, inColour, fog_factor);
 }
 
 /*

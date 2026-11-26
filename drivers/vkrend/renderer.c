@@ -133,12 +133,6 @@ br_renderer *RendererVkAllocate(br_device *device, br_renderer_facility *facilit
     self->scene_buffer      = VK_NULL_HANDLE;
     self->scene_light_count = 0;
 
-    self->material_buffer     = VK_NULL_HANDLE;
-    self->material_allocation = VK_NULL_HANDLE;
-    self->material_mapped     = NULL;
-    self->material_count      = 0;
-    self->material_capacity   = 0;
-
     ObjectContainerAddFront(facility, (br_object *)self);
 
     StateVkInit(&self->state, self->device);
@@ -503,127 +497,6 @@ static VkBuffer VkRenderSceneBufferCreate(br_renderer *self, const br_vk_scene_s
 }
 
 /*
- * The initial number of per-draw material blocks a scene's material buffer holds before it
- * grows. Small, because most scenes have few draws that change material; growth is a
- * reallocation, not a failure.
- */
-#define BR_VKREND_MATERIAL_INITIAL_BLOCKS 16
-
-/*
- * Create a host-visible device buffer for `capacity` per-draw material blocks and map it.
- * The caller retires it against the frame that reads it. Returns BR_FALSE on failure, with
- * the outputs unmodified.
- */
-/*
- * The stride the material blocks are spaced by. It is not the struct's size: std140 rounds an
- * array-of-structs stride up to 16, and the device independently requires a descriptor offset to
- * be a multiple of minUniformBufferOffsetAlignment, which can be larger than that. Only the
- * spacing is padded - a block's descriptor range and flush stay the struct's own size.
- */
-static VkDeviceSize RendererVkMaterialStride(const br_device *dev)
-{
-    const VkDeviceSize alignment = dev->physical_device->props2.properties.limits.minUniformBufferOffsetAlignment;
-    const VkDeviceSize step      = alignment > 16 ? alignment : 16;
-    const VkDeviceSize size      = sizeof(br_vk_material_state);
-
-    return (size + step - 1) / step * step;
-}
-
-static br_boolean VkRenderMaterialBufferCreate(br_renderer *self, br_uint_32 capacity, VkBuffer *out_buffer, VmaAllocation *out_allocation,
-                                               void **out_mapped)
-{
-    br_device *dev = self->device;
-    VkBuffer   buffer;
-    VkResult   res;
-
-    const VkBufferCreateInfo buffer_info = {
-        .sType       = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO,
-        .size        = (VkDeviceSize)capacity * RendererVkMaterialStride(dev),
-        .usage       = VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
-        .sharingMode = VK_SHARING_MODE_EXCLUSIVE,
-    };
-
-    const VmaAllocationCreateInfo alloc_info = {
-        .flags = VMA_ALLOCATION_CREATE_MAPPED_BIT,
-        .usage = VMA_MEMORY_USAGE_CPU_TO_GPU,
-    };
-
-    VmaAllocation     allocation;
-    VmaAllocationInfo alloc_info_out;
-
-    if((res = vmaCreateBuffer(dev->vma_allocator, &buffer_info, &alloc_info, &buffer, &allocation, &alloc_info_out)) != VK_SUCCESS) {
-        BrLogError("VKREND", "Failed to create the material block buffer: VkResult = %d", res);
-        return BR_FALSE;
-    }
-
-    *out_buffer     = buffer;
-    *out_allocation = allocation;
-    *out_mapped     = alloc_info_out.pMappedData;
-    return BR_TRUE;
-}
-
-/*
- * Reserve the next per-draw material block from the scene's material buffer, growing the
- * buffer if it is full. Returns the block for the caller to fill, or NULL if it could not
- * be allocated - which declines the draw, because a draw that needed fog but had no block
- * would silently render unfogged. *out_offset is the block's byte offset in
- * renderer->material_buffer; the draw pushes it as the block's descriptor range.
- *
- * Every buffer this creates is retired against the frame at creation, exactly like the
- * scene block: sceneBegin() retires the initial one and each replacement retires itself, so
- * the descriptors recorded against a buffer stay readable until the frame's fence signals
- * and no buffer is destroyed twice or leaked. (The buffer being replaced was already
- * retired when it was created - retiring it again here would enqueue a second destroy.)
- */
-br_vk_material_state *RendererVkMaterialReserve(br_renderer *self, VkDeviceSize *out_offset)
-{
-    br_vk_material_state *block;
-    VkDeviceSize          offset;
-
-    if(self->material_buffer == VK_NULL_HANDLE)
-        return NULL;
-
-    if(self->material_count == self->material_capacity) {
-        br_uint_32    capacity = self->material_capacity ? self->material_capacity * 2 : BR_VKREND_MATERIAL_INITIAL_BLOCKS;
-        VkBuffer      buffer;
-        VmaAllocation allocation;
-        void         *mapped;
-
-        if(!VkRenderMaterialBufferCreate(self, capacity, &buffer, &allocation, &mapped))
-            return NULL;
-
-        BrMemCpy(mapped, self->material_mapped, self->material_count * RendererVkMaterialStride(self->device));
-
-        DevicePixelmapVkRetireBuffer(DevicePixelmapVkGetCurrentFrame(self->scene_dst->screen), buffer, allocation);
-
-        self->material_buffer     = buffer;
-        self->material_allocation = allocation;
-        self->material_mapped     = mapped;
-        self->material_capacity   = capacity;
-    }
-
-    offset = (VkDeviceSize)self->material_count * RendererVkMaterialStride(self->device);
-    block  = (br_vk_material_state *)((char *)self->material_mapped + offset);
-    self->material_count++;
-
-    *out_offset = offset;
-    return block;
-}
-
-/*
- * Push a just-filled material block to the device. CPU_TO_GPU memory is not guaranteed
- * coherent, so a draw flushes its block after writing it and before recording the
- * descriptor that reads it.
- */
-void RendererVkMaterialFlush(br_renderer *self, VkDeviceSize offset)
-{
-    if(self->material_buffer == VK_NULL_HANDLE)
-        return;
-
-    vmaFlushAllocation(self->device->vma_allocator, self->material_allocation, offset, sizeof(br_vk_material_state));
-}
-
-/*
  * Close the dynamic rendering scope sceneBegin() opened, if one is open, and put the
  * destination back in GENERAL. Shared by sceneEnd() and sceneBegin(): the core re-enters a
  * scene through BrZsSceneRenderContinue(), which calls BrDbSceneRenderBegin() - and so
@@ -734,12 +607,6 @@ static void BR_CMETHOD_DECL(br_renderer_vk, sceneBegin)(br_renderer *self)
 
     self->scene_buffer      = VK_NULL_HANDLE;
     self->scene_light_count = 0;
-
-    self->material_buffer     = VK_NULL_HANDLE;
-    self->material_allocation = VK_NULL_HANDLE;
-    self->material_mapped     = NULL;
-    self->material_count      = 0;
-    self->material_capacity   = 0;
 
     colour_target = (self->state.current->valid & MASK_STATE_OUTPUT) ? self->state.current->output.colour : self->pixelmap;
 
@@ -853,28 +720,6 @@ static void BR_CMETHOD_DECL(br_renderer_vk, sceneBegin)(br_renderer *self)
 
     DevicePixelmapVkRetireBuffer(frame, scene_buffer, scene_allocation);
     self->scene_buffer = scene_buffer;
-
-    /*
-     * The per-draw material buffer, created fresh per scene and retired against this frame
-     * like the scene block: every draw in the scene bump-allocates from it, and no draw may
-     * read a block a later draw overwrites. The rendering scope has not been opened yet, so
-     * a failure here returns with has_begun clear and no draw is recorded.
-     */
-    {
-        VkBuffer      material_buffer;
-        VmaAllocation material_allocation;
-        void         *material_mapped;
-
-        if(!VkRenderMaterialBufferCreate(self, BR_VKREND_MATERIAL_INITIAL_BLOCKS, &material_buffer, &material_allocation, &material_mapped))
-            return;
-
-        DevicePixelmapVkRetireBuffer(frame, material_buffer, material_allocation);
-        self->material_buffer     = material_buffer;
-        self->material_allocation = material_allocation;
-        self->material_mapped     = material_mapped;
-        self->material_count      = 0;
-        self->material_capacity   = BR_VKREND_MATERIAL_INITIAL_BLOCKS;
-    }
 
     range = (VkImageSubresourceRange){
         .aspectMask     = VK_IMAGE_ASPECT_COLOR_BIT,
@@ -1014,12 +859,6 @@ static void BR_CMETHOD_DECL(br_renderer_vk, sceneEnd)(br_renderer *self)
      */
     self->scene_buffer      = VK_NULL_HANDLE;
     self->scene_light_count = 0;
-
-    self->material_buffer     = VK_NULL_HANDLE;
-    self->material_allocation = VK_NULL_HANDLE;
-    self->material_mapped     = NULL;
-    self->material_count      = 0;
-    self->material_capacity   = 0;
 
     BrPoolEmpty(self->state_pool);
 }

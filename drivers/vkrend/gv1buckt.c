@@ -14,9 +14,10 @@
  * shading mode and front-face winding - on top of the destination format and sample count.
  * It is device-scoped and built on first use.
  *
- * The push constant block carries the per-draw model-view, surface colour and lighting
- * factors. The projection and the frame's packed lights come from a scene block bound as a
- * push descriptor, which the vertex stage also needs for the projection.
+ * The push constant block carries the per-draw model-view, surface colour, lighting
+ * factors and material state. The projection and the frame's packed lights come from a
+ * scene block bound as a push descriptor, which the vertex stage also needs for the
+ * projection.
  */
 #include "drv.h"
 #include "brassert.h"
@@ -39,6 +40,13 @@ static br_tv_template_entry geometryV1BucketsTemplateEntries[] = {
 };
 #undef F
 
+typedef struct br_vk_material_state {
+    float    fog_colour[4]; /* (R, G, B, 1): glrend's fog_colour with alpha 1.     */
+    float    fog_range[2];  /* (fog_min, fog_max), in view-space units.           */
+    uint32_t fog_enabled;   /* 1 when the primitive's fog_type is not BRT_NONE.   */
+    uint32_t reserved;      /* Padding to a 16-byte struct; room for more state.  */
+} br_vk_material_state;
+
 /*
  * The push constant payload for one group draw. The layout must match the RenderData block
  * in render.common.glsl. A br_matrix4's floats are copied in row-major order; a GLSL mat4
@@ -55,7 +63,22 @@ typedef struct br_vk_render_data {
     float    map_translate[2]; /* m20, m21 - the map transform's translation.                          */
     uint32_t flags[2];         /* [0] bit 0 flat, bit 1 colour key, bits 2..31 cull 0..29; [1] cull 30..47, bit 18
                                   colour source, bit 19 prelighting, bit 20 GOURAUD, bits 21..22 mapping source. */
+    br_vk_material_state material;
 } br_vk_render_data;
+
+_Static_assert(offsetof(br_vk_render_data, model_view) == 0, "model_view offset");
+_Static_assert(offsetof(br_vk_render_data, colour) == 64, "colour offset");
+_Static_assert(offsetof(br_vk_render_data, factors) == 80, "factors offset");
+_Static_assert(offsetof(br_vk_render_data, map_linear) == 96, "map_linear offset");
+_Static_assert(offsetof(br_vk_render_data, map_translate) == 112, "map_translate offset");
+_Static_assert(offsetof(br_vk_render_data, flags) == 120, "flags offset");
+_Static_assert(offsetof(br_vk_render_data, material) == 128, "material offset");
+_Static_assert(offsetof(br_vk_material_state, fog_colour) == 0, "fog_colour offset");
+_Static_assert(offsetof(br_vk_material_state, fog_range) == 16, "fog_range offset");
+_Static_assert(offsetof(br_vk_material_state, fog_enabled) == 24, "fog_enabled offset");
+_Static_assert(offsetof(br_vk_material_state, reserved) == 28, "reserved offset");
+_Static_assert(sizeof(br_vk_material_state) == 32, "material size");
+_Static_assert(sizeof(br_vk_render_data) == 160, "push constant size");
 
 /**
  * \brief Release the scene-draw machinery's device-scoped resources and mark it unavailable.
@@ -131,6 +154,14 @@ br_vk_render_state DeviceVkRenderEnsureInit(br_device *dev)
 
     if(!dev->dynamic_rendering || !dev->push_descriptor || dev->context.CmdBeginRendering == NULL || dev->context.CmdPushDescriptorSet == NULL) {
         BrLogInfo("VKREND", "Scene draw disabled: dynamic rendering or push descriptors are unavailable.");
+        return dev->render_state;
+    }
+
+    const uint32_t max_push_constants = dev->physical_device->props2.properties.limits.maxPushConstantsSize;
+
+    if(sizeof(br_vk_render_data) > max_push_constants) {
+        BrLogError("VKREND", "Scene draw disabled: the push constant block is %zu bytes, more than the device's %u.",
+                   sizeof(br_vk_render_data), max_push_constants);
         return dev->render_state;
     }
 
@@ -210,12 +241,10 @@ br_vk_render_state DeviceVkRenderEnsureInit(br_device *dev)
      * lit fragment stage reads the packed lights from, so both stages name it. Binding 1 is
      * the colour map, which every fragment shader samples - the device binds a 1x1 white image
      * there when the material has no map - and binding 2 is its palette, which only the indexed
-     * shaders use. Binding 3 is the per-draw material block (fog for now), which every fragment
-     * shader reads for its fog state, so only the fragment stage names it. A push descriptor
-     * that is not used can be left undefined, so a draw without an indexed map pushes 0, 1 and
-     * 3 and an indexed one pushes 2 as well.
+     * shaders use. A push descriptor that is not used can be left undefined, so a draw
+     * without an indexed map pushes 0 and 1 and an indexed one pushes 2 as well.
      */
-    const VkDescriptorSetLayoutBinding scene_bindings[4] = {
+    const VkDescriptorSetLayoutBinding scene_bindings[3] = {
         {
          .binding         = 0,
          .descriptorType  = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
@@ -231,12 +260,6 @@ br_vk_render_state DeviceVkRenderEnsureInit(br_device *dev)
         {
          .binding         = 2,
          .descriptorType  = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
-         .descriptorCount = 1,
-         .stageFlags      = VK_SHADER_STAGE_FRAGMENT_BIT,
-         },
-        {
-         .binding         = 3,
-         .descriptorType  = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
          .descriptorCount = 1,
          .stageFlags      = VK_SHADER_STAGE_FRAGMENT_BIT,
          },
@@ -730,9 +753,8 @@ static br_boolean VkV1ModelRenderIndexed(br_geometry_stored *geom, br_renderer *
     br_boolean                indexed;
     br_token                  shading_mode;
     br_buffer_stored         *colour_map;
-    br_vk_render_data         data = {0};
-    br_vk_material_state     *material;
-    VkDeviceSize              material_offset;
+    br_vk_render_data         data     = {0};
+    br_vk_material_state     *material = &data.material;
 
     if(!renderer->has_begun)
         return BR_FALSE;
@@ -959,25 +981,15 @@ static br_boolean VkV1ModelRenderIndexed(br_geometry_stored *geom, br_renderer *
     }
 
     /*
-     * The per-draw material block, from glrend's extract (drivers/glrend/v1model.c): fog is
+     * The per-draw material state, from glrend's extract (drivers/glrend/v1model.c): fog is
      * on when the primitive's fog type is not BRT_NONE, its colour is the fog colour's RGB
      * over 255 with alpha 1, and fog_range is fog_min/fog_max. The primitive's fog_scale is
-     * carried in state but glrend never applies it, so it is not packed. The block is
-     * reserved before anything is recorded for the draw, so a failed reserve declines the
-     * draw cleanly rather than drawing it unfogged.
+     * carried in state but glrend never applies it, so it is not packed.
      */
-    material = RendererVkMaterialReserve(renderer, &material_offset);
-    if(material == NULL)
-        return BR_FALSE;
-
     material->fog_colour[0] = 1.0f;
     material->fog_colour[1] = 1.0f;
     material->fog_colour[2] = 1.0f;
     material->fog_colour[3] = 1.0f;
-    material->fog_range[0]  = 0.0f;
-    material->fog_range[1]  = 0.0f;
-    material->fog_enabled   = 0;
-    material->reserved      = 0;
 
     if((state->valid & MASK_STATE_PRIMITIVE) && state->prim.fog_type != BRT_NONE) {
         material->fog_colour[0] = BR_RED(state->prim.fog_colour) / 255.0f;
@@ -988,8 +1000,6 @@ static br_boolean VkV1ModelRenderIndexed(br_geometry_stored *geom, br_renderer *
         material->fog_range[1]  = (float)state->prim.fog_max;
         material->fog_enabled   = 1;
     }
-
-    RendererVkMaterialFlush(renderer, material_offset);
 
     cmd = DevicePixelmapVkGetCurrentFrame(dst->screen)->command_buffer;
 
@@ -1012,25 +1022,6 @@ static br_boolean VkV1ModelRenderIndexed(br_geometry_stored *geom, br_renderer *
         .pBufferInfo     = &scene_info,
     };
     vk->CmdPushDescriptorSet(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, dev->render_pipeline_layout, 0, 1, &scene_write);
-
-    /*
-     * The material block every fragment shader reads for its fog state. Its descriptor is
-     * the block at this draw's offset in the scene's material buffer, so two draws with
-     * different fog state can share the buffer without overwriting each other.
-     */
-    const VkDescriptorBufferInfo material_info = {
-        .buffer = renderer->material_buffer,
-        .offset = material_offset,
-        .range  = sizeof(br_vk_material_state),
-    };
-    const VkWriteDescriptorSet material_write = {
-        .sType           = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
-        .dstBinding      = 3,
-        .descriptorCount = 1,
-        .descriptorType  = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
-        .pBufferInfo     = &material_info,
-    };
-    vk->CmdPushDescriptorSet(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, dev->render_pipeline_layout, 0, 1, &material_write);
 
     /*
      * The colour map's slot is always bound. A material with no map binds the device's 1x1

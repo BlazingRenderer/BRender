@@ -974,18 +974,10 @@ static const br_uint_8 vkrend_renderer_index_zero[4] = {0x33, 0x22, 0x11, 0xff};
  */
 #define VKREND_RENDERER_CAMERA_DISTANCE BR_SCALAR(8.0)
 
-/*
- * The per-draw material buffer growth witness draws this many one-triangle actors in a
- * single scene. RendererVkMaterialReserve() bump-allocates one block per draw from a buffer
- * vkrend's sceneBegin() creates with BR_VKREND_MATERIAL_INITIAL_BLOCKS (16) blocks, so the
- * count must exceed 16 for the scene to grow it. The actors are scaled down and laid out in
- * a grid that keeps every triangle apart and inside the viewport, so each one's projected
- * centre can be asserted.
- */
-#define VKREND_MATERIAL_GROWTH_DRAWS   24
-#define VKREND_MATERIAL_GROWTH_COLUMNS 6
-#define VKREND_MATERIAL_GROWTH_SPACING BR_SCALAR(0.6)
-#define VKREND_MATERIAL_GROWTH_SCALE   BR_SCALAR(0.15)
+#define VKREND_DRAW_GRID_COUNT          24
+#define VKREND_DRAW_GRID_COLUMNS        6
+#define VKREND_DRAW_GRID_SPACING        BR_SCALAR(0.6)
+#define VKREND_DRAW_GRID_SCALE          BR_SCALAR(0.15)
 
 /* Fill the whole offscreen with the clear colour. */
 static br_error vkrend_renderer_fill_clear(br_pixelmap *offscreen)
@@ -4959,44 +4951,30 @@ static br_error vkrend_renderer_init(void *user, br_pixelmap *screen, br_pixelma
     if(vkrend_renderer_aspect_step(state, camera, actor, camera_data) != BRE_OK)
         goto fail;
 
-    /*
-     * Step 16: the per-draw material buffer's growth. RendererVkMaterialReserve() is called
-     * once per draw (drivers/vkrend/gv1buckt.c) and bump-allocates from a buffer sceneBegin()
-     * creates with BR_VKREND_MATERIAL_INITIAL_BLOCKS (16) blocks, growing it by doubling when a
-     * scene draws more. This step draws VKREND_MATERIAL_GROWTH_DRAWS (24) one-triangle actors -
-     * more than the 16 the initial buffer holds - so the scene grows it once, then reads the
-     * image back. The readback flushes the frame and drains its retire list; a growth path that
-     * retired the buffer it replaced - already retired when sceneBegin() created it - rather
-     * than the replacement destroys the initial buffer twice there. Each triangle's projected
-     * centre must also be the surface colour, so a growth that declined a draw rather than
-     * reallocating leaves its triangle clear.
-     */
+    /* Separate the draws so a neighbouring triangle cannot satisfy a centre-pixel check. */
     {
-        br_actor  *growth[VKREND_MATERIAL_GROWTH_DRAWS];
+        br_actor  *draws[VKREND_DRAW_GRID_COUNT];
         br_uint_32 i;
 
-        for(i = 0; i < VKREND_MATERIAL_GROWTH_DRAWS; ++i) {
-            const br_int_32 col = (br_int_32)(i % VKREND_MATERIAL_GROWTH_COLUMNS);
-            const br_int_32 row = (br_int_32)(i / VKREND_MATERIAL_GROWTH_COLUMNS);
-            const br_scalar x   = BR_MUL(BR_SUB(BR_SCALAR(col), BR_SCALAR(2.5)), VKREND_MATERIAL_GROWTH_SPACING);
-            const br_scalar y   = BR_MUL(BR_SUB(BR_SCALAR(row), BR_SCALAR(1.5)), VKREND_MATERIAL_GROWTH_SPACING);
+        for(i = 0; i < VKREND_DRAW_GRID_COUNT; ++i) {
+            const br_int_32 col = (br_int_32)(i % VKREND_DRAW_GRID_COLUMNS);
+            const br_int_32 row = (br_int_32)(i / VKREND_DRAW_GRID_COLUMNS);
+            const br_scalar x   = BR_MUL(BR_SUB(BR_SCALAR(col), BR_SCALAR(2.5)), VKREND_DRAW_GRID_SPACING);
+            const br_scalar y   = BR_MUL(BR_SUB(BR_SCALAR(row), BR_SCALAR(1.5)), VKREND_DRAW_GRID_SPACING);
 
-            if((growth[i] = BrActorAdd(state->world, BrActorAllocate(BR_ACTOR_MODEL, NULL))) == NULL) {
-                BrLogError("RT", "vkrend: could not allocate the material-growth actor %u.", i);
+            if((draws[i] = BrActorAdd(state->world, BrActorAllocate(BR_ACTOR_MODEL, NULL))) == NULL) {
+                BrLogError("RT", "vkrend: could not allocate grid actor %u.", i);
                 goto fail;
             }
 
-            growth[i]->model    = state->model;
-            growth[i]->material = state->material;
-            growth[i]->t.type   = BR_TRANSFORM_MATRIX34;
-            BrMatrix34Scale(&growth[i]->t.t.mat, VKREND_MATERIAL_GROWTH_SCALE, VKREND_MATERIAL_GROWTH_SCALE, VKREND_MATERIAL_GROWTH_SCALE);
-            BrMatrix34PostTranslate(&growth[i]->t.t.mat, x, y, BR_SCALAR(0.0));
+            draws[i]->model    = state->model;
+            draws[i]->material = state->material;
+            draws[i]->t.type   = BR_TRANSFORM_MATRIX34;
+            BrMatrix34Scale(&draws[i]->t.t.mat, VKREND_DRAW_GRID_SCALE, VKREND_DRAW_GRID_SCALE, VKREND_DRAW_GRID_SCALE);
+            BrMatrix34PostTranslate(&draws[i]->t.t.mat, x, y, BR_SCALAR(0.0));
         }
 
-        /*
-         * The aspect step left its sphere on the shared actor; detach it so this scene draws
-         * exactly the growth triangles and the draw count is the one this step controls.
-         */
+        /* The aspect step left its sphere on the shared actor. */
         actor->model = NULL;
 
         /*
@@ -5013,18 +4991,17 @@ static br_error vkrend_renderer_init(void *user, br_pixelmap *screen, br_pixelma
         if((readback = vkrend_renderer_read(state->offscreen)) == NULL)
             goto fail;
 
-        for(i = 0; i < VKREND_MATERIAL_GROWTH_DRAWS; ++i) {
-            const br_int_32 col = (br_int_32)(i % VKREND_MATERIAL_GROWTH_COLUMNS);
-            const br_int_32 row = (br_int_32)(i / VKREND_MATERIAL_GROWTH_COLUMNS);
-            const br_scalar x   = BR_MUL(BR_SUB(BR_SCALAR(col), BR_SCALAR(2.5)), VKREND_MATERIAL_GROWTH_SPACING);
-            const br_scalar y   = BR_MUL(BR_SUB(BR_SCALAR(row), BR_SCALAR(1.5)), VKREND_MATERIAL_GROWTH_SPACING);
+        for(i = 0; i < VKREND_DRAW_GRID_COUNT; ++i) {
+            const br_int_32 col = (br_int_32)(i % VKREND_DRAW_GRID_COLUMNS);
+            const br_int_32 row = (br_int_32)(i / VKREND_DRAW_GRID_COLUMNS);
+            const br_scalar x   = BR_MUL(BR_SUB(BR_SCALAR(col), BR_SCALAR(2.5)), VKREND_DRAW_GRID_SPACING);
+            const br_scalar y   = BR_MUL(BR_SUB(BR_SCALAR(row), BR_SCALAR(1.5)), VKREND_DRAW_GRID_SPACING);
 
             /* The image's top row is view +y (see the offscreen orientation witness). */
             vkrend_renderer_project(state->offscreen, fov, distance, x, BR_NEG(y), &expected_x, &expected_y);
 
             if(!vkrend_renderer_pixel_is(readback, expected_x, expected_y, vkrend_renderer_surface)) {
-                BrLogError("RT", "vkrend: the material-growth triangle %u at image (%d,%d) is not the surface colour; the grown buffer dropped its draw.",
-                           i, expected_x, expected_y);
+                BrLogError("RT", "vkrend: grid triangle %u at image (%d,%d) is not the surface colour.", i, expected_x, expected_y);
                 BrPixelmapFree(readback);
                 goto fail;
             }
@@ -5032,14 +5009,13 @@ static br_error vkrend_renderer_init(void *user, br_pixelmap *screen, br_pixelma
 
         BrPixelmapFree(readback);
 
-        for(i = 0; i < VKREND_MATERIAL_GROWTH_DRAWS; ++i) {
-            BrActorRemove(growth[i]);
-            BrActorFree(growth[i]);
+        for(i = 0; i < VKREND_DRAW_GRID_COUNT; ++i) {
+            BrActorRemove(draws[i]);
+            BrActorFree(draws[i]);
         }
 
-        BrLogInfo("RT", "vkrend: material growth witness passed (%d one-triangle draws, more than the 16-block initial per-draw material buffer, so the scene grew it once and drained the frame's retire list; every triangle's centre is the surface %02x %02x %02x %02x).",
-                  VKREND_MATERIAL_GROWTH_DRAWS, vkrend_renderer_surface[0], vkrend_renderer_surface[1], vkrend_renderer_surface[2],
-                  vkrend_renderer_surface[3]);
+        BrLogInfo("RT", "vkrend: every triangle centre in the %d-draw scene reads back as %02x %02x %02x %02x.", VKREND_DRAW_GRID_COUNT,
+                  vkrend_renderer_surface[0], vkrend_renderer_surface[1], vkrend_renderer_surface[2], vkrend_renderer_surface[3]);
     }
 
     BrRendererEnd();

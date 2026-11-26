@@ -14,9 +14,8 @@
  * BRender row-vector `pos * model_view`, and `projection * model_view` computes the BRender
  * `model_to_view * view_to_screen`.
  *
- * A BRender normal transforms by the inverse transpose of the model-view linear part. The
- * model-view is already here, so the normal matrix is derived instead of pushed, keeping
- * the push constant block inside the 128 bytes Vulkan guarantees.
+ * A BRender normal transforms by the inverse transpose of the model-view linear part,
+ * so the shader derives the normal matrix from the model-view it already receives.
  *
  * Flat shading samples the normal at the provoking vertex, so the normal is emitted both
  * interpolated and flat; the lit fragment shader picks by the surface's shading mode.
