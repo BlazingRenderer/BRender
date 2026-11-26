@@ -191,7 +191,7 @@ br_scalar BR_PUBLIC_ENTRY BrMatrix23Inverse(br_matrix23 *B, const br_matrix23 *A
     if(BR_ABS(det) <= BR_SCALAR_EPSILON * 2)
         return S0;
 
-    if(BR_DIV(det, pos - neg) < PRECISION_LIMIT)
+    if(BR_DIV(BR_ABS(det), pos - neg) < PRECISION_LIMIT)
         return S0;
 
     idet = BR_RCP(det);
