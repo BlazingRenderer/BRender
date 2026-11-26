@@ -26,7 +26,12 @@
  * than a black frame - a black frame would not distinguish "the light was culled"
  * from "nothing rendered".
  */
+#if defined(_MSC_VER) && !defined(_USE_MATH_DEFINES)
+#define _USE_MATH_DEFINES
+#endif
+
 #include <stdio.h>
+#include <math.h>
 #include <brender.h>
 
 /* cube.c */
@@ -86,6 +91,87 @@ static void scene_place_and_aim(br_actor *a, br_scalar x, br_scalar y, br_scalar
 
     a->t.type  = BR_TRANSFORM_MATRIX34;
     a->t.t.mat = m;
+}
+
+/*
+ * Point the scene camera at the origin from an arbitrary place, so a face can be seen at a
+ * grazing angle. A camera looks down its local -Z, so its local +Z runs from the origin back
+ * to the camera; X is the world up crossed into that, and Y closes the right-handed frame.
+ */
+static br_boolean scene_aim_camera_at_origin(br_actor *world, br_scalar x, br_scalar y, br_scalar z)
+{
+    br_actor   *a;
+    br_matrix34 m;
+
+    for(a = world->children; a != NULL; a = a->next) {
+        if(a->type == BR_ACTOR_CAMERA)
+            break;
+    }
+
+    if(a == NULL)
+        return BR_FALSE;
+
+    /*
+     * The basis is built in double and rounded once when it reaches br_scalar. It is a
+     * normalise and two crosses, and at br_scalar their last bits are the compiler's business
+     * rather than the scene's: under x87 every intermediate is 80-bit and under declared
+     * rounding it is not, so the two produce matrices that differ in the last place - enough
+     * for the fixture file to record the FPU instead of the scene, which is what the 32-bit
+     * fixture check was failing on. Rounding at the end hides the difference, because the
+     * double result is thirty bits wider than the float it becomes.
+     */
+    const double px = BrScalarToFloat(x), py = BrScalarToFloat(y), pz = BrScalarToFloat(z);
+    double       len, xx, xy, xz, yx, yy, yz, zx, zy, zz;
+
+    len = sqrt(px * px + py * py + pz * pz);
+
+    if(len == 0.0)
+        return BR_FALSE;
+
+    zx = px / len;
+    zy = py / len;
+    zz = pz / len;
+
+    /* X is the world up (0,1,0) crossed into Z, which is exact until the normalise. */
+    xx = zz;
+    xy = 0.0;
+    xz = -zx;
+
+    len = sqrt(xx * xx + xz * xz);
+
+    if(len == 0.0)
+        return BR_FALSE;
+
+    xx /= len;
+    xy /= len;
+    xz /= len;
+
+    /* Y closes the right-handed frame. */
+    yx = zy * xz - zz * xy;
+    yy = zz * xx - zx * xz;
+    yz = zx * xy - zy * xx;
+
+    m.m[0][0] = BrFloatToScalar((br_float)xx);
+    m.m[0][1] = BrFloatToScalar((br_float)xy);
+    m.m[0][2] = BrFloatToScalar((br_float)xz);
+    m.m[0][3] = BR_SCALAR(0.0);
+    m.m[1][0] = BrFloatToScalar((br_float)yx);
+    m.m[1][1] = BrFloatToScalar((br_float)yy);
+    m.m[1][2] = BrFloatToScalar((br_float)yz);
+    m.m[1][3] = BR_SCALAR(0.0);
+    m.m[2][0] = BrFloatToScalar((br_float)zx);
+    m.m[2][1] = BrFloatToScalar((br_float)zy);
+    m.m[2][2] = BrFloatToScalar((br_float)zz);
+    m.m[2][3] = BR_SCALAR(0.0);
+    m.m[3][0] = x;
+    m.m[3][1] = y;
+    m.m[3][2] = z;
+    m.m[3][3] = BR_SCALAR(1.0);
+
+    a->t.type  = BR_TRANSFORM_MATRIX34;
+    a->t.t.mat = m;
+
+    return BR_TRUE;
 }
 
 /*
@@ -802,6 +888,295 @@ static br_pixelmap *scene_shade_table_rgb(const char *name, br_uint_8 type)
  * ever satisfy that requirement. The two hues are scene_texture()'s, so a
  * channel-order or channel-drop failure reads the same way on either map.
  */
+/*
+ * A tangent-space normal map: RGBX_888, because a normal map is a vector per texel and an
+ * indexed map cannot hold one. The relief is a sine grid, so the shading follows it in both
+ * axes and a map that silently stops being applied leaves a flat surface rather than a
+ * shifted one.
+ */
+/*
+ * Round each operation before the next one sees it.
+ *
+ * These maps index a texel by sin and cos of a normalised co-ordinate, and the fixture file has
+ * to hold the same bytes on every floating-point class. Rounding once per statement is not
+ * enough: gcc's -fexcess-precision=fast lets the x87 carry a chain of operations in 80-bit and
+ * round only at the end, so `a * b * c` lands a place away from two rounded multiplications.
+ * The store through a volatile is what stops one expression's spare precision reaching the
+ * next. It is not a proof that the operation itself rounded once - an x87 operation may already
+ * have rounded in its register, and libm and FMA contraction remain the compiler's - so what is
+ * guaranteed here is the barrier, and the fixture's stability across x87, SSE and SSE+FMA was
+ * measured rather than derived. Same test and same technique as PizRounded() in
+ * drivers/softprim/raster.cpp, which has the longer note.
+ */
+#if (defined(__FLT_EVAL_METHOD__) && __FLT_EVAL_METHOD__ == 2) || (defined(_M_IX86_FP) && _M_IX86_FP == 0)
+#define SCENE_ROUNDS
+#endif
+
+#ifdef SCENE_ROUNDS
+static double scene_add(double a, double b)
+{
+    volatile double r = a + b;
+
+    return r;
+}
+static double scene_mul(double a, double b)
+{
+    volatile double r = a * b;
+
+    return r;
+}
+static double scene_div(double a, double b)
+{
+    volatile double r = a / b;
+
+    return r;
+}
+#else
+static double scene_add(double a, double b)
+{
+    return a + b;
+}
+static double scene_mul(double a, double b)
+{
+    return a * b;
+}
+static double scene_div(double a, double b)
+{
+    return a / b;
+}
+#endif
+
+static br_pixelmap *scene_normal_map(const char *name, int width, int height, int cells)
+{
+    br_pixelmap *pm;
+    br_uint_8   *pixels;
+
+    /*
+     * RGBA, not RGBX: the fourth channel carries the height a parallax map
+     * displaces by, and both drivers swizzle an RGBX map's alpha to one.
+     */
+    if((pm = BrPixelmapAllocate(BR_PMT_RGBA_8888, width, height, NULL, BR_PMAF_NORMAL)) == NULL)
+        return NULL;
+
+    pm->identifier = BrResStrDup(pm, name);
+    pixels         = pm->pixels;
+
+    for(int y = 0; y < height; ++y) {
+        for(int x = 0; x < width; ++x) {
+            /*
+             * Grouped the way the expressions were written before the roundings were forced in,
+             * so that a `declared' build computes exactly what it did and only the x87 one moves.
+             */
+            const double u  = scene_div((double)x, width);
+            const double v  = scene_div((double)y, height);
+            const double w  = scene_mul(scene_mul(2.0, M_PI), cells);
+            const double a  = scene_mul(w, u);
+            const double b  = scene_mul(w, v);
+            const double sa = sin(a), sb = sin(b), ca = cos(a), cb = cos(b);
+
+            /* dh/dx and dh/dy of 0.5 * sin(a) * sin(b), and the field itself. */
+            const double h    = scene_mul(scene_mul(0.5, sa), sb);
+            const double dhdx = scene_mul(scene_mul(scene_div(scene_mul(scene_mul(0.5, 2.0 * M_PI), cells), width), ca), sb);
+            const double dhdy = scene_mul(scene_mul(scene_div(scene_mul(scene_mul(0.5, 2.0 * M_PI), cells), height), sa), cb);
+            double       nx = -dhdx, ny = -dhdy, nz = 1.0;
+            const double len = sqrt(scene_add(scene_add(scene_mul(nx, nx), scene_mul(ny, ny)), scene_mul(nz, nz)));
+            br_uint_8   *px  = pixels + (br_size_t)y * pm->row_bytes + (br_size_t)x * 4;
+
+            nx = scene_div(nx, len);
+            ny = scene_div(ny, len);
+            nz = scene_div(nz, len);
+
+            /* A host 888 map is byte-ordered B,G,R, so x goes in the third byte. */
+            px[0] = (br_uint_8)scene_add(scene_mul(scene_add(scene_mul(nz, 0.5), 0.5), 255.0), 0.5);
+            px[1] = (br_uint_8)scene_add(scene_mul(scene_add(scene_mul(ny, 0.5), 0.5), 255.0), 0.5);
+            px[2] = (br_uint_8)scene_add(scene_mul(scene_add(scene_mul(nx, 0.5), 0.5), 255.0), 0.5);
+            px[3] = (br_uint_8)scene_add(scene_mul(scene_add(h, 0.5), 255.0), 0.5);
+        }
+    }
+
+    BrMapAdd(pm);
+
+    return pm;
+}
+
+/*
+ * A brick lattice, for the eye rather than for the checksum.
+ *
+ * The colour, the height and the normal all come from one field, so the mortar that reads as a
+ * recess and the mortar that is shaded as one cannot disagree: a generator that drew the bricks
+ * and separately carved them would let the two drift apart, and the drift would look like a
+ * parallax fault. The height is the map's alpha channel, which is where the parallax reads it,
+ * and the normal is the finite difference of that same height.
+ */
+#define SCENE_BRICK_SIZE 512
+
+static unsigned scene_brick_hash(unsigned a, unsigned b)
+{
+    unsigned h = a * 374761393u + b * 668265263u;
+
+    h = (h ^ (h >> 13)) * 1274126177u;
+    return h ^ (h >> 16);
+}
+
+/*
+ * The field at (u, v): the height in [0,1], the colour, and the per-brick tint that makes the
+ * courses read as separate bricks rather than as one pattern.
+ */
+static void scene_brick_sample(double u, double v, int courses, double *out_h, double *out_r, double *out_g, double *out_b)
+{
+    const double ch = 1.0 / (double)courses; /* course height */
+    const double bl = 2.0 / (double)courses; /* brick length: 2:1, so u and v share a scale */
+    const double mu = 0.045;                 /* mortar half-width, in brick lengths */
+    const double mv = 0.110;                 /* mortar half-width, in course heights */
+    int          row, col;
+    double       uu, ul, vl;
+
+    if(u < 0.0)
+        u += 1.0;
+    if(v < 0.0)
+        v += 1.0;
+
+    row = (int)(v / ch);
+    vl  = v / ch - (double)row;
+
+    uu  = u / bl + ((row & 1) ? 0.5 : 0.0);
+    col = (int)uu;
+    ul  = uu - (double)col;
+
+    if(ul < mu || ul > 1.0 - mu || vl < mv || vl > 1.0 - mv) {
+        /* Mortar: recessed, and one colour everywhere so it reads as one material. */
+        *out_h = 0.0;
+        *out_r = 0.62;
+        *out_g = 0.59;
+        *out_b = 0.52;
+        return;
+    }
+
+    {
+        const unsigned h    = scene_brick_hash((unsigned)row, (unsigned)col);
+        double         tint = 0.74 + 0.26 * (double)(h & 0xff) / 255.0;
+        /* A dark brick here and there, as a real wall has: the features must not be uniform. */
+        const double grain = 0.02 * (double)((h >> 8) & 0xff) / 255.0;
+
+        if(((h >> 16) % 7) == 0)
+            tint *= 0.55;
+
+        *out_h = 0.80 + 0.12 * (double)((h >> 20) & 0xff) / 255.0;
+        *out_r = 0.80 * tint + grain;
+        *out_g = 0.30 * tint + grain;
+        *out_b = 0.22 * tint + grain;
+    }
+}
+
+static br_pixelmap *scene_brick_albedo(const char *name, int size, int courses)
+{
+    br_pixelmap *pm = BrPixelmapAllocate(BR_PMT_RGBA_8888, size, size, NULL, BR_PMAF_NORMAL);
+
+    if(pm == NULL)
+        return NULL;
+
+    pm->identifier = BrResStrDup(pm, name);
+
+    for(int y = 0; y < size; ++y) {
+        br_uint_8 *px = (br_uint_8 *)pm->pixels + (br_size_t)y * pm->row_bytes;
+
+        for(int x = 0; x < size; ++x) {
+            double h, r, g, b;
+
+            scene_brick_sample((double)x / size, (double)y / size, courses, &h, &r, &g, &b);
+
+            /* A host 888 map is byte-ordered B,G,R in memory (pixelmap.h, pmwitness). */
+            px[x * 4 + 0] = (br_uint_8)(b * 255.0 + 0.5);
+            px[x * 4 + 1] = (br_uint_8)(g * 255.0 + 0.5);
+            px[x * 4 + 2] = (br_uint_8)(r * 255.0 + 0.5);
+            px[x * 4 + 3] = 255;
+        }
+    }
+
+    BrMapAdd(pm);
+    return pm;
+}
+
+/*
+ * The normal map, differentiated from the same field: the surface normal of the recessed mortar
+ * so the shading follows it, and the height in alpha for the parallax.
+ */
+static br_pixelmap *scene_brick_normal(const char *name, int size, int courses)
+{
+    br_pixelmap *pm = BrPixelmapAllocate(BR_PMT_RGBA_8888, size, size, NULL, BR_PMAF_NORMAL);
+
+    if(pm == NULL)
+        return NULL;
+
+    pm->identifier = BrResStrDup(pm, name);
+
+    for(int y = 0; y < size; ++y) {
+        br_uint_8 *px = (br_uint_8 *)pm->pixels + (br_size_t)y * pm->row_bytes;
+
+        for(int x = 0; x < size; ++x) {
+            const double u = (double)x / size, v = (double)y / size;
+            const double d = 1.0 / size;
+            double       h, hl, hr, hd, hu, r, g, b, nx, ny, nz, len;
+
+            scene_brick_sample(u, v, courses, &h, &r, &g, &b);
+            scene_brick_sample(u - d, v, courses, &hl, &r, &g, &b);
+            scene_brick_sample(u + d, v, courses, &hr, &r, &g, &b);
+            scene_brick_sample(u, v - d, courses, &hd, &r, &g, &b);
+            scene_brick_sample(u, v + d, courses, &hu, &r, &g, &b);
+
+            nx = -(hr - hl) / (2.0 * d) * 0.004;
+            ny = -(hu - hd) / (2.0 * d) * 0.004;
+            nz = 1.0;
+
+            len = sqrt(nx * nx + ny * ny + nz * nz);
+            nx /= len;
+            ny /= len;
+            nz /= len;
+
+            px[x * 4 + 0] = (br_uint_8)((nz * 0.5 + 0.5) * 255.0 + 0.5);
+            px[x * 4 + 1] = (br_uint_8)((ny * 0.5 + 0.5) * 255.0 + 0.5);
+            px[x * 4 + 2] = (br_uint_8)((nx * 0.5 + 0.5) * 255.0 + 0.5);
+            px[x * 4 + 3] = (br_uint_8)(h * 255.0 + 0.5);
+        }
+    }
+
+    BrMapAdd(pm);
+    return pm;
+}
+
+/*
+ * A plain two-axis gradient, for the parallax pair. Every (u, v) has its own colour, so
+ * the shift the sampled height applies is visible as a colour change and has no period to
+ * alias against - a checker of any cell size makes the direction ambiguous, because an
+ * offset of a few cells looks like an offset of a few cells the other way.
+ */
+static br_pixelmap *scene_bump_parallax_map(const char *name, int width, int height)
+{
+    br_pixelmap *pm;
+    br_uint_8   *pixels;
+
+    if((pm = BrPixelmapAllocate(BR_PMT_RGB_888, width, height, NULL, BR_PMAF_NORMAL)) == NULL)
+        return NULL;
+
+    pm->identifier = BrResStrDup(pm, name);
+    pixels         = pm->pixels;
+
+    for(int y = 0; y < height; ++y) {
+        for(int x = 0; x < width; ++x) {
+            br_uint_8 *px = pixels + (br_size_t)y * pm->row_bytes + (br_size_t)x * 3;
+
+            /* RGB_888 is byte-ordered B,G,R in memory. */
+            px[0] = 96;
+            px[1] = (br_uint_8)((br_uint_32)y * 255 / (height - 1));
+            px[2] = (br_uint_8)((br_uint_32)x * 255 / (width - 1));
+        }
+    }
+
+    BrMapAdd(pm);
+
+    return pm;
+}
+
 static br_pixelmap *scene_texture_rgb(const char *name, br_uint_8 type, int width, int height, int cells)
 {
     br_pixelmap *pm;
@@ -2697,6 +3072,176 @@ static br_error scene_make_feature_fixtures(br_model *cube)
             mat->colour_map = tex888;
 
             if(scene_save("scene-tex-rgb888-affine.gltf", scene_fx_world(cube, mat)) != BRE_OK)
+                r = BRE_FAIL;
+        }
+    }
+
+    /*
+     * Normal (bump) mapping, as a pair: the same cube and the same colour map, with and
+     * without a bump map, so a bump map that stops reaching the renderer makes the two
+     * frames equal rather than merely moving one. The material asks for PHONG shading
+     * because a bump map perturbs a fragment normal, and the colour map is a different
+     * image from the bump map so that a dropped one of the two is visible.
+     *
+     * This is also the glTF round trip's witness: the saver writes material.normalTexture
+     * from bump_map and the loader reads it back, so the pair covers both halves.
+     *
+     * The parallax pair is the same cube and the same maps under a camera low enough that
+     * the top face is seen at a grazing angle, where the height in the map's alpha
+     * displaces the co-ordinate. The two differ only in bump_depth, so a parallax path
+     * that stops firing makes the frames equal, and one with the wrong sign moves the
+     * relief the other way rather than not at all.
+     *
+     * The tiled pair makes bump_map_transform visible: a detail normal at twice the
+     * albedo's frequency, against the identity modifier that gives it the albedo's own
+     * mapping. Only the modifier differs.
+     */
+    {
+        br_pixelmap *bump_tex = scene_texture_rgb("scene-bump-map", BR_PMT_RGB_888, SCENE_ARB_WIDTH, SCENE_ARB_HEIGHT, SCENE_ARB_CELLS);
+        br_pixelmap *bump_nrm = scene_normal_map("scene-bump-normal", SCENE_ARB_WIDTH * 2, SCENE_ARB_HEIGHT * 2, 4);
+
+        if(bump_tex == NULL || bump_nrm == NULL)
+            return BRE_FAIL;
+
+        {
+            br_material *mat = scene_fx_material("scene-bump-material", BR_MATF_LIGHT | BR_MATF_SMOOTH | BR_MATF_PERSPECTIVE);
+
+            mat->colour_map = bump_tex;
+            mat->bump_map   = bump_nrm;
+            mat->bump_scale = BR_SCALAR(1.0);
+            mat->mode       = (mat->mode & ~BR_MATM_SHADING_MODE_MASK) | BR_MATM_SHADING_MODE_PHONG;
+
+            if(scene_save("scene-bump.gltf", scene_fx_world(cube, mat)) != BRE_OK)
+                r = BRE_FAIL;
+        }
+
+        {
+            br_material *mat = scene_fx_material("scene-bump-off-material", BR_MATF_LIGHT | BR_MATF_SMOOTH | BR_MATF_PERSPECTIVE);
+
+            mat->colour_map = bump_tex;
+            mat->mode       = (mat->mode & ~BR_MATM_SHADING_MODE_MASK) | BR_MATM_SHADING_MODE_PHONG;
+
+            if(scene_save("scene-bump-off.gltf", scene_fx_world(cube, mat)) != BRE_OK)
+                r = BRE_FAIL;
+        }
+
+        /*
+         * The parallax pair. (2.5, 2.5, 4.0) puts the eye about 28 degrees above the
+         * top face's plane, which is a grazing view without the offset smearing a whole
+         * tile; the cube's own turn gives the other visible faces their own angles.
+         *
+         * The albedo is a two-axis gradient rather than the bump pair's twelve-cell
+         * checker: every (u, v) has its own colour, so the direction the texels moved is
+         * readable. A checker has a period, and an offset of a few cells is indistinguishable
+         * from an offset of a few cells the other way.
+         */
+        {
+            br_pixelmap *parallax_tex = scene_bump_parallax_map("scene-bump-parallax-map", SCENE_ARB_WIDTH, SCENE_ARB_HEIGHT);
+
+            if(parallax_tex == NULL)
+                return BRE_FAIL;
+
+            {
+                br_material *mat = scene_fx_material("scene-bump-parallax-material", BR_MATF_LIGHT | BR_MATF_SMOOTH | BR_MATF_PERSPECTIVE);
+                br_actor    *world;
+
+                mat->colour_map = parallax_tex;
+                mat->bump_map   = bump_nrm;
+                mat->bump_scale = BR_SCALAR(1.0);
+                mat->bump_depth = BR_FRACTION(0.2);
+                mat->mode       = (mat->mode & ~BR_MATM_SHADING_MODE_MASK) | BR_MATM_SHADING_MODE_PHONG;
+
+                world = scene_fx_world(cube, mat);
+
+                if(world == NULL || !scene_aim_camera_at_origin(world, BR_SCALAR(2.5), BR_SCALAR(2.5), BR_SCALAR(4.0)) ||
+                   scene_save("scene-bump-parallax.gltf", world) != BRE_OK)
+                    r = BRE_FAIL;
+            }
+
+            {
+                br_material *mat = scene_fx_material("scene-bump-parallax-off-material", BR_MATF_LIGHT | BR_MATF_SMOOTH | BR_MATF_PERSPECTIVE);
+                br_actor *world;
+
+                mat->colour_map = parallax_tex;
+                mat->bump_map   = bump_nrm;
+                mat->bump_scale = BR_SCALAR(1.0);
+                mat->mode       = (mat->mode & ~BR_MATM_SHADING_MODE_MASK) | BR_MATM_SHADING_MODE_PHONG;
+
+                world = scene_fx_world(cube, mat);
+
+                if(world == NULL || !scene_aim_camera_at_origin(world, BR_SCALAR(2.5), BR_SCALAR(2.5), BR_SCALAR(4.0)) ||
+                   scene_save("scene-bump-parallax-off.gltf", world) != BRE_OK)
+                    r = BRE_FAIL;
+            }
+        }
+
+        /*
+         * The brick lattice, as a legibility pair: one wall with the parallax off and on. Its
+         * own rig, because the fixture light is dim enough (#83) that no relief can be read in
+         * it: a direct light at a low angle plus a little ambient, and a material that is
+         * white and fully diffuse so the brick's own colour is what the eye judges.
+         */
+        {
+            br_pixelmap *brick_tex = scene_brick_albedo("scene-brick-map", SCENE_BRICK_SIZE, 8);
+            br_pixelmap *brick_nrm = scene_brick_normal("scene-brick-normal", SCENE_BRICK_SIZE, 8);
+            static const struct {
+                const char *name;
+                double      depth;
+            } brick_scenes[] = {
+                {"scene-brick.gltf",          0.0 },
+                {"scene-brick-parallax.gltf", 0.04},
+            };
+
+            if(brick_tex == NULL || brick_nrm == NULL)
+                return BRE_FAIL;
+
+            for(size_t i = 0; i < BR_ASIZE(brick_scenes); ++i) {
+                br_material *mat = scene_material_ex("scene-brick-material", BR_COLOUR_RGB(255, 255, 255),
+                                                     BR_MATF_LIGHT | BR_MATF_SMOOTH | BR_MATF_PERSPECTIVE, BR_SCALAR(0.30), BR_SCALAR(1.7),
+                                                     BR_SCALAR(0.0), BR_SCALAR(20.0));
+                br_actor    *world;
+
+                mat->colour_map = brick_tex;
+                mat->bump_map   = brick_nrm;
+                mat->bump_scale = BR_SCALAR(1.0);
+                mat->bump_depth = BR_FRACTION(brick_scenes[i].depth);
+                mat->mode       = (mat->mode & ~BR_MATM_SHADING_MODE_MASK) | BR_MATM_SHADING_MODE_PHONG;
+
+                world = scene_fx_world(cube, mat);
+
+                if(world == NULL || scene_add_light(world, "sun", BR_LIGHT_DIRECT, BR_SCALAR(0.0), BR_TRUE) == NULL ||
+                   scene_add_ambient(world) == NULL || !scene_aim_camera_at_origin(world, BR_SCALAR(2.2), BR_SCALAR(1.6), BR_SCALAR(3.6)) ||
+                   scene_save(brick_scenes[i].name, world) != BRE_OK)
+                    r = BRE_FAIL;
+            }
+        }
+
+        /* The tiled bump modifier, and the identity modifier it is compared against. */
+        {
+            br_material *mat = scene_fx_material("scene-bump-tiled-material", BR_MATF_LIGHT | BR_MATF_SMOOTH | BR_MATF_PERSPECTIVE);
+
+            mat->colour_map = bump_tex;
+            mat->bump_map   = bump_nrm;
+            mat->bump_scale = BR_SCALAR(1.0);
+            mat->mode       = (mat->mode & ~BR_MATM_SHADING_MODE_MASK) | BR_MATM_SHADING_MODE_PHONG;
+
+            BrMatrix23Scale(&mat->bump_map_transform, BR_SCALAR(2.0), BR_SCALAR(2.0));
+
+            if(scene_save("scene-bump-tiled.gltf", scene_fx_world(cube, mat)) != BRE_OK)
+                r = BRE_FAIL;
+        }
+
+        {
+            br_material *mat = scene_fx_material("scene-bump-tiled-shared-material", BR_MATF_LIGHT | BR_MATF_SMOOTH | BR_MATF_PERSPECTIVE);
+
+            mat->colour_map = bump_tex;
+            mat->bump_map   = bump_nrm;
+            mat->bump_scale = BR_SCALAR(1.0);
+            mat->mode       = (mat->mode & ~BR_MATM_SHADING_MODE_MASK) | BR_MATM_SHADING_MODE_PHONG;
+
+            BrMatrix23Identity(&mat->bump_map_transform);
+
+            if(scene_save("scene-bump-tiled-shared.gltf", scene_fx_world(cube, mat)) != BRE_OK)
                 r = BRE_FAIL;
         }
     }

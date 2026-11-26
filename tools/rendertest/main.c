@@ -1368,6 +1368,39 @@ static const rt_relation rt_relations[] = {
      .device = "softrend"},
     {.a = "scene-fog-p2-tex",         .b = "scene-fog-p2",          .equal = BR_FALSE, .pm_type = BR_PMT_INDEX_8, .mode = RT_MODE_ZB,
      .device = "softrend"},
+
+    /*
+     * The bump-mapping pairs; see scene.c. Each pair differs by one bump field -
+     * the parallax's depth and the tiled scene's modifier - so a renderer that
+     * applies it must draw two different frames and the two software paths, which
+     * ignore the bump map entirely, must draw the same one. The identity-modifier
+     * scene is the original bump fixture's material with its modifier written
+     * explicitly, so it must stay that fixture's frame on every device.
+     */
+    {.a = "scene-bump-tiled-shared", .b = "scene-bump",            .equal = BR_TRUE,  .pm_type = RT_ANY_TYPE, .mode = RT_ANY_MODE},
+    {.a = "scene-bump-parallax",     .b = "scene-bump-parallax-off", .equal = BR_FALSE, .pm_type = RT_ANY_TYPE, .mode = RT_ANY_MODE,
+     .device = "glrend"},
+    {.a = "scene-bump-tiled",        .b = "scene-bump-tiled-shared", .equal = BR_FALSE, .pm_type = RT_ANY_TYPE, .mode = RT_ANY_MODE,
+     .device = "glrend"},
+    {.a = "scene-bump-parallax",     .b = "scene-bump-parallax-off", .equal = BR_TRUE,  .pm_type = RT_ANY_TYPE, .mode = RT_ANY_MODE,
+     .device = "softrend"},
+    {.a = "scene-bump-tiled",        .b = "scene-bump-tiled-shared", .equal = BR_TRUE,  .pm_type = RT_ANY_TYPE, .mode = RT_ANY_MODE,
+     .device = "softrend"},
+    {.a = "scene-bump-parallax",     .b = "scene-bump-parallax-off", .equal = BR_TRUE,  .pm_type = RT_ANY_TYPE, .mode = RT_ANY_MODE,
+     .device = "glrend1x"},
+    {.a = "scene-bump-tiled",        .b = "scene-bump-tiled-shared", .equal = BR_TRUE,  .pm_type = RT_ANY_TYPE, .mode = RT_ANY_MODE,
+     .device = "glrend1x"},
+
+    /*
+     * The brick pair differs by bump_depth alone, so the two paths that ignore the bump map
+     * must draw the same frame and glrend must not.
+     */
+    {.a = "scene-brick", .b = "scene-brick-parallax", .equal = BR_FALSE, .pm_type = RT_ANY_TYPE, .mode = RT_ANY_MODE,
+     .device = "glrend"},
+    {.a = "scene-brick", .b = "scene-brick-parallax", .equal = BR_TRUE,  .pm_type = RT_ANY_TYPE, .mode = RT_ANY_MODE,
+     .device = "softrend"},
+    {.a = "scene-brick", .b = "scene-brick-parallax", .equal = BR_TRUE,  .pm_type = RT_ANY_TYPE, .mode = RT_ANY_MODE,
+     .device = "glrend1x"},
 };
 // clang-format on
 
@@ -2454,6 +2487,21 @@ static const char *const rt_default_scenes[] = {
      * interpolated-intensity span's per-pixel step drifts by one 16.16 unit.
      */
     "scene-shade-i8",
+
+    /*
+     * The normal (bump) mapping pair; see scene.c. It is also the glTF round trip's
+     * witness: mkres saves material.normalTexture from the material's bump_map and
+     * rendertest loads it back, so both halves of the format are exercised here.
+     */
+    "scene-bump", "scene-bump-off", "scene-bump-parallax", "scene-bump-parallax-off",
+    "scene-bump-tiled", "scene-bump-tiled-shared",
+
+    /*
+     * The brick lattice, for the eye rather than the checksum: one wall with the parallax
+     * off and on. Its albedo, its height and its normal come from one field in scene.c, so
+     * the mortar that is drawn and the mortar that is carved cannot disagree.
+     */
+    "scene-brick", "scene-brick-parallax",
 
     /*
      * The 256x256 RGB shade-table fixtures; see scene.c. pentprim draws these
