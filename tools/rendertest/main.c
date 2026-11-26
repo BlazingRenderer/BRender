@@ -1987,12 +1987,8 @@ static br_error rt_app_init(rt_demo *demo)
     rt_state *st = BrResAllocate(NULL, sizeof(rt_state), BR_MEMORY_APPLICATION);
     demo->user   = st;
 
-    /*
-     * --vk-witness runs on a vkrend front screen, which owns no GL context, so
-     * the hardware checksum readback below has nothing to bind to. The witness
-     * builds its own scene, so there is nothing here to prepare either.
-     */
-    if(rt_cfg_vk_witness)
+    /* Vulkan witnesses build their own scenes and the front screen has no GL context. */
+    if(rt_cfg_vulkan)
         return BRE_OK;
 
     if(demo->hw_accel) {
@@ -2210,7 +2206,7 @@ static int rt_run(rt_demo *demo)
     if(rt_cfg_parallax_witness) {
         BrRendererEnd();
 
-        if(rt_parallax_witness_run(demo, rt_cfg_device) != BRE_OK)
+        if(rt_parallax_witness_run(demo, rt_cfg_vulkan ? "vkrend" : rt_cfg_device) != BRE_OK)
             g_failed = 1;
 
         printf("RT result=%s failures=%d\n", g_failed ? "FAIL" : "PASS", g_failed ? 1 : 0);
@@ -2873,7 +2869,7 @@ static void rt_usage(FILE *out, const char *argv0)
             "                     run the material round-trip witness and exit\n"
             "  --wireframe-witness\n"
             "                     run the wireframe witness and exit\n"
-            "  --vulkan           bring up a vkrend front screen (with --vk-witness)\n"
+            "  --vulkan           use a vkrend front screen for --vk-witness or --parallax-witness\n"
             "  --vk-witness       run the vkrend witness and exit\n"
             "  -l, --list         list the scenes and exit\n"
             "  --list-scene-dir <dir>\n"
@@ -2926,16 +2922,11 @@ int main(int argc, char **argv)
             rt_cfg_scenes[rt_cfg_nscenes++] = rt_default_scenes[k];
     }
 
-    /*
-     * The vkrend witness needs a front screen, which only --vulkan builds, so
-     * --vk-witness implies it. --vulkan on its own would put the fixture corpus
-     * on a front screen that cannot render it, so that pairing is refused
-     * rather than run into a failure that names nothing.
-     */
-    if(rt_cfg_vk_witness) {
+    if(rt_cfg_vk_witness)
         rt_cfg_vulkan = 1;
-    } else if(rt_cfg_vulkan) {
-        fprintf(stderr, "--vulkan needs --vk-witness: the fixture corpus cannot run on a Vulkan front screen\n");
+
+    if(rt_cfg_vulkan && !rt_cfg_vk_witness && !rt_cfg_parallax_witness) {
+        fprintf(stderr, "--vulkan needs --vk-witness or --parallax-witness: the fixture corpus cannot run on a Vulkan front screen\n");
         return 2;
     }
 
@@ -2945,6 +2936,10 @@ int main(int argc, char **argv)
     }
 
     if(strcmp(rt_cfg_device, "softrend") == 0) {
+        if(rt_cfg_vulkan) {
+            fprintf(stderr, "--vulkan requires a hardware front screen, not softrend's window\n");
+            return 2;
+        }
         /*
          * BR_PMT_MAX is "no type asked for"; the software renderer's own colour
          * buffer is INDEX_8, which is what every stored softrend entry is.

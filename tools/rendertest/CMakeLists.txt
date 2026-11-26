@@ -248,17 +248,8 @@ if (BUILD_TESTING)
                          ENVIRONMENT "SDL_VIDEODRIVER=offscreen")
 
     #
-    # The parallax witness (--parallax-witness). The corpus can say that the parallax pair
-    # differs from the depth-0 pair, which an offset of the wrong sign, size or axis also does;
-    # it cannot say that the offset is the one the geometry names. This scene encodes its own
-    # coordinate in the albedo, so the sampled coordinate is read back from the pixel and
-    # compared with the value the camera's angle, the map's height and the material's depth
-    # predict.
-    #
-    # glrend only, for now, and for a reason rather than for want of a scene: softrend cannot
-    # shade a bump map at all - the software path has no per-fragment normal - and glrend1x
-    # borrows softrend's transform and lighting, so neither has an offset to measure. A scene
-    # for them would assert the absence of the feature, which the corpus pairs already do.
+    # The checksum corpus cannot tell whether parallax moved the sample in the right
+    # direction or by the right amount. Only glrend and vkrend apply an offset to measure.
     #
     add_test(NAME "pxw-glrend" COMMAND rendertest --parallax-witness --device glrend)
     set_tests_properties("pxw-glrend" PROPERTIES
@@ -317,6 +308,10 @@ if (BUILD_TESTING)
     if (BRENDER_HAVE_VK)
         add_test(NAME "vkwitness" COMMAND rendertest --vulkan --vk-witness)
         set_tests_properties("vkwitness" PROPERTIES
+                             ENVIRONMENT "SDL_VIDEODRIVER=offscreen")
+
+        add_test(NAME "pxw-vkrend" COMMAND rendertest --vulkan --parallax-witness)
+        set_tests_properties("pxw-vkrend" PROPERTIES
                              ENVIRONMENT "SDL_VIDEODRIVER=offscreen")
     endif ()
 endif ()
