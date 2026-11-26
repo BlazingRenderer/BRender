@@ -164,6 +164,10 @@ static void cgltf_write_brender_material(cgltf_write_context *context, const cgl
         CGLTF_WRITE_IDXPROP("colour_map", br_material->colour_map, context->data->images);
     }
 
+    if(br_material->bump_map) {
+        CGLTF_WRITE_IDXPROP("bump_map", br_material->bump_map, context->data->images);
+    }
+
     if(br_material->screendoor) {
         CGLTF_WRITE_IDXPROP("screendoor", br_material->screendoor, context->data->images);
     }
@@ -188,6 +192,12 @@ static void cgltf_write_brender_material(cgltf_write_context *context, const cgl
     cgltf_write_brender_intprop(context, "subdivide_tolerance", br_material->subdivide_tolerance);
 
     cgltf_write_brender_floatprop(context, "depth_bias", br_material->depth_bias);
+
+    cgltf_write_brender_floatprop(context, "bump_scale", br_material->bump_scale);
+
+    cgltf_write_floatarrayprop(context, "bump_map_transform", br_material->bump_map_transform, 6);
+
+    cgltf_write_brender_floatprop(context, "bump_depth", br_material->bump_depth);
 
     cgltf_write_line(context, "}");
 }

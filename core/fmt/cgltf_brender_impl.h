@@ -297,6 +297,15 @@ static int cgltf_brender_material_defaults(cgltf_brender_material *defaults)
     defaults->ks    = BrScalarToFloat(mat->ks);
     defaults->power = BrScalarToFloat(mat->power);
 
+    defaults->bump_map_transform[0] = BrScalarToFloat(mat->bump_map_transform.m[0][0]);
+    defaults->bump_map_transform[1] = BrScalarToFloat(mat->bump_map_transform.m[0][1]);
+    defaults->bump_map_transform[2] = BrScalarToFloat(mat->bump_map_transform.m[1][0]);
+    defaults->bump_map_transform[3] = BrScalarToFloat(mat->bump_map_transform.m[1][1]);
+    defaults->bump_map_transform[4] = BrScalarToFloat(mat->bump_map_transform.m[2][0]);
+    defaults->bump_map_transform[5] = BrScalarToFloat(mat->bump_map_transform.m[2][1]);
+
+    defaults->bump_depth = BrScalarToFloat(BrFractionToScalar(mat->bump_depth));
+
     defaults->flags = mat->flags;
     defaults->mode  = mat->mode;
 
@@ -417,6 +426,10 @@ static int cgltf_parse_json_brender_material(cgltf_options *options, jsmntok_t c
             ++i;
             out_material->colour_map = CGLTF_PTRINDEX(cgltf_image, cgltf_json_to_int(tokens + i, json_chunk));
             ++i;
+        } else if(cgltf_json_strcmp(tokens + i, json_chunk, "bump_map") == 0) {
+            ++i;
+            out_material->bump_map = CGLTF_PTRINDEX(cgltf_image, cgltf_json_to_int(tokens + i, json_chunk));
+            ++i;
         } else if(cgltf_json_strcmp(tokens + i, json_chunk, "screendoor") == 0) {
             ++i;
             out_material->screendoor = CGLTF_PTRINDEX(cgltf_image, cgltf_json_to_int(tokens + i, json_chunk));
@@ -446,6 +459,17 @@ static int cgltf_parse_json_brender_material(cgltf_options *options, jsmntok_t c
         } else if(cgltf_json_strcmp(tokens + i, json_chunk, "subdivide_tolerance") == 0) {
             ++i;
             out_material->subdivide_tolerance = cgltf_json_to_int(tokens + i, json_chunk);
+            ++i;
+        } else if(cgltf_json_strcmp(tokens + i, json_chunk, "bump_scale") == 0) {
+            ++i;
+            out_material->has_bump_scale = 1;
+            out_material->bump_scale     = cgltf_json_to_float(tokens + i, json_chunk);
+            ++i;
+        } else if(cgltf_json_strcmp(tokens + i, json_chunk, "bump_map_transform") == 0) {
+            i = cgltf_parse_json_float_array(tokens, i + 1, json_chunk, out_material->bump_map_transform, 6);
+        } else if(cgltf_json_strcmp(tokens + i, json_chunk, "bump_depth") == 0) {
+            ++i;
+            out_material->bump_depth = cgltf_json_to_float(tokens + i, json_chunk);
             ++i;
         } else if(cgltf_json_strcmp(tokens + i, json_chunk, "depth_bias") == 0) {
             ++i;

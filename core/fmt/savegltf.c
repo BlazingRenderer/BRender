@@ -288,6 +288,9 @@ static int count_textures(const void *key, void *value, br_hash hash, void *user
     if(mat->colour_map != NULL)
         ++state->data->textures_count;
 
+    if(mat->bump_map != NULL)
+        ++state->data->textures_count;
+
     return 0;
 }
 
@@ -386,6 +389,7 @@ static int gather_pixelmaps(const void *key, void *value, br_hash hash, void *us
     // clang-format off
     const br_pixelmap *maps[] = {
         mat->colour_map,
+        mat->bump_map,
         mat->screendoor,
         mat->index_shade,
         mat->index_blend,
@@ -1366,6 +1370,18 @@ static int fill_material(const void *key, void *value, br_hash hash, void *user)
         material->pbr_metallic_roughness.base_color_texture.texture = texture;
     }
 
+    if(mat->bump_map != NULL) {
+        cgltf_texture           *texture     = get_next_texture(state);
+        br_gltf_save_sampler_key sampler_key = material_to_sampler_key(mat);
+
+        texture->name    = mat->identifier;
+        texture->sampler = BrHashMapFind(state->sampler_map, &sampler_key);
+        texture->image   = BrHashMapFind(state->pixelmap_map, mat->bump_map);
+
+        material->normal_texture.texture = texture;
+        material->normal_texture.scale   = BrScalarToFloat(mat->bump_scale);
+    }
+
     material->pbr_metallic_roughness.base_color_factor[0] = srgb_to_linear(BR_RED(mat->colour) / 255.0f);
     material->pbr_metallic_roughness.base_color_factor[1] = srgb_to_linear(BR_GRN(mat->colour) / 255.0f);
     material->pbr_metallic_roughness.base_color_factor[2] = srgb_to_linear(BR_BLU(mat->colour) / 255.0f);
@@ -1433,10 +1449,22 @@ static int fill_br_material(const void *key, void *value, br_hash hash, void *us
     br_material->index_range = mat->index_range;
 
     br_material->colour_map  = BrHashMapFind(state->pixelmap_map, mat->colour_map);
+    br_material->bump_map    = BrHashMapFind(state->pixelmap_map, mat->bump_map);
     br_material->screendoor  = BrHashMapFind(state->pixelmap_map, mat->screendoor);
     br_material->index_shade = BrHashMapFind(state->pixelmap_map, mat->index_shade);
     br_material->index_blend = BrHashMapFind(state->pixelmap_map, mat->index_blend);
     br_material->index_fog   = BrHashMapFind(state->pixelmap_map, mat->index_fog);
+
+    br_material->bump_scale = BrScalarToFloat(mat->bump_scale);
+
+    br_material->bump_map_transform[0] = BrScalarToFloat(mat->bump_map_transform.m[0][0]);
+    br_material->bump_map_transform[1] = BrScalarToFloat(mat->bump_map_transform.m[0][1]);
+    br_material->bump_map_transform[2] = BrScalarToFloat(mat->bump_map_transform.m[1][0]);
+    br_material->bump_map_transform[3] = BrScalarToFloat(mat->bump_map_transform.m[1][1]);
+    br_material->bump_map_transform[4] = BrScalarToFloat(mat->bump_map_transform.m[2][0]);
+    br_material->bump_map_transform[5] = BrScalarToFloat(mat->bump_map_transform.m[2][1]);
+
+    br_material->bump_depth = BrScalarToFloat(BrFractionToScalar(mat->bump_depth));
 
     br_material->fog_min = BrScalarToFloat(mat->fog_min);
     br_material->fog_max = BrScalarToFloat(mat->fog_max);

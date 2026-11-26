@@ -7022,6 +7022,7 @@ static int cgltf_fixup_pointers(cgltf_data* data)
 	for (cgltf_size i = 0; i < data->brender_materials_count; ++i)
 	{
 		CGLTF_PTRFIXUP(data->brender_materials[i].colour_map, data->images, data->images_count);
+		CGLTF_PTRFIXUP(data->brender_materials[i].bump_map, data->images, data->images_count);
 		CGLTF_PTRFIXUP(data->brender_materials[i].screendoor, data->images, data->images_count);
 		CGLTF_PTRFIXUP(data->brender_materials[i].index_shade, data->images, data->images_count);
 		CGLTF_PTRFIXUP(data->brender_materials[i].index_blend, data->images, data->images_count);

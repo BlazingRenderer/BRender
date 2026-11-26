@@ -1,4 +1,5 @@
 #include <limits.h>
+
 #include <stdbool.h>
 #include <brender.h>
 
@@ -347,12 +348,31 @@ static br_error load_pixelmap(br_gltf_load_state *state, br_size_t image_index, 
     return BRE_OK;
 }
 
-/*
- * Scan our attributes, taking the lowest index of each one.
- *
- * Is this overkill? Probably.
- */
-static br_gltf_load_prim_info *filter_primitive_attributes(br_gltf_load_prim_info *info, const cgltf_primitive *prim)
+static const cgltf_texture_view *base_color_texture(const cgltf_material *material)
+{
+    const cgltf_texture_view *base = &material->pbr_metallic_roughness.base_color_texture;
+    return material->has_pbr_metallic_roughness && base->texture != NULL ? base : NULL;
+}
+
+static cgltf_int texture_texcoord(const cgltf_texture_view *view)
+{
+    return view->has_transform && view->transform.has_texcoord ? view->transform.texcoord : view->texcoord;
+}
+
+static cgltf_int primitive_texcoord(const cgltf_primitive *prim, const cgltf_data *data)
+{
+    if(data->brender_materials_count != 0 || prim->material == NULL)
+        return -1;
+
+    const cgltf_texture_view *base = base_color_texture(prim->material);
+    if(base != NULL)
+        return texture_texcoord(base);
+
+    const cgltf_texture_view *normal = &prim->material->normal_texture;
+    return normal->texture != NULL ? texture_texcoord(normal) : -1;
+}
+
+static br_gltf_load_prim_info *filter_primitive_attributes(br_gltf_load_prim_info *info, const cgltf_primitive *prim, cgltf_int texcoord)
 {
     const cgltf_attribute *attrib_position = NULL;
     const cgltf_attribute *attrib_normal   = NULL;
@@ -392,7 +412,7 @@ static br_gltf_load_prim_info *filter_primitive_attributes(br_gltf_load_prim_inf
                 break;
 
             case cgltf_attribute_type_texcoord:
-                if(attrib->index < index_texcoord) {
+                if(attrib->index == texcoord || (index_texcoord != texcoord && attrib->index < index_texcoord)) {
                     attrib_texcoord = attrib;
                     index_texcoord  = attrib->index;
                 }
@@ -453,6 +473,24 @@ static br_gltf_load_prim_info *filter_primitive_attributes(br_gltf_load_prim_inf
     return info;
 }
 
+static void check_primitive_bump_uv(const cgltf_primitive *prim, const cgltf_attribute *uv, const br_gltf_load_state *state)
+{
+    if(state->data->brender_materials_count != 0 || prim->material == NULL)
+        return;
+
+    br_material *mat = state->results->materials[cgltf_material_index(state->data, prim->material)];
+    if(mat->bump_map == NULL)
+        return;
+
+    cgltf_int texcoord = texture_texcoord(&prim->material->normal_texture);
+    if(uv == NULL || uv->index != texcoord) {
+        BrLogWarn("GLTF", "material \"%s\": ignoring normalTexture because a primitive lacks TEXCOORD_%d",
+                  mat->identifier != NULL ? mat->identifier : "<unnamed>", texcoord);
+        /* One material is shared by all primitives that reference it. */
+        mat->bump_map = NULL;
+    }
+}
+
 static br_model *create_model(const cgltf_mesh *mesh, br_gltf_load_state *state)
 {
     br_model               *model;
@@ -467,7 +505,8 @@ static br_model *create_model(const cgltf_mesh *mesh, br_gltf_load_state *state)
      */
     for(br_size_t i = 0; i < mesh->primitives_count; ++i) {
         const cgltf_primitive        *prim = mesh->primitives + i;
-        const br_gltf_load_prim_info *info = filter_primitive_attributes(primitive_info + i, prim);
+        const br_gltf_load_prim_info *info = filter_primitive_attributes(primitive_info + i, prim, primitive_texcoord(prim, state->data));
+        check_primitive_bump_uv(prim, info->attrib_texcoord, state);
         num_vertices += info->output_vertex_count;
         num_faces += info->output_face_count;
     }
@@ -641,8 +680,67 @@ static float linear_to_srgb(float f)
     return (f <= 0.0031308f) ? f * 12.92f : 1.055f * powf(f, 1.0f / 2.4f) - 0.055f;
 }
 
+static void fill_texture_transform(br_matrix23 *mat, const cgltf_texture_view *view)
+{
+    if(!view->has_transform) {
+        BrMatrix23Identity(mat);
+        return;
+    }
+
+    const cgltf_texture_transform *xform = &view->transform;
+    BrMatrix23Scale(mat, BrFloatToScalar(xform->scale[0]), BrFloatToScalar(xform->scale[1]));
+    /* glTF UVs are Y-down; the KHR_texture_transform overview's GLSL example uses a Y-up rotation. */
+    BrMatrix23PostRotate(mat, -BrRadianToAngle(xform->rotation));
+    BrMatrix23PostTranslate(mat, BrFloatToScalar(xform->offset[0]), BrFloatToScalar(xform->offset[1]));
+}
+
+static void fill_normal_texture(br_material *mat, const cgltf_material *material, const cgltf_data *data, br_pixelmap **pixelmaps)
+{
+    if(material == NULL || material->normal_texture.texture == NULL)
+        return;
+
+    if(material->normal_texture.texture->image != NULL) {
+        cgltf_size image_index = cgltf_image_index(data, material->normal_texture.texture->image);
+
+        if(image_index < data->images_count && pixelmaps[image_index] != NULL) {
+            mat->bump_map   = pixelmaps[image_index];
+            mat->bump_scale = BrFloatToScalar(material->normal_texture.scale);
+        }
+    }
+}
+
+static void fill_normal_transform(br_material *mat, const cgltf_texture_view *normal, const cgltf_texture_view *base)
+{
+    const char *name = mat->identifier != NULL ? mat->identifier : "<unnamed>";
+    br_matrix23 normal_transform, inverse;
+
+    if(base != NULL && texture_texcoord(normal) != texture_texcoord(base)) {
+        BrLogWarn("GLTF", "material \"%s\": ignoring normalTexture on TEXCOORD_%d; baseColorTexture uses TEXCOORD_%d", name,
+                  texture_texcoord(normal), texture_texcoord(base));
+        mat->bump_map = NULL;
+        return;
+    }
+
+    fill_texture_transform(&normal_transform, normal);
+    if(base == NULL || !base->has_transform) {
+        mat->bump_map_transform = normal_transform;
+        return;
+    }
+
+    if(BrMatrix23Inverse(&inverse, &mat->map_transform) == 0) {
+        BrLogWarn("GLTF", "material \"%s\": ignoring normalTexture because the baseColorTexture transform cannot be inverted", name);
+        mat->bump_map = NULL;
+        return;
+    }
+
+    /* BRender applies bump_map_transform before map_transform; glTF transforms each texture independently. */
+    BrMatrix23Mul(&mat->bump_map_transform, &normal_transform, &inverse);
+}
+
 static void fill_material(br_material *mat, const cgltf_material *material, const cgltf_data *data, br_pixelmap **pixelmaps)
 {
+    const cgltf_texture_view *base = base_color_texture(material);
+
     if(material->name != NULL) {
         mat->identifier = BrResStrDup(mat, material->name);
     }
@@ -653,6 +751,8 @@ static void fill_material(br_material *mat, const cgltf_material *material, cons
 
     if(material->double_sided)
         mat->flags |= BR_MATF_TWO_SIDED;
+
+    fill_normal_texture(mat, material, data, pixelmaps);
 
     if(material->has_pbr_metallic_roughness) {
         const cgltf_pbr_metallic_roughness *pbr = &material->pbr_metallic_roughness;
@@ -670,8 +770,8 @@ static void fill_material(br_material *mat, const cgltf_material *material, cons
         /*
          * Base colour texture -> colour_map.
          */
-        if(pbr->base_color_texture.texture != NULL) {
-            const cgltf_texture *texture = pbr->base_color_texture.texture;
+        if(base != NULL) {
+            const cgltf_texture *texture = base->texture;
 
             if(texture->image != NULL) {
                 cgltf_size image_index = cgltf_image_index(data, texture->image);
@@ -713,20 +813,7 @@ static void fill_material(br_material *mat, const cgltf_material *material, cons
                 }
             }
 
-            if(pbr->base_color_texture.has_transform) {
-                const cgltf_texture_transform *xform = &pbr->base_color_texture.transform;
-
-                /*
-                 * glTF's KHR_texture_transform defines (in column-vector convention):
-                 *   uv' = T * R * S * uv
-                 *
-                 * In BRender's row-vector convention this becomes:
-                 *   uv' = uv * S * R(-angle) * T
-                 */
-                BrMatrix23Scale(&mat->map_transform, BrFloatToScalar(xform->scale[0]), BrFloatToScalar(xform->scale[1]));
-                BrMatrix23PostRotate(&mat->map_transform, -BrRadianToAngle(xform->rotation));
-                BrMatrix23PostTranslate(&mat->map_transform, BrFloatToScalar(xform->offset[0]), BrFloatToScalar(xform->offset[1]));
-            }
+            fill_texture_transform(&mat->map_transform, base);
         }
 
         /*
@@ -757,6 +844,9 @@ static void fill_material(br_material *mat, const cgltf_material *material, cons
         }
     }
 
+    if(mat->bump_map != NULL)
+        fill_normal_transform(mat, &material->normal_texture, base);
+
     /*
      * Alpha mode.
      */
@@ -771,8 +861,11 @@ static void fill_material(br_material *mat, const cgltf_material *material, cons
     }
 }
 
-static void fill_br_material(br_material *mat, const cgltf_brender_material *br_material, const cgltf_data *data, br_pixelmap **pixelmaps)
+static void fill_br_material(br_material *mat, const cgltf_brender_material *br_material, const cgltf_material *material,
+                             const cgltf_data *data, br_pixelmap **pixelmaps)
 {
+    fill_normal_texture(mat, material, data, pixelmaps);
+
     if(br_material->identifier != NULL) {
         mat->identifier = BrResStrDup(mat, br_material->identifier);
     }
@@ -802,6 +895,22 @@ static void fill_br_material(br_material *mat, const cgltf_brender_material *br_
     if(br_material->colour_map != NULL) {
         mat->colour_map = pixelmaps[cgltf_image_index(data, br_material->colour_map)];
     }
+
+    if(br_material->bump_map != NULL) {
+        mat->bump_map = pixelmaps[cgltf_image_index(data, br_material->bump_map)];
+    }
+
+    if(br_material->has_bump_scale)
+        mat->bump_scale = BrFloatToScalar(br_material->bump_scale);
+
+    mat->bump_map_transform.m[0][0] = BrFloatToScalar(br_material->bump_map_transform[0]);
+    mat->bump_map_transform.m[0][1] = BrFloatToScalar(br_material->bump_map_transform[1]);
+    mat->bump_map_transform.m[1][0] = BrFloatToScalar(br_material->bump_map_transform[2]);
+    mat->bump_map_transform.m[1][1] = BrFloatToScalar(br_material->bump_map_transform[3]);
+    mat->bump_map_transform.m[2][0] = BrFloatToScalar(br_material->bump_map_transform[4]);
+    mat->bump_map_transform.m[2][1] = BrFloatToScalar(br_material->bump_map_transform[5]);
+
+    mat->bump_depth = BrScalarToFraction(BrFloatToScalar(br_material->bump_depth));
 
     if(br_material->screendoor != NULL) {
         mat->screendoor = pixelmaps[cgltf_image_index(data, br_material->screendoor)];
@@ -1673,7 +1782,8 @@ br_fmt_results *BR_PUBLIC_ENTRY BrFmtGLTFActorLoadMany(const char *name, const b
     if(data->brender_materials_count > 0) {
         for(br_size_t i = 0; i < data->brender_materials_count; ++i) {
             results->materials[i] = BrMaterialAllocate(NULL);
-            fill_br_material(results->materials[i], data->brender_materials + i, data, results->pixelmaps);
+            fill_br_material(results->materials[i], data->brender_materials + i, i < data->materials_count ? data->materials + i : NULL,
+                             data, results->pixelmaps);
         }
     } else {
         for(br_size_t i = 0; i < data->materials_count; ++i) {

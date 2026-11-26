@@ -310,7 +310,10 @@
           "fog_max": 8,
           "fog_colour": [0, 0, 0],
           "subdivide_tolerance": 0,
-          "depth_bias": 0
+          "depth_bias": 0,
+          "bump_scale": 1,
+          "bump_map_transform": [1, 0, 0, 1, 0, 0],
+          "bump_depth": 0
         },
         {
           "identifier": "scene-fog-arb-persp-flat-material",
@@ -332,7 +335,10 @@
           "fog_max": 8,
           "fog_colour": [0, 0, 0],
           "subdivide_tolerance": 0,
-          "depth_bias": 0
+          "depth_bias": 0,
+          "bump_scale": 1,
+          "bump_map_transform": [1, 0, 0, 1, 0, 0],
+          "bump_depth": 0
         },
         {
           "identifier": "scene-fog-arb-persp-smooth-material",
@@ -354,7 +360,10 @@
           "fog_max": 8,
           "fog_colour": [0, 0, 0],
           "subdivide_tolerance": 0,
-          "depth_bias": 0
+          "depth_bias": 0,
+          "bump_scale": 1,
+          "bump_map_transform": [1, 0, 0, 1, 0, 0],
+          "bump_depth": 0
         }
       ]
     }

@@ -63,6 +63,7 @@ typedef struct cgltf_brender_material {
     cgltf_int    index_base;
     cgltf_int    index_range;
     cgltf_image *colour_map;
+    cgltf_image *bump_map;
     cgltf_image *screendoor;
     cgltf_image *index_shade;
     cgltf_image *index_blend;
@@ -74,6 +75,10 @@ typedef struct cgltf_brender_material {
     cgltf_float fog_colour[3];
     cgltf_int   subdivide_tolerance;
     cgltf_float depth_bias;
+    cgltf_bool  has_bump_scale;
+    cgltf_float bump_scale;
+    cgltf_float bump_map_transform[6];
+    cgltf_float bump_depth;
 } cgltf_brender_material;
 
 typedef struct cgltf_brender_light_region {
