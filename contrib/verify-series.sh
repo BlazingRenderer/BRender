@@ -127,8 +127,12 @@ for c in $(git rev-list --reverse "$range"); do
 
     cp "$repo/contrib/run-tests.sh" "$worktree/contrib/run-tests.sh"
 
-    if ! ( cd "$worktree" && contrib/run-tests.sh "$build" --no-build ) >>"$log" 2>&1; then
+    checks_log="$worktree/$build/verify-series-checks.log"
+    if ( cd "$worktree" && contrib/run-tests.sh "$build" --no-build ) >"$checks_log" 2>&1; then
+        cat "$checks_log" >>"$log"
+    else
         printf '  %-9s %-58s CHECKS FAILED (%s)\n' "$short" "$subject" "$log"
+        tee -a "$log" <"$checks_log"
         fail=$((fail + 1))
         continue
     fi

@@ -219,15 +219,12 @@ hdr "corpus: ctest"
 # pass says the corpus is clean when nothing looked at it. A build registers no
 # tests either because BUILD_TESTING is off or because the commit predates the
 # corpus being registered with CTest.
-if ctest --test-dir "$build" -j"$(nproc)" --output-on-failure --no-tests=error >/tmp/run-tests-ctest.log 2>&1; then
-    ok "$(grep -oE '[0-9]+% tests passed[^,]*' /tmp/run-tests-ctest.log | tail -1) (log: /tmp/run-tests-ctest.log)"
+ctest_log="$build/run-tests-ctest.log"
+if ctest --test-dir "$build" -j"$(nproc)" --output-on-failure --no-tests=error >"$ctest_log" 2>&1; then
+    ok "$(grep -oE '[0-9]+% tests passed[^,]*' "$ctest_log" | tail -1) (log: $ctest_log)"
 else
-    if grep -q 'tests passed' /tmp/run-tests-ctest.log; then
-        bad "ctest failed (log: /tmp/run-tests-ctest.log)"
-        grep -E '\*\*\*Failed|Failed ' /tmp/run-tests-ctest.log | head -5 | sed 's/^/        /'
-    else
-        bad "this build registered no tests, so the corpus was not run (log: /tmp/run-tests-ctest.log)"
-    fi
+    bad "ctest failed (log: $ctest_log)"
+    cat "$ctest_log"
 fi
 
 # ------------------------------------------------------------------ done
