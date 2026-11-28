@@ -6,6 +6,8 @@ add_executable(rendertest
         b2dwitness.h
         mipwitness.c
         mipwitness.h
+        mswitness.c
+        mswitness.h
         pmwitness.c
         pmwitness.h
         materialwitness.c
@@ -312,6 +314,17 @@ if (BUILD_TESTING)
 
         add_test(NAME "pxw-vkrend" COMMAND rendertest --vulkan --parallax-witness)
         set_tests_properties("pxw-vkrend" PROPERTIES
+                             ENVIRONMENT "SDL_VIDEODRIVER=offscreen")
+
+        #
+        # The multisample witness (--ms-witness). It is a property rather than a
+        # fixture: the same scene is drawn into a single-sampled offscreen and into a
+        # multisampled one, and the second must show partial coverage along the shape's
+        # edges where the first cannot. Like the two above it drives a vkrend front
+        # screen, so it is registered only when the driver is built.
+        #
+        add_test(NAME "msw-vkrend" COMMAND rendertest --vulkan --ms-witness)
+        set_tests_properties("msw-vkrend" PROPERTIES
                              ENVIRONMENT "SDL_VIDEODRIVER=offscreen")
     endif ()
 endif ()

@@ -37,6 +37,7 @@
 #include "vkwitness.h"
 #include "b2dwitness.h"
 #include "mipwitness.h"
+#include "mswitness.h"
 #include "pmwitness.h"
 #include "parallaxwitness.h"
 #include "materialwitness.h"
@@ -128,6 +129,7 @@ static int         rt_cfg_warmup           = 2;
 static int         rt_cfg_bless            = 0;
 static int         rt_cfg_env_witness      = 0;
 static int         rt_cfg_mip_witness      = 0;
+static int         rt_cfg_ms_witness       = 0;
 static int         rt_cfg_2d_witness       = 0;
 static int         rt_cfg_pm_witness       = 0;
 static int         rt_cfg_parallax_witness = 0;
@@ -2253,6 +2255,16 @@ static int rt_run(rt_demo *demo)
         return g_failed;
     }
 
+    if(rt_cfg_ms_witness) {
+        BrRendererEnd();
+
+        if(rt_ms_witness_run(demo, rt_cfg_vulkan ? "vkrend" : rt_cfg_device) != BRE_OK)
+            g_failed = 1;
+
+        printf("RT result=%s failures=%d\n", g_failed ? "FAIL" : "PASS", g_failed ? 1 : 0);
+        return g_failed;
+    }
+
     for(;;) {
         for(int i = 0; i <= st->warmup; ++i)
             rt_render_frame(st, demo);
@@ -2649,6 +2661,7 @@ static int rt_list_scene_dir(const char *dir)
 #define ARGDEF_PM_WITNESS       317
 #define ARGDEF_WF_WITNESS       318
 #define ARGDEF_MIP_WITNESS      319
+#define ARGDEF_MS_WITNESS       322
 #define ARGDEF_PARALLAX_WITNESS 320
 #define ARGDEF_MATERIAL_WITNESS 321
 
@@ -2670,6 +2683,7 @@ static const struct parg_option rt_argdefs[] = {
     {.name = "pm-witness",       .has_arg = PARG_NOARG,  .flag = NULL, .val = ARGDEF_PM_WITNESS      },
     {.name = "wireframe-witness", .has_arg = PARG_NOARG, .flag = NULL, .val = ARGDEF_WF_WITNESS      },
     {.name = "mip-witness",      .has_arg = PARG_NOARG,  .flag = NULL, .val = ARGDEF_MIP_WITNESS     },
+    {.name = "ms-witness",       .has_arg = PARG_NOARG,  .flag = NULL, .val = ARGDEF_MS_WITNESS      },
     {.name = "parallax-witness", .has_arg = PARG_NOARG,  .flag = NULL, .val = ARGDEF_PARALLAX_WITNESS},
     {.name = "material-witness", .has_arg = PARG_NOARG,  .flag = NULL, .val = ARGDEF_MATERIAL_WITNESS},
     {.name = "vk-witness",       .has_arg = PARG_NOARG,  .flag = NULL, .val = ARGDEF_VK_WITNESS      },
@@ -2792,6 +2806,10 @@ static rt_parse rt_parse_args(int argc, char *const *argv)
                 rt_cfg_wf_witness = 1;
                 break;
 
+            case ARGDEF_MS_WITNESS:
+                rt_cfg_ms_witness = 1;
+                break;
+
             case ARGDEF_MIP_WITNESS:
                 rt_cfg_mip_witness = 1;
                 break;
@@ -2862,6 +2880,7 @@ static void rt_usage(FILE *out, const char *argv0)
             "  --bless            write the reference instead of comparing\n"
             "  --env-witness      run the environment-map orientation witness and exit\n"
             "  --mip-witness      run the mip-chain witness and exit\n"
+            "  --ms-witness       run the multisample witness and exit\n"
             "  --2d-witness       run the Br2D immediate-path witness and exit\n"
             "  --parallax-witness\n"
             "                     run the parallax offset witness and exit\n"
@@ -2925,7 +2944,7 @@ int main(int argc, char **argv)
     if(rt_cfg_vk_witness)
         rt_cfg_vulkan = 1;
 
-    if(rt_cfg_vulkan && !rt_cfg_vk_witness && !rt_cfg_parallax_witness) {
+    if(rt_cfg_vulkan && !rt_cfg_vk_witness && !rt_cfg_parallax_witness && !rt_cfg_ms_witness) {
         fprintf(stderr, "--vulkan needs --vk-witness or --parallax-witness: the fixture corpus cannot run on a Vulkan front screen\n");
         return 2;
     }
