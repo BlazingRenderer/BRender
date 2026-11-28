@@ -353,6 +353,86 @@ inline bool IsShadeTable(sp_shade s) noexcept
 }
 
 /*
+ * Whether the block declares vertex k's component.
+ *
+ * brp_block's two masks are the contract between softrend and the rasteriser:
+ * constant_components are written in vertex 0 only, vertex_components in every
+ * vertex, and a component in neither is not written at all. match.c derives
+ * both from the block's axes, so the mask already says which slots this kernel
+ * may look at - and a slot it may not look at holds whatever the last face
+ * left there, which need not be a float at all.
+ *
+ * Converting one is a defect even when the result is thrown away:
+ * BrFloatToFixed is a float-to-fixed conversion, and converting a value outside
+ * its range - a stale NaN, or the small integer a previous vertex left in the
+ * slot - is undefined behaviour.
+ */
+inline bool Declares(const brp_block *block, br_uint_32 component, int k) noexcept
+{
+    return (block->vertex_components & component) != 0 || ((block->constant_components & component) != 0 && k == 0);
+}
+
+inline bool FixedRepresentable(float v) noexcept
+{
+    return isfinite(v) && v >= -32768.0f && v < 32768.0f;
+}
+
+/*
+ * Whether every component the block declares for this vertex survives BrFloatToFixed.
+ *
+ * A kernel validates first and converts afterwards, in two passes, because testing the value
+ * a conversion produced is too late: the conversion of one outside the 16.16 range is
+ * undefined behaviour whether or not its result is then thrown away.
+ */
+inline bool VertexRepresentable(const brp_block *block, const brp_vertex *v, int k) noexcept
+{
+    static const struct {
+        br_uint_32 component;
+        int        index;
+    } components[] = {
+        {CM_X,  C_X },
+        {CM_Y,  C_Y },
+        {CM_Z,  C_Z },
+        {CM_W,  C_W },
+        {CM_SX, C_SX},
+        {CM_SY, C_SY},
+        {CM_SZ, C_SZ},
+        {CM_U,  C_U },
+        {CM_V,  C_V },
+        {CM_I,  C_I },
+        {CM_A,  C_A },
+        {CM_R,  C_R },
+        {CM_G,  C_G },
+        {CM_B,  C_B },
+    };
+
+    for(const auto& c : components) {
+        if(Declares(block, c.component, k) && !FixedRepresentable(v->comp[c.index]))
+            return false;
+    }
+
+    return true;
+}
+
+/*
+ * One component's value, and zero where the block does not declare it - so a slot nothing
+ * wrote is not read either.
+ */
+inline float DeclaredFloat(const brp_block *block, br_uint_32 component, int k, const brp_vertex *v, int index) noexcept
+{
+    return Declares(block, component, k) ? v->comp[index] : 0.0f;
+}
+
+/*
+ * The same component's fixed-point value. Only the declared slots are ever converted, which
+ * is the only rule a kernel needs: what the block does not declare, it does not touch.
+ */
+inline br_fixed_ls DeclaredFixed(const brp_block *block, br_uint_32 component, int k, const brp_vertex *v, int index) noexcept
+{
+    return BrFloatToFixed(DeclaredFloat(block, component, k, v, index));
+}
+
+/*
  * Broadcast the per-vertex intensity the asm expects.
  *
  * The unlit blocks have no intensity component at all, and the constant ones
@@ -702,8 +782,6 @@ void IndexedTrapezium(IndexedWalk& w, const softprim_buffer& colour, const softp
 template <sp_depth D, sp_shade S, sp_fog G>
 void IndexedTriangle(brp_block *block, brp_vertex *v0, brp_vertex *v1, brp_vertex *v2)
 {
-    (void)block;
-
     const softprim_buffer& colour = SoftPrimWork.colour;
     const softprim_buffer& depth  = SoftPrimWork.depth;
 
@@ -729,17 +807,19 @@ void IndexedTriangle(brp_block *block, brp_vertex *v0, brp_vertex *v1, brp_verte
     TexVert     in[3];
 
     for(int k = 0; k < 3; k++) {
-        in[k].x  = BrFloatToFixed(src[k]->comp[C_SX]);
-        in[k].y  = BrFloatToFixed(src[k]->comp[C_SY]);
-        in[k].z  = BrFloatToFixed(src[k]->comp[C_SZ]);
-        in[k].i  = BrFloatToFixed(src[k]->comp[C_I]);
-        in[k].rx = src[k]->comp[C_SX];
-        in[k].ry = src[k]->comp[C_SY];
-        in[k].rz = src[k]->comp[C_SZ];
-        in[k].ri = src[k]->comp[C_I];
-
-        if(!isfinite(in[k].rx) || !isfinite(in[k].ry))
+        if(!VertexRepresentable(block, src[k], k))
             return;
+    }
+
+    for(int k = 0; k < 3; k++) {
+        in[k].x  = DeclaredFixed(block, CM_SX, k, src[k], C_SX);
+        in[k].y  = DeclaredFixed(block, CM_SY, k, src[k], C_SY);
+        in[k].z  = DeclaredFixed(block, CM_SZ, k, src[k], C_SZ);
+        in[k].i  = DeclaredFixed(block, CM_I, k, src[k], C_I);
+        in[k].rx = DeclaredFloat(block, CM_SX, k, src[k], C_SX);
+        in[k].ry = DeclaredFloat(block, CM_SY, k, src[k], C_SY);
+        in[k].rz = DeclaredFloat(block, CM_SZ, k, src[k], C_SZ);
+        in[k].ri = DeclaredFloat(block, CM_I, k, src[k], C_I);
     }
 
     ApplyIntensity(in, S, interpolated);
@@ -1393,8 +1473,6 @@ inline br_uint_8 RgbFormatType(sp_fmt F) noexcept;
 template <sp_depth D, sp_shade S, sp_persp P, sp_blend B, sp_fog G>
 void TexturedIndexedTriangle(brp_block *block, brp_vertex *v0, brp_vertex *v1, brp_vertex *v2) noexcept
 {
-    (void)block;
-
     const softprim_buffer& colour  = SoftPrimWork.colour;
     const softprim_buffer& dbuf    = SoftPrimWork.depth;
     const softprim_buffer& texture = SoftPrimWork.texture;
@@ -1435,23 +1513,25 @@ void TexturedIndexedTriangle(brp_block *block, brp_vertex *v0, brp_vertex *v1, b
     TexVert     in[3];
 
     for(int k = 0; k < 3; k++) {
-        in[k].x  = BrFloatToFixed(src[k]->comp[C_SX]);
-        in[k].y  = BrFloatToFixed(src[k]->comp[C_SY]);
-        in[k].z  = BrFloatToFixed(src[k]->comp[C_SZ]);
-        in[k].u  = BrFloatToFixed(src[k]->comp[C_U]);
-        in[k].v  = BrFloatToFixed(src[k]->comp[C_V]);
-        in[k].w  = BrFloatToFixed(src[k]->comp[C_W]);
-        in[k].i  = BrFloatToFixed(src[k]->comp[C_I]);
-        in[k].rx = src[k]->comp[C_SX];
-        in[k].ry = src[k]->comp[C_SY];
-        in[k].rz = src[k]->comp[C_SZ];
-        in[k].rw = src[k]->comp[C_W];
-        in[k].ru = src[k]->comp[C_U];
-        in[k].rv = src[k]->comp[C_V];
-        in[k].ri = src[k]->comp[C_I];
-
-        if(!isfinite(in[k].rx) || !isfinite(in[k].ry) || !isfinite(in[k].rw))
+        if(!VertexRepresentable(block, src[k], k))
             return;
+    }
+
+    for(int k = 0; k < 3; k++) {
+        in[k].x  = DeclaredFixed(block, CM_SX, k, src[k], C_SX);
+        in[k].y  = DeclaredFixed(block, CM_SY, k, src[k], C_SY);
+        in[k].z  = DeclaredFixed(block, CM_SZ, k, src[k], C_SZ);
+        in[k].u  = DeclaredFixed(block, CM_U, k, src[k], C_U);
+        in[k].v  = DeclaredFixed(block, CM_V, k, src[k], C_V);
+        in[k].w  = DeclaredFixed(block, CM_W, k, src[k], C_W);
+        in[k].i  = DeclaredFixed(block, CM_I, k, src[k], C_I);
+        in[k].rx = DeclaredFloat(block, CM_SX, k, src[k], C_SX);
+        in[k].ry = DeclaredFloat(block, CM_SY, k, src[k], C_SY);
+        in[k].rz = DeclaredFloat(block, CM_SZ, k, src[k], C_SZ);
+        in[k].rw = DeclaredFloat(block, CM_W, k, src[k], C_W);
+        in[k].ru = DeclaredFloat(block, CM_U, k, src[k], C_U);
+        in[k].rv = DeclaredFloat(block, CM_V, k, src[k], C_V);
+        in[k].ri = DeclaredFloat(block, CM_I, k, src[k], C_I);
     }
 
     ApplyIntensity(in, S, interpolated);
@@ -2062,8 +2142,6 @@ void DivideTrapezium(DivideWalk& w) noexcept
 template <sp_depth D, sp_shade S, sp_blend B, sp_fog G>
 void TexturedDivideTriangle(brp_block *block, brp_vertex *v0, brp_vertex *v1, brp_vertex *v2) noexcept
 {
-    (void)block;
-
     const softprim_buffer& colour  = SoftPrimWork.colour;
     const softprim_buffer& dbuf    = SoftPrimWork.depth;
     const softprim_buffer& texture = SoftPrimWork.texture;
@@ -2093,21 +2171,23 @@ void TexturedDivideTriangle(brp_block *block, brp_vertex *v0, brp_vertex *v1, br
     TexVert     in[3];
 
     for(int k = 0; k < 3; k++) {
-        in[k].x  = BrFloatToFixed(src[k]->comp[C_SX]);
-        in[k].y  = BrFloatToFixed(src[k]->comp[C_SY]);
-        in[k].z  = BrFloatToFixed(src[k]->comp[C_SZ]);
-        in[k].u  = BrFloatToFixed(src[k]->comp[C_U]);
-        in[k].v  = BrFloatToFixed(src[k]->comp[C_V]);
-        in[k].i  = BrFloatToFixed(src[k]->comp[C_I]);
-        in[k].rx = src[k]->comp[C_SX];
-        in[k].ry = src[k]->comp[C_SY];
-        in[k].rz = src[k]->comp[C_SZ];
-        in[k].ru = src[k]->comp[C_U];
-        in[k].rv = src[k]->comp[C_V];
-        in[k].ri = src[k]->comp[C_I];
-
-        if(!isfinite(in[k].rx) || !isfinite(in[k].ry) || !isfinite(in[k].ru) || !isfinite(in[k].rv))
+        if(!VertexRepresentable(block, src[k], k))
             return;
+    }
+
+    for(int k = 0; k < 3; k++) {
+        in[k].x  = DeclaredFixed(block, CM_SX, k, src[k], C_SX);
+        in[k].y  = DeclaredFixed(block, CM_SY, k, src[k], C_SY);
+        in[k].z  = DeclaredFixed(block, CM_SZ, k, src[k], C_SZ);
+        in[k].u  = DeclaredFixed(block, CM_U, k, src[k], C_U);
+        in[k].v  = DeclaredFixed(block, CM_V, k, src[k], C_V);
+        in[k].i  = DeclaredFixed(block, CM_I, k, src[k], C_I);
+        in[k].rx = DeclaredFloat(block, CM_SX, k, src[k], C_SX);
+        in[k].ry = DeclaredFloat(block, CM_SY, k, src[k], C_SY);
+        in[k].rz = DeclaredFloat(block, CM_SZ, k, src[k], C_SZ);
+        in[k].ru = DeclaredFloat(block, CM_U, k, src[k], C_U);
+        in[k].rv = DeclaredFloat(block, CM_V, k, src[k], C_V);
+        in[k].ri = DeclaredFloat(block, CM_I, k, src[k], C_I);
     }
 
     ApplyIntensity(in, S, interpolated);
@@ -2212,7 +2292,7 @@ void DecalTriangle(brp_block *block, brp_vertex *v0, brp_vertex *v1, brp_vertex 
     brp_vertex  pass2[3];
 
     for(int k = 0; k < 3; k++) {
-        const double vi = (double)(float)src[k]->comp[C_I];
+        const double vi = (double)DeclaredFloat(block, CM_I, k, src[k], C_I);
 
         pass1[k] = pass2[k] = *src[k];
 
@@ -2897,8 +2977,6 @@ void PizTriangle(brp_block *block, brp_vertex *v0, brp_vertex *v1, brp_vertex *v
     constexpr int  BPP   = (F == SP_FMT_I8) ? 1 : 2;
     constexpr bool LIGHT = (F != SP_FMT_I8);
 
-    (void)block;
-
     const softprim_buffer& colour  = SoftPrimWork.colour;
     const softprim_buffer& dbuf    = SoftPrimWork.depth;
     const softprim_buffer& texture = SoftPrimWork.texture;
@@ -2938,23 +3016,16 @@ void PizTriangle(brp_block *block, brp_vertex *v0, brp_vertex *v1, brp_vertex *v
     PizVert     pv[3];
 
     for(int k = 0; k < 3; k++) {
-        if(!isfinite(src[k]->comp[C_SX]) || !isfinite(src[k]->comp[C_SY]) || !isfinite(src[k]->comp[C_W]))
+        if(!VertexRepresentable(block, src[k], k))
             return;
 
-        const bool read_intensity = LIGHT && (S != SP_SHADE_CONST_I_RGB || k == 0);
-        if(read_intensity && !isfinite(src[k]->comp[C_I]))
-            return;
-
-        pv[k].x = BrFloatToFixed(src[k]->comp[C_SX]);
-        pv[k].y = BrFloatToFixed(src[k]->comp[C_SY]);
-        pv[k].z = BrFloatToFixed(src[k]->comp[C_SZ]);
-        pv[k].u = BrFloatToFixed(src[k]->comp[C_U]);
-        pv[k].v = BrFloatToFixed(src[k]->comp[C_V]);
-        pv[k].w = BrFloatToFixed(src[k]->comp[C_W]);
-
-        if(read_intensity)
-            pv[k].i = BrFloatToFixed(src[k]->comp[C_I]);
-
+        pv[k].x  = DeclaredFixed(block, CM_SX, k, src[k], C_SX);
+        pv[k].y  = DeclaredFixed(block, CM_SY, k, src[k], C_SY);
+        pv[k].z  = DeclaredFixed(block, CM_SZ, k, src[k], C_SZ);
+        pv[k].u  = DeclaredFixed(block, CM_U, k, src[k], C_U);
+        pv[k].v  = DeclaredFixed(block, CM_V, k, src[k], C_V);
+        pv[k].w  = DeclaredFixed(block, CM_W, k, src[k], C_W);
+        pv[k].i  = DeclaredFixed(block, CM_I, k, src[k], C_I);
         pv[k].sy = pv[k].y;
     }
 
@@ -4080,8 +4151,6 @@ void RgbAwtTrapezium(RgbAwtWalk& w, AwtEdge& edge) noexcept
 template <sp_fmt F, sp_depth D, sp_tex X, sp_shade S, sp_blend B>
 void RgbAwtTriangle(brp_block *block, brp_vertex *v0, brp_vertex *v1, brp_vertex *v2) noexcept
 {
-    (void)block;
-
     const softprim_buffer& colour  = SoftPrimWork.colour;
     const softprim_buffer& dbuf    = SoftPrimWork.depth;
     const softprim_buffer& texture = SoftPrimWork.texture;
@@ -4115,27 +4184,25 @@ void RgbAwtTriangle(brp_block *block, brp_vertex *v0, brp_vertex *v1, brp_vertex
     PizVert     pv[3];
 
     for(int k = 0; k < 3; k++) {
-        if(!isfinite(src[k]->comp[C_SX]) || !isfinite(src[k]->comp[C_SY]) || !isfinite(src[k]->comp[C_U]) || !isfinite(src[k]->comp[C_V]))
+        if(!VertexRepresentable(block, src[k], k))
             return;
 
-        pv[k].x  = BrFloatToFixed(src[k]->comp[C_SX]);
-        pv[k].y  = BrFloatToFixed(src[k]->comp[C_SY]);
-        pv[k].z  = BrFloatToFixed(src[k]->comp[C_SZ]);
-        pv[k].u  = BrFloatToFixed(src[k]->comp[C_U]);
-        pv[k].v  = BrFloatToFixed(src[k]->comp[C_V]);
-        pv[k].i  = BrFloatToFixed(src[k]->comp[C_I]);
+        pv[k].x  = DeclaredFixed(block, CM_SX, k, src[k], C_SX);
+        pv[k].y  = DeclaredFixed(block, CM_SY, k, src[k], C_SY);
+        pv[k].z  = DeclaredFixed(block, CM_SZ, k, src[k], C_SZ);
+        pv[k].u  = DeclaredFixed(block, CM_U, k, src[k], C_U);
+        pv[k].v  = DeclaredFixed(block, CM_V, k, src[k], C_V);
+        pv[k].i  = DeclaredFixed(block, CM_I, k, src[k], C_I);
         pv[k].sy = pv[k].y;
 
         /*
          * Only the sprite blocks declare the colour components, so only they
          * have anything in the slots; every other arm leaves them alone.
          */
-        if(X == SP_TEX_RGBA8888) {
-            pv[k].r = BrFloatToFixed(src[k]->comp[C_R]);
-            pv[k].g = BrFloatToFixed(src[k]->comp[C_G]);
-            pv[k].b = BrFloatToFixed(src[k]->comp[C_B]);
-            pv[k].a = BrFloatToFixed(src[k]->comp[C_A]);
-        }
+        pv[k].r = DeclaredFixed(block, CM_R, k, src[k], C_R);
+        pv[k].g = DeclaredFixed(block, CM_G, k, src[k], C_G);
+        pv[k].b = DeclaredFixed(block, CM_B, k, src[k], C_B);
+        pv[k].a = DeclaredFixed(block, CM_A, k, src[k], C_A);
     }
 
     /*
@@ -4292,8 +4359,6 @@ inline void RgbPow2Span(const softprim_buffer& texture, br_uint_8 *start, br_uin
 template <sp_fmt F>
 void RgbPow2Triangle(brp_block *block, brp_vertex *v0, brp_vertex *v1, brp_vertex *v2) noexcept
 {
-    (void)block;
-
     const softprim_buffer& colour  = SoftPrimWork.colour;
     const softprim_buffer& dbuf    = SoftPrimWork.depth;
     const softprim_buffer& texture = SoftPrimWork.texture;
@@ -4335,20 +4400,21 @@ void RgbPow2Triangle(brp_block *block, brp_vertex *v0, brp_vertex *v1, brp_verte
     TexVert     in[3]  = {};
 
     for(int k = 0; k < 3; k++) {
-        if(!isfinite(src[k]->comp[C_SX]) || !isfinite(src[k]->comp[C_SY]) || !isfinite(src[k]->comp[C_SZ]) ||
-           !isfinite(src[k]->comp[C_U]) || !isfinite(src[k]->comp[C_V]))
+        if(!VertexRepresentable(block, src[k], k))
             return;
+    }
 
-        in[k].x  = BrFloatToFixed(src[k]->comp[C_SX]);
-        in[k].y  = BrFloatToFixed(src[k]->comp[C_SY]);
-        in[k].z  = BrFloatToFixed(src[k]->comp[C_SZ]);
-        in[k].u  = BrFloatToFixed(src[k]->comp[C_U]);
-        in[k].v  = BrFloatToFixed(src[k]->comp[C_V]);
-        in[k].rx = src[k]->comp[C_SX];
-        in[k].ry = src[k]->comp[C_SY];
-        in[k].rz = src[k]->comp[C_SZ];
-        in[k].ru = src[k]->comp[C_U];
-        in[k].rv = src[k]->comp[C_V];
+    for(int k = 0; k < 3; k++) {
+        in[k].x  = DeclaredFixed(block, CM_SX, k, src[k], C_SX);
+        in[k].y  = DeclaredFixed(block, CM_SY, k, src[k], C_SY);
+        in[k].z  = DeclaredFixed(block, CM_SZ, k, src[k], C_SZ);
+        in[k].u  = DeclaredFixed(block, CM_U, k, src[k], C_U);
+        in[k].v  = DeclaredFixed(block, CM_V, k, src[k], C_V);
+        in[k].rx = DeclaredFloat(block, CM_SX, k, src[k], C_SX);
+        in[k].ry = DeclaredFloat(block, CM_SY, k, src[k], C_SY);
+        in[k].rz = DeclaredFloat(block, CM_SZ, k, src[k], C_SZ);
+        in[k].ru = DeclaredFloat(block, CM_U, k, src[k], C_U);
+        in[k].rv = DeclaredFloat(block, CM_V, k, src[k], C_V);
     }
 
     TriSetup ts;
@@ -4754,8 +4820,6 @@ void RgbPiTrapezium(RgbPiWalk& w, PiEdge& edge) noexcept
 template <sp_fmt F, sp_depth D, bool INTERP>
 void RgbPiTriangle(brp_block *block, brp_vertex *v0, brp_vertex *v1, brp_vertex *v2) noexcept
 {
-    (void)block;
-
     const softprim_buffer& colour = SoftPrimWork.colour;
     const softprim_buffer& dbuf   = SoftPrimWork.depth;
 
@@ -4769,15 +4833,15 @@ void RgbPiTriangle(brp_block *block, brp_vertex *v0, brp_vertex *v1, brp_vertex 
     PizVert     pv[3];
 
     for(int k = 0; k < 3; k++) {
-        if(!isfinite(src[k]->comp[C_SX]) || !isfinite(src[k]->comp[C_SY]))
+        if(!VertexRepresentable(block, src[k], k))
             return;
 
-        pv[k].x  = BrFloatToFixed(src[k]->comp[C_SX]);
-        pv[k].y  = BrFloatToFixed(src[k]->comp[C_SY]);
-        pv[k].z  = BrFloatToFixed(src[k]->comp[C_SZ]);
-        pv[k].r  = BrFloatToFixed(src[k]->comp[C_R]);
-        pv[k].g  = BrFloatToFixed(src[k]->comp[C_G]);
-        pv[k].b  = BrFloatToFixed(src[k]->comp[C_B]);
+        pv[k].x  = DeclaredFixed(block, CM_SX, k, src[k], C_SX);
+        pv[k].y  = DeclaredFixed(block, CM_SY, k, src[k], C_SY);
+        pv[k].z  = DeclaredFixed(block, CM_SZ, k, src[k], C_SZ);
+        pv[k].r  = DeclaredFixed(block, CM_R, k, src[k], C_R);
+        pv[k].g  = DeclaredFixed(block, CM_G, k, src[k], C_G);
+        pv[k].b  = DeclaredFixed(block, CM_B, k, src[k], C_B);
         pv[k].sy = pv[k].y;
     }
 
@@ -5026,7 +5090,6 @@ void RgbTrapezium(RgbWalk& w) noexcept
 template <sp_fmt F, sp_depth D, sp_shade S, sp_tex X, sp_addr A, sp_persp P, bool C7>
 void RgbTriangle(brp_block *block, brp_vertex *v0, brp_vertex *v1, brp_vertex *v2) noexcept
 {
-    (void)block;
     (void)A;
     (void)P;
 
@@ -5055,31 +5118,27 @@ void RgbTriangle(brp_block *block, brp_vertex *v0, brp_vertex *v1, brp_vertex *v
     TexVert     in[3];
 
     for(int k = 0; k < 3; k++) {
-        in[k].x  = BrFloatToFixed(src[k]->comp[C_SX]);
-        in[k].y  = BrFloatToFixed(src[k]->comp[C_SY]);
-        in[k].z  = BrFloatToFixed(src[k]->comp[C_SZ]);
-        in[k].u  = BrFloatToFixed(src[k]->comp[C_U]);
-        in[k].v  = BrFloatToFixed(src[k]->comp[C_V]);
-        in[k].r  = BrFloatToFixed(src[k]->comp[C_R]);
-        in[k].g  = BrFloatToFixed(src[k]->comp[C_G]);
-        in[k].b  = BrFloatToFixed(src[k]->comp[C_B]);
-        in[k].rx = src[k]->comp[C_SX];
-        in[k].ry = src[k]->comp[C_SY];
-        in[k].rz = src[k]->comp[C_SZ];
-        in[k].ru = src[k]->comp[C_U];
-        in[k].rv = src[k]->comp[C_V];
-        in[k].rr = src[k]->comp[C_R];
-        in[k].rg = src[k]->comp[C_G];
-        in[k].rb = src[k]->comp[C_B];
-
-        if(!isfinite(in[k].rx) || !isfinite(in[k].ry) || !isfinite(in[k].rz))
+        if(!VertexRepresentable(block, src[k], k))
             return;
+    }
 
-        if(X != SP_TEX_NONE && (!isfinite(in[k].ru) || !isfinite(in[k].rv)))
-            return;
-
-        if(S != SP_SHADE_NONE && (!isfinite(in[k].rr) || !isfinite(in[k].rg) || !isfinite(in[k].rb)))
-            return;
+    for(int k = 0; k < 3; k++) {
+        in[k].x  = DeclaredFixed(block, CM_SX, k, src[k], C_SX);
+        in[k].y  = DeclaredFixed(block, CM_SY, k, src[k], C_SY);
+        in[k].z  = DeclaredFixed(block, CM_SZ, k, src[k], C_SZ);
+        in[k].u  = DeclaredFixed(block, CM_U, k, src[k], C_U);
+        in[k].v  = DeclaredFixed(block, CM_V, k, src[k], C_V);
+        in[k].r  = DeclaredFixed(block, CM_R, k, src[k], C_R);
+        in[k].g  = DeclaredFixed(block, CM_G, k, src[k], C_G);
+        in[k].b  = DeclaredFixed(block, CM_B, k, src[k], C_B);
+        in[k].rx = DeclaredFloat(block, CM_SX, k, src[k], C_SX);
+        in[k].ry = DeclaredFloat(block, CM_SY, k, src[k], C_SY);
+        in[k].rz = DeclaredFloat(block, CM_SZ, k, src[k], C_SZ);
+        in[k].ru = DeclaredFloat(block, CM_U, k, src[k], C_U);
+        in[k].rv = DeclaredFloat(block, CM_V, k, src[k], C_V);
+        in[k].rr = DeclaredFloat(block, CM_R, k, src[k], C_R);
+        in[k].rg = DeclaredFloat(block, CM_G, k, src[k], C_G);
+        in[k].rb = DeclaredFloat(block, CM_B, k, src[k], C_B);
     }
 
     /* A constant-colour block duplicates vertex 0's colour before the sort. */
@@ -5790,8 +5849,6 @@ void MmxRun(const MmxFrame& f) noexcept
 template <sp_fmt F, sp_depth D, sp_shade S, sp_tex X, sp_blend B, sp_dith H>
 void MmxTriangle(brp_block *block, brp_vertex *v0, brp_vertex *v1, brp_vertex *v2) noexcept
 {
-    (void)block;
-
     /*
      * The buffer-full flush comes first, before the triangle is looked at: the
      * asm makes the same check before its setup starts (gsetuptf.asm:291).
@@ -5819,26 +5876,25 @@ void MmxTriangle(brp_block *block, brp_vertex *v0, brp_vertex *v1, brp_vertex *v
     TexVert     in[3];
 
     for(int k = 0; k < 3; k++) {
-        in[k].x  = BrFloatToFixed(src[k]->comp[C_SX]);
-        in[k].y  = BrFloatToFixed(src[k]->comp[C_SY]);
-        in[k].z  = BrFloatToFixed(src[k]->comp[C_SZ]);
-        in[k].u  = BrFloatToFixed(src[k]->comp[C_U]);
-        in[k].v  = BrFloatToFixed(src[k]->comp[C_V]);
-        in[k].rx = src[k]->comp[C_SX];
-        in[k].ry = src[k]->comp[C_SY];
-        in[k].rz = src[k]->comp[C_SZ];
-        in[k].ru = src[k]->comp[C_U];
-        in[k].rv = src[k]->comp[C_V];
-        in[k].rr = src[k]->comp[C_R];
-        in[k].rg = src[k]->comp[C_G];
-        in[k].rb = src[k]->comp[C_B];
-        in[k].ra = src[k]->comp[C_A];
-
-        if(!isfinite(in[k].rx) || !isfinite(in[k].ry) || !isfinite(in[k].rz))
+        if(!VertexRepresentable(block, src[k], k))
             return;
+    }
 
-        if(X == SP_TEX_I8 && (!isfinite(in[k].ru) || !isfinite(in[k].rv)))
-            return;
+    for(int k = 0; k < 3; k++) {
+        in[k].x  = DeclaredFixed(block, CM_SX, k, src[k], C_SX);
+        in[k].y  = DeclaredFixed(block, CM_SY, k, src[k], C_SY);
+        in[k].z  = DeclaredFixed(block, CM_SZ, k, src[k], C_SZ);
+        in[k].u  = DeclaredFixed(block, CM_U, k, src[k], C_U);
+        in[k].v  = DeclaredFixed(block, CM_V, k, src[k], C_V);
+        in[k].rx = DeclaredFloat(block, CM_SX, k, src[k], C_SX);
+        in[k].ry = DeclaredFloat(block, CM_SY, k, src[k], C_SY);
+        in[k].rz = DeclaredFloat(block, CM_SZ, k, src[k], C_SZ);
+        in[k].ru = DeclaredFloat(block, CM_U, k, src[k], C_U);
+        in[k].rv = DeclaredFloat(block, CM_V, k, src[k], C_V);
+        in[k].rr = DeclaredFloat(block, CM_R, k, src[k], C_R);
+        in[k].rg = DeclaredFloat(block, CM_G, k, src[k], C_G);
+        in[k].rb = DeclaredFloat(block, CM_B, k, src[k], C_B);
+        in[k].ra = DeclaredFloat(block, CM_A, k, src[k], C_A);
     }
 
     /*
