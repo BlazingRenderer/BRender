@@ -143,11 +143,31 @@ install(FILES
         )
 
 # pkg-config
+#
+# The .pc file names the prefix it was installed under, so that has to come from
+# where the file itself lands rather than from CMAKE_INSTALL_PREFIX at configure
+# time: a "cmake --install --prefix" that differs from the configure-time one
+# moves the file, and an absolute libdir - Nix, with the libraries in their own
+# output - has no prefix above it to name at all.
+if (IS_ABSOLUTE "${CMAKE_INSTALL_LIBDIR}")
+	set(BRENDER_PC_PREFIX "")
+	set(BRENDER_PC_LIBDIR "${CMAKE_INSTALL_FULL_LIBDIR}")
+else()
+	set(BRENDER_PC_PREFIX "\${pcfiledir}/../..")
+	set(BRENDER_PC_LIBDIR "\${prefix}/${CMAKE_INSTALL_LIBDIR}")
+endif()
+
+if (IS_ABSOLUTE "${CMAKE_INSTALL_INCLUDEDIR}")
+	set(BRENDER_PC_INCLUDEDIR "${CMAKE_INSTALL_FULL_INCLUDEDIR}/brender")
+else()
+	set(BRENDER_PC_INCLUDEDIR "\${prefix}/${CMAKE_INSTALL_INCLUDEDIR}/brender")
+endif()
+
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/cmake/brender.pc.in ${CMAKE_CURRENT_BINARY_DIR}/brender.pc @ONLY)
-install(FILES ${CMAKE_CURRENT_BINARY_DIR}/brender.pc DESTINATION ${CMAKE_INSTALL_PREFIX}/lib/pkgconfig)
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/brender.pc DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig)
 foreach(driver sdl2dev sdl3dev glrend glrend1x vkrend softrend softprim mcga)
 	if (TARGET ${driver})
 		configure_file(${CMAKE_CURRENT_SOURCE_DIR}/cmake/brender-driver.pc.in ${CMAKE_CURRENT_BINARY_DIR}/brender-${driver}.pc @ONLY)
-		install(FILES ${CMAKE_CURRENT_BINARY_DIR}/brender-${driver}.pc DESTINATION ${CMAKE_INSTALL_PREFIX}/lib/pkgconfig)
+		install(FILES ${CMAKE_CURRENT_BINARY_DIR}/brender-${driver}.pc DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig)
 	endif()
 endforeach()
