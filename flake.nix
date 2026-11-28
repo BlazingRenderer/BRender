@@ -68,6 +68,8 @@
     }) // (lib.optionalAttrs pkgs.stdenv.hostPlatform.isx86 {
 
       brender-samples-linux32 = pkgs.pkgsi686Linux.callPackage ./nix/brender.nix {
+        inherit (pkgs) cmake perl spirv-cross glslang; # It appears pkgsi686Linux doesn't splice.
+
        version = self.lastModifiedDate;
        withExamples = true;
       };
