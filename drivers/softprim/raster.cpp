@@ -377,14 +377,22 @@ inline bool FixedRepresentable(float v) noexcept
     return isfinite(v) && v >= -32768.0f && v < 32768.0f;
 }
 
+inline bool DeclaresAny(const brp_block *block, br_uint_32 component) noexcept
+{
+    return (block->vertex_components & component) != 0 || (block->constant_components & component) != 0;
+}
+
 /*
- * Whether every component the block declares for this vertex survives BrFloatToFixed.
+ * Whether every component a block declares survives BrFloatToFixed. Whether a component is
+ * declared is the caller's test, because a triangle's constant components are in vertex zero
+ * alone while softrend replicates them onto every vertex of a line or a point.
  *
  * A kernel validates first and converts afterwards, in two passes, because testing the value
  * a conversion produced is too late: the conversion of one outside the 16.16 range is
  * undefined behaviour whether or not its result is then thrown away.
  */
-inline bool VertexRepresentable(const brp_block *block, const brp_vertex *v, int k) noexcept
+template <typename Declared>
+inline bool VertexRepresentableIf(const brp_vertex *v, Declared declared) noexcept
 {
     static const struct {
         br_uint_32 component;
@@ -407,29 +415,36 @@ inline bool VertexRepresentable(const brp_block *block, const brp_vertex *v, int
     };
 
     for(const auto& c : components) {
-        if(Declares(block, c.component, k) && !FixedRepresentable(v->comp[c.index]))
+        if(declared(c.component) && !FixedRepresentable(v->comp[c.index]))
             return false;
     }
 
     return true;
 }
 
-/*
- * One component's value, and zero where the block does not declare it - so a slot nothing
- * wrote is not read either.
- */
+inline bool VertexRepresentable(const brp_block *block, const brp_vertex *v, int k) noexcept
+{
+    return VertexRepresentableIf(v, [&](br_uint_32 c) { return Declares(block, c, k); });
+}
+
+inline bool VertexRepresentableAll(const brp_block *block, const brp_vertex *v) noexcept
+{
+    return VertexRepresentableIf(v, [&](br_uint_32 c) { return DeclaresAny(block, c); });
+}
+
 inline float DeclaredFloat(const brp_block *block, br_uint_32 component, int k, const brp_vertex *v, int index) noexcept
 {
     return Declares(block, component, k) ? v->comp[index] : 0.0f;
 }
 
-/*
- * The same component's fixed-point value. Only the declared slots are ever converted, which
- * is the only rule a kernel needs: what the block does not declare, it does not touch.
- */
 inline br_fixed_ls DeclaredFixed(const brp_block *block, br_uint_32 component, int k, const brp_vertex *v, int index) noexcept
 {
     return BrFloatToFixed(DeclaredFloat(block, component, k, v, index));
+}
+
+inline br_fixed_ls DeclaredFixedAll(const brp_block *block, br_uint_32 component, const brp_vertex *v, int index) noexcept
+{
+    return BrFloatToFixed(DeclaresAny(block, component) ? v->comp[index] : 0.0f);
 }
 
 /*
@@ -6373,8 +6388,6 @@ static inline void LpStoreRgb(br_uint_8 *p, br_fixed_ls r, br_fixed_ls g, br_fix
 template <sp_fmt F, sp_depth D, sp_shade S, sp_tex X, sp_addr A>
 static void SoftPrimLine(brp_block *block, brp_vertex *v0, brp_vertex *v1)
 {
-    (void)block;
-
     static_assert(F == SP_FMT_I8 || F == SP_FMT_555 || F == SP_FMT_565 || F == SP_FMT_888, "softprim: unknown line output format");
     static_assert(X == SP_TEX_NONE || (X == SP_TEX_I8 && F == SP_FMT_I8) || (X == SP_TEX_RGB888 && F == SP_FMT_888) ||
                       (X == SP_TEX_555 && F == SP_FMT_555) || (X == SP_TEX_565 && F == SP_FMT_565),
@@ -6385,16 +6398,19 @@ static void SoftPrimLine(brp_block *block, brp_vertex *v0, brp_vertex *v1)
                                  : (S == SP_SHADE_NONE || S == SP_SHADE_INTERP_RGB || S == SP_SHADE_CONST_RGB),
                   "softprim: no line kernel for this shading mode");
 
+    if(!VertexRepresentableAll(block, v0) || !VertexRepresentableAll(block, v1))
+        return;
+
     const softprim_buffer& col = SoftPrimWork.colour;
     const softprim_buffer& dep = SoftPrimWork.depth;
     const softprim_buffer& tex = SoftPrimWork.texture;
 
     const int bpp = (F == SP_FMT_I8) ? 1 : (F == SP_FMT_888) ? 3 : 2;
 
-    br_fixed_ls fx0 = BrFloatToFixed(v0->comp[C_SX]);
-    br_fixed_ls fy0 = BrFloatToFixed(v0->comp[C_SY]);
-    br_fixed_ls fx1 = BrFloatToFixed(v1->comp[C_SX]);
-    br_fixed_ls fy1 = BrFloatToFixed(v1->comp[C_SY]);
+    br_fixed_ls fx0 = DeclaredFixedAll(block, CM_SX, v0, C_SX);
+    br_fixed_ls fy0 = DeclaredFixedAll(block, CM_SY, v0, C_SY);
+    br_fixed_ls fx1 = DeclaredFixedAll(block, CM_SX, v1, C_SX);
+    br_fixed_ls fy1 = DeclaredFixedAll(block, CM_SY, v1, C_SY);
 
     int X0 = BrFixedToInt(fx0);
     int Y0 = BrFixedToInt(fy0);
@@ -6468,21 +6484,21 @@ static void SoftPrimLine(brp_block *block, brp_vertex *v0, brp_vertex *v1)
     br_fixed_ls pr = 0, pg = 0, pb = 0, dr = 0, dg = 0, db = 0;
 
     if constexpr(D == SP_DEPTH_ZW)
-        pz = BrFloatToFixed(v0->comp[C_SZ]);
+        pz = DeclaredFixedAll(block, CM_SZ, v0, C_SZ);
 
     if constexpr(F == SP_FMT_I8 && (S == SP_SHADE_INTERP_I || S == SP_SHADE_CONST_I))
-        pi = BrFloatToFixed(v0->comp[C_I]);
+        pi = DeclaredFixedAll(block, CM_I, v0, C_I);
     else if constexpr(F != SP_FMT_I8 && (S == SP_SHADE_INTERP_RGB || S == SP_SHADE_CONST_RGB)) {
-        pr = BrFloatToFixed(v0->comp[C_R]);
-        pg = BrFloatToFixed(v0->comp[C_G]);
-        pb = BrFloatToFixed(v0->comp[C_B]);
+        pr = DeclaredFixedAll(block, CM_R, v0, C_R);
+        pg = DeclaredFixedAll(block, CM_G, v0, C_G);
+        pb = DeclaredFixedAll(block, CM_B, v0, C_B);
     }
 
     if constexpr(X != SP_TEX_NONE) {
-        pu = BrFloatToFixed(v0->comp[C_U]) % tex_fw;
+        pu = DeclaredFixedAll(block, CM_U, v0, C_U) % tex_fw;
         if(pu < 0)
             pu += tex_fw;
-        pv = BrFloatToFixed(v0->comp[C_V]) % tex_fh;
+        pv = DeclaredFixedAll(block, CM_V, v0, C_V) % tex_fh;
         if(pv < 0)
             pv += tex_fh;
     }
@@ -6491,22 +6507,22 @@ static void SoftPrimLine(brp_block *block, brp_vertex *v0, brp_vertex *v1)
         const br_fixed_ls den = BrIntToFixed(count);
 
         if constexpr(D == SP_DEPTH_ZW)
-            dz = LpFixedDiv(BrFloatToFixed(v1->comp[C_SZ]) - BrFloatToFixed(v0->comp[C_SZ]), den);
+            dz = LpFixedDiv(DeclaredFixedAll(block, CM_SZ, v1, C_SZ) - DeclaredFixedAll(block, CM_SZ, v0, C_SZ), den);
 
         if constexpr(F == SP_FMT_I8 && (S == SP_SHADE_INTERP_I || S == SP_SHADE_CONST_I))
-            di = LpFixedDiv(BrFloatToFixed(v1->comp[C_I]) - BrFloatToFixed(v0->comp[C_I]), den);
+            di = LpFixedDiv(DeclaredFixedAll(block, CM_I, v1, C_I) - DeclaredFixedAll(block, CM_I, v0, C_I), den);
         else if constexpr(F != SP_FMT_I8 && (S == SP_SHADE_INTERP_RGB || S == SP_SHADE_CONST_RGB)) {
-            dr = LpFixedDiv(BrFloatToFixed(v1->comp[C_R]) - BrFloatToFixed(v0->comp[C_R]), den);
-            dg = LpFixedDiv(BrFloatToFixed(v1->comp[C_G]) - BrFloatToFixed(v0->comp[C_G]), den);
-            db = LpFixedDiv(BrFloatToFixed(v1->comp[C_B]) - BrFloatToFixed(v0->comp[C_B]), den);
+            dr = LpFixedDiv(DeclaredFixedAll(block, CM_R, v1, C_R) - DeclaredFixedAll(block, CM_R, v0, C_R), den);
+            dg = LpFixedDiv(DeclaredFixedAll(block, CM_G, v1, C_G) - DeclaredFixedAll(block, CM_G, v0, C_G), den);
+            db = LpFixedDiv(DeclaredFixedAll(block, CM_B, v1, C_B) - DeclaredFixedAll(block, CM_B, v0, C_B), den);
         }
 
         if constexpr(X != SP_TEX_NONE) {
-            du = LpFixedDiv(BrFloatToFixed(v1->comp[C_U]) - BrFloatToFixed(v0->comp[C_U]), den);
+            du = LpFixedDiv(DeclaredFixedAll(block, CM_U, v1, C_U) - DeclaredFixedAll(block, CM_U, v0, C_U), den);
             du = du % tex_fw;
             if(du > 0)
                 du -= tex_fw;
-            dv = LpFixedDiv(BrFloatToFixed(v1->comp[C_V]) - BrFloatToFixed(v0->comp[C_V]), den);
+            dv = LpFixedDiv(DeclaredFixedAll(block, CM_V, v1, C_V) - DeclaredFixedAll(block, CM_V, v0, C_V), den);
             dv = dv % tex_fh;
             if(dv > 0)
                 dv -= tex_fh;
@@ -6637,8 +6653,6 @@ static void SoftPrimLine(brp_block *block, brp_vertex *v0, brp_vertex *v1)
 template <sp_fmt F, sp_depth D, sp_shade S, sp_tex X>
 static void SoftPrimPoint(brp_block *block, brp_vertex *tvp)
 {
-    (void)block;
-
     static_assert(F == SP_FMT_I8 || F == SP_FMT_555 || F == SP_FMT_565 || F == SP_FMT_888, "softprim: unknown point output format");
     static_assert(X == SP_TEX_NONE || (X == SP_TEX_I8 && F == SP_FMT_I8) || (X == SP_TEX_RGB888 && F == SP_FMT_888) ||
                       (X == SP_TEX_555 && F == SP_FMT_555) || (X == SP_TEX_565 && F == SP_FMT_565),
@@ -6647,14 +6661,17 @@ static void SoftPrimPoint(brp_block *block, brp_vertex *tvp)
                                  : (S == SP_SHADE_NONE || S == SP_SHADE_INTERP_RGB || S == SP_SHADE_CONST_RGB),
                   "softprim: no point kernel for this shading mode");
 
+    if(!VertexRepresentableAll(block, tvp))
+        return;
+
     const softprim_buffer& col = SoftPrimWork.colour;
     const softprim_buffer& dep = SoftPrimWork.depth;
     const softprim_buffer& tex = SoftPrimWork.texture;
 
     const int bpp = (F == SP_FMT_I8) ? 1 : (F == SP_FMT_888) ? 3 : 2;
 
-    int x0 = BrFixedToInt(BrFloatToFixed(tvp->comp[C_SX]));
-    int y0 = BrFixedToInt(BrFloatToFixed(tvp->comp[C_SY]));
+    int x0 = BrFixedToInt(DeclaredFixedAll(block, CM_SX, tvp, C_SX));
+    int y0 = BrFixedToInt(DeclaredFixedAll(block, CM_SY, tvp, C_SY));
 
     LpClamp(x0, y0);
 
@@ -6662,7 +6679,7 @@ static void SoftPrimPoint(brp_block *block, brp_vertex *tvp)
     br_uint_16 pz   = 0;
 
     if constexpr(D == SP_DEPTH_ZW) {
-        pz   = LpDepth(BrFloatToFixed(tvp->comp[C_SZ]));
+        pz   = LpDepth(DeclaredFixedAll(block, CM_SZ, tvp, C_SZ));
         zptr = dep.base + y0 * dep.stride_b + 2 * x0;
 
         if(!(LoadDepth(zptr) > pz))
@@ -6673,18 +6690,19 @@ static void SoftPrimPoint(brp_block *block, brp_vertex *tvp)
 
     if constexpr(X == SP_TEX_NONE) {
         if constexpr(F == SP_FMT_I8)
-            p[0] = (br_uint_8)BrFixedToInt(BrFloatToFixed(tvp->comp[C_I]));
+            p[0] = (br_uint_8)BrFixedToInt(DeclaredFixedAll(block, CM_I, tvp, C_I));
         else
-            LpStoreRgb<F>(p, BrFloatToFixed(tvp->comp[C_R]), BrFloatToFixed(tvp->comp[C_G]), BrFloatToFixed(tvp->comp[C_B]));
+            LpStoreRgb<F>(p, DeclaredFixedAll(block, CM_R, tvp, C_R), DeclaredFixedAll(block, CM_G, tvp, C_G),
+                          DeclaredFixedAll(block, CM_B, tvp, C_B));
     } else if constexpr(F == SP_FMT_I8) {
         const br_fixed_ls fw = BrIntToFixed(tex.width_p);
         const br_fixed_ls fh = BrIntToFixed(tex.height);
-        br_fixed_ls       pu = BrFloatToFixed(tvp->comp[C_U]) % fw;
+        br_fixed_ls       pu = DeclaredFixedAll(block, CM_U, tvp, C_U) % fw;
 
         if(pu < 0)
             pu += fw;
 
-        br_fixed_ls pv = BrFloatToFixed(tvp->comp[C_V]) % fh;
+        br_fixed_ls pv = DeclaredFixedAll(block, CM_V, tvp, C_V) % fh;
 
         if(pv < 0)
             pv += fh;
@@ -6705,18 +6723,18 @@ static void SoftPrimPoint(brp_block *block, brp_vertex *tvp)
             return;
 
         if constexpr(S != SP_SHADE_NONE)
-            p[0] = SoftPrimWork.shade.base[256 * (br_fixed_ls)(BrFloatToFixed(tvp->comp[C_I]) >> 16) + texel];
+            p[0] = SoftPrimWork.shade.base[256 * (br_fixed_ls)(DeclaredFixedAll(block, CM_I, tvp, C_I) >> 16) + texel];
         else
             p[0] = texel;
     } else if constexpr(X == SP_TEX_RGB888) {
         const br_fixed_ls fw = BrIntToFixed(tex.width_p);
         const br_fixed_ls fh = BrIntToFixed(tex.height);
-        br_fixed_ls       pu = BrFloatToFixed(tvp->comp[C_U]) % fw;
+        br_fixed_ls       pu = DeclaredFixedAll(block, CM_U, tvp, C_U) % fw;
 
         if(pu < 0)
             pu += fw;
 
-        br_fixed_ls pv = BrFloatToFixed(tvp->comp[C_V]) % fh;
+        br_fixed_ls pv = DeclaredFixedAll(block, CM_V, tvp, C_V) % fh;
 
         if(pv < 0)
             pv += fh;
@@ -6732,12 +6750,12 @@ static void SoftPrimPoint(brp_block *block, brp_vertex *tvp)
     } else {
         const br_fixed_ls fw = BrIntToFixed(tex.width_p);
         const br_fixed_ls fh = BrIntToFixed(tex.height);
-        br_fixed_ls       pu = BrFloatToFixed(tvp->comp[C_U]) % fw;
+        br_fixed_ls       pu = DeclaredFixedAll(block, CM_U, tvp, C_U) % fw;
 
         if(pu < 0)
             pu += fw;
 
-        br_fixed_ls pv = BrFloatToFixed(tvp->comp[C_V]) % fh;
+        br_fixed_ls pv = DeclaredFixedAll(block, CM_V, tvp, C_V) % fh;
 
         if(pv < 0)
             pv += fh;
