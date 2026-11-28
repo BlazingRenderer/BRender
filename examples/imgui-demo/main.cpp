@@ -184,8 +184,10 @@ static void demo_destroy(br_demo *demo)
     if(ImGui::GetCurrentContext() != nullptr)
         ImGui::DestroyContext();
 
-    BrPixelmapFree(state->palette);
-    state->palette = nullptr;
+    if(state->palette != nullptr) {
+        BrPixelmapFree(state->palette);
+        state->palette = nullptr;
+    }
 }
 
 static constexpr br_demo_dispatch dispatch = {
