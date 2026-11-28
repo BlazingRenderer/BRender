@@ -2941,7 +2941,8 @@ void PizTriangle(brp_block *block, brp_vertex *v0, brp_vertex *v1, brp_vertex *v
         if(!isfinite(src[k]->comp[C_SX]) || !isfinite(src[k]->comp[C_SY]) || !isfinite(src[k]->comp[C_W]))
             return;
 
-        if(LIGHT && !isfinite(src[k]->comp[C_I]))
+        const bool read_intensity = LIGHT && (S != SP_SHADE_CONST_I_RGB || k == 0);
+        if(read_intensity && !isfinite(src[k]->comp[C_I]))
             return;
 
         pv[k].x = BrFloatToFixed(src[k]->comp[C_SX]);
@@ -2951,7 +2952,7 @@ void PizTriangle(brp_block *block, brp_vertex *v0, brp_vertex *v1, brp_vertex *v
         pv[k].v = BrFloatToFixed(src[k]->comp[C_V]);
         pv[k].w = BrFloatToFixed(src[k]->comp[C_W]);
 
-        if(LIGHT)
+        if(read_intensity)
             pv[k].i = BrFloatToFixed(src[k]->comp[C_I]);
 
         pv[k].sy = pv[k].y;
