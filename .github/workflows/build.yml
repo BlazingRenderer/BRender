@@ -126,3 +126,34 @@ jobs:
 
       - name: Build
         run: cmake --build build --config Release --parallel
+
+      #
+      # The installed tree has to work from a prefix other than the one it was
+      # configured with, which is what a packager passes: `cmake --install
+      # --prefix` moves the files, and anything that recorded the configure-time
+      # path at generate time (the pkg-config files did) then points at a
+      # directory that does not exist. The consumer build is the other half -
+      # find_package() on that prefix and a link through the exported target.
+      #
+      - name: Install to a scratch prefix and consume the package
+        shell: pwsh
+        run: |
+          $inst = Join-Path $env:RUNNER_TEMP 'brender-install'
+          $cfg  = (Select-String -Path build\CMakeCache.txt -Pattern '^CMAKE_INSTALL_PREFIX:PATH=(.*)$').Matches[0].Groups[1].Value
+          Write-Host "configure-time prefix: $cfg"
+
+          cmake --install build --config Release --prefix $inst
+          if ($LASTEXITCODE -ne 0) { throw 'the install failed' }
+
+          $pc = @(Get-ChildItem -Recurse $inst -Filter *.pc -ErrorAction SilentlyContinue)
+          if ($pc.Count -eq 0) { throw "no pkg-config files were installed under $inst" }
+
+          $leak = @(Get-ChildItem -Recurse $inst -File | Select-String -SimpleMatch $cfg -List)
+          if ($leak.Count -ne 0) { throw "$($leak[0].Path) names the configure-time prefix" }
+
+          cmake -S cmake/consume-test -B consume-build -A ${{ matrix.configuration.platform }} `
+                -DCMAKE_PREFIX_PATH="$inst"
+          if ($LASTEXITCODE -ne 0) { throw 'the consumer could not find the installed package' }
+
+          cmake --build consume-build --config Release
+          if ($LASTEXITCODE -ne 0) { throw 'the consumer did not build' }
