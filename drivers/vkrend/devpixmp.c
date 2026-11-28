@@ -41,6 +41,7 @@ static br_tv_template_entry devicePixelmapTemplateEntries[] = {
     {BRT(FACILITY_O),        F(output_facility), BRTV_QUERY,            BRTV_CONV_COPY,    0                    },
     {BRT(CLUT_O),            0,                  BRTV_QUERY | BRTV_ALL, BRTV_CONV_CUSTOM,  (br_uintptr_t)&custom},
     {BRT(IDENTIFIER_CSTR),   F(pm_identifier),   BRTV_QUERY | BRTV_ALL, BRTV_CONV_COPY,    0                    },
+    {BRT(MSAA_SAMPLES_I32),  F(msaa_samples),    BRTV_QUERY | BRTV_ALL, BRTV_CONV_COPY,    0                    },
 };
 #undef F
 
@@ -89,6 +90,12 @@ br_boolean DevicePixelmapVkIsOffscreen(const br_device_pixelmap *pm)
 br_boolean DevicePixelmapVkIsDepth(const br_device_pixelmap *pm)
 {
     return pm->use_type == BRT_DEPTH && pm->dispatch == &devicePixelmapDispatch;
+}
+
+VkSampleCountFlagBits DevicePixelmapVkSamples(const br_device_pixelmap *pm)
+{
+    /* The Vulkan sample-count flags are their own value: VK_SAMPLE_COUNT_4_BIT is 4. */
+    return (pm->msaa_samples > 1) ? (VkSampleCountFlagBits)pm->msaa_samples : VK_SAMPLE_COUNT_1_BIT;
 }
 
 static void DevicePixelmapVkDestroyImage(br_device_pixelmap *pm);
@@ -206,6 +213,60 @@ static br_error DevicePixelmapVkCreateImage(br_device *dev, br_device_pixelmap *
 
     pm->as_back.layout = VK_IMAGE_LAYOUT_UNDEFINED;
 
+    /*
+     * The multisampled target is a second image of the same format, used only as an
+     * attachment: nothing samples it, copies to it or blits from it, so its usage is the
+     * one bit it needs. A subresolved, filtered or storage image would need a feature the
+     * device need not offer for the count it accepted.
+     */
+    if(pm->msaa_samples > 1) {
+        const VkImageCreateInfo ms_image_info = {
+            .sType         = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO,
+            .imageType     = VK_IMAGE_TYPE_2D,
+            .format        = fmt->format,
+            .extent        = {(uint32_t)width, (uint32_t)height, 1},
+            .mipLevels     = 1,
+            .arrayLayers   = 1,
+            .samples       = (VkSampleCountFlagBits)pm->msaa_samples,
+            .tiling        = VK_IMAGE_TILING_OPTIMAL,
+            .usage         = fmt->depth ? VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT : VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT,
+            .initialLayout = VK_IMAGE_LAYOUT_UNDEFINED,
+        };
+
+        if((res = vmaCreateImage(dev->vma_allocator, &ms_image_info, &alloc_info, &pm->as_back.msaa_image, &pm->as_back.msaa_allocation, NULL)) !=
+           VK_SUCCESS) {
+            BrLogError("VKREND", "Failed to create multisampled image: VkResult = %d", res);
+            pm->as_back.msaa_image      = VK_NULL_HANDLE;
+            pm->as_back.msaa_allocation = NULL;
+            DevicePixelmapVkDestroyImage(pm);
+            return BRE_FAIL;
+        }
+
+        const VkImageViewCreateInfo ms_view_info = {
+            .sType    = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO,
+            .image    = pm->as_back.msaa_image,
+            .viewType = VK_IMAGE_VIEW_TYPE_2D,
+            .format   = fmt->format,
+            .subresourceRange =
+                {
+                                   .aspectMask     = aspect,
+                                   .baseMipLevel   = 0,
+                                   .levelCount     = 1,
+                                   .baseArrayLayer = 0,
+                                   .layerCount     = 1,
+                                   },
+        };
+
+        if((res = vk->CreateImageView(dev->vk_device, &ms_view_info, NULL, &pm->as_back.msaa_view)) != VK_SUCCESS) {
+            BrLogError("VKREND", "Failed to create multisampled image view: VkResult = %d", res);
+            pm->as_back.msaa_view = VK_NULL_HANDLE;
+            DevicePixelmapVkDestroyImage(pm);
+            return BRE_FAIL;
+        }
+
+        pm->as_back.msaa_layout = VK_IMAGE_LAYOUT_UNDEFINED;
+    }
+
     {
         VkCommandBuffer                   cmd;
         const VkCommandBufferAllocateInfo alloc_info = {
@@ -249,6 +310,27 @@ static br_error DevicePixelmapVkCreateImage(br_device *dev, br_device_pixelmap *
         };
         vk->CmdPipelineBarrier(cmd, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, VK_PIPELINE_STAGE_ALL_COMMANDS_BIT, 0, 0, NULL, 0, NULL, 1, &barrier);
 
+        /*
+         * The multisampled image rests in its attachment layout for its whole life: it
+         * is attached, and the resolve reads it, and nothing else touches it. Going
+         * there once here is what lets every scope attach it without a transition.
+         */
+        if(pm->as_back.msaa_image != VK_NULL_HANDLE) {
+            const VkImageMemoryBarrier ms_barrier = {
+                .sType         = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER,
+                .srcAccessMask = 0,
+                .dstAccessMask = fmt->depth ? (VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_READ_BIT | VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT)
+                                            : (VK_ACCESS_COLOR_ATTACHMENT_READ_BIT | VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT),
+                .oldLayout     = VK_IMAGE_LAYOUT_UNDEFINED,
+                .newLayout     = fmt->depth ? VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL : VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+                .image         = pm->as_back.msaa_image,
+                .subresourceRange = range,
+            };
+            vk->CmdPipelineBarrier(cmd, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, VK_PIPELINE_STAGE_ALL_COMMANDS_BIT, 0, 0, NULL, 0, NULL, 1, &ms_barrier);
+
+            pm->as_back.msaa_layout = fmt->depth ? VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL : VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+        }
+
         vk->EndCommandBuffer(cmd);
 
         const VkSubmitInfo submit_info = {
@@ -277,6 +359,15 @@ static br_error DevicePixelmapVkCreateImage(br_device *dev, br_device_pixelmap *
  */
 static void DevicePixelmapVkDestroyImage(br_device_pixelmap *pm)
 {
+    if(pm->as_back.msaa_image != VK_NULL_HANDLE || pm->as_back.msaa_view != VK_NULL_HANDLE)
+        DevicePixelmapVkRetireImage(DevicePixelmapVkGetCurrentFrame(pm->screen), pm->as_back.msaa_image, pm->as_back.msaa_view,
+                                    pm->as_back.msaa_allocation);
+
+    pm->as_back.msaa_image      = VK_NULL_HANDLE;
+    pm->as_back.msaa_view       = VK_NULL_HANDLE;
+    pm->as_back.msaa_allocation = NULL;
+    pm->as_back.msaa_layout     = VK_IMAGE_LAYOUT_UNDEFINED;
+
     if(pm->as_back.image == VK_NULL_HANDLE && pm->as_back.view == VK_NULL_HANDLE)
         return;
 
@@ -388,17 +479,51 @@ struct pixelmapMatchTokens {
     br_int_32 pixel_bits;
     br_uint_8 type;
     br_token  use_type;
+    br_int_32 msaa_samples;
 };
 
 #define F(f) offsetof(struct pixelmapMatchTokens, f)
 static br_tv_template_entry pixelmapMatchTemplateEntries[] = {
-    {BRT_WIDTH_I32,      NULL, F(width),      BRTV_SET, BRTV_CONV_COPY},
-    {BRT_HEIGHT_I32,     NULL, F(height),     BRTV_SET, BRTV_CONV_COPY},
-    {BRT_PIXEL_BITS_I32, NULL, F(pixel_bits), BRTV_SET, BRTV_CONV_COPY},
-    {BRT_PIXEL_TYPE_U8,  NULL, F(type),       BRTV_SET, BRTV_CONV_COPY},
-    {BRT_USE_T,          NULL, F(use_type),   BRTV_SET, BRTV_CONV_COPY},
+    {BRT_WIDTH_I32,        NULL, F(width),        BRTV_SET, BRTV_CONV_COPY},
+    {BRT_HEIGHT_I32,       NULL, F(height),       BRTV_SET, BRTV_CONV_COPY},
+    {BRT_PIXEL_BITS_I32,   NULL, F(pixel_bits),   BRTV_SET, BRTV_CONV_COPY},
+    {BRT_PIXEL_TYPE_U8,    NULL, F(type),         BRTV_SET, BRTV_CONV_COPY},
+    {BRT_USE_T,            NULL, F(use_type),     BRTV_SET, BRTV_CONV_COPY},
+    {BRT_MSAA_SAMPLES_I32, NULL, F(msaa_samples), BRTV_SET, BRTV_CONV_COPY},
 };
 #undef F
+
+/*
+ * The largest multisample count this device will allocate for a render target in this
+ * format, not above what the caller asked for. 0 means single-sample, and is also the
+ * answer for a format the device cannot render into at all - the image creation that
+ * follows reports that separately.
+ */
+static br_int_32 DevicePixelmapVkClampSamples(br_device *dev, br_uint_8 pm_type, br_int_32 requested)
+{
+    static const br_int_32    counts[] = {2, 4, 8, 16, 32, 64};
+    const br_pixelmap_vk_fmt *fmt      = DeviceVkGetFormatDetails(pm_type);
+    VkImageFormatProperties   props;
+    br_int_32                 best = 0;
+
+    if(requested < 2 || fmt == NULL || fmt->indexed)
+        return 0;
+
+    if(dev->context.GetPhysicalDeviceImageFormatProperties(
+           dev->physical_device->dev, fmt->format, VK_IMAGE_TYPE_2D, VK_IMAGE_TILING_OPTIMAL,
+           fmt->depth ? VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT : VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT, 0, &props) != VK_SUCCESS)
+        return 0;
+
+    for(size_t i = 0; i < BR_ASIZE(counts); ++i) {
+        if(counts[i] > requested)
+            break;
+
+        if(props.sampleCounts & (VkSampleCountFlags)counts[i])
+            best = counts[i];
+    }
+
+    return best;
+}
 
 br_error BR_CMETHOD_DECL(br_device_pixelmap_vk, match)(br_device_pixelmap *self, br_device_pixelmap **newpm, br_token_value *tv)
 {
@@ -406,11 +531,12 @@ br_error BR_CMETHOD_DECL(br_device_pixelmap_vk, match)(br_device_pixelmap *self,
     br_error                   err;
     br_device_pixelmap        *pm;
     struct pixelmapMatchTokens mt = {
-        .width      = self->pm_width,
-        .height     = self->pm_height,
-        .pixel_bits = -1,
-        .type       = BR_PMT_MAX,
-        .use_type   = BRT_NONE,
+        .width        = self->pm_width,
+        .height       = self->pm_height,
+        .pixel_bits   = -1,
+        .type         = BR_PMT_MAX,
+        .use_type     = BRT_NONE,
+        .msaa_samples = 0,
     };
 
     if(self->device->templates.pixelmapMatchTemplate == NULL) {
@@ -466,11 +592,27 @@ br_error BR_CMETHOD_DECL(br_device_pixelmap_vk, match)(br_device_pixelmap *self,
     if(DeviceVkGetFormatDetails(mt.type) == NULL)
         return BRE_FAIL;
 
+    /*
+     * A depth buffer belongs to the colour buffer it is matched from, and a rendering
+     * scope needs both attachments at one sample count, so the colour buffer's count is
+     * what applies to it whatever the token says.
+     */
+    if(mt.use_type == BRT_DEPTH)
+        mt.msaa_samples = self->msaa_samples;
+
+    const br_int_32 msaa_samples = DevicePixelmapVkClampSamples(self->device, mt.type, mt.msaa_samples);
+
+    if(mt.use_type == BRT_DEPTH && msaa_samples != mt.msaa_samples) {
+        BrLogError("VKREND", "Depth pixelmap type %d cannot be multisampled at the colour buffer's %d samples.", mt.type, mt.msaa_samples);
+        return BRE_UNSUPPORTED;
+    }
+
     pm                  = BrResAllocate(self->device, sizeof(br_device_pixelmap), BR_MEMORY_OBJECT);
     pm->dispatch        = &devicePixelmapDispatch;
     pm->device          = self->device;
     pm->output_facility = self->output_facility;
     pm->use_type        = mt.use_type;
+    pm->msaa_samples    = msaa_samples;
     pm->screen          = self->screen;
     DevicePixelmapVkIncRef(self->screen);
 
@@ -488,7 +630,13 @@ br_error BR_CMETHOD_DECL(br_device_pixelmap_vk, match)(br_device_pixelmap *self,
     pm->as_back.allocation = NULL;
     pm->as_back.layout     = VK_IMAGE_LAYOUT_UNDEFINED;
     pm->as_back.clut       = NULL;
-    pm->num_refs           = 0;
+
+    pm->as_back.msaa_image      = VK_NULL_HANDLE;
+    pm->as_back.msaa_view       = VK_NULL_HANDLE;
+    pm->as_back.msaa_allocation = NULL;
+    pm->as_back.msaa_layout     = VK_IMAGE_LAYOUT_UNDEFINED;
+
+    pm->num_refs = 0;
 
     pm->pm_origin_x = self->pm_origin_x;
     pm->pm_origin_y = self->pm_origin_y;
@@ -710,7 +858,6 @@ static br_error BR_CMETHOD_DECL(br_device_pixelmap_vk, rectangleFill)(br_device_
     const br_pixelmap_vk_fmt    *fmt;
     br_rectangle                 clip;
     VkCommandBuffer              cmd;
-
     if(self->use_type != BRT_OFFSCREEN)
         return BRE_UNSUPPORTED;
 
@@ -755,7 +902,89 @@ static br_error BR_CMETHOD_DECL(br_device_pixelmap_vk, rectangleFill)(br_device_
      * A clip that covers the whole image is a clear of the image. This is also the only
      * path for the indexed (R8_UINT) format, which is not a colour-attachment format and so
      * cannot be cleared through a rendering scope.
+     *
+     * A multisampled target is the one case the transfer engine cannot serve at all: the
+     * transfer commands neither write a multisampled image nor resolve one, so a fill is a
+     * rendering scope with no draws in it - the load op clears the samples and the end of
+     * the scope resolves them into the image every reader sees.
      */
+    if(self->as_back.msaa_image != VK_NULL_HANDLE) {
+        /*
+         * A depth attachment is not cleared by a colour load op, and the transfer engine cannot
+         * write a multisampled image either, so a multisampled depth fill has no path here.
+         * Every scope that attaches the buffer clears it, which is what the callers rely on.
+         */
+        if(fmt->depth) {
+            BrLogError("VKREND", "%s is a multisampled depth buffer; only a rendering scope writes it.", self->pm_identifier);
+            return BRE_UNSUPPORTED;
+        }
+
+        const VkImageMemoryBarrier to_colour = {
+            .sType            = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER,
+            .srcAccessMask    = VK_ACCESS_MEMORY_WRITE_BIT,
+            .dstAccessMask    = VK_ACCESS_COLOR_ATTACHMENT_READ_BIT | VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,
+            .oldLayout        = self->as_back.layout,
+            .newLayout        = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+            .image            = self->as_back.image,
+            .subresourceRange = range,
+        };
+        vk->CmdPipelineBarrier(cmd, VK_PIPELINE_STAGE_ALL_COMMANDS_BIT, VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT, 0, 0, NULL, 0, NULL,
+                               1, &to_colour);
+
+        const VkImageMemoryBarrier ms_ready = {
+            .sType            = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER,
+            .srcAccessMask    = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,
+            .dstAccessMask    = VK_ACCESS_COLOR_ATTACHMENT_READ_BIT | VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,
+            .oldLayout        = self->as_back.msaa_layout,
+            .newLayout        = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+            .image            = self->as_back.msaa_image,
+            .subresourceRange = range,
+        };
+        vk->CmdPipelineBarrier(cmd, VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT, VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT, 0, 0,
+                               NULL, 0, NULL, 1, &ms_ready);
+
+        const VkRenderingAttachmentInfo attachment = {
+            .sType              = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO,
+            .imageView          = self->as_back.msaa_view,
+            .imageLayout        = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+            .loadOp             = VK_ATTACHMENT_LOAD_OP_CLEAR,
+            .storeOp            = VK_ATTACHMENT_STORE_OP_STORE,
+            .clearValue         = clear_value,
+            .resolveImageView   = self->as_back.view,
+            .resolveImageLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+            .resolveMode        = VK_RESOLVE_MODE_AVERAGE_BIT,
+        };
+        const VkRect2D area = {
+            .offset = {clip.x,             clip.y            },
+            .extent = {(br_uint_32)clip.w, (br_uint_32)clip.h},
+        };
+        const VkRenderingInfo rendering = {
+            .sType                = VK_STRUCTURE_TYPE_RENDERING_INFO,
+            .renderArea           = area,
+            .layerCount           = 1,
+            .colorAttachmentCount = 1,
+            .pColorAttachments    = &attachment,
+        };
+        vk->CmdBeginRendering(cmd, &rendering);
+        vk->CmdEndRendering(cmd);
+
+        const VkImageMemoryBarrier to_general = {
+            .sType            = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER,
+            .srcAccessMask    = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,
+            .dstAccessMask    = VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_SHADER_WRITE_BIT,
+            .oldLayout        = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+            .newLayout        = VK_IMAGE_LAYOUT_GENERAL,
+            .image            = self->as_back.image,
+            .subresourceRange = range,
+        };
+        vk->CmdPipelineBarrier(cmd, VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT, VK_PIPELINE_STAGE_ALL_COMMANDS_BIT, 0, 0, NULL, 0, NULL,
+                               1, &to_general);
+
+        self->as_back.layout      = VK_IMAGE_LAYOUT_GENERAL;
+        self->as_back.msaa_layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+        return BRE_OK;
+    }
+
     if(clip.x == 0 && clip.y == 0 && clip.w == self->pm_width && clip.h == self->pm_height) {
         if(self->as_back.layout != VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL && self->as_back.layout != VK_IMAGE_LAYOUT_GENERAL) {
             VkImageMemoryBarrier barrier = {
@@ -1047,6 +1276,18 @@ static br_error BR_CMETHOD_DECL(br_device_pixelmap_vk, rectangleCopyTo)(br_devic
 
     if(DeviceVkRectDraw(self, &drect, src, &src_rect) == BRE_OK)
         return BRE_OK;
+
+    /*
+     * Everything from here down writes the destination's image with the transfer engine,
+     * which cannot write a multisampled one - and writing the resolve destination alone
+     * would be overwritten by the next scope's resolve. The rect draw above is the path
+     * that can serve such a target, so the refusal belongs after it, not before: rejecting
+     * the copy at the top would refuse the operation this driver can do.
+     */
+    if(self->as_back.msaa_image != VK_NULL_HANDLE) {
+        BrLogError("VKREND", "%s is multisampled; only the rect draw can write it.", self->pm_identifier);
+        return BRE_UNSUPPORTED;
+    }
 
     /*
      * The staging copy is always made in the destination's own format. When the source is a

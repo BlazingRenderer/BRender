@@ -29,7 +29,7 @@ static br_tv_template_entry outputFacilityTemplateEntries[] = {
      * We don't use these, but we need BrDevBeginVar to accept them.
      * These are passed to pixelmapNew, which will handle them.
      */
-    {BRT(MSAA_SAMPLES_I32),    0,                    BRTV_QUERY | BRTV_ALL,            BRTV_CONV_DIRECT},
+    {BRT(MSAA_SAMPLES_I32),    F(msaa_samples),      BRTV_QUERY | BRTV_ALL,            BRTV_CONV_COPY  },
     {BRT(WINDOW_HANDLE_H),     0,                    BRTV_QUERY | BRTV_ALL,            BRTV_CONV_DIRECT},
 };
 
@@ -46,6 +46,21 @@ br_output_facility *OutputFacilityVkAllocate(br_device *dev, br_renderer_facilit
     self->device            = dev;
     self->object_list       = BrObjectListAllocate(self);
     self->renderer_facility = rendfcty;
+
+    /*
+     * What a caller may ask a matched pixelmap for. The per-format check is in
+     * DevicePixelmapVkClampSamples(); this is the device-wide ceiling, so a caller that
+     * asks for 8 on a format that only takes 4 is clamped rather than refused.
+     */
+    {
+        const VkSampleCountFlags counts = dev->physical_device->props2.properties.limits.framebufferColorSampleCounts;
+
+        self->msaa_samples = 0;
+        for(br_int_32 n = 2; n <= 64; n <<= 1) {
+            if(counts & (VkSampleCountFlags)n)
+                self->msaa_samples = n;
+        }
+    }
 
     ObjectContainerAddFront(dev, (br_object *)self);
     return self;

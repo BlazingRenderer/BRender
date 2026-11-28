@@ -905,8 +905,8 @@ static br_boolean VkV1ModelRenderIndexed(br_geometry_stored *geom, br_renderer *
             depth_write = BR_FALSE;
     }
 
-    if((pipeline = DeviceVkRenderGetPipeline(dev, dst_fmt->format, VK_SAMPLE_COUNT_1_BIT, lit, indexed, shading_mode, cull, front_face, blended,
-                                             blend_mode, depth_test, depth_write, depth_compare, depth_format, polygon_mode)) == VK_NULL_HANDLE)
+    if((pipeline = DeviceVkRenderGetPipeline(dev, dst_fmt->format, DevicePixelmapVkSamples(dst), lit, indexed, shading_mode, cull, front_face,
+                                             blended, blend_mode, depth_test, depth_write, depth_compare, depth_format, polygon_mode)) == VK_NULL_HANDLE)
         return BR_FALSE;
 
     for(int r = 0; r < 4; ++r) {

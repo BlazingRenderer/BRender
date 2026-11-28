@@ -48,6 +48,15 @@ typedef struct br_device_pixelmap {
      */
     br_int_32 num_refs;
 
+    /**
+     * \brief Samples per pixel the colour image is drawn at.
+     *
+     * 0 and 1 both mean the image is the render target. 2 or more means the image is
+     * resolved into from as_back.msaa_image at the end of every rendering scope.
+     * Clamped by match() to what the device and the format can do.
+     */
+    br_int_32 msaa_samples;
+
     union {
         struct {
             void             *window_handle;
@@ -97,6 +106,18 @@ typedef struct br_device_pixelmap {
              * is the guard).
              */
             br_device_clut *clut;
+
+            /*
+             * The multisampled render target, when msaa_samples is 2 or more: draws
+             * attach this and the resolve writes the image above, which is what every
+             * reader of this pixelmap - a copy, a texture binding, a readback - sees.
+             * It keeps its attachment layout for its whole life, so msaa_layout is only
+             * ever that or UNDEFINED.
+             */
+            VkImage       msaa_image;
+            VkImageView   msaa_view;
+            VmaAllocation msaa_allocation;
+            VkImageLayout msaa_layout;
         } as_back;
 
         struct {

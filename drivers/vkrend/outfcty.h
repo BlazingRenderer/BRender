@@ -38,6 +38,13 @@ typedef struct br_output_facility {
      * Renderer facilities to use, and default
      */
     struct br_renderer_facility *renderer_facility;
+
+    /**
+     * \brief The largest multisample count this device can render into, 0 for none.
+     *
+     * Matched pixelmaps clamp what they are asked for against this.
+     */
+    br_int_32 msaa_samples;
 } br_output_facility;
 
 #endif /* BR_OUTPUT_FACILITY_PRIVATE */

@@ -115,6 +115,12 @@ br_device_pixelmap *DevicePixelmapVkResolve(const br_device_pixelmap *pm);
 br_boolean          DevicePixelmapVkIsDepth(const br_device_pixelmap *pm);
 
 /*
+ * The sample-count flag this pixelmap's images are drawn at, for the pipeline and image
+ * creation calls that take one. A pixelmap that was not matched multisampled answers 1.
+ */
+VkSampleCountFlagBits DevicePixelmapVkSamples(const br_device_pixelmap *pm);
+
+/*
  * devpmsub.c
  */
 br_error BR_CMETHOD_DECL(br_device_pixelmap_vk, allocateSub)(br_device_pixelmap *self, br_device_pixelmap **newpm, br_rectangle *rect);

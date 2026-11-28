@@ -359,8 +359,7 @@ br_error DeviceVkLineDraw(br_device_pixelmap *dst, br_point *start, br_point *en
     if(!DeviceVkLineFormatSupported(dev, dst_fmt->format, VK_FORMAT_FEATURE_COLOR_ATTACHMENT_BIT))
         return BRE_UNSUPPORTED;
 
-    /* vkrend creates every image single-sampled, so that is the only sample count here. */
-    if((pipeline = DeviceVkLineGetPipeline(dev, dst_fmt->format, VK_SAMPLE_COUNT_1_BIT, topology, indexed)) == VK_NULL_HANDLE)
+    if((pipeline = DeviceVkLineGetPipeline(dev, dst_fmt->format, DevicePixelmapVkSamples(dst), topology, indexed)) == VK_NULL_HANDLE)
         return BRE_FAIL;
 
     frame = DevicePixelmapVkGetCurrentFrame(dst->screen);
@@ -392,6 +391,20 @@ br_error DeviceVkLineDraw(br_device_pixelmap *dst, br_point *start, br_point *en
         vk->CmdPipelineBarrier(cmd, VK_PIPELINE_STAGE_ALL_COMMANDS_BIT, VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT, 0, 0, NULL, 0, NULL,
                                1, &dst_to_colour);
 
+        if(dst->as_back.msaa_image != VK_NULL_HANDLE) {
+            const VkImageMemoryBarrier ms_ready = {
+                .sType            = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER,
+                .srcAccessMask    = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,
+                .dstAccessMask    = VK_ACCESS_COLOR_ATTACHMENT_READ_BIT | VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,
+                .oldLayout        = dst->as_back.msaa_layout,
+                .newLayout        = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+                .image            = dst->as_back.msaa_image,
+                .subresourceRange = range,
+            };
+            vk->CmdPipelineBarrier(cmd, VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT, VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT, 0, 0,
+                                   NULL, 0, NULL, 1, &ms_ready);
+        }
+
         /*
          * The viewport is the whole destination image and the shader places each endpoint
          * at its pixel centre, so the scissor is the whole image too.
@@ -413,17 +426,25 @@ br_error DeviceVkLineDraw(br_device_pixelmap *dst, br_point *start, br_point *en
 
         const VkRenderingAttachmentInfo colour_attachment = {
             .sType       = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO,
-            .imageView   = dst->as_back.view,
+            .imageView   = (dst->as_back.msaa_image != VK_NULL_HANDLE) ? dst->as_back.msaa_view : dst->as_back.view,
             .imageLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
             .loadOp      = VK_ATTACHMENT_LOAD_OP_LOAD,
             .storeOp     = VK_ATTACHMENT_STORE_OP_STORE,
         };
+        VkRenderingAttachmentInfo colour_resolved = colour_attachment;
+
+        if(dst->as_back.msaa_image != VK_NULL_HANDLE) {
+            colour_resolved.resolveImageView   = dst->as_back.view;
+            colour_resolved.resolveImageLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+            colour_resolved.resolveMode        = VK_RESOLVE_MODE_AVERAGE_BIT;
+        }
+
         const VkRenderingInfo rendering = {
             .sType                = VK_STRUCTURE_TYPE_RENDERING_INFO,
             .renderArea           = area,
             .layerCount           = 1,
             .colorAttachmentCount = 1,
-            .pColorAttachments    = &colour_attachment,
+            .pColorAttachments    = &colour_resolved,
         };
         vk->CmdBeginRendering(cmd, &rendering);
 

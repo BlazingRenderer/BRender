@@ -677,6 +677,18 @@ static void BR_CMETHOD_DECL(br_renderer_vk, sceneBegin)(br_renderer *self)
             BrLogError("VKREND", "Destination pixelmap type %d cannot be a depth attachment.", depth_target->pm_type);
             return;
         }
+
+        /*
+         * Both attachments of a rendering scope must have the same sample count, and the
+         * pair is matched separately by the caller, so a mismatch cannot be repaired here.
+         * Refusing the scope is the only honest answer: building the pipeline for one of
+         * the two would fail, and using the other would attach them together.
+         */
+        if(depth_target->msaa_samples != colour_owner->msaa_samples) {
+            BrLogError("VKREND", "Colour destination has %d samples and depth buffer has %d; they must match.", colour_owner->msaa_samples,
+                       depth_target->msaa_samples);
+            return;
+        }
     }
 
     /*
@@ -687,9 +699,10 @@ static void BR_CMETHOD_DECL(br_renderer_vk, sceneBegin)(br_renderer *self)
     if(DeviceVkRenderEnsureInit(self->device) != BR_VK_RENDER_READY)
         return;
 
-    if(DeviceVkRenderGetPipeline(self->device, dst_fmt->format, VK_SAMPLE_COUNT_1_BIT, BR_FALSE, BR_FALSE, BRT_FLAT, VK_CULL_MODE_NONE,
-                                 VK_FRONT_FACE_COUNTER_CLOCKWISE, BR_FALSE, BRT_NONE, depth_target != NULL, depth_target != NULL, VK_COMPARE_OP_LESS,
-                                 (depth_target != NULL) ? depth_fmt->format : VK_FORMAT_UNDEFINED, VK_POLYGON_MODE_FILL) == VK_NULL_HANDLE)
+    if(DeviceVkRenderGetPipeline(self->device, dst_fmt->format, DevicePixelmapVkSamples(colour_owner), BR_FALSE, BR_FALSE, BRT_FLAT,
+                                 VK_CULL_MODE_NONE, VK_FRONT_FACE_COUNTER_CLOCKWISE, BR_FALSE, BRT_NONE, depth_target != NULL,
+                                 depth_target != NULL, VK_COMPARE_OP_LESS, (depth_target != NULL) ? depth_fmt->format : VK_FORMAT_UNDEFINED,
+                                 VK_POLYGON_MODE_FILL) == VK_NULL_HANDLE)
         return;
 
     frame = DevicePixelmapVkGetCurrentFrame(colour_target->screen);
@@ -753,6 +766,28 @@ static void BR_CMETHOD_DECL(br_renderer_vk, sceneBegin)(br_renderer *self)
     colour_owner->as_back.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
 
     /*
+     * The multisampled target never leaves its attachment layout, so it needs no
+     * transition - but a scope that writes it follows one that did, and the driver is not
+     * obliged to order two separate render pass instances against each other. A
+     * same-layout barrier is what makes the second scope's writes visible to the resolve.
+     */
+    if(colour_owner->as_back.msaa_image != VK_NULL_HANDLE) {
+        const VkImageMemoryBarrier ms_ready = {
+            .sType            = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER,
+            .srcAccessMask    = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,
+            .dstAccessMask    = VK_ACCESS_COLOR_ATTACHMENT_READ_BIT | VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,
+            .oldLayout        = colour_owner->as_back.msaa_layout,
+            .newLayout        = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+            .image            = colour_owner->as_back.msaa_image,
+            .subresourceRange = range,
+        };
+        vk->CmdPipelineBarrier(cmd, VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT, VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT, 0, 0,
+                               NULL, 0, NULL, 1, &ms_ready);
+
+        colour_owner->as_back.msaa_layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+    }
+
+    /*
      * A Zb scene also attaches the depth buffer: GENERAL -> depth-stencil attachment, cleared
      * to the far plane so every draw starts with a full depth range. As with the colour
      * image, the new layout is recorded in the pixelmap so a command recorded inside the
@@ -780,6 +815,23 @@ static void BR_CMETHOD_DECL(br_renderer_vk, sceneBegin)(br_renderer *self)
                                1, &to_depth);
 
         depth_target->as_back.layout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+
+        if(depth_target->as_back.msaa_image != VK_NULL_HANDLE) {
+            const VkImageMemoryBarrier ms_ready = {
+                .sType            = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER,
+                .srcAccessMask    = VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT,
+                .dstAccessMask    = VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_READ_BIT | VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT,
+                .oldLayout        = depth_target->as_back.msaa_layout,
+                .newLayout        = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL,
+                .image            = depth_target->as_back.msaa_image,
+                .subresourceRange = depth_range,
+            };
+            vk->CmdPipelineBarrier(cmd, VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT | VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT,
+                                   VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT | VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT, 0, 0, NULL, 0,
+                                   NULL, 1, &ms_ready);
+
+            depth_target->as_back.msaa_layout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+        }
     }
 
     /*
@@ -813,11 +865,26 @@ static void BR_CMETHOD_DECL(br_renderer_vk, sceneBegin)(br_renderer *self)
 
     const VkRenderingAttachmentInfo colour_attachment = {
         .sType       = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO,
-        .imageView   = colour_owner->as_back.view,
+        .imageView   = (colour_owner->as_back.msaa_image != VK_NULL_HANDLE) ? colour_owner->as_back.msaa_view : colour_owner->as_back.view,
         .imageLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
         .loadOp      = VK_ATTACHMENT_LOAD_OP_LOAD,
         .storeOp     = VK_ATTACHMENT_STORE_OP_STORE,
     };
+
+    /*
+     * A multisampled colour attachment is resolved into the pixelmap's own image when the
+     * scope ends, which is why nothing downstream of this renderer changes: a copy, a
+     * texture binding and a readback all still read as_back.image. AVERAGE is the resolve
+     * for the UNORM formats the table maps to; an integer format cannot be averaged, which
+     * is why match() refuses more than one sample for one.
+     */
+    VkRenderingAttachmentInfo colour_attachment_resolved = colour_attachment;
+
+    if(colour_owner->as_back.msaa_image != VK_NULL_HANDLE) {
+        colour_attachment_resolved.resolveImageView   = colour_owner->as_back.view;
+        colour_attachment_resolved.resolveImageLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+        colour_attachment_resolved.resolveMode        = VK_RESOLVE_MODE_AVERAGE_BIT;
+    }
 
     /*
      * The depth attachment exists only for the Zb path (output.depth != NULL). loadOp CLEAR
@@ -828,7 +895,9 @@ static void BR_CMETHOD_DECL(br_renderer_vk, sceneBegin)(br_renderer *self)
      */
     const VkRenderingAttachmentInfo depth_attachment = {
         .sType       = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO,
-        .imageView   = (depth_target != NULL) ? depth_target->as_back.view : VK_NULL_HANDLE,
+        .imageView   = (depth_target != NULL)
+                           ? ((depth_target->as_back.msaa_image != VK_NULL_HANDLE) ? depth_target->as_back.msaa_view : depth_target->as_back.view)
+                           : VK_NULL_HANDLE,
         .imageLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL,
         .loadOp      = VK_ATTACHMENT_LOAD_OP_CLEAR,
         .storeOp     = VK_ATTACHMENT_STORE_OP_STORE,
@@ -839,7 +908,7 @@ static void BR_CMETHOD_DECL(br_renderer_vk, sceneBegin)(br_renderer *self)
         .renderArea           = area,
         .layerCount           = 1,
         .colorAttachmentCount = 1,
-        .pColorAttachments    = &colour_attachment,
+        .pColorAttachments    = &colour_attachment_resolved,
         .pDepthAttachment     = (depth_target != NULL) ? &depth_attachment : NULL,
     };
     vk->CmdBeginRendering(cmd, &rendering);
