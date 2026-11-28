@@ -20,10 +20,12 @@ install(TARGETS
         FILE_SET ddi DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/brender/ddi
         )
 
-install(TARGETS glrend-headers
-        EXPORT Core
-        FILE_SET include DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/brender/glrend
-        )
+if (TARGET glrend-headers)
+    install(TARGETS glrend-headers
+            EXPORT Core
+            FILE_SET include DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/brender/glrend
+            )
+endif()
 
 if (TARGET glrend)
     install(TARGETS glrend
@@ -33,10 +35,12 @@ if (TARGET glrend)
             )
 endif()
 
-install(TARGETS glrend1x-headers
-        EXPORT Core
-        FILE_SET include DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/brender/glrend1x
-        )
+if (TARGET glrend1x-headers)
+    install(TARGETS glrend1x-headers
+            EXPORT Core
+            FILE_SET include DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/brender/glrend1x
+            )
+endif()
 
 if (TARGET glrend1x)
     install(TARGETS glrend1x
@@ -46,10 +50,12 @@ if (TARGET glrend1x)
             )
 endif()
 
-install(TARGETS vkrend-headers
-        EXPORT Core
-        FILE_SET include DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/brender/vkrend
-        )
+if (TARGET vkrend-headers)
+    install(TARGETS vkrend-headers
+            EXPORT Core
+            FILE_SET include DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/brender/vkrend
+            )
+endif()
 
 if (TARGET vkrend)
     install(TARGETS vkrend
