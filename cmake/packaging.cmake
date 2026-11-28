@@ -20,10 +20,12 @@ install(TARGETS
         FILE_SET ddi DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/brender/ddi
         )
 
-install(TARGETS glrend-headers
-        EXPORT Core
-        FILE_SET include DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/brender/glrend
-        )
+if (TARGET glrend-headers)
+    install(TARGETS glrend-headers
+            EXPORT Core
+            FILE_SET include DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/brender/glrend
+            )
+endif()
 
 if (TARGET glrend)
     install(TARGETS glrend
@@ -33,10 +35,12 @@ if (TARGET glrend)
             )
 endif()
 
-install(TARGETS glrend1x-headers
-        EXPORT Core
-        FILE_SET include DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/brender/glrend1x
-        )
+if (TARGET glrend1x-headers)
+    install(TARGETS glrend1x-headers
+            EXPORT Core
+            FILE_SET include DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/brender/glrend1x
+            )
+endif()
 
 if (TARGET glrend1x)
     install(TARGETS glrend1x
@@ -46,10 +50,12 @@ if (TARGET glrend1x)
             )
 endif()
 
-install(TARGETS vkrend-headers
-        EXPORT Core
-        FILE_SET include DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/brender/vkrend
-        )
+if (TARGET vkrend-headers)
+    install(TARGETS vkrend-headers
+            EXPORT Core
+            FILE_SET include DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/brender/vkrend
+            )
+endif()
 
 if (TARGET vkrend)
     install(TARGETS vkrend
@@ -102,10 +108,22 @@ if (TARGET softprim)
 endif()
 
 
+# install(EXPORT) writes a relocatable _IMPORT_PREFIX (computed from the file's
+# own location) only when the destination is relative; an absolute one pins it
+# to the configure-time prefix instead. A packager that passes an absolute
+# CMAKE_INSTALL_LIBDIR - Nix, with the libraries in their own output - also
+# moves the package out from under that prefix, so fall back to a relative
+# directory there.
+if (IS_ABSOLUTE "${CMAKE_INSTALL_LIBDIR}")
+	set(BRENDER_CMAKE_INSTALL_DIR lib/cmake/brender)
+else()
+	set(BRENDER_CMAKE_INSTALL_DIR "${CMAKE_INSTALL_LIBDIR}/cmake/brender")
+endif()
+
 install(EXPORT Core
         FILE BRenderTargets.cmake
         NAMESPACE BRender::
-        DESTINATION lib/cmake/brender
+        DESTINATION ${BRENDER_CMAKE_INSTALL_DIR}
         )
 
 include(CMakePackageConfigHelpers)
@@ -113,7 +131,7 @@ include(CMakePackageConfigHelpers)
 configure_package_config_file(
         "${CMAKE_CURRENT_SOURCE_DIR}/Config.cmake.in"
         "${CMAKE_CURRENT_BINARY_DIR}/BRenderConfig.cmake"
-        INSTALL_DESTINATION lib/cmake/brender
+        INSTALL_DESTINATION ${BRENDER_CMAKE_INSTALL_DIR}
         NO_SET_AND_CHECK_MACRO
         NO_CHECK_REQUIRED_COMPONENTS_MACRO
 )
@@ -127,15 +145,35 @@ write_basic_package_version_file(
 install(FILES
         ${CMAKE_CURRENT_BINARY_DIR}/BRenderConfig.cmake
         ${CMAKE_CURRENT_BINARY_DIR}/BRenderConfigVersion.cmake
-        DESTINATION lib/cmake/brender
+        DESTINATION ${BRENDER_CMAKE_INSTALL_DIR}
         )
 
 # pkg-config
+#
+# The .pc file names the prefix it was installed under, so that has to come from
+# where the file itself lands rather than from CMAKE_INSTALL_PREFIX at configure
+# time: a "cmake --install --prefix" that differs from the configure-time one
+# moves the file, and an absolute libdir - Nix, with the libraries in their own
+# output - has no prefix above it to name at all.
+if (IS_ABSOLUTE "${CMAKE_INSTALL_LIBDIR}")
+	set(BRENDER_PC_PREFIX "")
+	set(BRENDER_PC_LIBDIR "${CMAKE_INSTALL_FULL_LIBDIR}")
+else()
+	set(BRENDER_PC_PREFIX "\${pcfiledir}/../..")
+	set(BRENDER_PC_LIBDIR "\${prefix}/${CMAKE_INSTALL_LIBDIR}")
+endif()
+
+if (IS_ABSOLUTE "${CMAKE_INSTALL_INCLUDEDIR}")
+	set(BRENDER_PC_INCLUDEDIR "${CMAKE_INSTALL_FULL_INCLUDEDIR}/brender")
+else()
+	set(BRENDER_PC_INCLUDEDIR "\${prefix}/${CMAKE_INSTALL_INCLUDEDIR}/brender")
+endif()
+
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/cmake/brender.pc.in ${CMAKE_CURRENT_BINARY_DIR}/brender.pc @ONLY)
-install(FILES ${CMAKE_CURRENT_BINARY_DIR}/brender.pc DESTINATION ${CMAKE_INSTALL_PREFIX}/lib/pkgconfig)
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/brender.pc DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig)
 foreach(driver sdl2dev sdl3dev glrend glrend1x vkrend softrend softprim mcga)
 	if (TARGET ${driver})
 		configure_file(${CMAKE_CURRENT_SOURCE_DIR}/cmake/brender-driver.pc.in ${CMAKE_CURRENT_BINARY_DIR}/brender-${driver}.pc @ONLY)
-		install(FILES ${CMAKE_CURRENT_BINARY_DIR}/brender-${driver}.pc DESTINATION ${CMAKE_INSTALL_PREFIX}/lib/pkgconfig)
+		install(FILES ${CMAKE_CURRENT_BINARY_DIR}/brender-${driver}.pc DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig)
 	endif()
 endforeach()

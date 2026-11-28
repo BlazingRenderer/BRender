@@ -15,7 +15,7 @@ target_include_directories(brender-inc-ddi INTERFACE
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/ddi>
         $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>
         $<BUILD_INTERFACE:${SOFTREND_DDI_DIR}>
-        $<INSTALL_INTERFACE:ddi>
+        $<INSTALL_INTERFACE:include/brender/ddi>
         )
 
 add_custom_command(
