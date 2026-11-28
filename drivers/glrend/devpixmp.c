@@ -352,10 +352,23 @@ br_error BR_CMETHOD_DECL(br_device_pixelmap_gl, match)(br_device_pixelmap *self,
     if(fmt->indexed)
         mt.msaa_samples = 0;
 
+    /*
+     * A depth buffer belongs to the colour buffer it is matched from, and a rendering
+     * scope needs both attachments at one sample count, so the colour buffer's count is
+     * what applies to it whatever the token says.
+     */
+    if(mt.use_type == BRT_DEPTH)
+        mt.msaa_samples = self->msaa_samples;
+
     if(mt.msaa_samples < 0)
         mt.msaa_samples = 0;
     else if(mt.msaa_samples > ctx->limits.max_samples)
         mt.msaa_samples = ctx->limits.max_samples;
+
+    if(mt.use_type == BRT_DEPTH && mt.msaa_samples != self->msaa_samples) {
+        BrLogError("GLREND", "A depth buffer cannot be multisampled at its colour buffer's %d samples.", self->msaa_samples);
+        return BRE_UNSUPPORTED;
+    }
 
     pm                  = BrResAllocate(self->device, sizeof(br_device_pixelmap), BR_MEMORY_OBJECT);
     pm->dispatch        = &devicePixelmapDispatch;
